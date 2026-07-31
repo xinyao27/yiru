@@ -20,7 +20,7 @@ const OUT_COMMONJS_PACKAGE_JSON = `${JSON.stringify(
  * compiled output tree that the packaged CLI loads at runtime.
  */
 export function verifyPackageCliBin({
-  projectDir = path.resolve(import.meta.dirname, '..', '..'),
+  projectDir = path.resolve(import.meta.dirname, '..'),
   fixExecutable = false,
   fixPackageJson = false,
   runHelp = false

@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { chmodSync, copyFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
-const repoRoot = path.resolve(import.meta.dirname, '../..')
+const repoRoot = path.resolve(import.meta.dirname, '..')
 const packagePath = path.join(repoRoot, 'native', 'computer-use-macos')
 const binaryPath = path.join(packagePath, '.build', 'release', 'yiru-computer-use-macos')
 const appPath = path.join(packagePath, '.build', 'release', 'Yiru Computer Use.app')

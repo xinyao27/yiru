@@ -17,7 +17,7 @@ import { createRequire } from 'node:module'
 import { platform as osPlatform, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-const projectDir = resolve(import.meta.dirname, '../..')
+const projectDir = resolve(import.meta.dirname, '..')
 const electronPackageDir = resolve(projectDir, 'node_modules/electron')
 // Why: pnpm need not hoist Electron's transitive dependencies, so resolve
 // @electron/get from Electron's real virtual-store location, not its symlink.

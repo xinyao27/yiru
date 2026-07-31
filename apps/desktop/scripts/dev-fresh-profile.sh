@@ -4,9 +4,9 @@
 # no saved sessions). Your real `yiru-dev` profile is left untouched.
 #
 # Usage:
-#   ./config/scripts/dev-fresh-profile.sh           # ephemeral temp profile, deleted on exit
-#   ./config/scripts/dev-fresh-profile.sh --keep    # keep the profile dir after exit
-#   YIRU_FRESH_PROFILE_DIR=/some/path ./config/scripts/dev-fresh-profile.sh   # use a fixed dir
+#   ./scripts/dev-fresh-profile.sh           # ephemeral temp profile, deleted on exit
+#   ./scripts/dev-fresh-profile.sh --keep    # keep the profile dir after exit
+#   YIRU_FRESH_PROFILE_DIR=/some/path ./scripts/dev-fresh-profile.sh   # use a fixed dir
 set -euo pipefail
 
 KEEP=0

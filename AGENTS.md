@@ -43,12 +43,20 @@ apps/mobile/  Expo app: app/ = routes, src/ = features
 packages/     cross-client contracts: workbench-model, runtime-protocol,
               mobile-relay-protocol
 skills/       agent skill packages shipped to end users, one folder per skill
+scripts/      workspace-level tooling: contracts that span apps, skill generators
 ```
+
+**Scripts live at the level they serve.** `scripts/` holds only tooling whose
+inputs cross app boundaries — the source-path and max-lines contracts, the skill
+generators — and the root `package.json` owns their npm scripts. Everything
+scoped to one app lives in that app's own `apps/<app>/scripts/`, invoked from
+that app's `package.json`. A script that reaches outside its app is in the wrong
+folder; `config/` is for configuration, never executables.
 
 `skills/<name>/SKILL.md` is product content, not app source — it sits at the
 repository root because it is shipped to users' agent installs rather than built
 into any one client. It is the **source of truth**: `src/cli/bundled-skill-guides.ts`
-is generated from it by `config/scripts/generate-bundled-skill-guides.mjs`, and
+is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
 `resources/skills/*.json` records its release-freshness digests. Edit `SKILL.md`,
 then run that script with `--write`; never edit the generated module.
 

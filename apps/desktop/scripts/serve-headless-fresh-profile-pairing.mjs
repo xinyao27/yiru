@@ -7,7 +7,7 @@ import path from 'node:path'
 import { createInterface } from 'node:readline'
 
 const scriptDir = import.meta.dirname
-const repoRoot = path.resolve(scriptDir, '..', '..')
+const repoRoot = path.resolve(scriptDir, '..')
 const yiruDevScript = path.join(scriptDir, 'yiru-dev.mjs')
 const ensureNativeRuntimeScript = path.join(scriptDir, 'ensure-native-runtime.mjs')
 const fixedProfileDir = process.env.YIRU_HEADLESS_PAIRING_PROFILE_DIR
@@ -116,7 +116,7 @@ function parseArgs(args) {
  * Prints script usage without touching the dev profile or starting the server.
  */
 function printHelp() {
-  console.log(`Usage: node config/scripts/serve-headless-fresh-profile-pairing.mjs [--keep] [yiru serve flags]
+  console.log(`Usage: node scripts/serve-headless-fresh-profile-pairing.mjs [--keep] [yiru serve flags]
 
 Starts yiru-dev serve --json with a fresh isolated userData profile, ensures Electron's dev runtime is usable, and prints the pairing URL.
 
@@ -125,9 +125,9 @@ Wrapper flags:
   -h, --help    Show this help.
 
 Forwarded examples:
-  node config/scripts/serve-headless-fresh-profile-pairing.mjs --port 6768
-  node config/scripts/serve-headless-fresh-profile-pairing.mjs --pairing-address 100.64.1.20
-  node config/scripts/serve-headless-fresh-profile-pairing.mjs --mobile-pairing
+  node scripts/serve-headless-fresh-profile-pairing.mjs --port 6768
+  node scripts/serve-headless-fresh-profile-pairing.mjs --pairing-address 100.64.1.20
+  node scripts/serve-headless-fresh-profile-pairing.mjs --mobile-pairing
 
 Environment:
   YIRU_HEADLESS_PAIRING_ADDRESS=<host|host:port|ws://...>  Override the auto pairing address.

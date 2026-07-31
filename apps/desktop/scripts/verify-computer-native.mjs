@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-const repoRoot = resolve(import.meta.dirname, '..', '..')
+const repoRoot = resolve(import.meta.dirname, '..')
 const checks = [
   {
     name: 'Linux provider Python syntax',

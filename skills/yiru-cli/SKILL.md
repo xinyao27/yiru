@@ -17,7 +17,7 @@ description: >-
 
 Use `yiru` when Yiru's running editor/runtime is the source of truth. The public CLI command is `yiru` on every platform.
 
-**Dev builds (`pnpm dev`):** after `pnpm build:cli`, the dev CLI is exposed as `yiru-dev` (the global shim points at this checkout's wrapper + out/cli). Inside a dev Yiru's terminals use `yiru-dev emulator ...` (or `./config/scripts/yiru-dev.mjs emulator ...` for worktree-local invocation that does not depend on the /usr/local/bin symlink). Plain `yiru` targets any installed production Yiru. The app's own agent preambles use `yiru-dev` automatically in dev mode.
+**Dev builds (`pnpm dev`):** after `pnpm build:cli`, the dev CLI is exposed as `yiru-dev` (the global shim points at this checkout's wrapper + out/cli). Inside a dev Yiru's terminals use `yiru-dev emulator ...` (or `./scripts/yiru-dev.mjs emulator ...` for worktree-local invocation that does not depend on the /usr/local/bin symlink). Plain `yiru` targets any installed production Yiru. The app's own agent preambles use `yiru-dev` automatically in dev mode.
 
 Use plain shell tools when Yiru state does not matter.
 

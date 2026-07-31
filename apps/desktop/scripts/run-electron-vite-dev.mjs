@@ -25,7 +25,7 @@ import path from 'node:path'
 delete process.env.ELECTRON_RUN_AS_NODE
 
 const require = createRequire(import.meta.url)
-const appRoot = path.resolve(import.meta.dirname, '../..')
+const appRoot = path.resolve(import.meta.dirname, '..')
 // Why: app assets live under apps/desktop, while dev-instance identity must
 // remain tied to the enclosing worktree so parallel worktrees stay distinct.
 const workspaceRoot = (() => {

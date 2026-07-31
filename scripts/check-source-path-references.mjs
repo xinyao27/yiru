@@ -15,7 +15,7 @@ import { pathToFileURL } from 'node:url'
  * stale comment paths.
  */
 
-const REPO_ROOT = path.resolve(import.meta.dirname, '..', '..', '..', '..')
+const REPO_ROOT = path.resolve(import.meta.dirname, '..')
 
 // Why: a path is only worth checking when it starts at a real tree root.
 // Prompt fixtures and doc samples are full of things like 'src/foo.ts' or
@@ -27,7 +27,8 @@ const CHECKED_ROOT = new RegExp(
     '^apps/(desktop|mobile)/',
     '^packages/[a-z0-9-]+/',
     '^config/',
-    '^resources/'
+    '^resources/',
+    '^scripts/'
   ].join('|')
 )
 
@@ -37,7 +38,8 @@ const CHECKED_ROOT = new RegExp(
 // is worth its own cleanup, not a permanently red gate.
 const CHECKED_EXTENSION = /\.(ts|tsx|mjs|cjs|css)$/
 
-const PATH_TOKEN = /(?:^|['"`\s(=,:])((?:src|apps|packages|config|resources)\/[A-Za-z0-9._@/-]+)/g
+const PATH_TOKEN =
+  /(?:^|['"`\s(=,:])((?:src|apps|packages|config|resources|scripts)\/[A-Za-z0-9._@/-]+)/g
 
 // Why: each entry is a string that looks like a repo path but never was one.
 // Keep the reason attached — without it the next reader cannot tell an
@@ -58,8 +60,10 @@ const ALLOWED_UNRESOLVED = new Map([
 
 const SEARCH_GLOBS = [
   'apps/*/config/**',
+  'apps/*/scripts/**',
   'apps/*/src/**',
   'packages/*/src/**',
+  'scripts/**',
   '.github/workflows/*',
   'package.json',
   'apps/*/package.json',

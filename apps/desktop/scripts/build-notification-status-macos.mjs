@@ -12,7 +12,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
-const repoRoot = path.resolve(import.meta.dirname, '../..')
+const repoRoot = path.resolve(import.meta.dirname, '..')
 const sourcePath = path.join(repoRoot, 'native', 'notification-status-macos', 'main.swift')
 const defaultOutputPath = path.join(
   repoRoot,

@@ -51,7 +51,7 @@ import { commonPropsSchema, validate } from './validator'
 // the build-identity gate below: both must be satisfied to transmit, so
 // flipping the flag alone still leaves contributor builds silent.
 //
-// NOTE: config/scripts/verify-telemetry-constants.mjs greps this declaration
+// NOTE: scripts/verify-telemetry-constants.mjs greps this declaration
 // shape (`const TELEMETRY_ENABLED = true|false`) to gate release verification.
 // If you refactor this (e.g. let, export, computed-from-env, moved into a
 // config object), update the regex in that script too.

@@ -15,7 +15,7 @@ const yiruRootToolingConfig = defineConfig({
   staged: {
     '*.{ts,tsx,js,jsx,mjs,mts,cts}': [
       'vp lint',
-      'node apps/desktop/config/scripts/run-vite-plus-lint-profile.mjs react-doctor',
+      'node scripts/run-vite-plus-lint-profile.mjs react-doctor',
       'vp fmt --write'
     ],
     '*.{json,css}': ['vp fmt --write']

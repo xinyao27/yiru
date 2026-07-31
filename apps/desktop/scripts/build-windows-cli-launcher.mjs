@@ -12,7 +12,7 @@ if (process.platform !== 'win32') {
   )
 }
 
-const repoRoot = resolve(import.meta.dirname, '../..')
+const repoRoot = resolve(import.meta.dirname, '..')
 const sourcePath = join(repoRoot, 'native', 'windows-cli-launcher', 'YiruCliLauncher.cs')
 const outputPath = readArg('--output') ?? defaultOutputPath(repoRoot)
 const compilerPath = findFrameworkCompiler(process.env)

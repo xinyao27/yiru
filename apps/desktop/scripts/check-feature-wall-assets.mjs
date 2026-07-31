@@ -3,7 +3,7 @@ import { readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 const __dirname = import.meta.dirname
-const ROOT = path.join(__dirname, '..', '..')
+const ROOT = path.join(__dirname, '..')
 const FEATURE_WALL_ASSET_DIR = path.join(ROOT, 'resources', 'onboarding', 'feature-wall')
 const MAX_BYTES = 11 * 1024 * 1024
 const MEDIA_TILE_IDS = [

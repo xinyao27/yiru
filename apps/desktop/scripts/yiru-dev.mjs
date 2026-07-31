@@ -6,7 +6,7 @@ import path from 'node:path'
 
 const scriptPath = realpathSync(import.meta.filename)
 const scriptDir = path.dirname(scriptPath)
-const repoRoot = path.resolve(scriptDir, '..', '..')
+const repoRoot = path.resolve(scriptDir, '..')
 const cliEntry =
   process.env.YIRU_DEV_CLI_ENTRY_PATH ?? path.join(repoRoot, 'out', 'cli', 'index.js')
 

@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto'
  * The updater's lock records the git tree sha of the skill folder it installed,
  * so hashing the observed bytes the same way lets the post-run verdict recognise
  * content the bundled registry has never seen. The algorithm is a port of
- * `gitTreeSha` in config/scripts/generate-skill-bundle-manifest.mjs and must
+ * `gitTreeSha` in scripts/generate-skill-bundle-manifest.mjs and must
  * match it exactly — a near-miss never matches anything and silently disables
  * the verdict's lock check.
  *

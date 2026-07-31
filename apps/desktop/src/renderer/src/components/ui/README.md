@@ -26,7 +26,7 @@ The supported general-purpose vocabulary is the default shadcn set. Use those ro
 - `text-green-700 dark:text-green-300`, not a success token.
 - `border-border` plus an opaque surface, not an elevation variable.
 
-Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `config/scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit. `config/scripts/check-ui-style-drift.mjs` fails on feature-TSX drift that reintroduces native form/action tags, dead `rounded-*`, black/white alpha washes, or private style-module imports, and warns on Button classNames that look like the old quiet/`sidebar-accent` stacks — see `docs/style-guide.md`.
+Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit. `scripts/check-ui-style-drift.mjs` fails on feature-TSX drift that reintroduces native form/action tags, dead `rounded-*`, black/white alpha washes, or private style-module imports, and warns on Button classNames that look like the old quiet/`sidebar-accent` stacks — see `docs/style-guide.md`.
 
 ## Primitive catalog
 

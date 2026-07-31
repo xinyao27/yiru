@@ -199,22 +199,18 @@ function runElectronPackageBinaryInstall() {
   delete env.ELECTRON_SKIP_BINARY_DOWNLOAD
   delete env.npm_config_electron_skip_binary_download
 
-  const result = spawnSync(
-    process.execPath,
-    ['config/scripts/install-electron-package-binary.mjs'],
-    {
-      cwd: projectDir,
-      env,
-      stdio: 'inherit'
-    }
-  )
+  const result = spawnSync(process.execPath, ['scripts/install-electron-package-binary.mjs'], {
+    cwd: projectDir,
+    env,
+    stdio: 'inherit'
+  })
 
   if (result.error) {
     throw result.error
   }
   if (result.status !== 0) {
     throw new Error(
-      `config/scripts/install-electron-package-binary.mjs exited with status ${result.status}`
+      `scripts/install-electron-package-binary.mjs exited with status ${result.status}`
     )
   }
 }
@@ -233,7 +229,7 @@ function continuePostinstallWithoutElectron() {
   console.error(
     '[rebuild] Continuing postinstall because Electron binary installation failed. ' +
       'Electron-consuming package scripts and release jobs run ' +
-      'config/scripts/ensure-native-runtime.mjs --runtime=electron before launching Electron.'
+      'scripts/ensure-native-runtime.mjs --runtime=electron before launching Electron.'
   )
   return true
 }

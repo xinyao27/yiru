@@ -70,7 +70,7 @@ export function highestRcForBase(base, { cwd = process.cwd() } = {}) {
 function main() {
   const base = process.argv[2]
   if (!base) {
-    throw new Error('Usage: node config/scripts/release-rc-history.mjs <base-version>')
+    throw new Error('Usage: node scripts/release-rc-history.mjs <base-version>')
   }
 
   const highest = highestRcForBase(base)

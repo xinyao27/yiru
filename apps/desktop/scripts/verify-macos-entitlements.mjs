@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const __dirname = import.meta.dirname
-const repoRoot = resolve(__dirname, '../..')
+const repoRoot = resolve(__dirname, '..')
 
 const defaultPlists = [
   'resources/build/entitlements.mac.plist',

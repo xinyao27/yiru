@@ -16,7 +16,7 @@ import { rolldown } from 'rolldown'
 
 const __dirname = import.meta.dirname
 // Why: the script lives under config/scripts, so go two levels up to reach the repo root.
-const ROOT = join(__dirname, '..', '..')
+const ROOT = join(__dirname, '..')
 const RELAY_ENTRY = join(ROOT, 'src', 'relay', 'relay.ts')
 const WATCHER_ENTRY = join(ROOT, 'src', 'main', 'filesystem', 'parcel-watcher-process-entry.ts')
 

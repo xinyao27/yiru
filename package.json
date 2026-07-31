@@ -41,14 +41,16 @@
     "ensure:electron-runtime": "pnpm --filter yiru run ensure:electron-runtime",
     "verify:computer-native": "pnpm --filter yiru run verify:computer-native",
     "verify:repository-contracts": "pnpm --filter yiru run verify:repository-contracts",
-    "check:max-lines-ratchet": "pnpm --filter yiru run check:max-lines-ratchet",
-    "verify:bundled-skill-guides": "pnpm --filter yiru run verify:bundled-skill-guides",
-    "verify:skill-bundle-manifest": "pnpm --filter yiru run verify:skill-bundle-manifest",
+    "verify:workspace-contracts": "node scripts/check-source-path-references.mjs && node scripts/check-max-lines-ratchet.mjs && node scripts/generate-bundled-skill-guides.mjs --check && node scripts/generate-skill-bundle-manifest.mjs",
+    "check:source-path-references": "node scripts/check-source-path-references.mjs",
+    "check:max-lines-ratchet": "node scripts/check-max-lines-ratchet.mjs",
+    "verify:bundled-skill-guides": "node scripts/generate-bundled-skill-guides.mjs --check",
+    "verify:skill-bundle-manifest": "node scripts/generate-skill-bundle-manifest.mjs",
     "verify:localization-catalog": "pnpm --filter yiru run verify:localization-catalog",
     "sync:localization-catalog": "pnpm --filter yiru run sync:localization-catalog",
     "verify:localization-coverage": "pnpm --filter yiru run verify:localization-coverage",
     "typecheck": "pnpm --filter './packages/*' run typecheck && pnpm --filter yiru run typecheck && pnpm --filter yiru-mobile run typecheck",
-    "check": "vp check --fix && pnpm run typecheck && pnpm --filter yiru run verify:repository-contracts",
+    "check": "vp check --fix && pnpm run typecheck && pnpm run verify:workspace-contracts && pnpm --filter yiru run verify:repository-contracts",
     "lint": "vp lint --fix",
     "fmt": "vp fmt",
     "up": "taze major -Ir",
@@ -60,7 +62,8 @@
     "taze": "catalog:",
     "typescript": "catalog:desktop",
     "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "yaml": "catalog:"
   },
   "engines": {
     "node": "24"

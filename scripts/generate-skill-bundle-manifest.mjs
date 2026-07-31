@@ -12,16 +12,17 @@ const CURRENT_MANIFEST_SCHEMA_VERSION = 2
 const SNAPSHOT_REGISTRY_SCHEMA_VERSION = 1
 const RELEASE_MAPPING_SCHEMA_VERSION = 1
 const SCRIPT_DIR = import.meta.dirname
-const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
-// Why: tagged paths are repository-root relative even when pnpm runs this script from apps/desktop.
+// Why: tagged paths are repository-root relative regardless of the cwd pnpm runs
+// this script from, so every lookup anchors on Git's top level.
 const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
-  cwd: REPO_ROOT,
+  cwd: SCRIPT_DIR,
   encoding: 'utf8'
 }).trim()
 // Why: skills/ is product content shipped to end users' agent installs, so it
-// lives at the repository root rather than inside the desktop app package.
+// lives at the repository root; only the freshness artifacts it digests into
+// belong to the desktop package, which packages them as extraResources.
 const SKILLS_ROOT = path.join(GIT_ROOT, 'skills')
-const OUTPUT_ROOT = path.join(REPO_ROOT, 'resources', 'skills')
+const OUTPUT_ROOT = path.join(GIT_ROOT, 'apps', 'desktop', 'resources', 'skills')
 const CURRENT_MANIFEST_PATH = path.join(OUTPUT_ROOT, 'current-manifest.json')
 const SNAPSHOT_REGISTRY_PATH = path.join(OUTPUT_ROOT, 'snapshot-registry.json')
 const RELEASE_MAPPING_PATH = path.join(OUTPUT_ROOT, 'release-mapping.json')
@@ -576,8 +577,8 @@ async function verifyArtifacts(artifacts) {
   if (stale.length > 0) {
     throw new Error(
       `Generated skill artifacts are stale:\n${stale
-        .map((filePath) => path.relative(REPO_ROOT, filePath))
-        .join('\n')}\nRun node config/scripts/generate-skill-bundle-manifest.mjs --write.`
+        .map((filePath) => path.relative(GIT_ROOT, filePath))
+        .join('\n')}\nRun node scripts/generate-skill-bundle-manifest.mjs --write.`
     )
   }
 }

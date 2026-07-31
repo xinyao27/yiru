@@ -17,7 +17,7 @@ const BASELINE_PATH = 'apps/desktop/config/max-lines-baseline.txt'
 const MOBILE_CONFIG_PATH = 'apps/mobile/config/mobile-max-lines-ratchets.ts'
 // This file contains the directive text as regex data, so scanning it would
 // self-flag. The ratchet does not police itself.
-const SELF_FILES = new Set(['apps/desktop/config/scripts/check-max-lines-ratchet.mjs'])
+const SELF_FILES = new Set(['scripts/check-max-lines-ratchet.mjs'])
 
 // Default max-lines budgets from vite.config.ts (counted lines).
 export function defaultLimitForPath(p) {
@@ -175,7 +175,7 @@ export function main(root = process.cwd()) {
   const baselineFile = path.join(root, BASELINE_PATH)
   if (!fs.existsSync(baselineFile)) {
     console.error(
-      `::error::Missing ${BASELINE_PATH}. Generate it with: node config/scripts/check-max-lines-ratchet.mjs --init`
+      `::error::Missing ${BASELINE_PATH}. Generate it with: node scripts/check-max-lines-ratchet.mjs --init`
     )
     return 1
   }

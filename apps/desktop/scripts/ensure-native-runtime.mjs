@@ -8,7 +8,7 @@ import { basename, resolve } from 'node:path'
 
 const require = createRequire(import.meta.url)
 const scriptPath = import.meta.filename
-const projectDir = resolve(import.meta.dirname, '../..')
+const projectDir = resolve(import.meta.dirname, '..')
 const runtime = readRuntimeArg()
 
 const NATIVE_MODULES = ['node-pty']
@@ -30,7 +30,7 @@ if (runtime === 'node') {
 } else if (runtime === 'electron') {
   ensureElectronRuntime()
 } else {
-  console.error('Usage: node config/scripts/ensure-native-runtime.mjs --runtime=node|electron')
+  console.error('Usage: node scripts/ensure-native-runtime.mjs --runtime=node|electron')
   process.exit(2)
 }
 
@@ -103,7 +103,7 @@ function ensureElectronRuntime() {
     )
     printCheckError(initial)
   }
-  runNodeScript(['config/scripts/rebuild-native-deps.mjs'])
+  runNodeScript(['scripts/rebuild-native-deps.mjs'])
 
   const final = runElectronCheck()
   if (!final.ok) {

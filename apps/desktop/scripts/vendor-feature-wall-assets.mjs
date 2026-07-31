@@ -5,7 +5,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 
 const __dirname = import.meta.dirname
-const ROOT = path.join(__dirname, '..', '..')
+const ROOT = path.join(__dirname, '..')
 const DEFAULT_MARKETING_REPO = path.join(
   homedir(),
   'source',

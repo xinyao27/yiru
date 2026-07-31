@@ -31,13 +31,13 @@ are surfaced directly as UI copy:
 Generate a machine-readable inventory:
 
 ```sh
-node config/scripts/audit-localization-coverage.mjs --json --output tmp/localization-candidates.json
+node scripts/audit-localization-coverage.mjs --json --output tmp/localization-candidates.json
 ```
 
 Generate a reviewable Markdown inventory:
 
 ```sh
-node config/scripts/audit-localization-coverage.mjs --markdown --output tmp/localization-candidates.md
+node scripts/audit-localization-coverage.mjs --markdown --output tmp/localization-candidates.md
 ```
 
 Run the maintained coverage gate:

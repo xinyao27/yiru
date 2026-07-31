@@ -182,7 +182,7 @@ export async function verifyRequiredReleaseAssets({ repo, tag, token, includeWin
 async function main() {
   const tag = process.argv[2]
   if (!tag) {
-    throw new Error('Usage: node config/scripts/verify-release-required-assets.mjs <tag>')
+    throw new Error('Usage: node scripts/verify-release-required-assets.mjs <tag>')
   }
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
   if (!token) {

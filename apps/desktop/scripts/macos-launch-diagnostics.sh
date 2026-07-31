@@ -2,8 +2,8 @@
 # Capture one-shot macOS launch diagnostics for a published Yiru release.
 #
 # Usage:
-#   YIRU_DIAGNOSTIC_TAG=v1.4.42-rc.1 bash config/scripts/macos-launch-diagnostics.sh
-#   bash config/scripts/macos-launch-diagnostics.sh --tag v1.4.42-rc.1
+#   YIRU_DIAGNOSTIC_TAG=v1.4.42-rc.1 bash scripts/macos-launch-diagnostics.sh
+#   bash scripts/macos-launch-diagnostics.sh --tag v1.4.42-rc.1
 set -euo pipefail
 
 REPO="${YIRU_DIAGNOSTIC_REPO:-xinyao27/yiru}"
@@ -29,8 +29,8 @@ while [[ $# -gt 0 ]]; do
 Capture one-shot macOS launch diagnostics for a published Yiru release.
 
 Usage:
-  YIRU_DIAGNOSTIC_TAG=v1.4.42-rc.1 bash config/scripts/macos-launch-diagnostics.sh
-  bash config/scripts/macos-launch-diagnostics.sh --tag v1.4.42-rc.1
+  YIRU_DIAGNOSTIC_TAG=v1.4.42-rc.1 bash scripts/macos-launch-diagnostics.sh
+  bash scripts/macos-launch-diagnostics.sh --tag v1.4.42-rc.1
 EOF
       exit 0
       ;;

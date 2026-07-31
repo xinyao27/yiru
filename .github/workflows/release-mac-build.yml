@@ -71,7 +71,7 @@ jobs:
           command: pnpm install --frozen-lockfile
 
       - name: Verify macOS signing environment
-        run: pnpm --filter yiru exec node config/scripts/verify-macos-release-env.mjs
+        run: pnpm --filter yiru exec node scripts/verify-macos-release-env.mjs
         env:
           CSC_LINK: ${{ secrets.MAC_CERTS }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
@@ -82,7 +82,7 @@ jobs:
       # Why: `plutil -lint` accepts duplicate plist keys, but `codesign`
       # rejects duplicate entitlements after the expensive app build.
       - name: Verify macOS entitlements
-        run: pnpm --filter yiru exec node config/scripts/verify-macos-entitlements.mjs
+        run: pnpm --filter yiru exec node scripts/verify-macos-entitlements.mjs
 
       # Why: telemetry's transport gate (`apps/desktop/src/main/telemetry/client.ts:IS_OFFICIAL_BUILD`)
       # requires the build identity to be the literal string `stable` or `rc`,
@@ -160,4 +160,4 @@ jobs:
       # single `--publish always` invocation, so there is no cheap insertion
       # point between pack and upload without splitting those steps.
       - name: Verify telemetry constants present in app.asar
-        run: pnpm --filter yiru exec node config/scripts/verify-telemetry-constants.mjs
+        run: pnpm --filter yiru exec node scripts/verify-telemetry-constants.mjs

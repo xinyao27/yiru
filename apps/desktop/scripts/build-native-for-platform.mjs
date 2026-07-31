@@ -3,7 +3,7 @@
 import { spawnSync } from 'node:child_process'
 
 if (process.platform === 'win32') {
-  runNodeScript('config/scripts/build-windows-cli-launcher.mjs')
+  runNodeScript('scripts/build-windows-cli-launcher.mjs')
   process.exit(0)
 }
 

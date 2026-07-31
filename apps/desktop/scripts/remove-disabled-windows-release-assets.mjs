@@ -7,7 +7,7 @@ import { deleteWindowsReleaseAssetsForTag } from './publish-complete-draft-relea
 async function main() {
   const tag = process.argv[2]
   if (!tag) {
-    throw new Error('Usage: node config/scripts/remove-disabled-windows-release-assets.mjs <tag>')
+    throw new Error('Usage: node scripts/remove-disabled-windows-release-assets.mjs <tag>')
   }
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
   if (!token) {

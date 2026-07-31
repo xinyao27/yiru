@@ -42,7 +42,7 @@ import { extractFile, listPackage } from '@electron/asar'
 // Resolving relative to the script's own location turns a misleading
 // "could not parse TELEMETRY_ENABLED flag" parse error into a clear
 // file-not-found error, and decouples the script from the caller's cwd.
-const repoRoot = resolve(import.meta.dirname, '..', '..')
+const repoRoot = resolve(import.meta.dirname, '..')
 
 function findAsar(rootDir) {
   // Why: electron-builder produces one `app.asar` per platform-arch combo.
