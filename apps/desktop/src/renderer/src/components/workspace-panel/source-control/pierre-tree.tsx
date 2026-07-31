@@ -7,6 +7,10 @@ import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import type { SourceControlController } from './controller'
 import {
+  SOURCE_CONTROL_PIERRE_ACTIONS_UNSAFE_CSS,
+  SourceControlPierreTreeActions
+} from './pierre-tree-actions'
+import {
   buildBranchPierreTreeData,
   buildUncommittedPierreTreeData,
   type SourceControlPierreTarget,
@@ -23,7 +27,7 @@ import { getSubmoduleExpansionKey } from './submodule-expansion'
 
 const SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX = 26
 
-const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}
+const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}${SOURCE_CONTROL_PIERRE_ACTIONS_UNSAFE_CSS}
   /* Why: the source-control panel owns scrolling, so Pierre must not reserve
      an internal scrollbar gutter that shortens every row. */
   [data-file-tree-virtualized-scroll="true"] {
@@ -65,6 +69,15 @@ function findTreeItemPath(event: React.SyntheticEvent<HTMLElement>): string | nu
   return row?.dataset.itemPath ?? null
 }
 
+function isTreeActionEvent(event: React.SyntheticEvent<HTMLElement>): boolean {
+  return event.nativeEvent
+    .composedPath()
+    .some(
+      (entry) =>
+        entry instanceof HTMLElement && entry.dataset.yiruSourceControlActions !== undefined
+    )
+}
+
 function getCanonicalParentPath(path: string): string {
   const pathWithoutTrailingSlash = path.endsWith('/') ? path.slice(0, -1) : path
   const separatorIndex = pathWithoutTrailingSlash.lastIndexOf('/')
@@ -72,23 +85,42 @@ function getCanonicalParentPath(path: string): string {
 }
 
 function countVisibleRows(data: SourceControlPierreTreeData): number {
-  const expandedPaths = new Set(data.expandedPaths)
-  let count = 0
+  const childrenByParent = new Map<string, string[]>()
   for (const path of data.targetByCanonicalPath.keys()) {
-    let ancestorPath = getCanonicalParentPath(path)
-    let isVisible = true
-    while (ancestorPath) {
-      if (!expandedPaths.has(ancestorPath)) {
-        isVisible = false
-        break
-      }
-      ancestorPath = getCanonicalParentPath(ancestorPath)
-    }
-    if (isVisible) {
-      count += 1
+    const parentPath = getCanonicalParentPath(path)
+    const siblings = childrenByParent.get(parentPath)
+    if (siblings) {
+      siblings.push(path)
+    } else {
+      childrenByParent.set(parentPath, [path])
     }
   }
-  return count
+  const expandedPaths = new Set(data.expandedPaths)
+
+  const countChildren = (parentPath: string): number => {
+    let count = 0
+    for (const childPath of childrenByParent.get(parentPath) ?? []) {
+      count += 1
+      if (!childPath.endsWith('/')) {
+        continue
+      }
+
+      // Why: Pierre projects a sole-directory chain as one row whose terminal
+      // directory owns expansion, but its public model does not expose the visible count.
+      let terminalPath = childPath
+      let children = childrenByParent.get(terminalPath) ?? []
+      while (children.length === 1 && children[0]?.endsWith('/')) {
+        terminalPath = children[0]
+        children = childrenByParent.get(terminalPath) ?? []
+      }
+      if (expandedPaths.has(terminalPath)) {
+        count += countChildren(terminalPath)
+      }
+    }
+    return count
+  }
+
+  return countChildren('')
 }
 
 function openTarget(
@@ -137,7 +169,7 @@ function SourceControlPierreTree({
   )
   const { model } = useFileTree({
     paths: data.paths,
-    flattenEmptyDirectories: false,
+    flattenEmptyDirectories: true,
     initialExpansion: 'closed',
     initialExpandedPaths: data.expandedPaths,
     initialSelectedPaths: selectedCanonicalPaths,
@@ -172,8 +204,22 @@ function SourceControlPierreTree({
   useLayoutEffect(() => {
     resettingRef.current = true
     model.resetPaths(data.paths, { initialExpandedPaths: data.expandedPaths })
+    const expandedPaths = new Set(data.expandedPaths)
+    for (const path of data.targetByCanonicalPath.keys()) {
+      const item = model.getItem(path)
+      if (!item || !('isExpanded' in item) || item.isExpanded() === expandedPaths.has(path)) {
+        continue
+      }
+      // Why: the panel height follows controlled collapse state, so Pierre's
+      // disclosure state must match it immediately after a path reset.
+      if (expandedPaths.has(path)) {
+        item.expand()
+      } else {
+        item.collapse()
+      }
+    }
     resettingRef.current = false
-  }, [data.expandedPaths, data.paths, model])
+  }, [data.expandedPaths, data.paths, data.targetByCanonicalPath, model])
 
   useLayoutEffect(() => {
     model.setGitStatus(data.gitStatus)
@@ -235,65 +281,80 @@ function SourceControlPierreTree({
   const height = Math.max(1, countVisibleRows(data)) * SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX
 
   return (
-    <FileTree
-      id={treeHostId}
-      model={model}
-      className="yiru-pierre-file-tree bg-sidebar block w-full"
-      style={{ ...PIERRE_FILE_TREE_STYLE, height }}
-      onClickCapture={(event) => {
-        const path = findTreeItemPath(event)
-        const target = path ? data.targetByCanonicalPath.get(path) : undefined
-        if (event.detail > 1 && target?.kind === 'uncommitted' && target.isSubmodule) {
-          event.preventDefault()
-          event.stopPropagation()
-          return
-        }
-        openTarget(controller, target, event)
-      }}
-      onDoubleClickCapture={(event) => {
-        const path = findTreeItemPath(event)
-        openTarget(controller, path ? data.targetByCanonicalPath.get(path) : undefined, event, true)
-      }}
-      onKeyDownCapture={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') {
-          return
-        }
-        const path = model.getFocusedPath()
-        if (!path) {
-          return
-        }
-        const target = data.targetByCanonicalPath.get(path)
-        if (target?.kind === 'uncommitted' && target.isSubmodule) {
-          const item = model.getItem(path)
-          if (item && 'toggle' in item) {
-            item.toggle()
+    <>
+      <FileTree
+        id={treeHostId}
+        model={model}
+        className="yiru-pierre-file-tree bg-sidebar block w-full"
+        style={{ ...PIERRE_FILE_TREE_STYLE, height }}
+        onClickCapture={(event) => {
+          const path = findTreeItemPath(event)
+          const target = path ? data.targetByCanonicalPath.get(path) : undefined
+          if (event.detail > 1 && target?.kind === 'uncommitted' && target.isSubmodule) {
+            event.preventDefault()
+            event.stopPropagation()
+            return
           }
-        } else if (target?.kind === 'uncommitted' || target?.kind === 'branch') {
           openTarget(controller, target, event)
-        } else {
-          return
-        }
-        event.preventDefault()
-      }}
-      onDragStartCapture={(event) => {
-        const path = findTreeItemPath(event)
-        const target = path ? data.targetByCanonicalPath.get(path) : undefined
-        if (target?.kind !== 'uncommitted' && target?.kind !== 'branch') {
-          return
-        }
-        event.dataTransfer.setData(
-          WORKSPACE_FILE_PATH_MIME,
-          joinPath(controller.worktreePath ?? '', target.entry.path)
-        )
-        event.dataTransfer.effectAllowed = 'copy'
-      }}
-      renderContextMenu={(item, context) => {
-        const target = data.targetByCanonicalPath.get(item.path)
-        return target ? (
-          <SourceControlPierreTreeMenu controller={controller} target={target} context={context} />
-        ) : null
-      }}
-    />
+        }}
+        onDoubleClickCapture={(event) => {
+          const path = findTreeItemPath(event)
+          openTarget(
+            controller,
+            path ? data.targetByCanonicalPath.get(path) : undefined,
+            event,
+            true
+          )
+        }}
+        onKeyDownCapture={(event) => {
+          if (isTreeActionEvent(event)) {
+            return
+          }
+          if (event.key !== 'Enter' && event.key !== ' ') {
+            return
+          }
+          const path = model.getFocusedPath()
+          if (!path) {
+            return
+          }
+          const target = data.targetByCanonicalPath.get(path)
+          if (target?.kind === 'uncommitted' && target.isSubmodule) {
+            const item = model.getItem(path)
+            if (item && 'toggle' in item) {
+              item.toggle()
+            }
+          } else if (target?.kind === 'uncommitted' || target?.kind === 'branch') {
+            openTarget(controller, target, event)
+          } else {
+            return
+          }
+          event.preventDefault()
+        }}
+        onDragStartCapture={(event) => {
+          const path = findTreeItemPath(event)
+          const target = path ? data.targetByCanonicalPath.get(path) : undefined
+          if (target?.kind !== 'uncommitted' && target?.kind !== 'branch') {
+            return
+          }
+          event.dataTransfer.setData(
+            WORKSPACE_FILE_PATH_MIME,
+            joinPath(controller.worktreePath ?? '', target.entry.path)
+          )
+          event.dataTransfer.effectAllowed = 'copy'
+        }}
+        renderContextMenu={(item, context) => {
+          const target = data.targetByCanonicalPath.get(item.path)
+          return target ? (
+            <SourceControlPierreTreeMenu
+              controller={controller}
+              target={target}
+              context={context}
+            />
+          ) : null
+        }}
+      />
+      <SourceControlPierreTreeActions controller={controller} data={data} treeHostId={treeHostId} />
+    </>
   )
 }
 

@@ -38,4 +38,34 @@ export const PIERRE_FILE_TREE_UNSAFE_CSS = `
     background-color: var(--trees-selected-bg) !important;
 
   }
+  /* Why: app-level Button styles cannot cross Pierre's Shadow DOM. This is the
+     shared bridge for row actions portaled into any Pierre tree. */
+  [data-yiru-pierre-row-actions="true"] button {
+    all: unset;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    color: var(--trees-fg-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  [data-yiru-pierre-row-actions="true"] button:hover,
+  [data-yiru-pierre-row-actions="true"] button:focus-visible {
+    color: var(--trees-fg);
+    background-color: var(--trees-bg);
+  }
+  [data-yiru-pierre-row-actions="true"] button:focus-visible {
+    outline: var(--trees-focus-ring-width) solid var(--trees-focus-ring-color);
+    outline-offset: var(--trees-focus-ring-offset);
+  }
+  [data-yiru-pierre-row-actions="true"] button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  [data-yiru-pierre-row-actions="true"] svg {
+    width: 14px;
+    height: 14px;
+  }
 `

@@ -1,3 +1,4 @@
+import { ScrollArea } from '../../ui/scroll-area'
 import { SourceControlBranchSection } from './branch-section'
 import { CompareUnavailable } from './compare-summary'
 import type { SourceControlController } from './controller'
@@ -32,9 +33,10 @@ export function SourceControlPanelBody({
     !hasUncommittedEntries && branchSummary?.status === 'ready' && branchEntries.length === 0
 
   return (
-    <div
-      ref={setFileListScrollElement}
-      className="scrollbar-sleek relative flex flex-1 flex-col overflow-auto pt-1"
+    <ScrollArea
+      className="min-h-0 flex-1"
+      viewportClassName="flex flex-col overflow-x-hidden pt-1"
+      viewportRef={setFileListScrollElement}
     >
       <SourceControlPanelStatus
         controller={controller}
@@ -63,6 +65,6 @@ export function SourceControlPanelBody({
       ) : null}
       <SourceControlBranchSection controller={controller} />
       <SourceControlHistorySectionMemo controller={controller} />
-    </div>
+    </ScrollArea>
   )
 }
