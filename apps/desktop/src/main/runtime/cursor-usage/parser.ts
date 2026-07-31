@@ -1,8 +1,4 @@
-import type {
-  ProviderRateLimits,
-  RateLimitBucket,
-  RateLimitWindow
-} from '../../../shared/rate-limit-types'
+import type { ProviderRateLimits, RateLimitBucket, RateLimitWindow } from '~shared/rate-limit-types'
 
 const MONTHLY_WINDOW_MINUTES = 30 * 24 * 60
 const ESC = String.fromCharCode(27)

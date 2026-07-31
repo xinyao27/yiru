@@ -1,5 +1,4 @@
 import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
-
 import {
   normalizeLanguageServerSettings,
   type LanguageServerDocumentUriArgs,
@@ -12,7 +11,8 @@ import {
   type LanguageServerSettings,
   type LanguageServerStartArgs,
   type LanguageServerStartResult
-} from '../shared/language-server'
+} from '~shared/language-server'
+
 import { encodeLanguageServerMessage } from './language-server-message-framing'
 import { spawnLanguageServerProcess, writeLanguageServerFrame } from './language-server-process'
 import {

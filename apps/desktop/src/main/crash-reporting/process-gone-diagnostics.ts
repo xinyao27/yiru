@@ -1,10 +1,10 @@
 import { app } from 'electron'
-
 import {
   sanitizeCrashReportDetails,
   type CrashReportBreadcrumbData,
   type CrashReportDetailValue
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
+
 import type { ExpectedTeardownScope } from './process-gone-classification'
 
 type ProcessMetricLike = {

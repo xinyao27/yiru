@@ -5,10 +5,9 @@ import i18next, {
   type ReadCallback,
   type TOptions
 } from 'i18next'
-
-import { isPseudoLocalizationLocale, pseudoLocalizeString } from '../../shared/pseudo-localization'
-import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '../../shared/ui-language'
-import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '../../shared/ui-locale'
+import { isPseudoLocalizationLocale, pseudoLocalizeString } from '~shared/pseudo-localization'
+import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '~shared/ui-language'
+import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '~shared/ui-locale'
 
 export const mainI18n: I18nInstance = i18next.createInstance()
 
@@ -21,10 +20,10 @@ const LAZY_LOCALE_LOADERS: Record<
   Exclude<SupportedUiLocale, 'en'>,
   () => Promise<{ default: Record<string, unknown> }>
 > = {
-  es: () => import('../../renderer/src/i18n/locales/es.json'),
-  ja: () => import('../../renderer/src/i18n/locales/ja.json'),
-  ko: () => import('../../renderer/src/i18n/locales/ko.json'),
-  zh: () => import('../../renderer/src/i18n/locales/zh.json')
+  es: () => import('../../renderer/i18n/locales/es.json'),
+  ja: () => import('../../renderer/i18n/locales/ja.json'),
+  ko: () => import('../../renderer/i18n/locales/ko.json'),
+  zh: () => import('../../renderer/i18n/locales/zh.json')
 }
 
 const lazyLocaleBackend: BackendModule = {

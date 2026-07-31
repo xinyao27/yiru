@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 
-import type { ProviderRateLimits } from '../../../shared/rate-limit-types'
+import type { ProviderRateLimits } from '~shared/rate-limit-types'
+
 import { cleanupHiddenRateLimitPty, registerHiddenRateLimitPty } from '../hidden-pty-cleanup'
 import { resolveHiddenRateLimitPtyCwd } from '../hidden-rate-limit-pty-cwd'
 import { describeCursorUsageFailure, parseCursorUsage, stripCursorTerminalOutput } from './parser'

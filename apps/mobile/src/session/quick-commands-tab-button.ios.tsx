@@ -1,5 +1,5 @@
-import { MobileSwiftUiGlassAccessoryButton } from '@/components/glass/swift-ui.ios'
-import { translate } from '@/i18n/translate'
+import { MobileSwiftUiGlassAccessoryButton } from '~/components/glass/swift-ui.ios'
+import { translate } from '~/i18n/translate'
 
 type QuickCommandsTabButtonProps = {
   disabled: boolean

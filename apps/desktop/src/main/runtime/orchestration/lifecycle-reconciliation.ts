@@ -1,4 +1,5 @@
-import { parsePaneKey } from '../../../shared/stable-pane-id'
+import { parsePaneKey } from '~shared/stable-pane-id'
+
 import type { OrchestrationDb } from './db'
 import type { MessageRow, WorkerReportOutcome } from './types'
 

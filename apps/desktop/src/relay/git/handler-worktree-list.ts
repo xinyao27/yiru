@@ -1,6 +1,7 @@
 import { stat } from 'node:fs/promises'
 
-import type { GitCapabilityCache } from '../../shared/git/capability-cache'
+import type { GitCapabilityCache } from '~shared/git/capability-cache'
+
 import type { GitExec } from './handler-ops'
 import { isUnsupportedWorktreeListZError, parseWorktreeList } from './handler-output-parser'
 

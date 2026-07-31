@@ -1,4 +1,5 @@
-import { extractLastOscTitle } from '../../shared/agent/detection'
+import { extractLastOscTitle } from '~shared/agent/detection'
+
 import { parseFileUriPath } from './osc7-file-uri'
 import { extractOscScanTail, scanOsc7Uris } from './osc7-uri-extraction'
 

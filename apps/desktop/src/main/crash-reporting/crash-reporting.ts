@@ -7,7 +7,6 @@ import {
   isClipboardTextWriteTooLargeError
 } from '@yiru/workbench-model/ui'
 import { app, clipboard, ipcMain } from 'electron'
-
 import {
   type CrashReportBreadcrumbData,
   type CrashReportCopyDiagnosticsArgs,
@@ -20,7 +19,8 @@ import {
   formatUncapturedCrashReportText,
   sanitizeCrashReportDetails,
   sanitizeCrashReportString
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
+
 import { startSpan } from '../observability/tracer'
 import {
   getCrashBreadcrumbSnapshot,

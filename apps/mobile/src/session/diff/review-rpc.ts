@@ -2,14 +2,14 @@ import type {
   MobileGitBranchChangeEntry,
   MobileGitBranchCompareResult,
   MobileGitBranchCompareSummary
-} from '../../source-control/branch-compare'
+} from '~/source-control/branch-compare'
 import type {
   MobileGitFileStatus,
   MobileGitStagingArea,
   MobileGitStatusEntry,
   MobileGitStatusResult,
   MobileGitUpstreamStatus
-} from '../../source-control/git-status'
+} from '~/source-control/git-status'
 
 export type MobileReviewGitDiffResult =
   | {

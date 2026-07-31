@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { hardenExistingSecureFile, writeSecureJsonFile } from '../../../shared/secure-file'
+import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
+
 import { collectLegacyProvenanceCandidates } from '../legacy-provenance-merge'
 import {
   sameCoworkingSessionProvenance,

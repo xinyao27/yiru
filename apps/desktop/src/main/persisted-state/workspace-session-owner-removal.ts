@@ -3,10 +3,9 @@ import {
   WORKTREE_ID_SEPARATOR,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { getDefaultWorkspaceSession } from '../../shared/constants'
-import type { WorkspaceSessionState } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/scope'
+import { getDefaultWorkspaceSession } from '~shared/constants'
+import type { WorkspaceSessionState } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 type HostWorkspaceSessions = Partial<Record<ExecutionHostId, WorkspaceSessionState>>
 

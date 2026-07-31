@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 
-import { isOrchestrationMutation } from '../../../shared/orchestration-rpc-contract'
+import { isOrchestrationMutation } from '~shared/orchestration-rpc-contract'
+
 import { OrchestrationError } from '../orchestration/orchestration-error'
 import type { YiruRuntimeService } from '../yiru-runtime'
 import type { RpcRequest } from './core'

@@ -1,11 +1,11 @@
 import os from 'node:os'
 
 import { app } from 'electron'
-
 import {
   sanitizeCrashReportString,
   type CrashReportDiagnosticBundle
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
+
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
 import { collectDiagnosticBundle, getDiagnosticsStatus } from '../observability/service'
 import type { FeedbackDiagnosticBundleAttachment, FeedbackSubmitResult } from './feedback'

@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
-import { triggerError, triggerSuccess } from '../../platform/haptics'
-import { parseGitHubPrReference } from '../../source-control/github-pr-link-parse'
-import { linkMobilePr } from '../../source-control/pr-link'
-import type { RpcClient } from '../../transport/rpc-client'
+import { triggerError, triggerSuccess } from '~/platform/haptics'
+import { parseGitHubPrReference } from '~/source-control/github-pr-link-parse'
+import { linkMobilePr } from '~/source-control/pr-link'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { MobileGlassSurface } from '../glass/surface'
 import { MobileGlassTextButton } from '../glass/text-button'
 

@@ -1,7 +1,7 @@
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
+import { buildUsageValueSnapshot } from '~shared/stats/usage-value'
+import type { StatsSummary } from '~shared/types'
 
-import { buildUsageValueSnapshot } from '../../shared/stats/usage-value'
-import type { StatsSummary } from '../../shared/types'
 import { listAiVaultSessions } from '../ai-vault/cached-session-list'
 import type { ClaudeUsageStore } from '../claude/usage/store'
 import type { CodexUsageStore } from '../codex/usage/store'
@@ -30,12 +30,14 @@ export async function buildStatsSummary(
   const activitySummary = stats.getSummary()
   if (usageStores) {
     try {
+      const usageStats = buildUsageStats(usageStores)
+      refreshUsageInBackground(usageStores, refreshUsage)
       return {
         ...activitySummary,
-        ...(await buildUsageStats(usageStores, refreshUsage))
+        ...usageStats
       }
     } catch (error) {
-      console.error('[stats] Failed to refresh attributed usage:', error)
+      console.error('[stats] Failed to read attributed usage:', error)
     }
   }
   try {
@@ -60,26 +62,18 @@ export async function buildStatsSummary(
   }
 }
 
-async function buildUsageStats(
-  usageStores: StatsUsageStores,
-  refreshUsage: boolean
-): Promise<
-  Pick<
-    StatsSummary,
-    | 'dailyTokens'
-    | 'dailyValues'
-    | 'modelUsage'
-    | 'tokenDataAvailable'
-    | 'tokenUnavailableAgents'
-    | 'usageValueAvailable'
-    | 'hasUnpricedUsage'
-  >
+function buildUsageStats(
+  usageStores: StatsUsageStores
+): Pick<
+  StatsSummary,
+  | 'dailyTokens'
+  | 'dailyValues'
+  | 'modelUsage'
+  | 'tokenDataAvailable'
+  | 'tokenUnavailableAgents'
+  | 'usageValueAvailable'
+  | 'hasUnpricedUsage'
 > {
-  await Promise.all([
-    usageStores.claude.refresh(refreshUsage),
-    usageStores.codex.refresh(refreshUsage),
-    usageStores.openCode.refresh(refreshUsage)
-  ])
   const usage = buildUsageValueSnapshot({
     claude: usageStores.claude.getSnapshot('yiru', 'all'),
     codex: usageStores.codex.getSnapshot('yiru', 'all'),
@@ -96,6 +90,16 @@ async function buildUsageStats(
     usageValueAvailable: usage.hasValue,
     hasUnpricedUsage: usage.hasUnpricedUsage
   }
+}
+
+function refreshUsageInBackground(usageStores: StatsUsageStores, force: boolean): void {
+  void Promise.all([
+    usageStores.claude.refresh(force),
+    usageStores.codex.refresh(force),
+    usageStores.openCode.refresh(force)
+  ]).catch((error: unknown) => {
+    console.error('[stats] Failed to refresh attributed usage:', error)
+  })
 }
 
 function aggregateDailyTokens(

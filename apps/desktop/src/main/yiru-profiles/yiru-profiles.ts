@@ -1,6 +1,5 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { app, ipcMain } from 'electron'
-
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
@@ -11,7 +10,8 @@ import type {
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
+
 import type { Store } from '../persistence'
 import {
   createLocalYiruProfile,

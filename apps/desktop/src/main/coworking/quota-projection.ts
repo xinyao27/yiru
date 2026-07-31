@@ -1,12 +1,8 @@
 import type {
   CoworkingProviderQuota,
   CoworkingProviderQuotaWindow
-} from '../../shared/coworking/catalog-contract'
-import type {
-  ProviderRateLimits,
-  RateLimitState,
-  RateLimitWindow
-} from '../../shared/rate-limit-types'
+} from '~shared/coworking/catalog-contract'
+import type { ProviderRateLimits, RateLimitState, RateLimitWindow } from '~shared/rate-limit-types'
 
 export type CoworkingCachedQuotaState = Pick<RateLimitState, 'claude' | 'codex'>
 

@@ -2,12 +2,12 @@ import { spawn, type ChildProcessWithoutNullStreams, type ChildProcess } from 'n
 import type { Readable, Writable } from 'node:stream'
 
 import type { ClientChannel } from 'ssh2'
-
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import type { LanguageServerWorkspace } from './language-server-workspace'
 import { powerShellCommand, powerShellLiteral, powerShellNativeArg } from './ssh/remote/powershell'
 import { getSshConnectionManager, getActiveSshHostPlatform } from './ssh/ssh'

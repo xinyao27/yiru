@@ -1,8 +1,8 @@
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+import { callRuntimeEnvironmentExistingRoute } from '~main/runtime/environment-existing-route'
+import { CoworkingPairedRuntimeWorktreeCatalogSchema } from '~shared/coworking/paired-runtime-result-contract'
+import type { DetectedWorktreeListResult, Repo } from '~shared/types'
 
-import { CoworkingPairedRuntimeWorktreeCatalogSchema } from '../../../shared/coworking/paired-runtime-result-contract'
-import type { DetectedWorktreeListResult, Repo } from '../../../shared/types'
-import { callRuntimeEnvironmentExistingRoute } from '../../runtime/environment-existing-route'
 import { withCoworkingOuterActualHostScope } from '../canonical-host-path'
 
 export type CoworkingPairedRuntimeWorktreeCatalog = {

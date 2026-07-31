@@ -1,4 +1,5 @@
-import type { RpcClient } from '../../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { sendMobileNativeChatMessageWithOutcome, type MobileNativeChatSendOutcome } from './send'
 
 type MobileTerminalClient = { id: string; type: 'mobile' }

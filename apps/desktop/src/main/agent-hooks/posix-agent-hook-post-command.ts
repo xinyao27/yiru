@@ -1,4 +1,4 @@
-import type { AgentHookSource } from '../../shared/agent/hook-relay'
+import type { AgentHookSource } from '~shared/agent/hook-relay'
 
 // Why: split out of installer-utils.ts to stay under the 300-line budget —
 // this type plus buildPosixAgentHookCurlPostCommand pushed that file over.

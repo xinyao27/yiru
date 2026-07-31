@@ -1,13 +1,12 @@
 import { ORCHESTRATION_FEDERATION_CONTROL_MAIL_PROTOCOL_VERSION } from '@yiru/runtime-protocol/capabilities'
 import { z } from 'zod'
-
+import { importFederatedControlMessage } from '~main/runtime/orchestration/federation-control-message'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
 import {
   OptionalFiniteNumber,
   requiredString
-} from '../../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { importFederatedControlMessage } from '../../../../orchestration/federation-control-message'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../../core'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 const FederationPullParams = z.object({
   dispatchId: requiredString('Missing Dispatch ID'),

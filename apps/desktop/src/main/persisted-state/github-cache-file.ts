@@ -1,7 +1,7 @@
 import { readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import type { PersistedState } from '../../shared/types'
+import type { PersistedState } from '~shared/types'
 
 function cachePath(dataFile: string): string {
   return join(dirname(dataFile), 'yiru-github-cache.json')

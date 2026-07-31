@@ -7,21 +7,22 @@ import { basename, join } from 'node:path'
 import { platform } from 'node:process'
 import { promisify } from 'node:util'
 
-import { mapWithConcurrency } from '../shared/map-with-concurrency'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
 import {
   scanWorkspaceSpaceEntryTree,
   type WorkspaceSpaceEntryScan
-} from '../shared/workspace/entry-traversal'
+} from '~shared/workspace/entry-traversal'
 import {
   collectWorkspaceSpaceDirectoryEntries,
   createWorkspaceSpaceScanBudget,
   WorkspaceSpaceScanCapacityError
-} from '../shared/workspace/scan-budget'
-import { compactWorkspaceSpaceItems } from '../shared/workspace/space-compaction'
+} from '~shared/workspace/scan-budget'
+import { compactWorkspaceSpaceItems } from '~shared/workspace/space-compaction'
 import type {
   WorkspaceSpaceDirectoryScanResult,
   WorkspaceSpaceItem
-} from '../shared/workspace/space-types'
+} from '~shared/workspace/space-types'
+
 import type { RequestContext } from './dispatcher'
 
 const RELAY_FS_CONCURRENCY = 48

@@ -1,4 +1,4 @@
-import type { RuntimeTerminalDriverState } from '../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
 
 type InputFloorClaim = {
   base: RuntimeTerminalDriverState

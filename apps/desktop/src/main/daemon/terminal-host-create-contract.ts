@@ -1,5 +1,6 @@
-import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
-import type { TuiAgent } from '../../shared/types'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { TuiAgent } from '~shared/types'
+
 import type { ShellReadyState, TerminalSnapshot } from './types'
 
 export type CreateOrAttachOptions = {

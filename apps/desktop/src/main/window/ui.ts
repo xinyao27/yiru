@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, webContents, type WebContents } from 'electron'
+import { isFeatureInteractionId } from '~shared/feature-interactions'
+import type { PersistedUIState } from '~shared/types'
 
-import { isFeatureInteractionId } from '../../shared/feature-interactions'
-import type { PersistedUIState } from '../../shared/types'
 import type { Store } from '../persistence'
 
 let trustedUIRendererWebContentsId: number | null = null

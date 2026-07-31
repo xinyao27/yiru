@@ -1,5 +1,6 @@
-import type { GitStatusResult, Repo, Worktree } from '../../shared/types'
-import type { WorkspaceCleanupBlocker } from '../../shared/workspace/cleanup'
+import type { GitStatusResult, Repo, Worktree } from '~shared/types'
+import type { WorkspaceCleanupBlocker } from '~shared/workspace/cleanup'
+
 import { gitExecFileAsync } from '../git/runner'
 import { getStatus } from '../git/status'
 import type { IGitProvider } from '../providers/types'

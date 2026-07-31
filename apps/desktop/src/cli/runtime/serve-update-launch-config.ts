@@ -1,7 +1,8 @@
 import {
   SERVE_UPDATE_HANDOFF_PATH_ENV,
   getServeUpdateHandoffPath
-} from '../../shared/serve-update-handoff'
+} from '~shared/serve-update-handoff'
+
 import { getMacAppBundlePath } from './mac-app-update-bundle'
 
 export function resolveServeUpdateHandoffLaunchPath(args: {

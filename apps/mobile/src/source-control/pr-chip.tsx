@@ -8,8 +8,8 @@ import {
   GitPullRequest,
   Chat as MessageSquare,
   X
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { statusColorClasses } from '../components/pr-sidebar/status-color'
 import { hubStyles } from './hub-styles'

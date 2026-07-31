@@ -2,7 +2,8 @@ import type {
   BrowserCookieDeleteResult,
   BrowserCookieGetResult,
   BrowserCookieSetResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
 import { printResult } from '../format'

@@ -1,7 +1,8 @@
-import { clampOrchestrationAskTimeoutMs } from '../../../../../shared/orchestration-ask-timeout'
-import { isGroupAddress } from '../../../orchestration/groups'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../core'
+import { isGroupAddress } from '~main/runtime/orchestration/groups'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { clampOrchestrationAskTimeoutMs } from '~shared/orchestration-ask-timeout'
+
 import { rejectFederatedExplicitTarget } from './message-routing'
 import { AskParams } from './question-params'
 import { askRemoteRunHome } from './remote-question'

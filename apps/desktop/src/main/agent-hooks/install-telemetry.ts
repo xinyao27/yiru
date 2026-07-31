@@ -4,7 +4,8 @@
 // the agent label to fire `agent_hook_install_failed`, and the previous
 // closure-style loop lost it.
 
-import type { HookInstallAgent } from '../../shared/telemetry-events'
+import type { HookInstallAgent } from '~shared/telemetry-events'
+
 import { track } from '../telemetry/client'
 
 // Why: install errors are about config-file shape (malformed JSON, ACL

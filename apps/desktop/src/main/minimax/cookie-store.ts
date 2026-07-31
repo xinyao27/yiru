@@ -3,8 +3,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import { safeStorage } from 'electron'
-
-import { hardenExistingSecureFile, writeSecureFile } from '../../shared/secure-file'
+import { hardenExistingSecureFile, writeSecureFile } from '~shared/secure-file'
 
 const MINIMAX_COOKIE_FILE = 'minimax-session-cookie.enc'
 const COOKIE_ENVELOPE_PREFIX = 'yiru-minimax-cookie:v1:'

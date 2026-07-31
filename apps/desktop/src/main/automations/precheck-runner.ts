@@ -1,9 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 
 import type { ClientChannel } from 'ssh2'
+import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '~shared/automation/precheck'
+import type { AutomationPrecheck, AutomationPrecheckResult } from '~shared/automations-types'
 
-import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '../../shared/automation/precheck'
-import type { AutomationPrecheck, AutomationPrecheckResult } from '../../shared/automations-types'
 import { shellEscape } from '../ssh/connection-utils'
 import { getSshConnectionManager } from '../ssh/ssh'
 

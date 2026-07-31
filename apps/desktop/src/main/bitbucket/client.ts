@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer'
 
-import type { CheckStatus } from '../../shared/types'
+import type { CheckStatus } from '~shared/types'
+
 import {
   HostedReviewApiRequestError,
   requestHostedReviewJson

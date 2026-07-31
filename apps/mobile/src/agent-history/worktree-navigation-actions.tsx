@@ -1,4 +1,4 @@
-import { GitMerge } from '@/components/uniwind-icons'
+import { GitMerge } from '~/components/uniwind-icons'
 
 import type { ActionSheetAction } from '../components/action-sheet-modal'
 import { MobileAgentSessionHistoryIcon } from './agent-session-history-icon'

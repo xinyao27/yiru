@@ -1,6 +1,6 @@
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import type { RunRow } from '../../../orchestration/types'
-import type { YiruRuntimeService } from '../../../yiru-runtime'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { RunRow } from '~main/runtime/orchestration/types'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
 export function parseRemoteWorkerPayload(payload: string | undefined): Record<string, unknown> {
   if (!payload) {

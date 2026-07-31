@@ -1,0 +1,206 @@
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
+
+import { Label } from '../ui/label'
+import {
+  MAX_AGENT_HIBERNATION_IDLE_MS,
+  MIN_AGENT_HIBERNATION_IDLE_MS,
+  getEffectiveAgentHibernationIdleMs
+} from './agent/hibernation-planner'
+import { EphemeralVmsExperimentalSetting } from './ephemeral-vms-experimental-setting'
+import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './experimental-search'
+import { NumberField, SettingsSwitch } from './form-controls'
+import { HiddenExperimentalGroup } from './hidden-experimental-group'
+import { NativeChatExperimentalSetting } from './native-chat-experimental-setting'
+import { matchesSettingsSearch } from './search'
+import { SearchableSetting } from './searchable-setting'
+
+export { getExperimentalPaneSearchEntries }
+
+const MS_PER_MINUTE = 60 * 1000
+
+type ExperimentalPaneProps = {
+  settings: GlobalSettings
+  updateSettings: (updates: Partial<GlobalSettings>) => void
+  /** Hidden-experimental group is only rendered once the user has unlocked
+   *  it via Shift-clicking the Experimental sidebar entry. */
+  hiddenExperimentalUnlocked?: boolean
+}
+
+export function ExperimentalPane({
+  settings,
+  updateSettings,
+  hiddenExperimentalUnlocked = false
+}: ExperimentalPaneProps): React.JSX.Element {
+  const searchQuery = useAppStore((s) => s.settingsSearchQuery)
+  const showPet = matchesSettingsSearch(searchQuery, [getExperimentalSearchEntry().pet])
+  const showNativeChat = matchesSettingsSearch(searchQuery, [
+    getExperimentalSearchEntry().nativeChat
+  ])
+  const showTerminalAttention = matchesSettingsSearch(searchQuery, [
+    getExperimentalSearchEntry().terminalAttention
+  ])
+  const showAgentHibernation = matchesSettingsSearch(searchQuery, [
+    getExperimentalSearchEntry().agentHibernation
+  ])
+  const agentHibernationEnabled = settings.experimentalAgentHibernation === true
+  // Why: the planner owns ms-based bounds/defaults; the UI edits minutes
+  // while displaying the same effective clamped value the planner will use.
+  const agentHibernationIdleMinutes = Math.round(
+    getEffectiveAgentHibernationIdleMs(settings.agentHibernationIdleMs) / MS_PER_MINUTE
+  )
+
+  return (
+    <div className="space-y-4">
+      {showPet ? (
+        <SearchableSetting
+          title={translate('auto.components.settings.ExperimentalPane.dd6f0a1d45', 'Pet')}
+          description={translate(
+            'auto.components.settings.ExperimentalPane.0e89a574ae',
+            'Floating animated pet in the bottom-right corner.'
+          )}
+          keywords={getExperimentalSearchEntry().pet.keywords}
+          className="space-y-3 py-2"
+          id="experimental-pet"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 shrink space-y-1.5">
+              <Label>
+                {translate('auto.components.settings.ExperimentalPane.dd6f0a1d45', 'Pet')}
+              </Label>
+              <p className="text-muted-foreground text-xs">
+                {translate(
+                  'auto.components.settings.ExperimentalPane.ca2219fe5e',
+                  'Shows a small animated pet pinned to the bottom-right corner. Pick a character (Claudino, OpenCode, Gremlin) or upload your own PNG, APNG, GIF, WebP, JPG, or SVG from the status-bar pet menu. Hide it any time from the same menu without disabling this setting.'
+                )}
+              </p>
+            </div>
+            <Switch
+              checked={settings.experimentalPet}
+              onCheckedChange={(checked) => updateSettings({ experimentalPet: checked })}
+            />
+          </div>
+        </SearchableSetting>
+      ) : null}
+
+      {showNativeChat ? (
+        <NativeChatExperimentalSetting settings={settings} updateSettings={updateSettings} />
+      ) : null}
+
+      {showTerminalAttention ? (
+        <SearchableSetting
+          title={translate(
+            'auto.components.settings.ExperimentalPane.ec897e8d89',
+            'Terminal attention'
+          )}
+          description={translate(
+            'auto.components.settings.ExperimentalPane.88b7613afb',
+            'Persistent pane highlight for terminal bell and agent-completion events.'
+          )}
+          keywords={getExperimentalSearchEntry().terminalAttention.keywords}
+          className="space-y-3 py-2"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 shrink space-y-0.5">
+              <Label>
+                {translate(
+                  'auto.components.settings.ExperimentalPane.ec897e8d89',
+                  'Terminal attention'
+                )}
+              </Label>
+              <p className="text-muted-foreground text-xs">
+                {translate(
+                  'auto.components.settings.ExperimentalPane.a20d5ea365',
+                  'Keeps a pane-level highlight visible after terminal bell or agent-completion events until you interact with that pane. Experimental while we tune the signal.'
+                )}
+              </p>
+            </div>
+            <Switch
+              checked={settings.experimentalTerminalAttention}
+              onCheckedChange={(checked) =>
+                updateSettings({ experimentalTerminalAttention: checked })
+              }
+            />
+          </div>
+        </SearchableSetting>
+      ) : null}
+
+      {showAgentHibernation ? (
+        <SearchableSetting
+          title={translate(
+            'auto.components.settings.ExperimentalPane.agentHibernation.title',
+            'Agent sleep'
+          )}
+          description={translate(
+            'auto.components.settings.ExperimentalPane.agentHibernation.description',
+            'Stops idle background agent terminals after the configured idle window and resumes supported sessions when you open them again.'
+          )}
+          keywords={getExperimentalSearchEntry().agentHibernation.keywords}
+          className="space-y-3 py-2"
+          id="experimental-agent-hibernation"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 shrink space-y-0.5">
+              <Label>
+                {translate(
+                  'auto.components.settings.ExperimentalPane.agentHibernation.title',
+                  'Agent sleep'
+                )}
+              </Label>
+              <p className="text-muted-foreground text-xs">
+                {translate(
+                  'auto.components.settings.ExperimentalPane.agentHibernation.copy',
+                  'Stops idle background agent terminals after the configured idle window and resumes supported sessions when you open them again. Agent sleep preserves launch options for agents started by Yiru. Manually started agents may resume with your current Yiru defaults. Experimental while we tune the safety model.'
+                )}
+              </p>
+            </div>
+            <SettingsSwitch
+              checked={agentHibernationEnabled}
+              ariaLabel={translate(
+                'auto.components.settings.ExperimentalPane.agentHibernation.toggleLabel',
+                'Toggle agent sleep'
+              )}
+              onChange={() =>
+                updateSettings({
+                  experimentalAgentHibernation: !agentHibernationEnabled
+                })
+              }
+            />
+          </div>
+          {agentHibernationEnabled ? (
+            <NumberField
+              label={translate(
+                'auto.components.settings.ExperimentalPane.agentHibernation.idleMinutesLabel',
+                'Sleep after'
+              )}
+              description={translate(
+                'auto.components.settings.ExperimentalPane.agentHibernation.idleMinutesDescription',
+                'How many idle minutes a completed background agent must wait before Yiru can sleep it.'
+              )}
+              value={agentHibernationIdleMinutes}
+              min={MIN_AGENT_HIBERNATION_IDLE_MS / MS_PER_MINUTE}
+              max={MAX_AGENT_HIBERNATION_IDLE_MS / MS_PER_MINUTE}
+              step={1}
+              suffix={translate(
+                'auto.components.settings.ExperimentalPane.agentHibernation.idleMinutesSuffix',
+                'minutes'
+              )}
+              onChange={(minutes) =>
+                updateSettings({
+                  // Why: settings persist the planner contract, not the display unit.
+                  agentHibernationIdleMs: minutes * MS_PER_MINUTE
+                })
+              }
+            />
+          ) : null}
+        </SearchableSetting>
+      ) : null}
+
+      <EphemeralVmsExperimentalSetting settings={settings} updateSettings={updateSettings} />
+
+      {hiddenExperimentalUnlocked ? <HiddenExperimentalGroup /> : null}
+    </div>
+  )
+}

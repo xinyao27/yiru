@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron'
-
 import type {
   CodexUsageBreakdownKind,
   CodexUsageRange,
   CodexUsageScope
-} from '../../../shared/codex-usage-types'
+} from '~shared/codex-usage-types'
+
 import type { CodexUsageStore } from './store'
 
 export function registerCodexUsageHandlers(codexUsage: CodexUsageStore): void {

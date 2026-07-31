@@ -3,7 +3,8 @@ import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/age
 import { stripLeadingAgentTitleDecorationOrEmpty } from '@yiru/workbench-model/agent'
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
-import { isBlankBrowserUrl } from '../../browser/url'
+import { isBlankBrowserUrl } from '~/browser/url'
+
 import type { MobileSessionTab } from '../screen-state'
 
 // Why: tab identity + title cleaning uses the same shared glyph/label maps as

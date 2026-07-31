@@ -5,16 +5,16 @@ import {
   type AgentType,
   type NativeChatMessage
 } from '@yiru/workbench-model/agent'
-
-import type { OrchestrationWorkerReadFallbackReason } from '../../../shared/orchestration-worker-output'
-import { resolveSessionFilePath } from '../../native-chat/session-file-resolver'
-import { transcriptFallbackId } from '../../native-chat/transcript-fallback-id'
+import { resolveSessionFilePath } from '~main/native-chat/session-file-resolver'
+import { transcriptFallbackId } from '~main/native-chat/transcript-fallback-id'
 import {
   MAX_NATIVE_CHAT_TRANSCRIPT_RECORD_BYTES,
   nativeChatLineDecoderForAgent,
   readNativeChatTranscriptTailFile,
   type NativeChatLineDecoder
-} from '../../native-chat/transcript-tail-reader'
+} from '~main/native-chat/transcript-tail-reader'
+import type { OrchestrationWorkerReadFallbackReason } from '~shared/orchestration-worker-output'
+
 import {
   boundWorkerTranscriptMessages,
   clampWorkerTranscriptLimit

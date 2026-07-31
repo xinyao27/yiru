@@ -8,11 +8,12 @@ import {
 import { useMemo } from 'react'
 import { useUniwind } from 'uniwind'
 
-import { useMobileGlassAvailable } from '../../components/glass/availability'
+import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   MobileSwiftUiGlassGroup,
   mobileSwiftUiGlassButtonStyle
-} from '../../components/glass/swift-ui.ios'
+} from '~/components/glass/swift-ui.ios'
+
 import type { MobileChatPermission } from './permission'
 
 type MobileNativeChatPermissionActionsProps = {

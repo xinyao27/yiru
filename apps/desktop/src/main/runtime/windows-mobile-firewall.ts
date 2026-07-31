@@ -5,7 +5,8 @@ import type {
   WindowsMobileFirewallRepairResult,
   WindowsMobileFirewallStatus,
   WindowsNetworkCategory
-} from '../../shared/windows-mobile-firewall'
+} from '~shared/windows-mobile-firewall'
+
 import { hasSufficientWindowsFirewallRemoteScope } from './windows-firewall-remote-scope'
 
 // Why: a stable rule key lets upgrades replace the existing entry instead of

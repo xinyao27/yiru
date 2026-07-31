@@ -3,7 +3,8 @@ import { Text, type TextStyle, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useCSSVariable, useUniwind, withUniwind } from 'uniwind'
 
-import { resolveCssNumber, resolveCssString } from '../../style/resolve-css-variable'
+import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
+
 import {
   highlightMobileNativeChatCode,
   plainMobileNativeChatCodeLines,

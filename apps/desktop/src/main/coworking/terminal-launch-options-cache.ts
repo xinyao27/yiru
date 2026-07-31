@@ -1,4 +1,5 @@
-import type { TuiAgent } from '../../shared/types'
+import type { TuiAgent } from '~shared/types'
+
 import { CoworkingExecutionError } from './execution-error'
 
 const LAUNCH_OPTIONS_TTL_MS = 30_000

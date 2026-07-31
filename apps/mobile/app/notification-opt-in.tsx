@@ -2,8 +2,8 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, BackHandler, ScrollView, Text, View } from 'react-native'
 
-import { BellRinging as BellRing } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
+import { BellRinging as BellRing } from '~/components/uniwind-icons'
+import { SafeAreaView } from '~/components/uniwind-native-components'
 
 import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'

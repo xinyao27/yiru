@@ -1,7 +1,8 @@
 import type { NativeChatBlock } from '@yiru/workbench-model/agent'
 import { Pressable, Text, View } from 'react-native'
 
-import { BottomDrawer } from '../../components/bottom-drawer'
+import { BottomDrawer } from '~/components/bottom-drawer'
+
 import { pairToolBlocks, type ToolPair } from './blocks'
 import { MobileNativeChatCodeBlock } from './code-block'
 import { diffFromText, diffFromToolCall, type DiffLine } from './diff'

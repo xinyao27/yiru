@@ -1,6 +1,5 @@
 import type { AgentStatusIpcPayload } from '@yiru/workbench-model/agent'
-
-import type { ExactWorkerProviderSession } from '../../../shared/orchestration-worker-output'
+import type { ExactWorkerProviderSession } from '~shared/orchestration-worker-output'
 
 export function selectExactWorkerProviderSession(args: {
   paneKey: string

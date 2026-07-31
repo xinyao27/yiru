@@ -1,4 +1,4 @@
-import { stripAnsiControlSequences } from '../../shared/commit-message/agent-output'
+import { stripAnsiControlSequences } from '~shared/commit-message/agent-output'
 
 /** Full (bounded) output of a failed agent-CLI generation run, kept for
  *  on-demand display only — never persisted or synced. */

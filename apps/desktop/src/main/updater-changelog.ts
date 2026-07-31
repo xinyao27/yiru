@@ -1,7 +1,6 @@
 import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import type { UpdateInfo } from 'electron-updater'
-
-import type { ChangelogData } from '../shared/types'
+import type { ChangelogData } from '~shared/types'
 
 type GitHubReleaseUpdateInfo = Pick<UpdateInfo, 'version' | 'releaseName' | 'releaseNotes'>
 type CachedReleaseChangelog = { title: string | null; notes: string }

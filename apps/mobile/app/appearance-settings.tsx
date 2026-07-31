@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
 
 import {
   MOBILE_THEME_MODES,

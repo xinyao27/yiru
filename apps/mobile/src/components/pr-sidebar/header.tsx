@@ -2,11 +2,11 @@ import type { GitHubWorkItemDetails, PRInfo } from '@yiru/workbench-model/review
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
-import { ArrowRight, Pencil } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { ArrowRight, Pencil } from '~/components/uniwind-icons'
+import { canEditPRTitle } from '~/session/pr/title-edit'
+import type { MobilePrTitleAction } from '~/session/pr/use-title-action'
+import { cn } from '~/style/class-names'
 
-import { canEditPRTitle } from '../../session/pr/title-edit'
-import type { MobilePrTitleAction } from '../../session/pr/use-title-action'
 import { MobileContentSection } from '../content-section'
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'

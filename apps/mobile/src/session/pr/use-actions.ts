@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import {
   fetchMergePR,
   fetchRemovePRReviewers,

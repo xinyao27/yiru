@@ -12,12 +12,11 @@ import {
 import { dirname, join } from 'node:path'
 
 import { app } from 'electron'
-
 import {
   TERMINAL_SCROLLBACK_REPLAY_BYTE_LIMIT,
   TERMINAL_SCROLLBACK_STORE_BYTE_LIMIT
-} from '../shared/terminal/scrollback-limits'
-import type { WorkspaceSessionState } from '../shared/types'
+} from '~shared/terminal/scrollback-limits'
+import type { WorkspaceSessionState } from '~shared/types'
 
 const SNAPSHOT_DIR_NAME = 'terminal-scrollback'
 const REF_PREFIX = 'v1'

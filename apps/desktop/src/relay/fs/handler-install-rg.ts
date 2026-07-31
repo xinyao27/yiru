@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import {
   getProcessOutputFields,
   iterateProcessOutputLines
-} from '../../shared/process-output-field-scanner'
+} from '~shared/process-output-field-scanner'
 
 const GENERIC_LINUX_RIPGREP_INSTALL =
   'install ripgrep via your package manager (e.g. apt/dnf/pacman)'

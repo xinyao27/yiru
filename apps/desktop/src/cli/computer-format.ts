@@ -16,7 +16,8 @@ import type {
   ComputerListAppsResult,
   ComputerListWindowsResult,
   ComputerSnapshotResult
-} from '../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { formatBase64PayloadByteCount } from './base64-payload-byte-count'
 import type { RuntimeRpcSuccess } from './runtime-client'
 import { quoteCliCommandArgument } from './shell-command-quote'

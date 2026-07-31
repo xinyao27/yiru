@@ -1,10 +1,9 @@
 import { REMOTE_RUNTIME_SHARED_CONTROL_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
-
-import { sendRemoteRuntimeRequest } from '../../shared/remote-runtime/client'
-import { markEnvironmentUsed } from '../../shared/runtime-environment-store'
-import type { getPreferredPairingOffer } from '../../shared/runtime-environments'
-import type { KnownRuntimeEnvironment } from '../../shared/runtime-environments'
-import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
+import { sendRemoteRuntimeRequest } from '~shared/remote-runtime/client'
+import { markEnvironmentUsed } from '~shared/runtime-environment-store'
+import type { getPreferredPairingOffer } from '~shared/runtime-environments'
+import type { KnownRuntimeEnvironment } from '~shared/runtime-environments'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 
 const sharedControlSupport = new Map<string, { cacheKey: string; check: Promise<boolean> }>()
 

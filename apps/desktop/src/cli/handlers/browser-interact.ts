@@ -11,7 +11,8 @@ import type {
   BrowserSelectResult,
   BrowserTypeResult,
   BrowserUploadResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalNumberFlag,

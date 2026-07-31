@@ -5,13 +5,12 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 
 import { ipcMain, shell, systemPreferences } from 'electron'
-
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState,
   DeveloperPermissionStatus
-} from '../shared/developer-permissions-types'
+} from '~shared/developer-permissions-types'
 
 const PRIVACY_PANE_URLS: Partial<Record<DeveloperPermissionId, string>> = {
   camera: 'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera',

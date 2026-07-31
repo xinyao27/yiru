@@ -7,7 +7,8 @@
  */
 import * as path from 'node:path'
 
-import { readBranchCompareHead } from '../../shared/git/branch-compare-head'
+import { readBranchCompareHead } from '~shared/git/branch-compare-head'
+
 import { isGitBufferOverflowError } from './buffer-overflow'
 import { buildDiffResult } from './diff-result'
 import { bufferToBlob, parseBranchDiff } from './handler-output-parser'

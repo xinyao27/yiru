@@ -1,4 +1,5 @@
-import type { OrchestrationDb } from '../../../../orchestration/db'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+
 import { isUnknownWorkerStartOutcome, type WorkerSetupReceipt } from './topology'
 
 export function failWorkerStartWithReceipt(args: {

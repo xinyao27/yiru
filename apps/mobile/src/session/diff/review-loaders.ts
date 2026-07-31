@@ -1,10 +1,11 @@
-import { resolveMobileBranchCompareBaseRef } from '../../source-control/branch-base-ref'
+import { resolveMobileBranchCompareBaseRef } from '~/source-control/branch-base-ref'
 import {
   canOpenMobileBranchCompareDiff,
   type MobileGitBranchCompareResult
-} from '../../source-control/branch-compare'
-import { isMobileGitUnavailable } from '../../source-control/git-status'
-import type { RpcClient } from '../../transport/rpc-client'
+} from '~/source-control/branch-compare'
+import { isMobileGitUnavailable } from '~/source-control/git-status'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { highlightMobileDiffLines, resolveMobileSyntaxLanguage } from '../file-syntax'
 import { normalizeMobileDiffComments } from './comments'
 import { buildMobileDiffHunks } from './hunks'

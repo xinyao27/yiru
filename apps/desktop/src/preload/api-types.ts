@@ -17,11 +17,10 @@ import type {
 } from '@yiru/workbench-model/review'
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
-import type { AppIdentity } from '../shared/app-identity'
-import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser/annotation-viewport-bridge'
+import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '~shared/agent/interrupt-intent'
+import type { AppIdentity } from '~shared/app-identity'
+import type { BrowserSetAnnotationViewportBridgeArgs } from '~shared/browser/annotation-viewport-bridge'
 import type {
   BrowserSetGrabModeArgs,
   BrowserSetGrabModeResult,
@@ -32,7 +31,7 @@ import type {
   BrowserCaptureSelectionScreenshotResult,
   BrowserExtractHoverArgs,
   BrowserExtractHoverResult
-} from '../shared/browser/grab-types'
+} from '~shared/browser/grab-types'
 import type {
   BrowserContextMenuDismissedEvent,
   BrowserContextMenuRequestedEvent,
@@ -41,13 +40,13 @@ import type {
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../shared/browser/guest-events'
-import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
+} from '~shared/browser/guest-events'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '../shared/commit-message/agent-spec'
+} from '~shared/commit-message/agent-spec'
 import type {
   CoworkingDecideControlArgs,
   CoworkingRequestControlArgs,
@@ -61,11 +60,11 @@ import type {
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
-} from '../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
@@ -74,33 +73,44 @@ import type {
   CrashReportSubmitResult,
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
-} from '../shared/crash-reporting'
+} from '~shared/crash-reporting'
 import type {
   HostQualifiedDetectedWorktreeResult,
   ListDetectedWorktreesArgs,
   ProviderRequestId
-} from '../shared/detected-worktree-provider-contract'
+} from '~shared/detected-worktree-provider-contract'
 import type {
   EphemeralVmRecipeDoctorResult,
   EphemeralVmRecipeResultWarning
-} from '../shared/ephemeral-vm/recipes'
-import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/runtimes'
-import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
-import type { FeatureInteractionId } from '../shared/feature-interactions'
+} from '~shared/ephemeral-vm/recipes'
+import type { EphemeralVmRuntimeRecord } from '~shared/ephemeral-vm/runtimes'
+import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
+import type { FeatureInteractionId } from '~shared/feature-interactions'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
-} from '../shared/folder-workspace-path-status'
-import type { FridaySession } from '../shared/friday-types'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
+} from '~shared/folder-workspace-path-status'
+import type { FridaySession } from '~shared/friday-types'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+import type {
+  GitAddTagResult,
+  GitCheckoutCommitResult,
+  GitCherryPickResult,
+  GitCreateBranchResult,
+  GitDropCommitResult,
+  GitMergeCommitResult,
+  GitRebaseOntoCommitResult,
+  GitResetToCommitResult,
+  GitRevertResult
+} from '~shared/git/write-op-results'
 import type {
   HostLineageSnapshot,
   ListDesktopLineageForHostArgs
-} from '../shared/host-lineage-contract'
+} from '~shared/host-lineage-contract'
 import type {
   HostRepoCatalogSnapshot,
   ListReposForExecutionHostArgs
-} from '../shared/host-repo-catalog-contract'
+} from '~shared/host-repo-catalog-contract'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -111,28 +121,28 @@ import type {
   LanguageServerSendArgs,
   LanguageServerStartArgs,
   LanguageServerStartResult
-} from '../shared/language-server'
+} from '~shared/language-server'
 import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
   LocalLogTailReadResult,
   LocalLogTailWatchArgs
-} from '../shared/local-log-tail-types'
+} from '~shared/local-log-tail-types'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
-} from '../shared/localhost-worktree-labels'
-import type { NativeFileDropPayload } from '../shared/native-file-drop'
-import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
-import type { PtyMainDeliveryDiagnostics } from '../shared/pty-delivery-diagnostics'
-import type { PtyModelRestoreNeededEvent } from '../shared/pty-model-restore-marker'
+} from '~shared/localhost-worktree-labels'
+import type { NativeFileDropPayload } from '~shared/native-file-drop'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { PtyMainDeliveryDiagnostics } from '~shared/pty-delivery-diagnostics'
+import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marker'
 import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
-} from '../shared/pty-renderer-delivery-health'
-import type { RichMarkdownContextMenuCommandPayload } from '../shared/rich-markdown-context-menu'
-import type { RuntimeAccessGrant } from '../shared/runtime-access-grants'
-import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
+} from '~shared/pty-renderer-delivery-health'
+import type { RichMarkdownContextMenuCommandPayload } from '~shared/rich-markdown-context-menu'
+import type { RuntimeAccessGrant } from '~shared/runtime-access-grants'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -142,37 +152,31 @@ import type {
   RuntimeTerminalCreateRequestPayload,
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
-} from '../shared/runtime-types'
-import type { SetupScriptImportCandidate } from '../shared/setup/script-imports'
+} from '~shared/runtime-types'
+import type { SetupScriptImportCandidate } from '~shared/setup/script-imports'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '../shared/shell-open-types'
+} from '~shared/shell-open-types'
 import type {
   SkillFreshnessInventory,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../shared/skill-freshness'
+} from '~shared/skill-freshness'
 import type {
   SkillDirectoryListing,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillFileReadResult
-} from '../shared/skills'
-import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
-import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
-import type {
-  WarpThemeImportPreview,
-  WarpThemeImportSource
-} from '../shared/terminal/custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
-import type {
-  TerminalTabCloseRequest,
-  TerminalTabCloseResponse
-} from '../shared/terminal/tab-close'
-import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
+} from '~shared/skills'
+import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
+import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
+import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
+import type { TerminalTabCloseRequest, TerminalTabCloseResponse } from '~shared/terminal/tab-close'
+import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
 import type {
   BaseRefDefaultResult,
   BaseRefSearchResult,
@@ -294,7 +298,7 @@ import type {
   WorktreeStartupLaunch,
   WorkspaceSessionPatch,
   WorkspaceSessionState
-} from '../shared/types'
+} from '~shared/types'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
@@ -305,13 +309,13 @@ import type {
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
-} from '../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
 
 export type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '../shared/shell-open-types'
+} from '~shared/shell-open-types'
 
 type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
@@ -332,7 +336,6 @@ import type {
   AiVaultSubagentListResult
 } from '@yiru/workbench-model/agent'
 import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
-
 import type {
   Automation,
   AutomationCreateInput,
@@ -347,7 +350,7 @@ import type {
   AutomationRun,
   AutomationPrecheckResult,
   AutomationUpdateInput
-} from '../shared/automations-types'
+} from '~shared/automations-types'
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
@@ -358,7 +361,7 @@ import type {
   ClaudeUsageSessionRow,
   ClaudeUsageSnapshot,
   ClaudeUsageSummary
-} from '../shared/claude-usage-types'
+} from '~shared/claude-usage-types'
 import type {
   CodexUsageBreakdownKind,
   CodexUsageBreakdownRow,
@@ -369,25 +372,25 @@ import type {
   CodexUsageSessionRow,
   CodexUsageSnapshot,
   CodexUsageSummary
-} from '../shared/codex-usage-types'
+} from '~shared/codex-usage-types'
 import type {
   ComputerUsePermissionId,
   ComputerUsePermissionResetResult,
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState
-} from '../shared/developer-permissions-types'
-import type { AppStarSource } from '../shared/gh-star-source'
-import type { GhAuthDiagnostic } from '../shared/github-auth-types'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
+} from '~shared/developer-permissions-types'
+import type { AppStarSource } from '~shared/gh-star-source'
+import type { GhAuthDiagnostic } from '~shared/github-auth-types'
+import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
 import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
-} from '../shared/mobile-markdown-document'
+} from '~shared/mobile-markdown-document'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -398,29 +401,29 @@ import type {
   OpenCodeUsageSessionRow,
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
-} from '../shared/opencode-usage-types'
+} from '~shared/opencode-usage-types'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
   GrokAccountStatus,
   RateLimitRuntimeTarget,
   RateLimitState
-} from '../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
 import type {
   RemoteWorkspaceChangedEvent,
   RemoteWorkspaceConnectedClient,
   RemoteWorkspacePatchResult,
   RemoteWorkspaceSnapshot
-} from '../shared/remote-workspace-types'
+} from '~shared/remote-workspace-types'
 import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
   SpeechModelManifest,
   SpeechModelState,
   SpeechTranscriptEvent
-} from '../shared/speech-types'
-import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
-import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
+} from '~shared/speech-types'
+import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
+import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
 import type {
   WorkspaceCleanupDismissArgs,
   WorkspaceCleanupLocalProcessArgs,
@@ -428,18 +431,18 @@ import type {
   WorkspaceCleanupScanArgs,
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
-} from '../shared/workspace/cleanup'
+} from '~shared/workspace/cleanup'
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortScanRequest,
   WorkspacePortScanResult
-} from '../shared/workspace/ports'
+} from '~shared/workspace/ports'
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '../shared/workspace/space-types'
+} from '~shared/workspace/space-types'
 
 type GitLabRepoSelectorArgs = {
   repoPath: string
@@ -1773,7 +1776,7 @@ export type PreloadApi = {
   }
   /** Fire-and-forget track. Loose typing at the IPC boundary on purpose —
    *  the main-side validator is the single enforcement point. Renderer call
-   *  sites should import `track<N>()` from `src/renderer/src/lib/telemetry.ts`
+   *  sites should import `track<N>()` from `src/renderer/lib/telemetry.ts`
    *  for the `EventMap`-based type safety, not reach for this directly. */
   telemetryTrack: (name: string, props: Record<string, unknown>) => Promise<void>
   /** Flip the persisted opt-in preference. Subject to a per-session
@@ -2314,6 +2317,63 @@ export type PreloadApi = {
     }) => Promise<GitConflictOperation>
     abortMerge: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
     abortRebase: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
+    abortRevert: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
+    addTag: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      message?: string
+      force?: boolean
+      connectionId?: string
+    }) => Promise<GitAddTagResult>
+    createBranch: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      checkout?: boolean
+      connectionId?: string
+    }) => Promise<GitCreateBranchResult>
+    checkoutCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitCheckoutCommitResult>
+    cherryPick: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }) => Promise<GitCherryPickResult>
+    revertCommit: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }) => Promise<GitRevertResult>
+    dropCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitDropCommitResult>
+    mergeCommit: (args: {
+      worktreePath: string
+      commit: string
+      noFf?: boolean
+      squash?: boolean
+      message?: string
+      connectionId?: string
+    }) => Promise<GitMergeCommitResult>
+    rebaseOntoCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitRebaseOntoCommitResult>
+    resetToCommit: (args: {
+      worktreePath: string
+      commit: string
+      mode: 'soft' | 'mixed' | 'hard'
+      connectionId?: string
+    }) => Promise<GitResetToCommitResult>
     diff: (args: {
       worktreePath: string
       filePath: string

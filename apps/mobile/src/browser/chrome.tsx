@@ -4,7 +4,7 @@ import {
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   ArrowClockwise as RefreshCw
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassIconButton } from '../components/glass/icon-button'

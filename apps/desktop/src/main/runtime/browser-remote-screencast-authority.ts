@@ -1,4 +1,5 @@
-import type { BrowserScreencastResult, RuntimeBrowserDriverState } from '../../shared/runtime-types'
+import type { BrowserScreencastResult, RuntimeBrowserDriverState } from '~shared/runtime-types'
+
 import { BrowserError } from '../browser/cdp-bridge'
 
 export type BrowserRemoteScreencastStartResult = {

@@ -13,8 +13,9 @@ import {
   MobileSwiftUiGlassCircleButton,
   MobileSwiftUiGlassGroup,
   MobileSwiftUiGlassInputShell
-} from '../../components/glass/swift-ui.ios'
-import { resolveCssString } from '../../style/resolve-css-variable'
+} from '~/components/glass/swift-ui.ios'
+import { resolveCssString } from '~/style/resolve-css-variable'
+
 import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileNativeChatInputProps } from './composer-input'
 

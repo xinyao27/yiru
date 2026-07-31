@@ -1,4 +1,4 @@
-import { MobileSearchField } from '@/components/search-field'
+import { MobileSearchField } from '~/components/search-field'
 
 import type { MobileAgentHistorySearchControlProps } from './search-control-props'
 

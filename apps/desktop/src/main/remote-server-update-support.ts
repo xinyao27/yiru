@@ -1,7 +1,7 @@
 import type {
   RemoteServerUpdateInstallMode,
   RemoteServerUpdateSupport
-} from '../shared/remote-server-update'
+} from '~shared/remote-server-update'
 
 export function resolveRemoteServerUpdateSupport(args: {
   installMode: RemoteServerUpdateInstallMode

@@ -1,7 +1,7 @@
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
 
-import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 import { listRegisteredPtys } from '../memory/pty-registry'
 import type { IPtyProvider } from '../providers/types'
 import type { YiruRuntimeService } from './yiru-runtime'

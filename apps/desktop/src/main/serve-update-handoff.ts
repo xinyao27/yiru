@@ -2,14 +2,14 @@ import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from '
 import { dirname, resolve } from 'node:path'
 
 import { app } from 'electron'
-
 import {
   SERVE_UPDATE_HANDOFF_PATH_ENV,
   getServeUpdateHandoffPath,
   parseServeUpdateHandoffState,
   type ServeSupervisorMessage,
   type ServeUpdateHandoffState
-} from '../shared/serve-update-handoff'
+} from '~shared/serve-update-handoff'
+
 import { getCanonicalUserDataPath } from './persistence'
 
 export function isServeUpdateSupervisorConfigured(args: {

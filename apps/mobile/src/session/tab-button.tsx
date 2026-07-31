@@ -1,14 +1,14 @@
 import type { LayoutChangeEvent } from 'react-native'
 import { Pressable, Text, View } from 'react-native'
 
-import { MobileAgentIcon } from '@/components/agent-icon'
-import { MobileGlassSurface } from '@/components/glass/surface'
-import { File, FileText, Globe } from '@/components/uniwind-icons'
-import type { MobileSessionTab } from '@/session/screen-state'
+import { MobileAgentIcon } from '~/components/agent-icon'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { File, FileText, Globe } from '~/components/uniwind-icons'
+import type { MobileSessionTab } from '~/session/screen-state'
 import {
   getMobileSessionTabTitle,
   resolveMobileTerminalTabAgentId
-} from '@/session/terminal/tab-agent'
+} from '~/session/terminal/tab-agent'
 
 type MobileSessionTabButtonProps = {
   tab: MobileSessionTab

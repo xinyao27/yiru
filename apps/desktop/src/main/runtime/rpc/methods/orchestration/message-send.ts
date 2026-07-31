@@ -1,12 +1,12 @@
 import { ORCHESTRATION_FEDERATION_CONTROL_MAIL_PROTOCOL_VERSION } from '@yiru/runtime-protocol/capabilities'
+import type { MessagePriority, MessageType } from '~main/runtime/orchestration/db'
+import { encodeFederatedControlMessage } from '~main/runtime/orchestration/federation-control-message'
+import { isGroupAddress, resolveGroupAddress } from '~main/runtime/orchestration/groups'
+import { reconcileLifecycleMessage } from '~main/runtime/orchestration/lifecycle-reconciliation'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { orchestrationSkillRecoveryData } from '~shared/orchestration-rpc-contract'
 
-import { orchestrationSkillRecoveryData } from '../../../../../shared/orchestration-rpc-contract'
-import type { MessagePriority, MessageType } from '../../../orchestration/db'
-import { encodeFederatedControlMessage } from '../../../orchestration/federation-control-message'
-import { isGroupAddress, resolveGroupAddress } from '../../../orchestration/groups'
-import { reconcileLifecycleMessage } from '../../../orchestration/lifecycle-reconciliation'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../core'
 import {
   parseRemoteWorkerPayload,
   rejectFederatedExplicitTarget,

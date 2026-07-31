@@ -24,6 +24,29 @@ import {
 } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { MOBILE_AI_VAULT_CAPABILITY } from '~/agent-history/capability'
+import { MobileBrowserPane } from '~/browser/pane'
+import { normalizeBrowserUrl } from '~/browser/url'
+import { ActionSheetModal } from '~/components/action-sheet-modal'
+import { MobileAgentIcon } from '~/components/agent-icon'
+import { ConfirmModal } from '~/components/confirm-modal'
+import { MobileContentSection } from '~/components/content-section'
+import {
+  CustomKeyModal,
+  loadCustomKeys,
+  saveCustomKeys,
+  type CustomKey
+} from '~/components/custom-key-modal'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassHeader } from '~/components/glass/header'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { MobileHtmlPreview } from '~/components/html-preview'
+import { MobileRichMarkdownEditor } from '~/components/rich-markdown-editor'
+import { StatusDot } from '~/components/status-dot'
+import { MobileSyntaxSegments } from '~/components/syntax-segments'
+import { TextInputModal } from '~/components/text-input-modal'
 import {
   Warning as AlertTriangle,
   Robot as Bot,
@@ -38,92 +61,67 @@ import {
   Plus,
   ArrowClockwise as RefreshCw,
   TerminalWindow as SquareTerminal
-} from '@/components/uniwind-icons'
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
-
-import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/capability'
-import { MobileBrowserPane } from '../../../../src/browser/pane'
-import { normalizeBrowserUrl } from '../../../../src/browser/url'
-import { ActionSheetModal } from '../../../../src/components/action-sheet-modal'
-import { MobileAgentIcon } from '../../../../src/components/agent-icon'
-import { ConfirmModal } from '../../../../src/components/confirm-modal'
-import { MobileContentSection } from '../../../../src/components/content-section'
-import {
-  CustomKeyModal,
-  loadCustomKeys,
-  saveCustomKeys,
-  type CustomKey
-} from '../../../../src/components/custom-key-modal'
-import { MobileGlassGroup } from '../../../../src/components/glass/group'
-import { MobileGlassHeader } from '../../../../src/components/glass/header'
-import { MobileGlassIconButton } from '../../../../src/components/glass/icon-button'
-import { MobileGlassSurface } from '../../../../src/components/glass/surface'
-import { MobileGlassTextButton } from '../../../../src/components/glass/text-button'
-import { MobileHtmlPreview } from '../../../../src/components/html-preview'
-import { MobileRichMarkdownEditor } from '../../../../src/components/rich-markdown-editor'
-import { StatusDot } from '../../../../src/components/status-dot'
-import { MobileSyntaxSegments } from '../../../../src/components/syntax-segments'
-import { TextInputModal } from '../../../../src/components/text-input-modal'
-import { isFileExistsErrorMessage } from '../../../../src/files/file-exists-error'
-import { resolveMobileFileTabDoc } from '../../../../src/files/file-tab-doc'
-import { useResponsiveLayout } from '../../../../src/layout/responsive-layout'
+} from '~/components/uniwind-icons'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { isFileExistsErrorMessage } from '~/files/file-exists-error'
+import { resolveMobileFileTabDoc } from '~/files/file-tab-doc'
+import { useResponsiveLayout } from '~/layout/responsive-layout'
 import {
   triggerMediumImpact,
   triggerSelection,
   triggerSuccess,
   triggerError,
   triggerEdgeBump
-} from '../../../../src/platform/haptics'
-import { MobileBrowserTabActionSheet } from '../../../../src/session/browser-tab-action-sheet'
-import { sendMobileBufferedTerminalInput } from '../../../../src/session/buffered-terminal-send'
+} from '~/platform/haptics'
+import { MobileBrowserTabActionSheet } from '~/session/browser-tab-action-sheet'
+import { sendMobileBufferedTerminalInput } from '~/session/buffered-terminal-send'
 import {
   createMobileSessionCreateWarningState,
   dismissMobileSessionCreateWarningState,
   reconcileMobileSessionCreateWarningState
-} from '../../../../src/session/create-warning-state'
+} from '~/session/create-warning-state'
 import {
   addMobileDiffComment,
   formatDiffComments,
   normalizeMobileDiffComments,
   removeDeliveredMobileDiffComments,
   removeMobileDiffComments
-} from '../../../../src/session/diff/comments'
-import { SessionDockColumn } from '../../../../src/session/dock-column'
+} from '~/session/diff/comments'
+import { SessionDockColumn } from '~/session/dock-column'
 import {
   buildPlainMobileDiffSyntaxLines,
   highlightMobileCode,
   highlightMobileDiffLines,
   resolveMobileSyntaxLanguage
-} from '../../../../src/session/file-syntax'
-import { isFloatingWorkspaceWorktreeId } from '../../../../src/session/floating-workspace'
-import { MobileSessionHeaderIconButton } from '../../../../src/session/header-icon-button'
-import { shouldUseNativeSessionHeader } from '../../../../src/session/header-mode'
-import { MobileSessionHeaderMoreActionsSheet } from '../../../../src/session/header-more-actions-sheet'
+} from '~/session/file-syntax'
+import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
+import { MobileSessionHeaderIconButton } from '~/session/header-icon-button'
+import { shouldUseNativeSessionHeader } from '~/session/header-mode'
+import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
 import {
   buildMarkdownDiskFallbackDoc,
   shouldReadMarkdownFromDiskAfterReadTabFailure
-} from '../../../../src/session/markdown-disk-fallback'
-import { resolveMarkdownFloatingActionsBottom } from '../../../../src/session/markdown-floating-actions-layout'
-import { MobileNativeChatOverlay } from '../../../../src/session/native-chat/overlay'
-import * as nativeChatTerminalStream from '../../../../src/session/native-chat/terminal-stream'
-import { useMobileNativeChatController } from '../../../../src/session/native-chat/use-controller'
-import { useMobileNativeChatInputLease } from '../../../../src/session/native-chat/use-input-lease'
-import { useMobileNativeChatReadability } from '../../../../src/session/native-chat/use-readability'
-import { useMobileNativeChatTerminalStream } from '../../../../src/session/native-chat/use-terminal-stream'
-import { loadMobileNewTabAgentOptions } from '../../../../src/session/new-tab-agent-loader'
-import type { MobileNewTabAgentOption } from '../../../../src/session/new-tab-agent-options'
-import { activateOpenedSourceControlDiffTab } from '../../../../src/session/opened-mobile-session-tab'
+} from '~/session/markdown-disk-fallback'
+import { resolveMarkdownFloatingActionsBottom } from '~/session/markdown-floating-actions-layout'
+import { MobileNativeChatOverlay } from '~/session/native-chat/overlay'
+import * as nativeChatTerminalStream from '~/session/native-chat/terminal-stream'
+import { useMobileNativeChatController } from '~/session/native-chat/use-controller'
+import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
+import { useMobileNativeChatReadability } from '~/session/native-chat/use-readability'
+import { useMobileNativeChatTerminalStream } from '~/session/native-chat/use-terminal-stream'
+import { loadMobileNewTabAgentOptions } from '~/session/new-tab-agent-loader'
+import type { MobileNewTabAgentOption } from '~/session/new-tab-agent-options'
+import { activateOpenedSourceControlDiffTab } from '~/session/opened-mobile-session-tab'
 import {
   type ActivePanel,
   canDockSessionPanel,
   resolvePanelAction,
   shouldShowSessionHeaderChecksAction,
   panelRouteDescriptor
-} from '../../../../src/session/panel-host'
-import { useMobilePrBranchContext } from '../../../../src/session/pr/use-branch-context'
-import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
-import { sessionScreenClassNames as styles } from '../../../../src/session/screen-class-names'
+} from '~/session/panel-host'
+import { useMobilePrBranchContext } from '~/session/pr/use-branch-context'
+import { QuickCommandsSheet } from '~/session/quick-commands-sheet'
+import { sessionScreenClassNames as styles } from '~/session/screen-class-names'
 import type {
   DiffCommentActions,
   DiffNotesDelivery,
@@ -144,25 +142,22 @@ import type {
   TerminalCreateResult,
   TerminalGestureInputBucket,
   TerminalGestureInputQueue
-} from '../../../../src/session/screen-state'
-import { MOBILE_SESSION_STATUS_LABELS } from '../../../../src/session/status-labels'
-import {
-  activateMobileSessionTab,
-  focusMobileTerminal
-} from '../../../../src/session/tab-activation'
+} from '~/session/screen-state'
+import { MOBILE_SESSION_STATUS_LABELS } from '~/session/status-labels'
+import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
 import {
   acceptSessionSnapshot,
   applyClosedTabTombstones,
   confirmsMirroredTabSelection,
   type AppliedSnapshotMarker
-} from '../../../../src/session/tab-snapshot-gate'
-import { MobileSessionTabStrip } from '../../../../src/session/tab-strip'
-import { MobileTerminalAccessoryKey } from '../../../../src/session/terminal/accessory-key'
-import { getMobileTerminalActionSheetActions } from '../../../../src/session/terminal/action-sheet-actions'
-import { MobileTerminalDiagnostics } from '../../../../src/session/terminal/diagnostics'
-import { openMobileTerminalFileTap } from '../../../../src/session/terminal/file-tap-open'
-import { MobileTerminalInputBar } from '../../../../src/session/terminal/input-bar'
-import { TerminalPaneView } from '../../../../src/session/terminal/pane-view'
+} from '~/session/tab-snapshot-gate'
+import { MobileSessionTabStrip } from '~/session/tab-strip'
+import { MobileTerminalAccessoryKey } from '~/session/terminal/accessory-key'
+import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
+import { MobileTerminalDiagnostics } from '~/session/terminal/diagnostics'
+import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
+import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
+import { TerminalPaneView } from '~/session/terminal/pane-view'
 import {
   getActiveTabIdForHandle,
   getTerminalRecordsFromSessionTabs,
@@ -171,13 +166,13 @@ import {
   mobileSessionTabsEqual,
   terminalRecordsEqual,
   updateTerminalCwdFromStreamEvent
-} from '../../../../src/session/terminal/records'
-import { subscribeMobileTerminalSafely } from '../../../../src/session/terminal/stream-subscribe'
-import { useTerminalLiveInputModePreference } from '../../../../src/session/terminal/use-live-input-mode-preference'
-import { useMobileTerminalPaste } from '../../../../src/session/terminal/use-paste'
-import { useMobileAttachmentInputLeaseGate } from '../../../../src/session/use-attachment-input-lease-gate'
-import { useMobileImageAttachment } from '../../../../src/session/use-image-attachment'
-import { useLiveWorktreeName } from '../../../../src/session/use-live-worktree-name'
+} from '~/session/terminal/records'
+import { subscribeMobileTerminalSafely } from '~/session/terminal/stream-subscribe'
+import { useTerminalLiveInputModePreference } from '~/session/terminal/use-live-input-mode-preference'
+import { useMobileTerminalPaste } from '~/session/terminal/use-paste'
+import { useMobileAttachmentInputLeaseGate } from '~/session/use-attachment-input-lease-gate'
+import { useMobileImageAttachment } from '~/session/use-image-attachment'
+import { useLiveWorktreeName } from '~/session/use-live-worktree-name'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalLinkOpenMode,
@@ -185,17 +180,18 @@ import {
   HOST_DOCK_MIN_WIDTH,
   saveTerminalTextScale,
   type MobileTerminalLinkOpenMode
-} from '../../../../src/storage/preferences'
-import { resolveCssNumber, resolveCssString } from '../../../../src/style/resolve-css-variable'
+} from '~/storage/preferences'
+import { cn } from '~/style/class-names'
+import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 import {
   getDefaultTerminalAccessoryBuiltInIds,
   getVisibleTerminalAccessoryKeys,
   loadTerminalAccessoryLayout
-} from '../../../../src/terminal/accessory-layout'
+} from '~/terminal/accessory-layout'
 import {
   recoverActiveTerminalAfterForeground,
   shouldRecoverTerminalOnAppStateChange
-} from '../../../../src/terminal/foreground-recovery'
+} from '~/terminal/foreground-recovery'
 import {
   countTerminalGestureInputSequences,
   isGestureMouseTrackingMode,
@@ -204,49 +200,46 @@ import {
   TERMINAL_GESTURE_INPUT_MAX_PENDING_SEQUENCES,
   TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
-} from '../../../../src/terminal/gesture-input'
-import { dismissTerminalKeyboard } from '../../../../src/terminal/keyboard-dismiss'
-import { getTerminalLiveInputKeyboardType } from '../../../../src/terminal/keyboard-type'
-import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live/accessory-input'
-import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live/accessory-raw-send-target'
+} from '~/terminal/gesture-input'
+import { dismissTerminalKeyboard } from '~/terminal/keyboard-dismiss'
+import { getTerminalLiveInputKeyboardType } from '~/terminal/keyboard-type'
+import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
+import { getTerminalLiveAccessoryRawSendTarget } from '~/terminal/live/accessory-raw-send-target'
 import {
   clearTerminalLiveInputFocusTimer,
   focusTerminalLiveInputTarget,
   isTerminalLiveInputWithinByteLimit,
   scheduleTerminalLiveInputFocus
-} from '../../../../src/terminal/live/input'
-import type { TerminalLiveInputSender } from '../../../../src/terminal/live/input-sender'
-import { useTerminalLiveInputCommit } from '../../../../src/terminal/live/use-input-commit'
-import { isTerminalOscLinkRanges } from '../../../../src/terminal/osc-link-ranges'
-import { sendMobileTerminalQueryReply } from '../../../../src/terminal/query-reply'
+} from '~/terminal/live/input'
+import type { TerminalLiveInputSender } from '~/terminal/live/input-sender'
+import { useTerminalLiveInputCommit } from '~/terminal/live/use-input-commit'
+import { isTerminalOscLinkRanges } from '~/terminal/osc-link-ranges'
+import { sendMobileTerminalQueryReply } from '~/terminal/query-reply'
 import {
   buildMobileQuickCommandLaunch,
   shouldShowMobileQuickCommandsAction,
   supportsMobileQuickCommands,
   type MobileQuickCommandLaunch
-} from '../../../../src/terminal/quick-commands'
-import { isTerminalSendRpcAccepted } from '../../../../src/terminal/send-rpc-response'
-import { normalizeTerminalTextInput } from '../../../../src/terminal/text-input-normalization'
-import { useTerminalViewportRefit } from '../../../../src/terminal/viewport-refit'
+} from '~/terminal/quick-commands'
+import { isTerminalSendRpcAccepted } from '~/terminal/send-rpc-response'
+import { normalizeTerminalTextInput } from '~/terminal/text-input-normalization'
+import { useTerminalViewportRefit } from '~/terminal/viewport-refit'
 import type {
   TerminalKeyboardAvoidanceMetrics,
   TerminalModes,
   TerminalWebViewHandle
-} from '../../../../src/terminal/webview/contract'
-import { useHostClient, useForceReconnect } from '../../../../src/transport/client-context'
+} from '~/terminal/webview/contract'
+import { useHostClient, useForceReconnect } from '~/transport/client-context'
 import {
   useLastConnectedAt,
   useReconnectAttempt
-} from '../../../../src/transport/client-context-connection-metrics'
-import {
-  classifyConnection,
-  verdictDisplayLabel
-} from '../../../../src/transport/connection-health'
-import { loadHosts } from '../../../../src/transport/host-store'
-import type { RpcClient } from '../../../../src/transport/rpc-client'
-import type { ConnectionState, RpcFailure, RpcSuccess } from '../../../../src/transport/types'
-import { getRepoIdFromMobileWorktreeId } from '../../../../src/worktree-id'
-import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/activation-result'
+} from '~/transport/client-context-connection-metrics'
+import { classifyConnection, verdictDisplayLabel } from '~/transport/connection-health'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState, RpcFailure, RpcSuccess } from '~/transport/types'
+import { getRepoIdFromMobileWorktreeId } from '~/worktree-id'
+import { headlessActivationNeedsHostRenderer } from '~/worktree/activation-result'
 
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 

@@ -1,7 +1,7 @@
 import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import { openInExternalEditor } from '~main/ipc/shell'
+import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '~shared/runtime-method-contracts/external-editor-contracts'
 
-import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '../../../../shared/runtime-method-contracts/external-editor-contracts'
-import { openInExternalEditor } from '../../../ipc/shell'
 import { defineMethod, type RpcMethod } from '../core'
 
 export const EXTERNAL_EDITOR_METHODS: RpcMethod[] = [

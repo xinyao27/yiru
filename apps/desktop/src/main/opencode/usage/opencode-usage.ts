@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron'
-
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageRange,
   OpenCodeUsageScope
-} from '../../../shared/opencode-usage-types'
+} from '~shared/opencode-usage-types'
+
 import type { OpenCodeUsageStore } from './store'
 
 export function registerOpenCodeUsageHandlers(openCodeUsage: OpenCodeUsageStore): void {

@@ -3,7 +3,8 @@ import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store owns OpenCode analytics persistence, scan policy, and renderer query semantics. Keeping range/scope queries next to scan persistence prevents UI totals from drifting from the SQLite projection. */
 import { app } from 'electron'
-
+import type { Store } from '~main/persistence'
+import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -14,9 +15,8 @@ import type {
   OpenCodeUsageSessionRow,
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
-} from '../../../shared/opencode-usage-types'
-import type { Store } from '../../persistence'
-import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+} from '~shared/opencode-usage-types'
+
 import { createWorktreeRefs, scanOpenCodeUsageDatabases } from './scanner'
 import type { OpenCodeUsageDailyAggregate, OpenCodeUsagePersistedState } from './types'
 

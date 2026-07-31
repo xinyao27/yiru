@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { fetchWorktreeLinkedPR } from '../../source-control/pr-link'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { fetchWorktreeLinkedPR } from '~/source-control/pr-link'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import {
   fetchGithubRepoSlug,
   fetchHostedReviewForBranch,

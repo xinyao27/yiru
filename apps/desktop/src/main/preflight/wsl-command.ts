@@ -4,7 +4,8 @@ import { promisify } from 'node:util'
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
-} from '../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import type { WslPreflightTarget } from './wsl-agent-detection'
 
 const execFileAsync = promisify(execFile)

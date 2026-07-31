@@ -6,17 +6,17 @@ import { isDeepStrictEqual } from 'node:util'
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { ipcMain, type BrowserWindow } from 'electron'
-
-import { exportRemoteWorkspaceSession } from '../../../shared/remote-workspace-session-projection'
+import type { Store } from '~main/persistence'
+import { exportRemoteWorkspaceSession } from '~shared/remote-workspace-session-projection'
 import type {
   RemoteWorkspaceChangedEvent,
   RemoteWorkspaceConnectedClient,
   RemoteWorkspacePatchResult,
   RemoteWorkspaceSession,
   RemoteWorkspaceSnapshot
-} from '../../../shared/remote-workspace-types'
-import type { WorkspaceSessionState } from '../../../shared/types'
-import type { Store } from '../../persistence'
+} from '~shared/remote-workspace-types'
+import type { WorkspaceSessionState } from '~shared/types'
+
 import { getActiveMultiplexer, getSshConnectionStore } from '../ssh'
 import { registerRemoteWorkspaceNotificationHandler } from './workspace-events'
 import { getRemoteWorkspaceNamespace } from './workspace-namespace'

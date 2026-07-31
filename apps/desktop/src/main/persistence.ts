@@ -27,14 +27,13 @@ import {
 /* eslint-disable max-lines -- Why: Store remains the single mutation authority
 while its codecs, file mechanics, and notifications are extracted incrementally. */
 import { app } from 'electron'
-
-import { normalizeAutomationPrecheck } from '../shared/automation/precheck'
-import { getAutomationLegacyRepoId } from '../shared/automation/run-identity'
-import { nextAutomationRunNumber, pruneAutomationRuns } from '../shared/automation/run-retention'
+import { normalizeAutomationPrecheck } from '~shared/automation/precheck'
+import { getAutomationLegacyRepoId } from '~shared/automation/run-identity'
+import { nextAutomationRunNumber, pruneAutomationRuns } from '~shared/automation/run-retention'
 import {
   latestAutomationOccurrenceAtOrBefore,
   nextAutomationOccurrenceAfter
-} from '../shared/automation/schedules'
+} from '~shared/automation/schedules'
 import type {
   Automation,
   AutomationCreateInput,
@@ -45,12 +44,12 @@ import type {
   AutomationSchedulerOwner,
   AutomationRunTrigger,
   AutomationUpdateInput
-} from '../shared/automations-types'
+} from '~shared/automations-types'
 import {
   getDefaultOnboardingState,
   getDefaultRepoHookSettings,
   getDefaultWorkspaceSession
-} from '../shared/constants'
+} from '~shared/constants'
 import {
   compareFeatureInteractionUsageBuckets,
   getFeatureInteractionCategory,
@@ -58,32 +57,32 @@ import {
   normalizeFeatureInteractions,
   normalizeFeatureInteractionTelemetryBuckets,
   type FeatureInteractionId
-} from '../shared/feature-interactions'
-import { normalizeFolderWorkspaceName } from '../shared/folder-workspaces'
-import type { GitRemoteIdentity } from '../shared/git/remote-identity'
-import { normalizeProjectRuntimePreference } from '../shared/project-execution-runtime'
+} from '~shared/feature-interactions'
+import { normalizeFolderWorkspaceName } from '~shared/folder-workspaces'
+import type { GitRemoteIdentity } from '~shared/git/remote-identity'
+import { normalizeProjectRuntimePreference } from '~shared/project-execution-runtime'
 import {
   clearMissingProjectGroupMemberships,
   createProjectGroup,
   getNextProjectGroupOrder,
   getProjectGroupSubtreeIds,
   normalizeProjectGroupName
-} from '../shared/project-groups'
-import { projectHostSetupProjectionFromRepos } from '../shared/project-host-setup-projection'
+} from '~shared/project-groups'
+import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
 import {
   buildProjectSourceContextFromRepo,
   buildWorkspaceRunContext
-} from '../shared/project-source-context'
-import { normalizeRepoBadgeColor } from '../shared/repo-badge-color'
-import { isFolderRepo } from '../shared/repo-kind'
-import { hardenExistingSecureFile } from '../shared/secure-file'
-import { normalizeRepoSourceControlAiOverrides } from '../shared/source-control/ai'
+} from '~shared/project-source-context'
+import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
+import { isFolderRepo } from '~shared/repo-kind'
+import { hardenExistingSecureFile } from '~shared/secure-file'
+import { normalizeRepoSourceControlAiOverrides } from '~shared/source-control/ai'
 import {
   isTerminalLeafId,
   makePaneKey,
   parseLegacyNumericPaneKey,
   parsePaneKey
-} from '../shared/stable-pane-id'
+} from '~shared/stable-pane-id'
 import type {
   PersistedState,
   Project,
@@ -112,16 +111,17 @@ import type {
   TerminalTab,
   WorkspaceSessionPatch,
   WorkspaceSessionState
-} from '../shared/types'
+} from '~shared/types'
 import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../shared/workspace/scope'
-import { pruneWorkspaceSessionBrowserHistory } from '../shared/workspace/session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '../shared/workspace/session-terminal-buffers'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../shared/workspace/statuses'
-import { isLegacyRepoForExternalWorktreeVisibility } from '../shared/workspace/worktree-ownership'
+} from '~shared/workspace/scope'
+import { pruneWorkspaceSessionBrowserHistory } from '~shared/workspace/session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '~shared/workspace/session-terminal-buffers'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '~shared/workspace/statuses'
+import { isLegacyRepoForExternalWorktreeVisibility } from '~shared/workspace/worktree-ownership'
+
 import {
   setMigrationUnsupportedPty,
   setMigrationUnsupportedPtyPersistenceListener

@@ -1,4 +1,4 @@
-import type SyncDatabase from '../../sqlite/sync-database'
+import type SyncDatabase from '~main/sqlite/sync-database'
 
 // Why: OpenCode's usage scanner and the AI Vault session scanner both need to
 // probe the opencode.db schema shape across multiple DB generations. Centralizing

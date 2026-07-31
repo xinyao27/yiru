@@ -1,6 +1,7 @@
-import { extractLastOscTitle, detectAgentStatusFromTitle } from '../../shared/agent/detection'
-import type { AgentStatus } from '../../shared/agent/detection'
-import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
+import { extractLastOscTitle, detectAgentStatusFromTitle } from '~shared/agent/detection'
+import type { AgentStatus } from '~shared/agent/detection'
+import { extractOscTitleScanTail } from '~shared/osc-title-scan-tail'
+
 import type { StatsCollector } from './collector'
 
 type PtyAgentState = 'unknown' | 'agent' | 'stopped'

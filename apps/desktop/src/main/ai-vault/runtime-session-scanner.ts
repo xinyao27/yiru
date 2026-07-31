@@ -7,9 +7,9 @@ import {
 } from '@yiru/workbench-model/agent'
 import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
+import { listEnvironments } from '~shared/runtime-environment-store'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
 
-import { listEnvironments } from '../../shared/runtime-environment-store'
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../shared/runtime-method-contracts/ai-vault-contracts'
 import { callRuntimeEnvironment } from '../runtime/environment-transport-routing'
 
 export type RuntimeAiVaultHostInfo = {

@@ -2,9 +2,10 @@ import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FlatList } from 'react-native'
 
-import { canOpenMobileBranchCompareDiff } from '../../source-control/branch-compare'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { canOpenMobileBranchCompareDiff } from '~/source-control/branch-compare'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { useMobilePrSidebarController } from '../pr/use-sidebar-controller'
 import { getWorktreeLabel } from '../worktree-label'
 import { getUnsentMobileDiffComments } from './comment-edit'

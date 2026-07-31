@@ -1,7 +1,6 @@
 // Why: browser schemas stay separate from handler registration so both sides
 // remain under the line cap and dispatch wiring stays scannable.
 import { z } from 'zod'
-
 import {
   BrowserTarget,
   OptionalBoolean,
@@ -10,7 +9,7 @@ import {
   OptionalString,
   requiredStringAllowingEmpty,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 export const Element = BrowserTarget.extend({
   element: requiredString('Missing required --element')

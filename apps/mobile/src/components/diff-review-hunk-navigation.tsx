@@ -1,8 +1,8 @@
 import { Text } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { ArrowDown, ArrowUp, type Icon } from '@/components/uniwind-icons'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { ArrowDown, ArrowUp, type Icon } from '~/components/uniwind-icons'
 
 import type { MobileDiffReviewHunkNavigationProps } from './diff-review-hunk-navigation-props'
 

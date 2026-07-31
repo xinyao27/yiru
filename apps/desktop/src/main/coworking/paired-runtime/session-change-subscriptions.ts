@@ -1,9 +1,10 @@
+import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '~main/runtime/environment-existing-route'
 import {
   CoworkingPairedRuntimeSessionChangedEventSchema,
   CoworkingPairedRuntimeSubscribeSessionChangesParamsSchema
-} from '../../../shared/coworking/paired-runtime-session-contract'
-import type { RemoteRuntimeSubscription } from '../../../shared/remote-runtime/client'
-import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../../runtime/environment-existing-route'
+} from '~shared/coworking/paired-runtime-session-contract'
+import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
+
 import type {
   CoworkingExecutionHostSessionReadRequest,
   CoworkingMobileSessionTabsResult,

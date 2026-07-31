@@ -1,7 +1,7 @@
 import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
-import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '@/components/uniwind-icons'
+import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '~/components/uniwind-icons'
 
 import { SourceProviderLogo } from './source-provider-logo'
 

@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron'
-
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageRange,
   ClaudeUsageScope
-} from '../../../shared/claude-usage-types'
+} from '~shared/claude-usage-types'
+
 import type { ClaudeUsageStore } from './store'
 
 export function registerClaudeUsageHandlers(claudeUsage: ClaudeUsageStore): void {

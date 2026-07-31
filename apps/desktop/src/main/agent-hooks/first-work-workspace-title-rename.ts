@@ -1,4 +1,5 @@
-import { deriveWorkspaceDisplayName } from '../../shared/display-name-from-work'
+import { deriveWorkspaceDisplayName } from '~shared/display-name-from-work'
+
 import {
   generateBranchNameFromContext,
   resolveTextGenerationParams

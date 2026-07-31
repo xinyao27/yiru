@@ -4,7 +4,6 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { app } from 'electron'
-
 import {
   formatCrashReportText,
   sanitizeCrashReportBreadcrumbs,
@@ -12,7 +11,8 @@ import {
   type CrashReportCreateInput,
   type CrashReportRecord,
   type CrashReportStatus
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
+
 import { grantDirAclAsync, isPermissionError } from '../win32-utils'
 
 const MAX_REPORTS = 5

@@ -7,13 +7,13 @@ import { dirname, join } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
+import type { AiVaultSessionRuntimeTarget } from '~main/ai-vault/session/root-configuration'
+import { writeFileAtomically } from '~main/codex/accounts/fs-utils'
+import type { Store } from '~main/persistence'
+import { getDefaultWslDistro, getWslHome, getWslHomeAsync, toWindowsWslPath } from '~main/wsl'
+import { buildEncodedWslBashCommand } from '~main/wsl-bash-command'
+import type { ClaudeManagedAccount } from '~shared/types'
 
-import type { ClaudeManagedAccount } from '../../../shared/types'
-import type { AiVaultSessionRuntimeTarget } from '../../ai-vault/session/root-configuration'
-import { writeFileAtomically } from '../../codex/accounts/fs-utils'
-import type { Store } from '../../persistence'
-import { getDefaultWslDistro, getWslHome, getWslHomeAsync, toWindowsWslPath } from '../../wsl'
-import { buildEncodedWslBashCommand } from '../../wsl-bash-command'
 import type { ClaudeEnvPatch } from './environment'
 import {
   deleteActiveClaudeKeychainCredentialsStrict,

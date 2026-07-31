@@ -1,9 +1,10 @@
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
 import {
   RUNTIME_FILE_WATCH_CRAWL_TIMEOUT_MS,
   RUNTIME_FILE_WATCH_MAX_SETUP_ATTEMPTS
-} from '../../shared/runtime-file-watch-limits'
-import type { FsChangeEvent } from '../../shared/types'
+} from '~shared/runtime-file-watch-limits'
+import type { FsChangeEvent } from '~shared/types'
+
 import {
   forgetRuntimeWatcherProcessRoot,
   subscribeViaRuntimeWatcherProcess,

@@ -1,7 +1,7 @@
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
 
 export type CoworkingWindowsFirewallOperations = {
   inspect: () => Promise<CoworkingWindowsFirewallStatus>

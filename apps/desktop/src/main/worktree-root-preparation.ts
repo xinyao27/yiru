@@ -1,9 +1,9 @@
 import { mkdir } from 'node:fs/promises'
 
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { GlobalSettings, Repo } from '~shared/types'
 
-import { isFolderRepo } from '../shared/repo-kind'
-import type { GlobalSettings, Repo } from '../shared/types'
 import { computeWorkspaceRoot, getWorktreePathSettings } from './worktree/logic'
 
 type WorktreeRootPreparationSettings = Pick<GlobalSettings, 'workspaceDir' | 'nestWorkspaces'>

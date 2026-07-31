@@ -14,12 +14,12 @@ import {
   type IpcMainInvokeEvent,
   type WebContents
 } from 'electron'
-
 import {
   assertClipboardImageBase64LengthWithinLimit,
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
-} from '../../shared/clipboard-image'
+} from '~shared/clipboard-image'
+
 import { isENOENT, PATH_ACCESS_DENIED_MESSAGE, resolveAuthorizedPath } from '../filesystem/auth'
 import type { Store } from '../persistence'
 import {

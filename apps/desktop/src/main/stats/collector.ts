@@ -2,8 +2,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync } from '
 import { join, dirname } from 'node:path'
 
 import { app } from 'electron'
+import type { StatsSummary } from '~shared/types'
 
-import type { StatsSummary } from '../../shared/types'
 import { addEventToDailyActivity, buildDailyActivity } from './daily-activity'
 import type { StatsEvent, StatsAggregates, StatsDailyActivity, StatsFile } from './types'
 

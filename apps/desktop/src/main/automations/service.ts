@@ -1,9 +1,8 @@
 import type { WebContents } from 'electron'
-
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
-} from '../../shared/automation/precheck'
+} from '~shared/automation/precheck'
 import {
   isFinalAutomationRunStatus,
   type Automation,
@@ -11,7 +10,8 @@ import {
   type AutomationDispatchResult,
   type AutomationPrecheckResult,
   type AutomationRun
-} from '../../shared/automations-types'
+} from '~shared/automations-types'
+
 import type { ClaudeUsageStore } from '../claude/usage/store'
 import type { CodexUsageStore } from '../codex/usage/store'
 import type { Store } from '../persistence'

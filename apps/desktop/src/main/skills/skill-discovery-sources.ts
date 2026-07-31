@@ -4,14 +4,13 @@ import { basename, join, type posix } from 'node:path'
 
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
-
 import type {
   DiscoveredSkill,
   SkillDiscoverySource,
   SkillProvider,
   SkillSourceKind
-} from '../../shared/skills'
-import type { Repo } from '../../shared/types'
+} from '~shared/skills'
+import type { Repo } from '~shared/types'
 
 export type SkillScanRoot = Omit<SkillDiscoverySource, 'exists' | 'skippedReason'>
 type SkillDiscoveryPathApi = Pick<typeof posix, 'basename' | 'join'>

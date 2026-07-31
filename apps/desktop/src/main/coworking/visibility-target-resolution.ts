@@ -1,4 +1,5 @@
-import type { WorktreeMeta } from '../../shared/types'
+import type { WorktreeMeta } from '~shared/types'
+
 import { CoworkingVisibilityError } from './visibility-errors'
 import type {
   CoworkingPersistedWorktreeIdentity,

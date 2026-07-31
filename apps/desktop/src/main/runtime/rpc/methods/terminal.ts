@@ -2,24 +2,28 @@ import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-l
 import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
 /* oxlint-disable max-lines -- Why: terminal RPC methods are co-located for discoverability; splitting would scatter related handlers across files. */
 import { z } from 'zod'
-
-import { TERMINAL_PANE_SPLIT_SOURCES } from '../../../../shared/feature-education-telemetry'
+import {
+  MOBILE_SNAPSHOT_BYTE_BUDGET,
+  MOBILE_SUBSCRIBE_SCROLLBACK_ROWS
+} from '~main/runtime/scrollback-limits'
+import type { DriverState, YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { TERMINAL_PANE_SPLIT_SOURCES } from '~shared/feature-education-telemetry'
 import {
   OptionalFiniteNumber,
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 import {
   TERMINAL_INPUT_MAX_BYTES,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   isTerminalInputTooLargeWithYield
-} from '../../../../shared/terminal/input'
+} from '~shared/terminal/input'
 import {
   EMPTY_TERMINAL_REPLY_QUERY_SCAN_STATE,
   scanTerminalReplyQuerySequences,
   type TerminalReplyQuerySequence,
   type TerminalReplyQueryScanState
-} from '../../../../shared/terminal/reply-query-scan'
+} from '~shared/terminal/reply-query-scan'
 import {
   TerminalStreamOpcode,
   decodeTerminalStreamJson,
@@ -28,13 +32,9 @@ import {
   encodeTerminalStreamJson,
   encodeTerminalStreamText,
   type TerminalStreamFrame
-} from '../../../../shared/terminal/stream-protocol'
-import { isTuiAgent } from '../../../../shared/tui-agent/config'
-import {
-  MOBILE_SNAPSHOT_BYTE_BUDGET,
-  MOBILE_SUBSCRIBE_SCROLLBACK_ROWS
-} from '../../scrollback-limits'
-import type { DriverState, YiruRuntimeService } from '../../yiru-runtime'
+} from '~shared/terminal/stream-protocol'
+import { isTuiAgent } from '~shared/tui-agent/config'
+
 import {
   InvalidArgumentError,
   defineMethod,

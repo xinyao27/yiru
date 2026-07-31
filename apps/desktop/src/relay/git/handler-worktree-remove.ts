@@ -1,9 +1,10 @@
 import * as path from 'node:path'
 
-import type { GitCapabilityCache } from '../../shared/git/capability-cache'
-import type { RemoveWorktreeResult } from '../../shared/types'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
-import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/workspace/worktree-submodule-removal'
+import type { GitCapabilityCache } from '~shared/git/capability-cache'
+import type { RemoveWorktreeResult } from '~shared/types'
+import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
+import { isSubmoduleWorktreeRemovalRefusal } from '~shared/workspace/worktree-submodule-removal'
+
 import { deleteAlreadyMergedRelayBranchAfterSafeDeleteFailure } from './handler-branch-cleanup'
 import type { GitExec } from './handler-ops'
 import { readRelayWorktreeList } from './handler-worktree-list'

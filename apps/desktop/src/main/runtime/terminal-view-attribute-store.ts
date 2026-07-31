@@ -12,7 +12,7 @@
 import {
   terminalViewAttributesEqual,
   type TerminalViewAttributes
-} from '../../shared/terminal/view-attributes'
+} from '~shared/terminal/view-attributes'
 
 // Why module state (pattern of pty-hidden-delivery-gate.ts): pty.ts receives
 // the push, the runtime emulators consult it at reply time via the getter.

@@ -1,6 +1,6 @@
 import { z } from 'zod'
+import { requiredString } from '~shared/runtime-method-contracts/runtime-method-params'
 
-import { requiredString } from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
 
 const HostedReviewForBranch = z.object({

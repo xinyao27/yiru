@@ -1,7 +1,7 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RuntimeMobileSessionTabsResult } from '~shared/runtime-types'
 
-import type { RuntimeMobileSessionTabsResult } from '../../../shared/runtime-types'
 import type {
   CoworkingLiveSessionIdentity,
   CoworkingLiveSessionProvider

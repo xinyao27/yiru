@@ -28,14 +28,14 @@ import {
   DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
   SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
 } from '@yiru/runtime-protocol/ssh-connection'
-
 import {
   AGENT_HOOK_INSTALL_PLUGINS_METHOD,
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
-} from '../shared/agent/hook-relay'
-import { detectPiAgentKindFromCommand } from '../shared/pi-agent-kind'
-import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-sequencing'
+} from '~shared/agent/hook-relay'
+import { detectPiAgentKindFromCommand } from '~shared/pi-agent-kind'
+import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
+
 import { AgentExecHandler } from './agent-exec-handler'
 import { endpointDirForRelaySocket, RelayAgentHookServer } from './agent-hook-server'
 import { RelayContext } from './context'

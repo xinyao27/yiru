@@ -1,5 +1,4 @@
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-
 /**
  * Phase 5 of the terminal model/view architecture: main-side terminal query
  * authority (docs/reference/terminal-query-authority.md).
@@ -10,7 +9,8 @@ import { isWslUncPath } from '@yiru/workbench-model/platform'
  * renderer's native-Windows-ConPTY determination, recorded per PTY at spawn
  * so the runtime emulator can register the DA1 override before byte zero.
  */
-import type { GlobalSettings } from '../../shared/types'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   isHiddenPtyDeliveryGateEnabled,
   shouldDropHiddenRendererPtyData

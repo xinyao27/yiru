@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron'
-
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '../shared/workspace/space-types'
+} from '~shared/workspace/space-types'
+
 import type { Store } from './persistence'
 import { analyzeWorkspaceSpace, WorkspaceSpaceScanCancelledError } from './workspace-space-analysis'
 

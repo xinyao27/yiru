@@ -11,11 +11,12 @@ import {
 } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileGlassIconButton } from '../../components/glass/icon-button'
-import { MobileGlassTextButton } from '../../components/glass/text-button'
-import { GestureDetector, GestureHandlerRootView } from '../../components/uniwind-native-components'
-import { useSafeAreaInsets } from '../../components/uniwind-native-components'
-import { resolveCssNumber } from '../../style/resolve-css-variable'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { GestureDetector, GestureHandlerRootView } from '~/components/uniwind-native-components'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
+
 import type { MobileImageSource } from '../image-source-picker'
 import type { AskAnswerSelection, AskPrompt } from './ask'
 import { MobileNativeChatAsk } from './ask-wizard'

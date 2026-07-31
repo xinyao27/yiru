@@ -1,9 +1,9 @@
-import { buildPosixCommandPathLookupScript } from '../../../shared/posix-command-path-lookup'
+import { buildPosixCommandPathLookupScript } from '~shared/posix-command-path-lookup'
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
 
 export const WSL_CODEX_AVAILABILITY_TIMEOUT_MS = 5_000
 

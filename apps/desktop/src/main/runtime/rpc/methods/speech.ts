@@ -1,9 +1,9 @@
 import { z } from 'zod'
-
 import {
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const AUDIO_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/

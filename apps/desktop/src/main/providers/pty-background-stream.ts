@@ -1,6 +1,5 @@
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
-
-import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 
 export type PtyTransientFact =
   | { kind: 'bell' }

@@ -4,12 +4,14 @@ import { realpath, readdir, stat } from 'node:fs/promises'
 import { basename, join, win32, posix } from 'node:path'
 import { createInterface } from 'node:readline'
 
-import type { Repo } from '../../../shared/types'
-import { canonicalizeUsageWorktreePaths } from '../../usage-worktree-canonicalizer'
-import { areWorktreePathsEqual } from '../../worktree/logic'
+import { canonicalizeUsageWorktreePaths } from '~main/usage-worktree-canonicalizer'
+import { areWorktreePathsEqual } from '~main/worktree/logic'
+import type { Repo } from '~shared/types'
+
 import { getCodexAccountHomeSessionDirectories } from '../account-home-discovery'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../session-bridge'
+import { buildCodexUsageEventKey } from './event-key'
 import { priceCodexUsage } from './pricing'
 import type {
   CodexUsageAttributedEvent,
@@ -404,29 +406,6 @@ function resolveCodexUsageDelta(
   }
 
   return null
-}
-
-function buildCodexUsageEventKey(
-  timestamp: string,
-  totalUsage: CodexUsageRawUsage | null,
-  lastUsage: CodexUsageRawUsage | null
-): string {
-  // Why: fork/resume copies token_count records byte-for-byte into a new
-  // rollout file, but session_meta.id is often rewritten to the new session.
-  // Key only on the raw record fields (timestamp + usage tuples) so the copy
-  // matches the original regardless of surrounding parse context / session id.
-  const tupleOf = (usage: CodexUsageRawUsage | null): string =>
-    usage
-      ? [
-          usage.inputTokens,
-          usage.cachedInputTokens,
-          usage.cacheWriteTokens,
-          usage.outputTokens,
-          usage.reasoningOutputTokens,
-          usage.totalTokens
-        ].join(',')
-      : ''
-  return [timestamp, tupleOf(totalUsage), tupleOf(lastUsage)].join('|')
 }
 
 function extractString(value: unknown): string | null {

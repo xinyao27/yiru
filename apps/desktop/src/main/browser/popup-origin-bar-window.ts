@@ -52,7 +52,7 @@ export function describePopupOrigin(rawUrl: string): { label: string; insecure: 
   }
 }
 
-// Colors mirror the canonical tokens in src/renderer/src/assets/main.css
+// Colors mirror the canonical tokens in src/renderer/assets/main.css
 // (--background/--foreground/--border/--destructive); a data: URL page cannot
 // import that stylesheet, so the values are inlined per theme here.
 const ORIGIN_BAR_HTML = `<!doctype html><html><head><meta charset="utf-8"><style>

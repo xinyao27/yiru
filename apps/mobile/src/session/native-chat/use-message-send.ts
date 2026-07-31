@@ -1,6 +1,7 @@
 import { useCallback, type MutableRefObject } from 'react'
 
-import type { RpcClient } from '../../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import {
   beginMobileNativeChatSend,
   healMobileNativeChatInput,

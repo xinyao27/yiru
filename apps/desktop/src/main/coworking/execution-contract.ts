@@ -1,7 +1,8 @@
 import type {
   CoworkingExecutionOperation,
   CoworkingSubscriptionOperation
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import type { CoworkingHostSubscription } from './terminal-subscription-capacity'
 import type { CoworkingPublicWorktreeInstance } from './worktree-publication-state'
 

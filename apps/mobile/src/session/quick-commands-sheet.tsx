@@ -2,7 +2,7 @@ import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import { useMemo, useRef, useState } from 'react'
 import { Alert, Text, View } from 'react-native'
 
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import {

@@ -1,4 +1,5 @@
-import type { GhAuthDiagnostic, GhAuthAccount } from '../../shared/github-auth-types'
+import type { GhAuthDiagnostic, GhAuthAccount } from '~shared/github-auth-types'
+
 /**
  * gh CLI auth diagnostics.
  *

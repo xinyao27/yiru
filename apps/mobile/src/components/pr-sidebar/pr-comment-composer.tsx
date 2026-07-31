@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
 import { ActivityIndicator, TextInput, View } from 'react-native'
 
-import { isSubmittableCommentBody } from '../../session/pr/comment-actions'
+import { isSubmittableCommentBody } from '~/session/pr/comment-actions'
+
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassSurface } from '../glass/surface'
 import { MobileGlassTextButton } from '../glass/text-button'

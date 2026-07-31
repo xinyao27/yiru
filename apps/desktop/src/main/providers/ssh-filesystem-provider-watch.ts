@@ -1,7 +1,7 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
+import type { FsChangeEvent } from '~shared/types'
 
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
-import type { FsChangeEvent } from '../../shared/types'
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 

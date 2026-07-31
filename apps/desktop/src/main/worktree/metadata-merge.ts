@@ -1,7 +1,8 @@
 import { basename } from 'node:path'
 
-import type { GitWorktreeInfo, Worktree, WorktreeMeta } from '../../shared/types'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
+import type { GitWorktreeInfo, Worktree, WorktreeMeta } from '~shared/types'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '~shared/workspace/statuses'
+
 import { getLinkedReviewMetadata } from './linked-review-metadata'
 
 /**

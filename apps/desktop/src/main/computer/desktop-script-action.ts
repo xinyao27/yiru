@@ -1,7 +1,5 @@
-import type {
-  ComputerActionMetadata,
-  ComputerProviderCapabilities
-} from '../../shared/runtime-types'
+import type { ComputerActionMetadata, ComputerProviderCapabilities } from '~shared/runtime-types'
+
 import { optionalNumberParam, optionalStringParam } from './desktop-script-provider-params'
 import type {
   BridgeElement,

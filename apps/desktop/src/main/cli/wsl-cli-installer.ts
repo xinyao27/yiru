@@ -2,7 +2,8 @@
    splitting the installer would separate conflict checks from the operations they guard. */
 import { execFile } from 'node:child_process'
 
-import type { CliInstallStatus } from '../../shared/cli-install-types'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+
 import { getDefaultWslDistro } from '../wsl'
 import { CliInstaller } from './installer'
 import {

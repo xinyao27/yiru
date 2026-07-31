@@ -3,7 +3,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileS
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
-import type { PersistedState } from '../../shared/types'
+import type { PersistedState } from '~shared/types'
+
 import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/diagnostics'
 import {
   hasDurableStateBackup,

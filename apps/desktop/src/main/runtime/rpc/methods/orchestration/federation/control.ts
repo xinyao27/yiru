@@ -1,14 +1,14 @@
 import { z } from 'zod'
-
-import { ORCHESTRATION_WORKER_READ_SOURCES } from '../../../../../../shared/orchestration-worker-output'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { RemoteDispatchAttachmentRow } from '~main/runtime/orchestration/types'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { ORCHESTRATION_WORKER_READ_SOURCES } from '~shared/orchestration-worker-output'
 import {
   OptionalFiniteNumber,
   requiredString
-} from '../../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import type { RemoteDispatchAttachmentRow } from '../../../../orchestration/types'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
-import { defineMethod, type RpcMethod } from '../../../core'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { readExactWorkerOutput } from '../worker/output'
 
 const FederationDispatchParams = z.object({

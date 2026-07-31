@@ -8,7 +8,6 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { app } from 'electron'
-
 import {
   WSL_HOOK_RELAY_BUNDLE_NAME,
   WSL_HOOK_RELAY_DIR,
@@ -17,7 +16,8 @@ import {
   WSL_HOOK_RELAY_STALE_EXIT_CODE,
   WSL_HOOK_RELAY_VERSION_ENV,
   WSL_HOOK_RELAY_VERSION_FILE
-} from '../../shared/wsl-hook-relay-contract'
+} from '~shared/wsl-hook-relay-contract'
+
 import { addYiruWslInteropEnv } from '../pty/wsl-yiru-env'
 import type { MultiplexerTransport } from '../ssh/channel-multiplexer'
 import {

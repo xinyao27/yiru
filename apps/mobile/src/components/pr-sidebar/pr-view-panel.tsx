@@ -1,11 +1,11 @@
 import { View } from 'react-native'
 
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import type { MobilePrSidebarController } from '~/session/pr/use-sidebar-controller'
+import type { MobileGitStatusResult } from '~/source-control/git-status'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
 
-import type { MobilePrSidebarController } from '../../session/pr/use-sidebar-controller'
-import type { MobileGitStatusResult } from '../../source-control/git-status'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
 import { MobilePRSidebar } from '../pr-sidebar'
 
 type Props = {

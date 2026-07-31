@@ -5,9 +5,9 @@ import { pathToFileURL } from 'node:url'
 
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'electron'
+import type { AppIdentity } from '~shared/app-identity'
+import type { FloatingTerminalCwdRequest, MarkdownDocument } from '~shared/types'
 
-import type { AppIdentity } from '../../shared/app-identity'
-import type { FloatingTerminalCwdRequest, MarkdownDocument } from '../../shared/types'
 import { setUnreadDockBadgeCount } from '../dock/unread-badge'
 import { authorizeExternalPath } from '../filesystem/auth'
 import {

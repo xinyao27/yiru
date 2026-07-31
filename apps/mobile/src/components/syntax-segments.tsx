@@ -1,6 +1,6 @@
 import { Text } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import type { MobileSyntaxSegment, MobileSyntaxTokenKind } from '../session/file-syntax'
 

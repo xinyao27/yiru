@@ -42,7 +42,23 @@ apps/desktop/src/
 apps/mobile/  Expo app: app/ = routes, src/ = features
 packages/     cross-client contracts: workbench-model, runtime-protocol,
               mobile-relay-protocol
+skills/       agent skill packages shipped to end users, one folder per skill
+scripts/      workspace-level tooling: contracts that span apps, skill generators
 ```
+
+**Scripts live at the level they serve.** `scripts/` holds only tooling whose
+inputs cross app boundaries — the source-path and max-lines contracts, the skill
+generators — and the root `package.json` owns their npm scripts. Everything
+scoped to one app lives in that app's own `apps/<app>/scripts/`, invoked from
+that app's `package.json`. A script that reaches outside its app is in the wrong
+folder; `config/` is for configuration, never executables.
+
+`skills/<name>/SKILL.md` is product content, not app source — it sits at the
+repository root because it is shipped to users' agent installs rather than built
+into any one client. It is the **source of truth**: `src/cli/bundled-skill-guides.ts`
+is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
+`resources/skills/*.json` records its release-freshness digests. Edit `SKILL.md`,
+then run that script with `--write`; never edit the generated module.
 
 **Import direction is one-way.** `renderer` never imports `main`. `shared` never imports `main`, `renderer`, or `electron` — Node built-ins are fine. `relay` and `cli` may reuse `main` modules. The renderer reaches the main process only through the preload contract. A type used only inside `apps/desktop` belongs in `src/shared/`, not in a package.
 
@@ -112,7 +128,9 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - `switch` over a union is exhaustive with no `default` — adding a union member should break every switch that handles it.
 - Type declarations go in `.ts`. Under `src/preload` and `src/shared` this is a CI gate: `skipLibCheck: true` silently widens unresolved names in a `.d.ts` to `any`, which is how a broken IPC signature once shipped past typecheck.
 - Prefer `satisfies` over `as`. An `as` cast is a claim the type system can't back — if you need one, say why.
-- Path aliases `@/*` and `@renderer/*` map to the renderer root; use them there. Cross-process imports stay relative.
+- **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*`, `~shared/*`, `~main/*`, and `~preload/*` are the whole set for desktop; mobile has `~/*` for its `src/`. Any import that crosses from one of those areas into another uses the alias, at any depth. Inside one area, `./x` and `../x` stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf executables nothing imports into, so they have no alias of their own, and there is no bare `~` for desktop.
+- A renderer file importing `~main/*` is a build error, not a style problem — the one-way rule above is enforced by `check-import-path-policy.mjs`.
+- `build:cli` is a plain `tsc` emit, so it cannot resolve aliases at runtime: `scripts/rewrite-emitted-aliases.mjs` turns them back into relative requires and fails the build on any it does not recognize. Adding a desktop alias means updating that script and `config/tsconfig.cli.json` together.
 
 ---
 
@@ -145,7 +163,7 @@ No `TODO` without an issue link. No commented-out code — git has it.
 Work runs on the local machine, in a WSL distro, over SSH, and through a relay. Every path that touches a filesystem, a process, or a git binary must work on all of them, on macOS, Linux, and Windows alike — code, commands, and scripts.
 
 - Resolve paths with `path.join` or Electron path utilities. Never assume `/` or `\`.
-- Route filesystem, git, terminal, and search operations through the runtime clients (`renderer/src/runtime/runtime-*-client.ts`, `main/runtime/`) instead of calling Node from a feature.
+- Route filesystem, git, terminal, and search operations through the runtime clients (`renderer/runtime/runtime-*-client.ts`, `main/runtime/`) instead of calling Node from a feature.
 - Scope cached host state — capabilities, versions, connection health — to the host that executes it. One host's answer must never leak into another's.
 - Keyboard shortcuts branch on platform: `navigator.userAgent.includes('Mac')` → `metaKey`, else `ctrlKey`. Electron menu accelerators use `CmdOrCtrl`.
 
@@ -182,7 +200,7 @@ Report results honestly: if something fails, show the output; if you skipped a s
 
 ## 11. Working in legacy areas
 
-Much of this repo predates these rules — hundreds of loose modules in `shared/` and `renderer/src/lib/`, flat feature folders, stuttering filenames, feature CSS in `main.css`, and a `max-lines` grandfather list. That is the state to move away from, not a precedent to copy.
+Much of this repo predates these rules — hundreds of loose modules in `shared/` and `renderer/lib/`, flat feature folders, stuttering filenames, feature CSS in `main.css`, and a `max-lines` grandfather list. That is the state to move away from, not a precedent to copy.
 
 - **New code follows this document**, without exception.
 - **When you touch a legacy area, move what you touch toward it**: pull the files you're already editing into the feature folder, drop the redundant prefixes. Don't launch an unrequested refactor beyond that.

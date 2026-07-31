@@ -21,61 +21,54 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import { isRemoteAgentHooksEnabled } from '../../shared/agent/hook-relay'
-import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
-import {
-  getCommandTokenPathBasename,
-  getFirstCommandToken
-} from '../../shared/command-token-scanner'
+import { isRemoteAgentHooksEnabled } from '~shared/agent/hook-relay'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import { getCommandTokenPathBasename, getFirstCommandToken } from '~shared/command-token-scanner'
 import {
   isWslShellName,
   resolveLocalWindowsTerminalRuntimeOptions
-} from '../../shared/local-windows-terminal-runtime'
-import { buildConfiguredProxyEnv, type NetworkProxySettings } from '../../shared/network-proxy'
-import { detectPiAgentKindFromCommand, type PiAgentKind } from '../../shared/pi-agent-kind'
-import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
+} from '~shared/local-windows-terminal-runtime'
+import { buildConfiguredProxyEnv, type NetworkProxySettings } from '~shared/network-proxy'
+import { detectPiAgentKindFromCommand, type PiAgentKind } from '~shared/pi-agent-kind'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 import {
   type PtyMainDeliveryDiagnostics,
   type PtyPerPtyDeliveryDiagnostics,
   EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS,
   createPtyDeliveryBreadcrumbRing,
   redactPtyIdForDiagnostics
-} from '../../shared/pty-delivery-diagnostics'
-import type { PtyModelRestoreReason } from '../../shared/pty-model-restore-marker'
+} from '~shared/pty-delivery-diagnostics'
+import type { PtyModelRestoreReason } from '~shared/pty-model-restore-marker'
 import type {
   PtyDeliveryWriteOff,
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
-} from '../../shared/pty-renderer-delivery-health'
-import { resolveSetupAgentSequenceLaunchCommand } from '../../shared/setup/agent-sequencing'
+} from '~shared/pty-renderer-delivery-health'
+import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
 import {
   isTerminalLeafId,
   makePaneKey,
   parseLegacyNumericPaneKey,
   parsePaneKey
-} from '../../shared/stable-pane-id'
-import {
-  agentKindSchema,
-  launchSourceSchema,
-  requestKindSchema
-} from '../../shared/telemetry-events'
+} from '~shared/stable-pane-id'
+import { agentKindSchema, launchSourceSchema, requestKindSchema } from '~shared/telemetry-events'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../shared/terminal/input'
-import { extractHiddenStartupRendererQueryData } from '../../shared/terminal/reply-query-extraction'
-import { terminalOutputBacklogCapChars } from '../../shared/terminal/scrollback-policy'
-import { createTerminalSessionStateSaveFailureMessage } from '../../shared/terminal/session-state-save-failure'
+} from '~shared/terminal/input'
+import { extractHiddenStartupRendererQueryData } from '~shared/terminal/reply-query-extraction'
+import { terminalOutputBacklogCapChars } from '~shared/terminal/scrollback-policy'
+import { createTerminalSessionStateSaveFailureMessage } from '~shared/terminal/session-state-save-failure'
 import {
   resolveTerminalStartupCwdForWorkspace,
   type TerminalStartupCwdMissingDirFallback
-} from '../../shared/terminal/startup-cwd'
-import { isValidTerminalTabId } from '../../shared/terminal/tab-id'
-import { validateTerminalViewAttributes } from '../../shared/terminal/view-attributes'
-import { isTuiAgent } from '../../shared/tui-agent/config'
-import type { GlobalSettings, TuiAgent } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/scope'
+} from '~shared/terminal/startup-cwd'
+import { isValidTerminalTabId } from '~shared/terminal/tab-id'
+import { validateTerminalViewAttributes } from '~shared/terminal/view-attributes'
+import { isTuiAgent } from '~shared/tui-agent/config'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   clearMigrationUnsupportedPty,

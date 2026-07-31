@@ -1,10 +1,9 @@
 import { z } from 'zod'
-
 import {
   OptionalFiniteNumber,
   OptionalString,
   requiredString
-} from '../../../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 export const FederationAttachStartParams = z.object({
   dispatchId: requiredString('Missing Dispatch ID'),

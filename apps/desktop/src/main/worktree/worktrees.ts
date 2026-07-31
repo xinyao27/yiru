@@ -11,23 +11,22 @@ import {
 /* oxlint-disable max-lines */
 import type { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron'
-
 import type {
   DirectSshDetectedWorktreeRequest,
   HostQualifiedDetectedWorktreeResult,
   ListDetectedWorktreesArgs,
   ProviderRequestId
-} from '../../shared/detected-worktree-provider-contract'
-import { PROVIDER_REQUEST_ID_MAX_UTF8_BYTES } from '../../shared/detected-worktree-provider-contract'
+} from '~shared/detected-worktree-provider-contract'
+import { PROVIDER_REQUEST_ID_MAX_UTF8_BYTES } from '~shared/detected-worktree-provider-contract'
 import type {
   HostLineageSnapshot,
   ListDesktopLineageForHostArgs
-} from '../../shared/host-lineage-contract'
-import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
-import { isFolderRepo } from '../../shared/repo-kind'
-import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
-import { isAdmissibleDirectSshAuthority } from '../../shared/ssh-retained-payload-admission'
-import { workspaceSourceSchema, type WorkspaceSource } from '../../shared/telemetry-events'
+} from '~shared/host-lineage-contract'
+import { getProjectHostSetupWorktreeMeta } from '~shared/project-host-setup-projection'
+import { isFolderRepo } from '~shared/repo-kind'
+import { inspectSetupScriptImportCandidates } from '~shared/setup/script-imports'
+import { isAdmissibleDirectSshAuthority } from '~shared/ssh-retained-payload-admission'
+import { workspaceSourceSchema, type WorkspaceSource } from '~shared/telemetry-events'
 import type {
   AutomationWorkspaceProvenance,
   CreateWorktreeArgs,
@@ -43,18 +42,15 @@ import type {
   RemoveWorktreeResult,
   Worktree,
   WorktreeMeta
-} from '../../shared/types'
-import {
-  isWorkspaceKey,
-  parseWorkspaceKey,
-  worktreeWorkspaceKey
-} from '../../shared/workspace/scope'
+} from '~shared/types'
+import { isWorkspaceKey, parseWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
 import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
-} from '../../shared/workspace/worktree-ownership'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
+} from '~shared/workspace/worktree-ownership'
+import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
+
 import { readBranchRenameFailureOutputForDisplay } from '../agent-hooks/branch-rename-failure-output'
 import {
   finishAutomationWorkspaceProvenanceRequest,
@@ -187,8 +183,8 @@ import {
   FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
   getRepoIdFromWorktreeId
 } from '@yiru/workbench-model/workspace'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '~shared/workspace/statuses'
 
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
 import {
   getLocalWorktreePathAccess,
   removeLocalWorktreePath,

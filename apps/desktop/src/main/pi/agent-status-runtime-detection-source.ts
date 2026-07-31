@@ -1,4 +1,4 @@
-import type { PiAgentKind } from '../../shared/pi-agent-kind'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 export function getPiAgentStatusRuntimeDetectionSourceLines(kind: PiAgentKind): string[] {
   return [

@@ -1,4 +1,4 @@
-import type { WorktreeMeta } from '../shared/types'
+import type { WorktreeMeta } from '~shared/types'
 
 type WorktreeSortOrderStore = {
   getWorktreeMeta(worktreeId: string): WorktreeMeta | undefined

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import type { RpcClient } from '../../transport/rpc-client'
-import { getRepoIdFromMobileWorktreeId } from '../../worktree-id'
+import type { RpcClient } from '~/transport/rpc-client'
+import { getRepoIdFromMobileWorktreeId } from '~/worktree-id'
+
 import { isFloatingWorkspaceWorktreeId } from '../floating-workspace'
 import { isMobileNativeChatTranscriptReadable } from './eligibility'
 

@@ -6,7 +6,8 @@ import type {
   ComputerUsePermissionResetResult,
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
+
 import { getComputerUsePermissionStatus } from './macos-computer-use-permission-status'
 import { resolveMacOSComputerUseAppPath } from './macos-native-provider-paths'
 import { RuntimeClientError } from './runtime-client-error'

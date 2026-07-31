@@ -1,4 +1,4 @@
-import { GithubLogo, GitlabLogo } from '@/components/uniwind-icons'
+import { GithubLogo, GitlabLogo } from '~/components/uniwind-icons'
 
 export type SourceProviderLogoKind = 'github' | 'gitlab'
 

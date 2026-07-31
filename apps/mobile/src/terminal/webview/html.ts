@@ -2,7 +2,8 @@
 // terminal-web-view.tsx to keep that file within the max-lines budget.
 import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
 
-import { TERMINAL_TEXT_SCALES } from '../../storage/preferences'
+import { TERMINAL_TEXT_SCALES } from '~/storage/preferences'
+
 import { TERMINAL_PATH_TAP_JS } from '../path-tap-injected'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from '../webview-engine.generated'
 import { TERMINAL_QUERY_REPLY_JS } from './query-reply-injected'

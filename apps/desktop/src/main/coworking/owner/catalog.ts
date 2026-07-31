@@ -1,9 +1,10 @@
-import type { CoworkingRemoteDesktop } from '../../../shared/coworking/catalog-contract'
+import type { CoworkingRemoteDesktop } from '~shared/coworking/catalog-contract'
 import type {
   CoworkingRequesterControlView,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs
-} from '../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
+
 import {
   cancelCoworkingCatalogSessionLoad,
   reconcileCoworkingCatalogSessionLoad

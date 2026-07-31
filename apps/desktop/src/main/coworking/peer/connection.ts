@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto'
 
 import WebSocket from 'ws'
-
-import type { CoworkingConnectionState } from '../../../shared/coworking/wire-contract'
+import type { CoworkingConnectionState } from '~shared/coworking/wire-contract'
 import {
   COWORKING_CONNECT_PATH,
   COWORKING_INGRESS_PORT,
   COWORKING_MAX_ENCRYPTED_FRAME_BYTES
-} from '../../../shared/coworking/wire-contract'
-import { decrypt, deriveSharedKey, encrypt, publicKeyFromBase64 } from '../../../shared/e2ee-crypto'
+} from '~shared/coworking/wire-contract'
+import { decrypt, deriveSharedKey, encrypt, publicKeyFromBase64 } from '~shared/e2ee-crypto'
+
 import type { CoworkingPeerAdmission } from '../probe-client'
 import {
   COWORKING_CANCEL_REQUEST_METHOD,

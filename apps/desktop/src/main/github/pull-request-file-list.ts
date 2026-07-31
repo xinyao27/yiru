@@ -1,4 +1,5 @@
-import type { GitHubPRFile, GitHubPRFileViewedState } from '../../shared/types'
+import type { GitHubPRFile, GitHubPRFileViewedState } from '~shared/types'
+
 import {
   getOwnerRepo,
   ghExecFileAsync,

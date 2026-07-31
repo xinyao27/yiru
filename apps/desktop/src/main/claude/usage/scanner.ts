@@ -6,8 +6,8 @@ import { join, basename } from 'node:path'
 import { createInterface } from 'node:readline'
 
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../../shared/types'
 import { priceClaudeUsage } from './pricing'
 import type {
   ClaudeUsageAttributedTurn,

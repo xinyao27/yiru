@@ -1,4 +1,5 @@
-import type { DirEntry } from '../../shared/types'
+import type { DirEntry } from '~shared/types'
+
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type { SftpFactory } from './ssh-filesystem-file-upload'

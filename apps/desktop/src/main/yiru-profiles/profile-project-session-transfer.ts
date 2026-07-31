@@ -1,6 +1,5 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { getDefaultWorkspaceSession } from '../../shared/constants'
+import { getDefaultWorkspaceSession } from '~shared/constants'
 import type {
   BrowserPage,
   BrowserWorkspace,
@@ -9,8 +8,9 @@ import type {
   TabGroup,
   TerminalTab,
   WorkspaceSessionState
-} from '../../shared/types'
-import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
+} from '~shared/types'
+import { parseWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
+
 import {
   isRepoWorktreeId,
   rekeyOwnerKey,

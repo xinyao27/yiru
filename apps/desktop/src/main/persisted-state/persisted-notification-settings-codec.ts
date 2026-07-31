@@ -1,5 +1,5 @@
-import { getDefaultNotificationSettings } from '../../shared/constants'
-import type { NotificationSettings } from '../../shared/types'
+import { getDefaultNotificationSettings } from '~shared/constants'
+import type { NotificationSettings } from '~shared/types'
 
 export function normalizePersistedNotificationSettings(value: unknown): NotificationSettings {
   const defaults = getDefaultNotificationSettings()

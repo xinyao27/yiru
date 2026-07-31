@@ -10,7 +10,8 @@
 // the returned source is a string (loaded by jiti from disk inside the pi process), so we
 // keep the source body in plain JS without TS types and avoid pulling pi or
 // any Yiru dep into the pi runtime.
-import type { PiAgentKind } from '../../shared/pi-agent-kind'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
+
 import { getPiAgentStatusHandlerSourceLines } from './agent-status-handler-source'
 import { getPiAgentStatusRuntimeDetectionSourceLines } from './agent-status-runtime-detection-source'
 

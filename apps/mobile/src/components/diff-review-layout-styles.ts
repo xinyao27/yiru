@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 export const mobileDiffReviewLayoutStyles = {
   iconButton: cn('h-11 w-11 items-center justify-center rounded-full'),

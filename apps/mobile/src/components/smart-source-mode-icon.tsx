@@ -1,4 +1,4 @@
-import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '@/components/uniwind-icons'
+import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '~/components/uniwind-icons'
 
 import type { SmartModeIcon } from '../workspace-create/smart-source-modes'
 import { SourceProviderLogo } from './source-provider-logo'

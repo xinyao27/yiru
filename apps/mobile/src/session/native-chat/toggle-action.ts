@@ -1,8 +1,6 @@
-import type { ActionSheetAction } from '../../components/action-sheet-modal'
-import {
-  Chat as MessageSquare,
-  TerminalWindow as SquareTerminal
-} from '../../components/uniwind-icons'
+import type { ActionSheetAction } from '~/components/action-sheet-modal'
+import { Chat as MessageSquare, TerminalWindow as SquareTerminal } from '~/components/uniwind-icons'
+
 import { resolveMobileNativeChat, type MobileNativeChatTab } from './eligibility'
 
 type ToggleTab = MobileNativeChatTab & {

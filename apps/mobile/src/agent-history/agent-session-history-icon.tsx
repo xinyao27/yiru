@@ -1,1 +1,1 @@
-export { ClockCounterClockwise as MobileAgentSessionHistoryIcon } from '@/components/uniwind-icons'
+export { ClockCounterClockwise as MobileAgentSessionHistoryIcon } from '~/components/uniwind-icons'

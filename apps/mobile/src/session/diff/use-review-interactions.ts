@@ -1,9 +1,10 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react'
 import type { FlatList } from 'react-native'
 
-import { triggerSelection } from '../../platform/haptics'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { triggerSelection } from '~/platform/haptics'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { findNextMobileDiffHunkIndex, findPreviousMobileDiffHunkIndex } from './hunks'
 import type { MobileDiffReviewQueueFilter, MobileDiffReviewQueueItem } from './review-queue'
 import type {

@@ -4,12 +4,13 @@ import type {
   CoworkingGitHistoryOperation,
   CoworkingGitHistoryResult,
   CoworkingGitStatusResult
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 import {
   COWORKING_GIT_DIFF_MAX_BYTES,
   COWORKING_GIT_HISTORY_DEFAULT_LIMIT,
   COWORKING_GIT_HISTORY_MAX_LIMIT
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from './execution-error'
 import type { CoworkingGitCommitReferences } from './git-commit-references'
 import {

@@ -12,79 +12,71 @@ import {
   RefreshControl
 } from 'react-native'
 
+import { buildWorktreeNavigationActions } from '~/agent-history/worktree-navigation-actions'
+import { setCachedRepos } from '~/cache/repo-cache'
+import { getCachedWorktrees, setCachedWorktrees } from '~/cache/worktree-cache'
+import { ActionSheetContent } from '~/components/action-sheet-modal'
+import { AuthFailedBanner } from '~/components/auth-failed-banner'
+import { BottomDrawer } from '~/components/bottom-drawer'
+import { ConfirmModal } from '~/components/confirm-modal'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { NewWorkspaceFab } from '~/components/new-workspace-fab'
+import { NewWorktreeModalController } from '~/components/new-worktree-modal-controller'
+import { ProtocolBlockScreen } from '~/components/protocol-block-screen'
+import { MobileRepoIcon } from '~/components/repo-icon'
 import {
   PushPin as Pin,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   Moon
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-
-import { buildWorktreeNavigationActions } from '../../../src/agent-history/worktree-navigation-actions'
-import { setCachedRepos } from '../../../src/cache/repo-cache'
-import { getCachedWorktrees, setCachedWorktrees } from '../../../src/cache/worktree-cache'
-import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
-import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
-import { BottomDrawer } from '../../../src/components/bottom-drawer'
-import { ConfirmModal } from '../../../src/components/confirm-modal'
-import { MobileGlassGroup } from '../../../src/components/glass/group'
-import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
-import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
-import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
-import { ProtocolBlockScreen } from '../../../src/components/protocol-block-screen'
-import { MobileRepoIcon } from '../../../src/components/repo-icon'
-import { WorkspaceDetailPlaceholder } from '../../../src/components/workspace-detail-placeholder'
-import { WorktreeListRow } from '../../../src/components/worktree-list-row'
-import { useActiveWorktreeScroll } from '../../../src/hooks/use-active-worktree-scroll'
-import { useNow } from '../../../src/hooks/use-now'
+} from '~/components/uniwind-icons'
+import { WorkspaceDetailPlaceholder } from '~/components/workspace-detail-placeholder'
+import { WorktreeListRow } from '~/components/worktree-list-row'
+import { useActiveWorktreeScroll } from '~/hooks/use-active-worktree-scroll'
+import { useNow } from '~/hooks/use-now'
 import {
   createInitialHostRouteActionState,
   resolveHostRouteActionState,
   setHostRouteNewWorktreeVisible
-} from '../../../src/host-route-action-state'
-import { leaveHostRoute } from '../../../src/host-route-exit'
-import { useResponsiveLayout } from '../../../src/layout/responsive-layout'
-import { floatingWorkspaceSessionPath } from '../../../src/session/floating-workspace'
-import { loadPinnedIds, savePinnedIds } from '../../../src/storage/preferences'
-import {
-  useHostClient,
-  useCloseHost,
-  useForceReconnect
-} from '../../../src/transport/client-context'
+} from '~/host-route-action-state'
+import { leaveHostRoute } from '~/host-route-exit'
+import { useResponsiveLayout } from '~/layout/responsive-layout'
+import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
+import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
+import { cn } from '~/style/class-names'
+import { useHostClient, useCloseHost, useForceReconnect } from '~/transport/client-context'
 import {
   useLastConnectedAt,
   useReconnectAttempt
-} from '../../../src/transport/client-context-connection-metrics'
-import {
-  classifyConnection,
-  type ConnectionVerdict
-} from '../../../src/transport/connection-health'
-import { removeHostAndCloseClient } from '../../../src/transport/host-removal-lifecycle'
-import { useHostStatusGates } from '../../../src/transport/host-status-gates'
-import { loadHosts, updateLastConnected } from '../../../src/transport/host-store'
-import type { RpcClient } from '../../../src/transport/rpc-client'
-import type { RpcSuccess } from '../../../src/transport/types'
-import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
-import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
-import { MobileWorkspaceListChrome } from '../../../src/worktree/list-chrome'
-import { areWorktreeListsEqual } from '../../../src/worktree/list-snapshot'
-import { MobileWorkspaceListToolbar } from '../../../src/worktree/list-toolbar'
-import { repoColor } from '../../../src/worktree/repo-color'
-import { useWorkspaceSections } from '../../../src/worktree/use-workspace-sections'
-import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/workspace-lineage'
+} from '~/transport/client-context-connection-metrics'
+import { classifyConnection, type ConnectionVerdict } from '~/transport/connection-health'
+import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
+import { useHostStatusGates } from '~/transport/host-status-gates'
+import { loadHosts, updateLastConnected } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { RpcSuccess } from '~/transport/types'
+import { useWorktreeResync } from '~/transport/use-worktree-resync'
+import type { RepoSummary } from '~/worktree/host-worktree-rpc-types'
+import { MobileWorkspaceListChrome } from '~/worktree/list-chrome'
+import { areWorktreeListsEqual } from '~/worktree/list-snapshot'
+import { MobileWorkspaceListToolbar } from '~/worktree/list-toolbar'
+import { repoColor } from '~/worktree/repo-color'
+import { useWorkspaceSections } from '~/worktree/use-workspace-sections'
+import { getMobileWorkspaceLineageGroupKey } from '~/worktree/workspace-lineage'
 import {
   getWorktreeStatus,
   isWorktreePinned,
   type FilterState,
   type Worktree
-} from '../../../src/worktree/workspace-list-sections'
-import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '../../../src/worktree/workspace-statuses'
+} from '~/worktree/workspace-list-sections'
+import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/worktree/workspace-statuses'
 import {
   applyDesktopViewSettings,
   type MobileSortMode,
   type MobileViewState,
   type WorkspaceViewSettings
-} from '../../../src/worktree/workspace-view-settings'
+} from '~/worktree/workspace-view-settings'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return v.kind === 'warning' || v.kind === 'unreachable' || v.kind === 'auth-failed'

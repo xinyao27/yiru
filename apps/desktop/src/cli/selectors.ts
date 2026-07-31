@@ -1,9 +1,9 @@
 import { resolve as resolvePath } from 'node:path'
 
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import { WORKTREE_LIST_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
+import type { ComputerAppQuery, RuntimeWorktreeRecord } from '~shared/runtime-types'
 
-import { WORKTREE_LIST_CONTRACT } from '../shared/runtime-method-contracts/workspace-contracts'
-import type { ComputerAppQuery, RuntimeWorktreeRecord } from '../shared/runtime-types'
 import { getOptionalStringFlag, getRequiredStringFlag } from './flags'
 import type { RuntimeClient } from './runtime-client'
 import { RuntimeClientError } from './runtime-client'

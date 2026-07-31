@@ -6,8 +6,9 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { DeviceScope } from '../../shared/runtime-types'
-import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
+import type { DeviceScope } from '~shared/runtime-types'
+import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
+
 import { DEVICE_REGISTRY_FILENAME } from './mobile-pairing-files'
 
 export type { DeviceScope }

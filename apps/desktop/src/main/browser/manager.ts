@@ -5,37 +5,37 @@ in one file avoids scattering the browser security boundary across modules. */
 import { randomUUID } from 'node:crypto'
 
 import { shell, webContents } from 'electron'
-
 import {
   type BrowserAnnotationViewportBridgeOptions,
   BROWSER_ANNOTATION_VIEWPORT_BRIDGE_WORLD_ID,
   buildBrowserAnnotationViewportBridgeScript
-} from '../../shared/browser/annotation-viewport-bridge'
+} from '~shared/browser/annotation-viewport-bridge'
 import type {
   BrowserGrabCancelReason,
   BrowserGrabPayload,
   BrowserGrabRect,
   BrowserGrabResult,
   BrowserGrabScreenshot
-} from '../../shared/browser/grab-types'
+} from '~shared/browser/grab-types'
 import type {
   BrowserDownloadFinishedEvent,
   BrowserDownloadProgressEvent,
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../../shared/browser/guest-events'
-import { buildSessionStoragePersistenceScript } from '../../shared/browser/session-storage-persistence'
+} from '~shared/browser/guest-events'
+import { buildSessionStoragePersistenceScript } from '~shared/browser/session-storage-persistence'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken,
   toSecureCertificateEndpoint
-} from '../../shared/browser/url'
-import { YIRU_BROWSER_BLANK_URL } from '../../shared/constants'
-import type { KeybindingOverrides } from '../../shared/keybindings'
-import type { BrowserViewportOverride } from '../../shared/types'
-import type { BrowserCertificateFailure, BrowserLoadError } from '../../shared/types'
+} from '~shared/browser/url'
+import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
+import type { KeybindingOverrides } from '~shared/keybindings'
+import type { BrowserViewportOverride } from '~shared/types'
+import type { BrowserCertificateFailure, BrowserLoadError } from '~shared/types'
+
 import { ANTI_DETECTION_SCRIPT } from './anti-detection'
 import {
   BrowserCertificateTrustController,

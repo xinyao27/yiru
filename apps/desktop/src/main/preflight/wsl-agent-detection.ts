@@ -2,11 +2,11 @@ import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { buildPosixCommandPathLookupScript } from '../../shared/posix-command-path-lookup'
+import { buildPosixCommandPathLookupScript } from '~shared/posix-command-path-lookup'
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
-} from '../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
 
 const execFileAsync = promisify(execFile)
 const WSL_AGENT_DETECTION_TIMEOUT_MS = 10000

@@ -2,7 +2,8 @@ import { GlassView, type GlassViewProps } from 'expo-glass-effect'
 import { View } from 'react-native'
 import { useUniwind, withUniwind } from 'uniwind'
 
-import { cn } from '../../style/class-names'
+import { cn } from '~/style/class-names'
+
 import { useMobileGlassAvailable } from './availability'
 
 const UniwindGlassView = withUniwind(GlassView)

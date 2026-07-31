@@ -1,11 +1,9 @@
 import { lstat } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import type {
-  SkillFreshnessInstallation,
-  SkillFreshnessInventory
-} from '../../shared/skill-freshness'
-import type { Repo } from '../../shared/types'
+import type { SkillFreshnessInstallation, SkillFreshnessInventory } from '~shared/skill-freshness'
+import type { Repo } from '~shared/types'
+
 import { loadSkillBundleArtifacts } from './skill-bundle-artifacts'
 import { runSkillCandidateTasks } from './skill-candidate-concurrency'
 import { buildSkillDiscoverySources, type SkillScanRoot } from './skill-discovery-sources'

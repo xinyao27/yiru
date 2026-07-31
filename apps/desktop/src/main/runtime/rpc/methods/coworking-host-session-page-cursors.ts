@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
-import { CoworkingExecutionError } from '../../../coworking/execution-error'
-import type { YiruRuntimeService } from '../../yiru-runtime'
+import { CoworkingExecutionError } from '~main/coworking/execution-error'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+
 import {
   encodeCoworkingHostSessionPageBinding,
   encodeCoworkingHostSessionPageReleaseBinding,

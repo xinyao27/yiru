@@ -4,8 +4,8 @@ import path from 'node:path'
 
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
+import { assertClipboardImageByteLengthWithinLimit } from '~shared/clipboard-image'
 
-import { assertClipboardImageByteLengthWithinLimit } from '../../shared/clipboard-image'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 
 export type SaveClipboardImageAsTempFileArgs = {

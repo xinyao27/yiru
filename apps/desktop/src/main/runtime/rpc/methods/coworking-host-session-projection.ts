@@ -1,22 +1,21 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import type { CoworkingPairedRuntimeResolvedWorktree } from '../../../../shared/coworking/paired-runtime-host-contract'
-import {
-  CoworkingPairedRuntimeHistoricalSessionSchema,
-  CoworkingPairedRuntimeLiveSessionSchema
-} from '../../../../shared/coworking/paired-runtime-session-contract'
-import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
-import { CoworkingExecutionError } from '../../../coworking/execution-error'
+import { CoworkingExecutionError } from '~main/coworking/execution-error'
 import {
   resolveCoworkingLiveSessionIdentity,
   coworkingObservedAgentProvider
-} from '../../../coworking/live-session-display-identity'
+} from '~main/coworking/live-session-display-identity'
 import type {
   CoworkingExecutionHostSessionReader,
   CoworkingHistoricalSessionPurpose
-} from '../../../coworking/session/source'
-import type { CoworkingTerminalSessionBindings } from '../../../coworking/terminal-session-bindings'
-import type { YiruRuntimeService } from '../../yiru-runtime'
+} from '~main/coworking/session/source'
+import type { CoworkingTerminalSessionBindings } from '~main/coworking/terminal-session-bindings'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import type { CoworkingPairedRuntimeResolvedWorktree } from '~shared/coworking/paired-runtime-host-contract'
+import {
+  CoworkingPairedRuntimeHistoricalSessionSchema,
+  CoworkingPairedRuntimeLiveSessionSchema
+} from '~shared/coworking/paired-runtime-session-contract'
+import type { RuntimeMobileSessionTerminalClientTab } from '~shared/runtime-types'
 
 type SessionRuntime = Pick<YiruRuntimeService, 'listMobileSessionTabs'>
 type ReadyMobileSessionTerminalTab = Extract<

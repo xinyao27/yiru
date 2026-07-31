@@ -1,12 +1,11 @@
 import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
-
-import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
+import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
 import {
   OptionalFiniteNumber,
   OptionalString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { normalizeRepoSourceControlAiOverrides } from '../../../../shared/source-control/ai'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+import { normalizeRepoSourceControlAiOverrides } from '~shared/source-control/ai'
 
 export const RepoSourceControlAiOverrides = z
   .unknown()

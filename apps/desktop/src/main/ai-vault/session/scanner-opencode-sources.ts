@@ -3,8 +3,8 @@ import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
 import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
+import { listOpenCodeDatabases } from '~main/opencode/usage/scanner'
 
-import { listOpenCodeDatabases } from '../../opencode/usage/scanner'
 import { discoverOpenCodeSessions } from './scanner-opencode-sqlite-discovery'
 import type { AiVaultScanOptions, SessionFileDiscovery } from './scanner-types'
 

@@ -21,9 +21,10 @@ import {
 } from 'react-native-reanimated'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileContentSection } from '../../components/content-section'
-import { useMobileLoaderStyle } from '../../loading/loader-style-context'
-import { resolveCssNumber, resolveCssString } from '../../style/resolve-css-variable'
+import { MobileContentSection } from '~/components/content-section'
+import { useMobileLoaderStyle } from '~/loading/loader-style-context'
+import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
+
 import type { MobileImageSource } from '../image-source-picker'
 import { applyAutocomplete, detectAutocompleteTrigger, rankSuggestions } from './autocomplete'
 import { MobileNativeChatInput } from './composer-input'

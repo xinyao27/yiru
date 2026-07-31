@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { Pressable, type PressableProps } from 'react-native'
 
-import { cn } from '../../style/class-names'
+import { cn } from '~/style/class-names'
+
 import { useMobileGlassAvailable } from './availability'
 import { MobileGlassSurface } from './surface'
 

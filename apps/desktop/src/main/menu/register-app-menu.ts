@@ -1,12 +1,12 @@
 import { BrowserWindow, Menu, app } from 'electron'
-
 import {
   formatKeybindingList,
   getEffectiveKeybindingsForAction,
   type KeybindingActionId,
   type KeybindingOverrides
-} from '../../shared/keybindings'
-import type { UpdateCheckOptions } from '../../shared/types'
+} from '~shared/keybindings'
+import type { UpdateCheckOptions } from '~shared/types'
+
 import { translateMain } from '../i18n/main-i18n'
 
 export type AppearanceMenuState = {

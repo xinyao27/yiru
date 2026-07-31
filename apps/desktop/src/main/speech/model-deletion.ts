@@ -1,5 +1,6 @@
-import { getDefaultVoiceSettings } from '../../shared/constants'
-import type { VoiceSettings } from '../../shared/speech-types'
+import { getDefaultVoiceSettings } from '~shared/constants'
+import type { VoiceSettings } from '~shared/speech-types'
+
 import { getCatalogModel, isLocalSpeechModel } from './model-catalog'
 import type { ModelManager } from './model-manager'
 import type { SttService } from './stt-service'

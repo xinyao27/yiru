@@ -8,20 +8,21 @@ import { readFile } from 'node:fs/promises'
  */
 import * as path from 'node:path'
 
-import { splitRemoteBranchName } from '../../shared/git/effective-upstream'
-import { DEFAULT_GIT_STATUS_LIMIT } from '../../shared/git/status-limit'
+import { splitRemoteBranchName } from '~shared/git/effective-upstream'
+import { DEFAULT_GIT_STATUS_LIMIT } from '~shared/git/status-limit'
 import {
   beginGitStatusLineStatsCacheWrite,
   clearGitStatusLineStatsCacheKey,
   reuseOrRecomputeGitStatusLineStats
-} from '../../shared/git/status-line-stats-cache'
+} from '~shared/git/status-line-stats-cache'
 import {
   applyLineStats,
   collectUntrackedAdditions,
   parseNumstat,
   type GitLineStats
-} from '../../shared/git/uncommitted-line-stats'
-import type { GitUpstreamStatus } from '../../shared/types'
+} from '~shared/git/uncommitted-line-stats'
+import type { GitUpstreamStatus } from '~shared/types'
+
 import type { GitExec } from './handler-ops'
 import { parseUnmergedEntry } from './handler-output-parser'
 import { parseStatusOutput } from './status-output-parser'
@@ -55,6 +56,9 @@ export async function detectConflictOperation(worktreePath: string): Promise<str
     }
     if (existsSync(path.join(gitDir, 'CHERRY_PICK_HEAD'))) {
       return 'cherry-pick'
+    }
+    if (existsSync(path.join(gitDir, 'REVERT_HEAD'))) {
+      return 'revert'
     }
   } catch {
     // fs error — treat as no conflict operation

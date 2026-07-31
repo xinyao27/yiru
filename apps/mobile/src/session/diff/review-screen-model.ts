@@ -1,7 +1,8 @@
 import type { DiffComment, MobileDiffReviewState } from '@yiru/workbench-model/workspace'
 
-import type { MobileGitBranchCompareResult } from '../../source-control/branch-compare'
-import type { MobileGitStatusResult } from '../../source-control/git-status'
+import type { MobileGitBranchCompareResult } from '~/source-control/branch-compare'
+import type { MobileGitStatusResult } from '~/source-control/git-status'
+
 import type { MobileHighlightedDiffLine } from '../file-syntax'
 import type { MobileDiffHunk } from './hunks'
 import type { MobileDiffLine } from './lines'

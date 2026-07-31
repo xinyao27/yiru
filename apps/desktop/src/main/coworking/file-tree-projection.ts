@@ -1,4 +1,5 @@
-import type { CoworkingFileTreeEntry } from '../../shared/coworking/operation-contract'
+import type { CoworkingFileTreeEntry } from '~shared/coworking/operation-contract'
+
 import type { CoworkingFileHostEntry } from './file-operation-host'
 import { normalizeCoworkingRelativePath } from './worktree-containment'
 

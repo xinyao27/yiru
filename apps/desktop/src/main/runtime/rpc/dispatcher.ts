@@ -1,7 +1,8 @@
-import type { FeatureInteractionId } from '../../../shared/feature-interactions'
-import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
-import type { TerminalStreamFrame } from '../../../shared/terminal/stream-protocol'
-import { emulatorProbe, emulatorProbeError } from '../../emulator/probe'
+import { emulatorProbe, emulatorProbeError } from '~main/emulator/probe'
+import type { FeatureInteractionId } from '~shared/feature-interactions'
+import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
+import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
+
 import type { YiruRuntimeService } from '../yiru-runtime'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport

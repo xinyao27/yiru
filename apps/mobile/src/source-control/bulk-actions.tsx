@@ -1,9 +1,9 @@
 import { ActivityIndicator, Text } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { Minus, Plus, type Icon } from '@/components/uniwind-icons'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { Minus, Plus, type Icon } from '~/components/uniwind-icons'
 
 import type { MobileSourceControlBulkActionsProps } from './bulk-actions-props'
 

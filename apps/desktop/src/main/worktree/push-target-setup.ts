@@ -3,7 +3,8 @@
 // The git-driven core accepts the host-specific `execGit` boundary. The
 // store-aware ownership decision stays with the caller via a predicate.
 
-import type { GitPushTarget } from '../../shared/types'
+import type { GitPushTarget } from '~shared/types'
+
 import { parseGitHubOwnerRepo } from '../github/gh-utils'
 import type { GitRemoteExec } from './push-target-cleanup'
 

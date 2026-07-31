@@ -1,11 +1,11 @@
 import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
-
 import {
   readNativeChatTranscriptTail,
   subscribeNativeChatTranscript
-} from '../../../native-chat/transcript-watch'
+} from '~main/native-chat/transcript-watch'
+
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 
 // Why: native chat renders an agent's own transcript (Claude/Codex JSONL). The

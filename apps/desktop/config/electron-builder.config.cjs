@@ -1,11 +1,11 @@
 const { chmodSync, existsSync, readdirSync } = require('node:fs')
 const { execFileSync } = require('node:child_process')
 const { join, resolve } = require('node:path')
-const electronBuilderNativeRebuild = require('./scripts/electron-builder-native-rebuild.cjs')
+const electronBuilderNativeRebuild = require('../scripts/electron-builder-native-rebuild.cjs')
 const {
   assertPackagedDaemonEntryExists,
   verifyPackagedDaemonEntryBoots
-} = require('./scripts/verify-packaged-daemon-entry.cjs')
+} = require('../scripts/verify-packaged-daemon-entry.cjs')
 const {
   createPackagedRuntimeNodeModuleResources,
   prunePackagedRuntimeNodeModules,
@@ -79,13 +79,12 @@ module.exports = {
     // extraResources. Shipping them in app.asar bloats the desktop bundle.
     '!src{,/**/*}',
     '!config{,/**/*}',
+    // Why: build and release tooling only — they used to be excluded as part of
+    // config/, so leaving them out keeps them from bloating app.asar.
+    '!scripts{,/**/*}',
     '!docs{,/**/*}',
     '!mobile{,/**/*}',
     '!native{,/**/*}',
-    '!skills{,/**/*}',
-    // Why: authoritative guide markdown is compiled into out/cli; shipping the
-    // authoring sources too would duplicate content without a runtime consumer.
-    '!skill-guides{,/**/*}',
     '!Casks{,/**/*}',
     '!{AGENTS.md,CLAUDE.md,DEVELOPING.md,bundle-size-progress.md}',
     '!electron.vite.config.{js,ts,mjs,cjs}',

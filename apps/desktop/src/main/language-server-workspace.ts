@@ -4,12 +4,12 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { getLocalExecutionHostLabel, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
 import type {
   LanguageServerDocumentUriResult,
   LanguageServerLocationResult,
   LanguageServerSettings
-} from '../shared/language-server'
+} from '~shared/language-server'
+
 import {
   authorizedLanguageServerRelativePath,
   languageServerDisplayPath,

@@ -2,7 +2,8 @@ import {
   sanitizeCrashReportDetails,
   sanitizeCrashReportString,
   type CrashReportBreadcrumbData
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
+
 import { flushActiveSink, startSpan } from '../observability/tracer'
 import { recordCrashBreadcrumb } from './crash-breadcrumb-store'
 

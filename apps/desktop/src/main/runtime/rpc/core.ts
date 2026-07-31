@@ -3,14 +3,14 @@
 // CLI-facing contract greppable and lets the dispatcher verify every payload
 // against the same shape the handler consumed during development.
 import { ZodError, type ZodType } from 'zod'
-
-import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
+import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
-import type { TerminalStreamFrame } from '../../../shared/terminal/stream-protocol'
+} from '~shared/runtime-method-contract'
+import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
+
 import type { MobileNotificationChannel } from '../mobile-notification-channel'
 import type { YiruRuntimeService } from '../yiru-runtime'
 import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'

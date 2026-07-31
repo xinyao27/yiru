@@ -3,7 +3,7 @@
   "style": "new-york-v4",
   "tailwind": {
     "config": "",
-    "css": "src/renderer/src/assets/main.css",
+    "css": "src/renderer/assets/main.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""

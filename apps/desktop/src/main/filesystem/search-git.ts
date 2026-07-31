@@ -5,8 +5,9 @@ import {
   finalize,
   ingestGitGrepLine,
   SEARCH_TIMEOUT_MS
-} from '../../shared/text-search'
-import type { SearchOptions, SearchResult } from '../../shared/types'
+} from '~shared/text-search'
+import type { SearchOptions, SearchResult } from '~shared/types'
+
 import { gitSpawn } from '../git/runner'
 
 /**

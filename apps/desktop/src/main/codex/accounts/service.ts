@@ -9,20 +9,20 @@ import { dirname, join, resolve, sep } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
-
+import { MANAGED_HOOK_TIMEOUT_SECONDS } from '~main/agent-hooks/installer-utils'
+import type { Store } from '~main/persistence'
+import type { RateLimitService } from '~main/rate-limits/service'
+import { resolveCodexCommand } from '~main/runtime/cli-command'
+import { getSpawnArgsForWindows } from '~main/win32-utils'
+import { toWindowsWslPath } from '~main/wsl'
+import { buildEncodedWslBashCommand } from '~main/wsl-bash-command'
 import type {
   CodexManagedAccount,
   CodexManagedAccountSummary,
   CodexRateLimitAccountsState,
   CodexSystemDefaultIdentity
-} from '../../../shared/types'
-import { MANAGED_HOOK_TIMEOUT_SECONDS } from '../../agent-hooks/installer-utils'
-import type { Store } from '../../persistence'
-import type { RateLimitService } from '../../rate-limits/service'
-import { resolveCodexCommand } from '../../runtime/cli-command'
-import { getSpawnArgsForWindows } from '../../win32-utils'
-import { toWindowsWslPath } from '../../wsl'
-import { buildEncodedWslBashCommand } from '../../wsl-bash-command'
+} from '~shared/types'
+
 import { syncSystemConfigIntoManagedCodexHome } from '../config-mirror'
 import { rewriteRelativePathConfigValues } from '../config-path-reference-rewrite'
 import { getSystemCodexHomePath } from '../home-paths'

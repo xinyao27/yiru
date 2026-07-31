@@ -1,4 +1,4 @@
-import type { ComputerActionResult } from '../../shared/runtime-types'
+import type { ComputerActionResult } from '~shared/runtime-types'
 
 export function normalizeComputerActionResult(result: ComputerActionResult): ComputerActionResult {
   const action = result.action

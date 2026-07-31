@@ -1,4 +1,5 @@
-import type { RuntimeTerminalDriverState } from '../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
+
 import {
   TerminalSessionEvents,
   type TerminalDataMeta,

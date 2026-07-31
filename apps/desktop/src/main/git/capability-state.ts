@@ -1,6 +1,5 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-
-import { GitCapabilityCache } from '../../shared/git/capability-cache'
+import { GitCapabilityCache } from '~shared/git/capability-cache'
 
 type LocalGitCapabilityTarget = {
   cwd?: string

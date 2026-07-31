@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 export const filePreviewStyles = {
   state: cn('flex-1 items-center justify-center gap-3 p-6'),

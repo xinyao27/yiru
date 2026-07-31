@@ -2,8 +2,9 @@ import { exec, spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 
-import { mergeGitConfigEnvProtocol } from '../shared/git/credential-prompt-env'
-import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
+import { mergeGitConfigEnvProtocol } from '~shared/git/credential-prompt-env'
+import { applyTerminalGitCredentialPromptGuard } from '~shared/terminal/git-credential-guard'
+
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 
 const DEFAULT_TIMEOUT_MS = 60_000

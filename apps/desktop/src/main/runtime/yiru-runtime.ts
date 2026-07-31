@@ -68,7 +68,6 @@ import {
   splitWorktreeIdForFilesystem
 } from '@yiru/workbench-model/workspace'
 import { BrowserWindow, ipcMain } from 'electron'
-
 /* eslint-disable max-lines -- Why: YiruRuntimeService still coordinates terminal output analysis, mobile session projections, worktree lifecycle, and automation. Terminal session state now lives behind TerminalSessionAuthority; later tickets split the remaining workflows before enforcing max-lines. */
 /* eslint-disable unicorn/no-useless-spread -- Why: waiter sets and handle keys are cloned intentionally before mutation so resolution and rejection can safely remove entries while iterating. */
 /* eslint-disable no-control-regex -- Why: terminal normalization must strip ANSI and OSC control sequences from PTY output before returning bounded text to agents. */
@@ -79,85 +78,82 @@ import {
   isCursorNativeAgentTitle,
   isShellProcess,
   normalizeTerminalTitle
-} from '../../shared/agent/detection'
-import type { AgentStatus } from '../../shared/agent/detection'
-import { repoIsRemote } from '../../shared/agent/launch-remote'
+} from '~shared/agent/detection'
+import type { AgentStatus } from '~shared/agent/detection'
+import { repoIsRemote } from '~shared/agent/launch-remote'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcess
-} from '../../shared/agent/process-recognition'
+} from '~shared/agent/process-recognition'
 import {
   AGENT_PROMPT_BRACKETED_PASTE_END,
   AGENT_PROMPT_SUBMIT,
   AGENT_PROMPT_SUBMIT_DELAY_MS,
   buildAgentPromptPasteBytes
-} from '../../shared/agent/prompt-injection'
+} from '~shared/agent/prompt-injection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../shared/agent/status-osc'
+} from '~shared/agent/status-osc'
 import {
   hasCompatibleAgentTitleIdentity,
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../shared/agent/title-owner'
+} from '~shared/agent/title-owner'
 import type {
   Automation,
   AutomationCreateInput,
   AutomationRun,
   AutomationUpdateInput,
   AutomationWorkspaceMode
-} from '../../shared/automations-types'
-import type { BranchPrefixSettings } from '../../shared/branch-prefix'
+} from '~shared/automations-types'
+import type { BranchPrefixSettings } from '~shared/branch-prefix'
 import {
   addClaudeTeammateModeAuto,
   addClaudeTeammateModeInProcess,
   type ClaudeAgentTeamsMode
-} from '../../shared/claude-agent-teams-tmux-compat'
-import { createCommandCodeOutputStatusDetector } from '../../shared/command-code-output-status'
+} from '~shared/claude-agent-teams-tmux-compat'
+import { createCommandCodeOutputStatusDetector } from '~shared/command-code-output-status'
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID,
   FRIDAY_WORKTREE_ID,
   getDefaultVoiceSettings
-} from '../../shared/constants'
+} from '~shared/constants'
 import type {
   CoworkingPairedRuntimeResolvedWorktree,
   CoworkingPairedRuntimeWorktreeSelector
-} from '../../shared/coworking/paired-runtime-host-contract'
-import { createDraftPasteReadyScanner } from '../../shared/draft-paste-ready-scanner'
-import { mergeExternalWorktreeInboxPaths } from '../../shared/external-worktree-inbox'
-import type { TerminalPaneSplitSource } from '../../shared/feature-education-telemetry'
-import type { FeatureInteractionId } from '../../shared/feature-interactions'
+} from '~shared/coworking/paired-runtime-host-contract'
+import { createDraftPasteReadyScanner } from '~shared/draft-paste-ready-scanner'
+import { mergeExternalWorktreeInboxPaths } from '~shared/external-worktree-inbox'
+import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
+import type { FeatureInteractionId } from '~shared/feature-interactions'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
-} from '../../shared/folder-workspace-path-status'
-import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
-import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/fetch-auto-maintenance'
+} from '~shared/folder-workspace-path-status'
+import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
+import { getGitCloneFailureMessage } from '~shared/git/clone-failure-message'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '~shared/git/fetch-auto-maintenance'
 import {
   isOrchestrationMutation,
   orchestrationMigrationData
-} from '../../shared/orchestration-rpc-contract'
-import { buildOrchestrationTaskDisplayMetadata } from '../../shared/orchestration-task-display'
-import type { ExactWorkerProviderSession } from '../../shared/orchestration-worker-output'
-import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
-import { FIRST_PANE_ID } from '../../shared/pane-key'
-import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
+} from '~shared/orchestration-rpc-contract'
+import { buildOrchestrationTaskDisplayMetadata } from '~shared/orchestration-task-display'
+import type { ExactWorkerProviderSession } from '~shared/orchestration-worker-output'
+import { extractOscTitleScanTail } from '~shared/osc-title-scan-tail'
+import { FIRST_PANE_ID } from '~shared/pane-key'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 import {
   getProjectHostSetupForRepo,
   getProjectHostSetupWorktreeMeta
-} from '../../shared/project-host-setup-projection'
-import type { RateLimitState } from '../../shared/rate-limit-types'
-import { isFolderRepo } from '../../shared/repo-kind'
-import type { RuntimeClientEvent } from '../../shared/runtime-client-events'
-import { toRuntimeActivateWorktreeEvent } from '../../shared/runtime-client-events'
-import {
-  HEADLESS_RUNTIME_WINDOW_ID,
-  type RuntimeDesktopWindowStatus
-} from '../../shared/runtime-types'
+} from '~shared/project-host-setup-projection'
+import type { RateLimitState } from '~shared/rate-limit-types'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { RuntimeClientEvent } from '~shared/runtime-client-events'
+import { toRuntimeActivateWorktreeEvent } from '~shared/runtime-client-events'
+import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import type {
   RuntimeRepoSearchRefs,
   RuntimeTerminalRead,
@@ -208,48 +204,44 @@ import type {
   RuntimeWorktreeListResult,
   RuntimeWorkspaceOpenPathResult,
   BrowserTabInfo
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
 import {
   createSequencedSetupAgentCommands,
   SETUP_AGENT_SEQUENCE_STARTUP_COMMAND_ENV
-} from '../../shared/setup/agent-sequencing'
+} from '~shared/setup/agent-sequencing'
 import {
   buildSetupRunnerCommand,
   getSetupRunnerCommandPlatformForPath
-} from '../../shared/setup/runner-command'
-import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
-import type { VoiceSettings } from '../../shared/speech-types'
-import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
-import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
-import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
+} from '~shared/setup/runner-command'
+import { inspectSetupScriptImportCandidates } from '~shared/setup/script-imports'
+import type { VoiceSettings } from '~shared/speech-types'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import { isTerminalLeafId, makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 import {
   isTerminalInputTooLargeWithYield,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   iterateTerminalInputChunks
-} from '../../shared/terminal/input'
-import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal/kitty-keyboard-mode-tracker'
+} from '~shared/terminal/input'
+import { TerminalKittyKeyboardModeTracker } from '~shared/terminal/kitty-keyboard-mode-tracker'
 import {
   createTerminalTitleTracker,
   stripBrailleSpinnerGlyphs,
   type TerminalTitleTracker
-} from '../../shared/terminal/output-side-effects'
+} from '~shared/terminal/output-side-effects'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../shared/terminal/side-effect-facts'
-import { resolveTerminalStartupCwd } from '../../shared/terminal/startup-cwd'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../shared/terminal/tab-id'
-import {
-  getTuiAgentLaunchCommand,
-  isTuiAgent,
-  TUI_AGENT_CONFIG
-} from '../../shared/tui-agent/config'
+} from '~shared/terminal/side-effect-facts'
+import { resolveTerminalStartupCwd } from '~shared/terminal/startup-cwd'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '~shared/terminal/tab-id'
+import { getTuiAgentLaunchCommand, isTuiAgent, TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../shared/tui-agent/launch-defaults'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent/selection'
-import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '../../shared/tui-agent/startup'
+} from '~shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled, pickTuiAgent } from '~shared/tui-agent/selection'
+import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '~shared/tui-agent/startup'
 import type {
   AutomationWorkspaceProvenance,
   BaseRefSearchResult,
@@ -302,7 +294,7 @@ import type {
   WorkspaceCreateTelemetrySource,
   WorkspaceSessionState,
   DirEntry
-} from '../../shared/types'
+} from '~shared/types'
 import type {
   GitHubPullRequestStateUpdate,
   GitHubPRFile,
@@ -311,29 +303,30 @@ import type {
   GitLabProjectRef,
   ListWorkItemsResult,
   MRListState
-} from '../../shared/types'
-import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '../../shared/types'
+} from '~shared/types'
+import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '~shared/types'
 import type {
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace/ports'
+} from '~shared/workspace/ports'
 import {
   folderWorkspaceKey,
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../shared/workspace/scope'
-import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace/session-terminal-tab-close'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+} from '~shared/workspace/scope'
+import { closeTerminalTabInWorkspaceSession } from '~shared/workspace/session-terminal-tab-close'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '~shared/workspace/statuses'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
 import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
-} from '../../shared/workspace/worktree-ownership'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
+} from '~shared/workspace/worktree-ownership'
+import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
+
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   markCodexProjectTrusted,

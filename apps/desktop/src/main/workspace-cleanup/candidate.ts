@@ -1,5 +1,5 @@
-import { isFolderRepo } from '../../shared/repo-kind'
-import type { Repo, Worktree } from '../../shared/types'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { Repo, Worktree } from '~shared/types'
 import {
   applyWorkspaceCleanupPolicy,
   createWorkspaceCleanupFingerprint,
@@ -8,7 +8,8 @@ import {
   type WorkspaceCleanupBlocker,
   type WorkspaceCleanupCandidate,
   type WorkspaceCleanupReason
-} from '../../shared/workspace/cleanup'
+} from '~shared/workspace/cleanup'
+
 import type { IGitProvider } from '../providers/types'
 import {
   createEmptyWorkspaceCleanupGitEvidence,

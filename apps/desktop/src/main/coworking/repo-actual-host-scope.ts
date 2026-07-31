@@ -1,7 +1,7 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import {

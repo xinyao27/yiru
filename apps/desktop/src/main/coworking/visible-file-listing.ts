@@ -1,12 +1,13 @@
 import type {
   CoworkingFileListResult,
   CoworkingFileTreeEntry
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 import {
   COWORKING_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   COWORKING_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT
-} from '../../shared/coworking/operation-contract'
-import { mapWithConcurrency } from '../../shared/map-with-concurrency'
+} from '~shared/coworking/operation-contract'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
+
 import { CoworkingExecutionError } from './execution-error'
 import type { CoworkingFileOperationHost } from './file-operation-host'
 import { projectCoworkingFileTreeEntry } from './file-tree-projection'

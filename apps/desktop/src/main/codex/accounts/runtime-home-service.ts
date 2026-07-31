@@ -33,12 +33,12 @@ import {
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
+import type { Store } from '~main/persistence'
+import { WSL_CODEX_RUNTIME_HOME_SEGMENTS } from '~main/pty/codex-home-wsl-env'
+import { readShellStartupEnvVar } from '~main/pty/shell-startup-env'
+import { getDefaultWslDistro, getWslHome } from '~main/wsl'
+import type { CodexManagedAccount } from '~shared/types'
 
-import type { CodexManagedAccount } from '../../../shared/types'
-import type { Store } from '../../persistence'
-import { WSL_CODEX_RUNTIME_HOME_SEGMENTS } from '../../pty/codex-home-wsl-env'
-import { readShellStartupEnvVar } from '../../pty/shell-startup-env'
-import { getDefaultWslDistro, getWslHome } from '../../wsl'
 import {
   prepareSystemConfigForFreshRuntimeMirror,
   syncSystemConfigIntoManagedCodexHome

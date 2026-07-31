@@ -7,7 +7,8 @@ import type {
   ComputerListWindowsResult,
   ComputerProviderCapabilities,
   ComputerSnapshotResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { normalizeComputerActionResult } from './action-verification-normalization'
 import { RuntimeClientError } from './runtime-client-error'
 import { validateComputerSidecarPasteText } from './sidecar-paste-validation'

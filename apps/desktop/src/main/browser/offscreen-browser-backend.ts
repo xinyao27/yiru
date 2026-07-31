@@ -1,13 +1,13 @@
 import { randomUUID } from 'node:crypto'
 
 import { BrowserWindow } from 'electron'
-
-import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser/guest-web-preferences'
+import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '~shared/browser/guest-web-preferences'
 import {
   buildSessionStoragePersistenceScript,
   YIRU_PERSIST_SESSION_STORAGE_EXPRESSION
-} from '../../shared/browser/session-storage-persistence'
-import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
+} from '~shared/browser/session-storage-persistence'
+import { YIRU_BROWSER_PARTITION } from '~shared/constants'
+
 import type { BrowserBackend, BrowserBackendCreateTab } from './backend'
 import type { BrowserManager } from './manager'
 import { browserSessionRegistry } from './session-registry'

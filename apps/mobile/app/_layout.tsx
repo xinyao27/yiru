@@ -8,8 +8,8 @@ import { useEffect, useMemo, useRef } from 'react'
 import { View, type TextStyle, type ViewStyle } from 'react-native'
 import { Uniwind, useCSSVariable, useResolveClassNames, useUniwind } from 'uniwind'
 
-import { IconContext } from '@/components/uniwind-icons'
-import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
+import { IconContext } from '~/components/uniwind-icons'
+import { SafeAreaListener, SafeAreaProvider } from '~/components/uniwind-native-components'
 
 import { MobileThemeProvider } from '../src/appearance/theme-preference'
 import { MobileGlassAvailabilityProvider } from '../src/components/glass/availability'

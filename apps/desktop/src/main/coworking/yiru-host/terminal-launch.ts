@@ -1,26 +1,26 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { isCoworkingAgentLaunchId } from '../../../shared/coworking/agent-launch-contract'
+import type { Store } from '~main/persistence'
+import {
+  detectInstalledAgentsWithShellPathHydration,
+  detectRemoteAgents
+} from '~main/preflight/preflight'
+import { getLocalProjectWorktreeGitOptions } from '~main/project-runtime-git-options'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { isCoworkingAgentLaunchId } from '~shared/coworking/agent-launch-contract'
 import type {
   CoworkingExecutionOperation,
   CoworkingTerminalCreateHostResult,
   CoworkingTerminalLaunchOptionsResult
-} from '../../../shared/coworking/operation-contract'
-import { isTuiAgent } from '../../../shared/tui-agent/config'
-import { TUI_AGENT_DISPLAY_NAMES } from '../../../shared/tui-agent/display-names'
+} from '~shared/coworking/operation-contract'
+import { isTuiAgent } from '~shared/tui-agent/config'
+import { TUI_AGENT_DISPLAY_NAMES } from '~shared/tui-agent/display-names'
 import {
   isTuiAgentEnabled,
   pickTuiAgent,
   TUI_AGENT_AUTO_PICK_ORDER
-} from '../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../shared/types'
-import type { Store } from '../../persistence'
-import {
-  detectInstalledAgentsWithShellPathHydration,
-  detectRemoteAgents
-} from '../../preflight/preflight'
-import { getLocalProjectWorktreeGitOptions } from '../../project-runtime-git-options'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
+} from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingHostOperationContext } from '../execution-gateway'
 import { coworkingLiveTerminalSessionKey } from '../session/resolution'

@@ -1,19 +1,19 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { z } from 'zod'
-
 import type {
   SkillFreshnessInventory,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 import {
   SkillDiscoveryTargetSchema,
   type SkillDiscoveryResult,
   type SkillDiscoveryTarget,
   type SkillDirectoryListing,
   type SkillFileReadResult
-} from '../../shared/skills'
+} from '~shared/skills'
+
 import type { Store } from '../persistence'
 import { SkillCliRunner } from './skill-cli-run'
 import { listSkillFiles, readSkillDirectoryFile } from './skill-directory-access'

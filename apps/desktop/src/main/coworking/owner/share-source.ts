@@ -1,9 +1,10 @@
+import type { Store } from '~main/persistence'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import {
   getPortableProjectIdentityKey,
   getProjectIdentityKey
-} from '../../../shared/project-host-setup-projection'
-import type { Store } from '../../persistence'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
+} from '~shared/project-host-setup-projection'
+
 import type { CoworkingSessionCatalog } from '../session/catalog'
 import type {
   CoworkingCatalogWorktreeDescription,

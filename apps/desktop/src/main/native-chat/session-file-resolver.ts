@@ -4,11 +4,8 @@ import { basename, extname, join } from 'node:path'
 
 import { resolveNativeChatTranscriptAgent } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
+import { findGrokChatHistoryBySessionId, resolveGrokSessionsDir } from '~shared/grok-session-paths'
 
-import {
-  findGrokChatHistoryBySessionId,
-  resolveGrokSessionsDir
-} from '../../shared/grok-session-paths'
 import { walkSessionFiles } from '../ai-vault/session/scanner-discovery'
 import { getYiruManagedCodexHomePath } from '../codex/home-paths'
 

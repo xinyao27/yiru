@@ -1,7 +1,7 @@
 import { realpathSync, statSync } from 'node:fs'
 import { isAbsolute, join, resolve, sep } from 'node:path'
 
-import type { GlobalSettings } from '../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 export type PersistedFloatingWorkspaceSettingsDecodeResult = {
   settings: Pick<

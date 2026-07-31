@@ -21,10 +21,10 @@ import {
   Quotes as Quote,
   TextStrikethrough as Strikethrough,
   type Icon
-} from '@/components/uniwind-icons'
-import { UniwindWebView } from '@/components/uniwind-web-view'
-import { cn } from '@/style/class-names'
-import { resolveCssNumber, resolveCssString } from '@/style/resolve-css-variable'
+} from '~/components/uniwind-icons'
+import { UniwindWebView } from '~/components/uniwind-web-view'
+import { cn } from '~/style/class-names'
+import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 
 import { MobileGlassSurface } from './glass/surface'
 import {

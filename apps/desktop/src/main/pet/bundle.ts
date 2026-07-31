@@ -5,8 +5,8 @@ import {
   CODEX_PET_FRAME,
   CODEX_PET_SPRITESHEET_PATH,
   codexAnimationsAtUniformFps
-} from '../../shared/codex-pet-sprite-defaults'
-import type { SpriteAnimation } from '../../shared/types'
+} from '~shared/codex-pet-sprite-defaults'
+import type { SpriteAnimation } from '~shared/types'
 
 // Re-exported so main-side consumers keep their import path. The tables live
 // in shared/ so the renderer can reuse the same fingerprint for upgrades.

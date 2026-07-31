@@ -1,4 +1,5 @@
-import type { WarpThemeImportSkippedFile } from '../../shared/terminal/custom-themes'
+import type { WarpThemeImportSkippedFile } from '~shared/terminal/custom-themes'
+
 import type { PreviewOperationBudget } from './preview-operation-budget'
 import {
   MAX_THEME_FILES,

@@ -1,4 +1,5 @@
-import type { GlobalSettings } from '../../shared/types'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   getClaudeWslSelectionKey,
   normalizeClaudeRuntimeSelection,

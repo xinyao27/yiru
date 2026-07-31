@@ -7,17 +7,17 @@ import { tmpdir } from 'node:os'
 import { join, relative, resolve, sep } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-
+import type { Store } from '~main/persistence'
+import type { RateLimitService } from '~main/rate-limits/service'
+import { resolveClaudeCommand } from '~main/runtime/cli-command'
+import { toWindowsWslPath } from '~main/wsl'
+import { buildEncodedWslBashCommand } from '~main/wsl-bash-command'
 import type {
   ClaudeManagedAccount,
   ClaudeManagedAccountSummary,
   ClaudeRateLimitAccountsState
-} from '../../../shared/types'
-import type { Store } from '../../persistence'
-import type { RateLimitService } from '../../rate-limits/service'
-import { resolveClaudeCommand } from '../../runtime/cli-command'
-import { toWindowsWslPath } from '../../wsl'
-import { buildEncodedWslBashCommand } from '../../wsl-bash-command'
+} from '~shared/types'
+
 import { findDuplicateClaudeAccount } from './claude-duplicate-account'
 import {
   deleteActiveClaudeKeychainCredentialsStrict,

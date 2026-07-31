@@ -1,0 +1,22 @@
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import type { LaunchSource } from '~shared/telemetry-events'
+import type { TuiAgent } from '~shared/types'
+
+export type LaunchAgentBackgroundSessionArgs = {
+  agent: TuiAgent
+  worktreeId: string
+  prompt?: string
+  launchSource?: LaunchSource
+  title?: string
+  onData?: (chunk: string) => void
+  onExit?: (ptyId: string, code: number) => void
+  onAgentStatus?: (payload: ParsedAgentStatusPayload) => void
+}
+
+export type LaunchAgentBackgroundSessionResult = {
+  tabId: string
+  paneKey: string
+  ptyId: string
+  startupPlan: AgentStartupPlan
+}

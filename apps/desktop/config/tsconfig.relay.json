@@ -8,6 +8,10 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "../src",
-    "outDir": "../out/relay"
+    "outDir": "../out/relay",
+    "paths": {
+      "~shared/*": ["../src/shared/*"],
+      "~main/*": ["../src/main/*"]
+    }
   }
 }

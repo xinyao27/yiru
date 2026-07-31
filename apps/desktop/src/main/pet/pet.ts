@@ -7,8 +7,8 @@ import { pipeline } from 'node:stream/promises'
 /* eslint-disable max-lines */
 import { app, BrowserWindow, dialog, ipcMain, nativeImage } from 'electron'
 import { z } from 'zod'
+import type { CustomPet } from '~shared/types'
 
-import type { CustomPet } from '../../shared/types'
 import {
   applyCodexPetDefaults,
   readWebpDimensionsFromBuffer,

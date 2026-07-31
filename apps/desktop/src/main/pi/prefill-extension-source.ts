@@ -1,4 +1,4 @@
-import type { PiAgentKind } from '../../shared/pi-agent-kind'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 export const YIRU_PI_PREFILL_EXTENSION_FILE = 'yiru-prefill.ts'
 

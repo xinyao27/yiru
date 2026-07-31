@@ -4,14 +4,15 @@ import type {
   MobileDiffReviewState
 } from '@yiru/workbench-model/workspace'
 
-import type { MobileGitBranchChangeEntry } from '../../source-control/branch-compare'
+import type { MobileGitBranchChangeEntry } from '~/source-control/branch-compare'
 import {
   isMobileGitDiscardableEntry,
   isMobileGitStageableEntry,
   type MobileGitFileStatus,
   type MobileGitStagingArea,
   type MobileGitStatusEntry
-} from '../../source-control/git-status'
+} from '~/source-control/git-status'
+
 import {
   buildMobileDiffIdentity,
   didMobileDiffReviewFileChangeSinceReview,

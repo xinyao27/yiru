@@ -1,4 +1,5 @@
-import { redactRuntimeEnvironment } from '../../shared/runtime-environments'
+import { redactRuntimeEnvironment } from '~shared/runtime-environments'
+
 import type { CommandHandler } from '../dispatch'
 import { formatEnvironment, formatEnvironmentList, printResult } from '../format'
 import { getDefaultUserDataPath } from '../runtime-client'

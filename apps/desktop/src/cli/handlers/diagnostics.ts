@@ -1,4 +1,5 @@
-import type { MemorySnapshot } from '../../shared/types'
+import type { MemorySnapshot } from '~shared/types'
+
 import type { CommandHandler } from '../dispatch'
 import { formatMemorySnapshot, printResult } from '../format'
 

@@ -4,7 +4,8 @@ import {
   COWORKING_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
   COWORKING_SESSION_INVENTORY_STREAM_PROFILE,
   COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../../shared/coworking/resource-limits'
+} from '~shared/coworking/resource-limits'
+
 import type { FileReadResult } from '../providers/types'
 import type { SshChannelMultiplexer } from './channel-multiplexer'
 import {

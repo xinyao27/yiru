@@ -6,8 +6,8 @@ import type {
   AiVaultSession
 } from '@yiru/workbench-model/agent'
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { withSpan } from '~main/observability/tracer'
 
-import { withSpan } from '../../observability/tracer'
 import {
   codexRolloutHardlinkIdentity,
   dedupeCodexRolloutFileAliases,

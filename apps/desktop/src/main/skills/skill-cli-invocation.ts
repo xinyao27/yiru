@@ -3,7 +3,7 @@ import {
   canonicalizeSkillUpdateNames,
   type SkillManageOperation,
   type SkillManageScope
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 
 export type SkillCliRequest =
   | { operation: 'update'; names: readonly string[] }

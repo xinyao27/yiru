@@ -1,22 +1,22 @@
 import { app, ipcMain } from 'electron'
-
 // Why: import directly from the doctor module (not the barrel) — it uses Node
 // fs/path and must stay out of the browser bundle that imports the barrel.
-import { doctorEphemeralVmRecipe } from '../../shared/ephemeral-vm/recipe-doctor'
+import { doctorEphemeralVmRecipe } from '~shared/ephemeral-vm/recipe-doctor'
 import {
   getEphemeralVmRecipeResultConnection,
   getEphemeralVmRecipeResultWarnings,
   redactEphemeralVmRecipeDiagnosticText,
   type EphemeralVmRecipeResultWarning,
   type EphemeralVmRecipeDoctorResult
-} from '../../shared/ephemeral-vm/recipes'
-import { updateEphemeralVmRuntimeStatus } from '../../shared/ephemeral-vm/runtime-store'
-import type { EphemeralVmRuntimeRecord } from '../../shared/ephemeral-vm/runtimes'
-import { addEnvironmentFromPairingCode } from '../../shared/runtime-environment-store'
+} from '~shared/ephemeral-vm/recipes'
+import { updateEphemeralVmRuntimeStatus } from '~shared/ephemeral-vm/runtime-store'
+import type { EphemeralVmRuntimeRecord } from '~shared/ephemeral-vm/runtimes'
+import { addEnvironmentFromPairingCode } from '~shared/runtime-environment-store'
 import {
   redactRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment
-} from '../../shared/runtime-environments'
+} from '~shared/runtime-environments'
+
 import {
   cleanupEphemeralVmRuntime,
   provisionEphemeralVmRuntime

@@ -1,10 +1,10 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { Store } from '~main/persistence'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
+import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '~shared/types'
 
-import { mapWithConcurrency } from '../../../shared/map-with-concurrency'
-import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '../../../shared/types'
-import type { Store } from '../../persistence'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
 import type { CoworkingPairedRuntimeWorktreeCatalog } from '../paired-runtime/worktree-catalog'
 import {
   COWORKING_PUBLICATION_MAX_REGISTERED_REPOS,

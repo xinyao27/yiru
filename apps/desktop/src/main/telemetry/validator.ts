@@ -27,7 +27,7 @@ import {
   eventSchemas,
   type EventName,
   type EventProps
-} from '../../shared/telemetry-events'
+} from '~shared/telemetry-events'
 
 export type ValidationResult<N extends EventName> =
   | { ok: true; props: EventProps<N> }

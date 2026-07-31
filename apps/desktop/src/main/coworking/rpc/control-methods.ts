@@ -3,7 +3,8 @@ import type {
   CoworkingControlRequest,
   CoworkingRequesterControlRequestResult,
   CoworkingRequesterControlState
-} from '../../../shared/coworking/access-contract'
+} from '~shared/coworking/access-contract'
+
 import type { CoworkingAccessAuthority } from '../access-authority'
 import { CoworkingAccessError } from '../access-authority'
 import type { CoworkingPublicWorktreeInstance } from '../worktree-visibility'

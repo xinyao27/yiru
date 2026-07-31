@@ -1,10 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
-import {
-  isEligibleLocalCertificateHost,
-  toSecureCertificateEndpoint
-} from '../../shared/browser/url'
-import type { BrowserCertificateFailure, BrowserCertificateProceedResult } from '../../shared/types'
+import { isEligibleLocalCertificateHost, toSecureCertificateEndpoint } from '~shared/browser/url'
+import type { BrowserCertificateFailure, BrowserCertificateProceedResult } from '~shared/types'
+
 import {
   certificateChallengeIdentityMatches,
   CERTIFICATE_CHALLENGE_TTL_MS,

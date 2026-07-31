@@ -1,14 +1,14 @@
 import { useCallback } from 'react'
 import { View } from 'react-native'
 
-import { cn } from '../../style/class-names'
-import { TerminalWebView } from '../../terminal/web-view'
+import { cn } from '~/style/class-names'
+import { TerminalWebView } from '~/terminal/web-view'
 import type {
   MobileTerminalTheme,
   TerminalKeyboardAvoidanceMetrics,
   TerminalModes,
   TerminalWebViewHandle
-} from '../../terminal/webview/contract'
+} from '~/terminal/webview/contract'
 
 type TerminalPaneViewProps = {
   handle: string

@@ -1,8 +1,9 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
-import { triggerError, triggerSuccess } from '../../platform/haptics'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { triggerError, triggerSuccess } from '~/platform/haptics'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import type { MobileDiffReviewQueueItem } from './review-queue'
 import type { GitMutationMethod } from './review-screen-model'
 import { mobileReviewCountLabel } from './review-screen-model'

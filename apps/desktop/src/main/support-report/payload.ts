@@ -1,14 +1,12 @@
-import {
-  sanitizeCrashReportString,
-  type CrashReportDetailValue
-} from '../../shared/crash-reporting'
+import { sanitizeCrashReportString, type CrashReportDetailValue } from '~shared/crash-reporting'
 import {
   SUPPORT_REPORT_DIAGNOSTIC_EXCERPT_MAX_LENGTH,
   SUPPORT_REPORT_GITHUB_EMAIL_MAX_LENGTH,
   SUPPORT_REPORT_GITHUB_LOGIN_MAX_LENGTH,
   SUPPORT_REPORT_TEXT_MAX_LENGTH,
   type SupportReportDraft
-} from '../../shared/telemetry-events'
+} from '~shared/telemetry-events'
+
 import { redactString } from '../observability/redactor'
 
 const MAX_DIAGNOSTIC_LINE_LENGTH = 4_000

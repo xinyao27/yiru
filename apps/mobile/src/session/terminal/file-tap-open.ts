@@ -1,9 +1,10 @@
 import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { filesystemPathToFileUri } from '@yiru/workbench-model/platform'
 
-import { createMobileFilePreviewHref } from '../../files/file-preview-route'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { RpcSuccess } from '../../transport/types'
+import { createMobileFilePreviewHref } from '~/files/file-preview-route'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { RpcSuccess } from '~/transport/types'
+
 import { classifyMobileArtifact } from '../artifact-kind'
 import { shouldActivateOpenedMobileSessionTab } from '../opened-mobile-session-tab'
 

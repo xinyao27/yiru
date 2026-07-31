@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
 import WebSocket from 'ws'
+import { encrypt } from '~shared/e2ee-crypto'
 
-import { encrypt } from '../../../shared/e2ee-crypto'
 import type { CoworkingPendingPeerRequest } from './response-dispatch'
 import { clearPendingRequest } from './response-dispatch'
 

@@ -1,9 +1,9 @@
-import { listEnvironments } from '../shared/runtime-environment-store'
+import { listEnvironments } from '~shared/runtime-environment-store'
 import {
   isUserManagedRuntimeEnvironment,
   type KnownRuntimeEnvironment
-} from '../shared/runtime-environments'
-import type { GlobalSettings } from '../shared/types'
+} from '~shared/runtime-environments'
+import type { GlobalSettings } from '~shared/types'
 
 type RuntimeEnvironmentFocusStore = {
   getSettings: () => Pick<GlobalSettings, 'activeRuntimeEnvironmentId'>

@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 export const mobileDiffReviewControlStyles = {
   primaryButton: cn(

@@ -1,4 +1,5 @@
-import type { CoworkingDesktopCatalog } from '../../../shared/coworking/catalog-contract'
+import type { CoworkingDesktopCatalog } from '~shared/coworking/catalog-contract'
+
 import type { CoworkingOwnerRecord } from '../owner/record'
 import type { CoworkingPeerConnection } from '../peer/connection'
 import {

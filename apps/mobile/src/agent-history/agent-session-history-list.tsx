@@ -3,7 +3,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View } from 'react-native'
 
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import type { MobileAgentHistorySection } from './sections'

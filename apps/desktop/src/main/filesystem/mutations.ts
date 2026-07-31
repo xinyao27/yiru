@@ -17,8 +17,8 @@ import { pipeline } from 'node:stream/promises'
 /* eslint-disable max-lines -- Why: filesystem mutation IPC handlers stay centralized so
 authorization, SSH routing, and external import behavior remain audited together. */
 import { ipcMain } from 'electron'
+import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
-import { assertNoClobberRenameDestinationAvailable } from '../../shared/filesystem-rename-collision'
 import type { Store } from '../persistence'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { authorizeExternalPath, resolveAuthorizedPath, isENOENT } from './auth'

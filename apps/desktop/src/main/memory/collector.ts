@@ -26,19 +26,19 @@ import { promisify } from 'node:util'
 
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import { app } from 'electron'
-
-import { ORPHAN_WORKTREE_ID } from '../../shared/constants'
+import { ORPHAN_WORKTREE_ID } from '~shared/constants'
 import {
   getProcessOutputFields,
   iterateProcessOutputLines
-} from '../../shared/process-output-field-scanner'
+} from '~shared/process-output-field-scanner'
 import type {
   AppMemory,
   MemorySnapshot,
   HostMemory,
   SessionMemory,
   WorktreeMemory
-} from '../../shared/types'
+} from '~shared/types'
+
 import type { Store } from '../persistence'
 import { listRegisteredPtys } from './pty-registry'
 

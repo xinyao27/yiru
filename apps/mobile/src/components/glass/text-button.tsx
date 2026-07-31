@@ -1,6 +1,7 @@
 import { Text } from 'react-native'
 
-import { cn } from '../../style/class-names'
+import { cn } from '~/style/class-names'
+
 import { MobileGlassPressable } from './pressable'
 import type { MobileGlassTextButtonProps } from './text-button-props'
 

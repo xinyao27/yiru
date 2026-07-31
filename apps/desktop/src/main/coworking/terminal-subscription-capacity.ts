@@ -1,4 +1,5 @@
-import { COWORKING_MAX_TERMINAL_SUBSCRIPTIONS_PER_CONNECTION_WORKTREE } from '../../shared/coworking/resource-limits'
+import { COWORKING_MAX_TERMINAL_SUBSCRIPTIONS_PER_CONNECTION_WORKTREE } from '~shared/coworking/resource-limits'
+
 import { CoworkingExecutionError } from './execution-error'
 
 export type CoworkingHostSubscription = {

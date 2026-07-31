@@ -3,7 +3,8 @@ import {
   renderTmuxFormat,
   tmuxSendKeysText,
   tmuxValue
-} from '../../shared/claude-agent-teams-tmux-compat'
+} from '~shared/claude-agent-teams-tmux-compat'
+
 import {
   formatContext,
   paneEnv,

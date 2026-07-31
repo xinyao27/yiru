@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { triggerError, triggerSuccess } from '../../platform/haptics'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { triggerError, triggerSuccess } from '~/platform/haptics'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { createTerminalAndSendPrompt } from './ai-triage-launch'
 
 // Launches an agent for the PR triage actions ("Fix checks with AI" / "Resolve

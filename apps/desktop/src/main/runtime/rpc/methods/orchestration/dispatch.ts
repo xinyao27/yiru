@@ -1,13 +1,13 @@
 import { z } from 'zod'
-
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { buildDispatchPreamble } from '~main/runtime/orchestration/preamble'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
 import {
   OptionalBoolean,
   OptionalString,
   requiredString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { buildDispatchPreamble } from '../../../orchestration/preamble'
-import { defineMethod, type RpcMethod } from '../../core'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { resolveRunScope } from './run-scope'
 
 const DispatchParams = z.object({

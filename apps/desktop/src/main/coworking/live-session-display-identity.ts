@@ -1,7 +1,7 @@
 import {
   isCoworkingAgentLaunchId,
   type CoworkingAgentLaunchId
-} from '../../shared/coworking/agent-launch-contract'
+} from '~shared/coworking/agent-launch-contract'
 
 export type CoworkingLiveSessionDisplayIdentity =
   | { sessionKind: 'terminal'; agent: null }

@@ -3,13 +3,12 @@ import { join, resolve } from 'node:path'
 
 import { app } from 'electron'
 import { z, type ZodType } from 'zod'
-
 import type {
   SkillBundleManifest,
   SkillKnownSnapshot,
   SkillReleaseMapping,
   SkillSnapshotRegistry
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 
 export type SkillBundleArtifacts = {
   manifest: SkillBundleManifest

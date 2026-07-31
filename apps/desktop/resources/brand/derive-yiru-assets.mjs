@@ -8,7 +8,7 @@ import {
   cropImage,
   findOpaqueBounds,
   resizeImage
-} from '../../config/scripts/trim-windows-icon-source.mjs'
+} from '../../scripts/trim-windows-icon-source.mjs'
 
 const brandDir = import.meta.dirname
 const desktopDir = dirname(dirname(brandDir))

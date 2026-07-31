@@ -1,4 +1,4 @@
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
 
 export type RelayWatcherPendingSetup = PromiseSettlementWaiters<void>
 

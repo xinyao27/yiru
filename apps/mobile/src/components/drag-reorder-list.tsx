@@ -14,8 +14,8 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useCSSVariable } from 'uniwind'
 
-import { DotsSixVertical as GripVertical } from '@/components/uniwind-icons'
-import { resolveCssString } from '@/style/resolve-css-variable'
+import { DotsSixVertical as GripVertical } from '~/components/uniwind-icons'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import { triggerMediumImpact, triggerSelection } from '../platform/haptics'
 import {

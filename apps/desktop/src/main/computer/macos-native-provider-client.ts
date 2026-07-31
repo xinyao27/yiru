@@ -7,7 +7,8 @@ import type {
   ComputerListWindowsResult,
   ComputerProviderCapabilities,
   ComputerSnapshotResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { normalizeComputerActionResult } from './action-verification-normalization'
 import {
   assertMacOSProviderCapability,

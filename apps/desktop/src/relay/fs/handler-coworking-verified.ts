@@ -2,14 +2,15 @@ import { constants } from 'node:fs'
 import { mkdir, opendir, rename, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
 import {
   COWORKING_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   COWORKING_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   COWORKING_FILE_READ_MAX_BYTES,
   COWORKING_FILE_WRITE_MAX_BYTES
-} from '../../shared/coworking/operation-contract'
-import { assertNoClobberRenameDestinationAvailable } from '../../shared/filesystem-rename-collision'
+} from '~shared/coworking/operation-contract'
+import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
+
 import type { RelayDispatcher, RequestContext } from '../dispatcher'
 import { registerCoworkingIncarnationMarkerHandler } from './handler-coworking-incarnation-marker'
 import {

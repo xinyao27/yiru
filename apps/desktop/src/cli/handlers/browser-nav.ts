@@ -8,7 +8,8 @@ import type {
   BrowserScrollResult,
   BrowserSnapshotResult,
   BrowserWaitResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,

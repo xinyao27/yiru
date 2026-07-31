@@ -19,17 +19,15 @@ import {
 } from 'node:child_process'
 import { StringDecoder } from 'node:string_decoder'
 
-import {
-  appendGitConfigEnv,
-  gitCredentialPromptGuardEnv
-} from '../../shared/git/credential-prompt-env'
-import { UNTRANSLATED_GIT_OUTPUT_ENV } from '../../shared/git/output-locale'
-import { endSubprocessStdin } from '../../shared/subprocess-stdin-write'
+import { appendGitConfigEnv, gitCredentialPromptGuardEnv } from '~shared/git/credential-prompt-env'
+import { UNTRANSLATED_GIT_OUTPUT_ENV } from '~shared/git/output-locale'
+import { endSubprocessStdin } from '~shared/subprocess-stdin-write'
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import { recordSubprocessSpawn } from '../diagnostics/main-thread-churn-probe'
 import { withGitSpan } from '../observability/instrumentation'
 import { getSpawnArgsForWindows, isWindowsBatchScript, resolveWindowsCommand } from '../win32-utils'

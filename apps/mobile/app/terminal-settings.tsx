@@ -10,8 +10,8 @@ import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
   TextT as Type
-} from '@/components/uniwind-icons'
-import { GestureHandlerRootView } from '@/components/uniwind-native-components'
+} from '~/components/uniwind-icons'
+import { GestureHandlerRootView } from '~/components/uniwind-native-components'
 
 import { MobileContentSection } from '../src/components/content-section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'

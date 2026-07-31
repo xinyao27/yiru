@@ -1,12 +1,12 @@
 import { ipcMain, type WebContents } from 'electron'
-
 import {
   LANGUAGE_SERVER_EVENT_CHANNEL,
   type LanguageServerDocumentUriArgs,
   type LanguageServerLocationArgs,
   type LanguageServerSendArgs,
   type LanguageServerStartArgs
-} from '../shared/language-server'
+} from '~shared/language-server'
+
 import { LanguageServerManager } from './language-server-manager'
 import type { Store } from './persistence'
 

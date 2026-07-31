@@ -1,15 +1,12 @@
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
-
-import type { PairingOffer } from '../../shared/pairing'
-import {
-  RemoteRuntimeClientError,
-  sendRemoteRuntimeRequest
-} from '../../shared/remote-runtime/client'
+import type { PairingOffer } from '~shared/pairing'
+import { RemoteRuntimeClientError, sendRemoteRuntimeRequest } from '~shared/remote-runtime/client'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../shared/runtime-method-contract'
+} from '~shared/runtime-method-contract'
+
 import { RuntimeClientError, type RuntimeRpcResponse } from './types'
 
 export function sendWebSocketRequest<TContract extends RuntimeMethodContract>(

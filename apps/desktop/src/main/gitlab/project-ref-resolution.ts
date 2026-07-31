@@ -1,4 +1,5 @@
-import type { ForgeRemotePreference } from '../../shared/types'
+import type { ForgeRemotePreference } from '~shared/types'
+
 import { gitExecFileAsync, glabExecFileAsync } from '../git/runner'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { runProjectRefProbeOnce } from './project-ref-inflight'

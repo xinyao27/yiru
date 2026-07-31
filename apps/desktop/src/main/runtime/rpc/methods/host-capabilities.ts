@@ -1,6 +1,7 @@
-import { isGitBashAvailable } from '../../../git-bash'
-import { isPwshAvailable } from '../../../pwsh'
-import { isWslAvailable, listWslDistros } from '../../../wsl'
+import { isGitBashAvailable } from '~main/git-bash'
+import { isPwshAvailable } from '~main/pwsh'
+import { isWslAvailable, listWslDistros } from '~main/wsl'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 export const HOST_CAPABILITY_METHODS: RpcMethod[] = [

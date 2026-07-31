@@ -1,5 +1,6 @@
-import { discoverSkills } from '../main/skills/discovery'
-import { SSH_SKILL_DISCOVERY_RELAY_CAPABILITY } from '../shared/skills'
+import { discoverSkills } from '~main/skills/discovery'
+import { SSH_SKILL_DISCOVERY_RELAY_CAPABILITY } from '~shared/skills'
+
 import type { RelayDispatcher } from './dispatcher'
 
 export function registerSkillDiscoveryHandlers(dispatcher: RelayDispatcher): void {

@@ -1,22 +1,22 @@
 import { z } from 'zod'
-
-import {
-  ORCHESTRATION_WORKER_READ_SOURCES,
-  type OrchestrationWorkerReadResult
-} from '../../../../../../shared/orchestration-worker-output'
-import {
-  OptionalFiniteNumber,
-  requiredString
-} from '../../../../../../shared/runtime-method-contracts/runtime-method-params'
-import type { RuntimeTerminalRead } from '../../../../../../shared/runtime-types'
-import { syncFederatedDispatch } from '../../../../orchestration/federation-sync'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
+import { syncFederatedDispatch } from '~main/runtime/orchestration/federation-sync'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
 import {
   createWorkerOutputSourceIdentity,
   decodeWorkerOutputCursor,
   encodeWorkerOutputCursor
-} from '../../../../orchestration/worker-output-cursor'
-import { defineMethod, type RpcMethod } from '../../../core'
+} from '~main/runtime/orchestration/worker-output-cursor'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import {
+  ORCHESTRATION_WORKER_READ_SOURCES,
+  type OrchestrationWorkerReadResult
+} from '~shared/orchestration-worker-output'
+import {
+  OptionalFiniteNumber,
+  requiredString
+} from '~shared/runtime-method-contracts/runtime-method-params'
+import type { RuntimeTerminalRead } from '~shared/runtime-types'
+
 import {
   callFederatedWorkerShow,
   exposeWorker,

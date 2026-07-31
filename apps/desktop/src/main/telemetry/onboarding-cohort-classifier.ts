@@ -32,8 +32,9 @@
 // an event with an undefined cohort still validates and emits — it just
 // lands without the cohort property. Mirrors `getCohortAtEmit`.
 
-import { ONBOARDING_FINAL_STEP } from '../../shared/constants'
-import type { OnboardingCohort } from '../../shared/telemetry-events'
+import { ONBOARDING_FINAL_STEP } from '~shared/constants'
+import type { OnboardingCohort } from '~shared/telemetry-events'
+
 import type { Store } from '../persistence'
 
 let storeRef: Store | null = null

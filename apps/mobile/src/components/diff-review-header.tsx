@@ -1,8 +1,8 @@
 import { FlatList, Text, View } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { cn } from '@/style/class-names'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { cn } from '~/style/class-names'
 
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/diff/review-screen-model'
 import type { MobileDiffReviewHeaderProps } from './diff-review-header-props'

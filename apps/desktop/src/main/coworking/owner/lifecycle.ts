@@ -1,7 +1,7 @@
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { Store } from '~main/persistence'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { Store } from '../../persistence'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
 import type { CoworkingSessionCatalog } from '../session/catalog'
 import type { CoworkingWorktreeVisibility } from '../worktree-visibility'
 import type { CoworkingOwnerService } from './service'

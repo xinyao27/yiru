@@ -1,13 +1,13 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
 import {
   isCoworkingMutationOperation,
   type CoworkingExecutionOperation
-} from '../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 import {
   CoworkingPairedRuntimeInvokeResponseSchema,
   parseCoworkingPairedRuntimeResult
-} from '../../../shared/coworking/paired-runtime-result-contract'
+} from '~shared/coworking/paired-runtime-result-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingHostOperationContext } from '../execution-gateway'
 

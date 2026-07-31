@@ -4,7 +4,8 @@ import {
   GIT_CHECK_IGNORE_TIMEOUT_MS,
   parseGitCheckIgnorePaths,
   splitGitCheckIgnorePathsByStdinBytes
-} from '../../shared/git/check-ignore-stdio'
+} from '~shared/git/check-ignore-stdio'
+
 import { gitExecFileAsync } from './runner'
 import type { GitRuntimeOptions } from './runtime-options'
 import { gitOptionsForWorktree } from './runtime-options'

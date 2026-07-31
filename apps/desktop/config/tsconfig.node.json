@@ -11,6 +11,12 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"]
+    "types": ["electron-vite/node"],
+    "paths": {
+      "~renderer/*": ["../src/renderer/*"],
+      "~shared/*": ["../src/shared/*"],
+      "~main/*": ["../src/main/*"],
+      "~preload/*": ["../src/preload/*"]
+    }
   }
 }

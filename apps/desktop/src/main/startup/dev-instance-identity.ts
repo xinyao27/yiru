@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 
-import type { AppIdentity } from '../../shared/app-identity'
+import type { AppIdentity } from '~shared/app-identity'
 
 const BASE_APP_NAME = 'Yiru'
 // Why: Windows notification grouping and existing permissions are keyed to the

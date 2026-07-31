@@ -25,14 +25,14 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { useMobileGlassAvailable } from '@/components/glass/availability'
+import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
   MobileSwiftUiGlassCircleButton,
   MobileSwiftUiGlassGroup,
   MobileSwiftUiGlassInputShell
-} from '@/components/glass/swift-ui.ios'
-import { resolveCssString } from '@/style/resolve-css-variable'
+} from '~/components/glass/swift-ui.ios'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileSourceControlCommitBarProps } from './commit-bar-props'
 

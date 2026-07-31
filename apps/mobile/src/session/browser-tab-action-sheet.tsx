@@ -2,7 +2,7 @@ import {
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   ArrowClockwise as RefreshCw
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import { ActionSheetModal } from '../components/action-sheet-modal'
 import type { MobileSessionTab } from './screen-state'

@@ -4,7 +4,8 @@ import type {
   SkillUpdateFailure,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
+
 import { killWithDescendantSweep } from '../pty-descendant-termination'
 import { resolveCliCommand } from '../runtime/cli-command'
 import { getSpawnArgsForWindows } from '../win32-utils'

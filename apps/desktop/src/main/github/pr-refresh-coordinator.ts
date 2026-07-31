@@ -2,7 +2,6 @@
 renderer broadcast rules together so freshness and rate-limit invariants are
 reviewable in one place. */
 import { webContents } from 'electron'
-
 import type {
   GitHubPRRefreshAlias,
   GitHubPRRefreshCandidate,
@@ -10,7 +9,8 @@ import type {
   GitHubPRRefreshReason,
   GitHubPRRefreshSkippedReason,
   PRRefreshOutcome
-} from '../../shared/types'
+} from '~shared/types'
+
 import { recordCoalescedCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { sendToTrustedUIRenderer } from '../window/ui'
 import { getPRForBranchOutcome, type GitHubPRBranchLookupOptions } from './client'

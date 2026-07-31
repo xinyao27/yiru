@@ -2,14 +2,14 @@ import { is } from '@electron-toolkit/utils'
 import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '@yiru/workbench-model/product'
 /* eslint-disable max-lines */
 import { app, BrowserWindow, powerMonitor } from 'electron'
-
 import type {
   RemoteServerUpdateInstallMode,
   RemoteServerUpdateInstallResult,
   RemoteServerUpdaterSnapshot,
   RemoteServerUpdateSupport
-} from '../shared/remote-server-update'
-import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
+} from '~shared/remote-server-update'
+import type { UpdateCheckOptions, UpdateStatus } from '~shared/types'
+
 import { writeMainThreadDiagnosticMarker } from './diagnostics/main-thread-churn-probe'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
 import { withUpdaterSpan } from './observability/instrumentation'

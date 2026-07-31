@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { resolveCssString } from '../../style/resolve-css-variable'
+import { resolveCssString } from '~/style/resolve-css-variable'
+
 import type { MobileTerminalTheme } from './contract'
 
 // Why: xterm cannot consume Uniwind classes, so theme changes are translated

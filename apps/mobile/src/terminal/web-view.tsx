@@ -2,7 +2,7 @@ import { useRef, useCallback, forwardRef, useImperativeHandle, useEffect, useMem
 import { Platform, View } from 'react-native'
 import type { WebView, WebViewMessageEvent } from 'react-native-webview'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import { UniwindWebView } from '../components/uniwind-web-view'
 import type { TerminalOscLinkRange } from './osc-link-ranges'

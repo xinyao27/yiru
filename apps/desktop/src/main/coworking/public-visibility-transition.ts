@@ -1,5 +1,6 @@
-import { COWORKING_CATALOG_MAX_WORKTREES } from '../../shared/coworking/catalog-contract'
-import type { WorktreeMeta } from '../../shared/types'
+import { COWORKING_CATALOG_MAX_WORKTREES } from '~shared/coworking/catalog-contract'
+import type { WorktreeMeta } from '~shared/types'
+
 import { revalidateCoworkingPublicationSnapshot } from './publication-final-guard'
 import { CoworkingVisibilityError, rethrowPublicationResourceLimit } from './visibility-errors'
 import type {

@@ -1,6 +1,6 @@
 import { Text } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassPressable } from '../components/glass/pressable'

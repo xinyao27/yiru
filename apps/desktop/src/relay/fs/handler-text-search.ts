@@ -8,15 +8,15 @@
 import { spawn, execFile } from 'node:child_process'
 import { open } from 'node:fs/promises'
 
-import { IMAGE_FILE_MIME_TYPES } from '../../shared/image-file-extensions'
+import { IMAGE_FILE_MIME_TYPES } from '~shared/image-file-extensions'
 import {
   buildRgArgs,
   createAccumulator,
   finalize,
   ingestRgJsonLine,
   SEARCH_TIMEOUT_MS as SHARED_SEARCH_TIMEOUT_MS
-} from '../../shared/text-search'
-import type { SearchResult as SharedSearchResult } from '../../shared/types'
+} from '~shared/text-search'
+import type { SearchResult as SharedSearchResult } from '~shared/types'
 
 // ─── Constants ───────────────────────────────────────────────────────
 

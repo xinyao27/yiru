@@ -132,12 +132,12 @@ export function MobileWorkspaceListToolbar({
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
           label="Floating Workspace"
-          size="regular"
+          size="large"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />
       ) : null}
-      <MobileSwiftUiGlassInputShell hasTrailingAction={false} minHeight={44}>
+      <MobileSwiftUiGlassInputShell hasTrailingAction={false}>
         <Image systemName="magnifyingglass" size={16} color={mutedForegroundColor} />
         <TextField
           modifiers={searchModifiers}
@@ -153,7 +153,7 @@ export function MobileWorkspaceListToolbar({
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
           label="Floating Workspace"
-          size="regular"
+          size="large"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />

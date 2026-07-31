@@ -1,4 +1,5 @@
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
+
 import type { RelayWatcherTeardownState } from './teardown-tracker'
 
 export function createRelayWatcherState(

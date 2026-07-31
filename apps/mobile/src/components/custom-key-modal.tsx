@@ -2,13 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput, Switch } from 'react-native'
 
-import { MobileContentSection } from '@/components/content-section'
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { MobileGlassSurface } from '@/components/glass/surface'
-import { MobileGlassTextButton } from '@/components/glass/text-button'
-import { cn } from '@/style/class-names'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { cn } from '~/style/class-names'
 
 import {
   buildTerminalShortcutKey,

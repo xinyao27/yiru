@@ -1,9 +1,10 @@
-import { hasExactCoworkingWireKeys } from '../../../shared/coworking/exact-wire-record'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
 import {
   COWORKING_RPC_ERROR_CODES,
   type CoworkingRpcFailure,
   type CoworkingRpcResponse
-} from '../../../shared/coworking/wire-contract'
+} from '~shared/coworking/wire-contract'
+
 import type { CoworkingSink } from './connection-contract'
 
 export type CoworkingPendingPeerRequest = {

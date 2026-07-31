@@ -1,6 +1,5 @@
 import { safeStorage } from 'electron'
-
-import type { PersistedState } from '../../shared/types'
+import type { PersistedState } from '~shared/types'
 
 function encrypt(plaintext: string): string {
   if (!plaintext || !safeStorage.isEncryptionAvailable()) {

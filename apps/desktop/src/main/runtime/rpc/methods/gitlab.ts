@@ -1,10 +1,10 @@
 import { z } from 'zod'
-
 import {
   OptionalFiniteNumber,
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const RepoSelector = z.object({

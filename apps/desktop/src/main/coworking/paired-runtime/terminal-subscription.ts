@@ -1,5 +1,6 @@
-import { CoworkingPairedRuntimeTerminalEventSchema } from '../../../shared/coworking/paired-runtime-result-contract'
-import type { RemoteRuntimeSubscription } from '../../../shared/remote-runtime/client'
+import { CoworkingPairedRuntimeTerminalEventSchema } from '~shared/coworking/paired-runtime-result-contract'
+import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
+
 import type { CoworkingHostSubscription } from '../execution-gateway'
 
 type PairedRuntimeTerminalSubscriptionOptions = {

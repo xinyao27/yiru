@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process'
 
-import { RUNTIME_FILE_WATCH_CANCEL_TIMEOUT_MS } from '../../shared/runtime-file-watch-limits'
+import { RUNTIME_FILE_WATCH_CANCEL_TIMEOUT_MS } from '~shared/runtime-file-watch-limits'
 
 type CancelledSubscribe = {
   child: ChildProcess

@@ -2,9 +2,10 @@ import type { GitHubPRMergeMethod, PRInfo } from '@yiru/workbench-model/review'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Switch, Text, View } from 'react-native'
 
-import type { MobilePrActions } from '../../session/pr/use-actions'
-import { unlinkMobilePr } from '../../source-control/pr-link'
-import type { RpcClient } from '../../transport/rpc-client'
+import type { MobilePrActions } from '~/session/pr/use-actions'
+import { unlinkMobilePr } from '~/source-control/pr-link'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { ConfirmModal } from '../confirm-modal'
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassTextButton } from '../glass/text-button'

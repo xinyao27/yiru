@@ -16,9 +16,9 @@ import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView
-} from '@/components/uniwind-native-components'
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+} from '~/components/uniwind-native-components'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 // Why: mount-before-commit logic is anchor-agnostic, so the X-axis drawer reuses

@@ -2,7 +2,7 @@ import {
   richMarkdownContextMenuCommandChannel,
   type RichMarkdownContextMenuCommand,
   type RichMarkdownContextMenuCommandPayload
-} from '../../shared/rich-markdown-context-menu'
+} from '~shared/rich-markdown-context-menu'
 
 type EditableContextMenuWebContents = Pick<
   Electron.WebContents,

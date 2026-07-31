@@ -6,18 +6,18 @@ import { lstat, opendir } from 'node:fs/promises'
 import { posix, win32 } from 'node:path'
 import { platform } from 'node:process'
 
-import { isFolderRepo } from '../shared/repo-kind'
-import type { DirEntry, GitWorktreeInfo, Repo, Worktree } from '../shared/types'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { DirEntry, GitWorktreeInfo, Repo, Worktree } from '~shared/types'
 import {
   scanWorkspaceSpaceEntryTree,
   type WorkspaceSpaceEntryScan
-} from '../shared/workspace/entry-traversal'
+} from '~shared/workspace/entry-traversal'
 import {
   collectWorkspaceSpaceDirectoryEntries,
   createWorkspaceSpaceScanBudget,
   WorkspaceSpaceScanCapacityError
-} from '../shared/workspace/scan-budget'
-import { compactWorkspaceSpaceItems } from '../shared/workspace/space-compaction'
+} from '~shared/workspace/scan-budget'
+import { compactWorkspaceSpaceItems } from '~shared/workspace/space-compaction'
 import type {
   WorkspaceSpaceAnalysis,
   WorkspaceSpaceDirectoryScanResult,
@@ -26,7 +26,8 @@ import type {
   WorkspaceSpaceScanProgress,
   WorkspaceSpaceScanStatus,
   WorkspaceSpaceWorktree
-} from '../shared/workspace/space-types'
+} from '~shared/workspace/space-types'
+
 import type { Store } from './persistence'
 import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from './providers/ssh-git-dispatch'

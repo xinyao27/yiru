@@ -1,4 +1,5 @@
-import type { GitHubWorkItem, GitHubWorkItemDetails, PRCheckDetail } from '../../shared/types'
+import type { GitHubWorkItem, GitHubWorkItemDetails, PRCheckDetail } from '~shared/types'
+
 import { getPRChecks, getPRComments, getWorkItem } from './client'
 import {
   acquire,

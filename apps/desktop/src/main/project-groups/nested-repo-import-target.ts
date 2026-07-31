@@ -1,6 +1,6 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import type { GitWorktreeInfo } from '~shared/types'
 
-import type { GitWorktreeInfo } from '../../shared/types'
 import { listWorktreeGraph } from '../git/worktree'
 
 type WorktreeLister = {

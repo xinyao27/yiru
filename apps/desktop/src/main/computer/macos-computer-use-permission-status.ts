@@ -8,7 +8,8 @@ import type {
   ComputerUsePermissionId,
   ComputerUsePermissionStatus,
   ComputerUsePermissionStatusResult
-} from '../../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
+
 import {
   resolveMacOSComputerUseAppPath,
   resolveMacOSComputerUseExecutablePath

@@ -1,4 +1,5 @@
-import type { BrowserGrabCancelReason, BrowserGrabResult } from '../../shared/browser/grab-types'
+import type { BrowserGrabCancelReason, BrowserGrabResult } from '~shared/browser/grab-types'
+
 import { buildGuestOverlayScript } from './grab-guest-script'
 import { clampGrabPayload } from './grab-payload'
 

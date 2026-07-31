@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
 
 import type { WebSocket } from 'ws'
+import { COWORKING_MAX_STREAM_QUEUED_BYTES } from '~shared/coworking/resource-limits'
+import { COWORKING_PROTOCOL_VERSION } from '~shared/coworking/wire-contract'
 
-import { COWORKING_MAX_STREAM_QUEUED_BYTES } from '../../shared/coworking/resource-limits'
-import { COWORKING_PROTOCOL_VERSION } from '../../shared/coworking/wire-contract'
 import { E2EEChannel } from '../runtime/rpc/e2ee-channel'
 import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import type { CoworkingRpcGateway, CoworkingServerConnection } from './rpc/gateway'

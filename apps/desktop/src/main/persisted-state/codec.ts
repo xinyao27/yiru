@@ -1,12 +1,10 @@
-import {
-  backfillAutomationRunNumbers,
-  pruneAutomationRuns
-} from '../../shared/automation/run-retention'
-import { getDefaultPersistedState } from '../../shared/constants'
-import { normalizeFeatureInteractionTelemetryBuckets } from '../../shared/feature-interactions'
-import { normalizeFolderWorkspaces } from '../../shared/folder-workspaces'
-import { normalizeProjectGroups } from '../../shared/project-groups'
-import type { PersistedState } from '../../shared/types'
+import { backfillAutomationRunNumbers, pruneAutomationRuns } from '~shared/automation/run-retention'
+import { getDefaultPersistedState } from '~shared/constants'
+import { normalizeFeatureInteractionTelemetryBuckets } from '~shared/feature-interactions'
+import { normalizeFolderWorkspaces } from '~shared/folder-workspaces'
+import { normalizeProjectGroups } from '~shared/project-groups'
+import type { PersistedState } from '~shared/types'
+
 import { decodePersistedOnboarding } from './persisted-onboarding-codec'
 import { decodePersistedSettings } from './persisted-settings-codec'
 import { decodePersistedSshState } from './persisted-ssh-codec'

@@ -23,8 +23,8 @@ import {
   Sparkle as Sparkles,
   TerminalWindow as SquareTerminal,
   Wrench
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 // The desktop payload keeps historical icon names; map them to Phosphor so
 // mobile and desktop still render the same project concept.

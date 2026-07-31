@@ -3,13 +3,10 @@ import { open, readdir, realpath, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, isAbsolute, join, relative, sep } from 'node:path'
 
-import { summarizeSkillMarkdown } from '../../shared/skill-metadata'
-import type {
-  DiscoveredSkill,
-  SkillDiscoveryResult,
-  SkillDiscoverySource
-} from '../../shared/skills'
-import type { Repo } from '../../shared/types'
+import { summarizeSkillMarkdown } from '~shared/skill-metadata'
+import type { DiscoveredSkill, SkillDiscoveryResult, SkillDiscoverySource } from '~shared/skills'
+import type { Repo } from '~shared/types'
+
 import { discoverClaudePluginSkillSources } from './claude-plugin-skill-sources'
 import {
   buildSkillDiscoverySources,

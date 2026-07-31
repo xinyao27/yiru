@@ -1,6 +1,7 @@
-import { findTransport } from '../../shared/runtime-bootstrap'
-import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
-import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
+import { findTransport } from '~shared/runtime-bootstrap'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import type { CliStatusResult, RuntimeStatus } from '~shared/runtime-types'
+
 import { tryReadMetadata } from './metadata'
 import { sendRequest } from './transport'
 import { RuntimeRpcFailureError, type RuntimeRpcSuccess } from './types'

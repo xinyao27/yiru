@@ -1,7 +1,8 @@
 import { Text } from 'react-native'
 
-import { MobileGlassGroup } from '../../components/glass/group'
-import { MobileGlassPressable } from '../../components/glass/pressable'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+
 import type { MobileChatPermission } from './permission'
 
 type MobileNativeChatPermissionActionsProps = {

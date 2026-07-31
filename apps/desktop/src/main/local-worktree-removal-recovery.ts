@@ -1,5 +1,6 @@
-import type { GitWorktreeInfo, RemoveWorktreeResult } from '../shared/types'
-import { assertWorktreeUnlockedForRemoval } from '../shared/workspace/worktree-removal'
+import type { GitWorktreeInfo, RemoveWorktreeResult } from '~shared/types'
+import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
+
 import { gitExecFileAsync } from './git/runner'
 import { listWorktreesStrict, type GitWorktreeExecOptions } from './git/worktree'
 import { removeLocalWorktreePath } from './local-worktree-filesystem'

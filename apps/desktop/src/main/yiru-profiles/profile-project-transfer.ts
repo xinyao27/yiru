@@ -1,7 +1,8 @@
 import type {
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
+
 import { getYiruProfileListState } from './profile-index-store'
 import { removeSourceRepo } from './profile-project-source-removal'
 import { readProfileState, writeProfileState } from './profile-project-state-file'

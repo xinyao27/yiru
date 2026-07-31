@@ -90,7 +90,7 @@ jobs:
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
           SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-        run: node apps/desktop/config/scripts/release-desktop-build-matrix.mjs >> "$GITHUB_OUTPUT"
+        run: node apps/desktop/scripts/release-desktop-build-matrix.mjs >> "$GITHUB_OUTPUT"
 
       - name: Configure git author
         run: |
@@ -200,7 +200,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YIRU_WINDOWS_RELEASE_ENABLED: ${{ steps.desktop-platforms.outputs.windows_enabled }}
-        run: node apps/desktop/config/scripts/publish-complete-draft-releases.mjs
+        run: node apps/desktop/scripts/publish-complete-draft-releases.mjs
 
       - name: Compute next version
         id: version
@@ -236,7 +236,7 @@ jobs:
           # stable after older releases. On 2026-06-04, v1.4.44 existed but
           # the list returned v1.4.42 first, causing a manual RC cut to reopen
           # the already-shipped 1.4.43 series as v1.4.43-rc.0.
-          latest_stable="$(node apps/desktop/config/scripts/latest-stable-release.mjs)"
+          latest_stable="$(node apps/desktop/scripts/latest-stable-release.mjs)"
           latest_stable="${latest_stable#v}"
           echo "Latest stable: ${latest_stable:-<none>}"
 
@@ -271,7 +271,7 @@ jobs:
           }
 
           highest_rc_for_base() {
-            node apps/desktop/config/scripts/release-rc-history.mjs "$1"
+            node apps/desktop/scripts/release-rc-history.mjs "$1"
           }
 
           current_package_stable() {
@@ -542,7 +542,7 @@ jobs:
             exit 0
           fi
 
-          node apps/desktop/config/scripts/create-draft-release.mjs "$TAG"
+          node apps/desktop/scripts/create-draft-release.mjs "$TAG"
 
   build:
     needs:
@@ -1121,7 +1121,7 @@ jobs:
           }
 
           Copy-Item -Path $signedInstaller.FullName -Destination 'apps/desktop/dist/yiru-windows-setup.exe' -Force
-          node apps/desktop/config/scripts/windows-release-archive-tools.mjs blockmap 'apps/desktop/dist/yiru-windows-setup.exe' 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
+          node apps/desktop/scripts/windows-release-archive-tools.mjs blockmap 'apps/desktop/dist/yiru-windows-setup.exe' 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
 
           $installer = Get-Item 'apps/desktop/dist/yiru-windows-setup.exe'
           $blockmap = Get-Item 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
@@ -1190,7 +1190,7 @@ jobs:
             # Why: verify the files a user actually gets on disk, not the build
             # tree — 7z parses the NSIS exe directly as its embedded payload.
             New-Item -ItemType Directory -Path inner-evidence-extract -Force | Out-Null
-            node apps/desktop/config/scripts/windows-release-archive-tools.mjs extract 'apps/desktop/dist/yiru-windows-setup.exe' 'inner-evidence-extract'
+            node apps/desktop/scripts/windows-release-archive-tools.mjs extract 'apps/desktop/dist/yiru-windows-setup.exe' 'inner-evidence-extract'
 
             $root = Resolve-Path 'inner-evidence-extract'
             # Why elevate.exe is always appended: staging skips already-signed
@@ -1293,7 +1293,7 @@ jobs:
       # (`IS_OFFICIAL_BUILD === false`) — the exact failure mode flagged
       # in PR #1385's deferred follow-up.
       - name: Verify telemetry constants present in app.asar
-        run: pnpm --filter yiru exec node config/scripts/verify-telemetry-constants.mjs
+        run: pnpm --filter yiru exec node scripts/verify-telemetry-constants.mjs
 
   build-mac:
     needs:
@@ -1317,7 +1317,7 @@ jobs:
           node-version-file: package.json
 
       - name: Run isolated macOS release build
-        run: node apps/desktop/config/scripts/run-release-mac-build-workflow.mjs
+        run: node apps/desktop/scripts/run-release-mac-build-workflow.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_MAC_BUILD_REF: ${{ github.ref_name }}
@@ -1369,7 +1369,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.cut.outputs.tag }}
-        run: node apps/desktop/config/scripts/remove-disabled-windows-release-assets.mjs "$TAG"
+        run: node apps/desktop/scripts/remove-disabled-windows-release-assets.mjs "$TAG"
 
       - name: Verify release assets complete
         # Why: publish-release is the only intended draft -> published
@@ -1379,7 +1379,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.cut.outputs.tag }}
           YIRU_WINDOWS_RELEASE_ENABLED: ${{ needs.cut.outputs.windows_enabled }}
-        run: node apps/desktop/config/scripts/verify-release-required-assets.mjs "$TAG"
+        run: node apps/desktop/scripts/verify-release-required-assets.mjs "$TAG"
 
       - name: Publish release
         # Why: derive `--prerelease` from the tag shape (not from whatever

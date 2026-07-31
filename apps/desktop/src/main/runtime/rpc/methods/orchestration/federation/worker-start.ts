@@ -4,13 +4,13 @@ import {
   ORCHESTRATION_FEDERATION_CONTROL_MAIL_RUNTIME_CAPABILITY,
   ORCHESTRATION_FEDERATION_RUNTIME_CAPABILITY
 } from '@yiru/runtime-protocol/capabilities'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { orchestrationMigrationData } from '~shared/orchestration-rpc-contract'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import { isTuiAgent } from '~shared/tui-agent/config'
 
-import { orchestrationMigrationData } from '../../../../../../shared/orchestration-rpc-contract'
-import type { RuntimeStatus } from '../../../../../../shared/runtime-types'
-import { isTuiAgent } from '../../../../../../shared/tui-agent/config'
-import type { OrchestrationDb } from '../../../../orchestration/db'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
 import type { WorkerStartInput } from '../worker/start-schema'
 
 export async function startFederatedWorker(args: {

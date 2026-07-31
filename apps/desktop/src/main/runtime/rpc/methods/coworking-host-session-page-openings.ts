@@ -1,4 +1,5 @@
-import { CoworkingExecutionError } from '../../../coworking/execution-error'
+import { CoworkingExecutionError } from '~main/coworking/execution-error'
+
 import {
   encodeCoworkingHostSessionPageReleaseBinding,
   type CoworkingHostSessionPageBinding,

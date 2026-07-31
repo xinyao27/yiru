@@ -1,4 +1,5 @@
-import { isWorkspaceKey } from '../../shared/workspace/scope'
+import { isWorkspaceKey } from '~shared/workspace/scope'
+
 import { getOptionalStringFlag } from '../flags'
 import { RuntimeClientError, type RuntimeClient } from '../runtime-client'
 import { getOptionalWorktreeSelector } from '../selectors'

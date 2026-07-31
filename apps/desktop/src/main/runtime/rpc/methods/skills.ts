@@ -1,13 +1,13 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { SkillDiscoveryTargetSchema } from '../../../../shared/skills'
-import { SSH_SKILL_DISCOVERY_RELAY_CAPABILITY } from '../../../../shared/skills'
-import type { SkillDiscoveryResult } from '../../../../shared/skills'
 import {
   discoverSkillsOnTarget,
   resolveSkillDiscoveryTarget
-} from '../../../skills/skill-discovery-target'
-import { getActiveMultiplexer } from '../../../ssh/ssh'
+} from '~main/skills/skill-discovery-target'
+import { getActiveMultiplexer } from '~main/ssh/ssh'
+import { SkillDiscoveryTargetSchema } from '~shared/skills'
+import { SSH_SKILL_DISCOVERY_RELAY_CAPABILITY } from '~shared/skills'
+import type { SkillDiscoveryResult } from '~shared/skills'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 export const SKILL_METHODS: RpcMethod[] = [

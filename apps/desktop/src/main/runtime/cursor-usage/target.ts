@@ -5,13 +5,12 @@ import {
   toSshExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { normalizeGlobalWindowsRuntimeDefault } from '../../../shared/project-execution-runtime'
-import type { CursorRateLimitRefreshContext } from '../../../shared/rate-limit-types'
-import type { GlobalSettings, Repo } from '../../../shared/types'
-import { parseWorkspaceKey } from '../../../shared/workspace/scope'
-import { resolveLocalProjectRuntimeForRepo } from '../../local-project-runtime-resolution'
-import type { Store } from '../../persistence'
+import { resolveLocalProjectRuntimeForRepo } from '~main/local-project-runtime-resolution'
+import type { Store } from '~main/persistence'
+import { normalizeGlobalWindowsRuntimeDefault } from '~shared/project-execution-runtime'
+import type { CursorRateLimitRefreshContext } from '~shared/rate-limit-types'
+import type { GlobalSettings, Repo } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 export type CursorHostRuntimeTarget =
   | { runtime: 'host' }

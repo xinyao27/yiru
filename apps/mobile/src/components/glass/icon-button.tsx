@@ -1,4 +1,5 @@
-import { cn } from '../../style/class-names'
+import { cn } from '~/style/class-names'
+
 import {
   ArrowClockwise,
   ArrowDown,

@@ -1,12 +1,12 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
-
-import { isWatcherProcessFailure } from '../main/filesystem/parcel-watcher-process-failure'
-import { MAX_BATCHED_WATCHER_EVENTS } from '../main/filesystem/watcher-event-batch'
+import { isWatcherProcessFailure } from '~main/filesystem/parcel-watcher-process-failure'
+import { MAX_BATCHED_WATCHER_EVENTS } from '~main/filesystem/watcher-event-batch'
 import {
   WATCHER_IGNORE_DIRS,
   buildParcelWatcherIgnoreOptions
-} from '../main/filesystem/watcher-ignore'
-import { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
+} from '~main/filesystem/watcher-ignore'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
+
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { emitRelayWatcherEvents, emitRelayWatcherOverflow } from './watcher/event-emitter'
 import { joinRelayWatcherPendingSetup } from './watcher/pending-setup-join'

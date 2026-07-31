@@ -14,7 +14,7 @@
 import {
   createQuickOpenReaddirBudget,
   listQuickOpenFilesWithReaddir
-} from '../../shared/quick-open/readdir-walk'
+} from '~shared/quick-open/readdir-walk'
 
 /**
  * Recursively list files under `rootPath` using fs.readdir.

@@ -3,36 +3,36 @@ import { existsSync } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { isBinaryBuffer } from '../../shared/binary-buffer'
-import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
-import { readBranchCompareHead } from '../../shared/git/branch-compare-head'
-import { createGitConfigSnapshotRunner } from '../../shared/git/config-snapshot-runner'
-import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
+import { isBinaryBuffer } from '~shared/binary-buffer'
+import type { CommitMessageDraftContext } from '~shared/commit-message/generation'
+import { readBranchCompareHead } from '~shared/git/branch-compare-head'
+import { createGitConfigSnapshotRunner } from '~shared/git/config-snapshot-runner'
+import { decodeGitCQuotedPath } from '~shared/git/cquoted-path'
 import {
   removeSafeUntrackedDiscardTarget,
   removeSafeUntrackedDiscardTargets
-} from '../../shared/git/discard-path-safety'
+} from '~shared/git/discard-path-safety'
 import {
   getEffectiveGitUpstreamStatus,
   getGitUpstreamStatusForUpstreamName,
   splitRemoteBranchName
-} from '../../shared/git/effective-upstream'
-import { parseGitRevListFirstParentOid } from '../../shared/git/rev-list-output'
-import { DEFAULT_GIT_STATUS_LIMIT } from '../../shared/git/status-limit'
+} from '~shared/git/effective-upstream'
+import { parseGitRevListFirstParentOid } from '~shared/git/rev-list-output'
+import { DEFAULT_GIT_STATUS_LIMIT } from '~shared/git/status-limit'
 import {
   beginGitStatusLineStatsCacheWrite,
   clearGitStatusLineStatsCache,
   clearGitStatusLineStatsCacheKey,
   reuseOrRecomputeGitStatusLineStats
-} from '../../shared/git/status-line-stats-cache'
+} from '~shared/git/status-line-stats-cache'
 import {
   applyLineStats,
   collectUntrackedAdditions,
   parseNumstat,
   type GitLineStats
-} from '../../shared/git/uncommitted-line-stats'
-import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
-import { getLargeDiffRenderLimit } from '../../shared/large-diff-render-limit'
+} from '~shared/git/uncommitted-line-stats'
+import { InFlightPromiseDedupe, stableInFlightKey } from '~shared/in-flight-promise-dedupe'
+import { getLargeDiffRenderLimit } from '~shared/large-diff-render-limit'
 import type {
   GitBranchChangeEntry,
   GitBranchChangeStatus,
@@ -46,8 +46,9 @@ import type {
   GitStatusEntry,
   GitStatusResult,
   GitUpstreamStatus
-} from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+} from '~shared/types'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
+
 import { findExistingWorktreeSymlinkPaths } from '../worktree/symlink-detection'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {
@@ -997,16 +998,19 @@ export async function detectConflictOperation(worktreePath: string): Promise<Git
   const gitDir = await resolveGitDir(worktreePath)
   const mergeHead = path.join(gitDir, 'MERGE_HEAD')
   const cherryPickHead = path.join(gitDir, 'CHERRY_PICK_HEAD')
+  const revertHead = path.join(gitDir, 'REVERT_HEAD')
   const rebaseMergeDir = path.join(gitDir, 'rebase-merge')
   const rebaseApplyDir = path.join(gitDir, 'rebase-apply')
 
   let hasMergeHead = false
   let hasCherryPickHead = false
+  let hasRevertHead = false
   let hasRebaseDir = false
 
   try {
     hasMergeHead = existsSync(mergeHead)
     hasCherryPickHead = existsSync(cherryPickHead)
+    hasRevertHead = existsSync(revertHead)
     hasRebaseDir = existsSync(rebaseMergeDir) || existsSync(rebaseApplyDir)
   } catch {
     return 'unknown'
@@ -1020,6 +1024,12 @@ export async function detectConflictOperation(worktreePath: string): Promise<Git
   }
   if (hasCherryPickHead) {
     return 'cherry-pick'
+  }
+  // Why: cherry-pick and revert both leave CHERRY_PICK_HEAD absent and their
+  // own head file present, but never both REVERT_HEAD and CHERRY_PICK_HEAD at
+  // once — check revert last since it's the rarer op.
+  if (hasRevertHead) {
+    return 'revert'
   }
   return 'unknown'
 }
@@ -1039,6 +1049,15 @@ export async function abortRebase(
 ): Promise<void> {
   await runWithGitReadCacheInvalidation(() =>
     gitExecFileAsync(['rebase', '--abort'], gitOptionsForWorktree(worktreePath, options))
+  )
+}
+
+export async function abortRevert(
+  worktreePath: string,
+  options: GitRuntimeOptions = {}
+): Promise<void> {
+  await runWithGitReadCacheInvalidation(() =>
+    gitExecFileAsync(['revert', '--abort'], gitOptionsForWorktree(worktreePath, options))
   )
 }
 

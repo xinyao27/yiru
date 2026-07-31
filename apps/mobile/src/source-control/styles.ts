@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import { diffStyles } from './diff-styles'
 import { listStyles } from './list-styles'

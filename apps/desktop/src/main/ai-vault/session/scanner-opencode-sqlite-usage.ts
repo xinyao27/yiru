@@ -1,4 +1,5 @@
-import type SyncDatabase from '../../sqlite/sync-database'
+import type SyncDatabase from '~main/sqlite/sync-database'
+
 import { addSessionTokens } from './scanner-accumulator'
 import type { SessionAccumulator } from './scanner-types'
 import { asRecord, timeObjectValue, tokenTotal } from './scanner-values'

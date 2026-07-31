@@ -3,8 +3,8 @@ import {
   TUI_AGENT_CONFIG,
   type TuiAgentConfig,
   type TuiAgentDetectionRuntime
-} from '../../shared/tui-agent/config'
-import type { TuiAgent } from '../../shared/types'
+} from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
 
 export type TuiAgentDetectionCommand = {
   id: TuiAgent

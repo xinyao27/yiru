@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 
-import { resolveMobileBranchCompareBaseRef } from '../../source-control/branch-base-ref'
-import type { MobileGitBranchCompareResult } from '../../source-control/branch-compare'
-import type { MobileGitStatusResult } from '../../source-control/git-status'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { resolveMobileBranchCompareBaseRef } from '~/source-control/branch-base-ref'
+import type { MobileGitBranchCompareResult } from '~/source-control/branch-compare'
+import type { MobileGitStatusResult } from '~/source-control/git-status'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { readMobileBranchCompareResult, readMobileGitStatusResult } from '../diff/review-rpc'
 import { fetchGithubRepoSlug } from '../github-pr-rpc'
 

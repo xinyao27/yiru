@@ -1,6 +1,6 @@
 import { View, Text, ActivityIndicator } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 // Pure types and selectors live in account-usage-state.ts (no RN imports) so
 // they are unit-testable; re-exported here so existing import sites are stable.

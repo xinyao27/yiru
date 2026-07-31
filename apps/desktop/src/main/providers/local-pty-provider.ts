@@ -9,12 +9,12 @@ import { win32 as pathWin32 } from 'node:path'
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import * as pty from 'node-pty'
+import { recognizeAgentProcessFromCommandLine } from '~shared/agent/process-recognition'
+import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
+import { mergeGitConfigEnvProtocol } from '~shared/git/credential-prompt-env'
+import { YIRU_HERMES_STARTUP_QUERY_ENV } from '~shared/hermes-startup-query'
+import { PhysicalExitTracker } from '~shared/physical-exit-tracker'
 
-import { recognizeAgentProcessFromCommandLine } from '../../shared/agent/process-recognition'
-import { shouldUseShellReadyStartupDelivery } from '../../shared/codex-startup-delivery'
-import { mergeGitConfigEnvProtocol } from '../../shared/git/credential-prompt-env'
-import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
-import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
 import {
   isWindowsGitBashShellPath,
   resolveGitBashPath,

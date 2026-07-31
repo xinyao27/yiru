@@ -7,7 +7,6 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
-
 import type {
   ExternalAutomationAction,
   ExternalAutomationActionInput,
@@ -17,7 +16,8 @@ import type {
   ExternalAutomationRunsInput,
   ExternalAutomationRunsPage,
   ExternalAutomationUpdateInput
-} from '../../shared/automations-types'
+} from '~shared/automations-types'
+
 import type { Store } from '../persistence'
 import { isRuntimeOwnedSshTarget } from '../ssh/connection-store'
 import { getActiveMultiplexer } from '../ssh/ssh'

@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { isCoworkingIncarnationMarkerId } from '~shared/coworking/incarnation-marker-id'
 
-import { isCoworkingIncarnationMarkerId } from '../../shared/coworking/incarnation-marker-id'
 import { CoworkingWorktreeIncarnationHostError } from './worktree-incarnation'
 
 const MARKER_RESULT_PREFIX = '__YIRU_COWORKING_MARKER_ID__'

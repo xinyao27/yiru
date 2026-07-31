@@ -1,4 +1,5 @@
-import { COWORKING_CATALOG_MAX_WORKTREES } from '../../../shared/coworking/catalog-contract'
+import { COWORKING_CATALOG_MAX_WORKTREES } from '~shared/coworking/catalog-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type {
   CoworkingCatalogWorktreeDescription,

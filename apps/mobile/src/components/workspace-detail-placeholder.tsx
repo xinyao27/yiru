@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native'
 
-import { TerminalWindow as SquareTerminal } from '@/components/uniwind-icons'
+import { TerminalWindow as SquareTerminal } from '~/components/uniwind-icons'
 
 // Empty detail pane shown beside the worktree-list sidebar on wide
 // tablet/foldable layouts until the user opens a workspace.

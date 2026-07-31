@@ -1,12 +1,11 @@
 import { session } from 'electron'
-
 import {
   getProxyBypassRulesFromEnvironment,
   getProxyUrlFromEnvironment,
   normalizeProxyBypassRules,
   normalizeProxyUrl,
   type NetworkProxySettings
-} from '../../shared/network-proxy'
+} from '~shared/network-proxy'
 
 type ProxySession = {
   resolveProxy(url: string): Promise<string>

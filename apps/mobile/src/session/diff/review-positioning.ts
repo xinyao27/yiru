@@ -1,6 +1,7 @@
 import type { DiffReviewScope } from '@yiru/workbench-model/workspace'
 
-import type { MobileGitStagingArea } from '../../source-control/git-status'
+import type { MobileGitStagingArea } from '~/source-control/git-status'
+
 import { createMobileDiffReviewFileKey, type MobileDiffReviewQueueItem } from './review-queue'
 
 export type MobileDiffReviewTargetArea = MobileGitStagingArea | 'branch'

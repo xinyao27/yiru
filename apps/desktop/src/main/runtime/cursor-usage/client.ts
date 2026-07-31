@@ -3,7 +3,8 @@ import type {
   ProviderRateLimitStatus,
   RateLimitBucket,
   RateLimitWindow
-} from '../../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import { fetchCursorRateLimits } from './fetcher'
 import type { CursorUsageRuntimeTarget } from './target'
 

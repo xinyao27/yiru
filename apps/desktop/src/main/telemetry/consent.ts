@@ -6,8 +6,8 @@
 // runtime only and never mutate `GlobalSettings.telemetry.optedIn`. Unsetting
 // the variable on the next launch restores the user's stored preference.
 
-import type { TelemetryConsentState } from '../../shared/telemetry-consent-types'
-import type { GlobalSettings } from '../../shared/types'
+import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
+import type { GlobalSettings } from '~shared/types'
 
 // Discriminated union instead of a boolean: the Privacy pane (PR 3) needs the
 // `reason` to render the correct "disabled because X" helper text, and the

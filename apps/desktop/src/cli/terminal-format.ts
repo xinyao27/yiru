@@ -13,7 +13,7 @@ import type {
   RuntimeTerminalShow,
   RuntimeTerminalSplit,
   RuntimeTerminalWait
-} from '../shared/runtime-types'
+} from '~shared/runtime-types'
 
 export function formatTerminalList(result: RuntimeTerminalListResult): string {
   if (result.terminals.length === 0) {

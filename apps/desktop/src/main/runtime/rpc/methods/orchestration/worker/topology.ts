@@ -1,6 +1,6 @@
-import type { TuiAgent } from '../../../../../../shared/types'
-import type { OrchestrationDb } from '../../../../orchestration/db'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import type { TuiAgent } from '~shared/types'
 
 export type WorkerEffect = {
   kind: 'worktree' | 'terminal' | 'setup' | 'dispatch_input'

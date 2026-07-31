@@ -1,7 +1,8 @@
 import type {
   CoworkingExecutionOperation,
   CoworkingSubscriptionOperation
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from './execution-error'
 import type {
   CoworkingHostAdapter,

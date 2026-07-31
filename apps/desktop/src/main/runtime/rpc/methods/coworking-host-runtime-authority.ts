@@ -1,27 +1,27 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
+import {
+  coworkingActualHostScopeKey,
+  coworkingLocalActualHostScopeKey
+} from '~main/coworking/canonical-host-path'
+import {
+  CoworkingExecutionError,
+  type CoworkingExecutionErrorCode
+} from '~main/coworking/execution-error'
+import type { CoworkingHostOperationContext } from '~main/coworking/execution-gateway'
+import { resolveCoworkingRepoLocalWslDistro } from '~main/coworking/repo-actual-host-scope'
+import type { CoworkingOwnerWorktree } from '~main/coworking/worktree-incarnation'
+import { CoworkingActualHostWorktreeIncarnationHost } from '~main/coworking/worktree-incarnation-host'
+import type { CoworkingPublicWorktreeInstance } from '~main/coworking/worktree-publication-state'
+import { createYiruCoworkingHostAdapter } from '~main/coworking/yiru-host/adapter'
+import { getLocalProjectWorktreeGitOptions } from '~main/project-runtime-git-options'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import type {
   CoworkingPairedRuntimeBoundWorktree,
   CoworkingPairedRuntimeResolvedWorktree,
   CoworkingPairedRuntimeWorktreeSelector
-} from '../../../../shared/coworking/paired-runtime-host-contract'
-import type { CoworkingPairedRuntimeSessionWorktree } from '../../../../shared/coworking/paired-runtime-session-contract'
-import {
-  coworkingActualHostScopeKey,
-  coworkingLocalActualHostScopeKey
-} from '../../../coworking/canonical-host-path'
-import {
-  CoworkingExecutionError,
-  type CoworkingExecutionErrorCode
-} from '../../../coworking/execution-error'
-import type { CoworkingHostOperationContext } from '../../../coworking/execution-gateway'
-import { resolveCoworkingRepoLocalWslDistro } from '../../../coworking/repo-actual-host-scope'
-import type { CoworkingOwnerWorktree } from '../../../coworking/worktree-incarnation'
-import { CoworkingActualHostWorktreeIncarnationHost } from '../../../coworking/worktree-incarnation-host'
-import type { CoworkingPublicWorktreeInstance } from '../../../coworking/worktree-publication-state'
-import { createYiruCoworkingHostAdapter } from '../../../coworking/yiru-host/adapter'
-import { getLocalProjectWorktreeGitOptions } from '../../../project-runtime-git-options'
-import type { YiruRuntimeService } from '../../yiru-runtime'
+} from '~shared/coworking/paired-runtime-host-contract'
+import type { CoworkingPairedRuntimeSessionWorktree } from '~shared/coworking/paired-runtime-session-contract'
+
 import type { RpcContext } from '../core'
 
 const bundles = new WeakMap<YiruRuntimeService, ReturnType<typeof createYiruCoworkingHostAdapter>>()

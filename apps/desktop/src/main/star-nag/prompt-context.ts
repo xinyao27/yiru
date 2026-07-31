@@ -1,9 +1,10 @@
-import { STAR_NAG_INITIAL_THRESHOLD } from '../../shared/constants'
+import { STAR_NAG_INITIAL_THRESHOLD } from '~shared/constants'
 import {
   bucketStarNagAgentsSinceBaseline,
   type StarNagPromptMode,
   type StarNagPromptSource
-} from '../../shared/star-nag-telemetry'
+} from '~shared/star-nag-telemetry'
+
 import type { Store } from '../persistence'
 import type { StatsCollector } from '../stats/collector'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'

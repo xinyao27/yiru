@@ -1,5 +1,5 @@
-import type { FeatureInteractionId } from '../../../shared/feature-interactions'
-import { isBrowserPaneUiRuntimeRpcParams } from '../../../shared/runtime-rpc-feature-interaction-source'
+import type { FeatureInteractionId } from '~shared/feature-interactions'
+import { isBrowserPaneUiRuntimeRpcParams } from '~shared/runtime-rpc-feature-interaction-source'
 
 export function getRuntimeFeatureInteractionId(
   method: string,

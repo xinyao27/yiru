@@ -1,5 +1,4 @@
 import type { WebContents } from 'electron'
-
 import {
   isCoworkingRequesterTransportErrorCode,
   type CoworkingRequesterSubscriptionArgs,
@@ -7,7 +6,7 @@ import {
   type CoworkingRequesterSubscriptionStartResult,
   type CoworkingRequesterSubscriptionStopResult,
   type CoworkingRequesterTransportErrorCode
-} from '../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 
 const COWORKING_REQUESTER_SUBSCRIPTION_EVENT_CHANNEL = 'coworkingSharing:subscriptionEvent'
 

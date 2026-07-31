@@ -6,14 +6,13 @@ import type {
   CreateHostedReviewInput,
   CreateHostedReviewResult
 } from '@yiru/workbench-model/review'
-
-import { splitRemoteBranchName } from '../../shared/git/effective-upstream'
-import { normalizeGitHubPRMergeMethodSettings } from '../../shared/github-pr-merge-methods'
-import { isGitHubWorkItemsQueryTooLarge } from '../../shared/github-work-items-query-bounds'
+import { splitRemoteBranchName } from '~shared/git/effective-upstream'
+import { normalizeGitHubPRMergeMethodSettings } from '~shared/github-pr-merge-methods'
+import { isGitHubWorkItemsQueryTooLarge } from '~shared/github-work-items-query-bounds'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
-} from '../../shared/hosted-review-refs'
+} from '~shared/hosted-review-refs'
 /* eslint-disable max-lines -- Why: co-locating all GitHub client functions keeps the
 concurrency acquire/release pattern and error handling consistent across operations. */
 import type {
@@ -36,7 +35,8 @@ import type {
   GitHubRerunPRChecksResult,
   GitHubPRMergeMethod,
   GitHubPRMergeMethodSettings
-} from '../../shared/types'
+} from '~shared/types'
+
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'

@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from 'expo-router'
 
-import { parseSourceControlHubTab } from '../../../../src/source-control/hub-tab'
-import { MobileSourceControlPanel } from '../../../../src/source-control/panel'
-import { firstParam } from '../../../../src/source-control/screen-state'
+import { parseSourceControlHubTab } from '~/source-control/hub-tab'
+import { MobileSourceControlPanel } from '~/source-control/panel'
+import { firstParam } from '~/source-control/screen-state'
 
 export default function MobileSourceControlScreen() {
   const params = useLocalSearchParams<{

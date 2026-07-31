@@ -1,4 +1,5 @@
-import type { CliInstallState, CliInstallStatus } from '../../shared/cli-install-types'
+import type { CliInstallState, CliInstallStatus } from '~shared/cli-install-types'
+
 import { listWslDistrosAsync } from '../wsl'
 import { CliInstaller } from './installer'
 import { WslCliInstaller } from './wsl-cli-installer'

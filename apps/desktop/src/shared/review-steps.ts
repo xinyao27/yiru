@@ -22,7 +22,7 @@ export const REVIEW_STEPS: readonly ReviewStep[] = [
     id: 'pr-view',
     name: 'PR checks',
     subtitle: 'PR checks & comments',
-    description: 'See PR status in the Checks tab.'
+    description: 'See PR status in Changes & Review.'
   },
   {
     id: 'ship',

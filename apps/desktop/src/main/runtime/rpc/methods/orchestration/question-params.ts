@@ -1,9 +1,8 @@
 import { z } from 'zod'
-
 import {
   OptionalFiniteNumber,
   OptionalString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 export const AskParams = z
   .object({

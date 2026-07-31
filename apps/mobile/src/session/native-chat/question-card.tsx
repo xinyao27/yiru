@@ -1,13 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
-import { MobileContentSection } from '../../components/content-section'
-import { MobileGlassGroup } from '../../components/glass/group'
-import { MobileGlassIconButton } from '../../components/glass/icon-button'
-import { MobileGlassSurface } from '../../components/glass/surface'
-import { MobileGlassTextButton } from '../../components/glass/text-button'
-import { Check, Question as CircleHelp } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { Check, Question as CircleHelp } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+
 import { formatQuestionAnswer, type MobileChatQuestion } from './question'
 
 type MobileNativeChatQuestionProps = {

@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 
-import { CaretRight as ChevronRight, Monitor } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretRight as ChevronRight, Monitor } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import type { ConnectionVerdict } from '../transport/connection-health'
 import { verdictDisplayLabel } from '../transport/connection-health'

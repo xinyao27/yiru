@@ -1,4 +1,4 @@
-import { ListChecks } from '@/components/uniwind-icons'
+import { ListChecks } from '~/components/uniwind-icons'
 
 import { MobileAgentSessionHistoryIcon } from '../agent-history/agent-session-history-icon'
 import { ActionSheetModal } from '../components/action-sheet-modal'

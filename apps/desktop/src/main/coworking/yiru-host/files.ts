@@ -1,8 +1,9 @@
 import { realpath } from 'node:fs/promises'
 
-import { resolveAuthorizedPath } from '../../filesystem/auth'
-import type { Store } from '../../persistence'
-import { getSshGitProvider } from '../../providers/ssh-git-dispatch'
+import { resolveAuthorizedPath } from '~main/filesystem/auth'
+import type { Store } from '~main/persistence'
+import { getSshGitProvider } from '~main/providers/ssh-git-dispatch'
+
 import { CoworkingExecutionError } from '../execution-error'
 import { readCoworkingGitAdministrativePaths } from '../git-administrative-path-reader'
 import type {

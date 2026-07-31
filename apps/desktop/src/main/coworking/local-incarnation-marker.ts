@@ -3,7 +3,8 @@ import { constants } from 'node:fs'
 import { link, lstat, open, opendir, realpath, rm, stat } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 
-import { isCoworkingIncarnationMarkerId } from '../../shared/coworking/incarnation-marker-id'
+import { isCoworkingIncarnationMarkerId } from '~shared/coworking/incarnation-marker-id'
+
 import {
   isExistingCoworkingFilesystemError,
   isMissingCoworkingFilesystemError,

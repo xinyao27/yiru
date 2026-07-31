@@ -1,13 +1,13 @@
 import { URL } from 'node:url'
 
 import { ipcMain } from 'electron'
-
 import {
   LOOPBACK_LOCALHOST_HOSTS,
   normalizeLocalhostHostname,
   type LocalhostWorktreeLabelResult,
   type LocalhostWorktreeLabelRoute
-} from '../../shared/localhost-worktree-labels'
+} from '~shared/localhost-worktree-labels'
+
 import { localhostWorktreeLabelProxy } from '../localhost-worktree-label-proxy'
 import type { Store } from '../persistence'
 import { getStoreWorkspacePortProbes, scanWorkspacePortProbes } from './workspace-port-ownership'

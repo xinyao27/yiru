@@ -3,7 +3,7 @@ import { open } from 'node:fs/promises'
 import {
   LOCAL_LOG_TAIL_CHUNK_BYTES,
   type LocalLogTailReadResult
-} from '../../shared/local-log-tail-types'
+} from '~shared/local-log-tail-types'
 
 export function localLogFileIdentity(stats: {
   dev: number

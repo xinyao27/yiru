@@ -1,5 +1,6 @@
-import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
-import { buildStartupCommandSubmission } from '../../shared/startup-command-submission'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import { buildStartupCommandSubmission } from '~shared/startup-command-submission'
+
 import { resolveProcessCwd } from '../providers/process-cwd'
 import { normalizePtySize } from './pty-size'
 import { Session, type SubprocessHandle } from './session'

@@ -1,12 +1,9 @@
 import { readFile, stat } from 'node:fs/promises'
 
 import type { WebContents } from 'electron'
+import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
+import { makeCustomTerminalThemeSelection } from '~shared/terminal/custom-themes'
 
-import type {
-  WarpThemeImportPreview,
-  WarpThemeImportSource
-} from '../../shared/terminal/custom-themes'
-import { makeCustomTerminalThemeSelection } from '../../shared/terminal/custom-themes'
 import type { Store } from '../persistence'
 import { filesFromAutoDirectories } from './auto-discovered-theme-files'
 import {

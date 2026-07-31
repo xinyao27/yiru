@@ -6,7 +6,8 @@ import {
   parseServeSupervisorMessage,
   parseServeUpdateHandoffState,
   type ServeUpdateHandoffState
-} from '../../shared/serve-update-handoff'
+} from '~shared/serve-update-handoff'
+
 import { waitForMacBundleVersion } from './mac-app-update-bundle'
 import { RuntimeClientError } from './types'
 

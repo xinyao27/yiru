@@ -1,4 +1,5 @@
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
+
 import {
   onWatcherChildCapacityAvailable,
   WatcherChildCapacityError

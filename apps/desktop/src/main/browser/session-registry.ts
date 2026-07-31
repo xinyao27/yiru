@@ -16,15 +16,15 @@ import { dirname, join } from 'node:path'
    security boundary across modules. */
 import { app, session } from 'electron'
 import type { Session } from 'electron'
-
-import { SKILLS_MARKETPLACE_PARTITION, YIRU_BROWSER_PARTITION } from '../../shared/constants'
-import type { BrowserSessionProfile, BrowserSessionProfileScope } from '../../shared/types'
+import { SKILLS_MARKETPLACE_PARTITION, YIRU_BROWSER_PARTITION } from '~shared/constants'
+import type { BrowserSessionProfile, BrowserSessionProfileScope } from '~shared/types'
 import {
   DEFAULT_LOCAL_YIRU_PROFILE_ID,
   getYiruProfileBrowserDefaultPartition,
   getYiruProfileBrowserPartitionSegment,
   getYiruProfileBrowserSessionPartition
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
+
 import { resolveChromiumCookiesPath } from './chromium-cookie-path'
 import { browserManager } from './manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from './media-access'

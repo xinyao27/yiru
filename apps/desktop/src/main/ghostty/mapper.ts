@@ -1,9 +1,6 @@
-import { HEX_COLOR_RE } from '../../shared/color-validation'
-import type {
-  GlobalSettings,
-  TerminalColorOverrides,
-  GhosttyImportPreview
-} from '../../shared/types'
+import { HEX_COLOR_RE } from '~shared/color-validation'
+import type { GlobalSettings, TerminalColorOverrides, GhosttyImportPreview } from '~shared/types'
+
 import { parsePaddingValue, parseStrictInt } from './numeric-config-values'
 
 const PALETTE_INDEX_MAP: Record<number, keyof TerminalColorOverrides> = {

@@ -7,23 +7,23 @@ import {
   GitPullRequest as GitPullRequestArrow,
   Sparkle as Sparkles,
   Warning as TriangleAlert
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-
-import { triggerError, triggerSuccess } from '../../platform/haptics'
-import { hostedReviewCopy } from '../../source-control/hosted-review-copy'
+} from '~/components/uniwind-icons'
+import { triggerError, triggerSuccess } from '~/platform/haptics'
+import { hostedReviewCopy } from '~/source-control/hosted-review-copy'
 import {
   getPrComposeDisabledReason,
   isBaseHeadDistinct
-} from '../../source-control/pr-compose-validation'
+} from '~/source-control/pr-compose-validation'
 import {
   createMobilePr,
   getMobilePrCreateSuccessWarning,
   shouldPushBeforeMobilePrCreate,
   type MobilePrPrefill
-} from '../../source-control/pr-create'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { RpcSuccess } from '../../transport/types'
+} from '~/source-control/pr-create'
+import { cn } from '~/style/class-names'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { RpcSuccess } from '~/transport/types'
+
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'
 import { MobileGlassPressable } from '../glass/pressable'

@@ -23,20 +23,19 @@ boundary. Splitting by line count would scatter tightly coupled repo behavior. *
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import { dialog, ipcMain } from 'electron'
 import { z } from 'zod'
-
-import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
-import type { FolderWorkspacePathStatusRequest } from '../../shared/folder-workspace-path-status'
-import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
+import { DEFAULT_REPO_BADGE_COLOR } from '~shared/constants'
+import type { FolderWorkspacePathStatusRequest } from '~shared/folder-workspace-path-status'
+import { getGitCloneFailureMessage } from '~shared/git/clone-failure-message'
 import type {
   HostRepoCatalogSnapshot,
   ListReposForExecutionHostArgs
-} from '../../shared/host-repo-catalog-contract'
-import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
-import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
-import { isFolderRepo } from '../../shared/repo-kind'
-import { normalizeRepoSourceControlAiOverrides } from '../../shared/source-control/ai'
-import type { RepoMethod } from '../../shared/telemetry-events'
-import { isTuiAgent } from '../../shared/tui-agent/config'
+} from '~shared/host-repo-catalog-contract'
+import { getProjectHostSetupForRepo } from '~shared/project-host-setup-projection'
+import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
+import { isFolderRepo } from '~shared/repo-kind'
+import { normalizeRepoSourceControlAiOverrides } from '~shared/source-control/ai'
+import type { RepoMethod } from '~shared/telemetry-events'
+import { isTuiAgent } from '~shared/tui-agent/config'
 import type {
   BaseRefSearchResult,
   Project,
@@ -56,7 +55,8 @@ import type {
   NestedRepoScanResult,
   BaseRefDefaultResult,
   SparsePreset
-} from '../../shared/types'
+} from '~shared/types'
+
 import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
 import { getSshGitCapabilityCache } from '../git/capability-state'
 import {

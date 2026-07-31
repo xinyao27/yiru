@@ -1,12 +1,11 @@
 /* eslint-disable max-lines -- Why: browser IPC handlers must be registered together so the
    trust boundary (isTrustedBrowserRenderer) and handler teardown stay consistent. */
 import { BrowserWindow, ipcMain, webContents } from 'electron'
-
 import {
   isValidBrowserAnnotationViewportBridgeMarkers,
   isValidBrowserAnnotationViewportBridgeToken,
   type BrowserSetAnnotationViewportBridgeArgs
-} from '../../shared/browser/annotation-viewport-bridge'
+} from '~shared/browser/annotation-viewport-bridge'
 import type {
   BrowserSetGrabModeArgs,
   BrowserSetGrabModeResult,
@@ -17,14 +16,15 @@ import type {
   BrowserCaptureSelectionScreenshotResult,
   BrowserExtractHoverArgs,
   BrowserExtractHoverResult
-} from '../../shared/browser/grab-types'
+} from '~shared/browser/grab-types'
 import type {
   BrowserCookieImportResult,
   BrowserCertificateProceedResult,
   BrowserSessionProfile,
   BrowserSessionProfileScope,
   BrowserViewportOverride
-} from '../../shared/types'
+} from '~shared/types'
+
 import type { AgentBrowserBridge } from './agent-browser-bridge'
 import {
   pickCookieFile,

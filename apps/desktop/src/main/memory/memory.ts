@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
+import type { MemorySnapshot } from '~shared/types'
 
-import type { MemorySnapshot } from '../../shared/types'
 import type { Store } from '../persistence'
 import { collectMemorySnapshot } from './collector'
 

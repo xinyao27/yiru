@@ -3,8 +3,8 @@ import { useCallback, useRef, useState } from 'react'
 import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
 import { MobileGlassGroup } from '../src/components/glass/group'

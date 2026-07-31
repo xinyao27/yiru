@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Linking, View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
-import { UniwindWebView } from '@/components/uniwind-web-view'
+import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
+import { UniwindWebView } from '~/components/uniwind-web-view'
 
 type Props = {
   html: string

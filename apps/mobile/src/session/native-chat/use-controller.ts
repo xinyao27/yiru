@@ -6,7 +6,8 @@ import {
   type SetStateAction
 } from 'react'
 
-import type { RpcClient } from '../../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { useThrottledLatestValue } from '../use-throttled-latest-value'
 import { useMobileSessionViewMode } from '../use-view-mode'
 import type { parseAskFromStatus } from './ask'

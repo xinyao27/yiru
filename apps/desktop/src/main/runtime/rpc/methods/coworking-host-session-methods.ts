@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
-import type { CoworkingExecutionOperation } from '../../../../shared/coworking/operation-contract'
+import { CoworkingExecutionError } from '~main/coworking/execution-error'
+import type { CoworkingExecutionOperation } from '~shared/coworking/operation-contract'
 import {
   CoworkingPairedRuntimeHistoricalSessionPageResponseSchema,
   CoworkingPairedRuntimeListHistoricalSessionPageParamsSchema,
@@ -10,8 +11,8 @@ import {
   CoworkingPairedRuntimeSessionInvokeParamsSchema,
   CoworkingPairedRuntimeSubscribeSessionChangesParamsSchema,
   CoworkingPairedRuntimeUnsubscribeSessionChangesParamsSchema
-} from '../../../../shared/coworking/paired-runtime-session-contract'
-import { CoworkingExecutionError } from '../../../coworking/execution-error'
+} from '~shared/coworking/paired-runtime-session-contract'
+
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
 import { getCoworkingHostChannelLifetimes } from './coworking-host-channel-lifetimes'
 import { projectCoworkingHostExecutionResult } from './coworking-host-result-projection'

@@ -1,7 +1,8 @@
 import { readFile, stat } from 'node:fs/promises'
 import { platform } from 'node:os'
 
-import type { GlobalSettings, GhosttyImportPreview } from '../../shared/types'
+import type { GlobalSettings, GhosttyImportPreview } from '~shared/types'
+
 import type { Store } from '../persistence'
 import { findGhosttyConfigPaths } from './discovery'
 import { mapGhosttyToYiru } from './mapper'

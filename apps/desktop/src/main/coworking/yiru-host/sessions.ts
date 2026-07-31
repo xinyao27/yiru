@@ -1,10 +1,10 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import type {
   CoworkingExecutionOperation,
   CoworkingSessionContinueHostResult
-} from '../../../shared/coworking/operation-contract'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingHostOperationContext } from '../execution-gateway'
 import type { CoworkingOwnerSessionRecords } from '../owner/session-records'

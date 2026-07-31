@@ -1,4 +1,5 @@
-import type { ProjectHostSetup } from '../shared/types'
+import type { ProjectHostSetup } from '~shared/types'
+
 import type { RuntimeClient } from './runtime-client'
 import { RuntimeClientError } from './runtime-client'
 

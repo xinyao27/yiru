@@ -1,8 +1,9 @@
 import { Pressable, TextInput, View } from 'react-native'
 
-import { MobileGlassSurface } from '../../components/glass/surface'
-import { ArrowUp, Square } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { ArrowUp, Square } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+
 import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileImageSource } from '../image-source-picker'
 

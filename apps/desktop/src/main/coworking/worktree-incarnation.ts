@@ -1,6 +1,5 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import type { CoworkingWorktreeKind } from '../../shared/coworking/worktree-kind'
+import type { CoworkingWorktreeKind } from '~shared/coworking/worktree-kind'
 
 export type CoworkingOwnerWorktree = {
   kind: CoworkingWorktreeKind

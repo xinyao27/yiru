@@ -1,6 +1,5 @@
 import { net, session } from 'electron'
-
-import { ensureElectronProxyFromEnvironment } from '../../network/proxy-settings'
+import { ensureElectronProxyFromEnvironment } from '~main/network/proxy-settings'
 
 // Why: the OAuth client id and token endpoint are the public Claude Code
 // values, verified against the installed `claude` binary (2.1.177) and the

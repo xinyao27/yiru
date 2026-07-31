@@ -9,19 +9,19 @@ import {
   RUNTIME_PROTOCOL_VERSION
 } from '@yiru/runtime-protocol/capabilities'
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
-
 import {
   isOrchestrationMutation,
   orchestrationMigrationData
-} from '../../shared/orchestration-rpc-contract'
-import type { PairingOffer } from '../../shared/pairing'
+} from '~shared/orchestration-rpc-contract'
+import type { PairingOffer } from '~shared/pairing'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
-import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
+} from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import type { CliStatusResult, RuntimeStatus } from '~shared/runtime-types'
+
 import {
   attachMutationRecovery,
   delay,

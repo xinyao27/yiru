@@ -1,12 +1,12 @@
 import { z } from 'zod'
-
 import {
   callComputerSidecarAction,
   callComputerSidecarCapabilities,
   callComputerSidecarListApps,
   callComputerSidecarListWindows,
   callComputerSidecarSnapshot
-} from '../../../computer/sidecar-client'
+} from '~main/computer/sidecar-client'
+
 import { defineMethod, type RpcMethod } from '../core'
 import {
   Click,
@@ -44,7 +44,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
     params: ComputerPermissions,
     handler: async (params) => {
       const { openComputerUsePermissions } =
-        await import('../../../computer/macos-computer-use-permissions')
+        await import('~main/computer/macos-computer-use-permissions')
       return openComputerUsePermissions(params.id)
     }
   }),
@@ -53,7 +53,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
     params: z.object({}),
     handler: async () => {
       const { getComputerUsePermissionStatus } =
-        await import('../../../computer/macos-computer-use-permissions')
+        await import('~main/computer/macos-computer-use-permissions')
       return getComputerUsePermissionStatus()
     }
   }),

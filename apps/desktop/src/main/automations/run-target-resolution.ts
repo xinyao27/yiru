@@ -1,9 +1,9 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+import { getAutomationLegacyRepoId } from '~shared/automation/run-identity'
+import type { Automation } from '~shared/automations-types'
+import type { ProjectHostSetup, Repo } from '~shared/types'
 
-import { getAutomationLegacyRepoId } from '../../shared/automation/run-identity'
-import type { Automation } from '../../shared/automations-types'
-import type { ProjectHostSetup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 
 export type AutomationRunTargetResult =

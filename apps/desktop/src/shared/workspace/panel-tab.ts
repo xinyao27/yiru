@@ -6,7 +6,6 @@ const WORKSPACE_PANEL_TAB_CONTENT_TYPES = new Set<WorkspacePanelTabContentType>(
   'workspaces',
   'pr-checks',
   'source-control',
-  'checks',
   'ports'
 ])
 

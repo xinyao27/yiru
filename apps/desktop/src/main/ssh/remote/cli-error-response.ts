@@ -1,4 +1,4 @@
-import type { RpcResponse } from '../../runtime/rpc/core'
+import type { RpcResponse } from '~main/runtime/rpc/core'
 
 export function buildRemoteCliError(message: string, code = 'runtime_error'): RpcResponse {
   return {

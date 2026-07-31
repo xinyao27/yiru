@@ -1,17 +1,18 @@
 import type { ChildProcess } from 'node:child_process'
 
-import { fileListingCancellationError } from '../../shared/file-listing-cancellation'
+import { fileListingCancellationError } from '~shared/file-listing-cancellation'
 import {
   buildGitLsFilesArgsForQuickOpen,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../../shared/quick-open/filter'
+} from '~shared/quick-open/filter'
 import {
   createQuickOpenReaddirBudget,
   expandQuickOpenGitFileListing,
   listQuickOpenFilesWithReaddir,
   parseQuickOpenGitLsFilesEntry
-} from '../../shared/quick-open/readdir-walk'
+} from '~shared/quick-open/readdir-walk'
+
 import { gitSpawn } from '../git/runner'
 
 /**

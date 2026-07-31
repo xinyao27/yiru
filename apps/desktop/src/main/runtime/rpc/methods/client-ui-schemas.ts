@@ -1,19 +1,15 @@
 import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
 import { z } from 'zod'
-
-import {
-  isFeatureInteractionId,
-  type FeatureInteractionId
-} from '../../../../shared/feature-interactions'
-import { isFeatureTipId } from '../../../../shared/feature-tips'
-import { isTuiAgent } from '../../../../shared/tui-agent/config'
+import { isFeatureInteractionId, type FeatureInteractionId } from '~shared/feature-interactions'
+import { isFeatureTipId } from '~shared/feature-tips'
+import { isTuiAgent } from '~shared/tui-agent/config'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../../../shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent/selection'
-import { normalizeWorkspacePanelTitlebarPinnedIds } from '../../../../shared/workspace/panel-titlebar-pinned'
-import { normalizeWorktreeCardProperties } from '../../../../shared/workspace/worktree-card-properties'
+} from '~shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
+import { normalizeWorkspacePanelTitlebarPinnedIds } from '~shared/workspace/panel-titlebar-pinned'
+import { normalizeWorktreeCardProperties } from '~shared/workspace/worktree-card-properties'
 const NullableString = z.string().nullable()
 const StringArray = z.array(z.string())
 const FeatureTipIds = z.array(z.custom(isFeatureTipId, { message: 'Unknown feature tip id' }))
@@ -142,7 +138,10 @@ export const UiUpdate = z
     sidebarWidth: z.number().finite().optional(),
     rightSidebarOpen: z.boolean().optional(),
     rightSidebarTab: z
-      .enum(['explorer', 'search', 'vault', 'source-control', 'checks', 'ports'])
+      .preprocess(
+        (value) => (value === 'checks' ? 'source-control' : value),
+        z.enum(['explorer', 'search', 'vault', 'source-control', 'ports'])
+      )
       .optional(),
     rightSidebarExplorerView: z.enum(['files', 'search']).optional(),
     rightSidebarWidth: z.number().finite().optional(),

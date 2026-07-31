@@ -1,5 +1,5 @@
-import { hasExactCoworkingWireKeys } from '../../../shared/coworking/exact-wire-record'
-import type { CoworkingRpcRequest } from '../../../shared/coworking/wire-contract'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import type { CoworkingRpcRequest } from '~shared/coworking/wire-contract'
 
 export function parseCoworkingRpcRequest(frame: string): CoworkingRpcRequest | null {
   let value: unknown

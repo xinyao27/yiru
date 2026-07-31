@@ -2,7 +2,8 @@ import type {
   Automation,
   AutomationRun,
   AutomationRunOutputSnapshot
-} from '../../shared/automations-types'
+} from '~shared/automations-types'
+
 import type { AutomationRunTargetResult } from './run-target-resolution'
 
 const MAX_HEADLESS_OUTPUT_SNAPSHOT_CHARS = 256 * 1024

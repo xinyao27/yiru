@@ -1,8 +1,3 @@
-import type {
-  CodexManagedAccount,
-  CodexManagedAccountRuntimeSelection,
-  GlobalSettings
-} from '../../../shared/types'
 import {
   getManagedSelectionTargetForAccount,
   getSelectedManagedAccountIdForTarget,
@@ -13,9 +8,14 @@ import {
   setSelectedManagedAccountIdForTarget,
   type ManagedAccountSelectionTarget,
   type NormalizedManagedAccountSelectionTarget
-} from '../../managed-account-runtime-selection'
+} from '~main/managed-account-runtime-selection'
+import type {
+  CodexManagedAccount,
+  CodexManagedAccountRuntimeSelection,
+  GlobalSettings
+} from '~shared/types'
 
-export { getWslSelectionKey } from '../../managed-account-runtime-selection'
+export { getWslSelectionKey } from '~main/managed-account-runtime-selection'
 
 export type CodexAccountSelectionTarget = ManagedAccountSelectionTarget
 

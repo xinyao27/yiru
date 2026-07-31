@@ -1,4 +1,5 @@
-import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
+import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
+
 import type { E2EEChannel } from './e2ee-channel'
 import { isValidMobileE2EEAuthVersion, type MobileE2EEAuth } from './mobile-e2ee-auth-validation'
 import type { DesktopMobileE2EEV2Session } from './mobile-e2ee-v2-desktop-session'

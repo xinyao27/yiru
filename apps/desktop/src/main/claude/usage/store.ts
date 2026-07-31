@@ -3,8 +3,9 @@ import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store is the single main-process owner for Claude usage persistence, scan gating, and query semantics. Keeping those policy decisions together avoids split-brain range/scope logic across multiple files. */
 import { app } from 'electron'
-
-import type { AutomationRunUsage } from '../../../shared/automations-types'
+import type { Store } from '~main/persistence'
+import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
+import type { AutomationRunUsage } from '~shared/automations-types'
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
@@ -15,9 +16,8 @@ import type {
   ClaudeUsageSessionRow,
   ClaudeUsageSnapshot,
   ClaudeUsageSummary
-} from '../../../shared/claude-usage-types'
-import type { Store } from '../../persistence'
-import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+} from '~shared/claude-usage-types'
+
 import { priceClaudeUsage } from './pricing'
 import { createWorktreeRefs, getSessionProjectLabel, scanClaudeUsageFiles } from './scanner'
 import type { ClaudeUsagePersistedState } from './types'

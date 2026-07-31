@@ -1,6 +1,5 @@
 import { buildAgentNameRe, isCursorAgentTitle } from '@yiru/workbench-model/agent'
-
-import type { RuntimeTerminalSummary } from '../../../shared/runtime-types'
+import type { RuntimeTerminalSummary } from '~shared/runtime-types'
 
 // Why: group addresses enable broadcast messaging to logical groups of agents.
 // Resolution is done at send-time: one message record per recipient, same thread_id,

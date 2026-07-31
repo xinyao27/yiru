@@ -20,6 +20,9 @@ function getConflictOperationPromptLabel(conflictOperation: GitConflictOperation
   if (conflictOperation === 'cherry-pick') {
     return 'cherry-pick'
   }
+  if (conflictOperation === 'revert') {
+    return 'revert'
+  }
   return 'git'
 }
 
@@ -33,6 +36,9 @@ function getConflictOperationContinueCommand(conflictOperation: GitConflictOpera
   if (conflictOperation === 'cherry-pick') {
     return 'git cherry-pick --continue'
   }
+  if (conflictOperation === 'revert') {
+    return 'git revert --continue'
+  }
   return 'the appropriate git --continue command for the active operation'
 }
 
@@ -42,6 +48,9 @@ function getConflictOperationSkipCommand(conflictOperation: GitConflictOperation
   }
   if (conflictOperation === 'cherry-pick') {
     return 'git cherry-pick --skip'
+  }
+  if (conflictOperation === 'revert') {
+    return 'git revert --skip'
   }
   return null
 }
@@ -54,6 +63,9 @@ function getConflictOperationPatchInspectionHint(
   }
   if (conflictOperation === 'cherry-pick') {
     return 'For cherry-pick, inspect the commit being replayed if available, for example git show --stat --patch CHERRY_PICK_HEAD.'
+  }
+  if (conflictOperation === 'revert') {
+    return 'For revert, inspect the commit being reverted if available, for example git show --stat --patch REVERT_HEAD.'
   }
   return null
 }

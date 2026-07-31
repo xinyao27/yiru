@@ -1,11 +1,12 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
-import type { CoworkingOsFamily, CoworkingProbeRequest } from '../../shared/coworking/wire-contract'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import type { CoworkingOsFamily, CoworkingProbeRequest } from '~shared/coworking/wire-contract'
 import {
   COWORKING_PROTOCOL_VERSION,
   COWORKING_SUPPORTED_PROTOCOL_VERSIONS
-} from '../../shared/coworking/wire-contract'
+} from '~shared/coworking/wire-contract'
+
 import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import type { TailnetControl } from './tailnet-control'
 import { normalizeTailnetIp } from './tailscale-json-projection'

@@ -9,7 +9,8 @@ import type {
   RuntimeTerminalShow,
   RuntimeTerminalSplit,
   RuntimeTerminalWait
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { shouldUseRendererBackedInteractiveTerminal } from '../codex-command-classification'
 import type { CommandHandler } from '../dispatch'
 import {

@@ -9,9 +9,9 @@ import {
   CaretRight as ChevronRight,
   GitMerge,
   GitPullRequest
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'
 import { AgentSpinner } from './agent-spinner'

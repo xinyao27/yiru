@@ -1,9 +1,9 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import { getProjectHostSetupForRepo } from '~shared/project-host-setup-projection'
+import { getRepoKind } from '~shared/repo-kind'
+import type { DetectedWorktree, ProjectHostSetup, Repo, WorktreeMeta } from '~shared/types'
 
-import { getProjectHostSetupForRepo } from '../../../shared/project-host-setup-projection'
-import { getRepoKind } from '../../../shared/repo-kind'
-import type { DetectedWorktree, ProjectHostSetup, Repo, WorktreeMeta } from '../../../shared/types'
 import type { CoworkingOwnerWorktree } from '../worktree-incarnation'
 
 export function projectRegisteredCoworkingWorktree(

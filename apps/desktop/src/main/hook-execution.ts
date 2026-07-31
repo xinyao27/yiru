@@ -1,7 +1,8 @@
 import { exec, execFile } from 'node:child_process'
 
-import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
-import type { Repo } from '../shared/types'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { Repo } from '~shared/types'
+
 import { promptGuardShellEnv } from './git/runner'
 import { getEffectiveHooks } from './hook-config'
 import {

@@ -2,8 +2,9 @@ import {
   syncForkDefaultBranch,
   type GitForkSyncExpectedUpstream,
   type GitForkSyncResult
-} from '../../shared/git/fork-sync'
-import { normalizeGitErrorMessage } from '../../shared/git/remote-error'
+} from '~shared/git/fork-sync'
+import { normalizeGitErrorMessage } from '~shared/git/remote-error'
+
 import { gitExecFileAsync } from './runner'
 import type { GitRuntimeOptions } from './runtime-options'
 import { gitOptionsForWorktree } from './runtime-options'

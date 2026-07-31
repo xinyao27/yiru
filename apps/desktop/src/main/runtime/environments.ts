@@ -2,19 +2,19 @@ import { randomUUID } from 'node:crypto'
 
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { app, ipcMain } from 'electron'
-
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/client'
+import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
 import {
   addEnvironmentFromPairingCode,
   listEnvironments,
   removeEnvironment,
   resolveEnvironment
-} from '../../shared/runtime-environment-store'
+} from '~shared/runtime-environment-store'
 import {
   redactRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment
-} from '../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../shared/runtime-types'
+} from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
+
 import type { Store } from '../persistence'
 import { clearActiveRuntimeEnvironmentFocusIfMatches } from '../runtime-environment-focus-self-heal'
 import { closeRemoteRuntimeRequestConnection } from './environment-request-connections'

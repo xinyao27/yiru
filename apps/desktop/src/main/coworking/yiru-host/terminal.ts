@@ -1,9 +1,10 @@
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import type {
   CoworkingExecutionOperation,
   CoworkingSubscriptionOperation,
   CoworkingTerminalSubscriptionEvent
-} from '../../../shared/coworking/operation-contract'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingHostOperationContext, CoworkingHostSubscription } from '../execution-gateway'
 import type { CoworkingTerminalHost } from '../structured-host-adapter'

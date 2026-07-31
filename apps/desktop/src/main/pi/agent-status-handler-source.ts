@@ -1,4 +1,4 @@
-import type { PiAgentKind } from '../../shared/pi-agent-kind'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 // Why: keep the generated handler registrations separate from hook transport;
 // both are independently sizeable and the installed extension concatenates them.

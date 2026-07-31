@@ -5,8 +5,9 @@ import type { FileHandle } from 'node:fs/promises'
 import { link, lstat, open, opendir, realpath, rm, stat } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
-import { isCoworkingIncarnationMarkerId } from '../../shared/coworking/incarnation-marker-id'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import { isCoworkingIncarnationMarkerId } from '~shared/coworking/incarnation-marker-id'
+
 import type { RelayDispatcher, RequestContext } from '../dispatcher'
 import {
   openRelayCoworkingExclusiveFile,

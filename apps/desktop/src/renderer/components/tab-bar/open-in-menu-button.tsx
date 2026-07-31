@@ -1,0 +1,171 @@
+import { FolderOpen, CaretDown } from '@phosphor-icons/react'
+import {
+  getLocalFileManagerLabel,
+  getPreferredWorktreeOpenInEntry,
+  getWorktreeOpenInEntries,
+  openWorktreePath,
+  type OpenInMenuEntry,
+  WorktreeOpenInMenuContent
+} from '~renderer/components/sidebar/worktree-open-in-menu'
+import type { DropIndicator } from '~renderer/components/tab-bar/drop-indicator'
+import { Button } from '~renderer/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { useRepoById } from '~renderer/store/selectors'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '~shared/workspace/panel-titlebar-pinned'
+
+import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
+import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
+
+export type TabBarOpenInMenuButtonProps = {
+  worktreeId: string
+  /** When provided, Open in joins the titlebar pin/drag strip. */
+  titlebarModel?: WorkspacePanelTitlebarModel | null
+  titlebarIndex?: number
+  titlebarSource?: 'visible' | 'overflow'
+  dropIndicator?: DropIndicator
+}
+
+export function TabBarOpenInMenuButton({
+  worktreeId,
+  titlebarModel = null,
+  titlebarIndex,
+  titlebarSource = 'visible',
+  dropIndicator = null
+}: TabBarOpenInMenuButtonProps): React.JSX.Element | null {
+  const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
+  const repo = useRepoById(worktree?.repoId ?? null)
+  const runtimeEnvironmentId = useAppStore((state) =>
+    getRuntimeEnvironmentIdForWorktree(state, worktreeId)
+  )
+  const openInApplications = useAppStore((state) => state.settings?.openInApplications ?? [])
+  const lastOpenInTargetKey = useAppStore((state) => state.settings?.lastOpenInTargetKey)
+  const updateSettings = useAppStore((state) => state.updateSettings)
+  const entries = getWorktreeOpenInEntries(openInApplications, getLocalFileManagerLabel())
+  const preferredEntry = getPreferredWorktreeOpenInEntry(entries, lastOpenInTargetKey)
+
+  if (!worktree || worktreeId === FLOATING_TERMINAL_WORKTREE_ID || !preferredEntry) {
+    return null
+  }
+
+  const openLabel = translate(
+    'auto.components.tab.bar.TabBarOpenInMenuButton.3f5d946e01',
+    'Open in {{value0}}',
+    { value0: preferredEntry.label }
+  )
+  const chooseLabel = translate(
+    'auto.components.tab.bar.TabBarOpenInMenuButton.50ec9a165e',
+    'Choose application'
+  )
+
+  const openEntry = (entry: OpenInMenuEntry): void => {
+    void openWorktreePath({
+      target: entry.target,
+      worktreePath: worktree.path,
+      connectionId: repo?.connectionId ?? null,
+      runtimeEnvironmentId,
+      command: entry.command
+    })
+  }
+
+  const rememberEntry = (entry: OpenInMenuEntry): void => {
+    if (entry.preferenceKey !== lastOpenInTargetKey) {
+      // Why: the left half is a repeat action, so menu choices must survive relaunches.
+      void updateSettings({ lastOpenInTargetKey: entry.preferenceKey })
+    }
+  }
+
+  const pinDraggable = Boolean(titlebarModel)
+  const startPinDrag = (event: React.PointerEvent): void => {
+    if (!titlebarModel) {
+      return
+    }
+    titlebarModel.handleItemPointerDown(event, WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID, titlebarSource)
+  }
+
+  return (
+    // Why: Open in is two chrome buttons but one pin slot. The wrapper owns the
+    // ButtonGroup L/R seams; inner buttons stay borderless so icon + caret read
+    // as one control with no mid seam.
+    <div
+      data-workspace-titlebar-slot={titlebarIndex != null ? String(titlebarIndex) : undefined}
+      className={cn(
+        'relative flex h-full items-stretch border border-y-0 border-border [-webkit-app-region:no-drag] dark:border-input',
+        pinDraggable && 'cursor-grab active:cursor-grabbing',
+        getDropIndicatorClasses(dropIndicator)
+      )}
+      // Why: bubble after the menu trigger records pointer type, then stop before
+      // the surrounding tab-strip drag handler sees the press.
+      onPointerDown={pinDraggable ? startPinDrag : undefined}
+    >
+      <DropdownMenu modal={false}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline-transparent"
+                size="icon-titlebar-compact"
+                className="text-muted-foreground border-0"
+                aria-label={openLabel}
+                onClick={() => openEntry(preferredEntry)}
+              >
+                {preferredEntry.target === 'file-manager' ? (
+                  <FolderOpen />
+                ) : (
+                  <OpenInApplicationIcon
+                    application={{ command: preferredEntry.command ?? '' }}
+                    size={16}
+                  />
+                )}
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={6}>
+            {openLabel}
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline-transparent"
+                    size="icon-titlebar-compact"
+                    className="text-muted-foreground border-0"
+                    aria-label={chooseLabel}
+                  >
+                    <CaretDown />
+                  </Button>
+                }
+              />
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={6}>
+            {chooseLabel}
+          </TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent align="end" side="bottom" sideOffset={4} className="w-52">
+          <WorktreeOpenInMenuContent
+            worktreePath={worktree.path}
+            connectionId={repo?.connectionId ?? null}
+            runtimeEnvironmentId={runtimeEnvironmentId}
+            onEntryOpen={rememberEntry}
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}

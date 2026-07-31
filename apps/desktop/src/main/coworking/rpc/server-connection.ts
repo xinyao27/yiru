@@ -2,9 +2,10 @@ import type {
   CoworkingRpcFailure,
   CoworkingRpcRequest,
   CoworkingRpcResponse
-} from '../../../shared/coworking/wire-contract'
-import { COWORKING_MAX_RPC_PLAINTEXT_BYTES } from '../../../shared/coworking/wire-contract'
-import type { AuthenticatedCoworkingPrincipal } from '../../../shared/rpc-principal'
+} from '~shared/coworking/wire-contract'
+import { COWORKING_MAX_RPC_PLAINTEXT_BYTES } from '~shared/coworking/wire-contract'
+import type { AuthenticatedCoworkingPrincipal } from '~shared/rpc-principal'
+
 import {
   COWORKING_CANCEL_REQUEST_METHOD,
   COWORKING_CANCEL_SUBSCRIPTION_METHOD

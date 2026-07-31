@@ -1,5 +1,6 @@
-import { computerUseErrorRecoveryData } from '../../../shared/computer-use-error-recovery'
-import { COMPUTER_ERROR_CODES } from '../../../shared/runtime-types'
+import { computerUseErrorRecoveryData } from '~shared/computer-use-error-recovery'
+import { COMPUTER_ERROR_CODES } from '~shared/runtime-types'
+
 // Why: every RPC response needs the same runtimeId envelope, and the
 // runtime/browser error allowlists define the contract the CLI relies on to
 // format human-facing messages. Centralizing this mapping keeps the allowlist

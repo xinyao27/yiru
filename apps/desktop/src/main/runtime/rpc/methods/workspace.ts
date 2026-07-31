@@ -1,10 +1,10 @@
 import { z } from 'zod'
-
+import { WorkspacePathOpenError } from '~main/workspace-path-opening'
 import {
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { WorkspacePathOpenError } from '../../../workspace-path-opening'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { InvalidArgumentError, defineMethod, type RpcMethod } from '../core'
 
 const WorkspaceOpenPath = z.object({

@@ -11,8 +11,9 @@ import type {
   GitLabWorkItem,
   GitLabWorkItemDetails,
   MRComment
-} from '../../shared/types'
-import type { ForgeRemotePreference } from '../../shared/types'
+} from '~shared/types'
+import type { ForgeRemotePreference } from '~shared/types'
+
 import {
   acquire,
   getGlabKnownHosts,

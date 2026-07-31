@@ -1,9 +1,5 @@
-import {
-  compareAppVersions,
-  isPrereleaseAppVersion,
-  isValidAppVersion
-} from '../shared/app-version'
-import type { UpdateStatus } from '../shared/types'
+import { compareAppVersions, isPrereleaseAppVersion, isValidAppVersion } from '~shared/app-version'
+import type { UpdateStatus } from '~shared/types'
 
 export function statusesEqual(left: UpdateStatus, right: UpdateStatus): boolean {
   switch (left.state) {

@@ -2,8 +2,9 @@ import type {
   CoworkingDesktopCatalog,
   CoworkingSessionCatalogEntry,
   CoworkingWorktreeCatalogEntry
-} from '../../../shared/coworking/catalog-contract'
-import { COWORKING_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../../shared/coworking/resource-limits'
+} from '~shared/coworking/catalog-contract'
+import { COWORKING_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '~shared/coworking/resource-limits'
+
 import type { CoworkingPeerConnection } from '../peer/connection'
 import { CoworkingCatalogSessionBudget, coworkingCatalogSessionBytes } from './session-budget'
 import { isCoworkingSessionCatalogPage } from './wire-validation'

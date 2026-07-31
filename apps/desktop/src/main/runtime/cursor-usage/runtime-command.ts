@@ -2,7 +2,8 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import { resolveCliCommand } from '../cli-command'
 import { getHiddenRateLimitWslCwdSetupCommands } from '../hidden-rate-limit-pty-cwd'
 import type { CursorHostRuntimeTarget } from './target'

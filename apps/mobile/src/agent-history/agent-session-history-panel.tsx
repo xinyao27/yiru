@@ -3,10 +3,10 @@ import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
-import { MobileContentSection } from '@/components/content-section'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
-import { MobileGlassTextButton } from '@/components/glass/text-button'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import {

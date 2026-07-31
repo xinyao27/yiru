@@ -1,7 +1,6 @@
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 
 export type OrchestrationCliCommand = 'yiru' | 'yiru-ide'
 

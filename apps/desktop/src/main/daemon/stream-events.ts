@@ -1,5 +1,5 @@
 // ─── Events (Daemon → Client, on stream socket) ────────────────────
-import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 
 export type DataEvent = {
   type: 'event'

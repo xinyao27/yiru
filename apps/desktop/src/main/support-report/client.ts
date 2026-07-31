@@ -3,8 +3,8 @@ import { arch as osArch, platform as osPlatform, release as osRelease } from 'no
 
 import { app } from 'electron'
 import { PostHog } from 'posthog-node'
+import type { SupportReportDraft } from '~shared/telemetry-events'
 
-import type { SupportReportDraft } from '../../shared/telemetry-events'
 import { consumeBurstToken } from '../telemetry/burst-cap'
 import { validate } from '../telemetry/validator'
 

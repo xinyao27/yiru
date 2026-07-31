@@ -1,7 +1,7 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
 import {

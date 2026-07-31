@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
+import type { OnboardingState } from '~shared/types'
 
-import type { OnboardingState } from '../../shared/types'
 import { sanitizeOnboardingUpdate, type Store } from '../persistence'
 
 export function registerOnboardingHandlers(store: Store): void {

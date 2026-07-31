@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
-import { CoworkingPairedRuntimeSessionChangedEventSchema } from '../../../../shared/coworking/paired-runtime-session-contract'
-import type { CoworkingTerminalSessionBindings } from '../../../coworking/terminal-session-bindings'
+import type { CoworkingTerminalSessionBindings } from '~main/coworking/terminal-session-bindings'
+import { CoworkingPairedRuntimeSessionChangedEventSchema } from '~shared/coworking/paired-runtime-session-contract'
+
 import type { RpcContext } from '../core'
 import type { resolveIncarnationBoundActualWorktree } from './coworking-host-runtime-authority'
 import { projectCoworkingHostObservedProviderSessions } from './coworking-host-session-change-projection'

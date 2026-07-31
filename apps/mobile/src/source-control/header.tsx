@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
 
 type Props = {
   embedded: boolean

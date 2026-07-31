@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { copyFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 
-import { grantDirAcl, isPermissionError } from '../../win32-utils'
+import { grantDirAcl, isPermissionError } from '~main/win32-utils'
 
 export function writeFileAtomically(
   targetPath: string,

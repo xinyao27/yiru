@@ -10,7 +10,7 @@ import {
   PaperPlaneTilt as Send,
   Trash as Trash2,
   X
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import { mobileReviewCountLabel } from '../session/diff/review-screen-model'
 import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'

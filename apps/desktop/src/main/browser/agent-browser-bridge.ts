@@ -6,7 +6,6 @@ import { join } from 'node:path'
 
 import { assertClipboardTextWriteWithinLimitWithYield } from '@yiru/workbench-model/ui'
 import { app, type WebContents } from 'electron'
-
 import type {
   BrowserTabInfo,
   BrowserTabListResult,
@@ -44,7 +43,8 @@ import type {
   BrowserCaptureStartResult,
   BrowserCaptureStopResult,
   BrowserCookie
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { BrowserError } from './cdp-bridge'
 import { captureFullPageScreenshot } from './cdp-screenshot'
 import { CdpWsProxy } from './cdp-ws-proxy'

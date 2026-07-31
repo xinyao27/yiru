@@ -1,11 +1,12 @@
 import { win32 as pathWin32 } from 'node:path'
 
-import { quoteStartupArg } from '../../shared/tui-agent/startup-shell'
+import { quoteStartupArg } from '~shared/tui-agent/startup-shell'
 import {
   buildWslInteractiveLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import { isWindowsGitBashShellPath } from '../git-bash'
 import {
   encodePowerShellCommand,

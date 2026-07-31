@@ -14,12 +14,8 @@ import { pipeline } from 'node:stream/promises'
 
 /* eslint-disable max-lines -- Why: model download, checksum, extraction, and cleanup share one state machine so progress/error transitions stay coupled. */
 import { app, net } from 'electron'
+import type { SpeechModelManifest, SpeechModelState, SpeechModelStatus } from '~shared/speech-types'
 
-import type {
-  SpeechModelManifest,
-  SpeechModelState,
-  SpeechModelStatus
-} from '../../shared/speech-types'
 import {
   getSpeechModelCacheDirCandidates,
   migrateSpeechModelCacheIfNeeded,

@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { CoworkingSessionCatalogIdentity } from '~shared/coworking/catalog-contract'
 
-import type { CoworkingSessionCatalogIdentity } from '../../../shared/coworking/catalog-contract'
 import type { CoworkingLiveSessionIdentity } from '../live-session-display-identity'
 import type { CoworkingProvenanceProvider } from './provenance-index'
 import type {

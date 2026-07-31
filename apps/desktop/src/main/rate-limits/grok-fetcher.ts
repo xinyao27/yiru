@@ -1,10 +1,10 @@
 import { net } from 'electron'
-
 import type {
   ProviderRateLimits,
   RateLimitWindow,
   UsageRateLimitMetadata
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import {
   isGrokAccessTokenFresh,
   readGrokAuthSession,

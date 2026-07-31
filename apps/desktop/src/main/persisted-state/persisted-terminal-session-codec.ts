@@ -1,11 +1,6 @@
 import type { MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
-
-import {
-  isTerminalLeafId,
-  parseLegacyNumericPaneKey,
-  parsePaneKey
-} from '../../shared/stable-pane-id'
-import type { LegacyPaneKeyAliasEntry, PersistedState } from '../../shared/types'
+import { isTerminalLeafId, parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { LegacyPaneKeyAliasEntry, PersistedState } from '~shared/types'
 
 export const MAX_CLAUDE_LIVE_PTY_SESSION_IDS = 200
 

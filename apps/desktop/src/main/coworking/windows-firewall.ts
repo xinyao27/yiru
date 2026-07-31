@@ -4,7 +4,7 @@ import { win32 } from 'node:path'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
 
 export const COWORKING_WINDOWS_FIREWALL_RULE_NAME = 'Yiru.Coworking'
 

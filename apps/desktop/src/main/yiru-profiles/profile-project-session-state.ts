@@ -1,7 +1,6 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { getDefaultWorkspaceSession } from '../../shared/constants'
-import type { WorkspaceSessionState } from '../../shared/types'
+import { getDefaultWorkspaceSession } from '~shared/constants'
+import type { WorkspaceSessionState } from '~shared/types'
 
 export {
   removeRepoFromHostWorkspaceSessions,

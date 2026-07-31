@@ -1,4 +1,4 @@
-import type { PRInfo, CheckStatus, PRCheckDetail } from '../../shared/types'
+import type { PRInfo, CheckStatus, PRCheckDetail } from '~shared/types'
 
 // ── REST API check-runs mapping ───────────────────────────────────────
 // The REST check-runs endpoint returns separate status + conclusion fields

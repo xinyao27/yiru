@@ -4,6 +4,16 @@ import { extname, isAbsolute, normalize } from 'node:path'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: notification IPC keeps permission, dispatch, custom sound asset, and sound-loading handlers colocated so renderer/main contracts stay auditable. */
 import { app, BrowserWindow, Notification, ipcMain, shell } from 'electron'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type {
+  NotificationDeliveryProbeResult,
+  NotificationDispatchRequest,
+  NotificationDispatchResult,
+  NotificationDismissResult,
+  NotificationPermissionStatusResult,
+  NotificationSettings,
+  NotificationSoundDataResult
+} from '~shared/types'
 
 import beepSoundPath from '../../../resources/notification-sounds/beep.mp3?asset'
 import blipSoundPath from '../../../resources/notification-sounds/blip.mp3?asset'
@@ -14,16 +24,6 @@ import dingSoundPath from '../../../resources/notification-sounds/ding.mp3?asset
 import sonarSoundPath from '../../../resources/notification-sounds/sonar.mp3?asset'
 import thumpSoundPath from '../../../resources/notification-sounds/thump.mp3?asset'
 import twoToneSoundPath from '../../../resources/notification-sounds/two-tone.mp3?asset'
-import { parsePaneKey } from '../../shared/stable-pane-id'
-import type {
-  NotificationDeliveryProbeResult,
-  NotificationDispatchRequest,
-  NotificationDispatchResult,
-  NotificationDismissResult,
-  NotificationPermissionStatusResult,
-  NotificationSettings,
-  NotificationSoundDataResult
-} from '../../shared/types'
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { setTrayAttention } from '../tray/system-tray'

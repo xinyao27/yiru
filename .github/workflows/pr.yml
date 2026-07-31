@@ -72,7 +72,7 @@ jobs:
       # Why: feature work must reuse the closed shadcn vocabulary instead of
       # growing one-off color, state, or floating-surface tokens.
       - name: Check design token budget
-        run: pnpm --filter yiru exec node config/scripts/check-design-token-budget.mjs
+        run: pnpm --filter yiru exec node scripts/check-design-token-budget.mjs
 
       # Why: oxlint fails any file over max-lines that is NOT suppressed, so this
       # ratchet forbids ADDING a new suppression (inline disable or mobile max
@@ -82,8 +82,8 @@ jobs:
       - name: Enforce max-lines ratchet (no new bypasses)
         run: pnpm run check:max-lines-ratchet
 
-      # Why: the CLI embeds guide content while the skills CLI installs generated
-      # projections from the repository, so stale output would split those two truths.
+      # Why: the CLI embeds guide content copied out of skills/, while the skills
+      # CLI installs skills/ directly, so stale output would split those two truths.
       - name: Verify bundled skill guides
         run: pnpm run verify:bundled-skill-guides
 
@@ -121,10 +121,10 @@ jobs:
           fi
 
       - name: Check feature wall asset budget
-        run: pnpm --filter yiru exec node config/scripts/check-feature-wall-assets.mjs
+        run: pnpm --filter yiru exec node scripts/check-feature-wall-assets.mjs
 
       - name: Verify macOS entitlements
-        run: pnpm --filter yiru exec node config/scripts/verify-macos-entitlements.mjs
+        run: pnpm --filter yiru exec node scripts/verify-macos-entitlements.mjs
 
       - name: Typecheck
         run: pnpm typecheck

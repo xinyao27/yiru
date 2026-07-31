@@ -3,18 +3,14 @@ import { randomUUID } from 'node:crypto'
 
 import { app, ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
-
 import type {
   RuntimeMarkdownReadTabResult,
   RuntimeMarkdownSaveTabResult
-} from '../../shared/mobile-markdown-document'
-import { isNativeFileDropPayload, type NativeFileDropPayload } from '../../shared/native-file-drop'
-import type { RuntimeMobileSessionTabMove } from '../../shared/runtime-types'
-import type {
-  CreateWorktreeResult,
-  UpdateCheckOptions,
-  WorktreeStartupLaunch
-} from '../../shared/types'
+} from '~shared/mobile-markdown-document'
+import { isNativeFileDropPayload, type NativeFileDropPayload } from '~shared/native-file-drop'
+import type { RuntimeMobileSessionTabMove } from '~shared/runtime-types'
+import type { CreateWorktreeResult, UpdateCheckOptions, WorktreeStartupLaunch } from '~shared/types'
+
 import { browserManager } from '../browser/manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'

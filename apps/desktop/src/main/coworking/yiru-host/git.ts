@@ -1,10 +1,10 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { gitExecFileAsync } from '~main/git/runner'
+import type { Store } from '~main/persistence'
+import { getLocalProjectWorktreeGitOptions } from '~main/project-runtime-git-options'
+import { getSshGitProvider } from '~main/providers/ssh-git-dispatch'
+import type { RuntimeGitCommands } from '~main/runtime/yiru-runtime-git'
 
-import { gitExecFileAsync } from '../../git/runner'
-import type { Store } from '../../persistence'
-import { getLocalProjectWorktreeGitOptions } from '../../project-runtime-git-options'
-import { getSshGitProvider } from '../../providers/ssh-git-dispatch'
-import type { RuntimeGitCommands } from '../../runtime/yiru-runtime-git'
 import { CoworkingExecutionError } from '../execution-error'
 import type {
   CoworkingGitMutationHost,

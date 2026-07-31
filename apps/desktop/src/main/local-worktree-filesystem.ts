@@ -8,7 +8,8 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows,
   quotePosixShell
-} from '../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import type { ReadPath, StatPath } from './worktree-orphan-gitdir-proof'
 import { toLinuxPath } from './wsl'
 

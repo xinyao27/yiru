@@ -1,8 +1,9 @@
 import type {
   CoworkingDesktopCatalog,
   CoworkingRemoteDesktop
-} from '../../../shared/coworking/catalog-contract'
-import type { CoworkingRequesterControlView } from '../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/catalog-contract'
+import type { CoworkingRequesterControlView } from '~shared/coworking/ipc-contract'
+
 import type { CoworkingPeerConnection } from '../peer/connection'
 import type { CoworkingSubscription } from '../peer/connection-contract'
 import type { DiscoveredCoworkingDesktop } from '../tailnet-peer-directory'

@@ -1,9 +1,9 @@
 import { networkInterfaces } from 'node:os'
 
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
+import type { RuntimeAccessGrant } from '~shared/runtime-access-grants'
+import { isTailnetIPv4Address } from '~shared/tailnet-address'
 
-import type { RuntimeAccessGrant } from '../../shared/runtime-access-grants'
-import { isTailnetIPv4Address } from '../../shared/tailnet-address'
 import type { DeviceEntry } from './device-registry'
 import type { YiruRuntimeRpcServer } from './rpc'
 import {

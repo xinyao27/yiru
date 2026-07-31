@@ -2,7 +2,7 @@ import {
   YIRU_PROFILE_INDEX_SCHEMA_VERSION,
   type YiruProfileIndex,
   type YiruProfileSummary
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
 
 export type ProfileIndexReadResult = {
   index: YiruProfileIndex

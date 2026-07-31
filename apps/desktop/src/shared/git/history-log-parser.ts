@@ -2,8 +2,20 @@ import type { GitHistoryItem, GitHistoryItemRef } from '@yiru/workbench-model/re
 
 const GIT_HISTORY_DECORATION_SEPARATOR = '\x1f'
 
-export const GIT_HISTORY_COMMIT_FORMAT =
-  '%H%n%aN%n%aE%n%at%n%ct%n%P%n%(decorate:prefix=,suffix=,separator=%x1f)%n%B'
+// Why: `%(decorate:...)` lets the decoration field use a control-character
+// separator, which real ref names cannot contain — Git ref names permit
+// commas, so a comma-joined decoration string is ambiguous. This modifier
+// needs Git 2.34+; `GIT_HISTORY_COMMIT_FORMAT_FALLBACK` (plain `%D`, comma
+// joined) covers the 2.25 baseline and is why the parser below accepts
+// either separator style.
+export const GIT_HISTORY_COMMIT_FORMAT = buildGitHistoryCommitFormat(
+  '%(decorate:prefix=,suffix=,separator=%x1f)'
+)
+export const GIT_HISTORY_COMMIT_FORMAT_FALLBACK = buildGitHistoryCommitFormat('%D')
+
+function buildGitHistoryCommitFormat(decorateField: string): string {
+  return `%H%n%aN%n%aE%n%at%n%ct%n%P%n${decorateField}%n%B`
+}
 
 export function shortGitHash(hash: string): string {
   return hash.slice(0, 7)
@@ -12,6 +24,15 @@ export function shortGitHash(hash: string): string {
 function commitSubject(message: string): string {
   const firstLine = message.split(/\r?\n/, 1)[0]?.trim()
   return firstLine || '(no commit message)'
+}
+
+// Why: `refs/remotes/<remote>/<branch>` normally has a branch component, but
+// a bare `refs/remotes/<remote>` (no slash left) is a valid ref name too —
+// `indexOf('/')` returning -1 must not silently become a truncated name via
+// `slice(0, -1)`.
+function remoteNameFromQualifiedName(remoteQualifiedName: string): string | undefined {
+  const separatorIndex = remoteQualifiedName.indexOf('/')
+  return separatorIndex === -1 ? undefined : remoteQualifiedName.slice(0, separatorIndex)
 }
 
 function parseGitDecorationRefs(raw: string, revision: string): GitHistoryItemRef[] {
@@ -28,16 +49,30 @@ function parseGitDecorationRefs(raw: string, revision: string): GitHistoryItemRe
 
   for (const part of parts) {
     const ref = part.trim()
-    if (!ref || ref === 'HEAD' || /^refs\/remotes\/[^/]+\/HEAD(?:\s|$)/.test(ref)) {
+    // Why: a remote's own HEAD symref (`refs/remotes/origin/HEAD`) points at
+    // whichever branch that remote treats as default — it is metadata about
+    // the remote, not a real branch tip, so it is never a useful decoration.
+    if (!ref || /^refs\/remotes\/[^/]+\/HEAD(?:\s|$)/.test(ref)) {
+      continue
+    }
+
+    if (ref === 'HEAD') {
+      // Why: detached HEAD decorates the commit as a bare "HEAD" with no
+      // "-> refs/heads/..." arrow — surface it as its own ref kind so a
+      // graph UI can badge "HEAD" even when it is not on a branch.
+      refs.push({ id: 'HEAD', name: 'HEAD', revision, category: 'head' })
       continue
     }
 
     if (ref.startsWith('HEAD -> refs/heads/')) {
+      const branchRefId = ref.slice('HEAD -> '.length)
+      refs.push({ id: 'HEAD', name: 'HEAD', revision, category: 'head' })
       refs.push({
-        id: ref.slice('HEAD -> '.length),
-        name: ref.slice('HEAD -> refs/heads/'.length),
+        id: branchRefId,
+        name: branchRefId.slice('refs/heads/'.length),
         revision,
-        category: 'branches'
+        category: 'branches',
+        isCheckedOut: true
       })
       continue
     }
@@ -53,11 +88,14 @@ function parseGitDecorationRefs(raw: string, revision: string): GitHistoryItemRe
     }
 
     if (ref.startsWith('refs/remotes/')) {
+      const remoteQualifiedName = ref.slice('refs/remotes/'.length)
+      const remoteName = remoteNameFromQualifiedName(remoteQualifiedName)
       refs.push({
         id: ref,
-        name: ref.slice('refs/remotes/'.length),
+        name: remoteQualifiedName,
         revision,
-        category: 'remote branches'
+        category: 'remote branches',
+        ...(remoteName ? { remoteName } : {})
       })
       continue
     }
@@ -80,13 +118,16 @@ export function compareGitHistoryItemRefsByCategory(
   ref2: GitHistoryItemRef
 ): number {
   const order = (ref: GitHistoryItemRef): number => {
-    if (ref.id.startsWith('refs/heads/')) {
+    if (ref.category === 'head') {
+      return 0
+    }
+    if (ref.category === 'branches' || ref.id.startsWith('refs/heads/')) {
       return 1
     }
-    if (ref.id.startsWith('refs/remotes/')) {
+    if (ref.category === 'remote branches' || ref.id.startsWith('refs/remotes/')) {
       return 2
     }
-    if (ref.id.startsWith('refs/tags/')) {
+    if (ref.category === 'tags' || ref.id.startsWith('refs/tags/')) {
       return 3
     }
     return 99
@@ -142,7 +183,15 @@ export function gitHistoryRefFromFullName(
     return { id, name: id.slice('refs/heads/'.length), revision, category: 'branches' }
   }
   if (id.startsWith('refs/remotes/')) {
-    return { id, name: id.slice('refs/remotes/'.length), revision, category: 'remote branches' }
+    const remoteQualifiedName = id.slice('refs/remotes/'.length)
+    const remoteName = remoteNameFromQualifiedName(remoteQualifiedName)
+    return {
+      id,
+      name: remoteQualifiedName,
+      revision,
+      category: 'remote branches',
+      ...(remoteName ? { remoteName } : {})
+    }
   }
   if (id.startsWith('refs/tags/')) {
     return { id, name: id.slice('refs/tags/'.length), revision, category: 'tags' }

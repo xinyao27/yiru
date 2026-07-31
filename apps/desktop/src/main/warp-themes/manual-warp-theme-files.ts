@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto'
 import path from 'node:path'
 
 import { BrowserWindow, dialog, type OpenDialogOptions, type WebContents } from 'electron'
+import type { WarpThemeImportSkippedFile } from '~shared/terminal/custom-themes'
 
-import type { WarpThemeImportSkippedFile } from '../../shared/terminal/custom-themes'
 import {
   compareThemeFileLabels,
   isYamlFile,

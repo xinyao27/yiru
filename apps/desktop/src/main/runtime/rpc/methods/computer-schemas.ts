@@ -1,16 +1,15 @@
 import { z } from 'zod'
-
 import {
   computerUseHotkeyValidationMessage,
   computerUsePressKeyValidationMessage
-} from '../../../../shared/computer-use-key-spec'
+} from '~shared/computer-use-key-spec'
 import {
   OptionalBoolean,
   OptionalFiniteNumber,
   OptionalString,
   requiredString,
   requiredStringAllowingEmpty
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 const OptionalNonNegativeInt = z.number().int().nonnegative().optional()
 const OptionalPositiveInt = z.number().int().positive().optional()

@@ -1,5 +1,6 @@
-import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
-import type { CliStatusResult } from '../../shared/runtime-types'
+import { parsePairingCode, type PairingOffer } from '~shared/pairing'
+import type { CliStatusResult } from '~shared/runtime-types'
+
 import { resolveEnvironmentPairingOffer } from './environments'
 import { RuntimeClientError, type RuntimeRpcSuccess } from './types'
 

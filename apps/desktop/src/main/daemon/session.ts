@@ -1,6 +1,7 @@
-import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
-import { isPowerShellProcess } from '../../shared/shell-process-detection'
-import type { TuiAgent } from '../../shared/types'
+import { PhysicalExitTracker } from '~shared/physical-exit-tracker'
+import { isPowerShellProcess } from '~shared/shell-process-detection'
+import type { TuiAgent } from '~shared/types'
+
 import { killWithDescendantSweep } from '../pty-descendant-termination'
 import {
   createShellReadyScanState,

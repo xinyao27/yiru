@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassPressable } from '@/components/glass/pressable'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
   Check,
   CaretLeft as ChevronLeft,
@@ -11,8 +11,8 @@ import {
   Trash as Trash2,
   ArrowCounterClockwise as Undo2,
   type Icon
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import type { MobileDiffReviewFooterProps } from './diff-review-footer-props'
 

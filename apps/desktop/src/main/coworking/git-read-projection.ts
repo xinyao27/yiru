@@ -2,8 +2,9 @@ import type {
   CoworkingGitHistoryEntry,
   CoworkingGitStatusEntry,
   CoworkingGitStatusResult
-} from '../../shared/coworking/operation-contract'
-import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
+} from '~shared/coworking/operation-contract'
+import { decodeGitCQuotedPath } from '~shared/git/cquoted-path'
+
 import { StatusPorcelainParser } from '../git/status-porcelain-parser'
 import { normalizeCoworkingRelativePath } from './worktree-containment'
 

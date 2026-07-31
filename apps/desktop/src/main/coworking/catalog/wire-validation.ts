@@ -1,4 +1,4 @@
-import { isCoworkingAgentLaunchId } from '../../../shared/coworking/agent-launch-contract'
+import { isCoworkingAgentLaunchId } from '~shared/coworking/agent-launch-contract'
 import type {
   CoworkingDesktopCatalog,
   CoworkingProjectCatalogEntry,
@@ -7,14 +7,14 @@ import type {
   CoworkingSessionCatalogPage,
   CoworkingSessionCatalogPageState,
   CoworkingWorktreeCatalogEntry
-} from '../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
 import {
   COWORKING_CATALOG_MAX_PROJECTS,
   COWORKING_CATALOG_MAX_SESSIONS_PER_WORKTREE,
   COWORKING_CATALOG_MAX_WORKTREES
-} from '../../../shared/coworking/catalog-contract'
-import { hasExactCoworkingWireKeys } from '../../../shared/coworking/exact-wire-record'
-import { COWORKING_PROTOCOL_VERSION } from '../../../shared/coworking/wire-contract'
+} from '~shared/coworking/catalog-contract'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import { COWORKING_PROTOCOL_VERSION } from '~shared/coworking/wire-contract'
 
 type CatalogCounts = { worktrees: number }
 
