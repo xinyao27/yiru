@@ -204,7 +204,7 @@ export function CompareUnavailable({
     summary.status === 'error'
 
   return (
-    <div className="border-border/60 bg-muted/20 m-3 border px-3 py-3 text-xs">
+    <div className="border-border/60 bg-muted/20 m-2 border px-3 py-3 text-xs">
       <div className="text-foreground font-medium">
         {summary.status === 'error'
           ? translate(

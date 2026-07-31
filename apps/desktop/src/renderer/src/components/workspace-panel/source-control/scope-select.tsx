@@ -55,9 +55,9 @@ export function SourceControlScopeSelect({
             type="button"
             variant="quiet"
             size="xs"
-            // Why: negative margin pulls the label flush with the panel's
-            // content edge while the button keeps a comfortable hover target.
-            className="-ml-1 h-7 min-w-0 shrink justify-start px-1 font-medium"
+            // Why: no left padding keeps the label flush with the panel gutter
+            // without a negative margin bleeding the hover surface past it.
+            className="h-7 min-w-0 shrink justify-start pr-1 pl-0 font-medium"
             aria-label={activeScope.label}
             title={activeScope.label}
           >

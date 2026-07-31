@@ -3,10 +3,12 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { DiffComment, GitStatusEntry } from '../../../../../shared/types'
 import { translate } from '../../../i18n/i18n'
+import { cn } from '../../../lib/class-names'
 import { getDiffCommentLineLabel, getDiffCommentSource } from '../../editor/diff-comment-compat'
 import { formatDiffComment } from '../../editor/diff-comments-format'
 import { Button } from '../../ui/button'
 import { useCopyFeedbackState } from './copy-feedback-state'
+import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 
 export function getLocalizedDiffCommentLineLabel(
   comment: Pick<DiffComment, 'lineNumber' | 'startLine'>
@@ -103,7 +105,7 @@ export function DiffCommentsInlineList({
   return (
     <div className="bg-muted/20">
       {groups.map(([filePath, list]) => (
-        <div key={filePath} className="px-3 py-1.5">
+        <div key={filePath} className={cn('py-1.5', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
           <div className="group/file flex items-center gap-1">
             <Button
               variant="quiet"

@@ -1,6 +1,8 @@
+import { cn } from '../../../lib/class-names'
 import { ConflictSummaryCard, OperationBanner, TooManyChangesBanner } from './conflict-summary'
 import type { SourceControlController } from './controller'
 import { EmptyState } from './empty-state'
+import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 
 export function SourceControlPanelStatus({
   controller,
@@ -34,7 +36,7 @@ export function SourceControlPanelStatus({
   return (
     <>
       {unresolvedConflictReviewEntries.length > 0 ? (
-        <div className="px-3 pb-2">
+        <div className={cn('pb-2', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
           <ConflictSummaryCard
             conflictOperation={conflictOperation}
             unresolvedCount={unresolvedConflictReviewEntries.length}
@@ -60,7 +62,7 @@ export function SourceControlPanelStatus({
 
       {/* Why: the conflict card owns active conflicts; this covers the between-step state. */}
       {unresolvedConflictReviewEntries.length === 0 && conflictOperation !== 'unknown' ? (
-        <div className="px-3 pb-2">
+        <div className={cn('pb-2', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
           <OperationBanner
             conflictOperation={conflictOperation}
             isAbortingOperation={isAbortingOperation}
@@ -70,7 +72,7 @@ export function SourceControlPanelStatus({
       ) : null}
 
       {repositoryHuge ? (
-        <div className="px-3 pb-2">
+        <div className={cn('pb-2', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
           <TooManyChangesBanner limit={repositoryHuge.limit} />
         </div>
       ) : null}

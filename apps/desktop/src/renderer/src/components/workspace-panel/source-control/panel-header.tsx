@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import type { SourceControlController } from './controller'
 import { DiffCommentsInlineList } from './diff-comments-inline-list'
 import { SourceControlHeaderToolbar } from './header-toolbar'
+import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 import { SourceControlScopeToolbarActions, SourceControlScopeToolbarSelect } from './scope-toolbar'
 
 export function SourceControlPanelHeader({
@@ -86,14 +87,16 @@ export function SourceControlPanelHeader({
       />
 
       {detachedHeadDisplay ? (
-        <div className="border-border border-b px-3 py-2">
+        <div className={cn('border-border border-b py-2', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
           <DetachedHeadBadge display={detachedHeadDisplay} side="bottom" />
         </div>
       ) : null}
 
       {activeWorktreeId && worktreePath && diffCommentCount > 0 ? (
         <div className="border-border border-b">
-          <div className="flex items-center gap-1 py-1.5 pr-2 pl-3">
+          <div
+            className={cn('flex items-center gap-1 py-1.5', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}
+          >
             <Button
               variant="quiet"
               size="xs"

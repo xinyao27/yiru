@@ -27,6 +27,11 @@ export const CONFLICTS_SECTION_LABEL = {
 // Why: explicit mutation paths refresh immediately; polling can stay conservative.
 export const BRANCH_REFRESH_INTERVAL_MS = 30_000
 
+// Why: every stacked block in the panel — tab strip, toolbar, commit area,
+// status banners, tree rows — must share one horizontal gutter, and the tree
+// rows cannot move because they mirror Pierre's 8px row inline padding.
+export const SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME = 'px-2'
+
 export const SOURCE_CONTROL_TREE_INDENT_PX = 12
 export const SOURCE_CONTROL_TREE_DIRECTORY_PADDING_PX = 8
 export const SOURCE_CONTROL_TREE_FILE_PADDING_PX = 20

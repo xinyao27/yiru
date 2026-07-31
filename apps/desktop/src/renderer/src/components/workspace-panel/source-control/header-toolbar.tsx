@@ -9,6 +9,7 @@ import { Input } from '../../ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 import { SourceControlHeaderOverflowMenu } from './header-overflow-menu'
+import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 
 type SourceControlHeaderToolbarProps = {
   filterQuery: string
@@ -113,7 +114,9 @@ export function SourceControlHeaderToolbar({
   )
 
   return (
-    <div className="border-border border-b px-3 pt-1.5 pb-1">
+    <div
+      className={cn('border-border border-b pt-1.5 pb-1', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}
+    >
       <div
         className={cn('flex min-w-0 items-center gap-1', filterExpanded && 'w-full gap-1.5')}
         data-filter-expanded={filterExpanded ? 'true' : 'false'}

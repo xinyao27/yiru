@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 
+import { cn } from '../../../lib/class-names'
 import { hasExpandedCommitFailureDetails, summarizeCommitFailure } from '../commit-failure-summary'
 import { SourceControlCommitActions } from './commit-actions'
 import type { CommitAreaProps } from './commit-area-types'
@@ -7,6 +8,7 @@ import { SourceControlCommitComposer } from './commit-composer'
 import { isCommitMessageFieldDisabled } from './commit-eligibility'
 import { getCommitMessageTextareaRows } from './commit-message-rows'
 import { SourceControlCommitNotices } from './commit-notices'
+import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 import { getSourceControlRecoveryFailureKindLabel } from './push-recovery'
 
 export type { CommitAreaProps } from './commit-area-types'
@@ -123,7 +125,7 @@ export function CommitArea({
     hasUnresolvedConflicts
 
   return (
-    <div className="px-3 pb-2">
+    <div className={cn('pb-2', SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME)}>
       {showComposer ? (
         <SourceControlCommitComposer
           rows={rows}
