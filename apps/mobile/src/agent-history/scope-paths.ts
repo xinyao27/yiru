@@ -4,7 +4,7 @@ import {
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 
-import type { Worktree } from '../worktree/workspace-list-types'
+import type { Worktree } from '../workspace/list-types'
 
 // Why: the renderer's deriveAiVault* helpers are renderer-located and
 // Metro-unresolvable, so mobile does its own minimal derivation seeded by the

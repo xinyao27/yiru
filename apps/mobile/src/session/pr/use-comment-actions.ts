@@ -5,14 +5,14 @@ import { triggerError, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState } from '~/transport/types'
 
+import { buildAddRootCommentParams, buildReplyParams, buildResolveParams } from './comment-actions'
 import {
   fetchAddPRComment,
   fetchAddPRReviewCommentReply,
   fetchResolveReviewThread,
   type GitHubPrMutationOutcome
-} from '../github-pr-mutations'
-import type { GitHubPrRepoSlug } from '../github-pr-rpc'
-import { buildAddRootCommentParams, buildReplyParams, buildResolveParams } from './comment-actions'
+} from './github-mutations'
+import type { GitHubPrRepoSlug } from './github-rpc'
 
 type PrCommentMutations = {
   reply: (args: {

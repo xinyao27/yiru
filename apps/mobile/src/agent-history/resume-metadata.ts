@@ -3,7 +3,7 @@ import {
   type MobileAiVaultResumeSettings
 } from '../session/ai-vault-resume-launch'
 import type { RpcClient } from '../transport/rpc-client'
-import type { Worktree } from '../worktree/workspace-list-types'
+import type { Worktree } from '../workspace/list-types'
 import type {
   MobileAiVaultResumeFolderWorkspace,
   MobileAiVaultResumeProjectGroup,

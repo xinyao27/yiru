@@ -2,17 +2,14 @@ import { useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect } from 'react'
 import { AppState, Linking, View, Text, Switch } from 'react-native'
 
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 import {
   ensureNotificationPermissions,
   getNotificationPermissionState,
   type NotificationPermissionState
-} from '../src/notifications/notifications'
-import {
-  loadPushNotificationsEnabled,
-  savePushNotificationsEnabled
-} from '../src/storage/preferences'
+} from '~/notifications/notifications'
+import { loadPushNotificationsEnabled, savePushNotificationsEnabled } from '~/storage/preferences'
 
 const DEFAULT_PERMISSION_STATE: NotificationPermissionState = {
   granted: false,

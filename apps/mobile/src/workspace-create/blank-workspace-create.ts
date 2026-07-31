@@ -4,7 +4,7 @@ import type { RpcClient } from '../transport/rpc-client'
 import { buildMobileWorkspaceAgentLaunchFields, type WorkspaceCreateSetupDecision } from './params'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
 
-// The blank/named create path, extracted from NewWorktreeModal so the modal keeps
+// The blank/named create path, extracted from NewWorkspaceModal so the modal keeps
 // only the UI-coupled setup-trust flow. Assembles worktree.create params and
 // applies the shared name-collision retry.
 export async function createBlankWorkspace(args: {

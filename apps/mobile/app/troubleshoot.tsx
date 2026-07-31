@@ -2,6 +2,9 @@ import { useRouter } from 'expo-router'
 import { useState, useCallback, useRef } from 'react'
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native'
 
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
   CaretDown as ChevronDown,
   CaretUp as ChevronUp,
@@ -11,22 +14,18 @@ import {
   XCircle,
   Warning as AlertTriangle
 } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassPressable } from '../src/components/glass/pressable'
 import {
   startDiagnosticFetchTimeout,
   type DiagnosticFetchTimeout
-} from '../src/diagnostics/diagnostic-fetch-timeout'
+} from '~/diagnostics/diagnostic-fetch-timeout'
 import {
   formatEndpoint,
   testHostReachability,
   unreachableHostDetail
-} from '../src/diagnostics/host-reachability'
-import { troubleshootCommonIssues } from '../src/diagnostics/troubleshoot-common-issues'
-import { loadHosts } from '../src/transport/host-store'
+} from '~/diagnostics/host-reachability'
+import { troubleshootCommonIssues } from '~/diagnostics/troubleshoot-common-issues'
+import { cn } from '~/style/class-names'
+import { loadHosts } from '~/transport/host-store'
 
 type DiagnosticStatus = 'idle' | 'running' | 'done'
 

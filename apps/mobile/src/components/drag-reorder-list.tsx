@@ -15,6 +15,7 @@ import Animated, {
 import { useCSSVariable } from 'uniwind'
 
 import { DotsSixVertical as GripVertical } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import { triggerMediumImpact, triggerSelection } from '../platform/haptics'
@@ -304,11 +305,14 @@ function DragReorderRow({
           className="justify-center self-stretch px-3"
           accessible
           accessibilityRole="button"
-          accessibilityLabel="Drag to reorder"
-          accessibilityHint="Use the move up and move down actions to reorder without dragging"
+          accessibilityLabel={translate('mobile.dragReorder.handle', 'Drag to reorder')}
+          accessibilityHint={translate(
+            'mobile.dragReorder.hint',
+            'Use the move up and move down actions to reorder without dragging'
+          )}
           accessibilityActions={[
-            { name: 'moveUp', label: 'Move up' },
-            { name: 'moveDown', label: 'Move down' }
+            { name: 'moveUp', label: translate('mobile.dragReorder.moveUp', 'Move up') },
+            { name: 'moveDown', label: translate('mobile.dragReorder.moveDown', 'Move down') }
           ]}
           onAccessibilityAction={(event) => {
             if (event.nativeEvent.actionName === 'moveUp') {

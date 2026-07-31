@@ -25,7 +25,7 @@ type Props = {
 }
 
 // The repo-owned yiru.yaml setup-hook trust prompt, shown before a workspace
-// create that would run an untrusted setup script. Extracted from NewWorktreeModal
+// create that would run an untrusted setup script. Extracted from NewWorkspaceModal
 // to keep that file focused; the async persist/create logic stays with the caller.
 export function SetupHookTrustDrawer({
   visible,

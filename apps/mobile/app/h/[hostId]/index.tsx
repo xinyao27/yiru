@@ -22,7 +22,7 @@ import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { NewWorkspaceFab } from '~/components/new-workspace-fab'
-import { NewWorktreeModalController } from '~/components/new-worktree-modal-controller'
+import { NewWorkspaceModalController } from '~/components/new-workspace-modal-controller'
 import { ProtocolBlockScreen } from '~/components/protocol-block-screen'
 import { MobileRepoIcon } from '~/components/repo-icon'
 import {
@@ -32,15 +32,13 @@ import {
   Moon
 } from '~/components/uniwind-icons'
 import { WorkspaceDetailPlaceholder } from '~/components/workspace-detail-placeholder'
-import { WorktreeListRow } from '~/components/worktree-list-row'
-import { useActiveWorktreeScroll } from '~/hooks/use-active-worktree-scroll'
-import { useNow } from '~/hooks/use-now'
+import { WorkspaceListRow } from '~/components/workspace-list-row'
 import {
   createInitialHostRouteActionState,
   resolveHostRouteActionState,
   setHostRouteNewWorktreeVisible
-} from '~/host-route-action-state'
-import { leaveHostRoute } from '~/host-route-exit'
+} from '~/host-route/action-state'
+import { leaveHostRoute } from '~/host-route/exit'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
 import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
@@ -52,31 +50,33 @@ import {
 } from '~/transport/client-context-connection-metrics'
 import { classifyConnection, type ConnectionVerdict } from '~/transport/connection-health'
 import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
+import type { RepoSummary } from '~/transport/host-rpc-types'
 import { useHostStatusGates } from '~/transport/host-status-gates'
 import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
-import type { RepoSummary } from '~/worktree/host-worktree-rpc-types'
-import { MobileWorkspaceListChrome } from '~/worktree/list-chrome'
-import { areWorktreeListsEqual } from '~/worktree/list-snapshot'
-import { MobileWorkspaceListToolbar } from '~/worktree/list-toolbar'
-import { repoColor } from '~/worktree/repo-color'
-import { useWorkspaceSections } from '~/worktree/use-workspace-sections'
-import { getMobileWorkspaceLineageGroupKey } from '~/worktree/workspace-lineage'
+import { getMobileWorkspaceLineageGroupKey } from '~/workspace/lineage'
+import { MobileWorkspaceListChrome } from '~/workspace/list-chrome'
 import {
   getWorktreeStatus,
   isWorktreePinned,
   type FilterState,
   type Worktree
-} from '~/worktree/workspace-list-sections'
-import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/worktree/workspace-statuses'
+} from '~/workspace/list-sections'
+import { areWorktreeListsEqual } from '~/workspace/list-snapshot'
+import { MobileWorkspaceListToolbar } from '~/workspace/list-toolbar'
+import { repoColor } from '~/workspace/repo-color'
+import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/workspace/statuses'
+import { useActiveWorktreeScroll } from '~/workspace/use-active-scroll'
+import { useWorkspaceSections } from '~/workspace/use-list-sections'
+import { useNow } from '~/workspace/use-now'
 import {
   applyDesktopViewSettings,
   type MobileSortMode,
   type MobileViewState,
   type WorkspaceViewSettings
-} from '~/worktree/workspace-view-settings'
+} from '~/workspace/view-settings'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return v.kind === 'warning' || v.kind === 'unreachable' || v.kind === 'auth-failed'
@@ -261,7 +261,7 @@ export function HostScreen({
     [client, applyViewState]
   )
 
-  const openNewWorktreeModal = useCallback(() => {
+  const openNewWorkspaceModal = useCallback(() => {
     const modal = newWorktreeModalRef.current
     if (!modal) {
       return
@@ -850,7 +850,7 @@ export function HostScreen({
           search={search}
           onAccounts={openAccounts}
           onFloatingWorkspace={openFloatingWorkspace}
-          onNewWorkspace={openNewWorktreeModal}
+          onNewWorkspace={openNewWorkspaceModal}
           onSearchChange={setSearch}
         />
       </MobileWorkspaceListChrome>
@@ -879,10 +879,10 @@ export function HostScreen({
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
             {search
-              ? 'No matching worktrees'
+              ? 'No matching workspaces'
               : activeFilterCount > 0
-                ? 'No worktrees match filters'
-                : 'No worktrees'}
+                ? 'No workspaces match filters'
+                : 'No workspaces'}
           </Text>
         </View>
       )}
@@ -965,7 +965,7 @@ export function HostScreen({
             />
           }
           renderItem={({ item, section }) => (
-            <WorktreeListRow
+            <WorkspaceListRow
               item={item}
               isReadOnly={isReadOnly}
               now={now}
@@ -985,7 +985,7 @@ export function HostScreen({
 
       {/* Floating "new workspace" button — phone only; embedded sidebars keep the toolbar +. */}
       {!embedded && (
-        <NewWorkspaceFab onPress={openNewWorktreeModal} disabled={connState !== 'connected'} />
+        <NewWorkspaceFab onPress={openNewWorkspaceModal} disabled={connState !== 'connected'} />
       )}
 
       {/* Worktree long-press action sheet (inline confirm to avoid double-Modal lag) */}
@@ -1086,7 +1086,7 @@ export function HostScreen({
         onCancel={() => setConfirmRemoveHost(false)}
       />
 
-      <NewWorktreeModalController
+      <NewWorkspaceModalController
         ref={newWorktreeModalRef}
         routeVisible={showNewWorktree}
         client={client}

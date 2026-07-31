@@ -10,7 +10,7 @@ import {
   fetchPRChecks,
   fetchPRForBranch,
   fetchWorkItemDetails
-} from '../github-pr-rpc'
+} from './github-rpc'
 import {
   loadPrSidebarData,
   loadPrSidebarDetails,

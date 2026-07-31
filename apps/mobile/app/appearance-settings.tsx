@@ -1,25 +1,24 @@
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
-
 import {
   MOBILE_THEME_MODES,
   type MobileThemeMode,
   useMobileTheme
-} from '../src/appearance/theme-preference'
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassSegmentedControl } from '../src/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '../src/components/glass/segmented-control-props'
-import { LoadingIndicator } from '../src/components/loading-indicator'
-import { PickerModal, type PickerOption } from '../src/components/picker-modal'
-import { translate } from '../src/i18n/translate'
+} from '~/appearance/theme-preference'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
+import { LoadingIndicator } from '~/components/loading-indicator'
+import { PickerModal, type PickerOption } from '~/components/picker-modal'
+import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import {
   getMobileLoaderStyleLabel,
   MOBILE_LOADER_STYLES,
   type MobileLoaderStyle
-} from '../src/loading/loader-style'
-import { useMobileLoaderStyle } from '../src/loading/loader-style-context'
+} from '~/loading/loader-style'
+import { useMobileLoaderStyle } from '~/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
   const [loaderPickerOpen, setLoaderPickerOpen] = useState(false)

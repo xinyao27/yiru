@@ -9,9 +9,9 @@ import {
   Chat as MessageSquare,
   X
 } from '~/components/uniwind-icons'
+import { statusColorClasses } from '~/session/pr/sidebar/status-color'
 import { cn } from '~/style/class-names'
 
-import { statusColorClasses } from '../components/pr-sidebar/status-color'
 import { hubStyles } from './hub-styles'
 import type { MobilePrChipRollup, MobilePrChipSummary } from './pr-chip-summary'
 

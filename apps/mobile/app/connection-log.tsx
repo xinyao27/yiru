@@ -3,21 +3,20 @@ import Constants from 'expo-constants'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { View, Text, Platform } from 'react-native'
 
+import { ConnectionLog } from '~/components/connection-log'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import { Copy, Check } from '~/components/uniwind-icons'
+import { buildConnectionDiagnosticsReport } from '~/diagnostics/connection-diagnostics-report'
 import { cn } from '~/style/class-names'
-
-import { ConnectionLog } from '../src/components/connection-log'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassPressable } from '../src/components/glass/pressable'
-import { buildConnectionDiagnosticsReport } from '../src/diagnostics/connection-diagnostics-report'
-import { useHostClient } from '../src/transport/client-context'
+import { useHostClient } from '~/transport/client-context'
 import {
   useLastConnectedAt,
   useReconnectAttempt
-} from '../src/transport/client-context-connection-metrics'
-import { connectionLogStore } from '../src/transport/connection-log-buffer'
-import { loadHosts } from '../src/transport/host-store'
-import type { ConnectionLogEntry, HostProfile } from '../src/transport/types'
+} from '~/transport/client-context-connection-metrics'
+import { connectionLogStore } from '~/transport/connection-log-buffer'
+import { loadHosts } from '~/transport/host-store'
+import type { ConnectionLogEntry, HostProfile } from '~/transport/types'
 
 // Why: getSnapshot must be referentially stable when there's no data —
 // a fresh [] per call would make useSyncExternalStore re-render forever.

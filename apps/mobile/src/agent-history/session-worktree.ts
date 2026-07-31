@@ -3,7 +3,7 @@ import { isPathInsideOrEqual, isRuntimePathAbsolute } from '@yiru/workbench-mode
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import type { Worktree } from '../worktree/workspace-list-types'
+import type { Worktree } from '../workspace/list-types'
 
 export type MobileAgentHistorySessionWorktreeStatus = 'current' | 'active' | 'archived'
 

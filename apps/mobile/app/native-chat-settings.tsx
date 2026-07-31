@@ -1,7 +1,7 @@
 import { ScrollView, Switch, Text, View } from 'react-native'
 
-import { MobileContentSection } from '../src/components/content-section'
-import { useMobileDefaultSessionViewPreference } from '../src/session/use-default-session-view-preference'
+import { MobileContentSection } from '~/components/content-section'
+import { useMobileDefaultSessionViewPreference } from '~/session/use-default-session-view-preference'
 
 export default function NativeChatSettingsScreen() {
   const { defaultView, setDefaultView } = useMobileDefaultSessionViewPreference()

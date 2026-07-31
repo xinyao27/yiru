@@ -3,6 +3,8 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
 
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 import {
   CaretRight as ChevronRight,
   Info,
@@ -17,14 +19,11 @@ import {
   Terminal as TerminalIcon,
   Key as KeyRound
 } from '~/components/uniwind-icons'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import {
   loadPendingHostCredentialCleanup,
   subscribePendingHostCredentialCleanup
-} from '../src/transport/host-credential-cleanup'
-import { retryPendingHostCredentialCleanup } from '../src/transport/host-store'
+} from '~/transport/host-credential-cleanup'
+import { retryPendingHostCredentialCleanup } from '~/transport/host-store'
 
 export default function SettingsScreen() {
   const router = useRouter()

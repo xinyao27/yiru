@@ -1,0 +1,57 @@
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+// Why: this feature folder is named for the product term (workspace), but the
+// entity keeps the wire name: it mirrors the worktree.ps summary payload
+// (RuntimeWorktreePsSummary) field-for-field, plus list-render decorations.
+export type Worktree = {
+  sectionListKey?: string
+  workspaceKind?: 'git' | 'folder-workspace'
+  worktreeId: string
+  repoId: string
+  hostId?: ExecutionHostId
+  terminalPlatform?: NodeJS.Platform
+  repo: string
+  branch: string
+  displayName: string
+  workspaceStatus?: string
+  sortOrder?: number
+  manualOrder?: number
+  lastActivityAt?: number
+  createdAt?: number
+  // Why: on-disk worktree directory path. Needed by NewWorkspaceModal so the
+  // marine-creature fallback dedupes against filesystem basenames.
+  path: string
+  isArchived?: boolean
+  isMainWorktree?: boolean
+  hasHostSidebarActivity?: boolean
+  worktreeInstanceId?: string
+  lineageWorktreeInstanceId?: string
+  parentWorktreeInstanceId?: string
+  parentWorktreeId?: string | null
+  childWorktreeIds?: string[]
+  lineageDepth?: number
+  lineageChildCount?: number
+  lineageCollapsed?: boolean
+  isLastLineageChild?: boolean
+  liveTerminalCount: number
+  hasAttachedPty: boolean
+  preview: string
+  unread: boolean
+  lastOutputAt?: number
+  isPinned: boolean
+  isActive?: boolean
+  linkedPR: { number: number; state: string } | null
+  linkedGitLabMR?: number | null
+  comment?: string
+  status?: 'working' | 'active' | 'permission' | 'done' | 'inactive'
+  agents?: RuntimeWorktreeAgentRow[]
+}
+
+export type FilterState = {
+  filterRepoIds: Set<string>
+  hideSleeping: boolean
+  hideDefaultBranch: boolean
+}
+
+export type Section = { key: string; title: string; icon?: 'pin'; data: Worktree[] }

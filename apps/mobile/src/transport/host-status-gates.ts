@@ -4,7 +4,7 @@ import {
 } from '@yiru/runtime-protocol/capabilities'
 import { useEffect, useState } from 'react'
 
-import type { DesktopStatus } from '../worktree/host-worktree-rpc-types'
+import type { DesktopStatus } from '../transport/host-rpc-types'
 import type { RpcClient } from './rpc-client'
 import type { ConnectionState, RpcSuccess } from './types'
 

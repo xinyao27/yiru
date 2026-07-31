@@ -2,7 +2,7 @@ import { View } from 'react-native'
 
 import { cn } from '~/style/class-names'
 
-import type { AgentDotState } from '../worktree/agent-row-display'
+import type { AgentDotState } from '../workspace/agent-row-display'
 import { LoadingIndicator } from './loading-indicator'
 
 // Per-agent state indicator, 1:1 with desktop AgentStateDot

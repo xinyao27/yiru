@@ -3,17 +3,8 @@ import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
-import {
-  CaretRight as ChevronRight,
-  Terminal,
-  ArrowClockwise as RefreshCw,
-  Power as PowerOff,
-  PencilSimple as Edit3
-} from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
-
-import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
-import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'
+import { loadHomeSnapshot, saveHomeSnapshot } from '~/cache/home-snapshot-cache'
+import { setCachedWorktrees, getCachedWorktrees } from '~/cache/worktree-cache'
 import {
   type AccountsSnapshot,
   type ProviderKey,
@@ -22,36 +13,44 @@ import {
   hasActiveProviderUsage,
   hasRenderableUsage,
   UsageBar
-} from '../src/components/account-usage'
-import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
-import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
-import { ConfirmModal } from '../src/components/confirm-modal'
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassIconButton } from '../src/components/glass/icon-button'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { MobileHostCard } from '../src/components/host-card'
-import { refreshHomeStatsForHost } from '../src/home/stats-refresh'
+} from '~/components/account-usage'
+import { ActionSheetModal, type ActionSheetAction } from '~/components/action-sheet-modal'
+import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
+import { ConfirmModal } from '~/components/confirm-modal'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { MobileHostCard } from '~/components/host-card'
+import {
+  CaretRight as ChevronRight,
+  Terminal,
+  ArrowClockwise as RefreshCw,
+  Power as PowerOff,
+  PencilSimple as Edit3
+} from '~/components/uniwind-icons'
+import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
   hydrateHomeStatsByHost,
   subscribeHomeStatsByHost
-} from '../src/home/stats-state'
-import { translate } from '../src/i18n/translate'
-import { useResponsiveLayout } from '../src/layout/responsive-layout'
-import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
-import { triggerMediumImpact } from '../src/platform/haptics'
-import { useAllHostClients } from '../src/transport/all-host-clients'
-import { useCloseHost, useForceReconnect, usePrimeHosts } from '../src/transport/client-context'
-import { classifyConnection } from '../src/transport/connection-health'
-import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycle'
-import { loadHosts } from '../src/transport/host-store'
-import type { RpcClient } from '../src/transport/rpc-client'
-import type { ConnectionState, HostProfile } from '../src/transport/types'
-import { scheduleWidgetSnapshotUpdate } from '../src/widgets/snapshot-sync'
-import { repoColor } from '../src/worktree/repo-color'
-import { pickResumeWorktree } from '../src/worktree/resume-worktree'
+} from '~/home/stats-state'
+import { translate } from '~/i18n/translate'
+import { useResponsiveLayout } from '~/layout/responsive-layout'
+import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
+import { subscribeToDesktopNotifications } from '~/notifications/notifications'
+import { triggerMediumImpact } from '~/platform/haptics'
+import { cn } from '~/style/class-names'
+import { useAllHostClients } from '~/transport/all-host-clients'
+import { useCloseHost, useForceReconnect, usePrimeHosts } from '~/transport/client-context'
+import { classifyConnection } from '~/transport/connection-health'
+import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState, HostProfile } from '~/transport/types'
+import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
+import { repoColor } from '~/workspace/repo-color'
+import { pickResumeWorktree } from '~/worktree/resume-pick'
 
 function endpointLabel(endpoint: string): string {
   try {

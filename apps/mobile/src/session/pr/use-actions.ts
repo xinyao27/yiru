@@ -3,6 +3,7 @@ import { useCallback, useEffect, useReducer, useRef } from 'react'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState } from '~/transport/types'
 
+import { PrActionsEngine, type PrActionMutations, type PrActionBusyKey } from './actions-engine'
 import {
   fetchMergePR,
   fetchRemovePRReviewers,
@@ -10,9 +11,8 @@ import {
   fetchRerunPRChecks,
   fetchSetPRAutoMerge,
   fetchUpdatePRState
-} from '../github-pr-mutations'
-import type { GitHubPrRepoSlug } from '../github-pr-rpc'
-import { PrActionsEngine, type PrActionMutations, type PrActionBusyKey } from './actions-engine'
+} from './github-mutations'
+import type { GitHubPrRepoSlug } from './github-rpc'
 
 export type { PrActionBusyKey } from './actions-engine'
 

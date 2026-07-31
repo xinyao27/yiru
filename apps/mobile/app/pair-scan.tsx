@@ -4,22 +4,21 @@ import { useState, useRef, useCallback } from 'react'
 import { View, Text, ActivityIndicator, Linking, type LayoutChangeEvent } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { ConnectionLog } from '~/components/connection-log'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { TextInputModal } from '~/components/text-input-modal'
 import { UniwindCameraView } from '~/components/uniwind-camera-view'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
-
-import { ConnectionLog } from '../src/components/connection-log'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { TextInputModal } from '../src/components/text-input-modal'
-import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { useCloseHost } from '../src/transport/client-context'
-import { decodePairingUrl, parsePairingCode } from '../src/transport/pairing'
+import { useCloseHost } from '~/transport/client-context'
+import { decodePairingUrl, parsePairingCode } from '~/transport/pairing'
 import {
   startPreProfilePairing,
   type PreProfilePairingAttempt
-} from '../src/transport/pre-profile-pairing-coordinator'
-import type { ConnectionLogEntry, PairingOffer } from '../src/transport/types'
+} from '~/transport/pre-profile-pairing-coordinator'
+import type { ConnectionLogEntry, PairingOffer } from '~/transport/types'
 
 // Why: see pair-confirm.tsx — cap initial-pair "Connecting…" so a broken
 // route surfaces as a real error with the log visible instead of a

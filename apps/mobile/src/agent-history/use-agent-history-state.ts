@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useHostClient, useForceReconnect } from '../transport/client-context'
 import type { RpcSuccess } from '../transport/types'
-import type { Worktree } from '../worktree/workspace-list-types'
+import type { Worktree } from '../workspace/list-types'
 import { MOBILE_AI_VAULT_CAPABILITY } from './capability'
 import { deriveMobileAiVaultScopePaths } from './scope-paths'
 

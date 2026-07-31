@@ -6,27 +6,26 @@ import Animated, {
   useSharedValue
 } from 'react-native-reanimated'
 
+import { MobileContentSection } from '~/components/content-section'
+import { PickerModal, type PickerOption } from '~/components/picker-modal'
+import { TerminalShortcutSettings } from '~/components/terminal-shortcut-settings'
 import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
   TextT as Type
 } from '~/components/uniwind-icons'
 import { GestureHandlerRootView } from '~/components/uniwind-native-components'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { PickerModal, type PickerOption } from '../src/components/picker-modal'
-import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalTextScale,
   saveTerminalAutocompleteEnabled,
   saveTerminalTextScale
-} from '../src/storage/preferences'
-import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/auto-restore-fit-state'
-import { useAllHostClients } from '../src/transport/all-host-clients'
-import { loadHosts } from '../src/transport/host-store'
-import type { RpcClient } from '../src/transport/rpc-client'
-import type { HostProfile } from '../src/transport/types'
+} from '~/storage/preferences'
+import { setTerminalAutoRestoreFitMsForHost } from '~/terminal/auto-restore-fit-state'
+import { useAllHostClients } from '~/transport/all-host-clients'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { HostProfile } from '~/transport/types'
 
 type RestoreValue = 'indefinite' | '60s' | '5m' | '30m'
 
