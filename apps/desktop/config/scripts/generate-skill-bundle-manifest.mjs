@@ -18,14 +18,18 @@ const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
   cwd: REPO_ROOT,
   encoding: 'utf8'
 }).trim()
-const SKILLS_ROOT = path.join(REPO_ROOT, 'skills')
+// Why: skills/ is product content shipped to end users' agent installs, so it
+// lives at the repository root rather than inside the desktop app package.
+const SKILLS_ROOT = path.join(GIT_ROOT, 'skills')
 const OUTPUT_ROOT = path.join(REPO_ROOT, 'resources', 'skills')
 const CURRENT_MANIFEST_PATH = path.join(OUTPUT_ROOT, 'current-manifest.json')
 const SNAPSHOT_REGISTRY_PATH = path.join(OUTPUT_ROOT, 'snapshot-registry.json')
 const RELEASE_MAPPING_PATH = path.join(OUTPUT_ROOT, 'release-mapping.json')
 const PRODUCT_SKILL_PREFIX = 'yiru-'
-// Why: release history spans both the former single-package layout and the
-// monorepo layout, so tagged skill trees may live at either repository path.
+// Why: tagged skill trees may live at either repository path — the monorepo
+// migration moved skills/ into apps/desktop and a later cleanup moved it back
+// out, so only releases cut during that interval use the nested path. Probe the
+// nested path first and fall through to the root, which covers both eras.
 const RELEASED_SKILLS_PATHS = ['apps/desktop/skills', 'skills']
 
 function sha256(bytes) {

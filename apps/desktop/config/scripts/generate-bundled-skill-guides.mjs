@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { constants } from 'node:fs'
 import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -7,6 +8,12 @@ import { parse } from 'yaml'
 
 const SCRIPT_DIR = import.meta.dirname
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
+// Why: skills/ is product content shipped to end users' agent installs, so it
+// lives at the repository root rather than inside the desktop app package.
+const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+  cwd: REPO_ROOT,
+  encoding: 'utf8'
+}).trim()
 
 const CANONICAL_GUIDE_NAMES = [
   'computer-use',
@@ -107,37 +114,39 @@ function assertAliasContract(guides) {
   }
 }
 
-async function buildArtifacts(repoRoot = REPO_ROOT) {
-  const guideRoot = path.join(repoRoot, 'skill-guides')
-  const sourceFiles = (await readdir(guideRoot, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-    .map((entry) => entry.name.slice(0, -3))
+async function buildArtifacts(repoRoot = REPO_ROOT, gitRoot = GIT_ROOT) {
+  // Why: the skill package layout (`<name>/SKILL.md`) is the on-disk contract
+  // agents discover, so it is the source of truth; the embedded CLI module is
+  // the only generated projection of it.
+  const skillsRoot = path.join(gitRoot, 'skills')
+  const sourceNames = (await readdir(skillsRoot, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
     .sort((left, right) => left.localeCompare(right, 'en'))
   const expectedNames = [...CANONICAL_GUIDE_NAMES].sort((left, right) =>
     left.localeCompare(right, 'en')
   )
-  if (JSON.stringify(sourceFiles) !== JSON.stringify(expectedNames)) {
+  if (JSON.stringify(sourceNames) !== JSON.stringify(expectedNames)) {
     throw new Error(
-      `Guide sources must match the canonical topic list.\nExpected: ${expectedNames.join(', ')}\nFound: ${sourceFiles.join(', ')}`
+      `Skill packages must match the canonical topic list.\nExpected: ${expectedNames.join(', ')}\nFound: ${sourceNames.join(', ')}`
     )
   }
 
   const guides = []
-  const projections = []
   for (const name of expectedNames) {
-    const sourcePath = path.join(guideRoot, `${name}.md`)
+    const sourcePath = path.join(skillsRoot, name, 'SKILL.md')
     // Why: Git may render text with native EOLs despite repository policy; the
-    // embedded guide and generated projection must have one platform-neutral identity.
+    // embedded guide must have one platform-neutral identity.
     const markdown = normalizeMarkdown(await readFile(sourcePath, 'utf8'))
-    const frontmatter = parseFrontmatter(markdown, path.relative(repoRoot, sourcePath))
+    const frontmatter = parseFrontmatter(markdown, path.relative(gitRoot, sourcePath))
     if (frontmatter.name !== name) {
-      throw new Error(`Guide source ${name}.md declares mismatched name ${frontmatter.name}`)
+      throw new Error(`Skill package ${name} declares mismatched name ${frontmatter.name}`)
     }
-    const aliases = GUIDE_ALIASES[name]
-    guides.push({ name, description: frontmatter.description, markdown, aliases })
-    projections.push({
-      path: path.join(repoRoot, 'skills', name, 'SKILL.md'),
-      content: markdown
+    guides.push({
+      name,
+      description: frontmatter.description,
+      markdown,
+      aliases: GUIDE_ALIASES[name]
     })
   }
   assertAliasContract(guides)
@@ -146,8 +155,7 @@ async function buildArtifacts(repoRoot = REPO_ROOT) {
     {
       path: path.join(repoRoot, 'src', 'cli', 'bundled-skill-guides.ts'),
       content: serializeEmbeddedModule(guides)
-    },
-    ...projections
+    }
   ]
 }
 

@@ -82,10 +82,6 @@ module.exports = {
     '!docs{,/**/*}',
     '!mobile{,/**/*}',
     '!native{,/**/*}',
-    '!skills{,/**/*}',
-    // Why: authoritative guide markdown is compiled into out/cli; shipping the
-    // authoring sources too would duplicate content without a runtime consumer.
-    '!skill-guides{,/**/*}',
     '!Casks{,/**/*}',
     '!{AGENTS.md,CLAUDE.md,DEVELOPING.md,bundle-size-progress.md}',
     '!electron.vite.config.{js,ts,mjs,cjs}',

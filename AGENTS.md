@@ -42,7 +42,15 @@ apps/desktop/src/
 apps/mobile/  Expo app: app/ = routes, src/ = features
 packages/     cross-client contracts: workbench-model, runtime-protocol,
               mobile-relay-protocol
+skills/       agent skill packages shipped to end users, one folder per skill
 ```
+
+`skills/<name>/SKILL.md` is product content, not app source — it sits at the
+repository root because it is shipped to users' agent installs rather than built
+into any one client. It is the **source of truth**: `src/cli/bundled-skill-guides.ts`
+is generated from it by `config/scripts/generate-bundled-skill-guides.mjs`, and
+`resources/skills/*.json` records its release-freshness digests. Edit `SKILL.md`,
+then run that script with `--write`; never edit the generated module.
 
 **Import direction is one-way.** `renderer` never imports `main`. `shared` never imports `main`, `renderer`, or `electron` — Node built-ins are fine. `relay` and `cli` may reuse `main` modules. The renderer reaches the main process only through the preload contract. A type used only inside `apps/desktop` belongs in `src/shared/`, not in a package.
 

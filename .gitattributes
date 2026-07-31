@@ -6,6 +6,5 @@
 /apps/desktop/config/scripts/run-internal-dev-setup.mjs text eol=lf
 /apps/desktop/config/scripts/verify-cli-bin.mjs text eol=lf
 /apps/desktop/config/scripts/verify-release-required-assets.mjs text eol=lf
-/apps/desktop/skill-guides/*.md text eol=lf
-/apps/desktop/skills/*/SKILL.md text eol=lf
+/skills/*/SKILL.md text eol=lf
 /apps/desktop/src/cli/bundled-skill-guides.ts text eol=lf
