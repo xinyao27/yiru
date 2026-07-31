@@ -150,7 +150,10 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     if (run.state === 'success') {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
-          <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2
+            weight="regular"
+            className="size-4 text-emerald-600 dark:text-emerald-400"
+          />
           {run.names.length === 1
             ? translate(
                 'auto.components.skills.SkillFreshnessUpdateDialog.updatedOne',
@@ -167,7 +170,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     if (run.state === 'error') {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
-          <AlertTriangle className="text-destructive size-4" />
+          <AlertTriangle weight="regular" className="text-destructive size-4" />
           {translate(
             'auto.components.skills.SkillFreshnessUpdateDialog.updatedPartial',
             'Updated {{value0}} of {{value1}} skills',
@@ -190,7 +193,10 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     if (eligibleNames.length === 0) {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
-          <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2
+            weight="regular"
+            className="size-4 text-emerald-600 dark:text-emerald-400"
+          />
           {translate(
             'auto.components.skills.SkillFreshnessUpdateDialog.success',
             'All installed Yiru skills are up to date.'
@@ -294,7 +300,10 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
                 disabled={state.loading}
                 onClick={() => void state.refresh()}
               >
-                <RefreshCw className={state.loading ? 'animate-spin' : undefined} />
+                <RefreshCw
+                  weight="regular"
+                  className={state.loading ? 'animate-spin' : undefined}
+                />
                 {translate(
                   'auto.components.skills.SkillFreshnessUpdateDialog.checkNow',
                   'Re-check'
