@@ -32,6 +32,7 @@ import { createDetectedAgentsSlice } from './slices/detected-agents'
 import { createHostedReviewSlice } from './slices/hosted-review'
 import { createKeybindingsSlice } from './slices/keybindings'
 import { createPreflightSlice } from './slices/preflight'
+import { createRateLimitResumeSlice } from './slices/rate-limit-resume'
 import { createRateLimitSlice } from './slices/rate-limits'
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import { createRemoteServerUpdatesSlice } from './slices/remote-server-updates'
@@ -68,6 +69,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createOpenCodeUsageSlice(...a),
   ...createBrowserSlice(...a),
   ...createRateLimitSlice(...a),
+  ...createRateLimitResumeSlice(...a),
   ...createRemoteServerUpdatesSlice(...a),
   ...createSshSlice(...a),
   ...createRuntimeEnvironmentSshSlice(...a),

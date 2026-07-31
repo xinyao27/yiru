@@ -403,6 +403,11 @@ import type {
   OpenCodeUsageSummary
 } from '~shared/opencode-usage-types'
 import type {
+  RateLimitBannerReport,
+  RateLimitHit,
+  RateLimitResumeSchedule
+} from '~shared/rate-limit-resume/types'
+import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
   GrokAccountStatus,
@@ -2963,6 +2968,18 @@ export type PreloadApi = {
     snapshotWorkspaceName: (args: { workspaceId: string; displayName: string }) => Promise<number>
     rendererReady: () => Promise<void>
     onDispatchRequested: (callback: (request: AutomationDispatchRequest) => void) => () => void
+  }
+  rateLimitResume: {
+    report: (report: RateLimitBannerReport) => Promise<RateLimitHit>
+    list: () => Promise<RateLimitResumeSchedule[]>
+    schedule: (hit: RateLimitHit) => Promise<RateLimitResumeSchedule>
+    cancel: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    runNow: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    markFired: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    markFailed: (args: { id: string; reason: string }) => Promise<RateLimitResumeSchedule>
+    markStale: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    rendererReady: () => Promise<void>
+    onDispatchRequested: (callback: (schedule: RateLimitResumeSchedule) => void) => () => void
   }
   wsl: {
     isAvailable: () => Promise<boolean>

@@ -23,6 +23,35 @@ export function buildWallClockTimestamp(
   return resolvedParts && areMatchingWallClockParts(resolvedParts, parts) ? timestamp : null
 }
 
+export type WallClockCalendarDate = Pick<WallClockDateParts, 'year' | 'monthIndex' | 'day'>
+
+/**
+ * The calendar date in effect at `timestamp` in `timeZone` (the local date when
+ * the zone is absent or unresolvable). Callers pairing a bare clock time with
+ * "today" need the day as the reset's own zone sees it, not as this machine does.
+ */
+export function getWallClockCalendarDate(
+  timestamp: number,
+  timeZone: string | null
+): WallClockCalendarDate {
+  const zoned = timeZone ? getTimeZoneDateParts(timestamp, timeZone) : null
+  if (zoned) {
+    return { year: zoned.year, monthIndex: zoned.monthIndex, day: zoned.day }
+  }
+  const local = new Date(timestamp)
+  return { year: local.getFullYear(), monthIndex: local.getMonth(), day: local.getDate() }
+}
+
+/** Same calendar date shifted by whole days, normalized across month/year ends. */
+export function addCalendarDays(date: WallClockCalendarDate, days: number): WallClockCalendarDate {
+  const shifted = new Date(Date.UTC(date.year, date.monthIndex, date.day + days))
+  return {
+    year: shifted.getUTCFullYear(),
+    monthIndex: shifted.getUTCMonth(),
+    day: shifted.getUTCDate()
+  }
+}
+
 function buildTimeZoneTimestamp(parts: WallClockDateParts, timeZone: string): number | null {
   const utcGuess = Date.UTC(parts.year, parts.monthIndex, parts.day, parts.hour, parts.minute)
   const firstOffset = getTimeZoneOffsetMs(utcGuess, timeZone)

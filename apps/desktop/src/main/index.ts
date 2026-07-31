@@ -141,6 +141,7 @@ import {
   getSshPtyProvider,
   registerHeadlessPtyRuntime
 } from './pty/pty'
+import { RateLimitResumeService } from './rate-limit-resume/service'
 import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit-target'
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
@@ -286,6 +287,7 @@ let unsubscribeSystemResumeBroadcast: (() => void) | null = null
 let watcherShutdownPromise: Promise<void> | null = null
 let watcherShutdownDone = false
 let automations: AutomationService | null = null
+let rateLimitResumes: RateLimitResumeService | null = null
 let keybindings: KeybindingService | null = null
 // Why: a reload/teardown intent set for one renderer must not leak to a later load.
 // The recovery reload re-fires did-finish-load, so its flag lets the local-PTY orphan
@@ -1173,10 +1175,13 @@ function openMainWindow(): BrowserWindow {
         isQuitting = true
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
       }
-    }
+    },
+    rateLimitResumes ?? undefined
   )
   automations.setWebContents(window.webContents)
   automations.start()
+  rateLimitResumes?.setWebContents(window.webContents)
+  rateLimitResumes?.start()
   attachMainWindowServices(
     window,
     store,
@@ -1210,6 +1215,7 @@ function openMainWindow(): BrowserWindow {
     }
     clearExpectedRendererReload(rendererWebContentsId)
     automations?.setWebContents(null)
+    rateLimitResumes?.setWebContents(null)
     // Why: detach the agent hook listener on window close so the server
     // never fires into a destroyed webContents during the gap before
     // reopen (e.g. macOS dock re-activation). This also ensures the
@@ -2179,6 +2185,7 @@ app.whenReady().then(async () => {
   browserManager.setBrowserGuestStateChangedListener((worktreeId) => {
     runtimeService.notifyMobileSessionTabsChanged(worktreeId)
   })
+  rateLimitResumes = new RateLimitResumeService(store, rateLimits!)
   automations = new AutomationService(store, {
     claudeUsage,
     codexUsage,

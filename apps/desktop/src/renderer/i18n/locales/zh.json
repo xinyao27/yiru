@@ -12481,5 +12481,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "每周额度",
+      "session": "5 小时额度",
+      "unknown": "服务商额度"
+    },
+    "title": {
+      "scheduled": "已安排 {{agent}} 在约 {{countdown}} 后继续运行",
+      "blocked": "{{agent}} 暂时不可用"
+    },
+    "resumesIn": "约 {{countdown}} 后",
+    "resumesUnknown": "未知",
+    "resumesAt": "恢复时间",
+    "quotaWindow": "额度周期",
+    "action": {
+      "cancel": "取消自动继续",
+      "runNow": "立即运行",
+      "retry": "立即重试",
+      "schedule": "约 {{countdown}} 后继续",
+      "reveal": "去看看"
+    },
+    "workspace": "工作区"
   }
 }
