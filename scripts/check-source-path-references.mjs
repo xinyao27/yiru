@@ -38,8 +38,13 @@ const CHECKED_ROOT = new RegExp(
 // is worth its own cleanup, not a permanently red gate.
 const CHECKED_EXTENSION = /\.(ts|tsx|mjs|cjs|css)$/
 
+// Why: the optional leading `./` matters. A relative require of a sibling build
+// script from a .cjs config file is invisible to typecheck, and moving the target
+// silently breaks packaging — which is exactly how the electron-builder config
+// broke when the scripts moved out of config/. Such a token is only reported when
+// it resolves neither against a tree root nor against its own file's directory.
 const PATH_TOKEN =
-  /(?:^|['"`\s(=,:])((?:src|apps|packages|config|resources|scripts)\/[A-Za-z0-9._@/-]+)/g
+  /(?:^|['"`\s(=,:])(\.\/)?((?:src|apps|packages|config|resources|scripts)\/[A-Za-z0-9._@/-]+)/g
 
 // Why: each entry is a string that looks like a repo path but never was one.
 // Keep the reason attached — without it the next reader cannot tell an
@@ -87,8 +92,19 @@ function listSearchFiles(repoRoot) {
   return output.split('\n').filter(Boolean)
 }
 
-function resolvesToFile(repoRoot, candidate) {
-  return RESOLUTION_BASES.some((base) => {
+function resolvesToFile(repoRoot, candidate, containingFile, isExplicitlyRelative) {
+  // Why: in a .cjs/.mjs build file an explicit `./` is a real require that
+  // typecheck never sees, so it must resolve against its own directory and
+  // nowhere else — allowing the tree roots would mask the move whenever a
+  // same-named file exists at a root, which is what hid the electron-builder
+  // breakage when the scripts left config/. Elsewhere `./` paths are either
+  // typechecked imports or prose inside embedded docs, where app-root-relative
+  // is the intended reading.
+  const bases =
+    isExplicitlyRelative && /\.[cm]js$/.test(containingFile)
+      ? [path.dirname(containingFile)]
+      : [...RESOLUTION_BASES, path.dirname(containingFile)]
+  return bases.some((base) => {
     const absolute = path.join(repoRoot, base, candidate)
     return fs.existsSync(absolute) && fs.statSync(absolute).isFile()
   })
@@ -105,7 +121,7 @@ export function findUnresolvedSourcePaths(repoRoot, files) {
     const lines = text.split('\n')
     for (const [index, line] of lines.entries()) {
       for (const match of line.matchAll(PATH_TOKEN)) {
-        const candidate = match[1]
+        const candidate = match[2]
         if (!CHECKED_EXTENSION.test(candidate)) {
           continue
         }
@@ -119,7 +135,7 @@ export function findUnresolvedSourcePaths(repoRoot, files) {
         if (ALLOWED_UNRESOLVED.has(candidate)) {
           continue
         }
-        if (resolvesToFile(repoRoot, candidate)) {
+        if (resolvesToFile(repoRoot, candidate, file, Boolean(match[1]))) {
           continue
         }
         unresolved.push({ file, line: index + 1, candidate })
