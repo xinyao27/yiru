@@ -1,8 +1,7 @@
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
 
 import {
   getTitlebarTabStateClasses,

@@ -2,21 +2,20 @@ import type { Popover as BasePopover } from '@base-ui/react/popover'
 import { GitMerge, HardDrives as Server } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { RepoBadgeMark } from '@/components/repo/badge-label'
+import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-import { useAllWorktrees, useRepoMap, useWorktreeMap } from '@/store/selectors'
+} from '~renderer/components/ui/command'
+import { Popover, PopoverAnchor, PopoverContent } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { useAllWorktrees, useRepoMap, useWorktreeMap } from '~renderer/store/selectors'
+import type { Worktree } from '~shared/types'
 
-import type { Worktree } from '../../../../shared/types'
 import { WorktreeActivityStatusIndicator } from './worktree-activity-status-indicator'
 import { branchDisplayName } from './worktree-card/helpers'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'

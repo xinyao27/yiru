@@ -1,4 +1,4 @@
-import type { AutomationRun, AutomationRunUsage } from '../../../../shared/automations-types'
+import type { AutomationRun, AutomationRunUsage } from '~shared/automations-types'
 
 export type AutomationUsageSummary = {
   knownRuns: number

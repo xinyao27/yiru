@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 
 import { ditherBackingSize, paintDitherColumn, resampleDitherValues } from './dither-paint'
 import { MONOCHROME_DITHER_SEED } from './palette'

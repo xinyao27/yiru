@@ -1,12 +1,12 @@
 import { z } from 'zod'
-
-import { CoworkingAgentLaunchIdSchema } from '../../../shared/coworking/agent-launch-contract'
+import { CoworkingAgentLaunchIdSchema } from '~shared/coworking/agent-launch-contract'
 import {
   CoworkingTerminalCreateHostResultSchema,
   CoworkingTerminalCreateRequesterResultSchema,
   CoworkingTerminalLaunchOptionsResultSchema
-} from '../../../shared/coworking/execution-result-schema'
-import type { CoworkingExecutionOperation } from '../../../shared/coworking/operation-contract'
+} from '~shared/coworking/execution-result-schema'
+import type { CoworkingExecutionOperation } from '~shared/coworking/operation-contract'
+
 import type { CoworkingAccessAuthority } from '../access-authority'
 import type { CoworkingExecutionGateway } from '../execution-gateway'
 import type { CoworkingLiveSessionDisplayIdentity } from '../live-session-display-identity'

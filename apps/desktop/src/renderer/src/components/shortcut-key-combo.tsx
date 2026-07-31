@@ -1,8 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import React from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 // Why: tooltips invert the app surface, so the shortcut component owns the
 // matching palette instead of making each tooltip style its internal parts.

@@ -2,19 +2,21 @@
    subscriptions share in-flight caches and state setters; splitting them would
    make the hook coordination harder to audit. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import type { OpenFile } from '@/components/editor/state'
-import { getConnectionIdForFile, isWorktreeConnectionResolved } from '@/lib/connection-context'
-import { joinPath } from '@/lib/path'
-import { getRuntimeFileReadScope, readRuntimeFileContent } from '@/runtime/file-client'
+import type { OpenFile } from '~renderer/components/editor/state'
+import {
+  getConnectionIdForFile,
+  isWorktreeConnectionResolved
+} from '~renderer/lib/connection-context'
+import { joinPath } from '~renderer/lib/path'
+import { getRuntimeFileReadScope, readRuntimeFileContent } from '~renderer/runtime/file-client'
 import {
   getRuntimeGitBranchDiff,
   getRuntimeGitCommitDiff,
   getRuntimeGitDiff,
   getRuntimeGitScope
-} from '@/runtime/git-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/git-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { getDiskBaselineSignature } from './diff-content-signature'
 import {

@@ -6,17 +6,20 @@ to reason about than scattering the switch across per-mode wrappers. Individual
 renderers (MonacoEditor, DiffViewer, ChangesModeView, MarkdownPreview, etc.)
 already live in their own modules. */
 import React from 'react'
+import type {
+  MarkdownViewMode,
+  OpenFile,
+  PendingEditorReveal
+} from '~renderer/components/editor/state'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
+import { joinPath } from '~renderer/lib/path'
+import { useAppStore } from '~renderer/store'
+import type { GitStatusEntry, GitDiffResult } from '~shared/types'
 
-import type { MarkdownViewMode, OpenFile, PendingEditorReveal } from '@/components/editor/state'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { detectLanguage } from '@/lib/language-detect'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { joinPath } from '@/lib/path'
-import { useAppStore } from '@/store'
-
-import type { GitStatusEntry, GitDiffResult } from '../../../../shared/types'
 import { ChangesModeView } from './changes-mode-view'
 import { CheckRunDetailsPanel } from './check-run-details-panel'
 import {

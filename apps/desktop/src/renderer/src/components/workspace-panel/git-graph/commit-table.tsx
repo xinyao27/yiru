@@ -1,14 +1,13 @@
 import type React from 'react'
 import { useCallback, useMemo, useRef } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitHistoryItem } from '~shared/git/history'
+import type { GitBranchChangeEntry } from '~shared/types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-
-import type { GitHistoryItem } from '../../../../../shared/git/history'
-import type { GitBranchChangeEntry } from '../../../../../shared/types'
 import type { SourceControlRowOpenEvent } from '../source-control/split-open'
 import {
   clampGitGraphColumnWidth,

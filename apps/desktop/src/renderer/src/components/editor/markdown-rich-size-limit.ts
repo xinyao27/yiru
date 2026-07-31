@@ -1,4 +1,4 @@
-import { RICH_MARKDOWN_MAX_SIZE_BYTES } from '../../../../shared/constants'
+import { RICH_MARKDOWN_MAX_SIZE_BYTES } from '~shared/constants'
 
 const richMarkdownSizeEncoder = new TextEncoder()
 // Why: rich-mode eligibility is checked during render-model work, so this

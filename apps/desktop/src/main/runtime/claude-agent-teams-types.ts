@@ -5,7 +5,7 @@ import type {
   RuntimeTerminalSend,
   RuntimeTerminalShow,
   RuntimeTerminalSplit
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
 
 export type AgentTeamsTmuxCompatRequest = {
   teamId: string

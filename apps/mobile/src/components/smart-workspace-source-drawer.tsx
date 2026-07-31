@@ -2,7 +2,7 @@ import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import type { RpcClient } from '../transport/rpc-client'
 import type { MrStateFilter, SmartNameMode } from '../workspace-create/composer-source-types'

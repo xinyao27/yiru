@@ -1,7 +1,7 @@
-import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
-import { useAppStore } from '@/store'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import {
   isSnapshotBackedTerminalPty,
   type ColdParkableTerminalTab

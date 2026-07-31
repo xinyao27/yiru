@@ -1,7 +1,7 @@
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
+import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
+import type { TuiAgent } from '~shared/types'
 
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/session-option-defaults'
-import type { TuiAgent } from '../../../../shared/types'
 import type { SourceControlAgentActionDeliveryPlanState } from './source-control/agent-action-dialog-form'
 import { buildSourceControlAgentConnectionErrorPlan } from './source-control/agent-action-dialog-support'
 import { planSourceControlAgentActionLaunch } from './source-control/agent-action-plan'

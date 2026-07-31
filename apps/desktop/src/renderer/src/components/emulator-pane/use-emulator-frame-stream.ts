@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 const FIRST_FRAME_TIMEOUT_MS = 6_000
 

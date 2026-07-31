@@ -6,20 +6,25 @@ import {
   Chat as MessageSquare,
   Trash as Trash2
 } from '@phosphor-icons/react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { useAppStore } from '../../../store'
-import { DetachedHeadBadge } from '../../detached-head-badge'
-import { DiffNotesSendMenu } from '../../editor/diff-notes-send-menu'
-import { Button } from '../../ui/button'
+import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
+import { DiffNotesSendMenu } from '~renderer/components/editor/diff-notes-send-menu'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+
 import type { SourceControlController } from './controller'
 import { DiffCommentsInlineList } from './diff-comments-inline-list'
 import { SourceControlHeaderToolbar } from './header-toolbar'

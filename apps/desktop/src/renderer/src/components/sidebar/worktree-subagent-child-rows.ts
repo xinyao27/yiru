@@ -1,8 +1,6 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-
-import type { TerminalTab } from '../../../../shared/types'
+import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
+import type { TerminalTab } from '~shared/types'
 
 /** Row-identity key for an in-process subagent child row. The NUL separator
  *  cannot appear in real pane keys, so synthetic keys can never collide with

@@ -1,10 +1,16 @@
 import type React from 'react'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
 
-import type { SourceControlAiSettings } from '../../../../../shared/source-control/ai-types'
-import { translate } from '../../../i18n/i18n'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { CUSTOM_COMMAND_MODE_INHERIT, CUSTOM_COMMAND_MODE_REPO } from './source-control-ai-labels'
 
 type RepositorySourceControlAiCustomCommandProps = {

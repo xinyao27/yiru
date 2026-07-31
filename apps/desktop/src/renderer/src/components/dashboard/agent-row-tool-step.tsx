@@ -1,6 +1,5 @@
 import { Wrench } from '@phosphor-icons/react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 type DashboardAgentRowToolStepProps = {
   expanded: boolean

@@ -1,19 +1,18 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { selectCoworkingCanControl } from '@/components/coworking/selectors'
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+import { selectCoworkingCanControl } from '~renderer/components/coworking/selectors'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import type {
   CoworkingGitDiffResult,
   CoworkingGitHistoryEntry,
   CoworkingGitHistoryResult,
   CoworkingGitStatusEntry,
   CoworkingGitStatusResult
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { getCoworkingGitStatusEntryKey } from './git-changes-list'
 import { CoworkingGitDiffPane } from './git-diff-pane'
 import { CoworkingGitSidebar, type CoworkingGitSidebarMode } from './git-sidebar'

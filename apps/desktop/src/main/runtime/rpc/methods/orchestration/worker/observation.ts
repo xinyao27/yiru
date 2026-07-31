@@ -1,7 +1,7 @@
-import type { OrchestrationDb } from '../../../../orchestration/db'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import type { FederatedDispatchRow, WorkerDispatchRow } from '../../../../orchestration/types'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { FederatedDispatchRow, WorkerDispatchRow } from '~main/runtime/orchestration/types'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
 export async function inspectWorkerTerminal(
   runtime: YiruRuntimeService,

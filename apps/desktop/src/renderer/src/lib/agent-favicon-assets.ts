@@ -1,3 +1,5 @@
+import type { TuiAgent } from '~shared/types'
+
 import ampUrl from '../../../shared/agent-icons/amp.png?url'
 import anteUrl from '../../../shared/agent-icons/ante.png?url'
 import antigravityUrl from '../../../shared/agent-icons/antigravity.png?url'
@@ -21,7 +23,6 @@ import mistralVibeUrl from '../../../shared/agent-icons/mistral-vibe.png?url'
 import openclawUrl from '../../../shared/agent-icons/openclaw.png?url'
 import qwenCodeUrl from '../../../shared/agent-icons/qwen-code.png?url'
 import rovoUrl from '../../../shared/agent-icons/rovo.png?url'
-import type { TuiAgent } from '../../../shared/types'
 
 // Why: these agents have no hand-authored SVG glyph, so previously their icons
 // loaded live from Google's favicon service. That service is unreachable in some

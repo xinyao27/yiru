@@ -1,4 +1,5 @@
-import { ORCHESTRATION_LEGACY_RUN_ID } from '../../../shared/orchestration-rpc-contract'
+import { ORCHESTRATION_LEGACY_RUN_ID } from '~shared/orchestration-rpc-contract'
+
 import type { MessageRow } from './types'
 
 const BANNER_WIDTH = 60

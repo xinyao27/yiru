@@ -1,7 +1,6 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { OSC52_CLIPBOARD_SETTING_ID } from './osc52-clipboard-setting-anchor'
 

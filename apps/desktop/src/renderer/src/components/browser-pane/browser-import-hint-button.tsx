@@ -1,9 +1,8 @@
 import { DownloadSimple as Import } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { isLinuxUserAgent, isMacUserAgent } from '@/components/terminal-pane/pane-helpers'
-import { Button } from '@/components/ui/button'
+import { isLinuxUserAgent, isMacUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +13,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getBrowserCookieImportSourceLabels } from '~shared/browser/cookie-import-sources'
 
-import { getBrowserCookieImportSourceLabels } from '../../../../shared/browser/cookie-import-sources'
 import { formatBrowserImportSummary } from './browser-detected-browsers-summary'
 import { shouldShowBrowserImportHint } from './browser-import-hint-visibility'
 

@@ -1,4 +1,4 @@
-import { isWebClientLocation } from '@/lib/web-client-location'
+import { isWebClientLocation } from '~renderer/lib/web-client-location'
 
 // Why: navigator.clipboard is unavailable on plain-HTTP web clients, where the
 // browser's native ClipboardEvent is the only path to clipboard text.

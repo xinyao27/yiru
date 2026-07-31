@@ -1,10 +1,9 @@
 import { create } from 'zustand'
-
-import { registerHttpLinkStoreAccessor } from '@/components/editor/http-link-routing'
+import { registerHttpLinkStoreAccessor } from '~renderer/components/editor/http-link-routing'
 import {
   registerRendererMemoryProfileContributor,
   summarizeStateCollectionSizes
-} from '@/lib/renderer-memory-profile'
+} from '~renderer/lib/renderer-memory-profile'
 
 import { createBrowserSlice } from '../components/browser-pane/state'
 import { createCoworkingSharingSlice } from '../components/coworking/state'

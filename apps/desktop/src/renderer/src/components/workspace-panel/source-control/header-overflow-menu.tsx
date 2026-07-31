@@ -7,18 +7,18 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { SourceControlViewMode } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { SourceControlViewMode } from '~shared/types'
+
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 
 export function SourceControlHeaderOverflowMenu({

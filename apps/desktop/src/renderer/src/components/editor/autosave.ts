@@ -1,12 +1,11 @@
-import type { OpenFile } from '@/components/editor/state'
-import { joinPath } from '@/lib/path'
-import { clampNumber } from '@/lib/terminal-theme'
-
+import type { OpenFile } from '~renderer/components/editor/state'
+import { joinPath } from '~renderer/lib/path'
+import { clampNumber } from '~renderer/lib/terminal-theme'
 import {
   DEFAULT_EDITOR_AUTO_SAVE_DELAY_MS,
   MAX_EDITOR_AUTO_SAVE_DELAY_MS,
   MIN_EDITOR_AUTO_SAVE_DELAY_MS
-} from '../../../../shared/constants'
+} from '~shared/constants'
 
 export const YIRU_EDITOR_QUIESCE_FILE_SAVES_EVENT = 'yiru:editor-quiesce-file-saves'
 export const YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT = 'yiru:editor-external-file-change'

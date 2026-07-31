@@ -1,9 +1,8 @@
 import type React from 'react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
+import type { GitHistoryItem } from '~shared/git/history'
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
-
-import type { GitHistoryItem } from '../../../../../shared/git/history'
 import { type GitGraphColumnWidths, gitGraphColumnFlexStyle } from './column-widths'
 import { formatGitGraphShortDate } from './format'
 import { GitGraphRefBadge } from './ref-badge'

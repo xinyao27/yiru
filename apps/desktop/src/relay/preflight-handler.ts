@@ -3,10 +3,11 @@ import { userInfo } from 'node:os'
 import path, { win32 } from 'node:path'
 import { promisify } from 'node:util'
 
-import { isGitBashAvailable } from '../main/git-bash'
-import { isPwshAvailable } from '../main/pwsh'
-import { isWslAvailable, listWslDistros } from '../main/wsl'
-import { buildPosixCommandPathLookupScript } from '../shared/posix-command-path-lookup'
+import { isGitBashAvailable } from '~main/git-bash'
+import { isPwshAvailable } from '~main/pwsh'
+import { isWslAvailable, listWslDistros } from '~main/wsl'
+import { buildPosixCommandPathLookupScript } from '~shared/posix-command-path-lookup'
+
 import { buildRelayCommandEnv } from './command-env'
 import type { RelayDispatcher } from './dispatcher'
 

@@ -8,7 +8,8 @@ import { promisify } from 'node:util'
 import {
   getProcessOutputFields,
   iterateProcessOutputLines
-} from '../../shared/process-output-field-scanner'
+} from '~shared/process-output-field-scanner'
+
 import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/diagnostics'
 import { encodeNdjson } from './ndjson'
 import { getDaemonPidPath } from './spawner'

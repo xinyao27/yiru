@@ -1,7 +1,7 @@
 import type { ITerminalOptions } from '@xterm/xterm'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { TuiAgent } from '~shared/types'
 
-import type { TuiAgent } from '../../../../shared/types'
 import {
   isLocalNativeWindowsConpty,
   type WindowsPtyCompatibilityContext

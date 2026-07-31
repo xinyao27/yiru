@@ -1,6 +1,5 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
 
 export type PetAnimationName =
   | 'idle'

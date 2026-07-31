@@ -1,8 +1,7 @@
 import { UserCircle as CircleUserRound } from '@phosphor-icons/react'
+import { DropdownMenuLabel } from '~renderer/components/ui/dropdown-menu'
+import type { YiruProfileSummary } from '~shared/yiru-profiles'
 
-import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
-
-import type { YiruProfileSummary } from '../../../../shared/yiru-profiles'
 import { YiruProfileAvatar } from './yiru-profile-avatar'
 
 export function YiruProfileMenuHeader({

@@ -1,6 +1,5 @@
-import { cn } from '@/lib/class-names'
-
-import type { GlobalSettings } from '../../../../shared/types'
+import { cn } from '~renderer/lib/class-names'
+import type { GlobalSettings } from '~shared/types'
 
 export function ChromePreview({ variant }: { variant: GlobalSettings['theme'] }) {
   if (variant === 'system') {

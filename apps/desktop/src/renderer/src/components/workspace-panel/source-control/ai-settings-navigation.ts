@@ -1,7 +1,6 @@
-import type { AppState } from '@/store'
-
-import type { Repo } from '../../../../../shared/types'
-import { getRepositorySourceControlAiSectionId } from '../../settings/repository/settings-targets'
+import { getRepositorySourceControlAiSectionId } from '~renderer/components/settings/repository/settings-targets'
+import type { AppState } from '~renderer/store'
+import type { Repo } from '~shared/types'
 
 export function openSourceControlAiSettingsTarget({
   activeRepo,

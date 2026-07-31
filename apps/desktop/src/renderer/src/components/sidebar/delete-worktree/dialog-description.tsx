@@ -1,5 +1,5 @@
-import { translate } from '../../../i18n/i18n'
-import { DialogDescription } from '../../ui/dialog'
+import { DialogDescription } from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 export function DeleteWorktreeDialogDescription({
   targetClassName,

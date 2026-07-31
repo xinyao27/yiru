@@ -1,5 +1,5 @@
-import { humanizeBranchSlug } from '../../../../shared/branch-name-from-work'
-import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
+import { humanizeBranchSlug } from '~shared/branch-name-from-work'
+import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 export function resolveCreateReviewDraftTitle({
   branch,

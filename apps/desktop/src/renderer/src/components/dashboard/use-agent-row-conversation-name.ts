@@ -1,8 +1,8 @@
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import { getAgentRowConversationName } from '~shared/agent/row-conversation-name'
+import { parsePaneKey } from '~shared/stable-pane-id'
 
-import { getAgentRowConversationName } from '../../../../shared/agent/row-conversation-name'
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { DashboardAgentRow } from './use-dashboard-data'
 
 type WorktreeTabs = NonNullable<AppState['tabsByWorktree'][string]>

@@ -1,9 +1,8 @@
 import { FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,13 +10,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/types'
 import { finishProjectAddWithDefaultCheckout } from './project-added-default-checkout'
 
 const NON_GIT_REPO_ERROR = 'Not a valid git repository'

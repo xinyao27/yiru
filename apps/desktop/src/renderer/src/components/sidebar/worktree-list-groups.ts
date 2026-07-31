@@ -15,15 +15,22 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'
-
+import { translate } from '~renderer/i18n/i18n'
+import { branchName } from '~renderer/lib/git-utils'
+import {
+  getRepoDisplayLabelKey,
+  getRepoDisplayLabelsByPath
+} from '~renderer/lib/repo-display-labels'
+import {
+  getGitHubPRCacheKey,
+  getLegacyGitHubPRCacheKey
+} from '~renderer/store/slices/github-cache-key'
+import type { AppState } from '~renderer/store/types'
 import {
   getEffectiveProjectGroupManualRank,
   UNGROUPED_PROJECT_GROUP_KEY
-} from '../../../../shared/project-groups'
-import { getPortableProjectIdentityKey } from '../../../../shared/project-host-setup-projection'
+} from '~shared/project-groups'
+import { getPortableProjectIdentityKey } from '~shared/project-host-setup-projection'
 import type {
   DetectedWorktree,
   Project,
@@ -35,11 +42,9 @@ import type {
   Worktree,
   WorktreeLineage,
   WorkspaceStatusDefinition
-} from '../../../../shared/types'
-import { cloneDefaultWorkspaceStatuses } from '../../../../shared/workspace/statuses'
-import { branchName } from '../../lib/git-utils'
-import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from '../../store/slices/github-cache-key'
-import type { AppState } from '../../store/types'
+} from '~shared/types'
+import { cloneDefaultWorkspaceStatuses } from '~shared/workspace/statuses'
+
 import {
   getWorkspaceStatus,
   getWorkspaceStatusFromGroupKey,

@@ -1,6 +1,6 @@
 import { GitDiff } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import type { SourceControlController } from './controller'
 import { SourceControlHeaderIconButton } from './header-icon-button'
 import { SourceControlScopeSelect } from './scope-select'

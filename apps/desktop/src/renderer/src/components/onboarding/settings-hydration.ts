@@ -1,4 +1,4 @@
-import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
 
 export type OnboardingSettingsHydrationUpdate = {
   settingsHydrated: boolean

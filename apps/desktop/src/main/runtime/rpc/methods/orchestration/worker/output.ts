@@ -1,18 +1,18 @@
-import type {
-  OrchestrationWorkerReadFallbackReason,
-  OrchestrationWorkerReadResult,
-  OrchestrationWorkerReadSource
-} from '../../../../../../shared/orchestration-worker-output'
-import type { RuntimeTerminalState } from '../../../../../../shared/runtime-types'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
 import {
   createWorkerOutputSourceIdentity,
   decodeWorkerOutputCursor,
   encodeWorkerOutputCursor
-} from '../../../../orchestration/worker-output-cursor'
-import { redactWorkerTerminalLines } from '../../../../orchestration/worker-transcript-payload'
-import { readWorkerTranscript } from '../../../../orchestration/worker-transcript-read'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
+} from '~main/runtime/orchestration/worker-output-cursor'
+import { redactWorkerTerminalLines } from '~main/runtime/orchestration/worker-transcript-payload'
+import { readWorkerTranscript } from '~main/runtime/orchestration/worker-transcript-read'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import type {
+  OrchestrationWorkerReadFallbackReason,
+  OrchestrationWorkerReadResult,
+  OrchestrationWorkerReadSource
+} from '~shared/orchestration-worker-output'
+import type { RuntimeTerminalState } from '~shared/runtime-types'
 
 export async function readExactWorkerOutput(args: {
   runtime: YiruRuntimeService

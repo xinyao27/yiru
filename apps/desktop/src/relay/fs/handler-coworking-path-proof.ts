@@ -4,7 +4,7 @@ import { lstat, open, realpath } from 'node:fs/promises'
 import type { FileHandle } from 'node:fs/promises'
 import { isAbsolute } from 'node:path'
 
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
 
 const MAX_PATH_BYTES = 256 * 1_024
 const MAX_IDENTITY_BYTES = 512

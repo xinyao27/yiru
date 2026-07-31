@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getDefaultVoiceSettings } from '~shared/constants'
+import type { SpeechModelManifest, VoiceSettings } from '~shared/speech-types'
+import type { GlobalSettings } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import { getDefaultVoiceSettings } from '../../../../shared/constants'
-import type { SpeechModelManifest, VoiceSettings } from '../../../../shared/speech-types'
-import type { GlobalSettings } from '../../../../shared/types'
 import { Separator } from '../ui/separator'
 import { OpenAiTranscriptionKeyDialog } from './openai-transcription-key-dialog'
 import { OpenAiTranscriptionSettingsRow } from './openai-transcription-settings-row'

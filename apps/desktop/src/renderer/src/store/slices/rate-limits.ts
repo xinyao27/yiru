@@ -1,10 +1,10 @@
 import type { StateCreator } from 'zustand'
-
 import type {
   CursorRateLimitRefreshContext,
   RateLimitRuntimeTarget,
   RateLimitState
-} from '../../../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import type { AppState } from '../types'
 
 export type RateLimitSlice = {

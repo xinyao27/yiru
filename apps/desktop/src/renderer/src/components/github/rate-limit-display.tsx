@@ -1,17 +1,15 @@
 import { Gauge, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { getProviderRateLimitScope } from '@/components/settings/provider-account-scope'
-import { ProviderHostScopeControl } from '@/components/settings/provider-host-scope-control'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import type { GetRateLimitResult, GitHubRateLimitSnapshot } from '../../../../shared/types'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { getProviderRateLimitScope } from '~renderer/components/settings/provider-account-scope'
+import { ProviderHostScopeControl } from '~renderer/components/settings/provider-host-scope-control'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { GetRateLimitResult, GitHubRateLimitSnapshot } from '~shared/types'
 
 const REFRESH_INTERVAL_MS = 60_000
 

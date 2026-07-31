@@ -1,5 +1,5 @@
-import { getDefaultWorkspaceSession } from '../../../shared/constants'
-import type { WorkspaceSessionState } from '../../../shared/types'
+import { getDefaultWorkspaceSession } from '~shared/constants'
+import type { WorkspaceSessionState } from '~shared/types'
 
 export function sanitizeWebRuntimeWorkspaceSession(
   session: WorkspaceSessionState

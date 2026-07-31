@@ -1,9 +1,9 @@
 import type { FileTreeRenameEvent } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { basename, normalizeRelativePath } from '~renderer/lib/path'
 
-import { translate } from '../../../i18n/i18n'
-import { basename, normalizeRelativePath } from '../../../lib/path'
 import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import { usePierreFileTreeDragPayload } from '../use-pierre-file-tree-drag-payload'
 import { usePierreFileTreeFlash } from '../use-pierre-file-tree-flash'

@@ -1,8 +1,7 @@
 import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React from 'react'
-
-import { ContextMenuContent, ContextMenuItem } from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
+import { ContextMenuContent, ContextMenuItem } from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 export function HideSidebarMenu({ onHide }: { onHide: () => void }): React.JSX.Element {
   return (

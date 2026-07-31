@@ -1,10 +1,9 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { dispatchTerminalCommandFinishedEvent } from '~renderer/hooks/terminal-command-finished-event'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { useAppStore } from '~renderer/store'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
-import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { useAppStore } from '@/store'
-
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import {
   cancelCommandCodeDoneSettle,
   openCommandCodeDoneSettle,

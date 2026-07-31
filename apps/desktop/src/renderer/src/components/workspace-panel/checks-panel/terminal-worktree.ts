@@ -5,8 +5,7 @@ import {
 } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import type { TerminalLayoutSnapshot, Worktree } from '../../../../../shared/types'
+import type { TerminalLayoutSnapshot, Worktree } from '~shared/types'
 
 type TerminalPtyContext = {
   activeTabId: string | null

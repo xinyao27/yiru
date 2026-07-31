@@ -1,14 +1,13 @@
 import type { RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { useAppStore } from '@/store'
-
 import {
   getWorkspaceFileDragRejectionMessage,
   readWorkspaceFileDragPaths,
   WORKSPACE_FILE_PATH_MIME
-} from '../../../lib/workspace-file-drag'
+} from '~renderer/lib/workspace-file-drag'
+import { useAppStore } from '~renderer/store'
+
 import { getDragEdgeScrollTarget, useFileExplorerDragEdgeScroll } from './drag-edge-scroll'
 import { useFileExplorerPathMove } from './path-move'
 

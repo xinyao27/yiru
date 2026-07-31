@@ -1,19 +1,17 @@
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import {
   getProjectAgentSkillRuntime,
   getProjectAgentSkillTerminalShellOverride,
   getProjectSkillDiscoveryTarget,
   getProjectSkillInstallDisabledReason,
   type ProjectAgentSkillRuntime
-} from '@/lib/project-skill-runtime'
-import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
-import { useAppStore } from '@/store'
-
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
-import type { SkillDiscoveryTarget } from '../../../shared/skills'
+} from '~renderer/lib/project-skill-runtime'
+import { useWindowsTerminalCapabilities } from '~renderer/lib/windows-terminal-capabilities'
+import { useAppStore } from '~renderer/store'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { SkillDiscoveryTarget } from '~shared/skills'
 
 type ActiveProjectSkillRuntime = {
   projectRuntime?: ProjectExecutionRuntimeResolution

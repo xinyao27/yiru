@@ -3,7 +3,7 @@ import {
   getTerminalInputByteLength,
   isTerminalInputTooLarge,
   iterateTerminalInputChunks
-} from '../../../../shared/terminal/input'
+} from '~shared/terminal/input'
 
 export type CoworkingTerminalMutation =
   | { method: 'terminal.input'; data: string }

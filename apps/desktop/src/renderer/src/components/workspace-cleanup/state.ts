@@ -3,11 +3,13 @@ import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbe
    enrichment, dismissals, and destructive preflight/delete orchestration share
    one store state contract. */
 import type { StateCreator } from 'zustand'
-
-import { translate } from '@/i18n/i18n'
-import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
-
-import { mapWithConcurrency } from '../../../../shared/map-with-concurrency'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  classifyTitleActivity,
+  isExplicitAgentStatusFresh
+} from '~renderer/lib/pane-agent-evidence'
+import type { AppState } from '~renderer/store/types'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   applyWorkspaceCleanupPolicy,
@@ -21,8 +23,7 @@ import {
   type WorkspaceCleanupScanArgs,
   type WorkspaceCleanupScanProgress,
   type WorkspaceCleanupScanResult
-} from '../../../../shared/workspace/cleanup'
-import type { AppState } from '../../store/types'
+} from '~shared/workspace/cleanup'
 
 export type WorkspaceCleanupFailure = {
   worktreeId: string

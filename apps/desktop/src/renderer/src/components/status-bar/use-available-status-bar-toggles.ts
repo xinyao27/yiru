@@ -1,5 +1,6 @@
-import type { StatusBarItem } from '../../../../shared/types'
-import { useAppStore } from '../../store'
+import { useAppStore } from '~renderer/store'
+import type { StatusBarItem } from '~shared/types'
+
 import { isStatusBarItemAvailable } from './agent-gating'
 
 /** Subscribes to detected-agent state and returns the toggles filtered to

@@ -1,17 +1,15 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 import {
   MAX_TERMINAL_CUSTOM_THEMES,
   normalizeTerminalCustomThemes,
   type TerminalCustomTheme,
   type WarpThemeImportPreview,
   type WarpThemeImportSource
-} from '../../../../shared/terminal/custom-themes'
-import type { GlobalSettings } from '../../../../shared/types'
-import { useMountedRef } from '../../hooks/use-mounted-ref'
+} from '~shared/terminal/custom-themes'
+import type { GlobalSettings } from '~shared/types'
 
 /** Which entry point opened the import flow; only affects modal copy. */
 export type ThemeImportMode = 'warp' | 'yaml'

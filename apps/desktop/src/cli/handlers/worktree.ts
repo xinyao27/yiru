@@ -3,11 +3,12 @@ import {
   WORKTREE_LIST_CONTRACT,
   WORKTREE_REMOVE_CONTRACT,
   WORKTREE_SET_CONTRACT
-} from '../../shared/runtime-method-contracts/workspace-contracts'
-import type { RuntimeWorktreePsResult, RuntimeWorktreeRecord } from '../../shared/runtime-types'
-import { isTuiAgent } from '../../shared/tui-agent/config'
-import type { TuiAgent } from '../../shared/types'
-import { isWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
+} from '~shared/runtime-method-contracts/workspace-contracts'
+import type { RuntimeWorktreePsResult, RuntimeWorktreeRecord } from '~shared/runtime-types'
+import { isTuiAgent } from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
+import { isWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,

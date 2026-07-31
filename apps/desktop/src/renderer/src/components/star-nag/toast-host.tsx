@@ -2,10 +2,9 @@ import { Check, Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 type StarNagMode = 'gh' | 'web'
 type StarNagToastStatus = 'idle' | 'busy' | 'starred' | 'opened'

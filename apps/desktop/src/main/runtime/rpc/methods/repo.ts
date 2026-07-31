@@ -1,15 +1,15 @@
 import { z } from 'zod'
-
 import {
   OptionalFiniteNumber,
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 import {
   REPO_ADD_CONTRACT,
   REPO_LIST_CONTRACT,
   REPO_SEARCH_REFS_CONTRACT
-} from '../../../../shared/runtime-method-contracts/workspace-contracts'
+} from '~shared/runtime-method-contracts/workspace-contracts'
+
 import { defineMethod, type RpcMethod } from '../core'
 import { FOLDER_WORKSPACE_METHODS } from './folder-workspace'
 import { PROJECT_RUNTIME_METHODS } from './project-runtime-rpc-methods'

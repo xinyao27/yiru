@@ -1,5 +1,5 @@
-import type { OpenFile } from '@/components/editor/state'
-import { dirname } from '@/lib/path'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { dirname } from '~renderer/lib/path'
 
 type UntitledPathFile = Pick<OpenFile, 'filePath' | 'relativePath'>
 

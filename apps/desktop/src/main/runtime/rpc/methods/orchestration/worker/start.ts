@@ -1,8 +1,9 @@
-import { isTuiAgent } from '../../../../../../shared/tui-agent/config'
-import type { TuiAgent } from '../../../../../../shared/types'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import { buildDispatchPreamble } from '../../../../orchestration/preamble'
-import { defineMethod, type RpcMethod } from '../../../core'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { buildDispatchPreamble } from '~main/runtime/orchestration/preamble'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { isTuiAgent } from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
+
 import { startFederatedWorker } from '../federation/worker-start'
 import { assertOrchestrationWorktreeCreationSupported } from '../worktree-placement'
 import {

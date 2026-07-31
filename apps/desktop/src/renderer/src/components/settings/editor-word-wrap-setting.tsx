@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
 import { SettingsSegmentedControl } from './form-controls'
 import { SearchableSetting } from './searchable-setting'

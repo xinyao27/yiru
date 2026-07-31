@@ -15,8 +15,8 @@ import { tmpdir } from 'node:os'
 import { basename, win32 as pathWin32 } from 'node:path'
 
 import type * as pty from 'node-pty'
+import { buildStartupCommandSubmission } from '~shared/startup-command-submission'
 
-import { buildStartupCommandSubmission } from '../../shared/startup-command-submission'
 import {
   encodePowerShellCommand,
   getPowerShellOsc133Bootstrap,

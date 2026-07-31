@@ -1,10 +1,9 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { TabGroupLayoutNode } from '~shared/types'
 
-import { cn } from '@/lib/class-names'
-
-import type { TabGroupLayoutNode } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import TabDragPreview from '../tab-bar/tab-drag-preview'
 import TabGroupPanel from './panel'
 import { TabDragProvider } from './tab-drag-context'

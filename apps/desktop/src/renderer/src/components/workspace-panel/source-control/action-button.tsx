@@ -1,8 +1,7 @@
 import type { IconProps } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
 type ActionButtonProps = {
   icon: React.ComponentType<{ className?: string; weight?: IconProps['weight'] }>

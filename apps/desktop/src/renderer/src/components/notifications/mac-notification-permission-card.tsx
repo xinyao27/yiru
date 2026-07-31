@@ -5,11 +5,9 @@ import {
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
-import type { NotificationDeliveryProbeResult } from '../../../../shared/types'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { NotificationDeliveryProbeResult } from '~shared/types'
 
 export type MacNotificationPermissionState =
   | 'checking'

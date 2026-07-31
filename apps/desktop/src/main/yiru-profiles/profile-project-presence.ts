@@ -1,7 +1,8 @@
 import type {
   FindYiruProfileProjectsByPathArgs,
   FindYiruProfileProjectsByPathResult
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
+
 import { getYiruProfileListState } from './profile-index-store'
 import { readProfileState } from './profile-project-state-file'
 import { repoPhysicalKey } from './profile-project-worktree-identity'

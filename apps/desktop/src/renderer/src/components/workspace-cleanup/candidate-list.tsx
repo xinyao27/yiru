@@ -1,9 +1,7 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import type React from 'react'
-
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import type { WorkspaceCleanupCandidate } from '~shared/workspace/cleanup'
 
 // Why: a collapsed row is a single metadata line (~48px with px-3 py-2.5);
 // expanded rows and failure banners are taller, so LegendList starts from the

@@ -1,13 +1,9 @@
 import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '@yiru/workbench-model/product'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { ClaudeUsageDailyPoint, ClaudeUsageSummary } from '~shared/claude-usage-types'
+import type { CodexUsageDailyPoint, CodexUsageSummary } from '~shared/codex-usage-types'
 
 import logo from '../../../../../resources/yiru-wordmark.png?url'
-import type {
-  ClaudeUsageDailyPoint,
-  ClaudeUsageSummary
-} from '../../../../shared/claude-usage-types'
-import type { CodexUsageDailyPoint, CodexUsageSummary } from '../../../../shared/codex-usage-types'
 
 export type ClaudeShareData = {
   provider: 'claude'

@@ -1,4 +1,4 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   addRuntimeGitTag,
   checkoutRuntimeGitCommit,
@@ -10,9 +10,9 @@ import {
   resetRuntimeGitToCommit,
   revertRuntimeGitCommit,
   type RuntimeGitContext
-} from '@/runtime/git-client'
+} from '~renderer/runtime/git-client'
+import type { GitHistoryItem } from '~shared/git/history'
 
-import type { GitHistoryItem } from '../../../../../shared/git/history'
 import type { GitGraphCommitWriteAction, GitGraphCommitWriteForm } from './commit-write-action'
 
 // Why: every git write op already reports the same four outcomes (see

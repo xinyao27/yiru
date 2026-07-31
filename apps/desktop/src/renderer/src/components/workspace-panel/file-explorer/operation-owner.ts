@@ -3,18 +3,17 @@ import {
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { useAppStore } from '@/store'
-
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { translate } from '../../../i18n/i18n'
-import { getConnectionIdFromState } from '../../../lib/connection-context'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getSettingsForWorktreeRuntimeOwner
-} from '../../../lib/worktree-runtime-owner'
-import { getRepoIdFromWorktreeId } from '../../../store/slices/worktree-helpers'
-import type { AppState } from '../../../store/types'
+} from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import type { FileExplorerOperationOwner } from './types'
 
 export type FileExplorerOperationRoute = {

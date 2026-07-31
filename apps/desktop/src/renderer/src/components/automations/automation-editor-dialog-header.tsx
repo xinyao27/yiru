@@ -1,11 +1,10 @@
 import { Sparkle as Sparkles } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { AutomationCreateTarget } from './automation-editor-dialog'
 import type { AutomationTemplate } from './automation-templates'

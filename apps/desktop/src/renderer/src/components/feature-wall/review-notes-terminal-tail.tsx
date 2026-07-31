@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
 // Why: React must own the configured loader while the surrounding storyboard
 // imperatively reveals it and types into the adjacent text node.

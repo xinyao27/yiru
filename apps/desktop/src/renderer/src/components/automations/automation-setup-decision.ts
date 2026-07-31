@@ -1,13 +1,12 @@
-import { getSetupConfig } from '@/lib/new-workspace'
-
-import type { AutomationWorkspaceMode } from '../../../../shared/automations-types'
+import { getSetupConfig } from '~renderer/lib/new-workspace'
+import type { AutomationWorkspaceMode } from '~shared/automations-types'
 import type {
   YiruHooks,
   ProjectHostSetup,
   Repo,
   SetupDecision,
   SetupRunPolicy
-} from '../../../../shared/types'
+} from '~shared/types'
 
 type AutomationSetupSource = {
   setupScript: string

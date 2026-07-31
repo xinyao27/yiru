@@ -1,17 +1,16 @@
 import { CaretLeft as ChevronLeft } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { Button } from '~renderer/components/ui/button'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import type {
   CoworkingFileDiffResult,
   CoworkingFileReadResult,
   CoworkingFileTreeEntry
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingFilePreviewToolbar, type CoworkingFilePreviewMode } from './file-preview-toolbar'
 
 export function CoworkingFilePreview({

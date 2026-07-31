@@ -1,8 +1,8 @@
 import type React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { CoworkingOwnerControlGrantView } from '~shared/coworking/ipc-contract'
 
-import type { CoworkingOwnerControlGrantView } from '../../../../../shared/coworking/ipc-contract'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
 import { TruncatedSidebarLabel } from '../truncated-sidebar-label'
 
 type WorktreeCardControlGrantsProps = {

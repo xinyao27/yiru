@@ -1,9 +1,8 @@
 import type React from 'react'
 import { useCallback, useDeferredValue, useState } from 'react'
-
-import { CommandDialog, CommandInput, CommandList } from '@/components/ui/command'
-import { getNextWorktreePaletteSelection } from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import { translate } from '@/i18n/i18n'
+import { CommandDialog, CommandInput, CommandList } from '~renderer/components/ui/command'
+import { getNextWorktreePaletteSelection } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import { translate } from '~renderer/i18n/i18n'
 
 import { FooterKey } from './palette-parts'
 import { PaletteResultsList } from './rows/palette-list'

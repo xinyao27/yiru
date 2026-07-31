@@ -2,12 +2,8 @@ import {
   getDefaultOnboardingState,
   ONBOARDING_FINAL_STEP,
   ONBOARDING_FLOW_VERSION
-} from '../../shared/constants'
-import type {
-  OnboardingChecklistState,
-  OnboardingOutcome,
-  OnboardingState
-} from '../../shared/types'
+} from '~shared/constants'
+import type { OnboardingChecklistState, OnboardingOutcome, OnboardingState } from '~shared/types'
 
 type SanitizeOnboardingUpdateOptions = {
   migrateLegacyProgress?: boolean

@@ -1,6 +1,5 @@
-import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
-
-import type { TerminalPaneLayoutNode, TerminalPaneSplitDirection } from '../../../../shared/types'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import type { TerminalPaneLayoutNode, TerminalPaneSplitDirection } from '~shared/types'
 
 /**
  * Whether a tab's split layout is owned by a host (web/mobile clients, or a

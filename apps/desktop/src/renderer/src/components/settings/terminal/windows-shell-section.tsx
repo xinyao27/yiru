@@ -1,8 +1,8 @@
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { ShellIcon } from '~renderer/components/tab-bar/shell-icons'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { ShellIcon } from '../../tab-bar/shell-icons'
 import { SettingsRow, SettingsSegmentedControl, SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 

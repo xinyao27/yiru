@@ -1,7 +1,7 @@
 import {
   BACKGROUND_MOUNT_TERMINAL_WORKTREE_EVENT,
   type BackgroundMountTerminalWorktreeDetail
-} from '@/constants/terminal'
+} from '~renderer/constants/terminal'
 
 const pendingMounts = new Map<string, BackgroundMountTerminalWorktreeDetail>()
 const requestListeners = new Set<() => void>()

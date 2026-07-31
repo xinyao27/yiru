@@ -1,7 +1,7 @@
 import { Minus, Plus, Trash, ArrowCounterClockwise as Undo2, GitDiff } from '@phosphor-icons/react'
 import React from 'react'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import {
   getDiscardAllPaths,
   getUnstageAllPaths,

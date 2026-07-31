@@ -1,8 +1,9 @@
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+
 import type { DropdownActionKind, DropdownEntry } from './dropdown-items'
 import type { CreatePrIntentNotice } from './panel-types'
 import type { PrimaryAction, RemoteOpKind } from './primary-action'

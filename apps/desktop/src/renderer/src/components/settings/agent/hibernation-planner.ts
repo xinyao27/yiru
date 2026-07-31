@@ -4,14 +4,10 @@ import {
   type SleepingAgentSessionRecord
 } from '@yiru/workbench-model/agent'
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
-import { parsePaneKey } from '../../../../../shared/stable-pane-id'
-import type {
-  GlobalSettings,
-  TerminalLayoutSnapshot,
-  TerminalTab
-} from '../../../../../shared/types'
-import { parseRemoteRuntimePtyId } from '../../../runtime/terminal-stream'
 import { isCompletedAgentWithLiveRecoveryRecord } from '../completed-agent-live-recovery-record'
 import { getEffectiveAgentHibernationIdleMs } from './hibernation-idle-threshold'
 import { lastInputBlocksHibernation } from './hibernation-input-guard'

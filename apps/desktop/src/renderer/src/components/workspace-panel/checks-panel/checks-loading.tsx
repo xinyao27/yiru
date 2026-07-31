@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
+import { gitLabPipelineJobsToPRChecks } from '~shared/gitlab-pipeline-checks'
 
-import { gitLabPipelineJobsToPRChecks } from '../../../../../shared/gitlab-pipeline-checks'
 import { installWindowVisibilityTimeoutPoller } from '../window-visibility-timeout-poller'
 import {
   checksPanelAsyncResultKey,

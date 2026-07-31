@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from 'react'
+import { useAppStore } from '~renderer/store'
+import type { TabGroupLayoutNode } from '~shared/types'
 
-import type { TabGroupLayoutNode } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { selectEvictionExemptTerminalTabIds } from '../terminal-pane/eviction-exempt-tabs'
 import {
   canWatcherCoverParkedTerminalTab,

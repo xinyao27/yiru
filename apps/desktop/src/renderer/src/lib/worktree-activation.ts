@@ -3,49 +3,47 @@ import type {
   SleepingAgentLaunchConfig
 } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
-
-import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
-import { shouldAutoCreateInitialTerminal } from '@/components/terminal/initial-terminal'
-import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
-import { getConnectionId } from '@/lib/connection-context'
-import { queueHookCommandsForFirstWorktreeTab } from '@/lib/hook-command-delayed-delivery'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+import { resumeSleepingAgentSessionsForWorktree } from '~renderer/components/terminal-workspace/resume-sleeping-agent-session'
+import { shouldAutoCreateInitialTerminal } from '~renderer/components/terminal/initial-terminal'
+import { getAgentLaunchPlatformForRepo } from '~renderer/lib/agent-launch-platform'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { queueHookCommandsForFirstWorktreeTab } from '~renderer/lib/hook-command-delayed-delivery'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '@/lib/worktree-runtime-owner'
+} from '~renderer/lib/worktree-runtime-owner'
 import {
   activateWebRuntimeSessionWorktree,
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive,
   isWebTerminalSurfaceTabId
-} from '@/runtime/web-runtime-session'
+} from '~renderer/runtime/web-runtime-session'
 import {
   beginWebRuntimeWakeTerminalRespawn,
   endWebRuntimeWakeTerminalRespawn
-} from '@/runtime/web-runtime-wake-terminal-respawn'
-import { getLastKnownHostTerminalTabCount } from '@/runtime/web-session-tabs-sync'
-import { useAppStore } from '@/store'
-import type { PendingSidebarWorktreeReveal } from '@/store/slices/ui'
+} from '~renderer/runtime/web-runtime-wake-terminal-respawn'
+import { getLastKnownHostTerminalTabCount } from '~renderer/runtime/web-session-tabs-sync'
+import { useAppStore } from '~renderer/store'
+import type { PendingSidebarWorktreeReveal } from '~renderer/store/slices/ui'
 import {
   setWorktreeNavActivator,
   setWorktreeNavViewActivator
-} from '@/store/slices/worktree-nav-history'
-
-import { agentKindToTuiAgent } from '../../../shared/agent/kind'
-import { repoIsRemote } from '../../../shared/agent/launch-remote'
-import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
-import { createSequencedSetupAgentCommands } from '../../../shared/setup/agent-sequencing'
-import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup/runner-command'
-import { isTuiAgent } from '../../../shared/tui-agent/config'
+} from '~renderer/store/slices/worktree-nav-history'
+import { agentKindToTuiAgent } from '~shared/agent/kind'
+import { repoIsRemote } from '~shared/agent/launch-remote'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import { createSequencedSetupAgentCommands } from '~shared/setup/agent-sequencing'
+import { getSetupRunnerCommandPlatformForPath } from '~shared/setup/runner-command'
+import { isTuiAgent } from '~shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent/launch-defaults'
+} from '~shared/tui-agent/launch-defaults'
 /* eslint-disable max-lines -- Why: worktree activation is a single ordered flow spanning startup, setup, and default tabs; splitting it would obscure sequencing guarantees. */
 import type {
   FolderWorkspace,
@@ -56,8 +54,9 @@ import type {
   Worktree,
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
-} from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
+} from '~shared/types'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
+
 import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 import {
   folderWorkspaceActivationBlocked,

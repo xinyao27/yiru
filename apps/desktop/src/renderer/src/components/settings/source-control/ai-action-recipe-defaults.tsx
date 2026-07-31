@@ -1,28 +1,28 @@
 import { useMemo } from 'react'
 import type React from 'react'
 import { toast } from 'sonner'
-
-import { CUSTOM_AGENT_ID } from '../../../../../shared/commit-message/agent-spec'
-import type { CustomAgentId } from '../../../../../shared/commit-message/agent-spec'
-import { isFolderRepo } from '../../../../../shared/repo-kind'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  summarizeReposOverridingActionRecipe,
+  type SourceControlActionRecipeOverrideSummary
+} from '~renderer/lib/source-control-launch-agent-selection'
+import { useAppStore } from '~renderer/store'
+import { useRepos } from '~renderer/store/selectors'
+import { CUSTOM_AGENT_ID } from '~shared/commit-message/agent-spec'
+import type { CustomAgentId } from '~shared/commit-message/agent-spec'
+import { isFolderRepo } from '~shared/repo-kind'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   setSourceControlActionDefault,
   type SourceControlActionId
-} from '../../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
 import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
-} from '../../../../../shared/source-control/ai-types'
-import type { GlobalSettings, TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import {
-  summarizeReposOverridingActionRecipe,
-  type SourceControlActionRecipeOverrideSummary
-} from '../../../lib/source-control-launch-agent-selection'
-import { useAppStore } from '../../../store'
-import { useRepos } from '../../../store/selectors'
-import { Label } from '../../ui/label'
+} from '~shared/source-control/ai-types'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
+
 import { getRepositorySourceControlAiActionRecipeSectionId } from '../repository/settings-targets'
 import { matchesSettingsSearch } from '../search'
 import { SearchableSetting } from '../searchable-setting'

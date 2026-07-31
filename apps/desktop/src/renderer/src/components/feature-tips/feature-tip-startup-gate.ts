@@ -1,11 +1,9 @@
-import type { CliInstallStatus } from '../../../../shared/cli-install-types'
-import type { FeatureInteractionState } from '../../../../shared/feature-interactions'
-import type { FeatureTipId } from '../../../../shared/feature-tips'
-import {
-  getCompletedFeatureTipIds,
-  getOrderedUnseenFeatureTips
-} from '../../../../shared/feature-tips'
-import type { GlobalSettings, OnboardingState } from '../../../../shared/types'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+import type { FeatureInteractionState } from '~shared/feature-interactions'
+import type { FeatureTipId } from '~shared/feature-tips'
+import { getCompletedFeatureTipIds, getOrderedUnseenFeatureTips } from '~shared/feature-tips'
+import type { GlobalSettings, OnboardingState } from '~shared/types'
+
 import { shouldShowOnboarding } from '../onboarding/should-show-onboarding'
 
 export type FeatureTipsAppOpenDecision =

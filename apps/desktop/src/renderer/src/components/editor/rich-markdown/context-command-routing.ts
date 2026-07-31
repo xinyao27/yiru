@@ -1,9 +1,8 @@
 import type { Editor } from '@tiptap/react'
-
 import type {
   RichMarkdownContextMenuCommand,
   RichMarkdownContextMenuCommandPayload
-} from '../../../../../shared/rich-markdown-context-menu'
+} from '~shared/rich-markdown-context-menu'
 
 export function runRichMarkdownContextCommand({
   command,

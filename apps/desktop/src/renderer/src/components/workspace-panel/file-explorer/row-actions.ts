@@ -1,9 +1,9 @@
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import { downloadRuntimeFolder } from '~renderer/runtime/folder-download'
 
-import { translate } from '../../../i18n/i18n'
-import { extractIpcErrorMessage } from '../../../lib/ipc-error'
-import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '../../../runtime/file-client'
-import { downloadRuntimeFolder } from '../../../runtime/folder-download'
 import type { TreeNode } from './types'
 
 export function shouldShowCollapseFolderAction(node: TreeNode, isExpanded: boolean): boolean {

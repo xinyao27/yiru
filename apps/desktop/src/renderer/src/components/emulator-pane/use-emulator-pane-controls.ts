@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-
-import { callRuntimeRpc } from '@/runtime/rpc-client'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
 
 import type { EmulatorDeviceVisualOrientation } from './emulator-device-frame-layout'
 import type { EmulatorGesturePoint } from './emulator-screen-gesture'

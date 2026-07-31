@@ -9,19 +9,19 @@ import { toast } from 'sonner'
 // xterm's vendor stylesheet plus the vendor-patch overrides directly — the
 // Coworking workspace is its own lazy() chunk that never imports terminal-pane.tsx.
 import '@xterm/xterm/css/xterm.css'
-import '@/components/terminal-pane/terminal.css'
-import { selectCoworkingCanControl } from '@/components/coworking/selectors'
-import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { CoworkingRequesterSubscriptionEvent } from '../../../../shared/coworking/ipc-contract'
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
+import '~renderer/components/terminal-pane/terminal.css'
+import { selectCoworkingCanControl } from '~renderer/components/coworking/selectors'
+import { useSystemPrefersDark } from '~renderer/components/terminal-pane/use-system-prefers-dark'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { CoworkingRequesterSubscriptionEvent } from '~shared/coworking/ipc-contract'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 import type {
   CoworkingTerminalSubscriptionEvent,
   CoworkingMutationResult
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { getCoworkingRequesterTransportErrorCode } from './requester-error'
 import { isSameCoworkingSessionRoute, type CoworkingSessionRoute } from './session-route'
 import { useCoworkingTerminalAttachment } from './terminal-attachment'

@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { attachEditorAutosaveController } from './autosave-controller'
 import { attachRestoredTabConflictScan } from './restored-tab-conflict-scan'

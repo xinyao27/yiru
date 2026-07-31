@@ -11,8 +11,7 @@ import {
   type AskQuestion,
   type InteractiveQuestionParser
 } from '@yiru/workbench-model/agent'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 export {
   buildAskAnswerKeys,

@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser/viewport-presets'
-import type { BrowserViewportPresetId } from '../../../../shared/types'
+} from '~shared/browser/viewport-presets'
+import type { BrowserViewportPresetId } from '~shared/types'
+
 import { shouldShowBrowserImportHint } from './browser-import-hint-visibility'
 import { BrowserToolbarMenuDropdown } from './browser-toolbar-menu-dropdown'
 import { BrowserToolbarProfileDialogs } from './browser-toolbar-profile-dialogs'

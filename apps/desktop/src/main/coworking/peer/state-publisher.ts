@@ -1,4 +1,4 @@
-import type { CoworkingConnectionState } from '../../../shared/coworking/wire-contract'
+import type { CoworkingConnectionState } from '~shared/coworking/wire-contract'
 
 export class CoworkingPeerStatePublisher {
   private readonly listeners = new Set<(state: CoworkingConnectionState) => void>()

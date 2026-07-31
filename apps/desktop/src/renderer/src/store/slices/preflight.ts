@@ -1,13 +1,12 @@
 import type { StateCreator } from 'zustand'
-
+import type { PreflightRuntimeContext, PreflightStatus } from '~preload/api-types'
 import {
   getLocalPreflightContext,
   localPreflightContextKey,
   type LocalPreflightContext
-} from '@/lib/local-preflight-context'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
+} from '~renderer/lib/local-preflight-context'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 
-import type { PreflightRuntimeContext, PreflightStatus } from '../../../../preload/api-types'
 import type { AppState } from '../types'
 
 export type PreflightSlice = {

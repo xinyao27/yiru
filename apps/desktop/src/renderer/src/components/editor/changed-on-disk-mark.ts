@@ -1,4 +1,4 @@
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
 
 import { canAutoSaveOpenFile } from './autosave'
 import { trackExternalChangeConflictShown } from './external-change-telemetry'

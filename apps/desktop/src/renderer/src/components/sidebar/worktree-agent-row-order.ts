@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
+import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
 
 function comparableNumber(value: number | undefined, fallback = 0): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback

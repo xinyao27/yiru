@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
+import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
 
-import type { DecoratedDiffComment } from '../../diff-comments/use-diff-comment-decorator'
 import { submitDiffSectionComment } from './comment-submit'
 import type { DiffSection } from './types'
 

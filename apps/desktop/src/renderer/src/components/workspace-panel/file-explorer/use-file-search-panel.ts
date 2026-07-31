@@ -1,10 +1,9 @@
 import type React from 'react'
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef } from 'react'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree } from '~renderer/store/selectors'
+import type { SearchFileResult, SearchMatch, SearchResult } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { SearchFileResult, SearchMatch, SearchResult } from '../../../../../shared/types'
-import { useActiveWorktree } from '../../../store/selectors'
 import type { SearchFiltersProps } from '../search-filters'
 import { cancelRevealFrame, openMatchResult } from '../search-match-open'
 import type { SearchQueryRowProps } from '../search-query-row'

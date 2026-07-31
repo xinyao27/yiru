@@ -1,8 +1,8 @@
-import type { AppState } from '@/store/types'
+import { buildDismissedOnboardingFolderAgentStartup } from '~renderer/lib/onboarding-folder-agent-startup'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import type { AppState } from '~renderer/store/types'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../../../shared/types'
-import { buildDismissedOnboardingFolderAgentStartup } from '../../lib/onboarding-folder-agent-startup'
-import { activateAndRevealWorktree } from '../../lib/worktree-activation'
 import { markOnboardingProjectAdded } from './onboarding-project-checklist'
 
 export async function addNonGitFolderAndActivate(

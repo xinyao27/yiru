@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
 import {
   resolveCoworkingWorkspaceRoute,
   selectCoworkingCanControl
-} from '@/components/coworking/selectors'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/coworking/selectors'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
 import { getCoworkingRequesterTransportErrorCode } from './requester-error'
 import type { CoworkingSessionPanePhase as SessionPanePhase } from './session-continuation-notice'
 import {

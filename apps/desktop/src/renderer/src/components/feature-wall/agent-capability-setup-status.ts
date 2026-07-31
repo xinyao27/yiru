@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
 import {
   COMPUTER_USE_SKILL_NAME,
   YIRU_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
-} from '@/lib/agent-feature-install-commands'
+} from '~renderer/lib/agent-feature-install-commands'
 
 import type {
   OnboardingFeatureSetupId,

@@ -1,6 +1,7 @@
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { clampNumber } from '../../../lib/terminal-theme'
+import { translate } from '~renderer/i18n/i18n'
+import { clampNumber } from '~renderer/lib/terminal-theme'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   NumberField,
   SettingsRow,

@@ -1,13 +1,12 @@
-import { translate } from '@/i18n/i18n'
-
-import { canEnableGitHubPRAutoMerge } from '../../../shared/github-pr-auto-merge-availability'
+import { translate } from '~renderer/i18n/i18n'
+import { canEnableGitHubPRAutoMerge } from '~shared/github-pr-auto-merge-availability'
 import type {
   CheckStatus,
   GitHubPRCheckSummary,
   PRMergeableState,
   PRReviewDecision,
   PRState
-} from '../../../shared/types'
+} from '~shared/types'
 
 export type GitHubPRMergeStateInput = {
   state: PRState | 'open' | 'closed' | 'merged' | 'draft'

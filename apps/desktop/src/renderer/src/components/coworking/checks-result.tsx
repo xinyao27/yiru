@@ -1,15 +1,17 @@
 import { GitMerge, GitPullRequest, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { CHECK_COLOR, CHECK_ICON } from '@/components/workspace-panel/check-status-presentation'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { Button } from '~renderer/components/ui/button'
+import {
+  CHECK_COLOR,
+  CHECK_ICON
+} from '~renderer/components/workspace-panel/check-status-presentation'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import type {
   CoworkingChecksReadResult,
   CoworkingChecksReview
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { ChecksList } from '../workspace-panel/checks-panel/content'
 
 export function CoworkingChecksResult({

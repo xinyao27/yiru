@@ -1,4 +1,5 @@
-import type { GitStatusEntry } from '../../../../../shared/types'
+import type { GitStatusEntry } from '~shared/types'
+
 import { isStageableStatusEntry } from '../discard-all-sequence'
 
 export function canStageStatusEntry(entry: GitStatusEntry): boolean {

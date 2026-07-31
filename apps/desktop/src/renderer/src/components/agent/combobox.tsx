@@ -6,32 +6,31 @@ import {
   CaretUpDown as ChevronsUpDown
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
-
 import {
   agentPickerBlankTerminalMatches,
   getAgentPickerCommandValue,
   searchAgentPickerEntries
-} from '@/components/agent/picker-search'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/agent/picker-search'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
+} from '~renderer/components/ui/command'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon, type AgentCatalogEntry } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/context-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon, type AgentCatalogEntry } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { TuiAgent } from '~shared/types'
 
-import type { TuiAgent } from '../../../../shared/types'
 import {
   createAgentComboboxCommandState,
   resolveAgentComboboxCommandState,

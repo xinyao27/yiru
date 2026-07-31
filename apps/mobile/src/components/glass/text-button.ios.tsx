@@ -12,8 +12,9 @@ import { useMemo } from 'react'
 import { View } from 'react-native'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { cn } from '../../style/class-names'
-import { resolveCssString } from '../../style/resolve-css-variable'
+import { cn } from '~/style/class-names'
+import { resolveCssString } from '~/style/resolve-css-variable'
+
 import { useMobileGlassAvailable } from './availability'
 import { mobileSwiftUiGlassButtonStyle } from './swift-ui.ios'
 import type { MobileGlassTextButtonProps } from './text-button-props'

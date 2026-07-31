@@ -1,16 +1,15 @@
 import { FloppyDisk as Save, Gear as Settings, ArrowUpRight, Plus } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { useAllWorktrees } from '~renderer/store/selectors'
+import { getDefaultRepoHookSettings } from '~shared/constants'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo, RepoHookSettings, Worktree } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-import { useAllWorktrees } from '@/store/selectors'
-
-import { getDefaultRepoHookSettings } from '../../../../shared/constants'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo, RepoHookSettings, Worktree } from '../../../../shared/types'
 import {
   requestContextualTourWhenReady,
   type RequestContextualTourWhenReadyArgs

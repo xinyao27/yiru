@@ -1,12 +1,11 @@
-import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
+import { basename, joinPath, normalizeRelativePath } from '~renderer/lib/path'
+import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
 import {
   readRuntimeDirectory,
   readRuntimeFileContent,
   runtimePathExists
-} from '@/runtime/file-client'
-
-import type { DirEntry, GlobalSettings } from '../../../../shared/types'
-import { basename, joinPath, normalizeRelativePath } from '../../lib/path'
+} from '~renderer/runtime/file-client'
+import type { DirEntry, GlobalSettings } from '~shared/types'
 
 const MARKDOWN_TEMPLATE_ROOT = '.yiru/templates'
 const MARKDOWN_TEMPLATE_MAX_DEPTH = 8

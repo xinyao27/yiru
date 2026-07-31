@@ -6,12 +6,11 @@ import {
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { GitConflictOperation } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { GitConflictOperation } from '~shared/types'
 
 export function ConflictSummaryCard({
   conflictOperation,

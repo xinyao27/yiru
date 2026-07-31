@@ -1,8 +1,8 @@
 import { useRef, type ReactNode } from 'react'
 import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
-import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'

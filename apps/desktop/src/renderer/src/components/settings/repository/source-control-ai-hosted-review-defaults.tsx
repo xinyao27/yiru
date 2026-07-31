@@ -1,12 +1,18 @@
 import type React from 'react'
-
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../../shared/source-control/ai-types'
-import { translate } from '../../../i18n/i18n'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+} from '~shared/source-control/ai-types'
+
 import { triStateValue } from './source-control-ai-draft'
 
 type HostedReviewDefaultKey = keyof NonNullable<RepoSourceControlAiOverrides['prCreationDefaults']>

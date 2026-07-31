@@ -1,6 +1,5 @@
-import { createBrowserUuid } from '@/lib/browser-uuid'
-
-import type { Tab, TabContentType, TabGroup, WorkspaceSessionState } from '../../../../shared/types'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import type { Tab, TabContentType, TabGroup, WorkspaceSessionState } from '~shared/types'
 
 export function findTabAndWorktree(
   tabsByWorktree: Record<string, Tab[]>,

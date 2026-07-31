@@ -12,7 +12,7 @@
 // widening this match set later requires explicit review, not silent regex
 // expansion. Anything we cannot confidently bucket falls through to `unknown`.
 
-import type { WorkspaceCreateErrorClass } from '../../shared/telemetry-events'
+import type { WorkspaceCreateErrorClass } from '~shared/telemetry-events'
 
 export function classifyWorkspaceCreateError(error: unknown): WorkspaceCreateErrorClass {
   // Why: throw sites mix capitalization ('Worktree created...' vs lowercased

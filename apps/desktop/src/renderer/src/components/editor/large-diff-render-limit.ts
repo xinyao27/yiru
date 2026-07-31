@@ -1,1 +1,1 @@
-export * from '../../../../shared/large-diff-render-limit'
+export * from '~shared/large-diff-render-limit'

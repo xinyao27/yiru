@@ -9,7 +9,8 @@
  */
 import * as path from 'node:path'
 
-import { parseNumstat } from '../../shared/git/uncommitted-line-stats'
+import { parseNumstat } from '~shared/git/uncommitted-line-stats'
+
 import { buildDiffResult } from './diff-result'
 import { readBlobAtOid, type GitBufferExec, type GitExec } from './handler-ops'
 import { parseBranchDiff } from './handler-output-parser'

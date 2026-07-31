@@ -1,18 +1,17 @@
 import { Copy, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import { getRuntimeGitRemoteFileUrl } from '@/runtime/git-client'
-import { useAppStore } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRuntimeGitRemoteFileUrl } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 
 import { formatPathLineReference } from './line-copy-path'
 

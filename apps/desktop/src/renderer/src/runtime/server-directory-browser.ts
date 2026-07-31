@@ -1,4 +1,5 @@
-import type { DirEntry } from '../../../shared/types'
+import type { DirEntry } from '~shared/types'
+
 import { callRuntimeRpc } from './rpc-client'
 
 export type RuntimeServerDirectoryListing = {

@@ -1,9 +1,9 @@
+import { CoworkingExecutionError } from '~main/coworking/execution-error'
 import {
   isCoworkingMutationOperation,
   type CoworkingExecutionOperation
-} from '../../../../shared/coworking/operation-contract'
-import { parseCoworkingPairedRuntimeResult } from '../../../../shared/coworking/paired-runtime-result-contract'
-import { CoworkingExecutionError } from '../../../coworking/execution-error'
+} from '~shared/coworking/operation-contract'
+import { parseCoworkingPairedRuntimeResult } from '~shared/coworking/paired-runtime-result-contract'
 
 export function projectCoworkingHostExecutionResult(
   operation: CoworkingExecutionOperation,

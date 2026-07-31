@@ -1,8 +1,12 @@
 import React from 'react'
-
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
 
 type RichMarkdownToolbarButtonProps = {
   active: boolean

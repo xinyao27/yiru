@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import TerminalPane from '@/components/terminal-pane/terminal-pane'
-import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { useAppStore } from '@/store'
-
-import { brandEphemeralSetupTerminalWorktreeId } from '../../../../shared/ephemeral-setup-terminal-worktree-id'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import TerminalPane from '~renderer/components/terminal-pane/terminal-pane'
+import {
+  PASTE_TERMINAL_TEXT_EVENT,
+  type PasteTerminalTextDetail
+} from '~renderer/constants/terminal'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { useAppStore } from '~renderer/store'
+import { brandEphemeralSetupTerminalWorktreeId } from '~shared/ephemeral-setup-terminal-worktree-id'
 
 const ONBOARDING_INLINE_TERMINAL_WORKTREE_ID = 'onboarding-inline-terminal'
 const AUTO_INSERT_DELAY_MS = 250

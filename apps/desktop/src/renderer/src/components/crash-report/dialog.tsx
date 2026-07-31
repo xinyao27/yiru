@@ -1,13 +1,11 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import {
   REACT_ERROR_BOUNDARY_REPORT_AVAILABLE_EVENT,
   takePendingReactErrorBoundaryReport
-} from '@/lib/react-error-boundary-reporting'
-
-import type { CrashReportRecord } from '../../../../shared/crash-reporting'
+} from '~renderer/lib/react-error-boundary-reporting'
+import type { CrashReportRecord } from '~shared/crash-reporting'
 
 const CrashReportDialogSurface = lazy(() =>
   import('./dialog-surface').then((module) => ({

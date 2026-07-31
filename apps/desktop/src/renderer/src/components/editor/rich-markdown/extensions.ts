@@ -21,7 +21,8 @@ import { createLowlight, common } from 'lowlight'
 // editor instance) is only reachable through the editor's lazy chunks, so
 // the CSS ships there instead of the app's eager main.css.
 import 'katex/dist/katex.min.css'
-import type { RuntimeFileOperationArgs } from '../../../runtime/file-client'
+import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+
 import { DragSelectionGuard } from '../drag-selection-guard'
 import {
   createRawMarkdownHtmlBlock,

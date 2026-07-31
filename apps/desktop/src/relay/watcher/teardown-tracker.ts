@@ -1,6 +1,6 @@
-import type { WatcherProcessSubscription } from '../../main/filesystem/parcel-watcher-process'
-import { isWatcherProcessFailure } from '../../main/filesystem/parcel-watcher-process-failure'
-import type { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import type { WatcherProcessSubscription } from '~main/filesystem/parcel-watcher-process'
+import { isWatcherProcessFailure } from '~main/filesystem/parcel-watcher-process-failure'
+import type { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
 
 export type RelayWatcherTeardownState = {
   rootKey: string

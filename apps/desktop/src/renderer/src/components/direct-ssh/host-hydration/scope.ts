@@ -1,6 +1,5 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
-
-import type { AppState } from '@/store/types'
+import type { AppState } from '~renderer/store/types'
 
 import { resolveDirectSshTargetScope } from '../target-scope/scope'
 

@@ -1,7 +1,8 @@
 import {
   computerUseHotkeyValidationMessage,
   computerUsePressKeyValidationMessage
-} from '../../shared/computer-use-key-spec'
+} from '~shared/computer-use-key-spec'
+
 import {
   getOptionalNonNegativeIntegerFlag,
   getOptionalNumberFlag,

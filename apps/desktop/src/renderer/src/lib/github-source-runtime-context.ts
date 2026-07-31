@@ -1,12 +1,11 @@
 import type { ParsedExecutionHost } from '@yiru/workbench-model/workspace'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import { getProjectSourceRuntimeSettings } from '~shared/project-source-context'
+import type { GlobalSettings } from '~shared/types'
 
-import type { RuntimeClientTarget } from '@/runtime/rpc-client'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { ProjectSourceContext } from '../../../shared/project-source-context'
-import { getProjectSourceRuntimeSettings } from '../../../shared/project-source-context'
-import type { GlobalSettings } from '../../../shared/types'
 import {
   getExplicitRuntimeOwnerEnvironmentId,
   type RepoRuntimeOwnerState

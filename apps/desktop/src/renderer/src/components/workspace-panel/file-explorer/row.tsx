@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react'
-
-import type { GitFileStatus } from '../../../../../shared/types'
+import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import {
   encodeWorkspaceFilePaths,
   WORKSPACE_FILE_PATH_MIME,
   WORKSPACE_FILE_PATHS_MIME
-} from '../../../lib/workspace-file-drag'
-import type { RuntimeFileOperationArgs } from '../../../runtime/file-client'
-import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../../tab-bar/sortable-tab'
-import { ContextMenu, ContextMenuTrigger } from '../../ui/context-menu'
+} from '~renderer/lib/workspace-file-drag'
+import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import type { GitFileStatus } from '~shared/types'
+
 import { InlineInputRow, type InlineInput } from './inline-input-row'
 import {
   copyFileToOsClipboard,

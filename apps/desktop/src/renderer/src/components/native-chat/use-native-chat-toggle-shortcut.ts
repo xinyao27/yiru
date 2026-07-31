@@ -1,12 +1,11 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useEffect } from 'react'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
+import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import { useAppStore } from '~renderer/store'
+import type { TerminalLayoutSnapshot } from '~shared/types'
 
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
-
-import type { TerminalLayoutSnapshot } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { canToggleNativeChat } from './availability'
 import {
   isNativeChatTabWideFallbackSafe,

@@ -1,7 +1,6 @@
 import { PaperPlaneRight as Send, Sparkle as Sparkles } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +9,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-import type { AgentSendPopoverTargetMode } from '@/store/slices/ui'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { AgentSendPopoverTargetMode } from '~renderer/store/slices/ui'
 
 import { ReviewNotesSendMenuContent } from './review-notes-send-menu-content'
 

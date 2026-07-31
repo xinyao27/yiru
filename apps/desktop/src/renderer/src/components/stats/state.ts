@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand'
-
-import type { StatsSummary } from '../../../../shared/types'
-import type { AppState } from '../../store/types'
+import type { AppState } from '~renderer/store/types'
+import type { StatsSummary } from '~shared/types'
 
 export type StatsSlice = {
   statsSummary: StatsSummary | null

@@ -1,4 +1,4 @@
-import type { FsChangeEvent } from '../../../../shared/types'
+import type { FsChangeEvent } from '~shared/types'
 
 const FILE_WATCH_FLUSH_MS = 150
 const FILE_WATCH_MAX_WAIT_MS = 500

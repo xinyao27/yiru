@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 
-import type { CoworkingOsFamily } from '../../shared/coworking/wire-contract'
+import type { CoworkingOsFamily } from '~shared/coworking/wire-contract'
+
 import type { CoworkingProbeClient } from './probe-client'
 import type { TailnetControl, TailnetNode } from './tailnet-control'
 

@@ -1,12 +1,11 @@
 import React from 'react'
+import { SettingsSwitch } from '~renderer/components/settings/form-controls'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { translate } from '~renderer/i18n/i18n'
+import type { SetupConfig } from '~renderer/lib/new-workspace'
+import type { SetupAgentStartupPolicy } from '~shared/types'
 
-import { SettingsSwitch } from '@/components/settings/form-controls'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { translate } from '@/i18n/i18n'
-import type { SetupConfig } from '@/lib/new-workspace'
-
-import type { SetupAgentStartupPolicy } from '../../../../shared/types'
 import { SetupCommandPreview } from './setup-command-preview'
 
 type SetupSectionProps = {

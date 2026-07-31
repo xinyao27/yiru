@@ -1,8 +1,7 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { WorktreeRuntimeOwnerState } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
 
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-
-import type { WorktreeRuntimeOwnerState } from '../../lib/worktree-runtime-owner'
 import { splitWorktreeSortOrderByHost } from './worktree-sort-order-host-split'
 
 function ignoreSortOrderPersistenceFailure(promise: Promise<unknown>): void {

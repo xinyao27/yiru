@@ -1,18 +1,13 @@
 import React from 'react'
-
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-
+import { Dialog, DialogContent } from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
 import {
   isValidAutomationCronSchedule,
   isValidAutomationSchedule
-} from '../../../../shared/automation/schedules'
-import type {
-  AutomationSchedulePreset,
-  AutomationWorkspaceMode
-} from '../../../../shared/automations-types'
-import { filterEnabledTuiAgents } from '../../../../shared/tui-agent/selection'
+} from '~shared/automation/schedules'
+import type { AutomationSchedulePreset, AutomationWorkspaceMode } from '~shared/automations-types'
+import { filterEnabledTuiAgents } from '~shared/tui-agent/selection'
 import type {
   GlobalSettings,
   YiruHooks,
@@ -21,7 +16,8 @@ import type {
   SetupDecision,
   TuiAgent,
   Worktree
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { AutomationEditorDialogFooter } from './automation-editor-dialog-footer'
 import { AutomationEditorDialogHeader } from './automation-editor-dialog-header'
 import { AutomationEditorPromptSection } from './automation-editor-prompt-section'

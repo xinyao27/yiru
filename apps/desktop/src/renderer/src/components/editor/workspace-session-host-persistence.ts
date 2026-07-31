@@ -5,14 +5,9 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { Repo, Worktree, WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import type {
-  Repo,
-  Worktree,
-  WorkspaceSessionPatch,
-  WorkspaceSessionState
-} from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import {
   mergeWorkspaceSessionsFromHosts,
   splitWorkspaceSessionByHost,

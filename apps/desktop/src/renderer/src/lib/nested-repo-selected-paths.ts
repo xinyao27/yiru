@@ -1,4 +1,4 @@
-import type { NestedRepoScanResult } from '../../../shared/types'
+import type { NestedRepoScanResult } from '~shared/types'
 
 export function getSelectedNestedRepoPathsInScanOrder(
   scan: Pick<NestedRepoScanResult, 'repos'>,

@@ -1,9 +1,8 @@
 import { Gear as Settings, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,9 +10,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 type LinkRoutingPreferenceDialogOptions = {
   url?: string

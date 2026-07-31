@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
+import { isStageableStatusEntry } from '~renderer/components/workspace-panel/discard-all-sequence'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../../i18n/i18n'
-import { isStageableStatusEntry } from '../../discard-all-sequence'
 import { resolveDropdownItems, type DropdownEntry } from '../dropdown-items'
 import { resolveCommitAreaPrimaryAction, type PrimaryAction } from '../primary-action'
 import { resolveCreatePrHeaderAction } from '../primary-create-pr-intent-action'

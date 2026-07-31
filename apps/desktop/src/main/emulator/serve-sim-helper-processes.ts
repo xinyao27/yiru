@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process'
 import { platform } from 'node:os'
 
-import { commandContainsToken } from '../../shared/command-token-scanner'
-import { iterateProcessOutputLines } from '../../shared/process-output-field-scanner'
+import { commandContainsToken } from '~shared/command-token-scanner'
+import { iterateProcessOutputLines } from '~shared/process-output-field-scanner'
 
 export type ServeSimHelperProcess = {
   pid: number

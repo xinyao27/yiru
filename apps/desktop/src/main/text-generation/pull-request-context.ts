@@ -1,4 +1,4 @@
-import type { PullRequestDraftContext } from '../../shared/pull-request-generation'
+import type { PullRequestDraftContext } from '~shared/pull-request-generation'
 
 const MAX_PULL_REQUEST_CONTEXT_BYTES = 10 * 1024 * 1024
 

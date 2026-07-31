@@ -1,11 +1,13 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-
-import type { SkillUpdateRun } from '../../../../shared/skill-freshness'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from '~renderer/components/ui/collapsible'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { SkillUpdateRun } from '~shared/skill-freshness'
 
 export function SkillRunLog({ output }: { output: string }): React.JSX.Element | null {
   if (!output.trim()) {

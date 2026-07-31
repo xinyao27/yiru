@@ -1,4 +1,5 @@
-import { mapWithConcurrency } from '../../shared/map-with-concurrency'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
+
 import type {
   CoworkingOwnerWorktreeCatalog,
   CoworkingOwnerWorktreeCatalogInventory

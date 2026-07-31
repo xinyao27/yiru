@@ -4,10 +4,10 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:pat
 
 import { normalizeRuntimePathSeparators } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { isForEachRefExcludeUnsupportedError } from '~shared/git/ref-command-capabilities'
+import { parseGitRevListAheadBehindCounts } from '~shared/git/rev-list-output'
+import type { BaseRefSearchResult } from '~shared/types'
 
-import { isForEachRefExcludeUnsupportedError } from '../../shared/git/ref-command-capabilities'
-import { parseGitRevListAheadBehindCounts } from '../../shared/git/rev-list-output'
-import type { BaseRefSearchResult } from '../../shared/types'
 import { toWindowsWslPath } from '../wsl'
 import { getLocalGitCapabilityCache } from './capability-state'
 import { buildHostedRemoteCommitUrl, buildHostedRemoteFileUrl } from './hosted-remote-url'
@@ -855,7 +855,7 @@ export function mergeBaseRefSearchResultGroups(
   return merged
 }
 
-export { isForEachRefExcludeUnsupportedError } from '../../shared/git/ref-command-capabilities'
+export { isForEachRefExcludeUnsupportedError } from '~shared/git/ref-command-capabilities'
 
 /**
  * Resolve the default push remote for a repo.

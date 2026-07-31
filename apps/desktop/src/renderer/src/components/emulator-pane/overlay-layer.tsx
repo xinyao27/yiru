@@ -1,9 +1,8 @@
 import { memo, useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useAppStore } from '~renderer/store'
+import type { Tab, TabGroup } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { Tab, TabGroup } from '../../../../shared/types'
 import { tabGroupBodyAnchorName } from '../tab-group/body-anchor'
 import EmulatorPane from './emulator-pane'
 

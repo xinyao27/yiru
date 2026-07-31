@@ -11,11 +11,11 @@ import {
   type AiVaultSession
 } from '@yiru/workbench-model/agent'
 import type React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { sessionDetailConversationTurns } from './session-display'
 import { SessionSubagentsSection } from './session-subagents'
 import { SessionUnsavedConversationNotice } from './session-unsaved-notice'

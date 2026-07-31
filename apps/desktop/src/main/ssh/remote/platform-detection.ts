@@ -1,7 +1,8 @@
 import {
   getProcessOutputFields,
   iterateProcessOutputLines
-} from '../../../shared/process-output-field-scanner'
+} from '~shared/process-output-field-scanner'
+
 import type { SshConnection } from '../connection'
 import { execCommand } from '../relay/deploy-helpers'
 import { parseUnameToRelayPlatform, type RelayPlatform } from '../relay/protocol'

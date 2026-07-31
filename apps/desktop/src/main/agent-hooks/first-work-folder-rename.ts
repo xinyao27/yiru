@@ -4,7 +4,6 @@ import {
   getRepoIdFromWorktreeId,
   splitWorktreeIdForFilesystem
 } from '@yiru/workbench-model/workspace'
-
 // Why: after the first-work branch+display rename, the worktree's on-disk folder
 // still carries its creature name (e.g. `cunner`), which is confusing once the
 // branch reads `worktree-creation-spinner`. This module aligns the folder with
@@ -12,7 +11,8 @@ import {
 // worktree identity so meta, tabs, and the live PTY session carry over. It is
 // best-effort and local-only — remote/Windows/locked/dest-taken all degrade to
 // "folder kept" without disturbing the rename that already succeeded.
-import type { GlobalSettings, Repo } from '../../shared/types'
+import type { GlobalSettings, Repo } from '~shared/types'
+
 import { planWorktreeFolderRename } from '../worktree/folder-rename-target'
 
 export type FirstWorkFolderRenameDeps = {

@@ -1,9 +1,6 @@
-import type {
-  GitLabDiscussionResolveResult,
-  GitLabWorkItemDetails,
-  PRComment
-} from '../../../../../shared/types'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '../../../runtime/rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { GitLabDiscussionResolveResult, GitLabWorkItemDetails, PRComment } from '~shared/types'
+
 import type { ChecksPanelReview } from './review'
 
 export function isGitLabChecksPanelReview(

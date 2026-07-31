@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Text, View } from 'react-native'
 
-import { GitPullRequest as GitPullRequestArrow } from '@/components/uniwind-icons'
-
-import { MobileCommitFailurePanel } from '../../source-control/commit-failure-panel'
+import { GitPullRequest as GitPullRequestArrow } from '~/components/uniwind-icons'
+import { MobileCommitFailurePanel } from '~/source-control/commit-failure-panel'
 import {
   getMobileCommitFailureStagedEntries,
   type MobileCommitFailureRecovery
-} from '../../source-control/commit-failure-recovery'
-import type { MobileGitStatusResult } from '../../source-control/git-status'
-import { mobileHostedReviewCreateIntentProgressMessage } from '../../source-control/hosted-review-create-intent'
-import type { MobileHostedReviewCreateIntentProgress } from '../../source-control/hosted-review-create-intent'
+} from '~/source-control/commit-failure-recovery'
+import type { MobileGitStatusResult } from '~/source-control/git-status'
+import { mobileHostedReviewCreateIntentProgressMessage } from '~/source-control/hosted-review-create-intent'
+import type { MobileHostedReviewCreateIntentProgress } from '~/source-control/hosted-review-create-intent'
 import {
   isMobileHostedReviewCommitFailure,
   runMobileHostedReviewCreateIntent
-} from '../../source-control/hosted-review-create-intent-runner'
-import { recoverMobileHostedReviewRejectedPush } from '../../source-control/hosted-review-rejected-push-recovery'
-import { fetchWorktreeLinkedPR } from '../../source-control/pr-link'
-import { useMobileCommitFailureRecovery } from '../../source-control/use-commit-failure-recovery'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+} from '~/source-control/hosted-review-create-intent-runner'
+import { recoverMobileHostedReviewRejectedPush } from '~/source-control/hosted-review-rejected-push-recovery'
+import { fetchWorktreeLinkedPR } from '~/source-control/pr-link'
+import { useMobileCommitFailureRecovery } from '~/source-control/use-commit-failure-recovery'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { MobileContentSection } from '../content-section'
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'

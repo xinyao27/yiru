@@ -1,17 +1,18 @@
+import { translate } from '~renderer/i18n/i18n'
+import { clampNumber } from '~renderer/lib/terminal-theme'
 import {
   DEFAULT_TERMINAL_FONT_WEIGHT,
   TERMINAL_FONT_WEIGHT_MAX,
   TERMINAL_FONT_WEIGHT_MIN,
   TERMINAL_FONT_WEIGHT_STEP,
   normalizeTerminalFontWeight
-} from '../../../../../shared/terminal/fonts'
+} from '~shared/terminal/fonts'
 import {
   fontFamilyHasKnownLigatures,
   resolveTerminalLigaturesEnabled
-} from '../../../../../shared/terminal/ligatures'
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { clampNumber } from '../../../lib/terminal-theme'
+} from '~shared/terminal/ligatures'
+import type { GlobalSettings } from '~shared/types'
+
 import { NumberField, SettingsRow, SettingsSegmentedControl } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 import { getTerminalAdvancedTypographySearchEntries } from './typography-search'

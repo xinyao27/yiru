@@ -3,8 +3,9 @@ import type {
   CoworkingRemoteDesktop,
   CoworkingSessionCatalogEntry,
   CoworkingWorktreeCatalogEntry
-} from '../../../../shared/coworking/catalog-contract'
-import type { CoworkingRequesterControlView } from '../../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/catalog-contract'
+import type { CoworkingRequesterControlView } from '~shared/coworking/ipc-contract'
+
 import type {
   CoworkingExpandedRefsByDesktop,
   CoworkingSharingState,

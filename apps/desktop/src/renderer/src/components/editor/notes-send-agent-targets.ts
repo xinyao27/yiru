@@ -1,15 +1,14 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { resolveTerminalTitleAgentType } from '@yiru/workbench-model/agent'
-
-import type { AppState } from '@/store/types'
-
-import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../../shared/types'
-import { detectAgentSendTitleStatus } from '../../lib/agent-send-title-status'
+import { detectAgentSendTitleStatus } from '~renderer/lib/agent-send-title-status'
 import {
   resolveRuntimePaneTitleLeafResolution,
   type RuntimePaneTitleLeafResolution
-} from '../../lib/runtime-pane-title-leaf-id'
+} from '~renderer/lib/runtime-pane-title-leaf-id'
+import type { AppState } from '~renderer/store/types'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import type { TerminalTab } from '~shared/types'
+
 import {
   deriveRunningAgentSendTargets,
   type RunningAgentTargetState

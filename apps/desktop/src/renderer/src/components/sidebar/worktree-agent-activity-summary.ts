@@ -3,15 +3,14 @@ import {
   type AgentStatusEntry,
   type AgentStatusOrchestrationContext
 } from '@yiru/workbench-model/agent'
-
 import {
   mergeAgentStatusOrchestration,
   parseAgentStatusPaneIdentity,
   resolveAgentStatusWorktreeId
-} from '@/components/sidebar/agent-status-worktree-attribution'
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
-import type { AppState } from '@/store'
+} from '~renderer/components/sidebar/agent-status-worktree-attribution'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
+import { migrationUnsupportedToAgentStatusEntry } from '~renderer/lib/migration-unsupported-agent-entry'
+import type { AppState } from '~renderer/store'
 
 export type WorktreeAgentActivitySummary = {
   hasPermission: boolean

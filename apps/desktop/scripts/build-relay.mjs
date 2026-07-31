@@ -37,6 +37,14 @@ async function bundleNodeEntry(input, output, external = []) {
     cwd: ROOT,
     external,
     platform: 'node',
+    // Why: relay and the watcher entry import shared/ and main/ through the
+    // repository aliases, and rolldown has no tsconfig paths reader.
+    resolve: {
+      alias: {
+        '~shared': join(ROOT, 'src', 'shared'),
+        '~main': join(ROOT, 'src', 'main')
+      }
+    },
     transform: {
       target: 'node18',
       define: {

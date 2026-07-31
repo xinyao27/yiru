@@ -1,8 +1,7 @@
 import DOMPurify from 'dompurify'
 import type mermaidNamespace from 'mermaid'
 import React, { useEffect, useId, useRef, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import { getMermaidConfig } from './mermaid-config'
 

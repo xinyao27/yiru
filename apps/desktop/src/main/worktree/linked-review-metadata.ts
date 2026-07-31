@@ -1,4 +1,4 @@
-import type { Worktree, WorktreeMeta } from '../../shared/types'
+import type { Worktree, WorktreeMeta } from '~shared/types'
 
 type LinkedReviewMetadata = Pick<
   Worktree,

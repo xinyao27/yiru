@@ -3,8 +3,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 import nacl from 'tweetnacl'
-
-import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
+import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 const COWORKING_KEYPAIR_FILENAME = 'yiru-coworking-e2ee-keypair.json'
 const COWORKING_KEYPAIR_VERSION = 1

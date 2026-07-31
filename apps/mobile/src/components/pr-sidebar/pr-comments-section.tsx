@@ -2,13 +2,13 @@ import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/revie
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
-import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { canAddRootComment } from '~/session/pr/comment-actions'
+import { isPrSidebarDetailsPlaceholder } from '~/session/pr/sidebar-state'
+import type { MobilePrCommentActions } from '~/session/pr/use-comment-actions'
 
-import { canAddRootComment } from '../../session/pr/comment-actions'
-import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
-import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import {

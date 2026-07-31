@@ -1,6 +1,6 @@
-import { isFolderRepo } from '../../../../../shared/repo-kind'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import type { YiruRuntimeService } from '../../../yiru-runtime'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { isFolderRepo } from '~shared/repo-kind'
 
 export async function assertOrchestrationWorktreeCreationSupported(args: {
   runtime: YiruRuntimeService

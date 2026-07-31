@@ -5,25 +5,24 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
-
+} from '~renderer/components/ui/dialog'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
 import {
   buildTargetedSkillUpdateCommand,
   type SkillFreshnessInventory,
   type SkillUpdateRun
-} from '../../../../shared/skill-freshness'
+} from '~shared/skill-freshness'
+
 import { SkillRunLog } from './run-log'
 import { SkillFreshnessGroup } from './skill-freshness-group'
 import { groupSkillFreshness } from './skill-freshness-grouping'

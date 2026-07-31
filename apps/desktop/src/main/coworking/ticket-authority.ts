@@ -1,11 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto'
 
-import type {
-  CoworkingTicket,
-  CoworkingTicketBinding
-} from '../../shared/coworking/access-contract'
-import type { AuthenticatedCoworkingPrincipal } from '../../shared/coworking/wire-contract'
-import { COWORKING_TICKET_TTL_MS } from '../../shared/coworking/wire-contract'
+import type { CoworkingTicket, CoworkingTicketBinding } from '~shared/coworking/access-contract'
+import type { AuthenticatedCoworkingPrincipal } from '~shared/coworking/wire-contract'
+import { COWORKING_TICKET_TTL_MS } from '~shared/coworking/wire-contract'
 
 const MAX_OUTSTANDING_COWORKING_TICKETS = 2_048
 

@@ -1,10 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react'
-
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { translate } from '@/i18n/i18n'
-
-import type { TerminalQuickCommand } from '../../../../shared/types'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import type { TerminalQuickCommand } from '~shared/types'
 
 type TerminalQuickCommandLabelFieldProps = {
   label: string

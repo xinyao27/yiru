@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
-
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
 
 import type { WorktreeContextMenuState } from './state'
 

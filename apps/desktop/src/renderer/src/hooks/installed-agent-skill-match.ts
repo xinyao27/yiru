@@ -1,6 +1,5 @@
-import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
-
-import type { DiscoveredSkill, SkillSourceKind } from '../../../shared/skills'
+import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
+import type { DiscoveredSkill, SkillSourceKind } from '~shared/skills'
 
 type InstalledAgentSkillMatchOptions = {
   sourceKinds?: readonly SkillSourceKind[]

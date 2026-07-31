@@ -1,7 +1,7 @@
 import type React from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
 import { SettingsSubsectionHeader, SettingsSwitchRow } from '../form-controls'
 import { OpenInMenuSetting } from '../open-in-menu-setting'
 import { SearchableSetting } from '../searchable-setting'

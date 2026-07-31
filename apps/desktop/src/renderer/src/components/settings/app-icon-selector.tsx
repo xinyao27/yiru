@@ -1,12 +1,11 @@
 import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import { APP_ICON_OPTIONS, normalizeAppIconId, type AppIconId } from '~shared/app-icon'
 
 import blueIconUrl from '../../../../../resources/app-icons/yiru-graphite.png?url'
 import watercolorIconUrl from '../../../../../resources/app-icons/yiru-warm.png?url'
 import classicIconUrl from '../../../../../resources/icon.png?url'
-import { APP_ICON_OPTIONS, normalizeAppIconId, type AppIconId } from '../../../../shared/app-icon'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 

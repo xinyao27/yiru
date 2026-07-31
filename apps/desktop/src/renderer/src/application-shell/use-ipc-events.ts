@@ -6,42 +6,44 @@ import {
 /* oxlint-disable max-lines -- Why: this App-level IPC bridge intentionally keeps the renderer's main-process event contract in one place so shortcut, runtime, updater, and agent-status wiring do not drift across files. */
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-
 import {
   acquireBrowserAutomationVisibility,
   releaseBrowserAutomationVisibility
-} from '@/components/browser-pane/browser-automation-visibility'
-import { nextEditorFontZoomLevel, computeEditorFontSize } from '@/components/editor/font-zoom'
-import { buildWorkspaceSessionPayload } from '@/components/editor/workspace-session'
-import { persistWorkspaceSessionByHost } from '@/components/editor/workspace-session-host-persistence'
+} from '~renderer/components/browser-pane/browser-automation-visibility'
+import {
+  nextEditorFontZoomLevel,
+  computeEditorFontSize
+} from '~renderer/components/editor/font-zoom'
+import { buildWorkspaceSessionPayload } from '~renderer/components/editor/workspace-session'
+import { persistWorkspaceSessionByHost } from '~renderer/components/editor/workspace-session-host-persistence'
 import {
   isManualSimulatorLaunchPending,
   rememberPrelaunchedSimulatorSession
-} from '@/components/emulator-pane/simulator-launch-coordination'
-import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/constants'
-import { applyUIZoom } from '@/components/settings/ui-zoom'
-import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
-import { getVisibleWorktreeIds } from '@/components/sidebar/visible-worktrees'
+} from '~renderer/components/emulator-pane/simulator-launch-coordination'
+import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '~renderer/components/settings/constants'
+import { applyUIZoom } from '~renderer/components/settings/ui-zoom'
+import { runSleepWorktree } from '~renderer/components/sidebar/sleep-worktree-flow'
+import { getVisibleWorktreeIds } from '~renderer/components/sidebar/visible-worktrees'
 import {
   handleSwitchRecentTab,
   handleSwitchTab,
   handleSwitchTabAcrossAllTypes,
   handleSwitchTerminalTab
-} from '@/components/tab-bar/ipc-tab-switch'
-import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/components/tab-bar/quick-commands-menu-events'
-import { ensureSimulatorTab } from '@/components/tab-group/ensure-simulator-tab'
-import { shouldSuppressCodexAutoApprovalStatus } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
-import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
-import { showTerminalShortcutCaptureNotification } from '@/components/terminal-workspace/terminal-shortcut-capture-notification'
-import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
-import { closeTerminalTab } from '@/components/terminal/tab-actions'
-import { SPLIT_TERMINAL_PANE_EVENT, CLOSE_TERMINAL_PANE_EVENT } from '@/constants/terminal'
-import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '@/constants/terminal'
-import { translate } from '@/i18n/i18n'
-import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
+} from '~renderer/components/tab-bar/ipc-tab-switch'
+import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '~renderer/components/tab-bar/quick-commands-menu-events'
+import { ensureSimulatorTab } from '~renderer/components/tab-group/ensure-simulator-tab'
+import { shouldSuppressCodexAutoApprovalStatus } from '~renderer/components/terminal-pane/codex-auto-approval-notification-suppression'
+import { collectLeafIdsInOrder } from '~renderer/components/terminal-pane/layout-serialization'
+import { showTerminalShortcutCaptureNotification } from '~renderer/components/terminal-workspace/terminal-shortcut-capture-notification'
+import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
+import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
+import { SPLIT_TERMINAL_PANE_EVENT, CLOSE_TERMINAL_PANE_EVENT } from '~renderer/constants/terminal'
+import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '~renderer/constants/terminal'
+import { translate } from '~renderer/i18n/i18n'
+import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
+import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import {
   createFloatingWorkspaceBrowserTab,
   createFloatingWorkspaceMarkdownTab,
@@ -49,64 +51,60 @@ import {
   isEmptyFloatingWorkspacePanelVisible,
   isFloatingWorkspacePanelFocused,
   switchFloatingWorkspaceTab
-} from '@/lib/floating-workspace-terminal-actions'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { requestFriday } from '@/lib/friday'
-import { detectLanguage } from '@/lib/language-detect'
-import { initialAgentTabViewModeProps } from '@/lib/native-chat-initial-view-mode'
-import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
+} from '~renderer/lib/floating-workspace-terminal-actions'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { requestFriday } from '~renderer/lib/friday'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-view-mode'
+import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
+import { openMobileEmulatorTab } from '~renderer/lib/open-mobile-emulator-tab'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   hydrateBrowserDrivers,
   setDriverForBrowserPage
-} from '@/lib/pane-manager/browser-mobile-driver-state'
-import { setDriverForPty, hydrateDrivers } from '@/lib/pane-manager/mobile-driver-state'
-import { setFitOverride, hydrateOverrides } from '@/lib/pane-manager/mobile-fit-overrides'
-import { track } from '@/lib/telemetry'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
-import { destroyPersistentWebview } from '@/runtime/browser-webview-registry'
-import { subscribeRuntimeClientEvents } from '@/runtime/client-events'
+} from '~renderer/lib/pane-manager/browser-mobile-driver-state'
+import { setDriverForPty, hydrateDrivers } from '~renderer/lib/pane-manager/mobile-driver-state'
+import { setFitOverride, hydrateOverrides } from '~renderer/lib/pane-manager/mobile-fit-overrides'
+import { track } from '~renderer/lib/telemetry'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
+import { destroyPersistentWebview } from '~renderer/runtime/browser-webview-registry'
+import { subscribeRuntimeClientEvents } from '~renderer/runtime/client-events'
 import {
   applyRuntimeEnvironmentSshStateChanged,
   hydrateRuntimeEnvironmentSshState
-} from '@/runtime/environment-ssh-state'
-import { attachMobileMarkdownBridge } from '@/runtime/mobile-markdown-bridge'
-import { closeMobileSessionTabInStore } from '@/runtime/mobile-session-tab-close'
-import { hasRegisteredRuntimeTerminalTab } from '@/runtime/sync-runtime-graph'
-import { focusRuntimeTerminalSurface } from '@/runtime/sync-runtime-graph'
+} from '~renderer/runtime/environment-ssh-state'
+import { attachMobileMarkdownBridge } from '~renderer/runtime/mobile-markdown-bridge'
+import { closeMobileSessionTabInStore } from '~renderer/runtime/mobile-session-tab-close'
+import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
+import { focusRuntimeTerminalSurface } from '~renderer/runtime/sync-runtime-graph'
 import {
   closeWebRuntimeSessionTab,
   createWebRuntimeSessionBrowserTab,
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { getWorktreeMapFromState, getRepoMapFromState } from '@/store/selectors'
-import { resolveAgentPaneAuthorityKey } from '@/store/slices/agent-pane-authority'
-import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
-
-import { titleHasAgentName } from '../../../shared/agent/detection'
+} from '~renderer/runtime/web-runtime-session'
+import { getWorktreeMapFromState, getRepoMapFromState } from '~renderer/store/selectors'
+import { resolveAgentPaneAuthorityKey } from '~renderer/store/slices/agent-pane-authority'
+import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
+import { titleHasAgentName } from '~shared/agent/detection'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../../shared/agent/status-identity'
-import { FRIDAY_WORKTREE_ID } from '../../../shared/constants'
-import type { RateLimitState } from '../../../shared/rate-limit-types'
-import type { RuntimeClientEvent } from '../../../shared/runtime-client-events'
+} from '~shared/agent/status-identity'
+import { FRIDAY_WORKTREE_ID } from '~shared/constants'
+import type { RateLimitState } from '~shared/rate-limit-types'
+import type { RuntimeClientEvent } from '~shared/runtime-client-events'
 import type {
   RuntimeBrowserDriverState,
   RuntimeTerminalPresentation,
   RuntimeTerminalDriverState
-} from '../../../shared/runtime-types'
-import { makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
-import type {
-  TerminalLayoutSnapshot,
-  TerminalPaneLayoutNode,
-  UpdateStatus
-} from '../../../shared/types'
-import { isWslHookRelayConnectionId } from '../../../shared/wsl-hook-relay-contract'
+} from '~shared/runtime-types'
+import { makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, UpdateStatus } from '~shared/types'
+import { isWslHookRelayConnectionId } from '~shared/wsl-hook-relay-contract'
+
 import { isDirectSshRemoteWorkspaceApplyInProgress } from '../components/direct-ssh/remote-workspace/target-sync'
 import { createDirectSshRuntimeController } from '../components/direct-ssh/runtime-controller'
 import { runWorktreeDelete } from '../components/sidebar/delete-worktree/flow'

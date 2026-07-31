@@ -1,10 +1,9 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { SYNC_FIT_PANES_EVENT } from '~renderer/constants/terminal'
+import { useAppStore } from '~renderer/store'
+import type { Tab, TabGroup, TerminalTab } from '~shared/types'
 
-import { SYNC_FIT_PANES_EVENT } from '@/constants/terminal'
-
-import type { Tab, TabGroup, TerminalTab } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { useNativeChatToggleShortcut } from '../native-chat/use-native-chat-toggle-shortcut'
 import { tabGroupBodyAnchorName } from '../tab-group/body-anchor'
 import { shouldMountBackgroundWorktreeTab } from '../terminal/background-terminal-worktree-mount'

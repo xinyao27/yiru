@@ -1,5 +1,13 @@
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
-
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
+import {
+  clearConsumedPreHandlerPtyExit,
+  drainPreHandlerPtyData,
+  drainPreHandlerPtyExit,
+  hasPreHandlerPtyExit,
+  isPreHandlerPtyStateDiscarded
+} from '~renderer/runtime/pty-pre-handler-buffer'
 /* oxlint-disable max-lines -- Why: the PTY transport manages lifecycle, data flow,
 agent status extraction, and title tracking for terminal panes. Splitting would
 scatter the tightly coupled IPC ↔ xterm data pipeline across files with no clear
@@ -10,26 +18,18 @@ import {
   createAgentStatusTracker,
   normalizeTerminalTitle,
   extractAllOscTitles
-} from '../../../../../shared/agent/detection'
+} from '~shared/agent/detection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../../../../shared/agent/status-osc'
-import { createBellDetector } from '../../../../../shared/terminal/bell-detector'
+} from '~shared/agent/status-osc'
+import { createBellDetector } from '~shared/terminal/bell-detector'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../../../../shared/terminal/input'
-import { isTuiAgent } from '../../../../../shared/tui-agent/config'
-import { extractIpcErrorMessage } from '../../../lib/ipc-error'
-import type { PtyDataMeta } from '../../../runtime/pty-data-meta'
-import {
-  clearConsumedPreHandlerPtyExit,
-  drainPreHandlerPtyData,
-  drainPreHandlerPtyExit,
-  hasPreHandlerPtyExit,
-  isPreHandlerPtyStateDiscarded
-} from '../../../runtime/pty-pre-handler-buffer'
+} from '~shared/terminal/input'
+import { isTuiAgent } from '~shared/tui-agent/config'
+
 import {
   hasTerminalDisplayContent,
   trimIncompleteTerminalControlTail
@@ -62,7 +62,7 @@ export type {
   PtyConnectResult,
   PtyTransport
 } from './transport-types'
-export { extractLastOscTitle } from '../../../../../shared/agent/detection'
+export { extractLastOscTitle } from '~shared/agent/detection'
 
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
 // Why: an app SSH PTY id embeds the connection it was created under. When a pane

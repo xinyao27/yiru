@@ -1,21 +1,21 @@
-import { POST_PASTE_SUBMIT_DELAY_MS } from '@/lib/agent-paste-submit-delay'
+import { agentDeliversDraftViaNativePrefill } from '~renderer/lib/agent-native-draft-prefill'
+import { POST_PASTE_SUBMIT_DELAY_MS } from '~renderer/lib/agent-paste-submit-delay'
 import {
   BRACKETED_PASTE_END,
   BRACKETED_PASTE_START,
   sanitizeTerminalPasteText
-} from '@/lib/terminal-bracketed-paste'
+} from '~renderer/lib/terminal-bracketed-paste'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
-} from '@/runtime/terminal-inspection'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
+import { isExpectedAgentProcess } from '~shared/agent/process-recognition'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
+import type { GlobalSettings } from '~shared/types'
 
-import { isExpectedAgentProcess } from '../../../../shared/agent/process-recognition'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
-import type { TuiAgent } from '../../../../shared/types'
-import type { GlobalSettings } from '../../../../shared/types'
-import { agentDeliversDraftViaNativePrefill } from '../../lib/agent-native-draft-prefill'
-import { getSettingsForWorktreeRuntimeOwner } from '../../lib/worktree-runtime-owner'
 import { sendAgentDraftPasteContent } from '../terminal-pane/agent/draft-paste-content'
 import { waitForAgentDraftInputReady } from './agent-draft-readiness'
 import { waitForAgentReady } from './agent-ready-wait'

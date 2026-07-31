@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-
+import { translate } from '~renderer/i18n/i18n'
+import { track } from '~renderer/lib/telemetry'
 import {
   buildNestedRepoScanTelemetry,
   createNestedRepoTelemetryAttemptId,
   type NestedRepoTelemetryRuntimeKind
-} from '../../../../../shared/nested-repo-telemetry'
-import { isGitRepoKind } from '../../../../../shared/repo-kind'
-import type { AddRepoExistingWorkspaceSource } from '../../../../../shared/telemetry-events'
-import type { NestedRepoScanResult, Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { track } from '../../../lib/telemetry'
+} from '~shared/nested-repo-telemetry'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { AddRepoExistingWorkspaceSource } from '~shared/telemetry-events'
+import type { NestedRepoScanResult, Repo } from '~shared/types'
+
 import { createNestedRepoScanId } from './dialog-types'
 
 type ShowNestedRepoReview = (args: {

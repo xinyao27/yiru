@@ -1,12 +1,13 @@
 import { GitMerge } from '@phosphor-icons/react'
 import { useMemo, type Dispatch, type SetStateAction } from 'react'
-
-import { Checkbox } from '@/components/ui/checkbox'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'
-
-import type { NestedRepoScanResult } from '../../../../shared/types'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import {
+  getRepoDisplayLabelKey,
+  getRepoDisplayLabelsByPath
+} from '~renderer/lib/repo-display-labels'
+import type { NestedRepoScanResult } from '~shared/types'
 
 function NestedRepoSelectAllRow({
   total,

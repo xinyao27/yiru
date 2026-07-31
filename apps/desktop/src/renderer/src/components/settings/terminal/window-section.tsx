@@ -1,14 +1,14 @@
 import { ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import { Switch } from '~renderer/components/ui/switch'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { clampNumber } from '~renderer/lib/terminal-theme'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { clampNumber } from '../../../lib/terminal-theme'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Switch } from '../../ui/switch'
 import { ColorField, NumberField } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 
@@ -17,7 +17,8 @@ type TerminalWindowSectionProps = {
   updateSettings: (updates: Partial<GlobalSettings>) => void
 }
 
-import { cn } from '../../../lib/class-names'
+import { cn } from '~renderer/lib/class-names'
+
 import { COLOR_OVERRIDE_GROUPS } from './window-color-groups'
 
 export function TerminalWindowSection({

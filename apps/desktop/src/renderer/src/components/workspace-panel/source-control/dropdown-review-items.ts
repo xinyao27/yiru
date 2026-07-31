@@ -1,10 +1,10 @@
 import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
-
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
-} from '../../../i18n/hosted-review-localized-copy'
-import { translate } from '../../../i18n/i18n'
+} from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+
 import {
   canClickBlockedCreateReviewReason,
   resolveHostedReviewAuthInstruction

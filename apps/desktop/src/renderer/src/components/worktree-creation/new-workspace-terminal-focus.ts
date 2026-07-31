@@ -1,7 +1,7 @@
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import type { ActivateAndRevealResult } from '@/lib/worktree-activation'
-import { focusRuntimeTerminalSurface } from '@/runtime/sync-runtime-graph'
-import { useAppStore } from '@/store'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import type { ActivateAndRevealResult } from '~renderer/lib/worktree-activation'
+import { focusRuntimeTerminalSurface } from '~renderer/runtime/sync-runtime-graph'
+import { useAppStore } from '~renderer/store'
 
 function resolveCreatedWorkspaceTerminalTabId(
   worktreeId: string,

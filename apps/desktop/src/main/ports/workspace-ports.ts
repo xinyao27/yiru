@@ -1,12 +1,12 @@
 import { BrowserWindow, ipcMain } from 'electron'
-
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortScanRequest,
   WorkspacePortScanResult
-} from '../../shared/workspace/ports'
+} from '~shared/workspace/ports'
+
 import type { Store } from '../persistence'
 import { advertisedUrlWatcher, type AdvertisedUrlWatcher } from './advertised-url-watcher'
 import {

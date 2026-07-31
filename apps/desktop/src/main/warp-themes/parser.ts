@@ -1,7 +1,6 @@
 import path from 'node:path'
 
 import { parseDocument } from 'yaml'
-
 import {
   hasUsableTerminalThemeColors,
   makeCustomTerminalThemeSelection,
@@ -11,8 +10,8 @@ import {
   type TerminalCustomTheme,
   type TerminalCustomThemeMode,
   type WarpThemeImportPreviewTheme
-} from '../../shared/terminal/custom-themes'
-import type { TerminalColorOverrides } from '../../shared/types'
+} from '~shared/terminal/custom-themes'
+import type { TerminalColorOverrides } from '~shared/types'
 
 const WARP_COLOR_NAMES = [
   'black',

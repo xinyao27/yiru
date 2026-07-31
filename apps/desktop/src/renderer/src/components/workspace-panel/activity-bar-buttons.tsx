@@ -1,21 +1,20 @@
 import { DotsThree as MoreHorizontal, type IconProps } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { ActiveRightSidebarTab } from '@/components/editor/state'
-import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
-import { Button } from '@/components/ui/button'
+import type { ActiveRightSidebarTab } from '~renderer/components/editor/state'
+import { getSelectableControlStateClasses } from '~renderer/components/selectable-control-state-classes'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { CheckStatus } from '~shared/types'
 
-import type { CheckStatus } from '../../../../shared/types'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME } from './right-sidebar-titlebar-drag-regions'
 

@@ -1,13 +1,12 @@
-import { collectLeafIdsInOrder } from '@/components/terminal-pane/terminal-layout-leaf-ids'
-import { discardPreHandlerPtyState } from '@/runtime/pty-pre-handler-buffer'
+import { collectLeafIdsInOrder } from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
+import { discardPreHandlerPtyState } from '~renderer/runtime/pty-pre-handler-buffer'
 import {
   capturedPanesByTabId,
   disposeParkedTabWatchers,
   parkedWatchersByTabId,
   type ParkedTerminalPaneCapture
-} from '@/runtime/terminal-parked-watcher-registry'
-import { useAppStore } from '@/store'
-
+} from '~renderer/runtime/terminal-parked-watcher-registry'
+import { useAppStore } from '~renderer/store'
 /**
  * Parked terminal tab watcher lifecycle.
  *
@@ -20,8 +19,9 @@ import { useAppStore } from '@/store'
  * dispose watchers without importing this store-coupled module.
  * See docs/reference/terminal-hidden-view-parking.md.
  */
-import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../../shared/types'
+import { isTerminalLeafId } from '~shared/stable-pane-id'
+import type { TerminalTab } from '~shared/types'
+
 import { closeTerminalTab } from '../terminal/tab-actions'
 import {
   resolveTabTitleAfterPaneClose,
@@ -45,8 +45,8 @@ export {
   disposeParkedTerminalWatchersForWorktree,
   getParkedTerminalWatcherTabIds,
   pruneParkedTerminalWatchers
-} from '@/runtime/terminal-parked-watcher-registry'
-export type { ParkedTerminalPaneCapture } from '@/runtime/terminal-parked-watcher-registry'
+} from '~renderer/runtime/terminal-parked-watcher-registry'
+export type { ParkedTerminalPaneCapture } from '~renderer/runtime/terminal-parked-watcher-registry'
 
 export type ParkableTerminalTabModel = Pick<TerminalTab, 'id' | 'ptyId'>
 export type ParkedTerminalPtyEligibility = (ptyId: string) => boolean

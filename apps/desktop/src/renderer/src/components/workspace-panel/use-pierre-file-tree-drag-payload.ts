@@ -1,10 +1,9 @@
 import { useCallback } from 'react'
-
 import {
   encodeWorkspaceFilePaths,
   WORKSPACE_FILE_PATH_MIME,
   WORKSPACE_FILE_PATHS_MIME
-} from '@/lib/workspace-file-drag'
+} from '~renderer/lib/workspace-file-drag'
 
 import type { PierreFileTreeData } from './file-explorer/pierre-file-tree-data'
 

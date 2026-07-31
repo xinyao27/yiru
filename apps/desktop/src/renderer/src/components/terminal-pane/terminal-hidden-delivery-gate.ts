@@ -7,7 +7,7 @@
  * picks which mode-2031 responder is registered (byte sidecar vs fact reply),
  * so it must never flip per chunk.
  */
-import type { GlobalSettings } from '../../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 // Why: cached once per session — the blocking read should only ever run on
 // the pre-hydration startup path, never per pane bind.

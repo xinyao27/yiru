@@ -7,7 +7,8 @@ import type {
   BrowserTabProfileCloneResult,
   BrowserTabProfileShowResult,
   BrowserTabShowResult
-} from '../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { formatBase64PayloadByteCount } from './base64-payload-byte-count'
 
 export function formatSnapshot(result: BrowserSnapshotResult): string {

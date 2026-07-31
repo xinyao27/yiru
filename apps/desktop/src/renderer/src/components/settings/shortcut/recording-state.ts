@@ -1,4 +1,4 @@
-import type { KeybindingActionId } from '../../../../../shared/keybindings'
+import type { KeybindingActionId } from '~shared/keybindings'
 
 export function clearRecordingActionForShortcutMutation(
   recordingActionId: KeybindingActionId | null,

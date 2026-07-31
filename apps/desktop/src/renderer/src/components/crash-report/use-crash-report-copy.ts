@@ -1,12 +1,7 @@
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
-import type {
-  CrashReportCopySubmissionFailure,
-  CrashReportRecord
-} from '../../../../shared/crash-reporting'
+import { translate } from '~renderer/i18n/i18n'
+import type { CrashReportCopySubmissionFailure, CrashReportRecord } from '~shared/crash-reporting'
 
 export const CRASH_REPORT_COPY_FAILURE_TOAST_ID = 'crash-report-copy-failure'
 

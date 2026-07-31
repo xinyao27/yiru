@@ -1,20 +1,19 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { buildDuplicatedBrowserTabOptions } from '@/lib/duplicate-browser-tab-options'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
-
-import type { TuiAgent } from '../../../../shared/types'
-import { browserWorkspaceHasRemoteOwner } from '../../runtime/remote-browser-tab-ownership'
+import { translate } from '~renderer/i18n/i18n'
+import { buildDuplicatedBrowserTabOptions } from '~renderer/lib/duplicate-browser-tab-options'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { openMobileEmulatorTab } from '~renderer/lib/open-mobile-emulator-tab'
+import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
   createWebRuntimeSessionBrowserTab,
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive
-} from '../../runtime/web-runtime-session'
-import { useAppStore } from '../../store'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import type { TuiAgent } from '~shared/types'
+
 import { openTabBarEntry, type TabCreateEntryArgs } from '../tab-bar/tab-create-entry-action'
 import { getActiveWorktreeRuntimeEnvironmentId } from './tab-model-lookup'
 

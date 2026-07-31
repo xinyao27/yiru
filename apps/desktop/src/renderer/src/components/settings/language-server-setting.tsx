@@ -1,13 +1,12 @@
 import type React from 'react'
 import { useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   normalizeLanguageServerSettings,
   type LanguageServerSettings
-} from '../../../../shared/language-server'
-import type { GlobalSettings } from '../../../../shared/types'
+} from '~shared/language-server'
+import type { GlobalSettings } from '~shared/types'
+
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'

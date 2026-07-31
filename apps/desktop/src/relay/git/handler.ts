@@ -4,44 +4,39 @@ import { execFile, spawn, type ExecFileOptions } from 'node:child_process'
 import * as path from 'node:path'
 import { promisify } from 'node:util'
 
-import { GitCapabilityCache } from '../../shared/git/capability-cache'
-import { upstreamOnlyCommitsArePatchEquivalent } from '../../shared/git/cherry-patch-equivalence'
-import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
+import { GitCapabilityCache } from '~shared/git/capability-cache'
+import { upstreamOnlyCommitsArePatchEquivalent } from '~shared/git/cherry-patch-equivalence'
+import { getGitCloneFailureMessage } from '~shared/git/clone-failure-message'
 import {
   removeSafeUntrackedDiscardTarget,
   removeSafeUntrackedDiscardTargets
-} from '../../shared/git/discard-path-safety'
+} from '~shared/git/discard-path-safety'
 import {
   getEffectiveGitUpstreamStatus,
   resolveEffectiveGitUpstream
-} from '../../shared/git/effective-upstream'
-import { gitExecMutatesRepository } from '../../shared/git/exec-mutation'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/fetch-auto-maintenance'
-import {
-  syncForkDefaultBranch,
-  validateGitForkSyncExpectedUpstream
-} from '../../shared/git/fork-sync'
-import { loadGitHistoryFromExecutor } from '../../shared/git/history'
-import {
-  getPublishTargetStatus,
-  type GitCommandRunner
-} from '../../shared/git/publish-target-status'
-import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
-import { resolveGitRemoteRebaseSource } from '../../shared/git/rebase-source'
+} from '~shared/git/effective-upstream'
+import { gitExecMutatesRepository } from '~shared/git/exec-mutation'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '~shared/git/fetch-auto-maintenance'
+import { syncForkDefaultBranch, validateGitForkSyncExpectedUpstream } from '~shared/git/fork-sync'
+import { loadGitHistoryFromExecutor } from '~shared/git/history'
+import { getPublishTargetStatus, type GitCommandRunner } from '~shared/git/publish-target-status'
+import { assertGitPushTargetShape } from '~shared/git/push-target-validation'
+import { resolveGitRemoteRebaseSource } from '~shared/git/rebase-source'
 import {
   isNoUpstreamError,
   normalizeGitErrorMessage,
   runPullWithDivergenceFallback
-} from '../../shared/git/remote-error'
-import { clearGitStatusLineStatsCache } from '../../shared/git/status-line-stats-cache'
-import { parseNumstat } from '../../shared/git/uncommitted-line-stats'
+} from '~shared/git/remote-error'
+import { clearGitStatusLineStatsCache } from '~shared/git/status-line-stats-cache'
+import { parseNumstat } from '~shared/git/uncommitted-line-stats'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError
-} from '../../shared/git/worktree-command-capabilities'
-import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
-import { endSubprocessStdin } from '../../shared/subprocess-stdin-write'
-import type { GitPushTarget } from '../../shared/types'
+} from '~shared/git/worktree-command-capabilities'
+import { InFlightPromiseDedupe, stableInFlightKey } from '~shared/in-flight-promise-dedupe'
+import { endSubprocessStdin } from '~shared/subprocess-stdin-write'
+import type { GitPushTarget } from '~shared/types'
+
 import { buildRelayGitEnv, buildRelayUnattendedGitEnv } from '../command-env'
 import type { RelayContext } from '../context'
 import { expandTilde } from '../context'

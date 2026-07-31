@@ -1,9 +1,8 @@
 import { Plus } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { CommandItem } from '@/components/ui/command'
-import { CREATE_WORKTREE_ITEM_ID } from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import { translate } from '@/i18n/i18n'
+import { CommandItem } from '~renderer/components/ui/command'
+import { CREATE_WORKTREE_ITEM_ID } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { HintRow as HintRowEntry, SectionHeader as SectionHeaderEntry } from '../types'
 

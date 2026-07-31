@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '@/i18n/i18n'
-
-import { cn } from '../../lib/class-names'
 import { mobilePageStyles } from './page-tailwind'
 import { HomeSlide } from './slides/home-slide'
 import { TerminalSlide } from './slides/terminal-slide'

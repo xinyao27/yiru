@@ -1,12 +1,11 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useRef } from 'react'
-
 import {
   cursorPositionCache,
   diffViewStateCache,
   scrollTopCache
-} from '@/components/editor/scroll-cache'
-import type { OpenFile } from '@/components/editor/state'
+} from '~renderer/components/editor/scroll-cache'
+import type { OpenFile } from '~renderer/components/editor/state'
 
 import {
   disposeUnattachedMonacoModelsByPathPrefix,

@@ -1,5 +1,5 @@
-import type { TerminalColorOverrides } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { TerminalColorOverrides } from '~shared/types'
 
 export const COLOR_OVERRIDE_GROUPS: {
   label: string

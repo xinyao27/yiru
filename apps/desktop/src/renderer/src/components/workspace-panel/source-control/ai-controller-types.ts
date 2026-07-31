@@ -1,11 +1,5 @@
-import type { AppState } from '@/store'
-
-import type {
-  GitConflictOperation,
-  GitStatusEntry,
-  GlobalSettings,
-  Repo
-} from '../../../../../shared/types'
+import type { AppState } from '~renderer/store'
+import type { GitConflictOperation, GitStatusEntry, GlobalSettings, Repo } from '~shared/types'
 
 export type SourceControlAiStoreSnapshot = Pick<
   AppState,

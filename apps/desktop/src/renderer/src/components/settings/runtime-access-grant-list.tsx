@@ -1,9 +1,8 @@
 import { Trash as Trash2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import type { RuntimeAccessGrant } from '~shared/runtime-access-grants'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-
-import type { RuntimeAccessGrant } from '../../../../shared/runtime-access-grants'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 

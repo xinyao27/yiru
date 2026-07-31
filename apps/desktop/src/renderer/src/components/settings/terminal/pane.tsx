@@ -1,7 +1,8 @@
-import type { GlobalSettings } from '../../../../../shared/types'
-import { useAppStore } from '../../../store'
-import { isMacUserAgent, isWindowsUserAgent } from '../../terminal-pane/pane-helpers'
-import { Separator } from '../../ui/separator'
+import { isMacUserAgent, isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { Separator } from '~renderer/components/ui/separator'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
+
 import { ManageSessionsSection } from '../manage-sessions-section'
 import { matchesSettingsSearch } from '../search'
 import { TerminalAdvancedSection } from './advanced-section'

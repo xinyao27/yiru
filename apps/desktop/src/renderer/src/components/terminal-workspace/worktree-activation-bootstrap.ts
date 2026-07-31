@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { resumeSleepingAgentSessionsForWorktree } from '~renderer/components/terminal-workspace/resume-sleeping-agent-session'
+import { isWebRuntimeSessionActive } from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
 
-import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
-
-import { isWebRuntimeSessionActive } from '../../runtime/web-runtime-session'
-import { useAppStore } from '../../store'
 import { shouldAutoCreateInitialTerminal } from '../terminal/initial-terminal'
 import { getActiveWorktreeRuntimeEnvironmentId } from './tab-model-lookup'
 

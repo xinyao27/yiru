@@ -1,9 +1,8 @@
 import { Check, Copy } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 const LOG_EXCERPT_ERROR_LINE_PATTERN =
   /(?:##\[error\]|::error::|::error\b|\berror:|FAILED|exit code|ENOENT|EACCES|panic:|AssertionError)/i

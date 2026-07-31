@@ -1,6 +1,5 @@
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-
-import type { AppState } from '../../../store/types'
+import type { AppState } from '~renderer/store/types'
 
 export type ProjectRuntimeSessionSummary = {
   liveTerminalCount: number

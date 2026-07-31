@@ -16,28 +16,44 @@ import {
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
-
-import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
-import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
-import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
-import { branchName } from '@/lib/git-utils'
-import { markInputQuietSchedulerInput, scheduleAfterInputQuiet } from '@/lib/input-quiet-scheduler'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
+import { forgetAgentHibernationTabOutput } from '~renderer/components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '~renderer/components/terminal-pane/agent/startup-delivery-guards'
+import { clearSessionCommitDraftForWorktree } from '~renderer/components/workspace-panel/source-control/commit-draft-session'
+import {
+  forgetHugeRepoWarningDismissalsForWorktrees,
+  migrateHugeRepoWarningDismissal
+} from '~renderer/components/workspace-panel/source-control/huge-repo-warning-dismissals'
+import { cleanupEphemeralVmRuntimesForDeleted } from '~renderer/lib/ephemeral-vm-runtime-cleanup'
+import { forgetForegroundTerminalTabs } from '~renderer/lib/foreground-terminal-tabs'
+import { branchName } from '~renderer/lib/git-utils'
+import {
+  markInputQuietSchedulerInput,
+  scheduleAfterInputQuiet
+} from '~renderer/lib/input-quiet-scheduler'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import {
+  callRuntimeRpc,
+  getActiveRuntimeTarget,
+  isRuntimeScopeForbiddenError,
+  RuntimeRpcCallError
+} from '~renderer/runtime/rpc-client'
+import { disposeRemovedWorktreeParkedTerminalWatchers } from '~renderer/runtime/terminal-parked-watcher-registry'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import type {
   HostQualifiedDetectedWorktreeResult,
   ProviderRequestId,
   SshExecutionHostId
-} from '../../../../shared/detected-worktree-provider-contract'
-import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
+} from '~shared/detected-worktree-provider-contract'
+import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
 import {
   WORKTREE_CREATE_CONTRACT,
   WORKTREE_LIST_CONTRACT,
   WORKTREE_REMOVE_CONTRACT,
   WORKTREE_SET_CONTRACT
-} from '../../../../shared/runtime-method-contracts/workspace-contracts'
+} from '~shared/runtime-method-contracts/workspace-contracts'
 import type {
   DetectedWorktreeListResult,
   TerminalLayoutSnapshot,
@@ -53,34 +69,20 @@ import type {
   WorkspaceLineage,
   ProjectHostSetup,
   WorktreeMeta
-} from '../../../../shared/types'
+} from '~shared/types'
 import {
   folderWorkspaceKey,
   getActiveSidebarWorkspaceId,
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace/scope'
+} from '~shared/workspace/scope'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,
   isLockedWorktreeRemovalError
-} from '../../../../shared/workspace/worktree-removal'
-import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
-import { clearSessionCommitDraftForWorktree } from '../../components/workspace-panel/source-control/commit-draft-session'
-import {
-  forgetHugeRepoWarningDismissalsForWorktrees,
-  migrateHugeRepoWarningDismissal
-} from '../../components/workspace-panel/source-control/huge-repo-warning-dismissals'
-import {
-  callRuntimeRpc,
-  getActiveRuntimeTarget,
-  isRuntimeScopeForbiddenError,
-  RuntimeRpcCallError
-} from '../../runtime/rpc-client'
-import { disposeRemovedWorktreeParkedTerminalWatchers } from '../../runtime/terminal-parked-watcher-registry'
-import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
+} from '~shared/workspace/worktree-removal'
+
 import type { AppState } from '../types'
 import { moveFocusToRendererBeforeFocusedWebviewHidden } from './browser-webview-cleanup'
 import {

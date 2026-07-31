@@ -1,5 +1,5 @@
-import type { GrokAccountStatus } from '../../../shared/rate-limit-types'
-import { isGrokAccessTokenFresh, readGrokAuthSession } from '../../rate-limits/grok-auth'
+import { isGrokAccessTokenFresh, readGrokAuthSession } from '~main/rate-limits/grok-auth'
+import type { GrokAccountStatus } from '~shared/rate-limit-types'
 
 export function getGrokAccountStatus(): GrokAccountStatus {
   const readResult = readGrokAuthSession()

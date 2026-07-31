@@ -1,7 +1,6 @@
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
 export function CoworkingTooltipIconButton({
   children,

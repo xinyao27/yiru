@@ -1,16 +1,16 @@
-import { isCustomAgentId } from '../../../../../shared/commit-message/agent-spec'
+import { isCustomAgentId } from '~shared/commit-message/agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings,
   resolveSourceControlActionRecipe
-} from '../../../../../shared/source-control/ai'
+} from '~shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   type SourceControlActionId,
   type SourceControlActionRecipe
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { GlobalSettings, Repo } from '../../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { GlobalSettings, Repo } from '~shared/types'
 
 type NormalizedSourceControlActionRecipe = {
   agentId: SourceControlActionRecipe['agentId'] | null

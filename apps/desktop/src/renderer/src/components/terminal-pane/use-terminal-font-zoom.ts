@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { safeFit } from '~renderer/lib/pane-manager/pane-tree-ops'
+import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
+import { DEFAULT_TERMINAL_FONT_SIZE } from '~shared/terminal/fonts'
 
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { safeFit } from '@/lib/pane-manager/pane-tree-ops'
-import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
-
-import { DEFAULT_TERMINAL_FONT_SIZE } from '../../../../shared/terminal/fonts'
 import { getPaneOwnedActiveHelperTextarea } from './regular-terminal-focus-ownership'
 
 type FontZoomDeps = {

@@ -1,11 +1,11 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import type { Editor } from '@tiptap/react'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
 import { runSlashCommand } from './slash-commands'
 import type { SlashCommand, SlashMenuState } from './slash-commands'
 

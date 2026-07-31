@@ -1,4 +1,4 @@
-import type { RightSidebarExplorerView } from '../../../../../shared/types'
+import type { RightSidebarExplorerView } from '~shared/types'
 
 export function getVisibleFileExplorerWorktreePath({
   explorerView,

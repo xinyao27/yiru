@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretRight as ChevronRight, Globe } from '@/components/uniwind-icons'
+import { CaretRight as ChevronRight, Globe } from '~/components/uniwind-icons'
 
 import { MobileContentSection } from '../src/components/content-section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'

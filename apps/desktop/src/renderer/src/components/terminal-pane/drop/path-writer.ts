@@ -1,5 +1,6 @@
-import type { PaneManager } from '../../../lib/pane-manager/pane-manager'
-import { wrapTerminalBracketedPasteText } from '../../../lib/terminal-bracketed-paste'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { wrapTerminalBracketedPasteText } from '~renderer/lib/terminal-bracketed-paste'
+
 import { shellEscapePath } from '../pane-helpers'
 import { TERMINAL_PASTE_OPERATION_TIMEOUT_MS } from '../paste/limits'
 import { runTerminalPasteOperationWithTimeout } from '../paste/operation-timeout'

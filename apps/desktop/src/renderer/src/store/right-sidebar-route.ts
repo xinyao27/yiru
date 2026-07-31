@@ -1,4 +1,4 @@
-import type { ActiveRightSidebarTab, RightSidebarExplorerView } from '../../../shared/types'
+import type { ActiveRightSidebarTab, RightSidebarExplorerView } from '~shared/types'
 
 export type RightSidebarRoute = {
   rightSidebarTab: ActiveRightSidebarTab

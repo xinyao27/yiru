@@ -1,12 +1,12 @@
 import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { formatKeybindingList, type KeybindingDefinition } from '~shared/keybindings'
 
-import { formatKeybindingList, type KeybindingDefinition } from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
 import { matchesSettingsSearch, type SettingsSearchEntry } from '../search'
 import type { ShortcutTerminalStatus } from './terminal-status'
 

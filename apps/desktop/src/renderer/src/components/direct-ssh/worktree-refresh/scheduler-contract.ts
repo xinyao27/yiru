@@ -1,17 +1,15 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
-
 import type {
   DetectedWorktreeRefreshReleaseOutcome,
   WaiterLeaseId
-} from '@/store/slices/detected-worktree-refresh-leases'
-
+} from '~renderer/store/slices/detected-worktree-refresh-leases'
 import type {
   HostQualifiedDetectedWorktreeResult,
   ProviderRequestId,
   SshExecutionHostId
-} from '../../../../../shared/detected-worktree-provider-contract'
+} from '~shared/detected-worktree-provider-contract'
 
-export type { WaiterLeaseId } from '@/store/slices/detected-worktree-refresh-leases'
+export type { WaiterLeaseId } from '~renderer/store/slices/detected-worktree-refresh-leases'
 
 export type DirectSshWorktreeRefreshAuthorityRequirement = 'required' | 'allow-metadata-fallback'
 

@@ -11,25 +11,25 @@ import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { IPty } from 'node-pty'
 import type * as NodePty from 'node-pty'
-
-import { resolveWindowsGitBashShellPath } from '../main/git-bash'
-import { forceKillPosixPtyProcessGroups } from '../main/pty/posix-pty-process-groups'
+import { resolveWindowsGitBashShellPath } from '~main/git-bash'
+import { forceKillPosixPtyProcessGroups } from '~main/pty/posix-pty-process-groups'
 import {
   createShellReadyScanState,
   drainShellReadyHeldBytes,
   scanForShellReady,
   type ShellReadyScanState
-} from '../main/shell-ready-marker-scanner'
-import { shouldUseShellReadyStartupDelivery } from '../shared/codex-startup-delivery'
+} from '~main/shell-ready-marker-scanner'
+import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../shared/git/credential-prompt-env'
-import { PhysicalExitTracker } from '../shared/physical-exit-tracker'
-import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-sequencing'
-import { buildStartupCommandSubmission } from '../shared/startup-command-submission'
-import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
-import { isTuiAgent } from '../shared/tui-agent/config'
+} from '~shared/git/credential-prompt-env'
+import { PhysicalExitTracker } from '~shared/physical-exit-tracker'
+import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
+import { buildStartupCommandSubmission } from '~shared/startup-command-submission'
+import { applyTerminalGitCredentialPromptGuard } from '~shared/terminal/git-credential-guard'
+import { isTuiAgent } from '~shared/tui-agent/config'
+
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { PtyReplayBuffer } from './pty-replay-buffer'
 import {

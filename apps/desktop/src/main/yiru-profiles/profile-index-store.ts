@@ -9,7 +9,7 @@ import {
 } from 'node:fs'
 import { dirname } from 'node:path'
 
-import type { GlobalSettings } from '../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 import {
   createDefaultLocalYiruProfile,
   DEFAULT_LOCAL_YIRU_PROFILE_ID,
@@ -20,7 +20,8 @@ import {
   type YiruProfileIndex,
   type YiruProfileListState,
   type YiruProfileSummary
-} from '../../shared/yiru-profiles'
+} from '~shared/yiru-profiles'
+
 import { purgeLegacyCloudProfileFiles } from './legacy-cloud-profile-cleanup'
 import { normalizeProfileIndex, type ProfileIndexReadResult } from './profile-index-normalization'
 import {

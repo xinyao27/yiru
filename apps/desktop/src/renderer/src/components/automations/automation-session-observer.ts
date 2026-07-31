@@ -1,16 +1,15 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
-
-import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
-import { getRemoteRuntimeTerminalMultiplexer } from '@/runtime/remote-runtime-terminal-multiplexer'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
+import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/terminal-pane/terminal-side-effect-facts-handler'
+import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/remote-runtime-terminal-multiplexer'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
-} from '@/runtime/terminal-stream'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/terminal-stream'
+import { useAppStore } from '~renderer/store'
+import { createAgentStatusOscProcessor } from '~shared/agent/status-osc'
 
-import { createAgentStatusOscProcessor } from '../../../../shared/agent/status-osc'
 import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
 import { subscribeToPtyExit } from '../terminal-pane/pty/dispatcher'
 

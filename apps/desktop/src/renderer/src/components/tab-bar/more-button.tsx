@@ -1,8 +1,7 @@
 import { DotsThree as MoreHorizontal, X } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,13 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { getTitlebarMoreDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 import { TabBarQuickCommandsButton } from './quick-commands-button'

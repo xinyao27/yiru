@@ -18,16 +18,15 @@ in one predictable form control instead of splitting state across fragments. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { parseGitLabMergeRequestLink } from '@/components/new-workspace/gitlab-links'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { parseGitLabMergeRequestLink } from '~renderer/components/new-workspace/gitlab-links'
 import {
   listGitLabMRsForSource,
   lookupGitLabWorkItemByPathForSource
-} from '@/components/new-workspace/gitlab-work-item-source-lookup'
-import { lookupSmartGitHubSubmitItem } from '@/components/new-workspace/smart-github-submit'
-import { Button } from '@/components/ui/button'
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
+} from '~renderer/components/new-workspace/gitlab-work-item-source-lookup'
+import { lookupSmartGitHubSubmitItem } from '~renderer/components/new-workspace/smart-github-submit'
+import { Button } from '~renderer/components/ui/button'
+import { Command, CommandGroup, CommandItem, CommandList } from '~renderer/components/ui/command'
 import {
   Dialog,
   DialogContent,
@@ -35,35 +34,38 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Popover, PopoverAnchor, PopoverContent } from '~renderer/components/ui/popover'
+import { Tabs, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   normalizeGitHubLinkQuery,
   parseGitHubPullRequestLink,
   type RepoSlug
-} from '@/lib/github-links'
+} from '~renderer/lib/github-links'
 import {
   lookupGitHubWorkItemByOwnerRepoForSource,
   lookupGitHubWorkItemForSource
-} from '@/lib/github-work-item-source-lookup'
-import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
+} from '~renderer/lib/github-work-item-source-lookup'
+import {
+  getLocalPreflightContext,
+  localPreflightContextKey
+} from '~renderer/lib/local-preflight-context'
+import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails
-} from '@/runtime/repo-client'
-import { useAppStore } from '@/store'
-
+} from '~renderer/runtime/repo-client'
+import { useAppStore } from '~renderer/store'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
-} from '../../../../shared/project-source-context'
-import type { BaseRefSearchResult, GitHubWorkItem, GitLabWorkItem } from '../../../../shared/types'
+} from '~shared/project-source-context'
+import type { BaseRefSearchResult, GitHubWorkItem, GitLabWorkItem } from '~shared/types'
+
 import { resolveSmartWorkspaceCommandValue } from './smart-workspace-command-value'
 import {
   getGithubSearchRequest,

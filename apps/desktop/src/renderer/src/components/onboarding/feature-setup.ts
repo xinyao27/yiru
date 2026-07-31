@@ -4,21 +4,20 @@ import {
   YIRU_DEBUG_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME,
   buildAgentFeatureSkillInstallCommand
-} from '@/lib/agent-feature-install-commands'
-import { showYiruCliRegistrationPromptToast } from '@/lib/agent-skill-cli-prerequisite'
-import { BROWSER_USE_ENABLED_STORAGE_KEY } from '@/lib/browser-use-setup-state'
+} from '~renderer/lib/agent-feature-install-commands'
+import { showYiruCliRegistrationPromptToast } from '~renderer/lib/agent-skill-cli-prerequisite'
+import { BROWSER_USE_ENABLED_STORAGE_KEY } from '~renderer/lib/browser-use-setup-state'
 import {
   ORCHESTRATION_ENABLED_STORAGE_KEY,
   ORCHESTRATION_SETUP_DISMISSED_STORAGE_KEY,
   notifyOrchestrationSetupStateChanged
-} from '@/lib/orchestration-setup-state'
-
-import type { CliInstallStatus } from '../../../../shared/cli-install-types'
+} from '~renderer/lib/orchestration-setup-state'
+import type { CliInstallStatus } from '~shared/cli-install-types'
 import type {
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../../../../shared/computer-use-permissions-types'
-import type { EventProps } from '../../../../shared/telemetry-events'
+} from '~shared/computer-use-permissions-types'
+import type { EventProps } from '~shared/telemetry-events'
 
 export type OnboardingFeatureSetupId = 'browserUse' | 'computerUse' | 'orchestration'
 

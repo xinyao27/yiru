@@ -1,7 +1,8 @@
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Label } from '../../ui/label'
-import { Switch } from '../../ui/switch'
+import { Label } from '~renderer/components/ui/label'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
+
 import { SearchableSetting } from '../searchable-setting'
 
 type BrowserLinkRoutingSettingProps = {

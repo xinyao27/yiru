@@ -5,12 +5,12 @@ import {
   type DataCallback,
   type Message
 } from 'vscode-jsonrpc/browser'
-
 import type {
   LanguageServerEvent,
   LanguageServerJsonRpcMessage,
   LanguageServerSessionStatus
-} from '../../../../../shared/language-server'
+} from '~shared/language-server'
+
 import type { LanguageServerSessionTransport } from './session-transport'
 
 export class LanguageServerIpcReader extends AbstractMessageReader {

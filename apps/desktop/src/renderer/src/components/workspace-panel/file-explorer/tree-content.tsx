@@ -1,8 +1,8 @@
 import React from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { dirname, normalizeRelativePath } from '~renderer/lib/path'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { dirname, normalizeRelativePath } from '../../../lib/path'
 import { SearchResultsPane } from '../search-results-pane'
 import { shouldShowIgnoredDecoration, STATUS_COLORS } from '../status-display'
 import { canShowAddAsProjectAction } from './add-project-action'

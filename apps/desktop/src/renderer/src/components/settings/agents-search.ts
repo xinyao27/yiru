@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-import { getAgentCatalog } from '@/lib/agent-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
 
 import {
   getAgentAwakeDescription,

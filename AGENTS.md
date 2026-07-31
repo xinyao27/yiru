@@ -128,7 +128,9 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - `switch` over a union is exhaustive with no `default` — adding a union member should break every switch that handles it.
 - Type declarations go in `.ts`. Under `src/preload` and `src/shared` this is a CI gate: `skipLibCheck: true` silently widens unresolved names in a `.d.ts` to `any`, which is how a broken IPC signature once shipped past typecheck.
 - Prefer `satisfies` over `as`. An `as` cast is a claim the type system can't back — if you need one, say why.
-- Path aliases `@/*` and `@renderer/*` map to the renderer root; use them there. Cross-process imports stay relative.
+- **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*`, `~shared/*`, `~main/*`, and `~preload/*` are the whole set for desktop; mobile has `~/*` for its `src/`. Any import that crosses from one of those areas into another uses the alias, at any depth. Inside one area, `./x` and `../x` stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf executables nothing imports into, so they have no alias of their own, and there is no bare `~` for desktop.
+- A renderer file importing `~main/*` is a build error, not a style problem — the one-way rule above is enforced by `check-import-path-policy.mjs`.
+- `build:cli` is a plain `tsc` emit, so it cannot resolve aliases at runtime: `scripts/rewrite-emitted-aliases.mjs` turns them back into relative requires and fails the build on any it does not recognize. Adding a desktop alias means updating that script and `config/tsconfig.cli.json` together.
 
 ---
 

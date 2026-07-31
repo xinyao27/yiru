@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { renderSourceControlActionCommandTemplate } from '../../../../../shared/source-control/ai-actions'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../../../shared/types'
-import { getAgentCatalog } from '../../../lib/agent-catalog'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
 import {
   pickSourceControlLaunchAgent,
   resolveSourceControlLaunchAgentScope
-} from '../../../lib/source-control-launch-agent-selection'
-import { useRepoById } from '../../../store/selectors'
+} from '~renderer/lib/source-control-launch-agent-selection'
+import { useAppStore } from '~renderer/store'
+import { useRepoById } from '~renderer/store/selectors'
+import { renderSourceControlActionCommandTemplate } from '~shared/source-control/ai-actions'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
+
 import { useSavedSourceControlAgentActionAutoStart } from '../use-saved-source-control-agent-action-auto-start'
 import type { SourceControlAgentActionDialogProps } from './agent-action-dialog'
 import type { UseSourceControlAgentActionDialogResult } from './agent-action-dialog-result'

@@ -1,11 +1,11 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
-import type { RateLimitState } from '../../../shared/rate-limit-types'
+import type { RateLimitState } from '~shared/rate-limit-types'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   GlobalSettings
-} from '../../../shared/types'
+} from '~shared/types'
+
 import { callRuntimeRpc, getActiveRuntimeTarget, RuntimeRpcCallError } from './rpc-client'
 
 // Mirrors YiruRuntime.getAccountsSnapshot() / the accounts.subscribe payload.

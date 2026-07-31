@@ -1,6 +1,7 @@
-import type { StatusBarItem } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { createLocalizedCatalog } from '../../../i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import type { StatusBarItem } from '~shared/types'
+
 import { translateSearchKeyword } from '../search-keywords'
 import { getAntigravityStatusBarToggleSearchEntry } from './status-bar-antigravity-toggle-search'
 import { getGrokStatusBarToggleSearchEntry } from './status-bar-grok-toggle-search'

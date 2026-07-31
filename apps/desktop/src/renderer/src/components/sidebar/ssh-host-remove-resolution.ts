@@ -1,6 +1,5 @@
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
-
-import type { Repo, Worktree } from '../../../../shared/types'
+import type { Repo, Worktree } from '~shared/types'
 
 /**
  * Classifies what removing an SSH target means for the workspaces still on it,

@@ -1,5 +1,5 @@
-import { mergeExternalWorktreeInboxPaths } from '../../../../shared/external-worktree-inbox'
-import type { Repo } from '../../../../shared/types'
+import { mergeExternalWorktreeInboxPaths } from '~shared/external-worktree-inbox'
+import type { Repo } from '~shared/types'
 
 export type ImportedWorktreeCardActionState = {
   pending: boolean

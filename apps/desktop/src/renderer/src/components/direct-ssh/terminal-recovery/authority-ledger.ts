@@ -1,7 +1,7 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import type { TerminalTab } from '~shared/types'
 
-import { parseAppSshPtyId } from '../../../../../shared/ssh-pty-id'
-import type { TerminalTab } from '../../../../../shared/types'
 import type {
   DirectSshLivePtyBinding,
   DirectSshPaneRetryResult,

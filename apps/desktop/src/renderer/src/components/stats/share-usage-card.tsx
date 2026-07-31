@@ -1,9 +1,8 @@
 import { forwardRef } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import type { ClaudeUsageSummary } from '~shared/claude-usage-types'
+import type { CodexUsageSummary } from '~shared/codex-usage-types'
 
-import { translate } from '@/i18n/i18n'
-
-import type { ClaudeUsageSummary } from '../../../../shared/claude-usage-types'
-import type { CodexUsageSummary } from '../../../../shared/codex-usage-types'
 import {
   BackgroundGlows,
   CardFooter,

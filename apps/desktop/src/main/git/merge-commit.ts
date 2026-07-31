@@ -1,10 +1,11 @@
-import type { GitMergeCommitResult } from '../../shared/git/write-op-results'
+import type { GitMergeCommitResult } from '~shared/git/write-op-results'
 import {
   isWorkingTreeDirty,
   readCurrentBranchName,
   resolveCommitOid,
   runConflictableGitOp
-} from '../../shared/git/write-preconditions'
+} from '~shared/git/write-preconditions'
+
 import { gitExecFileAsync } from './runner'
 import { gitOptionsForWorktree, type GitRuntimeOptions } from './runtime-options'
 import { detectConflictOperation, runWithGitReadCacheInvalidation } from './status'

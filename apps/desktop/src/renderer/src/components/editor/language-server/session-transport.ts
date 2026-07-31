@@ -1,6 +1,10 @@
 import { LANGUAGE_SERVER_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
+import {
+  assertRuntimeEnvironmentCapability,
+  callRuntimeRpc,
+  type RuntimeClientTarget
+} from '~renderer/runtime/rpc-client'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -12,12 +16,7 @@ import type {
   LanguageServerSettings,
   LanguageServerStartArgs,
   LanguageServerStartResult
-} from '../../../../../shared/language-server'
-import {
-  assertRuntimeEnvironmentCapability,
-  callRuntimeRpc,
-  type RuntimeClientTarget
-} from '../../../runtime/rpc-client'
+} from '~shared/language-server'
 
 export type LanguageServerSessionTransport = {
   start: (args: LanguageServerStartArgs) => Promise<LanguageServerStartResult>

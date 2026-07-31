@@ -1,13 +1,12 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+import { branchName } from '~renderer/lib/git-utils'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review-cache-identity'
+import { getRepoHostIdentityForParts } from '~renderer/store/slices/repo-host-identity'
+import type { AppState } from '~renderer/store/types'
+import type { Repo, Worktree } from '~shared/types'
 
-import { branchName } from '@/lib/git-utils'
-import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
-import { getHostedReviewCacheKey } from '@/store/slices/hosted-review-cache-identity'
-import { getRepoHostIdentityForParts } from '@/store/slices/repo-host-identity'
-import type { AppState } from '@/store/types'
-
-import type { Repo, Worktree } from '../../../../shared/types'
 import { selectChecksPanelReview } from '../workspace-panel/checks-panel/review'
 
 type WorktreeChecksReviewIndexArgs = {

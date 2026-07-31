@@ -1,10 +1,9 @@
 import { Crosshair } from '@phosphor-icons/react'
 import React from 'react'
-
-import { requestScrollToCurrentWorkspaceReveal } from '@/components/sidebar/scroll-to-current-workspace-status'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { requestScrollToCurrentWorkspaceReveal } from '~renderer/components/sidebar/scroll-to-current-workspace-status'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 export function ScrollToCurrentWorkspaceToolbarButton(): React.JSX.Element {
   return (

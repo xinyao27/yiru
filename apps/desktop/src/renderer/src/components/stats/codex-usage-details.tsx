@@ -1,11 +1,11 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import type {
   CodexUsageBreakdownRow,
   CodexUsageDailyPoint,
   CodexUsageSessionRow,
   CodexUsageSummary
-} from '../../../../shared/codex-usage-types'
+} from '~shared/codex-usage-types'
+
 import { CodexUsageDailyChart } from './codex-usage-daily-chart'
 import { CodexUsageRecentSessionsTable } from './codex-usage-recent-sessions-table'
 import { UsageBreakdownSection } from './usage-breakdown-section'

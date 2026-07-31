@@ -1,4 +1,4 @@
-import { callRuntimeRpc } from '@/runtime/rpc-client'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
 
 export type ParsedOrchestrationTaskLink = {
   taskId: string

@@ -1,6 +1,6 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
-import type { MobileTerminalTheme } from '../../terminal/webview/contract'
+import type { MobileTerminalTheme } from '~/terminal/webview/contract'
 
 export type TerminalRecord = {
   handle: string

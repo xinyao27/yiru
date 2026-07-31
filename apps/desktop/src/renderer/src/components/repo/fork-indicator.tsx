@@ -1,9 +1,8 @@
 import { GitFork } from '@phosphor-icons/react'
 import React from 'react'
+import { cn } from '~renderer/lib/class-names'
+import type { GitHubRepositoryIdentity } from '~shared/types'
 
-import { cn } from '@/lib/class-names'
-
-import type { GitHubRepositoryIdentity } from '../../../../shared/types'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 /**

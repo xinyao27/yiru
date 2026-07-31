@@ -1,7 +1,6 @@
-import { useAppStore } from '@/store'
-
-import type { GlobalSettings } from '../../../../../shared/types'
-import { getSettingsForWorktreeRuntimeOwner } from '../../../lib/worktree-runtime-owner'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
 
 export function getRightSidebarWorktreeRuntimeSettings(
   worktreeId: string | null | undefined

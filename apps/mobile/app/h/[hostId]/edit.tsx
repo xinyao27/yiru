@@ -10,17 +10,17 @@ import {
   ScrollView
 } from 'react-native'
 
-import { MobileGlassSurface } from '../../../src/components/glass/surface'
-import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
-import { useForceReconnect, usePrimeHosts } from '../../../src/transport/client-context'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { useForceReconnect, usePrimeHosts } from '~/transport/client-context'
 import {
   displayHostEndpoint,
   endpointPort,
   endpointScheme,
   normalizeHostEndpoint
-} from '../../../src/transport/host-endpoint'
-import { loadHosts, updateHostNameAndEndpoint } from '../../../src/transport/host-store'
-import type { HostProfile } from '../../../src/transport/types'
+} from '~/transport/host-endpoint'
+import { loadHosts, updateHostNameAndEndpoint } from '~/transport/host-store'
+import type { HostProfile } from '~/transport/types'
 
 export default function EditHostScreen() {
   const router = useRouter()

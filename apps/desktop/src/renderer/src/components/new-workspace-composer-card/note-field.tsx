@@ -1,14 +1,13 @@
 import React from 'react'
 import { toast } from 'sonner'
-
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
 import {
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
   measureTextControlPasteByteLength,
   pasteTextIntoTextControl,
   shouldHandleTextControlPaste
-} from '@/lib/text-control-paste'
+} from '~renderer/lib/text-control-paste'
 
 type NoteFieldProps = {
   note: string

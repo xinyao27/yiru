@@ -10,9 +10,6 @@ import {
   Alert
 } from 'react-native'
 
-import { Check, User } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-
 import {
   type AccountsSnapshot,
   type ProviderKey,
@@ -22,12 +19,14 @@ import {
   getWindowResetLabel,
   hasActiveProviderUsage,
   UsageBar
-} from '../../../src/components/account-usage'
-import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
-import { MobileContentSection } from '../../../src/components/content-section'
-import { useHostClient } from '../../../src/transport/client-context'
-import { loadHosts } from '../../../src/transport/host-store'
-import type { RpcSuccess } from '../../../src/transport/types'
+} from '~/components/account-usage'
+import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
+import { MobileContentSection } from '~/components/content-section'
+import { Check, User } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+import { useHostClient } from '~/transport/client-context'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcSuccess } from '~/transport/types'
 
 const accountScreenClassNames = {
   row: 'flex-row items-center px-3 py-3',

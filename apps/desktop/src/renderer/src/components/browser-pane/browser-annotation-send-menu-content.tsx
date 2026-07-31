@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { ReviewNotesSendMenuContent } from '@/components/editor/review-notes-send-menu-content'
+import { ReviewNotesSendMenuContent } from '~renderer/components/editor/review-notes-send-menu-content'
 
 export type BrowserAnnotationSendMenuContentProps = {
   worktreeId: string

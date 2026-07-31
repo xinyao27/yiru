@@ -1,9 +1,5 @@
-import type {
-  Tab,
-  TabGroup,
-  TabGroupLayoutNode,
-  WorkspaceSessionState
-} from '../../../../shared/types'
+import type { Tab, TabGroup, TabGroupLayoutNode, WorkspaceSessionState } from '~shared/types'
+
 import type { WorkspaceSessionSnapshot } from './workspace-session'
 
 type PersistedUnifiedTabSessionData = Pick<

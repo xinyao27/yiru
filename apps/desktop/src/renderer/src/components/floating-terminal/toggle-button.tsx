@@ -1,12 +1,11 @@
 import { Layout as PanelsTopLeft } from '@phosphor-icons/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-import { selectFloatingWorkspaceHasUnread } from '@/store/selectors'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { selectFloatingWorkspaceHasUnread } from '~renderer/store/selectors'
 
 import { FloatingTerminalIconContextMenu } from './icon-context-menu'
 import {

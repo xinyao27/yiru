@@ -1,10 +1,9 @@
 import React from 'react'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { translate } from '~renderer/i18n/i18n'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import type { GitDiffResult, GitStatusEntry } from '~shared/types'
 
-import type { OpenFile } from '@/components/editor/state'
-import { translate } from '@/i18n/i18n'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-
-import type { GitDiffResult, GitStatusEntry } from '../../../../shared/types'
 import { ConflictBanner } from './conflict-components'
 import { getDiffContentSignature } from './diff-content-signature'
 

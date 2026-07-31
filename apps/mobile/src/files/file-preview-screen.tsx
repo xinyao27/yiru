@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, BackHandler, Platform, Text, View, useWindowDimensions } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useForceReconnect, useHostClient } from '../transport/client-context'

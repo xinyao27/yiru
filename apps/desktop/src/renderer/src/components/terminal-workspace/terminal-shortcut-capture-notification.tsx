@@ -1,8 +1,7 @@
 import { Keyboard } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   formatKeybindingList,
   getEffectiveKeybindingsForAction,
@@ -10,8 +9,7 @@ import {
   isKeybindingPotentialTerminalConflict,
   type KeybindingActionId,
   type KeybindingOverrides
-} from '../../../../shared/keybindings'
-import { useAppStore } from '../../store'
+} from '~shared/keybindings'
 
 const STORAGE_PREFIX = 'yiru.terminalShortcutCapturedNotice.'
 const NOTICE_DURATION_MS = 20_000

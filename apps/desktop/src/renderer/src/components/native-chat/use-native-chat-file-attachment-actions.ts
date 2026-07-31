@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react'
-
-import { NATIVE_FILE_DROP_TARGET } from '../../../../shared/native-file-drop'
+import { NATIVE_FILE_DROP_TARGET } from '~shared/native-file-drop'
 
 export function useNativeChatFileAttachmentActions(
   attachExternalPaths: (paths: string[]) => void

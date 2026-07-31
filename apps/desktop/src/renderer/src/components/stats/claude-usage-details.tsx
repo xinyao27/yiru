@@ -1,11 +1,11 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import type {
   ClaudeUsageBreakdownRow,
   ClaudeUsageDailyPoint,
   ClaudeUsageSessionRow,
   ClaudeUsageSummary
-} from '../../../../shared/claude-usage-types'
+} from '~shared/claude-usage-types'
+
 import { ClaudeUsageDailyChart } from './claude-usage-daily-chart'
 import { ClaudeUsageRecentSessionsTable } from './claude-usage-recent-sessions-table'
 import { UsageBreakdownSection } from './usage-breakdown-section'

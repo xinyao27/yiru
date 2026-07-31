@@ -6,10 +6,10 @@ import {
   type NativeChatSession
 } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAppStore } from '~renderer/store'
+import { getVerifiedNativeChatCommands } from '~shared/native-chat/agent-profiles'
+import { surfaceSkillInvocationUserTurns } from '~shared/native-chat/command-envelope'
 
-import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat/agent-profiles'
-import { surfaceSkillInvocationUserTurns } from '../../../../shared/native-chat/command-envelope'
-import { useAppStore } from '../../store'
 import {
   applyAppends,
   createIncrementalAssembler,

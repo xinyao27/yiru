@@ -1,4 +1,5 @@
-import { keybindingMatchesInput } from '../../../../shared/keybindings'
+import { keybindingMatchesInput } from '~shared/keybindings'
+
 import {
   isTerminalImeCandidateDigitKeyEvent,
   isTerminalImeCandidateSelectionKeyEvent

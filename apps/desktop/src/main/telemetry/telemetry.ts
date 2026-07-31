@@ -36,10 +36,10 @@
 // Settings).
 
 import { ipcMain } from 'electron'
+import { isCohortExtendedEvent, isOnboardingEvent } from '~shared/telemetry-events'
+import type { EventName, EventProps } from '~shared/telemetry-events'
+import type { OptInVia } from '~shared/telemetry-events'
 
-import { isCohortExtendedEvent, isOnboardingEvent } from '../../shared/telemetry-events'
-import type { EventName, EventProps } from '../../shared/telemetry-events'
-import type { OptInVia } from '../../shared/telemetry-events'
 import type { Store } from '../persistence'
 import { consumeConsentMutationToken } from './burst-cap'
 import { persistBannerAcknowledgeWithoutEmitting, setOptIn, track } from './client'

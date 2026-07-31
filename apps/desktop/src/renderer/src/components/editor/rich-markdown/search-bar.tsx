@@ -9,11 +9,10 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { useOptionalShortcutLabel } from '../../../hooks/use-shortcut-label'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
 
 type RichMarkdownSearchBarProps = {
   activeMatchIndex: number

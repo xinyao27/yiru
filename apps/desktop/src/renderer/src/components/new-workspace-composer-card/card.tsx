@@ -1,25 +1,24 @@
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
-import type { NewWorkspaceProjectOption } from '@/components/new-workspace-composer-card/new-workspace-project-options'
-import type { ProjectHostSetupOption } from '@/components/new-workspace-composer-card/project-host-setup-options'
-import type { WorkspaceCreateErrorDisplay } from '@/components/new-workspace-composer-card/workspace-create-error-format'
-import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
-import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
-import { cn } from '@/lib/class-names'
-import type { SetupConfig } from '@/lib/new-workspace'
-import { useAppStore } from '@/store'
-
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
+import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import type { NewWorkspaceProjectOption } from '~renderer/components/new-workspace-composer-card/new-workspace-project-options'
+import type { ProjectHostSetupOption } from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
+import type { WorkspaceCreateErrorDisplay } from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
+import type { SmartWorkspaceNameSelection } from '~renderer/components/new-workspace/smart-workspace-name-field'
+import type { SmartNameMode } from '~renderer/components/new-workspace/smart-workspace-source-results'
+import { cn } from '~renderer/lib/class-names'
+import type { SetupConfig } from '~renderer/lib/new-workspace'
+import { useAppStore } from '~renderer/store'
+import type { ProjectSourceContext } from '~shared/project-source-context'
 import type {
   GitHubWorkItem,
   GitLabWorkItem,
   SetupAgentStartupPolicy,
   SparsePreset,
   TuiAgent
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { AdvancedSection } from './advanced-section'
 import { AgentSection } from './agent-section'
 import type { EphemeralVmRecipeOption, RepoOption } from './card-types'

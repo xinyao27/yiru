@@ -1,21 +1,19 @@
 import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
-
 import {
   classifyTitleActivity,
   isExplicitAgentStatusFresh,
   resolveTitleActivityLabel
-} from '@/lib/pane-agent-evidence'
+} from '~renderer/lib/pane-agent-evidence'
+import { resolveRuntimePaneTitleForLeaf } from '~renderer/lib/runtime-pane-title-leaf-id'
 import {
   getSettingsForWorktreeRuntimeOwner,
   type WorktreeRuntimeOwnerState
-} from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-
-import type { RuntimeTerminalListResult } from '../../../../shared/runtime-types'
-import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot } from '../../../../shared/types'
-import { resolveRuntimePaneTitleForLeaf } from '../../lib/runtime-pane-title-leaf-id'
+} from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import type { RuntimeTerminalListResult } from '~shared/runtime-types'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot } from '~shared/types'
 
 const ACTIVE_AGENT_PROBE_RPC_TIMEOUT_MS = 3000
 const ACTIVE_AGENT_TERMINAL_LIST_LIMIT = 200

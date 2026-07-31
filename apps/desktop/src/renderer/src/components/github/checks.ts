@@ -1,6 +1,6 @@
-import type { PRCheckDetail, CheckStatus, GitHubOwnerRepo } from '../../../../shared/types'
-import { getGitHubPRCacheKey } from '../../store/slices/github-cache-key'
-import type { AppState } from '../../store/types'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import type { AppState } from '~renderer/store/types'
+import type { PRCheckDetail, CheckStatus, GitHubOwnerRepo } from '~shared/types'
 
 export function normalizeBranchName(branch: string): string {
   return branch.replace(/^refs\/heads\//, '')

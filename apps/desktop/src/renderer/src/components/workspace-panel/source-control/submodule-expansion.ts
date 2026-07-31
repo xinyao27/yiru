@@ -1,5 +1,6 @@
-import type { GitStatusEntry } from '../../../../../shared/types'
-import { basename } from '../../../lib/path'
+import { basename } from '~renderer/lib/path'
+import type { GitStatusEntry } from '~shared/types'
+
 import type { SourceControlSectionArea } from './section-order'
 import type { SourceControlTreeNode } from './tree'
 

@@ -1,5 +1,5 @@
-import type { CliStatusResult } from '../../../shared/runtime-types'
-import type { RpcResponse } from '../../runtime/rpc/core'
+import type { RpcResponse } from '~main/runtime/rpc/core'
+import type { CliStatusResult } from '~shared/runtime-types'
 
 export function formatRemoteCli(response: RpcResponse): { stdout: string; stderr: string } {
   if (!response.ok) {

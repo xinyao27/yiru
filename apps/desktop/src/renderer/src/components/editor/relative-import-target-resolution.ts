@@ -4,18 +4,17 @@ import {
   resolveRuntimePath
 } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import { getConnectionIdForFileFromState } from '@/components/editor/connection-owner-resolution'
-import { basename, dirname, joinPath } from '@/lib/path'
+import { getConnectionIdForFileFromState } from '~renderer/components/editor/connection-owner-resolution'
+import { basename, dirname, joinPath } from '~renderer/lib/path'
 import {
   readRuntimeDirectory,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { DirEntry } from '~shared/types'
 
-import type { DirEntry } from '../../../../shared/types'
 import { isRelativeModuleSpecifier } from './import-module-specifier'
 import type { EditorNavigationTarget } from './open-editor-navigation-target'
 

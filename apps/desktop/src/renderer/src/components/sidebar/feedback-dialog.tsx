@@ -3,9 +3,8 @@ import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -13,12 +12,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
-import type { GitHubViewer } from '../../../../shared/types'
+} from '~renderer/components/ui/dialog'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitHubViewer } from '~shared/types'
 
 type SubmitIdentity = {
   githubLogin: string | null

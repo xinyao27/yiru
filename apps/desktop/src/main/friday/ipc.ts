@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
+import type { FridaySession } from '~shared/friday-types'
 
-import type { FridaySession } from '../../shared/friday-types'
 import type { FridayService } from './service'
 
 function assertMainWindowSender(event: IpcMainInvokeEvent, mainWindow: BrowserWindow): void {

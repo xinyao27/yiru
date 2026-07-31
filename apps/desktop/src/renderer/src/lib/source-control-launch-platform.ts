@@ -1,7 +1,7 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
 import { CLIENT_PLATFORM } from './new-workspace'
 
 export function resolveSourceControlLaunchPlatform(args: {

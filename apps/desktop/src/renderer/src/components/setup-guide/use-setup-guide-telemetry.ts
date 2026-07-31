@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-
 import {
   persistEmittedSetupGuideStepId,
   readEmittedSetupGuideStepIds,
   trackSetupGuideClosed,
   trackSetupGuideOpened,
   trackSetupGuideStepCompleted
-} from '@/lib/feature-education-telemetry'
-
-import type { SetupGuideSource } from '../../../../shared/feature-education-telemetry'
+} from '~renderer/lib/feature-education-telemetry'
+import type { SetupGuideSource } from '~shared/feature-education-telemetry'
 import {
   FEATURE_WALL_SETUP_STEP_IDS,
   getFirstIncompleteFeatureWallSetupStepId,
   getFeatureWallSetupSteps,
   type FeatureWallSetupStepId
-} from '../../../../shared/feature-wall-setup-steps'
+} from '~shared/feature-wall-setup-steps'
+
 import type { FeatureWallSetupProgress } from '../feature-wall/setup-progress'
 
 type SetupGuideTelemetrySession = {

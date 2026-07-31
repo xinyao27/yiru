@@ -1,6 +1,5 @@
 import { useRef, type MutableRefObject } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import type { RichMarkdownHtmlSuperscriptLinkContext } from './html-superscript-link-context'
 import { createRichMarkdownImageResolverContext } from './image-context'

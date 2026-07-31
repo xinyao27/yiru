@@ -1,9 +1,8 @@
 import { Suspense } from 'react'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { useAppStore } from '@/store'
-
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
 import { WorkspacePanelEditorEmptyState } from './workspace-panel-editor-empty-state'
 import { WorkspacePanelSidePanel } from './workspace-panel-side-panel'

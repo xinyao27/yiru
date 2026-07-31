@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 // Why: Ship-page-specific CSS plus the cursor / caret animations shared with
 // the Notes page. Both visuals render their respective styles modules so the

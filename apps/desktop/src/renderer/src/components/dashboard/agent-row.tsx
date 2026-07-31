@@ -1,12 +1,15 @@
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useState, useCallback } from 'react'
-
-import { AgentStateDot, agentStateLabel, type AgentDotState } from '@/components/agent-state-dot'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
-import { agentTypeToIconAgent, formatAgentTypeLabel } from '@/lib/agent-status'
-import { cn } from '@/lib/class-names'
+import {
+  AgentStateDot,
+  agentStateLabel,
+  type AgentDotState
+} from '~renderer/components/agent-state-dot'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { getAgentRowPrimaryText } from '~renderer/lib/agent-row-primary-text'
+import { agentTypeToIconAgent, formatAgentTypeLabel } from '~renderer/lib/agent-status'
+import { cn } from '~renderer/lib/class-names'
 
 import { DashboardAgentChildDisclosure } from './agent-child-disclosure'
 import { DashboardAgentRowMessage } from './agent-row-message'

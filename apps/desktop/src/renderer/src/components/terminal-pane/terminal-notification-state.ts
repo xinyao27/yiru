@@ -1,11 +1,9 @@
 import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
-
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import type { useAppStore } from '@/store'
-import { getWorktreeMapFromState } from '@/store/selectors'
-
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalPaneLayoutNode } from '../../../../shared/types'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
+import type { useAppStore } from '~renderer/store'
+import { getWorktreeMapFromState } from '~renderer/store/selectors'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalPaneLayoutNode } from '~shared/types'
 
 type StoreSnapshot = ReturnType<typeof useAppStore.getState>
 

@@ -1,8 +1,8 @@
 import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
 import { SettingsSwitchRow } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 import { MobilePane } from './pane'

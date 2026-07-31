@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import {
   selectRefreshedNetworkAddress,

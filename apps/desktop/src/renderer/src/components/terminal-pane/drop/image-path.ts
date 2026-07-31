@@ -1,4 +1,5 @@
-import { IMAGE_FILE_EXTENSIONS } from '../../../../../shared/image-file-extensions'
+import { IMAGE_FILE_EXTENSIONS } from '~shared/image-file-extensions'
+
 import type { TerminalTargetShell } from './shell'
 
 // Why: dropped image files should be handed to terminal TUIs (Claude Code,

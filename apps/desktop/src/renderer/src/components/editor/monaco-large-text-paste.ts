@@ -1,10 +1,9 @@
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
 import type { editor } from 'monaco-editor'
-
 import {
   measureTextControlPasteByteLength,
   measureTextControlPasteByteLengthWithYield
-} from '@/lib/text-control-paste'
+} from '~renderer/lib/text-control-paste'
 
 export const MONACO_PASTE_DIRECT_MAX_BYTES = 64 * 1024
 export const MONACO_PASTE_CHUNK_MAX_BYTES = 16 * 1024

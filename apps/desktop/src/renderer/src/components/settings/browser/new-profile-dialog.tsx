@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../ui/dialog'
-import { Input } from '../../ui/input'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 type BrowserNewProfileDialogProps = {
   open: boolean

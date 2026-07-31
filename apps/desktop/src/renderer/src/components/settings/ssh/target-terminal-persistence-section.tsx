@@ -3,10 +3,10 @@ import {
   MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS
 } from '@yiru/runtime-protocol/ssh-connection'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
 import { SettingsSwitch } from '../form-controls'
 import type { EditingTarget } from './target-draft'
 import { SshTargetFormCollapsibleSection } from './target-form-collapsible-section'

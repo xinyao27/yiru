@@ -1,4 +1,4 @@
-import { WifiSlash as WifiOff, Shield, Monitor, Clock, Globe } from '@/components/uniwind-icons'
+import { WifiSlash as WifiOff, Shield, Monitor, Clock, Globe } from '~/components/uniwind-icons'
 
 export type TroubleshootSection = {
   id: string

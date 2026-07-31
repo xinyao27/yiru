@@ -1,6 +1,6 @@
-import CommentMarkdown from '@/components/sidebar/comment-markdown'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 type DashboardAgentRowMessageProps = {
   expanded: boolean

@@ -1,22 +1,20 @@
 import { HardDrives as Server, X } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
-
-import RepoBadgeLabel from '@/components/repo/badge-label'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import RepoBadgeLabel from '~renderer/components/repo/badge-label'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-import { searchRepos } from '@/lib/repo-search'
-import { useAppStore } from '@/store'
-
-import type { Repo } from '../../../../shared/types'
+} from '~renderer/components/ui/command'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import { searchRepos } from '~renderer/lib/repo-search'
+import { useAppStore } from '~renderer/store'
+import type { Repo } from '~shared/types'
 
 function projectCommandFilter(_value: string, search: string, keywords?: string[]): number {
   const query = search.trim().toLowerCase()

@@ -1,9 +1,10 @@
-import { ORCHESTRATION_LEGACY_RUN_ID } from '../../../../../shared/orchestration-rpc-contract'
-import type { MessageType } from '../../../orchestration/db'
-import { formatMessageBanner } from '../../../orchestration/formatter'
-import { reconcileLifecycleMessage } from '../../../orchestration/lifecycle-reconciliation'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../core'
+import type { MessageType } from '~main/runtime/orchestration/db'
+import { formatMessageBanner } from '~main/runtime/orchestration/formatter'
+import { reconcileLifecycleMessage } from '~main/runtime/orchestration/lifecycle-reconciliation'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { ORCHESTRATION_LEGACY_RUN_ID } from '~shared/orchestration-rpc-contract'
+
 import { MessageReadParams, parseMessageTypes } from './message-read-request'
 import { resolveRunScope } from './run-scope'
 

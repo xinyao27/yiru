@@ -1,12 +1,7 @@
 import { useEffect, useRef } from 'react'
-
-import { useAppStore } from '@/store'
-
-import type { ContextualTourId } from '../../../../shared/contextual-tours'
-import {
-  hasFeatureInteraction,
-  type FeatureInteractionState
-} from '../../../../shared/feature-interactions'
+import { useAppStore } from '~renderer/store'
+import type { ContextualTourId } from '~shared/contextual-tours'
+import { hasFeatureInteraction, type FeatureInteractionState } from '~shared/feature-interactions'
 
 const TOUR_SOURCES = {
   'workspace-agent-sessions': 'workspace_agent_sessions_visible',

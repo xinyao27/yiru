@@ -1,13 +1,12 @@
-import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { useAppStore } from '@/store'
-
+import { reconcileTabOrder } from '~renderer/components/tab-bar/reconcile-order'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { useAppStore } from '~renderer/store'
 import {
   flattenTerminalQuickCommand,
   isTerminalAgentQuickCommand,
   supportsTerminalAgentQuickCommand
-} from '../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand } from '../../../shared/types'
+} from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand } from '~shared/types'
 
 export type RunQuickCommandInNewTabArgs = {
   command: TerminalQuickCommand

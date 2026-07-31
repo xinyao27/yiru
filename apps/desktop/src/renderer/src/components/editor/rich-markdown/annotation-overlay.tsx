@@ -1,8 +1,8 @@
 import { Plus } from '@phosphor-icons/react'
+import { DiffCommentPopover } from '~renderer/components/diff-comments/diff-comment-popover'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { DiffCommentPopover } from '../../diff-comments/diff-comment-popover'
-import { Button } from '../../ui/button'
 import type { RichMarkdownAnnotationTarget } from './review-annotations'
 
 type RichMarkdownAnnotationOverlayProps = {

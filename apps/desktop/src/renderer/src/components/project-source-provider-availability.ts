@@ -1,10 +1,7 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { PreflightStatus } from '~preload/api-types'
+import type { ProjectSourceContext, ProjectSourceProvider } from '~shared/project-source-context'
 
-import type { PreflightStatus } from '../../../preload/api-types'
-import type {
-  ProjectSourceContext,
-  ProjectSourceProvider
-} from '../../../shared/project-source-context'
 import type { ProjectSourceHostAvailability } from './project-source-host-availability'
 
 export type RuntimeProviderPreflightStatus = {

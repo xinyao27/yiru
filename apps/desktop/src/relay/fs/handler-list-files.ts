@@ -17,13 +17,13 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process'
 
-import { fileListingCancellationError } from '../../shared/file-listing-cancellation'
+import { fileListingCancellationError } from '~shared/file-listing-cancellation'
 import {
   buildRgArgsForQuickOpen,
   normalizeQuickOpenRgLine,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../../shared/quick-open/filter'
+} from '~shared/quick-open/filter'
 
 export const LIST_FILES_TIMEOUT_MS = 25_000
 

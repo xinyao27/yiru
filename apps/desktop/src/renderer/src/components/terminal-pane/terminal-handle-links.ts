@@ -1,11 +1,10 @@
 import type { ILink, ILinkProvider, Terminal } from '@xterm/xterm'
-
-import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
-import type { AppState } from '@/store'
-import { useAppStore } from '@/store'
+import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import type { AppState } from '~renderer/store'
+import { useAppStore } from '~renderer/store'
 
 import {
   extractOrchestrationTaskLinks,

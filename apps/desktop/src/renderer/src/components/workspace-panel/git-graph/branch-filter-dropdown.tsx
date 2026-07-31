@@ -1,13 +1,12 @@
 import { GitBranch, MagnifyingGlass } from '@phosphor-icons/react'
 import type React from 'react'
 import { useMemo, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { Input } from '~renderer/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { GitGraphBranchOption } from './branch-filter'
 

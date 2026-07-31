@@ -1,7 +1,6 @@
 import type { RuntimeCompatVerdict } from '@yiru/runtime-protocol/capabilities'
 import type { ExecutionHostKind } from '@yiru/workbench-model/workspace'
-
-import type { ExecutionHostHealth } from '../../../../shared/execution-host-registry'
+import type { ExecutionHostHealth } from '~shared/execution-host-registry'
 
 // Why: the host-header dropdown shows different lifecycle actions per host kind.
 // Keeping the availability rules in a pure function makes them unit-testable

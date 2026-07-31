@@ -1,20 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { isFolderRepo } from '../../../../../../shared/repo-kind'
-import type { GitConflictOperation } from '../../../../../../shared/types'
-import { getConnectionId } from '../../../../lib/connection-context'
-import { getLocalProjectExecutionRuntimeContext } from '../../../../lib/local-preflight-context'
-import { resolveSourceControlLaunchPlatform } from '../../../../lib/source-control-launch-platform'
-import { useAppStore } from '../../../../store'
-import { useConfirmationDialog } from '../../../confirmation-dialog'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import {
   getCommitMessageGenerationRecordKey,
   type CommitMessageGenerationRecord
-} from '../../commit-message-generation-state'
+} from '~renderer/components/workspace-panel/commit-message-generation-state'
 import {
   getPullRequestGenerationRecordKey,
   getPullRequestGenerationSeedRestoreKey
-} from '../../pull-request-generation-state'
+} from '~renderer/components/workspace-panel/pull-request-generation-state'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { resolveSourceControlLaunchPlatform } from '~renderer/lib/source-control-launch-platform'
+import { useAppStore } from '~renderer/store'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { GitConflictOperation } from '~shared/types'
+
 import type { SourceControlActionError } from '../action-error'
 import { loadSessionCommitDrafts } from '../commit-draft-session'
 import {

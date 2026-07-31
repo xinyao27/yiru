@@ -1,6 +1,5 @@
-import { track } from '@/lib/telemetry'
-
-import type { EventProps } from '../../../../shared/telemetry-events'
+import { track } from '~renderer/lib/telemetry'
+import type { EventProps } from '~shared/telemetry-events'
 
 export type YiruCliFeatureTipSource = EventProps<'yiru_cli_feature_tip_shown'>['source']
 export type YiruCliFeatureTipSetupResult = EventProps<'yiru_cli_feature_tip_setup_result'>['result']

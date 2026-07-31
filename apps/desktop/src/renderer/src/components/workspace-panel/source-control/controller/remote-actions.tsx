@@ -1,10 +1,10 @@
 import { useCallback } from 'react'
+import { resolveCommitMessageGenerationCancel } from '~renderer/components/workspace-panel/commit-message-generation-state'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { isSyncPushStageError } from '~renderer/lib/source-control-remote-error'
+import { cancelRuntimeGenerateCommitMessage } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
 
-import { getConnectionId } from '../../../../lib/connection-context'
-import { isSyncPushStageError } from '../../../../lib/source-control-remote-error'
-import { cancelRuntimeGenerateCommitMessage } from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
-import { resolveCommitMessageGenerationCancel } from '../../commit-message-generation-state'
 import {
   captureSourceControlRecoveryEntrySnapshot,
   type SourceControlActionError,

@@ -5,12 +5,12 @@ import { fileURLToPath } from 'node:url'
 
 import { MAX_REPO_ICON_UPLOAD_BYTES } from '@yiru/workbench-model/workspace'
 import { ipcMain, shell, dialog } from 'electron'
-
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '../../shared/shell-open-types'
+} from '~shared/shell-open-types'
+
 import {
   EXTERNAL_EDITOR_CLI_COMMAND,
   resolveExternalEditorLaunchSpec,

@@ -1,16 +1,15 @@
 import type { PortForwardEntry } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
 
 export type PortForwardDialogState =
   | { mode: 'closed' }

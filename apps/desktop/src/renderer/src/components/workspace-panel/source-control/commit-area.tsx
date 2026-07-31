@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
 import { hasExpandedCommitFailureDetails, summarizeCommitFailure } from '../commit-failure-summary'
 import { SourceControlCommitActions } from './commit-actions'
 import type { CommitAreaProps } from './commit-area-types'

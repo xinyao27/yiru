@@ -1,4 +1,5 @@
-import type { OrchestrationDb } from '../../../../orchestration/db'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+
 import { applyWaitForSetupOutcome, type WorkerEffect, type WorkerSetupReceipt } from './topology'
 
 function residualWorkerEffects(effects: WorkerEffect[]): WorkerEffect[] {

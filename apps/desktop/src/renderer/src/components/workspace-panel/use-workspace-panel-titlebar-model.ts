@@ -1,27 +1,29 @@
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo } from 'react'
-
-import type { ActiveRightSidebarTab } from '@/components/editor/state'
+import type { ActiveRightSidebarTab } from '~renderer/components/editor/state'
 import {
   getLocalFileManagerLabel,
   getPreferredWorktreeOpenInEntry,
   getWorktreeOpenInEntries,
   openWorktreePath
-} from '@/components/sidebar/worktree-open-in-menu'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+} from '~renderer/components/sidebar/worktree-open-in-menu'
+import {
+  useShortcutKeyDetails,
+  type ShortcutKeyComboDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
+import { canShowRightSidebarForView } from '~renderer/lib/right-sidebar-visibility'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   splitWorkspacePanelTitlebarItems,
   WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID,
   WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID,
   type WorkspaceTitlebarActionId
-} from '../../../../shared/workspace/panel-titlebar-pinned'
+} from '~shared/workspace/panel-titlebar-pinned'
+
 import type { ActivityBarItem } from './activity-bar-buttons'
 import {
   resolveItemIcon,

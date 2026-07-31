@@ -3,8 +3,8 @@ import { access, mkdir, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import { app } from 'electron'
+import type { GlobalSettings, FloatingTerminalCwdRequest } from '~shared/types'
 
-import type { GlobalSettings, FloatingTerminalCwdRequest } from '../../shared/types'
 import type { Store } from '../persistence'
 import { authorizeExternalPath } from './auth'
 

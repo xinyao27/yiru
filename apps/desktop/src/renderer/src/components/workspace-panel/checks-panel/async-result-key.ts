@@ -1,4 +1,4 @@
-import type { GitHubOwnerRepo } from '../../../../../shared/types'
+import type { GitHubOwnerRepo } from '~shared/types'
 
 function normalizedPRRepoIdentity(prRepo?: GitHubOwnerRepo | null): string {
   if (!prRepo) {

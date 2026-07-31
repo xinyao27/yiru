@@ -1,16 +1,15 @@
 import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import React from 'react'
-
 import SmartWorkspaceNameField, {
   type SmartWorkspaceNameSelection
-} from '@/components/new-workspace/smart-workspace-name-field'
-import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
-import { Checkbox } from '@/components/ui/checkbox'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/new-workspace/smart-workspace-name-field'
+import type { SmartNameMode } from '~renderer/components/new-workspace/smart-workspace-source-results'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import type { GitHubWorkItem, GitLabWorkItem } from '~shared/types'
 
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import type { GitHubWorkItem, GitLabWorkItem } from '../../../../shared/types'
 import type { RepoOption } from './card-types'
 
 type NameSectionProps = {

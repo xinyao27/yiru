@@ -1,8 +1,9 @@
-import type { DiscoveredSkill } from '../../../../../shared/skills'
-import { useDetectedAgents } from '../../../hooks/use-detected-agents'
-import { translate } from '../../../i18n/i18n'
-import { AgentIcon } from '../../../lib/agent-catalog'
-import { cn } from '../../../lib/class-names'
+import { useDetectedAgents } from '~renderer/hooks/use-detected-agents'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { DiscoveredSkill } from '~shared/skills'
+
 import type { OrchestrationSkillAgentStatus } from './skill-coverage'
 import { getOrchestrationSkillAgentStatuses } from './skill-coverage'
 

@@ -1,8 +1,7 @@
 import React from 'react'
-
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'

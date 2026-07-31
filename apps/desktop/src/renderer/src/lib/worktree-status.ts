@@ -1,13 +1,9 @@
-import { resolveAgentTypeFromTerminalTitle } from '@/components/sidebar/terminal-title-agent-type'
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
-import { resolveRuntimePaneTitleLeafIdFromRoot } from '@/lib/runtime-pane-title-leaf-id'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+import { resolveAgentTypeFromTerminalTitle } from '~renderer/components/sidebar/terminal-title-agent-type'
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
+import { resolveRuntimePaneTitleLeafIdFromRoot } from '~renderer/lib/runtime-pane-title-leaf-id'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, TerminalTab } from '~shared/types'
 
-import type {
-  TerminalLayoutSnapshot,
-  TerminalPaneLayoutNode,
-  TerminalTab
-} from '../../../shared/types'
 import type { LiveAgentWorktreeStatus } from './worktree-activity-state'
 
 export type WorktreeStatus = 'active' | 'working' | 'permission' | 'done' | 'inactive'

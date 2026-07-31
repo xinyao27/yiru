@@ -1,5 +1,5 @@
-import type { AppState } from '../../store'
-import { getAllWorktreesFromState } from '../../store/selectors'
+import type { AppState } from '~renderer/store'
+import { getAllWorktreesFromState } from '~renderer/store/selectors'
 
 const EMPTY_TABS_BY_WORKTREE: AppState['tabsByWorktree'] = {}
 const EMPTY_PTY_IDS_BY_TAB_ID: AppState['ptyIdsByTabId'] = {}

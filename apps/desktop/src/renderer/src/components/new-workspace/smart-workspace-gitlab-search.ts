@@ -1,4 +1,5 @@
-import type { GitLabWorkItem } from '../../../../shared/types'
+import type { GitLabWorkItem } from '~shared/types'
+
 import type { MrStateFilter } from './smart-workspace-localized-options'
 
 // Why: the smart-name field's GitLab search has exactly one active shape at

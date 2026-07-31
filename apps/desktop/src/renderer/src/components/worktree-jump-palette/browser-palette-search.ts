@@ -1,7 +1,7 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
+import type { BrowserPage, BrowserWorkspace, Worktree } from '~shared/types'
 
-import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
-import type { BrowserPage, BrowserWorkspace, Worktree } from '../../../../shared/types'
 import type { MatchRange } from './worktree-palette-search'
 
 export type SearchableBrowserPage = {

@@ -1,8 +1,7 @@
 import type React from 'react'
-
-import { CommandItem } from '@/components/ui/command'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { CommandItem } from '~renderer/components/ui/command'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { QuickActionPaletteItem, SettingsPaletteItem } from '../types'
 

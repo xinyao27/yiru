@@ -1,13 +1,12 @@
 import { Code, WarningCircle } from '@phosphor-icons/react'
 import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useState, useSyncExternalStore } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import {
   monacoLanguageServerManager,

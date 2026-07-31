@@ -1,6 +1,6 @@
-import { track } from '@/lib/telemetry'
+import { track } from '~renderer/lib/telemetry'
+import type { EventProps } from '~shared/telemetry-events'
 
-import type { EventProps } from '../../../../../shared/telemetry-events'
 import type { DirectSshCoordinatorTelemetry } from './coordinator'
 
 type DirectSshReconnectProductProps = EventProps<'direct_ssh_reconnect_operation'>

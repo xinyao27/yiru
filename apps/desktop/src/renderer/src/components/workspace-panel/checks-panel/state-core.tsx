@@ -1,23 +1,22 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-
-import { useAppStore, type AppState } from '@/store'
-
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { resolveSourceControlLaunchPlatform } from '~renderer/lib/source-control-launch-platform'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore, type AppState } from '~renderer/store'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
 import {
   saveSourceControlActionRecipe,
   type SourceControlAiWriteTarget
-} from '../../../../../shared/source-control/ai-recipe-save'
-import type { PRCheckDetail, PRComment } from '../../../../../shared/types'
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { getConnectionId } from '../../../lib/connection-context'
-import { getLocalProjectExecutionRuntimeContext } from '../../../lib/local-preflight-context'
-import { resolveSourceControlLaunchPlatform } from '../../../lib/source-control-launch-platform'
-import { getWorktreeGitIdentityDisplay } from '../../../lib/worktree-git-identity-display'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { useActiveWorktree, useRepoById } from '../../../store/selectors'
+} from '~shared/source-control/ai-recipe-save'
+import type { PRCheckDetail, PRComment } from '~shared/types'
+
 import type { PRCommentsListSelectionClearRequest } from '../pr-comments-list-selection'
 import type { HostedReviewCreationSnapshot, ChecksAgentComposerState } from './controller-types'
 import {

@@ -1,11 +1,10 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, type Dispatch, type SetStateAction } from 'react'
-
 import {
   emitNativeChatMessageSent,
   emitNativeChatPickerItemAccepted,
   emitNativeChatSendClassified
-} from '@/components/native-chat/telemetry'
+} from '~renderer/components/native-chat/telemetry'
 
 import { pushHistory, type HistoryState, type NativeChatPickerItem } from './composer/state'
 import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer/target'

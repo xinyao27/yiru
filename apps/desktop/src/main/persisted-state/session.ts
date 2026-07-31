@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
+import type { WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
 
-import type { WorkspaceSessionPatch, WorkspaceSessionState } from '../../shared/types'
 import type { Store } from '../persistence'
 
 export function registerSessionHandlers(store: Store): void {

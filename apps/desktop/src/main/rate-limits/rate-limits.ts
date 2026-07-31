@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron'
-
 import type {
   CursorRateLimitRefreshContext,
   RateLimitRuntimeTarget
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import type { RateLimitService } from './service'
 
 export function registerRateLimitHandlers(rateLimits: RateLimitService): void {

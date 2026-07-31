@@ -7,14 +7,13 @@ import {
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getEphemeralVmRecipeResultProjectRoot } from '~shared/ephemeral-vm/recipes'
+import type { EphemeralVmRuntimeRecord } from '~shared/ephemeral-vm/runtimes'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { getEphemeralVmRecipeResultProjectRoot } from '../../../../shared/ephemeral-vm/recipes'
-import type { EphemeralVmRuntimeRecord } from '../../../../shared/ephemeral-vm/runtimes'
 import { Button } from '../ui/button'
 
 const CLEANED_STATUSES = new Set<EphemeralVmRuntimeRecord['status']>(['cleaned'])

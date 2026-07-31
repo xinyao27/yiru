@@ -1,7 +1,8 @@
 import { open, stat } from 'node:fs/promises'
 import { basename, isAbsolute, join, relative, sep, type posix } from 'node:path'
 
-import { stripUnsafeDisplayCharacters } from '../../shared/skill-display-text'
+import { stripUnsafeDisplayCharacters } from '~shared/skill-display-text'
+
 import { stablePathId, type SkillScanRoot } from './skill-discovery-sources'
 
 const MAX_PLUGIN_METADATA_BYTES = 4 * 1024 * 1024

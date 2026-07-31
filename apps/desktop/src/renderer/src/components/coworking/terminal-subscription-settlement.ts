@@ -1,4 +1,5 @@
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
+
 import type { CoworkingTerminalConnectionStatus } from './terminal-status-label'
 
 type CoworkingTerminalSubscriptionSettlementOptions = {

@@ -1,10 +1,10 @@
 import { z } from 'zod'
-
-import { parseCoworkingExecutionResult } from '../../../shared/coworking/execution-result-schema'
+import { parseCoworkingExecutionResult } from '~shared/coworking/execution-result-schema'
 import {
   isCoworkingMutationKind,
   type CoworkingExecutionOperation
-} from '../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import type { CoworkingAccessAuthority } from '../access-authority'
 import type { CoworkingExecutionGateway } from '../execution-gateway'
 import type { CoworkingSessionCatalog } from '../session/catalog'

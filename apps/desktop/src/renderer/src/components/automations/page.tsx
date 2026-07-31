@@ -22,21 +22,21 @@ import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
  * orchestration while the form and detail presentation live in sibling files. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
-import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import RepoBadgeLabel from '@/components/repo/badge-label'
-import CommentMarkdown from '@/components/sidebar/comment-markdown'
-import type { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import type { PreflightStatus } from '~preload/api-types'
+import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
+import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import RepoBadgeLabel from '~renderer/components/repo/badge-label'
+import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
+import type { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
+} from '~renderer/components/ui/context-menu'
 import {
   Dialog,
   DialogContent,
@@ -44,23 +44,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
-import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { checkRuntimeHooks } from '@/runtime/hooks-client'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-import { useRepoMap, useWorktreeMap } from '@/store/selectors'
-
-import type { PreflightStatus } from '../../../../preload/api-types'
-import { getAutomationRunRepoId } from '../../../../shared/automation/run-identity'
+} from '~renderer/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import {
+  getLocalPreflightContext,
+  localPreflightContextKey
+} from '~renderer/lib/local-preflight-context'
+import { getSettingsForRepoRuntimeOwner } from '~renderer/lib/repo-runtime-owner'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { useRepoMap, useWorktreeMap } from '~renderer/store/selectors'
+import { getAutomationRunRepoId } from '~shared/automation/run-identity'
 import {
   buildAutomationCronSchedule,
   buildAutomationRrule,
@@ -68,7 +69,7 @@ import {
   isValidAutomationCronSchedule,
   isValidAutomationSchedule,
   tryParseAutomationRrule
-} from '../../../../shared/automation/schedules'
+} from '~shared/automation/schedules'
 import type {
   Automation,
   ExternalAutomationAction,
@@ -78,12 +79,13 @@ import type {
   AutomationPrecheck,
   AutomationRun,
   AutomationUpdateInput
-} from '../../../../shared/automations-types'
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
-import type { YiruHooks, Repo, Worktree } from '../../../../shared/types'
+} from '~shared/automations-types'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import { filterEnabledTuiAgents, isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { YiruHooks, Repo, Worktree } from '~shared/types'
+
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import {
   getRepoBackedProviderAvailability,

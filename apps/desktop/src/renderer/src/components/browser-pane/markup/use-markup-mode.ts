@@ -1,12 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   CLIPBOARD_IMAGE_MAX_PIXELS,
   CLIPBOARD_IMAGE_MAX_SOURCE_BYTES
-} from '../../../../../shared/clipboard-image'
+} from '~shared/clipboard-image'
+
 import {
   captureMarkupBaseImage,
   type MarkupBaseImage,

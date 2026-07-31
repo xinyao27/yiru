@@ -7,13 +7,12 @@ import {
   type KeyboardEvent
 } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   buildServeSimKeyboardFramesForKey,
   type ServeSimKeyboardFrame
-} from '../../../../shared/emulator-keyboard-frame'
+} from '~shared/emulator-keyboard-frame'
+
 import {
   pasteTextIntoEmulatorKeyboard,
   type EmulatorKeyboardPasteResult

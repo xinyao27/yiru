@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { isFolderRepo } from '~shared/repo-kind'
 
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-
-import { isFolderRepo } from '../../../../shared/repo-kind'
 import { finishProjectAddWithDefaultCheckout } from './project-added-default-checkout'
 
 type ProjectAddedModalData = {

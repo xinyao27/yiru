@@ -1,7 +1,6 @@
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
-
-import type { EventProps } from '../../../../shared/telemetry-events'
-import type { GlobalSettings } from '../../../../shared/types'
+import type { EventProps } from '~shared/telemetry-events'
+import type { GlobalSettings } from '~shared/types'
 
 type WindowsTerminalSnapshot = EventProps<'onboarding_windows_terminal_snapshot'>
 

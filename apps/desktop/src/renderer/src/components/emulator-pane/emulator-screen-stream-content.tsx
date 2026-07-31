@@ -1,7 +1,6 @@
 import { useEffect, type CSSProperties } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { VisualStreamGeometry } from './emulator-device-frame-layout'
 import { useEmulatorFrameStream } from './use-emulator-frame-stream'

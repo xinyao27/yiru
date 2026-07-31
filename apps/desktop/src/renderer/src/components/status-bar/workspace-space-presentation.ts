@@ -4,16 +4,14 @@ import {
   type MigrationUnsupportedPtyEntry
 } from '@yiru/workbench-model/agent'
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
-
-import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../../shared/types'
-import type {
-  WorkspaceSpaceItem,
-  WorkspaceSpaceWorktree
-} from '../../../../shared/workspace/space-types'
+import {
+  classifyTitleActivity,
+  isExplicitAgentStatusFresh
+} from '~renderer/lib/pane-agent-evidence'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalTab } from '~shared/types'
+import type { WorkspaceSpaceItem, WorkspaceSpaceWorktree } from '~shared/workspace/space-types'
 
 export type WorkspaceSpaceSortKey = 'size' | 'name' | 'repo' | 'activity'
 export type WorkspaceSpaceSortDirection = 'asc' | 'desc'

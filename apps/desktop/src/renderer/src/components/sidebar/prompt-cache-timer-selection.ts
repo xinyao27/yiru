@@ -1,5 +1,5 @@
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../../shared/types'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalTab } from '~shared/types'
 
 export type PromptCacheCountdownSelection = {
   startedAt: number

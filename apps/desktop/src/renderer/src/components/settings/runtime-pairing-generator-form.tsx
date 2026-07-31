@@ -1,9 +1,8 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { parseServerShareAddress } from '~shared/network/server-share-address'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-
-import { parseServerShareAddress } from '../../../../shared/network/server-share-address'
 import { AddressPicker, type AddressOption } from '../network/address-picker'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

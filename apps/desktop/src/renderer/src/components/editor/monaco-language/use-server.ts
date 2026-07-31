@@ -1,11 +1,10 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { LanguageServerSettings } from '~shared/language-server'
 
-import { useAppStore } from '@/store'
-
-import type { LanguageServerSettings } from '../../../../../shared/language-server'
-import { translate } from '../../../i18n/i18n'
 import { getConnectionIdForFileFromState } from '../connection-owner-resolution'
 import { openEditorNavigationTarget } from '../open-editor-navigation-target'
 import { monacoLanguageServerManager } from './server-manager'

@@ -1,10 +1,11 @@
 import {
   normalizeRepoSourceControlAiOverrides,
   resolveSourceControlActionRecipe
-} from '../../../../../shared/source-control/ai'
-import type { SourceControlActionId } from '../../../../../shared/source-control/ai-actions'
-import type { RepoSourceControlAiOverrides } from '../../../../../shared/source-control/ai-types'
-import type { GlobalSettings } from '../../../../../shared/types'
+} from '~shared/source-control/ai'
+import type { SourceControlActionId } from '~shared/source-control/ai-actions'
+import type { RepoSourceControlAiOverrides } from '~shared/source-control/ai-types'
+import type { GlobalSettings } from '~shared/types'
+
 import { SOURCE_CONTROL_TEXT_ACTION_ID_SET } from '../source-control/action-recipe-options'
 import { completeRepoActionRecipe } from './source-control-ai-labels'
 

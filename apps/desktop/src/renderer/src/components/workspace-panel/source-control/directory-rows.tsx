@@ -8,10 +8,10 @@ import {
   ArrowCounterClockwise as Undo2
 } from '@phosphor-icons/react'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
 import type { DiscardAllArea } from '../discard-all-sequence'
 import { ActionButton } from './action-button'
 import type {

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
-
-import { selectWorktreePaletteCacheInputs } from '@/components/cmd-j/worktree-palette-cache-inputs'
-import { useSettingsNavigationMetadata } from '@/components/settings/use-navigation-metadata'
-import { useAppStore } from '@/store'
-import { useAllWorktrees } from '@/store/selectors'
+import { selectWorktreePaletteCacheInputs } from '~renderer/components/cmd-j/worktree-palette-cache-inputs'
+import { useSettingsNavigationMetadata } from '~renderer/components/settings/use-navigation-metadata'
+import { useAppStore } from '~renderer/store'
+import { useAllWorktrees } from '~renderer/store/selectors'
 
 import { selectPaletteStatusInputs } from '../worktree-jump-palette-status-inputs'
 

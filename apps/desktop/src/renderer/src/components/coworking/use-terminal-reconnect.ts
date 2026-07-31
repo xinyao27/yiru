@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
 const TERMINAL_RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 4_000, 8_000] as const
 const RECOVERABLE_TERMINAL_ERRORS: ReadonlySet<CoworkingRequesterTransportErrorCode> = new Set([

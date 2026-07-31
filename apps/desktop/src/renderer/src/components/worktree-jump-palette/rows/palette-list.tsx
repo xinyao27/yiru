@@ -1,7 +1,6 @@
 import type React from 'react'
-
-import { CommandEmpty } from '@/components/ui/command'
-import { translate } from '@/i18n/i18n'
+import { CommandEmpty } from '~renderer/components/ui/command'
+import { translate } from '~renderer/i18n/i18n'
 
 import { PaletteState } from '../palette-parts'
 import type { PaletteItem, PaletteListEntry } from '../types'

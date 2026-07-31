@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import CommentMarkdown from '@/components/sidebar/comment-markdown'
-import { translate } from '@/i18n/i18n'
-
-import type { SkillFileReadResult } from '../../../../shared/skills'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
+import { translate } from '~renderer/i18n/i18n'
+import type { SkillFileReadResult } from '~shared/skills'
 
 export type SkillFileViewProps = {
   directoryPath: string

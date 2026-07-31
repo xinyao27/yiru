@@ -1,16 +1,11 @@
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { useState } from 'react'
 import type { JSX } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { track } from '@/lib/telemetry'
-
-import {
-  getFeatureWallMediaTile,
-  type FeatureWallWorkflow
-} from '../../../../shared/feature-wall-workflows'
-import type { FeatureWallOpenSourceTelemetry } from '../../../../shared/telemetry-events'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { track } from '~renderer/lib/telemetry'
+import { getFeatureWallMediaTile, type FeatureWallWorkflow } from '~shared/feature-wall-workflows'
+import type { FeatureWallOpenSourceTelemetry } from '~shared/telemetry-events'
 
 export function PreviewMedia(props: {
   posterUrl: string | null

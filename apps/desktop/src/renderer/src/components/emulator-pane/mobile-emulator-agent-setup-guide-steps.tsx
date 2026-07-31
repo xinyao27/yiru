@@ -1,12 +1,12 @@
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { YIRU_CLI_SKILL_INSTALL_COMMAND } from '@/lib/agent-feature-install-commands'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { YIRU_CLI_SKILL_INSTALL_COMMAND } from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '@/lib/agent-skill-cli-prerequisite'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
 import { StepBadge } from '../settings/browser/use-step-badge'

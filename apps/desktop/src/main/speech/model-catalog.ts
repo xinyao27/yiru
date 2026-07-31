@@ -1,4 +1,4 @@
-import type { SpeechModelManifest } from '../../shared/speech-types'
+import type { SpeechModelManifest } from '~shared/speech-types'
 
 // Why: sizeBytes must be the exact upstream asset size — it is the UI size
 // label and the download-progress denominator when content-length is missing.

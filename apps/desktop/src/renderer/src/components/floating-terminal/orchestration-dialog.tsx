@@ -1,34 +1,33 @@
 import { useEffect } from 'react'
-
-import { IntegrationStatusPill } from '@/components/integration-status-pill'
+import { IntegrationStatusPill } from '~renderer/components/integration-status-pill'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,
   getWslCliDistroRequest
-} from '@/components/settings/cli-skill-runtime-setup'
+} from '~renderer/components/settings/cli-skill-runtime-setup'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+} from '~renderer/components/ui/dialog'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
-import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
+import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '@/lib/agent-skill-cli-prerequisite'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
 import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
-} from '@/lib/orchestration-install-command'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/orchestration-install-command'
+import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
 

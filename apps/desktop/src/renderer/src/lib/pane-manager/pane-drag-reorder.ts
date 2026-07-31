@@ -1,4 +1,4 @@
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import { detachPaneFromTree, findPaneChildren, insertPaneNextTo } from './pane-tree-ops'
 import type {

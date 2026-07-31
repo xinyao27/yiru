@@ -1,4 +1,5 @@
-import type { AppState } from '../../../store/types'
+import type { AppState } from '~renderer/store/types'
+
 import type { RunningAgentTargetState } from '../running-agent-targets'
 
 export type SendTargetInputsState = Pick<

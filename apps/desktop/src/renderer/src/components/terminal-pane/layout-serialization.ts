@@ -2,17 +2,17 @@ import {
   getLeftmostLeafId,
   normalizeTerminalLayoutSnapshot,
   resolveRootlessTerminalLayoutLeafId
-} from '@/components/terminal-pane/terminal-layout-leaf-ids'
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { isXtermInstanceDisposed } from '@/lib/pane-manager/xterm-instance-disposed'
-
-import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
+} from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-breadcrumb-recorder'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { isXtermInstanceDisposed } from '~renderer/lib/pane-manager/xterm-instance-disposed'
+import { isTerminalLeafId } from '~shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,
   TerminalPaneLayoutNode,
   TerminalPaneSplitDirection
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { replayIntoTerminal, type ReplayingPanesRef } from './replay-guard'
 import type { RestoredViewportBlankingPanesRef } from './terminal-restored-viewport'
 
@@ -20,7 +20,7 @@ export {
   collectLeafIdsInOrder,
   collectLeafIdsInReplayCreationOrder,
   normalizeTerminalLayoutSnapshot
-} from '@/components/terminal-pane/terminal-layout-leaf-ids'
+} from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
 
 export const EMPTY_LAYOUT: TerminalLayoutSnapshot = {
   root: null,

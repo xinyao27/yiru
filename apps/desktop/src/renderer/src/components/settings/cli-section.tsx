@@ -1,26 +1,25 @@
 import { FolderOpen, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 import {
   YIRU_CLI_SKILL_INSTALL_COMMAND,
   YIRU_CLI_SKILL_NAME,
   YIRU_CLI_SKILL_UPDATE_COMMAND
-} from '@/lib/agent-feature-install-commands'
+} from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal,
   isYiruCliAvailableOnPath
-} from '@/lib/agent-skill-cli-prerequisite'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+import type { GlobalSettings } from '~shared/types'
 
-import type { CliInstallStatus } from '../../../../shared/cli-install-types'
-import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'

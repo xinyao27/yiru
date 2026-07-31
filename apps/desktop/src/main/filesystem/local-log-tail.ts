@@ -1,13 +1,13 @@
 import { watch, type FSWatcher } from 'node:fs'
 
 import { ipcMain, type WebContents } from 'electron'
-
 import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
   LocalLogTailReadResult,
   LocalLogTailWatchArgs
-} from '../../shared/local-log-tail-types'
+} from '~shared/local-log-tail-types'
+
 import { readLocalLogTailRange } from '../ai-vault/local-log-tail-reader'
 import type { Store } from '../persistence'
 import { resolveAuthorizedPath } from './auth'

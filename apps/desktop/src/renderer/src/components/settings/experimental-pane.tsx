@@ -1,8 +1,8 @@
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { Label } from '../ui/label'
 import {
   MAX_AGENT_HIBERNATION_IDLE_MS,

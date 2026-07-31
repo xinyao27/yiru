@@ -1,5 +1,6 @@
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
-import { loadGitHistoryFromExecutor } from '../../shared/git/history'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+import { loadGitHistoryFromExecutor } from '~shared/git/history'
+
 import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync } from './runner'
 import type { GitRuntimeOptions } from './runtime-options'

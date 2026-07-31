@@ -1,6 +1,6 @@
-import { joinPath, normalizeRelativePath } from '@/lib/path'
+import { joinPath, normalizeRelativePath } from '~renderer/lib/path'
+import type { GitFileStatus, GitStatusEntry } from '~shared/types'
 
-import type { GitFileStatus, GitStatusEntry } from '../../../../shared/types'
 import { splitPathSegments } from './path-tree'
 
 export const STATUS_LABELS: Record<GitFileStatus, string> = {

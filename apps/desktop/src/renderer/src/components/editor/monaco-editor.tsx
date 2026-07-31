@@ -7,25 +7,28 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: selection annotations are synchronized from Monaco editor selection and layout APIs, not derived React props. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
-import { registerFileSearchSelectedTextProvider } from '@/components/editor/file-search-selection'
-import { resolveEditorFontFamily } from '@/components/editor/font-family'
-import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import { isMarkdownComment } from '~renderer/components/editor/diff-comment-compat'
+import { registerFileSearchSelectedTextProvider } from '~renderer/components/editor/file-search-selection'
+import { resolveEditorFontFamily } from '~renderer/components/editor/font-family'
+import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
 import {
   formatMarkdownReviewNotes,
   type MarkdownReviewNote
-} from '@/components/editor/markdown-review-notes'
-import { resolveCursorThemeName } from '@/components/editor/monaco-setup'
-import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/components/editor/scroll-cache'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { useAppStore } from '@/store'
-import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
+} from '~renderer/components/editor/markdown-review-notes'
+import { resolveCursorThemeName } from '~renderer/components/editor/monaco-setup'
+import {
+  scrollTopCache,
+  cursorPositionCache,
+  setWithLRU
+} from '~renderer/components/editor/scroll-cache'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
+import { useAppStore } from '~renderer/store'
+import { selectWorktreeDiffComments } from '~renderer/store/worktree-diff-comments-selector'
+import type { MarkdownDocument } from '~shared/types'
+import type { DiffComment } from '~shared/types'
 
-import type { MarkdownDocument } from '../../../../shared/types'
-import type { DiffComment } from '../../../../shared/types'
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'
 import {
   getDiffCommentPopoverLeft,

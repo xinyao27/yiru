@@ -1,7 +1,6 @@
 import { CursorClick as MousePointerClick } from '@phosphor-icons/react'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 export function BrowserUseComputerUseNotice({
   onOpenComputerUse

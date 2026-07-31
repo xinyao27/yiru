@@ -2,25 +2,24 @@
 coordination, and dirty-file shutdown hooks; keeping those lifecycles together
 avoids split-brain saves across visible and hidden editors. */
 import type { StoreApi } from 'zustand'
-
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
 import {
   buildWorkspaceSessionPayload,
   shouldPersistWorkspaceSession
-} from '@/components/editor/workspace-session'
-import { persistWorkspaceSessionByHostSync } from '@/components/editor/workspace-session-host-persistence'
-import { getConnectionIdForFile } from '@/lib/connection-context'
-import { writeRuntimeFile } from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import type { AppState } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
-
+} from '~renderer/components/editor/workspace-session'
+import { persistWorkspaceSessionByHostSync } from '~renderer/components/editor/workspace-session-host-persistence'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { writeRuntimeFile } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import type { AppState } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import {
   YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
   YIRU_EDITOR_SAVE_DIRTY_FILES_EVENT,
   type EditorPrepareHotExitDetail,
   type EditorSaveDirtyFilesDetail
-} from '../../../../shared/editor-save-events'
+} from '~shared/editor-save-events'
+
 import {
   canAutoSaveOpenFile,
   getOpenFilesForExternalFileChange,

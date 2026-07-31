@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState } from 'react'
-
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { LaunchSource } from '../../../../../shared/telemetry-events'
-import type { GlobalSettings, Repo, TuiAgent } from '../../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { LaunchSource } from '~shared/telemetry-events'
+import type { GlobalSettings, Repo, TuiAgent } from '~shared/types'
+
 import { buildSourceControlAgentDeliveryPlan } from '../build-source-control-agent-delivery-plan'
 import { runSourceControlAgentActionStart } from '../run-source-control-agent-action-start'
 import type { SourceControlAgentActionDeliveryPlanState } from './agent-action-dialog-form'

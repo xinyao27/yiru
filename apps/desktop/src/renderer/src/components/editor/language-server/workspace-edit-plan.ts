@@ -1,6 +1,5 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import type { MonacoLanguageServerSession } from '../monaco-language/server-session'
 import type { OpenFile } from '../state'

@@ -1,6 +1,8 @@
-import { listRuntimeMarkdownDocuments, type RuntimeFileOperationArgs } from '@/runtime/file-client'
-
-import type { MarkdownDocument } from '../../../../shared/types'
+import {
+  listRuntimeMarkdownDocuments,
+  type RuntimeFileOperationArgs
+} from '~renderer/runtime/file-client'
+import type { MarkdownDocument } from '~shared/types'
 
 type MarkdownDocumentListLoader = (
   context: RuntimeFileOperationArgs,

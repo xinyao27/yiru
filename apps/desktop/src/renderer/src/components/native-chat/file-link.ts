@@ -1,14 +1,12 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { fileUriToFilesystemPath } from '@yiru/workbench-model/platform'
-
 import {
   parseExplicitFileLinkTarget,
   resolveExplicitFileLinkTarget
-} from '@/components/native-chat/explicit-file-link-target'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import type { AppState } from '@/store/types'
-
-import type { Worktree } from '../../../../shared/types'
+} from '~renderer/components/native-chat/explicit-file-link-target'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import type { AppState } from '~renderer/store/types'
+import type { Worktree } from '~shared/types'
 
 export type NativeChatFileLinkContext = {
   worktreeId: string

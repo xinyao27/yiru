@@ -1,6 +1,6 @@
 import { app } from 'electron'
+import type { StarNagPromptMode } from '~shared/star-nag-telemetry'
 
-import type { StarNagPromptMode } from '../../shared/star-nag-telemetry'
 import { checkYiruStarred } from '../github/client'
 import type { Store } from '../persistence'
 

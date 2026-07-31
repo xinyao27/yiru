@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
-import { applyAgentRowLineage } from '@/components/dashboard/agent-row-lineage'
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
-import { useAppStore } from '@/store'
+import { applyAgentRowLineage } from '~renderer/components/dashboard/agent-row-lineage'
+import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
+import { migrationUnsupportedToAgentStatusEntry } from '~renderer/lib/migration-unsupported-agent-entry'
+import { useAppStore } from '~renderer/store'
 
 import {
   createWorktreeAgentFreshnessSelector,

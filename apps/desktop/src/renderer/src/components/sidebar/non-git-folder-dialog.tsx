@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import { addNonGitFolderAndActivate } from '@/components/sidebar/add-non-git-folder-command'
-import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
-import { Button } from '@/components/ui/button'
+import { addNonGitFolderAndActivate } from '~renderer/components/sidebar/add-non-git-folder-command'
+import { markOnboardingProjectAdded } from '~renderer/components/sidebar/onboarding-project-checklist'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,11 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { buildDismissedOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { buildDismissedOnboardingFolderAgentStartup } from '~renderer/lib/onboarding-folder-agent-startup'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
 
 const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
   const activeModal = useAppStore((s) => s.activeModal)

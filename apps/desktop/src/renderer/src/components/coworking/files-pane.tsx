@@ -1,22 +1,21 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
 import {
   resolveCoworkingWorktreeRoute,
   selectCoworkingCanControl
-} from '@/components/coworking/selectors'
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/coworking/selectors'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   COWORKING_FILE_READ_MAX_BYTES,
   COWORKING_FILE_WRITE_MAX_BYTES,
   type CoworkingFileDiffResult,
   type CoworkingFileReadResult,
   type CoworkingFileTreeEntry
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingFileActionDialog, type CoworkingFileAction } from './file-action-dialog'
 import {
   executeCoworkingFileAction,

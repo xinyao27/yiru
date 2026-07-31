@@ -1,6 +1,6 @@
 import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import type { AppState } from '../types'
 
 export function sshConnectionStatesEqual(

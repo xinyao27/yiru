@@ -1,6 +1,6 @@
-import type { AutomationRun } from '../../../../shared/automations-types'
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../shared/types'
+import type { AutomationRun } from '~shared/automations-types'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '~shared/types'
 
 export type AutomationRunPaneTarget = {
   tabId: string

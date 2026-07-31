@@ -6,13 +6,13 @@ import {
   CaretRight as ChevronRight
 } from '@phosphor-icons/react'
 import type React from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import type { GitFileStatus } from '~shared/types'
 
-import type { GitFileStatus } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { getFileTypeIcon } from '../../../lib/file-type-icons'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
 import { STATUS_LABELS } from '../status-display'
 import type { TreeNode } from './types'
 

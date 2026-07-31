@@ -1,15 +1,15 @@
-import { absolutePathToFileUri } from '@/components/editor/markdown-internal-links'
-import { getConnectionId } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { isPathInsideWorktree, toWorktreeRelativePath } from '@/lib/terminal-links'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { absolutePathToFileUri } from '~renderer/components/editor/markdown-internal-links'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { isPathInsideWorktree, toWorktreeRelativePath } from '~renderer/lib/terminal-links'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { resolveKnownWorktreeRootPathLink } from './terminal-worktree-path-link'
 

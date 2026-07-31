@@ -1,4 +1,4 @@
-import type { DropIndicator } from '@/components/tab-bar/drop-indicator'
+import type { DropIndicator } from '~renderer/components/tab-bar/drop-indicator'
 
 import type { WorkspacePanelTitlebarDropTarget } from './titlebar-strip-items'
 

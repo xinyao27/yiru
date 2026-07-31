@@ -1,23 +1,22 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
-
-import { Label } from '@/components/ui/label'
+import { Label } from '~renderer/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
+} from '~renderer/components/ui/select'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
 import {
   isTerminalAgentQuickCommand,
   supportsTerminalAgentQuickCommand
-} from '../../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand, TuiAgent } from '../../../../shared/types'
+} from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand, TuiAgent } from '~shared/types'
+
 import { getTerminalQuickCommandAgentOptions } from './terminal-quick-command-agent-options'
 import type { TerminalQuickCommandDialogDraftMemory } from './terminal-quick-command-dialog-draft'
 

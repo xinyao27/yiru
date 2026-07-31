@@ -1,10 +1,9 @@
-import type { CoworkingChecksReadState } from '@/components/coworking/checks-pane'
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-
+import type { CoworkingChecksReadState } from '~renderer/components/coworking/checks-pane'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
 import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
-} from '../../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
 
 export type RightSidebarPanelSource =
   | { kind: 'local' }

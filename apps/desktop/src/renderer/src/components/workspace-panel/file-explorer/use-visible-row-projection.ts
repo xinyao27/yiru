@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { buildIgnoredSet, isPathIgnored } from '../status-display'
 import { isDotfileRelativePath } from './entries'

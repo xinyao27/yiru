@@ -1,7 +1,7 @@
-import type { PaneExternalDropTarget } from '@/lib/pane-manager/pane-manager'
-import type { AppState } from '@/store'
+import type { PaneExternalDropTarget } from '~renderer/lib/pane-manager/pane-manager'
+import type { AppState } from '~renderer/store'
+import type { TerminalTab } from '~shared/types'
 
-import type { TerminalTab } from '../../../../shared/types'
 import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
 
 const TAB_GROUP_STRIP_SELECTOR = '[data-tab-group-strip-id][data-worktree-id]'

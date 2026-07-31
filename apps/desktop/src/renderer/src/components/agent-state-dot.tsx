@@ -1,8 +1,7 @@
 import { CheckCircle as CircleCheck, Question } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { cn } from '@/lib/class-names'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { cn } from '~renderer/lib/class-names'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's
 // agent hover share a single state vocabulary. Most states render as a dot,

@@ -1,13 +1,15 @@
 import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: base-ref defaults and search results come from runtime repo IPC and must clear stale repo results before new requests resolve. */
 import { useEffect, useRef, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getRuntimeEnvironmentIdForRepo } from '@/lib/repo-runtime-owner'
-import { getRuntimeRepoBaseRefDefault, searchRuntimeRepoBaseRefs } from '@/runtime/repo-client'
-import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/repo-search-bounds'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getRuntimeEnvironmentIdForRepo } from '~renderer/lib/repo-runtime-owner'
+import {
+  getRuntimeRepoBaseRefDefault,
+  searchRuntimeRepoBaseRefs
+} from '~renderer/runtime/repo-client'
+import { isRuntimeRepoRefSearchQueryWithinLimit } from '~renderer/runtime/repo-search-bounds'
+import { useAppStore } from '~renderer/store'
 
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'

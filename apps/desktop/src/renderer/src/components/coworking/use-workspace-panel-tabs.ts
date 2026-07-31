@@ -1,13 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import type { ActivityBarItem } from '~renderer/components/workspace-panel/activity-bar-buttons'
+import { createRightSidebarActivityItems } from '~renderer/components/workspace-panel/right-sidebar-activity-items'
+import { getVisibleRightSidebarActivityItems } from '~renderer/components/workspace-panel/right-sidebar-activity-visibility'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import type { ActivityBarItem } from '@/components/workspace-panel/activity-bar-buttons'
-import { createRightSidebarActivityItems } from '@/components/workspace-panel/right-sidebar-activity-items'
-import { getVisibleRightSidebarActivityItems } from '@/components/workspace-panel/right-sidebar-activity-visibility'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { useAppStore } from '@/store'
-
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { SourceControlPanelView } from '../workspace-panel/source-control/workspace-panel/state'
 import { useCoworkingChecksReadState, type CoworkingChecksReadState } from './checks-pane'
 

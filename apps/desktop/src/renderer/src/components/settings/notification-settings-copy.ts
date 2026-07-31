@@ -1,8 +1,6 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
-import type { GlobalSettings } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
 type SystemNotificationSettingsCopy = {
   failureTitle: string

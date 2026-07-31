@@ -1,7 +1,6 @@
 import type { DirectSshAuthority, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
-
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
 
 import type { DirectSshReconnectCoordinator } from './reconnect/coordinator-contract'
 import type { DirectSshPreparationReason } from './reconnect/coordinator-contract'

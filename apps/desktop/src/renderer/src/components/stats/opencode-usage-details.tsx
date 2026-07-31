@@ -1,11 +1,11 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import type {
   OpenCodeUsageBreakdownRow,
   OpenCodeUsageDailyPoint,
   OpenCodeUsageSessionRow,
   OpenCodeUsageSummary
-} from '../../../../shared/opencode-usage-types'
+} from '~shared/opencode-usage-types'
+
 import { CodexUsageDailyChart } from './codex-usage-daily-chart'
 import { OpenCodeUsageRecentSessionsTable } from './opencode-usage-recent-sessions-table'
 import { UsageBreakdownSection } from './usage-breakdown-section'

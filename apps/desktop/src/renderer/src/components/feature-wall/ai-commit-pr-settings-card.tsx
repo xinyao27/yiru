@@ -1,7 +1,6 @@
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { AiCommitPrSettingsFields } from './ai-commit-pr-settings-fields'
 import { AiCommitPrSettingsSwitch } from './ai-commit-pr-settings-switch'

@@ -1,8 +1,8 @@
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
 import { mobileWorktreePreviewStyles } from '../worktree-preview-tailwind'
 
 type Indicator = 'spinner' | 'green' | 'muted' | 'red'

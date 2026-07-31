@@ -15,8 +15,10 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@renderer/*": ["../src/renderer/src/*"],
-      "@/*": ["../src/renderer/src/*"]
+      "~renderer/*": ["../src/renderer/src/*"],
+      "~shared/*": ["../src/shared/*"],
+      "~main/*": ["../src/main/*"],
+      "~preload/*": ["../src/preload/*"]
     }
   }
 }

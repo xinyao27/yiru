@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
-
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
 
 export type CoworkingWorktreeRoute = Pick<
   CoworkingWorkspaceRoute,

@@ -1,10 +1,10 @@
-import type { OpenFile } from '@/components/editor/state'
-import { getConnectionIdForFile } from '@/lib/connection-context'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
 // Why: one place derives the path-free analytics shape for the changed-on-disk
 // conflict flow (issue #7265), so the three marking sites and the banner
 // actions cannot drift on enum values. Measures false-banner rates per
 // transport and which resolution users actually pick.
-import { track } from '@/lib/telemetry'
+import { track } from '~renderer/lib/telemetry'
 
 type ConflictSurface = 'edit' | 'unstaged-diff'
 type ConflictTransport = 'local' | 'ssh' | 'runtime'

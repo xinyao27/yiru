@@ -1,14 +1,13 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
-
-import { Input } from '@/components/ui/input'
+import { Input } from '~renderer/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { SkillsFilterState } from './filter'
 

@@ -14,23 +14,19 @@ import {
   screen,
   shell
 } from 'electron'
-
-import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser/guest-web-preferences'
-import {
-  normalizeBrowserNavigationUrl,
-  normalizeExternalBrowserUrl
-} from '../../shared/browser/url'
-import { isCrashReportReason } from '../../shared/crash-reporting'
+import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '~shared/browser/guest-web-preferences'
+import { normalizeBrowserNavigationUrl, normalizeExternalBrowserUrl } from '~shared/browser/url'
+import { isCrashReportReason } from '~shared/crash-reporting'
 import {
   normalizeTerminalShortcutPolicy,
   type KeybindingMatchOptions,
   type KeybindingOverrides
-} from '../../shared/keybindings'
+} from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../shared/modifier-double-tap-detector'
-import { supportsNativeSidebarMaterial } from '../../shared/native-sidebar-material-support'
+} from '~shared/modifier-double-tap-detector'
+import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
 import {
   getWindowShortcutActionId,
   matchesRecentTabSwitcherChord,
@@ -38,7 +34,8 @@ import {
   resolveWindowShortcutAction,
   windowShortcutActionCapturesTerminal,
   type WindowShortcutAction
-} from '../../shared/window-shortcut-policy'
+} from '~shared/window-shortcut-policy'
+
 import { getAppIconPath } from '../app-icon'
 import { browserManager } from '../browser/manager'
 import { browserSessionRegistry } from '../browser/session-registry'

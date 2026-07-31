@@ -1,8 +1,7 @@
 import { isFreshNonDoneAgentStatus, type AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import type { TerminalTab } from '~shared/types'
 
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
-import type { TerminalTab } from '../../../shared/types'
 import { resolveAgentStatusWorktreeId } from '../components/sidebar/agent-status-worktree-attribution'
 
 type TerminalLikeTab = Pick<TerminalTab, 'id'>

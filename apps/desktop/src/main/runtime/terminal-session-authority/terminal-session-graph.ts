@@ -1,4 +1,5 @@
-import type { RuntimeGraphStatus } from '../../../shared/runtime-types'
+import type { RuntimeGraphStatus } from '~shared/runtime-types'
+
 import { TerminalSessionHandleIndex } from './terminal-session-handle-index'
 
 export type TerminalSessionTab = { tabId: string }

@@ -1,4 +1,4 @@
-import type { AppState } from '@/store/types'
+import type { AppState } from '~renderer/store/types'
 
 /** Resolve a synthetic mobile handle's ptyId through persisted tab and split bindings. */
 export function resolveTerminalTabIdForPtyId(

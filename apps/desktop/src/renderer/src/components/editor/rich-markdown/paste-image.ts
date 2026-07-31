@@ -1,10 +1,9 @@
 import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { getConnectionId } from '../../../lib/connection-context'
-import { settingsForRuntimeOwner } from '../../../runtime/rpc-client'
 import { insertRichMarkdownImageFromPath } from './image-insert'
 import { extractIpcErrorMessage } from './ipc-error-message'
 

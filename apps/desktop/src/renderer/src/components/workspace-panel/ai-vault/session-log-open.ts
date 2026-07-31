@@ -1,13 +1,12 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
 
-import { useAppStore } from '@/store'
-
-import { folderWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { translate } from '../../../i18n/i18n'
-import { detectLanguage } from '../../../lib/language-detect'
-import { findWorktreeById } from '../../../store/slices/worktree-helpers'
-import type { AppState } from '../../../store/types'
 import { canOpenAiVaultSessionLogInYiru } from './session-path-actions'
 
 type AiVaultLogSession = Pick<AiVaultSession, 'filePath' | 'executionHostId'>

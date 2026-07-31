@@ -8,32 +8,34 @@ import {
 } from '@yiru/workbench-model/review'
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
-
-import { getConnectionIdForFileFromState } from '@/components/editor/connection-owner-resolution'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import { getConnectionIdForFileFromState } from '~renderer/components/editor/connection-owner-resolution'
+import {
+  openHttpLink,
+  type HttpLinkSourceOwner
+} from '~renderer/components/editor/http-link-routing'
 import {
   isLocalPathOpenBlocked,
   showLocalPathOpenBlockedToast
-} from '@/components/editor/local-path-open-guard'
-import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
-import { createUntitledMarkdownFileWithTemplateSelection } from '@/components/floating-terminal/create-untitled-markdown'
-import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/components/workspace-panel/push-target-upstream-refresh-cache'
-import { translate } from '@/i18n/i18n'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { detectLanguage } from '@/lib/language-detect'
-import { joinPath } from '@/lib/path'
-import { markSyncPushStageError } from '@/lib/source-control-remote-error'
+} from '~renderer/components/editor/local-path-open-guard'
+import { resolveMarkdownLinkTarget } from '~renderer/components/editor/markdown-internal-links'
+import { createUntitledMarkdownFileWithTemplateSelection } from '~renderer/components/floating-terminal/create-untitled-markdown'
+import { invalidateAutomaticPushTargetUpstreamStatusCache } from '~renderer/components/workspace-panel/push-target-upstream-refresh-cache'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { markSyncPushStageError } from '~renderer/lib/source-control-remote-error'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
-} from '@/lib/workspace-session-hydration-keys'
-import { getExplicitRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { notifyHostOfMirroredEditorClose } from '@/runtime/close-mirrored-editor-tab'
+} from '~renderer/lib/workspace-session-hydration-keys'
+import { getExplicitRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { notifyHostOfMirroredEditorClose } from '~renderer/runtime/close-mirrored-editor-tab'
 import {
   deleteRuntimePath,
   deleteRuntimeRelativePath,
   statRuntimePath
-} from '@/runtime/file-client'
+} from '~renderer/runtime/file-client'
 import {
   fastForwardRuntimeGit,
   fetchRuntimeGit,
@@ -41,12 +43,14 @@ import {
   pullRuntimeGit,
   pushRuntimeGit,
   rebaseRuntimeGitFromBase
-} from '@/runtime/git-client'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
+} from '~renderer/runtime/git-client'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { pushRecentlyClosedTabKind } from '~renderer/store/slices/recently-closed-tabs'
+import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { clampMarkdownTocPanelWidth } from '~shared/markdown-toc-panel-width'
 import type {
   GitBranchChangeEntry,
   GitBranchCompareSummary,
@@ -68,11 +72,9 @@ import type {
   SearchResult,
   WorkspaceSessionState,
   WorkspaceVisibleTabType
-} from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
-import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
-import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
-import type { AppState } from '../../store/types'
+} from '~shared/types'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
+
 import {
   buildCheckRunDetailsTabId,
   getCheckRunDetailsTabLabel,
@@ -86,7 +88,7 @@ export type {
   ActiveRightSidebarTab,
   RightSidebarExplorerView,
   RightSidebarTab
-} from '../../../../shared/types'
+} from '~shared/types'
 
 const DEFAULT_FILE_SEARCH_STATE = {
   query: '',

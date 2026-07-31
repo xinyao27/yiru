@@ -1,7 +1,8 @@
-import { resolveUnifiedTabLabel } from '../../../../shared/tab-title-resolution'
-import type { CtrlTabOrderMode, Tab, TabContentType, TabGroup } from '../../../../shared/types'
-import { sanitizeRecentTabIds } from '../../store/slices/tab-group-state'
-import type { AppState } from '../../store/types'
+import { sanitizeRecentTabIds } from '~renderer/store/slices/tab-group-state'
+import type { AppState } from '~renderer/store/types'
+import { resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
+import type { CtrlTabOrderMode, Tab, TabContentType, TabGroup } from '~shared/types'
+
 import { getActiveEntityIdForTabType, type TypeCyclableTab } from '../terminal/tab-type-cycle'
 import { getActiveTabNavOrder, type VisibleTabRef } from './group-tab-order'
 

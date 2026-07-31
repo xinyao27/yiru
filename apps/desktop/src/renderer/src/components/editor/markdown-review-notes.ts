@@ -1,4 +1,5 @@
-import type { DiffComment } from '../../../../shared/types'
+import type { DiffComment } from '~shared/types'
+
 import { getDiffCommentLineLabel } from './diff-comment-compat'
 
 const MAX_EXCERPT_LINES = 8

@@ -8,12 +8,11 @@ import {
   ListChecks,
   Plug
 } from '@phosphor-icons/react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'

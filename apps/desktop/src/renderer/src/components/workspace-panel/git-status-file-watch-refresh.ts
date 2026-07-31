@@ -3,22 +3,20 @@ import {
   relativePathInsideRoot
 } from '@yiru/workbench-model/platform'
 import { useEffect, useRef } from 'react'
-
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
 import {
   YIRU_WORKTREE_FILE_CHANGE_EVENT,
   type WorktreeFileChangeEventDetail
-} from '@/hooks/worktree-file-change-event'
-import { shouldPollActiveGitStatus } from '@/lib/passive-macos-app-data-access'
-import { isWindowVisible } from '@/lib/window-visibility-interval'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
-
+} from '~renderer/hooks/worktree-file-change-event'
+import { shouldPollActiveGitStatus } from '~renderer/lib/passive-macos-app-data-access'
+import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
 import type {
   ActiveRightSidebarTab,
   FsChangedPayload,
   RightSidebarExplorerView
-} from '../../../../shared/types'
+} from '~shared/types'
 
 const WATCH_REFRESH_DEBOUNCE_MS = 125
 

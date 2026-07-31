@@ -1,13 +1,12 @@
 import { Pencil, Play, Trash as Trash2, Plus } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useMemo, useState } from 'react'
-
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
-} from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
+import { Button } from '~renderer/components/ui/button'
 import {
   CommandDialog,
   CommandEmpty,
@@ -15,22 +14,22 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
-import { useAppStore } from '@/store'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+} from '~renderer/components/ui/command'
+import { DropdownMenuItem, DropdownMenuSeparator } from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { runQuickCommandInNewTab } from '~renderer/lib/run-quick-command-in-new-tab'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
   isTerminalQuickCommandComplete
-} from '../../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand } from '../../../../shared/types'
-import { WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID } from '../../../../shared/workspace/panel-titlebar-pinned'
+} from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand } from '~shared/types'
+import { WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID } from '~shared/workspace/panel-titlebar-pinned'
+
 import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 import type { DropIndicator } from './drop-indicator'

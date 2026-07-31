@@ -4,12 +4,11 @@ import {
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-
-import { IntegrationStatusPill } from '@/components/integration-status-pill'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { IntegrationStatusPill } from '~renderer/components/integration-status-pill'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 import { OnboardingInlineCommandTerminal } from './inline-command-terminal'
 

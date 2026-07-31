@@ -1,10 +1,10 @@
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   parseLoopbackUrlWithPort,
   type LocalhostWorktreeLabelRoute
-} from '../../../../shared/localhost-worktree-labels'
-import type { GlobalSettings } from '../../../../shared/types'
-import type { WorkspacePort, WorkspacePortScanResult } from '../../../../shared/workspace/ports'
+} from '~shared/localhost-worktree-labels'
+import type { GlobalSettings } from '~shared/types'
+import type { WorkspacePort, WorkspacePortScanResult } from '~shared/workspace/ports'
 
 export type OpenHttpLinkOptions = {
   worktreeId?: string | null
@@ -48,8 +48,8 @@ type LocalhostLinkWorktree = {
 }
 
 // Why: store access is injected via registerHttpLinkStoreAccessor rather than
-// a direct `import '@/store'` to avoid a circular import — store/slices/editor.ts
-// imports this module, and '@/store' transitively imports editor.ts. Without
+// a direct `import '~renderer/store'` to avoid a circular import — store/slices/editor.ts
+// imports this module, and '~renderer/store' transitively imports editor.ts. Without
 // the break, several renderer test files that load this module first see
 // `createEditorSlice` as undefined at store/index.ts initialization.
 let storeAccessor: StoreAccessor | null = null

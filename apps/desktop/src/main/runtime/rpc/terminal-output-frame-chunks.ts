@@ -1,4 +1,5 @@
-import { encodeTerminalStreamText } from '../../../shared/terminal/stream-protocol'
+import { encodeTerminalStreamText } from '~shared/terminal/stream-protocol'
+
 import { terminalStreamByteLength } from './terminal-stream-byte-length'
 
 export type TerminalOutputMeta = {

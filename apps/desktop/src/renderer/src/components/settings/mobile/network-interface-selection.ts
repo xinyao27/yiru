@@ -1,4 +1,4 @@
-import { isTailnetIPv4Address } from '../../../../../shared/tailnet-address'
+import { isTailnetIPv4Address } from '~shared/tailnet-address'
 
 export type MobileNetworkInterface = {
   name: string

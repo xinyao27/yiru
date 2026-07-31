@@ -1,12 +1,11 @@
 import { useDroppable } from '@dnd-kit/core'
 import { Suspense, useMemo } from 'react'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
-import { ButtonGroup } from '@/components/ui/button-group'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
 import { TabBarMoreButton } from '../tab-bar/more-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'

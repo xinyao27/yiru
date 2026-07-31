@@ -3,9 +3,8 @@ import {
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import type { ProjectHostSetupProjection } from '../../../../../shared/project-host-setup-projection'
-import type { Worktree } from '../../../../../shared/types'
+import type { ProjectHostSetupProjection } from '~shared/project-host-setup-projection'
+import type { Worktree } from '~shared/types'
 
 export function deriveAiVaultWorkspaceScopePaths(
   activeWorktree: Pick<Worktree, 'id' | 'path' | 'priorWorktreeIds' | 'repoId'> | null,

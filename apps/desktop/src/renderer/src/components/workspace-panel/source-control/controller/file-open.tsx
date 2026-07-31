@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { useAppStore } from '~renderer/store'
+import type { GitStatusEntry } from '~shared/types'
 
-import type { GitStatusEntry } from '../../../../../../shared/types'
-import { detectLanguage } from '../../../../lib/language-detect'
-import { joinPath } from '../../../../lib/path'
-import { useAppStore } from '../../../../store'
 import { buildActiveOpenFileSignature, buildActiveOpenRowKeys } from '../active-open-file-keys'
 import {
   dispatchCombinedDiffSectionReveal,

@@ -9,8 +9,7 @@ import { join } from 'node:path'
 // entry the local shell command uses — so remote invocations get the full
 // command surface (orchestration, worktree, terminal, ...) by construction.
 import { app } from 'electron'
-
-import { getCanonicalUserDataPath } from '../../persistence'
+import { getCanonicalUserDataPath } from '~main/persistence'
 
 export type RemoteYiruCliRequest = {
   argv: string[]

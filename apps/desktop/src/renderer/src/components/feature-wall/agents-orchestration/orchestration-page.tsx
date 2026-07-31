@@ -2,10 +2,9 @@ import { CaretDown as ChevronDown, FlowArrow as Workflow } from '@phosphor-icons
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this page is a timed storyboard; row state resets are part of replaying the animation when the active step changes. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
+import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '@/i18n/i18n'
-
-import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 import { arrowPathFromCoordTo, bubblePathBetweenRows } from './orchestration-bubble-path'
 import { AgentRow, WorkspaceCard } from './orchestration-cards'
 import {

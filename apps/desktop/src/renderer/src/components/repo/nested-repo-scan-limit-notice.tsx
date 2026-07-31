@@ -1,10 +1,9 @@
 import { Question as CircleHelp } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { NestedRepoScanResult } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
-import type { NestedRepoScanResult } from '../../../../shared/types'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 
 function formatTimeout(timeoutMs: number): string {

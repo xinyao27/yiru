@@ -1,7 +1,6 @@
 import type { Editor } from '@tiptap/react'
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { scrollToAnchorInEditor } from './markdown-anchor-scroll'
 import {

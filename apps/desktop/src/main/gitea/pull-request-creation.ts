@@ -2,11 +2,11 @@ import type {
   CreateHostedReviewInput,
   CreateHostedReviewResult
 } from '@yiru/workbench-model/review'
-
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
-} from '../../shared/hosted-review-refs'
+} from '~shared/hosted-review-refs'
+
 import {
   HostedReviewApiRequestError,
   requestHostedReviewJson

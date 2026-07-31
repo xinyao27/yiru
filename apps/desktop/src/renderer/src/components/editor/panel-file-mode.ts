@@ -1,4 +1,4 @@
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
 
 export function isAbsolutePathLike(value: string): boolean {
   return value.startsWith('/') || value.startsWith('\\\\') || /^[A-Za-z]:[\\/]/.test(value)

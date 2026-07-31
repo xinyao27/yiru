@@ -1,7 +1,6 @@
 import { Copy } from '@phosphor-icons/react'
-
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+import { DropdownMenuItem } from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 export function TerminalIdMenuItems({
   onCopyTerminalId,

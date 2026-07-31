@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process'
 import { normalize } from 'node:path'
 
-import type { RuntimeWorkspaceOpenPathResult } from '../../shared/runtime-types'
+import type { RuntimeWorkspaceOpenPathResult } from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag } from '../flags'
 import { formatCliStatus, formatStatus, printResult } from '../format'

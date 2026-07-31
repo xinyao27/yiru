@@ -1,4 +1,4 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
 
 export type CombinedDiffMode = 'all' | 'uncommitted' | 'branch' | 'commit'
 export type CombinedDiffEntry = GitStatusEntry | GitBranchChangeEntry

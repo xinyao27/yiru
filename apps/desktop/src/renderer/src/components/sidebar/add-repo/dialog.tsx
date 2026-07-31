@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { useCompleteGitRepoAdd } from '../use-complete-git-repo-add'
 import { useCreateProjectDefaults } from '../use-create-project-defaults'

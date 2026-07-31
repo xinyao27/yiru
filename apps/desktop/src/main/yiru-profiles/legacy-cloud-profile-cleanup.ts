@@ -1,7 +1,8 @@
 import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { YiruProfileIndex } from '../../shared/yiru-profiles'
+import type { YiruProfileIndex } from '~shared/yiru-profiles'
+
 import { getYiruProfileDirectory, getYiruProfilesDirectory } from './profile-storage-paths'
 
 export function purgeLegacyCloudProfileFiles(index: YiruProfileIndex, userDataPath: string): void {

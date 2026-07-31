@@ -1,7 +1,6 @@
 import { File, Folder } from '@phosphor-icons/react'
 import { useCallback, useRef } from 'react'
-
-import { Input } from '../../ui/input'
+import { Input } from '~renderer/components/ui/input'
 
 export type InlineInput = {
   parentPath: string

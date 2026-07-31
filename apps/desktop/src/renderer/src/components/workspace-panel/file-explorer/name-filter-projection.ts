@@ -1,6 +1,6 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+import { joinPath, normalizeRelativePath } from '~renderer/lib/path'
 
-import { joinPath, normalizeRelativePath } from '../../../lib/path'
 import { splitPathSegments } from '../path-tree'
 import { isPathIgnored } from '../status-display'
 import { isDotfileRelativePath } from './entries'

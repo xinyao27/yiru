@@ -1,5 +1,5 @@
-import type { CoworkingRequesterControlState } from '../../shared/coworking/access-contract'
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
+import type { CoworkingRequesterControlState } from '~shared/coworking/access-contract'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
 
 export function readRequesterControlState(
   value: unknown,

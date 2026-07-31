@@ -1,19 +1,18 @@
 import { FolderOpen, ArrowClockwise as RefreshCw, Trash } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import {
   skillDirectoryName,
   type DiscoveredSkill,
   type SkillDirectoryEntry,
   type SkillDirectoryListing
-} from '../../../../shared/skills'
+} from '~shared/skills'
+
 import { SkillFileTree } from './file-tree'
 import { SKILL_FILE_NAME } from './file-tree-model'
 import { formatUpdatedAt, providerLabels, sourceLabels } from './labels'

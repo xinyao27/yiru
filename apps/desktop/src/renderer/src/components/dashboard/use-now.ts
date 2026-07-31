@@ -1,9 +1,8 @@
 import { useSyncExternalStore } from 'react'
-
 import {
   installWindowVisibilityInterval,
   type WindowVisibilityIntervalTimer
-} from '@/lib/window-visibility-interval'
+} from '~renderer/lib/window-visibility-interval'
 
 type ClockDeps = {
   now: () => number

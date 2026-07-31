@@ -1,24 +1,25 @@
 import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: picker base-ref defaults and search results come from debounced runtime IPC, so loading/result state is intentionally synchronized from effects. */
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getRuntimeEnvironmentIdForRepo } from '@/lib/repo-runtime-owner'
-import { getRuntimeRepoBaseRefDefault, searchRuntimeRepoBaseRefs } from '@/runtime/repo-client'
-import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/repo-search-bounds'
-import { useAppStore } from '@/store'
-
-import type { Repo, Worktree } from '../../../../shared/types'
+} from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getRuntimeEnvironmentIdForRepo } from '~renderer/lib/repo-runtime-owner'
+import {
+  getRuntimeRepoBaseRefDefault,
+  searchRuntimeRepoBaseRefs
+} from '~renderer/runtime/repo-client'
+import { isRuntimeRepoRefSearchQueryWithinLimit } from '~renderer/runtime/repo-search-bounds'
+import { useAppStore } from '~renderer/store'
+import type { Repo, Worktree } from '~shared/types'
 
 const DEFAULT_VALUE = '__project_default__'
 

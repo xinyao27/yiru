@@ -1,4 +1,5 @@
-import type { GitHubAssignableUser, GitHubWorkItem, PRComment } from '../../shared/types'
+import type { GitHubAssignableUser, GitHubWorkItem, PRComment } from '~shared/types'
+
 import {
   getOwnerRepo,
   ghExecFileAsync,

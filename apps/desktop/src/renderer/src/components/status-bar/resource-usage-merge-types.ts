@@ -1,9 +1,4 @@
-import type {
-  BrowserWorkspace,
-  TerminalLayoutSnapshot,
-  TerminalTab,
-  Worktree
-} from '../../../../shared/types'
+import type { BrowserWorkspace, TerminalLayoutSnapshot, TerminalTab, Worktree } from '~shared/types'
 
 /** `null` === "no local sample" (e.g. SSH PTY); UI renders as em-dash. */
 export type Metric = number | null

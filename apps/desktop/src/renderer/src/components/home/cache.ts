@@ -1,6 +1,6 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
+import type { StatsSummary } from '~shared/types'
 
-import type { StatsSummary } from '../../../../shared/types'
 import type { ModelUsageValue, UsageValue } from './usage-value'
 
 const HOME_DATA_CACHE_KEY = 'yiru.home.data-cache.v1'

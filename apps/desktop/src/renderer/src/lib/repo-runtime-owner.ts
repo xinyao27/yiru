@@ -3,8 +3,7 @@ import {
   getSettingsFocusedExecutionHostId,
   parseExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import type { GlobalSettings, Repo } from '../../../shared/types'
+import type { GlobalSettings, Repo } from '~shared/types'
 
 export type RepoRuntimeOwnerState = {
   repos?: readonly Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>[]

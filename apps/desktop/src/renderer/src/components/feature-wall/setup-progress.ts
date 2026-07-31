@@ -1,10 +1,10 @@
-import type { FeatureInteractionState } from '../../../../shared/feature-interactions'
-import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
+import type { FeatureInteractionState } from '~shared/feature-interactions'
+import { hasFeatureInteraction } from '~shared/feature-interactions'
 import {
   FEATURE_WALL_SETUP_STEPS,
   type FeatureWallSetupStepId
-} from '../../../../shared/feature-wall-setup-steps'
-import type { GlobalSettings, Worktree } from '../../../../shared/types'
+} from '~shared/feature-wall-setup-steps'
+import type { GlobalSettings, Worktree } from '~shared/types'
 
 export type FeatureWallSetupProgressInput = {
   ready?: boolean

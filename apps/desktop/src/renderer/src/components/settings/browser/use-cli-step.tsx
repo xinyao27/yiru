@@ -1,7 +1,13 @@
-import type { CliInstallStatus } from '../../../../../shared/cli-install-types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+
 import { SearchableSetting } from '../searchable-setting'
 import { getBrowserUsePaneSearchEntries } from './use-search'
 import { StepBadge } from './use-step-badge'

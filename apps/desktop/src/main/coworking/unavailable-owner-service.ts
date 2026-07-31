@@ -7,11 +7,12 @@ import type {
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
-} from '../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
+
 import type { CoworkingSharingIpcSubscriptionSink } from './requester-subscriptions'
 import type { CoworkingSharingIpcController } from './sharing'
 

@@ -1,14 +1,13 @@
 import { BellRinging as BellRing, FileAudio, Upload } from '@phosphor-icons/react'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { getNotificationSoundOptions } from '@/components/notification-sound-options'
+import { getNotificationSoundOptions } from '~renderer/components/notification-sound-options'
 import {
   MacNotificationPermissionCard,
   useMacNotificationPermissionState
-} from '@/components/notifications/mac-notification-permission-card'
-import { sendNotificationSettingsTestNotification } from '@/components/settings/notifications-pane'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/notifications/mac-notification-permission-card'
+import { sendNotificationSettingsTestNotification } from '~renderer/components/settings/notifications-pane'
+import { Button } from '~renderer/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -16,11 +15,10 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
-import type { GlobalSettings } from '../../../../shared/types'
+} from '~renderer/components/ui/select'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
 type NotificationStepProps = {
   settings: GlobalSettings | null

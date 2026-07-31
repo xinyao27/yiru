@@ -1,8 +1,8 @@
 import type { AgentStatusState, AgentType } from '@yiru/workbench-model/agent'
+import { tuiAgentToAgentKind } from '~shared/agent/kind'
+import type { AgentKind } from '~shared/telemetry-events'
+import type { TerminalTab, TuiAgent, Worktree } from '~shared/types'
 
-import { tuiAgentToAgentKind } from '../../../shared/agent/kind'
-import type { AgentKind } from '../../../shared/telemetry-events'
-import type { TerminalTab, TuiAgent, Worktree } from '../../../shared/types'
 import { tabHasLivePty } from './tab-has-live-pty'
 import type { WorktreeStatus } from './worktree-status'
 
@@ -19,8 +19,9 @@ export {
   isClaudeAgent,
   isClaudeManagementTitle,
   getAgentLabel
-} from '../../../shared/agent/detection'
-import type { AgentStatus } from '../../../shared/agent/detection'
+} from '~shared/agent/detection'
+import type { AgentStatus } from '~shared/agent/detection'
+
 import { classifyTitleActivity, resolveTitleActivityLabel } from './pane-agent-evidence'
 
 type AgentQueryArgs = {

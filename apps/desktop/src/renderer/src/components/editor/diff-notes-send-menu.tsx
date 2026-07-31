@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo } from 'react'
+import { formatDiffComments } from '~renderer/components/editor/diff-comments-format'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { DiffComment } from '~shared/types'
 
-import { formatDiffComments } from '@/components/editor/diff-comments-format'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { DiffComment } from '../../../../shared/types'
 import { NotesSendMenu, type NotesSendMenuScope } from './notes-send-menu'
 
 // Why: a request missed during navigation must not reopen on a later remount.

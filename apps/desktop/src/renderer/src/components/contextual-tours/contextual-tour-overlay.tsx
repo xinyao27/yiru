@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react'
-
-import { requestActiveTerminalPaneSplit } from '@/components/tab-bar/request-active-terminal-pane-split'
+import { requestActiveTerminalPaneSplit } from '~renderer/components/tab-bar/request-active-terminal-pane-split'
 import {
   trackContextualTourOutcome,
   trackContextualTourShown
-} from '@/lib/feature-education-telemetry'
-import { isContextualTourAllowedForModal } from '@/runtime/contextual-tour-gate'
-import { useAppStore } from '@/store'
-
+} from '~renderer/lib/feature-education-telemetry'
+import { isContextualTourAllowedForModal } from '~renderer/runtime/contextual-tour-gate'
+import { useAppStore } from '~renderer/store'
 import {
   getContextualTour,
   type ContextualTourId,
   type ContextualTourStepAction
-} from '../../../../shared/contextual-tours'
-import type { ContextualTourOutcome } from '../../../../shared/feature-education-telemetry'
+} from '~shared/contextual-tours'
+import type { ContextualTourOutcome } from '~shared/feature-education-telemetry'
+
 import {
   getContextualTourCleanupOutcome,
   measureContextualTourOverlayRenderState

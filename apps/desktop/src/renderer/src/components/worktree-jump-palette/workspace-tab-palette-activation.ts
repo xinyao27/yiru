@@ -1,14 +1,14 @@
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   activateWebRuntimeSessionTab,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
-import type { AppState } from '@/store/types'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
 
-import { activateAndRevealWorktree } from '../../lib/worktree-activation'
 import type { WorkspaceTabPaletteSearchResult } from './workspace-tab-palette-search'
 
 export type WorkspaceTabPaletteActivationFailure =

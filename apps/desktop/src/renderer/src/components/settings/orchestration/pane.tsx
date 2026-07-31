@@ -5,24 +5,24 @@ import {
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import { useState } from 'react'
-
-import { useActiveProjectSkillRuntime } from '../../../hooks/use-active-project-skill-runtime'
+import { Button } from '~renderer/components/ui/button'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '../../../hooks/use-installed-agent-skills'
-import { translate } from '../../../i18n/i18n'
-import { ORCHESTRATION_SKILL_NAME } from '../../../lib/agent-feature-install-commands'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
+import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '../../../lib/agent-skill-cli-prerequisite'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
 import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
-} from '../../../lib/orchestration-install-command'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
+} from '~renderer/lib/orchestration-install-command'
+import { useAppStore } from '~renderer/store'
+
 import { AgentSkillSetupPanel } from '../agent/skill-setup-panel'
 import {
   buildSkillCommandForRuntime,

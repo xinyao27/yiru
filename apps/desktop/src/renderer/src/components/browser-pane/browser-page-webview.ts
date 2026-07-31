@@ -2,9 +2,8 @@ import {
   destroyPersistentWebview,
   registerPersistentWebview,
   webviewRegistry
-} from '@/runtime/browser-webview-registry'
-
-import { YIRU_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE } from '../../../../shared/browser/guest-web-preferences'
+} from '~renderer/runtime/browser-webview-registry'
+import { YIRU_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE } from '~shared/browser/guest-web-preferences'
 
 export function ensureBrowserPageWebview({
   browserTabId,

@@ -4,7 +4,8 @@ import { extname } from 'node:path'
 import {
   COWORKING_SESSION_INVENTORY_STREAM_PROFILE,
   COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../../shared/coworking/resource-limits'
+} from '~shared/coworking/resource-limits'
+
 import type { RelayDispatcher, RequestContext } from '../dispatcher'
 import { STREAM_ACK_WINDOW_CHUNKS, STREAM_CHUNK_SIZE, RelayErrorCode } from '../protocol'
 import {

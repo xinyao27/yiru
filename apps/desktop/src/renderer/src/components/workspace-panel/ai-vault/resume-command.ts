@@ -8,19 +8,18 @@ import { isResumableTuiAgent, type SleepingAgentLaunchConfig } from '@yiru/workb
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { resolveWindowsShellStartupFamily } from '@yiru/workbench-model/platform'
 import { LOCAL_EXECUTION_HOST_ID, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import { buildAgentResumeStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import type { AppState } from '~renderer/store/types'
+import { getIndexedWorktreeMap } from '~renderer/store/worktree-repo-index'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../../shared/tui-agent/launch-defaults'
-import type { AgentStartupShell } from '../../../../../shared/tui-agent/startup-shell'
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { getLocalProjectExecutionRuntimeContext } from '../../../lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '../../../lib/new-workspace'
-import { buildAgentResumeStartupPlan } from '../../../lib/tui-agent-startup'
-import { getExecutionHostIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import type { AppState } from '../../../store/types'
-import { getIndexedWorktreeMap } from '../../../store/worktree-repo-index'
+} from '~shared/tui-agent/launch-defaults'
+import type { AgentStartupShell } from '~shared/tui-agent/startup-shell'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 type AiVaultResumeCommandSession = Pick<
   AiVaultSession,

@@ -1,10 +1,8 @@
 import type React from 'react'
-
-import { DropdownMenuItem, DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-
-import type { TuiAgent } from '../../../../shared/types'
+import { DropdownMenuItem, DropdownMenuShortcut } from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import type { TuiAgent } from '~shared/types'
 
 export type AgentLaunchMenuOption = {
   agent: TuiAgent

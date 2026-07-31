@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import type { NestedRepoTelemetryRuntimeKind } from '~shared/nested-repo-telemetry'
+import type { NestedRepoScanResult } from '~shared/types'
 
-import type { NestedRepoTelemetryRuntimeKind } from '../../../../../shared/nested-repo-telemetry'
-import type { NestedRepoScanResult } from '../../../../../shared/types'
 import { defaultProjectGroupNameForPath, type AddRepoDialogStep } from './dialog-types'
 
 type ShowNestedRepoReviewArgs = {

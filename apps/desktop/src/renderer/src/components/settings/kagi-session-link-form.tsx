@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { normalizeKagiSessionLink } from '~shared/browser/url'
 
-import { translate } from '@/i18n/i18n'
-
-import { normalizeKagiSessionLink } from '../../../../shared/browser/url'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 

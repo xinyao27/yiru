@@ -1,4 +1,5 @@
-import type { RuntimeTerminalDriverState } from '../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
+
 import { TerminalMobileInputFloor } from './terminal-mobile-input-floor'
 import type { TerminalDimensions } from './terminal-session-layout-types'
 

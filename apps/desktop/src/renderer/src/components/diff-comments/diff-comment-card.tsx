@@ -1,11 +1,10 @@
 import { Pencil, Trash, ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-
-import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
+import { getDiffCommentLineLabel } from '~renderer/components/editor/diff-comment-compat'
+import { Button } from '~renderer/components/ui/button'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 
 import './diff-comment-styles.css'
 

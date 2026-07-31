@@ -1,17 +1,16 @@
 import { StopCircle as CircleStop } from '@phosphor-icons/react'
 import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 import { useId, useState, type Dispatch, type SetStateAction } from 'react'
-
-import type { NestedRepoScanResult } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { NestedRepoChecklist } from '../../repo/nested-repo-checklist'
-import { NestedRepoScanLimitNotice } from '../../repo/nested-repo-scan-limit-notice'
-import { Button } from '../../ui/button'
-import { DialogDescription, DialogHeader, DialogTitle } from '../../ui/dialog'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { NestedRepoChecklist } from '~renderer/components/repo/nested-repo-checklist'
+import { NestedRepoScanLimitNotice } from '~renderer/components/repo/nested-repo-scan-limit-notice'
+import { Button } from '~renderer/components/ui/button'
+import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { NestedRepoScanResult } from '~shared/types'
 
 type AddRepoNestedImportStepProps = {
   scan: NestedRepoScanResult

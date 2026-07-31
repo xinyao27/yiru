@@ -1,9 +1,8 @@
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
-
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../../../../shared/terminal/input'
+} from '~shared/terminal/input'
 
 // Why: 4096 UTF-16 code units encode to at most ~12KB UTF-8, safely under the
 // 16KB TERMINAL_INPUT_CHUNK_MAX_BYTES cap without paying byte measurement on

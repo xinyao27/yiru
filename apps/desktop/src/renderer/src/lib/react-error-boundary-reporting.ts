@@ -1,9 +1,5 @@
 import type React from 'react'
-
-import type {
-  CrashReportRecord,
-  ReactErrorBoundaryReportArgs
-} from '../../../shared/crash-reporting'
+import type { CrashReportRecord, ReactErrorBoundaryReportArgs } from '~shared/crash-reporting'
 
 type RendererErrorContext = Pick<
   ReactErrorBoundaryReportArgs,
@@ -43,7 +39,7 @@ function stringFromThrown(value: unknown): { name: string; message: string; stac
 
 async function collectRendererErrorContext(): Promise<RendererErrorContext> {
   try {
-    const { useAppStore } = await import('@/store')
+    const { useAppStore } = await import('~renderer/store')
     const state = useAppStore.getState()
     return {
       activeView: state.activeView,

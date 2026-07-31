@@ -1,9 +1,8 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 import { WORKTREE_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
-
-import type { Repo, WorkspaceKey } from '../../shared/types'
-import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
+import type { Repo, WorkspaceKey } from '~shared/types'
+import { parseWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
 
 export function repoPhysicalKey(
   repo: Pick<Repo, 'path' | 'connectionId' | 'executionHostId'>

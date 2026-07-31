@@ -1,8 +1,8 @@
 import type { Editor } from '@tiptap/react'
 import { useEffect } from 'react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { MarkdownDocument } from '~shared/types'
 
-import type { MarkdownDocument } from '../../../../../shared/types'
 import { encodeRawMarkdownHtmlForRichEditor } from '../raw-markdown-html'
 import { syncDocLinkMenu, type DocLinkMenuState } from './commands'
 import {

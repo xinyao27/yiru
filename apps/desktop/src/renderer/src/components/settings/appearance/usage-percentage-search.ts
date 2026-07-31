@@ -1,5 +1,6 @@
-import { translate } from '../../../i18n/i18n'
-import { createLocalizedCatalog } from '../../../i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+
 import { translateSearchKeyword } from '../search-keywords'
 
 /** Stable Settings deep-link / scroll target for the Used/Remaining control. */

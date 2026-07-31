@@ -1,4 +1,4 @@
-import type { GlobalSettings } from '../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 export function getProviderRuntimeContextKey(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined

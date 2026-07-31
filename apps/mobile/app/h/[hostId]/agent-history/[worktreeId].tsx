@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router'
 
-import { MobileAgentSessionHistoryPanel } from '../../../../src/agent-history/agent-session-history-panel'
-import { firstParam } from '../../../../src/source-control/screen-state'
+import { MobileAgentSessionHistoryPanel } from '~/agent-history/agent-session-history-panel'
+import { firstParam } from '~/source-control/screen-state'
 
 export default function MobileAgentSessionHistoryScreen() {
   const params = useLocalSearchParams<{

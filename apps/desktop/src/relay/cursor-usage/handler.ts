@@ -1,4 +1,5 @@
-import { fetchCursorRateLimits } from '../../main/runtime/cursor-usage/fetcher'
+import { fetchCursorRateLimits } from '~main/runtime/cursor-usage/fetcher'
+
 import type { RelayDispatcher } from '../dispatcher'
 
 export class ProviderUsageHandler {

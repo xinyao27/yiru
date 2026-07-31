@@ -3,8 +3,7 @@ import {
   type SleepingAgentSessionRecord
 } from '@yiru/workbench-model/agent'
 import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import {
   getProviderSessionClaimKey,

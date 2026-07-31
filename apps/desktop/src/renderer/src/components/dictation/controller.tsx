@@ -1,8 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { DICTATION_CONTROL_EVENT, type DictationControlAction } from './control-events'
 import { formatFinalTranscriptSegment } from './final-segments'

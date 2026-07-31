@@ -1,12 +1,11 @@
 import type { IDisposable, ILink, ILinkProvider, Terminal } from '@xterm/xterm'
-
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import {
   extractTerminalFileLinkCandidates,
   extractTerminalFileLinks,
   resolveTerminalFileLink
-} from '@/lib/terminal-links'
-import { isRemoteRuntimeFileOperation, runtimePathExists } from '@/runtime/file-client'
+} from '~renderer/lib/terminal-links'
+import { isRemoteRuntimeFileOperation, runtimePathExists } from '~renderer/runtime/file-client'
 
 import {
   buildCandidateLogicalLinesForBufferPosition,

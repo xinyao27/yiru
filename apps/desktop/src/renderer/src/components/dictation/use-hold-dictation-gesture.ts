@@ -1,10 +1,9 @@
 import { useEffect, useRef, type MutableRefObject } from 'react'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
+import type { DictationState } from '~shared/speech-types'
+import type { GlobalSettings } from '~shared/types'
 
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-
-import { keybindingMatchesAction, type KeybindingOverrides } from '../../../../shared/keybindings'
-import type { DictationState } from '../../../../shared/speech-types'
-import type { GlobalSettings } from '../../../../shared/types'
 import type { DictationInsertionTarget } from './insertion-target'
 
 type HoldDictationGestureOptions = {

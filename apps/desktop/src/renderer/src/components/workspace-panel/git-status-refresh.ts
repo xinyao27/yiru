@@ -3,15 +3,15 @@ import {
   getCachedAutomaticPushTargetUpstreamStatus,
   invalidateAutomaticPushTargetUpstreamStatusCache,
   storeCachedAutomaticPushTargetUpstreamStatus
-} from '@/components/workspace-panel/push-target-upstream-refresh-cache'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/git-client'
-
+} from '~renderer/components/workspace-panel/push-target-upstream-refresh-cache'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '~renderer/runtime/git-client'
 import type {
   GitPushTarget,
   GitStatusResult,
   GitUpstreamStatus,
   GlobalSettings
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import {
   beginAutomaticUpstreamRefresh,
   beginStrictUpstreamRefresh,

@@ -1,10 +1,8 @@
 import { useEffect, useRef } from 'react'
-
-import { useAppStore } from '@/store'
-import { useActiveWorktree, useRepoById } from '@/store/selectors'
-
-import { isFolderRepo } from '../../../../../../shared/repo-kind'
-import type { RightSidebarPanelSource } from '../../right-sidebar-panel-source'
+import type { RightSidebarPanelSource } from '~renderer/components/workspace-panel/right-sidebar-panel-source'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
+import { isFolderRepo } from '~shared/repo-kind'
 
 /**
  * Opens the combined "All Changes" diff in the panel's editor half the first

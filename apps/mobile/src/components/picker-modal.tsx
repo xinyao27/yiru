@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { View, Text, Pressable } from 'react-native'
 
-import { Check } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { Check } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'

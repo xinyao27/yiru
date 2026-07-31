@@ -2,16 +2,14 @@
 mutation, rollback, persistence ordering, and sent-state transitions together
 so every write follows the same queue and rollback invariants. */
 import type { StateCreator } from 'zustand'
-
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-
-import { WORKTREE_SET_CONTRACT } from '../../../../shared/runtime-method-contracts/workspace-contracts'
-import type { DiffComment, Worktree } from '../../../../shared/types'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
-import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
-import type { AppState } from '../../store/types'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
+import { WORKTREE_SET_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
+import type { DiffComment, Worktree } from '~shared/types'
 
 export type DiffCommentsSlice = {
   getDiffComments: (worktreeId: string | null | undefined) => DiffComment[]

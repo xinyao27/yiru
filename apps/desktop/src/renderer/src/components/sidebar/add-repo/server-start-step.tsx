@@ -1,12 +1,12 @@
 import { FolderOpen, Globe, Lightbulb, HardDrives as Server } from '@phosphor-icons/react'
 import { useState, type ComponentType, type ReactNode } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { DialogDescription, DialogHeader, DialogTitle } from '../../ui/dialog'
-import { Input } from '../../ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { RemoteFileBrowser } from '../remote-file-browser'
 
 type AddRepoServerPathStartStepProps = {

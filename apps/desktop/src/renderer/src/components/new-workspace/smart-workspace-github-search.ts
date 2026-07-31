@@ -1,4 +1,4 @@
-import type { GitHubWorkItem } from '../../../../shared/types'
+import type { GitHubWorkItem } from '~shared/types'
 
 // Why: the smart-name field's GitHub search has three mutually exclusive
 // fetch shapes (resolve a pasted cross-repo link, look an issue/PR number up

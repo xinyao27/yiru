@@ -1,11 +1,10 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
-
 import {
   NATIVE_FILE_DROP_MAX_PATH_BYTES,
   NATIVE_FILE_DROP_MAX_PATHS,
   validateNativeFileDropPaths
-} from '../../../shared/native-file-drop'
+} from '~shared/native-file-drop'
 
 export const WORKSPACE_FILE_PATH_MIME = 'text/x-yiru-file-path'
 export const WORKSPACE_FILE_PATHS_MIME = 'text/x-yiru-file-paths'

@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { isFolderRepo } from '../../../../../shared/repo-kind'
-import type { PRInfo } from '../../../../../shared/types'
-import { getGitHubPRCacheKey } from '../../../store/slices/github-cache-key'
-import { getHostedReviewCacheKey } from '../../../store/slices/hosted-review'
 import {
   buildGitHubPRRefreshStateClearToken,
   getGitHubPRRefreshStateExpiryAt
-} from '../../github/state'
+} from '~renderer/components/github/state'
+import { useAppStore } from '~renderer/store'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { PRInfo } from '~shared/types'
+
 import { selectReviewCacheEntry } from '../review-cache-entry-selection'
 import { hasAmbiguousGitHubHostedReviewForChecksPanel } from './ambiguous-github-review'
 import { isGitLabChecksPanelReview } from './gitlab-review'

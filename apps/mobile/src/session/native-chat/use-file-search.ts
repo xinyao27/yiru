@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { RpcClient } from '../../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+
 import { rankSuggestions } from './autocomplete'
 
 const FILE_SEARCH_DEBOUNCE_MS = 120

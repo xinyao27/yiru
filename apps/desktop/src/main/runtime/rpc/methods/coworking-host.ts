@@ -1,4 +1,5 @@
-import { isCoworkingMutationOperation } from '../../../../shared/coworking/operation-contract'
+import type { CoworkingHostSubscription } from '~main/coworking/execution-gateway'
+import { isCoworkingMutationOperation } from '~shared/coworking/operation-contract'
 import {
   CoworkingPairedRuntimeCanonicalizeParamsSchema,
   CoworkingPairedRuntimeInspectParamsSchema,
@@ -8,14 +9,14 @@ import {
   CoworkingPairedRuntimeSubscribeParamsSchema,
   CoworkingPairedRuntimeWorktreeCatalogParamsSchema,
   parseCoworkingPairedRuntimeOperation
-} from '../../../../shared/coworking/paired-runtime-host-contract'
+} from '~shared/coworking/paired-runtime-host-contract'
 import {
   CoworkingPairedRuntimeCanonicalizeResultSchema,
   CoworkingPairedRuntimeInspectionSchema,
   CoworkingPairedRuntimeTerminalEventSchema,
   CoworkingPairedRuntimeWorktreeCatalogSchema
-} from '../../../../shared/coworking/paired-runtime-result-contract'
-import type { CoworkingHostSubscription } from '../../../coworking/execution-gateway'
+} from '~shared/coworking/paired-runtime-result-contract'
+
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import { getCoworkingHostChannelLifetimes } from './coworking-host-channel-lifetimes'
 import { projectCoworkingHostExecutionResult } from './coworking-host-result-projection'

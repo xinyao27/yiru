@@ -1,6 +1,7 @@
 import * as path from 'node:path'
 
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
+
 import type { GitExec } from './handler-ops'
 export { removeWorktreeOp } from './handler-worktree-remove'
 export { readRelayWorktreeList } from './handler-worktree-list'

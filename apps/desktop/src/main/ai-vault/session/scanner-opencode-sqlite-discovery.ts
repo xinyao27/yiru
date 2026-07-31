@@ -1,9 +1,9 @@
 import { basename, extname, join } from 'node:path'
 
 import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
+import { columnExists, tableExists } from '~main/opencode/usage/schema-helpers'
+import SyncDatabase from '~main/sqlite/sync-database'
 
-import { columnExists, tableExists } from '../../opencode/usage/schema-helpers'
-import SyncDatabase from '../../sqlite/sync-database'
 import { discoverFiles } from './scanner-discovery'
 import { buildOpenCodeSqliteCandidatePath } from './scanner-opencode-sqlite-paths'
 import { splitOpenCodeSqliteCandidate } from './scanner-opencode-sqlite-paths'

@@ -1,11 +1,10 @@
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-
-import type { RuntimeMobileSessionTabMove } from '../../../../shared/runtime-types'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   isWebRuntimeSessionActive,
   moveWebRuntimeSessionTab
-} from '../../runtime/web-runtime-session'
-import { useAppStore } from '../../store'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import type { RuntimeMobileSessionTabMove } from '~shared/runtime-types'
 
 export function mirrorWebRuntimeTabMove(
   args: RuntimeMobileSessionTabMove & {

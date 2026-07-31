@@ -3,8 +3,9 @@ import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store owns Codex analytics persistence, scan policy, and renderer query semantics. Keeping them together prevents the Codex range/scope rules from drifting away from the scanner’s event model. */
 import { app } from 'electron'
-
-import type { AutomationRunUsage } from '../../../shared/automations-types'
+import type { Store } from '~main/persistence'
+import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
+import type { AutomationRunUsage } from '~shared/automations-types'
 import type {
   CodexUsageBreakdownKind,
   CodexUsageBreakdownRow,
@@ -15,9 +16,8 @@ import type {
   CodexUsageSessionRow,
   CodexUsageSnapshot,
   CodexUsageSummary
-} from '../../../shared/codex-usage-types'
-import type { Store } from '../../persistence'
-import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+} from '~shared/codex-usage-types'
+
 import { migrateCodexUsageEventKey } from './event-key'
 import { priceCodexAggregateUsage } from './pricing'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'

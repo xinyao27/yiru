@@ -2,7 +2,6 @@
 import { randomUUID } from 'node:crypto'
 
 import { ipcMain, webContents, type BrowserWindow } from 'electron'
-
 import type {
   BrowserBackResult,
   BrowserCaptureStartResult,
@@ -51,8 +50,9 @@ import type {
   BrowserUploadResult,
   BrowserViewportResult,
   BrowserWaitResult
-} from '../../shared/runtime-types'
-import type { BrowserCertificateProceedResult } from '../../shared/types'
+} from '~shared/runtime-types'
+import type { BrowserCertificateProceedResult } from '~shared/types'
+
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'
 import { waitForTabRegistration, waitForWorktreeTabRegistration } from '../browser/browser'

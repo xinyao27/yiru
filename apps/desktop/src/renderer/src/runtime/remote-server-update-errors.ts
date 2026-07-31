@@ -1,4 +1,4 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 export function remoteServerUpdateErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)

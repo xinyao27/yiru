@@ -1,11 +1,13 @@
 import { useEffect, useMemo } from 'react'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import {
+  installWindowVisibilityInterval,
+  isWindowVisible
+} from '~renderer/lib/window-visibility-interval'
+import { getRuntimeGitConflictOperation } from '~renderer/runtime/git-client'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { GitConflictOperation, Repo } from '~shared/types'
 
-import { getConnectionId } from '@/lib/connection-context'
-import { installWindowVisibilityInterval, isWindowVisible } from '@/lib/window-visibility-interval'
-import { getRuntimeGitConflictOperation } from '@/runtime/git-client'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { GitConflictOperation, Repo } from '../../../../shared/types'
 import { createCoalescedPollRunner, type SlowTaskBackoffOptions } from './coalesced-poll-runner'
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 

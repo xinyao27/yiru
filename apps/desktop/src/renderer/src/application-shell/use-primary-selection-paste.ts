@@ -1,12 +1,11 @@
 import { useEffect } from 'react'
-
 import {
   readPrimarySelectionText,
   setPrimarySelectionEnabled,
   setPrimarySelectionText,
   shouldSuppressPrimarySelectionNativePaste
-} from '@/lib/primary-selection'
-import { readCurrentPrimarySelectionText } from '@/lib/primary-selection-capture'
+} from '~renderer/lib/primary-selection'
+import { readCurrentPrimarySelectionText } from '~renderer/lib/primary-selection-capture'
 
 import {
   findEditablePrimarySelectionPasteTarget,

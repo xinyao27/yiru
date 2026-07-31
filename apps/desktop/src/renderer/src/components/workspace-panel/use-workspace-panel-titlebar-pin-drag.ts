@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { WorkspaceTitlebarActionId } from '~shared/workspace/panel-titlebar-pinned'
 
-import type { WorkspaceTitlebarActionId } from '../../../../shared/workspace/panel-titlebar-pinned'
 import {
   commitTitlebarDrop,
   resolveDropTargetFromPoint,

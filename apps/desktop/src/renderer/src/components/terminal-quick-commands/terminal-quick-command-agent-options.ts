@@ -1,8 +1,7 @@
-import type { AgentCatalogEntry } from '@/lib/agent-catalog'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-
-import { supportsTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
-import type { TuiAgent } from '../../../../shared/types'
+import type { AgentCatalogEntry } from '~renderer/lib/agent-catalog'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { supportsTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
+import type { TuiAgent } from '~shared/types'
 
 const QUICK_COMMAND_AGENT_PRESENTATION_ORDER = [
   'claude',

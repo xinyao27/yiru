@@ -1,9 +1,8 @@
 import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type React from 'react'
 import { useEffect } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,11 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
-import { translate } from '@/i18n/i18n'
-import type { RemoteServerUpdateEntry } from '@/runtime/remote-server-update-coordinator'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { Progress } from '~renderer/components/ui/progress'
+import { translate } from '~renderer/i18n/i18n'
+import type { RemoteServerUpdateEntry } from '~renderer/runtime/remote-server-update-coordinator'
+import { useAppStore } from '~renderer/store'
 
 import {
   getRemoteServerManualUpdateHelp,

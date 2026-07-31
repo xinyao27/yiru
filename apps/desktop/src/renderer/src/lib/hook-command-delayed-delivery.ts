@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 type AppStoreSnapshot = ReturnType<typeof useAppStore.getState>
 

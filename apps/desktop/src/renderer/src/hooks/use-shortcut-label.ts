@@ -5,7 +5,8 @@ import {
   isDoubleTapBinding,
   type KeybindingActionId,
   type KeybindingOverrides
-} from '../../../shared/keybindings'
+} from '~shared/keybindings'
+
 import { getShortcutPlatform } from '../lib/shortcut-platform'
 import { useAppStore } from '../store'
 

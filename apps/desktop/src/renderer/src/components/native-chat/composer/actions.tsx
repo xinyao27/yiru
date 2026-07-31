@@ -1,12 +1,12 @@
 import { Microphone as Mic, Square, ArrowUp, Plus } from '@phosphor-icons/react'
-
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface
-} from '../../../../../shared/native-chat/session-options'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~shared/native-chat/session-options'
+
 import { NativeChatSessionOptionPickers } from '../session/option-pickers'
 
 export type NativeChatComposerActionsProps = {

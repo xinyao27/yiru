@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react'
-
-import { isWindowVisible } from '@/lib/window-visibility-interval'
+import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
 
 type Listener = () => void
 

@@ -1,19 +1,19 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import type { PRCheckRunDetails } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { groupPRComments, type PRCommentGroup } from '../../../lib/pr-comment-groups'
-import { startFixChecksAgent } from '../../editor/fix-checks-agent-launch'
+import { startFixChecksAgent } from '~renderer/components/editor/fix-checks-agent-launch'
 import {
   buildFixBrokenChecksPrompt,
   getBrokenChecks,
   getCheckDetailsPromptKey
-} from '../../pr-checks-fix-prompt'
+} from '~renderer/components/pr-checks-fix-prompt'
 import {
   buildPRCommentsResolutionPrompt,
   isResolvablePRCommentGroup
-} from '../../pr-comments-resolution-prompt'
+} from '~renderer/components/pr-comments-resolution-prompt'
+import { translate } from '~renderer/i18n/i18n'
+import { groupPRComments, type PRCommentGroup } from '~renderer/lib/pr-comment-groups'
+import type { PRCheckRunDetails } from '~shared/types'
+
 import { clearPRCommentsListSelection } from '../pr-comments-list-selection'
 import { buildResolvePullRequestConflictsPrompt } from '../source-control'
 import type { useChecksPanelCommentActionsState } from './comment-actions-controller'

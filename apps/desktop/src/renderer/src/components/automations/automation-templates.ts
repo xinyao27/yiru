@@ -1,8 +1,7 @@
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-
-import type { AutomationSchedulePreset } from '../../../../shared/automations-types'
-import type { TuiAgent } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import type { AutomationSchedulePreset } from '~shared/automations-types'
+import type { TuiAgent } from '~shared/types'
 
 export type AutomationTemplate = {
   id: string

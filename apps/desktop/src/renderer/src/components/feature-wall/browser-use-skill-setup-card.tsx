@@ -1,23 +1,22 @@
 import type { JSX } from 'react'
-
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,
   getWslCliDistroRequest
-} from '@/components/settings/cli-skill-runtime-setup'
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
-import type { InstalledAgentSkillState } from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/settings/cli-skill-runtime-setup'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
+import type { InstalledAgentSkillState } from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
 import {
   YIRU_CLI_SKILL_INSTALL_COMMAND,
   YIRU_CLI_SKILL_UPDATE_COMMAND
-} from '@/lib/agent-feature-install-commands'
+} from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '@/lib/agent-skill-cli-prerequisite'
-import { BROWSER_USE_ENABLED_STORAGE_KEY } from '@/lib/browser-use-setup-state'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import { BROWSER_USE_ENABLED_STORAGE_KEY } from '~renderer/lib/browser-use-setup-state'
+import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
 

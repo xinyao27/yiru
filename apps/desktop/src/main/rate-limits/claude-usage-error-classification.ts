@@ -1,4 +1,5 @@
-import type { UsageRateLimitFailureKind } from '../../shared/rate-limit-types'
+import type { UsageRateLimitFailureKind } from '~shared/rate-limit-types'
+
 import { OAuthUsageError } from './claude-oauth-usage-error'
 
 export type ClaudeUsageErrorClassification = {

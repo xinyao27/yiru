@@ -1,6 +1,6 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
+import { normalizeCompatibleAgentTitleForOwner } from '~shared/agent/title-owner'
 
-import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/title-owner'
 import {
   resolvePaneRendererPolicy,
   type RendererPolicyDecision,

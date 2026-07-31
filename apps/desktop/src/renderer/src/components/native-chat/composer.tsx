@@ -1,11 +1,10 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { getSettingsForAgentTabRuntimeOwner } from '~renderer/components/native-chat/agent-paste-draft'
+import { emitNativeChatMessageSent } from '~renderer/components/native-chat/telemetry'
+import { sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
+import { getVerifiedNativeChatCommands } from '~shared/native-chat/agent-profiles'
 
-import { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
-import { emitNativeChatMessageSent } from '@/components/native-chat/telemetry'
-import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
-
-import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat/agent-profiles'
-import { useAppStore } from '../../store'
 import { NativeChatComposerField } from './composer/field'
 import {
   applyMentionSuggestion,

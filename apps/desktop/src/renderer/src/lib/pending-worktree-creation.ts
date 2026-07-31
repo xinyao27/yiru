@@ -1,10 +1,6 @@
-import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
-import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
-
-import type {
-  ProjectSourceContext,
-  WorkspaceRunContext
-} from '../../../shared/project-source-context'
+import type { AgentStartedTelemetry } from '~renderer/lib/agent-started-telemetry'
+import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import type { ProjectSourceContext, WorkspaceRunContext } from '~shared/project-source-context'
 import type {
   CreateSparseCheckoutRequest,
   GitPushTarget,
@@ -13,7 +9,7 @@ import type {
   WorkspaceCreateTelemetrySource,
   WorkspaceStatus,
   WorktreeStartupLaunch
-} from '../../../shared/types'
+} from '~shared/types'
 
 /** Two-phase status reported by the main process while a worktree is created.
  *  `preparing` covers renderer-side preflight before `createWorktree` starts;

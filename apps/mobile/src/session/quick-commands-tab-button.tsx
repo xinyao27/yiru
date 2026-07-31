@@ -1,6 +1,6 @@
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { ArrowSquareRight } from '@/components/uniwind-icons'
-import { translate } from '@/i18n/translate'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { ArrowSquareRight } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 type QuickCommandsTabButtonProps = {
   disabled: boolean

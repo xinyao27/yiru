@@ -3,8 +3,9 @@ import type {
   CoworkingRemoteDesktop,
   CoworkingSessionCatalogEntry,
   CoworkingWorktreeCatalogEntry
-} from '../../../../shared/coworking/catalog-contract'
-import { isCoworkingProjectIdentityKey } from '../../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
+import { isCoworkingProjectIdentityKey } from '~shared/coworking/catalog-contract'
+
 import { isCoworkingRefExpanded } from '../coworking/selectors'
 import type { CoworkingExpandedRefsByDesktop, CoworkingWorkspaceRoute } from '../coworking/types'
 

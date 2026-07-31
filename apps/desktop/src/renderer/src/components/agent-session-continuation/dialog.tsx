@@ -1,13 +1,12 @@
 import { ChatCentered as MessageSquarePlus } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-
 import {
   detectAgentSessionContinuationAgents,
   launchAgentSessionContinuation
-} from '@/components/agent-session-continuation/launch-agent-session-continuation'
-import AgentCombobox from '@/components/agent/combobox'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/agent-session-continuation/launch-agent-session-continuation'
+import AgentCombobox from '~renderer/components/agent/combobox'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -15,21 +14,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
+} from '~renderer/components/ui/dialog'
+import { Label } from '~renderer/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog, getAgentLabel } from '@/lib/agent-catalog'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog, getAgentLabel } from '~renderer/lib/agent-catalog'
+import { useAppStore } from '~renderer/store'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
 
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../../shared/types'
 import {
   buildAgentSessionContinuationPrompt,
   hasFullAgentSessionContext,

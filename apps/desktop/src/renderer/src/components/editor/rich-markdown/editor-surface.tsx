@@ -1,9 +1,9 @@
 import { EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import type React from 'react'
+import { cn } from '~renderer/lib/class-names'
+import type { DiffComment } from '~shared/types'
 
-import type { DiffComment } from '../../../../../shared/types'
-import { cn } from '../../../lib/class-names'
 import type { MarkdownReviewNote } from '../markdown-review-notes'
 import type { MarkdownTocItem } from '../markdown-table-of-contents'
 import { MarkdownTableOfContentsPanel } from '../markdown-table-of-contents-panel'

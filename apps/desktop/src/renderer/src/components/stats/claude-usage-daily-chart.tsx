@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { ClaudeUsageDailyPoint } from '~shared/claude-usage-types'
 
-import type { ClaudeUsageDailyPoint } from '../../../../shared/claude-usage-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 function formatTokens(value: number): string {

@@ -1,13 +1,12 @@
 import { BracketsCurly as Braces } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   SOURCE_CONTROL_ACTION_VARIABLE_INFO,
   SOURCE_CONTROL_ACTION_VARIABLES,
   type SourceControlActionId
-} from '../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
+
 import { Button } from '../ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 

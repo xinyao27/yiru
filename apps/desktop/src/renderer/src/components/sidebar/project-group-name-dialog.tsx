@@ -1,6 +1,5 @@
 import React, { useCallback, useId, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,10 +7,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
 
 type ProjectGroupNameDialogProps = {
   open: boolean

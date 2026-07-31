@@ -6,16 +6,15 @@ import {
 } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
+} from '~renderer/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,16 +22,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { Repo } from '~shared/types'
+import type { YiruProfileSummary, TransferYiruProfileProjectMode } from '~shared/yiru-profiles'
 
-import type { Repo } from '../../../../shared/types'
-import type {
-  YiruProfileSummary,
-  TransferYiruProfileProjectMode
-} from '../../../../shared/yiru-profiles'
 import { YiruProfileAvatar } from './yiru-profile-avatar'
 import {
   YiruProfileProjectTransferConfirmDialog,

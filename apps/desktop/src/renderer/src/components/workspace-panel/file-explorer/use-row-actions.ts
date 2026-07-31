@@ -1,11 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import type React from 'react'
+import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
+import { createNewTerminalTab } from '~renderer/components/terminal/tab-create'
+import { renameFileOnDisk } from '~renderer/lib/rename-file'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { renameFileOnDisk } from '../../../lib/rename-file'
-import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../../tab-bar/sortable-tab'
-import { createNewTerminalTab } from '../../terminal/tab-create'
 import { useFileDuplicate } from '../use-file-duplicate'
 import { buildAddProjectFromFolderModalData, canShowAddAsProjectAction } from './add-project-action'
 import { folderRelativePathToIncludeGlob } from './file-search-include-pattern'

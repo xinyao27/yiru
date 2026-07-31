@@ -1,7 +1,7 @@
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 
-import type { PublicKnownRuntimeEnvironment } from '../../../shared/runtime-environments'
 import type { WebPairingOffer } from './pairing'
 
 export type StoredWebRuntimeEnvironment = Omit<PublicKnownRuntimeEnvironment, 'endpoints'> & {

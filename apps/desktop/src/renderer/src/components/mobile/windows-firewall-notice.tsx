@@ -1,13 +1,12 @@
 import { WarningCircle as CircleAlert, ShieldCheck } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { WindowsMobileFirewallStatus } from '~shared/windows-mobile-firewall'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-
-import type { WindowsMobileFirewallStatus } from '../../../../shared/windows-mobile-firewall'
-import { useMountedRef } from '../../hooks/use-mounted-ref'
-import { translate } from '../../i18n/i18n'
-import { cn } from '../../lib/class-names'
 import { Button } from '../ui/button'
 
 type WindowsFirewallNoticeProps = {

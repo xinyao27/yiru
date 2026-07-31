@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { MODE_DRAWS, resolvePreset, type OrbState } from 'thinking-orbs'
-
-import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 
 const ORB_PRESET_SIZE = 20
 const STATIC_FRAME_TIME_SECONDS = 0.6

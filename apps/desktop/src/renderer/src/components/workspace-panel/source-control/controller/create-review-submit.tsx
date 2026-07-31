@@ -1,11 +1,11 @@
 import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
+import { resolveCreateReviewDraftTitle } from '~renderer/components/workspace-panel/create-review-draft-title'
+import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
+import { translate } from '~renderer/i18n/i18n'
+import { generateRuntimePullRequestFields } from '~renderer/runtime/git-client'
+import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
-import { normalizeHostedReviewHeadRef } from '../../../../../../shared/hosted-review-refs'
-import { translate } from '../../../../i18n/i18n'
-import { generateRuntimePullRequestFields } from '../../../../runtime/git-client'
-import { resolveCreateReviewDraftTitle } from '../../create-review-draft-title'
-import { stripBaseRef } from '../../use-create-pull-request-dialog-fields'
 import {
   createPrIntentRunTokenMatches,
   resolveCreatePrIntentReviewBase,

@@ -1,6 +1,5 @@
 import { Files, FlowArrow as Workflow, GitMerge, ListChecks, Plug } from '@phosphor-icons/react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
 import { AgentSessionHistoryIcon } from './agent-session-history-icon'

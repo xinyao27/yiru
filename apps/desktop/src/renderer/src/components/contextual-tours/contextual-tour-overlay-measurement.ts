@@ -1,5 +1,5 @@
-import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
+import { formatShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getContextualTourOutcomeStepTotal,
   getContextualTourPanelHost,
@@ -7,11 +7,11 @@ import {
   getContextualTourStepProgress,
   getMeasurableContextualTourTarget,
   getVisibleContextualTourStepIndexes
-} from '@/runtime/contextual-tour-gate'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/contextual-tour-gate'
+import { useAppStore } from '~renderer/store'
+import type { ContextualTour, ContextualTourId } from '~shared/contextual-tours'
+import type { ContextualTourOutcome } from '~shared/feature-education-telemetry'
 
-import type { ContextualTour, ContextualTourId } from '../../../../shared/contextual-tours'
-import type { ContextualTourOutcome } from '../../../../shared/feature-education-telemetry'
 import type { ActiveTourRenderState } from './contextual-tour-overlay-surface'
 
 export type ContextualTourMeasurementAction =

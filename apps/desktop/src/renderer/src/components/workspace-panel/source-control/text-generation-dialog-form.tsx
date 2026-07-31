@@ -6,26 +6,32 @@ import {
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
+import { Button } from '~renderer/components/ui/button'
+import { DialogFooter } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog, AgentIcon } from '~renderer/lib/agent-catalog'
 import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   listCommitMessageAgentCapabilities
-} from '../../../../../shared/commit-message/agent-spec'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../../shared/source-control/ai'
-import type { SourceControlTextActionId } from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { GlobalSettings, Repo, TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { getAgentCatalog, AgentIcon } from '../../../lib/agent-catalog'
-import { LoadingIndicator } from '../../loading-indicator'
-import { SourceControlActionVariableChips } from '../../source-control/action-variable-chips'
-import { Button } from '../../ui/button'
-import { DialogFooter } from '../../ui/dialog'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
-import { Textarea } from '../../ui/textarea'
+} from '~shared/commit-message/agent-spec'
+import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
+import type { SourceControlTextActionId } from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { GlobalSettings, Repo, TuiAgent } from '~shared/types'
+
 import { planSourceControlTextGeneration } from './generation-plan'
 import { sourceControlTextGenerationDefaultsMatchTarget } from './text-generation-defaults'
 import {

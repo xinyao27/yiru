@@ -1,8 +1,9 @@
-import type { GitConflictOperation } from '../../../../../shared/types'
 import {
   isSyncPushStageError,
   resolveRemoteOperationErrorMessage
-} from '../../../lib/source-control-remote-error'
+} from '~renderer/lib/source-control-remote-error'
+import type { GitConflictOperation } from '~shared/types'
+
 import type { SourceControlActionError } from './action-error'
 import type { RemoteOpKind } from './primary-action'
 

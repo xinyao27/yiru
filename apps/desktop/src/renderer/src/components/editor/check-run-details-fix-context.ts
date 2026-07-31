@@ -1,18 +1,17 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-
 import {
   buildFixBrokenChecksPrompt,
   getBrokenChecks,
   getCheckDetailsPromptKey
-} from '@/components/pr-checks-fix-prompt'
-import { translate } from '@/i18n/i18n'
-import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
-import { useAppStore } from '@/store'
-import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
-import { getHostedReviewCacheKey } from '@/store/slices/hosted-review-cache-identity'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+} from '~renderer/components/pr-checks-fix-prompt'
+import { translate } from '~renderer/i18n/i18n'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { useAppStore } from '~renderer/store'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review-cache-identity'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { PRCheckDetail, PRCheckRunDetails, Repo } from '~shared/types'
 
-import type { PRCheckDetail, PRCheckRunDetails, Repo } from '../../../../shared/types'
 import { gitHubPRToChecksPanelReview } from '../workspace-panel/checks-panel/review'
 
 export function resolveCheckRunDetailsFixCheck(

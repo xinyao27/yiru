@@ -1,8 +1,7 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useRef } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 
 import {
   nativeChatWorktreeNotReadyNotice,

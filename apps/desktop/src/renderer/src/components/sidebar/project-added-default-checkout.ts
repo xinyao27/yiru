@@ -1,15 +1,11 @@
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
+import { markOnboardingProjectAdded } from '~renderer/components/sidebar/onboarding-project-checklist'
+import { track } from '~renderer/lib/telemetry'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import type { AddRepoDefaultCheckoutHandoffSource, EventProps } from '~shared/telemetry-events'
+import type { DetectedWorktreeListResult, Worktree } from '~shared/types'
 
-import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
-import { track } from '@/lib/telemetry'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-
-import type {
-  AddRepoDefaultCheckoutHandoffSource,
-  EventProps
-} from '../../../../shared/telemetry-events'
-import type { DetectedWorktreeListResult, Worktree } from '../../../../shared/types'
 import { finalizeImportedRepoAfterSkip } from './add-repo/skip-finalization'
 
 type DefaultCheckoutHandoffReason = EventProps<'add_repo_default_checkout_handoff'>['reason']

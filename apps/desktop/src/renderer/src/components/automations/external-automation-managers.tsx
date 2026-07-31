@@ -1,19 +1,18 @@
 import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { SettingsSwitch } from '@/components/settings/form-controls'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { SettingsSwitch } from '~renderer/components/settings/form-controls'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   ExternalAutomationAction,
   ExternalAutomationJob,
   ExternalAutomationManager,
   ExternalAutomationRun
-} from '../../../../shared/automations-types'
+} from '~shared/automations-types'
+
 import { formatAutomationDateTimeWithRelative } from './automation-page-parts'
 import {
   ExternalAutomationRunTable,

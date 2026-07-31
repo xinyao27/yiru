@@ -1,13 +1,12 @@
 import type { StateCreator } from 'zustand'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
+import { getRuntimeGitHistory } from '~renderer/runtime/git-client'
+import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
+import type { AppState } from '~renderer/store/types'
+import type { GitHistoryItem, GitHistoryResult } from '~shared/git/history'
 
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
-import { getRuntimeGitHistory } from '@/runtime/git-client'
-import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
-import type { AppState } from '@/store/types'
-
-import type { GitHistoryItem, GitHistoryResult } from '../../../../../shared/git/history'
 import { DEFAULT_GIT_GRAPH_COLUMN_WIDTHS, type GitGraphColumnWidths } from './column-widths'
 
 export type GitGraphState =

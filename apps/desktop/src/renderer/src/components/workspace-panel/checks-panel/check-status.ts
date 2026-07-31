@@ -1,4 +1,4 @@
-import type { PRCheckDetail, PRCheckRunDetails } from '../../../../../shared/types'
+import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
 
 export const CHECK_SORT_ORDER: Record<string, number> = {
   failure: 0,

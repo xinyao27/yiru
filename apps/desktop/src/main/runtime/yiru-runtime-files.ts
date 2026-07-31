@@ -30,16 +30,15 @@ import {
   relativePathInsideRoot,
   resolveRuntimePath
 } from '@yiru/workbench-model/platform'
-
-import { assertNoClobberRenameDestinationAvailable } from '../../shared/filesystem-rename-collision'
-import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
+import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
+import { PhysicalExitTracker } from '~shared/physical-exit-tracker'
 import type {
   RuntimeFileListResult,
   RuntimeFileOpenResult,
   RuntimeFileReadChunkResult,
   RuntimeFilePreviewResult,
   RuntimeFileReadResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
 import {
   buildRgArgs,
   createAccumulator,
@@ -47,7 +46,7 @@ import {
   finalize,
   ingestRgJsonLine,
   SEARCH_TIMEOUT_MS
-} from '../../shared/text-search'
+} from '~shared/text-search'
 import type {
   DirEntry,
   FsChangeEvent,
@@ -56,7 +55,8 @@ import type {
   SearchOptions,
   SearchResult,
   Worktree
-} from '../../shared/types'
+} from '~shared/types'
+
 import { isENOENT, resolveAuthorizedPath } from '../filesystem/auth'
 import { listQuickOpenFiles } from '../filesystem/list-files'
 import { getLocalGitOptionsForRegisteredWorktree } from '../filesystem/local-worktree-runtime-options'

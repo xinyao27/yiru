@@ -1,7 +1,7 @@
-import type { KeybindingContext } from '../../../../shared/keybindings'
-import type { Tab } from '../../../../shared/types'
-import { getRuntimeEnvironmentIdForWorktree } from '../../lib/worktree-runtime-owner'
-import { useAppStore } from '../../store'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import type { KeybindingContext } from '~shared/keybindings'
+import type { Tab } from '~shared/types'
 
 export type TerminalStoreSnapshot = ReturnType<typeof useAppStore.getState>
 

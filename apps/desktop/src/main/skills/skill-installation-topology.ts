@@ -3,7 +3,8 @@ import { constants } from 'node:fs'
 import { access, lstat, realpath, stat } from 'node:fs/promises'
 import { dirname, normalize, resolve } from 'node:path'
 
-import type { SkillInstallationTopology } from '../../shared/skill-freshness'
+import type { SkillInstallationTopology } from '~shared/skill-freshness'
+
 import type { SkillScanRoot } from './skill-discovery-sources'
 
 export type ClassifiedSkillTopology = {

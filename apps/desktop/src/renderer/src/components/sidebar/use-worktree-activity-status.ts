@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
-import { resolveWorktreeStatus, type WorktreeStatus } from '@/lib/worktree-status'
-import { useAppStore } from '@/store'
+import { resolveWorktreeStatus, type WorktreeStatus } from '~renderer/lib/worktree-status'
+import { useAppStore } from '~renderer/store'
 
 import { selectWorktreeAgentActivitySummary } from './worktree-agent-activity-summary'
 import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card/helpers'

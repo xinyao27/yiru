@@ -1,21 +1,16 @@
 import { BookOpen, ArrowClockwise as RefreshCw, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { useAppStore } from '~renderer/store'
+import { skillDirectoryName, type DiscoveredSkill, type SkillDiscoveryResult } from '~shared/skills'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from '@/runtime/installed-agent-skill-discovery-state'
-import { useAppStore } from '@/store'
-
-import {
-  skillDirectoryName,
-  type DiscoveredSkill,
-  type SkillDiscoveryResult
-} from '../../../../shared/skills'
 import { filterSkills, type SkillsFilterState } from './filter'
 import { SkillInstallDialog, type SkillInstallRequest } from './install-dialog'
 import { SkillsInstalledPane } from './installed-pane'

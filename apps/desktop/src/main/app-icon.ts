@@ -7,6 +7,7 @@ import { dirname, resolve } from 'node:path'
 
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage } from 'electron'
+import { normalizeAppIconId, type AppIconId } from '~shared/app-icon'
 
 import blueIcon from '../../resources/app-icons/yiru-graphite.png?asset'
 import blueMacDockIcon from '../../resources/app-icons/yiru-graphite.png?asset&asarUnpack'
@@ -14,7 +15,6 @@ import watercolorIcon from '../../resources/app-icons/yiru-warm.png?asset'
 import watercolorMacDockIcon from '../../resources/app-icons/yiru-warm.png?asset&asarUnpack'
 import classicDevIcon from '../../resources/icon-dev.png?asset'
 import classicIcon from '../../resources/icon.png?asset'
-import { normalizeAppIconId, type AppIconId } from '../shared/app-icon'
 
 const APP_ICON_PATHS = {
   classic: is.dev ? classicDevIcon : classicIcon,

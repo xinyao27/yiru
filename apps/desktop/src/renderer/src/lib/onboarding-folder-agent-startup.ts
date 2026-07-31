@@ -1,18 +1,16 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-
-import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-
-import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
+import type { AgentStartedTelemetry } from '~renderer/lib/agent-started-telemetry'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent/launch-defaults'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent/selection'
-import type { GlobalSettings, OnboardingState, TuiAgent } from '../../../shared/types'
+} from '~shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { GlobalSettings, OnboardingState, TuiAgent } from '~shared/types'
 
 export type OnboardingFolderAgentStartup = {
   command: string

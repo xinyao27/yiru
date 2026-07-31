@@ -1,10 +1,14 @@
 import { Copy, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 const EMULATOR_EXAMPLE_PROMPTS = [
   'Using Yiru CLI, attach to the active iPhone simulator, sign in with the test account, complete onboarding, and tell me where the flow feels confusing.',

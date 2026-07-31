@@ -6,8 +6,8 @@ import type {
   HostedReviewForBranchArgs
 } from '@yiru/workbench-model/review'
 import { ipcMain } from 'electron'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../shared/types'
 import { resolveRegisteredWorktreePath } from '../filesystem/auth'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'

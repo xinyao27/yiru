@@ -1,5 +1,6 @@
-import type { Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { Repo } from '~shared/types'
+
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 

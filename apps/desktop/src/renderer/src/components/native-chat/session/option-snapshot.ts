@@ -1,16 +1,17 @@
+import { translate } from '~renderer/i18n/i18n'
 import {
   findCatalogModel,
   type AgentSessionOptionCatalog,
   type CatalogMidSessionApply,
   type CatalogModel,
   type CatalogOption
-} from '../../../../../shared/agent/session-option-catalog'
+} from '~shared/agent/session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionSelectChoice,
   SessionOptionValue
-} from '../../../../../shared/native-chat/session-options'
-import { translate } from '../../../i18n/i18n'
+} from '~shared/native-chat/session-options'
+
 import type { NativeChatSessionOptionRecord, TrackedNativeChatSessionOption } from './option-cache'
 
 export type NativeChatSessionOptionMode = 'draft' | 'live'

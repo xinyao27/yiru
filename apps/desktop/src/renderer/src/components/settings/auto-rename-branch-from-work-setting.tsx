@@ -1,23 +1,22 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { buildBranchNamePrompt } from '../../../../shared/branch-name-from-work'
-import { normalizeSourceControlAiSettings } from '../../../../shared/source-control/ai'
+import { Switch } from '~renderer/components/ui/switch'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { buildBranchNamePrompt } from '~shared/branch-name-from-work'
+import { normalizeSourceControlAiSettings } from '~shared/source-control/ai'
 import {
   resolveSourceControlActionCommandTemplate,
   setSourceControlActionDefault
-} from '../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
-} from '../../../../shared/source-control/ai-types'
-import type { GlobalSettings } from '../../../../shared/types'
-import { useAppStore } from '../../store'
+} from '~shared/source-control/ai-types'
+import type { GlobalSettings } from '~shared/types'
+
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { Button } from '../ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'

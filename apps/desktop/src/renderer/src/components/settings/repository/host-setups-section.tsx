@@ -4,17 +4,23 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { useMemo, useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { getProjectHostSetupProjectionFromState } from '~renderer/store/selectors'
+import { buildExecutionHostRegistry } from '~shared/execution-host-registry'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import type { Repo } from '~shared/types'
 
-import { buildExecutionHostRegistry } from '../../../../../shared/execution-host-registry'
-import { getHostDisplayLabelOverrides } from '../../../../../shared/host-setting-overrides'
-import type { Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { useAppStore } from '../../../store'
-import { getProjectHostSetupProjectionFromState } from '../../../store/selectors'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { SettingsBadge } from '../form-controls'
 import { matchesSettingsSearch } from '../search'
 import type { SettingsSearchEntry } from '../search'

@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
-import { MobileGlassGroup } from '../../components/glass/group'
-import { MobileGlassPressable } from '../../components/glass/pressable'
-import { MobileGlassSurface } from '../../components/glass/surface'
-import { MobileGlassTextButton } from '../../components/glass/text-button'
-import { Check } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { Check } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+
 import type { AskAnswerSelection, AskPrompt } from './ask'
 
 type Props = {

@@ -9,23 +9,22 @@ import {
   X
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getLiveBrowserUrl } from '@/runtime/browser-live-url'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getLiveBrowserUrl } from '~renderer/runtime/browser-live-url'
+import { redactKagiSessionToken } from '~shared/browser/url'
+import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
+import type { BrowserTab as BrowserTabState } from '~shared/types'
 
-import { redactKagiSessionToken } from '../../../../shared/browser/url'
-import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
-import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'

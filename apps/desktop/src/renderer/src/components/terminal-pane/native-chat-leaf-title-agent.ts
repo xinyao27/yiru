@@ -1,6 +1,5 @@
-import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
-
-import type { TuiAgent } from '../../../../shared/types'
+import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import type { TuiAgent } from '~shared/types'
 
 export type NativeChatLeafTitlePane = {
   id: number

@@ -1,13 +1,12 @@
 import { z } from 'zod'
-
+import type { MessageType } from '~main/runtime/orchestration/db'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { MESSAGE_TYPES } from '~main/runtime/orchestration/types'
 import {
   OptionalBoolean,
   OptionalFiniteNumber,
   OptionalString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import type { MessageType } from '../../../orchestration/db'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { MESSAGE_TYPES } from '../../../orchestration/types'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 export const MessageReadParams = z
   .object({

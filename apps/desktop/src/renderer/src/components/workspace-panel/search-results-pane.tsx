@@ -1,10 +1,9 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import React from 'react'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { SearchFileResult, SearchMatch, SearchResult } from '~shared/types'
 
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-import { translate } from '@/i18n/i18n'
-
-import type { SearchFileResult, SearchMatch, SearchResult } from '../../../../shared/types'
 import { FileResultRow, MatchResultRow } from './search-result-items'
 import type { SearchRow } from './search-rows'
 

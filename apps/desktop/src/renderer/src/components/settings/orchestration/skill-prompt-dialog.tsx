@@ -1,8 +1,6 @@
 import { Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +8,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 export function OrchestrationSkillPromptDialog(props: {
   command: string

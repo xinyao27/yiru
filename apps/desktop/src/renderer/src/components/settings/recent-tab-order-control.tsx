@@ -1,8 +1,7 @@
 import React from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import type { CtrlTabOrderMode } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-
-import type { CtrlTabOrderMode } from '../../../../shared/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { SettingsRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'

@@ -1,9 +1,8 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-import { acquireDirectSshDetectedWorktreeRefresh } from '@/store/slices/worktrees'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { acquireDirectSshDetectedWorktreeRefresh } from '~renderer/store/slices/worktrees'
 
 import { createDirectSshConnectionStateController } from './connection-state'
 import { createDirectSshHostHydration } from './host-hydration/hydration'

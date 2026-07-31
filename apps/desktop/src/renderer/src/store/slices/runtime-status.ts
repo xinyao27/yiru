@@ -1,13 +1,12 @@
 import type { StateCreator } from 'zustand'
-
 import {
   clearRecentRuntimeCompatibilityFailure,
   clearRuntimeCompatibilityCache,
   unwrapRuntimeRpcResult
-} from '@/runtime/rpc-client'
+} from '~renderer/runtime/rpc-client'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
 
-import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import type { AppState } from '../types'
 
 /** Live status for one saved runtime environment, as last observed by the

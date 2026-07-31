@@ -10,7 +10,7 @@
  * remote-runtime transports (which never see main's gate) must stay
  * structurally unaffected.
  */
-import type { PtyModelRestoreNeededEvent } from '../../../../../shared/pty-model-restore-marker'
+import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marker'
 
 const ptyModelRestoreNeededHandlers = new Map<string, (event: PtyModelRestoreNeededEvent) => void>()
 let modelRestoreNeededChannelAttached = false

@@ -6,29 +6,31 @@ import {
 } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
-
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
-} from '@/lib/workspace-session-hydration-keys'
+} from '~renderer/lib/workspace-session-hydration-keys'
 import {
   getExecutionHostIdForWorktree,
   getRuntimeEnvironmentIdForWorktree
-} from '@/lib/worktree-runtime-owner'
+} from '~renderer/lib/worktree-runtime-owner'
 import {
   callRuntimeRpc,
   getActiveRuntimeTarget,
   type RuntimeClientTarget
-} from '@/runtime/rpc-client'
-import { createWebSessionBrowserTabCommand } from '@/runtime/web-session-commands'
-import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-
-import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser/grab-types'
-import { redactKagiSessionToken } from '../../../../shared/browser/url'
-import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
+} from '~renderer/runtime/rpc-client'
+import { createWebSessionBrowserTabCommand } from '~renderer/runtime/web-session-commands'
+import { requestWebSessionTabsRefresh } from '~renderer/runtime/web-session-tabs-refresh-requests'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
+import { pushRecentlyClosedTabKind } from '~renderer/store/slices/recently-closed-tabs'
+import { pickNeighbor } from '~renderer/store/slices/tab-group-state'
+import type { AppState } from '~renderer/store/types'
+import { GRAB_BUDGET, type BrowserPageAnnotation } from '~shared/browser/grab-types'
+import { redactKagiSessionToken } from '~shared/browser/url'
+import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '~shared/constants'
 import type {
   BrowserDetectProfilesResult,
   BrowserProfileClearDefaultCookiesResult,
@@ -36,7 +38,7 @@ import type {
   BrowserProfileDeleteResult,
   BrowserProfileImportFromBrowserResult,
   BrowserProfileListResult
-} from '../../../../shared/runtime-types'
+} from '~shared/runtime-types'
 import type {
   BrowserCookieImportResult,
   BrowserCookieImportSummary,
@@ -48,17 +50,13 @@ import type {
   BrowserViewportPresetId,
   BrowserWorkspace,
   WorkspaceSessionState
-} from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
+} from '~shared/types'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
 import {
   MAX_BROWSER_HISTORY_ENTRIES,
   normalizeBrowserHistoryEntries,
   normalizeBrowserHistoryUrl
-} from '../../../../shared/workspace/session-browser-history'
-import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
-import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
-import { pickNeighbor } from '../../store/slices/tab-group-state'
-import type { AppState } from '../../store/types'
+} from '~shared/workspace/session-browser-history'
 
 type CreateBrowserTabOptions = {
   activate?: boolean

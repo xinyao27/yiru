@@ -1,19 +1,18 @@
 import { Check, Pencil, Trash as Trash2, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   getOpenInAppPreset,
   isOpenInAppPresetAdded,
   OpenInApplicationIcon,
   getOpenInAppPresets,
   type OpenInAppPreset
-} from '@/lib/open-in-app-catalog'
+} from '~renderer/lib/open-in-app-catalog'
+import { OPEN_IN_APPLICATIONS_MAX } from '~shared/open-in-applications'
+import type { GlobalSettings, OpenInApplication } from '~shared/types'
 
-import { OPEN_IN_APPLICATIONS_MAX } from '../../../../shared/open-in-applications'
-import type { GlobalSettings, OpenInApplication } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

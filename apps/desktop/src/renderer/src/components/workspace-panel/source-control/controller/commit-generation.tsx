@@ -1,17 +1,17 @@
 import { useCallback } from 'react'
-
-import { isCustomAgentId } from '../../../../../../shared/commit-message/agent-spec'
-import { getConnectionId } from '../../../../lib/connection-context'
-import {
-  generateRuntimeCommitMessage,
-  type RuntimeGenerateCommitMessageOverrides
-} from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
 import {
   createRunningCommitMessageGenerationRecord,
   resolveCommitMessageGenerationFailure,
   resolveCommitMessageGenerationSuccess
-} from '../../commit-message-generation-state'
+} from '~renderer/components/workspace-panel/commit-message-generation-state'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import {
+  generateRuntimeCommitMessage,
+  type RuntimeGenerateCommitMessageOverrides
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import { isCustomAgentId } from '~shared/commit-message/agent-spec'
+
 import type { CreatePrIntentRunToken } from '../create-pr-intent-flow'
 import { writeCommitDraftForWorktree } from '../panel-state'
 import { hasConfiguredCommitMessageGenerationDefaults } from '../text-generation-defaults'

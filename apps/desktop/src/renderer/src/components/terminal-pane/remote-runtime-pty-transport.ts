@@ -1,37 +1,39 @@
 /* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { setDriverForPty } from '@/lib/pane-manager/mobile-driver-state'
-import { setFitOverride } from '@/lib/pane-manager/mobile-fit-overrides'
-import { isWebTerminalSurfaceTabId, toHostSessionTabId } from '@/runtime/web-terminal-surface-id'
-
-import type {
-  RuntimeMobileSessionTerminalClientTab,
-  RuntimeMobileSessionTabsResult,
-  RuntimeTerminalCreate,
-  RuntimeTerminalSend
-} from '../../../../shared/runtime-types'
-import {
-  isTerminalInputTooLargeWithDeferredMeasurement,
-  iterateTerminalInputChunks
-} from '../../../../shared/terminal/input'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { setDriverForPty } from '~renderer/lib/pane-manager/mobile-driver-state'
+import { setFitOverride } from '~renderer/lib/pane-manager/mobile-fit-overrides'
 import {
   getRemoteRuntimeTerminalMultiplexer,
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
-} from '../../runtime/remote-runtime-terminal-multiplexer'
-import { unwrapRuntimeRpcResult } from '../../runtime/rpc-client'
+} from '~renderer/runtime/remote-runtime-terminal-multiplexer'
+import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle,
   runtimeTerminalErrorMessage,
   toRemoteRuntimePtyId
-} from '../../runtime/terminal-stream'
+} from '~renderer/runtime/terminal-stream'
+import {
+  isWebTerminalSurfaceTabId,
+  toHostSessionTabId
+} from '~renderer/runtime/web-terminal-surface-id'
 import {
   toRuntimeTerminalWorktreeSelector,
   toRuntimeWorktreeSelector
-} from '../../runtime/worktree-selector'
+} from '~renderer/runtime/worktree-selector'
+import type {
+  RuntimeMobileSessionTerminalClientTab,
+  RuntimeMobileSessionTabsResult,
+  RuntimeTerminalCreate,
+  RuntimeTerminalSend
+} from '~shared/runtime-types'
+import {
+  isTerminalInputTooLargeWithDeferredMeasurement,
+  iterateTerminalInputChunks
+} from '~shared/terminal/input'
+
 import { createPtyOutputProcessor } from './pty/transport'
 import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty/transport-types'
 import {

@@ -1,7 +1,6 @@
 import type React from 'react'
 import { useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-
-import type { CoworkingFileTreeEntry } from '../../../../shared/coworking/operation-contract'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import type { CoworkingFileTreeEntry } from '~shared/coworking/operation-contract'
 
 export type CoworkingFileAction =
   | { kind: 'new-file' }

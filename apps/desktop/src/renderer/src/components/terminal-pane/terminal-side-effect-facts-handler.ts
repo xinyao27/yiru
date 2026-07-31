@@ -1,8 +1,8 @@
-import type { TerminalGitHubPRLink } from '../../../../shared/terminal/github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../../../shared/terminal/side-effect-facts'
+} from '~shared/terminal/side-effect-facts'
 /**
  * Renderer consumer registry for the `pty:sideEffect` channel.
  *
@@ -16,7 +16,7 @@ import type {
  * registered consumer are dropped — mirroring today's eager-buffer behavior
  * where pre-mount output produces no attention side effects.
  */
-import type { GlobalSettings } from '../../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 // Why: cached once per session — the blocking read should only ever run on
 // the pre-hydration startup path, never per pane bind.

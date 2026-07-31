@@ -1,9 +1,9 @@
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
 
 import { reconcileTabOrder } from '../tab-bar/reconcile-order'
 

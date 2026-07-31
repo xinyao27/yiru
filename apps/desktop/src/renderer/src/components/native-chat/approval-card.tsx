@@ -1,7 +1,6 @@
 import { Shield as ShieldQuestion } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { cn } from '~renderer/lib/class-names'
 
 import type { ChatApproval } from './interactive-prompt'
 import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './layout'

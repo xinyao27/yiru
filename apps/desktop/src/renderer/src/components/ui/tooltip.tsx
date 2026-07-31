@@ -1,6 +1,5 @@
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
   return <TooltipPrimitive.Provider delay={delay} {...props} />

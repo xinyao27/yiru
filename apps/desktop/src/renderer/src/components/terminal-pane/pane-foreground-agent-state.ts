@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand'
-
-import type { TuiAgent } from '../../../../shared/types'
-import type { AppState } from '../../store/types'
+import type { AppState } from '~renderer/store/types'
+import type { TuiAgent } from '~shared/types'
 
 export type PaneForegroundAgentEntry = {
   /** Recognized agent process in the pane's foreground; null when unknown. */

@@ -1,4 +1,4 @@
-import type { GitStatusEntry } from '../../../../shared/types'
+import type { GitStatusEntry } from '~shared/types'
 
 export type DiscardAllArea = 'staged' | 'unstaged' | 'untracked'
 

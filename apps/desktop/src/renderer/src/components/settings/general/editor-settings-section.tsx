@@ -1,16 +1,16 @@
 import type React from 'react'
 import { useState } from 'react'
-
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import { clampNumber } from '~renderer/lib/terminal-theme'
 import {
   DEFAULT_EDITOR_AUTO_SAVE_DELAY_MS,
   MAX_EDITOR_AUTO_SAVE_DELAY_MS,
   MIN_EDITOR_AUTO_SAVE_DELAY_MS
-} from '../../../../../shared/constants'
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { clampNumber } from '../../../lib/terminal-theme'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
+} from '~shared/constants'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   createAutoSaveDelayDraftState,
   resolveAutoSaveDelayDraftState,

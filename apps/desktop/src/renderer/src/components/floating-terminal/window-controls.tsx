@@ -1,26 +1,25 @@
 import { Minus, ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import { useAppStore } from '@/store'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/session-option-defaults'
+import { Button } from '~renderer/components/ui/button'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog, AgentIcon } from '~renderer/lib/agent-catalog'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent/launch-defaults'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
+} from '~shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+
 import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 
 type FloatingTerminalWindowControlsProps = {

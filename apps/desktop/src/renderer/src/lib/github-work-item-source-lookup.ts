@@ -1,7 +1,7 @@
-import { callRuntimeRpc } from '@/runtime/rpc-client'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import type { GitHubWorkItem, GitHubWorkItemDetails } from '~shared/types'
 
-import type { ProjectSourceContext } from '../../../shared/project-source-context'
-import type { GitHubWorkItem, GitHubWorkItemDetails } from '../../../shared/types'
 import {
   getGitHubRuntimeRepoId,
   getGitHubSourceRuntimeHost,

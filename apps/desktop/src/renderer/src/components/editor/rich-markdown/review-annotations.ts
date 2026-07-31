@@ -1,8 +1,8 @@
 import type { JSONContent } from '@tiptap/core'
 import type { Editor } from '@tiptap/react'
 import type { Dispatch, SetStateAction } from 'react'
+import type { DiffComment } from '~shared/types'
 
-import type { DiffComment } from '../../../../../shared/types'
 import type { RichMarkdownAnnotationHighlightRange } from './annotation-highlight'
 import { getRichMarkdownLineRangeFromBlocks, getRichMarkdownRangeStart } from './range-bounds'
 import { countRichMarkdownReviewMarkdownLines } from './review-line-count'

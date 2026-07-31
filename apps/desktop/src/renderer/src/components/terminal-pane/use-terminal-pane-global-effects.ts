@@ -1,14 +1,13 @@
 import { useEffect, useRef } from 'react'
-
 import {
   FOCUS_TERMINAL_PANE_EVENT,
   PASTE_TERMINAL_TEXT_EVENT,
   TOGGLE_TERMINAL_PANE_EXPAND_EVENT,
   type FocusTerminalPaneDetail,
   type PasteTerminalTextDetail
-} from '@/constants/terminal'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { useAppStore } from '@/store'
+} from '~renderer/constants/terminal'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { useAppStore } from '~renderer/store'
 
 import { handleTerminalFileDrop } from './drop/handler'
 import { handleFocusTerminalPaneDetail } from './focus-terminal-pane-event'

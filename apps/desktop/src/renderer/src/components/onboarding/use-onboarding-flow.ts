@@ -1,19 +1,17 @@
 /* eslint-disable max-lines -- Why: this hook is the single orchestrator for every onboarding-step transition (navigation, persistence, telemetry, ref-mirror, auto-select); splitting would force callers to coordinate ordering across multiple hooks and lose the controller-shape contract onboarding-flow.tsx consumes. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { applyDocumentTheme } from '@/components/editor/document-theme'
-import { isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { getSelectedNestedRepoPathsInScanOrder } from '@/lib/nested-repo-selected-paths'
-import { buildOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
-import { track } from '@/lib/telemetry'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '../../../../shared/constants'
+import { applyDocumentTheme } from '~renderer/components/editor/document-theme'
+import { isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { getSelectedNestedRepoPathsInScanOrder } from '~renderer/lib/nested-repo-selected-paths'
+import { buildOnboardingFolderAgentStartup } from '~renderer/lib/onboarding-folder-agent-startup'
+import { track } from '~renderer/lib/telemetry'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '~shared/constants'
 import {
   buildNestedRepoImportActionTelemetry,
   buildNestedRepoImportResultTelemetry,
@@ -21,16 +19,17 @@ import {
   createNestedRepoTelemetryAttemptId,
   shouldEmitNestedRepoImportSubmitTelemetry,
   type NestedRepoTelemetryRuntimeKind
-} from '../../../../shared/nested-repo-telemetry'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import { resolveAgentPermissionModeSummary } from '../../../../shared/tui-agent/permissions'
+} from '~shared/nested-repo-telemetry'
+import { isGitRepoKind } from '~shared/repo-kind'
+import { resolveAgentPermissionModeSummary } from '~shared/tui-agent/permissions'
 import type {
   GlobalSettings,
   NestedRepoScanResult,
   OnboardingState,
   Repo,
   TuiAgent
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { openProjectDefaultCheckout } from '../sidebar/project-added-default-checkout'
 import { buildAgentPickedPayload } from './agent-picked-payload'
 import { resolveOnboardingSettingsHydration } from './settings-hydration'

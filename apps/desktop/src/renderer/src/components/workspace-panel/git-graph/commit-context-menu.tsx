@@ -15,15 +15,14 @@ import {
   Trash
 } from '@phosphor-icons/react'
 import type React from 'react'
-
 import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator
-} from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitHistoryItem } from '~shared/git/history'
 
-import type { GitHistoryItem } from '../../../../../shared/git/history'
 import type { GitGraphCommitAction } from './commit-write-action'
 
 // Why: mirrors vscode-git-graph's commit menu — the ref-moving and

@@ -5,16 +5,14 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   buildExecutionHostRegistry,
   type ExecutionHostHealth
-} from '../../../../shared/execution-host-registry'
-import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { GlobalSettings, Repo, WorkspaceHostScope } from '../../../../shared/types'
+} from '~shared/execution-host-registry'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import type { GlobalSettings, Repo, WorkspaceHostScope } from '~shared/types'
 
 export type SidebarHostOption = {
   id: ExecutionHostId

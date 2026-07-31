@@ -1,8 +1,7 @@
 import { Warning as AlertTriangle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,21 +9,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { SkillManageScope, SkillUpdateRun } from '~shared/skill-freshness'
 
-import type { SkillManageScope, SkillUpdateRun } from '../../../../shared/skill-freshness'
 import { describeSkillRunFailure, SkillRunLog } from './run-log'
 import {
   acknowledgeSkillUpdateRun,

@@ -8,8 +8,8 @@ import {
   addClaudeTeammateModeInProcess,
   isDirectClaudeCommand,
   type ClaudeAgentTeamsMode
-} from '../../shared/claude-agent-teams-tmux-compat'
-import { getYiruCliCommandNameForPlatform } from '../../shared/yiru-cli-command-name'
+} from '~shared/claude-agent-teams-tmux-compat'
+import { getYiruCliCommandNameForPlatform } from '~shared/yiru-cli-command-name'
 
 export type ClaudeAgentTeamsLaunchPlan = {
   command: string

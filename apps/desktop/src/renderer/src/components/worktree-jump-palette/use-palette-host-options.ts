@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
+import { buildSidebarHostOptions } from '~renderer/components/sidebar/host-options'
+import { getRepoHostIdentity } from '~renderer/store/slices/repo-host-identity'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
 
-import { buildSidebarHostOptions } from '@/components/sidebar/host-options'
-import { getRepoHostIdentity } from '@/store/slices/repo-host-identity'
-
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { PaletteStoreState } from './use-palette-store-state'
 
 type PaletteHostOptionsInput = Pick<

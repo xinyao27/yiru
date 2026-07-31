@@ -1,6 +1,5 @@
 import { useRef } from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import { MIN_PANEL_HEIGHT, MIN_PANEL_WIDTH, type FloatingTerminalPanelBounds } from './panel-bounds'
 

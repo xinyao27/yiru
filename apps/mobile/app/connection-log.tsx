@@ -3,8 +3,8 @@ import Constants from 'expo-constants'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { View, Text, Platform } from 'react-native'
 
-import { Copy, Check } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { Copy, Check } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
 import { MobileGlassGroup } from '../src/components/glass/group'

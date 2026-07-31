@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
-import { Check, CaretDown as ChevronDown } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { Check, CaretDown as ChevronDown } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { searchBaseRefs } from '../source-control/base-ref-search'
 import type { RpcClient } from '../transport/rpc-client'

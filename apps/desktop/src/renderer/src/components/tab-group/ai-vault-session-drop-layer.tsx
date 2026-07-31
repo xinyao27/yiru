@@ -1,22 +1,21 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   canResumeAiVaultSessionOnTarget,
   getAiVaultResumeWorkspaceExecutionHostId,
   getAiVaultResumeWorkspaceTargetStatus
-} from '@/lib/ai-vault-resume-target'
+} from '~renderer/lib/ai-vault-resume-target'
 import {
   AI_VAULT_SESSION_DRAG_END_EVENT,
   AI_VAULT_SESSION_DRAG_START_EVENT,
   clearAiVaultSessionDragData,
   hasAiVaultSessionDragData,
   readAiVaultSessionDragData
-} from '@/lib/ai-vault-session-drag'
-import { cn } from '@/lib/class-names'
-import { launchAiVaultSessionInNewTab } from '@/lib/launch-ai-vault-session'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/ai-vault-session-drag'
+import { cn } from '~renderer/lib/class-names'
+import { launchAiVaultSessionInNewTab } from '~renderer/lib/launch-ai-vault-session'
+import { useAppStore } from '~renderer/store'
 
 import { resolveDropZone } from './tab-drop-zone'
 import type { TabDropZone } from './use-tab-drag-split'

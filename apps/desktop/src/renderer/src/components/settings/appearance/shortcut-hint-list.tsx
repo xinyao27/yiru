@@ -1,8 +1,7 @@
 import type React from 'react'
-
-import type { ShortcutKeyComboDetails } from '../../../hooks/use-shortcut-label'
-import { translate } from '../../../i18n/i18n'
-import { ShortcutKeyCombo } from '../../shortcut-key-combo'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import type { ShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
 
 /** Renders the primary keyboard shortcut combo inline, or an "Unassigned"
  *  hint when the action has no binding. Platform-aware glyphs come from

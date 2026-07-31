@@ -1,6 +1,5 @@
 import type { ILinkProvider, Terminal } from '@xterm/xterm'
-
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-diagnostics'
 
 /**
  * Wrap a link provider so a synchronous throw inside `provideLinks` is reported

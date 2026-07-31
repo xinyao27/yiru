@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import type React from 'react'
-
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 
 import {
   commitShape,

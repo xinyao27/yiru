@@ -4,7 +4,7 @@ import {
   type KeybindingMatchOptions,
   type KeybindingOverrides,
   type PhysicalModifierToken
-} from '../../../shared/keybindings'
+} from '~shared/keybindings'
 
 // Partial<> on the key/modifier fields so a synthetic double-tap input (which
 // carries no key/modifier flags) satisfies this shape; target stays required.

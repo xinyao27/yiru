@@ -1,9 +1,8 @@
 import type React from 'react'
 import { createContext, useContext } from 'react'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
-import { cn } from '@/lib/class-names'
-
-import { useAppStore } from '../../store'
 import type { SettingsSearchEntry } from './search'
 import { matchesSettingsSearch } from './search'
 

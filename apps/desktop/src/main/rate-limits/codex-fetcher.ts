@@ -4,8 +4,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-
-import { extractCodexAuthError, isCodexAuthError } from '../../shared/codex-auth-errors'
+import { extractCodexAuthError, isCodexAuthError } from '~shared/codex-auth-errors'
 /* eslint-disable max-lines -- Why: keeping both Codex RPC and PTY fallback
 paths together in one file makes it easier to audit the protocol/parsing
 differences and ensure account-scoped env handling stays identical. */
@@ -13,11 +12,12 @@ import type {
   CodexRateLimitResetOutcome,
   ProviderRateLimits,
   RateLimitWindow
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
 import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
-} from '../../shared/wsl-login-shell-command'
+} from '~shared/wsl-login-shell-command'
+
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { resolveCodexCommand } from '../runtime/cli-command'
 import {

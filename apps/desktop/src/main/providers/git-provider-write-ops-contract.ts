@@ -8,7 +8,7 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '../../shared/git/write-op-results'
+} from '~shared/git/write-op-results'
 
 /**
  * The nine commit-graph write operations (tag, create-branch,

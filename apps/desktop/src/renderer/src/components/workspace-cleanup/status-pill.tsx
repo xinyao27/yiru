@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '~renderer/components/ui/badge'
 
 import type { StatusPillTone } from './candidate-row-data'
 

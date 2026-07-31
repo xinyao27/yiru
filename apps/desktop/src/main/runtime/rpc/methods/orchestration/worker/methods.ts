@@ -1,4 +1,5 @@
-import type { RpcMethod } from '../../../core'
+import type { RpcMethod } from '~main/runtime/rpc/core'
+
 import { ORCHESTRATION_WORKER_CONTROL_METHODS } from './control'
 import { ORCHESTRATION_WORKER_START_METHODS } from './start'
 import { ORCHESTRATION_WORKER_STOP_METHODS } from './stop'

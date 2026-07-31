@@ -1,11 +1,14 @@
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import {
   requestWorktreeNavigation,
   useHasWorktreeNavigationTargets
-} from '@/components/sidebar/worktree-navigation-request'
-import { Button } from '@/components/ui/button'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/sidebar/worktree-navigation-request'
+import { Button } from '~renderer/components/ui/button'
+import {
+  useShortcutKeyDetails,
+  type ShortcutKeyComboDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
 
 type LandingShortcut = {
   disabled: boolean

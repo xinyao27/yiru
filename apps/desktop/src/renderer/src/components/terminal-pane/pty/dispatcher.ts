@@ -1,3 +1,17 @@
+import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
+import { clampUtf8Tail, type EagerBufferChunk } from '~renderer/runtime/pty-eager-buffer-clamp'
+import {
+  ptyDataHandlers,
+  ptyDataSidecars,
+  ptyExitHandlers,
+  ptyReplayHandlers
+} from '~renderer/runtime/pty-handler-registry'
+import {
+  bufferPreHandlerPtyData,
+  clearPreHandlerPtyState,
+  drainPreHandlerPtyData,
+  drainPreHandlerPtyExit
+} from '~renderer/runtime/pty-pre-handler-buffer'
 /**
  * Singleton PTY event dispatcher and eager buffer helpers.
  *
@@ -5,21 +19,8 @@
  * co-locating the global handler maps that both the transport factory
  * and the eager-buffer reconnection logic share.
  */
-import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../../shared/terminal/scrollback-limits'
-import type { PtyDataMeta } from '../../../runtime/pty-data-meta'
-import { clampUtf8Tail, type EagerBufferChunk } from '../../../runtime/pty-eager-buffer-clamp'
-import {
-  ptyDataHandlers,
-  ptyDataSidecars,
-  ptyExitHandlers,
-  ptyReplayHandlers
-} from '../../../runtime/pty-handler-registry'
-import {
-  bufferPreHandlerPtyData,
-  clearPreHandlerPtyState,
-  drainPreHandlerPtyData,
-  drainPreHandlerPtyExit
-} from '../../../runtime/pty-pre-handler-buffer'
+import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '~shared/terminal/scrollback-limits'
+
 import {
   clearReceivedPtyCharTotal,
   recordPtyDataReceived,
@@ -39,7 +40,7 @@ import { deliverPtyExitToHandlers } from './exit-delivery'
 // PTY ID. Eliminates the N-listener problem that triggers
 // MaxListenersExceededWarning with many panes/tabs.
 
-export type { PtyDataMeta } from '../../../runtime/pty-data-meta'
+export type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
 
 export {
   ptyDataHandlers,
@@ -49,7 +50,7 @@ export {
   ptyTeardownHandlers,
   restorePtyDataHandlersAfterFailedShutdown,
   unregisterPtyDataHandlers
-} from '../../../runtime/pty-handler-registry'
+} from '~renderer/runtime/pty-handler-registry'
 
 const ptyExitSidecars = new Map<
   string,

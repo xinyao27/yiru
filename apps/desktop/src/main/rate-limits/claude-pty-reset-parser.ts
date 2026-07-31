@@ -1,4 +1,5 @@
-import type { RateLimitWindow } from '../../shared/rate-limit-types'
+import type { RateLimitWindow } from '~shared/rate-limit-types'
+
 import { buildWallClockTimestamp } from './time-zone-wall-clock'
 
 const RESET_LINE_RE = /resets?\s+(?:at\s+|in\s+)?(.+)/i

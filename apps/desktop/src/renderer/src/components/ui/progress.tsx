@@ -1,7 +1,6 @@
 import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 import { cva, type VariantProps } from 'class-variance-authority'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 const progressVariants = cva('relative overflow-hidden', {
   variants: {

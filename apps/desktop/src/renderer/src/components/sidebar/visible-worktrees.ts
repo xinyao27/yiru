@@ -5,13 +5,15 @@ import {
   type ExecutionHostId,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
+import {
+  getWorktreeIdsWithLiveAgent,
+  isInactiveWorkspace
+} from '~renderer/lib/worktree-activity-state'
+import { useAppStore } from '~renderer/store'
+import { getAllWorktreesFromState, getRepoMapFromState } from '~renderer/store/selectors'
+import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '~shared/constants'
+import type { Worktree, Repo, TerminalTab, WorktreeLineage } from '~shared/types'
 
-import { getWorktreeIdsWithLiveAgent, isInactiveWorkspace } from '@/lib/worktree-activity-state'
-import { useAppStore } from '@/store'
-import { getAllWorktreesFromState, getRepoMapFromState } from '@/store/selectors'
-
-import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
-import type { Worktree, Repo, TerminalTab, WorktreeLineage } from '../../../../shared/types'
 import { buildWorktreeComparator, sortWorktreesSmart } from './smart-sort'
 
 /**

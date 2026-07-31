@@ -1,9 +1,10 @@
-import type { GitResetToCommitResult } from '../../shared/git/write-op-results'
+import type { GitResetToCommitResult } from '~shared/git/write-op-results'
 import {
   hasCommittedHead,
   isWorkingTreeDirty,
   resolveCommitOid
-} from '../../shared/git/write-preconditions'
+} from '~shared/git/write-preconditions'
+
 import { gitExecFileAsync } from './runner'
 import { gitOptionsForWorktree, type GitRuntimeOptions } from './runtime-options'
 import { detectConflictOperation, runWithGitReadCacheInvalidation } from './status'

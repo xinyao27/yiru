@@ -1,7 +1,7 @@
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { shouldShutdownSimulatorForPaneUnmountFromTabs } from '~renderer/lib/simulator-tab-shutdown'
+import { useAppStore } from '~renderer/store'
 
-import { shouldShutdownSimulatorForPaneUnmountFromTabs } from '../../lib/simulator-tab-shutdown'
 import { cancelPendingSimulatorPaneShutdown } from '../emulator-pane/simulator-pane-shutdown-scheduler'
 import { findReusableRightSplitGroupId } from './emulator-right-split-target'
 

@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { parseManualNetworkAddress } from '~shared/network/manual-address'
 
-import { translate } from '@/i18n/i18n'
-
-import { parseManualNetworkAddress } from '../../../../shared/network/manual-address'
 import { AddressPicker, type AddressOption } from '../network/address-picker'
 import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 

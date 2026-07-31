@@ -3,9 +3,8 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: terminal pane lifecycle wiring is intentionally co-located so PTY attach, theme sync, and runtime graph publication remain consistent for live terminals. */
 import { useEffect, useRef } from 'react'
-
-import { resolveLocalhostHttpLinkDisplayUrl } from '@/components/editor/http-link-routing'
-import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import { resolveLocalhostHttpLinkDisplayUrl } from '~renderer/components/editor/http-link-routing'
+import { resolveTerminalLayoutActiveLeafId } from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   SPLIT_TERMINAL_PANE_EVENT,
   CLOSE_TERMINAL_PANE_EVENT,
@@ -13,59 +12,59 @@ import {
   type SplitTerminalPaneDetail,
   type CloseTerminalPaneDetail,
   type WakeHibernatedAgentsWorktreeDetail
-} from '@/constants/terminal'
-import { getConnectionId } from '@/lib/connection-context'
-import type { EffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/detect-option-as-alt'
+} from '~renderer/constants/terminal'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import type { EffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/detect-option-as-alt'
 import {
   PaneManager,
   type PaneExternalDropHandler,
   type PaneExternalDropResolver
-} from '@/lib/pane-manager/pane-manager'
-import { normalizeTerminalTuiMouseWheelMultiplier } from '@/lib/pane-manager/pane-terminal-mouse-wheel'
+} from '~renderer/lib/pane-manager/pane-manager'
+import { normalizeTerminalTuiMouseWheelMultiplier } from '~renderer/lib/pane-manager/pane-terminal-mouse-wheel'
 import {
   normalizeTerminalFastScrollSensitivity,
   normalizeTerminalScrollSensitivity,
   resolveTerminalCursorInactiveStyle
-} from '@/lib/pane-manager/pane-terminal-options'
+} from '~renderer/lib/pane-manager/pane-terminal-options'
 import {
   configureTerminalOutputBacklogCap,
   writeTerminalOutput
-} from '@/lib/pane-manager/pane-terminal-output-scheduler'
-import { buildTerminalKeyboardProtocolOptions } from '@/lib/pane-manager/terminal-keyboard-protocol'
-import { markTerminalPinnedViewport } from '@/lib/pane-manager/terminal-scroll-intent'
-import { syncTerminalScrollIntentSoon } from '@/lib/pane-manager/terminal-scroll-intent-settle'
-import { buildWindowsPtyCompatibilityOptions } from '@/lib/pane-manager/windows-pty-compatibility'
+} from '~renderer/lib/pane-manager/pane-terminal-output-scheduler'
+import { buildTerminalKeyboardProtocolOptions } from '~renderer/lib/pane-manager/terminal-keyboard-protocol'
+import { markTerminalPinnedViewport } from '~renderer/lib/pane-manager/terminal-scroll-intent'
+import { syncTerminalScrollIntentSoon } from '~renderer/lib/pane-manager/terminal-scroll-intent-settle'
+import { buildWindowsPtyCompatibilityOptions } from '~renderer/lib/pane-manager/windows-pty-compatibility'
 import {
   PRIMARY_SELECTION_MAX_LENGTH,
   isPrimarySelectionEnabled,
   setPrimarySelectionText
-} from '@/lib/primary-selection'
-import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
-import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
-import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
-import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/terminal-stream'
-import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
-
-import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
-import type { TerminalPaneSplitSource } from '../../../../shared/feature-education-telemetry'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import type { EventProps } from '../../../../shared/telemetry-events'
+} from '~renderer/lib/primary-selection'
+import { resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
+import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
 import {
-  DEFAULT_TERMINAL_FONT_SIZE,
-  resolveTerminalFontWeights
-} from '../../../../shared/terminal/fonts'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/scrollback-policy'
+  registerRuntimeTerminalTab,
+  scheduleRuntimeGraphSync
+} from '~renderer/runtime/sync-runtime-graph'
+import { getRemoteRuntimePtyEnvironmentId } from '~renderer/runtime/terminal-stream'
+import { consumePendingWebRuntimeSplitMirrorTelemetry } from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
+import { makePaneKey } from '~shared/stable-pane-id'
+import type { EventProps } from '~shared/telemetry-events'
+import { DEFAULT_TERMINAL_FONT_SIZE, resolveTerminalFontWeights } from '~shared/terminal/fonts'
+import type { TerminalKittyKeyboardModeTracker } from '~shared/terminal/kitty-keyboard-mode-tracker'
+import { normalizeTerminalLineHeight } from '~shared/terminal/line-height-settings'
+import { normalizeDesktopTerminalScrollbackRows } from '~shared/terminal/scrollback-policy'
 import type {
   GlobalSettings,
   SetupSplitDirection,
   TerminalTab,
   TerminalLayoutSnapshot,
   TuiAgent
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { closeTerminalTab } from '../terminal/tab-actions'
 import {
   resolveTabTitleAfterPaneClose,

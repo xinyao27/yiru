@@ -1,13 +1,15 @@
 import { MagnifyingGlass as Search, HardDrives as Server, ArrowLeft } from '@phosphor-icons/react'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { CSSProperties, RefObject } from 'react'
+import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type {
+  SettingsNavIcon,
+  SettingsNavInstallStatus
+} from '~renderer/lib/settings-navigation-types'
+import type { GitHubRepositoryIdentity } from '~shared/types'
 
-import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import type { SettingsNavIcon, SettingsNavInstallStatus } from '@/lib/settings-navigation-types'
-
-import type { GitHubRepositoryIdentity } from '../../../../shared/types'
 import { RepoForkIndicator } from '../repo/fork-indicator'
 import { RepoIconGlyph } from '../repo/icon'
 import { SetupGuideProgressRing } from '../setup-guide/progress-ring'

@@ -1,7 +1,6 @@
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { editor } from 'monaco-editor'
-
-import { measureTextControlPasteByteLength } from '@/lib/text-control-paste'
+import { measureTextControlPasteByteLength } from '~renderer/lib/text-control-paste'
 
 import {
   MONACO_PASTE_DIRECT_MAX_BYTES,

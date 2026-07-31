@@ -1,6 +1,5 @@
 import { createContext, useContext } from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 type IntegrationCardPresentation = 'default' | 'setup-guide'
 

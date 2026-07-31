@@ -1,6 +1,6 @@
 import React from 'react'
+import type { RightSidebarExplorerView } from '~shared/types'
 
-import type { RightSidebarExplorerView } from '../../../../../shared/types'
 import { FileExplorerViewSwitch } from './view-switch'
 
 type FileExplorerQueryStripProps = {

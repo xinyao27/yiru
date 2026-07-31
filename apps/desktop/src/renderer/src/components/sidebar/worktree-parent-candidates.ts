@@ -1,6 +1,6 @@
 import { getWorktreeExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { Repo, Worktree, WorktreeLineage } from '~shared/types'
 
-import type { Repo, Worktree, WorktreeLineage } from '../../../../shared/types'
 import { canAssignWorktreeParent } from './worktree-parent-eligibility'
 
 type ParentCandidateArgs = {

@@ -5,18 +5,18 @@ import {
   ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import React from 'react'
-
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   isDigitIndexActionId,
   type KeybindingActionId,
   type KeybindingDefinition,
   type KeybindingInput
-} from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Badge } from '../../ui/badge'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~shared/keybindings'
+
 import { SearchableSetting } from '../searchable-setting'
 import { ShortcutBindingSubRow } from './binding-sub-row'
 import { ShortcutRecorderButton } from './recorder-button'

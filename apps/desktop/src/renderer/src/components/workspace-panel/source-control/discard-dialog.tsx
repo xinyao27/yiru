@@ -1,9 +1,6 @@
 import { Trash, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
 import { useMemo, useRef } from 'react'
-
-import type { GitStatusEntry } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,7 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitStatusEntry } from '~shared/types'
+
 import type { DiscardAllArea } from '../discard-all-sequence'
 import {
   getDiscardAreaConfirmationCopy,

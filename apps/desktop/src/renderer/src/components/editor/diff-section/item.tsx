@@ -2,20 +2,19 @@ import type { DiffOnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor } from 'monaco-editor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MutableRefObject, ReactNode } from 'react'
-
-import { useAppStore } from '@/store'
-
-import type { DiffComment } from '../../../../../shared/types'
-import { detectLanguage } from '../../../lib/language-detect'
-import { selectWorktreeDiffComments } from '../../../store/worktree-diff-comments-selector'
 import {
   getDiffCommentPopoverLeft,
   getDiffCommentPopoverTop
-} from '../../diff-comments/diff-comment-popover-position'
+} from '~renderer/components/diff-comments/diff-comment-popover-position'
 import {
   useDiffCommentDecorator,
   type DecoratedDiffComment
-} from '../../diff-comments/use-diff-comment-decorator'
+} from '~renderer/components/diff-comments/use-diff-comment-decorator'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { useAppStore } from '~renderer/store'
+import { selectWorktreeDiffComments } from '~renderer/store/worktree-diff-comments-selector'
+import type { DiffComment } from '~shared/types'
+
 import { isDiffComment } from '../diff-comment-compat'
 import { applyDiffEditorLineNumberOptions } from '../diff-editor-line-number-options'
 import { disposeUnattachedMonacoModelPaths } from '../diff-monaco-model-disposal'

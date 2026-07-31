@@ -7,14 +7,13 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getDetectedSetupScriptTextareaRows } from '@/lib/script-textarea-rows'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getDetectedSetupScriptTextareaRows } from '~renderer/lib/script-textarea-rows'
 
 type DismissButtonProps = {
   onDismiss: () => void

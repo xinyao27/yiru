@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { GitMerge, Chat as MessageSquare } from '@/components/uniwind-icons'
+import { GitMerge, Chat as MessageSquare } from '~/components/uniwind-icons'
 
 import { statusColorClasses, type StatusColorClasses } from './pr-sidebar/status-color'
 import { prStateToken } from './pr-state-token'

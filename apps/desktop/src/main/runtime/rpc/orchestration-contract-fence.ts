@@ -1,11 +1,11 @@
 import { ORCHESTRATION_CONTRACT_VERSION } from '@yiru/runtime-protocol/capabilities'
-
 import {
   isOrchestrationMutation,
   isRetiredOrchestrationMethod,
   orchestrationMigrationData,
   type OrchestrationMigrationReason
-} from '../../../shared/orchestration-rpc-contract'
+} from '~shared/orchestration-rpc-contract'
+
 import type { RpcEnvelopeMeta, RpcRequest, RpcResponse } from './core'
 import { errorResponse } from './errors'
 

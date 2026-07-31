@@ -1,4 +1,5 @@
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+
 import type { PtyBufferSnapshot } from './pty/transport-types'
 
 export type SshReattachModelReplay = {

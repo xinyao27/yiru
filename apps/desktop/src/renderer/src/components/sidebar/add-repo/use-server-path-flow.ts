@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-
+import { track } from '~renderer/lib/telemetry'
 import {
   buildNestedRepoScanTelemetry,
   createNestedRepoTelemetryAttemptId,
   type NestedRepoTelemetryRuntimeKind
-} from '../../../../../shared/nested-repo-telemetry'
-import { isGitRepoKind } from '../../../../../shared/repo-kind'
-import type { AddRepoExistingWorkspaceSource } from '../../../../../shared/telemetry-events'
-import type { NestedRepoScanResult, Repo } from '../../../../../shared/types'
-import { track } from '../../../lib/telemetry'
+} from '~shared/nested-repo-telemetry'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { AddRepoExistingWorkspaceSource } from '~shared/telemetry-events'
+import type { NestedRepoScanResult, Repo } from '~shared/types'
+
 import { markOnboardingProjectAdded } from '../onboarding-project-checklist'
 import { createNestedRepoScanId } from './dialog-types'
 

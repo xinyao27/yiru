@@ -1,10 +1,10 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   forEachSparseDirectoryInputLine,
   hasSparseDirectoryParentSegment,
   isAbsoluteSparseDirectoryPath,
   normalizeSparseDirectoryLines
-} from '@/lib/sparse-paths'
+} from '~renderer/lib/sparse-paths'
 
 export type SparsePresetDirectoryParseResult = {
   directories: string[]

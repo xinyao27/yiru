@@ -1,12 +1,11 @@
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
+import { isTuiAgent } from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
-import { useAppStore } from '@/store'
-
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTuiAgent } from '../../../../shared/tui-agent/config'
-import type { TuiAgent } from '../../../../shared/types'
 import {
   buildAgentSessionContinuationPrompt,
   type AgentSessionContinuationRequest

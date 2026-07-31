@@ -1,6 +1,5 @@
-import { detectLanguage } from '@/lib/language-detect'
-
-import type { SearchFileResult, SearchMatch } from '../../../../shared/types'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import type { SearchFileResult, SearchMatch } from '~shared/types'
 
 export function cancelRevealFrame(frameRef: React.RefObject<number | null>): void {
   if (frameRef.current !== null) {

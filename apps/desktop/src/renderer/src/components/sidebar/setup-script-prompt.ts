@@ -1,10 +1,9 @@
-import type { HookCheckResult } from '@/runtime/hooks-client'
-import { isRuntimeScopeForbiddenError } from '@/runtime/rpc-client'
-
-import { getDefaultRepoHookSettings } from '../../../../shared/constants'
-import { resolveHookCommandSourcePolicy } from '../../../../shared/hook-command-source-policy'
-import type { SetupScriptImportCandidate } from '../../../../shared/setup/script-imports'
-import type { Repo, RepoHookSettings } from '../../../../shared/types'
+import type { HookCheckResult } from '~renderer/runtime/hooks-client'
+import { isRuntimeScopeForbiddenError } from '~renderer/runtime/rpc-client'
+import { getDefaultRepoHookSettings } from '~shared/constants'
+import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
+import type { SetupScriptImportCandidate } from '~shared/setup/script-imports'
+import type { Repo, RepoHookSettings } from '~shared/types'
 
 const SETUP_SCRIPT_PROMPT_DISMISSAL_PREFIX = 'generation-v1:'
 

@@ -3,7 +3,6 @@ import {
   Sidebar as PanelRightClose,
   TerminalWindow as SquareTerminal
 } from '@phosphor-icons/react'
-
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -11,8 +10,8 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 import { requestActiveTerminalPaneSplit } from './request-active-terminal-pane-split'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'

@@ -1,5 +1,4 @@
 import { ipcMain } from 'electron'
-
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   type WorkspaceCleanupDismissArgs,
@@ -7,7 +6,8 @@ import {
   type WorkspaceCleanupLocalProcessResult,
   type WorkspaceCleanupScanArgs,
   type WorkspaceCleanupScanResult
-} from '../../shared/workspace/cleanup'
+} from '~shared/workspace/cleanup'
+
 import { listRegisteredPtys } from '../memory/pty-registry'
 import type { Store } from '../persistence'
 import type { IPtyProvider } from '../providers/types'

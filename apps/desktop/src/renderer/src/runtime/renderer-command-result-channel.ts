@@ -1,11 +1,10 @@
-import type { RemoteOperationErrorOptions } from '@/lib/source-control-remote-error'
-
+import type { RemoteOperationErrorOptions } from '~renderer/lib/source-control-remote-error'
 import type {
   LocalBaseRefRefreshResult,
   LocalBaseRefUpdateSuggestion,
   RemoveWorktreeResult,
   Worktree
-} from '../../../shared/types'
+} from '~shared/types'
 
 export type RendererCommandResult =
   | {

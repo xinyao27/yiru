@@ -1,13 +1,13 @@
-import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { RuntimeTerminalSend, RuntimeTerminalWait } from '../../../../shared/runtime-types'
-import { POST_PASTE_SUBMIT_DELAY_MS } from '../../lib/agent-paste-submit-delay'
+import { POST_PASTE_SUBMIT_DELAY_MS } from '~renderer/lib/agent-paste-submit-delay'
 import {
   BRACKETED_PASTE_END,
   BRACKETED_PASTE_START,
   sanitizeTerminalPasteText
-} from '../../lib/terminal-bracketed-paste'
+} from '~renderer/lib/terminal-bracketed-paste'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { RuntimeTerminalSend, RuntimeTerminalWait } from '~shared/runtime-types'
+
 import type { ActiveAgentNotesSendResult } from './active-agent-note-send-result'
 import {
   findActiveRuntimeTerminal,

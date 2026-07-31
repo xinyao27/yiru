@@ -1,6 +1,6 @@
 import React from 'react'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
 import { WorktreeTitleInlineRename } from '../worktree-title-inline-rename'
 
 type WorktreeCardHoverIdentityHeaderProps = {

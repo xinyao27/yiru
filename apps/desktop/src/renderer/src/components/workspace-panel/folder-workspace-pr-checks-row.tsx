@@ -3,14 +3,13 @@ import {
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
 
-import { openHttpLink } from '@/components/editor/http-link-routing'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import {
   CHECK_COLOR,
   CHECK_ICON,

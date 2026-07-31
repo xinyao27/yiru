@@ -1,9 +1,8 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 // Why: these rows are the top level of the same tree as the files below them, so
 // the metrics mirror Pierre's row CSS (26px tall, 8px inline padding, 12px text,

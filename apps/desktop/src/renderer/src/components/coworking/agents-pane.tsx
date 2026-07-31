@@ -1,19 +1,18 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import type React from 'react'
 import { useMemo } from 'react'
-
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon, getAgentLabel } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
-} from '../../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
+
 import { AiVaultPanelNotice, AiVaultPanelSurface } from '../workspace-panel/ai-vault/panel-surface'
 import { getCoworkingSessionCatalogStatusLabel } from './session-catalog-status'
 

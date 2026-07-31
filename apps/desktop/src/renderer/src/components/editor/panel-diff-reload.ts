@@ -1,6 +1,5 @@
-import type { OpenFile } from '@/components/editor/state'
-
-import type { GitStatusEntry } from '../../../../shared/types'
+import type { OpenFile } from '~renderer/components/editor/state'
+import type { GitStatusEntry } from '~shared/types'
 
 export function isReloadableSingleFileDiffTab(file: OpenFile): boolean {
   return (

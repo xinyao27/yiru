@@ -3,8 +3,8 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../../../shared/types'
 import type { SidebarHostOption } from '../sidebar/host-options'
 
 export type PaletteHostBadge = {

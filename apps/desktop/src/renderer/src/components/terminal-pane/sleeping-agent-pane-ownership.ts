@@ -1,13 +1,7 @@
 import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
-
-import type { useAppStore } from '@/store'
-
-import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../../shared/stable-pane-id'
-import type {
-  TerminalLayoutSnapshot,
-  TerminalPaneLayoutNode,
-  TerminalTab
-} from '../../../../shared/types'
+import type { useAppStore } from '~renderer/store'
+import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, TerminalTab } from '~shared/types'
 
 type AppStoreState = ReturnType<typeof useAppStore.getState>
 

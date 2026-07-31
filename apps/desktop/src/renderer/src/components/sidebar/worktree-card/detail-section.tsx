@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { cn } from '../../../lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 type WorktreeCardDetailSectionProps = React.HTMLAttributes<HTMLElement>
 type WorktreeCardDetailSectionContentProps = React.HTMLAttributes<HTMLDivElement>

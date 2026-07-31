@@ -3,15 +3,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { View, PanResponder, type TextStyle, type ViewStyle } from 'react-native'
 import { useResolveClassNames } from 'uniwind'
 
-import { useResponsiveLayout } from '../../src/layout/responsive-layout'
-import { shouldUseNativeSessionHeader } from '../../src/session/header-mode'
+import { useResponsiveLayout } from '~/layout/responsive-layout'
+import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import {
   HOST_SIDEBAR_DEFAULT_WIDTH,
   HOST_SIDEBAR_MAX_WIDTH,
   HOST_SIDEBAR_MIN_WIDTH,
   loadHostSidebarWidth,
   saveHostSidebarWidth
-} from '../../src/storage/preferences'
+} from '~/storage/preferences'
+
 import { HostScreen } from './[hostId]/index'
 
 // Keep at least this much room for the detail pane when resizing the sidebar.

@@ -1,13 +1,12 @@
 import type React from 'react'
-
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { RightSidebarPanelContent } from '@/components/workspace-panel/right-sidebar-panel-content'
-
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { RightSidebarPanelContent } from '~renderer/components/workspace-panel/right-sidebar-panel-content'
 import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
-} from '../../../../shared/coworking/catalog-contract'
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+} from '~shared/coworking/catalog-contract'
+import type { WorkspacePanelTabContentType } from '~shared/types'
+
 import type { SourceControlPanelView } from '../workspace-panel/source-control/workspace-panel/state'
 import type { CoworkingChecksReadState } from './checks-pane'
 import { getCoworkingWorkspacePanelTabId } from './workspace-panel-tab'

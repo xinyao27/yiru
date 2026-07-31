@@ -1,6 +1,5 @@
 import { ALL_EXECUTION_HOSTS_SCOPE, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type React from 'react'
-
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
@@ -8,10 +7,10 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import type { VisibleWorkspaceHostIds, WorkspaceHostScope } from '~shared/types'
 
-import type { VisibleWorkspaceHostIds, WorkspaceHostScope } from '../../../../shared/types'
 import { getSidebarHostHealthLabel, type SidebarHostOption } from './host-options'
 
 type SidebarHostScopeMenuSectionProps = {

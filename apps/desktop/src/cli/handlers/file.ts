@@ -1,7 +1,7 @@
 import type { GitStatusEntry } from '@yiru/workbench-model/review'
+import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
+import type { RuntimeFileOpenResult } from '~shared/runtime-types'
 
-import { GIT_STATUS_CONTRACT } from '../../shared/runtime-method-contracts/source-control-contracts'
-import type { RuntimeFileOpenResult } from '../../shared/runtime-types'
 import type { CommandHandler, HandlerContext } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
 import { printResult } from '../format'

@@ -1,18 +1,17 @@
 import { Check, HardDrive, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionState,
   DeveloperPermissionStatus
-} from '../../../../shared/developer-permissions-types'
+} from '~shared/developer-permissions-types'
+
 import { isMacUserAgent } from '../terminal-pane/pane-helpers'
 
 type FullDiskAccessStatusState = {

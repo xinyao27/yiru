@@ -1,8 +1,7 @@
 import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { normalizeManualRepoOrder } from '../../shared/manual-repo-order'
-import { parseAppSshPtyId, toAppSshPtyId } from '../../shared/ssh-pty-id'
-import type { PersistedUIState, WorkspaceSessionState } from '../../shared/types'
+import { normalizeManualRepoOrder } from '~shared/manual-repo-order'
+import { parseAppSshPtyId, toAppSshPtyId } from '~shared/ssh-pty-id'
+import type { PersistedUIState, WorkspaceSessionState } from '~shared/types'
 
 /**
  * Carrier sweep for SSH target re-adoption (see target-readoption.ts).

@@ -1,4 +1,5 @@
-import type { Worktree, WorktreeLineage } from '../../../../shared/types'
+import type { Worktree, WorktreeLineage } from '~shared/types'
+
 import { getLineageRenderInfo } from './worktree-list-groups'
 
 type ParentEligibilityArgs = {

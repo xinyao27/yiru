@@ -1,4 +1,5 @@
-import { canonicalizeSkillInstallSource } from '../../../../shared/skill-freshness'
+import { canonicalizeSkillInstallSource } from '~shared/skill-freshness'
+
 import type { SkillInstallRequest } from './install-dialog'
 
 export const SKILLS_MARKETPLACE_URL = 'https://skills.sh'

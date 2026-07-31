@@ -1,6 +1,5 @@
 import type { AgentStatusEntry, AgentStatusOrchestrationContext } from '@yiru/workbench-model/agent'
-
-import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../../shared/stable-pane-id'
+import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
 
 export type AgentStatusPaneIdentity = { tabId: string; paneId: string }
 

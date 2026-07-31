@@ -1,4 +1,5 @@
-import { recordTerminalWebglDiagnostic } from '../../../../shared/terminal/webgl-diagnostics'
+import { recordTerminalWebglDiagnostic } from '~shared/terminal/webgl-diagnostics'
+
 import type { PaneRenderingDiagnostics } from './types'
 
 type RegisteredPaneManager = {

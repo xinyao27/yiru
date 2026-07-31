@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { useAppStore } from '@/store'
-
-import type { AgentsStepId } from '../../../../shared/agents-orchestration-steps'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { useAppStore } from '~renderer/store'
+import type { AgentsStepId } from '~shared/agents-orchestration-steps'
 import {
   getCommitMessageAgentCapability,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../../../../shared/commit-message/agent-spec'
-import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
-import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
-import type { ReviewStepId } from '../../../../shared/review-steps'
-import type { WorkbenchStepId } from '../../../../shared/workbench-steps'
+} from '~shared/commit-message/agent-spec'
+import type { FeatureWallTourDepthSummary } from '~shared/feature-wall-tour-depth'
+import type { FeatureWallWorkflowId } from '~shared/feature-wall-workflows'
+import type { ReviewStepId } from '~shared/review-steps'
+import type { WorkbenchStepId } from '~shared/workbench-steps'
+
 import {
   FEATURE_WALL_AGENT_STEP_IDS,
   FEATURE_WALL_REVIEW_STEP_IDS,

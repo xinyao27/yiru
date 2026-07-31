@@ -8,9 +8,9 @@ import {
   FileText,
   Folder,
   Image as ImageIcon
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import { triggerSelection } from '../platform/haptics'

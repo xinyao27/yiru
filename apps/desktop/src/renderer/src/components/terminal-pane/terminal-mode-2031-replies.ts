@@ -1,5 +1,6 @@
-import { mode2031SequenceFor } from '../../../../shared/terminal/color-scheme-protocol'
-import type { TerminalColorSchemeMode } from '../../../../shared/terminal/color-scheme-protocol'
+import { mode2031SequenceFor } from '~shared/terminal/color-scheme-protocol'
+import type { TerminalColorSchemeMode } from '~shared/terminal/color-scheme-protocol'
+
 import type { PtyTransport } from './pty/transport'
 
 const MODE_2031_CONNECT_RETRY_MS = 25

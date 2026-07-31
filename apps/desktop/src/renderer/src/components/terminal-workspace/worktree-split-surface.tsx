@@ -1,9 +1,9 @@
 import React from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useBrowserMobileDriverForAny } from '~renderer/lib/pane-manager/browser-mobile-driver-state'
+import { useAppStore } from '~renderer/store'
+import type { TabGroupLayoutNode } from '~shared/types'
 
-import type { TabGroupLayoutNode } from '../../../../shared/types'
-import { useBrowserMobileDriverForAny } from '../../lib/pane-manager/browser-mobile-driver-state'
-import { useAppStore } from '../../store'
 import { useBrowserAutomationVisibilityForAny } from '../browser-pane/browser-automation-visibility'
 import BrowserPaneOverlayLayer from '../browser-pane/overlay-layer'
 import CodexRestartChip from '../codex-restart-chip'

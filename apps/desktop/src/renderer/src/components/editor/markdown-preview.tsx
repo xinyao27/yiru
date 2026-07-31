@@ -42,43 +42,46 @@ import { toast } from 'sonner'
 import './markdown.css'
 import './markdown-review.css'
 import 'katex/dist/katex.min.css'
-import { createConnectionIdForFileSelector } from '@/components/editor/connection-owner-resolution'
-import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
-import { computeEditorFontSize } from '@/components/editor/font-zoom'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import { createConnectionIdForFileSelector } from '~renderer/components/editor/connection-owner-resolution'
+import { isMarkdownComment } from '~renderer/components/editor/diff-comment-compat'
+import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
+import {
+  openHttpLink,
+  type HttpLinkSourceOwner
+} from '~renderer/components/editor/http-link-routing'
 import {
   isLocalPathOpenBlocked,
   showLocalPathOpenBlockedToast
-} from '@/components/editor/local-path-open-guard'
+} from '~renderer/components/editor/local-path-open-guard'
 import {
   absolutePathToFileUri,
   resolveMarkdownLinkTarget
-} from '@/components/editor/markdown-internal-links'
-import { copyMarkdownReviewNotesForAgent } from '@/components/editor/markdown-review-note-copy'
+} from '~renderer/components/editor/markdown-internal-links'
+import { copyMarkdownReviewNotesForAgent } from '~renderer/components/editor/markdown-review-note-copy'
 import {
   formatMarkdownReviewCardQuote,
   formatMarkdownReviewNotes,
   getMarkdownReviewCardQuote,
   sortMarkdownReviewNotes,
   type MarkdownReviewNote
-} from '@/components/editor/markdown-review-notes'
-import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getConnectionIdForFile } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { dirname } from '@/lib/path'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { statRuntimePath } from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+} from '~renderer/components/editor/markdown-review-notes'
+import { scrollTopCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { dirname } from '~renderer/lib/path'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { statRuntimePath } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { DiffComment, MarkdownDocument, Worktree } from '~shared/types'
 
-import type { DiffComment, MarkdownDocument, Worktree } from '../../../../shared/types'
 import { DiffCommentCard } from '../diff-comments/diff-comment-card'
 import CodeBlockCopyButton from './code-block-copy-button'
 import {

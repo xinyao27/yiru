@@ -3,11 +3,11 @@ import {
   getNextTabAcrossAllTypes,
   getNextTabWithinActiveType,
   type TypeCyclableTab
-} from '@/components/terminal/tab-type-cycle'
+} from '~renderer/components/terminal/tab-type-cycle'
+import { useAppStore } from '~renderer/store'
+import { sanitizeRecentTabIds } from '~renderer/store/slices/tab-group-state'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { useAppStore } from '../../store'
-import { sanitizeRecentTabIds } from '../../store/slices/tab-group-state'
 import { getActiveTabNavOrder } from './group-tab-order'
 
 type AppStoreState = ReturnType<typeof useAppStore.getState>

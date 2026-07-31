@@ -1,12 +1,11 @@
 import React, { useEffect, useCallback, useMemo } from 'react'
+import { cn } from '~renderer/lib/class-names'
+import { setForegroundTerminalTabIds } from '~renderer/lib/foreground-terminal-tabs'
+import { useAppStore } from '~renderer/store'
+import { useAllWorktrees } from '~renderer/store/selectors'
+import { hasFeatureInteraction } from '~shared/feature-interactions'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
 
-import { cn } from '@/lib/class-names'
-import { setForegroundTerminalTabIds } from '@/lib/foreground-terminal-tabs'
-
-import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
-import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
-import { useAppStore } from '../../store'
-import { useAllWorktrees } from '../../store/selectors'
 import { useContextualTour } from '../contextual-tours/use-contextual-tour'
 import EditorAutosaveController from '../editor/autosave-controller-host'
 import { TAB_CONTENT_SURFACE_CLASSES } from '../tab-bar/tab-chrome-classes'

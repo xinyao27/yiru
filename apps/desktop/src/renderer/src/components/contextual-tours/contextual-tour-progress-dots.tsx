@@ -1,7 +1,6 @@
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 export function ContextualTourProgressDots({
   current,

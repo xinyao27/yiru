@@ -4,12 +4,11 @@
 // be uploaded first, exactly like terminal drops (docs/terminal-drop-ssh.md).
 
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import type { AppState } from '@/store/types'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import type { AppState } from '~renderer/store/types'
 
 import { reportTerminalDropUploadSkipsAndFailures } from '../terminal-pane/drop/upload-report'
 import { findTerminalTabWorktreeId, resolveNativeChatFileLinkContext } from './file-link'

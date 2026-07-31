@@ -1,5 +1,5 @@
-import type { RuntimeMobileSessionTabGroup } from '../../shared/runtime-types'
-import type { TabGroupLayoutNode } from '../../shared/types'
+import type { RuntimeMobileSessionTabGroup } from '~shared/runtime-types'
+import type { TabGroupLayoutNode } from '~shared/types'
 
 /**
  * Headless ("Yiru server") tab-GROUP split operations (distinct from terminal

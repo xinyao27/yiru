@@ -4,10 +4,9 @@ import {
   Terminal,
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import {
   useIntegrationCommandRowClass,

@@ -1,7 +1,7 @@
 import type {
   CoworkingControlGrant,
   CoworkingControlRequest
-} from '../../../shared/coworking/access-contract'
+} from '~shared/coworking/access-contract'
 import type {
   CoworkingDecideControlArgs,
   CoworkingOwnerControlGrantView,
@@ -14,11 +14,12 @@ import type {
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
-} from '../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../../../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
+
 import type { CoworkingSharingIpcController } from '../sharing'
 import { CoworkingWindowsFirewallRecovery } from '../windows-firewall-recovery'
 import type { CoworkingOwnerCatalogSnapshot, CoworkingRequesterSubscriptionSink } from './catalog'

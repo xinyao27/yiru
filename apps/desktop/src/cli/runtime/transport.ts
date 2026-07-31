@@ -2,13 +2,13 @@ import { randomUUID } from 'node:crypto'
 import { createConnection } from 'node:net'
 
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
-
-import { findTransport, type RuntimeMetadata } from '../../shared/runtime-bootstrap'
+import { findTransport, type RuntimeMetadata } from '~shared/runtime-bootstrap'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../shared/runtime-method-contract'
+} from '~shared/runtime-method-contract'
+
 import { isKeepaliveFrame, RuntimeRpcEnvelopeSchema } from './envelope-schema'
 import { RuntimeClientError, type RuntimeRpcResponse } from './types'
 

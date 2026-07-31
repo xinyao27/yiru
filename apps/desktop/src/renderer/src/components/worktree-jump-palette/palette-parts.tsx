@@ -1,11 +1,10 @@
 import type React from 'react'
-
-import type { PaletteHostBadge } from '@/components/cmd-j/palette-host-badge'
+import type { PaletteHostBadge } from '~renderer/components/cmd-j/palette-host-badge'
 import type {
   MatchRange,
   PaletteSearchResult
-} from '@/components/worktree-jump-palette/worktree-palette-search'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/worktree-jump-palette/worktree-palette-search'
+import { translate } from '~renderer/i18n/i18n'
 
 export function HighlightedText({
   text,

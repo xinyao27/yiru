@@ -16,53 +16,52 @@ import {
   type MutableRefObject
 } from 'react'
 import { toast } from 'sonner'
-
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import { applyDocumentTheme } from '@/components/editor/document-theme'
-import { useSkillFreshness } from '@/components/skills/use-skill-freshness'
-import { isMacUserAgent, isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
-import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
+import { applyDocumentTheme } from '~renderer/components/editor/document-theme'
+import { useSkillFreshness } from '~renderer/components/skills/use-skill-freshness'
+import { isMacUserAgent, isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { useSystemPrefersDark } from '~renderer/components/terminal-pane/use-system-prefers-dark'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
 import {
   COMPUTER_USE_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
-} from '@/lib/agent-feature-install-commands'
-import { cn } from '@/lib/class-names'
+} from '~renderer/lib/agent-feature-install-commands'
+import { cn } from '~renderer/lib/class-names'
 import type {
   SettingsNavGroup,
   SettingsNavInstallStatus,
   SettingsNavSection,
   SettingsNavTarget
-} from '@/lib/settings-navigation-types'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { getSkillFreshnessDisplayStatus } from '@/lib/skill-freshness-display-status'
-import { isIntentionalAppRestartInProgress } from '@/lib/updater-beforeunload'
+} from '~renderer/lib/settings-navigation-types'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { getSkillFreshnessDisplayStatus } from '~renderer/lib/skill-freshness-display-status'
+import { isIntentionalAppRestartInProgress } from '~renderer/lib/updater-beforeunload'
 import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
-} from '@/lib/windows-terminal-capabilities'
-import { checkRuntimeHooks } from '@/runtime/hooks-client'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import { DEFAULT_APP_FONT_FAMILY, getDefaultVoiceSettings } from '../../../../shared/constants'
-import { keybindingMatchesAction } from '../../../../shared/keybindings'
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'
-import { normalizeSourceControlAiSettings } from '../../../../shared/source-control/ai'
+} from '~renderer/lib/windows-terminal-capabilities'
+import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { getProjectHostSetupProjectionFromState } from '~renderer/store/selectors'
+import { getRepoHostIdentity } from '~renderer/store/slices/repo-host-identity'
+import { DEFAULT_APP_FONT_FAMILY, getDefaultVoiceSettings } from '~shared/constants'
+import { keybindingMatchesAction } from '~shared/keybindings'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { SkillFreshnessInventory } from '~shared/skill-freshness'
+import { normalizeSourceControlAiSettings } from '~shared/source-control/ai'
 import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
-} from '../../../../shared/source-control/ai-types'
-import type { SpeechModelState } from '../../../../shared/speech-types'
-import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '../../../../shared/types'
-import { useAppStore } from '../../store'
-import { getProjectHostSetupProjectionFromState } from '../../store/selectors'
-import { getRepoHostIdentity } from '../../store/slices/repo-host-identity'
+} from '~shared/source-control/ai-types'
+import type { SpeechModelState } from '~shared/speech-types'
+import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '~shared/types'
+
 import { registerWindowCloseGuard } from '../window-close-request-coordinator'
 import { AccountsPane } from './accounts-pane'
 import { AdvancedPane } from './advanced-pane'

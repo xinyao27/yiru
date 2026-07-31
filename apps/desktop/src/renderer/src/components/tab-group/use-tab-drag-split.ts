@@ -14,12 +14,11 @@ import {
  * resolution, same-group reordering, and cross-group handoff so state
  * transitions stay readable in one place. */
 import { useCallback, useRef, useState, type RefObject } from 'react'
+import type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
+import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
+import { useAppStore } from '~renderer/store'
+import type { TabGroup, TuiAgent } from '~shared/types'
 
-import type { TabSplitDirection } from '@/lib/tab-split-direction'
-import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
-
-import type { TabGroup, TuiAgent } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { mirrorWebRuntimeTabMove } from '../tab-bar/web-runtime-tab-move-mirror'
 import {
   captureTabGroupPanelGeometrySnapshot,

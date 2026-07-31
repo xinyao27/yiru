@@ -10,23 +10,20 @@ import { electronApp, is } from '@electron-toolkit/utils'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
-
-import { resolveEnvironment } from '../shared/runtime-environment-store'
-import { getPreferredPairingOffer } from '../shared/runtime-environments'
-import { CURSOR_USAGE_GET_CONTRACT } from '../shared/runtime-method-contracts/provider-usage-contracts'
-import {
-  HEADLESS_RUNTIME_WINDOW_ID,
-  type RuntimeDesktopWindowStatus
-} from '../shared/runtime-types'
+import { resolveEnvironment } from '~shared/runtime-environment-store'
+import { getPreferredPairingOffer } from '~shared/runtime-environments'
+import { CURSOR_USAGE_GET_CONTRACT } from '~shared/runtime-method-contracts/provider-usage-contracts'
+import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import {
   getSyntheticAgentTitleProfile,
   shouldDriveSyntheticAgentTitleFromHook,
   type SyntheticAgentTitleProfile
-} from '../shared/synthetic-agent-title'
-import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
-import { resolveTuiAgentPermissionMode } from '../shared/tui-agent/permissions'
-import type { UpdateCheckOptions } from '../shared/types'
-import { parseWorkspaceKey } from '../shared/workspace/scope'
+} from '~shared/synthetic-agent-title'
+import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
+import { resolveTuiAgentPermissionMode } from '~shared/tui-agent/permissions'
+import type { UpdateCheckOptions } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { AgentAwakeService } from './agent-awake-service'
 import { rememberBranchRenameFailureOutput } from './agent-hooks/branch-rename-failure-output'

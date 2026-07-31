@@ -1,25 +1,24 @@
 import React, { useCallback, useDeferredValue, useMemo, useState } from 'react'
-
-import { useRuntimeFileListForWorktree } from '@/components/quick-open-file-list'
+import { useRuntimeFileListForWorktree } from '~renderer/components/quick-open-file-list'
 import {
   parseQuickOpenInstallRgGuidance,
   QuickOpenInstallRgGuidance
-} from '@/components/quick-open-install-rg-guidance'
-import { prepareQuickOpenFiles, rankQuickOpenFiles } from '@/components/quick-open-search'
+} from '~renderer/components/quick-open-install-rg-guidance'
+import { prepareQuickOpenFiles, rankQuickOpenFiles } from '~renderer/components/quick-open-search'
 import {
   CommandDialog,
   CommandInput,
   CommandList,
   CommandEmpty,
   CommandItem
-} from '@/components/ui/command'
-import { useModalReturnFocus } from '@/hooks/use-modal-return-focus'
-import { translate } from '@/i18n/i18n'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { detectLanguage } from '@/lib/language-detect'
-import { joinPath } from '@/lib/path'
-import { useAppStore } from '@/store'
-import { useActiveWorktree } from '@/store/selectors'
+} from '~renderer/components/ui/command'
+import { useModalReturnFocus } from '~renderer/hooks/use-modal-return-focus'
+import { translate } from '~renderer/i18n/i18n'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree } from '~renderer/store/selectors'
 
 function FooterKey({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (

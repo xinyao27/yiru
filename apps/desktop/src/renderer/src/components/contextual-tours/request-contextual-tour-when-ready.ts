@@ -1,6 +1,5 @@
-import { useAppStore } from '@/store'
-
-import type { ContextualTourId } from '../../../../shared/contextual-tours'
+import { useAppStore } from '~renderer/store'
+import type { ContextualTourId } from '~shared/contextual-tours'
 
 type RequestContextualTourWhenReadyArgs = {
   id: ContextualTourId

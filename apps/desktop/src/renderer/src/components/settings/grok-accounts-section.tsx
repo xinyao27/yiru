@@ -4,14 +4,13 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { GrokAccountStatus } from '~shared/rate-limit-types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
-import type { GrokAccountStatus } from '../../../../shared/rate-limit-types'
-import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { SearchableSetting } from './searchable-setting'

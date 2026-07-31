@@ -1,15 +1,18 @@
 import { ShieldCheck } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Switch } from '~renderer/components/ui/switch'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  PRIVACY_URL,
+  getConsentState,
+  setOptIn as telemetrySetOptIn
+} from '~renderer/lib/telemetry'
+import { useAppStore } from '~renderer/store'
+import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
+import type { GlobalSettings } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
-import type { TelemetryConsentState } from '../../../../shared/telemetry-consent-types'
-import type { GlobalSettings } from '../../../../shared/types'
-import { PRIVACY_URL, getConsentState, setOptIn as telemetrySetOptIn } from '../../lib/telemetry'
-import { useAppStore } from '../../store'
 import { Label } from '../ui/label'
 import { PrivacyDiagnosticsSection } from './privacy-diagnostics-section'
 

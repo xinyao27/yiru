@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/class-names'
+import { Badge } from '~renderer/components/ui/badge'
+import { cn } from '~renderer/lib/class-names'
 
 export type IntegrationStatusTone = 'connected' | 'attention' | 'neutral'
 

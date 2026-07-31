@@ -1,11 +1,11 @@
+import { translate } from '~renderer/i18n/i18n'
 import {
   isKeybindingAllowedInTerminal,
   isKeybindingPotentialTerminalConflict,
   keybindingIsActiveInContext,
   type KeybindingDefinition,
   type TerminalShortcutPolicy
-} from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
+} from '~shared/keybindings'
 
 // Describes how a shortcut behaves while a terminal/TUI has keyboard focus,
 // surfaced as a badge on the command header. Lives in its own module so the

@@ -1,14 +1,14 @@
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
-import { writeForegroundTerminalChunk } from '@/lib/pane-manager/pane-terminal-foreground-render-settle'
-import { ensureArabicShapingJoinerForText } from '@/lib/pane-manager/terminal-arabic-shaping-joiner'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-breadcrumb-recorder'
+import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
+import { writeForegroundTerminalChunk } from '~renderer/lib/pane-manager/pane-terminal-foreground-render-settle'
+import { ensureArabicShapingJoinerForText } from '~renderer/lib/pane-manager/terminal-arabic-shaping-joiner'
 import {
   captureTerminalParseProgressGeneration,
   hasTerminalParseProgressSince,
   isTerminalWritePipelineCertifiedDead,
   notifyUndeliverableWrite,
   recordTerminalParseProgress
-} from '@/lib/pane-manager/terminal-write-pipeline-health'
+} from '~renderer/lib/pane-manager/terminal-write-pipeline-health'
 
 // Why: xterm.js auto-responds to terminal query sequences (DA1 `CSI c`,
 // DECRQM `CSI ? Ps $ p`, OSC 10/11 color queries, focus events, CPR) by

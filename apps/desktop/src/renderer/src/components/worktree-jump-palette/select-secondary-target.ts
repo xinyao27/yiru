@@ -1,14 +1,16 @@
 import type React from 'react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import type { CmdJProjectSearchResult } from '@/components/cmd-j/palette-project-results'
-import type { CmdJActionResult, CmdJSettingsResult } from '@/components/cmd-j/palette-results'
+import type { CmdJProjectSearchResult } from '~renderer/components/cmd-j/palette-project-results'
+import type {
+  CmdJActionResult,
+  CmdJSettingsResult
+} from '~renderer/components/cmd-j/palette-results'
 import {
   getUnavailableQuickActionMessage,
   type CmdJQuickActionContext
-} from '@/components/cmd-j/quick-action-context'
-import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
+} from '~renderer/components/cmd-j/quick-action-context'
+import type { SettingsNavTarget } from '~renderer/lib/settings-navigation-types'
 
 import type { PaletteStoreState } from './use-palette-store-state'
 

@@ -1,9 +1,11 @@
-import { listBoundAgentTabActions, resolveDefaultAgentForNewTab } from '@/lib/agent-tab-shortcuts'
-
-import type { KeybindingActionId } from '../../../../shared/keybindings'
-import type { TuiAgent } from '../../../../shared/types'
-import { getConnectionId } from '../../lib/connection-context'
-import { useAppStore } from '../../store'
+import {
+  listBoundAgentTabActions,
+  resolveDefaultAgentForNewTab
+} from '~renderer/lib/agent-tab-shortcuts'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { useAppStore } from '~renderer/store'
+import type { KeybindingActionId } from '~shared/keybindings'
+import type { TuiAgent } from '~shared/types'
 
 type AgentLaunchShortcutMatch = {
   agentActionId: KeybindingActionId

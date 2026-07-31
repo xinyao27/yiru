@@ -1,4 +1,5 @@
-import type { GitHubAssignableUser, GitHubCommentResult, PRComment } from '../../shared/types'
+import type { GitHubAssignableUser, GitHubCommentResult, PRComment } from '~shared/types'
+
 import {
   acquire,
   classifyGhError,

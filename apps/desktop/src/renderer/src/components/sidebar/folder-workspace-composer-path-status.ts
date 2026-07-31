@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
 import {
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
-} from '@/components/sidebar/folder-workspace-path-status'
-import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
-import { useAppStore } from '@/store'
-
-import { isConfirmedStaleFolderPathStatus } from '../../../../shared/folder-workspace-path-status'
-import type { ProjectGroup } from '../../../../shared/types'
+} from '~renderer/components/sidebar/folder-workspace-path-status'
+import { useFolderWorkspacePathStatusCacheExpiryTick } from '~renderer/components/sidebar/folder-workspace-path-status-cache-expiry'
+import { useAppStore } from '~renderer/store'
+import { isConfirmedStaleFolderPathStatus } from '~shared/folder-workspace-path-status'
+import type { ProjectGroup } from '~shared/types'
 
 export function useFolderWorkspaceComposerPathStatus(
   projectGroup: ProjectGroup | null,

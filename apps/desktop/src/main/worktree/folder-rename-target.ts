@@ -1,8 +1,8 @@
 import { posix } from 'node:path'
 
 import { WORKTREE_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../shared/types'
 import { computeWorktreePath } from './logic'
 
 type WorktreePathSettings = Pick<GlobalSettings, 'nestWorkspaces' | 'workspaceDir'>

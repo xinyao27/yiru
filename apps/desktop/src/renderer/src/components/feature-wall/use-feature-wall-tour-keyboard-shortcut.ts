@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-
-import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
+import { isScreenSubmitShortcut } from '~renderer/lib/screen-submit-shortcut'
 
 export function useFeatureWallTourKeyboardShortcut({
   isOpen,

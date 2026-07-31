@@ -1,12 +1,11 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import type { StoreApi } from 'zustand'
+import { buildWorkspaceSessionPayload } from '~renderer/components/editor/workspace-session'
+import { translate } from '~renderer/i18n/i18n'
+import type { AppState } from '~renderer/store/types'
+import { importRemoteWorkspaceSession } from '~shared/remote-workspace-session-projection'
+import type { RemoteWorkspaceSnapshot } from '~shared/remote-workspace-types'
 
-import { buildWorkspaceSessionPayload } from '@/components/editor/workspace-session'
-import { translate } from '@/i18n/i18n'
-import type { AppState } from '@/store/types'
-
-import { importRemoteWorkspaceSession } from '../../../../../shared/remote-workspace-session-projection'
-import type { RemoteWorkspaceSnapshot } from '../../../../../shared/remote-workspace-types'
 import {
   admitDirectSshSnapshotApplyToken,
   type DirectSshPreparationToken,

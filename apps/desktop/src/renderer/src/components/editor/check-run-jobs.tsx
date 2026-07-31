@@ -6,13 +6,12 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { CheckJobLogTail } from '~renderer/components/workspace-panel/check-job-log-tail'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { PRCheckJob, PRCheckStep } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { CheckJobLogTail } from '@/components/workspace-panel/check-job-log-tail'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { PRCheckJob, PRCheckStep } from '../../../../shared/types'
 import { resolveStepOutcome, summarizeJobSteps, type StepOutcome } from './check-job-step-status'
 
 function StepOutcomeIcon({ outcome }: { outcome: StepOutcome }): React.JSX.Element {

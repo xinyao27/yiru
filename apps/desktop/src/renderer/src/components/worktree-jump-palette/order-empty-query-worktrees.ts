@@ -1,4 +1,4 @@
-import type { Worktree } from '../../../../shared/types'
+import type { Worktree } from '~shared/types'
 
 export type OrderEmptyQueryInputs = {
   visibleWorktrees: readonly Worktree[]

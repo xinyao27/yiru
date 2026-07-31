@@ -1,15 +1,13 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
+import { translate } from '~renderer/i18n/i18n'
+import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
 import {
   createWebRuntimeAgentSessionTerminal,
   createWebRuntimeSessionTerminal,
   isWebTerminalSurfaceTabId
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
-
-import type { Tab, TuiAgent } from '../../../shared/types'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import type { Tab, TuiAgent } from '~shared/types'
 
 function removeStaleLocalAgentTabsForWebHostLaunch(worktreeId: string): void {
   const state = useAppStore.getState()

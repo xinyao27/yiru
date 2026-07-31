@@ -1,8 +1,7 @@
 import { ArrowRight } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { AndroidLogo, IosBrandIcon } from './brand-icons'
 import { mobilePageStyles } from './page-tailwind'

@@ -1,4 +1,5 @@
-import type { ProjectGroup } from '../../../../shared/types'
+import type { ProjectGroup } from '~shared/types'
+
 import type { Row } from './worktree-list-groups'
 import {
   computeWorktreeSidebarHeaderDropPreview,

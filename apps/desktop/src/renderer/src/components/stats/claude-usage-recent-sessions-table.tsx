@@ -1,9 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { ClaudeUsageSessionRow, ClaudeUsageSummary } from '~shared/claude-usage-types'
 
-import type {
-  ClaudeUsageSessionRow,
-  ClaudeUsageSummary
-} from '../../../../shared/claude-usage-types'
 import { formatSessionTime, formatTokens } from './usage-formatters'
 
 export function ClaudeUsageRecentSessionsTable({

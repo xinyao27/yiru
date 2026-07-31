@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
-
 import {
   YIRU_BROWSER_FOCUS_REQUEST_EVENT,
   queueBrowserFocusRequest
-} from '@/components/browser-pane/browser-focus'
-import { resolvePaletteFocusRestoreTarget } from '@/components/cmd-j/palette-focus-restore-target'
+} from '~renderer/components/browser-pane/browser-focus'
+import { resolvePaletteFocusRestoreTarget } from '~renderer/components/cmd-j/palette-focus-restore-target'
 
 // Why: dismissing Cmd+J needs to hand focus back to whatever surface the user
 // left — a browser page's webview/address-bar, or the previously-focused

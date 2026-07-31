@@ -1,9 +1,14 @@
 import {
+  finishAutomationWorkspaceProvenanceRequest,
+  releaseAutomationWorkspaceProvenanceRequest,
+  resolveAutomationWorkspaceProvenance
+} from '~main/automations/workspace-provenance'
+import {
   WORKTREE_CREATE_CONTRACT,
   WORKTREE_LIST_CONTRACT,
   WORKTREE_REMOVE_CONTRACT,
   WORKTREE_SET_CONTRACT
-} from '../../../../shared/runtime-method-contracts/workspace-contracts'
+} from '~shared/runtime-method-contracts/workspace-contracts'
 import {
   WorktreeDetectedListParams,
   WorktreeActivate,
@@ -14,12 +19,8 @@ import {
   WorktreeResolvePrBase,
   WorktreeSelector,
   WorktreeSortOrder
-} from '../../../../shared/runtime-method-contracts/worktree-method-params'
-import {
-  finishAutomationWorkspaceProvenanceRequest,
-  releaseAutomationWorkspaceProvenanceRequest,
-  resolveAutomationWorkspaceProvenance
-} from '../../../automations/workspace-provenance'
+} from '~shared/runtime-method-contracts/worktree-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 export const WORKTREE_METHODS: RpcMethod[] = [

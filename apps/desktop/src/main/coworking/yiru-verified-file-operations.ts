@@ -2,7 +2,8 @@ import { constants } from 'node:fs'
 import { mkdir, open, opendir, realpath, rename, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { assertNoClobberRenameDestinationAvailable } from '../../shared/filesystem-rename-collision'
+import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
+
 import type {
   CoworkingVerifiedRemoteExistingPath,
   CoworkingVerifiedRemoteFilesystem

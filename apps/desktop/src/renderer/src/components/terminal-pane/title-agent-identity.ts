@@ -4,12 +4,11 @@ import {
   HERMES_AGENT_NAME_RE,
   titleHasAnyLegacyAgentName
 } from '@yiru/workbench-model/agent'
-
 import {
   detectAgentStatusFromTitle,
   isGeminiTerminalTitle,
   isPiTerminalTitle
-} from '../../../../shared/agent/detection'
+} from '~shared/agent/detection'
 
 const EXTRA_TITLE_AGENT_TOKEN_RE =
   /(?<![\w./\\-])(?:cursor-agent|pi)(?:\.(?:exe|cmd|bat|ps1))?(?![\w./\\-])/i

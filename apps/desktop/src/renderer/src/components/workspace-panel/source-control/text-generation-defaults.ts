@@ -1,14 +1,15 @@
 import {
   normalizeRepoSourceControlAiOverrides,
   type ResolvedSourceControlAiGenerationParams
-} from '../../../../../shared/source-control/ai'
+} from '~shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   type SourceControlActionRecipe,
   type SourceControlTextActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { GlobalSettings, Repo } from '../../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { GlobalSettings, Repo } from '~shared/types'
+
 import { sourceControlActionRecipeMatchesTarget } from './action-recipe-match'
 
 type TextGenerationRecipeConfiguration = {

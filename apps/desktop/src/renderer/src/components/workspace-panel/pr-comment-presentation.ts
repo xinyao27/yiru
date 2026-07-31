@@ -1,5 +1,5 @@
-import type { PRCommentGroupActionState } from '@/components/workspace-panel/pr-comment-action-state'
-import { cn } from '@/lib/class-names'
+import type { PRCommentGroupActionState } from '~renderer/components/workspace-panel/pr-comment-action-state'
+import { cn } from '~renderer/lib/class-names'
 
 /** PR comment sidebar typography and layout variants. */
 export type PRCommentPresentationVariant = 'flat' | 'cards' | 'focus'

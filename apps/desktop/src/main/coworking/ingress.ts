@@ -3,13 +3,13 @@ import { isIP, type Socket } from 'node:net'
 import type { Duplex } from 'node:stream'
 
 import { WebSocketServer, type WebSocket } from 'ws'
-
 import {
   COWORKING_CONNECT_PATH,
   COWORKING_INGRESS_PORT,
   COWORKING_MAX_ENCRYPTED_FRAME_BYTES,
   COWORKING_PROBE_PATH
-} from '../../shared/coworking/wire-contract'
+} from '~shared/coworking/wire-contract'
+
 import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import { openCoworkingEncryptedConnection } from './ingress-encrypted-connection'
 import type { CoworkingProbeService } from './ingress-probe'

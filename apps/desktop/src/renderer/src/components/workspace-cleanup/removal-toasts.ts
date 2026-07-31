@@ -1,10 +1,9 @@
 import { toast } from 'sonner'
-
 import type {
   WorkspaceCleanupFailure,
   WorkspaceCleanupRemoveResult
-} from '@/components/workspace-cleanup/state'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/workspace-cleanup/state'
+import { translate } from '~renderer/i18n/i18n'
 
 export function showWorkspaceCleanupRemovalResultToasts(
   result: WorkspaceCleanupRemoveResult,

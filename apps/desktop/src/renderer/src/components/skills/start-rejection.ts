@@ -1,6 +1,5 @@
-import { translate } from '@/i18n/i18n'
-
-import type { SkillUpdateStartResult } from '../../../../shared/skill-freshness'
+import { translate } from '~renderer/i18n/i18n'
+import type { SkillUpdateStartResult } from '~shared/skill-freshness'
 
 type SkillRunRejectionReason = Extract<SkillUpdateStartResult, { started: false }>['reason']
 

@@ -1,4 +1,4 @@
-import type { PreflightStatus } from '../../../../preload/api-types'
+import type { PreflightStatus } from '~preload/api-types'
 
 export type GhStatus = 'checking' | 'connected' | 'not-installed' | 'not-authenticated'
 // Why: parallel to GhStatus — GitLab uses glab and the same three failure

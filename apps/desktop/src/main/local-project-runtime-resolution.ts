@@ -1,11 +1,11 @@
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-
 import {
   resolveProjectExecutionRuntime,
   type ProjectExecutionRuntimeResolution
-} from '../shared/project-execution-runtime'
-import type { Project, Repo } from '../shared/types'
+} from '~shared/project-execution-runtime'
+import type { Project, Repo } from '~shared/types'
+
 import type { Store } from './persistence'
 import {
   getCachedWslAvailability,

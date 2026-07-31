@@ -1,7 +1,7 @@
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
+import { buildUsageValueSnapshot } from '~shared/stats/usage-value'
+import type { StatsSummary } from '~shared/types'
 
-import { buildUsageValueSnapshot } from '../../shared/stats/usage-value'
-import type { StatsSummary } from '../../shared/types'
 import { listAiVaultSessions } from '../ai-vault/cached-session-list'
 import type { ClaudeUsageStore } from '../claude/usage/store'
 import type { CodexUsageStore } from '../codex/usage/store'

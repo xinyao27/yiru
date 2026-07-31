@@ -1,8 +1,8 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { CoworkingHistoricalSessionPurpose } from '~main/coworking/session/source'
+import type { CoworkingPairedRuntimeResolvedWorktree } from '~shared/coworking/paired-runtime-host-contract'
+import type { CoworkingPairedRuntimeSessionWorktree } from '~shared/coworking/paired-runtime-session-contract'
 
-import type { CoworkingPairedRuntimeResolvedWorktree } from '../../../../shared/coworking/paired-runtime-host-contract'
-import type { CoworkingPairedRuntimeSessionWorktree } from '../../../../shared/coworking/paired-runtime-session-contract'
-import type { CoworkingHistoricalSessionPurpose } from '../../../coworking/session/source'
 import type { RpcContext } from '../core'
 
 export type CoworkingHostSessionPageReleaseBinding = Readonly<{

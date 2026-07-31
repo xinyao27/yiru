@@ -1,4 +1,4 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './hero'

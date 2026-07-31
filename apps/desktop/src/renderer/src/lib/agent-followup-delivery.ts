@@ -1,14 +1,13 @@
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
-} from '@/runtime/terminal-inspection'
-
+} from '~renderer/runtime/terminal-inspection'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess
-} from '../../../shared/agent/process-recognition'
-import { isShellProcess } from '../../../shared/shell-process-detection'
-import type { GlobalSettings } from '../../../shared/types'
+} from '~shared/agent/process-recognition'
+import { isShellProcess } from '~shared/shell-process-detection'
+import type { GlobalSettings } from '~shared/types'
 
 type RuntimeOwnerSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
 

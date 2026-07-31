@@ -7,12 +7,11 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

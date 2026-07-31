@@ -1,6 +1,6 @@
-import type { TabSplitDirection } from '@/lib/tab-split-direction'
+import type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '../../store'
 import { mirrorWebRuntimeTabMove } from './web-runtime-tab-move-mirror'
 
 type TabMovePaneColumnState = Pick<

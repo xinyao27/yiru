@@ -1,13 +1,12 @@
 import { Globe, MagnifyingGlass as Search } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: dropdown visibility depends on DOM focus plus browser-history suggestions, so the close path is an imperative popover sync. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Command, CommandGroup, CommandItem, CommandList } from '~renderer/components/ui/command'
+import { Input } from '~renderer/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { useAppStore } from '~renderer/store'
+import { DEFAULT_SEARCH_ENGINE, type SearchEngine } from '~shared/browser/url'
 
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useAppStore } from '@/store'
-
-import { DEFAULT_SEARCH_ENGINE, type SearchEngine } from '../../../../shared/browser/url'
 import { buildBrowserAddressBarSuggestions } from './browser-address-bar-suggestions'
 
 type BrowserAddressBarProps = {

@@ -1,14 +1,14 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
-
+import type { RuntimeTerminalProcessInspection } from '~renderer/runtime/terminal-inspection'
 /* oxlint-disable max-lines */
-import { detectAgentStatusFromTitle, type AgentStatus } from '../../../../../shared/agent/detection'
+import { detectAgentStatusFromTitle, type AgentStatus } from '~shared/agent/detection'
 import {
   isRecognizedAgentType,
   recognizeAgentProcess,
   type RecognizedAgentProcess
-} from '../../../../../shared/agent/process-recognition'
-import { isPiCompatibleAgentType } from '../../../../../shared/pi-agent-kind'
-import type { RuntimeTerminalProcessInspection } from '../../../runtime/terminal-inspection'
+} from '~shared/agent/process-recognition'
+import { isPiCompatibleAgentType } from '~shared/pi-agent-kind'
+
 import {
   titleHasExplicitAgentIdentity,
   titleIsInconclusiveNativeDroidTitle

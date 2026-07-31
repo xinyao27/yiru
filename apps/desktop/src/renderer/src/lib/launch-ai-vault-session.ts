@@ -1,15 +1,14 @@
 import type { AiVaultAgent } from '@yiru/workbench-model/agent'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-
-import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
-import type { TabSplitDirection } from '@/lib/tab-split-direction'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { reconcileTabOrder } from '~renderer/components/tab-bar/reconcile-order'
+import type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
 
 export type LaunchAiVaultSessionInNewTabResult =
   | { tabId: string; groupId?: string }

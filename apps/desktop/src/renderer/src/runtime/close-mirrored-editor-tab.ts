@@ -1,9 +1,9 @@
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '@/lib/worktree-runtime-owner'
+} from '~renderer/lib/worktree-runtime-owner'
+import type { Tab } from '~shared/types'
 
-import type { Tab } from '../../../shared/types'
 import { closeWebSessionTabCommand } from './web-session-commands'
 import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
 

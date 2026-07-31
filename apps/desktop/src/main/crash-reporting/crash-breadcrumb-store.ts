@@ -2,7 +2,7 @@ import {
   sanitizeCrashReportBreadcrumbs,
   type CrashReportBreadcrumbData,
   type CrashReportBreadcrumb
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
 
 const MAX_BREADCRUMBS = 30
 // Why: retain both heap thresholds for each renderer surface without growing the ring.

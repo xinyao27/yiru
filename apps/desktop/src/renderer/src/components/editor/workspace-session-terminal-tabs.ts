@@ -1,4 +1,4 @@
-import type { TerminalTab, WorkspaceSessionState } from '../../../../shared/types'
+import type { TerminalTab, WorkspaceSessionState } from '~shared/types'
 
 export function buildSanitizedTabsByWorktree(
   tabsByWorktree: Record<string, TerminalTab[]>

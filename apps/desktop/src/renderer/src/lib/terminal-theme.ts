@@ -1,13 +1,13 @@
 import type { ITheme } from '@xterm/xterm'
-
 import {
   makeCustomTerminalThemeSelection,
   normalizeTerminalCustomThemes,
   parseCustomTerminalThemeSelection,
   terminalCustomThemeToXtermTheme,
   type TerminalCustomTheme
-} from '../../../shared/terminal/custom-themes'
-import type { GlobalSettings } from '../../../shared/types'
+} from '~shared/terminal/custom-themes'
+import type { GlobalSettings } from '~shared/types'
+
 import { getTheme, getThemeNames } from './terminal-themes-data'
 
 export const BUILTIN_TERMINAL_THEME_NAMES = getThemeNames()

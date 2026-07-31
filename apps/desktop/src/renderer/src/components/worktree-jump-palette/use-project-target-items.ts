@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
-
 import {
   hasCmdJProjectSearchCandidates,
   searchCmdJProjectResults
-} from '@/components/cmd-j/palette-project-results'
-import { buildImportedWorktreesCardCandidates } from '@/components/sidebar/imported-worktrees-card-candidates'
+} from '~renderer/components/cmd-j/palette-project-results'
+import { buildImportedWorktreesCardCandidates } from '~renderer/components/sidebar/imported-worktrees-card-candidates'
 
 import type { ProjectTargetPaletteItem } from './types'
 import type { PaletteStoreState } from './use-palette-store-state'

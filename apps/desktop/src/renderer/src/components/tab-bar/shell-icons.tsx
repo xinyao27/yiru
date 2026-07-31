@@ -1,7 +1,6 @@
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import React from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import gitForWindowsLogoUrl from '../../../../../resources/git-for-windows-logo.svg?url'
 

@@ -2,12 +2,12 @@ import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import { getPosixOmpShellWrapper } from '../main/pty/omp-shell-wrapper'
+import { getPosixOmpShellWrapper } from '~main/pty/omp-shell-wrapper'
 import {
   getZshFinalZdotdirRestoreBlock,
   getZshShellReadyMarkerRegistrationBlock,
   getZshStartupFileSourceBlock
-} from '../main/shell-templates'
+} from '~main/shell-templates'
 
 const RELAY_SHELL_READY_DIR = '.yiru-relay/shell-ready'
 const POSIX_LOGIN_ARGS = ['-l']

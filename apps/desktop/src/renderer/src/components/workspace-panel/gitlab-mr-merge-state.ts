@@ -1,6 +1,5 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 type GitLabMRMergeStateReview = Pick<HostedReviewInfo, 'state' | 'status' | 'mergeable'>
 

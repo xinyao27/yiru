@@ -1,5 +1,5 @@
-import { translate } from '../../../i18n/i18n'
-import { Switch } from '../../ui/switch'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
 export function BrowserUseEnableSwitch({
   enabled,
   onToggle

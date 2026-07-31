@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
 import {
   encodeServeSimKeyboardFrame,
   type ServeSimKeyboardFrame
-} from '../../../../shared/emulator-keyboard-frame'
-import {
-  encodeServeSimTouchFrame,
-  type ServeSimTouchFrame
-} from '../../../../shared/emulator-touch-frame'
+} from '~shared/emulator-keyboard-frame'
+import { encodeServeSimTouchFrame, type ServeSimTouchFrame } from '~shared/emulator-touch-frame'
 
 const RECONNECT_DELAY_MS = 750
 const KEYBOARD_FRAME_DELAY_MS = 4

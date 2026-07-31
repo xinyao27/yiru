@@ -1,9 +1,9 @@
 import { Minus, Plus } from '@phosphor-icons/react'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
 import { SettingsRow } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 

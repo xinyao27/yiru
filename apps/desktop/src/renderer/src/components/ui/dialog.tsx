@@ -3,16 +3,15 @@
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { XIcon } from '@phosphor-icons/react'
 import * as React from 'react'
-
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '~renderer/components/ui/button'
 import {
   modalBackdropClass,
   modalBackdropMotionClass,
   modalSurfaceClass,
   modalSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/floating-surface-styles'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />

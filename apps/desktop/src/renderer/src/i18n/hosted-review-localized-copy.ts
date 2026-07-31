@@ -3,8 +3,7 @@ import {
   resolveHostedReviewCreationProvider,
   type HostedReviewCreationProvider
 } from '@yiru/workbench-model/review'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 export type SupportedHostedReviewCopyProvider = HostedReviewCreationProvider
 

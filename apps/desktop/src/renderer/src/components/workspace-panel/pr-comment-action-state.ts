@@ -1,5 +1,5 @@
-import type { PRCommentGroup } from '../../lib/pr-comment-groups'
-import { getPRCommentGroupId, getPRCommentGroupRoot } from '../../lib/pr-comment-groups'
+import type { PRCommentGroup } from '~renderer/lib/pr-comment-groups'
+import { getPRCommentGroupId, getPRCommentGroupRoot } from '~renderer/lib/pr-comment-groups'
 
 /** How a comment group should read in the PR sidebar triage UI. */
 export type PRCommentGroupActionState = 'open' | 'conversation' | 'resolved'

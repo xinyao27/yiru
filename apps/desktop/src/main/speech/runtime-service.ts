@@ -1,4 +1,5 @@
-import type { VoiceSettings } from '../../shared/speech-types'
+import type { VoiceSettings } from '~shared/speech-types'
+
 import { ModelManager } from './model-manager'
 import { SttService } from './stt-service'
 

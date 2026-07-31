@@ -4,8 +4,8 @@ import {
   isBundledPetId,
   OPENCODE_PET_ID,
   type BundledPetId
-} from '@/components/pet/id'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/pet/id'
+import { translate } from '~renderer/i18n/i18n'
 
 import claudeUrl from '../../../../../resources/claude.webp?url'
 import gremlinUrl from '../../../../../resources/gremlin.webp?url'

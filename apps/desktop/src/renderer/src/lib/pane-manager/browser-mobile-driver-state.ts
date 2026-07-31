@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react'
-
-import type { RuntimeBrowserDriverState } from '../../../../shared/runtime-types'
+import type { RuntimeBrowserDriverState } from '~shared/runtime-types'
 
 export type BrowserDriverState = RuntimeBrowserDriverState
 

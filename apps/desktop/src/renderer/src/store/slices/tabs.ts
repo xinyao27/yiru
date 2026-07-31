@@ -3,18 +3,16 @@
  * one slice avoids split-brain behavior between the unified tab model and the
  * legacy terminal/editor/browser content slices. */
 import type { StateCreator } from 'zustand'
-
-import { emitNativeChatToggled } from '@/components/native-chat/telemetry'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import type { TabSplitDirection } from '@/lib/tab-split-direction'
+import { emitNativeChatToggled } from '~renderer/components/native-chat/telemetry'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
-} from '@/lib/workspace-session-hydration-keys'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { setWebSessionTabPropsCommand } from '@/runtime/web-session-commands'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+} from '~renderer/lib/workspace-session-hydration-keys'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { setWebSessionTabPropsCommand } from '~renderer/runtime/web-session-commands'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import type {
   Tab,
   TabContentType,
@@ -24,9 +22,10 @@ import type {
   TuiAgent,
   WorkspaceSessionState,
   WorkspaceVisibleTabType
-} from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
+} from '~shared/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
+
 import type { AppState } from '../types'
 import { isPaneColumnSplitDropNoOp } from './pane-column-split-drop-no-op'
 import {
@@ -45,7 +44,7 @@ import {
 import { buildHydratedTabState, pruneTabGroupLayoutForGroups } from './tabs-hydration'
 import { buildOrphanTerminalCleanupPatch, getOrphanTerminalIds } from './terminal-orphan-helpers'
 
-export type { TabSplitDirection } from '@/lib/tab-split-direction'
+export type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
 
 export type TabsSlice = {
   unifiedTabsByWorktree: Record<string, Tab[]>

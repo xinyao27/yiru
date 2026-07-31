@@ -9,12 +9,11 @@
 // verification resolves — otherwise the read would merely race the autosave
 // timer and a slow remote read would lose.
 import type { StoreApi } from 'zustand'
-
-import type { OpenFile } from '@/components/editor/state'
-import { getConnectionIdForFile } from '@/lib/connection-context'
-import { readRuntimeFileContent } from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import type { AppState } from '@/store'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { readRuntimeFileContent } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import type { AppState } from '~renderer/store'
 
 import { canAutoSaveOpenFile } from './autosave'
 import { markFileChangedOnDisk } from './changed-on-disk-mark'

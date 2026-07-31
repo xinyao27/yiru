@@ -1,13 +1,12 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
+import type { GitHubPRAutoMergeAction } from '~renderer/components/github-pr-merge-state'
+import { translate } from '~renderer/i18n/i18n'
+import type { PRInfo, Repo } from '~shared/types'
+import type { GitHubPRMergeMethod } from '~shared/types'
 
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import type { GitHubPRAutoMergeAction } from '@/components/github-pr-merge-state'
-import { translate } from '@/i18n/i18n'
-
-import type { PRInfo, Repo } from '../../../../shared/types'
-import type { GitHubPRMergeMethod } from '../../../../shared/types'
 import {
   mergeGitHubHostedReview,
   setGitHubHostedReviewAutoMerge,

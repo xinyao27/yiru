@@ -1,7 +1,6 @@
 import type { IconProps } from '@phosphor-icons/react'
 import { createElement } from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import logo from '../../../../../resources/yiru-wordmark.png?url'
 

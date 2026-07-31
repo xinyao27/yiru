@@ -1,15 +1,13 @@
 import { GearSix as Settings2 } from '@phosphor-icons/react'
 import React from 'react'
-
-import AgentCombobox from '@/components/agent/combobox'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { useAppStore } from '@/store'
-
-import { filterEnabledTuiAgents } from '../../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../../shared/types'
+import AgentCombobox from '~renderer/components/agent/combobox'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { useAppStore } from '~renderer/store'
+import { filterEnabledTuiAgents } from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
 
 type AgentSectionProps = {
   quickAgent: TuiAgent | null

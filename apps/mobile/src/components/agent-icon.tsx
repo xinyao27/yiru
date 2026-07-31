@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from 'react-native'
 import Svg, { Defs, G, LinearGradient, Path, Stop } from 'react-native-svg'
 import { withUniwind } from 'uniwind'
 
-import { Terminal } from '@/components/uniwind-icons'
+import { Terminal } from '~/components/uniwind-icons'
 
 import { MOBILE_AGENT_CATALOG } from '../workspace-create/agent-catalog'
 import { MOBILE_AGENT_ICON_ASSETS } from './agent-icon-assets'

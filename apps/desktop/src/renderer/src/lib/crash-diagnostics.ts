@@ -1,7 +1,5 @@
-import type {
-  CrashReportBreadcrumbData,
-  CrashReportDetailValue
-} from '../../../shared/crash-reporting'
+import type { CrashReportBreadcrumbData, CrashReportDetailValue } from '~shared/crash-reporting'
+
 import {
   getBrowserWebviewMemoryProfile,
   type BrowserWebviewMemoryProfile

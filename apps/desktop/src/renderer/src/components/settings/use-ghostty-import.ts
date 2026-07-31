@@ -1,7 +1,6 @@
 import { useState } from 'react'
-
-import type { GhosttyImportPreview, GlobalSettings } from '../../../../shared/types'
-import { useMountedRef } from '../../hooks/use-mounted-ref'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import type { GhosttyImportPreview, GlobalSettings } from '~shared/types'
 
 export type UseGhosttyImportReturn = {
   open: boolean

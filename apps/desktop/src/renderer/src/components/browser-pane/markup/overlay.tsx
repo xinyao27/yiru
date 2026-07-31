@@ -1,9 +1,8 @@
 import { Check, X } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { MarkupBaseImage } from './base-image'
 import type { MarkupShape } from './drawing-model'

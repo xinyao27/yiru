@@ -1,8 +1,8 @@
 import {
   getProjectIdentityKey,
   type ProjectHostSetupProjection
-} from '../../../shared/project-host-setup-projection'
-import type { Project, ProjectHostSetup, Repo } from '../../../shared/types'
+} from '~shared/project-host-setup-projection'
+import type { Project, ProjectHostSetup, Repo } from '~shared/types'
 
 export type NormalizedProjectHostSetupProjection = ProjectHostSetupProjection & {
   changed: boolean

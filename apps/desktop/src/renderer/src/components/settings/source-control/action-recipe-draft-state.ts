@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-
 import {
   setSourceControlActionDefault,
   type SourceControlActionId
-} from '../../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
 import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
-} from '../../../../../shared/source-control/ai-types'
+} from '~shared/source-control/ai-types'
+
 import type { ActionRecipeDraftState } from './ai-action-recipe-draft'
 import {
   readActionRecipeInputValues,

@@ -1,4 +1,4 @@
-import { SSH_TERMINATE_RECONNECT_REQUIRED } from '../../../../../shared/constants'
+import { SSH_TERMINATE_RECONNECT_REQUIRED } from '~shared/constants'
 
 export type SshTargetRemoveApi = {
   terminateSessions: (args: { targetId: string }) => Promise<unknown>

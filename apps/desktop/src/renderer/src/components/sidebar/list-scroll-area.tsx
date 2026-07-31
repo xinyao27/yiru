@@ -4,9 +4,8 @@ import type {
   NativeSyntheticEvent
 } from '@legendapp/list/react'
 import * as React from 'react'
-
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/class-names'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { cn } from '~renderer/lib/class-names'
 
 type LegendListStyle =
   | React.CSSProperties

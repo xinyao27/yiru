@@ -1,10 +1,10 @@
 import { Minus, Trash, Plus, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
 import type { ContextMenuOpenContext } from '@pierre/trees'
 import { useEffect, useRef } from 'react'
+import { ContextMenu, ContextMenuItem } from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { joinPath } from '~renderer/lib/path'
 
-import { translate } from '../../../i18n/i18n'
-import { joinPath } from '../../../lib/path'
-import { ContextMenu, ContextMenuItem } from '../../ui/context-menu'
 import type { SourceControlController } from './controller'
 import { getSourceControlDirectoryActionPaths } from './directory-action-paths'
 import { canDiscardStatusEntry, canStageStatusEntry, canUnstageStatusEntry } from './entry-actions'

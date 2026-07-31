@@ -6,8 +6,7 @@ import {
   relativePathInsideRoot,
   resolveRuntimePath
 } from '@yiru/workbench-model/platform'
-
-import type { NestedRepoScanResult, ProjectGroup, ProjectGroupImportMode } from '../../shared/types'
+import type { NestedRepoScanResult, ProjectGroup, ProjectGroupImportMode } from '~shared/types'
 
 type CreateGroupInput = {
   name: string

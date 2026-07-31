@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 
-import { Check } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { Check } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { MobileContentSection } from './content-section'

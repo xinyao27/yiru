@@ -1,9 +1,8 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   getDisplayedUsagePercentage,
   type UsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
+} from '~shared/usage-percentage-display'
 
 export function formatUsagePercentageLabel(
   usedPercent: number,

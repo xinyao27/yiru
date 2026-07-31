@@ -1,9 +1,8 @@
 import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-
-import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
-import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message/host-key'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type { CommitMessageDraftContext } from '~shared/commit-message/generation'
+import { getCommitMessageModelDiscoveryHostKey } from '~shared/commit-message/host-key'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 import type {
   GitAddTagResult,
   GitCheckoutCommitResult,
@@ -14,13 +13,13 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '../../shared/git/write-op-results'
-import type { RuntimeGitCheckoutResult } from '../../shared/runtime-types'
+} from '~shared/git/write-op-results'
+import type { RuntimeGitCheckoutResult } from '~shared/runtime-types'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   type ResolvedSourceControlAiGenerationParams
-} from '../../shared/source-control/ai'
-import type { SourceControlAiOperation } from '../../shared/source-control/ai-types'
+} from '~shared/source-control/ai'
+import type { SourceControlAiOperation } from '~shared/source-control/ai-types'
 /* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so local, SSH, and runtime-environment behavior remains comparable. */
 import type {
   GitBranchCompareResult,
@@ -38,7 +37,8 @@ import type {
   Repo,
   TuiAgent,
   Worktree
-} from '../../shared/types'
+} from '~shared/types'
+
 import { createBranchFromCommit } from '../git/branch-create'
 import { checkIgnoredPaths } from '../git/check-ignored-paths'
 import { checkoutBranch, listLocalBranches } from '../git/checkout'

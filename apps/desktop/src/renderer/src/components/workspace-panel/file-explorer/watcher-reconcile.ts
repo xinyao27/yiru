@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { normalizeAbsolutePath, isPathEqualOrDescendant } from './paths'
 import type { DirCache } from './types'

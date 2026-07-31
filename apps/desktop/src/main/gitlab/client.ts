@@ -18,7 +18,8 @@ import type {
   MRComment,
   MRInfo,
   MRListState
-} from '../../shared/types'
+} from '~shared/types'
+
 import { extractExecError } from '../git/runner'
 import {
   hasHostedReviewLocalGitOptions,

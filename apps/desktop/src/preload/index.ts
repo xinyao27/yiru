@@ -22,10 +22,9 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
-
-import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
-import type { AppIdentity } from '../shared/app-identity'
+import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '~shared/agent/interrupt-intent'
+import type { AppIdentity } from '~shared/app-identity'
 import type {
   Automation,
   AutomationCreateInput,
@@ -40,9 +39,9 @@ import type {
   AutomationRun,
   AutomationPrecheckResult,
   AutomationUpdateInput
-} from '../shared/automations-types'
-import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
+} from '~shared/automations-types'
+import type { CliInstallStatus } from '~shared/cli-install-types'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
   CoworkingDecideControlArgs,
   CoworkingRequestControlArgs,
@@ -56,11 +55,11 @@ import type {
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
-} from '../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
@@ -68,32 +67,32 @@ import type {
   CrashReportSubmitResult,
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
-} from '../shared/crash-reporting'
+} from '~shared/crash-reporting'
 import {
   YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
   type EditorPrepareHotExitDetail
-} from '../shared/editor-save-events'
-import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
-import type { FridaySession } from '../shared/friday-types'
-import type { AppStarSource } from '../shared/gh-star-source'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
-import type { GhAuthDiagnostic } from '../shared/github-auth-types'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
-import type { LanguageServerEvent } from '../shared/language-server'
+} from '~shared/editor-save-events'
+import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
+import type { FridaySession } from '~shared/friday-types'
+import type { AppStarSource } from '~shared/gh-star-source'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+import type { GhAuthDiagnostic } from '~shared/github-auth-types'
+import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
+import type { LanguageServerEvent } from '~shared/language-server'
 import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
   LocalLogTailReadResult,
   LocalLogTailWatchArgs
-} from '../shared/local-log-tail-types'
+} from '~shared/local-log-tail-types'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
-} from '../shared/localhost-worktree-labels'
+} from '~shared/localhost-worktree-labels'
 import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
-} from '../shared/mobile-markdown-document'
+} from '~shared/mobile-markdown-document'
 import {
   YIRU_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
@@ -104,33 +103,33 @@ import {
   type NativeDropResolution,
   type NativeFileDropPayload,
   type NativeFileDropPathEntry
-} from '../shared/native-file-drop'
-import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
-import type { PtyMainDeliveryDiagnostics } from '../shared/pty-delivery-diagnostics'
-import type { PtyModelRestoreNeededEvent } from '../shared/pty-model-restore-marker'
+} from '~shared/native-file-drop'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { PtyMainDeliveryDiagnostics } from '~shared/pty-delivery-diagnostics'
+import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marker'
 import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
-} from '../shared/pty-renderer-delivery-health'
+} from '~shared/pty-renderer-delivery-health'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
   GrokAccountStatus,
   RateLimitRuntimeTarget,
   RateLimitState
-} from '../shared/rate-limit-types'
-import type { RemoteWorkspaceChangedEvent } from '../shared/remote-workspace-types'
+} from '~shared/rate-limit-types'
+import type { RemoteWorkspaceChangedEvent } from '~shared/remote-workspace-types'
 import {
   richMarkdownContextMenuCommandChannel,
   type RichMarkdownContextMenuCommandPayload
-} from '../shared/rich-markdown-context-menu'
-import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
+} from '~shared/rich-markdown-context-menu'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../shared/runtime-method-contracts/runtime-control-contracts'
+} from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -140,44 +139,41 @@ import type {
   RuntimeTerminalCreateRequestPayload,
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
-} from '../shared/runtime-types'
+} from '~shared/runtime-types'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '../shared/shell-open-types'
+} from '~shared/shell-open-types'
 import type {
   SkillFreshnessInventory,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../shared/skill-freshness'
+} from '~shared/skill-freshness'
 import type {
   SkillDirectoryListing,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillFileReadResult
-} from '../shared/skills'
+} from '~shared/skills'
 import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
   SpeechModelManifest,
   SpeechModelState,
   SpeechTranscriptEvent
-} from '../shared/speech-types'
+} from '~shared/speech-types'
 import {
   admitSshConnectionState,
   admitSshConnectionStateForAuthorityReconciliation,
   admitSshDetectedPorts
-} from '../shared/ssh-retained-payload-admission'
-import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
-import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
-import type {
-  WarpThemeImportPreview,
-  WarpThemeImportSource
-} from '../shared/terminal/custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
-import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
+} from '~shared/ssh-retained-payload-admission'
+import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
+import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
+import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
+import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
 import type {
   BaseRefSearchResult,
   BaseRefDefaultResult,
@@ -219,16 +215,17 @@ import type {
   WorktreeDefaultTabsLaunch,
   WorktreeHeadIdentity,
   WorktreeRemoteBranchConflictEvent
-} from '../shared/types'
+} from '~shared/types'
 import {
   YIRU_APP_RESTART_ABORTED_EVENT,
   YIRU_APP_RESTART_STARTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
-} from '../shared/updater-renderer-events'
-import type { WorkspaceCleanupScanProgress } from '../shared/workspace/cleanup'
-import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace/ports'
-import type { WorkspaceSpaceScanProgress } from '../shared/workspace/space-types'
+} from '~shared/updater-renderer-events'
+import type { WorkspaceCleanupScanProgress } from '~shared/workspace/cleanup'
+import type { WorkspacePortAdvertisedUrlChangedEvent } from '~shared/workspace/ports'
+import type { WorkspaceSpaceScanProgress } from '~shared/workspace/space-types'
+
 import type { PreflightRuntimeContext, RefreshAgentsResult } from './api-types'
 import type {
   NativeChatAppendedPayload,

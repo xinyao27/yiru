@@ -1,5 +1,5 @@
-import type { WorkspaceLineage, WorkspaceKey } from '../../shared/types'
-import { isWorkspaceKey } from '../../shared/workspace/scope'
+import type { WorkspaceLineage, WorkspaceKey } from '~shared/types'
+import { isWorkspaceKey } from '~shared/workspace/scope'
 
 export function decodePersistedWorkspaceLineage(
   value: unknown,

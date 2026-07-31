@@ -1,10 +1,9 @@
 import { DeviceMobile as Smartphone } from '@phosphor-icons/react'
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import type { DriverState } from '@/lib/pane-manager/mobile-driver-state'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { DriverState } from '~renderer/lib/pane-manager/mobile-driver-state'
 
 import {
   createMobileDriverOverlayCollapseState,

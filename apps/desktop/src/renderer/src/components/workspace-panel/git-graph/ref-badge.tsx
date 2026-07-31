@@ -1,10 +1,8 @@
 import { CloudCheck, GitBranch, GitCommit, Tag as TagIcon, Target } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
-
-import type { GitHistoryItemRef } from '../../../../../shared/git/history'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
+import type { GitHistoryItemRef } from '~shared/git/history'
 
 // Why: Git Graph uses one pill shape (`.gitRef`) for every ref kind and
 // differentiates purely by an inset icon — never a separate shape per type —

@@ -2,35 +2,38 @@ import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { AgentStateDot, agentStateLabel, type AgentDotState } from '@/components/agent-state-dot'
-import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
-import { useNow } from '@/components/dashboard/use-now'
+import {
+  AgentStateDot,
+  agentStateLabel,
+  type AgentDotState
+} from '~renderer/components/agent-state-dot'
+import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
+import { useNow } from '~renderer/components/dashboard/use-now'
 import {
   activeAgentNotesSendFailureMessage,
   sendNotesToActiveAgentSession,
   type ActiveAgentNotesSendResult
-} from '@/components/editor/active-agent-note-send'
+} from '~renderer/components/editor/active-agent-note-send'
 import {
   deriveNotesSendAgentTargets,
   type NotesSendAgentTarget
-} from '@/components/editor/notes-send-agent-targets'
-import { useWorktreeAgentRows } from '@/components/sidebar/use-worktree-agent-rows'
-import { QuickLaunchAgentMenuItems } from '@/components/tab-bar/quick-launch-button'
+} from '~renderer/components/editor/notes-send-agent-targets'
+import { useWorktreeAgentRows } from '~renderer/components/sidebar/use-worktree-agent-rows'
+import { QuickLaunchAgentMenuItems } from '~renderer/components/tab-bar/quick-launch-button'
 import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { agentKindForAgentType, formatAgentTypeLabel } from '@/lib/agent-status'
-import { agentTypeToIconAgent } from '@/lib/agent-status'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { track } from '@/lib/telemetry'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { agentKindForAgentType, formatAgentTypeLabel } from '~renderer/lib/agent-status'
+import { agentTypeToIconAgent } from '~renderer/lib/agent-status'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { track } from '~renderer/lib/telemetry'
+import { useAppStore } from '~renderer/store'
+import type { LaunchSource } from '~shared/telemetry-events'
 
-import type { LaunchSource } from '../../../../shared/telemetry-events'
 import { selectLivePtyIdsForWorktree } from '../sidebar/worktree-card/status-inputs'
 
 type OrderedSendTarget = {

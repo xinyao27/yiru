@@ -3,8 +3,8 @@ import {
   type AiVaultAgent,
   type AiVaultSession
 } from '@yiru/workbench-model/agent'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
 
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../shared/runtime-method-contracts/ai-vault-contracts'
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,

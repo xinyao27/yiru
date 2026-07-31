@@ -1,22 +1,21 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 /* eslint-disable max-lines -- Why: provider normalization, totals, and heatmap aggregation share
    one tested model so the overview UI cannot drift from the math. */
 import type {
   ClaudeUsageDailyPoint,
   ClaudeUsageScanState,
   ClaudeUsageSummary
-} from '../../../../shared/claude-usage-types'
+} from '~shared/claude-usage-types'
 import type {
   CodexUsageDailyPoint,
   CodexUsageScanState,
   CodexUsageSummary
-} from '../../../../shared/codex-usage-types'
+} from '~shared/codex-usage-types'
 import type {
   OpenCodeUsageDailyPoint,
   OpenCodeUsageScanState,
   OpenCodeUsageSummary
-} from '../../../../shared/opencode-usage-types'
+} from '~shared/opencode-usage-types'
 
 export type UsageProviderId = 'claude' | 'codex' | 'opencode'
 

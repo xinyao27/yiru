@@ -1,9 +1,8 @@
 import { shouldStepNativeChatAskAnswer } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useLayoutEffect, useRef } from 'react'
-
-import { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
-import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
+import { getSettingsForAgentTabRuntimeOwner } from '~renderer/components/native-chat/agent-paste-draft'
+import { sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
 
 import {
   buildAskAnswerKeys,

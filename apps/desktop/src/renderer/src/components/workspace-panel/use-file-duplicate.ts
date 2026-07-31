@@ -1,9 +1,8 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import { getConnectionId } from '@/lib/connection-context'
-import { basename, dirname, joinPath } from '@/lib/path'
-import { copyRuntimePath, runtimePathExists } from '@/runtime/file-client'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { basename, dirname, joinPath } from '~renderer/lib/path'
+import { copyRuntimePath, runtimePathExists } from '~renderer/runtime/file-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 import type { TreeNode } from './file-explorer/types'

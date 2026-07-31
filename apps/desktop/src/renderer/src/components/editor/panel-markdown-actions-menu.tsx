@@ -1,7 +1,6 @@
 import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -9,8 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 type EditorPanelMarkdownActionsMenuProps = {
   isMarkdown: boolean

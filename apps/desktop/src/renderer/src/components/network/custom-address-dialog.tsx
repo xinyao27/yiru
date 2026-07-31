@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,9 +7,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
 
 export type CustomAddressValidator = (input: string) => { ok: true; value: string } | { ok: false }
 

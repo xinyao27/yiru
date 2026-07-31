@@ -8,9 +8,9 @@ import {
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { getAiVaultResumeWorkspaceExecutionHostId } from '~renderer/lib/ai-vault-resume-target'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 
-import type { PublicKnownRuntimeEnvironment } from '../../../../../shared/runtime-environments'
-import { getAiVaultResumeWorkspaceExecutionHostId } from '../../../lib/ai-vault-resume-target'
 import type { AiVaultSessionResumeTargetState } from './session-resume'
 
 export type AiVaultHostScopeOption = {

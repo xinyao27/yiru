@@ -5,14 +5,13 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
+import type { ConflictReviewEntry } from '~renderer/components/editor/state'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import type { GitStatusEntry } from '~shared/types'
 
-import type { ConflictReviewEntry } from '@/components/editor/state'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
-
-import type { GitStatusEntry } from '../../../../shared/types'
 import {
   buildSourceControlTree,
   compactSourceControlTree,

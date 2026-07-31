@@ -6,14 +6,13 @@ import {
   Wrench
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Badge } from '@/components/ui/badge'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Badge } from '~renderer/components/ui/badge'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   RemoteServerUpdateEntry,
   RemoteServerUpdatePhase
-} from '@/runtime/remote-server-update-coordinator'
+} from '~renderer/runtime/remote-server-update-coordinator'
 
 export function getRemoteServerUpdatePhaseLabel(phase: RemoteServerUpdatePhase): string {
   switch (phase) {

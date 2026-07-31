@@ -1,7 +1,6 @@
 import { Globe, SquaresFour, Terminal as TerminalIcon } from '@phosphor-icons/react'
-
-import { AgentIcon } from '@/lib/agent-catalog'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
 
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 

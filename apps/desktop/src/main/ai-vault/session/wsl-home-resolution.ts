@@ -1,4 +1,4 @@
-import { getWslHomeAsync, listWslDistrosAsync } from '../../wsl'
+import { getWslHomeAsync, listWslDistrosAsync } from '~main/wsl'
 
 export async function resolveAiVaultWslHomeDirsForDistro(distro: string): Promise<string[]> {
   if (process.platform !== 'win32') {

@@ -1,6 +1,5 @@
-import { translate } from '@/i18n/i18n'
-
-import type { CoworkingSessionCatalogPageState } from '../../../../shared/coworking/catalog-contract'
+import { translate } from '~renderer/i18n/i18n'
+import type { CoworkingSessionCatalogPageState } from '~shared/coworking/catalog-contract'
 
 export function getCoworkingSessionCatalogStatusLabel(
   status: CoworkingSessionCatalogPageState['status']

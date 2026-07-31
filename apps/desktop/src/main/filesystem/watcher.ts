@@ -12,8 +12,8 @@ one module so subscription/cleanup invariants stay auditable from a single
 file. Splitting by transport would scatter the shared debounce/coalesce
 helpers and the common batch-flush path across three files. */
 import { ipcMain, type WebContents } from 'electron'
+import type { FsChangeEvent, FsChangedPayload } from '~shared/types'
 
-import type { FsChangeEvent, FsChangedPayload } from '../../shared/types'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { isWslPath } from '../wsl'
 import {

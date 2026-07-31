@@ -1,10 +1,10 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
 import {
   COMBINED_DIFF_REVEAL_SECTION_EVENT,
   getCombinedDiffEntrySectionKey,
   type CombinedDiffRevealSectionRequest
-} from '../../editor/combined-diff/section-model'
-import type { DiffSource, OpenFile } from '../../editor/state'
+} from '~renderer/components/editor/combined-diff/section-model'
+import type { DiffSource, OpenFile } from '~renderer/components/editor/state'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
 
 /** The branch-compare identity a `combined-branch` view must still be showing. */
 export type CombinedDiffRevealCompare = {

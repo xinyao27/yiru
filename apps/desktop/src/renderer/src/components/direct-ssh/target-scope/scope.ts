@@ -5,9 +5,9 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { isPathInsideOrEqual } from '@yiru/workbench-model/workspace'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
+import { folderWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
 
-import { getProjectGroupSubtreeIds } from '../../../../../shared/project-groups'
-import { folderWorkspaceKey, worktreeWorkspaceKey } from '../../../../../shared/workspace/scope'
 import { indexDirectSshOwnerRows } from './owner-index'
 import type {
   DirectSshFolderOwner as FolderOwner,

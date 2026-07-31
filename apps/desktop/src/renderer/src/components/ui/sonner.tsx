@@ -5,8 +5,7 @@ import {
   Warning as TriangleAlertIcon
 } from '@phosphor-icons/react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
 const Toaster = ({ theme = 'system', ...props }: ToasterProps) => {
   return (

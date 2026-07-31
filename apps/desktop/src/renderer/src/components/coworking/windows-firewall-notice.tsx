@@ -1,14 +1,12 @@
 import { ShieldCheck, WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
-import type { CoworkingWindowsFirewallStatus } from '../../../../shared/coworking/windows-firewall-contract'
-import { COWORKING_INGRESS_PORT } from '../../../../shared/coworking/wire-contract'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import type { CoworkingWindowsFirewallStatus } from '~shared/coworking/windows-firewall-contract'
+import { COWORKING_INGRESS_PORT } from '~shared/coworking/wire-contract'
 
 export function CoworkingWindowsFirewallNotice(): React.JSX.Element {
   const [status, setStatus] = useState<CoworkingWindowsFirewallStatus | null>(null)

@@ -1,12 +1,11 @@
 import type { Editor } from '@tiptap/react'
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   measureTextControlPasteByteLength,
   measureTextControlPasteByteLengthWithYield
-} from '../../../lib/text-control-paste'
+} from '~renderer/lib/text-control-paste'
 
 export const RICH_MARKDOWN_PASTE_DIRECT_MAX_BYTES = 64 * 1024
 export const RICH_MARKDOWN_PASTE_CHUNK_MAX_BYTES = 16 * 1024

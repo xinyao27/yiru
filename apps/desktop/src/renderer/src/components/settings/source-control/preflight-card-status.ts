@@ -1,11 +1,11 @@
 import { useState } from 'react'
-
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import {
   getLocalPreflightContext,
   localPreflightContextKey
-} from '../../../lib/local-preflight-context'
-import { useAppStore } from '../../../store'
+} from '~renderer/lib/local-preflight-context'
+import { useAppStore } from '~renderer/store'
+
 import {
   getPreflightIntegrationStatuses,
   type PreflightIntegrationStatuses,

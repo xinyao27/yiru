@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
-
-import { resolveDocumentTheme } from '@/components/editor/document-theme'
-import { resolveEditorFontFamily } from '@/components/editor/font-family'
-import { computeEditorFontSize } from '@/components/editor/font-zoom'
-import { monaco, resolveCursorThemeName } from '@/components/editor/monaco-setup'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { resolveDocumentTheme } from '~renderer/components/editor/document-theme'
+import { resolveEditorFontFamily } from '~renderer/components/editor/font-family'
+import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
+import { monaco, resolveCursorThemeName } from '~renderer/components/editor/monaco-setup'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 let pythonLanguageRegistrationPromise: Promise<void> | null = null
 

@@ -1,4 +1,4 @@
-import type Database from '../../sqlite/sync-database'
+import type Database from '~main/sqlite/sync-database'
 
 const POST_V6_COLUMNS = [
   ['messages', 'run_id'],

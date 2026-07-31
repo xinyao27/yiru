@@ -3,20 +3,20 @@ import type {
   RuntimeRpcResponse
 } from '@yiru/runtime-protocol/rpc-envelope'
 import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
-
 import {
   sendRemoteRuntimeRequest,
   subscribeRemoteRuntimeRequest,
   type RemoteRuntimeSubscription
-} from '../../shared/remote-runtime/client'
-import { resolveEnvironment, markEnvironmentUsed } from '../../shared/runtime-environment-store'
-import { getPreferredPairingOffer } from '../../shared/runtime-environments'
+} from '~shared/remote-runtime/client'
+import { resolveEnvironment, markEnvironmentUsed } from '~shared/runtime-environment-store'
+import { getPreferredPairingOffer } from '~shared/runtime-environments'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
+} from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+
 import { enqueueRuntimeCall } from './environment-call-queue'
 import {
   sendRemoteRuntimeConnectionRequest,

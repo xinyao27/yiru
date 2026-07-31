@@ -1,4 +1,4 @@
-import type { GitHubOwnerRepo } from '../../shared/types'
+import type { GitHubOwnerRepo } from '~shared/types'
 
 export type GitHubRemoteIdentity = GitHubOwnerRepo & { host: string }
 

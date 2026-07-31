@@ -18,8 +18,7 @@ import {
   X
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,14 +30,14 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { formatPrimaryShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
+} from '~renderer/components/ui/dropdown-menu'
+import { formatPrimaryShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import type { KeybindingOverrides } from '~shared/keybindings'
+import { isTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand } from '~shared/types'
 
-import type { KeybindingOverrides } from '../../../../shared/keybindings'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand } from '../../../../shared/types'
 import { isMacPlatform, nativeChatToggleShortcutLabel } from '../native-chat/shortcut'
 import { AgentSessionContinuationMenuItem } from './agent/session-continuation-menu-item'
 import { shouldIgnoreTerminalMenuPointerDownOutside } from './terminal-context-menu-dismiss'

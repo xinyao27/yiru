@@ -6,8 +6,8 @@ import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { View, Text, TextInput, Pressable, Switch, ActivityIndicator, Keyboard } from 'react-native'
 
-import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'

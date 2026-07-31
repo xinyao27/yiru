@@ -1,7 +1,6 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
-
-import type { CodexRestartNotice } from '../../../../../shared/terminal/codex-restart-notice'
-import type { TerminalTab } from '../../../../../shared/types'
+import type { CodexRestartNotice } from '~shared/terminal/codex-restart-notice'
+import type { TerminalTab } from '~shared/types'
 
 export type DirectSshPaneRetryAttemptId = string & {
   readonly __directSshPaneRetryAttemptId: unique symbol

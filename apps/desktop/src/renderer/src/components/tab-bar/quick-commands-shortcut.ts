@@ -1,18 +1,16 @@
 import { useEffect } from 'react'
-
-import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/components/tab-bar/quick-commands-menu-events'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { useAppStore } from '@/store'
-
+import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '~renderer/components/tab-bar/quick-commands-menu-events'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
 import {
   keybindingMatchesAction,
   type KeybindingContext,
   type KeybindingInput
-} from '../../../../shared/keybindings'
+} from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../../../shared/modifier-double-tap-detector'
+} from '~shared/modifier-double-tap-detector'
 
 type UseTabBarQuickCommandsShortcutParams = {
   enabled?: boolean

@@ -1,7 +1,6 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-
-import { hostedReviewInfoFromGitHubPRInfo } from '../../../../../shared/hosted-review-github'
-import type { PRInfo } from '../../../../../shared/types'
+import { hostedReviewInfoFromGitHubPRInfo } from '~shared/hosted-review-github'
+import type { PRInfo } from '~shared/types'
 
 export type ChecksPanelReview = HostedReviewInfo
 

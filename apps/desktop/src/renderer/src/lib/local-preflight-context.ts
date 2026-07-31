@@ -1,14 +1,13 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
-
-import type { AppState } from '@/store/types'
-
+import type { AppState } from '~renderer/store/types'
 import {
   deriveGlobalWindowsRuntimeDefaultFromLegacySettings,
   resolveProjectExecutionRuntime,
   type ProjectExecutionRuntimeResolution
-} from '../../../shared/project-execution-runtime'
-import type { Repo, Worktree } from '../../../shared/types'
+} from '~shared/project-execution-runtime'
+import type { Repo, Worktree } from '~shared/types'
+
 import { getRendererAppPlatform } from '../components/settings/renderer-app-platform'
 import {
   getProjectRuntimePreflightContext,

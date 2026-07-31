@@ -1,4 +1,4 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { RuntimeFileListState } from '../quick-open-file-list'
 import { isQuickOpenQueryTooLarge, prepareQuickOpenFiles } from '../quick-open-search'

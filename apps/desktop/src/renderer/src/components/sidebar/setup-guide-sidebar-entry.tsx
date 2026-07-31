@@ -1,21 +1,20 @@
 import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import {
   getFirstIncompleteFeatureWallSetupStepId,
   type FeatureWallSetupStepId
-} from '../../../../shared/feature-wall-setup-steps'
+} from '~shared/feature-wall-setup-steps'
+
 import type { FeatureWallSetupProgress } from '../feature-wall/setup-progress'
 import { SetupGuideProgressRing } from '../setup-guide/progress-ring'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'

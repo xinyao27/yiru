@@ -1,6 +1,6 @@
 import type { PointerEvent } from 'react'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../../../shared/types'
 import type { ProjectHeaderDragBucketKey, ProjectHeaderDragRect } from './project-header-drop'
 
 export type RepoDragState = {

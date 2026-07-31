@@ -10,7 +10,7 @@
  * interest, which suppresses the gate for that PTY.
  * See docs/reference/terminal-side-effect-authority.md (Open Items).
  */
-import type { GlobalSettings } from '../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 export type HiddenPtyDeliveryGateSettings = Pick<
   GlobalSettings,

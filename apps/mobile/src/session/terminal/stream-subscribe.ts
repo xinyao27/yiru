@@ -1,4 +1,4 @@
-import type { RpcClient } from '../../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
 
 export function subscribeMobileTerminalSafely(
   client: Pick<RpcClient, 'subscribe'>,

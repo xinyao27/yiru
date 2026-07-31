@@ -1,12 +1,14 @@
-import type { CmdJProjectSearchResult } from '@/components/cmd-j/palette-project-results'
-import type { CmdJActionResult, CmdJSettingsResult } from '@/components/cmd-j/palette-results'
-import type { BrowserPaletteSearchResult } from '@/components/worktree-jump-palette/browser-palette-search'
-import type { SimulatorPaletteSearchResult } from '@/components/worktree-jump-palette/simulator-palette-search'
-import type { WorkspaceTabPaletteSearchResult } from '@/components/worktree-jump-palette/workspace-tab-palette-search'
-import type { CREATE_WORKTREE_ITEM_ID } from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import type { PaletteSearchResult } from '@/components/worktree-jump-palette/worktree-palette-search'
-
-import type { Worktree } from '../../../../shared/types'
+import type { CmdJProjectSearchResult } from '~renderer/components/cmd-j/palette-project-results'
+import type {
+  CmdJActionResult,
+  CmdJSettingsResult
+} from '~renderer/components/cmd-j/palette-results'
+import type { BrowserPaletteSearchResult } from '~renderer/components/worktree-jump-palette/browser-palette-search'
+import type { SimulatorPaletteSearchResult } from '~renderer/components/worktree-jump-palette/simulator-palette-search'
+import type { WorkspaceTabPaletteSearchResult } from '~renderer/components/worktree-jump-palette/workspace-tab-palette-search'
+import type { CREATE_WORKTREE_ITEM_ID } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import type { PaletteSearchResult } from '~renderer/components/worktree-jump-palette/worktree-palette-search'
+import type { Worktree } from '~shared/types'
 
 export type WorktreePaletteItem = {
   id: string

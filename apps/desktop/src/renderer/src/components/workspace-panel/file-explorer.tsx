@@ -1,7 +1,6 @@
 import React from 'react'
-
-import { CoworkingFilesPane } from '@/components/coworking/files-pane'
-import { getCoworkingWorktreeRouteKey } from '@/components/coworking/worktree-route'
+import { CoworkingFilesPane } from '~renderer/components/coworking/files-pane'
+import { getCoworkingWorktreeRouteKey } from '~renderer/components/coworking/worktree-route'
 
 import { FileExplorerFilesMemo } from './file-explorer/files'
 import {

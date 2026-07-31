@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 // Changed-files list, section headers, file rows, and the commit bar. Split
 // from the main source-control stylesheet to stay under the line limit.

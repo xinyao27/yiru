@@ -1,6 +1,5 @@
 import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 export type MobilePlatform = 'ios' | 'android'
 export type MobileReleaseLink = { ctaLabel: string; url: string }

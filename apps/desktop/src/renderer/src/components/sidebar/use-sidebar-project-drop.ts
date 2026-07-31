@@ -1,14 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { NATIVE_FILE_DROP_TARGET, hasNativeFileDragTypes } from '~shared/native-file-drop'
 
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import {
-  NATIVE_FILE_DROP_TARGET,
-  hasNativeFileDragTypes
-} from '../../../../shared/native-file-drop'
 import {
   getSidebarProjectDropAffordance,
   isRemoteRuntimeActive,

@@ -1,14 +1,15 @@
+import type { Store } from '~main/persistence'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import type { RuntimeGitCommands } from '~main/runtime/yiru-runtime-git'
 import {
   normalizeCoworkingChecksHttpUrl,
   CoworkingChecksReadResultSchema
-} from '../../../shared/coworking/checks-result-schema'
+} from '~shared/coworking/checks-result-schema'
 import type {
   CoworkingChecksReadOperation,
   CoworkingChecksReadResult
-} from '../../../shared/coworking/operation-contract'
-import type { Store } from '../../persistence'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
-import type { RuntimeGitCommands } from '../../runtime/yiru-runtime-git'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingChecksReadCache } from '../checks-read-cache'
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingPublicWorktreeInstance } from '../worktree-publication-state'

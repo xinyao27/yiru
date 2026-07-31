@@ -6,7 +6,7 @@ import type {
   SkillDirectoryEntry,
   SkillDirectoryListing,
   SkillFileReadResult
-} from '../../shared/skills'
+} from '~shared/skills'
 
 // Why: discovery only recognizes a file named exactly SKILL.md, so both
 // channels here anchor on the same name.

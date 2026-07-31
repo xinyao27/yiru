@@ -1,11 +1,10 @@
 import { X } from '@phosphor-icons/react'
-
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useShortcutKeyDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { TAB_CLOSE_BUTTON_CLASSES } from './tab-close-button-classes'
 

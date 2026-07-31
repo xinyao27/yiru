@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 import { LoadingIndicator } from './loading-indicator'
 

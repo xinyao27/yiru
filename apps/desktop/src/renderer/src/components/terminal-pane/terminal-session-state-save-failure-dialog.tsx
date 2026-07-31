@@ -1,6 +1,5 @@
 import { HardDrive } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 export function TerminalSessionStateSaveFailureDialog({
   open,

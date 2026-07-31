@@ -1,18 +1,16 @@
 import { Check } from '@phosphor-icons/react'
 import type { JSX, KeyboardEvent } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { AgentsStep, AgentsStepId } from '../../../../shared/agents-orchestration-steps'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { AgentsStep, AgentsStepId } from '~shared/agents-orchestration-steps'
 import {
   FEATURE_WALL_WORKFLOWS,
   type FeatureWallWorkflow,
   type FeatureWallWorkflowId
-} from '../../../../shared/feature-wall-workflows'
-import type { ReviewStep, ReviewStepId } from '../../../../shared/review-steps'
-import type { WorkbenchStep, WorkbenchStepId } from '../../../../shared/workbench-steps'
+} from '~shared/feature-wall-workflows'
+import type { ReviewStep, ReviewStepId } from '~shared/review-steps'
+import type { WorkbenchStep, WorkbenchStepId } from '~shared/workbench-steps'
 
 const SUB_STEP_LABELS = ['a', 'b', 'c', 'd', 'e', 'f'] as const
 

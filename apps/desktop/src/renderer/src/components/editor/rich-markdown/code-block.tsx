@@ -3,11 +3,10 @@ import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import React, { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
 import MermaidBlock from '../mermaid-block'
 
 /**

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Pressable, Switch, Text, TextInput, View } from 'react-native'
 
-import { CaretDown, CaretRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretDown, CaretRight } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import { MobileGlassGroup } from '../components/glass/group'

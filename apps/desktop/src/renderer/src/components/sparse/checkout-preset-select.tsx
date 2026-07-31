@@ -6,17 +6,16 @@ import {
   ArrowCounterClockwise as RefreshCcw
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { parseSparsePresetDirectories } from '~renderer/lib/sparse-preset-draft'
+import { useAppStore } from '~renderer/store'
+import type { SparsePreset } from '~shared/types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { parseSparsePresetDirectories } from '@/lib/sparse-preset-draft'
-import { useAppStore } from '@/store'
-
-import type { SparsePreset } from '../../../../shared/types'
 import { SparseCheckoutPresetDraftForm, type SparsePresetDraft } from './checkout-preset-draft-form'
 
 type SparseCheckoutPresetSelectProps = {

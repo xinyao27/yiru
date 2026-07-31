@@ -8,28 +8,27 @@ import type React from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
 import {
   selectActiveCoworkingWorkspace,
   selectCoworkingCanControl,
   selectCoworkingRequesterControlState
-} from '@/components/coworking/selectors'
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { LoadingIndicator } from '@/components/loading-indicator'
+} from '~renderer/components/coworking/selectors'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
-} from '@/components/tab-group/workspace-column-chrome'
-import { WorkspacePaneFrame } from '@/components/tab-group/workspace-pane-frame'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/tab-group/workspace-column-chrome'
+import { WorkspacePaneFrame } from '~renderer/components/tab-group/workspace-pane-frame'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
-} from '../../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
+
 import { getCoworkingSessionCatalogStatusLabel } from './session-catalog-status'
 import { CoworkingSessionCreateMenu } from './session-create-menu'
 import { CoworkingSessionPane } from './session-pane'

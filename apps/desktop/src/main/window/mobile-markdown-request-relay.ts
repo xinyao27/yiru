@@ -2,13 +2,12 @@ import { randomUUID } from 'node:crypto'
 
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
-
 import type {
   RuntimeMarkdownReadTabResult,
   RuntimeMarkdownSaveTabResult,
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
-} from '../../shared/mobile-markdown-document'
+} from '~shared/mobile-markdown-document'
 
 const MOBILE_MARKDOWN_RENDERER_TIMEOUT_MS = 20_000
 

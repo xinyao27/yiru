@@ -4,8 +4,7 @@ import {
 } from '@yiru/runtime-protocol/ssh-connection'
 import { useState } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -13,9 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import {
   EMPTY_FORM,

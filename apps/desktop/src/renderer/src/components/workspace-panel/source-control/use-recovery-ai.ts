@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
-
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { GitStatusEntry } from '../../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { GitStatusEntry } from '~shared/types'
+
 import { summarizeCommitFailure } from '../commit-failure-summary'
 import type { SourceControlAiStoreSnapshot } from './ai-controller-types'
 import { buildFixCommitFailurePrompt } from './ai-prompts'

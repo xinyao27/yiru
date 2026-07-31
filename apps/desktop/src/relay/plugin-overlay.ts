@@ -30,8 +30,8 @@ import {
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { mirrorEntry, safeRemoveOverlay } from '../main/pty/overlay-mirror'
-import type { PiAgentKind } from '../shared/pi-agent-kind'
+import { mirrorEntry, safeRemoveOverlay } from '~main/pty/overlay-mirror'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 const RELAY_HOOKS_DIR = '.yiru-relay'
 const OPENCODE_OVERLAY_SUBDIR = 'opencode-overlays'

@@ -1,11 +1,10 @@
 import { ArrowClockwise, MagnifyingGlass, X } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Switch } from '~renderer/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { GitGraphBranchOption } from './branch-filter'
 import { GitGraphBranchFilterDropdown } from './branch-filter-dropdown'

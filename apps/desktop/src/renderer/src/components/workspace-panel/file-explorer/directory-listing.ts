@@ -1,6 +1,7 @@
-import type { DirEntry } from '../../../../../shared/types'
-import { joinPath, normalizeRelativePath } from '../../../lib/path'
-import { readRuntimeDirectory } from '../../../runtime/file-client'
+import { joinPath, normalizeRelativePath } from '~renderer/lib/path'
+import { readRuntimeDirectory } from '~renderer/runtime/file-client'
+import type { DirEntry } from '~shared/types'
+
 import { shouldIncludeFileExplorerEntry } from './entries'
 import {
   getFileExplorerOperationOwner,

@@ -1,26 +1,24 @@
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { joinPath } from '@/lib/path'
-import { isPathInsideWorktree, toWorktreeRelativePath } from '@/lib/terminal-links'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import type { WorktreeRuntimeOwnerState } from '@/lib/worktree-runtime-owner'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { isPathInsideWorktree, toWorktreeRelativePath } from '~renderer/lib/terminal-links'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import type { WorktreeRuntimeOwnerState } from '~renderer/lib/worktree-runtime-owner'
 import {
   importExternalPathsToRuntime,
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/file-client'
-import { useAppStore } from '@/store'
-
+} from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
 import {
   NATIVE_FILE_DROP_MAX_PATHS,
   type NativeFileDropRejectedPayload
-} from '../../../shared/native-file-drop'
-import type { GlobalSettings } from '../../../shared/types'
+} from '~shared/native-file-drop'
+import type { GlobalSettings } from '~shared/types'
 
 export function getEditorFileDropSettingsForWorktree(
   store: WorktreeRuntimeOwnerState,

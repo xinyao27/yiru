@@ -1,4 +1,4 @@
-import type { AppState } from '@/store/types'
+import type { AppState } from '~renderer/store/types'
 
 export type PaletteStatusInputsState = Pick<
   AppState,

@@ -1,14 +1,13 @@
 import { useState } from 'react'
-
-import WorktreeCard from '@/components/sidebar/worktree-card'
+import WorktreeCard from '~renderer/components/sidebar/worktree-card'
 import {
   getLineageChildrenInlineStyle,
   getLineageNestedRowGeometry
-} from '@/components/sidebar/worktree-list-indentation'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/sidebar/worktree-list-indentation'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { Worktree } from '~shared/types'
 
-import type { Worktree } from '../../../../shared/types'
 import { getAttachedWorktreesForFolderWorkspace } from './folder-workspace-attached-worktrees'
 
 function stopNestedWorktreeCardBubble(event: React.SyntheticEvent<HTMLElement>): void {

@@ -1,9 +1,9 @@
-import { captureTerminalShutdownBuffersBestEffort } from '@/runtime/terminal-shutdown-buffer-captures'
-
+import { captureTerminalShutdownBuffersBestEffort } from '~renderer/runtime/terminal-shutdown-buffer-captures'
 import {
   shouldPreserveTerminalScrollbackBuffers,
   type RepoConnection
-} from '../../../../shared/workspace/session-terminal-buffers'
+} from '~shared/workspace/session-terminal-buffers'
+
 import {
   selectIdsBeyondHotRetain,
   TERMINAL_WORKTREE_COLD_PARK_DELAY_MS,

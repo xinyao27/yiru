@@ -7,7 +7,8 @@ import type {
   NestedRepoCandidate,
   NestedRepoScanOptions,
   NestedRepoScanResult
-} from '../../shared/types'
+} from '~shared/types'
+
 import { isGitRepo } from '../git/repo'
 
 type NestedRepoDirectoryEntry = {

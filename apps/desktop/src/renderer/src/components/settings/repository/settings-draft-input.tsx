@@ -1,7 +1,6 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-
-import { Input } from '../../ui/input'
+import { Input } from '~renderer/components/ui/input'
 
 type RepoTextDraft = { repoId: string; text: string }
 

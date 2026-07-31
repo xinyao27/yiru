@@ -1,23 +1,23 @@
 import { useMemo, useState } from 'react'
 import type React from 'react'
-
-import { CUSTOM_AGENT_ID } from '../../../../../shared/commit-message/agent-spec'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { CUSTOM_AGENT_ID } from '~shared/commit-message/agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings
-} from '../../../../../shared/source-control/ai'
+} from '~shared/source-control/ai'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   type SourceControlActionId
-} from '../../../../../shared/source-control/ai-actions'
-import { toSourceControlAiRepoUpdate } from '../../../../../shared/source-control/ai-recipe-save'
-import type { SourceControlAiRepoUpdate } from '../../../../../shared/source-control/ai-recipe-save'
-import type { RepoSourceControlAiOverrides } from '../../../../../shared/source-control/ai-types'
-import type { Repo, TuiAgent } from '../../../../../shared/types'
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
+} from '~shared/source-control/ai-actions'
+import { toSourceControlAiRepoUpdate } from '~shared/source-control/ai-recipe-save'
+import type { SourceControlAiRepoUpdate } from '~shared/source-control/ai-recipe-save'
+import type { RepoSourceControlAiOverrides } from '~shared/source-control/ai-types'
+import type { Repo, TuiAgent } from '~shared/types'
+
 import { getSettingOwnershipSummary } from '../setting-ownership'
 import { getRepositorySourceControlAiSectionId } from './settings-targets'
 import { RepositorySourceControlAiActionRows } from './source-control-ai-action-rows'

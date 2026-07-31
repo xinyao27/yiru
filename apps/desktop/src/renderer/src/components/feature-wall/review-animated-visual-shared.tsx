@@ -1,8 +1,7 @@
 import type { ComponentProps, JSX } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 // Why: shared between ReviewNotesAnimatedVisual / ReviewShipAnimatedVisual.
 // Kept in a single module so the two pages stay aligned (same diff data,

@@ -1,24 +1,23 @@
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { startFixChecksAgent } from '@/components/editor/fix-checks-agent-launch'
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launch-agent-selection'
-import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
-import { useAppStore } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
-
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/ai'
+import { startFixChecksAgent } from '~renderer/components/editor/fix-checks-agent-launch'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { readSourceControlLaunchRecipeAgentId } from '~renderer/lib/source-control-launch-agent-selection'
+import { resolveSourceControlLaunchPlatform } from '~renderer/lib/source-control-launch-platform'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { resolveSourceControlActionRecipe } from '~shared/source-control/ai'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai-actions'
 import {
   saveSourceControlActionRecipe,
   type SourceControlAiWriteTarget
-} from '../../../../shared/source-control/ai-recipe-save'
-import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
+} from '~shared/source-control/ai-recipe-save'
+import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
+
 import { openSourceControlAiSettingsTarget } from '../workspace-panel/source-control/ai-settings-navigation'
 import {
   buildCheckRunDetailsFixBasePrompt,

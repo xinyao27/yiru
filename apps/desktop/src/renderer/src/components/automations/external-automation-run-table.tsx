@@ -6,19 +6,18 @@ import {
 } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: run rows are fetched from the external automation store; the loading state tracks that async request lifecycle. */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import type {
   ExternalAutomationJob,
   ExternalAutomationManager,
   ExternalAutomationRun
-} from '../../../../shared/automations-types'
+} from '~shared/automations-types'
+
 import { formatAutomationDateTimeWithRelative } from './automation-page-parts'
 import {
   createExternalAutomationRunTableState,

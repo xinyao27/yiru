@@ -2,9 +2,9 @@ import type {
   WorkspaceCleanupFailure,
   WorkspaceCleanupRemoveOptions,
   WorkspaceCleanupRemoveResult
-} from '@/components/workspace-cleanup/state'
+} from '~renderer/components/workspace-cleanup/state'
+import type { WorkspaceCleanupCandidate } from '~shared/workspace/cleanup'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 import {
   getSkippedAncestorMessage,
   isStrictWorkspaceCleanupDescendant,

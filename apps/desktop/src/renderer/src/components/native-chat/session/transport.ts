@@ -2,14 +2,14 @@ import type {
   NativeChatApi,
   NativeChatAppendedMessages,
   NativeChatReadSessionResult
-} from '../../../../../preload/api-types'
-import { isWebClientLocation } from '../../../lib/web-client-location'
-import { isRuntimeCompatBlockError } from '../../../runtime/protocol-compat'
+} from '~preload/api-types'
+import { isWebClientLocation } from '~renderer/lib/web-client-location'
+import { isRuntimeCompatBlockError } from '~renderer/runtime/protocol-compat'
 import {
   callRuntimeRpc,
   RuntimeRpcCallError,
   type RuntimeClientTarget
-} from '../../../runtime/rpc-client'
+} from '~renderer/runtime/rpc-client'
 
 /** The read/subscribe surface the live-session hook needs, decoupled from where
  *  the transcript actually lives. Same shape as `window.api.nativeChat`, so the

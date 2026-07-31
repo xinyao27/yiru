@@ -1,14 +1,14 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
-
-import type { CatalogModel } from '../../../../../shared/agent/session-option-catalog'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../../shared/commit-message/host-key'
-import { getConnectionIdFromState } from '../../../lib/connection-context'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import {
   discoverRuntimeCommitMessageModels,
   getRuntimeGitScope,
   type RuntimeGitContext
-} from '../../../runtime/git-client'
-import { useAppStore } from '../../../store'
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import type { CatalogModel } from '~shared/agent/session-option-catalog'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
+
 import { getSettingsForAgentTabRuntimeOwner } from '../agent-paste-draft'
 
 export type NativeChatModelDiscoveryContext = {

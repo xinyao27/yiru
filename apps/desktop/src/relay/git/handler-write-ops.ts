@@ -3,12 +3,13 @@ import type {
   GitCheckoutCommitResult,
   GitCreateBranchResult,
   GitResetToCommitResult
-} from '../../shared/git/write-op-results'
+} from '~shared/git/write-op-results'
 import {
   hasCommittedHead,
   isWorkingTreeDirty,
   resolveCommitOid
-} from '../../shared/git/write-preconditions'
+} from '~shared/git/write-preconditions'
+
 import type { GitExec } from './handler-ops'
 import { detectConflictOperation } from './handler-status-ops'
 

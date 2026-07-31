@@ -1,14 +1,12 @@
 import * as React from 'react'
 import { HexColorPicker } from 'react-colorful'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { normalizeRepoBadgeColor, resolveRepoBadgeColor } from '../../../../shared/repo-badge-color'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { normalizeRepoBadgeColor, resolveRepoBadgeColor } from '~shared/repo-badge-color'
 
 type RepoColorPickerProps = {
   value: string

@@ -2,10 +2,10 @@ import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
+import { AgentSessionContinuationDialog } from '~renderer/components/agent-session-continuation/dialog'
+import { CoworkingAgentsPane } from '~renderer/components/coworking/agents-pane'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   useActiveRepo,
   useActiveWorktree,
@@ -13,9 +13,8 @@ import {
   useAllWorktrees,
   useProjectHostSetupProjection,
   useRepos
-} from '../../../store/selectors'
-import { AgentSessionContinuationDialog } from '../../agent-session-continuation/dialog'
-import { CoworkingAgentsPane } from '../../coworking/agents-pane'
+} from '~renderer/store/selectors'
+
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource

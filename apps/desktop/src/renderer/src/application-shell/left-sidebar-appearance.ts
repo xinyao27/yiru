@@ -1,9 +1,10 @@
-import { HEX_COLOR_RE } from '../../../shared/color-validation'
+import { HEX_COLOR_RE } from '~shared/color-validation'
 import {
   normalizeLeftSidebarTintColor,
   normalizeLeftSidebarTintOpacity
-} from '../../../shared/left-sidebar-appearance'
-import type { GlobalSettings } from '../../../shared/types'
+} from '~shared/left-sidebar-appearance'
+import type { GlobalSettings } from '~shared/types'
+
 import { resolveEffectiveTerminalAppearance } from '../lib/terminal-theme'
 
 type LeftSidebarAppearanceSettings = Pick<

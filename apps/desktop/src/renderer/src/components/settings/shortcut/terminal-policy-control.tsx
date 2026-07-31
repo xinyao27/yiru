@@ -1,8 +1,14 @@
 import React from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import type { TerminalShortcutPolicy } from '~shared/keybindings'
 
-import type { TerminalShortcutPolicy } from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { SettingsRow } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 

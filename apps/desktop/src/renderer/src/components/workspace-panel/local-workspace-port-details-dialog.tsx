@@ -4,11 +4,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { addressForPort } from '@/lib/workspace-port-urls'
-
-import type { WorkspacePort } from '../../../../shared/workspace/ports'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { addressForPort } from '~renderer/lib/workspace-port-urls'
+import type { WorkspacePort } from '~shared/workspace/ports'
 
 export function LocalWorkspacePortDetailsDialog({
   port,

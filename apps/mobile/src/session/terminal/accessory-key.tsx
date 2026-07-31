@@ -1,7 +1,7 @@
 import type { PressableProps } from 'react-native'
 import { Text, View } from 'react-native'
 
-import { MobileGlassPressable } from '../../components/glass/pressable'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
   CaretDown as ChevronDown,
   CaretDoubleRight as ChevronsRight,
@@ -9,7 +9,7 @@ import {
   Monitor,
   Plus,
   DeviceMobile as Smartphone
-} from '../../components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 export type MobileTerminalAccessoryIcon =
   | 'add'

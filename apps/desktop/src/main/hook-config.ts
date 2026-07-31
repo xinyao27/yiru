@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { getDefaultRepoHookSettings } from '../shared/constants'
-import { resolveHookCommandSourcePolicy } from '../shared/hook-command-source-policy'
+import { getDefaultRepoHookSettings } from '~shared/constants'
+import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
 import type {
   HookCommandSourcePolicy,
   YiruHooks,
@@ -10,8 +10,8 @@ import type {
   SetupDecision,
   SetupRunPolicy,
   WorktreeDefaultTabsLaunch
-} from '../shared/types'
-import { parseYiruYaml } from '../shared/yiru-yaml'
+} from '~shared/types'
+import { parseYiruYaml } from '~shared/yiru-yaml'
 
 export { parseYiruYaml }
 

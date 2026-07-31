@@ -1,9 +1,8 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 import { useAppStore } from '../store'
 import { selectCodexRestartInputs } from './codex-restart-chip-inputs'

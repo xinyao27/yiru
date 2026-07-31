@@ -1,6 +1,5 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 // Why: agent completions can dispatch in bursts; one in-app pointer at the
 // broken OS setting per session teaches the fix without nagging.

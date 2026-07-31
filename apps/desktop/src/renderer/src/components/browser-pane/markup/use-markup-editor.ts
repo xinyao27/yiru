@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 
 import { blitMarkupScene, renderCommittedLayer } from './canvas-render'
 import {

@@ -1,8 +1,7 @@
 import { GitMerge, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import {
   ArrowUpIcon,

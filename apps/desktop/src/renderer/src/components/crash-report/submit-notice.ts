@@ -1,11 +1,10 @@
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   sanitizeCrashReportString,
   type CrashReportCopySubmissionFailure,
   type CrashReportDiagnosticBundle,
   type CrashReportSubmitResult
-} from '../../../../shared/crash-reporting'
+} from '~shared/crash-reporting'
 
 export const CRASH_REPORT_SUBMIT_FAILURE_TOAST_ID = 'crash-report-submit-failure'
 

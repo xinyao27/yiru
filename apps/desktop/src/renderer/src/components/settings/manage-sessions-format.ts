@@ -1,6 +1,5 @@
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-
-import type { PtyManagementSession } from '../../../../preload/api-types'
+import type { PtyManagementSession } from '~preload/api-types'
 
 export function shortCwd(cwd: string): string {
   if (!cwd) {

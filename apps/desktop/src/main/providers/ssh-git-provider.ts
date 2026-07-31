@@ -1,7 +1,7 @@
-import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
-import type { CommitMessagePlan } from '../../shared/commit-message/plan'
-import { gitExecMutatesRepository } from '../../shared/git/exec-mutation'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type { CommitMessageDraftContext } from '~shared/commit-message/generation'
+import type { CommitMessagePlan } from '~shared/commit-message/plan'
+import { gitExecMutatesRepository } from '~shared/git/exec-mutation'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 import type {
   GitAddTagResult,
   GitCheckoutCommitResult,
@@ -12,8 +12,8 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '../../shared/git/write-op-results'
-import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
+} from '~shared/git/write-op-results'
+import { InFlightPromiseDedupe, stableInFlightKey } from '~shared/in-flight-promise-dedupe'
 import type {
   GitStatusResult,
   GitDiffResult,
@@ -27,7 +27,8 @@ import type {
   GitUpstreamStatus,
   GitWorktreeInfo,
   RemoveWorktreeResult
-} from '../../shared/types'
+} from '~shared/types'
+
 import { buildHostedRemoteCommitUrl, buildHostedRemoteFileUrl } from '../git/hosted-remote-url'
 import {
   describeMaxBufferOverflowError,

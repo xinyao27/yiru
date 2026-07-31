@@ -1,4 +1,5 @@
-import { COWORKING_FILE_WRITE_MAX_BYTES } from '../../shared/coworking/operation-contract'
+import { COWORKING_FILE_WRITE_MAX_BYTES } from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from './execution-error'
 
 export function decodeCoworkingFileBytes(bytes: Uint8Array<ArrayBufferLike>): string | null {

@@ -1,9 +1,9 @@
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings, Repo } from '~shared/types'
 
-import type { GlobalSettings, Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
 import { BaseRefPicker } from '../base-ref-picker'
 import { SearchableSetting } from '../searchable-setting'
 import { RepoSettingsDraftInput } from './settings-draft-input'

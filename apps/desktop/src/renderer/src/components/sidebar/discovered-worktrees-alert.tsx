@@ -1,12 +1,11 @@
 import { WarningCircle } from '@phosphor-icons/react'
 import React, { useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { getExternalWorktreeParentPath } from '~shared/external-worktree-visibility'
 
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-
-import { getExternalWorktreeParentPath } from '../../../../shared/external-worktree-visibility'
 import type { ImportedWorktreeCardActionState } from './imported-worktrees-card-actions'
 import type { ImportedWorktreesCardCandidate } from './worktree-list-groups'
 

@@ -8,8 +8,7 @@ import {
   List as ListX,
   X
 } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,13 +16,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { formatShortcutLabel, useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dropdown-menu'
+import { formatShortcutLabel, useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { TerminalTab } from '~shared/types'
 
-import type { TerminalTab } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { TerminalTabSplitMenuSection } from './terminal-tab-split-menu-section'
 
 const TAB_COLORS = [

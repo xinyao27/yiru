@@ -1,29 +1,28 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-
-import { resolveQuickCreateLinkedWorkItemPrompt } from '@/components/sidebar/linked-work-item-context'
-import { isWorkItemLookupText } from '@/components/sidebar/work-item-lookup-text'
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { resolveQuickCreateLinkedWorkItemPrompt } from '~renderer/components/sidebar/linked-work-item-context'
+import { isWorkItemLookupText } from '~renderer/components/sidebar/work-item-lookup-text'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import {
   CLIENT_PLATFORM,
   ensureAgentStartupInTerminal,
   type LinkedWorkItemSummary
-} from '@/lib/new-workspace'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
+} from '~renderer/lib/new-workspace'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
 import {
   buildAgentDraftLaunchPlan,
   buildAgentStartupPlan,
   type AgentStartupPlan
-} from '@/lib/tui-agent-startup'
-import { activateAndRevealFolderWorkspace } from '@/lib/worktree-activation'
+} from '~renderer/lib/tui-agent-startup'
+import { activateAndRevealFolderWorkspace } from '~renderer/lib/worktree-activation'
+import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import type { LaunchSource } from '~shared/telemetry-events'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import type { AgentStartupShell } from '~shared/tui-agent/startup-shell'
+import type { FolderWorkspace, ProjectGroup, TuiAgent } from '~shared/types'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
 
-import type { SessionOptionValue } from '../../../../shared/native-chat/session-options'
-import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
-import type { AgentStartupShell } from '../../../../shared/tui-agent/startup-shell'
-import type { FolderWorkspace, ProjectGroup, TuiAgent } from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import {
   getLinkedItemDisplayName,
   toFolderWorkspaceLinkedReview

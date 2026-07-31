@@ -1,5 +1,4 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
-
 import {
   findCatalogModel,
   findCatalogOption,
@@ -7,12 +6,13 @@ import {
   type CatalogMidSessionApply,
   type CatalogModel,
   type CatalogOptionApply
-} from '../../../../shared/agent/session-option-catalog'
+} from '~shared/agent/session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface,
   SessionOptionValue
-} from '../../../../shared/native-chat/session-options'
+} from '~shared/native-chat/session-options'
+
 import {
   createNativeChatSessionOptionRecord,
   readNativeChatSessionOptionCache,

@@ -1,8 +1,6 @@
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
-
-import { getBranchPrefixIssue, normalizeBranchPrefix } from '../../../../shared/branch-prefix'
+import { translate } from '~renderer/i18n/i18n'
+import { getBranchPrefixIssue, normalizeBranchPrefix } from '~shared/branch-prefix'
 
 export function BranchPrefixFeedback({ rawPrefix }: { rawPrefix: string }): React.JSX.Element {
   const normalizedPrefix = normalizeBranchPrefix(rawPrefix)

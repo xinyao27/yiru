@@ -1,8 +1,8 @@
 import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { REPO_SEARCH_REFS_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
+import type { BaseRefSearchResult, GlobalSettings } from '~shared/types'
 
-import { REPO_SEARCH_REFS_CONTRACT } from '../../../shared/runtime-method-contracts/workspace-contracts'
-import type { BaseRefSearchResult, GlobalSettings } from '../../../shared/types'
 import { isRuntimeRepoRefSearchQueryWithinLimit } from './repo-search-bounds'
 import { callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'
 

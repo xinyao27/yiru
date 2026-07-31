@@ -6,7 +6,7 @@ import {
   TerminalWindow,
   UserCircle,
   type Icon
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassPressable } from '../components/glass/pressable'

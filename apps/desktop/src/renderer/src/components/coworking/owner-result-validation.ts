@@ -1,4 +1,4 @@
-import { CoworkingChecksReadResultSchema } from '../../../../shared/coworking/checks-result-schema'
+import { CoworkingChecksReadResultSchema } from '~shared/coworking/checks-result-schema'
 import {
   CoworkingFileDiffResultSchema,
   CoworkingFileListResultSchema,
@@ -10,7 +10,7 @@ import {
   CoworkingTerminalCreateRequesterResultSchema,
   CoworkingTerminalLaunchOptionsResultSchema,
   type CoworkingTerminalCreateRequesterResult
-} from '../../../../shared/coworking/execution-result-schema'
+} from '~shared/coworking/execution-result-schema'
 import type {
   CoworkingChecksReadResult,
   CoworkingFileDiffResult,
@@ -21,7 +21,7 @@ import type {
   CoworkingGitStatusResult,
   CoworkingMutationResult,
   CoworkingTerminalLaunchOptionsResult
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 
 export type CoworkingTerminalCreateResult = CoworkingTerminalCreateRequesterResult
 

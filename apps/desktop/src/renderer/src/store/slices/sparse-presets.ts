@@ -1,8 +1,7 @@
 import type { StateCreator } from 'zustand'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import type { SparsePreset } from '~shared/types'
 
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-
-import type { SparsePreset } from '../../../../shared/types'
 import type { AppState } from '../types'
 
 export type SparsePresetsLoadStatus = 'idle' | 'loading' | 'loaded' | 'error'

@@ -1,10 +1,8 @@
 import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { resolveWorktreeStatus, type WorktreeStatus } from '@/lib/worktree-status'
-
-import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot, TerminalTab } from '../../../../shared/types'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
+import { resolveWorktreeStatus, type WorktreeStatus } from '~renderer/lib/worktree-status'
+import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
 // Why: a terminal tab is a container of panes, exactly like a worktree card is
 // a container of tabs. Reuse the WorktreeCard status vocabulary and resolver so

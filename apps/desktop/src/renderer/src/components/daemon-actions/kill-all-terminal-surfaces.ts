@@ -1,9 +1,9 @@
-import { useAppStore, type AppState } from '@/store'
+import { useAppStore, type AppState } from '~renderer/store'
 import {
   buildTerminalTabRetirementPlans,
   type TerminalTabRetirementPlan,
   type TerminalTabRetirementState
-} from '@/store/slices/terminal-tab-retirement'
+} from '~renderer/store/slices/terminal-tab-retirement'
 
 import { closeTerminalTab, type PrecomputedTerminalCloseState } from '../terminal/tab-actions'
 import { reserveTerminalRetirementTeardowns } from './terminal-retirement-teardown-reservation'

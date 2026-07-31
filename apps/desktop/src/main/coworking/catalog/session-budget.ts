@@ -1,4 +1,4 @@
-import type { CoworkingSessionCatalogEntry } from '../../../shared/coworking/catalog-contract'
+import type { CoworkingSessionCatalogEntry } from '~shared/coworking/catalog-contract'
 
 const MAX_MATERIALIZED_SESSIONS_PER_DESKTOP = 55_000
 const MAX_MATERIALIZED_SESSION_BYTES_PER_DESKTOP = 64 * 1024 * 1024

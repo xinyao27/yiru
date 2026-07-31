@@ -4,9 +4,9 @@ import { useState, useRef, useCallback } from 'react'
 import { View, Text, ActivityIndicator, Linking, type LayoutChangeEvent } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { UniwindCameraView } from '@/components/uniwind-camera-view'
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+import { UniwindCameraView } from '~/components/uniwind-camera-view'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
 import { MobileGlassGroup } from '../src/components/glass/group'

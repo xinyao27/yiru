@@ -1,22 +1,15 @@
 import { Info, Plus } from '@phosphor-icons/react'
 import React from 'react'
+import AgentCombobox from '~renderer/components/agent/combobox'
+import { Button } from '~renderer/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { AgentCatalogEntry } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { AutomationWorkspaceMode } from '~shared/automations-types'
+import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo, Worktree } from '~shared/types'
 
-import AgentCombobox from '@/components/agent/combobox'
-import { Button } from '@/components/ui/button'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import type { AgentCatalogEntry } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
-import type { AutomationWorkspaceMode } from '../../../../shared/automations-types'
-import type {
-  GlobalSettings,
-  YiruHooks,
-  ProjectHostSetup,
-  Repo,
-  Worktree
-} from '../../../../shared/types'
 import type { AutomationDraft } from './automation-editor-dialog'
 import { AutomationMissedRunGraceField } from './automation-missed-run-grace-field'
 import { Field } from './automation-page-parts'

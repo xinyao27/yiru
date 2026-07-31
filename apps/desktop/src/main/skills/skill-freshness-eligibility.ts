@@ -1,7 +1,7 @@
 import {
   SUPPORTED_GLOBAL_SKILL_TOPOLOGIES,
   type SkillFreshnessInstallation
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 
 export function eligibleSkillUpdateNames(
   installations: readonly SkillFreshnessInstallation[]

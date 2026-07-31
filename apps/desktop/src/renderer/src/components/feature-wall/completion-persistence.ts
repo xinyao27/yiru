@@ -1,10 +1,10 @@
-import type { AgentsStepId } from '../../../../shared/agents-orchestration-steps'
+import type { AgentsStepId } from '~shared/agents-orchestration-steps'
 import {
   FEATURE_WALL_WORKFLOW_IDS,
   type FeatureWallWorkflowId
-} from '../../../../shared/feature-wall-workflows'
-import type { ReviewStepId } from '../../../../shared/review-steps'
-import type { WorkbenchStepId } from '../../../../shared/workbench-steps'
+} from '~shared/feature-wall-workflows'
+import type { ReviewStepId } from '~shared/review-steps'
+import type { WorkbenchStepId } from '~shared/workbench-steps'
 
 const PERSISTED_WORKFLOW_IDS = new Set<FeatureWallWorkflowId>(FEATURE_WALL_WORKFLOW_IDS)
 const VISITED_WORKFLOWS_STORAGE_KEY = 'yiru.featureWall.visitedWorkflows.v1'

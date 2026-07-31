@@ -1,8 +1,7 @@
-import { translate } from '@/i18n/i18n'
-
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
-import type { SkillDiscoveryTarget } from '../../../shared/skills'
-import type { GlobalSettings } from '../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { SkillDiscoveryTarget } from '~shared/skills'
+import type { GlobalSettings } from '~shared/types'
 
 export type ProjectAgentSkillRuntime = {
   runtime: 'host' | 'wsl'

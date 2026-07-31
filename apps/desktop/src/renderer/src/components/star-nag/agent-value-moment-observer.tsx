@@ -1,7 +1,6 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 // Why: leave a short quiet window after agents finish so the prompt does not
 // interrupt follow-up typing or status churn from the completed run.

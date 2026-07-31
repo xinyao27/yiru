@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import { useSidebarResize } from '@/hooks/use-sidebar-resize'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
 
 const MIN_PANEL_WIDTH = 220

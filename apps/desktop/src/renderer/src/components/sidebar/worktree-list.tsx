@@ -33,27 +33,26 @@ import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffe
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import { shallow } from 'zustand/shallow'
-
-import { CoworkingProjectVisibilityDialog } from '@/components/coworking/worktree-visibility-dialog'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { RepoForkIndicator } from '@/components/repo/fork-indicator'
-import { RepoIconGlyph } from '@/components/repo/icon'
+import { CoworkingProjectVisibilityDialog } from '~renderer/components/coworking/worktree-visibility-dialog'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { RepoForkIndicator } from '~renderer/components/repo/fork-indicator'
+import { RepoIconGlyph } from '~renderer/components/repo/icon'
 import {
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
-} from '@/components/sidebar/folder-workspace-path-status'
-import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
+} from '~renderer/components/sidebar/folder-workspace-path-status'
+import { useFolderWorkspacePathStatusCacheExpiryTick } from '~renderer/components/sidebar/folder-workspace-path-status-cache-expiry'
 import {
   getLegendListScrollElement,
   LEGEND_LIST_SCROLL_AREA_PROPS
-} from '@/components/sidebar/list-scroll-area'
-import { deriveRunningAgentSendTargets } from '@/components/sidebar/running-agent-targets'
+} from '~renderer/components/sidebar/list-scroll-area'
+import { deriveRunningAgentSendTargets } from '~renderer/components/sidebar/running-agent-targets'
 import {
   SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
   type ScrollToCurrentWorkspaceRevealRequestDetail
-} from '@/components/sidebar/scroll-to-current-workspace-status'
-import { persistWorktreeSortOrderByHost } from '@/components/sidebar/worktree-sort-order-persistence'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/sidebar/scroll-to-current-workspace-status'
+import { persistWorktreeSortOrderByHost } from '~renderer/components/sidebar/worktree-sort-order-persistence'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,39 +62,41 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-import { track } from '@/lib/telemetry'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { getWorktreeIdsWithLiveAgent } from '@/lib/worktree-activity-state'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { rightSidebarShowsPullRequestData } from '~renderer/lib/right-sidebar-visibility'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import { track } from '~renderer/lib/telemetry'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { getWorktreeIdsWithLiveAgent } from '~renderer/lib/worktree-activity-state'
+import { useAppStore } from '~renderer/store'
 import {
   getAllWorktreesFromState,
   useAllWorktrees,
   useProjectHostSetupProjection,
   useRepoMap,
   useWorktreeMap
-} from '@/store/selectors'
-import { selectProjectGroupRemovalTargets } from '@/store/slices/project-group-removal-targets'
-import type { PendingSidebarRowReveal, PendingSidebarWorktreeReveal } from '@/store/slices/ui'
-import type { AppState } from '@/store/types'
-
-import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
-import type { CoworkingOwnerControlGrantView } from '../../../../shared/coworking/ipc-contract'
+} from '~renderer/store/selectors'
+import { selectProjectGroupRemovalTargets } from '~renderer/store/slices/project-group-removal-targets'
+import type {
+  PendingSidebarRowReveal,
+  PendingSidebarWorktreeReveal
+} from '~renderer/store/slices/ui'
+import type { AppState } from '~renderer/store/types'
+import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '~shared/constants'
+import type { CoworkingOwnerControlGrantView } from '~shared/coworking/ipc-contract'
 import {
   isConfirmedStaleFolderPathStatus,
   type FolderWorkspacePathStatus
-} from '../../../../shared/folder-workspace-path-status'
-import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import { keybindingMatchesAction } from '../../../../shared/keybindings'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+} from '~shared/folder-workspace-path-status'
+import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import { keybindingMatchesAction } from '~shared/keybindings'
+import { isGitRepoKind } from '~shared/repo-kind'
 import type {
   Worktree,
   Repo,
@@ -107,12 +108,13 @@ import type {
   WorkspaceLineage,
   WorkspaceStatus,
   WorkspaceStatusDefinition
-} from '../../../../shared/types'
-import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '../../../../shared/workspace/scope'
+} from '~shared/types'
+import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '~shared/workspace/scope'
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
-} from '../../../../shared/workspace/worktree-ownership'
+} from '~shared/workspace/worktree-ownership'
+
 import { getRepositoryIconSectionId } from '../settings/repository/settings-targets'
 import { CoworkingSidebarProjectedRow } from './coworking-sidebar-projected-row'
 import { projectCoworkingSidebarRows, type CoworkingSidebarRow } from './coworking-sidebar-rows'

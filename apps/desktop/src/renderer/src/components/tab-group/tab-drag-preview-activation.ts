@@ -1,6 +1,6 @@
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { useAppStore } from '../../store'
-import type { AppState } from '../../store/types'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 export type TabDragActivationSnapshot = {
   activeGroupId: string | null

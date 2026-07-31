@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Switch } from '~renderer/components/ui/switch'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { VoiceSettings } from '~shared/speech-types'
 
-import type { VoiceSettings } from '../../../../shared/speech-types'
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
 

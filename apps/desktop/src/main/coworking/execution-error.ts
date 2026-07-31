@@ -1,4 +1,4 @@
-import type { CoworkingRpcFailure } from '../../shared/coworking/wire-contract'
+import type { CoworkingRpcFailure } from '~shared/coworking/wire-contract'
 
 export type CoworkingExecutionErrorCode = CoworkingRpcFailure['error']['code']
 export type CoworkingExecutionErrorDiagnostic =

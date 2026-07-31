@@ -2,10 +2,9 @@ import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/reac
 import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useState } from 'react'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { translate } from '~renderer/i18n/i18n'
 
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-
-import { translate } from '../../../i18n/i18n'
 import type { AiVaultOriginalPaneTarget } from './original-pane'
 import { EmptyState, SessionLoadingState, VaultGroupHeader } from './panel-controls'
 import type { AiVaultResumeStartup } from './resume-command'

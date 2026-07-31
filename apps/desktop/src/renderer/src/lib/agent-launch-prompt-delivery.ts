@@ -1,9 +1,8 @@
-import { pasteDraftWhenAgentReady } from '@/components/native-chat/agent-paste-draft'
-import { isNativeChatSupportedAgent } from '@/components/native-chat/supported-agent'
-import { agentDeliversDraftViaNativePrefill } from '@/lib/agent-native-draft-prefill'
-import { useAppStore } from '@/store'
-
-import type { TuiAgent } from '../../../shared/types'
+import { pasteDraftWhenAgentReady } from '~renderer/components/native-chat/agent-paste-draft'
+import { isNativeChatSupportedAgent } from '~renderer/components/native-chat/supported-agent'
+import { agentDeliversDraftViaNativePrefill } from '~renderer/lib/agent-native-draft-prefill'
+import { useAppStore } from '~renderer/store'
+import type { TuiAgent } from '~shared/types'
 
 export function deliverLaunchPromptToAgentTab(args: {
   tabId: string

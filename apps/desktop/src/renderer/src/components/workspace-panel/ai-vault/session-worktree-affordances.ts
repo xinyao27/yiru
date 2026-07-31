@@ -1,7 +1,7 @@
 import type { AiVaultScope } from '@yiru/workbench-model/agent'
 import { normalizeRuntimePathSeparators } from '@yiru/workbench-model/platform'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import type { AiVaultSessionWorktreeInfo, AiVaultSessionWorktreeStatus } from './session-worktree'
 
 export function canJumpToAiVaultSessionWorktree(

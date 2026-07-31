@@ -1,10 +1,7 @@
 import { Copy, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { Fragment } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { ORCHESTRATION_SKILL_NAME } from '../../../lib/agent-feature-install-commands'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
+
 import type { OrchestrationUsageExample } from './usage-examples'
 
 const ORCHESTRATION_SKILL_SLASH_COMMAND = `/${ORCHESTRATION_SKILL_NAME}`

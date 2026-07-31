@@ -1,11 +1,11 @@
 import type { IDisposable, IParser, Terminal } from '@xterm/xterm'
-
 import {
   sendTerminalOscColorQueryReplies as sendTerminalOscColorQueryRepliesForColors,
   terminalOscColorQueryReplies,
   terminalOscColorQuerySlotsForBody,
   type TerminalOscColorQuerySlot
-} from '../../../../shared/terminal/osc-color-reply'
+} from '~shared/terminal/osc-color-reply'
+
 import { guardParserHandler } from './terminal-parser-handler-guard'
 
 export const DEFAULT_DA1_RESPONSE = '\x1b[?1;2c'

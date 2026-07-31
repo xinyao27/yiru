@@ -1,22 +1,20 @@
 import type React from 'react'
-
-import { preventMiddleButtonDefault } from '@/components/tab-bar/middle-button-default-guard'
+import { preventMiddleButtonDefault } from '~renderer/components/tab-bar/middle-button-default-guard'
 import {
   getTitlebarTabStateClasses,
   TAB_LEADING_ICON_CLASSES,
   TAB_ROOT_CLASSES
-} from '@/components/tab-bar/tab-chrome-classes'
-import { TabCloseButton } from '@/components/tab-bar/tab-close-button'
+} from '~renderer/components/tab-bar/tab-chrome-classes'
+import { TabCloseButton } from '~renderer/components/tab-bar/tab-close-button'
 import {
   TAB_CONTAINER_WIDTH_CLASSES,
   TAB_LABEL_WIDTH_CLASSES
-} from '@/components/tab-bar/tab-width-rules'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import type { ActivityBarItem } from '@/components/workspace-panel/activity-bar-buttons'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+} from '~renderer/components/tab-bar/tab-width-rules'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import type { ActivityBarItem } from '~renderer/components/workspace-panel/activity-bar-buttons'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
 export function getCoworkingWorkspacePanelTabId(panel: WorkspacePanelTabContentType): string {
   return `workspace-panel:${panel}`

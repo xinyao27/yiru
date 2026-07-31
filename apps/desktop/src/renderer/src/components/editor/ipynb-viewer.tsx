@@ -30,18 +30,17 @@ import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-
-import { resolveDocumentTheme } from '@/components/editor/document-theme'
+import { resolveDocumentTheme } from '~renderer/components/editor/document-theme'
 import {
   resolveEditorFontFamily,
   resolveEditorFontFamilyOrInherit
-} from '@/components/editor/font-family'
-import { computeEditorFontSize } from '@/components/editor/font-zoom'
-import { monaco, resolveCursorThemeName } from '@/components/editor/monaco-setup'
-import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/editor/font-family'
+import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
+import { monaco, resolveCursorThemeName } from '~renderer/components/editor/monaco-setup'
+import { scrollTopCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -49,21 +48,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
+} from '~renderer/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getConnectionId } from '@/lib/connection-context'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/select'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import {
+  useShortcutKeyDetails,
+  type ShortcutKeyComboDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { useAppStore } from '~renderer/store'
 
 import { getIpynbCodeCellEditorHeight, getIpynbCodeCellPreviewLines } from './ipynb-code-cell-lines'
 import {

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import {
   parseInline,

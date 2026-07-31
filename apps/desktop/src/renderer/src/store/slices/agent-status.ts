@@ -20,23 +20,22 @@ import {
 } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the agent-status slice co-locates live map, retained snapshots, retention-suppression, and tab-prefix sweep so the teardown contract stays readable end-to-end. Splitting across files would scatter the drop/remove/retain interactions that must stay in lockstep. */
 import type { StateCreator } from 'zustand'
-
-import { isCompletedAgentWithLiveRecoveryRecord } from '@/components/settings/completed-agent-live-recovery-record'
-import { readLastTerminalInputAt } from '@/components/terminal-pane/input-activity-coalescing'
+import { isCompletedAgentWithLiveRecoveryRecord } from '~renderer/components/settings/completed-agent-live-recovery-record'
+import { readLastTerminalInputAt } from '~renderer/components/terminal-pane/input-activity-coalescing'
 import {
   getAgentRowGeneratedTitleText,
   getYiruDispatchTaskId,
   isYiruDispatchPrompt,
   orchestrationLabelsMatchLiveDispatch
-} from '@/lib/agent-row-primary-text'
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-
+} from '~renderer/lib/agent-row-primary-text'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../../../shared/agent/status-identity'
-import { isCommandCodeNewTurnWhileWorking } from '../../../../shared/command-code-turn-boundary'
-import type { TerminalTab } from '../../../../shared/types'
+} from '~shared/agent/status-identity'
+import { isCommandCodeNewTurnWhileWorking } from '~shared/command-code-turn-boundary'
+import type { TerminalTab } from '~shared/types'
+
 import type { AppState } from '../types'
 import {
   resolveAgentPaneAuthorityKey,

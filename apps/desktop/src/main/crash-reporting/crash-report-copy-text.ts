@@ -1,7 +1,7 @@
 import {
   sanitizeCrashReportString,
   type CrashReportCopySubmissionFailure
-} from '../../shared/crash-reporting'
+} from '~shared/crash-reporting'
 
 function sanitizedNonEmptyString(value: unknown): string | null {
   if (typeof value !== 'string') {

@@ -1,19 +1,18 @@
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
 import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
 import * as React from 'react'
-
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
+} from '~renderer/components/ui/floating-surface-styles'
 import {
   menuItemClass,
   menuLabelClass,
   menuSeparatorClass,
   menuShortcutClass,
   menuSubTriggerStateClass
-} from '@/components/ui/menu-item-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/menu-item-styles'
+import { cn } from '~renderer/lib/class-names'
 
 function DropdownMenu({ ...props }: DropdownMenuPrimitive.Root.Props) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />

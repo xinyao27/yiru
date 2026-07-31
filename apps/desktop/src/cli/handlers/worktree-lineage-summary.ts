@@ -1,5 +1,5 @@
-import type { RuntimeMethodResult } from '../../shared/runtime-method-contract'
-import type { WORKTREE_CREATE_CONTRACT } from '../../shared/runtime-method-contracts/workspace-contracts'
+import type { RuntimeMethodResult } from '~shared/runtime-method-contract'
+import type { WORKTREE_CREATE_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
 
 type WorktreeCreateResult = RuntimeMethodResult<typeof WORKTREE_CREATE_CONTRACT>
 

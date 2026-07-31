@@ -5,16 +5,15 @@ import {
   ArrowRight,
   ArrowUp
 } from '@phosphor-icons/react'
-
 import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuItem
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import type { TabSplitDirection } from '@/lib/tab-split-direction'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
 
 import { canMoveTabToNewPaneColumn, moveTabToNewPaneColumn } from './tab-move-to-pane-column'
 

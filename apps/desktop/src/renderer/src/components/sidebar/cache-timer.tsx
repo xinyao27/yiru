@@ -1,9 +1,8 @@
 import { Timer } from '@phosphor-icons/react'
 import { useShallow } from 'zustand/react/shallow'
-
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { Tooltip, TooltipTrigger, TooltipContent } from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 import { usePromptCacheCountdownNow } from './prompt-cache-countdown-clock'
 import {

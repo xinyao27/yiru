@@ -1,4 +1,4 @@
-import type { TopLevelView } from '../../../shared/types'
+import type { TopLevelView } from '~shared/types'
 
 /**
  * Determine which zoom domain (terminal, editor, simulator, or UI) should be adjusted

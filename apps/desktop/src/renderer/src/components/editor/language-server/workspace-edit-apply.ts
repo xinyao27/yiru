@@ -1,6 +1,5 @@
 import type * as monaco from 'monaco-editor'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 export type LanguageServerWorkspaceEditTarget = {
   filePath: string

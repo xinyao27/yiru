@@ -4,9 +4,10 @@ import { realpath, readdir, stat } from 'node:fs/promises'
 import { basename, join, win32, posix } from 'node:path'
 import { createInterface } from 'node:readline'
 
-import type { Repo } from '../../../shared/types'
-import { canonicalizeUsageWorktreePaths } from '../../usage-worktree-canonicalizer'
-import { areWorktreePathsEqual } from '../../worktree/logic'
+import { canonicalizeUsageWorktreePaths } from '~main/usage-worktree-canonicalizer'
+import { areWorktreePathsEqual } from '~main/worktree/logic'
+import type { Repo } from '~shared/types'
+
 import { getCodexAccountHomeSessionDirectories } from '../account-home-discovery'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../session-bridge'

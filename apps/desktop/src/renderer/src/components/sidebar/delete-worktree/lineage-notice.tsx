@@ -1,8 +1,8 @@
 import { FlowArrow as Workflow } from '@phosphor-icons/react'
 import type { JSX } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import type { Worktree } from '~shared/types'
 
-import type { Worktree } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
 import { DeleteWorktreeDirtyChangeHint } from './dirty-change-hint'
 
 type DeleteWorktreeLineageNoticeProps = {

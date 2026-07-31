@@ -1,22 +1,20 @@
 import { Eye, EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
-} from '../../../../shared/workspace/worktree-ownership'
+} from '~shared/workspace/worktree-ownership'
 
 export default function WorktreeVisibilityDialog(): React.JSX.Element | null {
   const activeModal = useAppStore((s) => s.activeModal)

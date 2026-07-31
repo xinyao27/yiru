@@ -1,6 +1,7 @@
-import type { AgentHookInstallStatus } from '../../shared/agent/hook-types'
-import type { HookInstallAgent } from '../../shared/telemetry-events'
-import type { GlobalSettings } from '../../shared/types'
+import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
+import type { HookInstallAgent } from '~shared/telemetry-events'
+import type { GlobalSettings } from '~shared/types'
+
 import { ampHookService } from '../amp/hook-service'
 import { antigravityHookService } from '../antigravity/hook-service'
 import { claudeHookService } from '../claude/hook-service'

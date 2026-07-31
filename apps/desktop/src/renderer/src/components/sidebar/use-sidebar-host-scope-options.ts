@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
+import { useAppStore } from '~renderer/store'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
 
-import { useAppStore } from '@/store'
-
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import {
   buildSidebarHostOptions,
   buildSidebarHostScopeOptions,

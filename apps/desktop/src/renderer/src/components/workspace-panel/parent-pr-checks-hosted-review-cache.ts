@@ -1,6 +1,6 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import type { PRInfo, Worktree } from '~shared/types'
 
-import type { PRInfo, Worktree } from '../../../../shared/types'
 import {
   getWorktreeCardPrDisplay,
   isCachedMergedBranchPRCurrentForWorktree

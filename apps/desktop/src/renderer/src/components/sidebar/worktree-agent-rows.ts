@@ -4,23 +4,14 @@ import {
   type AgentStatusEntry,
   type AgentStatusOrchestrationContext
 } from '@yiru/workbench-model/agent'
+import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
+import { resolveRuntimePaneTitleLeafId } from '~renderer/lib/runtime-pane-title-leaf-id'
+import type { RetainedAgentEntry } from '~renderer/store/slices/agent-status'
+import { resolveCompatibleAgentTypeForOwner } from '~shared/agent/title-owner'
+import { makePaneKey, parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, TerminalTab } from '~shared/types'
 
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
-import type { RetainedAgentEntry } from '@/store/slices/agent-status'
-
-import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/title-owner'
-import {
-  makePaneKey,
-  parseLegacyNumericPaneKey,
-  parsePaneKey
-} from '../../../../shared/stable-pane-id'
-import type {
-  TerminalLayoutSnapshot,
-  TerminalPaneLayoutNode,
-  TerminalTab
-} from '../../../../shared/types'
 import {
   effectiveWorktreeAgentRowStartedAt,
   tabFromWorktreeAttributedStatusEntry

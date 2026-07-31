@@ -1,4 +1,5 @@
-import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
+import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
+
 import { WatcherProcessFailure } from './parcel-watcher-process-failure'
 import type { WatcherProcessHooks } from './parcel-watcher-process-subscription'
 

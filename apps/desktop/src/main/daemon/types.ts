@@ -11,8 +11,8 @@ export type {
 } from './foreground-process-protocol'
 
 // ─── Protocol Version ────────────────────────────────────────────────
-import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
-import type { TuiAgent } from '../../shared/types'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { TuiAgent } from '~shared/types'
 // Why: daemons can survive app updates. Bump for IPC wire-shape changes, or
 // when daemon-baked behavior cannot be delivered by on-disk wrapper refresh.
 // Why: bump when adding daemon wire behavior so same-version old daemons do

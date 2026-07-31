@@ -1,10 +1,9 @@
 /* eslint-disable max-lines -- Why: this animation is a self-contained storyboard; splitting the slash-menu DOM, toolbar SVGs, and timing constants into separate modules would obscure the sequence rather than clarify it. */
 import { useEffect, useRef } from 'react'
 import type { JSX, ReactNode } from 'react'
-
-import { getShortcutPlatform } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { getShortcutPlatform } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 // Why: the visual leans on direct DOM mutation (typing into a node, swapping
 // classes, anchoring a floating menu by measured rect) so the loop reads

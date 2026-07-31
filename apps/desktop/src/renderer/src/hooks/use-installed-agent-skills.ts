@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { markOrchestrationSetupComplete } from '@/lib/orchestration-setup-state'
+import { markOrchestrationSetupComplete } from '~renderer/lib/orchestration-setup-state'
 import {
   getInstalledAgentSkillDiscoveryGeneration,
   INSTALLED_AGENT_SKILLS_CHANGED_EVENT,
@@ -9,14 +8,14 @@ import {
   pendingDiscoverySatisfiesForcedRefreshByTarget,
   readInstalledAgentSkillDiscovery,
   writeInstalledAgentSkillDiscovery
-} from '@/runtime/installed-agent-skill-discovery-state'
-
+} from '~renderer/runtime/installed-agent-skill-discovery-state'
 import type {
   DiscoveredSkill,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillSourceKind
-} from '../../../shared/skills'
+} from '~shared/skills'
+
 import {
   hasInstalledAgentSkillNamed,
   isOrchestrationSkillName,

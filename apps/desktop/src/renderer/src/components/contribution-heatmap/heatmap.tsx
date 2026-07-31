@@ -2,11 +2,10 @@ import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench
 import { buildContributionCalendar } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { ContributionDisplayMetric } from './metric'
 

@@ -1,6 +1,6 @@
 import { net } from 'electron'
+import type { ProviderRateLimits } from '~shared/rate-limit-types'
 
-import type { ProviderRateLimits } from '../../shared/rate-limit-types'
 import {
   buildRateLimitBucket,
   deduplicateBuckets,

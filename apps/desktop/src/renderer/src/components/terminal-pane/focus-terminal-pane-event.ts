@@ -1,6 +1,6 @@
-import type { FocusTerminalPaneDetail } from '@/constants/terminal'
-import { resolveLeafIdForManager } from '@/lib/pane-manager/pane-key-resolution'
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
+import type { FocusTerminalPaneDetail } from '~renderer/constants/terminal'
+import { resolveLeafIdForManager } from '~renderer/lib/pane-manager/pane-key-resolution'
+import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
 
 import { flashFocusedPaneRim } from './focused-pane-rim-flash'
 

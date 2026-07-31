@@ -1,9 +1,13 @@
 import { Copy, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 const EXAMPLE_PROMPTS: string[] = [
   'Using Yiru CLI, open https://github.com/notifications and click the first unread pull request.',

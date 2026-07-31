@@ -1,5 +1,6 @@
-import type { GitCreateBranchResult } from '../../shared/git/write-op-results'
-import { isWorkingTreeDirty, resolveCommitOid } from '../../shared/git/write-preconditions'
+import type { GitCreateBranchResult } from '~shared/git/write-op-results'
+import { isWorkingTreeDirty, resolveCommitOid } from '~shared/git/write-preconditions'
+
 import { gitExecFileAsync } from './runner'
 import { gitOptionsForWorktree, type GitRuntimeOptions } from './runtime-options'
 import { runWithGitReadCacheInvalidation } from './status'

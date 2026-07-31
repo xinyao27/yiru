@@ -1,9 +1,7 @@
 import { splitWorktreeId } from '@yiru/workbench-model/workspace'
-
-import type { AppState } from '@/store/types'
-
-import type { TerminalTab, WorkspaceSessionState } from '../../../../../shared/types'
-import { worktreeWorkspaceKey } from '../../../../../shared/workspace/scope'
+import type { AppState } from '~renderer/store/types'
+import type { TerminalTab, WorkspaceSessionState } from '~shared/types'
+import { worktreeWorkspaceKey } from '~shared/workspace/scope'
 
 function preserveNewerLocalTerminalFields(remote: TerminalTab, local: TerminalTab): TerminalTab {
   const preserved = {

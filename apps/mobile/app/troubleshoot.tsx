@@ -10,8 +10,8 @@ import {
   Scroll as ScrollText,
   XCircle,
   Warning as AlertTriangle
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { MobileContentSection } from '../src/components/content-section'
 import { MobileGlassGroup } from '../src/components/glass/group'

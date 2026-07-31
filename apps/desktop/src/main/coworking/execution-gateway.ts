@@ -4,8 +4,9 @@ import type {
   CoworkingSubscriptionEvent,
   CoworkingSubscriptionOperation,
   CoworkingTerminalCreateHostResult
-} from '../../shared/coworking/operation-contract'
-import { isCoworkingMutationOperation } from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+import { isCoworkingMutationOperation } from '~shared/coworking/operation-contract'
+
 import type {
   BoundWorktreeTarget,
   ExecutionAdmissionGuard,

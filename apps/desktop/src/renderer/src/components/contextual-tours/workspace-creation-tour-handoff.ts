@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { requestContextualTourWhenReady } from './request-contextual-tour-when-ready'
 

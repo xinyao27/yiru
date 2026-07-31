@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
-} from '../../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
 
 const MAX_VOLATILE_CREATED_SESSIONS = 64
 

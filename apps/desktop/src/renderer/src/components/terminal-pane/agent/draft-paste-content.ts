@@ -1,13 +1,12 @@
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
-
-import type { GlobalSettings } from '../../../../../shared/types'
 import {
   BRACKETED_PASTE_END,
   BRACKETED_PASTE_START,
   normalizeTerminalPasteLineEndings,
   wrapTerminalBracketedPasteText
-} from '../../../lib/terminal-bracketed-paste'
-import { sendRuntimePtyInputVerified } from '../../../runtime/terminal-inspection'
+} from '~renderer/lib/terminal-bracketed-paste'
+import { sendRuntimePtyInputVerified } from '~renderer/runtime/terminal-inspection'
+import type { GlobalSettings } from '~shared/types'
 
 // Why: bracketed paste markers let supported TUIs treat generated prompt text
 // as one paste instead of echoing character-by-character or triggering edits.

@@ -1,9 +1,8 @@
 import type { AgentStatusEntry, MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
+import { basename } from '~renderer/lib/path'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import type { Worktree, Repo, TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
-import { basename } from '@/lib/path'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
-import type { Worktree, Repo, TerminalLayoutSnapshot, TerminalTab } from '../../../../shared/types'
 import {
   IDLE,
   buildAttentionByWorktree,

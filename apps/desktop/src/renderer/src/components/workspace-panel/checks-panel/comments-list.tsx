@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-
-import type { PRComment } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   getPRCommentGroupId,
   groupPRComments,
   type PRCommentGroup
-} from '../../../lib/pr-comment-groups'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Checkbox } from '../../ui/checkbox'
+} from '~renderer/lib/pr-comment-groups'
+import type { PRComment } from '~shared/types'
+
 import { usePRBotAuthorOverrides } from '../pr-bot-author-overrides'
 import {
   getPRCommentGroupActionState,

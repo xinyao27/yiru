@@ -1,5 +1,5 @@
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
-import { useAppStore } from '@/store'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-breadcrumb-recorder'
+import { useAppStore } from '~renderer/store'
 
 // Why this module exists: a terminal pane can die renderer-side while its PTY
 // stays alive — a wedged xterm WriteBuffer (issue #2836), a disposed xterm

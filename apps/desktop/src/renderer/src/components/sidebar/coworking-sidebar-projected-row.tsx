@@ -1,7 +1,6 @@
 import type React from 'react'
-
-import { CoworkingWindowsFirewallNotice } from '@/components/coworking/windows-firewall-notice'
-import { useAppStore } from '@/store'
+import { CoworkingWindowsFirewallNotice } from '~renderer/components/coworking/windows-firewall-notice'
+import { useAppStore } from '~renderer/store'
 
 import { CoworkingRemoteDesktopStatusRow } from './coworking-remote-desktop-status-row'
 import { CoworkingRemoteWorktreesHeader } from './coworking-remote-worktrees-header'

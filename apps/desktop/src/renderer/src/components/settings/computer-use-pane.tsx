@@ -7,17 +7,16 @@ import {
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import type {
   ComputerUsePermissionId,
   ComputerUsePermissionState,
   ComputerUsePermissionStatus
-} from '../../../../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
+
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { ComputerUseSkillSetupPanel } from './computer-use-skill-setup-panel'

@@ -1,9 +1,8 @@
 import type { Editor } from '@tiptap/react'
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { getShortcutPlatform } from '../../../lib/shortcut-platform'
 import { isMarkdownPreviewFindShortcut } from '../markdown-preview-search'
 import { handleRichMarkdownAddReviewNoteShortcut } from './annotation-shortcut'
 import { handleRichMarkdownCitationKey } from './citation-keyboard'

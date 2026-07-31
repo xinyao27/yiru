@@ -1,15 +1,14 @@
 import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import type React from 'react'
-
-import { getPaletteHostBadge } from '@/components/cmd-j/palette-host-badge'
-import { RepoBadgeMark } from '@/components/repo/badge-label'
-import StatusIndicator from '@/components/sidebar/status-indicator'
-import { CommandItem } from '@/components/ui/command'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { branchName } from '@/lib/git-utils'
-import { getWorktreeStatus, getWorktreeStatusLabel } from '@/lib/worktree-status'
+import { getPaletteHostBadge } from '~renderer/components/cmd-j/palette-host-badge'
+import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
+import StatusIndicator from '~renderer/components/sidebar/status-indicator'
+import { CommandItem } from '~renderer/components/ui/command'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { branchName } from '~renderer/lib/git-utils'
+import { getWorktreeStatus, getWorktreeStatusLabel } from '~renderer/lib/worktree-status'
 
 import {
   HighlightedText,

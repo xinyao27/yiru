@@ -2,8 +2,9 @@ import {
   buildTerminalQuickCommandInput,
   flattenTerminalQuickCommand,
   isTerminalAgentQuickCommand
-} from '../../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand } from '../../../../shared/types'
+} from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand } from '~shared/types'
+
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 
 type QuickCommandPane = {

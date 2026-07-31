@@ -3,15 +3,14 @@ import { DIFFS_TAG_NAME, type FileDiffOptions } from '@pierre/diffs'
 import { MultiFileDiff, type DiffLineAnnotation, type SelectedLineRange } from '@pierre/diffs/react'
 import { CURSOR_DARK_THEME_NAME, CURSOR_LIGHT_THEME_NAME } from '@yiru/editor-themes/cursor'
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
-
-import type { DecoratedDiffComment } from '@/components/diff-comments/use-diff-comment-decorator'
+import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
 import {
   CURSOR_PIERRE_UNSAFE_CSS,
   registerCursorPierreThemes
-} from '@/components/editor/cursor-pierre-theme'
-import { buildEditorFontFamily } from '@/components/editor/font-family'
-import { setWithLRU } from '@/components/editor/scroll-cache'
-import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
+} from '~renderer/components/editor/cursor-pierre-theme'
+import { buildEditorFontFamily } from '~renderer/components/editor/font-family'
+import { setWithLRU } from '~renderer/components/editor/scroll-cache'
+import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,8 +18,8 @@ import {
   ContextMenuSeparator,
   ContextMenuShortcut,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 import { PierreDiffCommentAnnotation } from './pierre-diff-comment-annotation'
 import { PierreDiffCommentComposer } from './pierre-diff-comment-composer'

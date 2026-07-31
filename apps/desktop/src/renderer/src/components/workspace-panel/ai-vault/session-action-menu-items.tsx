@@ -7,10 +7,9 @@ import {
   Layout as PanelTopOpen,
   Play
 } from '@phosphor-icons/react'
-
-import { translate } from '../../../i18n/i18n'
-import { ContextMenuItem, ContextMenuSeparator } from '../../ui/context-menu'
-import { DropdownMenuItem, DropdownMenuSeparator } from '../../ui/dropdown-menu'
+import { ContextMenuItem, ContextMenuSeparator } from '~renderer/components/ui/context-menu'
+import { DropdownMenuItem, DropdownMenuSeparator } from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 export function SessionActionMenuItems({
   menuKind = 'dropdown',

@@ -1,12 +1,17 @@
 import { Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Textarea } from '~renderer/components/ui/textarea'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getRepositoryHookScriptTextareaRows } from '~renderer/lib/script-textarea-rows'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { getRepositoryHookScriptTextareaRows } from '../../../lib/script-textarea-rows'
-import { Button } from '../../ui/button'
-import { Textarea } from '../../ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
 import { YamlScriptBlock } from './hook-policy-controls'
 import { getEnvVars, type LocalHookField } from './hook-settings-model'
 

@@ -3,11 +3,10 @@ import type {
   HostedReviewCreationEligibility,
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
-
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
-} from '../../../i18n/hosted-review-localized-copy'
+} from '~renderer/i18n/hosted-review-localized-copy'
 
 export function canClickBlockedCreateReviewReason(
   reason: HostedReviewCreationBlockedReason | undefined

@@ -1,4 +1,4 @@
-import { isVsCodeRemoteSshCommand } from '../../../../shared/vscode-remote-ssh-launcher'
+import { isVsCodeRemoteSshCommand } from '~shared/vscode-remote-ssh-launcher'
 
 export type ExternalEditorOpenCapability =
   | { allowed: true; remote: boolean }

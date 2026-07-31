@@ -9,19 +9,19 @@ import {
   Trash
 } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
-
-import type { PRComment } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { PRComment } from '~shared/types'
+
 import { setPRBotAuthorOverride } from '../pr-bot-author-overrides'
 import type { PRCommentGroupActionState } from '../pr-comment-action-state'
 import { isBotPRComment, normalizePRCommentAuthorLogin } from '../pr-comment-audience'

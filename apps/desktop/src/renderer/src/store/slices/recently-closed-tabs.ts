@@ -1,7 +1,6 @@
 import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
 import type { StateCreator } from 'zustand'
-
-import { getExplicitRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { getExplicitRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 
 import type { AppState } from '../types'
 

@@ -1,9 +1,8 @@
 import { HardDrive, ArrowLeft } from '@phosphor-icons/react'
 import { useEffect } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '@/i18n/i18n'
-
-import { useAppStore } from '../../store'
 import { WorkspaceSpaceManagerPanel } from '../status-bar/workspace-space-manager-panel'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

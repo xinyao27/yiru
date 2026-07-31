@@ -1,6 +1,6 @@
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+import { readRuntimeFileContent, writeRuntimeFile } from '~renderer/runtime/file-client'
 
-import { readRuntimeFileContent, writeRuntimeFile } from '../../../runtime/file-client'
 import {
   clearSelfWrite,
   getEditorSelfWriteHostId,

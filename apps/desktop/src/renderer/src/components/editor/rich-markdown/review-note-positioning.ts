@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
+import type { DiffComment } from '~shared/types'
 
-import type { DiffComment } from '../../../../../shared/types'
 import {
   buildRichMarkdownCommentBlocks,
   getRichMarkdownCommentAnchorTop

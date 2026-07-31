@@ -1,8 +1,9 @@
 import {
   projectHostSetupProjectionFromRepos,
   type ProjectHostSetupProjection
-} from '../../../shared/project-host-setup-projection'
-import type { Project, ProjectHostSetup } from '../../../shared/types'
+} from '~shared/project-host-setup-projection'
+import type { Project, ProjectHostSetup } from '~shared/types'
+
 import { normalizeHydratedProjectHostSetupProjection } from './project-host-setup-selector-normalization'
 import type { AppState } from './types'
 

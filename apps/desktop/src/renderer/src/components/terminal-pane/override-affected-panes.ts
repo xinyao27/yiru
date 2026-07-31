@@ -5,7 +5,7 @@
 // mobile-fit and desktop-fit branches of the override listener refit the
 // same set of panes without colliding on global numeric pane IDs.
 
-import type { ManagedPane } from '@/lib/pane-manager/types'
+import type { ManagedPane } from '~renderer/lib/pane-manager/types'
 
 // Why: transports return string | null and the binding lookup yields
 // undefined for unbound panes, so the resolver tolerates both absent cases.

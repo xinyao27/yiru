@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
+import type { CliInstallStatus } from '~shared/cli-install-types'
 
-import type { CliInstallStatus } from '../../shared/cli-install-types'
 import { getCanonicalUserDataPath } from '../persistence'
 import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 import { getDefaultWslDistro } from '../wsl'

@@ -3,12 +3,11 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import { net } from 'electron'
-
 import type {
   ProviderRateLimits,
   RateLimitWindow,
   UsageRateLimitMetadata
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
 
 // Why: Kimi Code's managed coding plan exposes subscription usage at
 // `${base}/usages` (see packages/oauth/src/managed-usage.ts in the CLI bundle).

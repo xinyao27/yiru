@@ -1,10 +1,9 @@
 import { Check, Copy, ArrowsOut as Maximize2 } from '@phosphor-icons/react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog'
+import { Button } from '~renderer/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 type MobilePairingQrSectionProps = {
   qrDataUrl: string | null

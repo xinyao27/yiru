@@ -1,8 +1,8 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
-import { Chat as MessageSquare } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { Chat as MessageSquare } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import type { MobileDiffLine } from '../session/diff/lines'
 import type { MobileHighlightedDiffLine } from '../session/file-syntax'

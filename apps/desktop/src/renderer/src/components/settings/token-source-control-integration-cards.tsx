@@ -2,9 +2,8 @@ import {
   GitPullRequest as GitPullRequestArrow,
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { usePreflightCardStatuses } from './source-control/preflight-card-status'

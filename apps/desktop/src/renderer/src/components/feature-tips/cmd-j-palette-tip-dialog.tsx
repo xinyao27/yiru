@@ -1,7 +1,6 @@
 import type { JSX } from 'react'
-
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +8,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { formatShortcutLabel, useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { formatShortcutLabel, useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import type { FeatureTip } from '~shared/feature-tips'
 
-import type { FeatureTip } from '../../../../shared/feature-tips'
 import { CmdJPaletteFeatureTipVisual } from './cmd-j-palette-feature-tip-visual'
 import { FeatureTipActions } from './feature-tip-actions'
 

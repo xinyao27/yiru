@@ -7,9 +7,9 @@
  * render a slot as null. See docs/reference/terminal-hidden-view-parking.md.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useAppStore } from '~renderer/store'
+import type { TerminalTab } from '~shared/types'
 
-import type { TerminalTab } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { getTerminalTabColdParkRecheckDelayMs } from './cold-park-deadlines'
 import { selectEvictionExemptTerminalTabIds } from './eviction-exempt-tabs'
 import {

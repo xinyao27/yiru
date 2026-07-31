@@ -1,6 +1,7 @@
-import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import type { FolderWorkspace, ProjectGroup, Worktree } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
+import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
+import type { FolderWorkspace, ProjectGroup, Worktree } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import { getProjectGroupHeaderKey } from './worktree-list-groups'
 
 function findFolderWorkspaceByKey(

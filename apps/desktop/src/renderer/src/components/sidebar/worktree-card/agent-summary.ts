@@ -1,7 +1,6 @@
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
-
-import type { AgentDotState } from '../../agent-state-dot'
-import type { DashboardAgentRow as DashboardAgentRowData } from '../../dashboard/use-dashboard-data'
+import type { AgentDotState } from '~renderer/components/agent-state-dot'
+import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
 
 function asDotState(state: AgentStatusState | 'idle'): AgentDotState {
   switch (state) {

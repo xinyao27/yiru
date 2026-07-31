@@ -1,7 +1,6 @@
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
-
-import type { Repo } from '../../../../shared/types'
+import type { Repo } from '~shared/types'
 
 /**
  * How a workspace on an SSH host should be deleted, given the host's live

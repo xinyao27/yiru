@@ -1,7 +1,6 @@
 import { FolderOpen } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +8,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { getRelativePathInsideRoot } from '@/lib/path'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { getRelativePathInsideRoot } from '~renderer/lib/path'
 
 type UntitledFileRenameDialogProps = {
   open: boolean

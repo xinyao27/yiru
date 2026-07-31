@@ -6,19 +6,18 @@ import {
 } from '@phosphor-icons/react'
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import RepoBadgeLabel from '~renderer/components/repo/badge-label'
+import { Button } from '~renderer/components/ui/button'
+import { Command, CommandInput, CommandList } from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { isRepoSearchQueryTooLarge, searchRepos } from '~renderer/lib/repo-search'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import RepoBadgeLabel from '@/components/repo/badge-label'
-import { Button } from '@/components/ui/button'
-import { Command, CommandInput, CommandList } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { isRepoSearchQueryTooLarge, searchRepos } from '@/lib/repo-search'
-import { useAppStore } from '@/store'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/types'
 import {
   getAutomationProjectGroupForRepo,
   getAutomationProjectGroups,

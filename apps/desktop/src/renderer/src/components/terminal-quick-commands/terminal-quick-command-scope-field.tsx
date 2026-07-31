@@ -1,22 +1,17 @@
 import type { Dispatch, SetStateAction } from 'react'
-
-import RepoBadgeLabel from '@/components/repo/badge-label'
-import { Label } from '@/components/ui/label'
+import RepoBadgeLabel from '~renderer/components/repo/badge-label'
+import { Label } from '~renderer/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/select'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
+import type { Repo, TerminalQuickCommand, TerminalQuickCommandScope } from '~shared/types'
 
-import type {
-  Repo,
-  TerminalQuickCommand,
-  TerminalQuickCommandScope
-} from '../../../../shared/types'
 import { QUICK_COMMAND_TOGGLE_ITEM_CLASS } from './terminal-quick-command-toggle-style'
 
 type TerminalQuickCommandScopeFieldProps = {

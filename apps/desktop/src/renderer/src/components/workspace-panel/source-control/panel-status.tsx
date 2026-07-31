@@ -1,4 +1,5 @@
-import { cn } from '../../../lib/class-names'
+import { cn } from '~renderer/lib/class-names'
+
 import { ConflictSummaryCard, OperationBanner, TooManyChangesBanner } from './conflict-summary'
 import type { SourceControlController } from './controller'
 import { EmptyState } from './empty-state'

@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
-
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { YIRU_CLI_SKILL_NAME, ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
-import { getScreenSubmitModifierLabel } from '@/lib/screen-submit-shortcut'
-import { track } from '@/lib/telemetry'
-import { useAppStore } from '@/store'
-
-import { getAgentsSteps, type AgentsStepId } from '../../../../shared/agents-orchestration-steps'
-import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
+} from '~renderer/hooks/use-installed-agent-skills'
+import {
+  YIRU_CLI_SKILL_NAME,
+  ORCHESTRATION_SKILL_NAME
+} from '~renderer/lib/agent-feature-install-commands'
+import { getScreenSubmitModifierLabel } from '~renderer/lib/screen-submit-shortcut'
+import { track } from '~renderer/lib/telemetry'
+import { useAppStore } from '~renderer/store'
+import { getAgentsSteps, type AgentsStepId } from '~shared/agents-orchestration-steps'
+import type { FeatureWallTourDepthSummary } from '~shared/feature-wall-tour-depth'
 import {
   DEFAULT_FEATURE_WALL_WORKFLOW_ID,
   FEATURE_WALL_WORKFLOWS,
   getFeatureWallMediaTile,
   type FeatureWallWorkflow,
   type FeatureWallWorkflowId
-} from '../../../../shared/feature-wall-workflows'
-import { getReviewSteps, type ReviewStepId } from '../../../../shared/review-steps'
-import type { FeatureWallOpenSourceTelemetry } from '../../../../shared/telemetry-events'
-import { getWorkbenchSteps, type WorkbenchStepId } from '../../../../shared/workbench-steps'
+} from '~shared/feature-wall-workflows'
+import { getReviewSteps, type ReviewStepId } from '~shared/review-steps'
+import type { FeatureWallOpenSourceTelemetry } from '~shared/telemetry-events'
+import { getWorkbenchSteps, type WorkbenchStepId } from '~shared/workbench-steps'
+
 import { getFeatureWallActiveStepCopy } from './active-step-copy'
 import { toFeatureWallAssetUrl, useFeatureWallAssetBaseUrl } from './assets'
 import { FeatureWallContinueButton } from './continue-button'

@@ -1,13 +1,8 @@
 import { createContext, useContext } from 'react'
 import type React from 'react'
+import { cn } from '~renderer/lib/class-names'
+import { DEFAULT_LOADER_STYLE, normalizeLoaderStyle, type LoaderStyle } from '~shared/loader-style'
 
-import { cn } from '@/lib/class-names'
-
-import {
-  DEFAULT_LOADER_STYLE,
-  normalizeLoaderStyle,
-  type LoaderStyle
-} from '../../../shared/loader-style'
 import { ThinkingOrbLoader } from './thinking-orb-loader'
 
 const LoadingIndicatorStyleContext = createContext<LoaderStyle>(DEFAULT_LOADER_STYLE)

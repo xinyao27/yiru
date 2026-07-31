@@ -1,5 +1,5 @@
-import { detectLanguage } from '@/lib/language-detect'
-import { useAppStore } from '@/store'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { useAppStore } from '~renderer/store'
 
 import { buildMarkdownExportHtml } from './markdown-export-html'
 

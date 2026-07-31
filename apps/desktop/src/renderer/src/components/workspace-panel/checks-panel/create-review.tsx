@@ -1,10 +1,10 @@
 import { interpretSourceControlHostedReviewCreateResult } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import { translate } from '~renderer/i18n/i18n'
+import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
-import { normalizeHostedReviewHeadRef } from '../../../../../shared/hosted-review-refs'
-import { translate } from '../../../i18n/i18n'
-import { openHttpLink } from '../../editor/http-link-routing'
 import { formatCreateError } from '../create-pull-request-review-copy'
 import { clearPullRequestGenerationRequiresPushBeforeCreate } from '../pull-request-generation-state'
 import { stripBaseRef } from '../use-create-pull-request-dialog-fields'

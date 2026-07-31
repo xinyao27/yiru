@@ -19,7 +19,6 @@ import {
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import type React from 'react'
-
 import {
   ContextMenuContent,
   ContextMenuItem,
@@ -30,10 +29,10 @@ import {
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger
-} from '@/components/ui/context-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/context-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { getWorkspaceStatusVisualMeta } from '../workspace-status'
 import { WorktreeOpenInContextSubMenu } from '../worktree-open-in-menu'

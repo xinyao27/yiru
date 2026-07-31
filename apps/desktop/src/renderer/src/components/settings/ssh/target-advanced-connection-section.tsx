@@ -1,6 +1,7 @@
-import { translate } from '../../../i18n/i18n'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+
 import { SettingsSwitch } from '../form-controls'
 import type { EditingTarget } from './target-draft'
 import { SshTargetFormCollapsibleSection } from './target-form-collapsible-section'

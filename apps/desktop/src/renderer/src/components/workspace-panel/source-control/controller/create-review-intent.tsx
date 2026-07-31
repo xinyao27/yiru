@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { bulkStageRuntimeGitPaths } from '~renderer/runtime/git-client'
 
-import { translate } from '../../../../i18n/i18n'
-import { bulkStageRuntimeGitPaths } from '../../../../runtime/git-client'
 import {
   createCreatePrIntentRunToken,
   createPrIntentGitStatusMatchesToken,

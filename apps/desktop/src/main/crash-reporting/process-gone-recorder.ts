@@ -1,8 +1,8 @@
 import os from 'node:os'
 
 import { app } from 'electron'
+import { isCrashReportReason, sanitizeCrashReportString } from '~shared/crash-reporting'
 
-import { isCrashReportReason, sanitizeCrashReportString } from '../../shared/crash-reporting'
 import { flushActiveSink, startSpan } from '../observability/tracer'
 import { getCrashBreadcrumbSnapshot } from './crash-breadcrumb-store'
 import type { CrashReportStore } from './crash-report-store'

@@ -1,17 +1,22 @@
 import { Sparkle as Sparkles } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { PRComment } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { getPRCommentGroupId, type PRCommentGroup } from '../../../lib/pr-comment-groups'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '~renderer/components/ui/accordion'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger
-} from '../../ui/context-menu'
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getPRCommentGroupId, type PRCommentGroup } from '~renderer/lib/pr-comment-groups'
+import type { PRComment } from '~shared/types'
+
 import type { PRCommentGroupActionState } from '../pr-comment-action-state'
 import {
   getPRCommentGroupSurfaceClasses,

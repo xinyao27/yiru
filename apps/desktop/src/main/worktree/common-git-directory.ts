@@ -5,8 +5,8 @@ import {
   normalizeRuntimePathSeparators,
   resolveRuntimePath
 } from '@yiru/workbench-model/platform'
+import type { Repo } from '~shared/types'
 
-import type { Repo } from '../../shared/types'
 import type { FileStat } from '../providers/types'
 
 type GitDirectoryStat = NonNullable<Awaited<ReturnType<typeof stat>>> | FileStat

@@ -1,5 +1,5 @@
-import type { WorkspaceKey, WorkspaceSessionState } from '../../../shared/types'
-import { parseWorkspaceKey } from '../../../shared/workspace/scope'
+import type { WorkspaceKey, WorkspaceSessionState } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 export type WorkspaceSessionHydrationOptions = {
   additionalValidWorkspaceKeys?: readonly WorkspaceKey[]

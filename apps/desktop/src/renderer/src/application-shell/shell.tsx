@@ -24,53 +24,60 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { LinkRoutingPreferenceDialogProvider } from '@/components/link-routing-preference-dialog'
-import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
-import { getRendererAppPlatform } from '@/components/settings/renderer-app-platform'
-import { syncZoomCSSVar } from '@/components/settings/ui-zoom'
-import { requestScrollToCurrentWorkspaceRevealAndRename } from '@/components/sidebar/scroll-to-current-workspace-status'
-import { showTerminalShortcutCaptureNotification } from '@/components/terminal-workspace/terminal-shortcut-capture-notification'
-import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
-import { Toaster } from '@/components/ui/sonner'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { LinkRoutingPreferenceDialogProvider } from '~renderer/components/link-routing-preference-dialog'
+import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
+import { getRendererAppPlatform } from '~renderer/components/settings/renderer-app-platform'
+import { syncZoomCSSVar } from '~renderer/components/settings/ui-zoom'
+import { requestScrollToCurrentWorkspaceRevealAndRename } from '~renderer/components/sidebar/scroll-to-current-workspace-status'
+import { showTerminalShortcutCaptureNotification } from '~renderer/components/terminal-workspace/terminal-shortcut-capture-notification'
+import { Button } from '~renderer/components/ui/button'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { Toaster } from '~renderer/components/ui/sonner'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import {
+  SYNC_FIT_PANES_EVENT,
+  TOGGLE_TERMINAL_PANE_EXPAND_EVENT
+} from '~renderer/constants/terminal'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   isPairedWebClientWindow,
   shouldRenderDesktopWindowChrome
-} from '@/lib/desktop-window-chrome'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
+} from '~renderer/lib/desktop-window-chrome'
+import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import {
   isFloatingWorkspacePanelFocused,
   isFloatingWorkspacePanelShortcut,
   isFloatingWorkspaceTerminalInputTarget,
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
-} from '@/lib/floating-workspace-terminal-actions'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
+} from '~renderer/lib/floating-workspace-terminal-actions'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   canGoBackWorktreeHistory,
   canGoForwardWorktreeHistory
-} from '@/store/slices/worktree-nav-history'
-
-import logo from '../../../../resources/yiru-wordmark.png?url'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
+} from '~renderer/store/slices/worktree-nav-history'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   keybindingMatchesAction,
   type KeybindingActionId,
   type KeybindingContext,
   type PhysicalModifierToken
-} from '../../../shared/keybindings'
+} from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../../shared/modifier-double-tap-detector'
-import { supportsNativeSidebarMaterial } from '../../../shared/native-sidebar-material-support'
-import type { RemoteWorkspacePatchResult } from '../../../shared/remote-workspace-types'
-import type { OnboardingState, UpdateStatus } from '../../../shared/types'
+} from '~shared/modifier-double-tap-detector'
+import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
+import type { RemoteWorkspacePatchResult } from '~shared/remote-workspace-types'
+import type { OnboardingState, UpdateStatus } from '~shared/types'
+
+import logo from '../../../../resources/yiru-wordmark.png?url'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'

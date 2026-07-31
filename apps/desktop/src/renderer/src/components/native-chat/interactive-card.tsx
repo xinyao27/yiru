@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '../../store'
 import { NativeChatApprovalCard } from './approval-card'
 import { nativeChatCardDismissKey } from './dismiss-key'
 import { parseInteractivePrompt } from './interactive-prompt'

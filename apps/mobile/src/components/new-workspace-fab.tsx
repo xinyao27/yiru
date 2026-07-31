@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
 
 type NewWorkspaceFabProps = {
   onPress: () => void

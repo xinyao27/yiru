@@ -1,7 +1,7 @@
 import {
   isCoworkingRequesterTransportErrorCode,
   type CoworkingRequesterTransportErrorCode
-} from '../../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 
 const ELECTRON_INVOKE_ERROR_PATTERN =
   /^(?:Error:\s*)?(?:Error invoking remote method '[^']+':\s*)?(?:Error:\s*)*([a-z_]+)$/

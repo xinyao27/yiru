@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
 import { net } from 'electron'
+import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
 
-import type { ProviderRateLimits, RateLimitWindow } from '../../shared/rate-limit-types'
 import { parseSubscriptionFromPageText } from './opencode-go-page-scraper'
 
 const OPENCODE_BASE_URL = 'https://opencode.ai'

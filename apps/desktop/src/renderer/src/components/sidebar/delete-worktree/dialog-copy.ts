@@ -1,5 +1,5 @@
-import { isFolderRepo } from '../../../../../shared/repo-kind'
-import type { Repo, Worktree } from '../../../../../shared/types'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { Repo, Worktree } from '~shared/types'
 
 type WorktreeRepoRef = Pick<Worktree, 'repoId'>
 

@@ -1,11 +1,17 @@
 import { Plus } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import type { BrowserSessionProfile } from '~shared/types'
 
-import type { BrowserSessionProfile } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { SearchableSetting } from '../searchable-setting'
 import { BrowserProfileRow, type BrowserProfileRowProps } from './profile-row'
 

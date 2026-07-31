@@ -1,19 +1,19 @@
 import React from 'react'
-
-import type {
-  SourceControlActionRecipe,
-  SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { LaunchSource } from '../../../../../shared/telemetry-events'
-import type { TuiAgent } from '../../../../../shared/types'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import type {
+  SourceControlActionRecipe,
+  SourceControlLaunchActionId
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { LaunchSource } from '~shared/telemetry-events'
+import type { TuiAgent } from '~shared/types'
+
 import { SourceControlAgentActionDialogForm } from './agent-action-dialog-form'
 import { useSourceControlAgentActionDialog } from './use-agent-action-dialog'
 

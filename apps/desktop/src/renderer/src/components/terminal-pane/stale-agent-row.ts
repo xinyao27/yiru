@@ -1,9 +1,7 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
 
 export function dismissStaleAgentRowByKey(paneKey: string): void {
   const store = useAppStore.getState()

@@ -1,4 +1,4 @@
-import type { PairingOffer } from '../../shared/pairing'
+import type { PairingOffer } from '~shared/pairing'
 import {
   addEnvironmentFromPairingCode as addEnvironmentFromPairingCodeInStore,
   getEnvironmentStorePath,
@@ -9,11 +9,12 @@ import {
   resolveEnvironmentPairingOffer as resolveEnvironmentPairingOfferFromStore,
   RuntimeEnvironmentStoreError,
   type RuntimeEnvironmentStoreErrorCode
-} from '../../shared/runtime-environment-store'
+} from '~shared/runtime-environment-store'
 import type {
   KnownRuntimeEnvironment,
   PublicKnownRuntimeEnvironment
-} from '../../shared/runtime-environments'
+} from '~shared/runtime-environments'
+
 import { RuntimeClientError } from './types'
 
 export type EnvironmentAddResult = {

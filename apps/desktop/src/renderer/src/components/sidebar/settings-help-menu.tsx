@@ -14,23 +14,25 @@ import {
 import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { useShortcutKeyDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  getUpdateCheckClickOptions,
+  getUpdateCheckHint
+} from '~renderer/lib/update-check-click-options'
+import { useAppStore } from '~renderer/store'
 
 import logo from '../../../../../resources/yiru-wordmark.png?url'
 import { showOnboardingFromRenderer } from '../onboarding/show-onboarding-event'

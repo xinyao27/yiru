@@ -3,13 +3,14 @@ import type {
   CoworkingFileListResult,
   CoworkingFileReadResult,
   CoworkingMutationResult
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 import {
   COWORKING_FILE_LIST_DEFAULT_LIMIT,
   COWORKING_FILE_LIST_MAX_LIMIT,
   COWORKING_FILE_READ_DEFAULT_BYTES,
   COWORKING_FILE_READ_MAX_BYTES
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { asCoworkingExecutionError, CoworkingExecutionError } from './execution-error'
 import type { ExecutionAdmissionGuard } from './execution-gateway'
 import { decodeCoworkingFileBytes, decodeCoworkingFileWriteContent } from './file-content-codec'

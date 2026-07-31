@@ -26,10 +26,10 @@ import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView
-} from '@/components/uniwind-native-components'
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+} from '~/components/uniwind-native-components'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { cn } from '~/style/class-names'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import { useInsideBottomDrawerModalHost } from './bottom-drawer-modal-host'

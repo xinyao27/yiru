@@ -6,8 +6,8 @@ import {
   TextHFive as Heading5,
   CaretRight as ChevronRight
 } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import { icon, insertToggle, type SlashCommand } from './slash-command-primitives'
 
 export const headingSlashCommands: SlashCommand[] = [

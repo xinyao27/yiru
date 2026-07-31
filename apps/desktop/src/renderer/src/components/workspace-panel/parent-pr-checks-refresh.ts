@@ -1,14 +1,8 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { GitHubRepositoryIdentity, PRCheckDetail, Repo, Worktree } from '~shared/types'
 
-import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
-
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import type {
-  GitHubRepositoryIdentity,
-  PRCheckDetail,
-  Repo,
-  Worktree
-} from '../../../../shared/types'
 import {
   getParentPrChecksRefreshIdentity,
   type ParentPrChecksRefreshOutcome

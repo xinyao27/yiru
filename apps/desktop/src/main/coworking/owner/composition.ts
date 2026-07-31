@@ -1,13 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 
-import {
-  COWORKING_INGRESS_PORT,
-  type CoworkingOsFamily
-} from '../../../shared/coworking/wire-contract'
-import type { Store } from '../../persistence'
-import type { RateLimitService } from '../../rate-limits/service'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
+import type { Store } from '~main/persistence'
+import type { RateLimitService } from '~main/rate-limits/service'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { COWORKING_INGRESS_PORT, type CoworkingOsFamily } from '~shared/coworking/wire-contract'
+
 import { CoworkingAccessAuthority } from '../access-authority'
 import { CoworkingExecutionGateway } from '../execution-gateway'
 import { CoworkingCanonicalHistoricalSessionConsistency } from '../historical-session-consistency'

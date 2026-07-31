@@ -65,6 +65,13 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "rootDir": "../src",
-    "outDir": "../out"
+    "outDir": "../out",
+    // Why: tsc emits these specifiers verbatim, so `build:cli` runs
+    // scripts/rewrite-emitted-aliases.mjs afterwards to turn them back into
+    // relative requires. Adding an alias here means updating that script's map.
+    "paths": {
+      "~shared/*": ["../src/shared/*"],
+      "~main/*": ["../src/main/*"]
+    }
   }
 }

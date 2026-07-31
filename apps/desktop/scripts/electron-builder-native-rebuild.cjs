@@ -29,12 +29,7 @@ function buildNativeRebuildArgs(context) {
   const platform = readPlatformName(context?.platform)
   const arch = readArchName(context?.arch)
 
-  return [
-    'scripts/rebuild-native-deps.mjs',
-    `--platform=${platform}`,
-    `--arch=${arch}`,
-    '--force'
-  ]
+  return ['scripts/rebuild-native-deps.mjs', `--platform=${platform}`, `--arch=${arch}`, '--force']
 }
 
 function readPlatformName(platform) {

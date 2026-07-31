@@ -6,11 +6,11 @@ import {
 } from '@yiru/runtime-protocol/capabilities'
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { Automation } from '~shared/automations-types'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import type { ProjectHostSetup, Repo, Worktree } from '~shared/types'
 
-import type { Automation } from '../../../../shared/automations-types'
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import type { AutomationHostTarget } from './automation-host-client'
 

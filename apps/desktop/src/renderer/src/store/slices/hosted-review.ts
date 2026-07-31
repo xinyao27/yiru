@@ -13,10 +13,9 @@ import {
 /* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
 and race protection are kept together so branch review lookup invariants stay testable. */
 import type { StateCreator } from 'zustand'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { Repo } from '~shared/types'
 
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { Repo } from '../../../../shared/types'
 import type { AppState } from '../types'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'
 import {

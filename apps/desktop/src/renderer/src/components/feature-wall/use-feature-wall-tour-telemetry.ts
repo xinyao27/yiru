@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
-
-import { track } from '@/lib/telemetry'
-
-import { FEATURE_WALL_MAX_DWELL_MS } from '../../../../shared/feature-wall-telemetry'
-import type { FeatureWallExitAction } from '../../../../shared/feature-wall-tour-depth'
-import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
-import type {
-  EventProps,
-  FeatureWallOpenSourceTelemetry
-} from '../../../../shared/telemetry-events'
+import { track } from '~renderer/lib/telemetry'
+import { FEATURE_WALL_MAX_DWELL_MS } from '~shared/feature-wall-telemetry'
+import type { FeatureWallExitAction } from '~shared/feature-wall-tour-depth'
+import type { FeatureWallTourDepthSummary } from '~shared/feature-wall-tour-depth'
+import type { EventProps, FeatureWallOpenSourceTelemetry } from '~shared/telemetry-events'
 
 export type FeatureWallTourTelemetryState = {
   open: boolean

@@ -1,9 +1,9 @@
 import { CONTEXT_MENU_TRIGGER_TYPE } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { joinPath } from '~renderer/lib/path'
+import { WORKSPACE_FILE_PATH_MIME } from '~renderer/lib/workspace-file-drag'
 
-import { joinPath } from '../../../lib/path'
-import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import type { SourceControlController } from './controller'
 import {

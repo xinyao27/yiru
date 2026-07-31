@@ -4,19 +4,17 @@ import {
   Layout as PanelTop
 } from '@phosphor-icons/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { FloatingTerminalTriggerLocation } from '../../../../shared/types'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { FloatingTerminalTriggerLocation } from '~shared/types'
 
 type FloatingTerminalIconContextMenuProps = {
   children: React.ReactNode

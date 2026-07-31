@@ -1,8 +1,8 @@
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 import type {
   TerminalTabCloseReason,
   TerminalTabRetirementPlan
-} from '@/store/slices/terminal-tab-retirement'
+} from '~renderer/store/slices/terminal-tab-retirement'
 
 export function closeLocalTerminalTabState(
   terminalTabId: string,

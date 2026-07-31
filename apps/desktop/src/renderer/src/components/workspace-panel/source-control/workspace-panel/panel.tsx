@@ -3,26 +3,25 @@ import {
   type HostedReviewProvider
 } from '@yiru/workbench-model/review'
 import React from 'react'
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  localizedHostedReviewCopy,
-  resolveSupportedHostedReviewCopyProvider
-} from '@/i18n/hosted-review-localized-copy'
-import { translate } from '@/i18n/i18n'
-import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
-import { useAppStore } from '@/store'
-import { useActiveWorktree, useRepoById } from '@/store/selectors'
-import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
-import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
-
-import type { GitStatusEntry, Worktree } from '../../../../../../shared/types'
-import ChecksPanel from '../../checks-panel'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import ChecksPanel from '~renderer/components/workspace-panel/checks-panel'
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource
-} from '../../right-sidebar-panel-source'
-import SourceControl from '../../source-control'
+} from '~renderer/components/workspace-panel/right-sidebar-panel-source'
+import SourceControl from '~renderer/components/workspace-panel/source-control'
+import {
+  localizedHostedReviewCopy,
+  resolveSupportedHostedReviewCopyProvider
+} from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review'
+import type { GitStatusEntry, Worktree } from '~shared/types'
+
 import { DiffLineCounts } from '../entry-details'
 import { useAutoOpenAllDiffs } from './auto-open-all-diffs'
 import type { SourceControlPanelView } from './state'

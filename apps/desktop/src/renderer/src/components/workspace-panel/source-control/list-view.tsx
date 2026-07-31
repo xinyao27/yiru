@@ -1,7 +1,6 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import { useMemo } from 'react'
-
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
 
 import { BranchEntryRow } from './branch-entry-row'
 import type { SourceControlController } from './controller'

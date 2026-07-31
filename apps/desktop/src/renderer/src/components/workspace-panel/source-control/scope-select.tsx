@@ -1,13 +1,13 @@
 import { Check, CaretDown as ChevronDown } from '@phosphor-icons/react'
-
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
+} from '~renderer/components/ui/dropdown-menu'
+import { cn } from '~renderer/lib/class-names'
+
 import { DiffLineCounts } from './entry-details'
 import type { SourceControlScopeId, SourceControlScopeOption } from './scope-model'
 

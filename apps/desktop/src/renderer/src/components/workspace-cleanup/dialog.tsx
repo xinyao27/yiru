@@ -12,10 +12,9 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import RepoMultiCombobox from '@/components/repo/multi-combobox'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import RepoMultiCombobox from '~renderer/components/repo/multi-combobox'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -23,7 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
+} from '~renderer/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,24 +35,24 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+} from '~renderer/components/ui/dropdown-menu'
+import { Input } from '~renderer/components/ui/input'
+import { Progress } from '~renderer/components/ui/progress'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
 import {
   canQueueWorkspaceCleanupCandidate,
   type WorkspaceCleanupCandidate,
   type WorkspaceCleanupScanError,
   type WorkspaceCleanupScanProgress
-} from '../../../../shared/workspace/cleanup'
+} from '~shared/workspace/cleanup'
+
 import {
   startWorkspaceCleanupBackgroundRemoval,
   type WorkspaceCleanupRemovalProgress

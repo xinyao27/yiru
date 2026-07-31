@@ -1,9 +1,8 @@
 import { MAX_PR_BOT_AUTHOR_OVERRIDES } from '@yiru/workbench-model/review'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { createBotAuthorOverrideSet, normalizePRCommentAuthorLogin } from './pr-comment-audience'
 

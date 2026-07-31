@@ -1,11 +1,10 @@
 import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
+import { prChecksCacheSuffix, prCommentsCacheSuffix } from '~renderer/components/github/state'
+import { localizedHostedReviewCopy } from '~renderer/i18n/hosted-review-localized-copy'
+import { useAppStore } from '~renderer/store'
+import { getGitHubRepoCacheKey } from '~renderer/store/slices/github-cache-key'
 
-import { useAppStore } from '@/store'
-
-import { localizedHostedReviewCopy } from '../../../i18n/hosted-review-localized-copy'
-import { getGitHubRepoCacheKey } from '../../../store/slices/github-cache-key'
-import { prChecksCacheSuffix, prCommentsCacheSuffix } from '../../github/state'
 import {
   getPullRequestGenerationRecordKey,
   getPullRequestGenerationSeedRestoreKey,

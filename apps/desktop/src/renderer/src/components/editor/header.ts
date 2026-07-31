@@ -1,6 +1,6 @@
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
 
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../shared/types'
 import { getEditorDisplayLabel } from './labels'
 
 export type EditorHeaderCopyState = {

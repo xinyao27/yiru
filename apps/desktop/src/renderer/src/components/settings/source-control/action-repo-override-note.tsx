@@ -1,13 +1,12 @@
 import { Info } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '../../../i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   SourceControlActionRecipeOverrideField,
   SourceControlActionRecipeOverrideSummary
-} from '../../../lib/source-control-launch-agent-selection'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/lib/source-control-launch-agent-selection'
 
 type SourceControlActionRepoOverrideNoteProps = {
   summary: SourceControlActionRecipeOverrideSummary

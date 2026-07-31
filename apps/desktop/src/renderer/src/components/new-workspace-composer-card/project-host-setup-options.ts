@@ -9,10 +9,9 @@ import {
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
-import { isEphemeralVmRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { ProjectHostSetup, Repo } from '../../../../shared/types'
+import type { ExecutionHostRegistryEntry } from '~shared/execution-host-registry'
+import { isEphemeralVmRuntimeEnvironment } from '~shared/runtime-environments'
+import type { ProjectHostSetup, Repo } from '~shared/types'
 
 export type ProjectHostSetupOption =
   | {

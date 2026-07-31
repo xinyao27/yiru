@@ -1,9 +1,7 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { buildUsageValueSnapshot, type UsageValueModel } from '../../../../shared/stats/usage-value'
+import { useAppStore } from '~renderer/store'
+import { buildUsageValueSnapshot, type UsageValueModel } from '~shared/stats/usage-value'
 
 export type ModelUsageValue = UsageValueModel
 

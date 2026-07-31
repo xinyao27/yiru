@@ -10,7 +10,8 @@ import type {
   ProjectHostSetupUpdateArgs,
   ProjectHostSetupUpdateResult,
   RepoKind
-} from '../../shared/types'
+} from '~shared/types'
+
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
 import {

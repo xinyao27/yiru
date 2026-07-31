@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router'
 
-import { MobileFileExplorerPanel } from '../../../../src/files/file-explorer-panel'
+import { MobileFileExplorerPanel } from '~/files/file-explorer-panel'
 
 export default function MobileFileExplorerScreen() {
   const { hostId, worktreeId, name } = useLocalSearchParams<{

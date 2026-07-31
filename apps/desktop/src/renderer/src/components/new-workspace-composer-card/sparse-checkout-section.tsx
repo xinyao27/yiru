@@ -1,9 +1,7 @@
 import React from 'react'
-
-import SparseCheckoutPresetSelect from '@/components/sparse/checkout-preset-select'
-import { translate } from '@/i18n/i18n'
-
-import type { SparsePreset } from '../../../../shared/types'
+import SparseCheckoutPresetSelect from '~renderer/components/sparse/checkout-preset-select'
+import { translate } from '~renderer/i18n/i18n'
+import type { SparsePreset } from '~shared/types'
 
 type SparseCheckoutSectionProps = {
   repoId: string

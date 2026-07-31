@@ -1,14 +1,13 @@
 import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { dirname, basename } from '~renderer/lib/path'
+import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import { useAppStore } from '@/store'
-
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { translate } from '../../../i18n/i18n'
-import { getConnectionId } from '../../../lib/connection-context'
-import { dirname, basename } from '../../../lib/path'
-import { importExternalPathsToRuntime } from '../../../runtime/file-client'
-import { settingsForRuntimeOwner } from '../../../runtime/rpc-client'
 import { extractIpcErrorMessage } from './ipc-error-message'
 
 export type RichMarkdownImageInsertArgs = {

@@ -1,7 +1,6 @@
 import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
 import * as React from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 type SwitchProps = Omit<SwitchPrimitive.Root.Props, 'nativeButton' | 'render'>
 

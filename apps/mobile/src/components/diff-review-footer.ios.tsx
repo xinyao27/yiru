@@ -11,13 +11,13 @@ import { useMemo } from 'react'
 import { View } from 'react-native'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { useMobileGlassAvailable } from '@/components/glass/availability'
+import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
   MobileSwiftUiGlassCircleButton,
   MobileSwiftUiGlassGroup
-} from '@/components/glass/swift-ui.ios'
-import { resolveCssString } from '@/style/resolve-css-variable'
+} from '~/components/glass/swift-ui.ios'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileDiffReviewFooterProps } from './diff-review-footer-props'
 

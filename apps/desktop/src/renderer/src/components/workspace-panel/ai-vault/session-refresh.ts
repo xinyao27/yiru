@@ -1,8 +1,7 @@
 import type { AiVaultListResult, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 const SESSION_LIMIT = 500
 

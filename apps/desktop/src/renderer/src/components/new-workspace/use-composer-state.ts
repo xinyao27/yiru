@@ -17,69 +17,68 @@ truth without duplicating effects, derivation, or the create side-effect. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
-import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
+import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
+import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '~renderer/components/contextual-tours/contextual-tour-composer-events'
 import {
   buildNewWorkspaceCreateTargetOptions,
   getProjectGroupIdFromNewWorkspaceOptionId,
   type NewWorkspaceProjectOption
-} from '@/components/new-workspace-composer-card/new-workspace-project-options'
+} from '~renderer/components/new-workspace-composer-card/new-workspace-project-options'
 import {
   buildProjectHostSetupOptions,
   type ProjectHostSetupOption
-} from '@/components/new-workspace-composer-card/project-host-setup-options'
+} from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
 import {
   formatWorkspaceCreateError,
   getWorkspaceCreateErrorToastMessage,
   type WorkspaceCreateErrorDisplay
-} from '@/components/new-workspace-composer-card/workspace-create-error-format'
+} from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
 import {
   lookupSmartGitHubSubmitItem,
   getSmartGitHubSubmitIntent,
   getSmartGitHubSubmitResolution,
   type SmartGitHubSubmitResolution
-} from '@/components/new-workspace/smart-github-submit'
-import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
-import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
+} from '~renderer/components/new-workspace/smart-github-submit'
+import type { SmartWorkspaceNameSelection } from '~renderer/components/new-workspace/smart-workspace-name-field'
+import type { SmartNameMode } from '~renderer/components/new-workspace/smart-workspace-source-results'
 import {
   getFolderSourceRepos,
   getLinkedItemDisplayName,
   getSmartNameSelection as getFolderSmartNameSelection,
   toGitHubLinkedWorkItem,
   toGitLabLinkedWorkItem
-} from '@/components/sidebar/folder-workspace-composer-helpers'
-import { useFolderWorkspaceComposerPathStatus } from '@/components/sidebar/folder-workspace-composer-path-status'
-import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
+} from '~renderer/components/sidebar/folder-workspace-composer-helpers'
+import { useFolderWorkspaceComposerPathStatus } from '~renderer/components/sidebar/folder-workspace-composer-path-status'
+import { submitFolderWorkspaceCreate } from '~renderer/components/sidebar/folder-workspace-composer-submit'
 import {
   getLinkedWorkItemPromptContext,
   resolveQuickCreateLinkedWorkItemPrompt
-} from '@/components/sidebar/linked-work-item-context'
+} from '~renderer/components/sidebar/linked-work-item-context'
 import {
   canUseRepoBackedComposerSources,
   getSelectedRepoSshGate,
   isSshConnectInProgress
-} from '@/components/sidebar/new-workspace-ssh-gate'
-import { isWorkItemLookupText } from '@/components/sidebar/work-item-lookup-text'
-import { getSuggestedCreatureName } from '@/components/sidebar/worktree-name-suggestions'
-import { runBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
-import { queueNewWorkspaceTerminalFocus } from '@/components/worktree-creation/new-workspace-terminal-focus'
+} from '~renderer/components/sidebar/new-workspace-ssh-gate'
+import { isWorkItemLookupText } from '~renderer/components/sidebar/work-item-lookup-text'
+import { getSuggestedCreatureName } from '~renderer/components/sidebar/worktree-name-suggestions'
+import { runBackgroundWorktreeCreation } from '~renderer/components/worktree-creation/flow'
+import { queueNewWorkspaceTerminalFocus } from '~renderer/components/worktree-creation/new-workspace-terminal-focus'
 import {
   getComposerEligibleRepos,
   resolveComposerActiveRepoId
-} from '@/components/worktree-jump-palette/new-workspace-composer-repo'
-import { useDetectedAgents } from '@/hooks/use-detected-agents'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
-import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { parseGitHubPullRequestLink, normalizeGitHubLinkQuery } from '@/lib/github-links'
+} from '~renderer/components/worktree-jump-palette/new-workspace-composer-repo'
+import { useDetectedAgents } from '~renderer/hooks/use-detected-agents'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { getAgentLaunchPlatformForRepo } from '~renderer/lib/agent-launch-platform'
+import type { AgentStartedTelemetry } from '~renderer/lib/agent-started-telemetry'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { parseGitHubPullRequestLink, normalizeGitHubLinkQuery } from '~renderer/lib/github-links'
 import {
   lookupGitHubWorkItemByOwnerRepoForSource,
   lookupGitHubWorkItemForSource
-} from '@/lib/github-work-item-source-lookup'
-import { getLocalRepoProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+} from '~renderer/lib/github-work-item-source-lookup'
+import { getLocalRepoProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import {
   CLIENT_PLATFORM,
   buildAgentPromptWithContext,
@@ -93,35 +92,34 @@ import {
   PER_REPO_FETCH_LIMIT,
   type LinkedWorkItemSummary,
   type SetupConfig
-} from '@/lib/new-workspace'
-import { joinPath } from '@/lib/path'
-import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
-import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
-import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '@/lib/sparse-paths'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { importExternalPathsToRuntime } from '@/runtime/file-client'
-import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/hooks-client'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { resolveWorktreeCreateBaseBranch } from '@/runtime/worktree-create-base'
-import { useAppStore } from '@/store'
-
-import { repoIsRemote } from '../../../../shared/agent/launch-remote'
-import { getDefaultRepoHookSettings } from '../../../../shared/constants'
-import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/session-option-defaults'
+} from '~renderer/lib/new-workspace'
+import { joinPath } from '~renderer/lib/path'
+import type { WorktreeCreationRequest } from '~renderer/lib/pending-worktree-creation'
+import { getSettingsForRepoRuntimeOwner } from '~renderer/lib/repo-runtime-owner'
+import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '~renderer/lib/sparse-paths'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
+import { checkRuntimeHooks, type HookCheckResult } from '~renderer/runtime/hooks-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { resolveWorktreeCreateBaseBranch } from '~renderer/runtime/worktree-create-base'
+import { useAppStore } from '~renderer/store'
+import { repoIsRemote } from '~shared/agent/launch-remote'
+import { getDefaultRepoHookSettings } from '~shared/constants'
+import { buildExecutionHostRegistry } from '~shared/execution-host-registry'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
-} from '../../../../shared/project-source-context'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+} from '~shared/project-source-context'
+import { isGitRepoKind } from '~shared/repo-kind'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent/launch-defaults'
-import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
+} from '~shared/tui-agent/launch-defaults'
+import { filterEnabledTuiAgents, isTuiAgentEnabled } from '~shared/tui-agent/selection'
 import type {
   GitHubWorkItem,
   GitHubPrStartPoint,
@@ -138,8 +136,9 @@ import type {
   WorkspaceStatus,
   WorkspaceCreateTelemetrySource,
   ProjectGroup
-} from '../../../../shared/types'
-import { isWorkspaceStatusId } from '../../../../shared/workspace/statuses'
+} from '~shared/types'
+import { isWorkspaceStatusId } from '~shared/workspace/statuses'
+
 import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 import {
   resolveComposerBranchNameOverrideForCreate,

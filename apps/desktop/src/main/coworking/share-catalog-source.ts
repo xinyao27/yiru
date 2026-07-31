@@ -1,5 +1,6 @@
-import type { CoworkingSessionCatalogIdentity } from '../../shared/coworking/catalog-contract'
-import type { CoworkingWorktreeKind } from '../../shared/coworking/worktree-kind'
+import type { CoworkingSessionCatalogIdentity } from '~shared/coworking/catalog-contract'
+import type { CoworkingWorktreeKind } from '~shared/coworking/worktree-kind'
+
 import type { CoworkingPublicWorktreeInstance } from './worktree-visibility'
 
 export type CoworkingCatalogSessionDescription = {

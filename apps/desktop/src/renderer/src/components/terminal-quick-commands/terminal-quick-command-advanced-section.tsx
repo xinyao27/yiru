@@ -1,13 +1,12 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { getTerminalQuickCommandScope } from '~shared/terminal/quick-commands'
+import { isTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
+import type { Repo, TerminalQuickCommand } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { getTerminalQuickCommandScope } from '../../../../shared/terminal/quick-commands'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
-import type { Repo, TerminalQuickCommand } from '../../../../shared/types'
 import { TerminalQuickCommandAppendEnterSwitch } from './terminal-quick-command-append-enter-switch'
 import { TerminalQuickCommandScopeField } from './terminal-quick-command-scope-field'
 

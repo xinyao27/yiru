@@ -15,6 +15,17 @@ const CROSS_CLIENT_WORKSPACE_PACKAGES = [
   '@yiru/workbench-model'
 ]
 
+// Why: the only import aliases desktop code may use, shared by all three
+// bundles so a specifier means the same thing in every process. relay/ and cli/
+// are leaf executables nothing imports into, so they deliberately get none —
+// and there is no bare '~', which is what keeps prefix matching unambiguous.
+const SOURCE_ALIASES = {
+  '~renderer': resolve('src/renderer/src'),
+  '~shared': resolve('src/shared'),
+  '~main': resolve('src/main'),
+  '~preload': resolve('src/preload')
+}
+
 // Why: the telemetry transport is gated by two compile-time constants that
 // only the official CI release workflow sets. Contributor / `pnpm dev` /
 // third-party rebuilds must substitute literal `null` at these sites so
@@ -223,6 +234,7 @@ export default defineConfig({
     // directly at the published main file so the bundler can inline it.
     resolve: {
       alias: {
+        ...SOURCE_ALIASES,
         '@xterm/headless': resolve('node_modules/@xterm/headless/lib-headless/xterm-headless.js'),
         '@xterm/addon-serialize': resolve(
           'node_modules/@xterm/addon-serialize/lib/addon-serialize.js'
@@ -232,6 +244,9 @@ export default defineConfig({
   },
   preload: {
     plugins: [createElectronViteRolldownOptionsBridge()],
+    resolve: {
+      alias: { ...SOURCE_ALIASES }
+    },
     build: {
       externalizeDeps: {
         exclude: ['@electron-toolkit/preload', ...CROSS_CLIENT_WORKSPACE_PACKAGES]
@@ -248,10 +263,7 @@ export default defineConfig({
   },
   renderer: {
     resolve: {
-      alias: {
-        '@renderer': resolve('src/renderer/src'),
-        '@': resolve('src/renderer/src')
-      }
+      alias: { ...SOURCE_ALIASES }
     },
     plugins: [react(), tailwindcss()],
     worker: {

@@ -1,11 +1,11 @@
 import {
   buildParentPrChecksRows,
   type ParentPrChecksRow
-} from '@/components/workspace-panel/parent-pr-checks-rows'
-import type { AppState } from '@/store/types'
+} from '~renderer/components/workspace-panel/parent-pr-checks-rows'
+import type { AppState } from '~renderer/store/types'
+import type { Repo, Worktree, WorktreeLineage, WorkspaceLineage } from '~shared/types'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
-import type { Repo, Worktree, WorktreeLineage, WorkspaceLineage } from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
 
 type FolderWorkspaceCardPrDisplayArgs = {

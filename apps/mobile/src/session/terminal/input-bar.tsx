@@ -1,11 +1,12 @@
 import type { RefObject } from 'react'
 import { Platform, Pressable, TextInput, View } from 'react-native'
 
-import { MobileGlassPressable } from '../../components/glass/pressable'
-import { MobileGlassSurface } from '../../components/glass/surface'
-import { ArrowUp, Keyboard as KeyboardIcon } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
-import { getTerminalCommandKeyboardType } from '../../terminal/keyboard-type'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { ArrowUp, Keyboard as KeyboardIcon } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
+import { getTerminalCommandKeyboardType } from '~/terminal/keyboard-type'
+
 import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileImageSource } from '../image-source-picker'
 import { MobileTerminalLiveInputStatus } from './live-input-status'

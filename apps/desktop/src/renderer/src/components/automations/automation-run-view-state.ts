@@ -1,4 +1,4 @@
-import type { Automation, AutomationRun } from '../../../../shared/automations-types'
+import type { Automation, AutomationRun } from '~shared/automations-types'
 
 export type AutomationRunViewAvailability = 'terminal' | 'workspace' | 'snapshot' | 'metadata'
 

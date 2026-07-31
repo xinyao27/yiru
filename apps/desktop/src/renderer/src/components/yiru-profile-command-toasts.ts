@@ -1,7 +1,6 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import type { RendererCommandResult } from '@/runtime/renderer-command-result-channel'
+import { translate } from '~renderer/i18n/i18n'
+import type { RendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
 
 type YiruProfileResult = Extract<RendererCommandResult, { type: 'yiru-profile' }>
 

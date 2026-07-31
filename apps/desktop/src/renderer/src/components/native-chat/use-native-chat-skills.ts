@@ -1,13 +1,12 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { emitNativeChatSkillDiscovery } from '~renderer/components/native-chat/telemetry'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { getNativeChatAgentProfile } from '~shared/native-chat/agent-profiles'
+import type { DiscoveredSkill, SkillDiscoveryResult } from '~shared/skills'
 
-import { emitNativeChatSkillDiscovery } from '@/components/native-chat/telemetry'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-
-import { getNativeChatAgentProfile } from '../../../../shared/native-chat/agent-profiles'
-import type { DiscoveredSkill, SkillDiscoveryResult } from '../../../../shared/skills'
-import { useAppStore } from '../../store'
 import {
   resolveNativeChatSkillDiscoveryContext,
   selectNativeChatSkillStateInputs,

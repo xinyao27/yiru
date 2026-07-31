@@ -1,6 +1,5 @@
-import { useAppStore } from '@/store'
-
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
 
 export function recordTerminalUserInputForLeaf(tabId: string, leafId: string): void {
   try {

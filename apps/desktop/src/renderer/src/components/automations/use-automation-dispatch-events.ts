@@ -2,25 +2,21 @@
  * coordinator spanning workspace creation, SSH readiness, terminal launch/reuse,
  * completion bookkeeping, and focus restoration. */
 import { useEffect } from 'react'
-
 import {
   createAutomationRunOutputSnapshotBuffer,
   selectAutomationRunOutputSnapshot
-} from '@/components/automations/automation-run-output-snapshot'
-import { submitPromptToAgentPty } from '@/components/native-chat/agent-paste-draft'
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/automations/automation-run-output-snapshot'
+import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { useAppStore } from '~renderer/store'
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
-} from '../../../../shared/automation/precheck'
-import { getAutomationRunRepoId } from '../../../../shared/automation/run-identity'
-import type {
-  AutomationDispatchResult,
-  AutomationPrecheckResult
-} from '../../../../shared/automations-types'
+} from '~shared/automation/precheck'
+import { getAutomationRunRepoId } from '~shared/automation/run-identity'
+import type { AutomationDispatchResult, AutomationPrecheckResult } from '~shared/automations-types'
+
 import { observeExistingAutomationSession } from './automation-session-observer'
 import { findReusableAutomationSession } from './automation-session-reuse'
 import { launchAgentBackgroundSession } from './launch-agent-background-session'

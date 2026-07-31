@@ -9,14 +9,13 @@
  * so seeded/replayed bytes and delivered chunks never produce a reply.
  */
 import type { Terminal } from '@xterm/headless'
-
 import {
   formatXColorRgbSpec,
   parseXColorSpec,
   TERMINAL_VIEW_ANSI_COLOR_COUNT,
   type TerminalViewAttributes,
   type TerminalViewRgb
-} from '../../shared/terminal/view-attributes'
+} from '~shared/terminal/view-attributes'
 
 type ViewAttributeParser = Pick<Terminal['parser'], 'registerOscHandler' | 'registerCsiHandler'>
 

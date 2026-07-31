@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { splitPathSegments } from '../path-tree'
 import { useFileDeletion } from '../use-file-deletion'

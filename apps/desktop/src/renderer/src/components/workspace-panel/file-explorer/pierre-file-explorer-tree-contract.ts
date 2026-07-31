@@ -1,7 +1,7 @@
 import type { ContextMenuOpenContext } from '@pierre/trees'
 import type React from 'react'
+import type { GitFileStatus } from '~shared/types'
 
-import type { GitFileStatus } from '../../../../../shared/types'
 import type { InlineInput } from './row'
 import type { FileExplorerRowProjection } from './row-projection'
 import type { TreeNode } from './types'

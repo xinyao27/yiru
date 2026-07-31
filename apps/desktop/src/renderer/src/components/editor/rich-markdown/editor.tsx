@@ -6,10 +6,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 // syntax-highlight spans) that has no JSX to carry a Tailwind className, so
 // those rules stay real CSS here instead of the app's eager main.css.
 import './content.css'
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
+import { selectWorktreeDiffComments } from '~renderer/store/worktree-diff-comments-selector'
+import type { DiffComment, MarkdownDocument } from '~shared/types'
 
-import type { DiffComment, MarkdownDocument } from '../../../../../shared/types'
-import { selectWorktreeDiffComments } from '../../../store/worktree-diff-comments-selector'
 import { registerPendingEditorFlush } from '../pending-flush'
 import { useEditorScrollRestore } from '../use-editor-scroll-restore'
 import { useLinkBubble } from '../use-link-bubble'

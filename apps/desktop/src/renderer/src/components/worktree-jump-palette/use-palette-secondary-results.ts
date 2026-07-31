@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
-
 import {
   buildCmdJActionResults,
   buildCmdJSettingsResults,
   rankCmdJMiddleResults
-} from '@/components/cmd-j/palette-results'
-import type { CmdJQuickActionContext } from '@/components/cmd-j/quick-action-context'
-import { getCmdJQuickActions } from '@/components/cmd-j/quick-actions'
+} from '~renderer/components/cmd-j/palette-results'
+import type { CmdJQuickActionContext } from '~renderer/components/cmd-j/quick-action-context'
+import { getCmdJQuickActions } from '~renderer/components/cmd-j/quick-actions'
 
 import type { QuickActionPaletteItem, SettingsPaletteItem } from './types'
 import type { PaletteStoreState } from './use-palette-store-state'

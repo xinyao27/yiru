@@ -1,4 +1,5 @@
-import { ScrollArea } from '../../ui/scroll-area'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+
 import { CompareUnavailable } from './compare-summary'
 import type { SourceControlController } from './controller'
 import { shouldShowSourceControlCompareUnavailableCard } from './header-toolbar'

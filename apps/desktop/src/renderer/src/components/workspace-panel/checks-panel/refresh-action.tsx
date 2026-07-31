@@ -1,11 +1,10 @@
 import { useCallback } from 'react'
+import { buildGitHubPRRefreshStateClearToken } from '~renderer/components/github/state'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
+import type { PRInfo } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { PRInfo } from '../../../../../shared/types'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '../../../runtime/git-client'
-import { refreshHostedReviewCard } from '../../../store/slices/hosted-review'
-import { buildGitHubPRRefreshStateClearToken } from '../../github/state'
 import { checksPanelAsyncResultKey } from './async-result-key'
 import type { useChecksPanelCommentsLoadingState } from './comments-loading'
 import {

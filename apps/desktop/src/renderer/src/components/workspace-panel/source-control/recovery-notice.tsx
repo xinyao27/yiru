@@ -1,14 +1,6 @@
 import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-
-import type {
-  SourceControlActionRecipe,
-  SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import { translate } from '../../../i18n/i18n'
-import { readSourceControlLaunchRecipeAgentId } from '../../../lib/source-control-launch-agent-selection'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -17,7 +9,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { readSourceControlLaunchRecipeAgentId } from '~renderer/lib/source-control-launch-agent-selection'
+import type {
+  SourceControlActionRecipe,
+  SourceControlLaunchActionId
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+
 import { SourceControlFixSplitButton } from './fix-split-button'
 
 export type SourceControlRecoveryKind = 'commit' | 'push'

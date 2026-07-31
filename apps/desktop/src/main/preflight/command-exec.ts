@@ -2,7 +2,8 @@ import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { buildPosixCommandPathLookupScript } from '../../shared/posix-command-path-lookup'
+import { buildPosixCommandPathLookupScript } from '~shared/posix-command-path-lookup'
+
 import { buildLocalPreflightEnv } from './local-env'
 import type { WslPreflightTarget } from './wsl-agent-detection'
 import { runPreflightCommandInWsl } from './wsl-command'

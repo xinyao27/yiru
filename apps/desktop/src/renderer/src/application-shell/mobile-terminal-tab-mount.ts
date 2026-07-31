@@ -1,5 +1,5 @@
-import type { BackgroundMountTerminalWorktreeDetail } from '@/constants/terminal'
-import type { AppState } from '@/store/types'
+import type { BackgroundMountTerminalWorktreeDetail } from '~renderer/constants/terminal'
+import type { AppState } from '~renderer/store/types'
 
 import { resolveTerminalTabIdForPtyId } from './terminal-tab-for-pty-id'
 

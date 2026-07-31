@@ -10,9 +10,9 @@ import {
   type ExecutionHostKind,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
+import type { ExecutionHostHealth } from '~shared/execution-host-registry'
+import type { FolderWorkspace, ProjectGroup, Repo } from '~shared/types'
 
-import type { ExecutionHostHealth } from '../../../../shared/execution-host-registry'
-import type { FolderWorkspace, ProjectGroup, Repo } from '../../../../shared/types'
 import type { Row } from './worktree-list-groups'
 
 export type HostHeaderRow = {

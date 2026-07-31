@@ -1,13 +1,12 @@
 import { useSyncExternalStore } from 'react'
-
-import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
-
+import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
 import type {
   SkillManageOperation,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../../../../shared/skill-freshness'
+} from '~shared/skill-freshness'
+
 import {
   getSkillFreshnessUpdateDialogRequest,
   subscribeSkillFreshnessUpdateDialog

@@ -1,4 +1,4 @@
-import type { MarkdownViewMode } from '@/components/editor/state'
+import type { MarkdownViewMode } from '~renderer/components/editor/state'
 
 export type MarkdownRenderMode = 'source' | 'rich-editor' | 'preview'
 

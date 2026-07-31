@@ -6,11 +6,10 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
 
 import { ToggleButton } from './search-result-items'
 

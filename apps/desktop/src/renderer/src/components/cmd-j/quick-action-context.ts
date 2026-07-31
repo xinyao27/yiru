@@ -1,9 +1,7 @@
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
-
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
-import type { AppState } from '@/store/types'
-
-import type { Worktree } from '../../../../shared/types'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { AppState } from '~renderer/store/types'
+import type { Worktree } from '~shared/types'
 
 export type CmdJUnavailableReason =
   | 'loading'

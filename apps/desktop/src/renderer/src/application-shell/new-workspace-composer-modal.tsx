@@ -1,27 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-
-import AgentSettingsDialog from '@/components/agent/settings-dialog'
-import { NewWorkspaceComposerCard } from '@/components/new-workspace-composer-card/card'
-import { useComposerState } from '@/components/new-workspace/use-composer-state'
-import { getFolderWorkspacePrimaryActionLabel } from '@/components/sidebar/folder-workspace-composer-helpers'
+import AgentSettingsDialog from '~renderer/components/agent/settings-dialog'
+import { NewWorkspaceComposerCard } from '~renderer/components/new-workspace-composer-card/card'
+import { useComposerState } from '~renderer/components/new-workspace/use-composer-state'
+import { getFolderWorkspacePrimaryActionLabel } from '~renderer/components/sidebar/folder-workspace-composer-helpers'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
-import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import type { LinkedWorkItemSummary } from '~renderer/lib/new-workspace'
+import { isScreenSubmitShortcut } from '~renderer/lib/screen-submit-shortcut'
+import { useAppStore } from '~renderer/store'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import type { TuiAgent, WorkspaceCreateTelemetrySource, WorkspaceStatus } from '~shared/types'
 
-import type { ProjectSourceContext } from '../../../shared/project-source-context'
-import type {
-  TuiAgent,
-  WorkspaceCreateTelemetrySource,
-  WorkspaceStatus
-} from '../../../shared/types'
 import { shouldAllowComposerEnterSubmitTarget } from './new-workspace-enter-guard'
 import {
   pickQuickWorkspaceAgent,

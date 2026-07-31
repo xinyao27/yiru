@@ -1,8 +1,7 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot, TuiAgent } from '../../../../shared/types'
-import { agentTypeToIconAgent } from '../../lib/agent-status'
+import { agentTypeToIconAgent } from '~renderer/lib/agent-status'
+import { isTerminalLeafId, makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TuiAgent } from '~shared/types'
 
 /**
  * Resolve a terminal tab's agent from hook-reported status — the PRIMARY

@@ -1,15 +1,14 @@
 import React, { useCallback, useMemo } from 'react'
-
-import { useAppStore } from '@/store'
-
-import type { WorktreeCardProperty } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
-} from '../../ui/dropdown-menu'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { WorktreeCardProperty } from '~shared/types'
+
 import { getWorktreeCardPropertyOptions } from '../workspace-option-items'
 
 export function WorktreeCardDisplayMenuSection(): React.JSX.Element {

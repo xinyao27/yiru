@@ -2,13 +2,13 @@ import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
+import { refreshGitStatusForWorktree } from '~renderer/components/workspace-panel/git-status-refresh'
+import type { PullRequestGenerationContext } from '~renderer/components/workspace-panel/pull-request-generation-state'
+import { localizedHostedReviewCopy } from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRuntimeRepoBaseRefDefault } from '~renderer/runtime/repo-client'
 
-import { localizedHostedReviewCopy } from '../../../../i18n/hosted-review-localized-copy'
-import { translate } from '../../../../i18n/i18n'
-import { getConnectionId } from '../../../../lib/connection-context'
-import { getRuntimeRepoBaseRefDefault } from '../../../../runtime/repo-client'
-import { refreshGitStatusForWorktree } from '../../git-status-refresh'
-import type { PullRequestGenerationContext } from '../../pull-request-generation-state'
 import {
   resolveSourceControlBaseRef,
   resolveSourceControlCompareBaseRef,

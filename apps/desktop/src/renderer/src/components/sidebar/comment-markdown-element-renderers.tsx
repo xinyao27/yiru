@@ -1,7 +1,6 @@
 import React from 'react'
 import type { Components } from 'react-markdown'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import {
   GitHubUserAttachmentImage,

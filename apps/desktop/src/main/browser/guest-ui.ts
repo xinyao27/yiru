@@ -3,25 +3,25 @@ privileged bridge for context menus, grab-mode shortcuts, and app-shortcut
 forwarding from webContents guests. Splitting this rebase-only integration
 would make the security boundary harder to audit. */
 import { screen, webContents } from 'electron'
-
-import type { BrowserPageZoomDirection } from '../../shared/browser/page-zoom'
+import type { BrowserPageZoomDirection } from '~shared/browser/page-zoom'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken
-} from '../../shared/browser/url'
-import { keybindingMatchesAction, type KeybindingOverrides } from '../../shared/keybindings'
+} from '~shared/browser/url'
+import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../shared/modifier-double-tap-detector'
+} from '~shared/modifier-double-tap-detector'
 import {
   isRecentTabSwitcherCommitRelease,
   matchesRecentTabSwitcherChord,
   nativeZoomCommandMatchesKeybindings,
   resolveWindowShortcutAction,
   type WindowShortcutInput
-} from '../../shared/window-shortcut-policy'
+} from '~shared/window-shortcut-policy'
+
 import { readGuestNavigationState } from './guest-navigation-state'
 
 type ResolveRenderer = (browserTabId: string) => Electron.WebContents | null

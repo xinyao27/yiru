@@ -18,11 +18,10 @@ import {
   toRuntimeExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/icon-context-menu'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { FloatingTerminalIconContextMenu } from '~renderer/components/floating-terminal/icon-context-menu'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -30,7 +29,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
+} from '~renderer/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -42,45 +41,45 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useDetectedAgents, type AgentDetectionTarget } from '@/hooks/use-detected-agents'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
-import { lazyWithRetry } from '@/lib/lazy-with-retry'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useDetectedAgents, type AgentDetectionTarget } from '~renderer/hooks/use-detected-agents'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import { markLiveCodexSessionsForRestart } from '~renderer/lib/codex-session-restart'
+import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
+import { lazyWithRetry } from '~renderer/lib/lazy-with-retry'
 import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
-} from '@/lib/windows-terminal-capabilities'
-import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
+} from '~renderer/lib/windows-terminal-capabilities'
+import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   fetchProviderAccountsSnapshot,
   selectClaudeProviderAccount,
   selectCodexProviderAccount
-} from '@/runtime/provider-accounts-client'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
+} from '~renderer/runtime/provider-accounts-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { selectFloatingWorkspaceHasUnread } from '~renderer/store/selectors'
 import type {
   CursorRateLimitRefreshContext,
   ProviderRateLimits,
   RateLimitRuntimeTarget
-} from '../../../../shared/rate-limit-types'
-import { normalizeStatusBarUsageMode } from '../../../../shared/status-bar-usage-mode'
+} from '~shared/rate-limit-types'
+import { normalizeStatusBarUsageMode } from '~shared/status-bar-usage-mode'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   GlobalSettings
-} from '../../../../shared/types'
+} from '~shared/types'
 import {
   getDisplayedUsagePercentage,
   normalizeUsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
-import { useAppStore } from '../../store'
-import { selectFloatingWorkspaceHasUnread } from '../../store/selectors'
+} from '~shared/usage-percentage-display'
+
 import { isStatusBarItemAvailable } from './agent-gating'
 import { summarizeCodexRestartStatus } from './codex-restart-status-summary'
 import {

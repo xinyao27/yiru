@@ -1,20 +1,20 @@
-import type { OpenFile } from '@/components/editor/state'
-import { getConnectionId } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { joinPath } from '@/lib/path'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   createRuntimePath,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/file-client'
+} from '~renderer/runtime/file-client'
 import {
   createWebRuntimeSessionBrowserTab,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import type { BrowserTab as BrowserTabState } from '~shared/types'
 
-import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { RuntimeFileListState } from '../quick-open-file-list'
 import {
   classifyTabEntryQuery,

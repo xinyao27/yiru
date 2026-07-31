@@ -1,9 +1,7 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-
-import { translate } from '@/i18n/i18n'
-import type { AppState } from '@/store'
-
-import type { CheckStatus, PRCheckDetail, PRInfo, Repo, Worktree } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { AppState } from '~renderer/store'
+import type { CheckStatus, PRCheckDetail, PRInfo, Repo, Worktree } from '~shared/types'
 
 export type ParentPrChecksCacheEntry<T> = {
   data: T | null

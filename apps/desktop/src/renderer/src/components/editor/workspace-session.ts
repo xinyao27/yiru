@@ -1,13 +1,14 @@
+import type { AppState } from '~renderer/store'
 import type {
   BrowserPage,
   BrowserWorkspace,
   PersistedOpenFile,
   WorkspaceSessionState,
   WorkspaceVisibleTabType
-} from '../../../../shared/types'
-import { normalizeBrowserHistoryEntries } from '../../../../shared/workspace/session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '../../../../shared/workspace/session-terminal-buffers'
-import type { AppState } from '../../store'
+} from '~shared/types'
+import { normalizeBrowserHistoryEntries } from '~shared/workspace/session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '~shared/workspace/session-terminal-buffers'
+
 import type { OpenFile } from './state'
 import { buildLastVisitedAtByWorktreeId } from './workspace-session-focus-recency'
 import { buildActiveConnectionIdsAtShutdown } from './workspace-session-reconnect-targets'

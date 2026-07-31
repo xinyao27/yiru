@@ -6,16 +6,15 @@ import {
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { getShortcutPlatform } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import {
   isRecentTabSwitcherCommitRelease,
   matchesRecentTabSwitcherChord
-} from '../../../../shared/window-shortcut-policy'
-import { getShortcutPlatform } from '../../hooks/use-shortcut-label'
-import { useAppStore } from '../../store'
+} from '~shared/window-shortcut-policy'
+
 import { activateCyclableTab } from './ipc-tab-switch'
 import {
   buildRecentTabSwitcherModel,

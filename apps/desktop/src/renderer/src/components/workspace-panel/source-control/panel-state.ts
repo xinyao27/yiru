@@ -1,9 +1,5 @@
-import type {
-  GitConflictOperation,
-  SourceControlViewMode,
-  TuiAgent
-} from '../../../../../shared/types'
-import { pickSourceControlLaunchAgent } from '../../../lib/source-control-launch-agent-selection'
+import { pickSourceControlLaunchAgent } from '~renderer/lib/source-control-launch-agent-selection'
+import type { GitConflictOperation, SourceControlViewMode, TuiAgent } from '~shared/types'
 
 export type CommitDraftsByWorktree = Record<string, string>
 

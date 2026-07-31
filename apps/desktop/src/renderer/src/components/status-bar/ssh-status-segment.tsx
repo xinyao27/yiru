@@ -5,19 +5,18 @@ import {
 } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import type { RemoteRuntimeSharedConnectionDiagnostics } from '~shared/remote-runtime/shared-control-types'
+import { isUserManagedRuntimeEnvironment } from '~shared/runtime-environments'
 
-import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime/shared-control-types'
-import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import { useAppStore } from '../../store'
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './runtime-host-status-row'
 import { SshStatusTrigger } from './ssh-status-trigger'
 import { SshTargetStatusRow } from './ssh-target-status-row'

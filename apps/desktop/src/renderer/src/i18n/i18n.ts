@@ -5,9 +5,9 @@ import i18next, {
   type TOptions
 } from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import type { UiLanguage } from '~shared/ui-language'
+import type { SupportedUiLocale } from '~shared/ui-locale'
 
-import type { UiLanguage } from '../../../shared/ui-language'
-import type { SupportedUiLocale } from '../../../shared/ui-locale'
 import en from './locales/en.json'
 import { isPseudoLocalizationLocale, pseudoLocalizeString } from './pseudo-localization'
 import { DEFAULT_LOCALE, resolveUiLocale } from './supported-languages'

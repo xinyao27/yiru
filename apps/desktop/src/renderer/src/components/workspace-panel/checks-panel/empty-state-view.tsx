@@ -1,6 +1,7 @@
-import { translate } from '../../../i18n/i18n'
-import { DetachedHeadBadge } from '../../detached-head-badge'
-import { Button } from '../../ui/button'
+import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+
 import { CreateHostedReviewComposer } from '../create-hosted-review-composer'
 import type { useChecksPanelCreateReviewState } from './create-review'
 import {

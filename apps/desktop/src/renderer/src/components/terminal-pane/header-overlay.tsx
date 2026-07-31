@@ -12,15 +12,15 @@ import type { CSSProperties, RefObject } from 'react'
 // reachable through the terminal-pane lazy chunk — keeping the stylesheet
 // here instead of main.css keeps title-bar chrome out of eager first-paint CSS.
 import './pane-title.css'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
-import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
-import { WORKSPACE_FILE_PATH_MIME, WORKSPACE_FILE_PATHS_MIME } from '@/lib/workspace-file-drag'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { isImeCompositionKeyDown } from '~renderer/lib/ime-composition-keyboard-event'
+import type { ManagedPane, PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 
 import { handleInternalTerminalFileDrop } from './drop/handler'
+import { carriesWorkspaceFilePaths } from './drop/workspace-file-payload'
 import type { PtyTransport } from './pty/transport'
 
 export type PaneTitleOverlayRect = {
@@ -151,19 +151,13 @@ export default function TerminalPaneHeaderOverlay({
             }
             onDragOver={(event) => {
               onActivatePaneTitleInteraction(pane.id)
-              if (
-                event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME) ||
-                event.dataTransfer.types.includes(WORKSPACE_FILE_PATHS_MIME)
-              ) {
+              if (carriesWorkspaceFilePaths(event.dataTransfer)) {
                 event.preventDefault()
                 event.dataTransfer.dropEffect = 'copy'
               }
             }}
             onDrop={(event) => {
-              if (
-                !event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME) &&
-                !event.dataTransfer.types.includes(WORKSPACE_FILE_PATHS_MIME)
-              ) {
+              if (!carriesWorkspaceFilePaths(event.dataTransfer)) {
                 return
               }
               event.preventDefault()

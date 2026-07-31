@@ -4,8 +4,7 @@
 // rule (match on normalized user-message content) is unit-testable without React.
 
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
-
-import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
+import type { NativeChatLaunchPrompt } from '~renderer/components/native-chat/launch-prompt'
 
 import { setBoundedScopeCacheEntry } from './composer/scope-cache'
 import {

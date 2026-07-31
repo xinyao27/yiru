@@ -33,10 +33,9 @@ import {
   type DragEvent
 } from 'react'
 import { createPortal } from 'react-dom'
-
-import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,34 +43,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
-import { Textarea } from '@/components/ui/textarea'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getShortcutPlatform, useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { cn } from '@/lib/class-names'
-import { getConnectionId } from '@/lib/connection-context'
-import { getWorkspaceFileBrowserOpenTarget } from '@/lib/file-preview'
-import { detectLanguage } from '@/lib/language-detect'
+} from '~renderer/components/ui/dropdown-menu'
+import { Label } from '~renderer/components/ui/label'
+import { Popover, PopoverAnchor, PopoverContent } from '~renderer/components/ui/popover'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { getShortcutPlatform, useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { cn } from '~renderer/lib/class-names'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getWorkspaceFileBrowserOpenTarget } from '~renderer/lib/file-preview'
+import { detectLanguage } from '~renderer/lib/language-detect'
 import {
   getDriverForBrowserPage,
   onBrowserDriverChange,
   useBrowserMobileDrivenPageIds,
   type BrowserDriverState
-} from '@/lib/pane-manager/browser-mobile-driver-state'
-import { getScreenSubmitModifierLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { isPathInsideWorktree, toWorktreeRelativePath } from '@/lib/terminal-links'
+} from '~renderer/lib/pane-manager/browser-mobile-driver-state'
+import {
+  getScreenSubmitModifierLabel,
+  isScreenSubmitShortcut
+} from '~renderer/lib/screen-submit-shortcut'
+import { isPathInsideWorktree, toWorktreeRelativePath } from '~renderer/lib/terminal-links'
 import {
   getWorkspaceFileDragRejectionMessage,
   readWorkspaceFileDragPaths,
   WORKSPACE_FILE_PATH_MIME
-} from '@/lib/workspace-file-drag'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { rememberLiveBrowserUrl } from '@/runtime/browser-live-url'
+} from '~renderer/lib/workspace-file-drag'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { rememberLiveBrowserUrl } from '~renderer/runtime/browser-live-url'
 import {
   applyBrowserPageViewportLayout,
   ensureBrowserPageViewport,
@@ -79,23 +81,26 @@ import {
   parkBrowserPageViewport,
   subscribeBrowserOverlaySlotViewport,
   syncBrowserPageChromeInset
-} from '@/runtime/browser-page-viewport'
+} from '~renderer/runtime/browser-page-viewport'
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeWebviewDetach,
   registeredWebContentsIds,
   waitForPendingWebviewDestruction
-} from '@/runtime/browser-webview-registry'
+} from '~renderer/runtime/browser-webview-registry'
 import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/file-client'
-import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@/runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-import { useAppStore } from '@/store'
-
-import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser/annotation-viewport-bridge'
+} from '~renderer/runtime/file-client'
+import {
+  callRuntimeRpc,
+  RuntimeRpcCallError,
+  type RuntimeClientTarget
+} from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { useAppStore } from '~renderer/store'
+import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '~shared/browser/annotation-viewport-bridge'
 import {
   GRAB_BUDGET,
   type BrowserAnnotationIntent,
@@ -105,45 +110,46 @@ import {
   type BrowserGrabRect,
   type BrowserGrabScreenshot,
   type BrowserPageAnnotation
-} from '../../../../shared/browser/grab-types'
+} from '~shared/browser/grab-types'
 import type {
   BrowserDownloadRequestedEvent,
   BrowserDownloadProgressEvent,
   BrowserDownloadFinishedEvent
-} from '../../../../shared/browser/guest-events'
+} from '~shared/browser/guest-events'
 import {
   decodeBrowserScreencastFrame,
   type BrowserScreencastFrameMetadata
-} from '../../../../shared/browser/screencast-protocol'
+} from '~shared/browser/screencast-protocol'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken,
   resolveRemoteFailureExternalUrl,
   toHttpsRecoveryUrl
-} from '../../../../shared/browser/url'
+} from '~shared/browser/url'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser/viewport-presets'
-import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '../../../../shared/constants'
-import { keybindingMatchesAction } from '../../../../shared/keybindings'
-import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
-import { withBrowserPaneUiRuntimeRpcSource } from '../../../../shared/runtime-rpc-feature-interaction-source'
+} from '~shared/browser/viewport-presets'
+import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '~shared/constants'
+import { keybindingMatchesAction } from '~shared/keybindings'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
 import type {
   BrowserBackResult,
   BrowserGotoResult,
   BrowserReloadResult,
   BrowserScreencastResult,
   BrowserTabInfo
-} from '../../../../shared/runtime-types'
+} from '~shared/runtime-types'
 import type {
   BrowserCertificateProceedResult,
   BrowserLoadError,
   BrowserPage as BrowserPageState,
   BrowserWorkspace as BrowserWorkspaceState
-} from '../../../../shared/types'
-import { getYiruProfileBrowserDefaultPartition } from '../../../../shared/yiru-profiles'
+} from '~shared/types'
+import { getYiruProfileBrowserDefaultPartition } from '~shared/yiru-profiles'
+
 import BrowserAddressBar from './browser-address-bar'
 import { formatBrowserAnnotationsAsMarkdown } from './browser-annotation-output'
 import { BrowserAnnotationSendMenuContent } from './browser-annotation-send-menu-content'

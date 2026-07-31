@@ -7,21 +7,20 @@ import {
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { joinPath } from '~renderer/lib/path'
+import { useAppStore } from '~renderer/store'
 import {
   canInspectLocalMcpConfigRoot,
   inspectMcpConfigContent,
   MCP_CONFIG_CANDIDATES,
   MCP_STARTER_CONFIG
-} from '../../../../shared/mcp-config'
-import type { Repo, Worktree } from '../../../../shared/types'
-import { extractIpcErrorMessage } from '../../lib/ipc-error'
-import { joinPath } from '../../lib/path'
-import { useAppStore } from '../../store'
+} from '~shared/mcp-config'
+import type { Repo, Worktree } from '~shared/types'
+
 import { isWindowsUserAgent } from '../terminal-pane/pane-helpers'
 import { Button } from '../ui/button'
 import { McpConfigFileRow, type LoadedMcpConfigInspection } from './mcp-config-file-row'

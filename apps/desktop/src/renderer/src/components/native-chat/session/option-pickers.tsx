@@ -1,14 +1,7 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { memo, useState } from 'react'
 import { toast } from 'sonner'
-
-import type {
-  SessionOptionDescriptor,
-  SessionOptionsSurface,
-  SessionOptionValue
-} from '../../../../../shared/native-chat/session-options'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -19,8 +12,15 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type {
+  SessionOptionDescriptor,
+  SessionOptionsSurface,
+  SessionOptionValue
+} from '~shared/native-chat/session-options'
+
 import {
   nativeChatModelPillLabel,
   nativeChatOptionsPillLabel,

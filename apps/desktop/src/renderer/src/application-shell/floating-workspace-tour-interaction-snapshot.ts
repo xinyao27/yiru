@@ -1,7 +1,4 @@
-import {
-  hasFeatureInteraction,
-  type FeatureInteractionState
-} from '../../../shared/feature-interactions'
+import { hasFeatureInteraction, type FeatureInteractionState } from '~shared/feature-interactions'
 
 export type FloatingWorkspaceTourInteractionSnapshot = {
   wasPreviouslyInteracted?: boolean

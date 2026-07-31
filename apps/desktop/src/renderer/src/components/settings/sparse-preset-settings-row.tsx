@@ -1,10 +1,9 @@
 import { Bookmark, Pencil, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { SparsePreset } from '~shared/types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { SparsePreset } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { formatSparsePresetUpdatedAt } from './sparse-preset-date'
 import { SparsePresetDirectoryPreview } from './sparse-preset-directory-preview'

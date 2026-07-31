@@ -1,7 +1,7 @@
 import {
   resolveSetupRunnerCommand,
   type SetupRunnerCommandPlatform
-} from '../../../shared/setup/runner-command'
+} from '~shared/setup/runner-command'
 
 const SETUP_COMPLETION_PREFIX = '__YIRU_SETUP_COMPLETE__:'
 const SETUP_COMPLETION_CARRY_LENGTH = SETUP_COMPLETION_PREFIX.length + 96

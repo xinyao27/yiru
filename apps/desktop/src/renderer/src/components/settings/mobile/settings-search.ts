@@ -1,5 +1,6 @@
-import { translate } from '../../../i18n/i18n'
-import { createLocalizedCatalog } from '../../../i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 import { getMobilePaneSearchEntries } from './pane-search'

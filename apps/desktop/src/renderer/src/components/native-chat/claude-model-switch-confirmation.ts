@@ -1,7 +1,7 @@
-import { isRemoteRuntimePtyId, sendRuntimePtyInput } from '@/runtime/terminal-inspection'
-import { subscribeToRuntimeTerminalData } from '@/runtime/terminal-stream'
+import { isRemoteRuntimePtyId, sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
+import { subscribeToRuntimeTerminalData } from '~renderer/runtime/terminal-stream'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../shared/types'
 import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
 import { stripScrollbackAnsi } from './scrape-fallback'
 import { NATIVE_CHAT_SUBMIT } from './send'

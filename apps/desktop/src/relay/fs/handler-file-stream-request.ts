@@ -1,4 +1,5 @@
-import { COWORKING_SESSION_INVENTORY_STREAM_PROFILE } from '../../shared/coworking/resource-limits'
+import { COWORKING_SESSION_INVENTORY_STREAM_PROFILE } from '~shared/coworking/resource-limits'
+
 import type { RelayDispatcher, RequestContext } from '../dispatcher'
 import { parseRelayFileStreamProfile, readRelayFileStreamMetadata } from './handler-file-read'
 import type { RelayStreamRegistry } from './stream-registry'

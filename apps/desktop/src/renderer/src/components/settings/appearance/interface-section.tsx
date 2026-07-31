@@ -1,17 +1,23 @@
 import type React from 'react'
-
-import { DEFAULT_APP_FONT_FAMILY } from '../../../../../shared/constants'
-import type { GlobalSettings } from '../../../../../shared/types'
-import type { UiLanguage } from '../../../../../shared/ui-language'
-import { useShortcutKeyComboDetails } from '../../../hooks/use-shortcut-label'
-import { translate } from '../../../i18n/i18n'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getUiLanguageChoiceLabel,
   SHOW_UI_LANGUAGE_SETTING,
   UI_LANGUAGE_CHOICES
-} from '../../../i18n/supported-languages'
-import { useAppStore } from '../../../store'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+} from '~renderer/i18n/supported-languages'
+import { useAppStore } from '~renderer/store'
+import { DEFAULT_APP_FONT_FAMILY } from '~shared/constants'
+import type { GlobalSettings } from '~shared/types'
+import type { UiLanguage } from '~shared/ui-language'
+
 import {
   FontAutocomplete,
   SettingsRow,

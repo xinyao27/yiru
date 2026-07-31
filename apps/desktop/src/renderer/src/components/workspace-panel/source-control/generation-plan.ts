@@ -1,10 +1,10 @@
-import { planCommitMessageGeneration } from '../../../../../shared/commit-message/plan'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../../shared/source-control/ai'
+import { translate } from '~renderer/i18n/i18n'
+import { planCommitMessageGeneration } from '~shared/commit-message/plan'
+import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
 import {
   renderSourceControlActionCommandTemplate,
   type SourceControlTextActionId
-} from '../../../../../shared/source-control/ai-actions'
-import { translate } from '../../../i18n/i18n'
+} from '~shared/source-control/ai-actions'
 
 export type SourceControlGenerationPlanResult =
   | { ok: true; commandLabel: string; delivery: string; caveat: string }

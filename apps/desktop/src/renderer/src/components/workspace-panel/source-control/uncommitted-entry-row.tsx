@@ -9,14 +9,19 @@ import {
   ArrowCounterClockwise as Undo2
 } from '@phosphor-icons/react'
 import React from 'react'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import { basename, dirname, joinPath } from '~renderer/lib/path'
+import { WORKSPACE_FILE_PATH_MIME } from '~renderer/lib/workspace-file-drag'
+import type { GitStatusEntry } from '~shared/types'
 
-import type { GitStatusEntry } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { getFileTypeIcon } from '../../../lib/file-type-icons'
-import { basename, dirname, joinPath } from '../../../lib/path'
-import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../ui/tooltip'
 import { isSubmoduleWorktreeOnlyChange } from '../discard-all-sequence'
 import { STATUS_COLORS, STATUS_LABELS } from '../status-display'
 import { ActionButton } from './action-button'

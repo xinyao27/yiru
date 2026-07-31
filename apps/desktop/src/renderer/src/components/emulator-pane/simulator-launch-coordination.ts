@@ -1,4 +1,4 @@
-import type { EmulatorStreamInfo } from '@/components/emulator-pane/types'
+import type { EmulatorStreamInfo } from '~renderer/components/emulator-pane/types'
 
 export const EMULATOR_MANUAL_LAUNCH_STARTED_EVENT = 'yiru:emulator-launch-started'
 export const EMULATOR_MANUAL_LAUNCH_FAILED_EVENT = 'yiru:emulator-launch-failed'

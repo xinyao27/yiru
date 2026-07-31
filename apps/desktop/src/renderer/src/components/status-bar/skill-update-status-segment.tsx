@@ -3,13 +3,12 @@ import {
   CheckCircle as CheckCircle2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { SkillManageOperation } from '~shared/skill-freshness'
 
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { SkillManageOperation } from '../../../../shared/skill-freshness'
 import { requestSkillFreshnessUpdateDialog } from '../skills/skill-freshness-update-dialog-request'
 import { useSkillUpdateRun } from '../skills/skill-update-run-store'
 

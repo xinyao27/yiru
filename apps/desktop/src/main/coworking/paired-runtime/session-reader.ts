@@ -1,14 +1,14 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
+import { callRuntimeEnvironmentExistingRoute } from '~main/runtime/environment-existing-route'
 import {
   CoworkingPairedRuntimeHistoricalSessionPageResponseSchema,
   CoworkingPairedRuntimeListHistoricalSessionPageParamsSchema,
   CoworkingPairedRuntimeListLiveSessionsParamsSchema,
   CoworkingPairedRuntimeLiveSessionsResponseSchema,
   CoworkingPairedRuntimeReleaseHistoricalSessionPageParamsSchema
-} from '../../../shared/coworking/paired-runtime-session-contract'
-import { COWORKING_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../../shared/coworking/resource-limits'
-import { callRuntimeEnvironmentExistingRoute } from '../../runtime/environment-existing-route'
+} from '~shared/coworking/paired-runtime-session-contract'
+import { COWORKING_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '~shared/coworking/resource-limits'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type {
   CoworkingExecutionHostSessionReader,

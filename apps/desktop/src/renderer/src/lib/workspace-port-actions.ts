@@ -1,16 +1,19 @@
 import * as executionHost from '@yiru/workbench-model/workspace'
-
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@/runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-import type { useAppStore } from '@/store'
-
-import type { LocalhostWorktreeLabelRoute } from '../../../shared/localhost-worktree-labels'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import {
+  callRuntimeRpc,
+  RuntimeRpcCallError,
+  type RuntimeClientTarget
+} from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import type { useAppStore } from '~renderer/store'
+import type { LocalhostWorktreeLabelRoute } from '~shared/localhost-worktree-labels'
 import type {
   WorkspacePort,
   WorkspacePortKillResult,
   WorkspacePortScanResult
-} from '../../../shared/workspace/ports'
+} from '~shared/workspace/ports'
+
 import { browserUrlForPort } from './workspace-port-urls'
 
 export { addressForPort } from './workspace-port-urls'

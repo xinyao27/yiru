@@ -4,8 +4,8 @@ import {
   normalizeRuntimePathSeparators,
   relativePathInsideRoot
 } from '@yiru/workbench-model/platform'
+import { joinPath, normalizeRelativePath } from '~renderer/lib/path'
 
-import { joinPath, normalizeRelativePath } from '../../../lib/path'
 import { splitPathSegments } from '../path-tree'
 
 export function normalizeAbsolutePath(path: string): string {

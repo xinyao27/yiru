@@ -1,8 +1,7 @@
 import { Warning as AlertTriangle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,12 +9,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { SkillUpdateRun } from '~shared/skill-freshness'
+import { skillDirectoryName, type DiscoveredSkill } from '~shared/skills'
 
-import type { SkillUpdateRun } from '../../../../shared/skill-freshness'
-import { skillDirectoryName, type DiscoveredSkill } from '../../../../shared/skills'
 import { describeSkillRunFailure, SkillRunLog } from './run-log'
 import {
   acknowledgeSkillUpdateRun,

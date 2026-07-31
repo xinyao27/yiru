@@ -1,7 +1,6 @@
 import type React from 'react'
-
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 import { TAB_CONTENT_SURFACE_CLASSES } from '../tab-bar/tab-chrome-classes'
 

@@ -1,6 +1,6 @@
 import type { ZodType } from 'zod'
+import type { AuthenticatedCoworkingPrincipal } from '~shared/rpc-principal'
 
-import type { AuthenticatedCoworkingPrincipal } from '../../../shared/rpc-principal'
 import { CoworkingGatewayConnection } from './server-connection'
 
 export { CoworkingRpcError } from './error'

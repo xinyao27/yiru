@@ -9,17 +9,22 @@ import {
 /* eslint-disable max-lines -- Why: the GitHub slice co-locates pull-request cache,
 checks, comments, and refresh orchestration so invalidation stays consistent. */
 import type { StateCreator } from 'zustand'
-
-import { translate } from '@/i18n/i18n'
-import { isMacAppDataPath } from '@/lib/passive-macos-app-data-access'
-import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
-
-import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
+import { translate } from '~renderer/i18n/i18n'
+import { isMacAppDataPath } from '~renderer/lib/passive-macos-app-data-access'
+import { rightSidebarShowsPullRequestData } from '~renderer/lib/right-sidebar-visibility'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '~renderer/store/slices/github-cache-key'
+import {
+  getHostedReviewCacheKey,
+  linkedReviewHintKey
+} from '~renderer/store/slices/hosted-review-cache-identity'
+import type { AppState } from '~renderer/store/types'
+import { hostedReviewInfoFromGitHubPRInfo } from '~shared/hosted-review-github'
 import {
   getProjectSourceCacheScope,
   getProjectSourceRuntimeSettings,
   type ProjectSourceContext
-} from '../../../../shared/project-source-context'
+} from '~shared/project-source-context'
 import type {
   GitHubOwnerRepo,
   GitHubPRRefreshAlias,
@@ -35,19 +40,13 @@ import type {
   Worktree,
   GitHubWorkItem,
   ListWorkItemsResult
-} from '../../../../shared/types'
+} from '~shared/types'
 import {
   isGitHubWorkItemsSshRemoteRequiredError,
   sortWorkItemsByNumber,
   PER_REPO_FETCH_LIMIT
-} from '../../../../shared/work-items'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
-import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '../../store/slices/github-cache-key'
-import {
-  getHostedReviewCacheKey,
-  linkedReviewHintKey
-} from '../../store/slices/hosted-review-cache-identity'
-import type { AppState } from '../../store/types'
+} from '~shared/work-items'
+
 import { deriveCheckStatusFromChecks, syncPRChecksStatus } from './checks'
 import { isGitHubWorkItemsQueryTooLarge } from './work-items-query-bounds'
 

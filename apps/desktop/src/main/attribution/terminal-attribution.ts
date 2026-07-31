@@ -6,8 +6,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { join, win32 as pathWin32 } from 'node:path'
 
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
-
-import { YIRU_GIT_COMMIT_TRAILER } from '../../shared/yiru-attribution'
+import { YIRU_GIT_COMMIT_TRAILER } from '~shared/yiru-attribution'
 
 const ATTRIBUTION_ROOT_DIR = 'yiru-terminal-attribution'
 // Why: v8 rewrites persisted wrappers so retired issue-create attribution

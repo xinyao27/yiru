@@ -6,12 +6,11 @@ import {
 } from '@phosphor-icons/react'
 import { useRef } from 'react'
 import type { ComponentType, JSX, ReactNode } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-styles'
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'

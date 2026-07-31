@@ -5,24 +5,24 @@ import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: daemon PTY spawning centralizes platform launch setup,
    preflight validation, and lifecycle guards that must stay in one execution path. */
 import * as pty from 'node-pty'
-
 import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../shared/agent/process-recognition'
+} from '~shared/agent/process-recognition'
 import {
   shouldUseShellReadyStartupDelivery,
   type StartupCommandDelivery
-} from '../../shared/codex-startup-delivery'
+} from '~shared/codex-startup-delivery'
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../../shared/git/credential-prompt-env'
-import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
-import { isShellProcess } from '../../shared/shell-process-detection'
-import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal/git-credential-guard'
-import type { TuiAgent } from '../../shared/types'
+} from '~shared/git/credential-prompt-env'
+import { YIRU_HERMES_STARTUP_QUERY_ENV } from '~shared/hermes-startup-query'
+import { isShellProcess } from '~shared/shell-process-detection'
+import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '~shared/terminal/git-credential-guard'
+import type { TuiAgent } from '~shared/types'
+
 import { isWindowsGitBashShellPath, resolveWindowsGitBashShellPath } from '../git-bash'
 import { getAgentForegroundContextPaths } from '../providers/agent-foreground-context-paths'
 import { resolveAgentForegroundProcessWithAvailability } from '../providers/agent-foreground-process'

@@ -1,5 +1,6 @@
-import type { ActionSheetAction } from '../../components/action-sheet-modal'
-import { Eraser, Monitor, DeviceMobile as Smartphone } from '../../components/uniwind-icons'
+import type { ActionSheetAction } from '~/components/action-sheet-modal'
+import { Eraser, Monitor, DeviceMobile as Smartphone } from '~/components/uniwind-icons'
+
 import type { MobileNativeChatTab } from '../native-chat/eligibility'
 import { getMobileNativeChatToggleActions } from '../native-chat/toggle-action'
 

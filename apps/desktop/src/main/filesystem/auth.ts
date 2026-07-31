@@ -6,9 +6,9 @@ the security boundary is auditable end to end. */
 import { resolve, relative, dirname, basename, isAbsolute, sep } from 'node:path'
 
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
+import type { FolderWorkspace, ProjectGroup, Repo } from '~shared/types'
 
-import { getProjectGroupSubtreeIds } from '../../shared/project-groups'
-import type { FolderWorkspace, ProjectGroup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 import { isRepoRoot, listRepoWorktrees } from '../repo-worktrees'
 import { computeWorkspaceRoot, getWorktreePathSettings } from '../worktree/logic'

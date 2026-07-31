@@ -1,13 +1,12 @@
 import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
-
-import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
+import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
 import {
   WAKE_HIBERNATED_AGENTS_WORKTREE_EVENT,
   type WakeHibernatedAgentsWorktreeDetail
-} from '@/constants/terminal'
-import { useAppStore } from '@/store'
+} from '~renderer/constants/terminal'
+import { useAppStore } from '~renderer/store'
+import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
 
-import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence,

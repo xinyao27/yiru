@@ -1,15 +1,14 @@
 import { ArrowSquareOut, TerminalWindow, WarningCircle } from '@phosphor-icons/react'
-
 import {
   focusRendererTerminalHandle,
   findTerminalHandleTarget
-} from '@/components/terminal-pane/terminal-handle-links'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
+} from '~renderer/components/terminal-pane/terminal-handle-links'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
 
 import { findTerminalTabWorktreeId } from '../file-link'
 import type { YiruAction } from './action'

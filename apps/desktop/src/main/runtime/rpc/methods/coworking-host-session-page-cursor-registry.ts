@@ -1,4 +1,5 @@
-import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+
 import { CoworkingHostSessionPageCursors } from './coworking-host-session-page-cursors'
 
 const stores = new WeakMap<YiruRuntimeService, CoworkingHostSessionPageCursors>()

@@ -1,11 +1,10 @@
 import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
+import type { DetectedSpriteCacheEntry } from '~renderer/runtime/custom-pet-blob-cache'
+import { useAppStore } from '~renderer/store'
+import type { CustomPet } from '~shared/types'
 
-import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
-import type { DetectedSpriteCacheEntry } from '@/runtime/custom-pet-blob-cache'
-
-import type { CustomPet } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { selectPetAnimationName, type PetAnimationName, type PetDragAnimation } from './agent-state'
 import { buildSpriteAnimationCss } from './sprite-animation-css'
 import { usePetPointerInteraction } from './use-pet-pointer-interaction'

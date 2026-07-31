@@ -1,15 +1,13 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getExecutionHostIdForWorktree
-} from '@/lib/worktree-runtime-owner'
-import type { RuntimeClientTarget } from '@/runtime/rpc-client'
-
-import type { SkillDiscoveryTarget } from '../../../../shared/skills'
-import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
-import type { AppState } from '../../store/types'
+} from '~renderer/lib/worktree-runtime-owner'
+import type { RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import type { AppState } from '~renderer/store/types'
+import type { SkillDiscoveryTarget } from '~shared/skills'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 export type NativeChatSkillStateInputs = Pick<
   AppState,

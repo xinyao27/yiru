@@ -1,4 +1,5 @@
-import type { ComputerSnapshotResult } from '../../shared/runtime-types'
+import type { ComputerSnapshotResult } from '~shared/runtime-types'
+
 import type { BridgeResponse, BridgeSnapshot, BridgeWindow } from './desktop-script-provider-types'
 import { RuntimeClientError } from './runtime-client-error'
 

@@ -1,25 +1,24 @@
 import { CalendarDots as CalendarClock, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   buildAutomationCronSchedule,
   buildAutomationRrule,
   formatAutomationSchedule,
   isValidAutomationSchedule
-} from '../../../../shared/automation/schedules'
-import type { AutomationSchedulePreset } from '../../../../shared/automations-types'
+} from '~shared/automation/schedules'
+import type { AutomationSchedulePreset } from '~shared/automations-types'
+
 import { AutomationCustomCronPanel } from './automation-custom-cron-panel'
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'

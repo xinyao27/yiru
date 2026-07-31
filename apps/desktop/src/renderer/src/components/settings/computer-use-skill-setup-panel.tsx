@@ -1,21 +1,20 @@
 import { Monitor as MonitorCog } from '@phosphor-icons/react'
-
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
 import {
   COMPUTER_USE_SKILL_INSTALL_COMMAND,
   COMPUTER_USE_SKILL_NAME,
   COMPUTER_USE_SKILL_UPDATE_COMMAND
-} from '@/lib/agent-feature-install-commands'
+} from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '@/lib/agent-skill-cli-prerequisite'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from './agent/skill-setup-panel'
 import {

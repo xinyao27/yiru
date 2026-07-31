@@ -1,13 +1,12 @@
 import { useCallback } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { getConnectionId } from '../../../lib/connection-context'
+import { getConnectionId } from '~renderer/lib/connection-context'
 import {
   cancelRuntimeGeneratePullRequestFields,
   generateRuntimePullRequestFields,
   type RuntimeGeneratePullRequestFieldsOverrides
-} from '../../../runtime/git-client'
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+
 import {
   createRunningPullRequestGenerationRecord,
   markPullRequestGenerationTerminalSeedRestored,

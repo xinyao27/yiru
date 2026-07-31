@@ -1,6 +1,5 @@
-import { isNativeChatSupportedAgent } from '@/components/native-chat/supported-agent'
-
-import type { GlobalSettings, Tab, TuiAgent } from '../../../shared/types'
+import { isNativeChatSupportedAgent } from '~renderer/components/native-chat/supported-agent'
+import type { GlobalSettings, Tab, TuiAgent } from '~shared/types'
 
 export type NativeChatLaunchPromptDelivery = 'auto-submit' | 'draft' | 'submit-after-ready'
 

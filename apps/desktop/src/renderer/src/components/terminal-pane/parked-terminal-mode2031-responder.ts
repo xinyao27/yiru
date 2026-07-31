@@ -1,6 +1,5 @@
-import { getSystemPrefersDark } from '@/lib/terminal-theme'
-import { useAppStore } from '@/store'
-
+import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
+import { useAppStore } from '~renderer/store'
 /**
  * DECSET 2031 color-scheme responder for parked terminals (byte-scan mode).
  *
@@ -21,7 +20,8 @@ import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode,
   scanMode2031Sequences
-} from '../../../../shared/terminal/color-scheme-protocol'
+} from '~shared/terminal/color-scheme-protocol'
+
 import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
 
 export type ParkedTerminalMode2031ResponderOptions = {

@@ -5,7 +5,8 @@ import type {
   CoworkingGitHistoryResult,
   CoworkingGitStatusResult,
   CoworkingMutationResult
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { asCoworkingExecutionError, CoworkingExecutionError } from './execution-error'
 import type { ExecutionAdmissionGuard } from './execution-gateway'
 import type { CoworkingGitReadProfile } from './git-read-profile'

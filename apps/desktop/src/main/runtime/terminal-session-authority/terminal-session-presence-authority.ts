@@ -1,4 +1,5 @@
-import type { RuntimeTerminalDriverState } from '../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
+
 import {
   TerminalMobileSessionState,
   type TerminalMobileRestoreTimer,

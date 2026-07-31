@@ -1,10 +1,10 @@
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useMemo } from 'react'
-
 import {
   deriveNativeChatStreamingText,
   nativeChatStreamingMessage
-} from '../../../../shared/native-chat/streaming'
+} from '~shared/native-chat/streaming'
+
 import { deriveNativeChatActivePrompt } from './active-prompt'
 import {
   commandMarkersAsMessages,

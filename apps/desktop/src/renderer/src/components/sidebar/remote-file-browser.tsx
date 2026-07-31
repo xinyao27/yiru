@@ -7,14 +7,13 @@ import {
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the remote file browser centralizes filter state, path-mode preview state, cache, debounce, request gen, and click/keyboard handling in one component so picker navigation stays coherent. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { browseRuntimeServerDirectory } from '@/runtime/server-directory-browser'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import { browseRuntimeServerDirectory } from '~renderer/runtime/server-directory-browser'
 
 import {
   decideEnterAction,

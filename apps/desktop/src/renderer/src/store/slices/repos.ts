@@ -21,31 +21,37 @@ add/remove/reorder side effects, and cross-slice teardown. Splitting it during
 the client-server refactor would obscure the invariants this file is currently
 auditing and preserving. */
 import type { StateCreator } from 'zustand'
-
-import { filterSetupScriptPromptDismissalsToValidRepos } from '@/components/sidebar/setup-script-prompt'
-import { translate } from '@/i18n/i18n'
-import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
-import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-
+import { formatFolderWorkspaceCreateError } from '~renderer/components/sidebar/folder-workspace-path-status'
+import { filterSetupScriptPromptDismissalsToValidRepos } from '~renderer/components/sidebar/setup-script-prompt'
+import { translate } from '~renderer/i18n/i18n'
+import { cleanupEphemeralVmRuntimesForDeleted } from '~renderer/lib/ephemeral-vm-runtime-cleanup'
+import { syncRuntimeGitForkDefaultBranch } from '~renderer/runtime/git-client'
+import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import {
+  assertRuntimeEnvironmentCapability,
+  callRuntimeRpc,
+  getActiveRuntimeTarget
+} from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import {
   FOLDER_WORKSPACE_PATH_STATUS_TTL_MS,
   type FolderWorkspacePathStatus,
   type FolderWorkspacePathStatusRequest
-} from '../../../../shared/folder-workspace-path-status'
-import { applyManualRepoOrder, getManualRepoOrder } from '../../../../shared/manual-repo-order'
-import { getProjectGroupSubtreeIds } from '../../../../shared/project-groups'
+} from '~shared/folder-workspace-path-status'
+import { applyManualRepoOrder, getManualRepoOrder } from '~shared/manual-repo-order'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
 import {
   getProjectIdentityKey,
   projectHostSetupProjectionFromRepos,
   type ProjectHostSetupProjection
-} from '../../../../shared/project-host-setup-projection'
-import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+} from '~shared/project-host-setup-projection'
+import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
+import { isGitRepoKind } from '~shared/repo-kind'
 import {
   REPO_ADD_CONTRACT,
   REPO_LIST_CONTRACT
-} from '../../../../shared/runtime-method-contracts/workspace-contracts'
+} from '~shared/runtime-method-contracts/workspace-contracts'
 import type {
   GlobalSettings,
   Project,
@@ -65,16 +71,9 @@ import type {
   ProjectHostSetupResult,
   ProjectHostSetupUpdateArgs,
   ProjectHostSetupUpdateResult
-} from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
-import { formatFolderWorkspaceCreateError } from '../../components/sidebar/folder-workspace-path-status'
-import { syncRuntimeGitForkDefaultBranch } from '../../runtime/git-client'
-import {
-  assertRuntimeEnvironmentCapability,
-  callRuntimeRpc,
-  getActiveRuntimeTarget
-} from '../../runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
+} from '~shared/types'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
+
 import type { AppState } from '../types'
 import { selectProjectGroupRemovalTargets } from './project-group-removal-targets'
 import { reconcileReadoptedSshWorktreesByRepo } from './readopted-ssh-worktree-rows'

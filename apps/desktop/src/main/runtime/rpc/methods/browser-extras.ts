@@ -1,9 +1,9 @@
 import { z } from 'zod'
-
 import {
   BrowserTarget,
   OptionalFiniteNumber
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { assertRpcClipboardTextWriteWithinLimit } from '../clipboard-text-validation'
 import { defineMethod, type RpcMethod } from '../core'
 import {

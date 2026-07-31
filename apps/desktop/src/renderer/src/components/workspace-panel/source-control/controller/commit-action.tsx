@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { commitRuntimeGit } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
 
-import { getConnectionId } from '../../../../lib/connection-context'
-import { commitRuntimeGit } from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
 import { writeCommitDraftForWorktree } from '../panel-state'
 import type { SourceControlOperationTarget } from '../panel-types'
 import type { SourceControlLifecycleController } from './lifecycle'

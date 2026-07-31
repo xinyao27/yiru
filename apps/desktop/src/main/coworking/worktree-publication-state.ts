@@ -1,4 +1,5 @@
-import type { WorktreeMeta } from '../../shared/types'
+import type { WorktreeMeta } from '~shared/types'
+
 import type {
   CoworkingOwnerWorktree,
   CoworkingWorktreeRootComparison

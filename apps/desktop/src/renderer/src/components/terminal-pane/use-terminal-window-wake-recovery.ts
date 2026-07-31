@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
 import { recoverVisibleTerminalWindowWake } from './terminal-visibility-resume'

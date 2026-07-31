@@ -1,18 +1,14 @@
 import type { JSX, KeyboardEvent, MutableRefObject, ReactNode } from 'react'
+import type { InstalledAgentSkillState } from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { AgentsStep, AgentsStepId } from '~shared/agents-orchestration-steps'
+import type { FeatureWallWorkflow, FeatureWallWorkflowId } from '~shared/feature-wall-workflows'
+import type { ReviewStep, ReviewStepId } from '~shared/review-steps'
+import type { FeatureWallOpenSourceTelemetry } from '~shared/telemetry-events'
+import type { GlobalSettings } from '~shared/types'
+import type { WorkbenchStep, WorkbenchStepId } from '~shared/workbench-steps'
 
-import type { InstalledAgentSkillState } from '@/hooks/use-installed-agent-skills'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { AgentsStep, AgentsStepId } from '../../../../shared/agents-orchestration-steps'
-import type {
-  FeatureWallWorkflow,
-  FeatureWallWorkflowId
-} from '../../../../shared/feature-wall-workflows'
-import type { ReviewStep, ReviewStepId } from '../../../../shared/review-steps'
-import type { FeatureWallOpenSourceTelemetry } from '../../../../shared/telemetry-events'
-import type { GlobalSettings } from '../../../../shared/types'
-import type { WorkbenchStep, WorkbenchStepId } from '../../../../shared/workbench-steps'
 import { FeatureWallBody } from './body'
 import { FeatureWallRail } from './rail'
 import type { FeatureWallCompletionState } from './use-feature-wall-completion'

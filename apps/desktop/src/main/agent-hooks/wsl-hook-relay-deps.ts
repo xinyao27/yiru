@@ -3,7 +3,8 @@
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
-import { isRemoteAgentHooksEnabled } from '../../shared/agent/hook-relay'
+import { isRemoteAgentHooksEnabled } from '~shared/agent/hook-relay'
+
 import { listWslDistrosAsync } from '../wsl'
 import { installRemoteManagedAgentHooks } from './remote-managed-hook-installers'
 import { agentHookServer } from './server'

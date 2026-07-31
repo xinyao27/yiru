@@ -1,4 +1,4 @@
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
+import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
 
 export type SessionRestoredBannerPane = Pick<ManagedPane, 'id' | 'container'>
 

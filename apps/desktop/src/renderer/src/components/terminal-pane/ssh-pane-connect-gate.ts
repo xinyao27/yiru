@@ -1,6 +1,5 @@
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
-
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
 export type SshPaneConnectGate = {
   /** Session the pane should reattach after connecting (null → fresh spawn). */

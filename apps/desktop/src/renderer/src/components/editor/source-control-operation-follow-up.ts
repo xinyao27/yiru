@@ -3,12 +3,10 @@ import {
   type SourceControlRemoteOperationOutcome,
   type SourceControlRemoteOpKind
 } from '@yiru/workbench-model/review'
-
-import { fetchRuntimeGit } from '@/runtime/git-client'
-
-import { resolveSourceControlOperationOwner } from '../../../../shared/source-control/operation-owner'
-import type { GitPushTarget, GlobalSettings } from '../../../../shared/types'
-import type { AppState } from '../../store/types'
+import { fetchRuntimeGit } from '~renderer/runtime/git-client'
+import type { AppState } from '~renderer/store/types'
+import { resolveSourceControlOperationOwner } from '~shared/source-control/operation-owner'
+import type { GitPushTarget, GlobalSettings } from '~shared/types'
 
 export type RemoteOperationFollowUpArgs = {
   operation: SourceControlRemoteOpKind

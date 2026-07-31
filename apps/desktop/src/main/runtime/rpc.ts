@@ -9,18 +9,18 @@ import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 import type { WebSocket } from 'ws'
-
-import { encodePairingOffer, PAIRING_OFFER_VERSION } from '../../shared/pairing'
+import { encodePairingOffer, PAIRING_OFFER_VERSION } from '~shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
-} from '../../shared/remote-runtime/request-cancellation'
-import type { RuntimeMetadata, RuntimeTransportMetadata } from '../../shared/runtime-bootstrap'
-import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
+} from '~shared/remote-runtime/request-cancellation'
+import type { RuntimeMetadata, RuntimeTransportMetadata } from '~shared/runtime-bootstrap'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
-} from '../../shared/terminal/stream-protocol'
+} from '~shared/terminal/stream-protocol'
+
 import { DeviceRegistry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'

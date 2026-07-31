@@ -1,22 +1,20 @@
 import { toast } from 'sonner'
-
-import type { AppState } from '@/store'
-
-import type {
-  SourceControlActionRecipe,
-  SourceControlLaunchActionId
-} from '../../../../../shared/source-control/ai-actions'
-import { buildSourceControlRecoveryAgentCommandInput } from '../../../../../shared/source-control/recovery-agent-command'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
-import { translate } from '../../../i18n/i18n'
-import { getConnectionId } from '../../../lib/connection-context'
-import { focusTerminalTabSurface } from '../../../lib/focus-terminal-tab-surface'
-import { launchAgentInNewTab } from '../../../lib/launch-agent-in-new-tab'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import {
   pickSourceControlLaunchAgent,
   readSourceControlLaunchRecipeAgentId
-} from '../../../lib/source-control-launch-agent-selection'
-import { planAgentCliArgsSuffix } from '../../../lib/tui-agent-startup'
+} from '~renderer/lib/source-control-launch-agent-selection'
+import { planAgentCliArgsSuffix } from '~renderer/lib/tui-agent-startup'
+import type { AppState } from '~renderer/store'
+import type {
+  SourceControlActionRecipe,
+  SourceControlLaunchActionId
+} from '~shared/source-control/ai-actions'
+import { buildSourceControlRecoveryAgentCommandInput } from '~shared/source-control/recovery-agent-command'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
 
 type SourceControlAiLaunchStoreSnapshot = Pick<
   AppState,

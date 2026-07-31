@@ -1,11 +1,12 @@
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
-import { isCoworkingIncarnationMarkerId } from '../../shared/coworking/incarnation-marker-id'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import { isCoworkingIncarnationMarkerId } from '~shared/coworking/incarnation-marker-id'
 import {
   COWORKING_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   COWORKING_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   COWORKING_FILE_READ_MAX_BYTES,
   COWORKING_FILE_WRITE_MAX_BYTES
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type {

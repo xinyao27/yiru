@@ -1,7 +1,7 @@
 import { ArrowLeft } from '@phosphor-icons/react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
 import type { AddRepoDialogStep } from './dialog-types'
 
 type AddRepoStepIndicatorProps = {

@@ -1,4 +1,5 @@
-import type { Repo } from '../../../../shared/types'
+import type { Repo } from '~shared/types'
+
 import { getRepoHostIdentity } from './repo-host-identity'
 
 // Why: after a drag-reorder we optimistically set `repos`, persist, and main

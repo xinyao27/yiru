@@ -1,5 +1,5 @@
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
 type TerminalQuickCommandAppendEnterSwitchProps = {
   appendEnter: boolean
   onToggle: () => void

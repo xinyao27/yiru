@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from 'react'
-
-import type { YiruHookScriptKind } from '@/components/sidebar/yiru-hook-trust'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import type { YiruHookScriptKind } from '~renderer/components/sidebar/yiru-hook-trust'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -10,10 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 type ScriptKind = YiruHookScriptKind
 

@@ -1,13 +1,13 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
-import { withBrowserPaneUiRuntimeRpcSource } from '../../../shared/runtime-rpc-feature-interaction-source'
-import type { GlobalSettings } from '../../../shared/types'
+} from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   callAbortableRuntimeEnvironment,
   createRuntimeRpcAbortError

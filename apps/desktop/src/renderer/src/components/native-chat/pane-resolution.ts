@@ -1,6 +1,6 @@
 import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
+import type { TuiAgent } from '~shared/types'
 
-import type { TuiAgent } from '../../../../shared/types'
 import { isNativeChatSupportedAgent } from './availability'
 
 /** Inputs that resolve the active pane to the agent/session/pty triple the

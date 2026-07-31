@@ -9,7 +9,7 @@ import {
   ClockCounterClockwise as History,
   ArrowClockwise as RefreshCw,
   type Icon
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import type { MobileDiffLine } from '../session/diff/lines'
 import type { MobileHighlightedDiffLine } from '../session/file-syntax'

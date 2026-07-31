@@ -1,7 +1,6 @@
 import { z } from 'zod'
-
-import { OptionalBoolean } from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { defineMethod, type RpcMethod } from '../../core'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { OptionalBoolean } from '~shared/runtime-method-contracts/runtime-method-params'
 
 const ResetParams = z
   .object({

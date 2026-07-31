@@ -1,10 +1,9 @@
 import { Folder, FolderOpen, Pencil } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 import { RemoteFileBrowser } from './remote-file-browser'
 

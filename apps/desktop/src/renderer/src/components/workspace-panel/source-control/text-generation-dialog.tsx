@@ -1,24 +1,24 @@
 import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
-
-import { buildBranchNamePrompt } from '../../../../../shared/branch-name-from-work'
-import { buildCommitMessagePrompt } from '../../../../../shared/commit-message/generation'
-import { buildPullRequestFieldsPrompt } from '../../../../../shared/pull-request-generation'
-import {
-  resolveSourceControlAiForOperation,
-  type ResolvedSourceControlAiGenerationParams
-} from '../../../../../shared/source-control/ai'
-import type { SourceControlTextActionId } from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { GlobalSettings, Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { buildBranchNamePrompt } from '~shared/branch-name-from-work'
+import { buildCommitMessagePrompt } from '~shared/commit-message/generation'
+import { buildPullRequestFieldsPrompt } from '~shared/pull-request-generation'
+import {
+  resolveSourceControlAiForOperation,
+  type ResolvedSourceControlAiGenerationParams
+} from '~shared/source-control/ai'
+import type { SourceControlTextActionId } from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { GlobalSettings, Repo } from '~shared/types'
+
 import {
   SourceControlTextGenerationDialogForm,
   type SourceControlTextGenerationSaveTarget

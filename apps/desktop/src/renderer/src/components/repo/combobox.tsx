@@ -5,24 +5,23 @@ import {
   FolderPlus
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { searchRepos } from '@/lib/repo-search'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { searchRepos } from '~renderer/lib/repo-search'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/types'
 import RepoBadgeLabel from './badge-label'
 
 type RepoComboboxProps = {

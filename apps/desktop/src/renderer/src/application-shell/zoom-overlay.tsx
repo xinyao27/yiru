@@ -1,9 +1,8 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
-
-import { cn } from '@/lib/class-names'
-import { ZOOM_LEVEL_CHANGED_EVENT } from '@/lib/zoom-events'
-import type { ZoomLevelChangedEventDetail } from '@/lib/zoom-events'
+import { cn } from '~renderer/lib/class-names'
+import { ZOOM_LEVEL_CHANGED_EVENT } from '~renderer/lib/zoom-events'
+import type { ZoomLevelChangedEventDetail } from '~renderer/lib/zoom-events'
 
 // Why: the overlay must fully unmount after its fade-out completes so the
 // fixed-position container doesn't linger in the DOM and interfere with

@@ -1,7 +1,13 @@
 import { DeviceMobile as Smartphone } from '@phosphor-icons/react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { AUTO_RESTORE_FIT_OPTIONS, autoRestoreValueFromMs } from './auto-restore-options'
 
 type MobileAutoRestoreFitSectionProps = {

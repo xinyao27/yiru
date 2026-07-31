@@ -1,13 +1,11 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
-
-import { basename, joinPath, normalizeRelativePath } from '@/lib/path'
-
+import { basename, joinPath, normalizeRelativePath } from '~renderer/lib/path'
 import type {
   RuntimeFilePreviewResult,
   RuntimeFileReadChunkResult,
   RuntimeFileReadResult
-} from '../../../shared/runtime-types'
+} from '~shared/runtime-types'
 /* eslint-disable max-lines -- Why: this client intentionally centralizes the
 file preload API plus remote runtime fallbacks so call sites cannot drift on
 local-vs-environment routing rules. */
@@ -18,7 +16,8 @@ import type {
   MarkdownDocument,
   SearchOptions,
   SearchResult
-} from '../../../shared/types'
+} from '~shared/types'
+
 import {
   createEmptyRuntimeFileSearchResult,
   getRuntimeFileSearchRejectedField

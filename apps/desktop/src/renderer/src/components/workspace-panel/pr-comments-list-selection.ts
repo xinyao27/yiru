@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { isPRCommentGroupQueueableForAI } from '@/components/workspace-panel/pr-comment-action-state'
-import { getPRCommentGroupId, groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
-
-import type { PRComment } from '../../../../shared/types'
+import { isPRCommentGroupQueueableForAI } from '~renderer/components/workspace-panel/pr-comment-action-state'
+import {
+  getPRCommentGroupId,
+  groupPRComments,
+  type PRCommentGroup
+} from '~renderer/lib/pr-comment-groups'
+import type { PRComment } from '~shared/types'
 
 export type PRCommentsListSelection = {
   isSelectingForAI: boolean

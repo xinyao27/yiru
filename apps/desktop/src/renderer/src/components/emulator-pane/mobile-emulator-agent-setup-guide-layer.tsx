@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { MobileEmulatorAgentSetupGuide } from './mobile-emulator-agent-setup-guide'
 import { shouldShowMobileEmulatorAgentSetupGuide } from './mobile-emulator-agent-setup-visibility'

@@ -1,7 +1,6 @@
-import { translate } from '@/i18n/i18n'
-
-import type { FolderWorkspacePathStatus } from '../../../../shared/folder-workspace-path-status'
-import { blocksFolderWorkspaceActivation } from '../../../../shared/folder-workspace-path-status'
+import { translate } from '~renderer/i18n/i18n'
+import type { FolderWorkspacePathStatus } from '~shared/folder-workspace-path-status'
+import { blocksFolderWorkspaceActivation } from '~shared/folder-workspace-path-status'
 
 export function getFolderWorkspacePathStatusTitle(
   status: FolderWorkspacePathStatus | null | undefined

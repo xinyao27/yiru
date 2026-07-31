@@ -1,11 +1,10 @@
 import { toast } from 'sonner'
-
 import {
   clearWorktreeSleepIntent,
   markWorktreeSleepIntent
-} from '@/components/sidebar/worktree-sleep-intent'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/sidebar/worktree-sleep-intent'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 /**
  * Shared "sleep worktree" flow (close all panels to free memory / CPU)

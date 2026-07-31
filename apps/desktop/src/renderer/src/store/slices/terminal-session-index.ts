@@ -1,4 +1,4 @@
-import type { Repo, TerminalTab, Worktree } from '../../../../shared/types'
+import type { Repo, TerminalTab, Worktree } from '~shared/types'
 
 function indexFirstById<T extends { id: string }>(rows: readonly T[]): Map<string, T> {
   const index = new Map<string, T>()

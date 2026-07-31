@@ -1,12 +1,13 @@
-import type { GlobalSettings } from '../../../../shared/types'
-import { detectLanguage } from '../../lib/language-detect'
-import { joinPath } from '../../lib/path'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
 import {
   createRuntimePath,
   deleteRuntimePath,
   runtimePathExists,
   writeRuntimeFile
-} from '../../runtime/file-client'
+} from '~renderer/runtime/file-client'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   applyMarkdownTemplatePlaceholders,
   getMarkdownTemplateTitleForFileName,

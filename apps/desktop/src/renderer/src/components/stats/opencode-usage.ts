@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-
+import type { AppState } from '~renderer/store/types'
 import type {
   OpenCodeUsageBreakdownRow,
   OpenCodeUsageDailyPoint,
@@ -9,8 +9,7 @@ import type {
   OpenCodeUsageSessionRow,
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
-} from '../../../../shared/opencode-usage-types'
-import type { AppState } from '../../store/types'
+} from '~shared/opencode-usage-types'
 
 export type OpenCodeUsageSlice = {
   openCodeUsageScope: OpenCodeUsageScope

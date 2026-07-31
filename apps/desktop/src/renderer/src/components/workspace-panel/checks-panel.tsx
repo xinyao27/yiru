@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { CoworkingChecksPane } from '@/components/coworking/checks-pane'
+import { CoworkingChecksPane } from '~renderer/components/coworking/checks-pane'
 
 import { useChecksPanelAgentActions } from './checks-panel/agent-actions'
 import { useChecksPanelChecksLoading } from './checks-panel/checks-loading'

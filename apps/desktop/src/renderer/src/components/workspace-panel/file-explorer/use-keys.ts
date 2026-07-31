@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react'
 import type React from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { isEditableTarget } from '~renderer/lib/editable-target'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
+import { keybindingMatchesAction } from '~shared/keybindings'
 
-import { useAppStore } from '@/store'
-
-import { keybindingMatchesAction } from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
-import { isEditableTarget } from '../../../lib/editable-target'
-import { getShortcutPlatform } from '../../../lib/shortcut-platform'
 import { applyFileExplorerNavigation, type SelectionMode } from './keyboard-navigation'
 import type { InlineInput } from './row'
 import type { FileExplorerRowProjection } from './row-projection'

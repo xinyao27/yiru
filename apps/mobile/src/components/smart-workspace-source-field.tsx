@@ -5,8 +5,8 @@ import {
   GitMerge,
   GitPullRequest,
   X
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import type { SmartNameSelection } from '../workspace-create/composer-source-types'
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'

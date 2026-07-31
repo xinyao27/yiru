@@ -5,4 +5,4 @@ export {
   encrypt,
   encryptBytes,
   generateKeyPair
-} from '../../../shared/e2ee-crypto'
+} from '~shared/e2ee-crypto'

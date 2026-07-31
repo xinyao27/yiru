@@ -1,4 +1,4 @@
-import type { Worktree, WorktreeLineage } from '../../../../shared/types'
+import type { Worktree, WorktreeLineage } from '~shared/types'
 
 type WorkspaceDeleteLineage = {
   descendants: Worktree[]

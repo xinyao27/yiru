@@ -1,10 +1,9 @@
 import { FolderOpen, FileArrowUp as FileUp } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { WarpThemeImportPreviewTheme } from '~shared/terminal/custom-themes'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { WarpThemeImportPreviewTheme } from '../../../../shared/terminal/custom-themes'
 import { Button } from '../ui/button'
 import {
   Dialog,

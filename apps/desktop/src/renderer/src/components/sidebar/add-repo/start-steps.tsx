@@ -1,13 +1,13 @@
 import { StopCircle as CircleStop } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type Ref } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
+import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { ShortcutKeyCombo } from '../../shortcut-key-combo'
-import { Button } from '../../ui/button'
-import { DialogDescription, DialogHeader, DialogTitle } from '../../ui/dialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { getAddRepoLocalStartActions } from './local-start-actions'
 
 type AddRepoNestedScanProgressNoticeProps = {

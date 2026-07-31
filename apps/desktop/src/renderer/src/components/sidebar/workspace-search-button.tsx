@@ -1,14 +1,13 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import type { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 type SidebarWorkspaceSearchButtonProps = {
   variant?: ComponentProps<typeof Button>['variant']

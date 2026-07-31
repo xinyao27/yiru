@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 export const fileExplorerStyles = {
   backButton: cn('h-9 w-9 items-center justify-center rounded-full'),

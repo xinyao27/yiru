@@ -1,10 +1,9 @@
 import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
-
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '@/lib/worktree-runtime-owner'
-import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
+} from '~renderer/lib/worktree-runtime-owner'
+import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
 
 import type { AppState } from '../types'
 

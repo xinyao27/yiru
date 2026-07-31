@@ -1,11 +1,10 @@
 import { toast } from 'sonner'
-
-import { requestEditorSaveQuiesce } from '@/components/editor/autosave'
-import { remapOpenEditorTabsForPathChange } from '@/components/workspace-panel/remap-open-editor-tabs-for-path-change'
-import { getConnectionId } from '@/lib/connection-context'
-import { basename, dirname, joinPath } from '@/lib/path'
-import { renameRuntimePath } from '@/runtime/file-client'
-import { useAppStore } from '@/store'
+import { requestEditorSaveQuiesce } from '~renderer/components/editor/autosave'
+import { remapOpenEditorTabsForPathChange } from '~renderer/components/workspace-panel/remap-open-editor-tabs-for-path-change'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { basename, dirname, joinPath } from '~renderer/lib/path'
+import { renameRuntimePath } from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
 
 import { commitFileExplorerOp } from '../components/workspace-panel/file-explorer/undo-redo'
 

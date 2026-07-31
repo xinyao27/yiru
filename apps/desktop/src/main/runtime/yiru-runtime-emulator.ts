@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../shared/types'
 import { setConfiguredAndroidSdkPath } from '../emulator/android/sdk-host-discovery'
 import { inspectEmulatorAvailability, type EmulatorAvailability } from '../emulator/availability'
 import type { EmulatorDevice } from '../emulator/backends/emulator-backend'

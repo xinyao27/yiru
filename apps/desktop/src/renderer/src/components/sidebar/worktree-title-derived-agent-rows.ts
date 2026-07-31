@@ -3,23 +3,17 @@ import type {
   AgentStatusOrchestrationContext,
   AgentStatusState
 } from '@yiru/workbench-model/agent'
-
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
+import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
 import {
   resolveAgentTypeFromTerminalTitle,
   resolveTitleDerivedAgentType
-} from '@/components/sidebar/terminal-title-agent-type'
-import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
-import { isClaudeManagementTitle } from '../../../../shared/agent/detection'
-import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/title-owner'
-import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
-import type {
-  TerminalLayoutSnapshot,
-  TerminalPaneLayoutNode,
-  TerminalTab
-} from '../../../../shared/types'
+} from '~renderer/components/sidebar/terminal-title-agent-type'
+import { classifyTitleActivity, resolveTitleActivityLabel } from '~renderer/lib/pane-agent-evidence'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import { isClaudeManagementTitle } from '~shared/agent/detection'
+import { normalizeCompatibleAgentTitleForOwner } from '~shared/agent/title-owner'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, TerminalTab } from '~shared/types'
 
 const EMPTY_RUNTIME_TITLES: Record<string, Record<number, string>> = {}
 const EMPTY_LIVE_PTY_IDS: Record<string, string[]> = {}

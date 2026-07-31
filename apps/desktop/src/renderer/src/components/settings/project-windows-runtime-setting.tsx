@@ -1,13 +1,12 @@
 import { useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-
-import type { LocalWindowsRuntimePreference } from '../../../../shared/project-execution-runtime'
+import { translate } from '~renderer/i18n/i18n'
+import type { LocalWindowsRuntimePreference } from '~shared/project-execution-runtime'
 import {
   normalizeProjectRuntimePreference,
   resolveProjectExecutionRuntime
-} from '../../../../shared/project-execution-runtime'
-import type { GlobalSettings, Project, ProjectUpdateArgs } from '../../../../shared/types'
+} from '~shared/project-execution-runtime'
+import type { GlobalSettings, Project, ProjectUpdateArgs } from '~shared/types'
+
 import { Button } from '../ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { SettingsRow, SettingsSegmentedControl } from './form-controls'

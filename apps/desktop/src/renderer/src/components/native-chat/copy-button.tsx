@@ -1,9 +1,8 @@
 import { Check, Copy } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 /**
  * Per-message copy affordance for the native chat. Copies the message's text to

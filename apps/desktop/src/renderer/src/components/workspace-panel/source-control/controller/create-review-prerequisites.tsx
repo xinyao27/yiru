@@ -1,9 +1,9 @@
 import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
+import { refreshGitStatusForWorktreeStrict } from '~renderer/components/workspace-panel/git-status-refresh'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRuntimeGitBranchCompare } from '~renderer/runtime/git-client'
 
-import { getConnectionId } from '../../../../lib/connection-context'
-import { getRuntimeGitBranchCompare } from '../../../../runtime/git-client'
-import { refreshGitStatusForWorktreeStrict } from '../../git-status-refresh'
 import type { CreatePrIntentRunToken } from '../create-pr-intent-flow'
 import type { SourceControlCreateReviewSubmitController } from './create-review-submit'
 

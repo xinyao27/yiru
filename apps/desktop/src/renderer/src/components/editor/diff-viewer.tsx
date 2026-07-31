@@ -1,17 +1,16 @@
 import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { isDiffComment } from '~renderer/components/editor/diff-comment-compat'
+import { resolveDocumentTheme } from '~renderer/components/editor/document-theme'
+import { resolveEditorFontFamily } from '~renderer/components/editor/font-family'
+import { computeDiffEditorFontSize } from '~renderer/components/editor/font-zoom'
+import { monaco, resolveCursorThemeName } from '~renderer/components/editor/monaco-setup'
+import { diffViewStateCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
+import { useAppStore } from '~renderer/store'
+import { selectWorktreeDiffComments } from '~renderer/store/worktree-diff-comments-selector'
+import type { DiffComment } from '~shared/types'
 
-import { isDiffComment } from '@/components/editor/diff-comment-compat'
-import { resolveDocumentTheme } from '@/components/editor/document-theme'
-import { resolveEditorFontFamily } from '@/components/editor/font-family'
-import { computeDiffEditorFontSize } from '@/components/editor/font-zoom'
-import { monaco, resolveCursorThemeName } from '@/components/editor/monaco-setup'
-import { diffViewStateCache, setWithLRU } from '@/components/editor/scroll-cache'
-import { useAppStore } from '@/store'
-import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
-
-import type { DiffComment } from '../../../../shared/types'
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'
 import {
   getDiffCommentPopoverLeft,

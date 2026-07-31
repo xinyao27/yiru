@@ -1,5 +1,4 @@
 import { ipcMain } from 'electron'
-
 import type {
   Automation,
   AutomationCreateInput,
@@ -13,7 +12,8 @@ import type {
   ExternalAutomationUpdateInput,
   AutomationRun,
   AutomationUpdateInput
-} from '../../shared/automations-types'
+} from '~shared/automations-types'
+
 import type { Store } from '../persistence'
 import {
   createExternalAutomation,

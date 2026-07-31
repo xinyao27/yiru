@@ -1,12 +1,11 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { resolveRemoteOperationErrorMessage } from '@/lib/source-control-remote-error'
+import { translate } from '~renderer/i18n/i18n'
+import { resolveRemoteOperationErrorMessage } from '~renderer/lib/source-control-remote-error'
 import {
   registerRendererCommandResultPresenter,
   type RendererCommandResult
-} from '@/runtime/renderer-command-result-channel'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/renderer-command-result-channel'
+import { useAppStore } from '~renderer/store'
 
 import { showLocalBaseRefUpdateSuggestionToast } from './sidebar/local-base-ref-suggestion-toast'
 import { showPreservedBranchToast } from './sidebar/preserved-branch-toast'

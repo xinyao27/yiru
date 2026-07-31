@@ -1,22 +1,25 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../../i18n/i18n'
-import { getRepoOwnerRoutedSettings } from '../../../../lib/repo-runtime-owner'
-import { getWorktreeGitIdentityDisplay } from '../../../../lib/worktree-git-identity-display'
-import { useAppStore } from '../../../../store'
-import { useActiveWorktree, useRepoById, useWorktreeMap } from '../../../../store/selectors'
-import { getGitHubPRCacheKey } from '../../../../store/slices/github-cache-key'
-import { getHostedReviewCacheKey } from '../../../../store/slices/hosted-review'
-import { selectWorktreeDiffCommentsOrEmpty } from '../../../../store/worktree-diff-comments-selector'
-import { formatDiffComments } from '../../../editor/diff-comments-format'
+import { formatDiffComments } from '~renderer/components/editor/diff-comments-format'
 import {
   countPendingDiffCommentsClear,
   formatPendingDiffCommentsClearDescription,
   resolvePendingDiffCommentsClear,
   type PendingDiffCommentsClear
-} from '../../diff-comments-clear-dialog-state'
-import { selectReviewCacheData, selectReviewCacheEntry } from '../../review-cache-entry-selection'
+} from '~renderer/components/workspace-panel/diff-comments-clear-dialog-state'
+import {
+  selectReviewCacheData,
+  selectReviewCacheEntry
+} from '~renderer/components/workspace-panel/review-cache-entry-selection'
+import { translate } from '~renderer/i18n/i18n'
+import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree, useRepoById, useWorktreeMap } from '~renderer/store/selectors'
+import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review'
+import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
+
 import { useCopyFeedbackState } from '../copy-feedback-state'
 import { cancelSourceControlEditorRevealFrames } from '../editor-reveal'
 import { EMPTY_BRANCH_CHANGE_ENTRIES, EMPTY_GIT_STATUS_ENTRIES } from '../panel-constants'

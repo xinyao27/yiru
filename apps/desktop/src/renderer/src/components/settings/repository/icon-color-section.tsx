@@ -1,10 +1,10 @@
-import { DEFAULT_REPO_BADGE_COLOR, REPO_COLORS } from '../../../../../shared/constants'
-import { normalizeRepoBadgeColor } from '../../../../../shared/repo-badge-color'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { RepoColorPicker } from '../../repo/color-picker'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
+import { RepoColorPicker } from '~renderer/components/repo/color-picker'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { DEFAULT_REPO_BADGE_COLOR, REPO_COLORS } from '~shared/constants'
+import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
 
 type RepositoryIconColorSectionProps = {
   badgeColor: string | null | undefined

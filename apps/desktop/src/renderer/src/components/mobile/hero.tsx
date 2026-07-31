@@ -1,10 +1,9 @@
 import { Copy, ArrowLeft, ArrowRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { type ComponentProps, useLayoutEffect, useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { cn } from '~renderer/lib/class-names'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-
-import { cn } from '../../lib/class-names'
 import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 import { AndroidLogo, IosBrandIcon } from './brand-icons'
 import { NetworkInterfacePicker } from './network-interface-picker'
@@ -12,7 +11,7 @@ import type { MobilePlatform, MobileReleaseLink } from './release-link'
 import { WindowsFirewallNotice } from './windows-firewall-notice'
 export { HeroIntro } from './hero-intro'
 export { HeroPaired, type PairedDevice } from './hero-paired-devices'
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import { mobilePageStyles } from './page-tailwind'
 

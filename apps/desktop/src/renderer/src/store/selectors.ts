@@ -1,7 +1,7 @@
 import { useShallow } from 'zustand/react/shallow'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import type { Repo, Worktree, TerminalTab } from '~shared/types'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import type { Repo, Worktree, TerminalTab } from '../../../shared/types'
 import { useAppStore } from './index'
 import { getProjectHostSetupProjectionFromState } from './project-host-setup-selector'
 import type { AppState } from './types'

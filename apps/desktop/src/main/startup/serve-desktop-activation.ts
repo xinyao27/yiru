@@ -1,4 +1,4 @@
-import type { RuntimeDesktopWindowStatus } from '../../shared/runtime-types'
+import type { RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 
 type ActivationGateState = Exclude<RuntimeDesktopWindowStatus, 'available' | 'openable'> | 'ready'
 

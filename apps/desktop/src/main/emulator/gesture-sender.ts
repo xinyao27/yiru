@@ -1,9 +1,5 @@
 import WebSocket from 'ws'
-
-import {
-  encodeServeSimTouchFrame,
-  type ServeSimTouchFrame
-} from '../../shared/emulator-touch-frame'
+import { encodeServeSimTouchFrame, type ServeSimTouchFrame } from '~shared/emulator-touch-frame'
 
 export type EmulatorGesturePoint = ServeSimTouchFrame
 

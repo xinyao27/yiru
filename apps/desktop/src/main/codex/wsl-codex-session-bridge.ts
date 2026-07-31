@@ -2,8 +2,7 @@ import { execFile } from 'node:child_process'
 import { posix as pathPosix } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-
-import { escapeWslShCommandForWindows } from '../../shared/wsl-login-shell-command'
+import { escapeWslShCommandForWindows } from '~shared/wsl-login-shell-command'
 
 export type WslCodexSessionBridgeTarget = {
   distro: string

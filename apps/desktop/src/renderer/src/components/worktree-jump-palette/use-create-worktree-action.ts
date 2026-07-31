@@ -1,21 +1,26 @@
 import type React from 'react'
 import { useCallback, useEffect } from 'react'
-
-import { CREATE_WORKSPACE_QUICK_ACTION_ID } from '@/components/cmd-j/quick-actions'
+import { CREATE_WORKSPACE_QUICK_ACTION_ID } from '~renderer/components/cmd-j/quick-actions'
 import {
   CREATE_WORKTREE_ITEM_ID,
   type WorktreePaletteRequestGuard
-} from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import { parseGitHubPullRequestNumber, parseGitHubPullRequestLink } from '@/lib/github-links'
-import { lookupGitHubWorkItemForSource } from '@/lib/github-work-item-source-lookup'
-import { getLinkedWorkItemSuggestedName, getLinkedWorkItemWorkspaceName } from '@/lib/new-workspace'
-import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-import { getRepoMapFromState } from '@/store/selectors'
+} from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import {
+  parseGitHubPullRequestNumber,
+  parseGitHubPullRequestLink
+} from '~renderer/lib/github-links'
+import { lookupGitHubWorkItemForSource } from '~renderer/lib/github-work-item-source-lookup'
+import {
+  getLinkedWorkItemSuggestedName,
+  getLinkedWorkItemWorkspaceName
+} from '~renderer/lib/new-workspace'
+import type { LinkedWorkItemSummary } from '~renderer/lib/new-workspace'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { getRepoMapFromState } from '~renderer/store/selectors'
+import { buildProjectSourceContextFromRepo } from '~shared/project-source-context'
+import { isGitRepoKind } from '~shared/repo-kind'
 
-import { buildProjectSourceContextFromRepo } from '../../../../shared/project-source-context'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { PaletteHostOptionsResult } from './use-palette-host-options'
 import type { PaletteStoreState } from './use-palette-store-state'
 

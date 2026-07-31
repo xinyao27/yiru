@@ -1,11 +1,11 @@
 import { Plug, Copy, Trash as Trash2, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-
-import { useAppStore } from '@/store'
-
-import type { WorkspacePort } from '../../../../../shared/workspace/ports'
-import { translate } from '../../../i18n/i18n'
+import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-menu'
+import { Button } from '~renderer/components/ui/button'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '~renderer/components/ui/hover-card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import {
   canStopWorkspacePort,
   getPortOpenBrowserTooltipLabel,
@@ -13,15 +13,14 @@ import {
   openWorkspacePortInBrowser,
   refreshWorkspacePortScanAfterStop,
   resolvePortOpenInYiruBrowser
-} from '../../../lib/workspace-port-actions'
-import { useLocalhostLabelRouteForPort } from '../../../lib/workspace-port-localhost-label-selector'
-import { addressForPort } from '../../../lib/workspace-port-urls'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '../../../runtime/rpc-client'
-import { SelectedTextCopyMenu } from '../../selected-text-copy-menu'
-import { Button } from '../../ui/button'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../ui/hover-card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/lib/workspace-port-actions'
+import { useLocalhostLabelRouteForPort } from '~renderer/lib/workspace-port-localhost-label-selector'
+import { addressForPort } from '~renderer/lib/workspace-port-urls'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePort } from '~shared/workspace/ports'
+
 import { WORKTREE_NATIVE_CONTEXT_MENU_ATTR } from '../worktree-context-menu/opening-policy'
 import { WorktreeCardDetailSection, WorktreeCardDetailSectionContent } from './detail-section'
 

@@ -1,12 +1,11 @@
 'use client'
 
 import { PreviewCard as HoverCardPrimitive } from '@base-ui/react/preview-card'
-
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/floating-surface-styles'
+import { cn } from '~renderer/lib/class-names'
 
 function HoverCard({ ...props }: HoverCardPrimitive.Root.Props) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />

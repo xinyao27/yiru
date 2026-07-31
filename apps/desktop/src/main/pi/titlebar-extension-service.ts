@@ -14,7 +14,8 @@ import {
   getPiPrefillExtensionSource
 } from './prefill-extension-source'
 export { YIRU_OMP_PREFILL_ENV_VAR, YIRU_PI_PREFILL_ENV_VAR } from './prefill-extension-source'
-import type { PiAgentKind } from '../../shared/pi-agent-kind'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
+
 import { safeRemoveOverlay } from '../pty/overlay-mirror'
 import { migrateLegacyOmpOverlayState } from './legacy-omp-overlay-migration'
 import { YIRU_PI_EXTENSION_FILE, getPiTitlebarExtensionSource } from './titlebar-extension-source'

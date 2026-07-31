@@ -4,13 +4,13 @@
 import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '@yiru/runtime-protocol/rpc-envelope'
 import { isKeepaliveFrame } from '@yiru/runtime-protocol/rpc-envelope'
 import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
-
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
+} from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+
 import {
   decrypt,
   decryptBytes,

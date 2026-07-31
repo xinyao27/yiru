@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitHistoryItem } from '~shared/git/history'
 
-import type { GitHistoryItem } from '../../../../../shared/git/history'
 import type { GitHistoryCommitAction } from '../git-history-commit-context-menu'
 
 // Why: the write half of the commit context menu — everything that moves refs

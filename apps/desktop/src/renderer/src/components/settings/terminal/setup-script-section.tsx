@@ -1,6 +1,7 @@
-import type { GlobalSettings, SetupScriptLaunchMode } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings, SetupScriptLaunchMode } from '~shared/types'
+
 import { SettingsRow, SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 

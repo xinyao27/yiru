@@ -1,4 +1,4 @@
-import { useAppStore } from '../../../store'
+import { useAppStore } from '~renderer/store'
 
 export function getTerminalPasteSshRemotePlatform(
   connectionId: string | null | undefined

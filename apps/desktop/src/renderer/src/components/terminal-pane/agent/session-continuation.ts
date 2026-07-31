@@ -1,5 +1,6 @@
-import type { LaunchSource } from '../../../../../shared/telemetry-events'
-import type { TuiAgent } from '../../../../../shared/types'
+import type { LaunchSource } from '~shared/telemetry-events'
+import type { TuiAgent } from '~shared/types'
+
 import { buildBoundedSessionTranscript } from './session-fork-context'
 
 export type AgentSessionContinuationContextMode = 'focused' | 'full'

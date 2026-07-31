@@ -17,12 +17,11 @@ import {
    would scatter those flows without a meaningful abstraction boundary. */
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { markLiveCodexSessionsForRestart } from '~renderer/lib/codex-session-restart'
 import {
   emptyClaudeAccountsState,
   emptyCodexAccountsState,
@@ -32,15 +31,15 @@ import {
   selectClaudeProviderAccount,
   selectCodexProviderAccount,
   watchProviderAccounts
-} from '@/runtime/provider-accounts-client'
-
+} from '~renderer/runtime/provider-accounts-client'
+import { useAppStore } from '~renderer/store'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   CodexSystemDefaultIdentity,
   GlobalSettings
-} from '../../../../shared/types'
-import { useAppStore } from '../../store'
+} from '~shared/types'
+
 import {
   ClaudeIcon,
   GeminiIcon,

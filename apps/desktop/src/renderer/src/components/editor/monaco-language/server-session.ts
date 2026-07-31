@@ -5,13 +5,13 @@ import {
   type Disposable,
   type MessageConnection
 } from 'vscode-jsonrpc/browser'
-
+import { translate } from '~renderer/i18n/i18n'
 import type {
   LanguageServerLocationResult,
   LanguageServerSessionStatus,
   LanguageServerStartResult
-} from '../../../../../shared/language-server'
-import { translate } from '../../../i18n/i18n'
+} from '~shared/language-server'
+
 import {
   getLanguageServerWorkspaceName,
   stageThreeClientCapabilities,

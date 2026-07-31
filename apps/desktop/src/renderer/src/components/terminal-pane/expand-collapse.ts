@@ -1,5 +1,5 @@
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { safeFit } from '@/lib/pane-manager/pane-tree-ops'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { safeFit } from '~renderer/lib/pane-manager/pane-tree-ops'
 
 type ExpandCollapseState = {
   expandedPaneIdRef: React.MutableRefObject<number | null>

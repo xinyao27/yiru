@@ -1,13 +1,19 @@
 import { useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import { requestEditorFileSave, requestEditorSaveQuiesce } from '@/components/editor/autosave'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { dirname } from '@/lib/path'
-import { deleteRuntimePath, readRuntimeFileContent, writeRuntimeFile } from '@/runtime/file-client'
-import { useAppStore } from '@/store'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
+import {
+  requestEditorFileSave,
+  requestEditorSaveQuiesce
+} from '~renderer/components/editor/autosave'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { dirname } from '~renderer/lib/path'
+import {
+  deleteRuntimePath,
+  readRuntimeFileContent,
+  writeRuntimeFile
+} from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
 
 import { runBatchDeletion, selectDeletionRoots } from './file-explorer/batch-deletion'
 import { getFileExplorerOperationRoute } from './file-explorer/operation-owner'

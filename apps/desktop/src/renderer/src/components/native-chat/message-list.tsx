@@ -5,16 +5,15 @@ import {
   type NativeChatMessage
 } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
-} from '@/components/sidebar/comment-markdown'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { basename } from '@/lib/path'
+} from '~renderer/components/sidebar/comment-markdown'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { basename } from '~renderer/lib/path'
+import { NATIVE_CHAT_STREAMING_ID } from '~shared/native-chat/streaming'
 
-import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat/streaming'
 import { isNearBottom, shouldShowJumpToLatest, type ScrollGeometry } from './autoscroll'
 import { NativeChatCopyButton } from './copy-button'
 import { isNativeChatPastedImagePath } from './image-paste'

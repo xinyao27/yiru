@@ -4,7 +4,7 @@ export {
   MARKDOWN_TOC_PANEL_MIN_WIDTH,
   clampMarkdownTocPanelWidth,
   computeMaxMarkdownTocPanelWidth
-} from '../../../../shared/markdown-toc-panel-width'
+} from '~shared/markdown-toc-panel-width'
 
 // Why: match the worktree/right sidebar 4px resize target; a 1px seam is too hard to acquire.
 export const MARKDOWN_TOC_RESIZE_HANDLE_CLASS_NAME =

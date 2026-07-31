@@ -1,7 +1,6 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { localCalendarDayKey } from '@yiru/workbench-model/ui'
-
-import type { DitherChartPoint } from '@/components/dither-kit/canvas-chart'
+import type { DitherChartPoint } from '~renderer/components/dither-kit/canvas-chart'
 
 const TREND_DAY_COUNT = 30
 const YEAR_DAY_COUNT = 366

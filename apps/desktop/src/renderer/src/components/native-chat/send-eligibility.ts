@@ -1,4 +1,4 @@
-import type { DriverState } from '@/lib/pane-manager/mobile-driver-state'
+import type { DriverState } from '~renderer/lib/pane-manager/mobile-driver-state'
 
 /**
  * Pure derivation of the composer's `canSend` (R8). A pty held by a mobile

@@ -1,8 +1,9 @@
-import { buildConfiguredProxyEnv, type NetworkProxySettings } from '../../shared/network-proxy'
+import { buildConfiguredProxyEnv, type NetworkProxySettings } from '~shared/network-proxy'
 /* eslint-disable max-lines -- Why: Claude PTY usage scraping keeps prompt
 driving, parser, timers, and teardown in one state machine; splitting it would
 make the lifecycle harder to audit. */
-import type { ProviderRateLimits, RateLimitWindow } from '../../shared/rate-limit-types'
+import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
+
 import { applyClaudeEnvPatch } from '../claude/accounts/environment'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'

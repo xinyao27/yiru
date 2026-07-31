@@ -2,10 +2,11 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { chmodSync, existsSync } from 'node:fs'
 
-import { ORCHESTRATION_LEGACY_RUN_ID } from '../../../shared/orchestration-rpc-contract'
-import { buildOrchestrationTaskDisplayMetadata } from '../../../shared/orchestration-task-display'
-import { parsePaneKey } from '../../../shared/stable-pane-id'
-import Database from '../../sqlite/sync-database'
+import Database from '~main/sqlite/sync-database'
+import { ORCHESTRATION_LEGACY_RUN_ID } from '~shared/orchestration-rpc-contract'
+import { buildOrchestrationTaskDisplayMetadata } from '~shared/orchestration-task-display'
+import { parsePaneKey } from '~shared/stable-pane-id'
+
 import { OrchestrationError } from './orchestration-error'
 import { resolveOrchestrationMigrationStartVersion } from './orchestration-schema-version-skew'
 import type {

@@ -1,7 +1,7 @@
 import { ActivityIndicator, ScrollView, SectionList, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { resolveCssNumber } from '@/style/resolve-css-variable'
+import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { MobileSourceControlBulkActions } from './bulk-actions'
 import { MobileSourceControlCommitBar } from './commit-bar'

@@ -5,9 +5,9 @@ import {
   type RuntimeCapabilityScope
 } from '@yiru/runtime-protocol/capabilities'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { RuntimeMethodResult } from '~shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 
-import type { RuntimeMethodResult } from '../../../shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import { assertRuntimeStatusCompatible } from './protocol-compat'
 import { unwrapRuntimeRpcResult } from './rpc-response'
 

@@ -1,11 +1,10 @@
 import { memo, useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useBrowserMobileDriverForAny } from '~renderer/lib/pane-manager/browser-mobile-driver-state'
+import { registerBrowserOverlaySlotViewport } from '~renderer/runtime/browser-page-viewport'
+import { useAppStore } from '~renderer/store'
+import type { BrowserTab as BrowserTabState, Tab, TabGroup } from '~shared/types'
 
-import { useBrowserMobileDriverForAny } from '@/lib/pane-manager/browser-mobile-driver-state'
-import { registerBrowserOverlaySlotViewport } from '@/runtime/browser-page-viewport'
-
-import type { BrowserTab as BrowserTabState, Tab, TabGroup } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { tabGroupBodyAnchorName } from '../tab-group/body-anchor'
 import { useBrowserAutomationVisibilityForAny } from './browser-automation-visibility'
 import BrowserPane from './browser-pane'

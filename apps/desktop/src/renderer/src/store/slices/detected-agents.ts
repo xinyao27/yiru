@@ -1,12 +1,11 @@
 import type { StateCreator } from 'zustand'
-
 import {
   getLocalAgentPreflightContext,
   localPreflightContextKey
-} from '@/lib/local-preflight-context'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
+} from '~renderer/lib/local-preflight-context'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '~shared/types'
 
-import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '../../../../shared/types'
 import type { AppState } from '../types'
 
 export type DetectedAgentsSlice = {

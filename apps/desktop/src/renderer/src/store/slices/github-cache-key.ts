@@ -3,8 +3,7 @@ import {
   normalizeExecutionHostId,
   toSshExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import type { GlobalSettings } from '../../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 type RuntimeFocusSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
 

@@ -1,4 +1,5 @@
-import type { CoworkingRpcRequest } from '../../../shared/coworking/wire-contract'
+import type { CoworkingRpcRequest } from '~shared/coworking/wire-contract'
+
 import { readCoworkingCancellationRequestId } from './request-validation'
 
 /** Validates a same-connection cancellation before touching its target request. */

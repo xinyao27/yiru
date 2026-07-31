@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native'
 
-import { GitMerge } from '@/components/uniwind-icons'
+import { GitMerge } from '~/components/uniwind-icons'
 
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import { mobileConflictAbortLabel } from './conflict-abort'

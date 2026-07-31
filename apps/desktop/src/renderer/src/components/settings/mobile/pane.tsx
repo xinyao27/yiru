@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { WindowsFirewallNotice } from '~renderer/components/mobile/windows-firewall-notice'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { WindowsFirewallNotice } from '../../mobile/windows-firewall-notice'
 import { MobileAutoRestoreFitSection } from './auto-restore-fit-section'
 import {
   selectRefreshedNetworkAddress,

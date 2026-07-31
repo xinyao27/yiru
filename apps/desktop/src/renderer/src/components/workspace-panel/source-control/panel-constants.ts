@@ -1,4 +1,5 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import type { SourceControlSectionArea } from './section-order'
 
 export const EMPTY_GIT_STATUS_ENTRIES: GitStatusEntry[] = []

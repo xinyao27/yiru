@@ -1,8 +1,7 @@
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
-
-import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
-import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { CommitMessageDraftContext } from '~shared/commit-message/generation'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 import type {
   DirEntry,
   FsChangeEvent,
@@ -21,8 +20,9 @@ import type {
   RemoveWorktreeResult,
   SearchOptions,
   SearchResult
-} from '../../shared/types'
-import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/space-types'
+} from '~shared/types'
+import type { WorkspaceSpaceDirectoryScanResult } from '~shared/workspace/space-types'
+
 import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'

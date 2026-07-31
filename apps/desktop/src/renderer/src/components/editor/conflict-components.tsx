@@ -9,14 +9,13 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
+import type { ConflictReviewEntry, OpenFile } from '~renderer/components/editor/state'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { GitConflictKind, GitStatusEntry } from '~shared/types'
 
-import type { ConflictReviewEntry, OpenFile } from '@/components/editor/state'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { GitConflictKind, GitStatusEntry } from '../../../../shared/types'
 import { ConflictReviewFileTree } from './conflict-review-file-tree'
 
 export const CONFLICT_KIND_LABELS: Record<GitConflictKind, string> = {

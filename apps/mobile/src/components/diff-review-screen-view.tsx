@@ -2,9 +2,9 @@ import { Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'

@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-import { MobileGlassPressable } from '@/components/glass/pressable'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 
 type HeaderIconProps = {
   size?: number

@@ -1,4 +1,4 @@
-import type { PRComment } from '../../../../shared/types'
+import type { PRComment } from '~shared/types'
 
 export function markPRCommentThreadResolved(
   comments: PRComment[],

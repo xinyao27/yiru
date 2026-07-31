@@ -8,8 +8,8 @@ import {
   CaretRight as ChevronRight,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import { headingSlashCommands } from './heading-slash-commands'
 import {
   icon,

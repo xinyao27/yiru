@@ -1,30 +1,32 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
-
-import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
-import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
-import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { subscribeToRuntimeTerminalData, toRemoteRuntimePtyId } from '@/runtime/terminal-stream'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-import { useAppStore } from '@/store'
-import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
-
-import { repoIsRemote } from '../../../../shared/agent/launch-remote'
-import { createAgentStatusOscProcessor } from '../../../../shared/agent/status-osc'
-import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
-import type { RuntimeTerminalCreate } from '../../../../shared/runtime-types'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
+import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/terminal-pane/terminal-side-effect-facts-handler'
+import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
+import { getAgentLaunchPlatformForRepo } from '~renderer/lib/agent-launch-platform'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import {
+  subscribeToRuntimeTerminalData,
+  toRemoteRuntimePtyId
+} from '~renderer/runtime/terminal-stream'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { useAppStore } from '~renderer/store'
+import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
+import { repoIsRemote } from '~shared/agent/launch-remote'
+import { createAgentStatusOscProcessor } from '~shared/agent/status-osc'
+import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
+import type { RuntimeTerminalCreate } from '~shared/runtime-types'
+import { makePaneKey } from '~shared/stable-pane-id'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent/launch-defaults'
+} from '~shared/tui-agent/launch-defaults'
+
 import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
 import {
   registerEagerPtyBuffer,

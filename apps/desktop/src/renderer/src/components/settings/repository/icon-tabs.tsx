@@ -3,14 +3,13 @@ import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { faviconUrlFromWebsite } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { getRepoLucideIconOptions } from '../../repo/icon'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { getRepoLucideIconOptions } from '~renderer/components/repo/icon'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 
 const EMOJI_OPTIONS = ['🚀', '✨', '💻', '🧠', '📦', '🔧', '🎨', '🌐', '📊', '🔒', '⚡', '✅']
 

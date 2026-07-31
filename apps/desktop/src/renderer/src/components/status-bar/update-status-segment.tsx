@@ -4,12 +4,10 @@ import {
   Download
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-
-import { useAppStore } from '../../store'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 // Why: always rendered (not gated by `statusBarItems`). When the update card
 // is collapsed, this segment is the only way back to it — hiding it would

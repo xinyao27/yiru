@@ -1,14 +1,14 @@
 import { useState } from 'react'
-
+import { Input } from '~renderer/components/ui/input'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
 import {
   DESKTOP_TERMINAL_SCROLLBACK_ROWS_MAX,
   DESKTOP_TERMINAL_SCROLLBACK_ROWS_MIN,
   normalizeDesktopTerminalScrollbackRows
-} from '../../../../../shared/terminal/scrollback-policy'
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Input } from '../../ui/input'
-import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group'
+} from '~shared/terminal/scrollback-policy'
+import type { GlobalSettings } from '~shared/types'
+
 import { SCROLLBACK_PRESETS_ROWS } from '../constants'
 import { SettingsRow, SettingsSegmentedControl, SettingsSubsectionHeader } from '../form-controls'
 import { matchesSettingsSearch } from '../search'

@@ -1,12 +1,11 @@
 import { z } from 'zod'
-
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import {
   OptionalString,
   requiredString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import type { YiruRuntimeService } from '../../../yiru-runtime'
-import { defineMethod, type RpcMethod } from '../../core'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 const RunCreateParams = z.object({
   objective: requiredString('Missing --objective'),

@@ -1,14 +1,13 @@
 import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getCommentBodySubmitState,
   hasBoundedCommentBodyText
-} from '@/lib/comment-body-submit-state'
+} from '~renderer/lib/comment-body-submit-state'
 
 export function PierreDiffCommentComposer({
   lineNumber,

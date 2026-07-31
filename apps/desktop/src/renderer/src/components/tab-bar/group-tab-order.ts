@@ -1,6 +1,7 @@
-import type { Tab, TabGroup } from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import type { AppState } from '../../store/types'
+import type { AppState } from '~renderer/store/types'
+import type { Tab, TabGroup } from '~shared/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
+
 import { reconcileTabOrder } from './reconcile-order'
 
 export type VisibleTabRef = {

@@ -1,4 +1,4 @@
-import { resetAndRefreshAllTerminalWebglAtlases } from '@/lib/pane-manager/registry'
+import { resetAndRefreshAllTerminalWebglAtlases } from '~renderer/lib/pane-manager/registry'
 
 const ATLAS_RECOVERY_DELAYS_MS = [120, 500]
 

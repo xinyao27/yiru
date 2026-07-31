@@ -1,11 +1,10 @@
 import { ArrowClockwise, Package } from '@phosphor-icons/react'
 import { memo, useEffect, useRef } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { SkillSourceKind } from '~shared/skills'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
-import type { SkillSourceKind } from '../../../../shared/skills'
 import type { ComposerAutocomplete, NativeChatPickerItem } from './composer/state'
 
 export const NativeChatPickerMenu = memo(function NativeChatPickerMenu({

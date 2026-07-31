@@ -6,8 +6,7 @@ import {
   Sparkle as Sparkles
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { SmartNameMode } from './smart-workspace-source-results'
 

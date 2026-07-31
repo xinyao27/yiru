@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
-
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-
-import type { CoworkingSessionCatalogEntry } from '../../../../shared/coworking/catalog-contract'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import type { CoworkingSessionCatalogEntry } from '~shared/coworking/catalog-contract'
 
 export function useCoworkingDefaultSessionRoute(args: {
   route: CoworkingWorkspaceRoute

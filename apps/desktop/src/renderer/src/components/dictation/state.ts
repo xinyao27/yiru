@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand'
-
-import type { DictationState, SpeechModelState } from '../../../../shared/speech-types'
-import type { AppState } from '../../store/types'
+import type { AppState } from '~renderer/store/types'
+import type { DictationState, SpeechModelState } from '~shared/speech-types'
 
 export type DictationSlice = {
   dictationState: DictationState

@@ -1,4 +1,5 @@
-import type { GlobalSettings } from '../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
+
 import { getRemoteRuntimeTerminalMultiplexer } from './remote-runtime-terminal-multiplexer'
 import { RuntimeRpcCallError, getActiveRuntimeTarget } from './rpc-client'
 

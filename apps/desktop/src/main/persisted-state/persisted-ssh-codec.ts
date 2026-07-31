@@ -3,8 +3,7 @@ import {
   type SshRemotePtyLease,
   type SshTarget
 } from '@yiru/runtime-protocol/ssh-connection'
-
-import type { PersistedState } from '../../shared/types'
+import type { PersistedState } from '~shared/types'
 
 type LegacySshTarget = SshTarget & {
   remoteWorkspaceSyncEnabled?: unknown

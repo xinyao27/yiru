@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
-
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../../shared/commit-message/host-key'
+import { getRuntimeGitScope } from '~renderer/runtime/git-client'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
 import {
   DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS,
   resolveSourceControlAiEnabled,
   resolveSourceControlAiForOperation,
   resolveSourceControlAiPrCreationDefaults
-} from '../../../../../shared/source-control/ai'
-import { getRuntimeGitScope } from '../../../runtime/git-client'
+} from '~shared/source-control/ai'
+
 import type { useChecksPanelReviewContextState } from './review-context'
 
 export function useChecksPanelGenerationDefaults(context: useChecksPanelReviewContextState) {

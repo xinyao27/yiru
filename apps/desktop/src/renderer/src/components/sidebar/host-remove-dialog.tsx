@@ -2,9 +2,8 @@ import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,13 +11,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Switch } from '@/components/ui/switch'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-import { getAllWorktreesFromState } from '@/store/selectors'
+} from '~renderer/components/ui/dialog'
+import { Switch } from '~renderer/components/ui/switch'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { getAllWorktreesFromState } from '~renderer/store/selectors'
 
 import { removeSshTargetWithBestEffortCleanup } from '../settings/ssh/target-remove'
 import { clearHostRename } from './host-rename-remove'

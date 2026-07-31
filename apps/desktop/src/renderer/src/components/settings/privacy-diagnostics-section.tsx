@@ -1,13 +1,9 @@
 import { FileText } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import type { DiagnosticsBundlePayload, DiagnosticsStatusPayload } from '~preload/api-types'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '@/i18n/i18n'
-
-import type {
-  DiagnosticsBundlePayload,
-  DiagnosticsStatusPayload
-} from '../../../../preload/api-types'
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
 import {

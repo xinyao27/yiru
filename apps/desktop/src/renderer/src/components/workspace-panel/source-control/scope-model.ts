@@ -1,5 +1,6 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import { SECTION_LABELS } from './panel-constants'
 import type { SourceControlDisplaySection } from './section-order'
 

@@ -1,6 +1,5 @@
-import type { AppState } from '@/store/types'
-
-import { isFolderRepo } from '../../../shared/repo-kind'
+import type { AppState } from '~renderer/store/types'
+import { isFolderRepo } from '~shared/repo-kind'
 
 type ActiveView = AppState['activeView']
 

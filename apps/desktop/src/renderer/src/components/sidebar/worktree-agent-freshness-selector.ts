@@ -1,7 +1,6 @@
 import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
-
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import type { AppState } from '@/store/types'
+import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
+import type { AppState } from '~renderer/store/types'
 
 import { selectLiveAgentStatusEntriesForWorktree } from './worktree-agent-row-selectors'
 

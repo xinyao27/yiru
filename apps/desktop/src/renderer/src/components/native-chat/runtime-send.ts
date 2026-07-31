@@ -7,9 +7,11 @@ import {
   NATIVE_CHAT_QUESTION_STEP_MS,
   NATIVE_CHAT_SUBMIT_DELAY_MS
 } from '@yiru/workbench-model/agent'
-
-import type { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
-import { sendRuntimePtyInput, sendRuntimePtyInputVerified } from '@/runtime/terminal-inspection'
+import type { getSettingsForAgentTabRuntimeOwner } from '~renderer/components/native-chat/agent-paste-draft'
+import {
+  sendRuntimePtyInput,
+  sendRuntimePtyInputVerified
+} from '~renderer/runtime/terminal-inspection'
 
 import type { AskAnswerKeyGroup } from './interactive-prompt'
 import {

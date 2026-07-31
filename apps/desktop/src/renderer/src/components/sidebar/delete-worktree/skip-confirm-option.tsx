@@ -1,9 +1,8 @@
 import { Check } from '@phosphor-icons/react'
 import type { JSX } from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 export function DeleteWorktreeSkipConfirmOption({
   showDontAskAgain,

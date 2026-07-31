@@ -3,8 +3,8 @@ import { homedir } from 'node:os'
 import { posix, win32 } from 'node:path'
 
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import type { GitWorktreeInfo, Repo, WorktreeMeta } from '~shared/types'
 
-import type { GitWorktreeInfo, Repo, WorktreeMeta } from '../shared/types'
 import {
   gitFileProvesOrphanedWorktreeDirectory,
   type ReadPath,

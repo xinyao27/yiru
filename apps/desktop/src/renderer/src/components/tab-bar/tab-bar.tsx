@@ -12,33 +12,32 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-
-import { getEditorDisplayLabel } from '@/components/editor/labels'
+import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { type AgentDetectionTarget, useDetectedAgents } from '@/hooks/use-detected-agents'
-import { useOptionalShortcutLabel, useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
-import { normalizeRelativePath } from '@/lib/path'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { type AgentDetectionTarget, useDetectedAgents } from '~renderer/hooks/use-detected-agents'
+import { useOptionalShortcutLabel, useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
+import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import { normalizeRelativePath } from '~renderer/lib/path'
 import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
-} from '@/lib/windows-terminal-capabilities'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
-import { resolveTerminalTabTitle } from '../../../../shared/tab-title-resolution'
+} from '~renderer/lib/windows-terminal-capabilities'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import { resolveTerminalTabTitle } from '~shared/tab-title-resolution'
 import type {
   BrowserTab as BrowserTabState,
   Tab,
@@ -46,9 +45,9 @@ import type {
   TuiAgent,
   WorkspacePanelTabContentType,
   WorkspaceVisibleTabType
-} from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { useAppStore } from '../../store'
+} from '~shared/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
+
 import type { OpenFile } from '../editor/state'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'
 import { shouldShowMobileEmulatorTabIntro } from '../emulator-pane/mobile-emulator-tab-intro-visibility'

@@ -1,7 +1,6 @@
 import React, { useCallback, useId, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -9,17 +8,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
 
 import {
   EMPTY_GIT_GRAPH_COMMIT_WRITE_FORM,

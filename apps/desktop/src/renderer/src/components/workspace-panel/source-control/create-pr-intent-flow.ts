@@ -1,10 +1,10 @@
 import { isBehindOnlyUpstream } from '@yiru/workbench-model/review'
-
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
-} from '../../../../../shared/hosted-review-refs'
-import type { GitStatusEntry, GitUpstreamStatus } from '../../../../../shared/types'
+} from '~shared/hosted-review-refs'
+import type { GitStatusEntry, GitUpstreamStatus } from '~shared/types'
+
 import { summarizeCommitFailure } from '../commit-failure-summary'
 import { getStageAllPaths } from '../discard-all-sequence'
 

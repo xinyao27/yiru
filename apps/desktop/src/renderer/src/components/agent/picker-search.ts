@@ -1,6 +1,5 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
-
-import type { AgentCatalogEntry } from '@/lib/agent-catalog'
+import type { AgentCatalogEntry } from '~renderer/lib/agent-catalog'
 
 type RankedAgent = {
   agent: AgentCatalogEntry

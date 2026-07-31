@@ -1,7 +1,7 @@
 import {
   shouldPreserveTerminalScrollbackBuffers,
   type RepoConnection
-} from '../../../../shared/workspace/session-terminal-buffers'
+} from '~shared/workspace/session-terminal-buffers'
 
 export function canReleaseReplayedScrollbackFromStore(args: {
   hasScrollbackRefs: boolean

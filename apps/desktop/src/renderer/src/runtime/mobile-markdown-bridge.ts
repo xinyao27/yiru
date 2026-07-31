@@ -3,13 +3,12 @@ import {
   requestEditorFileSave,
   requestEditorSaveQuiesce,
   type EditorFileSavedDetail
-} from '@/components/editor/autosave'
-import { flushPendingEditorChange } from '@/components/editor/pending-flush'
-import type { OpenFile } from '@/components/editor/state'
-import { getActiveTabNavOrder } from '@/components/tab-bar/group-tab-order'
-import { getConnectionIdForFile } from '@/lib/connection-context'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/editor/autosave'
+import { flushPendingEditorChange } from '~renderer/components/editor/pending-flush'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { getActiveTabNavOrder } from '~renderer/components/tab-bar/group-tab-order'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { useAppStore } from '~renderer/store'
 import {
   hashMarkdownContent,
   isMarkdownContentByteLengthOverLimit,
@@ -18,7 +17,8 @@ import {
   type RuntimeMarkdownSaveTabResult,
   type RuntimeMobileMarkdownRequest,
   type RuntimeMobileMarkdownResponse
-} from '../../../shared/mobile-markdown-document'
+} from '~shared/mobile-markdown-document'
+
 import { readRuntimeFileContent } from './file-client'
 import { settingsForRuntimeOwner } from './rpc-client'
 

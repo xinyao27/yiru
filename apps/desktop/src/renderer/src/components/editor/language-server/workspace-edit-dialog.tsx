@@ -1,14 +1,7 @@
 import { FileCode, WarningCircle } from '@phosphor-icons/react'
 import React, { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { detectLanguage } from '../../../lib/language-detect'
-import { lazyWithRetry } from '../../../lib/lazy-with-retry'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -16,7 +9,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { lazyWithRetry } from '~renderer/lib/lazy-with-retry'
+import { useAppStore } from '~renderer/store'
+
 import {
   languageServerWorkspaceEditController,
   type LanguageServerWorkspaceEditRequest

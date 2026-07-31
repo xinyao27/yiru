@@ -1,7 +1,7 @@
 import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
 import type { MarkdownReviewNote } from '../markdown-review-notes'
 import { NotesSendMenu, type NotesSendMenuScope } from '../notes-send-menu'
 

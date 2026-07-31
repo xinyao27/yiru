@@ -1,6 +1,6 @@
 import React from 'react'
+import type { KeybindingActionId, KeybindingInput } from '~shared/keybindings'
 
-import type { KeybindingActionId, KeybindingInput } from '../../../../../shared/keybindings'
 import { ShortcutRecorderButton } from './recorder-button'
 import { ShortcutRemoveButton } from './remove-button'
 

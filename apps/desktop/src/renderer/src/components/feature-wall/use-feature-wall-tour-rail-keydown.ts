@@ -1,10 +1,7 @@
 import { useCallback } from 'react'
 import type { KeyboardEvent, RefObject } from 'react'
+import { FEATURE_WALL_WORKFLOWS, type FeatureWallWorkflow } from '~shared/feature-wall-workflows'
 
-import {
-  FEATURE_WALL_WORKFLOWS,
-  type FeatureWallWorkflow
-} from '../../../../shared/feature-wall-workflows'
 import {
   getFeatureWallRailNavigationTarget,
   type FeatureWallRailNavigationKey

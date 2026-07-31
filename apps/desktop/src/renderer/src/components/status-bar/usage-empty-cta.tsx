@@ -1,13 +1,12 @@
 import { ChartBar as BarChart3, EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '~renderer/components/ui/hover-card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { useAppStore } from '~renderer/store'
 
-import { Button } from '@/components/ui/button'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-
-import { useAppStore } from '../../store'
 import { ClaudeIcon, GeminiIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 
 // Why: a brand-new user has no configured provider, so the bottom-left would

@@ -2,12 +2,11 @@
 
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import * as React from 'react'
-
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/floating-surface-styles'
+import { cn } from '~renderer/lib/class-names'
 
 import { updatePopoverContentRef } from './popover-content-ref'
 

@@ -1,11 +1,11 @@
 import { toast } from 'sonner'
-
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import {
   isLockedWorktreeRemovalError,
   type WorktreeForceDeleteReason
-} from '../../../../../shared/workspace/worktree-removal'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+} from '~shared/workspace/worktree-removal'
+
 import { getDeleteWorktreeToastCopy } from './toast'
 
 type DeleteWorktreeFailureToastOptions = {

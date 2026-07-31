@@ -1,9 +1,8 @@
 import { Check, Copy, Files } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
-
-import type { PRConflictSummary, PRMergeableState } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { PRConflictSummary, PRMergeableState } from '~shared/types'
 
 export type ConflictReview = {
   mergeable: PRMergeableState

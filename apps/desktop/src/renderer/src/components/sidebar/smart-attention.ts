@@ -4,15 +4,16 @@ import {
   type AgentStatusEntry,
   type MigrationUnsupportedPtyEntry
 } from '@yiru/workbench-model/agent'
-
-import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
-import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
-import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
-import type { AgentStatus } from '../../../../shared/agent/detection'
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot, TerminalTab, Worktree } from '../../../../shared/types'
+import { migrationUnsupportedToAgentStatusEntry } from '~renderer/lib/migration-unsupported-agent-entry'
+import {
+  classifyTitleActivity,
+  isExplicitAgentStatusFresh
+} from '~renderer/lib/pane-agent-evidence'
+import { resolveRuntimePaneTitleLeafId } from '~renderer/lib/runtime-pane-title-leaf-id'
+import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import type { AgentStatus } from '~shared/agent/detection'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalTab, Worktree } from '~shared/types'
 
 /**
  * Ordinal class for the "Smart" sort. Lower number = more attention-demanding.

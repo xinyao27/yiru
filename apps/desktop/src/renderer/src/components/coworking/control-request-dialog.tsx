@@ -3,8 +3,7 @@ import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 export function CoworkingControlRequestDialog(): React.JSX.Element | null {
   const request = useAppStore((state) => state.coworkingControlRequestQueue[0] ?? null)

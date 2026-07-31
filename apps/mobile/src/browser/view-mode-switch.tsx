@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
+import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
 
 import type { MobileBrowserViewMode } from './screencast-request'
 

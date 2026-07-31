@@ -6,16 +6,33 @@ import {
 } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
-
-import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-
-import { buildAgentNotificationId } from '../../../../shared/agent/notification-id'
+import { DEFAULT_PET_ID, isBundledPetId } from '~renderer/components/pet/id'
+import {
+  deriveRunningAgentSendTargets,
+  resolveRunningAgentSendTarget
+} from '~renderer/components/sidebar/running-agent-targets'
+import {
+  filterSetupScriptPromptDismissalsToValidRepos,
+  getSetupScriptPromptDismissalKey,
+  sanitizeSetupScriptPromptDismissals
+} from '~renderer/components/sidebar/setup-script-prompt'
+import type { YiruHookScriptKind } from '~renderer/components/sidebar/yiru-hook-trust'
+import { agentKindForAgentType, formatAgentTypeLabel } from '~renderer/lib/agent-status'
+import type { SettingsNavTarget } from '~renderer/lib/settings-navigation-types'
+import {
+  getContextualTourRequestDecision,
+  hasContextualTourTarget,
+  getNextVisibleContextualTourStepIndex,
+  getPreviousVisibleContextualTourStepIndex
+} from '~renderer/runtime/contextual-tour-gate'
+import { revokeCustomPetBlobUrl } from '~renderer/runtime/custom-pet-blob-cache'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import { buildAgentNotificationId } from '~shared/agent/notification-id'
 import {
   DEFAULT_BROWSER_PAGE_ZOOM_LEVEL,
   normalizeBrowserPageZoomLevel
-} from '../../../../shared/browser/page-zoom'
-import { normalizeKagiSessionLink } from '../../../../shared/browser/url'
+} from '~shared/browser/page-zoom'
+import { normalizeKagiSessionLink } from '~shared/browser/url'
 import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
@@ -25,37 +42,31 @@ import {
   normalizeAgentActivityDisplayMode,
   normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties
-} from '../../../../shared/constants'
+} from '~shared/constants'
 import {
   getContextualTour,
   normalizeContextualTourIds,
   type ContextualTourId
-} from '../../../../shared/contextual-tours'
+} from '~shared/contextual-tours'
 import {
   hasFeatureInteraction,
   normalizeFeatureInteractions,
   type FeatureInteractionId,
   type FeatureInteractionState
-} from '../../../../shared/feature-interactions'
-import { normalizeFeatureTipIds, type FeatureTipId } from '../../../../shared/feature-tips'
-import {
-  applyManualRepoOrder,
-  normalizeManualRepoOrder
-} from '../../../../shared/manual-repo-order'
-import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
-import { persistedUIValuesEqual } from '../../../../shared/persisted-ui-equality'
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import {
-  DEFAULT_STATUS_BAR_ITEMS,
-  normalizeStatusBarItems
-} from '../../../../shared/status-bar-defaults'
+} from '~shared/feature-interactions'
+import { normalizeFeatureTipIds, type FeatureTipId } from '~shared/feature-tips'
+import { applyManualRepoOrder, normalizeManualRepoOrder } from '~shared/manual-repo-order'
+import { clampMarkdownTocPanelWidth } from '~shared/markdown-toc-panel-width'
+import { persistedUIValuesEqual } from '~shared/persisted-ui-equality'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import { DEFAULT_STATUS_BAR_ITEMS, normalizeStatusBarItems } from '~shared/status-bar-defaults'
 import {
   DEFAULT_STATUS_BAR_USAGE_MODE,
   normalizeStatusBarUsageMode,
   type StatusBarUsageMode
-} from '../../../../shared/status-bar-usage-mode'
-import type { LaunchSource } from '../../../../shared/telemetry-events'
+} from '~shared/status-bar-usage-mode'
+import type { LaunchSource } from '~shared/telemetry-events'
 import type {
   ChangelogData,
   CustomPet,
@@ -74,41 +85,23 @@ import type {
   WorkspaceHostScope,
   VisibleWorkspaceHostIds,
   TopLevelView
-} from '../../../../shared/types'
-import { PET_SIZE_DEFAULT, PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../shared/types'
-import type { UsagePercentageDisplay } from '../../../../shared/usage-percentage-display'
+} from '~shared/types'
+import { PET_SIZE_DEFAULT, PET_SIZE_MAX, PET_SIZE_MIN } from '~shared/types'
+import type { UsagePercentageDisplay } from '~shared/usage-percentage-display'
 import {
   DEFAULT_USAGE_PERCENTAGE_DISPLAY,
   normalizeUsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
+} from '~shared/usage-percentage-display'
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   type WorkspaceCleanupDismissal
-} from '../../../../shared/workspace/cleanup'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace/ports'
+} from '~shared/workspace/cleanup'
+import type { WorkspacePortScanResult } from '~shared/workspace/ports'
 import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
-} from '../../../../shared/workspace/statuses'
-import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/id'
-import {
-  deriveRunningAgentSendTargets,
-  resolveRunningAgentSendTarget
-} from '../../components/sidebar/running-agent-targets'
-import {
-  filterSetupScriptPromptDismissalsToValidRepos,
-  getSetupScriptPromptDismissalKey,
-  sanitizeSetupScriptPromptDismissals
-} from '../../components/sidebar/setup-script-prompt'
-import type { YiruHookScriptKind } from '../../components/sidebar/yiru-hook-trust'
-import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
-import {
-  getContextualTourRequestDecision,
-  hasContextualTourTarget,
-  getNextVisibleContextualTourStepIndex,
-  getPreviousVisibleContextualTourStepIndex
-} from '../../runtime/contextual-tour-gate'
-import { revokeCustomPetBlobUrl } from '../../runtime/custom-pet-blob-cache'
+} from '~shared/workspace/statuses'
+
 import { normalizeRightSidebarRoute } from '../right-sidebar-route'
 import type { AppState } from '../types'
 import { findPrevLiveWorktreeHistoryIndex } from './worktree-nav-history'
@@ -893,7 +886,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
 
     const label = formatAgentTypeLabel(target.entry.agentType)
     const { activeAgentNotesSendFailureMessage, sendNotesToActiveAgentSession } =
-      await import('@/components/editor/active-agent-note-send')
+      await import('~renderer/components/editor/active-agent-note-send')
     const result = await sendNotesToActiveAgentSession({
       state: get(),
       worktreeId: mode.worktreeId,
@@ -940,7 +933,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       return false
     }
 
-    const { track } = await import('@/lib/telemetry')
+    const { track } = await import('~renderer/lib/telemetry')
     if (!stillCurrent()) {
       return false
     }

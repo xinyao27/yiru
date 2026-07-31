@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 
-import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
+import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 const COWORKING_VISIBILITY_DENY_JOURNAL_VERSION = 1
 

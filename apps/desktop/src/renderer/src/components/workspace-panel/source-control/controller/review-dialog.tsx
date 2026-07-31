@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
+import { markCommitMessageGenerationHydrated } from '~renderer/components/workspace-panel/commit-message-generation-state'
+import { shouldHydratePullRequestGenerationResult } from '~renderer/components/workspace-panel/pull-request-generation-state'
 
-import { markCommitMessageGenerationHydrated } from '../../commit-message-generation-state'
-import { shouldHydratePullRequestGenerationResult } from '../../pull-request-generation-state'
 import { writeCommitDraftForWorktree } from '../panel-state'
 import { hasConfiguredSourceControlTextGenerationDefaults } from '../text-generation-defaults'
 import type { SourceControlReviewGenerationController } from './review-generation'

@@ -1,8 +1,7 @@
 import type React from 'react'
-
-import type { RightSidebarExplorerView } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { Tabs, TabsList, TabsTrigger } from '../../ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { translate } from '~renderer/i18n/i18n'
+import type { RightSidebarExplorerView } from '~shared/types'
 
 type FileExplorerViewSwitchProps = {
   view: RightSidebarExplorerView

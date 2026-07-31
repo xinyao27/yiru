@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react'
-
-import { useAppStore } from '@/store'
-
-import type { SearchResult } from '../../../../../shared/types'
-import { getConnectionId } from '../../../lib/connection-context'
-import { searchRuntimeFiles } from '../../../runtime/file-client'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { searchRuntimeFiles } from '~renderer/runtime/file-client'
 import {
   createEmptyRuntimeFileSearchResult,
   getRuntimeFileSearchRejectedField
-} from '../../../runtime/file-search-bounds'
+} from '~renderer/runtime/file-search-bounds'
+import { useAppStore } from '~renderer/store'
+import type { SearchResult } from '~shared/types'
+
 import { getRightSidebarWorktreeRuntimeSettings } from './runtime-owner'
 
 const SEARCH_DEBOUNCE_MS = 300

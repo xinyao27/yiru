@@ -11,12 +11,16 @@ import {
   type IconProps
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { MARKUP_COLORS, MARKUP_FONT_SIZES, MARKUP_WIDTHS, type MarkupTool } from './drawing-model'
 

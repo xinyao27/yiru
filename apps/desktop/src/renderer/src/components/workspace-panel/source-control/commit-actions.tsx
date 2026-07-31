@@ -8,20 +8,20 @@ import {
   Plus
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { ButtonGroup } from '../../ui/button-group'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+
 import type { DropdownActionKind, DropdownEntry } from './dropdown-items'
 import type { PrimaryAction } from './primary-action'
 

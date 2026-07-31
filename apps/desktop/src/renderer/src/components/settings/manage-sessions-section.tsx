@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import type { PtyManagementSession } from '~preload/api-types'
+import { translate } from '~renderer/i18n/i18n'
+import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '@/i18n/i18n'
-import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-
-import type { PtyManagementSession } from '../../../../preload/api-types'
-import { useAppStore } from '../../store'
 import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-actions'
 import { ManageSessionKillDialog } from './manage-session-kill-dialog'
 import { ManageSessionsTable } from './manage-sessions-table'

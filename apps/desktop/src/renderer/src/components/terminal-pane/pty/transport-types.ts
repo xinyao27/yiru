@@ -1,12 +1,11 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
-
-import type { StartupCommandDelivery } from '../../../../../shared/codex-startup-delivery'
-import type { ProjectExecutionRuntimeResolution } from '../../../../../shared/project-execution-runtime'
-import type { EventProps } from '../../../../../shared/telemetry-events'
-import type { TerminalOscColorQueryReplyColors } from '../../../../../shared/terminal/osc-color-reply'
-import type { TuiAgent } from '../../../../../shared/types'
-import type { PtyDataMeta } from '../../../runtime/pty-data-meta'
+import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import type { EventProps } from '~shared/telemetry-events'
+import type { TerminalOscColorQueryReplyColors } from '~shared/terminal/osc-color-reply'
+import type { TuiAgent } from '~shared/types'
 
 export type PtyBufferSnapshot = {
   data: string

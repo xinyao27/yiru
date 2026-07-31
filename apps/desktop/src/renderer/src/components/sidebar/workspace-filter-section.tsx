@@ -1,9 +1,8 @@
 import { GitMerge, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilterSection() {
   const showSleepingWorkspaces = useAppStore((s) => s.showSleepingWorkspaces)

@@ -1,16 +1,22 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { AndroidLogo, IosBrandIcon } from '~renderer/components/mobile/brand-icons'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { callRuntimeRpc } from '../../../runtime/rpc-client'
-import { LoadingIndicator } from '../../loading-indicator'
-import { AndroidLogo, IosBrandIcon } from '../../mobile/brand-icons'
-import { Badge } from '../../ui/badge'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { SettingsRow, SettingsSwitchRow } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 import { MobileEmulatorAgentControlRow } from './emulator-agent-control-row'

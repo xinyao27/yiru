@@ -6,12 +6,12 @@ import type {
   AiVaultSort
 } from '@yiru/workbench-model/agent'
 import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
 import {
   RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
   RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME

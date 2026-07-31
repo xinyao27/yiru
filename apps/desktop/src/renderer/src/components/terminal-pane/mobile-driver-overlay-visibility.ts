@@ -1,4 +1,4 @@
-import type { FitHoldMode } from '@/lib/pane-manager/mobile-fit-overrides'
+import type { FitHoldMode } from '~renderer/lib/pane-manager/mobile-fit-overrides'
 
 export function shouldShowMobileDriverOverlay(
   driverKind: 'idle' | 'desktop' | 'mobile',

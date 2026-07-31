@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { useAppStore } from '~renderer/store'
+import { useRepoById } from '~renderer/store/selectors'
+import { isFolderRepo } from '~shared/repo-kind'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { useAppStore } from '@/store'
-import { useRepoById } from '@/store/selectors'
-
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import { createRightSidebarActivityItems } from './right-sidebar-activity-items'
 import { getVisibleRightSidebarActivityItems } from './right-sidebar-activity-visibility'

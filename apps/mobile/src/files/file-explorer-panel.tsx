@@ -2,9 +2,9 @@ import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, View, type ListRenderItem } from 'react-native'
 
-import { MobileGlassHeader } from '@/components/glass/header'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { MobileGlassTextButton } from '@/components/glass/text-button'
+import { MobileGlassHeader } from '~/components/glass/header'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'

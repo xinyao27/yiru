@@ -1,6 +1,6 @@
-import { basename, dirname, joinPath, normalizeRelativePath } from '@/lib/path'
+import { basename, dirname, joinPath, normalizeRelativePath } from '~renderer/lib/path'
+import type { CoworkingFileTreeEntry } from '~shared/coworking/operation-contract'
 
-import type { CoworkingFileTreeEntry } from '../../../../shared/coworking/operation-contract'
 import type { CoworkingFileAction } from './file-action-dialog'
 import { parseCoworkingMutationResult } from './owner-result-validation'
 import { invokeCoworkingWorkspaceMutation } from './workspace-operation'

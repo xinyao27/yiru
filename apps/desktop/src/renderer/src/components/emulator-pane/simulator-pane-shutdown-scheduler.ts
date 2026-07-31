@@ -1,7 +1,6 @@
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import { shouldShutdownSimulatorForPaneUnmountFromTabs } from '../../lib/simulator-tab-shutdown'
+import { shouldShutdownSimulatorForPaneUnmountFromTabs } from '~renderer/lib/simulator-tab-shutdown'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 type SimulatorTabReference = {
   id: string

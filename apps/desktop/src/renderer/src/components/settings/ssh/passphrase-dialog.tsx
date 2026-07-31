@@ -1,9 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,8 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
-import { Input } from '../../ui/input'
+} from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 export function SshPassphraseDialog(): React.JSX.Element | null {
   const request = useAppStore((s) => s.sshCredentialQueue[0] ?? null)

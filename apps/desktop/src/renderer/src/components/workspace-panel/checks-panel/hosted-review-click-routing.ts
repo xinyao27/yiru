@@ -1,4 +1,7 @@
-import { openHttpLink, type OpenHttpLinkOptions } from '../../editor/http-link-routing'
+import {
+  openHttpLink,
+  type OpenHttpLinkOptions
+} from '~renderer/components/editor/http-link-routing'
 
 type ChecksPanelHostedReviewClickEvent = Pick<MouseEvent, 'metaKey' | 'ctrlKey' | 'shiftKey'>
 

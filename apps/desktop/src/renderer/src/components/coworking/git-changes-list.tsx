@@ -1,13 +1,12 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import type React from 'react'
 import { useMemo, useState } from 'react'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { CoworkingGitStatusEntry } from '~shared/coworking/operation-contract'
 
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { CoworkingGitStatusEntry } from '../../../../shared/coworking/operation-contract'
 import { SourceControlSectionHeader } from '../workspace-panel/source-control/section-header'
 import { CoworkingTruncatedPathLabel } from './truncated-path-label'
 

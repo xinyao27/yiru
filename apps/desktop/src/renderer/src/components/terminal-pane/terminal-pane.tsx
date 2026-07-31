@@ -18,91 +18,100 @@ import { useShallow } from 'zustand/react/shallow'
 // shared lazy chunk instead of the app's eager first-paint CSS.
 import '@xterm/xterm/css/xterm.css'
 import './terminal.css'
-import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
-import { DaemonActionDialog, useDaemonActions } from '@/components/daemon-actions/use-actions'
-import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
-import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import { AgentSessionContinuationDialog } from '~renderer/components/agent-session-continuation/dialog'
+import {
+  DaemonActionDialog,
+  useDaemonActions
+} from '~renderer/components/daemon-actions/use-actions'
+import { useLinkRoutingPreferenceDialog } from '~renderer/components/link-routing-preference-dialog'
+import { resolveTerminalLayoutActiveLeafId } from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
   sanitizeTerminalLayoutPaneTitles
-} from '@/components/terminal-pane/title-sanitization'
+} from '~renderer/components/terminal-pane/title-sanitization'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
-} from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
-import TerminalSearch from '@/components/terminal-search'
-import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
-import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
-import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
-import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
-import { requestFriday } from '@/lib/friday'
-import { useEffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/use-effective-mac-option-as-alt'
-import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
+} from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
+import TerminalSearch from '~renderer/components/terminal-search'
+import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
+import { CODEX_ACCOUNT_RESTART_STARTUP } from '~renderer/lib/codex-session-restart'
+import { getConnectionId, getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
+import { requestFriday } from '~renderer/lib/friday'
+import { useEffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/use-effective-mac-option-as-alt'
+import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   getAllDrivers,
   getDriverForPty,
   isPtyLocked,
   onDriverChange
-} from '@/lib/pane-manager/mobile-driver-state'
+} from '~renderer/lib/pane-manager/mobile-driver-state'
 import {
   getMobileFitOverridePtyIds,
   getFitOverrideForPty,
   onOverrideChange
-} from '@/lib/pane-manager/mobile-fit-overrides'
+} from '~renderer/lib/pane-manager/mobile-fit-overrides'
 import type {
   ManagedPane,
   PaneExternalDropTarget,
   PaneManager
-} from '@/lib/pane-manager/pane-manager'
-import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
-import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/registry'
-import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
+} from '~renderer/lib/pane-manager/pane-manager'
+import { safeFit, safeFitAndThen } from '~renderer/lib/pane-manager/pane-tree-ops'
+import { refitAndRefreshAllTerminalPanes } from '~renderer/lib/pane-manager/registry'
+import { clearTerminalScrollbackAndFollowOutput } from '~renderer/lib/pane-manager/terminal-scrollback-clear'
 import {
   armPrimarySelectionNativePasteSuppression,
   isPrimarySelectionEnabled,
   readPrimarySelectionText
-} from '@/lib/primary-selection'
+} from '~renderer/lib/primary-selection'
 import {
   DEFAULT_TERMINAL_DIVIDER_DARK,
   isTerminalBackgroundLight,
   normalizeColor,
   resolveOpaqueTerminalBackground,
   resolveEffectiveTerminalAppearance
-} from '@/lib/terminal-theme'
-import { WORKSPACE_FILE_PATH_MIME, WORKSPACE_FILE_PATHS_MIME } from '@/lib/workspace-file-drag'
+} from '~renderer/lib/terminal-theme'
+import {
+  WORKSPACE_FILE_PATH_MIME,
+  WORKSPACE_FILE_PATHS_MIME
+} from '~renderer/lib/workspace-file-drag'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeEnvironmentIdForWorktree
-} from '@/lib/worktree-runtime-owner'
-import { hydrateRuntimeEnvironmentSshState } from '@/runtime/environment-ssh-state'
-import { inspectRuntimeTerminalProcess, isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
+} from '~renderer/lib/worktree-runtime-owner'
+import { hydrateRuntimeEnvironmentSshState } from '~renderer/runtime/environment-ssh-state'
+import {
+  inspectRuntimeTerminalProcess,
+  isRemoteRuntimePtyId
+} from '~renderer/runtime/terminal-inspection'
 import {
   clearWebRuntimeTerminalBuffer,
   closeWebRuntimeTerminal,
   updateWebRuntimePaneLayout
-} from '@/runtime/web-runtime-session'
-import { isUnifiedTabPinned } from '@/store/pinned-tab-close-guard'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import { isUnifiedTabPinned } from '~renderer/store/pinned-tab-close-guard'
 import {
   selectRuntimeAwareSshStatus,
   selectRuntimeAwareSshTargetLabel,
   selectRuntimeAwareSshTargetRemoved
-} from '@/store/slices/runtime-environment-ssh'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { keybindingMatchesAction } from '../../../../shared/keybindings'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
+} from '~renderer/store/slices/runtime-environment-ssh'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { keybindingMatchesAction } from '~shared/keybindings'
+import { makePaneKey } from '~shared/stable-pane-id'
+import type { TerminalKittyKeyboardModeTracker } from '~shared/terminal/kitty-keyboard-mode-tracker'
 import {
   getTerminalQuickCommandScope,
   isTerminalQuickCommandComplete,
   terminalQuickCommandMatchesRepo
-} from '../../../../shared/terminal/quick-commands'
-import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal/session-state-save-failure'
-import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal/zero-dimensions-diagnostic'
-import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
-import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace/session-terminal-buffers'
-import { useAppStore } from '../../store'
+} from '~shared/terminal/quick-commands'
+import { isTerminalSessionStateSaveFailure } from '~shared/terminal/session-state-save-failure'
+import { isTerminalZeroDimensionsDiagnostic } from '~shared/terminal/zero-dimensions-diagnostic'
+import type { TerminalQuickCommand, TerminalQuickCommandScope } from '~shared/types'
+import { shouldPreserveTerminalScrollbackBuffers } from '~shared/workspace/session-terminal-buffers'
+
 import { canToggleNativeChat } from '../native-chat/availability'
 import {
   nativeChatLaunchAgentForLeaf,
@@ -181,12 +190,12 @@ function isInsideNativeChatRoot(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(NATIVE_CHAT_ROOT_SELECTOR) !== null
 }
 
-import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
 // Why: registry lives in a leaf module so the store slice can import it
 // without re-entering the `slice → TerminalPane → store → slice` cycle
 // that otherwise leaves createTerminalSlice undefined at store-init time.
-import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
-import { useRepoById } from '@/store/selectors'
+import { shutdownBufferCaptures } from '~renderer/runtime/terminal-shutdown-buffer-captures'
+import { useRepoById } from '~renderer/store/selectors'
 
 import {
   applyTerminalPaneAttentionToManager,

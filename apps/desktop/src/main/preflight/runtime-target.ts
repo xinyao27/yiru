@@ -1,4 +1,5 @@
-import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+
 import type { WslPreflightTarget } from './wsl-agent-detection'
 
 export type PreflightRuntimeContext = {

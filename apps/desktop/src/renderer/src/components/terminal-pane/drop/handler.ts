@@ -1,10 +1,10 @@
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { readWorkspaceFileDragPaths } from '~renderer/lib/workspace-file-drag'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '../../../i18n/i18n'
-import { getConnectionId } from '../../../lib/connection-context'
-import { readWorkspaceFileDragPaths } from '../../../lib/workspace-file-drag'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { useAppStore } from '../../../store'
 import { getTerminalPasteSshRemotePlatform } from '../paste/ssh-platform'
 import { recordTerminalUserInputForLeaf } from '../terminal-input-activity'
 import {

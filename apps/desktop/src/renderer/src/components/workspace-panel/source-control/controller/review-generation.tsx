@@ -1,12 +1,4 @@
 import { useCallback } from 'react'
-
-import { getConnectionId } from '../../../../lib/connection-context'
-import {
-  cancelRuntimeGeneratePullRequestFields,
-  generateRuntimePullRequestFields,
-  type RuntimeGeneratePullRequestFieldsOverrides
-} from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
 import {
   createRunningPullRequestGenerationRecord,
   markPullRequestGenerationTerminalSeedRestored,
@@ -16,11 +8,19 @@ import {
   type PullRequestFieldRevisions,
   type PullRequestGenerationContext,
   type PullRequestGenerationFields
-} from '../../pull-request-generation-state'
+} from '~renderer/components/workspace-panel/pull-request-generation-state'
 import {
   stripBaseRef,
   useCreatePullRequestDialogFields
-} from '../../use-create-pull-request-dialog-fields'
+} from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import {
+  cancelRuntimeGeneratePullRequestFields,
+  generateRuntimePullRequestFields,
+  type RuntimeGeneratePullRequestFieldsOverrides
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+
 import type { SourceControlConflictActionsController } from './conflict-actions'
 
 export function useSourceControlReviewGeneration(scope: SourceControlConflictActionsController) {

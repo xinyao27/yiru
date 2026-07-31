@@ -1,15 +1,15 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type React from 'react'
 import { useEffect } from 'react'
-
-import { translate } from '../../../i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
-} from '../../../lib/update-check-click-options'
-import { useAppStore } from '../../../store'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+} from '~renderer/lib/update-check-click-options'
+import { useAppStore } from '~renderer/store'
+
 import { SearchableSetting } from '../searchable-setting'
 
 export function GeneralRemoteServerUpdates(): React.JSX.Element | null {

@@ -1,9 +1,8 @@
 import { ArrowLeft } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 type AutomationRunPageFrameProps = {
   title: string

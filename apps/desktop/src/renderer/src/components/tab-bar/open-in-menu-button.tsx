@@ -1,5 +1,4 @@
 import { FolderOpen, CaretDown } from '@phosphor-icons/react'
-
 import {
   getLocalFileManagerLabel,
   getPreferredWorktreeOpenInEntry,
@@ -7,24 +6,24 @@ import {
   openWorktreePath,
   type OpenInMenuEntry,
   WorktreeOpenInMenuContent
-} from '@/components/sidebar/worktree-open-in-menu'
-import type { DropIndicator } from '@/components/tab-bar/drop-indicator'
-import { Button } from '@/components/ui/button'
+} from '~renderer/components/sidebar/worktree-open-in-menu'
+import type { DropIndicator } from '~renderer/components/tab-bar/drop-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
-import { useRepoById } from '@/store/selectors'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { useRepoById } from '~renderer/store/selectors'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '~shared/workspace/panel-titlebar-pinned'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '../../../../shared/workspace/panel-titlebar-pinned'
 import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 

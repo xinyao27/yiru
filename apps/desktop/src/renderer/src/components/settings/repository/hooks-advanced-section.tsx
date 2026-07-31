@@ -1,8 +1,8 @@
 import { Warning as AlertTriangle, CaretRight as ChevronRight } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { HookCommandSourcePolicy, YiruHooks } from '~shared/types'
 
-import type { HookCommandSourcePolicy, YiruHooks } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
 import { SearchableSetting } from '../searchable-setting'
 import { ExampleTemplateCard, PolicyOptionGrid, YamlScriptBlock } from './hook-policy-controls'
 import { getCommandSourceLabel, type PolicyOption, YAML_STATE_STYLES } from './hook-settings-model'

@@ -1,20 +1,20 @@
-import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   activateWebRuntimeSessionTab,
   closeWebRuntimeSessionTab,
   isWebRuntimeSessionActive,
   toHostSessionTabId
-} from '@/runtime/web-runtime-session'
-import { resolveHostSessionTabIdForWebSessionTab } from '@/runtime/web-session-tabs-sync'
-import { useAppStore } from '@/store'
-import { guardPinnedTabClose, resolvePinnedTabLabel } from '@/store/pinned-tab-close-guard'
+} from '~renderer/runtime/web-runtime-session'
+import { resolveHostSessionTabIdForWebSessionTab } from '~renderer/runtime/web-session-tabs-sync'
+import { useAppStore } from '~renderer/store'
+import { guardPinnedTabClose, resolvePinnedTabLabel } from '~renderer/store/pinned-tab-close-guard'
 import type {
   TerminalTabCloseReason,
   TerminalTabRetirementPlan
-} from '@/store/slices/terminal-tab-retirement'
+} from '~renderer/store/slices/terminal-tab-retirement'
+import type { TabContentType } from '~shared/types'
 
-import type { TabContentType } from '../../../../shared/types'
 import { reconcileTabOrder } from '../tab-bar/reconcile-order'
 import { closeLocalTerminalTabState } from './close-local-terminal-tab-state'
 import {

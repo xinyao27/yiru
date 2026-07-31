@@ -1,10 +1,9 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
-
 import {
   getAgentSessionOptionCatalog,
   mergeCatalogModels,
   type CatalogModel
-} from '../../../../../shared/agent/session-option-catalog'
+} from '~shared/agent/session-option-catalog'
 
 type CatalogEnrichmentEntry = {
   state: 'idle' | 'pending' | 'settled'

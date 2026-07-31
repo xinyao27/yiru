@@ -1,14 +1,13 @@
 import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { useAppStore } from '~renderer/store'
+import { createNestedRepoTelemetryAttemptId } from '~shared/nested-repo-telemetry'
+import type { NestedRepoScanResult } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import { createNestedRepoTelemetryAttemptId } from '../../../../../shared/nested-repo-telemetry'
-import type { NestedRepoScanResult } from '../../../../../shared/types'
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
-import { extractIpcErrorMessage } from '../../../lib/ipc-error'
 import { upsertAddedRepoWithProjectHostSetup } from './store-upsert'
 
 // ── SSH host project hook ───────────────────────────────────────────

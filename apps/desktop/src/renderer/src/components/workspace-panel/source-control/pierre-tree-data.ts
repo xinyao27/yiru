@@ -1,11 +1,7 @@
 import type { GitStatusEntry as PierreGitStatusEntry } from '@pierre/trees'
+import { normalizeRelativePath } from '~renderer/lib/path'
+import type { GitBranchChangeEntry, GitFileStatus, GitStatusEntry } from '~shared/types'
 
-import type {
-  GitBranchChangeEntry,
-  GitFileStatus,
-  GitStatusEntry
-} from '../../../../../shared/types'
-import { normalizeRelativePath } from '../../../lib/path'
 import type { SourceControlTreeDirectoryNode } from './directory-action-paths'
 import {
   SUBMODULE_EMPTY_LABEL,

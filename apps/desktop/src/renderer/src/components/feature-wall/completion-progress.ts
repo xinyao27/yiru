@@ -1,7 +1,7 @@
-import type { AgentsStepId } from '../../../../shared/agents-orchestration-steps'
-import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
-import type { ReviewStepId } from '../../../../shared/review-steps'
-import type { WorkbenchStepId } from '../../../../shared/workbench-steps'
+import type { AgentsStepId } from '~shared/agents-orchestration-steps'
+import type { FeatureWallWorkflowId } from '~shared/feature-wall-workflows'
+import type { ReviewStepId } from '~shared/review-steps'
+import type { WorkbenchStepId } from '~shared/workbench-steps'
 
 export const FEATURE_WALL_AGENT_STEP_IDS: readonly AgentsStepId[] = [
   'statuses',

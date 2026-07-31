@@ -1,18 +1,18 @@
 import type { JSX } from 'react'
-
-import { useActiveProjectSkillRuntime } from '../../../hooks/use-active-project-skill-runtime'
-import type { InstalledAgentSkillState } from '../../../hooks/use-installed-agent-skills'
-import { translate } from '../../../i18n/i18n'
-import { ORCHESTRATION_SKILL_NAME } from '../../../lib/agent-feature-install-commands'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
+import type { InstalledAgentSkillState } from '~renderer/hooks/use-installed-agent-skills'
+import { translate } from '~renderer/i18n/i18n'
+import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '../../../lib/agent-skill-cli-prerequisite'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
 import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
-} from '../../../lib/orchestration-install-command'
-import { useAppStore } from '../../../store'
+} from '~renderer/lib/orchestration-install-command'
+import { useAppStore } from '~renderer/store'
+
 import { AgentSkillSetupPanel } from '../agent/skill-setup-panel'
 import {
   buildSkillCommandForRuntime,

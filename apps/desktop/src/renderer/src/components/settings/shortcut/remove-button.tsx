@@ -1,10 +1,9 @@
 import { X } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { KeybindingActionId } from '../../../../../shared/keybindings'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { KeybindingActionId } from '~shared/keybindings'
 
 // Removes one binding from an action. The hover-reveal wrapper lives in the
 // parent row so it can key off that row's hover group (the header row and the

@@ -1,11 +1,7 @@
-import { getNewExternalWorktreeInboxWorktrees } from '../../../../shared/external-worktree-inbox'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type {
-  DetectedWorktree,
-  DetectedWorktreeListResult,
-  Repo,
-  Worktree
-} from '../../../../shared/types'
+import { getNewExternalWorktreeInboxWorktrees } from '~shared/external-worktree-inbox'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { DetectedWorktree, DetectedWorktreeListResult, Repo, Worktree } from '~shared/types'
+
 import type { NewExternalWorktreesInboxCandidate } from './worktree-list-groups'
 
 export function buildNewExternalWorktreesInboxCandidates(args: {

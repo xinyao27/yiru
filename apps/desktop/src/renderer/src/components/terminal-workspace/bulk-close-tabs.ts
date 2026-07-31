@@ -1,9 +1,10 @@
-import { browserWorkspaceHasRemoteOwner } from '../../runtime/remote-browser-tab-ownership'
+import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
   closeWebRuntimeSessionTab,
   isWebRuntimeSessionActive
-} from '../../runtime/web-runtime-session'
-import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
+} from '~renderer/runtime/web-runtime-session'
+import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
+
 import { closeTerminalTab } from '../terminal/tab-actions'
 import {
   getActiveWorktreeRuntimeEnvironmentId,

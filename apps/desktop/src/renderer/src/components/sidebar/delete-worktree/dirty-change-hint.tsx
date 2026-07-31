@@ -1,8 +1,7 @@
 import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type { JSX } from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 export function DeleteWorktreeDirtyChangeHint({
   changeCount

@@ -1,13 +1,13 @@
 import { GitMerge, CaretDown as ChevronDown } from '@phosphor-icons/react'
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { DialogHeader, DialogTitle, DialogDescription } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog'
-import { Input } from '../../ui/input'
 import {
   formatCreateProjectParentSummary,
   joinCreateProjectPath,

@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { detectLanguage } from '@/lib/language-detect'
-import { joinPath } from '@/lib/path'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
-import { deleteRuntimePath, readRuntimeDirectory, runtimePathExists } from '@/runtime/file-client'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import {
+  deleteRuntimePath,
+  readRuntimeDirectory,
+  runtimePathExists
+} from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
 
 import type { WorktreeContextMenuState } from './state'
 

@@ -1,14 +1,13 @@
 import type { JSX } from 'react'
-
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { getFeatureWallOpenSource } from './modal-helpers'
 import { FeatureWallTourSurface } from './tour-surface'

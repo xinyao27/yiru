@@ -1,5 +1,5 @@
-import { getWorktreeMapFromState } from '@/store/selectors'
-import type { AppState } from '@/store/types'
+import { getWorktreeMapFromState } from '~renderer/store/selectors'
+import type { AppState } from '~renderer/store/types'
 
 export function selectMarkdownDocumentWorktreePath(
   state: Pick<AppState, 'worktreesByRepo'>,

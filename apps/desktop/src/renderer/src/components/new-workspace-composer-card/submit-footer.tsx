@@ -1,13 +1,12 @@
 import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import type { WorkspaceCreateErrorDisplay } from '@/components/new-workspace-composer-card/workspace-create-error-format'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getScreenSubmitModifierLabel } from '@/lib/screen-submit-shortcut'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import type { WorkspaceCreateErrorDisplay } from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
+import { Button } from '~renderer/components/ui/button'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getScreenSubmitModifierLabel } from '~renderer/lib/screen-submit-shortcut'
 
 type SubmitFooterProps = {
   createError: WorkspaceCreateErrorDisplay | null

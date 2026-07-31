@@ -1,10 +1,9 @@
 import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { Repo } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { Repo } from '../../../../shared/types'
 import RepoBadgeLabel from '../repo/badge-label'
 import { Button } from '../ui/button'
 import { Command, CommandItem, CommandList } from '../ui/command'

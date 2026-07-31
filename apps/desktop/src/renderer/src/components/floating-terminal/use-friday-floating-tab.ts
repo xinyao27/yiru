@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState, type SetStateAction } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { focusNativeChatTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { getFridayRequestMode, TOGGLE_FRIDAY_EVENT, type FridayRequestMode } from '@/lib/friday'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { focusNativeChatTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import {
+  getFridayRequestMode,
+  TOGGLE_FRIDAY_EVENT,
+  type FridayRequestMode
+} from '~renderer/lib/friday'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
 type UseFridayFloatingTabArgs = {
   floatingWorkspaceOpen: boolean

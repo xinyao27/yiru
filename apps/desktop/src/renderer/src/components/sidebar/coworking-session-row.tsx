@@ -1,9 +1,8 @@
 import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
 
 import type { CoworkingSessionSidebarRow } from './coworking-sidebar-rows'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'

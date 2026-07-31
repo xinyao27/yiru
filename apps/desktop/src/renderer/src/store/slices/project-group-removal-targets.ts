@@ -1,5 +1,5 @@
-import { getProjectGroupSubtreeIds } from '../../../../shared/project-groups'
-import type { ProjectGroup, Repo } from '../../../../shared/types'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
+import type { ProjectGroup, Repo } from '~shared/types'
 
 export type ProjectGroupRemovalTargets = {
   groupExists: boolean

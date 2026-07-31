@@ -1,9 +1,9 @@
 import { z } from 'zod'
+import { syncFederatedDispatch } from '~main/runtime/orchestration/federation-sync'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { requiredString } from '~shared/runtime-method-contracts/runtime-method-params'
 
-import { requiredString } from '../../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { syncFederatedDispatch } from '../../../../orchestration/federation-sync'
-import { OrchestrationError } from '../../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../../core'
 import { inspectWorkerTerminal, resolvePinnedFederatedServer } from './observation'
 
 const WorkerDispatchParams = z.object({ dispatch: requiredString('Missing --dispatch') })

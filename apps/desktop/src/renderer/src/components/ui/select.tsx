@@ -6,12 +6,11 @@ import {
   CaretDown as ChevronDownIcon,
   CaretUp as ChevronUpIcon
 } from '@phosphor-icons/react'
-
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/floating-surface-styles'
+import { cn } from '~renderer/lib/class-names'
 
 // Bare re-export: SelectPrimitive.Root.Props is generic <Value, Multiple>, which
 // a wrapper function / ComponentProps cannot express without erasing the generic.

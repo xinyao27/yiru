@@ -1,11 +1,10 @@
-import { callRuntimeRpc } from '@/runtime/rpc-client'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
-} from '@/runtime/terminal-stream'
-
-import { mapWithConcurrency } from '../../../../shared/map-with-concurrency'
-import type { GlobalSettings } from '../../../../shared/types'
+} from '~renderer/runtime/terminal-stream'
+import { mapWithConcurrency } from '~shared/map-with-concurrency'
+import type { GlobalSettings } from '~shared/types'
 
 type TerminalFitRestoreSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | undefined
 

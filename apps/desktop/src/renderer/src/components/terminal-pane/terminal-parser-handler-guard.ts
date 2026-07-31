@@ -1,4 +1,4 @@
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-breadcrumb-recorder'
 
 // Why: xterm's EscapeSequenceParser invokes custom CSI/OSC handlers
 // synchronously inside WriteBuffer._innerWrite, which has no try/catch. A

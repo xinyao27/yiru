@@ -1,17 +1,17 @@
 import { shouldForcePushWithLeaseForUpstream } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import type { GitConflictOperation } from '../../../../../../shared/types'
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
-} from '../../../../i18n/hosted-review-localized-copy'
-import { translate } from '../../../../i18n/i18n'
-import { getConnectionId } from '../../../../lib/connection-context'
-import { openWorkspacePanelTab } from '../../../../lib/open-workspace-panel-tab'
-import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
+} from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
+import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import type { GitConflictOperation } from '~shared/types'
+
 import type {
   AbortConflictOperation,
   CreatedHostedReview,

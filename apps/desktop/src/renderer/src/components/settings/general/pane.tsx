@@ -1,9 +1,9 @@
 import type React from 'react'
+import { Separator } from '~renderer/components/ui/separator'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Separator } from '../../ui/separator'
 import { CliSection } from '../cli-section'
 import { DefaultWindowsProjectRuntimeSetting } from '../default-windows-project-runtime-setting'
 import { SettingsSubsectionHeader, SettingsSwitchRow } from '../form-controls'

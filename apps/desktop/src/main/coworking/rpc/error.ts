@@ -1,4 +1,5 @@
-import type { CoworkingRpcFailure } from '../../../shared/coworking/wire-contract'
+import type { CoworkingRpcFailure } from '~shared/coworking/wire-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 
 export class CoworkingRpcError extends Error {

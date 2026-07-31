@@ -1,11 +1,9 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this page is a timed storyboard; phase state intentionally advances from animation effects and reduced-motion gates. */
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
+import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import './orchestration.css'
 

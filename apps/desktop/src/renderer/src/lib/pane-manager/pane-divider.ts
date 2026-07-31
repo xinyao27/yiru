@@ -1,4 +1,4 @@
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import { attachDividerDrag, disposeDividerDrag, type DividerCallbacks } from './pane-divider-drag'
 import type { PaneStyleOptions, ManagedPaneInternal } from './types'

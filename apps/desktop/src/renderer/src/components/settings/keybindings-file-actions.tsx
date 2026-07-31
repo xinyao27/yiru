@@ -8,14 +8,13 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
+import { isFloatingWorkspacePanelVisible } from '~renderer/lib/floating-workspace-terminal-actions'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
-import { translate } from '@/i18n/i18n'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '../../lib/floating-terminal'
-import { isFloatingWorkspacePanelVisible } from '../../lib/floating-workspace-terminal-actions'
-import { detectLanguage } from '../../lib/language-detect'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

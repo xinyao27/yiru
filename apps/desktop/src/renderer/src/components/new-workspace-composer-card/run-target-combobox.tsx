@@ -6,13 +6,12 @@ import {
   HardDrives as Server
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import type { ReadyProjectHostSetupOption } from '@/components/new-workspace-composer-card/project-host-setup-options'
-import { Button } from '@/components/ui/button'
-import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import type { ReadyProjectHostSetupOption } from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
+import { Button } from '~renderer/components/ui/button'
+import { Command, CommandEmpty, CommandItem, CommandList } from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { EphemeralVmRecipeOption } from './card-types'
 

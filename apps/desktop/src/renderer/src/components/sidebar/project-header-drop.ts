@@ -1,5 +1,6 @@
-import { getEffectiveProjectGroupManualRank } from '../../../../shared/project-groups'
-import type { Repo } from '../../../../shared/types'
+import { getEffectiveProjectGroupManualRank } from '~shared/project-groups'
+import type { Repo } from '~shared/types'
+
 import type { Row } from './worktree-list-groups'
 import {
   computeWorktreeSidebarHeaderDropPreview,

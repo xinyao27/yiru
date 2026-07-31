@@ -9,8 +9,7 @@ import {
   type Placement
 } from '@floating-ui/dom'
 import type { CSSProperties } from 'react'
-
-import type { ContextualTourStepPlacement } from '../../../../shared/contextual-tours'
+import type { ContextualTourStepPlacement } from '~shared/contextual-tours'
 
 export type ContextualTourPanelPlacement = 'top' | 'right' | 'bottom' | 'left'
 

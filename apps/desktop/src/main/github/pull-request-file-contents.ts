@@ -1,4 +1,5 @@
-import type { GitHubPRFile, GitHubPRFileContents } from '../../shared/types'
+import type { GitHubPRFile, GitHubPRFileContents } from '~shared/types'
+
 import { isMaxBufferOverflowError } from '../git/max-buffer-overflow'
 import {
   acquire,

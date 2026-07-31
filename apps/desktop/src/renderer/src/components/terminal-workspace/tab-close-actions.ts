@@ -1,15 +1,14 @@
 import { useCallback } from 'react'
-
-import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
-
-import { browserWorkspaceHasRemoteOwner } from '../../runtime/remote-browser-tab-ownership'
+import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
+import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
   activateWebRuntimeSessionTab,
   closeWebRuntimeSessionTab,
   isWebRuntimeSessionActive
-} from '../../runtime/web-runtime-session'
-import { useAppStore } from '../../store'
-import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
+
 import { shouldDeferParkedPtyExitTabClose } from '../terminal-pane/terminal-parked-tab-watchers'
 import { closeTerminalTab } from '../terminal/tab-actions'
 import { closeUnifiedTabsById } from './bulk-close-tabs'

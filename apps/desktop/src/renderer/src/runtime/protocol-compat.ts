@@ -4,8 +4,7 @@ import {
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   RUNTIME_PROTOCOL_VERSION
 } from '@yiru/runtime-protocol/capabilities'
-
-import type { RuntimeStatus } from '../../../shared/runtime-types'
+import type { RuntimeStatus } from '~shared/runtime-types'
 
 /** Marker on the compat-gate block error. Tagged as a `.code` on a plain Error
  *  (not a subclass) so the gate keeps throwing an `Error` — its other consumer,

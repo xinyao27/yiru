@@ -1,9 +1,7 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
-
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { useAppStore } from '@/store'
-
-import { keybindingMatchesAction, type KeybindingActionId } from '../../../../shared/keybindings'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
+import { keybindingMatchesAction, type KeybindingActionId } from '~shared/keybindings'
 
 export function editorShortcutMatches(
   actionId: KeybindingActionId,

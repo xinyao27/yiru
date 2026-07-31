@@ -12,9 +12,8 @@ import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,14 +21,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { clearRuntimeCompatibilityCache, unwrapRuntimeRpcResult } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  clearRuntimeCompatibilityCache,
+  unwrapRuntimeRpcResult
+} from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { RuntimeStatus } from '~shared/runtime-types'
 
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { buildHostHeaderMenuModel } from './host-header-menu-items'
 import { HostRemoveDialog } from './host-remove-dialog'
 import { HostRenameDialog } from './host-rename-dialog'

@@ -9,9 +9,8 @@ import {
   ArrowSquareOut as ExternalLink,
   X
 } from '@phosphor-icons/react'
-
-import { showLocalPathOpenBlockedToast } from '@/components/editor/local-path-open-guard'
-import { Button } from '@/components/ui/button'
+import { showLocalPathOpenBlockedToast } from '~renderer/components/editor/local-path-open-guard'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import type { OpenFile } from '../editor/state'
 import { shouldBlockEditorTabLocalOpen } from './editor-tab-local-open-guard'

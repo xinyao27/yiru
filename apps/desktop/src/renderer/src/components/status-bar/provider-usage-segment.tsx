@@ -1,16 +1,15 @@
 import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Progress } from '@/components/ui/progress'
-import { translate } from '@/i18n/i18n'
-
-import type { ProviderRateLimits } from '../../../../shared/rate-limit-types'
-import type { StatusBarUsageMode } from '../../../../shared/status-bar-usage-mode'
+import { Progress } from '~renderer/components/ui/progress'
+import { translate } from '~renderer/i18n/i18n'
+import type { ProviderRateLimits } from '~shared/rate-limit-types'
+import type { StatusBarUsageMode } from '~shared/status-bar-usage-mode'
 import {
   clampUsedPercent,
   getDisplayedUsagePercentage,
   type UsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
+} from '~shared/usage-percentage-display'
+
 import { getProviderUsageStatusLabel, ProviderIcon } from './tooltip'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getUsageUrgency, usageTextColorClass } from './usage-roster-formatting'

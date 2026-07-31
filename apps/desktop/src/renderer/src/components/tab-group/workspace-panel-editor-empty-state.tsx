@@ -1,17 +1,19 @@
 import { toast } from 'sonner'
-
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { Button } from '@/components/ui/button'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { resolveDefaultAgentForNewTab } from '@/lib/agent-tab-shortcuts'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { requestFriday } from '@/lib/friday'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { useAppStore } from '@/store'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
+import {
+  useShortcutKeyDetails,
+  type ShortcutKeyComboDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { resolveDefaultAgentForNewTab } from '~renderer/lib/agent-tab-shortcuts'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { requestFriday } from '~renderer/lib/friday'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { useAppStore } from '~renderer/store'
+import { getKeybindingDefinition, type KeybindingActionId } from '~shared/keybindings'
 
 import logo from '../../../../../resources/yiru-wordmark.png?url'
-import { getKeybindingDefinition, type KeybindingActionId } from '../../../../shared/keybindings'
 
 type WorkspacePanelShortcutHint = {
   actionId: KeybindingActionId

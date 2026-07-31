@@ -1,4 +1,4 @@
-import type { WorkspaceSessionState } from '../../../../shared/types'
+import type { WorkspaceSessionState } from '~shared/types'
 
 export function buildSleepingAgentSessionData(snapshot: {
   sleepingAgentSessionsByPaneKey?: WorkspaceSessionState['sleepingAgentSessionsByPaneKey']

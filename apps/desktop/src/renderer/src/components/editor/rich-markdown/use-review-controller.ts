@@ -1,10 +1,9 @@
 import type { Editor } from '@tiptap/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
+import type { AppState } from '~renderer/store'
+import type { DiffComment } from '~shared/types'
 
-import type { AppState } from '@/store'
-
-import type { DiffComment } from '../../../../../shared/types'
 import { richMarkdownAnnotationHighlightPluginKey } from './annotation-highlight'
 import { updateRichMarkdownAnnotationHighlightsAfterSubmit } from './annotation-submit-highlights'
 import {

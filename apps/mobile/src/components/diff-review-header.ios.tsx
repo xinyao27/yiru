@@ -1,6 +1,6 @@
 import { ActionSheetIOS, Text, View } from 'react-native'
 
-import { MobileSwiftUiGlassAccessoryButton } from '@/components/glass/swift-ui.ios'
+import { MobileSwiftUiGlassAccessoryButton } from '~/components/glass/swift-ui.ios'
 
 import type { MobileDiffReviewQueueFilter } from '../session/diff/review-queue'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/diff/review-screen-model'

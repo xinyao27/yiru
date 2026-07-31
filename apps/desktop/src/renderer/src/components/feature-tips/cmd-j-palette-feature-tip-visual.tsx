@@ -1,10 +1,12 @@
 import { MagnifyingGlass as Search, Plus } from '@phosphor-icons/react'
 import { Fragment, useEffect, useState, type JSX } from 'react'
-
-import { usePrefersReducedMotion } from '@/components/feature-wall/modal-helpers'
-import { formatShortcutKeyComboDetails, useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { usePrefersReducedMotion } from '~renderer/components/feature-wall/modal-helpers'
+import {
+  formatShortcutKeyComboDetails,
+  useShortcutKeyDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 const TYPED_QUERY = 'auth'
 // Why: the real palette lists recent worktrees on open; typing only narrows the

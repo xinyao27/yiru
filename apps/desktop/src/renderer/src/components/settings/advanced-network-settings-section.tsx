@@ -1,13 +1,12 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { normalizeProxyBypassRules, normalizeProxyUrl } from '~shared/network-proxy'
+import type { GlobalSettings } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { normalizeProxyBypassRules, normalizeProxyUrl } from '../../../../shared/network-proxy'
-import type { GlobalSettings } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { Input } from '../ui/input'

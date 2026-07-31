@@ -6,12 +6,12 @@ import {
   UI_LANGUAGE_SPANISH,
   UI_LANGUAGE_SYSTEM,
   type UiLanguage
-} from '../../../shared/ui-language'
+} from '~shared/ui-language'
 import {
   DEFAULT_UI_LOCALE,
   resolveRendererUiLocale,
   type SupportedUiLocale
-} from '../../../shared/ui-locale'
+} from '~shared/ui-locale'
 
 export const DEFAULT_LOCALE = DEFAULT_UI_LOCALE
 

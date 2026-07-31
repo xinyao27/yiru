@@ -1,5 +1,5 @@
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { cn } from '@/lib/class-names'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { cn } from '~renderer/lib/class-names'
 
 type ClaudeUsageLoadingStateProps = {
   title?: string

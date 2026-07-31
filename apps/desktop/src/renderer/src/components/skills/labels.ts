@@ -1,4 +1,4 @@
-import type { SkillProvider, SkillSourceKind } from '../../../../shared/skills'
+import type { SkillProvider, SkillSourceKind } from '~shared/skills'
 
 export const providerLabels: Record<SkillProvider, string> = {
   codex: 'Codex',

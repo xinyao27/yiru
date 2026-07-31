@@ -1,11 +1,11 @@
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
 import { normalizeSettingsSearchQuery } from '../search'
 
 type AppearanceAdvancedDisclosureProps = {

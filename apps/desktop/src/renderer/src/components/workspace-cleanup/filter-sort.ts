@@ -1,4 +1,5 @@
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
+import type { WorkspaceCleanupCandidate } from '~shared/workspace/cleanup'
+
 import type {
   WorkspaceCleanupContextFilter,
   WorkspaceCleanupFilters,

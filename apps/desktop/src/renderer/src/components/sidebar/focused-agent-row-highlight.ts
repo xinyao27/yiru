@@ -1,7 +1,6 @@
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
-
-import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
 
 export type FocusedAgentRowHighlightState = Pick<
   AppState,

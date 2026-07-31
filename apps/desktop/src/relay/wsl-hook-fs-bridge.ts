@@ -10,7 +10,8 @@ import {
   WSL_HOOK_FS_METHODS,
   type WslFsFailure,
   type WslFsResult
-} from '../shared/wsl-hook-relay-contract'
+} from '~shared/wsl-hook-relay-contract'
+
 import type { RelayDispatcher } from './dispatcher'
 
 function failure(err: unknown): WslFsFailure {

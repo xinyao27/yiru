@@ -1,4 +1,5 @@
-import { useAppStore } from '../../../store'
+import { useAppStore } from '~renderer/store'
+
 import { isTerminalDropWindowsPathLike } from './shell'
 
 export function resolveTerminalDropWorktreePath(

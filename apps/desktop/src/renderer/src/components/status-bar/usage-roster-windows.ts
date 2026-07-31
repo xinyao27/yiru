@@ -1,7 +1,7 @@
-import { formatWindowLabel } from '@/components/status-bar/window-label-formatter'
+import { formatWindowLabel } from '~renderer/components/status-bar/window-label-formatter'
+import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
+import { clampUsedPercent } from '~shared/usage-percentage-display'
 
-import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
-import { clampUsedPercent } from '../../../../shared/usage-percentage-display'
 import { formatResetCountdown, getWindowSections } from './tooltip'
 
 export type UsageSection = { label: string; window: RateLimitWindow }

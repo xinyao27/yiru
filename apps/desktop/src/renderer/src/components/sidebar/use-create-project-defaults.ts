@@ -2,9 +2,8 @@
 // parent (local/runtime host home) and probes Git
 // availability, guarding against stale async results when the target changes.
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { browseRuntimeServerDirectory } from '@/runtime/server-directory-browser'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { browseRuntimeServerDirectory } from '~renderer/runtime/server-directory-browser'
 
 import type { AddRepoDialogStep } from './add-repo/dialog-types'
 import { getDefaultCreateProjectParent, type GitAvailability } from './create-project-defaults'

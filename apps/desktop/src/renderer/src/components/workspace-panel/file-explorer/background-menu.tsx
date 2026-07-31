@@ -1,15 +1,14 @@
 import { FilePlus, FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../../tab-bar/sortable-tab'
-import { Button } from '../../ui/button'
+import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 function stopRightButtonMenuSelection(event: React.PointerEvent): void {
   if (event.button !== 2) {

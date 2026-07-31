@@ -1,4 +1,4 @@
-import type { GitStatusEntry } from '../../../../../shared/types'
+import type { GitStatusEntry } from '~shared/types'
 
 // Why: resolving a collator for every O(n log n) comparison dominates large
 // changed-file projections.

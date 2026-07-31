@@ -1,6 +1,7 @@
-import { translate } from '../../../i18n/i18n'
-import { createLocalizedCatalog } from '../../../i18n/localized-catalog'
-import { SHOW_UI_LANGUAGE_SETTING } from '../../../i18n/supported-languages'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import { SHOW_UI_LANGUAGE_SETTING } from '~renderer/i18n/supported-languages'
+
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 import { getTerminalAppearanceSearchEntries } from '../terminal/search'

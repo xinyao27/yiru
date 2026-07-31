@@ -1,11 +1,11 @@
 import { BrowserWindow, ipcMain } from 'electron'
-
-import { STAR_NAG_INITIAL_THRESHOLD } from '../../shared/constants'
+import { STAR_NAG_INITIAL_THRESHOLD } from '~shared/constants'
 import type {
   StarNagOutcome,
   StarNagPromptMode,
   StarNagPromptSource
-} from '../../shared/star-nag-telemetry'
+} from '~shared/star-nag-telemetry'
+
 import { checkYiruStarred } from '../github/client'
 import type { Store } from '../persistence'
 import type { StatsCollector } from '../stats/collector'

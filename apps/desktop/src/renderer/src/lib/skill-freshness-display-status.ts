@@ -1,4 +1,4 @@
-import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
+import type { SkillFreshnessInventory } from '~shared/skill-freshness'
 
 export type SkillFreshnessDisplayStatus = 'installed' | 'up-to-date' | 'update-available'
 

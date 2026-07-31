@@ -1,11 +1,11 @@
-import type { CoworkingRemoteDesktop } from '../../../../shared/coworking/catalog-contract'
+import type { CoworkingRemoteDesktop } from '~shared/coworking/catalog-contract'
 import type {
   CoworkingOwnerControlGrantView,
   CoworkingOwnerControlRequestView,
   CoworkingOwnerWorktreeSharing,
   CoworkingRequesterControlView,
   CoworkingSharingSnapshot
-} from '../../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 
 export type CoworkingWorkspaceRoute = {
   desktopRef: string

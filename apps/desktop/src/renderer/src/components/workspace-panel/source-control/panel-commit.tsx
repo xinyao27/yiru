@@ -1,6 +1,6 @@
 import { GitFork } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import { CreateHostedReviewComposer } from '../create-hosted-review-composer'
 import { describeForkPushTarget } from '../fork-push-target-label'
 import { CommitArea } from './commit-area'

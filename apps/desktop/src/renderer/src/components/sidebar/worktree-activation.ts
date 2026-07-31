@@ -1,12 +1,10 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   activateAndRevealFolderWorkspace,
   activateAndRevealWorktree
-} from '@/lib/worktree-activation'
-
-import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
+} from '~renderer/lib/worktree-activation'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 export async function activateWorktreeFromSidebar(worktreeId: string): Promise<void> {
   const workspaceScope = parseWorkspaceKey(worktreeId)

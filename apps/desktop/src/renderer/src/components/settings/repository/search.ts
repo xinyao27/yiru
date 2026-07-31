@@ -1,8 +1,8 @@
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+import { translate } from '~renderer/i18n/i18n'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import { isFolderRepo } from '../../../../../shared/repo-kind'
-import type { Repo } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 import { getRepositoryGitAuthorSearchEntries } from './git-author-search-entries'

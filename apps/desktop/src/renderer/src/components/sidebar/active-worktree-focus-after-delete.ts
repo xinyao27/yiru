@@ -1,10 +1,8 @@
 import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
-
-import type { Repo, Worktree } from '../../../../shared/types'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
+import type { Repo, Worktree } from '~shared/types'
 
 type AppStoreState = ReturnType<typeof useAppStore.getState>
 

@@ -1,19 +1,17 @@
 import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
-
-import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
-import { translate } from '@/i18n/i18n'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-import { buildAgentResumeStartupPlan } from '@/lib/tui-agent-startup'
-import { useAppStore } from '@/store'
-
+import { reconcileTabOrder } from '~renderer/components/tab-bar/reconcile-order'
+import { translate } from '~renderer/i18n/i18n'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import { buildAgentResumeStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { useAppStore } from '~renderer/store'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent/launch-defaults'
+} from '~shared/tui-agent/launch-defaults'
 
 export type ResumeSleepingAgentSessionsOptions = {
   suppressNavigation?: boolean

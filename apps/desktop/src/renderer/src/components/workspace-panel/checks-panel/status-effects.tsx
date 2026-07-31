@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '~renderer/runtime/git-client'
 
-import { installWindowVisibilityInterval } from '../../../lib/window-visibility-interval'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '../../../runtime/git-client'
 import { RUNTIME_SSH_STATUS_REFRESH_MS, GIT_STATUS_FAILURE_RETRY_MS } from './controller-types'
 import type { useChecksPanelGenerationFieldsState } from './generation-fields'
 import {

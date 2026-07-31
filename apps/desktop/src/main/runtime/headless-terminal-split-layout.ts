@@ -1,4 +1,4 @@
-import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../shared/types'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '~shared/types'
 
 /**
  * Insert a newly split-off leaf into a terminal tab's persisted layout tree.

@@ -1,5 +1,5 @@
-import { normalizeHostedReviewBaseRef } from '../../../../shared/hosted-review-refs'
-import type { BaseRefSearchResult } from '../../../../shared/types'
+import { normalizeHostedReviewBaseRef } from '~shared/hosted-review-refs'
+import type { BaseRefSearchResult } from '~shared/types'
 
 export function stripBaseRef(ref: string): string {
   return normalizeHostedReviewBaseRef(ref)

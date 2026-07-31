@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { MarkdownViewMode, OpenFile } from '~renderer/components/editor/state'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { statRuntimePath } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { MarkdownDocument } from '~shared/types'
 
-import type { MarkdownViewMode, OpenFile } from '@/components/editor/state'
-import { getConnectionId } from '@/lib/connection-context'
-import { statRuntimePath } from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import type { MarkdownDocument } from '../../../../shared/types'
 import {
   createMarkdownDocumentIndex,
   getMarkdownDocLinkAnchor,

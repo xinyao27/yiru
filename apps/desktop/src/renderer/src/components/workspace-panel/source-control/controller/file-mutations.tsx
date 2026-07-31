@@ -1,22 +1,25 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import type { GitStatusEntry } from '../../../../../../shared/types'
-import { translate } from '../../../../i18n/i18n'
-import { getConnectionId } from '../../../../lib/connection-context'
+import {
+  notifyEditorExternalFileChange,
+  requestEditorSaveQuiesce
+} from '~renderer/components/editor/autosave'
+import {
+  getDiscardAllPaths,
+  runDiscardAllForArea,
+  type DiscardAllArea
+} from '~renderer/components/workspace-panel/discard-all-sequence'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
 import {
   bulkDiscardRuntimeGitPaths,
   bulkUnstageRuntimeGitPaths,
   discardRuntimeGitPath,
   unstageRuntimeGitPath
-} from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
-import { notifyEditorExternalFileChange, requestEditorSaveQuiesce } from '../../../editor/autosave'
-import {
-  getDiscardAllPaths,
-  runDiscardAllForArea,
-  type DiscardAllArea
-} from '../../discard-all-sequence'
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import type { GitStatusEntry } from '~shared/types'
+
 import type { SourceControlHistoryController } from './history'
 
 export function useSourceControlFileMutations(scope: SourceControlHistoryController) {

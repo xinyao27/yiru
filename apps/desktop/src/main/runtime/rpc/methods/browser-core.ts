@@ -1,7 +1,8 @@
 import {
   BrowserTarget,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 import {
   Check,

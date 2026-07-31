@@ -1,6 +1,5 @@
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
-
-import type { TerminalLayoutSnapshot, TerminalTab } from '../../../../shared/types'
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
+import type { TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
 export function emptyLayoutSnapshot(): TerminalLayoutSnapshot {
   return {

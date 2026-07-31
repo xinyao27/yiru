@@ -1,4 +1,5 @@
-import { assertClipboardImageByteLengthWithinLimit } from '../../shared/clipboard-image'
+import { assertClipboardImageByteLengthWithinLimit } from '~shared/clipboard-image'
+
 import { callRuntimeEnvironment } from '../runtime/environment-transport-routing'
 
 const CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS = 512 * 1024

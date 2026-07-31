@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from 'react'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { AutomationRun } from '~shared/automations-types'
+import type { Worktree } from '~shared/types'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { AutomationRun } from '../../../../shared/automations-types'
-import type { Worktree } from '../../../../shared/types'
 import {
   formatAutomationDateTime,
   getAutomationRunStatusLabel,

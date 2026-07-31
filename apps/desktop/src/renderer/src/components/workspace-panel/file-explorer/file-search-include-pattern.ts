@@ -1,4 +1,4 @@
-import { normalizeRelativePath } from '../../../lib/path'
+import { normalizeRelativePath } from '~renderer/lib/path'
 
 const SEARCH_GLOB_LITERAL_META = new Set(['\\', '*', '?', '[', ']', '{', '}', '!', ','])
 

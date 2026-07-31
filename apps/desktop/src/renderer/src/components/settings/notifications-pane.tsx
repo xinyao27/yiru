@@ -1,14 +1,13 @@
 import { BellRinging as BellRing, Robot as Bot, Siren } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
-
 import {
   MacNotificationPermissionCard,
   useMacNotificationPermissionState
-} from '@/components/notifications/mac-notification-permission-card'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/notifications/mac-notification-permission-card'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Separator } from '../ui/separator'
 import { NotificationSettingToggle } from './notification-setting-toggle'

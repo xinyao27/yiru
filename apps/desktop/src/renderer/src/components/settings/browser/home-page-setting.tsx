@@ -1,11 +1,11 @@
 import { toast } from 'sonner'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import { normalizeBrowserNavigationUrl } from '~shared/browser/url'
+import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
 
-import { normalizeBrowserNavigationUrl } from '../../../../../shared/browser/url'
-import { YIRU_BROWSER_BLANK_URL } from '../../../../../shared/constants'
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
 import { SearchableSetting } from '../searchable-setting'
 
 type BrowserHomePageSettingProps = {

@@ -5,10 +5,9 @@
 // instrument-first plan in docs/agent-on-path-detection.md can ship dark
 // for two weeks before a dashboard read shows the fields are null-only.
 
-import { tuiAgentToAgentKind } from '@/lib/telemetry'
-
-import type { EventProps } from '../../../../shared/telemetry-events'
-import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '../../../../shared/types'
+import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import type { EventProps } from '~shared/telemetry-events'
+import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '~shared/types'
 
 export type AgentPickedSnapshot = {
   agent: TuiAgent

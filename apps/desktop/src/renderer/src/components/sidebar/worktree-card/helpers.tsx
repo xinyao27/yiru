@@ -1,12 +1,6 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import React from 'react'
-
-import type {
-  PRState,
-  CheckStatus,
-  GitConflictOperation,
-  TerminalTab
-} from '../../../../../shared/types'
+import type { PRState, CheckStatus, GitConflictOperation, TerminalTab } from '~shared/types'
 
 // ── Pure helper functions ────────────────────────────────────────────
 

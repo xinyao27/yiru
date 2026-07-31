@@ -1,21 +1,20 @@
 import React from 'react'
-
-import { AgentsPane } from '@/components/settings/agents-pane'
+import { AgentsPane } from '~renderer/components/settings/agents-pane'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { isWebClientLocation } from '@/lib/web-client-location'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { isWebClientLocation } from '~renderer/lib/web-client-location'
 import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
-} from '@/lib/windows-terminal-capabilities'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/windows-terminal-capabilities'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 type AgentSettingsDialogProps = {
   open: boolean

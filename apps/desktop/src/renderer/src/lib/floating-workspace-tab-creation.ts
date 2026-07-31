@@ -1,8 +1,8 @@
-import { translate } from '@/i18n/i18n'
-import type { AppState } from '@/store/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { AppState } from '~renderer/store/types'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import type { BrowserTab, TerminalTab } from '~shared/types'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import type { BrowserTab, TerminalTab } from '../../../shared/types'
 import { createUntitledMarkdownFileWithTemplateSelection } from '../components/floating-terminal/create-untitled-markdown'
 import { getConnectionId } from './connection-context'
 import { focusTerminalTabSurface } from './focus-terminal-tab-surface'

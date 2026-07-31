@@ -2,22 +2,21 @@
  * recovery, inherited-cwd split behavior, and agent-fork state in one hook. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
 import {
   REQUEST_ACTIVE_TERMINAL_PANE_SPLIT_EVENT,
   type RequestActiveTerminalPaneSplitDetail
-} from '@/constants/terminal'
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
-import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
-import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
+} from '~renderer/constants/terminal'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import type { ManagedPane, PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { runQuickCommandInNewTab } from '~renderer/lib/run-quick-command-in-new-tab'
+import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
+import { isTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
+import type { TerminalQuickCommand } from '~shared/types'
 
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
-import type { TerminalQuickCommand } from '../../../../shared/types'
 import type { AgentSessionContinuationRequest } from './agent/session-continuation'
 import {
   executeTerminalPastePlan,

@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
-
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails
-} from '@/runtime/repo-client'
+} from '~renderer/runtime/repo-client'
 
 import { normalizeCreateReviewBaseSearchResults, stripBaseRef } from './create-review-base-ref'
 import type { CreateReviewDialogFieldState } from './create-review-dialog-field-state'

@@ -1,9 +1,10 @@
-import type { CoworkingExecutionOperation } from '../../../shared/coworking/operation-contract'
+import { callRuntimeEnvironmentExistingRoute } from '~main/runtime/environment-existing-route'
+import type { CoworkingExecutionOperation } from '~shared/coworking/operation-contract'
 import {
   CoworkingPairedRuntimeSessionInvokeParamsSchema,
   type CoworkingPairedRuntimeSessionRecord
-} from '../../../shared/coworking/paired-runtime-session-contract'
-import { callRuntimeEnvironmentExistingRoute } from '../../runtime/environment-existing-route'
+} from '~shared/coworking/paired-runtime-session-contract'
+
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingHostOperationContext } from '../execution-gateway'
 import type { CoworkingOwnerHistoricalSessionRecord } from '../session/source'

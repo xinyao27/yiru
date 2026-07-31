@@ -1,5 +1,5 @@
-import { i18n } from '@/i18n/i18n'
-import { translate } from '@/i18n/i18n'
+import { i18n } from '~renderer/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 export type SearchKeywordSpec = {
   key: string

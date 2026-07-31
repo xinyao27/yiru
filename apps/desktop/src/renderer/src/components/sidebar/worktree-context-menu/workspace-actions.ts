@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { getWorkspaceStatus } from '../workspace-status'
 import type { WorktreeContextMenuState } from './state'

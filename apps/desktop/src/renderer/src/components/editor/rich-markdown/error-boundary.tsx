@@ -1,8 +1,7 @@
 import React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { reportReactErrorBoundaryCrash } from '../../../lib/react-error-boundary-reporting'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { reportReactErrorBoundaryCrash } from '~renderer/lib/react-error-boundary-reporting'
 
 type Props = {
   fileId: string

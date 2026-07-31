@@ -31,14 +31,14 @@ import { arch as osArch, platform as osPlatform, release as osRelease } from 'no
 
 import { app } from 'electron'
 import { PostHog } from 'posthog-node'
-
 import type {
   CommonProps,
   EventName,
   EventProps,
   OptInVia,
   SupportReportDraft
-} from '../../shared/telemetry-events'
+} from '~shared/telemetry-events'
+
 import type { Store } from '../persistence'
 import { sendSupportReport, type SupportReportSubmitResult } from '../support-report/client'
 import { consumeBurstToken, resetBurstCapsForSession } from './burst-cap'

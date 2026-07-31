@@ -1,8 +1,5 @@
-import type {
-  AddRepoExistingWorkspaceSource,
-  EventProps
-} from '../../../../../shared/telemetry-events'
-import type { Worktree } from '../../../../../shared/types'
+import type { AddRepoExistingWorkspaceSource, EventProps } from '~shared/telemetry-events'
+import type { Worktree } from '~shared/types'
 
 type ExistingWorkspacesDetectedProps = EventProps<'add_repo_existing_workspaces_detected'>
 

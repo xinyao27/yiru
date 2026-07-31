@@ -3,9 +3,8 @@ import {
   normalizeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import type { WorkspaceSessionState } from '../../shared/types'
-import { parseWorkspaceSession } from '../../shared/workspace/session-schema'
+import type { WorkspaceSessionState } from '~shared/types'
+import { parseWorkspaceSession } from '~shared/workspace/session-schema'
 
 export type PersistedStateCodecWarning = {
   code: 'corrupt-workspace-session' | 'corrupt-host-workspace-session'

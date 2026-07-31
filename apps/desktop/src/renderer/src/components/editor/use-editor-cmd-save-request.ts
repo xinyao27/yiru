@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
-
-import type { OpenFile } from '@/components/editor/state'
-import { useAppStore } from '@/store'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { useAppStore } from '~renderer/store'
 
 import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from './autosave'
 import type { FileContent } from './panel-content-types'

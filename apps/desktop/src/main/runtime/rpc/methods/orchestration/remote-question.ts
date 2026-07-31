@@ -1,6 +1,7 @@
-import { clampOrchestrationAskTimeoutMs } from '../../../../../shared/orchestration-ask-timeout'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import type { YiruRuntimeService } from '../../../yiru-runtime'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { clampOrchestrationAskTimeoutMs } from '~shared/orchestration-ask-timeout'
+
 import type { AskInput } from './question-params'
 
 export async function askRemoteRunHome(args: {

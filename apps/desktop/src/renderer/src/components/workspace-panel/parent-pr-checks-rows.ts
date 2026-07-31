@@ -1,13 +1,12 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { prChecksCacheSuffix } from '~renderer/components/github/state'
+import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { getGitHubRepoCacheKey } from '~renderer/store/slices/github-cache-key'
+import { getHostedReviewCacheKey, linkedReviewHintKey } from '~renderer/store/slices/hosted-review'
+import { hostedReviewInfoFromGitHubPRInfo } from '~shared/hosted-review-github'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { PRCheckDetail, Repo, Worktree } from '~shared/types'
 
-import { prChecksCacheSuffix } from '@/components/github/state'
-import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
-import { getGitHubRepoCacheKey } from '@/store/slices/github-cache-key'
-import { getHostedReviewCacheKey, linkedReviewHintKey } from '@/store/slices/hosted-review'
-
-import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import type { PRCheckDetail, Repo, Worktree } from '../../../../shared/types'
 import { getWorktreeCardPrDisplay } from '../sidebar/worktree-card/pr-display'
 import {
   canUseParentPrChecksGitHubPRCacheEntry,

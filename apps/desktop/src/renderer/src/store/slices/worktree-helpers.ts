@@ -1,11 +1,9 @@
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-
 import type {
   PendingWorktreeCreation,
   WorktreeCreationPhase
-} from '@/lib/pending-worktree-creation'
-
-import type { TerminalGitHubPRLink } from '../../../../shared/terminal/github-pr-link-detector'
+} from '~renderer/lib/pending-worktree-creation'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 import type {
   CreateWorktreeResult,
   CreateWorktreeArgs,
@@ -27,8 +25,8 @@ import type {
   WorktreeRemoteBranchConflictEvent,
   WorktreeMeta,
   WorkspaceKey
-} from '../../../../shared/types'
-import type { WorktreeForceDeleteReason } from '../../../../shared/workspace/worktree-removal'
+} from '~shared/types'
+import type { WorktreeForceDeleteReason } from '~shared/workspace/worktree-removal'
 export { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
 export type WorktreeDeleteState = {

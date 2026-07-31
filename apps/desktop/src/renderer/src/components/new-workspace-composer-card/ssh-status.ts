@@ -1,6 +1,5 @@
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 const SSH_STATUS_LABELS: Partial<Record<SshConnectionStatus, string>> = {
   get disconnected() {

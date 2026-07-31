@@ -1,14 +1,13 @@
 import { Sidebar as PanelRight } from '@phosphor-icons/react'
 import React from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { PRCheckDetail } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { PRCheckDetail } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import CommentMarkdown from '../../sidebar/comment-markdown'
-import { Button } from '../../ui/button'
 import {
   formatCheckTimestamp,
   getCheckConclusion,

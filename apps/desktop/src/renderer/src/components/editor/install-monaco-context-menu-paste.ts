@@ -2,8 +2,7 @@ import type * as Monaco from 'monaco-editor'
 import { InMemoryClipboardMetadataManager } from 'monaco-editor/esm/vs/editor/browser/controller/editContext/clipboardUtils.js'
 import { PasteAction } from 'monaco-editor/esm/vs/editor/contrib/clipboard/browser/clipboard.js'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import {
   YIRU_CONTEXT_MENU_PASTE_NAME,

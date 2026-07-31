@@ -1,11 +1,11 @@
-import type { CoworkingPairedRuntimeResolvedWorktree } from '../../../../shared/coworking/paired-runtime-host-contract'
+import type { CoworkingTerminalSessionBindings } from '~main/coworking/terminal-session-bindings'
+import type { CoworkingPairedRuntimeResolvedWorktree } from '~shared/coworking/paired-runtime-host-contract'
 import {
   CoworkingPairedRuntimeObservedProviderSessionSchema,
   type CoworkingPairedRuntimeObservedProviderSession
-} from '../../../../shared/coworking/paired-runtime-session-contract'
-import { COWORKING_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../../../shared/coworking/resource-limits'
-import type { RuntimeMobileSessionTabsResult } from '../../../../shared/runtime-types'
-import type { CoworkingTerminalSessionBindings } from '../../../coworking/terminal-session-bindings'
+} from '~shared/coworking/paired-runtime-session-contract'
+import { COWORKING_MAX_LIVE_SESSIONS_PER_WORKTREE } from '~shared/coworking/resource-limits'
+import type { RuntimeMobileSessionTabsResult } from '~shared/runtime-types'
 
 type SessionChangeWorktree = CoworkingPairedRuntimeResolvedWorktree & {
   actualHostScope: string

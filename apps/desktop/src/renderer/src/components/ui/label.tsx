@@ -1,8 +1,7 @@
 'use client'
 
 import * as React from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 // Base UI has no Label primitive; a native <label> covers the shadcn Label role.
 function Label({ className, ...props }: React.ComponentProps<'label'>) {

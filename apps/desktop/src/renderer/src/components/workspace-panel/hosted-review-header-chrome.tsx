@@ -1,8 +1,7 @@
 import { GitMerge } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import { PullRequestIcon } from './checks-panel/content'
 

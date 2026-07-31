@@ -1,9 +1,9 @@
+import { translate } from '~renderer/i18n/i18n'
 import type {
   SessionOptionDescriptor,
   SessionOptionDisabledReason,
   SessionOptionSelectChoice
-} from '../../../../../shared/native-chat/session-options'
-import { translate } from '../../../i18n/i18n'
+} from '~shared/native-chat/session-options'
 
 export function nativeChatSessionOptionLabel(descriptor: SessionOptionDescriptor): string {
   switch (descriptor.id) {

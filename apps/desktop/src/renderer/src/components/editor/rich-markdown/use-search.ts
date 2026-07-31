@@ -2,10 +2,9 @@ import { TextSelection } from '@tiptap/pm/state'
 import type { Editor } from '@tiptap/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { RefObject } from 'react'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { getShortcutPlatform } from '../../../lib/shortcut-platform'
 import {
   isMarkdownPreviewFindShortcut,
   isMarkdownPreviewReplaceShortcut,

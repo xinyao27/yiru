@@ -1,7 +1,6 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-
-import { emitNativeChatMessageSent } from '@/components/native-chat/telemetry'
+import { emitNativeChatMessageSent } from '~renderer/components/native-chat/telemetry'
 
 import {
   createClaudeModelSwitchConfirmationObserver,

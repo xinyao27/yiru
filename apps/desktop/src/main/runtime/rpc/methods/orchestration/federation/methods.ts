@@ -1,4 +1,5 @@
-import type { RpcMethod } from '../../../core'
+import type { RpcMethod } from '~main/runtime/rpc/core'
+
 import { ORCHESTRATION_FEDERATION_ATTACH_METHODS } from './attach'
 import { ORCHESTRATION_FEDERATION_CONTROL_METHODS } from './control'
 import { ORCHESTRATION_FEDERATION_RELAY_METHODS } from './relay'

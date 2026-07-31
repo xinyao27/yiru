@@ -1,8 +1,7 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
+import { shouldRetryPaneSpawnOnSshReconnect } from '~renderer/application-shell/ssh-reconnect-pane-retry'
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '~shared/types'
 
-import { shouldRetryPaneSpawnOnSshReconnect } from '@/application-shell/ssh-reconnect-pane-retry'
-
-import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../../shared/types'
 import {
   directSshAuthoritiesEqual,
   liveBindingMatches,

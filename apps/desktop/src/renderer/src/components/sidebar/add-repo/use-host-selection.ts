@@ -7,11 +7,10 @@ import {
 } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { isEphemeralVmRuntimeEnvironment } from '~shared/runtime-environments'
 
-import { useAppStore } from '@/store'
-
-import { isEphemeralVmRuntimeEnvironment } from '../../../../../shared/runtime-environments'
-import { translate } from '../../../i18n/i18n'
 import { useSidebarHostScopeOptions } from '../use-sidebar-host-scope-options'
 import type { AddRepoDialogStep } from './dialog-types'
 import { canSelectAddRepoHost } from './host-availability'

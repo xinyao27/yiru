@@ -1,10 +1,9 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { isRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subscription-replay'
-
 import type {
   RuntimeClientEvent,
   RuntimeClientEventStreamMessage
-} from '../../../shared/runtime-client-events'
+} from '~shared/runtime-client-events'
 
 export type RuntimeClientEventSubscription = {
   unsubscribe: () => void

@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import './click-ring.css'
 

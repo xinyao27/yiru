@@ -7,9 +7,8 @@ import {
   type Icon as PhosphorIcon,
   FolderPlus
 } from '@phosphor-icons/react'
-
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 
 import type { CmdJQuickActionAvailability, CmdJQuickActionContext } from './quick-action-context'
 import {

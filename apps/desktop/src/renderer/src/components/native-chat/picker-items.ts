@@ -1,9 +1,6 @@
-import type { SlashCommandSuggestion } from '../../../../shared/native-chat/slash-commands'
-import {
-  isSafeDisplayCharacter,
-  stripUnsafeDisplayCharacters
-} from '../../../../shared/skill-display-text'
-import type { DiscoveredSkill, SkillSourceKind } from '../../../../shared/skills'
+import type { SlashCommandSuggestion } from '~shared/native-chat/slash-commands'
+import { isSafeDisplayCharacter, stripUnsafeDisplayCharacters } from '~shared/skill-display-text'
+import type { DiscoveredSkill, SkillSourceKind } from '~shared/skills'
 
 export type NativeChatPickerItem =
   | {

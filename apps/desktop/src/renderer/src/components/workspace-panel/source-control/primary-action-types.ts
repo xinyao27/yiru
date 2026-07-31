@@ -3,8 +3,7 @@ import type {
   SourceControlPrimaryActionKind,
   SourceControlRemoteOpKind
 } from '@yiru/workbench-model/review'
-
-import type { GitUpstreamStatus, PRState } from '../../../../../shared/types'
+import type { GitUpstreamStatus, PRState } from '~shared/types'
 
 // Why: the primary button collapses to one-label-per-action. Compound
 // kinds ('commit_push', 'commit_sync', 'commit_publish') live in

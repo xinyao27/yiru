@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 // Why: PR-checks-specific CSS is split from ReviewPRViewAnimatedVisual so the
 // animation logic stays under the project max-lines lint cap.

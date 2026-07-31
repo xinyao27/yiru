@@ -1,5 +1,6 @@
-import type { OrchestrationDb } from '../../../../orchestration/db'
-import type { YiruRuntimeService } from '../../../../yiru-runtime'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+
 import { applyWaitForSetupOutcome, type WorkerSetupReceipt } from '../worker/topology'
 import { isFederationResidualEffect, type FederationEffect } from './effects'
 

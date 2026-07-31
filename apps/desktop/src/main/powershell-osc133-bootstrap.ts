@@ -1,5 +1,5 @@
 import { getPowerShellOmpShellWrapper } from './pty/omp-shell-wrapper'
-export { encodePowerShellCommand } from '../shared/powershell-command-encoding'
+export { encodePowerShellCommand } from '~shared/powershell-command-encoding'
 
 const POWERSHELL_OSC133_BOOTSTRAP = `# Yiru OSC 133 shell integration for PowerShell.
 if ((Test-Path variable:global:__YiruOsc133State) -and

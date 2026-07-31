@@ -1,12 +1,9 @@
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import type { RuntimeTerminalListResult, RuntimeTerminalSummary } from '~shared/runtime-types'
 
-import type {
-  RuntimeTerminalListResult,
-  RuntimeTerminalSummary
-} from '../../../shared/runtime-types'
 import {
   planAgentHibernationCandidates,
   type AgentHibernationCandidate,

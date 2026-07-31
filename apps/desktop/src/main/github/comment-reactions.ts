@@ -1,4 +1,4 @@
-import type { GitHubReaction, GitHubReactionContent } from '../../shared/types'
+import type { GitHubReaction, GitHubReactionContent } from '~shared/types'
 
 type GitHubGraphQLReactionContent =
   | 'THUMBS_UP'

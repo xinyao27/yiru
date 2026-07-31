@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { ScrollView, View } from 'react-native'
 
-import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
 
 import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type { MobileSessionTab } from './screen-state'

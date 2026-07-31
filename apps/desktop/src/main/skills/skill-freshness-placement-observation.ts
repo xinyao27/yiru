@@ -6,7 +6,8 @@ import type {
   SkillFreshnessInstallation,
   SkillFreshnessStatus,
   SkillKnownSnapshot
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
+
 import type { SkillBundleArtifacts } from './skill-bundle-artifacts'
 import type { SkillScanRoot } from './skill-discovery-sources'
 import {

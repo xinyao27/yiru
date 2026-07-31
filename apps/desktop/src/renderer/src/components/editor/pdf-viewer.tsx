@@ -17,13 +17,13 @@ import {
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import 'pdfjs-dist/web/pdf_viewer.css'
-import { Button } from '@/components/ui/button'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
-import { translate } from '@/i18n/i18n'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { useAppStore } from '@/store'
+import { Button } from '~renderer/components/ui/button'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
+import { keybindingMatchesAction } from '~shared/keybindings'
 
-import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import PdfFind from './pdf-find'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl

@@ -1,6 +1,5 @@
-import { translate } from '@/i18n/i18n'
-
-import type { ProviderRateLimits } from '../../../../shared/rate-limit-types'
+import { translate } from '~renderer/i18n/i18n'
+import type { ProviderRateLimits } from '~shared/rate-limit-types'
 
 export function getProviderDisplayName(provider: ProviderRateLimits['provider']): string {
   if (provider === 'claude') {

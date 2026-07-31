@@ -14,12 +14,12 @@ import {
   type SshTarget
 } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { isSshTargetConnecting, type SshTargetBusyAction } from './target-action-state'
 
 // ── Shared status helpers ────────────────────────────────────────────

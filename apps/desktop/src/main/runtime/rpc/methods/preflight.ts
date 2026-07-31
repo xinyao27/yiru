@@ -1,12 +1,12 @@
 import { z } from 'zod'
-
 import {
   detectRemoteAgents,
   detectRemoteWindowsTerminalCapabilities,
   detectInstalledAgentsWithShellPathHydration,
   refreshShellPathAndDetectAgents,
   runPreflightCheck
-} from '../../../preflight/preflight'
+} from '~main/preflight/preflight'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const PreflightCheck = z.object({

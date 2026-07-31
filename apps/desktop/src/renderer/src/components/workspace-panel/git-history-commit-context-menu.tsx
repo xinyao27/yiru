@@ -1,14 +1,12 @@
 import { Copy, Globe, Hash, Sparkle as Sparkles } from '@phosphor-icons/react'
 import type React from 'react'
-
 import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator
-} from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
-
-import type { GitHistoryItem } from '../../../../shared/git/history'
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitHistoryItem } from '~shared/git/history'
 
 export type GitHistoryCommitAction = 'open-remote' | 'copy-hash' | 'copy-message' | 'explain'
 

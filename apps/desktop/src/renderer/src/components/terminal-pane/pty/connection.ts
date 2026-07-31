@@ -14,38 +14,125 @@ import {
 } from '@yiru/workbench-model/agent'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
-
-import { directSshAuthoritiesEqual } from '@/components/direct-ssh/terminal-recovery/authority-ledger'
-import type { DirectSshPaneRetryAttempt } from '@/components/direct-ssh/terminal-recovery/binding-state'
-
+import { directSshAuthoritiesEqual } from '~renderer/components/direct-ssh/terminal-recovery/authority-ledger'
+import type { DirectSshPaneRetryAttempt } from '~renderer/components/direct-ssh/terminal-recovery/binding-state'
+import { dispatchTerminalCommandFinishedEvent } from '~renderer/hooks/terminal-command-finished-event'
+import {
+  detectAgentStatusFromTitle,
+  agentTypeToIconAgent,
+  isClaudeAgent
+} from '~renderer/lib/agent-status'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import { isPtyLocked } from '~renderer/lib/pane-manager/mobile-driver-state'
+import {
+  getFitOverrideForPty,
+  bindPanePtyId
+} from '~renderer/lib/pane-manager/mobile-fit-overrides'
+import { requestStablePaneFit } from '~renderer/lib/pane-manager/pane-fit-resize-observer'
+/* oxlint-disable max-lines */
+import type { PaneManager, ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
+import {
+  PANE_PTY_RESIZE_HOLD_FLUSH_EVENT,
+  queuePanePtyResizeIfHeld,
+  type PanePtyResizeHoldFlushDetail
+} from '~renderer/lib/pane-manager/pane-pty-resize-hold'
+import { recordTerminalOutput } from '~renderer/lib/pane-manager/pane-scroll'
+import {
+  discardTerminalOutput,
+  flushTerminalOutput,
+  registerTerminalBacklogRecovery,
+  waitForTerminalOutputParsed,
+  writeTerminalOutput
+} from '~renderer/lib/pane-manager/pane-terminal-output-scheduler'
+import {
+  cancelPendingSafeFitContinuations,
+  safeFit,
+  safeFitAndThen,
+  type SafeFitContinuationHandle
+} from '~renderer/lib/pane-manager/pane-tree-ops'
+import { ensureArabicShapingJoinerForText } from '~renderer/lib/pane-manager/terminal-arabic-shaping-joiner'
+import {
+  nativeWindowsRewriteNeedsFollowupRenderRefresh,
+  terminalOutputPrefersRenderRefresh,
+  terminalRewriteOutputRenderRefreshDecision,
+  terminalRewriteOutputPrefersRenderRefresh,
+  windowsEastAsianOutputPrefersRenderRefresh
+} from '~renderer/lib/pane-manager/terminal-complex-script'
+import { resolveCursorAgentImeAnchor } from '~renderer/lib/pane-manager/terminal-ime-anchor'
+import {
+  getTerminalScrollIntentKind,
+  markTerminalFollowOutput
+} from '~renderer/lib/pane-manager/terminal-scroll-intent'
+import {
+  cancelTerminalScrollIntentBufferRebuildCompletions,
+  deferTerminalGeometryMutationDuringRebuild
+} from '~renderer/lib/pane-manager/terminal-scroll-intent-rebuild'
+import { clearTerminalScrollbackAndFollowOutput } from '~renderer/lib/pane-manager/terminal-scrollback-clear'
+import { createTerminalStructuralReplayCoordinator } from '~renderer/lib/pane-manager/terminal-structural-replay-coordinator'
+import {
+  isTerminalWritePipelineCertifiedDead,
+  registerUndeliverableWriteHandler
+} from '~renderer/lib/pane-manager/terminal-write-pipeline-health'
+import type { ManagedPaneInternal } from '~renderer/lib/pane-manager/types'
+import {
+  isLocalNativeWindowsConpty,
+  resolveWindowsShellOverride
+} from '~renderer/lib/pane-manager/windows-pty-compatibility'
+import {
+  markTerminalBracketedPasteInterrupted,
+  observeTerminalBracketedPasteModeOutput
+} from '~renderer/lib/terminal-bracketed-paste'
+import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
+import { buildAgentResumeStartupPlan } from '~renderer/lib/tui-agent-startup'
+import {
+  getCachedWindowsTerminalCapabilities,
+  hasCachedWindowsTerminalCapabilities
+} from '~renderer/lib/windows-terminal-capabilities'
+import {
+  getExecutionHostIdForWorktree,
+  getSettingsForWorktreeRuntimeOwner,
+  getRuntimeEnvironmentIdForWorktree
+} from '~renderer/lib/worktree-runtime-owner'
+import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
+import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
+import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
+import { isTerminalTabParked } from '~renderer/runtime/terminal-parked-watcher-registry'
+import { getRemoteRuntimePtyEnvironmentId } from '~renderer/runtime/terminal-stream'
+import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
+import { useAppStore } from '~renderer/store'
+import { getWorktreeMapFromState } from '~renderer/store/selectors'
 import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInputIntent
-} from '../../../../../shared/agent/interrupt-intent'
+} from '~shared/agent/interrupt-intent'
 import {
   isExpectedAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../../../../shared/agent/process-recognition'
+} from '~shared/agent/process-recognition'
 import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
-} from '../../../../../shared/agent/title-owner'
-import { shouldUseShellReadyStartupDelivery } from '../../../../../shared/codex-startup-delivery'
-import { createCommandCodeOutputStatusDetector } from '../../../../../shared/command-code-output-status'
-import { createDraftPasteReadyScanner } from '../../../../../shared/draft-paste-ready-scanner'
-import { resolvePaneAgentOwner } from '../../../../../shared/pane-agent-owner'
-import { redactPtyIdForDiagnostics } from '../../../../../shared/pty-delivery-diagnostics'
-import { resolveSetupAgentSequenceLaunchCommand } from '../../../../../shared/setup/agent-sequencing'
-import { parseAppSshPtyId } from '../../../../../shared/ssh-pty-id'
-import { makePaneKey, parseLegacyNumericPaneKey } from '../../../../../shared/stable-pane-id'
+} from '~shared/agent/title-owner'
+import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
+import { createCommandCodeOutputStatusDetector } from '~shared/command-code-output-status'
+import { createDraftPasteReadyScanner } from '~shared/draft-paste-ready-scanner'
+import { resolvePaneAgentOwner } from '~shared/pane-agent-owner'
+import { redactPtyIdForDiagnostics } from '~shared/pty-delivery-diagnostics'
+import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import { makePaneKey, parseLegacyNumericPaneKey } from '~shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode,
   scanMode2031Sequences
-} from '../../../../../shared/terminal/color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../../shared/terminal/github-pr-link-detector'
-import { TerminalKittyKeyboardModeTracker } from '../../../../../shared/terminal/kitty-keyboard-mode-tracker'
-import { parseTerminalOscColorQuery } from '../../../../../shared/terminal/osc-color-reply'
+} from '~shared/terminal/color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '~shared/terminal/github-pr-link-detector'
+import { TerminalKittyKeyboardModeTracker } from '~shared/terminal/kitty-keyboard-mode-tracker'
+import { parseTerminalOscColorQuery } from '~shared/terminal/osc-color-reply'
 import {
   HIDDEN_STARTUP_RENDERER_QUERY_PENDING_CHARS,
   containsCsiRendererQuery,
@@ -54,102 +141,17 @@ import {
   findCsiFinalByteIndex,
   isStatefulRendererReplyCsiQuery,
   isStatelessRendererReplyCsiQuery
-} from '../../../../../shared/terminal/reply-query-extraction'
-import { serializeWithAbsoluteCursor } from '../../../../../shared/terminal/serialize-absolute-cursor'
-import { createTerminalZeroDimensionsMessage } from '../../../../../shared/terminal/zero-dimensions-diagnostic'
-import { isTuiAgent, TUI_AGENT_CONFIG } from '../../../../../shared/tui-agent/config'
+} from '~shared/terminal/reply-query-extraction'
+import { serializeWithAbsoluteCursor } from '~shared/terminal/serialize-absolute-cursor'
+import { createTerminalZeroDimensionsMessage } from '~shared/terminal/zero-dimensions-diagnostic'
+import { isTuiAgent, TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../../shared/tui-agent/launch-defaults'
-import type { SetupSplitDirection, TuiAgent } from '../../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { dispatchTerminalCommandFinishedEvent } from '../../../hooks/terminal-command-finished-event'
-import {
-  detectAgentStatusFromTitle,
-  agentTypeToIconAgent,
-  isClaudeAgent
-} from '../../../lib/agent-status'
-import { createBrowserUuid } from '../../../lib/browser-uuid'
-import { getConnectionId } from '../../../lib/connection-context'
-import { getLocalProjectExecutionRuntimeContext } from '../../../lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '../../../lib/new-workspace'
-import { resolveCommittedTitleAgentType } from '../../../lib/pane-agent-evidence'
-import { isPtyLocked } from '../../../lib/pane-manager/mobile-driver-state'
-import { getFitOverrideForPty, bindPanePtyId } from '../../../lib/pane-manager/mobile-fit-overrides'
-import { requestStablePaneFit } from '../../../lib/pane-manager/pane-fit-resize-observer'
-/* oxlint-disable max-lines */
-import type { PaneManager, ManagedPane } from '../../../lib/pane-manager/pane-manager'
-import {
-  PANE_PTY_RESIZE_HOLD_FLUSH_EVENT,
-  queuePanePtyResizeIfHeld,
-  type PanePtyResizeHoldFlushDetail
-} from '../../../lib/pane-manager/pane-pty-resize-hold'
-import { recordTerminalOutput } from '../../../lib/pane-manager/pane-scroll'
-import {
-  discardTerminalOutput,
-  flushTerminalOutput,
-  registerTerminalBacklogRecovery,
-  waitForTerminalOutputParsed,
-  writeTerminalOutput
-} from '../../../lib/pane-manager/pane-terminal-output-scheduler'
-import {
-  cancelPendingSafeFitContinuations,
-  safeFit,
-  safeFitAndThen,
-  type SafeFitContinuationHandle
-} from '../../../lib/pane-manager/pane-tree-ops'
-import { ensureArabicShapingJoinerForText } from '../../../lib/pane-manager/terminal-arabic-shaping-joiner'
-import {
-  nativeWindowsRewriteNeedsFollowupRenderRefresh,
-  terminalOutputPrefersRenderRefresh,
-  terminalRewriteOutputRenderRefreshDecision,
-  terminalRewriteOutputPrefersRenderRefresh,
-  windowsEastAsianOutputPrefersRenderRefresh
-} from '../../../lib/pane-manager/terminal-complex-script'
-import { resolveCursorAgentImeAnchor } from '../../../lib/pane-manager/terminal-ime-anchor'
-import {
-  getTerminalScrollIntentKind,
-  markTerminalFollowOutput
-} from '../../../lib/pane-manager/terminal-scroll-intent'
-import {
-  cancelTerminalScrollIntentBufferRebuildCompletions,
-  deferTerminalGeometryMutationDuringRebuild
-} from '../../../lib/pane-manager/terminal-scroll-intent-rebuild'
-import { clearTerminalScrollbackAndFollowOutput } from '../../../lib/pane-manager/terminal-scrollback-clear'
-import { createTerminalStructuralReplayCoordinator } from '../../../lib/pane-manager/terminal-structural-replay-coordinator'
-import {
-  isTerminalWritePipelineCertifiedDead,
-  registerUndeliverableWriteHandler
-} from '../../../lib/pane-manager/terminal-write-pipeline-health'
-import type { ManagedPaneInternal } from '../../../lib/pane-manager/types'
-import {
-  isLocalNativeWindowsConpty,
-  resolveWindowsShellOverride
-} from '../../../lib/pane-manager/windows-pty-compatibility'
-import {
-  markTerminalBracketedPasteInterrupted,
-  observeTerminalBracketedPasteModeOutput
-} from '../../../lib/terminal-bracketed-paste'
-import { getSystemPrefersDark } from '../../../lib/terminal-theme'
-import { buildAgentResumeStartupPlan } from '../../../lib/tui-agent-startup'
-import {
-  getCachedWindowsTerminalCapabilities,
-  hasCachedWindowsTerminalCapabilities
-} from '../../../lib/windows-terminal-capabilities'
-import {
-  getExecutionHostIdForWorktree,
-  getSettingsForWorktreeRuntimeOwner,
-  getRuntimeEnvironmentIdForWorktree
-} from '../../../lib/worktree-runtime-owner'
-import type { PtyDataMeta } from '../../../runtime/pty-data-meta'
-import { scheduleRuntimeGraphSync } from '../../../runtime/sync-runtime-graph'
-import { inspectRuntimeTerminalProcess } from '../../../runtime/terminal-inspection'
-import { isTerminalTabParked } from '../../../runtime/terminal-parked-watcher-registry'
-import { getRemoteRuntimePtyEnvironmentId } from '../../../runtime/terminal-stream'
-import { isWebTerminalSurfaceTabId } from '../../../runtime/web-terminal-surface-id'
-import { useAppStore } from '../../../store'
-import { getWorktreeMapFromState } from '../../../store/selectors'
+} from '~shared/tui-agent/launch-defaults'
+import type { SetupSplitDirection, TuiAgent } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import { createAgentCompletionCoordinator } from '../agent/completion-coordinator'
 import type {
   AgentCompletionDispatchMeta,

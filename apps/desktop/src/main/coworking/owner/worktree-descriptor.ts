@@ -1,6 +1,6 @@
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { Store } from '~main/persistence'
 
-import type { Store } from '../../persistence'
 import type { CoworkingOwnerWorktreeDescriptor } from './service-options'
 
 // Why: the owner catalog and the RPC layer both display a worktree by project

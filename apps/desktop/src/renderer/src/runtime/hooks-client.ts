@@ -1,7 +1,7 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { SetupScriptImportCandidate } from '~shared/setup/script-imports'
+import type { GlobalSettings, YiruHooks } from '~shared/types'
 
-import type { SetupScriptImportCandidate } from '../../../shared/setup/script-imports'
-import type { GlobalSettings, YiruHooks } from '../../../shared/types'
 import { callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'
 
 export type HookCheckResult = {

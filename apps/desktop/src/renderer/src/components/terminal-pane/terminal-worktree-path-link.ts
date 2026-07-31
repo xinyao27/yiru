@@ -1,6 +1,6 @@
-import { normalizeAbsolutePath } from '@/components/terminal-pane/terminal-path-normalization'
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
+import { normalizeAbsolutePath } from '~renderer/components/terminal-pane/terminal-path-normalization'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
 
 export type WorktreeRootPathLink = {
   id: string

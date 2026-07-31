@@ -1,4 +1,5 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import type { SourceControlDisplaySection, SourceControlDisplaySectionId } from './section-order'
 import type { RenderableSubmoduleListItem } from './submodule-expansion'
 

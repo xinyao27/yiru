@@ -1,4 +1,5 @@
-import type { Repo, Worktree } from '../../../shared/types'
+import type { Repo, Worktree } from '~shared/types'
+
 import type { AppState } from './types'
 
 type WorktreeSnapshot = {

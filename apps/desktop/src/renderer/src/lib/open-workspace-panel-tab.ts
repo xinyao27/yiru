@@ -1,7 +1,7 @@
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import type { WorkspacePanelTabContentType } from '../../../shared/types'
 import type { SourceControlPanelView } from '../components/workspace-panel/source-control/workspace-panel/state'
 
 type ExplorerDestination =

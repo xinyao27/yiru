@@ -1,7 +1,5 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   buildSearchUrl,
   DEFAULT_SEARCH_ENGINE,
@@ -9,8 +7,8 @@ import {
   normalizeBrowserNavigationUrl,
   SEARCH_ENGINE_LABELS,
   type SearchEngine
-} from '../../../../shared/browser/url'
-import type { BrowserHistoryEntry } from '../../../../shared/types'
+} from '~shared/browser/url'
+import type { BrowserHistoryEntry } from '~shared/types'
 
 export const MAX_BROWSER_ADDRESS_BAR_SUGGESTIONS = 8
 export const BROWSER_ADDRESS_BAR_QUERY_MAX_BYTES = 2 * 1024

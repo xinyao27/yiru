@@ -5,14 +5,13 @@ import {
   ArrowsDownUp as ArrowDownUp,
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import type { LocalizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { Input } from '~renderer/components/ui/input'
+import { Textarea } from '~renderer/components/ui/textarea'
+import type { LocalizedHostedReviewCopy } from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { stripBaseRef } from './use-create-pull-request-dialog-fields'
 

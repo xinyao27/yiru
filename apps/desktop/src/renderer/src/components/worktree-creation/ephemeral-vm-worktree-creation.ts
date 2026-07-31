@@ -1,11 +1,9 @@
 import { toast } from 'sonner'
-
-import { prepareEphemeralVmWorkspaceTarget } from '@/components/worktree-creation/ephemeral-vm-workspace-target'
-import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
-import { useAppStore } from '@/store'
-
-import { getProjectIdentityKey } from '../../../../shared/project-host-setup-projection'
-import type { Repo } from '../../../../shared/types'
+import { prepareEphemeralVmWorkspaceTarget } from '~renderer/components/worktree-creation/ephemeral-vm-workspace-target'
+import type { WorktreeCreationRequest } from '~renderer/lib/pending-worktree-creation'
+import { useAppStore } from '~renderer/store'
+import { getProjectIdentityKey } from '~shared/project-host-setup-projection'
+import type { Repo } from '~shared/types'
 
 const MAX_PROVISIONING_LOG_CHARS = 12_000
 

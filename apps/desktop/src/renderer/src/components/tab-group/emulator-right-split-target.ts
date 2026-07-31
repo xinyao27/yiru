@@ -1,4 +1,4 @@
-import type { TabGroupLayoutNode } from '../../../../shared/types'
+import type { TabGroupLayoutNode } from '~shared/types'
 
 type SearchResult = {
   containsSource: boolean

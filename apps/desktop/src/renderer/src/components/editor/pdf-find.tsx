@@ -1,11 +1,10 @@
 import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import type { EventBus } from 'pdfjs-dist/web/pdf_viewer.mjs'
 import { useCallback, useEffect, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { getFindRequestQuery } from '@/lib/find-query-bounds'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { getFindRequestQuery } from '~renderer/lib/find-query-bounds'
 
 type PdfFindProps = {
   isOpen: boolean

@@ -12,13 +12,13 @@ import {
   supportsHostedReviewCreation,
   type HostedReviewCreationProvider
 } from '@yiru/workbench-model/review'
-
-import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git/remote-error'
+import { isNoUpstreamError, normalizeGitErrorMessage } from '~shared/git/remote-error'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
-} from '../../shared/hosted-review-refs'
-import type { GitUpstreamStatus } from '../../shared/types'
+} from '~shared/hosted-review-refs'
+import type { GitUpstreamStatus } from '~shared/types'
+
 import { isAzureDevOpsReviewCreationAuthenticated } from '../azure-devops/pull-request-creation'
 import { parsePorcelainV1Records, type PorcelainV1Record } from '../git/porcelain-v1-records'
 import { resolveDefaultBaseRefViaExec } from '../git/repo'

@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 // Why: Notes-page-specific CSS lives here so the imperative loop in
 // ReviewNotesAnimatedVisual can flip a small set of stateful classes without

@@ -1,15 +1,15 @@
-import { formatAutomationPrecheckTimeout } from '../shared/automation/precheck'
-import { getAutomationLegacyRepoId } from '../shared/automation/run-identity'
-import { formatAutomationSchedule } from '../shared/automation/schedules'
-import type { Automation, AutomationRun } from '../shared/automations-types'
-import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
+import { formatAutomationPrecheckTimeout } from '~shared/automation/precheck'
+import { getAutomationLegacyRepoId } from '~shared/automation/run-identity'
+import { formatAutomationSchedule } from '~shared/automation/schedules'
+import type { Automation, AutomationRun } from '~shared/automations-types'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeRepoList,
   RuntimeRepoSearchRefs,
   RuntimeWorktreeListResult,
   RuntimeWorktreePsResult
-} from '../shared/runtime-types'
-import type { MemorySnapshot, WorktreeMemory } from '../shared/types'
+} from '~shared/runtime-types'
+import type { MemorySnapshot, WorktreeMemory } from '~shared/types'
 
 export function formatMemorySnapshot(snapshot: MemorySnapshot): string {
   const topWorktrees = [...snapshot.worktrees].sort((a, b) => b.memory - a.memory).slice(0, 10)

@@ -7,16 +7,16 @@ import { promisify } from 'node:util'
 import {
   resolveWindowsAgentForegroundProcess,
   shouldInspectWindowsAgentForeground
-} from '../main/providers/windows-agent-foreground-process'
+} from '~main/providers/windows-agent-foreground-process'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../shared/agent/process-recognition'
-import { getFirstCommandToken } from '../shared/command-token-scanner'
-import { getProcessTableSnapshot, type ProcessTableRow } from '../shared/process-table-snapshot'
-import { isShellProcess } from '../shared/shell-process-detection'
+} from '~shared/agent/process-recognition'
+import { getFirstCommandToken } from '~shared/command-token-scanner'
+import { getProcessTableSnapshot, type ProcessTableRow } from '~shared/process-table-snapshot'
+import { isShellProcess } from '~shared/shell-process-detection'
 
 const execFile = promisify(execFileCb)
 

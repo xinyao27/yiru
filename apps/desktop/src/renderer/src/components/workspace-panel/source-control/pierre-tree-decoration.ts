@@ -1,6 +1,6 @@
 import type { FileTreeRowDecoration } from '@pierre/trees'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import type { SourceControlController } from './controller'
 import { SUBMODULE_WORKTREE_ONLY_LABEL } from './panel-constants'
 import type { SourceControlPierreTarget } from './pierre-tree-data'

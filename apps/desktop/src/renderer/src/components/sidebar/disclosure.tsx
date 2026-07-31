@@ -1,9 +1,8 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 type SidebarDisclosureProps = {
   expanded: boolean

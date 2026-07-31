@@ -1,13 +1,11 @@
 import type { ITerminalOptions } from '@xterm/xterm'
-
-import { buildFontFamily } from '@/components/terminal-pane/layout-serialization'
-import { composeActiveTerminalTheme } from '@/components/terminal-pane/terminal-appearance'
-import { buildDefaultTerminalOptions } from '@/lib/pane-manager/pane-terminal-options'
-import { getBuiltinTheme, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
-
-import { resolveTerminalFontWeights } from '../../../../shared/terminal/fonts'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
-import type { GlobalSettings } from '../../../../shared/types'
+import { buildFontFamily } from '~renderer/components/terminal-pane/layout-serialization'
+import { composeActiveTerminalTheme } from '~renderer/components/terminal-pane/terminal-appearance'
+import { buildDefaultTerminalOptions } from '~renderer/lib/pane-manager/pane-terminal-options'
+import { getBuiltinTheme, resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
+import { resolveTerminalFontWeights } from '~shared/terminal/fonts'
+import { normalizeTerminalLineHeight } from '~shared/terminal/line-height-settings'
+import type { GlobalSettings } from '~shared/types'
 
 // Why: this maps the user's global terminal preferences (theme, font, line
 // height) into xterm's option shape — a mapping that changes whenever the

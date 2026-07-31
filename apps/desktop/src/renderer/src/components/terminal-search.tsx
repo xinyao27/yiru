@@ -7,13 +7,12 @@ import {
 } from '@phosphor-icons/react'
 import type { SearchAddon } from '@xterm/addon-search'
 import { useEffect, useState, useCallback } from 'react'
-
-import type { SearchState } from '@/components/terminal-pane/keyboard-handlers'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getFindRequestQuery } from '@/lib/find-query-bounds'
+import type { SearchState } from '~renderer/components/terminal-pane/keyboard-handlers'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFindRequestQuery } from '~renderer/lib/find-query-bounds'
 
 import { safeFind } from './terminal-search-safe-find'
 

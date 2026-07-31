@@ -1,12 +1,11 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { YiruHooks, ProjectHostSetup, Repo } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { YiruHooks, ProjectHostSetup, Repo } from '../../../../shared/types'
 import type { AutomationCreateTarget, AutomationDraft } from './automation-editor-dialog'
 import { getVisibleAutomationSetupDecision } from './automation-setup-decision'
 

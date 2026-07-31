@@ -1,10 +1,16 @@
 import type React from 'react'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import { SettingsSubsectionHeader, SettingsSwitch } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 import { getAgentCacheTimerSearchEntries } from './cache-timer-search'

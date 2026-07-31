@@ -5,8 +5,7 @@ import type {
   PointerEventHandler,
   WheelEventHandler
 } from 'react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import type {
   DeviceFrameLayout,

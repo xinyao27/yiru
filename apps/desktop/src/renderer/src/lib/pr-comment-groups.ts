@@ -1,4 +1,4 @@
-import type { PRComment } from '../../../shared/types'
+import type { PRComment } from '~shared/types'
 
 export const PR_COMMENT_RESOLVED_CONTAINER_CLASS = 'opacity-50'
 export const PR_COMMENT_RESOLVED_AUTHOR_CLASS = 'text-muted-foreground'

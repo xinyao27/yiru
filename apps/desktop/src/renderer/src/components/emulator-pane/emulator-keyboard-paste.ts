@@ -1,9 +1,8 @@
 import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
-
 import {
   buildServeSimKeyboardFramesForKey,
   type ServeSimKeyboardFrame
-} from '../../../../shared/emulator-keyboard-frame'
+} from '~shared/emulator-keyboard-frame'
 
 export const EMULATOR_KEYBOARD_PASTE_MAX_BYTES = 4 * 1024
 export const EMULATOR_KEYBOARD_PASTE_MAX_FRAMES_PER_CHUNK = 48

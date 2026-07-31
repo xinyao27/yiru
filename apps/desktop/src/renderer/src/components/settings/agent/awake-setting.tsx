@@ -1,6 +1,7 @@
-import type { GlobalSettings } from '../../../../../shared/types'
-import { Label } from '../../ui/label'
-import { Switch } from '../../ui/switch'
+import { Label } from '~renderer/components/ui/label'
+import { Switch } from '~renderer/components/ui/switch'
+import type { GlobalSettings } from '~shared/types'
+
 import { SearchableSetting } from '../searchable-setting'
 import {
   getAgentAwakeDescription,

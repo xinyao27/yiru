@@ -7,11 +7,10 @@ import {
 import type { Editor } from '@tiptap/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
 export type LinkBubbleState = {
   kind: 'markdown' | 'html-superscript'

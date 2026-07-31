@@ -5,14 +5,13 @@ import {
 } from '@yiru/workbench-model/platform'
 import { useEffect, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { joinPath, normalizeRelativePath, dirname } from '~renderer/lib/path'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { subscribeRuntimeFileChanges } from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import type { FsChangedPayload } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { FsChangedPayload } from '../../../../../shared/types'
-import { joinPath, normalizeRelativePath, dirname } from '../../../lib/path'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { subscribeRuntimeFileChanges } from '../../../runtime/file-client'
-import type { AppState } from '../../../store/types'
 import type { InlineInput } from './row'
 import type { DirCache } from './types'
 import {

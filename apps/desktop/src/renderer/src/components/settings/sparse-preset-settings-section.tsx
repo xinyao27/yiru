@@ -1,12 +1,11 @@
 import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { parseSparsePresetDirectories } from '~renderer/lib/sparse-preset-draft'
+import { useAppStore } from '~renderer/store'
+import type { SparsePreset } from '~shared/types'
 
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { parseSparsePresetDirectories } from '@/lib/sparse-preset-draft'
-
-import type { SparsePreset } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { SparsePresetDraftEditor, type SparsePresetDraft } from './sparse-preset-draft-editor'
 import { getSparsePresetOperationErrorMessage } from './sparse-preset-operation-error'

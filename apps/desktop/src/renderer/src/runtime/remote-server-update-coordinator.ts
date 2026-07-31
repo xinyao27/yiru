@@ -3,11 +3,12 @@ import {
   isPerfPrereleaseAppVersion,
   isPrereleaseAppVersion,
   isValidAppVersion
-} from '../../../shared/app-version'
-import { REMOTE_SERVER_UPDATE_CAPABILITY } from '../../../shared/remote-server-update'
-import type { PublicKnownRuntimeEnvironment } from '../../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../../shared/runtime-types'
-import type { UpdateCheckOptions } from '../../../shared/types'
+} from '~shared/app-version'
+import { REMOTE_SERVER_UPDATE_CAPABILITY } from '~shared/remote-server-update'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import type { UpdateCheckOptions } from '~shared/types'
+
 import { remoteServerUpdateErrorMessage } from './remote-server-update-errors'
 import {
   checkingRemoteServerUpdateEntry,

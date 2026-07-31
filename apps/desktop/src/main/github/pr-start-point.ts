@@ -1,4 +1,5 @@
-import type { GitHubPrStartPoint, GitPushTarget } from '../../shared/types'
+import type { GitHubPrStartPoint, GitPushTarget } from '~shared/types'
+
 import { isMissingRemoteRefGitError } from '../git/fetch-error-classification'
 import { getPullRequestPushTarget, getWorkItem } from './client'
 

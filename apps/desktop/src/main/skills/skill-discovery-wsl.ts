@@ -1,12 +1,9 @@
 import { execFile } from 'node:child_process'
 import { posix as pathPosix } from 'node:path'
 
-import { summarizeSkillMarkdown } from '../../shared/skill-metadata'
-import type {
-  DiscoveredSkill,
-  SkillDiscoveryResult,
-  SkillDiscoverySource
-} from '../../shared/skills'
+import { summarizeSkillMarkdown } from '~shared/skill-metadata'
+import type { DiscoveredSkill, SkillDiscoveryResult, SkillDiscoverySource } from '~shared/skills'
+
 import { buildEncodedWslBashCommand, quoteBashString } from '../wsl-bash-command'
 import { discoverClaudePluginSkillSourcesInWsl } from './claude-plugin-skill-sources-wsl'
 import {

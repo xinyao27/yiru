@@ -5,12 +5,12 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import type { GitBranchCompareSummary } from '~shared/types'
 
-import type { GitBranchCompareSummary } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 
 export type BranchCompareStatusHeadSnapshot = {

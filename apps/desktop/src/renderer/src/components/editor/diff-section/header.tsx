@@ -4,9 +4,8 @@ import {
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 import type { MouseEvent, ReactElement, ReactNode } from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 export function DiffSectionHeader({
   path,

@@ -2,8 +2,7 @@ import '../assets/main.css'
 import { Suspense, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
-
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'

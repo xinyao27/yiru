@@ -1,10 +1,9 @@
 import { Check, Pencil, X } from '@phosphor-icons/react'
 import { useState, type RefObject } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import type { AskAnswerSelection, AskPrompt } from './interactive-prompt'
 import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './layout'

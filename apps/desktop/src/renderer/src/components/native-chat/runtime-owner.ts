@@ -1,8 +1,8 @@
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '@/lib/worktree-runtime-owner'
-import type { AppState } from '@/store/types'
+} from '~renderer/lib/worktree-runtime-owner'
+import type { AppState } from '~renderer/store/types'
 
 import { findTerminalTabWorktreeId } from './file-link'
 

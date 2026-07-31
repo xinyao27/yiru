@@ -1,15 +1,14 @@
 import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useRef, useState } from 'react'
+import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { useAppStore } from '~renderer/store'
+import { worktreeUsesRemoteConnection } from '~renderer/store/slices/terminals'
+import { isShellProcess } from '~shared/agent/detection'
+import { resolveCompatibleAgentTypeForOwner } from '~shared/agent/title-owner'
+import { resolvePaneAgentOwner } from '~shared/pane-agent-owner'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import type { TerminalTab, TuiAgent } from '~shared/types'
 
-import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
-import { useAppStore } from '@/store'
-import { worktreeUsesRemoteConnection } from '@/store/slices/terminals'
-
-import { isShellProcess } from '../../../../shared/agent/detection'
-import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/title-owner'
-import { resolvePaneAgentOwner } from '../../../../shared/pane-agent-owner'
-import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalTab, TuiAgent } from '../../../../shared/types'
 import {
   resolveFocusedCompletedTabAgent,
   resolveFocusedTabAgent,

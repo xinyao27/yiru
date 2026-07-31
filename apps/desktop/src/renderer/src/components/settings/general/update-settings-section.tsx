@@ -3,15 +3,15 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
-} from '../../../lib/update-check-click-options'
-import { useAppStore } from '../../../store'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+} from '~renderer/lib/update-check-click-options'
+import { useAppStore } from '~renderer/store'
+
 import { SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 import { GeneralRemoteServerUpdates } from './remote-server-updates'

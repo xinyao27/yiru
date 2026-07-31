@@ -4,13 +4,14 @@ import { execFile } from 'node:child_process'
 import { readFile, readdir, readlink } from 'node:fs/promises'
 import path from 'node:path'
 
-import { getProcessOutputFields } from '../../shared/process-output-field-scanner'
+import { getProcessOutputFields } from '~shared/process-output-field-scanner'
 import type {
   WorkspacePort,
   WorkspacePortOwner,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace/ports'
+} from '~shared/workspace/ports'
+
 import { advertisedUrlWatcher, type AdvertisedUrlWatcher } from './advertised-url-watcher'
 import { WorkspacePortScanTimeoutBackoff } from './workspace-port-scan-timeout-backoff'
 

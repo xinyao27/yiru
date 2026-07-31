@@ -1,8 +1,7 @@
 import type React from 'react'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
-import { cn } from '@/lib/class-names'
-
-import { useAppStore } from '../../store'
 import { matchesSettingsSearch, type SettingsSearchEntry } from './search'
 
 type SearchableSettingProps = SettingsSearchEntry & {

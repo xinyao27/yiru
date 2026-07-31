@@ -1,9 +1,8 @@
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
-import { inspectRuntimeTerminalProcess } from '@/runtime/terminal-inspection'
-import { useAppStore } from '@/store'
-
-import { isExpectedAgentProcess } from '../../../../shared/agent/process-recognition'
-import { isShellProcess } from '../../lib/tui-agent-startup'
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
+import { isShellProcess } from '~renderer/lib/tui-agent-startup'
+import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
+import { isExpectedAgentProcess } from '~shared/agent/process-recognition'
 
 // Why: agent CLIs vary widely in how they signal readiness. Title-based
 // detection (OSC titles parsed by detectAgentStatusFromTitle) is the tightest

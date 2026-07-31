@@ -1,4 +1,4 @@
-import type { ExternalAutomationRun } from '../../../../shared/automations-types'
+import type { ExternalAutomationRun } from '~shared/automations-types'
 
 type ExternalAutomationRunTableJob = {
   id: string

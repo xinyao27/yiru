@@ -1,24 +1,23 @@
 import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+} from '~renderer/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   FEATURE_WALL_SETUP_STEP_IDS,
   getFirstIncompleteFeatureWallSetupStepId,
   getFeatureWallSetupSteps
-} from '../../../../shared/feature-wall-setup-steps'
-import type { FeatureWallSetupStepId } from '../../../../shared/feature-wall-setup-steps'
+} from '~shared/feature-wall-setup-steps'
+import type { FeatureWallSetupStepId } from '~shared/feature-wall-setup-steps'
+
 import { FeatureWallSetupChecklist } from '../feature-wall/setup-checklist'
 import { SetupGuideProgressRing } from './progress-ring'
 import { useSetupGuideProgress } from './use-setup-guide-progress'

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 // One-time discovery highlight for the screenshot-markup Draw button. Shows once
 // per install — the first time the button is usable and its surface is active —

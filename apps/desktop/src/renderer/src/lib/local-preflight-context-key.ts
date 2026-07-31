@@ -1,4 +1,4 @@
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 
 type LocalPreflightContextKeyInput =
   | {

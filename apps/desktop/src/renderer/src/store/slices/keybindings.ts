@@ -1,10 +1,10 @@
 import type { StateCreator } from 'zustand'
-
 import type {
   KeybindingActionId,
   KeybindingFileSnapshot,
   KeybindingOverrides
-} from '../../../../shared/keybindings'
+} from '~shared/keybindings'
+
 import type { AppState } from '../types'
 
 const EMPTY_KEYBINDINGS: KeybindingOverrides = {}

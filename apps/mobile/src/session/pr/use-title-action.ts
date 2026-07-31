@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { triggerError, triggerSuccess } from '../../platform/haptics'
-import type { RpcClient } from '../../transport/rpc-client'
-import type { ConnectionState } from '../../transport/types'
+import { triggerError, triggerSuccess } from '~/platform/haptics'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState } from '~/transport/types'
+
 import { fetchUpdatePRTitle, type GitHubPrMutationOutcome } from '../github-pr-mutations'
 import type { GitHubPrRepoSlug } from '../github-pr-rpc'
 import { buildUpdatePRTitleParams } from './title-edit'

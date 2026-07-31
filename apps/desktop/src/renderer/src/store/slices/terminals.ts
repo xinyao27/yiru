@@ -12,66 +12,78 @@ import {
 } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
-
-import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
-import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
-import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
-import { recordTerminalInputActivity } from '@/components/terminal-pane/input-activity-coalescing'
+import {
+  directSshAuthoritiesEqual,
+  settleDirectSshPaneRetryState
+} from '~renderer/components/direct-ssh/terminal-recovery/authority-ledger'
+import {
+  retryDirectSshTerminalPanes,
+  retrySettledDirectSshTerminalPane
+} from '~renderer/components/direct-ssh/terminal-recovery/pane-retry-ledger'
+import {
+  clearDirectSshTerminalBindings,
+  invalidateStaleDirectSshTerminalBindings,
+  type DirectSshLivePtyBinding,
+  type DirectSshPaneRetryAttempt,
+  type DirectSshPaneRetryAttemptId,
+  type DirectSshPaneRetryHistory,
+  type DirectSshPaneRetryResult
+} from '~renderer/components/direct-ssh/terminal-recovery/recovery'
+import { resolveDirectSshTerminalWorkspaceKeys } from '~renderer/components/direct-ssh/terminal-recovery/workspace-scope'
+import { getFolderWorkspaceConnectionId } from '~renderer/components/editor/folder-workspace-connection'
+import type { NativeChatLaunchPrompt } from '~renderer/components/native-chat/launch-prompt'
+import { hasWorktreeSleepIntent } from '~renderer/components/sidebar/worktree-sleep-intent'
+import { forgetAgentHibernationTabOutput } from '~renderer/components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '~renderer/components/terminal-pane/agent/startup-delivery-guards'
+import { recordTerminalInputActivity } from '~renderer/components/terminal-pane/input-activity-coalescing'
 import {
   normalizeTerminalLayoutSnapshot,
   resolvePtyBoundActiveLeafId
-} from '@/components/terminal-pane/terminal-layout-leaf-ids'
-import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
-import { isClaudeAgent } from '@/lib/agent-status'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
+} from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
+import { sanitizeTerminalLayoutPaneTitles } from '~renderer/components/terminal-pane/title-sanitization'
+import type { AgentStartedTelemetry } from '~renderer/lib/agent-started-telemetry'
+import { isClaudeAgent } from '~renderer/lib/agent-status'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { forgetForegroundTerminalTabs } from '~renderer/lib/foreground-terminal-tabs'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
-} from '@/lib/workspace-session-hydration-keys'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+} from '~renderer/lib/workspace-session-hydration-keys'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   restorePtyDataHandlersAfterFailedShutdown,
   unregisterPtyDataHandlers
-} from '@/runtime/pty-handler-registry'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
+} from '~renderer/runtime/pty-handler-registry'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
 // Why: import the store-free registry, not terminal-parked-tab-watchers —
 // that module imports @/store, and a slice importing it would re-enter store
 // creation before this slice finishes evaluating.
 import {
   disposeParkedTerminalWatchersForPtyIds,
   retireParkedTerminalTab
-} from '@/runtime/terminal-parked-watcher-registry'
-import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
-import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/terminal-stream'
+} from '~renderer/runtime/terminal-parked-watcher-registry'
+import { shutdownBufferCaptures } from '~renderer/runtime/terminal-shutdown-buffer-captures'
+import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
 import {
   createWebSessionTerminalCommand,
   setWebSessionTabPropsCommand
-} from '@/runtime/web-session-commands'
-import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
-import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
-
-import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent/decorative-title-signature'
-import { deriveGeneratedTabTitle } from '../../../../shared/agent/tab-title'
-import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
-import {
-  DEFAULT_REPO_BADGE_COLOR,
-  FLOATING_TERMINAL_WORKTREE_ID
-} from '../../../../shared/constants'
-import { resolveLocalWindowsTerminalShellOverrideForTab } from '../../../../shared/local-windows-terminal-runtime'
-import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
-import {
-  makePaneKey,
-  parseLegacyNumericPaneKey,
-  parsePaneKey
-} from '../../../../shared/stable-pane-id'
-import type { CodexRestartNotice } from '../../../../shared/terminal/codex-restart-notice'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal/tab-id'
+} from '~renderer/runtime/web-session-commands'
+import { requestWebSessionTabsRefresh } from '~renderer/runtime/web-session-tabs-refresh-requests'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
+import { isDecorativeAgentTitleFrameChange } from '~shared/agent/decorative-title-signature'
+import { deriveGeneratedTabTitle } from '~shared/agent/tab-title'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import { DEFAULT_REPO_BADGE_COLOR, FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { resolveLocalWindowsTerminalShellOverrideForTab } from '~shared/local-windows-terminal-runtime'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import { makePaneKey, parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { CodexRestartNotice } from '~shared/terminal/codex-restart-notice'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '~shared/terminal/tab-id'
 import type {
   Repo,
   SetupSplitDirection,
@@ -82,33 +94,13 @@ import type {
   Worktree,
   WorkspaceKey,
   WorkspaceSessionState
-} from '../../../../shared/types'
+} from '~shared/types'
 import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace/scope'
-import {
-  directSshAuthoritiesEqual,
-  settleDirectSshPaneRetryState
-} from '../../components/direct-ssh/terminal-recovery/authority-ledger'
-import {
-  retryDirectSshTerminalPanes,
-  retrySettledDirectSshTerminalPane
-} from '../../components/direct-ssh/terminal-recovery/pane-retry-ledger'
-import {
-  clearDirectSshTerminalBindings,
-  invalidateStaleDirectSshTerminalBindings,
-  type DirectSshLivePtyBinding,
-  type DirectSshPaneRetryAttempt,
-  type DirectSshPaneRetryAttemptId,
-  type DirectSshPaneRetryHistory,
-  type DirectSshPaneRetryResult
-} from '../../components/direct-ssh/terminal-recovery/recovery'
-import { resolveDirectSshTerminalWorkspaceKeys } from '../../components/direct-ssh/terminal-recovery/workspace-scope'
-import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
-import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
+} from '~shared/workspace/scope'
+
 import type { AppState } from '../types'
 import {
   collectHibernatedCompletionEvidenceForWorktree,

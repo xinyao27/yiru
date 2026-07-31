@@ -4,19 +4,18 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { Button } from '~renderer/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import type {
   CoworkingGitHistoryEntry,
   CoworkingGitHistoryResult,
   CoworkingGitStatusEntry,
   CoworkingGitStatusResult
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingGitChangesList } from './git-changes-list'
 
 export type CoworkingGitSidebarMode = 'changes' | 'history'

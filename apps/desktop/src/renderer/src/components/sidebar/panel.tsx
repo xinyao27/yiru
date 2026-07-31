@@ -1,12 +1,11 @@
 import { FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { useSidebarResize } from '@/hooks/use-sidebar-resize'
-import { cn } from '@/lib/class-names'
-import { lazyWithRetry } from '@/lib/lazy-with-retry'
-import { useAppStore } from '@/store'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { TooltipProvider } from '~renderer/components/ui/tooltip'
+import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
+import { cn } from '~renderer/lib/class-names'
+import { lazyWithRetry } from '~renderer/lib/lazy-with-retry'
+import { useAppStore } from '~renderer/store'
 
 import SidebarHeader from './header'
 import SidebarNav from './nav'

@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
-
-import { useAppStore } from '@/store'
-
-import type { TuiAgent } from '../../../shared/types'
+import { useAppStore } from '~renderer/store'
+import type { TuiAgent } from '~shared/types'
 
 export type UseDetectedAgentsResult = {
   /** Null while detection is in flight on first load. */

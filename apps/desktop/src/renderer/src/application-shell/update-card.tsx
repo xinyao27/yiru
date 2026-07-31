@@ -11,14 +11,13 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button as UiButton } from '~renderer/components/ui/button'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { ChangelogData } from '~shared/types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button as UiButton } from '@/components/ui/button'
-import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { ChangelogData } from '../../../shared/types'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { Progress } from '../components/ui/progress'

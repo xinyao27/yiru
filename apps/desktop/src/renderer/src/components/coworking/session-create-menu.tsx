@@ -1,32 +1,31 @@
 import type React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { AgentLaunchMenuItems } from '@/components/tab-bar/agent-launch-menu-items'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { AgentLaunchMenuItems } from '~renderer/components/tab-bar/agent-launch-menu-items'
 import {
   buildTabAgentLaunchOptions,
   orderTabLaunchAgents
-} from '@/components/tab-bar/tab-agent-launch-options'
+} from '~renderer/components/tab-bar/tab-agent-launch-options'
 import {
   WorkspaceNewTerminalMenuItem,
   WorkspaceTabCreateMenu
-} from '@/components/tab-bar/workspace-tab-create-menu'
+} from '~renderer/components/tab-bar/workspace-tab-create-menu'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-
-import type { CoworkingSessionCatalogEntry } from '../../../../shared/coworking/catalog-contract'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import type { CoworkingSessionCatalogEntry } from '~shared/coworking/catalog-contract'
 import type {
   CoworkingTerminalCreateOperation,
   CoworkingTerminalLaunchOptionsResult
-} from '../../../../shared/coworking/operation-contract'
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+} from '~shared/coworking/operation-contract'
+import type { WorkspacePanelTabContentType } from '~shared/types'
+
 import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import {
   parseCoworkingTerminalCreateResult,

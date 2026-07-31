@@ -5,7 +5,7 @@ import {
 import Constants from 'expo-constants'
 import { View, Text, Pressable, Linking, Platform } from 'react-native'
 
-import { GithubLogo, Globe } from '@/components/uniwind-icons'
+import { GithubLogo, Globe } from '~/components/uniwind-icons'
 
 import { MobileContentSection } from '../src/components/content-section'
 import { YiruLogo } from '../src/components/yiru-logo'

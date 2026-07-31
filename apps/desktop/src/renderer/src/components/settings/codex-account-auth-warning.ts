@@ -1,9 +1,6 @@
-import { isCodexAuthError } from '../../../../shared/codex-auth-errors'
-import type {
-  ProviderRateLimits,
-  RateLimitRuntimeTarget
-} from '../../../../shared/rate-limit-types'
-import type { CodexSystemDefaultIdentity } from '../../../../shared/types'
+import { isCodexAuthError } from '~shared/codex-auth-errors'
+import type { ProviderRateLimits, RateLimitRuntimeTarget } from '~shared/rate-limit-types'
+import type { CodexSystemDefaultIdentity } from '~shared/types'
 
 type AccountRuntime = {
   runtime: 'host' | 'wsl'

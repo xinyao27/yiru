@@ -1,10 +1,9 @@
 import { useLayoutEffect, useMemo, useState } from 'react'
+import { useAppStore } from '~renderer/store'
+import type { AppState } from '~renderer/store/types'
+import { getIndexedWorktreeById } from '~renderer/store/worktree-repo-index'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import { useAppStore } from '@/store'
-
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import type { AppState } from '../../../store/types'
-import { getIndexedWorktreeById } from '../../../store/worktree-repo-index'
 import { createConnectionIdForFileSelector } from '../connection-owner-resolution'
 import type { HttpLinkSourceOwner } from '../http-link-routing'
 import { createRichMarkdownHtmlSuperscriptLinkContext } from './html-superscript-link-context'

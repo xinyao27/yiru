@@ -10,7 +10,8 @@ import type {
   GetRateLimitResult,
   GitHubRateLimitBucket,
   GitHubRateLimitSnapshot
-} from '../../shared/types'
+} from '~shared/types'
+
 import {
   clearGhRateLimitBlock,
   getGhRateLimitBlockedUntilMs,

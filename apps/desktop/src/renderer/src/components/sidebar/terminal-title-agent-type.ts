@@ -1,10 +1,9 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
-
+import { resolveTitleActivityLabel } from '~renderer/lib/pane-agent-evidence'
 import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
-} from '../../../../shared/agent/title-owner'
-import { resolveTitleActivityLabel } from '../../lib/pane-agent-evidence'
+} from '~shared/agent/title-owner'
 
 const TITLE_AGENT_LABEL_TO_TYPE: Record<string, AgentType> = {
   'Claude Code': 'claude',

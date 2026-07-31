@@ -8,12 +8,11 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { AppState } from '~renderer/store/types'
+import { getIndexedWorktreeMap } from '~renderer/store/worktree-repo-index'
+import type { Repo } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import type { AppState } from '@/store/types'
-import { getIndexedWorktreeMap } from '@/store/worktree-repo-index'
-
-import type { Repo } from '../../../shared/types'
-import { parseWorkspaceKey } from '../../../shared/workspace/scope'
 import { getFolderWorkspaceCandidateRepos } from '../components/editor/folder-workspace-connection'
 
 export type AiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'

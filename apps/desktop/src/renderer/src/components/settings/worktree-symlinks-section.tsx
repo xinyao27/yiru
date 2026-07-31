@@ -1,12 +1,11 @@
 import { Folder, LinkSimple as Link2, Plus, X } from '@phosphor-icons/react'
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { useEffect, useMemo, useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import type { Repo } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
-
-import type { Repo } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '../ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'

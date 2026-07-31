@@ -1,12 +1,12 @@
 import { useCallback, useEffect } from 'react'
+import { getDiffCommentSource } from '~renderer/components/editor/diff-comment-compat'
+import { useGitHistoryCommitActions } from '~renderer/components/workspace-panel/use-git-history-commit-actions'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { stageRuntimeGitPath } from '~renderer/runtime/git-client'
+import type { DiffComment, GitBranchChangeEntry } from '~shared/types'
 
-import type { DiffComment, GitBranchChangeEntry } from '../../../../../../shared/types'
-import { getConnectionId } from '../../../../lib/connection-context'
-import { detectLanguage } from '../../../../lib/language-detect'
-import { joinPath } from '../../../../lib/path'
-import { stageRuntimeGitPath } from '../../../../runtime/git-client'
-import { getDiffCommentSource } from '../../../editor/diff-comment-compat'
-import { useGitHistoryCommitActions } from '../../use-git-history-commit-actions'
 import {
   cancelSourceControlEditorRevealFrames,
   requestSourceControlEditorRevealFrame

@@ -17,9 +17,8 @@ import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-mo
    exists to serve this one status-bar segment. See
    docs/resource-usage-merge-spec.md for the full design. */
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -27,21 +26,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
-import { cn } from '@/lib/class-names'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+} from '~renderer/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
+import { cn } from '~renderer/lib/class-names'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { useWorktreeMap } from '~renderer/store/selectors'
+import { ORPHAN_WORKTREE_ID } from '~shared/constants'
+import { isFolderRepo } from '~shared/repo-kind'
+import type { AppMemory, BrowserWorkspace, UsageValues, Worktree } from '~shared/types'
+import { isWorkspaceOldForCleanup } from '~shared/workspace/cleanup'
 
-import { ORPHAN_WORKTREE_ID } from '../../../../shared/constants'
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import type { AppMemory, BrowserWorkspace, UsageValues, Worktree } from '../../../../shared/types'
-import { isWorkspaceOldForCleanup } from '../../../../shared/workspace/cleanup'
-import { useAppStore } from '../../store'
-import { useWorktreeMap } from '../../store/selectors'
 import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-actions'
 import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'

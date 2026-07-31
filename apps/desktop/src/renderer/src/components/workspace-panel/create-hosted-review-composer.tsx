@@ -6,23 +6,22 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
-} from '@/i18n/hosted-review-localized-copy'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { CreateHostedReviewComposerFields } from './create-hosted-review-composer-fields'
 import {

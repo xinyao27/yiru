@@ -1,7 +1,7 @@
 import type { Editor, UseEditorOptions } from '@tiptap/react'
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react'
+import type { DiffComment } from '~shared/types'
 
-import type { DiffComment } from '../../../../../shared/types'
 import { encodeRawMarkdownHtmlForRichEditor } from '../raw-markdown-html'
 import { autoFocusRichEditor } from './auto-focus'
 import { syncDocLinkMenu, type DocLinkMenuRow, type DocLinkMenuState } from './commands'

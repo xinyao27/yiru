@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { CoworkingWorktreeVisibilityDialog } from '~renderer/components/coworking/worktree-visibility-dialog'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import type { Worktree } from '~shared/types'
 
-import { CoworkingWorktreeVisibilityDialog } from '@/components/coworking/worktree-visibility-dialog'
-import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
-
-import type { Worktree } from '../../../../../shared/types'
 import { ProjectGroupNameDialog } from '../project-group-name-dialog'
 import { isEventTargetInsideCurrentTarget } from '../worktree-card/dom-events'
 import { WorktreeParentPickerPopover } from '../worktree-parent-picker-popover'

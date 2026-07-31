@@ -9,8 +9,7 @@
  * consumers can use it.
  */
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import type { GlobalSettings } from '../../../../../shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 /** Delay before BEL/completion OS notifications so the richer
  *  agent-task-complete notification can win a same-burst BEL race. */

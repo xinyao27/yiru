@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
+import type { AppState } from '~renderer/store/types'
+import type { CoworkingRequesterControlView } from '~shared/coworking/ipc-contract'
 
-import type { CoworkingRequesterControlView } from '../../../../shared/coworking/ipc-contract'
-import type { AppState } from '../../store/types'
 import {
   getCoworkingWorktreeBindingKey,
   isCoworkingRequesterControlCurrent,

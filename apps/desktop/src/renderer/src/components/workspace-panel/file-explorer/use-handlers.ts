@@ -2,9 +2,9 @@ import { useCallback, useMemo } from 'react'
 import type React from 'react'
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { detectLanguage } from '~renderer/lib/language-detect'
 
-import { translate } from '../../../i18n/i18n'
-import { detectLanguage } from '../../../lib/language-detect'
 import { FILE_EXPLORER_DRAGGABLE_SELECTOR } from './drag-scroll-marker'
 import type { TreeNode } from './types'
 

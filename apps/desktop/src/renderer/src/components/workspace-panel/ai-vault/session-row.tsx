@@ -2,15 +2,19 @@ import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
 import type React from 'react'
-
-import { translate } from '../../../i18n/i18n'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
 import {
   AI_VAULT_SESSION_DRAG_END_EVENT,
   AI_VAULT_SESSION_DRAG_START_EVENT,
   writeAiVaultSessionDragData
-} from '../../../lib/ai-vault-session-drag'
-import { cn } from '../../../lib/class-names'
-import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '../../ui/context-menu'
+} from '~renderer/lib/ai-vault-session-drag'
+import { cn } from '~renderer/lib/class-names'
+
 import { SessionRowTrailingActions } from '../session-row-trailing-actions'
 import type { AiVaultResumeStartup } from './resume-command'
 import { SessionActionMenuItems } from './session-action-menu-items'

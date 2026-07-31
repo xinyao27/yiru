@@ -1,4 +1,5 @@
-import { keybindingMatchesAction, type KeybindingOverrides } from '../../../../shared/keybindings'
+import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
+
 import type { WindowsShiftEnterEncoding } from './terminal-windows-shift-enter'
 
 export type TerminalShortcutEvent = {

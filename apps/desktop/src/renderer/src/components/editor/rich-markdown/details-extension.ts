@@ -2,8 +2,8 @@ import { decodeHtmlEntities, type AnyExtension, type Editor } from '@tiptap/core
 import { Details, DetailsContent, DetailsSummary } from '@tiptap/extension-details'
 import type { PlaceholderOptions } from '@tiptap/extension-placeholder'
 import { TextSelection } from '@tiptap/pm/state'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import {
   detailsBodyHtmlToMarkdown,
   escapeDetailsHtml,

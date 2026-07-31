@@ -1,10 +1,8 @@
 import { Copy, Image, ChatCentered as MessageSquarePlus, X } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-
-import type { BrowserGrabPayload } from '../../../../shared/browser/grab-types'
+import { Button } from '~renderer/components/ui/button'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { BrowserGrabPayload } from '~shared/browser/grab-types'
 
 // ---------------------------------------------------------------------------
 // Grab payload → human-readable prompt context

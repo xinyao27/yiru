@@ -17,40 +17,30 @@ import {
 } from '@yiru/runtime-protocol/ssh-connection'
 import { toSshExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { BrowserWindow } from 'electron'
-
-import {
-  AGENT_HOOK_INSTALL_PLUGINS_METHOD,
-  AGENT_HOOK_NOTIFICATION_METHOD,
-  AGENT_HOOK_REQUEST_REPLAY_METHOD,
-  isRemoteAgentHooksEnabled
-} from '../../../shared/agent/hook-relay'
-import type { PtyModelRestoreNeededEvent } from '../../../shared/pty-model-restore-marker'
-import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import { isValidTerminalTabId } from '../../../shared/terminal/tab-id'
-import { isAgentStatusHooksEnabled } from '../../agent-hooks/managed-agent-hook-controls'
-import { installRemoteManagedAgentHooks } from '../../agent-hooks/remote-managed-hook-installers'
-import { agentHookServer } from '../../agent-hooks/server'
-import { getOpenCodePluginSource } from '../../opencode/hook-service'
-import type { Store } from '../../persistence'
-import { getPiAgentStatusExtensionSource } from '../../pi/agent-status-extension-source'
+import { isAgentStatusHooksEnabled } from '~main/agent-hooks/managed-agent-hook-controls'
+import { installRemoteManagedAgentHooks } from '~main/agent-hooks/remote-managed-hook-installers'
+import { agentHookServer } from '~main/agent-hooks/server'
+import { getOpenCodePluginSource } from '~main/opencode/hook-service'
+import type { Store } from '~main/persistence'
+import { getPiAgentStatusExtensionSource } from '~main/pi/agent-status-extension-source'
 import {
   registerSshFilesystemProvider,
   unregisterSshFilesystemProvider,
   getSshFilesystemProvider
-} from '../../providers/ssh-filesystem-dispatch'
-import { SshFilesystemProvider } from '../../providers/ssh-filesystem-provider'
-import { registerSshGitProvider, unregisterSshGitProvider } from '../../providers/ssh-git-dispatch'
-import { SshGitProvider } from '../../providers/ssh-git-provider'
-import { toAppSshPtyId, toRelaySshPtyId } from '../../providers/ssh-pty-id'
+} from '~main/providers/ssh-filesystem-dispatch'
+import { SshFilesystemProvider } from '~main/providers/ssh-filesystem-provider'
+import { registerSshGitProvider, unregisterSshGitProvider } from '~main/providers/ssh-git-dispatch'
+import { SshGitProvider } from '~main/providers/ssh-git-provider'
+import { toAppSshPtyId, toRelaySshPtyId } from '~main/providers/ssh-pty-id'
 import {
   SshPtyProvider,
   isSshPtyIdentityMismatchError,
   isSshPtyNotFoundError
-} from '../../providers/ssh-pty-provider'
+} from '~main/providers/ssh-pty-provider'
 import {
   recordHiddenRendererPtyDataDrop,
   shouldDropHiddenRendererPtyData
-} from '../../pty/hidden-delivery-gate'
+} from '~main/pty/hidden-delivery-gate'
 import {
   registerSshPtyProvider,
   unregisterSshPtyProvider,
@@ -60,10 +50,20 @@ import {
   clearProviderPtyState,
   deletePtyOwnership,
   setPtyOwnership
-} from '../../pty/pty'
-import { answerStartupTerminalColorQueries } from '../../pty/terminal-startup-color-query-replies'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
-import { isMainWindowVisible, onMainWindowBecameVisible } from '../../window/main-window-visibility'
+} from '~main/pty/pty'
+import { answerStartupTerminalColorQueries } from '~main/pty/terminal-startup-color-query-replies'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { isMainWindowVisible, onMainWindowBecameVisible } from '~main/window/main-window-visibility'
+import {
+  AGENT_HOOK_INSTALL_PLUGINS_METHOD,
+  AGENT_HOOK_NOTIFICATION_METHOD,
+  AGENT_HOOK_REQUEST_REPLAY_METHOD,
+  isRemoteAgentHooksEnabled
+} from '~shared/agent/hook-relay'
+import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marker'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import { isValidTerminalTabId } from '~shared/terminal/tab-id'
+
 import { SshChannelMultiplexer } from '../channel-multiplexer'
 import type { SshConnection } from '../connection'
 import { shellEscape } from '../connection-utils'

@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from 'react'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { getRuntimeGitBranchCompare } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
 
-import { getConnectionId } from '../../../../lib/connection-context'
-import { installWindowVisibilityInterval } from '../../../../lib/window-visibility-interval'
-import { getRuntimeGitBranchCompare } from '../../../../runtime/git-client'
-import { useAppStore } from '../../../../store'
 import { shouldClearBranchCompareForMissingBase } from '../base-ref'
 import {
   shouldRefreshBranchCompareForRemoteStatus,

@@ -8,7 +8,7 @@
 //
 // See docs/mobile-presence-lock.md.
 
-import type { RuntimeTerminalDriverState } from '../../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
 
 export type DriverState = RuntimeTerminalDriverState
 

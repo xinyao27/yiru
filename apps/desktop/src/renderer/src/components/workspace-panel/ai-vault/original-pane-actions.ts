@@ -3,12 +3,11 @@ import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
+import { translate } from '~renderer/i18n/i18n'
+import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
-import { activateTabAndFocusPane } from '../../../lib/activate-tab-and-focus-pane'
-import { activateAndRevealWorktree } from '../../../lib/worktree-activation'
 import { findOriginalAiVaultSessionPane } from './original-pane'
 import {
   createLazyAiVaultOriginalPaneIndex,

@@ -1,6 +1,6 @@
-import { inspectRuntimeTerminalProcess } from '@/runtime/terminal-inspection'
-import type { AppState } from '@/store'
-import { useAppStore } from '@/store'
+import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
+import type { AppState } from '~renderer/store'
+import { useAppStore } from '~renderer/store'
 
 // Why: account restarts must wait through slow prompt integrations before
 // writing Codex into the replacement shell.

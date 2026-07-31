@@ -1,4 +1,5 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import {
   getDiscardAllPaths,
   getUnstageAllPaths,

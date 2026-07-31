@@ -1,9 +1,10 @@
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { getAgentCatalog } from '../../../lib/agent-catalog'
-import type { SourceControlLaunchAgentScope } from '../../../lib/source-control-launch-agent-selection'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import type { SourceControlLaunchAgentScope } from '~renderer/lib/source-control-launch-agent-selection'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
+
 import type { SourceControlAgentActionDeliveryPlanState } from './agent-action-dialog-form'
 
 export function isSourceControlAgentDetectedAndEnabled(

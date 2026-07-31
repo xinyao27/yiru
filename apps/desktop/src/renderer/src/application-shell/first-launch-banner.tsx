@@ -34,10 +34,9 @@ import { X } from '@phosphor-icons/react'
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
 import { useState } from 'react'
-
-import { Button as UiButton } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
+import { Button as UiButton } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 
 import { Button } from '../components/ui/button'
 import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../lib/telemetry'

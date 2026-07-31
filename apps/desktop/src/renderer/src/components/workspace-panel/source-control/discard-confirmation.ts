@@ -1,6 +1,7 @@
-import type { GitStatusEntry } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { basename } from '../../../lib/path'
+import { translate } from '~renderer/i18n/i18n'
+import { basename } from '~renderer/lib/path'
+import type { GitStatusEntry } from '~shared/types'
+
 import type { DiscardAllArea } from '../discard-all-sequence'
 
 export type DiscardConfirmationCopy = {

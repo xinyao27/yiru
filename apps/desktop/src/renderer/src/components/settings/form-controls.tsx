@@ -5,12 +5,11 @@ co-locate shared layout and keyboard interaction logic, which keeps the settings
 panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { normalizeColor, type TerminalThemeOption } from '@/lib/terminal-theme'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { normalizeColor, type TerminalThemeOption } from '~renderer/lib/terminal-theme'
 
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'

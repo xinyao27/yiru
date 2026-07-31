@@ -1,15 +1,15 @@
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import {
   flushTerminalOutput,
   requestTerminalBacklogRecovery
-} from '@/lib/pane-manager/pane-terminal-output-scheduler'
-import { resetAndRefreshAllTerminalWebglAtlases } from '@/lib/pane-manager/registry'
-import { resetTerminalLinkifierHoverState } from '@/lib/pane-manager/terminal-linkifier-hover-reset'
+} from '~renderer/lib/pane-manager/pane-terminal-output-scheduler'
+import { resetAndRefreshAllTerminalWebglAtlases } from '~renderer/lib/pane-manager/registry'
+import { resetTerminalLinkifierHoverState } from '~renderer/lib/pane-manager/terminal-linkifier-hover-reset'
 import {
   enforceTerminalCurrentScrollIntent,
   syncTerminalScrollIntentFromViewport
-} from '@/lib/pane-manager/terminal-scroll-intent'
-import type { ScrollState } from '@/lib/pane-manager/types'
+} from '~renderer/lib/pane-manager/terminal-scroll-intent'
+import type { ScrollState } from '~renderer/lib/pane-manager/types'
 
 import { fitAndFocusPanes, fitPanes, focusActivePane } from './pane-helpers'
 import { scheduleTabRevealWebglAtlasRecovery } from './terminal-webgl-atlas-recovery'

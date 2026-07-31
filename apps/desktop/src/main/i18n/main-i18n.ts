@@ -5,10 +5,9 @@ import i18next, {
   type ReadCallback,
   type TOptions
 } from 'i18next'
-
-import { isPseudoLocalizationLocale, pseudoLocalizeString } from '../../shared/pseudo-localization'
-import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '../../shared/ui-language'
-import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '../../shared/ui-locale'
+import { isPseudoLocalizationLocale, pseudoLocalizeString } from '~shared/pseudo-localization'
+import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '~shared/ui-language'
+import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '~shared/ui-locale'
 
 export const mainI18n: I18nInstance = i18next.createInstance()
 

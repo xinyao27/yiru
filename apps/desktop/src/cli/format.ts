@@ -1,5 +1,6 @@
-import { computerUseErrorRecoveryData } from '../shared/computer-use-error-recovery'
-import type { CliStatusResult } from '../shared/runtime-types'
+import { computerUseErrorRecoveryData } from '~shared/computer-use-error-recovery'
+import type { CliStatusResult } from '~shared/runtime-types'
+
 import { prepareComputerCliJsonResult } from './computer-format'
 import type { RuntimeRpcFailure, RuntimeRpcSuccess } from './runtime-client'
 import { RuntimeClientError, RuntimeRpcFailureError } from './runtime-client'

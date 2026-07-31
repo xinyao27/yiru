@@ -1,11 +1,10 @@
 import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-
 import {
   clearHostSettingOverride,
   getHostSettingOverride,
   setHostSettingOverride
-} from '../../../../shared/host-setting-overrides'
-import type { GlobalSettings, HostSettingOverrides } from '../../../../shared/types'
+} from '~shared/host-setting-overrides'
+import type { GlobalSettings, HostSettingOverrides } from '~shared/types'
 
 type OverridesSlice = Pick<GlobalSettings, 'hostSettingOverrides'>
 type OverridesMap = Partial<Record<ExecutionHostId, HostSettingOverrides>>

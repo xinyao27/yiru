@@ -1,10 +1,8 @@
 import { Circle as CircleDot } from '@phosphor-icons/react'
 import React from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-
-import type { WorkspaceStatus, WorkspaceStatusDefinition } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import type { WorkspaceStatus, WorkspaceStatusDefinition } from '~shared/types'
 import {
   DEFAULT_WORKSPACE_STATUS_COLOR_ID,
   DEFAULT_WORKSPACE_STATUS_ICON_ID,
@@ -16,7 +14,8 @@ import {
   getWorkspaceStatusFromGroupKey,
   getWorkspaceStatusGroupKey,
   isWorkspaceStatusId
-} from '../../../../shared/workspace/statuses'
+} from '~shared/workspace/statuses'
+
 import {
   getWorkspaceStatusIconOptions,
   type WorkspaceStatusIconOption

@@ -1,7 +1,7 @@
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import { KEYBINDING_DEFINITIONS } from '~shared/keybindings'
 
-import { KEYBINDING_DEFINITIONS } from '../../../../shared/keybindings'
 import type { SettingsSearchEntry } from './search'
 import { translateSearchKeyword } from './search-keywords'
 

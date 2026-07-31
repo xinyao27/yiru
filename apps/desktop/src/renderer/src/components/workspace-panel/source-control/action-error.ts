@@ -1,4 +1,5 @@
-import type { GitStatusEntry } from '../../../../../shared/types'
+import type { GitStatusEntry } from '~shared/types'
+
 import type { RemoteOpKind } from './primary-action'
 
 export type AbortActionErrorKind = 'abort_merge' | 'abort_rebase'

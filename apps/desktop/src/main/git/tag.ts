@@ -1,5 +1,6 @@
-import type { GitAddTagResult } from '../../shared/git/write-op-results'
-import { isSafeRefArgument, resolveCommitOid } from '../../shared/git/write-preconditions'
+import type { GitAddTagResult } from '~shared/git/write-op-results'
+import { isSafeRefArgument, resolveCommitOid } from '~shared/git/write-preconditions'
+
 import { gitExecFileAsync } from './runner'
 import { gitOptionsForWorktree, type GitRuntimeOptions } from './runtime-options'
 import { runWithGitReadCacheInvalidation } from './status'

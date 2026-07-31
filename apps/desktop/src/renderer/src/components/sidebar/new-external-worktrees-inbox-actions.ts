@@ -1,7 +1,6 @@
-import { translate } from '@/i18n/i18n'
-
-import { mergeExternalWorktreeInboxPaths } from '../../../../shared/external-worktree-inbox'
-import type { Repo } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import { mergeExternalWorktreeInboxPaths } from '~shared/external-worktree-inbox'
+import type { Repo } from '~shared/types'
 
 export type NewExternalWorktreesInboxActionState = {
   pending: boolean

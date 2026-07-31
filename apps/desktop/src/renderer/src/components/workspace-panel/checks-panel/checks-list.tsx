@@ -4,16 +4,15 @@ import {
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree } from '~renderer/store/selectors'
+import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import type { PRCheckDetail, PRCheckRunDetails } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { useActiveWorktree } from '../../../store/selectors'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { CHECK_COLOR, CHECK_ICON } from '../check-status-presentation'
 import { CheckRunDetails } from './check-run-details'
 import {

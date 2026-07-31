@@ -3,13 +3,12 @@ import {
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
+import { getRuntimeEnvironmentIdForRepo } from '~renderer/lib/repo-runtime-owner'
+import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
+import type { AppState } from '~renderer/store/types'
+import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
+import type { YiruHooks } from '~shared/types'
 
-import { checkRuntimeHooks } from '@/runtime/hooks-client'
-import type { AppState } from '@/store/types'
-
-import { resolveHookCommandSourcePolicy } from '../../../../shared/hook-command-source-policy'
-import type { YiruHooks } from '../../../../shared/types'
-import { getRuntimeEnvironmentIdForRepo } from '../../lib/repo-runtime-owner'
 import { hashYiruHookScript, type YiruHookScriptKind } from '../sidebar/yiru-hook-trust'
 
 export type HookScriptKind = YiruHookScriptKind

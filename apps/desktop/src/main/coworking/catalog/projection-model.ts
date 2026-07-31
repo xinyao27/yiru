@@ -3,8 +3,9 @@ import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPage,
   CoworkingWorktreeCatalogEntry
-} from '../../../shared/coworking/catalog-contract'
-import { isCoworkingProjectIdentityKey } from '../../../shared/coworking/catalog-contract'
+} from '~shared/coworking/catalog-contract'
+import { isCoworkingProjectIdentityKey } from '~shared/coworking/catalog-contract'
+
 import type {
   CoworkingCatalogSessionDescription,
   CoworkingCatalogWorktreeDescription

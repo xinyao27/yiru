@@ -1,9 +1,8 @@
 import { toast } from 'sonner'
-
-import { absolutePathToFileUri } from '@/components/editor/markdown-internal-links'
-import { getConnectionId } from '@/lib/connection-context'
-import { useAppStore } from '@/store'
-import { findSiblingGroupId } from '@/store/slices/tabs'
+import { absolutePathToFileUri } from '~renderer/components/editor/markdown-internal-links'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { useAppStore } from '~renderer/store'
+import { findSiblingGroupId } from '~renderer/store/slices/tabs'
 
 export type PreviewableLanguage = 'html'
 export const REMOTE_FILE_BROWSER_UNSUPPORTED_MESSAGE =

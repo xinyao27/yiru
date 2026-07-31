@@ -1,5 +1,4 @@
 import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron'
-
 import type {
   CoworkingDecideControlArgs,
   CoworkingRequestControlArgs,
@@ -10,15 +9,16 @@ import type {
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
-} from '../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import {
   isCoworkingRequesterInvokeMethod,
   isCoworkingRequesterSubscriptionMethod
-} from '../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
 import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
-} from '../../shared/coworking/windows-firewall-contract'
+} from '~shared/coworking/windows-firewall-contract'
+
 import {
   CoworkingRequesterIpcSubscriptions,
   coworkingRequesterTransportError,

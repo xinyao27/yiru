@@ -1,19 +1,18 @@
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import { makePaneKey } from '~shared/stable-pane-id'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import type { TuiAgent } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
-import type { TuiAgent } from '../../../../shared/types'
 import {
   buildAgentSessionForkPrompt,
   buildBoundedSessionTranscript

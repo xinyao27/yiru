@@ -1,18 +1,17 @@
 import { WarningCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
-
 import {
   projectCoworkingAvailabilityDiagnostic,
   type CoworkingAvailabilityDiagnostic
-} from '@/components/coworking/availability-diagnostic'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/coworking/availability-diagnostic'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { COWORKING_INGRESS_PORT } from '~shared/coworking/wire-contract'
 
-import { COWORKING_INGRESS_PORT } from '../../../../shared/coworking/wire-contract'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 export function CoworkingAvailabilityStatusSegment(): React.JSX.Element | null {

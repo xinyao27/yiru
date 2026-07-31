@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import logo from '../../../../../../resources/yiru-wordmark.png?url'
-import { cn } from '../../../lib/class-names'
-import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 import { mobileHomePreviewStyles } from '../home-preview-tailwind'
 import { mobilePageStyles } from '../page-tailwind'
 

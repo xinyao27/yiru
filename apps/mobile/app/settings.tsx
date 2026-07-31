@@ -16,7 +16,7 @@ import {
   Chat as MessageSquare,
   Terminal as TerminalIcon,
   Key as KeyRound
-} from '@/components/uniwind-icons'
+} from '~/components/uniwind-icons'
 
 import { MobileContentSection } from '../src/components/content-section'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'

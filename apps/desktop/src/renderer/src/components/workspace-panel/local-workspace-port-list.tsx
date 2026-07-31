@@ -8,8 +8,7 @@ import {
   CaretRight as ChevronRight
 } from '@phosphor-icons/react'
 import { useCallback } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,14 +16,18 @@ import {
   ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getPortOpenBrowserTooltipLabel } from '@/lib/workspace-port-actions'
-import { addressForPort } from '@/lib/workspace-port-urls'
-
-import type { WorkspacePort } from '../../../../shared/workspace/ports'
+} from '~renderer/components/ui/context-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getPortOpenBrowserTooltipLabel } from '~renderer/lib/workspace-port-actions'
+import { addressForPort } from '~renderer/lib/workspace-port-urls'
+import type { WorkspacePort } from '~shared/workspace/ports'
 
 const MENU_CONTENT_CLASS =
   '!border-border/60 !bg-popover !text-popover-foreground !backdrop-blur-none'

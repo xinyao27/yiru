@@ -4,7 +4,7 @@ import type {
   GitMergeCommitResult,
   GitRebaseOntoCommitResult,
   GitRevertResult
-} from '../../shared/git/write-op-results'
+} from '~shared/git/write-op-results'
 import {
   countCommitParents,
   isWorkingTreeDirty,
@@ -12,7 +12,8 @@ import {
   resolveCommitOid,
   runConflictableGitOp,
   validateMainlineOption
-} from '../../shared/git/write-preconditions'
+} from '~shared/git/write-preconditions'
+
 import type { GitExec } from './handler-ops'
 import { detectConflictOperation } from './handler-status-ops'
 

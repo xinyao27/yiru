@@ -1,15 +1,17 @@
 import { Check, Info, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog, AgentIcon, type AgentCatalogEntry } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
-import type { TuiAgent } from '../../../../shared/types'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from '~renderer/components/ui/collapsible'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog, AgentIcon, type AgentCatalogEntry } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { TuiAgent } from '~shared/types'
 
 const AGENT_GRID_MAX_ROWS = 4
 

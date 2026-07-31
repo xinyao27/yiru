@@ -1,4 +1,4 @@
-import { basename } from '../../../lib/path'
+import { basename } from '~renderer/lib/path'
 
 const MAX_SHOWN_DRAG_PATHS = 5
 const FILE_ICON =

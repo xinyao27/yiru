@@ -1,8 +1,8 @@
 import type { JSX } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import type { Worktree } from '~shared/types'
 
-import type { Worktree } from '../../../../../shared/types'
-import { LoadingIndicator } from '../../loading-indicator'
-import { ScrollArea } from '../../ui/scroll-area'
 import { DeleteWorktreeDirtyChangeHint } from './dirty-change-hint'
 
 type DeleteState = {

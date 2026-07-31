@@ -1,6 +1,6 @@
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import type { FsChangeEvent } from '~shared/types'
 
-import type { FsChangeEvent } from '../../shared/types'
 import {
   failSshFilesystemWatchRegistration,
   type WatchRegistration

@@ -1,32 +1,31 @@
 import { toast } from 'sonner'
-
 import {
   formatWorkspaceCreateError,
   getWorkspaceCreateErrorToastMessage
-} from '@/components/new-workspace-composer-card/workspace-create-error-format'
+} from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
 import {
   attachEphemeralVmRuntimeToWorkspace,
   cleanupEphemeralVmRuntimeForFailedCreate,
   prepareRequestForCreate
-} from '@/components/worktree-creation/ephemeral-vm-worktree-creation'
-import { queueNewWorkspaceTerminalFocus } from '@/components/worktree-creation/new-workspace-terminal-focus'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { ensureAgentStartupInTerminal } from '@/lib/new-workspace'
+} from '~renderer/components/worktree-creation/ephemeral-vm-worktree-creation'
+import { queueNewWorkspaceTerminalFocus } from '~renderer/components/worktree-creation/new-workspace-terminal-focus'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { ensureAgentStartupInTerminal } from '~renderer/lib/new-workspace'
 import type {
   WorktreeCreationPhase,
   WorktreeCreationRequest
-} from '@/lib/pending-worktree-creation'
+} from '~renderer/lib/pending-worktree-creation'
 import {
   activateAndRevealWorktree,
   ensureWorktreeHasInitialTerminal,
   type ActivateAndRevealResult,
   type WorktreeStartupPayload
-} from '@/lib/worktree-activation'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/worktree-activation'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import type { CreateWorktreeResult } from '~shared/types'
 
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
-import type { CreateWorktreeResult } from '../../../../shared/types'
 import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 
 type ContinueBackgroundWorktreeCreationOptions = {

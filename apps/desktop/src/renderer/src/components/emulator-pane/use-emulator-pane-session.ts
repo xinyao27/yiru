@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
 import {
   consumePrelaunchedSimulatorSession,
   isManualSimulatorLaunchPending
-} from '@/components/emulator-pane/simulator-launch-coordination'
-import { shutdownManagedSimulatorIfNoPane } from '@/components/emulator-pane/simulator-pane-shutdown-scheduler'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/components/emulator-pane/simulator-launch-coordination'
+import { shutdownManagedSimulatorIfNoPane } from '~renderer/components/emulator-pane/simulator-pane-shutdown-scheduler'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { resolveEmulatorAttachTarget } from './emulator-attach-target'
 import { toSimulatorDeviceRows, type RawEmulatorDevice } from './emulator-device-row-mapping'

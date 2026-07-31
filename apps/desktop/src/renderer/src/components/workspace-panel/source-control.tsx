@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { CoworkingGitPane } from '@/components/coworking/git-pane'
+import { CoworkingGitPane } from '~renderer/components/coworking/git-pane'
 
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,

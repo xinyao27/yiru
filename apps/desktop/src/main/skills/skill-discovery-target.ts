@@ -1,5 +1,6 @@
-import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../../shared/skills'
-import type { Repo } from '../../shared/types'
+import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '~shared/skills'
+import type { Repo } from '~shared/types'
+
 import { getDefaultWslDistro, getWslHome, parseWslPath, toLinuxPath } from '../wsl'
 import { discoverSkills } from './discovery'
 import { discoverSkillsInWsl } from './skill-discovery-wsl'

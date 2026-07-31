@@ -1,14 +1,13 @@
 import { isFreshNonDoneAgentStatus, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
+import { showBlockedNotificationFallbackToast } from '~renderer/components/terminal-pane/blocked-notification-fallback'
+import { playDesktopNotificationSound } from '~renderer/components/terminal-pane/desktop-notification-sound'
+import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import { useAppStore } from '~renderer/store'
+import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
+import { buildAgentNotificationId } from '~shared/agent/notification-id'
+import { resolveCompatibleAgentTypeForOwner } from '~shared/agent/title-owner'
 
-import { showBlockedNotificationFallbackToast } from '@/components/terminal-pane/blocked-notification-fallback'
-import { playDesktopNotificationSound } from '@/components/terminal-pane/desktop-notification-sound'
-import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
-import { useAppStore } from '@/store'
-import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
-
-import { buildAgentNotificationId } from '../../../../shared/agent/notification-id'
-import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/title-owner'
 import type {
   AgentCompletionDispatchMeta,
   AgentCompletionStatusSnapshot

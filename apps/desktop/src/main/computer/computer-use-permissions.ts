@@ -1,11 +1,10 @@
 import { ipcMain } from 'electron'
-
 import type {
   ComputerUsePermissionId,
   ComputerUsePermissionResetResult,
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
 
 export function registerComputerUsePermissionHandlers(): void {
   ipcMain.handle(

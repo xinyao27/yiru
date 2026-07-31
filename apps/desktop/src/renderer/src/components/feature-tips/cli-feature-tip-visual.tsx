@@ -1,13 +1,12 @@
 import { useEffect, useState, type JSX } from 'react'
-
-import { AgentsOrchestrationVisual } from '@/components/feature-wall/agents-orchestration-visual'
+import { AgentsOrchestrationVisual } from '~renderer/components/feature-wall/agents-orchestration-visual'
 import {
   ORCHESTRATION_CLI_COMMAND_LOOP_MS,
   ORCHESTRATION_CLI_COMMAND_TIMINGS_MS
-} from '@/components/feature-wall/agents-orchestration/orchestration-types'
-import { usePrefersReducedMotion } from '@/components/feature-wall/modal-helpers'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/feature-wall/agents-orchestration/orchestration-types'
+import { usePrefersReducedMotion } from '~renderer/components/feature-wall/modal-helpers'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 const CLI_AGENT_COMMANDS = [
   'yiru worktree create --name auth-pr-1',

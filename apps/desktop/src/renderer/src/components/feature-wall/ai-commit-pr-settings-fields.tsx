@@ -1,18 +1,17 @@
 import { Terminal } from '@phosphor-icons/react'
 import type { JSX } from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
 import {
   CUSTOM_AGENT_ID,
   listCommitMessageAgentCapabilities,
   type CommitMessageAgentCapability,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message/agent-spec'
-import { CUSTOM_PROMPT_PLACEHOLDER } from '../../../../shared/commit-message/prompt'
-import type { CommitMessageAiSettings } from '../../../../shared/types'
+} from '~shared/commit-message/agent-spec'
+import { CUSTOM_PROMPT_PLACEHOLDER } from '~shared/commit-message/prompt'
+import type { CommitMessageAiSettings } from '~shared/types'
+
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'

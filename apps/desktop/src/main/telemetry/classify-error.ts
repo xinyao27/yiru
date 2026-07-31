@@ -5,7 +5,7 @@
 // else). A non-zero `unknown` slice on the dashboard is the trigger to add a
 // new enum value alongside the call site that would emit it.
 
-import type { ErrorClass } from '../../shared/telemetry-events'
+import type { ErrorClass } from '~shared/telemetry-events'
 
 export type ClassifiedError = {
   error_class: ErrorClass

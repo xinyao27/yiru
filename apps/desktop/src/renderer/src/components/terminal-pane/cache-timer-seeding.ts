@@ -1,5 +1,5 @@
-import { isClaudeAgent } from '@/lib/agent-status'
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
+import { isClaudeAgent } from '~renderer/lib/agent-status'
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
 
 export function shouldSeedCacheTimerOnInitialTitle(args: {
   rawTitle: string

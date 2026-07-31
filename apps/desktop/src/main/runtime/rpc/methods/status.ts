@@ -1,5 +1,6 @@
-import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
-import { getRemoteServerUpdaterSnapshot } from '../../remote-server-updater'
+import { getRemoteServerUpdaterSnapshot } from '~main/runtime/remote-server-updater'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 export const STATUS_METHODS: RpcMethod[] = [

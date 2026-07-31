@@ -1,10 +1,10 @@
 import type React from 'react'
+import { useAvailableStatusBarToggles } from '~renderer/components/status-bar/use-available-status-bar-toggles'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { FeatureInteractionId } from '~shared/feature-interaction-catalog'
+import type { GlobalSettings, StatusBarItem } from '~shared/types'
 
-import type { FeatureInteractionId } from '../../../../../shared/feature-interaction-catalog'
-import type { GlobalSettings, StatusBarItem } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { useAvailableStatusBarToggles } from '../../status-bar/use-available-status-bar-toggles'
 import {
   SettingsRow,
   SettingsSegmentedControl,

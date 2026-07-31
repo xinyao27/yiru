@@ -4,16 +4,15 @@ import {
   toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
-import type { WorktreeRuntimeOwnerState } from '../../lib/worktree-runtime-owner'
+import type { WorktreeRuntimeOwnerState } from '~renderer/lib/worktree-runtime-owner'
 import {
   findIndexedFolderWorkspaceOwner,
   findIndexedProjectGroupOwner,
   findIndexedRepoOwner,
   findIndexedWorktreeOwner
-} from '../../lib/worktree-runtime-owner-index'
+} from '~renderer/lib/worktree-runtime-owner-index'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
 function getResolvedFolderHost(
   state: WorktreeRuntimeOwnerState,

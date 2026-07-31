@@ -1,19 +1,17 @@
 import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { Worktree } from '../../../../shared/types'
+} from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { Worktree } from '~shared/types'
 
 export function WorkspaceCombobox({
   worktrees,

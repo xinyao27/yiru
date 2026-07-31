@@ -1,9 +1,9 @@
 import type { NativeChatSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useAppStore } from '~renderer/store'
+import type { TuiAgent } from '~shared/types'
 
-import type { TuiAgent } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { pruneConfirmedNativeChatActivePrompt } from './active-prompt'
 import { NativeChatComposer, type NativeChatComposerHandle } from './composer'
 import { NativeChatEmptyState } from './empty-state'

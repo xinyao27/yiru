@@ -3,7 +3,8 @@ import type {
   BrowserTabListResult,
   BrowserTabShowResult,
   BrowserTabSwitchResult
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalNonNegativeIntegerFlag,

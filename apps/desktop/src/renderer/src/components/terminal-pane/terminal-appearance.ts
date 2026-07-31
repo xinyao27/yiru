@@ -1,26 +1,25 @@
 import type { IDisposable, IParser, ITheme } from '@xterm/xterm'
-
-import type { EffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/detect-option-as-alt'
-import { getFitOverrideForPty } from '@/lib/pane-manager/mobile-fit-overrides'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import type { EffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/detect-option-as-alt'
+import { getFitOverrideForPty } from '~renderer/lib/pane-manager/mobile-fit-overrides'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import {
   normalizeTerminalFastScrollSensitivity,
   normalizeTerminalScrollSensitivity,
   resolveTerminalCursorInactiveStyle
-} from '@/lib/pane-manager/pane-terminal-options'
-import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
+} from '~renderer/lib/pane-manager/pane-terminal-options'
+import { safeFit, safeFitAndThen } from '~renderer/lib/pane-manager/pane-tree-ops'
 import {
   getBuiltinTheme,
   resolvePaneStyleOptions,
   resolveEffectiveTerminalAppearance
-} from '@/lib/terminal-theme'
+} from '~renderer/lib/terminal-theme'
+import { HEX_COLOR_RE } from '~shared/color-validation'
+import { resolveTerminalFontWeights } from '~shared/terminal/fonts'
+import { resolveTerminalLigaturesEnabled } from '~shared/terminal/ligatures'
+import { normalizeTerminalLineHeight } from '~shared/terminal/line-height-settings'
+import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
+import type { GlobalSettings } from '~shared/types'
 
-import { HEX_COLOR_RE } from '../../../../shared/color-validation'
-import { resolveTerminalFontWeights } from '../../../../shared/terminal/fonts'
-import { resolveTerminalLigaturesEnabled } from '../../../../shared/terminal/ligatures'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
-import type { TerminalViewAttributes } from '../../../../shared/terminal/view-attributes'
-import type { GlobalSettings } from '../../../../shared/types'
 import { buildFontFamily } from './layout-serialization'
 import type { PtyTransport } from './pty/transport'
 import { maybePushMode2031Flip } from './terminal-mode-2031-replies'

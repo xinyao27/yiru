@@ -1,7 +1,4 @@
-import type {
-  ComputerActionMetadata,
-  ComputerProviderCapabilities
-} from '../../shared/runtime-types'
+import type { ComputerActionMetadata, ComputerProviderCapabilities } from '~shared/runtime-types'
 
 export type NativeMethod =
   | 'handshake'

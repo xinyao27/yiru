@@ -1,10 +1,9 @@
 import type { StateCreator } from 'zustand'
-
+import type { AppState } from '~renderer/store/types'
 import type {
   WorkspaceSpaceAnalysis,
   WorkspaceSpaceScanProgress
-} from '../../../../shared/workspace/space-types'
-import type { AppState } from '../../store/types'
+} from '~shared/workspace/space-types'
 
 let inFlightScan: Promise<WorkspaceSpaceAnalysis> | null = null
 

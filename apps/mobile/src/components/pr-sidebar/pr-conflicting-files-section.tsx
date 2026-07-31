@@ -3,7 +3,7 @@ import * as Clipboard from 'expo-clipboard'
 import { useEffect, useRef, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 
-import { FileX as FileWarning } from '@/components/uniwind-icons'
+import { FileX as FileWarning } from '~/components/uniwind-icons'
 
 import { MobileGlassTextButton } from '../glass/text-button'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'

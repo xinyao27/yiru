@@ -1,4 +1,5 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import type { OpenFile } from '../state'
 import type { CombinedDiffMode } from './section-model'
 

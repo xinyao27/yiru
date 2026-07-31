@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { DialogFooter } from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { DialogFooter } from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 type TerminalQuickCommandDialogFooterProps = {
   canSave: boolean

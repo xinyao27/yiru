@@ -1,11 +1,11 @@
 import { z } from 'zod'
-
 import {
   CoworkingMutationResultSchema,
   CoworkingTerminalSubscriptionEventSchema
-} from '../../../shared/coworking/execution-result-schema'
-import type { CoworkingExecutionOperation } from '../../../shared/coworking/operation-contract'
-import { TERMINAL_INPUT_MAX_BYTES } from '../../../shared/terminal/input'
+} from '~shared/coworking/execution-result-schema'
+import type { CoworkingExecutionOperation } from '~shared/coworking/operation-contract'
+import { TERMINAL_INPUT_MAX_BYTES } from '~shared/terminal/input'
+
 import type { CoworkingExecutionGateway } from '../execution-gateway'
 import { CoworkingRpcError, type CoworkingRpcMethodSpec } from './gateway'
 import {

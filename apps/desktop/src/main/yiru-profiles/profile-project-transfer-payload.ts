@@ -2,10 +2,10 @@ import { randomUUID } from 'node:crypto'
 
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
+import type { PersistedState, Repo, SparsePreset, WorkspaceKey } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
-import { projectHostSetupProjectionFromRepos } from '../../shared/project-host-setup-projection'
-import type { PersistedState, Repo, SparsePreset, WorkspaceKey } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import { mergeHostWorkspaceSessions, mergeWorkspaceSessions } from './profile-project-session-state'
 import {
   extractHostSessionsForTransfer,

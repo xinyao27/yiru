@@ -1,13 +1,12 @@
 import { ORCHESTRATION_CONTRACT_VERSION } from '@yiru/runtime-protocol/capabilities'
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
-
+import type { RpcResponse } from '~main/runtime/rpc/core'
+import type { RpcDispatcher } from '~main/runtime/rpc/dispatcher'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
-import type { RpcResponse } from '../../runtime/rpc/core'
-import type { RpcDispatcher } from '../../runtime/rpc/dispatcher'
+} from '~shared/runtime-method-contract'
 
 type RpcCallResult<TContract extends string | RuntimeMethodContract> =
   TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown

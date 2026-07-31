@@ -1,6 +1,6 @@
-import type { ContributionDisplayMetric } from '@/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '@/components/contribution-heatmap/metric'
-import { translate } from '@/i18n/i18n'
+import type { ContributionDisplayMetric } from '~renderer/components/contribution-heatmap/metric'
+import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
+import { translate } from '~renderer/i18n/i18n'
 
 export function chartActivationLabel(
   chartLabel: string,

@@ -7,19 +7,18 @@ import {
   CaretRight as ChevronRight
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { CoworkingFileReadResult } from '~shared/coworking/operation-contract'
 
-import type { CoworkingFileReadResult } from '../../../../shared/coworking/operation-contract'
 import { CoworkingTooltipIconButton } from './tooltip-icon-button'
 import { CoworkingTruncatedPathLabel } from './truncated-path-label'
 

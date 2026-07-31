@@ -1,17 +1,13 @@
 import { Check } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { FeatureWallSetupStep, FeatureWallSetupStepId } from '~shared/feature-wall-setup-steps'
+import { getFeatureWallSetupStepsForSection } from '~shared/feature-wall-setup-steps'
+import type { TuiAgent } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
-import type {
-  FeatureWallSetupStep,
-  FeatureWallSetupStepId
-} from '../../../../shared/feature-wall-setup-steps'
-import { getFeatureWallSetupStepsForSection } from '../../../../shared/feature-wall-setup-steps'
-import type { TuiAgent } from '../../../../shared/types'
 import { AgentStep } from '../onboarding/agent-step'
 import { NotificationStep } from '../onboarding/notification-step'
 import { AgentCapabilitiesSetupAction } from './agent-capabilities-setup-action'

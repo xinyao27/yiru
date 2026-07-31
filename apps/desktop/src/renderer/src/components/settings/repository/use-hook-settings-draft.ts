@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { Repo, RepoHookSettings } from '~shared/types'
 
-import type { Repo, RepoHookSettings } from '../../../../../shared/types'
 import {
   areHookSettingsDraftsEqual,
   getHookSettingsDraft,

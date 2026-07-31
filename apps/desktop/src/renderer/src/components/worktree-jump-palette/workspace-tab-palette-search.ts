@@ -1,11 +1,8 @@
-import { getEditorDisplayLabel } from '@/components/editor/labels'
-import type { OpenFile } from '@/components/editor/state'
+import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { resolveTerminalTabTitle, resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
+import type { Tab, TabContentType, TabGroup, TerminalTab, Worktree } from '~shared/types'
 
-import {
-  resolveTerminalTabTitle,
-  resolveUnifiedTabLabel
-} from '../../../../shared/tab-title-resolution'
-import type { Tab, TabContentType, TabGroup, TerminalTab, Worktree } from '../../../../shared/types'
 import {
   collectAgentMetadataForTerminal,
   type AgentMetadata,

@@ -3,28 +3,28 @@ import { stat } from 'node:fs/promises'
 import { join, posix, win32 } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-
 import {
   branchHasNoUnmergedChangesOnAnyTarget,
   getBranchCleanupTargetRefs,
   refreshBranchCleanupTargetRefs
-} from '../../shared/git/branch-cleanup'
-import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
-import { parseGitRevListAheadBehindCounts } from '../../shared/git/rev-list-output'
+} from '~shared/git/branch-cleanup'
+import { decodeGitCQuotedPath } from '~shared/git/cquoted-path'
+import { parseGitRevListAheadBehindCounts } from '~shared/git/rev-list-output'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError,
   isUnsupportedWorktreeListZError
-} from '../../shared/git/worktree-command-capabilities'
+} from '~shared/git/worktree-command-capabilities'
 import type {
   GitWorktreeInfo,
   LocalBaseRefRefreshResult,
   LocalBaseRefUpdateSuggestion,
   RemoveWorktreeResult
-} from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
-import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/workspace/worktree-submodule-removal'
+} from '~shared/types'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
+import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
+import { isSubmoduleWorktreeRemovalRefusal } from '~shared/workspace/worktree-submodule-removal'
+
 import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync, translateWslOutputPaths } from './runner'
 import { resolveGitDir, runWithGitReadCacheInvalidation } from './status'

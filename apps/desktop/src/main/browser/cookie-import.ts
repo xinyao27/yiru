@@ -76,7 +76,8 @@ import type {
   BrowserCookieImportResult,
   BrowserCookieImportSummary,
   BrowserSessionProfileSource
-} from '../../shared/types'
+} from '~shared/types'
+
 import { resolveChromiumCookiesPath } from './chromium-cookie-path'
 import {
   createChromiumCookieSnapshot,

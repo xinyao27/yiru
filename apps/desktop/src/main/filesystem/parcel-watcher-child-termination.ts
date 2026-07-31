@@ -1,6 +1,7 @@
 import type { ChildProcess } from 'node:child_process'
 
-import { RUNTIME_FILE_WATCH_EXIT_DEADLINE_MS } from '../../shared/runtime-file-watch-limits'
+import { RUNTIME_FILE_WATCH_EXIT_DEADLINE_MS } from '~shared/runtime-file-watch-limits'
+
 import {
   type PendingWatcherUnsubscribe,
   resolvePendingWatcherUnsubscribes

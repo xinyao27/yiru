@@ -1,16 +1,15 @@
 import type React from 'react'
-
-import { ProviderPanel } from '@/components/status-bar/tooltip'
-import { HoverCardContent } from '@/components/ui/hover-card'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
+import { ProviderPanel } from '~renderer/components/status-bar/tooltip'
+import { HoverCardContent } from '~renderer/components/ui/hover-card'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import type {
   CoworkingProviderQuota,
   CoworkingProviderQuotaWindow
-} from '../../../../shared/coworking/catalog-contract'
-import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
-import { normalizeUsagePercentageDisplay } from '../../../../shared/usage-percentage-display'
+} from '~shared/coworking/catalog-contract'
+import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
+import { normalizeUsagePercentageDisplay } from '~shared/usage-percentage-display'
+
 import type { CoworkingRemoteDesktopSidebarContext } from './coworking-sidebar-rows'
 
 function toRateLimitWindow(

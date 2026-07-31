@@ -1,7 +1,6 @@
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { useAppStore } from '@/store'
-
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
 
 type TerminalPaneAttentionListener = () => void
 

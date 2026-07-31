@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import type { OpenFile } from '../../editor/state'
 import type { FileExplorerRowProjection } from './row-projection'
 
 type UseFileExplorerAutoRevealParams = {

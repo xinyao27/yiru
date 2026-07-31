@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: snapshot building, AX tree walking, ref mapping, and cursor-interactive detection are tightly coupled and belong in one module. */
-import type { BrowserSnapshotRef } from '../../shared/runtime-types'
+import type { BrowserSnapshotRef } from '~shared/runtime-types'
 
 export type CdpCommandSender = (
   method: string,

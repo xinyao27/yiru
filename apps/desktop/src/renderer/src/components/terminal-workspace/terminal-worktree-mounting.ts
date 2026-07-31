@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
-
 import {
   BACKGROUND_MOUNT_TERMINAL_WORKTREE_EVENT,
   type BackgroundMountTerminalWorktreeDetail
-} from '@/constants/terminal'
+} from '~renderer/constants/terminal'
+import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
+import { useAppStore } from '~renderer/store'
 
-import { hasRegisteredRuntimeTerminalTab } from '../../runtime/sync-runtime-graph'
-import { useAppStore } from '../../store'
 import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
 import { isMainTerminalSideEffectAuthorityForPty } from '../terminal-pane/terminal-side-effect-facts-handler'
 import {

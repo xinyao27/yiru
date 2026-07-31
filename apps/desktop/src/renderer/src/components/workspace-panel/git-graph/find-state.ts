@@ -1,4 +1,4 @@
-import type { GitHistoryItem } from '../../../../../shared/git/history'
+import type { GitHistoryItem } from '~shared/git/history'
 
 export type GitGraphFindState = {
   query: string

@@ -1,11 +1,18 @@
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
 import {
   BROWSER_PAGE_ZOOM_LEVELS,
   browserPageZoomLevelToPercent,
   normalizeBrowserPageZoomLevel
-} from '../../../../../shared/browser/page-zoom'
-import { translate } from '../../../i18n/i18n'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+} from '~shared/browser/page-zoom'
+
 import { SearchableSetting } from '../searchable-setting'
 
 type BrowserDefaultZoomSettingProps = {

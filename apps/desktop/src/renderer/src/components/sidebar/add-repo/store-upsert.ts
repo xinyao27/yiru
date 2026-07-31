@@ -1,7 +1,6 @@
-import { useAppStore } from '@/store'
-
-import { projectHostSetupProjectionFromRepos } from '../../../../../shared/project-host-setup-projection'
-import type { Repo } from '../../../../../shared/types'
+import { useAppStore } from '~renderer/store'
+import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
+import type { Repo } from '~shared/types'
 
 export function upsertAddedRepoWithProjectHostSetup(repo: Repo): void {
   const state = useAppStore.getState()

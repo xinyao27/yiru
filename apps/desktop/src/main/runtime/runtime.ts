@@ -1,12 +1,12 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { BrowserWindow, ipcMain } from 'electron'
-
 import type {
   RuntimeBrowserDriverState,
   RuntimeSyncWindowGraphResult,
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
-} from '../../shared/runtime-types'
+} from '~shared/runtime-types'
+
 import { RpcDispatcher } from './rpc/dispatcher'
 import { ALL_RPC_METHODS } from './rpc/methods/index'
 import type { YiruRuntimeService } from './yiru-runtime'

@@ -5,11 +5,11 @@ import type {
   CreateHostedReviewInput,
   CreateHostedReviewResult
 } from '@yiru/workbench-model/review'
-
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
-} from '../../shared/hosted-review-refs'
+} from '~shared/hosted-review-refs'
+
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {

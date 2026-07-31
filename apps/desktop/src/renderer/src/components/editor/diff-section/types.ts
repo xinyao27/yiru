@@ -1,4 +1,5 @@
-import type { GitDiffResult, GitStatusEntry } from '../../../../../shared/types'
+import type { GitDiffResult, GitStatusEntry } from '~shared/types'
+
 import type { LargeDiffRenderLimit } from '../large-diff-render-limit'
 
 export type DiffSection = {

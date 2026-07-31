@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
+import { isMacPlatform } from '~renderer/components/terminal-pane/terminal-link-open-hints'
+import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
-import { refreshHostedReviewCard } from '../../../store/slices/hosted-review'
-import { isMacPlatform } from '../../terminal-pane/terminal-link-open-hints'
 import type { useChecksPanelAgentActionsState } from './agent-actions'
 import { checksPanelAsyncResultKey } from './async-result-key'
 import { openChecksPanelHostedReviewUrl } from './hosted-review-click-routing'

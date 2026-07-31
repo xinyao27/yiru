@@ -5,16 +5,10 @@ import {
 } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostId, ParsedExecutionHost } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import type { FolderWorkspace, GlobalSettings, ProjectGroup, Repo, Worktree } from '~shared/types'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import type {
-  FolderWorkspace,
-  GlobalSettings,
-  ProjectGroup,
-  Repo,
-  Worktree
-} from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
 import {
   findIndexedFolderWorkspaceOwner,
   findIndexedProjectGroupOwner,

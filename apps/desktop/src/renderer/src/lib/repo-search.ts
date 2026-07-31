@@ -1,6 +1,5 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
-
-import type { Repo } from '../../../shared/types'
+import type { Repo } from '~shared/types'
 
 // Display-name matches must always outrank path-only matches. This offset is
 // added to every path-match score so that even a path hit at index 0 scores

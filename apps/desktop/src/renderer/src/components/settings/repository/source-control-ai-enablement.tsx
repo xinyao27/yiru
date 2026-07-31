@@ -1,9 +1,14 @@
 import type React from 'react'
-
-import type { SourceControlAiSettings } from '../../../../../shared/source-control/ai-types'
-import { translate } from '../../../i18n/i18n'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
 
 type RepositorySourceControlAiEnablementProps = {
   value: boolean | undefined

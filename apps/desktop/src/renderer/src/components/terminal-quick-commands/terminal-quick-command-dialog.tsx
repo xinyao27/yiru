@@ -1,30 +1,28 @@
 import { useRef, useState } from 'react'
-
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { getScreenSubmitShortcutLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-
+} from '~renderer/components/ui/dialog'
+import { Label } from '~renderer/components/ui/label'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import {
+  getScreenSubmitShortcutLabel,
+  isScreenSubmitShortcut
+} from '~renderer/lib/screen-submit-shortcut'
 import {
   getTerminalQuickCommandAction,
   getTerminalQuickCommandScope,
   isTerminalAgentQuickCommand,
   supportsTerminalAgentQuickCommand
-} from '../../../../shared/terminal/quick-commands'
-import type {
-  Repo,
-  TerminalQuickCommand,
-  TerminalQuickCommandScope
-} from '../../../../shared/types'
-import type { TuiAgent } from '../../../../shared/types'
+} from '~shared/terminal/quick-commands'
+import type { Repo, TerminalQuickCommand, TerminalQuickCommandScope } from '~shared/types'
+import type { TuiAgent } from '~shared/types'
+
 import { TerminalQuickCommandActionToggle } from './terminal-quick-command-action-toggle'
 import { TerminalQuickCommandAdvancedSection } from './terminal-quick-command-advanced-section'
 import { TerminalQuickCommandContentSection } from './terminal-quick-command-content-section'

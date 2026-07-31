@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-
+import type { AppState } from '~renderer/store/types'
 import type {
   CodexUsageBreakdownRow,
   CodexUsageDailyPoint,
@@ -9,8 +9,7 @@ import type {
   CodexUsageSessionRow,
   CodexUsageSnapshot,
   CodexUsageSummary
-} from '../../../../shared/codex-usage-types'
-import type { AppState } from '../../store/types'
+} from '~shared/codex-usage-types'
 
 export type CodexUsageSlice = {
   codexUsageScope: CodexUsageScope

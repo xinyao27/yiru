@@ -1,6 +1,5 @@
 import { GitMerge } from '@phosphor-icons/react'
-
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import { PullRequestIcon } from './worktree-card/helpers'
 import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'

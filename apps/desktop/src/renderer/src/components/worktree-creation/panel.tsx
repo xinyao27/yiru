@@ -5,14 +5,13 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { retryBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
-import { translate } from '@/i18n/i18n'
-import { getCreationProgressLabel } from '@/lib/pending-worktree-creation'
-import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { useAppStore } from '@/store'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { retryBackgroundWorktreeCreation } from '~renderer/components/worktree-creation/flow'
+import { translate } from '~renderer/i18n/i18n'
+import { getCreationProgressLabel } from '~renderer/lib/pending-worktree-creation'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { useAppStore } from '~renderer/store'
 
 /**
  * In-frame creation state, shown in the workspace content area while a worktree

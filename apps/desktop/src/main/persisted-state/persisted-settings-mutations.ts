@@ -1,31 +1,31 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
-
-import { normalizeAppIconId } from '../../shared/app-icon'
-import { normalizeTerminalShortcutPolicy } from '../../shared/keybindings'
-import { normalizeLanguageServerSettings } from '../../shared/language-server'
-import { normalizeLoaderStyle } from '../../shared/loader-style'
-import { normalizeOpenInApplications } from '../../shared/open-in-applications'
+import { normalizeAppIconId } from '~shared/app-icon'
+import { normalizeTerminalShortcutPolicy } from '~shared/keybindings'
+import { normalizeLanguageServerSettings } from '~shared/language-server'
+import { normalizeLoaderStyle } from '~shared/loader-style'
+import { normalizeOpenInApplications } from '~shared/open-in-applications'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   normalizeSourceControlAiSettings,
   projectSourceControlAiToLegacyCommitMessageAi
-} from '../../shared/source-control/ai'
+} from '~shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   SOURCE_CONTROL_TEXT_ACTION_IDS
-} from '../../shared/source-control/ai-actions'
-import { normalizeSourceControlGroupOrder } from '../../shared/source-control/group-order'
-import { normalizeTerminalCustomThemes } from '../../shared/terminal/custom-themes'
-import { normalizeTerminalQuickCommands } from '../../shared/terminal/quick-commands'
-import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal/scrollback-policy'
+} from '~shared/source-control/ai-actions'
+import { normalizeSourceControlGroupOrder } from '~shared/source-control/group-order'
+import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
+import { normalizeTerminalQuickCommands } from '~shared/terminal/quick-commands'
+import { normalizeDesktopTerminalScrollbackRows } from '~shared/terminal/scrollback-policy'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../shared/tui-agent/selection'
-import type { GlobalSettings, YiruWorkspaceLayout } from '../../shared/types'
-import { normalizeUiLanguage } from '../../shared/ui-language'
+} from '~shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
+import type { GlobalSettings, YiruWorkspaceLayout } from '~shared/types'
+import { normalizeUiLanguage } from '~shared/ui-language'
+
 import { normalizePersistedNotificationSettings } from './persisted-notification-settings-codec'
 import { stripRetiredGlobalSettings } from './persisted-settings-codec'
 

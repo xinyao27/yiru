@@ -5,9 +5,8 @@ import {
   type ExecutionHostId,
   getRepoIdFromWorktreeId
 } from '@yiru/workbench-model/workspace'
-
-import type { FolderWorkspace, ProjectGroup } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/scope'
+import type { FolderWorkspace, ProjectGroup } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 export type RestoredSubagentLivenessSweepDeps = {
   probeLiveLocalPty: (ptyId: string) => Promise<boolean | null>

@@ -1,4 +1,4 @@
-import { parseAppSshPtyId } from '../../../shared/ssh-pty-id'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
 // Why: on SSH (re)connect, panes that never got a live PTY must remount and
 // retry. Two shapes qualify: tabs with no ptyId at all (their spawn failed

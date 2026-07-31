@@ -1,13 +1,7 @@
 import { DownloadSimple as Import, Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { BROWSER_FAMILY_LABELS } from '../../../../../shared/constants'
-import type { BrowserCookieImportSummary, BrowserSessionProfile } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { useAppStore } from '../../../store'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +12,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { BROWSER_FAMILY_LABELS } from '~shared/constants'
+import type { BrowserCookieImportSummary, BrowserSessionProfile } from '~shared/types'
 
 type DetectedBrowser = {
   family: string

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { translate } from '@/i18n/i18n'
-
-import { useAppStore } from '../../store'
 import {
   YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT,
   YIRU_EDITOR_SAVE_AND_CLOSE_EVENT,

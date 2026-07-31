@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react'
-
 import {
   YIRU_TERMINAL_COMMAND_FINISHED_EVENT,
   type TerminalCommandFinishedEventDetail
-} from '@/hooks/terminal-command-finished-event'
-import { isWindowVisible } from '@/lib/window-visibility-interval'
+} from '~renderer/hooks/terminal-command-finished-event'
+import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
 
 type UseGitStatusPushSignalRefreshParams = {
   activeRepoId: string | null

@@ -1,9 +1,8 @@
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import { translate } from '~renderer/i18n/i18n'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/types'
 import { getSelectedRepoSshGate } from './new-workspace-ssh-gate'
 
 export type RepoHeaderCreateState = {

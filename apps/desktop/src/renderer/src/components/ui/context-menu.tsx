@@ -1,20 +1,19 @@
 import { ContextMenu as ContextMenuPrimitive } from '@base-ui/react/context-menu'
 import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
 import * as React from 'react'
-
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass,
   pointerAnchoredSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
+} from '~renderer/components/ui/floating-surface-styles'
 import {
   menuItemClass,
   menuLabelClass,
   menuSeparatorClass,
   menuShortcutClass,
   menuSubTriggerStateClass
-} from '@/components/ui/menu-item-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/menu-item-styles'
+import { cn } from '~renderer/lib/class-names'
 
 // FLAG: Base UI ContextMenu.Root has no `modal` prop (behavior is fixed), so the
 // previous `modal={false}` has no equivalent and was dropped.

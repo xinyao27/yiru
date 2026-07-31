@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
 import type {
   PullRequestFieldName,
   PullRequestFieldRevisions
-} from '@/components/workspace-panel/pull-request-generation-state'
-import { cancelRuntimeGeneratePullRequestFields } from '@/runtime/git-client'
+} from '~renderer/components/workspace-panel/pull-request-generation-state'
+import { cancelRuntimeGeneratePullRequestFields } from '~renderer/runtime/git-client'
+import type { SourceControlAiPrCreationDefaults } from '~shared/source-control/ai-types'
 
-import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control/ai-types'
 import { stripBaseRef } from './create-review-base-ref'
 import {
   createInitialPullRequestFieldRevisions,

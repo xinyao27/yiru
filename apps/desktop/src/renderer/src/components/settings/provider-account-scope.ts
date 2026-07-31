@@ -1,8 +1,6 @@
 import { getLocalExecutionHostLabel } from '@yiru/workbench-model/workspace'
-
-import { translate } from '@/i18n/i18n'
-
-import type { GlobalSettings } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
 export type ProviderAccountScope = {
   label: string

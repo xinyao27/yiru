@@ -2,12 +2,10 @@ import {
   normalizeRuntimePathSeparators,
   relativePathInsideRoot
 } from '@yiru/workbench-model/platform'
-
-import { detectLanguage } from '@/lib/language-detect'
-import { basename } from '@/lib/path'
-import { useAppStore } from '@/store'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { basename } from '~renderer/lib/path'
+import { useAppStore } from '~renderer/store'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
 function isPathInsideOrEqual(rootPath: string, candidatePath: string): boolean {
   if (candidatePath === rootPath) {

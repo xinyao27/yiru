@@ -2,17 +2,16 @@
 // AddRepoCreateStep so the create-state machine stays scoped and testable.
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { markOnboardingProjectAdded } from '~renderer/components/sidebar/onboarding-project-checklist'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { Repo } from '~shared/types'
 
-import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/types'
 import { upsertAddedRepoWithProjectHostSetup } from './add-repo/store-upsert'
 
 export function useCreateRepo(

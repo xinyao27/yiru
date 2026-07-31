@@ -5,19 +5,17 @@ import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbe
  * unified-tab, group, and PTY maps atomically so host-published surfaces don't
  * leave the web client in a split-brain tab state. */
 import { useEffect } from 'react'
-
-import { sanitizeTerminalLayoutPaneTitlesForLabels } from '@/components/terminal-pane/title-sanitization'
+import { sanitizeTerminalLayoutPaneTitlesForLabels } from '~renderer/components/terminal-pane/title-sanitization'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeSessionMirrorEnvironmentIds
-} from '@/lib/worktree-runtime-owner'
-
+} from '~renderer/lib/worktree-runtime-owner'
 import {
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../../shared/agent/title-owner'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
+} from '~shared/agent/title-owner'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { resolvePaneAgentOwner } from '~shared/pane-agent-owner'
 import type {
   RuntimeMobileSessionTabsResult,
   RuntimeMobileSessionBrowserTab,
@@ -25,8 +23,8 @@ import type {
   RuntimeMobileSessionMarkdownTab,
   RuntimeMobileSessionTabGroup,
   RuntimeMobileSessionTerminalClientTab
-} from '../../../shared/runtime-types'
-import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
+} from '~shared/runtime-types'
+import { isTerminalLeafId, makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
 import type {
   BrowserCertificateFailure,
   BrowserPage,
@@ -38,7 +36,8 @@ import type {
   TerminalPaneLayoutNode,
   TerminalTab,
   TuiAgent
-} from '../../../shared/types'
+} from '~shared/types'
+
 import type { OpenFile } from '../components/editor/state'
 import type { AppState } from '../store'
 import { useAppStore } from '../store'

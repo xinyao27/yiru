@@ -2,8 +2,8 @@ import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathSeparators
 } from '@yiru/workbench-model/platform'
+import type { DirEntry } from '~shared/types'
 
-import type { DirEntry } from '../../../shared/types'
 import {
   readRuntimeDirectory,
   streamRuntimeFileDownloadChunks,

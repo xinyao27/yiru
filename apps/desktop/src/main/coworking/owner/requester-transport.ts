@@ -5,7 +5,8 @@ import {
   type CoworkingRequesterInvokeArgs,
   type CoworkingRequesterRoute,
   type CoworkingRequesterSubscriptionArgs
-} from '../../../shared/coworking/ipc-contract'
+} from '~shared/coworking/ipc-contract'
+
 import type { CoworkingPeerConnection } from '../peer/connection'
 import type { CoworkingSubscription } from '../peer/connection-contract'
 import type { CoworkingOwnerRecord } from './record'

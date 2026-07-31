@@ -15,24 +15,23 @@ import {
   Trash as Trash2
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { useAppStore } from '@/store'
-
-import { useShortcutLabel } from '../../../hooks/use-shortcut-label'
-import { translate } from '../../../i18n/i18n'
-import { openFileInBrowserTab } from '../../../lib/file-preview'
-import { detectLanguage } from '../../../lib/language-detect'
-import type { RuntimeFileOperationArgs } from '../../../runtime/file-client'
 import {
   isLocalPathOpenBlocked,
   showLocalPathOpenBlockedToast
-} from '../../editor/local-path-open-guard'
+} from '~renderer/components/editor/local-path-open-guard'
 import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuShortcut
-} from '../../ui/context-menu'
+} from '~renderer/components/ui/context-menu'
+import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { translate } from '~renderer/i18n/i18n'
+import { openFileInBrowserTab } from '~renderer/lib/file-preview'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store'
+
 import {
   shouldShowCollapseFolderAction,
   shouldShowCopyFileAction,

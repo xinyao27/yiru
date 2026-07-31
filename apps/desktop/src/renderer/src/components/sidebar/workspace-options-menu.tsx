@@ -1,7 +1,6 @@
 import { SlidersHorizontal } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +11,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '~shared/constants'
 
-import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
 import { getSidebarHostVisibilityLabel, shouldShowHostScopeControls } from './host-options'
 import { SidebarHostScopeMenuSection } from './host-scope-menu-section'
 import SidebarRepositoryFilterSection from './repository-filter-section'

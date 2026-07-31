@@ -1,23 +1,21 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   isYiruCliAvailableOnPath,
   showYiruCliRegistrationPromptToast
-} from '@/lib/agent-skill-cli-prerequisite'
-
-import { buildAgentFeatureSkillInstallCommand } from '../../../../shared/agent/feature-install-commands'
-import type { CliInstallStatus } from '../../../../shared/cli-install-types'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import { buildAgentFeatureSkillInstallCommand } from '~shared/agent/feature-install-commands'
+import type { CliInstallStatus } from '~shared/cli-install-types'
 import {
   quotePowerShellLiteral,
   quotePowerShellNativeArgument
-} from '../../../../shared/powershell-native-argument'
+} from '~shared/powershell-native-argument'
 import {
   deriveGlobalWindowsRuntimeDefaultFromLegacySettings,
   normalizeGlobalWindowsRuntimeDefault
-} from '../../../../shared/project-execution-runtime'
-import type { GlobalSettings } from '../../../../shared/types'
-import { buildWslLoginShellCommand } from '../../../../shared/wsl-login-shell-command'
+} from '~shared/project-execution-runtime'
+import type { GlobalSettings } from '~shared/types'
+import { buildWslLoginShellCommand } from '~shared/wsl-login-shell-command'
 
 export type LocalAgentRuntime = {
   runtime: 'host' | 'wsl'

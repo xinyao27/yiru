@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { GhosttyImportPreview } from '~shared/types'
 
-import type { GhosttyImportPreview } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import {
   Dialog,

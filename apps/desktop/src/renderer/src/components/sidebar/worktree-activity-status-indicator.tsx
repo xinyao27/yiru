@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { getWorktreeStatusLabel } from '@/lib/worktree-status'
+import { getWorktreeStatusLabel } from '~renderer/lib/worktree-status'
 
 import StatusIndicator from './status-indicator'
 import { useWorktreeActivityStatus } from './use-worktree-activity-status'

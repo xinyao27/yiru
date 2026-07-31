@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
+import { translate } from '~renderer/i18n/i18n'
+import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
-import { normalizeHostedReviewHeadRef } from '../../../../../../shared/hosted-review-refs'
-import { translate } from '../../../../i18n/i18n'
-import { stripBaseRef } from '../../use-create-pull-request-dialog-fields'
 import { resolveBlockedCreateReviewNoticeMessage } from '../create-review-blocked-action'
 import type { SourceControlReviewDialogController } from './review-dialog'
 

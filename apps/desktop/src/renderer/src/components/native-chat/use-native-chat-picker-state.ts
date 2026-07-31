@@ -10,15 +10,14 @@ import {
   type RefObject,
   type SetStateAction
 } from 'react'
-
 import {
   emitNativeChatPickerItemAccepted,
   emitNativeChatPickerOpened,
   emitNativeChatSendClassified
-} from '@/components/native-chat/telemetry'
+} from '~renderer/components/native-chat/telemetry'
+import { getNativeChatAgentProfile } from '~shared/native-chat/agent-profiles'
+import type { SlashCommandSuggestion } from '~shared/native-chat/slash-commands'
 
-import { getNativeChatAgentProfile } from '../../../../shared/native-chat/agent-profiles'
-import type { SlashCommandSuggestion } from '../../../../shared/native-chat/slash-commands'
 import {
   applyPickerSuggestion,
   classifyNativeChatSend,

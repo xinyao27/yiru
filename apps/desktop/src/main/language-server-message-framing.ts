@@ -1,4 +1,4 @@
-import type { LanguageServerJsonRpcMessage } from '../shared/language-server'
+import type { LanguageServerJsonRpcMessage } from '~shared/language-server'
 
 export const MAX_LANGUAGE_SERVER_HEADER_BYTES = 8 * 1024
 export const MAX_LANGUAGE_SERVER_MESSAGE_BYTES = 8 * 1024 * 1024

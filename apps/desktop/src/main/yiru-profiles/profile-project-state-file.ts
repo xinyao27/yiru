@@ -4,9 +4,8 @@ import { homedir } from 'node:os'
 import { dirname } from 'node:path'
 
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import { getDefaultPersistedState, getDefaultWorkspaceSession } from '../../shared/constants'
-import { projectHostSetupProjectionFromRepos } from '../../shared/project-host-setup-projection'
+import { getDefaultPersistedState, getDefaultWorkspaceSession } from '~shared/constants'
+import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
 import type {
   PersistedState,
   Project,
@@ -14,7 +13,8 @@ import type {
   Repo,
   SparsePreset,
   WorkspaceSessionState
-} from '../../shared/types'
+} from '~shared/types'
+
 import { getYiruProfileDataFile } from './profile-index-store'
 
 export type TransferProfileState = PersistedState

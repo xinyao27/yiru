@@ -1,5 +1,6 @@
-import { translate } from '../../../i18n/i18n'
-import { isRemoteRuntimePtyId } from '../../../runtime/terminal-inspection'
+import { translate } from '~renderer/i18n/i18n'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+
 import type { getSettingsForAgentTabRuntimeOwner } from '../agent-paste-draft'
 
 export type NativeChatResolvedTarget = {

@@ -1,9 +1,8 @@
 import { toast } from 'sonner'
-
-import type { EmulatorStreamInfo } from '@/components/emulator-pane/types'
-import { translate } from '@/i18n/i18n'
-import { callRuntimeRpc } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+import type { EmulatorStreamInfo } from '~renderer/components/emulator-pane/types'
+import { translate } from '~renderer/i18n/i18n'
+import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import {
   beginManualSimulatorLaunch,

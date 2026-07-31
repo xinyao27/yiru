@@ -1,12 +1,11 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoExecutionHostId, toSshExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { StoreApi } from 'zustand'
+import type { AppState } from '~renderer/store/types'
+import type { HostLineageSnapshot } from '~shared/host-lineage-contract'
+import type { HostRepoCatalogSnapshot } from '~shared/host-repo-catalog-contract'
+import { isWorkspaceKey } from '~shared/workspace/scope'
 
-import type { AppState } from '@/store/types'
-
-import type { HostLineageSnapshot } from '../../../../../shared/host-lineage-contract'
-import type { HostRepoCatalogSnapshot } from '../../../../../shared/host-repo-catalog-contract'
-import { isWorkspaceKey } from '../../../../../shared/workspace/scope'
 import type {
   DirectSshLineageOutcome,
   DirectSshPreparationInput,

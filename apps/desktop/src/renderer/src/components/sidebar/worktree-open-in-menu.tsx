@@ -1,24 +1,23 @@
 import { FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
-
 import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger
-} from '@/components/ui/context-menu'
-import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
-import { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
-import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/context-menu'
+import { DropdownMenuItem, DropdownMenuSeparator } from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { getLocalFileManagerLabel } from '~renderer/lib/local-file-manager-label'
+import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
+import { useAppStore } from '~renderer/store'
+import type { OpenInApplication, OpenInTargetKey } from '~shared/types'
 
-import type { OpenInApplication, OpenInTargetKey } from '../../../../shared/types'
 import { useRuntimeRemoteSshSupport } from './use-runtime-remote-ssh-support'
 import { getOpenInEntryAvailability, openWorktreePath } from './worktree-path-opening'
 
-export { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
+export { getLocalFileManagerLabel } from '~renderer/lib/local-file-manager-label'
 export { openWorktreePath } from './worktree-path-opening'
 
 type WorktreeOpenInMenuItemsProps = {

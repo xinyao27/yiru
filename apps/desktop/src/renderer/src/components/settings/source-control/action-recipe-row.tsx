@@ -1,20 +1,26 @@
 import { Terminal } from '@phosphor-icons/react'
-
-import type { CustomAgentId } from '../../../../../shared/commit-message/agent-spec'
-import { CUSTOM_AGENT_ID, isCustomAgentId } from '../../../../../shared/commit-message/agent-spec'
+import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
+import { Button } from '~renderer/components/ui/button'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import type { CustomAgentId } from '~shared/commit-message/agent-spec'
+import { CUSTOM_AGENT_ID, isCustomAgentId } from '~shared/commit-message/agent-spec'
 import {
   SOURCE_CONTROL_ACTION_LABELS,
   type SourceControlActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { GlobalSettings, TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { AgentIcon } from '../../../lib/agent-catalog'
-import { SourceControlActionVariableChips } from '../../source-control/action-variable-chips'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
-import { Textarea } from '../../ui/textarea'
+} from '~shared/source-control/ai-actions'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
+
 import {
   getActionDescriptions,
   SOURCE_CONTROL_TEXT_ACTION_ID_SET,

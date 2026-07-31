@@ -7,13 +7,12 @@ import {
 } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { VoiceSettings } from '~shared/speech-types'
+import type { SpeechModelManifest, SpeechModelState } from '~shared/speech-types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { VoiceSettings } from '../../../../shared/speech-types'
-import type { SpeechModelManifest, SpeechModelState } from '../../../../shared/speech-types'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

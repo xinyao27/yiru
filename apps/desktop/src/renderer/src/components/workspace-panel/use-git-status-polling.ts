@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useRef } from 'react'
-
-import { getConnectionId } from '@/lib/connection-context'
+import { getConnectionId } from '~renderer/lib/connection-context'
 import {
   hasInteractiveActiveGitStatusConsumer,
   shouldPollActiveGitStatus
-} from '@/lib/passive-macos-app-data-access'
-import { isWindowVisible } from '@/lib/window-visibility-interval'
-import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
-import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeById } from '@/store/selectors'
+} from '~renderer/lib/passive-macos-app-data-access'
+import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
+import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import {
+  useAllWorktrees,
+  useRepoById,
+  useRepoMap,
+  useWorktreeById
+} from '~renderer/store/selectors'
+import { isGitRepoKind } from '~shared/repo-kind'
 
-import { isGitRepoKind } from '../../../../shared/repo-kind'
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 import { useGitStatusFileWatchRefresh } from './git-status-file-watch-refresh'
 import { useGitStatusPushSignalRefresh } from './git-status-push-signal-refresh'

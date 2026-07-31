@@ -1,4 +1,4 @@
-import type { SkillFreshnessInstallation } from '../../../../shared/skill-freshness'
+import type { SkillFreshnessInstallation } from '~shared/skill-freshness'
 
 export type SkillGroupStatus = 'update-available' | 'cannot-update'
 

@@ -1,4 +1,5 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
+import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+
 import type { DiffSection } from '../diff-section/types'
 import type { CombinedDiffMode } from './section-model'
 import { getCombinedDiffEntrySectionKey } from './section-model'

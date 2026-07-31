@@ -1,7 +1,7 @@
 import type { GitStatus, GitStatusEntry } from '@pierre/trees'
+import { normalizeRelativePath } from '~renderer/lib/path'
+import type { GitFileStatus } from '~shared/types'
 
-import type { GitFileStatus } from '../../../../../shared/types'
-import { normalizeRelativePath } from '../../../lib/path'
 import type { FileExplorerRowProjection } from './row-projection'
 import type { TreeNode } from './types'
 

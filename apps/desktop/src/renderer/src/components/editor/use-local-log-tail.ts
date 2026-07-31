@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import type { OpenFile } from '~renderer/components/editor/state'
+import type { LocalLogTailChangedPayload } from '~shared/local-log-tail-types'
 
-import type { OpenFile } from '@/components/editor/state'
-
-import type { LocalLogTailChangedPayload } from '../../../../shared/local-log-tail-types'
 import { LocalLogTailDecoder } from './local-log-tail-decoder'
 import type { FileContent } from './panel-content-types'
 

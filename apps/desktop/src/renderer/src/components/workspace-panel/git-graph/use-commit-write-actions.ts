@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import type { RuntimeGitContext } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import type { GitHistoryItem } from '~shared/git/history'
 
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import type { RuntimeGitContext } from '@/runtime/git-client'
-import { useAppStore } from '@/store'
-
-import type { GitHistoryItem } from '../../../../../shared/git/history'
 import type { GitHistoryCommitAction } from '../git-history-commit-context-menu'
 import {
   describeGitGraphCommitWrite,

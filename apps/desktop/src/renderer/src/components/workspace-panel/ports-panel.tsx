@@ -1,4 +1,4 @@
-import { useActiveWorktree, useRepoById } from '@/store/selectors'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
 
 import { LocalWorkspacePortsPanel } from './local-workspace-ports-panel'
 import { SshPortsPanel } from './ssh-ports-panel'
@@ -7,7 +7,7 @@ export {
   killWorkspacePortForTarget,
   openWorkspacePortInBrowser,
   scanWorkspacePortsForTarget
-} from '@/lib/workspace-port-actions'
+} from '~renderer/lib/workspace-port-actions'
 export { getLocalWorkspacePortSections } from './local-workspace-port-sections'
 
 export default function PortsPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element {

@@ -1,1 +1,1 @@
-export { formatDiffComment, formatDiffComments } from '../../../../shared/diff-comments-format'
+export { formatDiffComment, formatDiffComments } from '~shared/diff-comments-format'

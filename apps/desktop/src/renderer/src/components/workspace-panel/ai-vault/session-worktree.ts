@@ -13,8 +13,8 @@ import {
 } from '@yiru/workbench-model/workspace'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import { useMemo } from 'react'
+import type { Repo, Worktree } from '~shared/types'
 
-import type { Repo, Worktree } from '../../../../../shared/types'
 import { aiVaultWorktreeCompactPath } from './session-worktree-affordances'
 
 export {

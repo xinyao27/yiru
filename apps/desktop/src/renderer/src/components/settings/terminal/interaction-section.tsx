@@ -1,22 +1,22 @@
 import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
-
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { OSC52_CLIPBOARD_SETTING_ID } from '~renderer/components/terminal-pane/osc52-clipboard-setting-anchor'
+import { isMacPlatform } from '~renderer/components/terminal-pane/terminal-link-open-hints'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import { Slider } from '~renderer/components/ui/slider'
+import { translate } from '~renderer/i18n/i18n'
 import {
   TERMINAL_TUI_MOUSE_WHEEL_MULTIPLIER,
   normalizeTerminalTuiMouseWheelMultiplier
-} from '../../../lib/pane-manager/pane-terminal-mouse-wheel'
+} from '~renderer/lib/pane-manager/pane-terminal-mouse-wheel'
 import {
   DEFAULT_TERMINAL_FAST_SCROLL_SENSITIVITY,
   DEFAULT_TERMINAL_SCROLL_SENSITIVITY,
   normalizeTerminalFastScrollSensitivity,
   normalizeTerminalScrollSensitivity
-} from '../../../lib/pane-manager/pane-terminal-options'
-import { OSC52_CLIPBOARD_SETTING_ID } from '../../terminal-pane/osc52-clipboard-setting-anchor'
-import { isMacPlatform } from '../../terminal-pane/terminal-link-open-hints'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Slider } from '../../ui/slider'
+} from '~renderer/lib/pane-manager/pane-terminal-options'
+import type { GlobalSettings } from '~shared/types'
+
 import { SettingsSubsectionHeader, SettingsSwitchRow } from '../form-controls'
 import { matchesSettingsSearch } from '../search'
 import { SearchableSetting } from '../searchable-setting'

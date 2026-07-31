@@ -1,9 +1,9 @@
-import type {
-  CrashReportBreadcrumbData,
-  CrashReportDetailValue
-} from '../../../../../shared/crash-reporting'
-import { recordRendererCrashBreadcrumb } from '../../../lib/crash-diagnostics'
-import { getGitHubPRRefreshStateExpiryAt, type PRRefreshState } from '../../github/state'
+import {
+  getGitHubPRRefreshStateExpiryAt,
+  type PRRefreshState
+} from '~renderer/components/github/state'
+import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-diagnostics'
+import type { CrashReportBreadcrumbData, CrashReportDetailValue } from '~shared/crash-reporting'
 
 type ChecksPanelPRRefreshBreadcrumbEvent = 'start' | 'done' | 'stale_cleared'
 type ChecksPanelReviewProvider = 'github' | 'gitlab'

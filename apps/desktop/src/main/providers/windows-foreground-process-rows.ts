@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
-import { createProcessTableSnapshotReader } from '../../shared/process-table-snapshot'
+import { createProcessTableSnapshotReader } from '~shared/process-table-snapshot'
 
 const execFileAsync = promisify(execFile)
 const WINDOWS_PROCESS_QUERY_TIMEOUT_MS = 3_000

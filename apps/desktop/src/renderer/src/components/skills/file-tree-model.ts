@@ -1,4 +1,4 @@
-import type { SkillDirectoryEntry } from '../../../../shared/skills'
+import type { SkillDirectoryEntry } from '~shared/skills'
 
 export const SKILL_FILE_NAME = 'SKILL.md'
 

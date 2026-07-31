@@ -1,3 +1,5 @@
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { joinPath } from '~renderer/lib/path'
 import {
   getMcpConfigCandidateParentDir,
   getMcpConfigParentDirs,
@@ -5,9 +7,8 @@ import {
   MCP_CONFIG_CANDIDATES,
   selectExistingMcpConfigCandidates,
   type McpConfigDirectoryEntry
-} from '../../../../shared/mcp-config'
-import { extractIpcErrorMessage } from '../../lib/ipc-error'
-import { joinPath } from '../../lib/path'
+} from '~shared/mcp-config'
+
 import type { LoadedMcpConfigInspection } from './mcp-config-file-row'
 
 function isMissingFileError(error: unknown): boolean {

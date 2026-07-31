@@ -1,9 +1,8 @@
 import { useCallback, useRef, useState, type ReactElement } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import type { BrowserDriverState } from '@/lib/pane-manager/browser-mobile-driver-state'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { BrowserDriverState } from '~renderer/lib/pane-manager/browser-mobile-driver-state'
 
 type Props = {
   driver: BrowserDriverState

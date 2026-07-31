@@ -1,19 +1,18 @@
 import { useMemo } from 'react'
-
 import {
   searchBrowserPages,
   type SearchableBrowserPage
-} from '@/components/worktree-jump-palette/browser-palette-search'
+} from '~renderer/components/worktree-jump-palette/browser-palette-search'
 import {
   buildSearchableSimulatorTabs,
   searchSimulatorTabs,
   type SearchableSimulatorTab
-} from '@/components/worktree-jump-palette/simulator-palette-search'
+} from '~renderer/components/worktree-jump-palette/simulator-palette-search'
 import {
   buildSearchableWorkspaceTabs,
   searchWorkspaceTabs,
   type SearchableWorkspaceTab
-} from '@/components/worktree-jump-palette/workspace-tab-palette-search'
+} from '~renderer/components/worktree-jump-palette/workspace-tab-palette-search'
 
 import type { BrowserPaletteItem, SimulatorPaletteItem, WorkspaceTabPaletteItem } from './types'
 import type { PaletteHostOptionsResult } from './use-palette-host-options'

@@ -1,4 +1,4 @@
-import type { SkillDiscoveryResult } from '../../../shared/skills'
+import type { SkillDiscoveryResult } from '~shared/skills'
 
 export const INSTALLED_AGENT_SKILLS_CHANGED_EVENT = 'yiru:installed-agent-skills-changed'
 

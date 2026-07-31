@@ -1,7 +1,6 @@
 import { WarningCircle as CircleAlert } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 
 export function CoworkingMutationOutcomeNotice({
   description,

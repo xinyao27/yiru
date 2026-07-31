@@ -1,6 +1,5 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
-
-import type { Worktree, WorktreeHeadIdentity } from '../../../shared/types'
+import type { Worktree, WorktreeHeadIdentity } from '~shared/types'
 
 export type WorktreeHeadIdentityApplyDeps = {
   getWorktreesForRepo: (repoId: string) => Worktree[] | undefined

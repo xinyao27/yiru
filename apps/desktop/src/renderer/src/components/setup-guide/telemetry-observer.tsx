@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { useSetupGuideProgress } from './use-setup-guide-progress'
 import { useSetupGuideStepCompletionTelemetry } from './use-setup-guide-telemetry'

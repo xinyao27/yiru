@@ -1,9 +1,8 @@
 import { Terminal } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { requestSkillFreshnessUpdateDialog } from './skill-freshness-update-dialog-request'
 import { useSkillFreshness } from './use-skill-freshness'

@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
-
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '~renderer/components/ui/switch'
 
 type AiCommitPrSettingsSwitchProps = {
   checked: boolean

@@ -1,7 +1,7 @@
 import React from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
 import {
   SOURCE_CONTROL_TREE_FILE_PADDING_PX,
   SOURCE_CONTROL_TREE_INDENT_PX,

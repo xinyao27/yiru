@@ -1,14 +1,12 @@
 import type { StateCreator } from 'zustand'
-
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import type { AppState } from '~renderer/store/types'
 import type {
   YiruProfileSummary,
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
-} from '../../../../shared/yiru-profiles'
-import type { AppState } from '../../store/types'
+} from '~shared/yiru-profiles'
 
 export type YiruProfilesSlice = {
   yiruProfiles: YiruProfileSummary[]

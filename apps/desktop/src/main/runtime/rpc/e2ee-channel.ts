@@ -2,8 +2,8 @@
 // It owns the handshake state machine and transparent encrypt/decrypt so the RPC
 // handler only sees plaintext JSON, identical to the Unix socket path.
 import type { WebSocket } from 'ws'
+import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 
-import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import {
   E2EEChannelAuthentication,
   freezeAuthenticatedRpcPrincipal,

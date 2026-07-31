@@ -30,7 +30,8 @@ import { type ReactNode, useMemo } from 'react'
 import { Pressable, type PressableProps, View } from 'react-native'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { resolveCssString } from '../../style/resolve-css-variable'
+import { resolveCssString } from '~/style/resolve-css-variable'
+
 import { useMobileGlassAvailable } from './availability'
 
 type MobileSwiftUiGlassGroupProps = {

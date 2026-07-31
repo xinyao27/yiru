@@ -1,14 +1,12 @@
 import { GitDiff as GitCompareArrows, CaretLeft as ChevronLeft } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   CoworkingGitDiffResult,
   CoworkingGitHistoryEntry,
   CoworkingGitStatusEntry
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 
 export function CoworkingGitDiffPane({
   diff,

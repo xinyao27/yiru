@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
-
-import { buildNestedRepoScanTelemetry } from '../../../../../shared/nested-repo-telemetry'
-import type { NestedRepoScanResult } from '../../../../../shared/types'
-import { track } from '../../../lib/telemetry'
+import { track } from '~renderer/lib/telemetry'
+import { buildNestedRepoScanTelemetry } from '~shared/nested-repo-telemetry'
+import type { NestedRepoScanResult } from '~shared/types'
 
 export function useAddRepoRemoteNestedScan({
   setActiveNestedScanId,

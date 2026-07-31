@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 // Decodes the Android H.264 stream (scrcpy access units forwarded over the
 // emulator:videoStream* IPC) with WebCodecs and paints it to a <canvas>. The

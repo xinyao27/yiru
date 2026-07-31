@@ -1,4 +1,4 @@
-import type { ManagedPane, PaneManager } from '../../../lib/pane-manager/pane-manager'
+import type { ManagedPane, PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 
 export function resolveNativeTerminalDropPane(
   manager: PaneManager,

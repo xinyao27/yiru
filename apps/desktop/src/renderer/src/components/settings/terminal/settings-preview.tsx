@@ -2,21 +2,27 @@ import { Moon, Sun } from '@phosphor-icons/react'
 import { LigaturesAddon } from '@xterm/addon-ligatures'
 import { Terminal } from '@xterm/xterm'
 import { useEffect, useMemo, useRef, useState } from 'react'
-
-import { resolveTerminalFontWeights } from '../../../../../shared/terminal/fonts'
+import { buildFontFamily } from '~renderer/components/terminal-pane/layout-serialization'
 
 import '@xterm/xterm/css/xterm.css'
-import { resolveTerminalLigaturesEnabled } from '../../../../../shared/terminal/ligatures'
-import { normalizeTerminalLineHeight } from '../../../../../shared/terminal/line-height-settings'
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { buildDefaultTerminalOptions } from '../../../lib/pane-manager/pane-terminal-options'
-import { clampNumber, resolveEffectiveTerminalAppearance } from '../../../lib/terminal-theme'
-import { buildFontFamily } from '../../terminal-pane/layout-serialization'
-import { composeActiveTerminalTheme } from '../../terminal-pane/terminal-appearance'
-import { Button } from '../../ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card'
+import { composeActiveTerminalTheme } from '~renderer/components/terminal-pane/terminal-appearance'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '~renderer/components/ui/card'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { buildDefaultTerminalOptions } from '~renderer/lib/pane-manager/pane-terminal-options'
+import { clampNumber, resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
+import { resolveTerminalFontWeights } from '~shared/terminal/fonts'
+import { resolveTerminalLigaturesEnabled } from '~shared/terminal/ligatures'
+import { normalizeTerminalLineHeight } from '~shared/terminal/line-height-settings'
+import type { GlobalSettings } from '~shared/types'
+
 import { SettingsSwitch } from '../form-controls'
 import { PREVIEW_BUFFER } from './preview-content'
 

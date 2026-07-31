@@ -1,9 +1,7 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
-
-import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import type { AppState } from '@/store'
-
-import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
+import type { AppState } from '~renderer/store'
+import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 
 export function getAgentLaunchPlatformForRepo(
   repo: Pick<AppState['repos'][number], 'connectionId' | 'path'>,

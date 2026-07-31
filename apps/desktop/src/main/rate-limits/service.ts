@@ -4,15 +4,15 @@ import { randomUUID } from 'node:crypto'
 handling, account-switch fetch semantics, and renderer push coordination so the
 fetch ordering rules stay in one place. */
 import type { BrowserWindow } from 'electron'
-
-import type { NetworkProxySettings } from '../../shared/network-proxy'
+import type { NetworkProxySettings } from '~shared/network-proxy'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
   InactiveAccountUsage,
   ProviderRateLimits,
   RateLimitState
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import {
   normalizeClaudeAccountSelectionTarget,

@@ -15,7 +15,7 @@ import {
   type KeybindingFileSnapshot,
   type KeybindingOverrides,
   type KeybindingPlatform
-} from '../../shared/keybindings'
+} from '~shared/keybindings'
 
 type JsonObject = Record<string, unknown>
 

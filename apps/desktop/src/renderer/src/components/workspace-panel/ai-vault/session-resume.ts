@@ -1,15 +1,15 @@
 import { isAiVaultSessionResumableContent, type AiVaultSession } from '@yiru/workbench-model/agent'
-
-import type { Repo, Worktree } from '../../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 import {
   canResumeAiVaultSessionOnTarget,
   getAiVaultResumeWorkspaceExecutionHostId,
   getAiVaultResumeWorkspaceTargetStatus
-} from '../../../lib/ai-vault-resume-target'
-import type { AppState } from '../../../store/types'
-import { getIndexedWorktreeMap } from '../../../store/worktree-repo-index'
+} from '~renderer/lib/ai-vault-resume-target'
+import type { AppState } from '~renderer/store/types'
+import { getIndexedWorktreeMap } from '~renderer/store/worktree-repo-index'
+import type { Repo, Worktree } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import {
   canJumpToAiVaultSessionWorktree,
   type AiVaultSessionWorktreeInfo

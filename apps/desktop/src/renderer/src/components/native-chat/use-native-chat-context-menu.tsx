@@ -22,8 +22,7 @@ import {
   type MouseEventHandler,
   type RefObject
 } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,8 +30,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dropdown-menu'
+import { translate } from '~renderer/i18n/i18n'
 
 import { isMacPlatform, nativeChatToggleShortcutLabel } from './shortcut'
 

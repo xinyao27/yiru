@@ -7,10 +7,9 @@
 // `track(...)`-name pairing here keeps both call sites in lockstep and gives
 // the composer a single import (`emitNativeChatMessageSent`) to call.
 
-import { track, tuiAgentToAgentKind } from '@/lib/telemetry'
-
-import type { NativeChatRuntime } from '../../../../shared/telemetry-events'
-import type { TuiAgent } from '../../../../shared/types'
+import { track, tuiAgentToAgentKind } from '~renderer/lib/telemetry'
+import type { NativeChatRuntime } from '~shared/telemetry-events'
+import type { TuiAgent } from '~shared/types'
 
 /** Loose agent type accepted by these emitters: the strict launch `TuiAgent`, or
  *  the broader `AgentType` string carried by the chat view. Narrowing to the

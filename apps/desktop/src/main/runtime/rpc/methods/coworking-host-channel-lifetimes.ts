@@ -1,4 +1,5 @@
-import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+
 import type { RpcContext } from '../core'
 
 type CloseChannel = (channelRef: string) => void

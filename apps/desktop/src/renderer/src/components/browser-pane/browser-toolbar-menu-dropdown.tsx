@@ -6,8 +6,7 @@ import {
   Gear as Settings,
   Plus
 } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,11 +19,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { useAppStore } from '@/store'
-
-import { BROWSER_FAMILY_LABELS } from '../../../../shared/constants'
-import type { BrowserSessionProfile, BrowserViewportPresetId } from '../../../../shared/types'
+} from '~renderer/components/ui/dropdown-menu'
+import { useAppStore } from '~renderer/store'
+import { BROWSER_FAMILY_LABELS } from '~shared/constants'
+import type { BrowserSessionProfile, BrowserViewportPresetId } from '~shared/types'
 
 type DetectedBrowserEntry = {
   family: string
@@ -32,10 +30,9 @@ type DetectedBrowserEntry = {
   profiles: { name: string; directory: string }[]
   selectedProfile: string
 }
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { BROWSER_VIEWPORT_PRESETS } from '../../../../shared/browser/viewport-presets'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { BROWSER_VIEWPORT_PRESETS } from '~shared/browser/viewport-presets'
 
 type BrowserToolbarMenuDropdownProps = {
   menuOpen: boolean

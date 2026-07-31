@@ -1,8 +1,7 @@
 import { Microphone as Mic } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type JSX } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,19 +9,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dialog'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   ORCHESTRATION_ENABLED_STORAGE_KEY,
   ORCHESTRATION_SETUP_DISMISSED_STORAGE_KEY,
   notifyOrchestrationSetupStateChanged
-} from '@/lib/orchestration-setup-state'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/orchestration-setup-state'
+import { useAppStore } from '~renderer/store'
+import { getDefaultVoiceSettings } from '~shared/constants'
+import type { FeatureTip } from '~shared/feature-tips'
 
-import { getDefaultVoiceSettings } from '../../../../shared/constants'
-import type { FeatureTip } from '../../../../shared/feature-tips'
 import { CliFeatureTipVisual } from './cli-feature-tip-visual'
 import { CliSkillSetupTerminal } from './cli-skill-setup-terminal'
 import { CmdJPaletteFeatureTipVisual } from './cmd-j-palette-feature-tip-visual'

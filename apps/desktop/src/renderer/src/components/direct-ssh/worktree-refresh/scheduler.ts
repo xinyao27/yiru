@@ -1,9 +1,9 @@
 import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
-
 import type {
   HostQualifiedDetectedWorktreeResult,
   ProviderRequestId
-} from '../../../../../shared/detected-worktree-provider-contract'
+} from '~shared/detected-worktree-provider-contract'
+
 import { cancelDirectSshWorktreeRefreshAttempt } from './cancellation'
 import {
   adjustDirectSshAuthorityUnsettled,

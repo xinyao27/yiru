@@ -1,6 +1,6 @@
 import { app, autoUpdater as nativeUpdater } from 'electron'
+import type { UpdateStatus } from '~shared/types'
 
-import type { UpdateStatus } from '../shared/types'
 import type { ElectronAutoUpdater } from './electron-updater-loader'
 import { changelogFromUpdateInfo } from './updater-changelog'
 import { compareVersions } from './updater-fallback'

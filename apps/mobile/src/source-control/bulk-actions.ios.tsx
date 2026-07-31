@@ -11,12 +11,12 @@ import {
 import { useMemo } from 'react'
 import { useUniwind } from 'uniwind'
 
-import { useMobileGlassAvailable } from '@/components/glass/availability'
+import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
   MobileSwiftUiGlassCircleButton,
   MobileSwiftUiGlassGroup
-} from '@/components/glass/swift-ui.ios'
+} from '~/components/glass/swift-ui.ios'
 
 import type { MobileSourceControlBulkActionsProps } from './bulk-actions-props'
 

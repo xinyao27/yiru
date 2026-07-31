@@ -2,11 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
-
-import type {
-  TerminalTabCloseRequest,
-  TerminalTabCloseResponse
-} from '../../shared/terminal/tab-close'
+import type { TerminalTabCloseRequest, TerminalTabCloseResponse } from '~shared/terminal/tab-close'
 
 const TERMINAL_TAB_CLOSE_TIMEOUT_MS = 20_000
 

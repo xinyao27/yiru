@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { isIntentionalAppRestartInProgress } from '~renderer/lib/updater-beforeunload'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
 
-import { isIntentionalAppRestartInProgress } from '@/lib/updater-beforeunload'
-
-import { getConnectionId } from '../../lib/connection-context'
-import { isRemoteRuntimePtyId } from '../../runtime/terminal-inspection'
-import { useAppStore } from '../../store'
 import type { OpenFile } from '../editor/state'
 import { setWindowCloseRequestHandler } from '../window-close-request-coordinator'
 import { useEditorCloseQueue, type QueueEditorCloseRequests } from './editor-close-queue'

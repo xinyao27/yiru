@@ -3,9 +3,9 @@ import type {
   MigrationUnsupportedPtyEntry
 } from '@yiru/workbench-model/agent'
 import { ipcMain } from 'electron'
+import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '~shared/agent/interrupt-intent'
 
-import type { AgentHookInstallStatus } from '../../shared/agent/hook-types'
-import type { AgentInterruptInferenceRequest } from '../../shared/agent/interrupt-intent'
 import { ampHookService } from '../amp/hook-service'
 import { antigravityHookService } from '../antigravity/hook-service'
 import { claudeHookService } from '../claude/hook-service'

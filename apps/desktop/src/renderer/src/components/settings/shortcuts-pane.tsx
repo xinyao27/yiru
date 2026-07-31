@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 import {
   findKeybindingConflicts,
   formatKeybindingList,
@@ -12,8 +11,8 @@ import {
   normalizeKeybindingListForAction,
   type KeybindingActionId,
   type KeybindingInput
-} from '../../../../shared/keybindings'
-import { useAppStore } from '../../store'
+} from '~shared/keybindings'
+
 import { SettingsSubsectionHeader } from './form-controls'
 import {
   hasCommonBindingOverride,

@@ -4,8 +4,8 @@ import { AppState, View, Text, Pressable, Switch, type AppStateStatus } from 're
 import type Animated from 'react-native-reanimated'
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
 
-import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from '../terminal/accessory-keys'
 import {

@@ -9,30 +9,26 @@ import {
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
 import { useId, useMemo, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { useDetectedAgents } from '@/hooks/use-detected-agents'
-import { translate } from '@/i18n/i18n'
-import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useDetectedAgents } from '~renderer/hooks/use-detected-agents'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentCatalog, AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import {
   getTuiAgentDefaultArgs,
   getTuiAgentDefaultEnv,
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent/launch-defaults'
+} from '~shared/tui-agent/launch-defaults'
 import {
   applyAgentPermissionMode,
   resolveAgentPermissionModeSummary,
   type AgentPermissionMode
-} from '../../../../shared/tui-agent/permissions'
-import {
-  isTuiAgentEnabled,
-  normalizeDisabledTuiAgents
-} from '../../../../shared/tui-agent/selection'
-import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
+} from '~shared/tui-agent/permissions'
+import { isTuiAgentEnabled, normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
+
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { AgentAwakeSetting } from './agent/awake-setting'

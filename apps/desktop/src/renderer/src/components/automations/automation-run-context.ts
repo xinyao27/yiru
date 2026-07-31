@@ -1,8 +1,5 @@
-import {
-  buildWorkspaceRunContext,
-  type WorkspaceRunContext
-} from '../../../../shared/project-source-context'
-import type { ProjectHostSetup, Repo } from '../../../../shared/types'
+import { buildWorkspaceRunContext, type WorkspaceRunContext } from '~shared/project-source-context'
+import type { ProjectHostSetup, Repo } from '~shared/types'
 
 export function buildAutomationRunContextForRepo(args: {
   repoId: string

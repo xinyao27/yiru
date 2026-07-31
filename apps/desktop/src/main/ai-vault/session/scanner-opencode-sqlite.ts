@@ -1,7 +1,7 @@
 import type { AiVaultSession, AiVaultSessionPreviewMessage } from '@yiru/workbench-model/agent'
+import { columnExists, tableExists } from '~main/opencode/usage/schema-helpers'
+import SyncDatabase from '~main/sqlite/sync-database'
 
-import { columnExists, tableExists } from '../../opencode/usage/schema-helpers'
-import SyncDatabase from '../../sqlite/sync-database'
 import {
   addSessionTokens,
   addPreviewMessage,

@@ -2,20 +2,19 @@ import { Check } from '@phosphor-icons/react'
 import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform'
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import { useCallback, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
+} from '~renderer/components/ui/select'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useWindowsTerminalCapabilities } from '~renderer/lib/windows-terminal-capabilities'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalSettings } from '../../../../shared/types'
 import { SettingsSegmentedControl } from '../settings/form-controls'
 import { ShellIcon } from '../tab-bar/shell-icons'
 

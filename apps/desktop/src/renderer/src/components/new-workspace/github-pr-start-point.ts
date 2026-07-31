@@ -1,6 +1,5 @@
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { GitHubPrStartPoint, GlobalSettings } from '../../../../shared/types'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { GitHubPrStartPoint, GlobalSettings } from '~shared/types'
 
 type PrStartPointSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
 

@@ -1,4 +1,5 @@
-import type { GlobalSettings, PersistedState } from '../../shared/types'
+import type { GlobalSettings, PersistedState } from '~shared/types'
+
 import type { PersistedSettingsMutation } from './persisted-settings-mutations'
 
 export type PersistedSettingsChangeListener = (

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-
 import {
   getFeatureWallSetupSteps,
   getFirstIncompleteFeatureWallSetupStepId
-} from '../../../../shared/feature-wall-setup-steps'
-import type { FeatureWallSetupStepId } from '../../../../shared/feature-wall-setup-steps'
+} from '~shared/feature-wall-setup-steps'
+import type { FeatureWallSetupStepId } from '~shared/feature-wall-setup-steps'
+
 import { FeatureWallSetupChecklist } from '../feature-wall/setup-checklist'
 import { useSettingsSetupGuideFullProgress } from './setup-guide-progress'
 

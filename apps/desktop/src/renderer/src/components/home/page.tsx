@@ -2,22 +2,21 @@ import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { ContributionHeatmap } from '@/components/contribution-heatmap/heatmap'
+import { ContributionHeatmap } from '~renderer/components/contribution-heatmap/heatmap'
 import type {
   ContributionDisplayMetric,
   TokenValueMetric
-} from '@/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '@/components/contribution-heatmap/metric'
+} from '~renderer/components/contribution-heatmap/metric'
+import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import {
   loadContributionMetric,
   saveContributionMetric
-} from '@/components/contribution-heatmap/preference'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
+} from '~renderer/components/contribution-heatmap/preference'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
 import { loadHomeDataSnapshot, saveHomeDataSnapshot } from './cache'
 import { chartActivationLabel } from './chart-activation'

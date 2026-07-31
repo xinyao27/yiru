@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import type { MobileCommitFailureRecovery } from './commit-failure-recovery'

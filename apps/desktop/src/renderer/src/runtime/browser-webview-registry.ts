@@ -1,7 +1,8 @@
 import {
   buildSessionStoragePersistenceScript,
   YIRU_PERSIST_SESSION_STORAGE_EXPRESSION
-} from '../../../shared/browser/session-storage-persistence'
+} from '~shared/browser/session-storage-persistence'
+
 import { clearLiveBrowserUrl } from './browser-live-url'
 import { removeBrowserPageViewport } from './browser-page-viewport'
 

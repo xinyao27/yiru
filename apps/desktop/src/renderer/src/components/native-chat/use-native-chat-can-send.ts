@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-
-import { getDriverForPty, onDriverChange } from '@/lib/pane-manager/mobile-driver-state'
+import { getDriverForPty, onDriverChange } from '~renderer/lib/pane-manager/mobile-driver-state'
 
 import { deriveNativeChatCanSend } from './send-eligibility'
 

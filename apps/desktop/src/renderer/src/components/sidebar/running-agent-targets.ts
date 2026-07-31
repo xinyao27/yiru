@@ -1,11 +1,9 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-
-import { resolvePaneAgentActivity } from '@/lib/pane-agent-evidence'
-
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot, TerminalTab } from '../../../../shared/types'
-import { detectAgentSendTitleStatus } from '../../lib/agent-send-title-status'
-import { resolveRuntimePaneTitleLeafResolution } from '../../lib/runtime-pane-title-leaf-id'
+import { detectAgentSendTitleStatus } from '~renderer/lib/agent-send-title-status'
+import { resolvePaneAgentActivity } from '~renderer/lib/pane-agent-evidence'
+import { resolveRuntimePaneTitleLeafResolution } from '~renderer/lib/runtime-pane-title-leaf-id'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
 export type RunningAgentTargetState = {
   agentStatusByPaneKey: Record<string, AgentStatusEntry>

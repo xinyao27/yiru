@@ -1,15 +1,14 @@
 import { Warning as AlertTriangle, X } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   getCreationProgressLabel,
   type PendingWorktreeCreation
-} from '@/lib/pending-worktree-creation'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/pending-worktree-creation'
+import { useAppStore } from '~renderer/store'
 
 function statusLabel(entry: PendingWorktreeCreation): string {
   if (entry.status === 'error') {

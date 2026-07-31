@@ -1,6 +1,7 @@
 import { readFile, readdir, readlink } from 'node:fs/promises'
 
-import { getProcessOutputFields } from '../shared/process-output-field-scanner'
+import { getProcessOutputFields } from '~shared/process-output-field-scanner'
+
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { scanWindowsListeningPorts } from './windows-port-scan'
 

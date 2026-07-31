@@ -1,8 +1,8 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalWindowsRuntimeDefault } from '~shared/project-execution-runtime'
+import { normalizeGlobalWindowsRuntimeDefault } from '~shared/project-execution-runtime'
+import type { GlobalSettings } from '~shared/types'
 
-import type { GlobalWindowsRuntimeDefault } from '../../../../shared/project-execution-runtime'
-import { normalizeGlobalWindowsRuntimeDefault } from '../../../../shared/project-execution-runtime'
-import type { GlobalSettings } from '../../../../shared/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 

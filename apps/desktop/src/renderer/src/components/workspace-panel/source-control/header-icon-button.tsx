@@ -1,8 +1,8 @@
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 
 export function SourceControlHeaderIconButton({

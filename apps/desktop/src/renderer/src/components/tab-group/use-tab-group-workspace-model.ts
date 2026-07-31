@@ -3,36 +3,30 @@
    controller cannot drift from the TabGroupPanel surface it coordinates. */
 import { useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-
-import type { OpenFile } from '@/components/editor/state'
+import type { OpenFile } from '~renderer/components/editor/state'
 import {
   ensureSimulatorTab,
   getSimulatorTabForWorktree
-} from '@/components/tab-group/ensure-simulator-tab'
-import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
-import { buildDuplicatedBrowserTabOptions } from '@/lib/duplicate-browser-tab-options'
-import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
-
-import { resolveUnifiedTabLabel } from '../../../../shared/tab-title-resolution'
-import type {
-  BrowserTab as BrowserTabState,
-  Tab,
-  TabGroup,
-  TerminalTab
-} from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { focusTerminalTabSurface } from '../../lib/focus-terminal-tab-surface'
+} from '~renderer/components/tab-group/ensure-simulator-tab'
+import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
+import { buildDuplicatedBrowserTabOptions } from '~renderer/lib/duplicate-browser-tab-options'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { openMobileEmulatorTab } from '~renderer/lib/open-mobile-emulator-tab'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
   activateWebRuntimeSessionTab,
   closeWebRuntimeSessionTab,
   createWebRuntimeSessionBrowserTab,
   createWebRuntimeSessionTerminal,
   isWebRuntimeSessionActive
-} from '../../runtime/web-runtime-session'
-import { useAppStore } from '../../store'
-import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
+import { resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
+import type { BrowserTab as BrowserTabState, Tab, TabGroup, TerminalTab } from '~shared/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
+
 import { requestEditorFileClose } from '../editor/autosave'
 import { openTabBarEntry, type TabCreateEntryArgs } from '../tab-bar/tab-create-entry-action'
 import { closeTerminalTab } from '../terminal/tab-actions'

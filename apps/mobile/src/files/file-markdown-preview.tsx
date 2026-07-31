@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
-import { MobileGlassSurface } from '@/components/glass/surface'
-import { Code, Pencil } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { Code, Pencil } from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { MobileMarkdown } from '../components/markdown'
 import {

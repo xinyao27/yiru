@@ -1,5 +1,6 @@
-import { isDecorativeAgentTitleFrameChange } from '../../../shared/agent/decorative-title-signature'
-import type { WorkspaceSessionPatch } from '../../../shared/types'
+import { isDecorativeAgentTitleFrameChange } from '~shared/agent/decorative-title-signature'
+import type { WorkspaceSessionPatch } from '~shared/types'
+
 import {
   SESSION_RELEVANT_FIELDS,
   shouldPersistWorkspaceSession

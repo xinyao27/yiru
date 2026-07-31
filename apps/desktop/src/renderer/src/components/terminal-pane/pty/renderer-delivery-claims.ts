@@ -1,4 +1,5 @@
-import { redactPtyIdForDiagnostics } from '../../../../../shared/pty-delivery-diagnostics'
+import { redactPtyIdForDiagnostics } from '~shared/pty-delivery-diagnostics'
+
 import { recordTerminalFreezeBreadcrumb } from '../terminal-freeze-breadcrumbs'
 
 const hiddenClaimCounts = new Map<string, number>()

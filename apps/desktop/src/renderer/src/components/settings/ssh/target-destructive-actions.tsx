@@ -1,9 +1,9 @@
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 
-import { useMountedRef } from '../../../hooks/use-mounted-ref'
-import { translate } from '../../../i18n/i18n'
 import { SshDestructiveActionDialog } from './destructive-action-dialog'
 import {
   isSshTargetConnecting,

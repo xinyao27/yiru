@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
+import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
 
-import type { KeybindingActionId, KeybindingFileSnapshot } from '../../shared/keybindings'
 import { authorizeExternalPath } from '../filesystem/auth'
 import { rebuildAppMenu } from '../menu/register-app-menu'
 import type { KeybindingService } from './keybinding-service'

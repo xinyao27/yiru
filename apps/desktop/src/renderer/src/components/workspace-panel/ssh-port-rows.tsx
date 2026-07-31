@@ -6,17 +6,16 @@ import {
 } from '@phosphor-icons/react'
 import type { PortForwardEntry, EnrichedDetectedPort } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getPortOpenBrowserTooltipLabel } from '@/lib/workspace-port-actions'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getPortOpenBrowserTooltipLabel } from '~renderer/lib/workspace-port-actions'
 import {
   addressForPortForwardEntry,
   advertisedBrowserUrlForDetectedPort,
   advertisedBrowserUrlForForwardedRow
-} from '@/lib/workspace-port-urls'
+} from '~renderer/lib/workspace-port-urls'
 
 export function ForwardedPortRow({
   entry,

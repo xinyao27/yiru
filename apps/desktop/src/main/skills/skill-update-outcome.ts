@@ -1,7 +1,7 @@
 import {
   SUPPORTED_GLOBAL_SKILL_TOPOLOGIES,
   type SkillFreshnessInstallation
-} from '../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 
 /**
  * Names that did not land, judged from the post-run inventory.

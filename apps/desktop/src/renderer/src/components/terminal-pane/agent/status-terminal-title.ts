@@ -1,10 +1,9 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
-
+import { classifyTitleActivity } from '~renderer/lib/pane-agent-evidence'
 import {
   getSyntheticAgentTerminalTitle,
   getSyntheticAgentTitleProfile
-} from '../../../../../shared/synthetic-agent-title'
-import { classifyTitleActivity } from '../../../lib/pane-agent-evidence'
+} from '~shared/synthetic-agent-title'
 
 export function resolveAgentStatusTerminalTitle(
   payload: Pick<ParsedAgentStatusPayload, 'agentType' | 'state'>,

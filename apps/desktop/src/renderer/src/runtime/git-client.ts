@@ -3,13 +3,12 @@ import {
   getRepoIdFromWorktreeId,
   splitWorktreeIdForFilesystem
 } from '@yiru/workbench-model/workspace'
-
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '../../../shared/commit-message/agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message/host-key'
-import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git/history'
+} from '~shared/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 /* eslint-disable max-lines -- Why: this module mirrors the git preload API with
 runtime-aware routing so source-control callers have one typed boundary instead
 of reimplementing local-vs-environment branching per operation. */
@@ -23,9 +22,9 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '../../../shared/git/write-op-results'
-import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control/ai'
+} from '~shared/git/write-op-results'
+import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
+import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
 import type {
   GitBranchCompareResult,
   GitCommitCompareResult,
@@ -38,7 +37,8 @@ import type {
   GitStatusResult,
   GitUpstreamStatus,
   GlobalSettings
-} from '../../../shared/types'
+} from '~shared/types'
+
 import { callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'
 import { toRuntimeWorktreeSelector } from './worktree-selector'
 

@@ -1,6 +1,5 @@
-import { translate } from '@/i18n/i18n'
-
-import { classifySchemeLessLocalDevAddress } from '../../../../shared/browser/url'
+import { translate } from '~renderer/i18n/i18n'
+import { classifySchemeLessLocalDevAddress } from '~shared/browser/url'
 
 const HOST_FILE_EXTENSIONS = new Set([
   'css',

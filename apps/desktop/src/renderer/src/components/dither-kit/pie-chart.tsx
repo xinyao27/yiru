@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/class-names'
+import { Button } from '~renderer/components/ui/button'
+import { cn } from '~renderer/lib/class-names'
 
 import { ditherBackingSize, ditherThreshold } from './dither-paint'
 import { ditherColor, MONOCHROME_DITHER_SEED } from './palette'

@@ -1,10 +1,9 @@
 import { GitCommit as GitCommitHorizontal } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
-import type { WorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
+import { Badge } from '~renderer/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { cn } from '~renderer/lib/class-names'
+import type { WorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
 
 type DetachedHeadDisplay = Extract<WorktreeGitIdentityDisplay, { kind: 'detached' }>
 

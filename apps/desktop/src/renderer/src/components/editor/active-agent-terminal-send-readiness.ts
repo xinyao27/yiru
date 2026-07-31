@@ -1,7 +1,6 @@
-import { callRuntimeRpc, RuntimeRpcCallError } from '@/runtime/rpc-client'
-import type { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { RuntimeTerminalAgentStatus } from '../../../../shared/runtime-types'
+import { callRuntimeRpc, RuntimeRpcCallError } from '~renderer/runtime/rpc-client'
+import type { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { RuntimeTerminalAgentStatus } from '~shared/runtime-types'
 
 export const ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS = 15000
 

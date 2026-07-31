@@ -2,21 +2,15 @@ import { Trash as Trash2 } from '@phosphor-icons/react'
 import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useCallback, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { Button } from '~renderer/components/ui/button'
+import { Label } from '~renderer/components/ui/label'
+import { Separator } from '~renderer/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getRepoKindLabel, isFolderRepo } from '~shared/repo-kind'
+import type { YiruHooks, Project, ProjectUpdateArgs, Repo, RepoHookSettings } from '~shared/types'
 
-import { getRepoKindLabel, isFolderRepo } from '../../../../../shared/repo-kind'
-import type {
-  YiruHooks,
-  Project,
-  ProjectUpdateArgs,
-  Repo,
-  RepoHookSettings
-} from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Separator } from '../../ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import { McpConfigSection } from '../mcp-config-section'
 import { matchesSettingsSearch } from '../search'
 import { SearchableSetting } from '../searchable-setting'

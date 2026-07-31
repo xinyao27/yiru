@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type { CoworkingAgentLaunchId } from '~shared/coworking/agent-launch-contract'
 
-import type { CoworkingAgentLaunchId } from '../../../shared/coworking/agent-launch-contract'
 import type { CoworkingLiveSessionIdentity } from '../live-session-display-identity'
 import type {
   CoworkingExecutionHostSessionReadRequest,

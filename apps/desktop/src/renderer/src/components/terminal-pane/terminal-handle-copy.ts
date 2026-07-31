@@ -1,6 +1,5 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { makePaneKey } from '~shared/stable-pane-id'
 
 type CopyTerminalHandleDeps = {
   tabId: string

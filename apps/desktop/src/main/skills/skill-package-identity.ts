@@ -3,7 +3,8 @@ import type { Dirent } from 'node:fs'
 import { lstat, open, opendir } from 'node:fs/promises'
 import { isAbsolute, join, relative, sep } from 'node:path'
 
-import type { SkillBundleFileIdentity, SkillKnownSnapshot } from '../../shared/skill-freshness'
+import type { SkillBundleFileIdentity, SkillKnownSnapshot } from '~shared/skill-freshness'
+
 import {
   gitBlobSha,
   skillPackageGitTreeSha,

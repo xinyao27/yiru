@@ -1,8 +1,7 @@
 import React from 'react'
-
-import MermaidBlock from '@/components/editor/mermaid-block'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import MermaidBlock from '~renderer/components/editor/mermaid-block'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 // Why: comment markdown components are module-level constants without access to
 // the live theme, so this wrapper resolves dark mode from the app store (same

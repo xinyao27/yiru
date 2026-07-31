@@ -1,6 +1,6 @@
-import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/rpc-client'
+import { callRuntimeRpc, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 
-import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { WindowsTerminalCapabilities } from './windows-terminal-capabilities'
 
 export type WindowsTerminalCapabilityLoadTarget = RuntimeClientTarget

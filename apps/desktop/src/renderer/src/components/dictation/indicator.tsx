@@ -1,7 +1,6 @@
 import { Microphone as Mic } from '@phosphor-icons/react'
-
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 
 export function DictationIndicator() {
   const dictationState = useAppStore((s) => s.dictationState)

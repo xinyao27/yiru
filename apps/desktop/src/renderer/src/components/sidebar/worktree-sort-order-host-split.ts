@@ -1,9 +1,8 @@
 import { LOCAL_EXECUTION_HOST_ID, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
-
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '../../lib/worktree-runtime-owner'
+} from '~renderer/lib/worktree-runtime-owner'
 
 export type WorktreeSortOrderHostGroup = {
   hostId: string

@@ -1,13 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { getRuntimeGitStatus } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
-import { getConnectionId } from '../../../lib/connection-context'
-import { getSettingsForWorktreeRuntimeOwner } from '../../../lib/worktree-runtime-owner'
-import { getRuntimeGitStatus } from '../../../runtime/git-client'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../ui/dialog'
 import { prepareActiveWorktreeFocusAfterDelete } from '../active-worktree-focus-after-delete'
 import { getWorkspaceDeleteLineage } from '../workspace-delete-lineage'
 import {

@@ -13,10 +13,9 @@ import { posix, win32 } from 'node:path'
 
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import type { BrowserWindow } from 'electron'
-
-import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
-import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
-import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent/config'
+import { assertGitPushTargetShape } from '~shared/git/push-target-validation'
+import { getProjectHostSetupWorktreeMeta } from '~shared/project-host-setup-projection'
+import { TUI_AGENT_CONFIG, isTuiAgent } from '~shared/tui-agent/config'
 import type {
   AutomationWorkspaceProvenance,
   CreateWorktreeArgs,
@@ -29,8 +28,9 @@ import type {
   Worktree,
   WorktreeHeadIdentity,
   WorktreeMeta
-} from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+} from '~shared/types'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
+
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
 import { validateGitPushTarget } from '../git/push-target-validation'
 import {
@@ -78,15 +78,15 @@ type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
   automationProvenance?: AutomationWorkspaceProvenance
 }
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-
-import type { BranchPrefixSettings } from '../../shared/branch-prefix'
-import { createSequencedSetupAgentCommands } from '../../shared/setup/agent-sequencing'
-import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup/agent-startup-policy'
+import type { BranchPrefixSettings } from '~shared/branch-prefix'
+import { createSequencedSetupAgentCommands } from '~shared/setup/agent-sequencing'
+import { shouldWaitForSetupBeforeAgentStartup } from '~shared/setup/agent-startup-policy'
 import {
   buildSetupRunnerCommand,
   getSetupRunnerCommandPlatformForPath
-} from '../../shared/setup/runner-command'
-import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
+} from '~shared/setup/runner-command'
+import { parseWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
+
 import {
   markCodexProjectTrusted,
   markCopilotFolderTrusted,

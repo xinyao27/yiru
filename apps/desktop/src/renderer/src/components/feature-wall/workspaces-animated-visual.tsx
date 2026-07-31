@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { JSX } from 'react'
-
-import { AgentStateDot } from '@/components/agent-state-dot'
-import { cn } from '@/lib/class-names'
+import { AgentStateDot } from '~renderer/components/agent-state-dot'
+import { cn } from '~renderer/lib/class-names'
 
 import { ClaudeIcon, OpenCodeGoIcon } from '../status-bar/icons'
 

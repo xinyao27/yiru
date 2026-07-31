@@ -4,14 +4,13 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react'
 import { Command as CommandPrimitive } from 'cmdk'
 import * as React from 'react'
-
 import {
   modalBackdropClass,
   modalBackdropMotionClass,
   modalSurfaceClass,
   modalSurfaceMotionClass
-} from '@/components/ui/floating-surface-styles'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/floating-surface-styles'
+import { cn } from '~renderer/lib/class-names'
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (

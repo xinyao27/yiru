@@ -1,12 +1,11 @@
 import { FileAudio, Upload, SpeakerHigh as Volume2 } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { getNotificationSoundOptions } from '~renderer/components/notification-sound-options'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import type { GlobalSettings } from '~shared/types'
 
-import { getNotificationSoundOptions } from '@/components/notification-sound-options'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
-import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
 import {
   Select,

@@ -1,15 +1,14 @@
 import { formatResetCountdown, formatResetDuration } from '@yiru/workbench-model/ui'
-
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
-import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
 import {
   clampUsedPercent,
   getDisplayedUsagePercentage,
   type UsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
+} from '~shared/usage-percentage-display'
+
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 import {
   getProviderDisplayName,

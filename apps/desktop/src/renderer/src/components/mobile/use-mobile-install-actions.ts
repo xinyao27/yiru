@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 
 import { getMobileReleaseLink, type MobilePlatform } from './release-link'
 

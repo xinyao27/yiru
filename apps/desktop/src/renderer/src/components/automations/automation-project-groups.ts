@@ -1,7 +1,6 @@
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
-
-import { getProjectIdentityKey } from '../../../../shared/project-host-setup-projection'
-import type { Repo } from '../../../../shared/types'
+import { getProjectIdentityKey } from '~shared/project-host-setup-projection'
+import type { Repo } from '~shared/types'
 
 export type AutomationProjectGroup = {
   projectKey: string

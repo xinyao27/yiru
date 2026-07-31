@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState, type RefObject } from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { NativeChatComposerImageAttachment } from './composer/field'
 import { setBoundedScopeCacheEntry } from './composer/scope-cache'

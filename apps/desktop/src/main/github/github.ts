@@ -6,9 +6,8 @@ the repo-path validation, preference-threading, and stats wiring patterns are
 reviewable as one surface. Splitting by feature area would risk drifting
 validation/gate conventions across handler files. */
 import { ipcMain } from 'electron'
-
-import { appStarSourceSchema } from '../../shared/gh-star-source'
-import type { ProjectSourceContext } from '../../shared/project-source-context'
+import { appStarSourceSchema } from '~shared/gh-star-source'
+import type { ProjectSourceContext } from '~shared/project-source-context'
 import type {
   Repo,
   GitHubOwnerRepo,
@@ -17,8 +16,9 @@ import type {
   GitHubPRRefreshEnqueueResult,
   GitHubPRRefreshReason,
   PRRefreshOutcome
-} from '../../shared/types'
-import type { GitHubPRFile } from '../../shared/types'
+} from '~shared/types'
+import type { GitHubPRFile } from '~shared/types'
+
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import type { StatsCollector } from '../stats/collector'

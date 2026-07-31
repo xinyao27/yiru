@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { InteractionManager, Pressable, TextInput, View, type TextInputProps } from 'react-native'
 
-import { MobileGlassSurface } from '@/components/glass/surface'
-import { MagnifyingGlass as Search, X } from '@/components/uniwind-icons'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MagnifyingGlass as Search, X } from '~/components/uniwind-icons'
 
 // Why: toolbar/list chrome paints and settles after the open tap; native
 // autoFocus alone often fails to raise the soft keyboard on iOS/Android.

@@ -4,20 +4,20 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { WorktreeOpenInMenuItems } from '../../sidebar/worktree-open-in-menu'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { WorktreeOpenInMenuItems } from '~renderer/components/sidebar/worktree-open-in-menu'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 
 type FileExplorerToolbarProps = {

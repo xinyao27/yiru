@@ -1,28 +1,27 @@
 import { useRef } from 'react'
 import type React from 'react'
-
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { getRuntimeGitScope } from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
 import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message/agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message/host-key'
+} from '~shared/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
 import {
   normalizeSourceControlAiSettings,
   readSourceControlAiModelChoiceForHost,
   selectSourceControlAiModelChoiceForHost
-} from '../../../../shared/source-control/ai'
-import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '../../../../shared/source-control/ai-actions'
+} from '~shared/source-control/ai'
+import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '~shared/source-control/ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
-} from '../../../../shared/source-control/ai-types'
-import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
-import { getRuntimeGitScope } from '../../runtime/git-client'
-import { useAppStore } from '../../store'
+} from '~shared/source-control/ai-types'
+import type { GlobalSettings, TuiAgent } from '~shared/types'
+
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { HostedReviewCreationDefaults } from './hosted-review-creation-defaults'

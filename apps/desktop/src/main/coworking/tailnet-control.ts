@@ -1,6 +1,6 @@
-import type { TailnetPrincipal } from '../../shared/coworking/wire-contract'
+import type { TailnetPrincipal } from '~shared/coworking/wire-contract'
 
-export type { TailnetPrincipal } from '../../shared/coworking/wire-contract'
+export type { TailnetPrincipal } from '~shared/coworking/wire-contract'
 
 export type TailnetNode = {
   nodeId: string

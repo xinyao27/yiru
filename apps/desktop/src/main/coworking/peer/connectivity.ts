@@ -1,4 +1,5 @@
-import type { CoworkingOsFamily } from '../../../shared/coworking/wire-contract'
+import type { CoworkingOsFamily } from '~shared/coworking/wire-contract'
+
 import { loadOrCreateCoworkingE2EEKeypair } from '../e2ee-keypair'
 import { CoworkingProbeService } from '../ingress-probe'
 import { CoworkingOwnerCatalog } from '../owner/catalog'

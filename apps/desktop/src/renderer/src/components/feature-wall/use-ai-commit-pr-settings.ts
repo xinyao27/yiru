@@ -1,15 +1,14 @@
 import { useCallback, useState } from 'react'
-
-import { getAgentCatalog } from '@/lib/agent-catalog'
-import { useAppStore } from '@/store'
-
+import { getAgentCatalog } from '~renderer/lib/agent-catalog'
+import { useAppStore } from '~renderer/store'
 import {
   CUSTOM_AGENT_ID,
   getCommitMessageAgentCapability,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../../../../shared/commit-message/agent-spec'
-import type { CommitMessageAiSettings, TuiAgent } from '../../../../shared/types'
+} from '~shared/commit-message/agent-spec'
+import type { CommitMessageAiSettings, TuiAgent } from '~shared/types'
+
 import {
   EMPTY_COMMIT_MESSAGE_AI_SETTINGS,
   readCommitMessageAiSettings,

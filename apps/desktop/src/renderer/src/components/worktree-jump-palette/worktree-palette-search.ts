@@ -1,8 +1,7 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { branchName } from '~renderer/lib/git-utils'
+import type { Repo, Worktree } from '~shared/types'
 
-import { branchName } from '@/lib/git-utils'
-
-import type { Repo, Worktree } from '../../../../shared/types'
 import { extractWorktreePaletteCommentSnippet } from './worktree-palette-comment-snippet'
 import { isWorktreePaletteQueryTooLarge } from './worktree-palette-query-bounds'
 import { matchWorktreePaletteReview } from './worktree-palette-review-match'

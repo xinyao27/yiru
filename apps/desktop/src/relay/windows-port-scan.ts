@@ -1,8 +1,9 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
-import { encodePowerShellCommand } from '../shared/powershell-command-encoding'
-import { getProcessOutputFields } from '../shared/process-output-field-scanner'
+import { encodePowerShellCommand } from '~shared/powershell-command-encoding'
+import { getProcessOutputFields } from '~shared/process-output-field-scanner'
+
 import { buildRelayCommandEnv } from './command-env'
 import type { DetectedPort } from './port-scan-handler'
 

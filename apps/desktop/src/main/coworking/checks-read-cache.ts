@@ -1,4 +1,5 @@
-import type { CoworkingChecksReadResult } from '../../shared/coworking/operation-contract'
+import type { CoworkingChecksReadResult } from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from './execution-error'
 import type { CoworkingPublicWorktreeInstance } from './worktree-publication-state'
 

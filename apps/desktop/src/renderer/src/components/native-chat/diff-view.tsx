@@ -1,4 +1,4 @@
-import { cn } from '@/lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 import type { DiffLine } from './diff'
 

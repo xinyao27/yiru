@@ -1,4 +1,4 @@
-import type { TerminalLeafId } from '../../../../shared/stable-pane-id'
+import type { TerminalLeafId } from '~shared/stable-pane-id'
 
 // Why: Electron/test runtimes can lack crypto.randomUUID. The fallback still
 // produces a UUID-shaped v4 id so pane-key validation remains deterministic.

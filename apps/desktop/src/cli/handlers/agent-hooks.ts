@@ -6,10 +6,11 @@ import { dirname, join } from 'node:path'
 import {
   applyAgentStatusHooksEnabled,
   getManagedAgentHookStatuses
-} from '../../main/agent-hooks/managed-agent-hook-controls'
-import type { AgentHookInstallStatus } from '../../shared/agent/hook-types'
-import { getDefaultPersistedState } from '../../shared/constants'
-import type { PersistedState } from '../../shared/types'
+} from '~main/agent-hooks/managed-agent-hook-controls'
+import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
+import { getDefaultPersistedState } from '~shared/constants'
+import type { PersistedState } from '~shared/types'
+
 import type { CommandHandler } from '../dispatch'
 import { printResult } from '../format'
 import { RuntimeClientError, type RuntimeClient, type RuntimeRpcSuccess } from '../runtime-client'

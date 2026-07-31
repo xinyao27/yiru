@@ -2,11 +2,9 @@ import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
-
-import type { WorkspaceCleanupFailure } from '@/components/workspace-cleanup/state'
-import { translate } from '@/i18n/i18n'
-
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
+import type { WorkspaceCleanupFailure } from '~renderer/components/workspace-cleanup/state'
+import { translate } from '~renderer/i18n/i18n'
+import type { WorkspaceCleanupCandidate } from '~shared/workspace/cleanup'
 
 // Why: an ancestor skip is provisional while every blocking descendant is still
 // removing; it hardens or lifts once the blockers settle authoritatively.

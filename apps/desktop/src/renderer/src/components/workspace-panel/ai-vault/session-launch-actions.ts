@@ -1,24 +1,23 @@
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-
-import { useAppStore } from '@/store'
-
-import type { Worktree } from '../../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
-import { translate } from '../../../i18n/i18n'
+import type { AgentSessionContinuationRequest } from '~renderer/components/terminal-pane/agent/session-continuation'
+import { translate } from '~renderer/i18n/i18n'
 import {
   canResumeAiVaultSessionOnTarget,
   getAiVaultResumeWorkspaceExecutionHostId,
   getAiVaultResumeWorkspaceTargetStatus
-} from '../../../lib/ai-vault-resume-target'
-import { launchAiVaultSessionInNewTab } from '../../../lib/launch-ai-vault-session'
+} from '~renderer/lib/ai-vault-resume-target'
+import { launchAiVaultSessionInNewTab } from '~renderer/lib/launch-ai-vault-session'
 import {
   activateAndRevealFolderWorkspace,
   activateAndRevealWorktree
-} from '../../../lib/worktree-activation'
-import { findWorktreeById } from '../../../store/slices/worktree-helpers'
-import type { AgentSessionContinuationRequest } from '../../terminal-pane/agent/session-continuation'
+} from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { Worktree } from '~shared/types'
+import { parseWorkspaceKey } from '~shared/workspace/scope'
+
 import {
   buildAiVaultResumeCopyCommandForWorktree,
   buildAiVaultResumeStartupForWorktree,

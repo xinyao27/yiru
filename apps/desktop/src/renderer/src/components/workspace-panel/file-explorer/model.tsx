@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRuntimeFileListForWorktree } from '~renderer/components/quick-open-file-list'
+import { basename } from '~renderer/lib/path'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { RightSidebarExplorerView } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import { isGitRepoKind } from '../../../../../shared/repo-kind'
-import type { RightSidebarExplorerView } from '../../../../../shared/types'
-import { basename } from '../../../lib/path'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { useActiveWorktree, useRepoById } from '../../../store/selectors'
-import { useRuntimeFileListForWorktree } from '../../quick-open-file-list'
 import { buildFolderStatusMap, buildStatusMap } from '../status-display'
 import {
   getNameFilterCollapsedPathsAfterExpand,

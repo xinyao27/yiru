@@ -1,7 +1,6 @@
 import type React from 'react'
-
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { cn } from '~renderer/lib/class-names'
 
 export function AiVaultPanelSurface({
   children

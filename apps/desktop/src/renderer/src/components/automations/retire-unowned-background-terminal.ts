@@ -1,6 +1,6 @@
-import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-import { isTerminalTabPresent } from '@/store/slices/terminal-tab-retirement'
+import { callRuntimeRpc, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { isTerminalTabPresent } from '~renderer/store/slices/terminal-tab-retirement'
 
 export async function retireUnownedTerminal(args: {
   tabId: string

@@ -8,16 +8,16 @@
  */
 import { spawn } from 'node:child_process'
 
-import { fileListingCancellationError } from '../../shared/file-listing-cancellation'
+import { fileListingCancellationError } from '~shared/file-listing-cancellation'
 import {
   buildGitLsFilesArgsForQuickOpen,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../../shared/quick-open/filter'
+} from '~shared/quick-open/filter'
 import {
   expandQuickOpenGitFileListing,
   parseQuickOpenGitLsFilesEntry
-} from '../../shared/quick-open/readdir-walk'
+} from '~shared/quick-open/readdir-walk'
 import {
   buildGitGrepArgs,
   buildSubmatchRegex,
@@ -25,7 +25,8 @@ import {
   finalize,
   ingestGitGrepLine,
   SEARCH_TIMEOUT_MS
-} from '../../shared/text-search'
+} from '~shared/text-search'
+
 import { buildRelayGitEnv } from '../command-env'
 import type { SearchOptions, SearchResult } from './handler-text-search'
 

@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-
-import { showTerminalShortcutCaptureNotification } from '@/components/terminal-workspace/terminal-shortcut-capture-notification'
-import { translate } from '@/i18n/i18n'
+import { showTerminalShortcutCaptureNotification } from '~renderer/components/terminal-workspace/terminal-shortcut-capture-notification'
+import { translate } from '~renderer/i18n/i18n'
 import {
   createFloatingWorkspaceBrowserTab,
   createFloatingWorkspaceMarkdownTab,
@@ -10,13 +9,13 @@ import {
   handleEmptyFloatingWorkspacePanelCloseShortcut,
   isFloatingWorkspacePanelFocused,
   switchFloatingWorkspaceTab
-} from '@/lib/floating-workspace-terminal-actions'
+} from '~renderer/lib/floating-workspace-terminal-actions'
+import { useAppStore } from '~renderer/store'
+import { keybindingMatchesAction, type KeybindingActionId } from '~shared/keybindings'
+import type { TuiAgent } from '~shared/types'
+import { matchesRecentTabSwitcherChord } from '~shared/window-shortcut-policy'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
-import { keybindingMatchesAction, type KeybindingActionId } from '../../../../shared/keybindings'
-import type { TuiAgent } from '../../../../shared/types'
-import { matchesRecentTabSwitcherChord } from '../../../../shared/window-shortcut-policy'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
-import { useAppStore } from '../../store'
 import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from '../editor/autosave'
 import {
   handleSwitchRecentTab,

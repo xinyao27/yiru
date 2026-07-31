@@ -1,19 +1,18 @@
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { useAppStore } from '@/store'
-
+import { translate } from '~renderer/i18n/i18n'
+import { getSelectedNestedRepoPathsInScanOrder } from '~renderer/lib/nested-repo-selected-paths'
+import { track } from '~renderer/lib/telemetry'
+import { useAppStore } from '~renderer/store'
 import {
   buildNestedRepoImportActionTelemetry,
   buildNestedRepoImportResultTelemetry,
   shouldEmitNestedRepoImportSubmitTelemetry,
   type NestedRepoTelemetryRuntimeKind
-} from '../../../../../shared/nested-repo-telemetry'
-import type { AddRepoExistingWorkspaceSource } from '../../../../../shared/telemetry-events'
-import type { NestedRepoScanResult, ProjectGroupImportResult } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { getSelectedNestedRepoPathsInScanOrder } from '../../../lib/nested-repo-selected-paths'
-import { track } from '../../../lib/telemetry'
+} from '~shared/nested-repo-telemetry'
+import type { AddRepoExistingWorkspaceSource } from '~shared/telemetry-events'
+import type { NestedRepoScanResult, ProjectGroupImportResult } from '~shared/types'
+
 import { addNonGitFolderAndActivate } from '../add-non-git-folder-command'
 
 export function useAddRepoNestedImportFlow({

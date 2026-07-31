@@ -4,12 +4,11 @@ import {
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
+import type { PtyManagementSession } from '~preload/api-types'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { PtyManagementSession } from '../../../../preload/api-types'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'

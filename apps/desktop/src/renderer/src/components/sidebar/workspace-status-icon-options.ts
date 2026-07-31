@@ -11,9 +11,8 @@ import {
   Timer
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 
 import {
   ConductorDoneIcon,

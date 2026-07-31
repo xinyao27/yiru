@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRuntimeGitIgnoredPaths } from '~renderer/runtime/git-client'
 
-import { getConnectionId } from '../../../lib/connection-context'
-import { getRuntimeGitIgnoredPaths } from '../../../runtime/git-client'
 import { getRightSidebarWorktreeRuntimeSettings } from './runtime-owner'
 
 const EMPTY_IGNORED_PATHS: readonly string[] = []

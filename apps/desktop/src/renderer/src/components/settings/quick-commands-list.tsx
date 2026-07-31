@@ -1,19 +1,14 @@
 import { Pencil, Trash as Trash2 } from '@phosphor-icons/react'
-
-import { translate } from '@/i18n/i18n'
-import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
-import { cn } from '@/lib/class-names'
-
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon, getAgentLabel } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
 import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
   isTerminalAgentQuickCommand
-} from '../../../../shared/terminal/quick-commands'
-import type {
-  Repo,
-  TerminalQuickCommand,
-  TerminalQuickCommandScope
-} from '../../../../shared/types'
+} from '~shared/terminal/quick-commands'
+import type { Repo, TerminalQuickCommand, TerminalQuickCommandScope } from '~shared/types'
+
 import { RepoBadgeMark } from '../repo/badge-label'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

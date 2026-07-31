@@ -1,4 +1,5 @@
-import type { Repo } from '../shared/types'
+import type { Repo } from '~shared/types'
+
 import { detectGitRemoteIdentity } from './repo-git-remote-identity'
 
 const NO_IDENTITY_RETRY_TTL_MS = 5 * 60 * 1000

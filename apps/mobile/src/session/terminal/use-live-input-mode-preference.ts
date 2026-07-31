@@ -3,13 +3,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   readDisabledTerminalLiveInputHandlesPreference,
   saveDisabledTerminalLiveInputHandles
-} from '../../storage/preferences'
+} from '~/storage/preferences'
 import {
   applyDisabledTerminalLiveInputHandles,
   defaultTerminalLiveInputHandles,
   filterTerminalLiveInputDefaultCandidates,
   pruneTerminalLiveInputHandles
-} from '../../terminal/live/input'
+} from '~/terminal/live/input'
 
 type UseTerminalLiveInputModePreferenceOptions = {
   readonly hostId: string

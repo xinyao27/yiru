@@ -1,17 +1,16 @@
 import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
-
 import {
   getSettingsForAgentTabRuntimeOwner,
   pasteDraftToAgentPtyWhenReady
-} from '@/components/native-chat/agent-paste-draft'
-import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
-import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
-import { useAppStore } from '@/store'
+} from '~renderer/components/native-chat/agent-paste-draft'
+import { showAutomationPromptNotSentToast } from '~renderer/lib/agent-background-session-timeout-toast'
+import { sendFollowupPromptWhenAgentReady } from '~renderer/lib/agent-followup-delivery'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { useAppStore } from '~renderer/store'
+import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
+import type { FolderWorkspaceLinkedReview, YiruHooks } from '~shared/types'
 
-import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
-import type { FolderWorkspaceLinkedReview, YiruHooks } from '../../../shared/types'
 import {
   beginAgentStartupDeliveryAttempt,
   getAgentStartupTabPtyId,
@@ -21,7 +20,7 @@ import {
 export { getLinkedWorkItemSuggestedName } from '@yiru/workbench-model/workspace'
 export { getLinkedWorkItemWorkspaceName } from '@yiru/workbench-model/workspace'
 export { getWorkspaceIntentName } from '@yiru/workbench-model/workspace'
-export { PER_REPO_FETCH_LIMIT, CROSS_REPO_DISPLAY_LIMIT } from '../../../shared/work-items'
+export { PER_REPO_FETCH_LIMIT, CROSS_REPO_DISPLAY_LIMIT } from '~shared/work-items'
 
 export const CLIENT_PLATFORM: NodeJS.Platform = navigator.userAgent.includes('Windows')
   ? 'win32'

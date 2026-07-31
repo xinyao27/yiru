@@ -1,21 +1,19 @@
 import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
-
-import RepoBadgeLabel from '@/components/repo/badge-label'
-import { Button } from '@/components/ui/button'
+import RepoBadgeLabel from '~renderer/components/repo/badge-label'
+import { Button } from '~renderer/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { searchRepos } from '@/lib/repo-search'
-
-import type { Repo } from '../../../../shared/types'
+} from '~renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { searchRepos } from '~renderer/lib/repo-search'
+import type { Repo } from '~shared/types'
 
 type RepoMultiComboboxProps = {
   repos: Repo[]

@@ -1,6 +1,5 @@
 import { getExecutionHostLabel } from '@yiru/workbench-model/workspace'
-
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
+import type { ProjectSourceContext } from '~shared/project-source-context'
 
 export type AutomationSourceDisplay = {
   label: string

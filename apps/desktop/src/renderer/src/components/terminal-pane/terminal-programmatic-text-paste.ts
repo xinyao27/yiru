@@ -1,7 +1,7 @@
-import type { PasteTerminalTextDetail } from '@/constants/terminal'
-import { getConnectionId } from '@/lib/connection-context'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+import type { PasteTerminalTextDetail } from '~renderer/constants/terminal'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
 
 import { executeTerminalPastePlan, planTerminalPasteWithYield } from './paste/coordinator'
 import { resolveTerminalPasteRuntime } from './paste/runtime'

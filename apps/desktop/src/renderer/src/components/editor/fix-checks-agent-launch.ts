@@ -1,33 +1,27 @@
 import { toast } from 'sonner'
-
-import { findGithubPrWorkspaceAttachment } from '@/components/editor/github-work-item-workspace-attachment'
-import { translate } from '@/i18n/i18n'
-import { getConnectionId } from '@/lib/connection-context'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '@/lib/new-workspace'
+import { findGithubPrWorkspaceAttachment } from '~renderer/components/editor/github-work-item-workspace-attachment'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
+import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import {
   pickSourceControlLaunchAgent,
   readSourceControlLaunchRecipeAgentId
-} from '@/lib/source-control-launch-agent-selection'
-import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
-import { planAgentCliArgsSuffix } from '@/lib/tui-agent-startup'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/ai'
+} from '~renderer/lib/source-control-launch-agent-selection'
+import { resolveSourceControlLaunchPlatform } from '~renderer/lib/source-control-launch-platform'
+import { planAgentCliArgsSuffix } from '~renderer/lib/tui-agent-startup'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { resolveSourceControlActionRecipe } from '~shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   renderSourceControlActionCommandTemplate
-} from '../../../../shared/source-control/ai-actions'
-import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
-import type {
-  GitHubWorkItem,
-  TuiAgent,
-  WorkspaceCreateTelemetrySource
-} from '../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { LaunchSource } from '~shared/telemetry-events'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { GitHubWorkItem, TuiAgent, WorkspaceCreateTelemetrySource } from '~shared/types'
 
 type StartFixChecksAgentArgs = {
   repoId: string

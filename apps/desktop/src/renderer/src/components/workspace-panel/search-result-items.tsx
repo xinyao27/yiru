@@ -1,21 +1,24 @@
 import { Copy, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem
-} from '@/components/ui/context-menu'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { basename, dirname } from '@/lib/path'
-
-import { normalizeSearchFileMatchCount } from '../../../../shared/search-match-count'
-import type { SearchFileResult, SearchMatch } from '../../../../shared/types'
+} from '~renderer/components/ui/context-menu'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import { basename, dirname } from '~renderer/lib/path'
+import { normalizeSearchFileMatchCount } from '~shared/search-match-count'
+import type { SearchFileResult, SearchMatch } from '~shared/types'
 
 // ─── Toggle Button ────────────────────────────────────────
 export function ToggleButton({

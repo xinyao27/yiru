@@ -5,11 +5,11 @@ import {
   Warning as AlertTriangle
 } from '@phosphor-icons/react'
 import React from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { PRCheckDetail } from '~shared/types'
 
-import type { PRCheckDetail } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
 import { isFailedCheck } from './check-status'
 import type { ConflictReview } from './conflict-details'
 

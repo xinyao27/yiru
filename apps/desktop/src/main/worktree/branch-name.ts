@@ -3,7 +3,7 @@ import {
   normalizeBranchPrefix,
   selectBranchPrefixInput,
   type BranchPrefixSettings
-} from '../../shared/branch-prefix'
+} from '~shared/branch-prefix'
 
 /**
  * Resolve the branch prefix segment (the part before `/`) the configured

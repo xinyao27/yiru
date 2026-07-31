@@ -1,15 +1,14 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
-
 import type {
   ContributionDisplayMetric,
   TokenValueMetric
-} from '@/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '@/components/contribution-heatmap/metric'
-import { AreaChart } from '@/components/dither-kit/area-chart'
-import { BarChart } from '@/components/dither-kit/bar-chart'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/contribution-heatmap/metric'
+import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
+import { AreaChart } from '~renderer/components/dither-kit/area-chart'
+import { BarChart } from '~renderer/components/dither-kit/bar-chart'
+import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
+import { translate } from '~renderer/i18n/i18n'
 
 import { chartActivationLabel } from './chart-activation'
 import { buildContributionTrend, buildWeekdayRhythm } from './chart-data'

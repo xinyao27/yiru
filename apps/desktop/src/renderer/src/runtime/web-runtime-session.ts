@@ -1,17 +1,17 @@
 /* eslint-disable max-lines */
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-
-import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import type { TerminalPaneSplitSource } from '../../../shared/feature-education-telemetry'
+import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
 import type {
   RuntimeMobileSessionCreateTerminalResult,
   RuntimeMobileSessionTabMove,
   RuntimeMobileSessionTabMoveResult,
   RuntimeTerminalClose,
   RuntimeTerminalSplit
-} from '../../../shared/runtime-types'
-import type { TerminalPaneLayoutNode, TuiAgent } from '../../../shared/types'
+} from '~shared/runtime-types'
+import type { TerminalPaneLayoutNode, TuiAgent } from '~shared/types'
+
 import { deliverLaunchPromptToAgentTab } from '../lib/agent-launch-prompt-delivery'
 import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
 import { useAppStore } from '../store'

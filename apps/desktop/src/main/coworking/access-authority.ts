@@ -5,8 +5,8 @@ import type {
   CoworkingControlGrant,
   CoworkingControlRequest,
   CoworkingOwnerDecision
-} from '../../shared/coworking/access-contract'
-import type { AuthenticatedCoworkingPrincipal } from '../../shared/coworking/wire-contract'
+} from '~shared/coworking/access-contract'
+import type { AuthenticatedCoworkingPrincipal } from '~shared/coworking/wire-contract'
 
 const MAX_PENDING_REQUESTS_PER_CONNECTION = 4
 const DENIED_REQUEST_COOLDOWN_MS = 3_000

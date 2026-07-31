@@ -1,7 +1,6 @@
 import { useEffect, useRef, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
-
-import type { OpenFile } from '@/components/editor/state'
-import type { useAppStore } from '@/store'
+import type { OpenFile } from '~renderer/components/editor/state'
+import type { useAppStore } from '~renderer/store'
 
 import {
   getOpenFilesForExternalFileChange,

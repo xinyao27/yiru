@@ -13,20 +13,18 @@ import {
   getWorkspaceSourceName,
   getWorkspaceSourceProvider
 } from '@yiru/workbench-model/workspace'
-
-import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
-import { translate } from '@/i18n/i18n'
-import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
-
-import { getProjectGroupSubtreeIds } from '../../../../shared/project-groups'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
+import type { SmartWorkspaceNameSelection } from '~renderer/components/new-workspace/smart-workspace-name-field'
+import { translate } from '~renderer/i18n/i18n'
+import type { LinkedWorkItemSummary } from '~renderer/lib/new-workspace'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
+import { isGitRepoKind } from '~shared/repo-kind'
 import type {
   FolderWorkspace,
   GitHubWorkItem,
   GitLabWorkItem,
   ProjectGroup,
   Repo
-} from '../../../../shared/types'
+} from '~shared/types'
 
 const EMPTY_REPOS: Repo[] = []
 

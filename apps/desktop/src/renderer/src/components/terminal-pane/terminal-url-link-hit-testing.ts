@@ -1,6 +1,5 @@
 import type { IBufferLine, IBufferRange, IDisposable, Terminal } from '@xterm/xterm'
-
-import { openHttpLink } from '@/components/editor/http-link-routing'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 
 import { buildEdgeWrappedHttpLogicalLineCandidates } from './edge-wrapped-terminal-http-links'
 import { buildHardWrappedHttpLogicalLineCandidates } from './hard-wrapped-terminal-http-links'

@@ -1,7 +1,6 @@
 import React from 'react'
-
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
 
 export type SearchFiltersProps = {
   includePattern: string

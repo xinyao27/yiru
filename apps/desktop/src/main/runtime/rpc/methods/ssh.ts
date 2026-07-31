@@ -1,11 +1,11 @@
 import { z } from 'zod'
-
 import {
   connectRegisteredSshTarget,
   getRegisteredSshState,
   listRegisteredRemovedSshTargetLabels,
   listRegisteredSshTargets
-} from '../../../ssh/ssh'
+} from '~main/ssh/ssh'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const SshTarget = z.object({

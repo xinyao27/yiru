@@ -4,24 +4,28 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
-
-import { presentGitHubPRMergeState } from '@/components/github-pr-merge-state'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { presentGitHubPRMergeState } from '~renderer/components/github-pr-merge-state'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { resolveGitHubPRMergeMethods } from '~shared/github-pr-merge-methods'
+import type { PRInfo, Repo, Worktree } from '~shared/types'
 
-import { resolveGitHubPRMergeMethods } from '../../../../shared/github-pr-merge-methods'
-import type { PRInfo, Repo, Worktree } from '../../../../shared/types'
 import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import { presentGitLabMRMergeState } from './gitlab-mr-merge-state'
 import {

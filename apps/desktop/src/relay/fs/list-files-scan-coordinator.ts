@@ -16,7 +16,7 @@
 import {
   FileListingCancelledError,
   fileListingCancellationError
-} from '../../shared/file-listing-cancellation'
+} from '~shared/file-listing-cancellation'
 
 export const LIST_FILES_SUPERSEDED_MESSAGE = 'File listing superseded by a newer request'
 

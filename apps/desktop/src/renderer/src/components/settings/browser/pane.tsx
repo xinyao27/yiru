@@ -4,13 +4,13 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo, useRef, useState, type MutableRefObject } from 'react'
+import { buildSidebarHostOptions } from '~renderer/components/sidebar/host-options'
+import { isMacUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
+import type { GlobalSettings } from '~shared/types'
 
-import { getHostDisplayLabelOverrides } from '../../../../../shared/host-setting-overrides'
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
-import { buildSidebarHostOptions } from '../../sidebar/host-options'
-import { isMacUserAgent } from '../../terminal-pane/pane-helpers'
 import { matchesSettingsSearch } from '../search'
 import { BrowserDefaultZoomSetting } from './default-zoom-setting'
 import {

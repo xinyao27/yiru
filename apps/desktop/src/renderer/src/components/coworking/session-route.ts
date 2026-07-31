@@ -1,4 +1,4 @@
-import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
+import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
 
 export type CoworkingSessionRoute = CoworkingWorkspaceRoute & { sessionRef: string }
 

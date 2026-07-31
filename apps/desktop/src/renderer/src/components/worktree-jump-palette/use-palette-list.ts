@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-
 import {
   CREATE_WORKTREE_ITEM_ID,
   getWorktreePaletteCreateActionState,
   getWorktreePaletteSelectionItemIds
-} from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import { translate } from '~renderer/i18n/i18n'
 
 import type {
   PaletteItem,

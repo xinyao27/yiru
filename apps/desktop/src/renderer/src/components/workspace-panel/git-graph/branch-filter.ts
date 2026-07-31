@@ -1,4 +1,4 @@
-import type { GitHistoryItem, GitHistoryItemRef } from '../../../../../shared/git/history'
+import type { GitHistoryItem, GitHistoryItemRef } from '~shared/git/history'
 
 export type GitGraphBranchOption = {
   refId: string

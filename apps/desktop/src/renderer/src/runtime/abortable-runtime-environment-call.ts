@@ -1,10 +1,9 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
+} from '~shared/runtime-method-contract'
 
 export function createRuntimeRpcAbortError(): Error {
   const error = new Error('Runtime request aborted')

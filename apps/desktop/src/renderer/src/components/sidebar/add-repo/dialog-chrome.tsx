@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
+import { Dialog, DialogContent } from '~renderer/components/ui/dialog'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
-import { Dialog, DialogContent } from '../../ui/dialog'
 import type { AddRepoDialogStep } from './dialog-types'
 import { AddRepoStepIndicator } from './step-indicator'
 

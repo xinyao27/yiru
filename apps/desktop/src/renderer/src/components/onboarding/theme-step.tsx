@@ -1,18 +1,13 @@
 import { Check, Monitor, Moon, GearSix as Settings2, Sun } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { track } from '~renderer/lib/telemetry'
+import type { DiscoveryStatusEmitted, GhosttyImportPreview, GlobalSettings } from '~shared/types'
 
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { track } from '@/lib/telemetry'
-
-import type {
-  DiscoveryStatusEmitted,
-  GhosttyImportPreview,
-  GlobalSettings
-} from '../../../../shared/types'
 import { GhosttyDiscoveryRow } from './ghostty-discovery-row'
 import { ChromePreview } from './theme-chrome-preview'
 

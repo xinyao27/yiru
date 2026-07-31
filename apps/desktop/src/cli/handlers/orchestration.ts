@@ -1,21 +1,21 @@
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
-
 import {
   clampOrchestrationAskTimeoutMs,
   resolveOrchestrationAskClientTimeoutMs
-} from '../../shared/orchestration-ask-timeout'
+} from '~shared/orchestration-ask-timeout'
 import {
   ORCHESTRATION_LEGACY_RUN_ID,
   orchestrationMigrationData,
   orchestrationSkillRecoveryData
-} from '../../shared/orchestration-rpc-contract'
-import { abbreviateOrchestrationTasks } from '../../shared/orchestration-task-summary'
+} from '~shared/orchestration-rpc-contract'
+import { abbreviateOrchestrationTasks } from '~shared/orchestration-task-summary'
 import type {
   OrchestrationWorkerReadResult,
   OrchestrationWorkerReadSource
-} from '../../shared/orchestration-worker-output'
-import type { RuntimeTerminalRead } from '../../shared/runtime-types'
-import { parsePositiveSafeIntegerText } from '../../shared/timer-delay'
+} from '~shared/orchestration-worker-output'
+import type { RuntimeTerminalRead } from '~shared/runtime-types'
+import { parsePositiveSafeIntegerText } from '~shared/timer-delay'
+
 /* eslint-disable max-lines -- Why: orchestration CLI handlers share flag-parsing helpers and dispatch/preamble logic; splitting by verb would fragment the RuntimeClient call shape without reducing complexity. */
 import type { CommandHandler } from '../dispatch'
 import {

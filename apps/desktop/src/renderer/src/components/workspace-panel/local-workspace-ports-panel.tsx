@@ -1,11 +1,10 @@
 import { HardDrives as Server, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import {
   killWorkspacePortForTarget,
   openWorkspacePortInBrowser,
@@ -13,14 +12,14 @@ import {
   resolvePortOpenInYiruBrowser,
   scanWorkspacePortsForTarget,
   workspacePortRuntimeTargetKey
-} from '@/lib/workspace-port-actions'
-import { resolveLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-import { useActiveWorktree, useRepoById } from '@/store/selectors'
+} from '~renderer/lib/workspace-port-actions'
+import { resolveLocalhostLabelRouteForPort } from '~renderer/lib/workspace-port-localhost-label-selector'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
+import type { WorkspacePort } from '~shared/workspace/ports'
 
-import type { WorkspacePort } from '../../../../shared/workspace/ports'
 import { LocalWorkspacePortDetailsDialog } from './local-workspace-port-details-dialog'
 import { LocalWorkspacePortSection } from './local-workspace-port-list'
 import { getLocalWorkspacePortSections } from './local-workspace-port-sections'

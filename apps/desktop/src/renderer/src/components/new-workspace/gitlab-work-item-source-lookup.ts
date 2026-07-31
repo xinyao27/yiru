@@ -1,8 +1,7 @@
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
-
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import { getProjectSourceRuntimeSettings } from '../../../../shared/project-source-context'
-import type { GitLabWorkItem, ListMergeRequestsResult } from '../../../../shared/types'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import { getProjectSourceRuntimeSettings } from '~shared/project-source-context'
+import type { GitLabWorkItem, ListMergeRequestsResult } from '~shared/types'
 
 type GitLabSourceLookupArgs = {
   repoPath: string

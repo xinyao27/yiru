@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { CodexUsageSessionRow } from '~shared/codex-usage-types'
 
-import type { CodexUsageSessionRow } from '../../../../shared/codex-usage-types'
 import { formatSessionTime, formatTokens } from './usage-formatters'
 
 export function CodexUsageRecentSessionsTable({

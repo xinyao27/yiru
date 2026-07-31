@@ -1,6 +1,6 @@
 import React from 'react'
+import { cn } from '~renderer/lib/class-names'
 
-import { cn } from '../../../lib/class-names'
 import { SOURCE_CONTROL_PANEL_GUTTER_CLASS_NAME } from './panel-constants'
 
 export function EmptyState({

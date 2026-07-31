@@ -23,10 +23,9 @@ import {
 } from '@phosphor-icons/react'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import React from 'react'
-
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-import { cn } from '@/lib/class-names'
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import { cn } from '~renderer/lib/class-names'
 
 export type RepoLucideIconOption = {
   name: string

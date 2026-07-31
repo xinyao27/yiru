@@ -1,6 +1,8 @@
-import { parseGitHubPullRequestLink, parseGitHubPullRequestNumber } from '@/lib/github-links'
-
-import type { WorktreeMeta } from '../../../../shared/types'
+import {
+  parseGitHubPullRequestLink,
+  parseGitHubPullRequestNumber
+} from '~renderer/lib/github-links'
+import type { WorktreeMeta } from '~shared/types'
 
 export type WorktreeMetaSavedPayload = {
   worktreeId: string

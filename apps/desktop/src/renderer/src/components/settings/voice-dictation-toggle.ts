@@ -1,6 +1,6 @@
-import type { DeveloperPermissionRequestResult } from '../../../../shared/developer-permissions-types'
-import type { FeatureTipId } from '../../../../shared/feature-tips'
-import type { VoiceSettings } from '../../../../shared/speech-types'
+import type { DeveloperPermissionRequestResult } from '~shared/developer-permissions-types'
+import type { FeatureTipId } from '~shared/feature-tips'
+import type { VoiceSettings } from '~shared/speech-types'
 
 type VoiceDictationToggleOptions = {
   voiceEnabled: boolean

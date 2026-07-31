@@ -1,14 +1,13 @@
 import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import type React from 'react'
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react'
+import { WorkspaceSelectableTab } from '~renderer/components/tab-bar/workspace-selectable-tab'
+import { WorkspaceTabStripViewport } from '~renderer/components/tab-bar/workspace-tab-strip-viewport'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import type { CoworkingSessionCatalogEntry } from '~shared/coworking/catalog-contract'
+import type { WorkspacePanelTabContentType } from '~shared/types'
 
-import { WorkspaceSelectableTab } from '@/components/tab-bar/workspace-selectable-tab'
-import { WorkspaceTabStripViewport } from '@/components/tab-bar/workspace-tab-strip-viewport'
-import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
-
-import type { CoworkingSessionCatalogEntry } from '../../../../shared/coworking/catalog-contract'
-import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import { getCoworkingWorkspacePanelTabId, CoworkingWorkspacePanelTab } from './workspace-panel-tab'
 

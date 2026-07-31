@@ -4,11 +4,11 @@ import {
   toSshExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { isPathInsideOrEqual } from '@yiru/workbench-model/workspace'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import type { TerminalTab } from '~shared/types'
+import { folderWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
 
-import { getProjectGroupSubtreeIds } from '../../../../../shared/project-groups'
-import { parseAppSshPtyId } from '../../../../../shared/ssh-pty-id'
-import type { TerminalTab } from '../../../../../shared/types'
-import { folderWorkspaceKey, worktreeWorkspaceKey } from '../../../../../shared/workspace/scope'
 import { resolveDirectSshTargetScope, type DirectSshTargetScopeInput } from '../target-scope/scope'
 
 function isExplicitContradictoryHost(

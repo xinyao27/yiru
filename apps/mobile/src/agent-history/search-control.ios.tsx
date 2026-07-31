@@ -13,8 +13,8 @@ import { useCSSVariable, useUniwind } from 'uniwind'
 import {
   MobileSwiftUiGlassGroup,
   MobileSwiftUiGlassInputShell
-} from '@/components/glass/swift-ui.ios'
-import { resolveCssString } from '@/style/resolve-css-variable'
+} from '~/components/glass/swift-ui.ios'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileAgentHistorySearchControlProps } from './search-control-props'
 

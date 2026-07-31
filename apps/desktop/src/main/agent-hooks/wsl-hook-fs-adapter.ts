@@ -4,8 +4,8 @@
 // — the WSL twin of the SSH flow's real SFTPWrapper. Only the primitives
 // `installer-utils-remote.ts` touches are implemented.
 import type { SFTPWrapper } from 'ssh2'
+import { WSL_HOOK_FS_METHODS, type WslFsResult } from '~shared/wsl-hook-relay-contract'
 
-import { WSL_HOOK_FS_METHODS, type WslFsResult } from '../../shared/wsl-hook-relay-contract'
 import { wslCodexRuntimeHomeForGuestHome } from '../pty/codex-home-wsl-env'
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import type { installRemoteManagedAgentHooks } from './remote-managed-hook-installers'

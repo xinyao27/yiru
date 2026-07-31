@@ -1,4 +1,5 @@
-import type { ProjectGroup } from '../../../../shared/types'
+import type { ProjectGroup } from '~shared/types'
+
 import type { ProjectGroupHeaderDragSession } from './project-group-header-drag-contract'
 import { getProjectGroupTabOrderUpdatesForSidebarDrop } from './project-group-header-drop'
 

@@ -20,10 +20,6 @@ import {
   toRuntimeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { getDefaultCreateProjectParent } from '@/components/sidebar/create-project-defaults'
-import { translate } from '@/i18n/i18n'
-
 /* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
    replacement for Electron preload, so the compatibility surface is necessarily
    centralized at this boundary. */
@@ -34,8 +30,10 @@ import type {
   NativeChatApi,
   NativeChatReadSessionResult,
   NativeChatAppendedMessages
-} from '../../../preload/api-types'
-import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../../../shared/auto-rename-branch-from-work-settings'
+} from '~preload/api-types'
+import { getDefaultCreateProjectParent } from '~renderer/components/sidebar/create-project-defaults'
+import { translate } from '~renderer/i18n/i18n'
+import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
 import {
   CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
   CLIPBOARD_IMAGE_MAX_PIXELS,
@@ -43,11 +41,11 @@ import {
   CLIPBOARD_IMAGE_TOO_LARGE_ERROR,
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
-} from '../../../shared/clipboard-image'
+} from '~shared/clipboard-image'
 import type {
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../../../shared/computer-use-permissions-types'
+} from '~shared/computer-use-permissions-types'
 import {
   getDefaultOnboardingState,
   getDefaultSettings,
@@ -57,13 +55,13 @@ import {
   normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties,
   ONBOARDING_FLOW_VERSION
-} from '../../../shared/constants'
-import { normalizeContextualTourIds, type ContextualTourId } from '../../../shared/contextual-tours'
+} from '~shared/constants'
+import { normalizeContextualTourIds, type ContextualTourId } from '~shared/contextual-tours'
 import {
   normalizeFeatureInteractions,
   type FeatureInteractionId,
   type FeatureInteractionState
-} from '../../../shared/feature-interactions'
+} from '~shared/feature-interactions'
 import {
   findKeybindingConflicts,
   formatKeybindingList,
@@ -75,17 +73,17 @@ import {
   type KeybindingFileSnapshot,
   type KeybindingOverrides,
   type KeybindingPlatform
-} from '../../../shared/keybindings'
-import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '../../../shared/pty-delivery-diagnostics'
-import type { RateLimitState } from '../../../shared/rate-limit-types'
+} from '~shared/keybindings'
+import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '~shared/pty-delivery-diagnostics'
+import type { RateLimitState } from '~shared/rate-limit-types'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../../shared/runtime-method-contracts/ai-vault-contracts'
-import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
-import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
+} from '~shared/runtime-method-contract'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
+import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
 import {
   REPO_ADD_CONTRACT,
   REPO_LIST_CONTRACT,
@@ -94,27 +92,27 @@ import {
   WORKTREE_LIST_CONTRACT,
   WORKTREE_REMOVE_CONTRACT,
   WORKTREE_SET_CONTRACT
-} from '../../../shared/runtime-method-contracts/workspace-contracts'
-import { RuntimeRpcCallQueuePool } from '../../../shared/runtime-rpc-call-queue'
-import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
+} from '~shared/runtime-method-contracts/workspace-contracts'
+import { RuntimeRpcCallQueuePool } from '~shared/runtime-rpc-call-queue'
+import type { RuntimeStatus, RuntimeSyncWindowGraph } from '~shared/runtime-types'
 import type {
   SkillFreshnessInventory,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '../../../shared/skill-freshness'
+} from '~shared/skill-freshness'
 import type {
   SkillDirectoryListing,
   SkillDiscoveryResult,
   SkillFileReadResult
-} from '../../../shared/skills'
-import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
-import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal/cursor-style-settings'
-import { normalizeTerminalCustomThemes } from '../../../shared/terminal/custom-themes'
+} from '~shared/skills'
+import { normalizeStatusBarUsageMode } from '~shared/status-bar-usage-mode'
+import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
+import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../../shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../../shared/tui-agent/selection'
+} from '~shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
 import type {
   DetectedWorktreeListResult,
   DirEntry,
@@ -131,13 +129,11 @@ import type {
   WorkspaceLineage,
   WorkspaceSessionPatch,
   WorkspaceSessionState
-} from '../../../shared/types'
-import { normalizeUiLanguage } from '../../../shared/ui-language'
-import { normalizeUsagePercentageDisplay } from '../../../shared/usage-percentage-display'
-import {
-  createDefaultLocalYiruProfile,
-  DEFAULT_LOCAL_YIRU_PROFILE_ID
-} from '../../../shared/yiru-profiles'
+} from '~shared/types'
+import { normalizeUiLanguage } from '~shared/ui-language'
+import { normalizeUsagePercentageDisplay } from '~shared/usage-percentage-display'
+import { createDefaultLocalYiruProfile, DEFAULT_LOCAL_YIRU_PROFILE_ID } from '~shared/yiru-profiles'
+
 import { callAbortableRuntimeEnvironment } from '../runtime/abortable-runtime-environment-call'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
 import { parseWebPairingInput } from './pairing'

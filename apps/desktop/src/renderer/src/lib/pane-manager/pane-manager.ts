@@ -3,8 +3,9 @@
 // from the terminal-pane lazy chunk (use-terminal-pane-lifecycle.ts) — so its
 // CSS ships in that chunk instead of the app's eager main.css.
 import './pane-manager.css'
-import { FIRST_PANE_ID } from '../../../../shared/pane-key'
-import type { TerminalLeafId } from '../../../../shared/stable-pane-id'
+import { FIRST_PANE_ID } from '~shared/pane-key'
+import type { TerminalLeafId } from '~shared/stable-pane-id'
+
 import { shouldFollowMouseFocus } from './focus-follows-mouse'
 import {
   createDivider,

@@ -1,20 +1,22 @@
 import { useMemo } from 'react'
-
-import { buildWorktreeChecksReviewIndex } from '@/components/cmd-j/worktree-checks-review-index'
-import { sortWorktreesSmart } from '@/components/sidebar/smart-sort'
+import { buildWorktreeChecksReviewIndex } from '~renderer/components/cmd-j/worktree-checks-review-index'
+import { sortWorktreesSmart } from '~renderer/components/sidebar/smart-sort'
 import {
   isAutomationGeneratedWorkspace,
   isDefaultBranchWorkspace
-} from '@/components/sidebar/visible-worktrees'
-import { orderEmptyQueryWorktrees } from '@/components/worktree-jump-palette/order-empty-query-worktrees'
+} from '~renderer/components/sidebar/visible-worktrees'
+import { orderEmptyQueryWorktrees } from '~renderer/components/worktree-jump-palette/order-empty-query-worktrees'
 import {
   getWorktreePaletteSearchScope,
   searchWorktrees
-} from '@/components/worktree-jump-palette/worktree-palette-search'
-import { getWorkspacePortsByWorktreeId } from '@/lib/workspace-port-groups'
-import { getLiveAgentStatusByWorktreeId, isInactiveWorkspace } from '@/lib/worktree-activity-state'
+} from '~renderer/components/worktree-jump-palette/worktree-palette-search'
+import { getWorkspacePortsByWorktreeId } from '~renderer/lib/workspace-port-groups'
+import {
+  getLiveAgentStatusByWorktreeId,
+  isInactiveWorkspace
+} from '~renderer/lib/worktree-activity-state'
+import type { Worktree } from '~shared/types'
 
-import type { Worktree } from '../../../../shared/types'
 import type { WorktreePaletteItem } from './types'
 import type { PaletteHostOptionsResult } from './use-palette-host-options'
 import type { PaletteStoreState } from './use-palette-store-state'

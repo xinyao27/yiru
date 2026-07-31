@@ -1,10 +1,9 @@
 import { Info } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { normalizeGlobalWindowsRuntimeDefault } from '~shared/project-execution-runtime'
+import type { GlobalSettings } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-
-import { normalizeGlobalWindowsRuntimeDefault } from '../../../../shared/project-execution-runtime'
-import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'

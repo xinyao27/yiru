@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
+import type { PRInfo, PRCheckDetail } from '~shared/types'
 
-import type { PRInfo, PRCheckDetail } from '../../../../../shared/types'
 import { checksPanelAsyncResultKey } from './async-result-key'
 import type { useChecksPanelChecksLoadingState } from './checks-loading'
 

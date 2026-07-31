@@ -1,9 +1,8 @@
 import { X } from '@phosphor-icons/react'
 import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 const SSH_PREFIX = 'SSH connection is not active'
 const STALE_NODE_PTY_DAEMON_MARKERS = [
   "Daemon's node-pty install is gone",

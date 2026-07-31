@@ -6,10 +6,10 @@ import {
   GitMerge
 } from '@phosphor-icons/react'
 import React from 'react'
+import { Badge } from '~renderer/components/ui/badge'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { Badge } from '../../ui/badge'
 import { PullRequestIcon, checksLabel } from './helpers'
 import type { WorktreeCardPrDisplay } from './pr-display'
 

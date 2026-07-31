@@ -22,9 +22,9 @@ import {
   getRepoIdFromWorktreeId,
   getWorktreePathBasenameFromId
 } from '@yiru/workbench-model/workspace'
+import { parsePaneKey as parseStablePaneKey } from '~shared/stable-pane-id'
+import type { MemorySnapshot, SessionMemory, WorktreeMemory } from '~shared/types'
 
-import { parsePaneKey as parseStablePaneKey } from '../../../../shared/stable-pane-id'
-import type { MemorySnapshot, SessionMemory, WorktreeMemory } from '../../../../shared/types'
 import { buildResourceSessionBindingIndex } from './resource-session-bindings'
 import type {
   DaemonSession,

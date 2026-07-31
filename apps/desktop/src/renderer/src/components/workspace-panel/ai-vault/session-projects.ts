@@ -11,9 +11,8 @@ import {
   normalizeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import type { ProjectHostSetupProjection } from '../../../../../shared/project-host-setup-projection'
-import type { ProjectHostSetup, Repo, Worktree } from '../../../../../shared/types'
+import type { ProjectHostSetupProjection } from '~shared/project-host-setup-projection'
+import type { ProjectHostSetup, Repo, Worktree } from '~shared/types'
 
 // Why: the plain project descriptor moved to /shared (so the lifted filter core
 // stays renderer-free). Re-export it here for renderer import parity.

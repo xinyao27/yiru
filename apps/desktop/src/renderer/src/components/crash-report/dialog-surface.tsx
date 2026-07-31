@@ -1,9 +1,8 @@
 import { Warning as AlertTriangle, Clipboard, PaperPlaneRight as Send } from '@phosphor-icons/react'
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -11,19 +10,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-
+} from '~renderer/components/ui/dialog'
+import { Label } from '~renderer/components/ui/label'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 import {
   formatCrashReportText,
   isReactErrorBoundaryReport,
   type CrashReportDiagnosticBundle,
   type CrashReportRecord
-} from '../../../../shared/crash-reporting'
-import type { GitHubViewer } from '../../../../shared/types'
+} from '~shared/crash-reporting'
+import type { GitHubViewer } from '~shared/types'
+
 import {
   CRASH_REPORT_SUBMIT_FAILURE_TOAST_ID,
   getCrashReportCopySubmissionFailure,

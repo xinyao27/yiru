@@ -3,12 +3,10 @@ import type {
   AgentStatusOrchestrationContext,
   MigrationUnsupportedPtyEntry
 } from '@yiru/workbench-model/agent'
-
-import type { RetainedAgentEntry } from '@/store/slices/agent-status'
-import type { AppState } from '@/store/types'
-
-import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot } from '../../../../shared/types'
+import type { RetainedAgentEntry } from '~renderer/store/slices/agent-status'
+import type { AppState } from '~renderer/store/types'
+import { parsePaneKey } from '~shared/stable-pane-id'
+import type { TerminalLayoutSnapshot } from '~shared/types'
 
 const EMPTY_LIVE_ENTRIES: AgentStatusEntry[] = []
 const EMPTY_MIGRATION_UNSUPPORTED_ENTRIES: MigrationUnsupportedPtyEntry[] = []

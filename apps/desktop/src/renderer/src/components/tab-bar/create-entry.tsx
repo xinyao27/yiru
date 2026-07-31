@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import type { TuiAgent } from '~shared/types'
 
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-
-import type { TuiAgent } from '../../../../shared/types'
 import { useRuntimeFileListForWorktree } from '../quick-open-file-list'
 import {
   EntryActionRow,

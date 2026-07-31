@@ -1,7 +1,7 @@
 import type { OnMount } from '@monaco-editor/react'
 import type { IDisposable } from 'monaco-editor'
+import type { MarkdownDocument } from '~shared/types'
 
-import type { MarkdownDocument } from '../../../../shared/types'
 import {
   getMarkdownDocCompletionContext,
   getMarkdownDocCompletionDocuments

@@ -1,7 +1,7 @@
-import { getDefaultUIState } from '../../shared/constants'
-import { normalizeContextualTourIds } from '../../shared/contextual-tours'
-import { normalizeFeatureInteractions } from '../../shared/feature-interactions'
-import type { PersistedState } from '../../shared/types'
+import { getDefaultUIState } from '~shared/constants'
+import { normalizeContextualTourIds } from '~shared/contextual-tours'
+import { normalizeFeatureInteractions } from '~shared/feature-interactions'
+import type { PersistedState } from '~shared/types'
 
 export function normalizePersistedGroupBy(groupBy: unknown): PersistedState['ui']['groupBy'] {
   if (

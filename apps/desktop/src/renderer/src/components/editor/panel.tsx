@@ -1,14 +1,13 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
-
 import {
   isLocalPathOpenBlocked,
   showLocalPathOpenBlockedToast
-} from '@/components/editor/local-path-open-guard'
-import { getConnectionId } from '@/lib/connection-context'
-import { openFilePreviewToSide } from '@/lib/file-preview'
-import { detectLanguage } from '@/lib/language-detect'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/components/editor/local-path-open-guard'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { openFilePreviewToSide } from '~renderer/lib/file-preview'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { requestEditorFileSave } from './autosave'
 import { DiffNavigationProvider } from './diff-navigation-context'

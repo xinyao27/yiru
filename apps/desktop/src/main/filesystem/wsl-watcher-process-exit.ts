@@ -1,6 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 
-import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
+import { PhysicalExitTracker } from '~shared/physical-exit-tracker'
+
 import { WatcherProcessFailure } from './parcel-watcher-process-failure'
 
 export const WSL_WATCHER_PHYSICAL_EXIT_TIMEOUT_MS = 8_000

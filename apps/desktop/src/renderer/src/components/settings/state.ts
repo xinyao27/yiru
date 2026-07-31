@@ -1,28 +1,27 @@
 import type { StateCreator } from 'zustand'
-
-import { bumpProviderRuntimeSessionGeneration } from '@/lib/provider-runtime-context'
-import { assertRuntimeStatusCompatible } from '@/runtime/protocol-compat'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
+import { bumpProviderRuntimeSessionGeneration } from '~renderer/lib/provider-runtime-context'
+import { assertRuntimeStatusCompatible } from '~renderer/runtime/protocol-compat'
+import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
 import {
   clearRuntimeCompatibilityCache,
   markRuntimeEnvironmentCompatible,
   unwrapRuntimeRpcResult
-} from '@/runtime/rpc-client'
-
-import { normalizeLoaderStyle } from '../../../../shared/loader-style'
-import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import { normalizeTerminalCustomThemes } from '../../../../shared/terminal/custom-themes'
-import { normalizeTerminalQuickCommands } from '../../../../shared/terminal/quick-commands'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/scrollback-policy'
+} from '~renderer/runtime/rpc-client'
+import type { AppState } from '~renderer/store/types'
+import { normalizeLoaderStyle } from '~shared/loader-style'
+import { normalizeOpenInApplications } from '~shared/open-in-applications'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
+import { normalizeTerminalQuickCommands } from '~shared/terminal/quick-commands'
+import { normalizeDesktopTerminalScrollbackRows } from '~shared/terminal/scrollback-policy'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../../../shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent/selection'
-import type { GlobalSettings } from '../../../../shared/types'
-import { normalizeUiLanguage } from '../../../../shared/ui-language'
-import type { AppState } from '../../store/types'
+} from '~shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
+import type { GlobalSettings } from '~shared/types'
+import { normalizeUiLanguage } from '~shared/ui-language'
+
 import { createSettingsSearchState, type SettingsSearchState } from './search-state'
 
 export type SettingsSlice = SettingsSearchState & {

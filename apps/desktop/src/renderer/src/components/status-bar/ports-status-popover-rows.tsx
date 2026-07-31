@@ -6,10 +6,14 @@ import {
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import {
   addressForPort,
   canStopWorkspacePort,
@@ -19,14 +23,13 @@ import {
   openWorkspacePortInBrowser,
   refreshWorkspacePortScanAfterStop,
   resolvePortOpenInYiruBrowser
-} from '@/lib/workspace-port-actions'
-import type { WorkspacePortGroup } from '@/lib/workspace-port-groups'
-import { useLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
-import type { WorkspacePort } from '../../../../shared/workspace/ports'
+} from '~renderer/lib/workspace-port-actions'
+import type { WorkspacePortGroup } from '~renderer/lib/workspace-port-groups'
+import { useLocalhostLabelRouteForPort } from '~renderer/lib/workspace-port-localhost-label-selector'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import type { WorkspacePort } from '~shared/workspace/ports'
 
 function PortAction({
   label,

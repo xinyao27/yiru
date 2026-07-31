@@ -1,7 +1,8 @@
 import type {
   CoworkingTerminalCreateHostResult,
   CoworkingTerminalCreateOperation
-} from '../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { CoworkingExecutionError } from './execution-error'
 
 const MAX_INFLIGHT_PER_CONNECTION_WORKTREE = 4

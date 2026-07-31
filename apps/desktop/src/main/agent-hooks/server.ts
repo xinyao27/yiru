@@ -28,7 +28,6 @@ import {
   type ParsedAgentStatusPayload,
   normalizeAgentStatusPayload
 } from '@yiru/workbench-model/agent'
-
 import {
   clearAllListenerCaches,
   clearPaneCacheState,
@@ -52,26 +51,27 @@ import {
   writeEndpointFile,
   type AgentHookEventPayload,
   type HookListenerState
-} from '../../shared/agent/hook-listener'
-import type { AgentHookSource } from '../../shared/agent/hook-relay'
-import { YIRU_HOOK_PROTOCOL_VERSION } from '../../shared/agent/hook-types'
+} from '~shared/agent/hook-listener'
+import type { AgentHookSource } from '~shared/agent/hook-relay'
+import { YIRU_HOOK_PROTOCOL_VERSION } from '~shared/agent/hook-types'
 import {
   isAgentInterruptInputIntent,
   type AgentInterruptInferenceRequest
-} from '../../shared/agent/interrupt-intent'
+} from '~shared/agent/interrupt-intent'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../shared/agent/status-identity'
+} from '~shared/agent/status-identity'
 import {
   claudeRosterHasRestoredSnapshotSubagent,
   claudeRosterHasWorkingSubagent,
   claudeRosterToSnapshots
-} from '../../shared/claude-subagent-roster'
-import { isCommandCodeNewTurnWhileWorking } from '../../shared/command-code-turn-boundary'
-import { parseLegacyNumericPaneKey, parsePaneKey } from '../../shared/stable-pane-id'
-import { AGENT_KIND_VALUES, type AgentKind } from '../../shared/telemetry-events'
-import type { LegacyPaneKeyAliasEntry } from '../../shared/types'
+} from '~shared/claude-subagent-roster'
+import { isCommandCodeNewTurnWhileWorking } from '~shared/command-code-turn-boundary'
+import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import { AGENT_KIND_VALUES, type AgentKind } from '~shared/telemetry-events'
+import type { LegacyPaneKeyAliasEntry } from '~shared/types'
+
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 

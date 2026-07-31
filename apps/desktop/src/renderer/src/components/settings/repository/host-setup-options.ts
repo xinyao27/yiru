@@ -3,10 +3,9 @@ import {
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
 } from '@yiru/runtime-protocol/capabilities'
 import { getExecutionHostLabel, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-
-import type { ExecutionHostRegistryEntry } from '../../../../../shared/execution-host-registry'
-import type { ProjectHostSetup, ProjectHostSetupState } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { ExecutionHostRegistryEntry } from '~shared/execution-host-registry'
+import type { ProjectHostSetup, ProjectHostSetupState } from '~shared/types'
 
 export type SetupHostOption = {
   id: ExecutionHostId

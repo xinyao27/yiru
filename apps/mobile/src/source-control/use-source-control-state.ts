@@ -1,7 +1,7 @@
 import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'

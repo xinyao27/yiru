@@ -1,5 +1,6 @@
-import type { SkillFreshnessInventory } from '../../shared/skill-freshness'
-import { skillDirectoryName, type SkillDiscoveryResult } from '../../shared/skills'
+import type { SkillFreshnessInventory } from '~shared/skill-freshness'
+import { skillDirectoryName, type SkillDiscoveryResult } from '~shared/skills'
+
 import type { SkillCliInvocation } from './skill-cli-invocation'
 import { skillUpdateFailedNames } from './skill-update-outcome'
 

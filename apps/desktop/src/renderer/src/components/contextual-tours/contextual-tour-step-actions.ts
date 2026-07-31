@@ -1,6 +1,5 @@
-import type { RequestActiveTerminalPaneSplitDetail } from '@/constants/terminal'
-
-import type { ContextualTourStepAction } from '../../../../shared/contextual-tours'
+import type { RequestActiveTerminalPaneSplitDetail } from '~renderer/constants/terminal'
+import type { ContextualTourStepAction } from '~shared/contextual-tours'
 
 export function performContextualTourStepAction(args: {
   action: ContextualTourStepAction

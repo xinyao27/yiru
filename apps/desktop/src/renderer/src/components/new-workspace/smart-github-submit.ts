@@ -1,10 +1,9 @@
 import { getLinkedWorkItemWorkspaceName } from '@yiru/workbench-model/workspace'
-
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import { getProjectSourceCacheScope } from '../../../../shared/project-source-context'
-import type { GitHubWorkItem, GitPushTarget } from '../../../../shared/types'
-import { parseGitHubPullRequestLink } from '../../lib/github-links'
-import type { LinkedWorkItemSummary } from '../../lib/new-workspace'
+import { parseGitHubPullRequestLink } from '~renderer/lib/github-links'
+import type { LinkedWorkItemSummary } from '~renderer/lib/new-workspace'
+import type { ProjectSourceContext } from '~shared/project-source-context'
+import { getProjectSourceCacheScope } from '~shared/project-source-context'
+import type { GitHubWorkItem, GitPushTarget } from '~shared/types'
 
 export type SmartGitHubSubmitIntent =
   | {

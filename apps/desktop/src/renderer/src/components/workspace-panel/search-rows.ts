@@ -1,4 +1,4 @@
-import type { SearchFileResult, SearchMatch, SearchResult } from '../../../../shared/types'
+import type { SearchFileResult, SearchMatch, SearchResult } from '~shared/types'
 
 export type SearchRow =
   | {

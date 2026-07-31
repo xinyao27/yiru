@@ -2,19 +2,15 @@ import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '~shared/types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { ClaudeIcon, OpenAIIcon } from '@/components/status-bar/icons'
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
-import type {
-  ClaudeRateLimitAccountsState,
-  CodexRateLimitAccountsState
-} from '../../../../../shared/types'
 import { getFeatureWallUsageProviderConnection } from '../usage-tracking'
 
 type ConnectAction = 'idle' | 'adding'

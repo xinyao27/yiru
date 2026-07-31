@@ -2,9 +2,8 @@ import type {
   HostedReviewCreationEligibility,
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
-
-import type { GitConflictOperation, GitPushTarget } from '../../../../../shared/types'
-import type { RuntimeGitContext } from '../../../runtime/git-client'
+import type { RuntimeGitContext } from '~renderer/runtime/git-client'
+import type { GitConflictOperation, GitPushTarget } from '~shared/types'
 
 export type AbortConflictOperation = Extract<GitConflictOperation, 'merge' | 'rebase'>
 

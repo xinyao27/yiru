@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { isEditableTarget } from '@/lib/editable-target'
-import { getScreenSubmitModifierLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { isEditableTarget } from '~renderer/lib/editable-target'
+import {
+  getScreenSubmitModifierLabel,
+  isScreenSubmitShortcut
+} from '~renderer/lib/screen-submit-shortcut'
+import type { OnboardingState } from '~shared/types'
 
 import logo from '../../../../../resources/yiru-wordmark.png?url'
-import type { OnboardingState } from '../../../../shared/types'
 import { AgentStep } from './agent-step'
 import { shouldRequestOnboardingSkipConfirmation } from './dismiss-target'
 import { OnboardingFooter } from './footer'

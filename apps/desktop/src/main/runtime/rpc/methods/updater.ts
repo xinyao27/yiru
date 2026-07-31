@@ -1,15 +1,16 @@
 import {
-  UPDATER_CHECK_CONTRACT,
-  UPDATER_DOWNLOAD_CONTRACT,
-  UPDATER_GET_STATUS_CONTRACT,
-  UPDATER_INSTALL_CONTRACT
-} from '../../../../shared/runtime-method-contracts/runtime-updater-contracts'
-import {
   checkRemoteServerUpdater,
   downloadRemoteServerUpdater,
   getRemoteServerUpdaterSnapshot,
   installRemoteServerUpdater
-} from '../../remote-server-updater'
+} from '~main/runtime/remote-server-updater'
+import {
+  UPDATER_CHECK_CONTRACT,
+  UPDATER_DOWNLOAD_CONTRACT,
+  UPDATER_GET_STATUS_CONTRACT,
+  UPDATER_INSTALL_CONTRACT
+} from '~shared/runtime-method-contracts/runtime-updater-contracts'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 export const UPDATER_METHODS: RpcMethod[] = [

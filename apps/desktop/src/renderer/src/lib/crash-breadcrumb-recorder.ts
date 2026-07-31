@@ -1,4 +1,4 @@
-import type { CrashReportBreadcrumbData } from '../../../shared/crash-reporting'
+import type { CrashReportBreadcrumbData } from '~shared/crash-reporting'
 
 // Why a leaf module: terminal hot paths record breadcrumbs without loading
 // crash-diagnostics.ts and its webview-registry import chain. Keep this file

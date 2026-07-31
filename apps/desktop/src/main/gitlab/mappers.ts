@@ -1,8 +1,8 @@
 import {
   mapGitLabPipelineJobStatusToCheckStatus,
   mapGitLabPipelineJobStatusToConclusion
-} from '../../shared/gitlab-pipeline-checks'
-import type { CheckStatus, GitLabWorkItem, MRInfo, MRState } from '../../shared/types'
+} from '~shared/gitlab-pipeline-checks'
+import type { CheckStatus, GitLabWorkItem, MRInfo, MRState } from '~shared/types'
 
 // ── Pipeline job mapping (GitLab REST `/pipelines/:id/jobs`) ────────
 // Why: GitLab pipeline jobs roughly map to GitHub check-runs, but use a

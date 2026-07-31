@@ -1,15 +1,13 @@
 import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import { toast } from 'sonner'
-
-import { getExternalEditorOpenCapability } from '@/components/sidebar/external-editor-open-capability'
-import { translate } from '@/i18n/i18n'
-import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '@/runtime/rpc-client'
-
-import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '../../../../shared/runtime-method-contracts/external-editor-contracts'
+import { getExternalEditorOpenCapability } from '~renderer/components/sidebar/external-editor-open-capability'
+import { translate } from '~renderer/i18n/i18n'
+import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '~renderer/runtime/rpc-client'
+import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '~shared/runtime-method-contracts/external-editor-contracts'
 import type {
   ShellOpenExternalEditorResult,
   ShellOpenPathFailureReason
-} from '../../../../shared/shell-open-types'
+} from '~shared/shell-open-types'
 
 export type RuntimeRemoteSshSupport = 'not-needed' | 'checking' | 'supported' | 'unsupported'
 

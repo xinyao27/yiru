@@ -1,4 +1,5 @@
-import type { BrowserGeolocationResult, BrowserViewportResult } from '../../shared/runtime-types'
+import type { BrowserGeolocationResult, BrowserViewportResult } from '~shared/runtime-types'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalStringFlag,

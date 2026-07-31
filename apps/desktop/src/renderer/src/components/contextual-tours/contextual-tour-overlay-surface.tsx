@@ -9,18 +9,17 @@ import {
   type RefObject
 } from 'react'
 import { createPortal } from 'react-dom'
-
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { useAppStore } from '@/store'
-
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
 import type {
   ContextualTourId,
   ContextualTourStepPlacement,
   ContextualTourStepControl,
   ContextualTourStepAction
-} from '../../../../shared/contextual-tours'
+} from '~shared/contextual-tours'
+
 import { ContextualTourArrow } from './contextual-tour-arrow'
 import { ContextualTourControl } from './contextual-tour-control'
 import {

@@ -1,7 +1,7 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { Store } from '~main/persistence'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { Store } from '../../persistence'
-import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
 import type { CoworkingHostAdapter } from '../execution-gateway'
 import { CoworkingFileOperationExecutor } from '../file-operation-executor'
 import { CoworkingGitCommitReferences } from '../git-commit-references'

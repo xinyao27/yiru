@@ -1,6 +1,6 @@
-import type { MarkdownViewMode, OpenFile } from '@/components/editor/state'
+import type { MarkdownViewMode, OpenFile } from '~renderer/components/editor/state'
+import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
 
-import { keybindingMatchesAction, type KeybindingOverrides } from '../../../../shared/keybindings'
 import type { EditorToggleValue } from './view-toggle'
 
 type MarkdownPreviewTarget = Pick<OpenFile, 'mode' | 'diffSource'> & {

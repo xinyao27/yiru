@@ -1,8 +1,7 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import React, { useMemo } from 'react'
-
-import { LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-import { translate } from '@/i18n/i18n'
+import { LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { translate } from '~renderer/i18n/i18n'
 
 import { detectCsvDelimiter, parseCsv } from './csv-parse'
 

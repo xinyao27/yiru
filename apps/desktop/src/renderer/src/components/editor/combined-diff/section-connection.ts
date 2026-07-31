@@ -1,5 +1,5 @@
-import { getConnectionIdForFile } from '../../../lib/connection-context'
-import { joinPath } from '../../../lib/path'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { joinPath } from '~renderer/lib/path'
 
 /**
  * Resolve the SSH connectionId that owns a combined-diff section's file.

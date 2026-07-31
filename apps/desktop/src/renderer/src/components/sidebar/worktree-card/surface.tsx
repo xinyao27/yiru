@@ -1,6 +1,5 @@
 import type React from 'react'
-
-import { cn } from '../../../lib/class-names'
+import { cn } from '~renderer/lib/class-names'
 
 export type WorktreeCardSurfaceActiveVariant = 'primary' | 'secondary'
 

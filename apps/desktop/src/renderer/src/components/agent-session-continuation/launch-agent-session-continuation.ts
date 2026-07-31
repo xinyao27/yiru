@@ -1,17 +1,15 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { getAgentLabel } from '@/lib/agent-catalog'
-import { getConnectionIdFromState } from '@/lib/connection-context'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { useAppStore } from '@/store'
-
-import type { SessionOptionValue } from '../../../../shared/native-chat/session-options'
-import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
-import type { TuiAgent } from '../../../../shared/types'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentLabel } from '~renderer/lib/agent-catalog'
+import { getConnectionIdFromState } from '~renderer/lib/connection-context'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
+import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import type { LaunchSource } from '~shared/telemetry-events'
+import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
+import type { TuiAgent } from '~shared/types'
 
 type LaunchAgentSessionContinuationArgs = {
   agent: TuiAgent

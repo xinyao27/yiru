@@ -7,23 +7,29 @@ import {
   ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import React from 'react'
+import AgentCombobox from '~renderer/components/agent/combobox'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
+import { Button } from '~renderer/components/ui/button'
+import { Checkbox } from '~renderer/components/ui/checkbox'
+import { DialogFooter } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { Label } from '~renderer/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { Textarea } from '~renderer/components/ui/textarea'
+import { translate } from '~renderer/i18n/i18n'
+import type { AgentCatalogEntry } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+import type { SourceControlLaunchActionId } from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { GlobalSettings, Repo, TuiAgent } from '~shared/types'
 
-import type { SourceControlLaunchActionId } from '../../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import type { GlobalSettings, Repo, TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import type { AgentCatalogEntry } from '../../../lib/agent-catalog'
-import { cn } from '../../../lib/class-names'
-import AgentCombobox from '../../agent/combobox'
-import { LoadingIndicator } from '../../loading-indicator'
-import { SourceControlActionVariableChips } from '../../source-control/action-variable-chips'
-import { Button } from '../../ui/button'
-import { Checkbox } from '../../ui/checkbox'
-import { DialogFooter } from '../../ui/dialog'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
-import { Textarea } from '../../ui/textarea'
 import { sourceControlActionRecipeMatchesTarget } from './action-recipe-match'
 import type { SourceControlAgentScopeNote } from './agent-action-dialog-result'
 

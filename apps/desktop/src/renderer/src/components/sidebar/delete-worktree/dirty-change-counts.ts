@@ -1,5 +1,6 @@
-import type { Repo, Worktree } from '../../../../../shared/types'
-import type { WorktreeDeleteState } from '../../../store/slices/worktree-helpers'
+import type { WorktreeDeleteState } from '~renderer/store/slices/worktree-helpers'
+import type { Repo, Worktree } from '~shared/types'
+
 import { isFolderWorkspaceDelete } from './dialog-copy'
 
 export function getDeleteWorktreeDirtyChangeCounts({

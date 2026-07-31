@@ -1,20 +1,21 @@
 import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
-
 /* eslint-disable max-lines -- Why: runtime graph sync and mobile session-tab publication share the same injected renderer state and terminal registry. Keeping them together prevents a second store/registry reader from drifting. */
 import {
   collectLeafIdsInOrder,
   serializePaneTree,
   normalizeTerminalLayoutSnapshot
-} from '@/components/terminal-pane/layout-serialization'
-import { warnTerminalLifecycleAnomaly } from '@/components/terminal-pane/terminal-lifecycle-diagnostics'
-import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { resolveLeafIdForManager } from '@/lib/pane-manager/pane-key-resolution'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { getSystemPrefersDark, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
-import type { AppState } from '@/store/types'
-
-import { isClaudeManagementTitle } from '../../../shared/agent/detection'
+} from '~renderer/components/terminal-pane/layout-serialization'
+import { warnTerminalLifecycleAnomaly } from '~renderer/components/terminal-pane/terminal-lifecycle-diagnostics'
+import { sanitizeTerminalLayoutPaneTitles } from '~renderer/components/terminal-pane/title-sanitization'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { resolveLeafIdForManager } from '~renderer/lib/pane-manager/pane-key-resolution'
+import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import {
+  getSystemPrefersDark,
+  resolveEffectiveTerminalAppearance
+} from '~renderer/lib/terminal-theme'
+import type { AppState } from '~renderer/store/types'
+import { isClaudeManagementTitle } from '~shared/agent/detection'
 import type {
   RuntimeMobileSessionBrowserTab,
   RuntimeMobileSessionFileTab,
@@ -23,17 +24,18 @@ import type {
   RuntimeMobileSessionSnapshotTab,
   RuntimeMobileSessionTabsSnapshot,
   RuntimeSyncWindowGraph
-} from '../../../shared/runtime-types'
-import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import { resolveTerminalTabTitle } from '../../../shared/tab-title-resolution'
-import { isWebTerminalSurfaceTabId } from '../../../shared/terminal/surface-id'
+} from '~shared/runtime-types'
+import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
+import { resolveTerminalTabTitle } from '~shared/tab-title-resolution'
+import { isWebTerminalSurfaceTabId } from '~shared/terminal/surface-id'
 import type {
   Tab,
   TabGroup,
   TabGroupLayoutNode,
   TerminalLayoutSnapshot,
   TerminalTab
-} from '../../../shared/types'
+} from '~shared/types'
+
 import {
   getActiveTabNavOrder,
   getGroupVisibleTabOrder,

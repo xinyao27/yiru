@@ -1,16 +1,15 @@
 import { Plus } from '@phosphor-icons/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
-
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
-} from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { getTerminalQuickCommandScope } from '~shared/terminal/quick-commands'
+import type { GlobalSettings, TerminalQuickCommand } from '~shared/types'
 
-import { getTerminalQuickCommandScope } from '../../../../shared/terminal/quick-commands'
-import type { GlobalSettings, TerminalQuickCommand } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { QuickCommandsList } from './quick-commands-list'

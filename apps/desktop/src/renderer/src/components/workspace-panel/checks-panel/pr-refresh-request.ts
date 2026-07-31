@@ -1,4 +1,4 @@
-import type { GitHubPRRefreshReason } from '../../../../../shared/types'
+import type { GitHubPRRefreshReason } from '~shared/types'
 
 type ChecksPanelPRRefreshRequestInput = {
   cachedHasPR: boolean | null

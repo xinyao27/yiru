@@ -8,25 +8,24 @@ import {
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/use-installed-agent-skills'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/hooks/use-installed-agent-skills'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
 import {
   EPHEMERAL_VMS_SKILL_INSTALL_COMMAND,
   EPHEMERAL_VMS_SKILL_NAME,
   EPHEMERAL_VMS_SKILL_UPDATE_COMMAND
-} from '@/lib/agent-feature-install-commands'
+} from '~renderer/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
-} from '@/lib/agent-skill-cli-prerequisite'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/agent-skill-cli-prerequisite'
+import { useAppStore } from '~renderer/store'
 
 import { Button } from '../ui/button'
 import { AgentSkillSetupPanel } from './agent/skill-setup-panel'

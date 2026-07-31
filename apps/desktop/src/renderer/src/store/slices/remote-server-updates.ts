@@ -1,24 +1,23 @@
 import type { StateCreator } from 'zustand'
-
-import { runRemoteServerUpdateBatch } from '@/runtime/remote-server-update-batch'
+import { runRemoteServerUpdateBatch } from '~renderer/runtime/remote-server-update-batch'
 import {
   checkingRemoteServerUpdateEntry,
   inspectRemoteServerUpdate,
   runRemoteServerUpdate,
   type RemoteServerUpdateEntry,
   type RemoteServerUpdateTransport
-} from '@/runtime/remote-server-update-coordinator'
-import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '@/runtime/rpc-client'
-
-import { isValidAppVersion } from '../../../../shared/app-version'
-import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-environments'
+} from '~renderer/runtime/remote-server-update-coordinator'
+import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '~renderer/runtime/rpc-client'
+import { isValidAppVersion } from '~shared/app-version'
+import { isUserManagedRuntimeEnvironment } from '~shared/runtime-environments'
 import {
   UPDATER_CHECK_CONTRACT,
   UPDATER_DOWNLOAD_CONTRACT,
   UPDATER_GET_STATUS_CONTRACT,
   UPDATER_INSTALL_CONTRACT
-} from '../../../../shared/runtime-method-contracts/runtime-updater-contracts'
-import type { UpdateCheckOptions } from '../../../../shared/types'
+} from '~shared/runtime-method-contracts/runtime-updater-contracts'
+import type { UpdateCheckOptions } from '~shared/types'
+
 import type { AppState } from '../types'
 
 const MAX_CONCURRENT_REMOTE_SERVER_UPDATES = 2

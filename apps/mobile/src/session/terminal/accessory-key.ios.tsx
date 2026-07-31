@@ -1,7 +1,8 @@
 import {
   MobileSwiftUiGlassAccessoryButton,
   type MobileSwiftUiGlassAccessoryButtonProps
-} from '../../components/glass/swift-ui.ios'
+} from '~/components/glass/swift-ui.ios'
+
 import type { MobileTerminalAccessoryIcon, MobileTerminalAccessoryKeyProps } from './accessory-key'
 
 const TERMINAL_ACCESSORY_SYSTEM_IMAGES = {

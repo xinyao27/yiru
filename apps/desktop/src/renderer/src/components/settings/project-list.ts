@@ -3,9 +3,8 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-
-import { projectHostSetupProjectionFromRepos } from '../../../../shared/project-host-setup-projection'
-import type { Project, ProjectHostSetup, Repo } from '../../../../shared/types'
+import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
+import type { Project, ProjectHostSetup, Repo } from '~shared/types'
 
 export type SettingsProject = {
   projectId: string

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import type { CoworkingFileListResult } from '~shared/coworking/operation-contract'
 
-import { translate } from '@/i18n/i18n'
-
-import type { CoworkingFileListResult } from '../../../../shared/coworking/operation-contract'
 import { parseCoworkingFileListResult } from './owner-result-validation'
 import {
   invokeCoworkingWorkspaceRead,

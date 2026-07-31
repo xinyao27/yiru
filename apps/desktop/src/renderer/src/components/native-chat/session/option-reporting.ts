@@ -1,4 +1,5 @@
-import type { SessionOptionValue } from '../../../../../shared/native-chat/session-options'
+import type { SessionOptionValue } from '~shared/native-chat/session-options'
+
 import type { NativeChatSessionOptionRecord } from './option-cache'
 
 export function applyNativeChatReportedSessionOptions(

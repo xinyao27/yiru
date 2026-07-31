@@ -1,6 +1,7 @@
 import { Pressable, Text } from 'react-native'
 
-import { cn } from '../../style/class-names'
+import { cn } from '~/style/class-names'
+
 import type { MobileGlassSegmentedControlProps } from './segmented-control-props'
 import { MobileGlassSurface } from './surface'
 

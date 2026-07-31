@@ -1,8 +1,3 @@
-import type {
-  ClaudeManagedAccount,
-  ClaudeManagedAccountRuntimeSelection,
-  GlobalSettings
-} from '../../../shared/types'
 import {
   getManagedSelectionTargetForAccount,
   getSelectedManagedAccountIdForTarget,
@@ -14,7 +9,12 @@ import {
   setSelectedManagedAccountIdForTarget,
   type ManagedAccountSelectionTarget,
   type NormalizedManagedAccountSelectionTarget
-} from '../../managed-account-runtime-selection'
+} from '~main/managed-account-runtime-selection'
+import type {
+  ClaudeManagedAccount,
+  ClaudeManagedAccountRuntimeSelection,
+  GlobalSettings
+} from '~shared/types'
 
 export type ClaudeAccountSelectionTarget = ManagedAccountSelectionTarget
 

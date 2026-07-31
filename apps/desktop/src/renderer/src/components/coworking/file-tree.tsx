@@ -1,22 +1,21 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import { Trash as Trash2, FilePlus as FilePlus2, FolderPlus } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
-import { Button } from '@/components/ui/button'
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
+import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from '@/components/ui/context-menu'
-import { translate } from '@/i18n/i18n'
-
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   CoworkingFileListResult,
   CoworkingFileTreeEntry
-} from '../../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
+
 import { isDotfileRelativePath } from '../workspace-panel/file-explorer/entries'
 import { FileExplorerToolbar } from '../workspace-panel/file-explorer/toolbar'
 import { FileExplorerTreeRowButton } from '../workspace-panel/file-explorer/tree-row-button'

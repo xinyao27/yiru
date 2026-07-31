@@ -1,4 +1,4 @@
-import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
+import { classifyTitleActivity, resolveTitleActivityLabel } from '~renderer/lib/pane-agent-evidence'
 
 import type { AgentStatus } from './agent-status'
 

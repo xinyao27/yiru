@@ -1,12 +1,7 @@
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { isValidTerminalTabId } from '~shared/terminal/tab-id'
+import type { Tab, TabGroup, TabGroupLayoutNode, WorkspaceSessionState } from '~shared/types'
 
-import { isValidTerminalTabId } from '../../../../shared/terminal/tab-id'
-import type {
-  Tab,
-  TabGroup,
-  TabGroupLayoutNode,
-  WorkspaceSessionState
-} from '../../../../shared/types'
 import {
   dedupeTabOrder,
   getPersistedEditFileIdsByWorktree,

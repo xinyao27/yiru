@@ -13,16 +13,15 @@ import {
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   canQueueWorkspaceCleanupCandidate,
   type WorkspaceCleanupCandidate
-} from '../../../../shared/workspace/cleanup'
+} from '~shared/workspace/cleanup'
+
 import {
   formatBranchSafetyDetails,
   formatContextDetails,

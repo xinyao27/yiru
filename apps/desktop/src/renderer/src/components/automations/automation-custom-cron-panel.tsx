@@ -1,14 +1,13 @@
 import { CheckCircle as CheckCircle2, WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import React from 'react'
-
-import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   formatAutomationSchedule,
   getAutomationCronExpressionFields
-} from '../../../../shared/automation/schedules'
+} from '~shared/automation/schedules'
+
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'
 

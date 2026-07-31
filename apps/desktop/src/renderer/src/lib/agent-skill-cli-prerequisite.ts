@@ -1,8 +1,6 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-
-import type { CliInstallStatus } from '../../../shared/cli-install-types'
+import { translate } from '~renderer/i18n/i18n'
+import type { CliInstallStatus } from '~shared/cli-install-types'
 
 type EnsureYiruCliAvailableOptions = {
   onStatusChange?: (status: CliInstallStatus) => void

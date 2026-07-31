@@ -1,4 +1,5 @@
-import type { Repo } from '../../../../shared/types'
+import type { Repo } from '~shared/types'
+
 import type { ProjectHeaderDragSession } from './project-header-drag-contract'
 import {
   applyAllRepoInsertAt,

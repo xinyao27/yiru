@@ -1,6 +1,5 @@
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
 
 type SshDestructiveActionDialogProps = {
   open: boolean

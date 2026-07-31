@@ -6,22 +6,19 @@ import { isAiVaultSessionResumableContent } from '@yiru/workbench-model/agent'
 import { isNativeChatSupportedAgent } from '@yiru/workbench-model/agent'
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
-
-import { FRIDAY_WORKTREE_ID } from '../../shared/constants'
-import type { FridaySession } from '../../shared/friday-types'
-import { isTuiAgent, TUI_AGENT_CONFIG } from '../../shared/tui-agent/config'
-import {
-  getTuiAgentDefaultArgs,
-  getTuiAgentDefaultEnv
-} from '../../shared/tui-agent/launch-defaults'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent/selection'
+import { FRIDAY_WORKTREE_ID } from '~shared/constants'
+import type { FridaySession } from '~shared/friday-types'
+import { isTuiAgent, TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
+import { getTuiAgentDefaultArgs, getTuiAgentDefaultEnv } from '~shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled, pickTuiAgent } from '~shared/tui-agent/selection'
 import {
   buildAgentResumeStartupPlan,
   buildAgentStartupPlan,
   type AgentStartupPlan
-} from '../../shared/tui-agent/startup'
-import type { AgentStartupShell } from '../../shared/tui-agent/startup-shell'
-import type { TuiAgent } from '../../shared/types'
+} from '~shared/tui-agent/startup'
+import type { AgentStartupShell } from '~shared/tui-agent/startup-shell'
+import type { TuiAgent } from '~shared/types'
+
 import {
   markCodexProjectTrusted,
   markCopilotFolderTrusted,

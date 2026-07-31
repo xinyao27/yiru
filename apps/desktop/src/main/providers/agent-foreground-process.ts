@@ -1,9 +1,10 @@
-import { recognizeAgentProcessFromCommandLine } from '../../shared/agent/process-recognition'
+import { recognizeAgentProcessFromCommandLine } from '~shared/agent/process-recognition'
 import {
   getFreshProcessTableSnapshot,
   getProcessTableSnapshot,
   type ProcessTableRow
-} from '../../shared/process-table-snapshot'
+} from '~shared/process-table-snapshot'
+
 import {
   resolveWindowsAgentForegroundProcessWithAvailability,
   shouldInspectWindowsAgentForeground,

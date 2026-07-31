@@ -23,35 +23,11 @@ more error-prone than keeping the whole viewer flow together. */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset list measurement and generation state in lockstep with external scroll restoration. */
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react'
 import { toast } from 'sonner'
-
 import {
   getLegendListScrollElement,
   LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS
-} from '@/components/sidebar/list-scroll-area'
-import { useAppStore } from '@/store'
-
-import type {
-  DiffComment,
-  GitBranchChangeEntry,
-  GitDiffResult,
-  GitStatusEntry
-} from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { getConnectionIdForFile } from '../../../lib/connection-context'
-import { detectLanguage } from '../../../lib/language-detect'
-import { joinPath } from '../../../lib/path'
-import { writeRuntimeFile } from '../../../runtime/file-client'
-import {
-  getRuntimeGitBranchDiff,
-  getRuntimeGitCommitDiff,
-  getRuntimeGitDiff
-} from '../../../runtime/git-client'
-import { settingsForRuntimeOwner } from '../../../runtime/rpc-client'
-import { findWorktreeById } from '../../../store/slices/worktree-helpers'
-import { selectWorktreeDiffCommentsOrEmpty } from '../../../store/worktree-diff-comments-selector'
-import '../monaco-setup'
-import { Button } from '../../ui/button'
+} from '~renderer/components/sidebar/list-scroll-area'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -59,9 +35,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { joinPath } from '~renderer/lib/path'
+import { writeRuntimeFile } from '~renderer/runtime/file-client'
+import {
+  getRuntimeGitBranchDiff,
+  getRuntimeGitCommitDiff,
+  getRuntimeGitDiff
+} from '~renderer/runtime/git-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+
+import '../monaco-setup'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
+import type {
+  DiffComment,
+  GitBranchChangeEntry,
+  GitDiffResult,
+  GitStatusEntry
+} from '~shared/types'
+
 import { YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT, type EditorPathMutationTarget } from '../autosave'
 import { getDiffCommentLineLabel } from '../diff-comment-compat'
 import { formatDiffComments } from '../diff-comments-format'

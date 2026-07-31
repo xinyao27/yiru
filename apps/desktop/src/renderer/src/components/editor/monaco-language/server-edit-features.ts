@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor'
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
 import type { LspCodeAction, LspCommand, LspWorkspaceEdit } from '../language-server/protocol'
 import { languageServerWorkspaceEditController } from '../language-server/workspace-edit-controller'
 import { createLanguageServerWorkspaceEditPlan } from '../language-server/workspace-edit-plan'

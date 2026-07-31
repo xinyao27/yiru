@@ -1,6 +1,5 @@
-import { useAppStore } from '@/store'
-
-import { makePaneKey } from '../../../shared/stable-pane-id'
+import { useAppStore } from '~renderer/store'
+import { makePaneKey } from '~shared/stable-pane-id'
 
 /**
  * Why: Command Code has no prompt-submit hook, so when Yiru submits a generated

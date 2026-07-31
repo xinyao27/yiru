@@ -1,7 +1,7 @@
-import { isTerminalSendRpcAccepted } from '../../terminal/send-rpc-response'
-import type { RpcClient } from '../../transport/rpc-client'
-import { isRpcDeliveryUnknown } from '../../transport/rpc-delivery-ambiguity'
-import { isLogicalClientCutoverError } from '../../transport/stable-logical-rpc-client'
+import { isTerminalSendRpcAccepted } from '~/terminal/send-rpc-response'
+import type { RpcClient } from '~/transport/rpc-client'
+import { isRpcDeliveryUnknown } from '~/transport/rpc-delivery-ambiguity'
+import { isLogicalClientCutoverError } from '~/transport/stable-logical-rpc-client'
 
 type MobileTerminalClient = {
   id: string

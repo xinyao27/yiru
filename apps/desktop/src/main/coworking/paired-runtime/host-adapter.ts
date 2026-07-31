@@ -1,7 +1,11 @@
+import {
+  callRuntimeEnvironmentExistingRoute,
+  subscribeRuntimeEnvironmentExistingRoute
+} from '~main/runtime/environment-existing-route'
 import type {
   CoworkingExecutionOperation,
   CoworkingSubscriptionOperation
-} from '../../../shared/coworking/operation-contract'
+} from '~shared/coworking/operation-contract'
 import {
   CoworkingPairedRuntimeCanonicalizeParamsSchema,
   CoworkingPairedRuntimeInspectParamsSchema,
@@ -10,15 +14,12 @@ import {
   CoworkingPairedRuntimeRevokeWorktreeParamsSchema,
   CoworkingPairedRuntimeSubscribeParamsSchema,
   parseCoworkingPairedRuntimeOperation
-} from '../../../shared/coworking/paired-runtime-host-contract'
+} from '~shared/coworking/paired-runtime-host-contract'
 import {
   CoworkingPairedRuntimeCanonicalizeResultSchema,
   CoworkingPairedRuntimeInspectionSchema
-} from '../../../shared/coworking/paired-runtime-result-contract'
-import {
-  callRuntimeEnvironmentExistingRoute,
-  subscribeRuntimeEnvironmentExistingRoute
-} from '../../runtime/environment-existing-route'
+} from '~shared/coworking/paired-runtime-result-contract'
+
 import type {
   CoworkingCanonicalHostPathResult,
   CoworkingPairedRuntimeWorktreeHostAdapter

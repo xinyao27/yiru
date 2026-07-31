@@ -1,13 +1,12 @@
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { useAppStore } from '~renderer/store'
+import { useAllWorktrees, useRepoMap } from '~renderer/store/selectors'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import type { Worktree } from '~shared/types'
 
-import { useAppStore } from '@/store'
-
-import { parseAppSshPtyId } from '../../../../../shared/ssh-pty-id'
-import type { Worktree } from '../../../../../shared/types'
-import { isRemoteRuntimePtyId } from '../../../runtime/terminal-inspection'
-import { useAllWorktrees, useRepoMap } from '../../../store/selectors'
 import {
   resolveChecksPanelTerminalPtyId,
   resolveChecksPanelWorktreeFromTerminalCwd

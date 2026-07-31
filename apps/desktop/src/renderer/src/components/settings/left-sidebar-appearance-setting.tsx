@@ -1,13 +1,12 @@
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
-
+import { translate } from '~renderer/i18n/i18n'
 import {
   DEFAULT_LEFT_SIDEBAR_TINT_COLOR,
   DEFAULT_LEFT_SIDEBAR_TINT_OPACITY,
   MAX_LEFT_SIDEBAR_TINT_OPACITY
-} from '../../../../shared/left-sidebar-appearance'
-import type { GlobalSettings, LeftSidebarAppearanceMode } from '../../../../shared/types'
+} from '~shared/left-sidebar-appearance'
+import type { GlobalSettings, LeftSidebarAppearanceMode } from '~shared/types'
+
 import { ColorField, NumberField, SettingsRow, SettingsSegmentedControl } from './form-controls'
 
 type LeftSidebarAppearanceSettingProps = {

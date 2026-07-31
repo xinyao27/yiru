@@ -1,1 +1,1 @@
-export { addWslEnvKeys } from '../shared/wsl-env'
+export { addWslEnvKeys } from '~shared/wsl-env'

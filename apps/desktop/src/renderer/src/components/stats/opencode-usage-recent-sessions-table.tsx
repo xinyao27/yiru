@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { OpenCodeUsageSessionRow } from '~shared/opencode-usage-types'
 
-import type { OpenCodeUsageSessionRow } from '../../../../shared/opencode-usage-types'
 import { formatSessionTime, formatTokens } from './usage-formatters'
 
 export function OpenCodeUsageRecentSessionsTable({

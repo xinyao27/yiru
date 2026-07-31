@@ -1,6 +1,6 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+import type { Tab, TabGroup, Worktree } from '~shared/types'
 
-import type { Tab, TabGroup, Worktree } from '../../../../shared/types'
 import type { MatchRange } from './worktree-palette-search'
 
 export type SearchableSimulatorTab = {

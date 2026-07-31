@@ -6,8 +6,7 @@ import {
   XCircle as CircleX
 } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
 export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CircleCheck,

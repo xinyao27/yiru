@@ -1,4 +1,4 @@
-import type { WorktreeCreateTiming, WorktreeCreateTimingPhase } from '../shared/types'
+import type { WorktreeCreateTiming, WorktreeCreateTimingPhase } from '~shared/types'
 
 type TimingClock = () => number
 

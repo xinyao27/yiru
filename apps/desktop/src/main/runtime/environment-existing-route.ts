@@ -1,8 +1,8 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
+import { markEnvironmentUsed, resolveEnvironment } from '~shared/runtime-environment-store'
+import { getPreferredPairingOffer } from '~shared/runtime-environments'
 
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/client'
-import { markEnvironmentUsed, resolveEnvironment } from '../../shared/runtime-environment-store'
-import { getPreferredPairingOffer } from '../../shared/runtime-environments'
 import { enqueueRuntimeCall } from './environment-call-queue'
 import {
   sendRemoteRuntimeExistingSharedControlRequest,

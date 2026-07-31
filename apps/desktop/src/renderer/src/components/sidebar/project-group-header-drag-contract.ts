@@ -1,6 +1,6 @@
 import type { PointerEvent } from 'react'
+import type { ProjectGroup } from '~shared/types'
 
-import type { ProjectGroup } from '../../../../shared/types'
 import type {
   ProjectGroupHeaderDragBucketKey,
   ProjectGroupHeaderDragRect

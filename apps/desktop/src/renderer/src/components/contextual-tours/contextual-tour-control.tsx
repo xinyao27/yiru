@@ -1,10 +1,9 @@
 import type { JSX } from 'react'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { ContextualTourStepControl } from '~shared/contextual-tours'
 
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { ContextualTourStepControl } from '../../../../shared/contextual-tours'
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from './contextual-tour-composer-events'
 
 export function ContextualTourControl({

@@ -1,15 +1,14 @@
 import type React from 'react'
 import { useCallback } from 'react'
-
 import {
   buildCmdJQuickActionContext,
   type CmdJActiveGroupSnapshot
-} from '@/components/cmd-j/quick-action-context'
+} from '~renderer/components/cmd-j/quick-action-context'
 import {
   getComposerEligibleRepos,
   resolveComposerGitRepoId
-} from '@/components/worktree-jump-palette/new-workspace-composer-repo'
-import { useAppStore } from '@/store'
+} from '~renderer/components/worktree-jump-palette/new-workspace-composer-repo'
+import { useAppStore } from '~renderer/store'
 
 import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import type { PaletteStoreState } from './use-palette-store-state'

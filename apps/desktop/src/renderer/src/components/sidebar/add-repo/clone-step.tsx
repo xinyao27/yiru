@@ -1,10 +1,10 @@
 import { Folder } from '@phosphor-icons/react'
 import React, { useState } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
+import { Input } from '~renderer/components/ui/input'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { Button } from '../../ui/button'
-import { DialogDescription, DialogHeader, DialogTitle } from '../../ui/dialog'
-import { Input } from '../../ui/input'
 import { RemoteFileBrowser } from '../remote-file-browser'
 
 type CloneStepProps = {

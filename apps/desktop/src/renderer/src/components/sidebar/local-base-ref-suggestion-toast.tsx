@@ -1,9 +1,8 @@
 import { toast } from 'sonner'
+import { translate } from '~renderer/i18n/i18n'
+import type { AppState } from '~renderer/store/types'
+import type { LocalBaseRefUpdateSuggestion } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import type { AppState } from '@/store/types'
-
-import type { LocalBaseRefUpdateSuggestion } from '../../../../shared/types'
 import {
   KEEP_LOCAL_MAIN_UP_TO_DATE_SECTION_ID,
   getKeepLocalMainUpToDateTitle

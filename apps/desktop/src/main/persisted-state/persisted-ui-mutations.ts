@@ -2,24 +2,24 @@ import {
   normalizeExecutionHostOrder,
   normalizeVisibleExecutionHostIds
 } from '@yiru/workbench-model/workspace'
-
-import { normalizeBrowserPageZoomLevel } from '../../shared/browser/page-zoom'
+import { normalizeBrowserPageZoomLevel } from '~shared/browser/page-zoom'
 import {
   getDefaultUIState,
   normalizeAgentActivityDisplayMode,
   normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties
-} from '../../shared/constants'
-import { normalizeContextualTourIds } from '../../shared/contextual-tours'
-import { normalizeFeatureInteractions } from '../../shared/feature-interactions'
-import { normalizeFeatureTipIds } from '../../shared/feature-tips'
-import { normalizeManualRepoOrder } from '../../shared/manual-repo-order'
-import { clampMarkdownTocPanelWidth } from '../../shared/markdown-toc-panel-width'
-import { persistedUIValuesEqual } from '../../shared/persisted-ui-equality'
-import { normalizeStatusBarUsageMode } from '../../shared/status-bar-usage-mode'
-import type { PersistedState } from '../../shared/types'
-import { normalizeUsagePercentageDisplay } from '../../shared/usage-percentage-display'
-import { normalizeWorkspaceStatuses } from '../../shared/workspace/statuses'
+} from '~shared/constants'
+import { normalizeContextualTourIds } from '~shared/contextual-tours'
+import { normalizeFeatureInteractions } from '~shared/feature-interactions'
+import { normalizeFeatureTipIds } from '~shared/feature-tips'
+import { normalizeManualRepoOrder } from '~shared/manual-repo-order'
+import { clampMarkdownTocPanelWidth } from '~shared/markdown-toc-panel-width'
+import { persistedUIValuesEqual } from '~shared/persisted-ui-equality'
+import { normalizeStatusBarUsageMode } from '~shared/status-bar-usage-mode'
+import type { PersistedState } from '~shared/types'
+import { normalizeUsagePercentageDisplay } from '~shared/usage-percentage-display'
+import { normalizeWorkspaceStatuses } from '~shared/workspace/statuses'
+
 import {
   mergePersistedContextualTours,
   mergePersistedFeatureInteractions,

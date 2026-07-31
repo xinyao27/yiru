@@ -7,11 +7,7 @@ import {
   X
 } from '@phosphor-icons/react'
 import React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import type { PRCommentGroup } from '../../../lib/pr-comment-groups'
-import { Button } from '../../ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +15,12 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~renderer/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { PRCommentGroup } from '~renderer/lib/pr-comment-groups'
+
 import { getPrCommentAudienceFilters, type PRCommentAudienceFilter } from '../pr-comment-audience'
 import type { PRCommentPresentationClasses } from '../pr-comment-presentation'
 

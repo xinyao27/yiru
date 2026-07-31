@@ -3,7 +3,8 @@ import {
   reorderWorkspacePanelTitlebarPinnedIds,
   unpinWorkspacePanelTitlebarItem,
   type WorkspaceTitlebarActionId
-} from '../../../../shared/workspace/panel-titlebar-pinned'
+} from '~shared/workspace/panel-titlebar-pinned'
+
 import type { WorkspacePanelTitlebarDropTarget } from './titlebar-strip-items'
 
 export type PanelTitlebarDragSource = 'visible' | 'overflow'

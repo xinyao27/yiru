@@ -1,7 +1,6 @@
 import { ArrowsLeftRight as ArrowRightLeft } from '@phosphor-icons/react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,14 +8,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import type { Repo } from '~shared/types'
+import type { YiruProfileSummary, TransferYiruProfileProjectMode } from '~shared/yiru-profiles'
 
-import type { Repo } from '../../../../shared/types'
-import type {
-  YiruProfileSummary,
-  TransferYiruProfileProjectMode
-} from '../../../../shared/yiru-profiles'
 import type { YiruProfileSwitchLiveWorkSummary } from './yiru-profile-switch-liveness'
 
 type PendingProjectTransfer = {

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
+import type { AgentsStepId } from '~shared/agents-orchestration-steps'
+import type { FeatureWallTourDepthSummary } from '~shared/feature-wall-tour-depth'
+import { buildFeatureWallTourDepthSummary } from '~shared/feature-wall-tour-depth'
+import type { FeatureWallWorkflowId } from '~shared/feature-wall-workflows'
+import type { ReviewStepId } from '~shared/review-steps'
+import type { WorkbenchStepId } from '~shared/workbench-steps'
 
-import type { AgentsStepId } from '../../../../shared/agents-orchestration-steps'
-import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
-import { buildFeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
-import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
-import type { ReviewStepId } from '../../../../shared/review-steps'
-import type { WorkbenchStepId } from '../../../../shared/workbench-steps'
 import { getFeatureWallCompletionProgress } from './completion-progress'
 
 type FeatureWallSessionDepthInput = {

@@ -1,12 +1,11 @@
 import { ChartBar as BarChart3, X } from '@phosphor-icons/react'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { shouldShowUsagePercentageDisplayChangeNotice } from '~shared/usage-percentage-display-change-notice'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import { shouldShowUsagePercentageDisplayChangeNotice } from '../../../../shared/usage-percentage-display-change-notice'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '../settings/appearance/usage-percentage-search'
 
 // Why: let startup modals settle before the status-bar callout competes for focus.

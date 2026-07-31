@@ -1,10 +1,10 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
-
 import {
   OptionalString,
   requiredString
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const ProjectHostSetupExistingFolder = z.object({

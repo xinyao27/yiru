@@ -1,5 +1,6 @@
-import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import type { Worktree } from '../../../../shared/types'
+import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
+import type { Worktree } from '~shared/types'
+
 import type { HostSectionRow } from './host-section-rows'
 import {
   PINNED_GROUP_KEY,

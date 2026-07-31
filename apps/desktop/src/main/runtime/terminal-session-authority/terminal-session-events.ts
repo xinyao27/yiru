@@ -1,4 +1,4 @@
-import type { RuntimeTerminalDriverState } from '../../../shared/runtime-types'
+import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
 
 export type TerminalDataMeta = { seq?: number; rawLength?: number; cwd?: string }
 export type TerminalFitMode = 'mobile-fit' | 'remote-desktop-fit' | 'desktop-fit'

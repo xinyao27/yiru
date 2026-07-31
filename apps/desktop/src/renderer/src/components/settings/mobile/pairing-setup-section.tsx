@@ -3,13 +3,18 @@ import {
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { NetworkInterfacePicker } from '~renderer/components/mobile/network-interface-picker'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '~renderer/components/ui/accordion'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 
-import { translate } from '../../../i18n/i18n'
-import { LoadingIndicator } from '../../loading-indicator'
-import { NetworkInterfacePicker } from '../../mobile/network-interface-picker'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 import type { MobileNetworkInterface } from './network-interface-selection'
 
 const TAILSCALE_DOWNLOAD_URL = 'https://tailscale.com/download'

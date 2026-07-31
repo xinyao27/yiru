@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
-
 import {
   EMULATOR_MANUAL_LAUNCH_FAILED_EVENT,
   EMULATOR_MANUAL_LAUNCH_STARTED_EVENT
-} from '@/components/emulator-pane/simulator-launch-coordination'
-import { useAppStore } from '@/store'
+} from '~renderer/components/emulator-pane/simulator-launch-coordination'
+import { useAppStore } from '~renderer/store'
 
 import type { EmulatorPaneSession } from './types'
 

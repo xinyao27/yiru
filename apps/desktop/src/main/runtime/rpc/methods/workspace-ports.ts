@@ -1,9 +1,9 @@
 import { z } from 'zod'
-
 import {
   OptionalString,
   requiredNumber
-} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const WorkspacePortScanParams = z.object({

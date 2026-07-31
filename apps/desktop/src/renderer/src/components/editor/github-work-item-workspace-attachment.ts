@@ -1,5 +1,5 @@
-import type { Worktree } from '../../../../shared/types'
-import { basename } from '../../lib/path'
+import { basename } from '~renderer/lib/path'
+import type { Worktree } from '~shared/types'
 
 export function findGithubPrWorkspaceAttachment(
   worktrees: readonly Worktree[],

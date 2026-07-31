@@ -1,14 +1,14 @@
 import { createHash } from 'node:crypto'
 import { request } from 'node:http'
 
-import { hasExactCoworkingWireKeys } from '../../shared/coworking/exact-wire-record'
-import type { CoworkingProbeResponse } from '../../shared/coworking/wire-contract'
+import { hasExactCoworkingWireKeys } from '~shared/coworking/exact-wire-record'
+import type { CoworkingProbeResponse } from '~shared/coworking/wire-contract'
 import {
   COWORKING_INGRESS_PORT,
   COWORKING_PROBE_PATH,
   COWORKING_SUPPORTED_PROTOCOL_VERSIONS
-} from '../../shared/coworking/wire-contract'
-import { generateKeyPair, publicKeyFromBase64, publicKeyToBase64 } from '../../shared/e2ee-crypto'
+} from '~shared/coworking/wire-contract'
+import { generateKeyPair, publicKeyFromBase64, publicKeyToBase64 } from '~shared/e2ee-crypto'
 
 const PROBE_TIMEOUT_MS = 3_000
 const MAX_PROBE_RESPONSE_BYTES = 16 * 1024

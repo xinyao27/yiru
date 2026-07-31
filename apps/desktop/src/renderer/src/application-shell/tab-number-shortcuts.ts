@@ -1,15 +1,14 @@
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   activateWebRuntimeSessionTab,
   isWebRuntimeSessionActive
-} from '@/runtime/web-runtime-session'
-import { useAppStore } from '@/store'
-import { dedupeTabOrder } from '@/store/slices/tab-group-state'
-import type { AppState } from '@/store/types'
-
-import type { Tab } from '../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../shared/workspace/panel-tab'
+} from '~renderer/runtime/web-runtime-session'
+import { useAppStore } from '~renderer/store'
+import { dedupeTabOrder } from '~renderer/store/slices/tab-group-state'
+import type { AppState } from '~renderer/store/types'
+import type { Tab } from '~shared/types'
+import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 type TabNumberShortcutState = Pick<
   AppState,

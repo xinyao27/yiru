@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto'
 
 import { z } from 'zod'
-
+import { saveClipboardImageBufferAsTempFile } from '~main/window/clipboard-image-temp-file'
 import {
   CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
   CLIPBOARD_IMAGE_TOO_LARGE_ERROR
-} from '../../../../shared/clipboard-image'
-import { saveClipboardImageBufferAsTempFile } from '../../../window/clipboard-image-temp-file'
+} from '~shared/clipboard-image'
+
 import { defineMethod, type RpcMethod } from '../core'
 
 const MAX_CLIPBOARD_IMAGE_BASE64_CHARS = CLIPBOARD_IMAGE_MAX_BASE64_CHARS

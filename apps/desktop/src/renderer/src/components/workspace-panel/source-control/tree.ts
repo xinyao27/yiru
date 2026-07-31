@@ -1,5 +1,6 @@
-import type { GitStatusEntry, GitStagingArea } from '../../../../../shared/types'
-import { normalizeRelativePath } from '../../../lib/path'
+import { normalizeRelativePath } from '~renderer/lib/path'
+import type { GitStatusEntry, GitStagingArea } from '~shared/types'
+
 import { splitPathSegments } from '../path-tree'
 import { compareGitStatusEntries, sourceControlPathCollator } from './status-sort'
 

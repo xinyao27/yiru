@@ -1,10 +1,9 @@
 import type React from 'react'
+import { selectCoworkingCanControl } from '~renderer/components/coworking/selectors'
+import { useAppStore } from '~renderer/store'
+import type { CoworkingSessionCatalogEntry } from '~shared/coworking/catalog-contract'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
-import { selectCoworkingCanControl } from '@/components/coworking/selectors'
-import { useAppStore } from '@/store'
-
-import type { CoworkingSessionCatalogEntry } from '../../../../shared/coworking/catalog-contract'
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
 import type { CoworkingSessionPanePhase as SessionPanePhase } from './session-continuation-notice'
 import type { CoworkingSessionRoute } from './session-route'
 import { isRecoverableCoworkingTerminalError } from './use-terminal-reconnect'

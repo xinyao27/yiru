@@ -1,4 +1,4 @@
-import type { DeviceScope } from '../../../shared/runtime-types'
+import type { DeviceScope } from '~shared/runtime-types'
 
 const PAIRING_OFFER_VERSION = 2
 

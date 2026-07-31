@@ -1,6 +1,5 @@
 import { useLayoutEffect } from 'react'
-
-import { registerVisibleTerminalTab } from '@/lib/foreground-terminal-tabs'
+import { registerVisibleTerminalTab } from '~renderer/lib/foreground-terminal-tabs'
 
 type VisibleTerminalTabClaimOptions = {
   isVisible: boolean

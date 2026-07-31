@@ -1,10 +1,8 @@
 import type { JSX } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
-import type { FeatureTip, FeatureTipAction } from '../../../../shared/feature-tips'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import type { FeatureTip, FeatureTipAction } from '~shared/feature-tips'
 
 function getPrimaryBusyLabel(action: FeatureTipAction): string {
   if (action === 'setup-cli') {

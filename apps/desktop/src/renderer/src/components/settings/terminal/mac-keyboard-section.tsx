@@ -1,6 +1,7 @@
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useDetectedOptionAsAlt } from '../../../lib/keyboard-layout/use-effective-mac-option-as-alt'
+import { translate } from '~renderer/i18n/i18n'
+import { useDetectedOptionAsAlt } from '~renderer/lib/keyboard-layout/use-effective-mac-option-as-alt'
+import type { GlobalSettings } from '~shared/types'
+
 import { SettingsRow, SettingsSegmentedControl, SettingsSwitchRow } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
 

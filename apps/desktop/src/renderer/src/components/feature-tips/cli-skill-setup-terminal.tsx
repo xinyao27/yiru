@@ -1,11 +1,10 @@
 import { Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { OnboardingInlineCommandTerminal } from '@/components/onboarding/inline-command-terminal'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND } from '@/lib/agent-feature-install-commands'
+import { OnboardingInlineCommandTerminal } from '~renderer/components/onboarding/inline-command-terminal'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND } from '~renderer/lib/agent-feature-install-commands'
 
 export function CliSkillSetupTerminal(): React.JSX.Element {
   const handleCopySkillCommand = async (): Promise<void> => {

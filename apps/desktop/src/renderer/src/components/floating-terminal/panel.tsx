@@ -11,20 +11,19 @@ import {
  * main tab model while still keeping the DOM-mounted panes local. */
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
-import type { OpenFile } from '@/components/editor/state'
-import EmulatorPane from '@/components/emulator-pane/emulator-pane'
-import { createUntitledMarkdownFileWithTemplateSelection } from '@/components/floating-terminal/create-untitled-markdown'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import TabBar from '@/components/tab-bar/tab-bar'
-import { TAB_CONTENT_SURFACE_CLASSES } from '@/components/tab-bar/tab-chrome-classes'
-import { resolveGroupTabFromVisibleId } from '@/components/tab-group/visible-id'
-import TerminalPane from '@/components/terminal-pane/terminal-pane'
-import { appendUniqueOpenFileIds } from '@/components/terminal/unsaved-close-queue'
-import { useTerminalSaveDialog } from '@/components/terminal/use-terminal-save-dialog'
-import { Button } from '@/components/ui/button'
+import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import type { OpenFile } from '~renderer/components/editor/state'
+import EmulatorPane from '~renderer/components/emulator-pane/emulator-pane'
+import { createUntitledMarkdownFileWithTemplateSelection } from '~renderer/components/floating-terminal/create-untitled-markdown'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import TabBar from '~renderer/components/tab-bar/tab-bar'
+import { TAB_CONTENT_SURFACE_CLASSES } from '~renderer/components/tab-bar/tab-chrome-classes'
+import { resolveGroupTabFromVisibleId } from '~renderer/components/tab-group/visible-id'
+import TerminalPane from '~renderer/components/terminal-pane/terminal-pane'
+import { appendUniqueOpenFileIds } from '~renderer/components/terminal/unsaved-close-queue'
+import { useTerminalSaveDialog } from '~renderer/components/terminal/use-terminal-save-dialog'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -32,33 +31,35 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
-import { isYiruCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
-import { getConnectionId } from '@/lib/connection-context'
-import { buildDuplicatedBrowserTabOptions } from '@/lib/duplicate-browser-tab-options'
+} from '~renderer/components/ui/dialog'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import {
+  useShortcutKeyDetails,
+  type ShortcutKeyComboDetails
+} from '~renderer/hooks/use-shortcut-label'
+import { isYiruCliAvailableOnPath } from '~renderer/lib/agent-skill-cli-prerequisite'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { buildDuplicatedBrowserTabOptions } from '~renderer/lib/duplicate-browser-tab-options'
 import {
   isFloatingWorkspacePanelShortcut,
   isFloatingWorkspaceTerminalInputTarget,
   switchFloatingWorkspaceTab
-} from '@/lib/floating-workspace-terminal-actions'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { detectLanguage } from '@/lib/language-detect'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
+} from '~renderer/lib/floating-workspace-terminal-actions'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import {
   ORCHESTRATION_SETUP_DISMISSED_STORAGE_KEY,
   ORCHESTRATION_SETUP_STATE_EVENT,
   hasOrchestrationSetupMarker,
   isOrchestrationSetupDismissed,
   notifyOrchestrationSetupStateChanged
-} from '@/lib/orchestration-setup-state'
-import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { useAppStore } from '@/store'
-import { destroyWorkspaceWebviews } from '@/store/slices/browser-webview-cleanup'
-
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+} from '~renderer/lib/orchestration-setup-state'
+import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { useAppStore } from '~renderer/store'
+import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   keybindingMatchesAction,
   matchKeybindingDigitIndex,
@@ -66,21 +67,22 @@ import {
   type KeybindingContext,
   type KeybindingMatchOptions,
   type PhysicalModifierToken
-} from '../../../../shared/keybindings'
+} from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../../../shared/modifier-double-tap-detector'
-import { resolveUnifiedTabLabel } from '../../../../shared/tab-title-resolution'
-import type { BrowserTab as BrowserTabState, Tab, TerminalTab } from '../../../../shared/types'
+} from '~shared/modifier-double-tap-detector'
+import { resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
+import type { BrowserTab as BrowserTabState, Tab, TerminalTab } from '~shared/types'
+
 import { FloatingBrowserSlot } from './floating-browser-slot'
 import { FloatingTerminalOrchestrationDialog } from './orchestration-dialog'
 import { FloatingTerminalResizeHandles } from './resize-handles'
 import { FloatingTerminalWindowControls } from './window-controls'
 export { FloatingTerminalToggleButton } from './toggle-button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { OPEN_MAXIMIZED_INTENT_TTL_MS } from '@/lib/floating-terminal'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { OPEN_MAXIMIZED_INTENT_TTL_MS } from '~renderer/lib/floating-terminal'
 
 import {
   anchorFloatingTerminalPanelBounds,
@@ -101,7 +103,7 @@ import {
 import { selectFloatingTerminalPanelInputs } from './panel-inputs'
 const LOCAL_RUNTIME_SETTINGS = { activeRuntimeEnvironmentId: null } as const
 
-const EditorPanel = lazy(() => import('@/components/editor/panel'))
+const EditorPanel = lazy(() => import('~renderer/components/editor/panel'))
 
 type FloatingTerminalPanelProps = {
   open: boolean

@@ -1,7 +1,6 @@
 import { Monitor } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
 
 import type { CoworkingRemoteDesktopStatusSidebarRow } from './coworking-sidebar-rows'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'

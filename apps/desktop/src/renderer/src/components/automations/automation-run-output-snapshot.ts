@@ -1,5 +1,5 @@
 /* eslint-disable no-control-regex -- terminal snapshots normalize ANSI/control output. */
-import type { AutomationRunOutputSnapshot } from '../../../../shared/automations-types'
+import type { AutomationRunOutputSnapshot } from '~shared/automations-types'
 
 const MAX_OUTPUT_SNAPSHOT_CHARS = 256 * 1024
 

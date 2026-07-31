@@ -264,8 +264,10 @@ const yiruRootToolingConfig = defineConfig({
   },
   resolve: {
     alias: {
-      '@renderer': resolve(desktopRoot, 'src/renderer/src'),
-      '@': resolve(desktopRoot, 'src/renderer/src')
+      '~renderer': resolve(desktopRoot, 'src/renderer/src'),
+      '~shared': resolve(desktopRoot, 'src/shared'),
+      '~main': resolve(desktopRoot, 'src/main'),
+      '~preload': resolve(desktopRoot, 'src/preload')
     }
   },
   test: {

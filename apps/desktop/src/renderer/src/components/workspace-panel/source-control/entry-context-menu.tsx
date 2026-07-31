@@ -1,19 +1,12 @@
 import { Copy, Eye, FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
-
-import { useAppStore } from '@/store'
-
-import { translate } from '../../../i18n/i18n'
-import { getLocalFileManagerLabel } from '../../../lib/local-file-manager-label'
-import { OpenInApplicationIcon } from '../../../lib/open-in-app-catalog'
-import { getRuntimeEnvironmentIdForWorktree } from '../../../lib/worktree-runtime-owner'
-import { useRuntimeRemoteSshSupport } from '../../sidebar/use-runtime-remote-ssh-support'
+import { useRuntimeRemoteSshSupport } from '~renderer/components/sidebar/use-runtime-remote-ssh-support'
 import {
   getWorktreeOpenInEntries,
   openOpenInAppsSettings,
   openWorktreePath
-} from '../../sidebar/worktree-open-in-menu'
-import { getOpenInEntryAvailability } from '../../sidebar/worktree-path-opening'
+} from '~renderer/components/sidebar/worktree-open-in-menu'
+import { getOpenInEntryAvailability } from '~renderer/components/sidebar/worktree-path-opening'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -23,7 +16,12 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger
-} from '../../ui/context-menu'
+} from '~renderer/components/ui/context-menu'
+import { translate } from '~renderer/i18n/i18n'
+import { getLocalFileManagerLabel } from '~renderer/lib/local-file-manager-label'
+import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { useAppStore } from '~renderer/store'
 
 type SourceControlEntryContextMenuProps = {
   currentWorktreeId: string

@@ -1,20 +1,19 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
-
-import { translate } from '@/i18n/i18n'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
-
-import { buildSetupRunnerCommand } from '../../../../shared/setup/runner-command'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { translate } from '~renderer/i18n/i18n'
+import { createBrowserUuid } from '~renderer/lib/browser-uuid'
+import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
+import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
+import { buildSetupRunnerCommand } from '~shared/setup/runner-command'
+import { makePaneKey } from '~shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,
   Worktree,
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
-} from '../../../../shared/types'
+} from '~shared/types'
+
 import { registerEagerPtyBuffer, type EagerPtyHandle } from '../terminal-pane/pty/dispatcher'
 import { retireUnownedTerminal } from './retire-unowned-background-terminal'
 

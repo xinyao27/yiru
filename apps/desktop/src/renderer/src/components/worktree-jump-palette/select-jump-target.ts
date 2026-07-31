@@ -1,20 +1,19 @@
 import type React from 'react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-
 import {
   isBlankBrowserUrl,
   type BrowserPaletteSearchResult
-} from '@/components/worktree-jump-palette/browser-palette-search'
-import type { SimulatorPaletteSearchResult } from '@/components/worktree-jump-palette/simulator-palette-search'
-import { activateWorkspaceTabPaletteResult } from '@/components/worktree-jump-palette/workspace-tab-palette-activation'
-import type { WorkspaceTabPaletteSearchResult } from '@/components/worktree-jump-palette/workspace-tab-palette-search'
-import { translate } from '@/i18n/i18n'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+} from '~renderer/components/worktree-jump-palette/browser-palette-search'
+import type { SimulatorPaletteSearchResult } from '~renderer/components/worktree-jump-palette/simulator-palette-search'
+import { activateWorkspaceTabPaletteResult } from '~renderer/components/worktree-jump-palette/workspace-tab-palette-activation'
+import type { WorkspaceTabPaletteSearchResult } from '~renderer/components/worktree-jump-palette/workspace-tab-palette-search'
+import { translate } from '~renderer/i18n/i18n'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import type { BrowserPage, BrowserWorkspace, Worktree } from '~shared/types'
 
-import type { BrowserPage, BrowserWorkspace, Worktree } from '../../../../shared/types'
 import type { PaletteStoreState } from './use-palette-store-state'
 
 type BrowserSelection = {

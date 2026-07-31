@@ -23,21 +23,23 @@ import {
 } from '@yiru/runtime-protocol/capabilities'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
-import { unwrapRuntimeRpcResult } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
-
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import {
+  getUpdateCheckClickOptions,
+  getUpdateCheckHint
+} from '~renderer/lib/update-check-click-options'
+import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 import {
   isUserManagedRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment
-} from '../../../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { GlobalSettings } from '../../../../shared/types'
+} from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import type { GlobalSettings } from '~shared/types'
+
 import { Button } from '../ui/button'
 import {
   Dialog,

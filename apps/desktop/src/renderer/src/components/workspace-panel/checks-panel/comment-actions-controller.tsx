@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { mergePRCommentIntoList } from '~renderer/components/github/state'
+import { translate } from '~renderer/i18n/i18n'
+import type { PRComment } from '~shared/types'
 
-import type { PRComment } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { mergePRCommentIntoList } from '../../github/state'
 import {
   markPRCommentThreadResolved,
   restorePRCommentThreadSnapshot

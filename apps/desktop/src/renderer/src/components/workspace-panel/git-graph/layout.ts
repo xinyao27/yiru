@@ -1,4 +1,5 @@
-import type { GitHistoryItem } from '../../../../../shared/git/history'
+import type { GitHistoryItem } from '~shared/git/history'
+
 import { makeEdge, makeOffPageEdge, type GitGraphRowGap, type LayoutContext } from './layout-path'
 import { GIT_GRAPH_COLORS } from './palette'
 

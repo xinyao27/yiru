@@ -1,18 +1,18 @@
+import { translate } from '~renderer/i18n/i18n'
+import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
+import { getAgentCatalog, type AgentCatalogEntry } from '~renderer/lib/agent-catalog'
 import {
   CUSTOM_AGENT_ID,
   type CustomAgentId,
   getCommitMessageAgentCapability,
   isCustomAgentId,
   listCommitMessageAgentCapabilities
-} from '../../../../../shared/commit-message/agent-spec'
+} from '~shared/commit-message/agent-spec'
 import {
   SOURCE_CONTROL_TEXT_ACTION_IDS,
   type SourceControlActionId
-} from '../../../../../shared/source-control/ai-actions'
-import type { TuiAgent } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { createLocalizedCatalog } from '../../../i18n/localized-catalog'
-import { getAgentCatalog, type AgentCatalogEntry } from '../../../lib/agent-catalog'
+} from '~shared/source-control/ai-actions'
+import type { TuiAgent } from '~shared/types'
 
 export const SOURCE_CONTROL_TEXT_ACTION_ID_SET = new Set<string>(SOURCE_CONTROL_TEXT_ACTION_IDS)
 const TEXT_GENERATION_AGENT_ID_SET = new Set(

@@ -1,4 +1,5 @@
-import type { GitDiffResult } from '../../../../shared/types'
+import type { GitDiffResult } from '~shared/types'
+
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
 
 export function shouldPruneLargeDiffContent(

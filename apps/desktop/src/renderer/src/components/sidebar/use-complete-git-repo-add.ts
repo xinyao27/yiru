@@ -1,9 +1,8 @@
 import { useCallback, useRef } from 'react'
+import { track } from '~renderer/lib/telemetry'
+import { useAppStore } from '~renderer/store'
+import type { AddRepoExistingWorkspaceSource } from '~shared/telemetry-events'
 
-import { track } from '@/lib/telemetry'
-import { useAppStore } from '@/store'
-
-import type { AddRepoExistingWorkspaceSource } from '../../../../shared/telemetry-events'
 import {
   buildAddRepoExistingWorkspacesTelemetry,
   shouldTrackAddRepoExistingWorkspacesDetected

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '~renderer/components/ui/switch'
 
 import { Label } from '../ui/label'
 

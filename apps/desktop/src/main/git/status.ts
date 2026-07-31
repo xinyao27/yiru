@@ -3,36 +3,36 @@ import { existsSync } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { isBinaryBuffer } from '../../shared/binary-buffer'
-import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
-import { readBranchCompareHead } from '../../shared/git/branch-compare-head'
-import { createGitConfigSnapshotRunner } from '../../shared/git/config-snapshot-runner'
-import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
+import { isBinaryBuffer } from '~shared/binary-buffer'
+import type { CommitMessageDraftContext } from '~shared/commit-message/generation'
+import { readBranchCompareHead } from '~shared/git/branch-compare-head'
+import { createGitConfigSnapshotRunner } from '~shared/git/config-snapshot-runner'
+import { decodeGitCQuotedPath } from '~shared/git/cquoted-path'
 import {
   removeSafeUntrackedDiscardTarget,
   removeSafeUntrackedDiscardTargets
-} from '../../shared/git/discard-path-safety'
+} from '~shared/git/discard-path-safety'
 import {
   getEffectiveGitUpstreamStatus,
   getGitUpstreamStatusForUpstreamName,
   splitRemoteBranchName
-} from '../../shared/git/effective-upstream'
-import { parseGitRevListFirstParentOid } from '../../shared/git/rev-list-output'
-import { DEFAULT_GIT_STATUS_LIMIT } from '../../shared/git/status-limit'
+} from '~shared/git/effective-upstream'
+import { parseGitRevListFirstParentOid } from '~shared/git/rev-list-output'
+import { DEFAULT_GIT_STATUS_LIMIT } from '~shared/git/status-limit'
 import {
   beginGitStatusLineStatsCacheWrite,
   clearGitStatusLineStatsCache,
   clearGitStatusLineStatsCacheKey,
   reuseOrRecomputeGitStatusLineStats
-} from '../../shared/git/status-line-stats-cache'
+} from '~shared/git/status-line-stats-cache'
 import {
   applyLineStats,
   collectUntrackedAdditions,
   parseNumstat,
   type GitLineStats
-} from '../../shared/git/uncommitted-line-stats'
-import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
-import { getLargeDiffRenderLimit } from '../../shared/large-diff-render-limit'
+} from '~shared/git/uncommitted-line-stats'
+import { InFlightPromiseDedupe, stableInFlightKey } from '~shared/in-flight-promise-dedupe'
+import { getLargeDiffRenderLimit } from '~shared/large-diff-render-limit'
 import type {
   GitBranchChangeEntry,
   GitBranchChangeStatus,
@@ -46,8 +46,9 @@ import type {
   GitStatusEntry,
   GitStatusResult,
   GitUpstreamStatus
-} from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+} from '~shared/types'
+import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
+
 import { findExistingWorktreeSymlinkPaths } from '../worktree/symlink-detection'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {

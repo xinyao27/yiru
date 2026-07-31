@@ -9,8 +9,8 @@ import {
   ArrowClockwise as RefreshCw,
   Power as PowerOff,
   PencilSimple as Edit3
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+} from '~/components/uniwind-icons'
+import { cn } from '~/style/class-names'
 
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
 import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'

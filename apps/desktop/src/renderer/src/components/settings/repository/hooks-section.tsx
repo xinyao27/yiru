@@ -2,8 +2,9 @@ import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: repository hook saves synchronize debounced persistence state with external repo settings. */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { resolveHookCommandSourcePolicy } from '../../../../../shared/hook-command-source-policy'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
 import type {
   HookCommandSourcePolicy,
   YiruHooks,
@@ -11,9 +12,8 @@ import type {
   RepoHookSettings,
   SetupAgentStartupPolicy,
   SetupRunPolicy
-} from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { useAppStore } from '../../../store'
+} from '~shared/types'
+
 import { SettingsSwitch } from '../form-controls'
 import { matchesSettingsSearch } from '../search'
 import { SearchableSetting } from '../searchable-setting'

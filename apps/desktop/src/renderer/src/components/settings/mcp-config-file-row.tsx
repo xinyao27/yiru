@@ -1,9 +1,8 @@
 import { WarningCircle as AlertCircle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import type { McpConfigInspection } from '~shared/mcp-config'
 
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { McpConfigInspection } from '../../../../shared/mcp-config'
 import { Button } from '../ui/button'
 
 export type LoadedMcpConfigInspection = McpConfigInspection & {

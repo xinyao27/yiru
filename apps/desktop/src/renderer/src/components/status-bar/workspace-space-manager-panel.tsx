@@ -26,22 +26,18 @@ import type { AgentStatusEntry, MigrationUnsupportedPtyEntry } from '@yiru/workb
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: the relative time clock advances from a wall-clock interval, which is an external timer rather than render-derived state. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
+import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { useAppStore } from '~renderer/store'
+import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
+import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review'
+import type { GitStatusResult, Repo, TerminalTab, Worktree } from '~shared/types'
+import type { WorkspaceSpaceItem, WorkspaceSpaceWorktree } from '~shared/workspace/space-types'
+import type { WorktreeForceDeleteReason } from '~shared/workspace/worktree-removal'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-
-import type { GitStatusResult, Repo, TerminalTab, Worktree } from '../../../../shared/types'
-import type {
-  WorkspaceSpaceItem,
-  WorkspaceSpaceWorktree
-} from '../../../../shared/workspace/space-types'
-import type { WorktreeForceDeleteReason } from '../../../../shared/workspace/worktree-removal'
-import { useAppStore } from '../../store'
-import { getRepoMapFromState, getWorktreeMapFromState } from '../../store/selectors'
-import { getHostedReviewCacheKey } from '../../store/slices/hosted-review'
 import { prepareActiveWorktreeFocusAfterDelete } from '../sidebar/active-worktree-focus-after-delete'
 import { runWorktreeBatchDelete } from '../sidebar/delete-worktree/flow'
 import { branchDisplayName } from '../sidebar/worktree-card/helpers'

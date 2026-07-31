@@ -1,13 +1,12 @@
 import type { editor } from 'monaco-editor'
-
-import { monaco } from '@/components/editor/monaco-setup'
-import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
+import { monaco } from '~renderer/components/editor/monaco-setup'
+import { formatShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import {
   PRIMARY_SELECTION_MAX_LENGTH,
   isPrimarySelectionEnabled,
   setPrimarySelectionText
-} from '@/lib/primary-selection'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/primary-selection'
+import { useAppStore } from '~renderer/store'
 
 import { formatCopiedSelectionWithContext, getContextualCopyLineRange } from './selection-copy'
 import { editorShortcutMatches } from './shortcuts'

@@ -1,4 +1,5 @@
-import type { TerminalLayoutSnapshot, TerminalTab } from '../../../../shared/types'
+import type { TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
+
 import type { DaemonSession } from './resource-usage-merge-types'
 
 export type ResourceSessionBindingInputs = {

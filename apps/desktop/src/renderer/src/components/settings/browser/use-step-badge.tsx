@@ -1,6 +1,5 @@
 import { Check } from '@phosphor-icons/react'
-
-import { LoadingIndicator } from '../../loading-indicator'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
 export type StepState = 'pending' | 'done' | 'in-progress'
 

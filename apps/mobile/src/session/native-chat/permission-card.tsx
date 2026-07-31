@@ -1,7 +1,8 @@
 import { memo, useRef, useState } from 'react'
 import { Text } from 'react-native'
 
-import { MobileContentSection } from '../../components/content-section'
+import { MobileContentSection } from '~/components/content-section'
+
 import type { MobileChatPermission } from './permission'
 import { MobileNativeChatPermissionActions } from './permission-actions'
 

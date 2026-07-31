@@ -1,5 +1,8 @@
-import { FOCUS_TERMINAL_PANE_EVENT, type FocusTerminalPaneDetail } from '@/constants/terminal'
-import { useAppStore } from '@/store'
+import {
+  FOCUS_TERMINAL_PANE_EVENT,
+  type FocusTerminalPaneDetail
+} from '~renderer/constants/terminal'
+import { useAppStore } from '~renderer/store'
 
 let pendingFocusPaneFrameId: number | null = null
 

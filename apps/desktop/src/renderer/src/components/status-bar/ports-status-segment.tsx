@@ -1,19 +1,26 @@
 import { Plug, CaretDown as ChevronDown, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { SelectedTextCopyMenu } from '@/components/selected-text-copy-menu'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-menu'
+import { Button } from '~renderer/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import {
   scanWorkspacePortsForTarget,
   workspacePortScanKeyForTarget
-} from '@/lib/workspace-port-actions'
-import { getExternalWorkspacePorts, getWorkspacePortGroups } from '@/lib/workspace-port-groups'
-import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/lib/workspace-port-actions'
+import {
+  getExternalWorkspacePorts,
+  getWorkspacePortGroups
+} from '~renderer/lib/workspace-port-groups'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 import { PortRow, WorkspaceGroupRows } from './ports-status-popover-rows'

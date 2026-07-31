@@ -1,8 +1,7 @@
 import { Check, Package as PackageOpen, Trash as Trash2, Upload } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,13 +13,13 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Slider } from '@/components/ui/slider'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+} from '~renderer/components/ui/dropdown-menu'
+import { Slider } from '~renderer/components/ui/slider'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import { PET_SIZE_MAX, PET_SIZE_MIN } from '~shared/types'
 
-import { PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import { BUNDLED_PET, BUNDLED_PETS, findBundledPet, isBundledPetId } from '../pet/models'
 
 // Why: cluster pet-related controls (show/hide, character picker, custom

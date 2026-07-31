@@ -1,8 +1,7 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react'
-
-import type { OpenFile } from '@/components/editor/state'
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,14 +9,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { translate } from '@/i18n/i18n'
-import { getConnectionIdForFile } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { readRuntimeFileContent } from '@/runtime/file-client'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-import { useAppStore } from '@/store'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { getConnectionIdForFile } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { readRuntimeFileContent } from '~renderer/runtime/file-client'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 const DiffViewer = lazy(() => import('./diff-viewer'))
 

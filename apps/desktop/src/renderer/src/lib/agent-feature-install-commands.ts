@@ -14,4 +14,4 @@ export {
   YIRU_DEBUG_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
-} from '../../../shared/agent/feature-install-commands'
+} from '~shared/agent/feature-install-commands'

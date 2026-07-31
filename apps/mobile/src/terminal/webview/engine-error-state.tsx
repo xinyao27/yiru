@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Text, View } from 'react-native'
 
-import { MobileGlassTextButton } from '../../components/glass/text-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 
 export type NativeWebViewEngineEvent = {
   readonly nativeEvent?: object

@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { resolveDefaultAgentForNewTab } from '@/lib/agent-tab-shortcuts'
-import { getConnectionId } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
+import { translate } from '~renderer/i18n/i18n'
+import { resolveDefaultAgentForNewTab } from '~renderer/lib/agent-tab-shortcuts'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { detectLanguage } from '~renderer/lib/language-detect'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import {
   getRuntimeGitCommitCompare,
   getRuntimeGitRemoteCommitUrl,
   type RuntimeGitContext
-} from '@/runtime/git-client'
-import { useAppStore } from '@/store'
+} from '~renderer/runtime/git-client'
+import { useAppStore } from '~renderer/store'
+import type { GitHistoryItem } from '~shared/git/history'
+import type { GitBranchChangeEntry, GitCommitCompareResult } from '~shared/types'
 
-import type { GitHistoryItem } from '../../../../shared/git/history'
-import type { GitBranchChangeEntry, GitCommitCompareResult } from '../../../../shared/types'
 import type { GitHistoryCommitAction } from './git-history-commit-context-menu'
 import {
   shouldOpenSourceControlRowAsPreview,

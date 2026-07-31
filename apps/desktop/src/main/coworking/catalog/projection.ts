@@ -1,8 +1,9 @@
 import type {
   CoworkingDesktopCatalog,
   CoworkingSessionCatalogPage
-} from '../../../shared/coworking/catalog-contract'
-import { COWORKING_PROTOCOL_VERSION } from '../../../shared/coworking/wire-contract'
+} from '~shared/coworking/catalog-contract'
+import { COWORKING_PROTOCOL_VERSION } from '~shared/coworking/wire-contract'
+
 import type { CoworkingQuotaProjection } from '../quota-projection'
 import type { CoworkingShareCatalogSource } from '../share-catalog-source'
 import type {

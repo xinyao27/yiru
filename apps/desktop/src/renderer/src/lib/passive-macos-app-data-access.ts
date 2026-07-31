@@ -1,4 +1,4 @@
-import type { ActiveRightSidebarTab, RightSidebarExplorerView } from '../../../shared/types'
+import type { ActiveRightSidebarTab, RightSidebarExplorerView } from '~shared/types'
 
 const MAC_APP_DATA_SEGMENT_RE = /(^|\/)Library\/(Containers|Group Containers)\//
 

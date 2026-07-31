@@ -4,34 +4,33 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
    correlation so the end-to-end event-to-store mutation contract stays
    readable in one file. */
 import { useEffect, useRef } from 'react'
-
 import {
   canAutoSaveOpenFile,
   getOpenFilesForExternalFileChange,
   isExternalReloadableEditorTab,
   isWorkingTreeCombinedDiffTab,
   notifyEditorExternalFileChange
-} from '@/components/editor/autosave'
-import { markFileChangedOnDisk } from '@/components/editor/changed-on-disk-mark'
+} from '~renderer/components/editor/autosave'
+import { markFileChangedOnDisk } from '~renderer/components/editor/changed-on-disk-mark'
 import {
   clearSelfWrite,
   getEditorSelfWriteHostId,
   getRecentSelfWrite,
   type RecentSelfWrite
-} from '@/components/editor/self-write-registry'
-import type { OpenFile } from '@/components/editor/state'
+} from '~renderer/components/editor/self-write-registry'
+import type { OpenFile } from '~renderer/components/editor/state'
 import {
   YIRU_WORKTREE_FILE_CHANGE_EVENT,
   type WorktreeFileChangeEventDetail
-} from '@/hooks/worktree-file-change-event'
-import { basename, joinPath } from '@/lib/path'
-import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/file-client'
-import { useAppStore, type AppState } from '@/store'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+} from '~renderer/hooks/worktree-file-change-event'
+import { basename, joinPath } from '~renderer/lib/path'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '~renderer/runtime/file-client'
+import { useAppStore, type AppState } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { isGitRepoKind } from '~shared/repo-kind'
+import type { FsChangedPayload } from '~shared/types'
 
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { FsChangedPayload } from '../../../../shared/types'
 import { getExternalFileChangeRelativePath } from '../workspace-panel/file-explorer/use-watch'
 
 // Why: atomic-write patterns (Claude Code's Edit tool, editors like vim,

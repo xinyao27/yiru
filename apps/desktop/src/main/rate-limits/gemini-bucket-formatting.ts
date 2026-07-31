@@ -1,4 +1,4 @@
-import type { RateLimitBucket, RateLimitWindow } from '../../shared/rate-limit-types'
+import type { RateLimitBucket, RateLimitWindow } from '~shared/rate-limit-types'
 
 const MODEL_ID_TO_BUCKET_NAME: Record<string, string> = {
   'gemini-3.1-pro': '3.1 Pro',

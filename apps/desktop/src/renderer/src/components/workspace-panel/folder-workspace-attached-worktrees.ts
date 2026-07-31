@@ -1,10 +1,5 @@
-import type {
-  FolderWorkspace,
-  Worktree,
-  WorktreeLineage,
-  WorkspaceLineage
-} from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
+import type { FolderWorkspace, Worktree, WorktreeLineage, WorkspaceLineage } from '~shared/types'
+import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
 export type AttachedWorktreeResolution = {
   folderWorkspace: FolderWorkspace | null

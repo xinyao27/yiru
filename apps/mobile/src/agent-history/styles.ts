@@ -1,4 +1,4 @@
-import { cn } from '@/style/class-names'
+import { cn } from '~/style/class-names'
 
 export const styles = {
   cardMetaText: cn('text-muted-foreground text-xs'),

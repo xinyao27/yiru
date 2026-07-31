@@ -1,7 +1,6 @@
-import { isLocalPathOpenBlocked } from '@/components/editor/local-path-open-guard'
-import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
-
-import type { GlobalSettings } from '../../../../shared/types'
+import { isLocalPathOpenBlocked } from '~renderer/components/editor/local-path-open-guard'
+import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import type { GlobalSettings } from '~shared/types'
 
 export function shouldBlockEditorTabLocalOpen(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,

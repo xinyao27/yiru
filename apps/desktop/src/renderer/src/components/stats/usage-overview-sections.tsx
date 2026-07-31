@@ -1,8 +1,7 @@
 import { WarningCircle as AlertCircle } from '@phosphor-icons/react'
-
-import { ContributionHeatmap } from '@/components/contribution-heatmap/heatmap'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
+import { ContributionHeatmap } from '~renderer/components/contribution-heatmap/heatmap'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

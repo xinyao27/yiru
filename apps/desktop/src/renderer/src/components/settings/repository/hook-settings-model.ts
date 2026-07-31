@@ -1,10 +1,6 @@
-import type {
-  HookCommandSourcePolicy,
-  Repo,
-  RepoHookSettings,
-  SetupRunPolicy
-} from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import type { HookCommandSourcePolicy, Repo, RepoHookSettings, SetupRunPolicy } from '~shared/types'
+
 import { DEFAULT_REPO_HOOK_SETTINGS } from '../constants'
 
 export type PolicyOption<P> = { policy: P; label: string; description: string }

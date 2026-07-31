@@ -1,6 +1,5 @@
-import { cn } from '@/lib/class-names'
-
-import type { YiruProfileSummary } from '../../../../shared/yiru-profiles'
+import { cn } from '~renderer/lib/class-names'
+import type { YiruProfileSummary } from '~shared/yiru-profiles'
 
 export function YiruProfileAvatar({
   profile,

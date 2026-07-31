@@ -1,8 +1,7 @@
 import { Cloud } from '@phosphor-icons/react'
 import type React from 'react'
-
-import { getCoworkingSessionCatalogStatusLabel } from '@/components/coworking/session-catalog-status'
-import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
+import { getCoworkingSessionCatalogStatusLabel } from '~renderer/components/coworking/session-catalog-status'
+import { HoverCard, HoverCardTrigger } from '~renderer/components/ui/hover-card'
 
 import { CoworkingDesktopUsageHoverCard } from './coworking-desktop-usage-hover-card'
 import type { CoworkingWorktreeSidebarRow } from './coworking-sidebar-rows'

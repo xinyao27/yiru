@@ -1,10 +1,7 @@
 import { Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '../../../i18n/i18n'
-import { readSourceControlLaunchRecipeAgentId } from '../../../lib/source-control-launch-agent-selection'
-import { BaseRefPicker } from '../../settings/base-ref-picker'
-import { Button } from '../../ui/button'
+import { BaseRefPicker } from '~renderer/components/settings/base-ref-picker'
+import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog'
+} from '~renderer/components/ui/dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { readSourceControlLaunchRecipeAgentId } from '~renderer/lib/source-control-launch-agent-selection'
+
 import { SourceControlAgentActionDialog } from './agent-action-dialog'
 import type { SourceControlController } from './controller'
 import { SourceControlDiscardDialog } from './discard-dialog'

@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
 
-import { useAppStore } from '../../store'
 import { GitHubRateLimitPanel } from '../github/rate-limit-display'
 import { GitLabRateLimitPanel } from '../gitlab/rate-limit-display'
 import { matchesSettingsSearch } from './search'

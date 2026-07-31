@@ -6,7 +6,8 @@ import {
   findTransport,
   getRuntimeMetadataPath,
   type RuntimeMetadata
-} from '../../shared/runtime-bootstrap'
+} from '~shared/runtime-bootstrap'
+
 import { RuntimeClientError } from './types'
 
 export function readMetadata(userDataPath: string): RuntimeMetadata {

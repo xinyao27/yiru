@@ -17,8 +17,8 @@ import { promisify } from 'node:util'
 
 /* eslint-disable max-lines -- Why: this file centralizes cross-platform CLI install state, launcher resolution, and PATH registration so the public shell command stays consistent across packaged and development builds. */
 import { app } from 'electron'
+import type { CliInstallMethod, CliInstallStatus } from '~shared/cli-install-types'
 
-import type { CliInstallMethod, CliInstallStatus } from '../../shared/cli-install-types'
 import { buildAppImageCliWrapper } from './appimage-cli-wrapper'
 
 const execFileAsync = promisify(execFile)

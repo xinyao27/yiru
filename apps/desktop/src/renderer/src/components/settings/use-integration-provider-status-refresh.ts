@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
-
-import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { useAppStore } from '@/store'
+import {
+  getLocalPreflightContext,
+  localPreflightContextKey
+} from '~renderer/lib/local-preflight-context'
+import { useAppStore } from '~renderer/store'
 
 export function useIntegrationProviderStatusRefresh(): void {
   const preflightStatusChecked = useAppStore((s) => s.preflightStatusChecked)

@@ -3,7 +3,7 @@ import {
   YIRU_APP_RESTART_STARTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
-} from '../../../shared/updater-renderer-events'
+} from '~shared/updater-renderer-events'
 
 let intentionalAppRestartInProgress = false
 

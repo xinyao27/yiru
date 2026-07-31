@@ -1,4 +1,5 @@
-import type { CatalogAgentInteractionDetection } from '../../../../../shared/agent/session-option-catalog'
+import type { CatalogAgentInteractionDetection } from '~shared/agent/session-option-catalog'
+
 import type { ClaudeModelSwitchOutcome } from '../claude-model-switch-confirmation'
 
 export type NativeChatSessionOptionDispatchResult = {

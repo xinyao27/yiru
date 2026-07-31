@@ -4,12 +4,12 @@ import type {
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
 import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
-
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
-} from '../../../i18n/hosted-review-localized-copy'
-import { translate } from '../../../i18n/i18n'
+} from '~renderer/i18n/hosted-review-localized-copy'
+import { translate } from '~renderer/i18n/i18n'
+
 import { resolveCreatePrIntentEligibility } from './create-pr-intent-state'
 import { canClickBlockedCreateReviewReason } from './create-review-blocked-action'
 import type { PrimaryAction, PrimaryActionInputs } from './primary-action-types'

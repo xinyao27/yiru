@@ -1,11 +1,10 @@
-import type { PaneForegroundAgentEntry } from '@/components/terminal-pane/pane-foreground-agent-state'
-
+import type { PaneForegroundAgentEntry } from '~renderer/components/terminal-pane/pane-foreground-agent-state'
 import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess
-} from '../../../../shared/agent/process-recognition'
-import { isShellProcess } from '../../../../shared/shell-process-detection'
-import type { TuiAgent } from '../../../../shared/types'
+} from '~shared/agent/process-recognition'
+import { isShellProcess } from '~shared/shell-process-detection'
+import type { TuiAgent } from '~shared/types'
 
 // Why: settle after exec, then place the final generic retry beyond sequential
 // 3s PowerShell and WMIC enrichment scans.

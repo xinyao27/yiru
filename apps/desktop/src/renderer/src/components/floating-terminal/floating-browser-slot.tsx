@@ -1,9 +1,7 @@
 import { useCallback } from 'react'
-
-import BrowserPane from '@/components/browser-pane/browser-pane'
-import { registerBrowserOverlaySlotViewport } from '@/runtime/browser-page-viewport'
-
-import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
+import BrowserPane from '~renderer/components/browser-pane/browser-pane'
+import { registerBrowserOverlaySlotViewport } from '~renderer/runtime/browser-page-viewport'
+import type { BrowserTab as BrowserTabState } from '~shared/types'
 
 // Why: BrowserPane mounts its persistent Electron <webview> into a slot viewport
 // root keyed by the browser tab id. The main workspace registers that root via

@@ -1,9 +1,7 @@
 import { PTY_SESSION_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
-
-import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
-
-import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
-import type { TerminalTab } from '../../../../shared/types'
+import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { parseAppSshPtyId } from '~shared/ssh-pty-id'
+import type { TerminalTab } from '~shared/types'
 
 // Why: cold-park hysteresis keeps a hidden pane mounted for 30s so quick tab
 // flips never pay a re-hydrate; hot-retain keeps a bounded recently-visible

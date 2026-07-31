@@ -1,4 +1,5 @@
-import type { RuntimeGraphStatus } from '../../../shared/runtime-types'
+import type { RuntimeGraphStatus } from '~shared/runtime-types'
+
 import {
   TerminalSessionGraph,
   type TerminalSessionGraphPort,

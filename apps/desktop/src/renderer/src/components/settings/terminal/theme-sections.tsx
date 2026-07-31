@@ -1,14 +1,14 @@
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
-
-import type { GlobalSettings } from '../../../../../shared/types'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   DEFAULT_TERMINAL_THEME_DARK,
   DEFAULT_TERMINAL_THEME_LIGHT,
   getAvailableTerminalThemeOptions,
   resolveEffectiveTerminalAppearance
-} from '../../../lib/terminal-theme'
+} from '~renderer/lib/terminal-theme'
+import type { GlobalSettings } from '~shared/types'
+
 import {
   ColorField,
   SettingsSegmentedControl,

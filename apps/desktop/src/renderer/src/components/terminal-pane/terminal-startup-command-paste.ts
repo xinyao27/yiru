@@ -1,4 +1,4 @@
-import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
 
 import {
   executeTerminalPastePlan,

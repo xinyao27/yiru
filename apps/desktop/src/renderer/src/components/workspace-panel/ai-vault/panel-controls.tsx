@@ -17,12 +17,8 @@ import {
 } from '@yiru/workbench-model/agent'
 import { getExecutionHostLabel, type ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import type React from 'react'
-
-import { translate } from '../../../i18n/i18n'
-import { AgentIcon } from '../../../lib/agent-catalog'
-import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
-import { Button } from '../../ui/button'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -33,8 +29,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '../../ui/dropdown-menu'
-import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group'
+} from '~renderer/components/ui/dropdown-menu'
+import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
+import { translate } from '~renderer/i18n/i18n'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
 import type { AiVaultHostScopeOption } from './host-scope'
 import { agentLabel, type AiVaultSessionGroup } from './session-filters'

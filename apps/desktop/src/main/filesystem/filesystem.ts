@@ -9,11 +9,10 @@ import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
-
-import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message/host-key'
-import { validateGitForkSyncExpectedUpstream } from '../../shared/git/fork-sync'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
-import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
+import { getCommitMessageModelDiscoveryHostKey } from '~shared/commit-message/host-key'
+import { validateGitForkSyncExpectedUpstream } from '~shared/git/fork-sync'
+import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+import { assertGitPushTargetShape } from '~shared/git/push-target-validation'
 import type {
   GitAddTagResult,
   GitCheckoutCommitResult,
@@ -24,8 +23,8 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '../../shared/git/write-op-results'
-import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control/ai'
+} from '~shared/git/write-op-results'
+import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
 import {
   buildRgArgs,
   createAccumulator,
@@ -33,7 +32,7 @@ import {
   finalize,
   ingestRgJsonLine,
   SEARCH_TIMEOUT_MS
-} from '../../shared/text-search'
+} from '~shared/text-search'
 import type {
   DirEntry,
   GitBranchCompareResult,
@@ -52,7 +51,8 @@ import type {
   SearchResult,
   Repo,
   TuiAgent
-} from '../../shared/types'
+} from '~shared/types'
+
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { createBranchFromCommit } from '../git/branch-create'

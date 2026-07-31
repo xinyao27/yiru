@@ -1,4 +1,4 @@
-import { isWindowVisible } from '../../lib/window-visibility-interval'
+import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
 
 export type WindowVisibilityTimeoutPollerTimer = ReturnType<typeof setTimeout>
 

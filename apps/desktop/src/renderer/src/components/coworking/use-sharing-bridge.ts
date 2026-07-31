@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 export function useCoworkingSharingBridge(): void {
   const applySnapshot = useAppStore((state) => state.applyCoworkingSharingSnapshot)

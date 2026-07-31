@@ -8,15 +8,15 @@ import path from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { net, session } from 'electron'
-
-import type { NetworkProxySettings } from '../../shared/network-proxy'
+import type { NetworkProxySettings } from '~shared/network-proxy'
 import type {
   ProviderRateLimits,
   RateLimitWindow,
   UsageRateLimitFailureKind,
   UsageRateLimitMetadata,
   UsageRateLimitSource
-} from '../../shared/rate-limit-types'
+} from '~shared/rate-limit-types'
+
 import {
   deleteActiveClaudeKeychainCredentialsStrict,
   readActiveClaudeKeychainCredentials,

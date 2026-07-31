@@ -2,15 +2,14 @@ import { Warning as AlertTriangle, Cloud } from '@phosphor-icons/react'
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Button } from '~renderer/components/ui/button'
+import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { useAppStore } from '~renderer/store'
+import type { RemoteWorkspaceSyncStatus } from '~renderer/store/slices/ssh'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import { useAppStore } from '../../store'
-import type { RemoteWorkspaceSyncStatus } from '../../store/slices/ssh'
 import { STATUS_LABELS, statusColor } from '../settings/ssh/target-card'
 
 function isReconnectable(status: SshConnectionStatus): boolean {

@@ -1,10 +1,9 @@
 import { DownloadSimple } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
+import { SKILLS_MARKETPLACE_PARTITION } from '~shared/constants'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-
-import { SKILLS_MARKETPLACE_PARTITION } from '../../../../shared/constants'
 import type { SkillInstallRequest } from './install-dialog'
 import { SKILLS_MARKETPLACE_URL } from './marketplace-url'
 

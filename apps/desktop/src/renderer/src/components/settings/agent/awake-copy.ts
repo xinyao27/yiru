@@ -1,4 +1,5 @@
-import { translate } from '../../../i18n/i18n'
+import { translate } from '~renderer/i18n/i18n'
+
 import { searchKeywords } from '../search-keywords'
 
 const AGENT_AWAKE_TITLE_KEY = 'auto.components.settings.agent-awake-copy.e5995ce268'

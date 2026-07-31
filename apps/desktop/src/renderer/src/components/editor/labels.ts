@@ -1,5 +1,5 @@
-import type { OpenFile } from '@/components/editor/state'
-import { basename } from '@/lib/path'
+import type { OpenFile } from '~renderer/components/editor/state'
+import { basename } from '~renderer/lib/path'
 
 type EditorLabelVariant = 'fileName' | 'relativePath' | 'fullPath'
 

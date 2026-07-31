@@ -1,10 +1,10 @@
 import {
   resolveCoworkingWorkspaceRoute,
   selectCoworkingCanControl
-} from '@/components/coworking/selectors'
-import { useAppStore } from '@/store'
+} from '~renderer/components/coworking/selectors'
+import { useAppStore } from '~renderer/store'
+import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
-import type { CoworkingRequesterTransportErrorCode } from '../../../../shared/coworking/ipc-contract'
 import { getCoworkingRequesterTransportErrorCode } from './requester-error'
 import type { CoworkingWorktreeRoute } from './worktree-route'
 

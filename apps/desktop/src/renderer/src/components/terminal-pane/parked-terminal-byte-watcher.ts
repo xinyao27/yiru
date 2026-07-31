@@ -1,6 +1,5 @@
-import { getSystemPrefersDark } from '@/lib/terminal-theme'
-import { useAppStore } from '@/store'
-
+import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
+import { useAppStore } from '~renderer/store'
 /**
  * Parked terminal side-effect watcher.
  *
@@ -17,15 +16,16 @@ import { useAppStore } from '@/store'
  * moves to main. See docs/reference/terminal-hidden-view-parking.md and
  * docs/reference/terminal-side-effect-authority.md.
  */
-import { isClaudeAgent } from '../../../../shared/agent/detection'
-import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { isClaudeAgent } from '~shared/agent/detection'
+import { createCommandCodeOutputStatusDetector } from '~shared/command-code-output-status'
+import { makePaneKey } from '~shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
-} from '../../../../shared/terminal/color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/github-pr-link-detector'
-import { createOsc133CommandFinishedScanner } from '../../../../shared/terminal/osc133-command-finished'
+} from '~shared/terminal/color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '~shared/terminal/github-pr-link-detector'
+import { createOsc133CommandFinishedScanner } from '~shared/terminal/osc133-command-finished'
+
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,

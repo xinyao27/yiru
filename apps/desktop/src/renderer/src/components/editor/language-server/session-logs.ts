@@ -1,4 +1,5 @@
-import type { LanguageServerStartResult } from '../../../../../shared/language-server'
+import type { LanguageServerStartResult } from '~shared/language-server'
+
 import type { LanguageServerSessionTransport } from './session-transport'
 
 const MAX_LOG_LINES = 100

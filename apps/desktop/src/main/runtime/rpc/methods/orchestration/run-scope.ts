@@ -1,7 +1,7 @@
-import { orchestrationSkillRecoveryData } from '../../../../../shared/orchestration-rpc-contract'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import type { RunRow } from '../../../orchestration/types'
-import type { YiruRuntimeService } from '../../../yiru-runtime'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import type { RunRow } from '~main/runtime/orchestration/types'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
+import { orchestrationSkillRecoveryData } from '~shared/orchestration-rpc-contract'
 
 export function resolveRunScope(
   runtime: YiruRuntimeService,

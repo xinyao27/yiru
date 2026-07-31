@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { UniwindWebView } from '@/components/uniwind-web-view'
-import { cn } from '@/style/class-names'
-import { resolveCssString } from '@/style/resolve-css-variable'
+import { UniwindWebView } from '~/components/uniwind-web-view'
+import { cn } from '~/style/class-names'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 type Props = {
   codeClassName: string

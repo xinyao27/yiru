@@ -1,16 +1,10 @@
 import type { RefObject } from 'react'
 import React, { Suspense } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import type { BrowserTab, TerminalTab, TopLevelView, WorkspaceVisibleTabType } from '~shared/types'
 
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-
-import type {
-  BrowserTab,
-  TerminalTab,
-  TopLevelView,
-  WorkspaceVisibleTabType
-} from '../../../../shared/types'
 import BrowserPane from '../browser-pane/browser-pane'
 import CodexRestartChip from '../codex-restart-chip'
 import type { OpenFile } from '../editor/state'

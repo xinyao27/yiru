@@ -1,4 +1,4 @@
-import type { FeatureInteractionState } from '../../../../shared/feature-interactions'
+import type { FeatureInteractionState } from '~shared/feature-interactions'
 import {
   FEATURE_TIPS,
   getCompletedFeatureTipIds,
@@ -6,8 +6,8 @@ import {
   isFeatureTipId,
   type FeatureTip,
   type FeatureTipId
-} from '../../../../shared/feature-tips'
-import type { GlobalSettings } from '../../../../shared/types'
+} from '~shared/feature-tips'
+import type { GlobalSettings } from '~shared/types'
 
 export function getFeatureTipForModal(args: {
   cliInstalled: boolean

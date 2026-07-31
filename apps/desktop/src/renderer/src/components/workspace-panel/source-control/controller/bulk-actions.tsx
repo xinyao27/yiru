@@ -1,12 +1,9 @@
 import { shouldForcePushWithLeaseForUpstream } from '@yiru/workbench-model/review'
 import { useCallback, useRef } from 'react'
+import { getStageAllPaths } from '~renderer/components/workspace-panel/discard-all-sequence'
+import { getConnectionId } from '~renderer/lib/connection-context'
+import { bulkStageRuntimeGitPaths, bulkUnstageRuntimeGitPaths } from '~renderer/runtime/git-client'
 
-import { getConnectionId } from '../../../../lib/connection-context'
-import {
-  bulkStageRuntimeGitPaths,
-  bulkUnstageRuntimeGitPaths
-} from '../../../../runtime/git-client'
-import { getStageAllPaths } from '../../discard-all-sequence'
 import type {
   BranchCompareRemoteStatusSnapshot,
   BranchCompareStatusHeadSnapshot

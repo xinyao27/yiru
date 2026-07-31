@@ -2,9 +2,9 @@ import type { GitHubReaction, GitHubReactionContent, PRComment } from '@yiru/wor
 import { memo, useState } from 'react'
 import { Image, Linking, Text, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { isResolvableComment } from '~/session/pr/comment-actions'
+import { cn } from '~/style/class-names'
 
-import { isResolvableComment } from '../../session/pr/comment-actions'
 import { MobileContentSection } from '../content-section'
 import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'

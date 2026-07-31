@@ -2,10 +2,10 @@ import type {
   RemoteServerUpdateInstallResult,
   RemoteServerUpdaterSnapshot,
   RemoteServerUpdateSupport
-} from '../../../shared/remote-server-update'
-import type { PublicKnownRuntimeEnvironment } from '../../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../../shared/runtime-types'
-import type { UpdateCheckOptions } from '../../../shared/types'
+} from '~shared/remote-server-update'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+import type { RuntimeStatus } from '~shared/runtime-types'
+import type { UpdateCheckOptions } from '~shared/types'
 
 export type RemoteServerUpdatePhase =
   | 'checking'

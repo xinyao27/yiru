@@ -1,20 +1,20 @@
 import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
-
-import { normalizeAppIconId } from '../../shared/app-icon'
-import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../../shared/auto-rename-branch-from-work-settings'
-import { getDefaultSettings, getDefaultVoiceSettings } from '../../shared/constants'
-import { normalizeLanguageServerSettings } from '../../shared/language-server'
-import { normalizeLoaderStyle } from '../../shared/loader-style'
-import { normalizeOpenInApplications } from '../../shared/open-in-applications'
-import { deriveGlobalWindowsRuntimeDefaultFromLegacySettings } from '../../shared/project-execution-runtime'
+import { normalizeAppIconId } from '~shared/app-icon'
+import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
+import { getDefaultSettings, getDefaultVoiceSettings } from '~shared/constants'
+import { normalizeLanguageServerSettings } from '~shared/language-server'
+import { normalizeLoaderStyle } from '~shared/loader-style'
+import { normalizeOpenInApplications } from '~shared/open-in-applications'
+import { deriveGlobalWindowsRuntimeDefaultFromLegacySettings } from '~shared/project-execution-runtime'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   projectSourceControlAiToLegacyCommitMessageAi,
   sourceControlAiSettingsFromLegacy
-} from '../../shared/source-control/ai'
-import { normalizeSourceControlGroupOrder } from '../../shared/source-control/group-order'
-import type { GlobalSettings } from '../../shared/types'
-import { normalizeUiLanguage } from '../../shared/ui-language'
+} from '~shared/source-control/ai'
+import { normalizeSourceControlGroupOrder } from '~shared/source-control/group-order'
+import type { GlobalSettings } from '~shared/types'
+import { normalizeUiLanguage } from '~shared/ui-language'
+
 import { decodePersistedAgentSettings } from './persisted-agent-settings-codec'
 import { decodePersistedFloatingWorkspaceSettings } from './persisted-floating-workspace-settings-codec'
 import { normalizePersistedNotificationSettings } from './persisted-notification-settings-codec'

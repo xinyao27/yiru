@@ -1,13 +1,12 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import React, { useCallback, useMemo, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-
-import { getAgentSessionOptionCatalog } from '../../../../shared/agent/session-option-catalog'
+import { translate } from '~renderer/i18n/i18n'
+import { getAgentSessionOptionCatalog } from '~shared/agent/session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionValue
-} from '../../../../shared/native-chat/session-options'
+} from '~shared/native-chat/session-options'
+
 import {
   nativeChatSessionChoiceLabel,
   nativeChatSessionOptionLabel

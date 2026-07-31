@@ -1,21 +1,20 @@
 import React, { useEffect, useRef } from 'react'
-
+import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 import {
   formatKeybinding,
   isDoubleTapBinding,
   type KeybindingActionId,
   type KeybindingInput
-} from '../../../../../shared/keybindings'
+} from '~shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   modifierFromKeyEvent,
   toModifierDoubleTapEvent
-} from '../../../../../shared/modifier-double-tap-detector'
-import { translate } from '../../../i18n/i18n'
-import { cn } from '../../../lib/class-names'
-import { ShortcutKeyCombo } from '../../shortcut-key-combo'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+} from '~shared/modifier-double-tap-detector'
 
 type ShortcutRecorderButtonProps = {
   actionId: KeybindingActionId

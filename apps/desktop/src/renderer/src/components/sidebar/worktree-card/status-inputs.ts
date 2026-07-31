@@ -1,5 +1,5 @@
-import type { TerminalPaneLayoutNode } from '../../../../../shared/types'
-import type { AppState } from '../../../store/types'
+import type { AppState } from '~renderer/store/types'
+import type { TerminalPaneLayoutNode } from '~shared/types'
 
 // Why: these selectors return fresh maps whose top-level values preserve
 // underlying per-tab references, so callers must compare them shallowly.

@@ -4,7 +4,7 @@
 import {
   sanitizeBracketedPasteText,
   wrapTerminalBracketedPasteText
-} from '@/lib/terminal-bracketed-paste'
+} from '~renderer/lib/terminal-bracketed-paste'
 
 // Why: carriage return (not \n) is what xterm/agent composers treat as the
 // submit/Enter key over a PTY.

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-
 import {
   captureCmdJActiveGroupSnapshot,
   type CmdJActiveGroupSnapshot
-} from '@/components/cmd-j/quick-action-context'
-import { createWorktreePaletteRequestGuard } from '@/components/worktree-jump-palette/worktree-palette-create-action'
-import { useAppStore } from '@/store'
+} from '~renderer/components/cmd-j/quick-action-context'
+import { createWorktreePaletteRequestGuard } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
+import { useAppStore } from '~renderer/store'
 
 import type { PaletteStoreState } from './use-palette-store-state'
 

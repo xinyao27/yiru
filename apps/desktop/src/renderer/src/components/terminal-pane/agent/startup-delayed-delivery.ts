@@ -1,6 +1,7 @@
-import { parsePaneKey } from '../../../../../shared/stable-pane-id'
-import type { AgentStartupPlan } from '../../../lib/tui-agent-startup'
-import { useAppStore } from '../../../store'
+import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import { useAppStore } from '~renderer/store'
+import { parsePaneKey } from '~shared/stable-pane-id'
+
 import {
   agentStartupDeliveryKey as deliveryKey,
   isAgentStartupDeliveryConsumed,

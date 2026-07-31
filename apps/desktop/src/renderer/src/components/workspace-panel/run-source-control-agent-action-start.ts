@@ -1,16 +1,15 @@
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-
+import { translate } from '~renderer/i18n/i18n'
+import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
+import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control/ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/ai-recipe-save'
-import type { LaunchSource } from '../../../../shared/telemetry-events'
-import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
+} from '~shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '~shared/source-control/ai-recipe-save'
+import type { LaunchSource } from '~shared/telemetry-events'
+import type { GlobalSettings, Repo, TuiAgent } from '~shared/types'
+
 import { sourceControlActionRecipeMatchesTarget } from './source-control/action-recipe-match'
 import { resolveSourceControlAgentSaveTarget } from './source-control/agent-action-dialog-support'
 

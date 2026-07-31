@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
-
-import { useAppStore } from '@/store'
+import { useAppStore } from '~renderer/store'
 
 import { synchronizeTerminalProviderSnapshotCapabilities } from './provider-snapshot-capability'
 

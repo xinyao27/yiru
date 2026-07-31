@@ -1,9 +1,8 @@
 import { Question } from '@phosphor-icons/react'
 import React from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { cn } from '@/lib/class-names'
-import { getWorktreeStatusLabel, type WorktreeStatus } from '@/lib/worktree-status'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { cn } from '~renderer/lib/class-names'
+import { getWorktreeStatusLabel, type WorktreeStatus } from '~renderer/lib/worktree-status'
 
 // Why: re-export WorktreeStatus under the existing `Status` alias so the
 // sidebar component and the canonical lib share one source of truth — the

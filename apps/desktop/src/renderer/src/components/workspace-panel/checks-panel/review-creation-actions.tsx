@@ -1,8 +1,8 @@
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
+import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
+import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
-import { openWorkspacePanelTab } from '../../../lib/open-workspace-panel-tab'
-import { refreshHostedReviewCard } from '../../../store/slices/hosted-review'
 import type { useChecksPanelReviewMutationsState } from './review-mutations'
 
 export function useChecksPanelReviewCreation(context: useChecksPanelReviewMutationsState) {

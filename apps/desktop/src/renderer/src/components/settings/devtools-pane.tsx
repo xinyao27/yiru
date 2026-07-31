@@ -6,9 +6,8 @@ import {
   Trash as Trash2
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-
-import { translate } from '@/i18n/i18n'
-import type { AppState } from '@/store/types'
+import { translate } from '~renderer/i18n/i18n'
+import type { AppState } from '~renderer/store/types'
 
 import { showDeleteWorktreeFailureToast } from '../sidebar/delete-worktree/failure-toast'
 import { showLocalBaseRefUpdateSuggestionToast } from '../sidebar/local-base-ref-suggestion-toast'

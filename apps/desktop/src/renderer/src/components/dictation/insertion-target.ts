@@ -1,5 +1,4 @@
 import { yieldToEventLoop } from '@yiru/workbench-model/ui'
-
 import {
   TEXT_CONTROL_PASTE_CHUNK_MAX_BYTES,
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
@@ -8,7 +7,7 @@ import {
   measureTextControlPasteByteLength,
   measureTextControlPasteByteLengthWithYield,
   pasteTextIntoTextControl
-} from '@/lib/text-control-paste'
+} from '~renderer/lib/text-control-paste'
 
 export type DictationInsertionTarget =
   | { kind: 'terminal'; tabId: string; paneId: number }

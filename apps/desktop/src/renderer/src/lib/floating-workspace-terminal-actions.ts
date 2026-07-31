@@ -1,15 +1,15 @@
-import { getGroupVisibleTabOrder } from '@/components/tab-bar/group-tab-order'
+import { getGroupVisibleTabOrder } from '~renderer/components/tab-bar/group-tab-order'
 import {
   getNextTabAcrossAllTypes,
   getNextTabWithinActiveType,
   type TabCycleType,
   type TypeCyclableTab
-} from '@/components/terminal/tab-type-cycle'
-import type { AppState } from '@/store/types'
+} from '~renderer/components/terminal/tab-type-cycle'
+import type { AppState } from '~renderer/store/types'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
+import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
+import type { BrowserTab, TabGroup } from '~shared/types'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import { keybindingMatchesAction, type KeybindingOverrides } from '../../../shared/keybindings'
-import type { BrowserTab, TabGroup } from '../../../shared/types'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from './floating-terminal'
 import { focusTerminalTabSurface } from './focus-terminal-tab-surface'
 export {

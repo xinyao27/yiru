@@ -1,4 +1,5 @@
-import type { OrchestrationDb } from '../../../../orchestration/db'
+import type { OrchestrationDb } from '~main/runtime/orchestration/db'
+
 import type { WorkerSetupReceipt } from '../worker/topology'
 import { isFederationEffectUnknown } from './effects'
 

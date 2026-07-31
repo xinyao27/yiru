@@ -1,12 +1,11 @@
 import { BookOpen } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { Badge } from '~renderer/components/ui/badge'
+import { Button } from '~renderer/components/ui/button'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
+import { translate } from '~renderer/i18n/i18n'
+import type { DiscoveredSkill } from '~shared/skills'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { translate } from '@/i18n/i18n'
-
-import type { DiscoveredSkill } from '../../../../shared/skills'
 import { SkillsEmptyState } from './empty-state'
 import type { SkillsFilterState } from './filter'
 import { SkillsFilterBar } from './filter-bar'

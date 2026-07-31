@@ -29,7 +29,7 @@
 // then drops quietly until the next session reset. Rate-limiting the logs
 // themselves is what keeps a pathological caller from DoSing stderr.
 
-import { eventSchemas, type EventName } from '../../shared/telemetry-events'
+import { eventSchemas, type EventName } from '~shared/telemetry-events'
 
 const PER_EVENT_DEFAULT_CAPACITY = 30
 const PER_EVENT_AGENT_ERROR_CAPACITY = 20

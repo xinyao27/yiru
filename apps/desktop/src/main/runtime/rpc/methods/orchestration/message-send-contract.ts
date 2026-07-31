@@ -1,11 +1,10 @@
 import { z } from 'zod'
-
+import { isGroupAddress } from '~main/runtime/orchestration/groups'
 import {
   OptionalBoolean,
   OptionalString,
   requiredString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { isGroupAddress } from '../../../orchestration/groups'
+} from '~shared/runtime-method-contracts/runtime-method-params'
 
 function getLifecycleGroupRecipientError(type: 'worker_done' | 'heartbeat'): string {
   return `${type} messages belong to one exact Dispatch and cannot target a group address.`

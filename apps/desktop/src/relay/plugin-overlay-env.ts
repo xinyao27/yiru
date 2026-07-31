@@ -1,5 +1,5 @@
-import { readShellStartupEnvVar } from '../main/pty/shell-startup-env'
-import type { PiAgentKind } from '../shared/pi-agent-kind'
+import { readShellStartupEnvVar } from '~main/pty/shell-startup-env'
+import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 function firstNonEmpty(...values: (string | undefined)[]): string | undefined {
   return values.find((value) => typeof value === 'string' && value.length > 0)

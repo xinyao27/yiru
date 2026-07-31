@@ -10,13 +10,12 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useEffect } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { Switch } from '~renderer/components/ui/switch'
+import { translate } from '~renderer/i18n/i18n'
+import { useAppStore } from '~renderer/store'
+import type { ClaudeUsageRange, ClaudeUsageScope } from '~shared/claude-usage-types'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
-
-import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'
-import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

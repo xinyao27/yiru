@@ -1,4 +1,5 @@
-import type { RpcMethod } from '../../core'
+import type { RpcMethod } from '~main/runtime/rpc/core'
+
 import { ORCHESTRATION_ASK_METHODS } from './ask'
 import { ORCHESTRATION_DISPATCH_METHODS } from './dispatch'
 import { ORCHESTRATION_FEDERATION_METHODS } from './federation/methods'

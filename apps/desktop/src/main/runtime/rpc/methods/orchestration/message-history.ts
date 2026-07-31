@@ -1,13 +1,13 @@
 import { z } from 'zod'
-
-import { ORCHESTRATION_LEGACY_RUN_ID } from '../../../../../shared/orchestration-rpc-contract'
+import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
+import { defineMethod, type RpcMethod } from '~main/runtime/rpc/core'
+import { ORCHESTRATION_LEGACY_RUN_ID } from '~shared/orchestration-rpc-contract'
 import {
   OptionalFiniteNumber,
   OptionalString,
   requiredString
-} from '../../../../../shared/runtime-method-contracts/runtime-method-params'
-import { OrchestrationError } from '../../../orchestration/orchestration-error'
-import { defineMethod, type RpcMethod } from '../../core'
+} from '~shared/runtime-method-contracts/runtime-method-params'
+
 import { resolveRunScope } from './run-scope'
 
 const ReplyParams = z.object({

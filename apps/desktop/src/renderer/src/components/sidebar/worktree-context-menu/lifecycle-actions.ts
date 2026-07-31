@@ -1,9 +1,8 @@
 import { useCallback } from 'react'
 import type { RefObject } from 'react'
+import { useAppStore } from '~renderer/store'
+import { folderWorkspaceKey } from '~shared/workspace/scope'
 
-import { useAppStore } from '@/store'
-
-import { folderWorkspaceKey } from '../../../../../shared/workspace/scope'
 import { runWorktreeBatchDelete, runWorktreeDelete } from '../delete-worktree/flow'
 import { runSleepWorktrees } from '../sleep-worktree-flow'
 import { prepareDeleteSiblingPositionRestore } from './delete-position'

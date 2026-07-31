@@ -1,4 +1,5 @@
-import { COWORKING_CATALOG_MAX_WORKTREES } from '../../shared/coworking/catalog-contract'
+import { COWORKING_CATALOG_MAX_WORKTREES } from '~shared/coworking/catalog-contract'
+
 import { CoworkingPublicationValidationError } from './publication-errors'
 import { COWORKING_PUBLICATION_MAX_REGISTERED_WORKTREES } from './publication-inventory-limits'
 import {
