@@ -2,7 +2,7 @@ import type { GitHistoryItem } from '../../../../../shared/git/history'
 import { makeEdge, makeOffPageEdge, type GitGraphRowGap, type LayoutContext } from './layout-path'
 import { GIT_GRAPH_COLORS } from './palette'
 
-export { GIT_GRAPH_EXPAND_HEIGHT, type GitGraphRowGap } from './layout-path'
+export { GIT_GRAPH_EXPAND_HEIGHT, GIT_GRAPH_PIXEL_SIZE, type GitGraphRowGap } from './layout-path'
 
 // Why: faithful port of vscode-git-graph's `web/graph.ts` column/colour reuse
 // algorithm (getAvailableColour + registerUnavailablePoint + the merge
@@ -10,11 +10,10 @@ export { GIT_GRAPH_EXPAND_HEIGHT, type GitGraphRowGap } from './layout-path'
 // (toPixel/pathFromPoints/makeEdge) lives in ./layout-path.ts, and lane
 // colours live in ./palette.ts.
 
-export type GitGraphLineStyle = 'rounded' | 'angular'
+export type GitGraphLineStyle = 'rounded' | 'angular' | 'pixel'
 export type GitGraphGrid = { x: number; y: number; offsetX: number; offsetY: number }
 
 export const GIT_GRAPH_DEFAULT_GRID: GitGraphGrid = { x: 16, y: 24, offsetX: 16, offsetY: 12 }
-export const GIT_GRAPH_VERTEX_RADIUS = 4
 
 export type GitGraphVertex = {
   commitId: string
@@ -237,7 +236,7 @@ export function buildGitGraphLayout(
 ): GitGraphLayout {
   const ctx: LayoutContext = {
     grid: options?.grid ?? GIT_GRAPH_DEFAULT_GRID,
-    style: options?.style ?? 'rounded',
+    style: options?.style ?? 'pixel',
     rowGap: options?.rowGap
   }
   const grid = ctx.grid

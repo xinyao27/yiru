@@ -1,22 +1,17 @@
 import type React from 'react'
 
-import { resolveDocumentTheme } from '@/components/editor/document-theme'
-import { useAppStore } from '@/store'
-
 import {
   GIT_GRAPH_DEFAULT_GRID,
-  GIT_GRAPH_VERTEX_RADIUS,
+  GIT_GRAPH_PIXEL_SIZE,
   type GitGraphGrid,
   type GitGraphLayout,
   type GitGraphRowGap
 } from './layout'
-import { gitGraphPalette } from './palette'
+import { GIT_GRAPH_COLORS } from './palette'
+import { gitGraphVertexPath } from './vertex-mosaic'
 
 const MUTED_OPACITY = 0.5
-// Why: the checked-out commit's line/vertex gets a heavier stroke to draw the
-// eye to "where am I", matching vscode-git-graph's `.commit.current` rule.
-const CURRENT_HEAD_STROKE_WIDTH = 2
-const DEFAULT_STROKE_WIDTH = 1
+const DEFAULT_STROKE_WIDTH = GIT_GRAPH_PIXEL_SIZE
 
 export type GitGraphSvgProps = {
   layout: GitGraphLayout
@@ -39,9 +34,9 @@ export function GitGraphSvg({
   grid = GIT_GRAPH_DEFAULT_GRID,
   rowGap
 }: GitGraphSvgProps): React.JSX.Element {
-  const settings = useAppStore((s) => s.settings)
-  const isDark = resolveDocumentTheme(settings?.theme ?? 'system')
-  const colors = gitGraphPalette(isDark)
+  // Why: lane colours are design-system `var()` references, so the surface
+  // follows the theme through CSS — no store read, no re-render on theme flip.
+  const colors = GIT_GRAPH_COLORS
 
   const rowCount = layout.vertices.reduce((max, vertex) => Math.max(max, vertex.row + 1), 0)
   const hasGapRows = rowGap !== undefined && rowCount - 1 > rowGap.afterRow
@@ -58,6 +53,7 @@ export function GitGraphSvg({
       className="shrink-0 overflow-visible"
       width={layout.width}
       height={height}
+      shapeRendering="crispEdges"
     >
       {layout.edges.map((edge) => (
         <path
@@ -70,7 +66,7 @@ export function GitGraphSvg({
           fill="none"
           opacity={isMuted(edge.fromCommitId) || isMuted(edge.toCommitId) ? MUTED_OPACITY : 1}
           stroke={colors[edge.colorIndex % colors.length]}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeWidth={DEFAULT_STROKE_WIDTH}
         />
       ))}
@@ -79,15 +75,11 @@ export function GitGraphSvg({
         const cy = rowY(vertex.row)
         const color = colors[vertex.colorIndex % colors.length]
         return (
-          <circle
+          <path
             key={vertex.commitId}
-            cx={cx}
-            cy={cy}
-            r={GIT_GRAPH_VERTEX_RADIUS}
+            d={gitGraphVertexPath(cx, cy, vertex.isCurrentHead ? 'current-head' : 'commit')}
             fill={color}
             opacity={isMuted(vertex.commitId) ? MUTED_OPACITY : 1}
-            stroke={vertex.isCurrentHead ? color : undefined}
-            strokeWidth={vertex.isCurrentHead ? CURRENT_HEAD_STROKE_WIDTH : undefined}
           />
         )
       })}

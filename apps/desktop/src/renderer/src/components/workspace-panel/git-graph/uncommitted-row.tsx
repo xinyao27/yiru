@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { type GitGraphColumnWidths, gitGraphColumnFlexStyle } from './column-widths'
+import { gitGraphVertexPath } from './vertex-mosaic'
 
 // Why: pinned pseudo-row for the dirty worktree, rendered above the real
 // commit graph. It draws its own small grey vertex rather than participating
@@ -37,22 +38,24 @@ export function GitGraphUncommittedRow({
         className="flex h-full shrink-0 items-center justify-center"
         style={{ width: graphColumnWidth }}
       >
-        <svg width="16" height="24" viewBox="0 0 16 24" aria-hidden="true">
-          <circle
-            cx="8"
-            cy="12"
-            r="4"
-            fill="none"
-            stroke="var(--muted-foreground)"
-            strokeWidth="1.5"
-          />
+        {/* Why: hollow square + dashed stem in the same pixel register as
+            GitGraphSvg, so the pinned pseudo-row reads as part of the graph. */}
+        <svg
+          width="16"
+          height="24"
+          viewBox="0 0 16 24"
+          aria-hidden="true"
+          shapeRendering="crispEdges"
+        >
+          <path d={gitGraphVertexPath(8, 12, 'uncommitted')} fill="var(--muted-foreground)" />
           <line
             x1="8"
             y1="16"
             x2="8"
             y2="24"
             stroke="var(--muted-foreground)"
-            strokeWidth="1.5"
+            strokeLinecap="butt"
+            strokeWidth="2"
             strokeDasharray="2"
           />
         </svg>

@@ -1269,7 +1269,17 @@ export function registerFilesystemHandlers(
       _event,
       args: { worktreePath: string; connectionId?: string } & GitHistoryOptions
     ): Promise<GitHistoryResult> => {
-      const options: GitHistoryOptions = { limit: args.limit, baseRef: args.baseRef }
+      // Why: forward every option the contract carries. Hand-picking a subset
+      // here silently dropped `skip` (so "Load More" refetched page one and
+      // deduped it away) plus the graph's `refScope`/`includeRemoteBranches`
+      // walk — the renderer's request must survive the IPC hop intact.
+      const options: GitHistoryOptions = {
+        limit: args.limit,
+        baseRef: args.baseRef,
+        refScope: args.refScope,
+        includeRemoteBranches: args.includeRemoteBranches,
+        skip: args.skip
+      }
       if (args.connectionId) {
         const provider = getSshGitProvider(args.connectionId)
         if (!provider) {

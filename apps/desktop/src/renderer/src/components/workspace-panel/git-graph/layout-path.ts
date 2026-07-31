@@ -9,6 +9,16 @@ import { GIT_GRAPH_COLORS } from './palette'
 export type GitGraphRowGap = { afterRow: number; height: number }
 export const GIT_GRAPH_EXPAND_HEIGHT = 250
 
+// Why: the graph shares the home charts' pixel-art register (dither-kit paints
+// on a half-resolution canvas), so every pixel coordinate lands on a 2px
+// lattice and diagonals become visible stairs instead of smooth curves.
+export const GIT_GRAPH_PIXEL_SIZE = 2
+const GIT_GRAPH_PIXEL_STEPS = 4
+
+function snapToPixelLattice(value: number): number {
+  return Math.round(value / GIT_GRAPH_PIXEL_SIZE) * GIT_GRAPH_PIXEL_SIZE
+}
+
 export type GridPoint = { x: number; y: number }
 export type LayoutContext = {
   grid: GitGraphGrid
@@ -32,6 +42,22 @@ export function toPixel(
   }
 }
 
+// Why: a lane change becomes a run of axis-aligned 2px stairs — the same
+// blocky vocabulary the dither charts use — so no segment is ever a curve or
+// an off-lattice diagonal that the renderer would have to antialias.
+function pixelStaircase(from: { x: number; y: number }, to: { x: number; y: number }): string {
+  let path = ''
+  let previousY = snapToPixelLattice(from.y)
+  for (let step = 1; step <= GIT_GRAPH_PIXEL_STEPS; step++) {
+    const progress = step / GIT_GRAPH_PIXEL_STEPS
+    const x = snapToPixelLattice(from.x + (to.x - from.x) * progress)
+    const y = snapToPixelLattice(from.y + (to.y - from.y) * progress)
+    path += `L${x},${previousY}L${x},${y}`
+    previousY = y
+  }
+  return path
+}
+
 // Why: ports `Branch.draw`'s per-segment path verbatim — angular is two
 // straight elbow segments anchored at the locked endpoint; rounded is a
 // single cubic Bezier with control points pulled `d` px off each endpoint.
@@ -42,11 +68,19 @@ export function pathFromPoints(
 ): string {
   const d = grid.y * (style === 'angular' ? 0.38 : 0.8)
   const first = toPixel(points[0]!, grid, rowGap)
-  let path = `M${first.x.toFixed(0)},${first.y.toFixed(1)}`
+  let path =
+    style === 'pixel'
+      ? `M${snapToPixelLattice(first.x)},${snapToPixelLattice(first.y)}`
+      : `M${first.x.toFixed(0)},${first.y.toFixed(1)}`
   for (let i = 0; i < points.length - 1; i++) {
     const p1 = toPixel(points[i]!, grid, rowGap)
     const p2 = toPixel(points[i + 1]!, grid, rowGap)
-    if (p1.x === p2.x) {
+    if (style === 'pixel') {
+      path +=
+        p1.x === p2.x
+          ? `L${snapToPixelLattice(p2.x)},${snapToPixelLattice(p2.y)}`
+          : pixelStaircase(p1, p2)
+    } else if (p1.x === p2.x) {
       path += `L${p2.x.toFixed(0)},${p2.y.toFixed(1)}`
     } else if (style === 'angular') {
       path += lockedFirstFlags[i]
