@@ -2034,7 +2034,15 @@
             "stoppingLabel": "Stopping skill update",
             "runningLabel": "Updating skills",
             "successLabel": "Skills updated",
-            "errorLabel": "Skill update failed"
+            "errorLabel": "Skill update failed",
+            "installRunningLabel": "Installing skill",
+            "installStoppingLabel": "Stopping skill install",
+            "installSuccessLabel": "Skill installed",
+            "installErrorLabel": "Skill install failed",
+            "removeRunningLabel": "Removing skill",
+            "removeStoppingLabel": "Stopping skill removal",
+            "removeSuccessLabel": "Skill removed",
+            "removeErrorLabel": "Skill removal failed"
           },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "更新されました",
@@ -2566,10 +2574,7 @@
           "426be2aac6": "Codex",
           "39b6998ddb": "すべてのプロバイダー",
           "a68dee6a32": "スキルを検索",
-          "e46e162e2e": "から",
-          "b088e0785d": "ベータ",
           "f43ad6edf3": "スキル",
-          "7e828fb2c6": "戻る",
           "ea72d6185b": "ローカルスキルをスキャンできませんでした",
           "dc4c3328ee": "ファイルを公開する",
           "9963dff6d3": "説明が見つかりませんでした。",
@@ -2580,7 +2585,12 @@
           "6a62a0168c": "一致なし",
           "cd7893fbc1": "スキャンスキル",
           "35b9a724a0": "利用可能",
-          "0c74e7ff34": "ローカル"
+          "0c74e7ff34": "ローカル",
+          "installedTab": "Installed",
+          "marketplaceTab": "Browse marketplace",
+          "closeSkills": "Close skills",
+          "closeShortcut": "Close · Esc",
+          "refreshSkills": "Refresh skills"
         },
         "SkillFreshnessNudge": {
           "titleOne": "インストール済みの Yiru スキルが古くなっています",
@@ -2620,7 +2630,6 @@
           "skippedReasonBrokenLink": "This copy is a shortcut to something that no longer exists, so Yiru left it out — you can safely delete it."
         },
         "SkillFreshnessUpdateDialog": {
-          "showLog": "Show log",
           "stoppingHeadline": "Stopping the update…",
           "runningOne": "Updating 1 skill…",
           "runningMany": "Updating {{value0}} skills…",
@@ -2661,6 +2670,76 @@
           "updateAvailable": "更新があります",
           "upToDate": "最新です",
           "installed": "インストール済み"
+        },
+        "SkillInstallDialog": {
+          "title": "Install skill",
+          "description": "Runs the skills CLI against a repository source such as owner/repo.",
+          "sourceLabel": "Source",
+          "sourcePlaceholder": "owner/repo",
+          "skillLabel": "Skill name (optional)",
+          "skillPlaceholder": "Leave empty to install every skill in the source",
+          "scopeLabel": "Install into",
+          "scopeGlobal": "All projects (global)",
+          "stoppingHeadline": "Stopping the install…",
+          "runningHeadline": "Installing…",
+          "success": "Skill installed",
+          "errorTitle": "The install didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "done": "Done",
+          "close": "Close",
+          "retry": "Retry install",
+          "install": "Install"
+        },
+        "SkillsMarketplace": {
+          "installFromSource": "Install from source",
+          "installCurrent": "Install this skill"
+        },
+        "SkillRemoveDialog": {
+          "title": "Remove skill",
+          "description": "Deletes {{value0}} from the global skill home shared by every project.",
+          "stoppingHeadline": "Stopping the removal…",
+          "runningHeadline": "Removing…",
+          "success": "Skill removed",
+          "errorTitle": "The removal didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "done": "Done",
+          "cancel": "Cancel",
+          "retry": "Retry removal",
+          "confirm": "Remove",
+          "folderName": "Removes the skill folder {{value0}}."
+        },
+        "SkillRunLog": {
+          "showLog": "Show log",
+          "unsafeCommandPath": "Could not run {{value0}} safely from this location.",
+          "launchFailed": "The skills command could not start: {{value0}}",
+          "commandExitedUnknown": "The skills command stopped unexpectedly.",
+          "commandExited": "The skills command exited with code {{value0}}.",
+          "incomplete": "The command finished, but the skills did not land on disk."
+        },
+        "startRejection": {
+          "unavailable": "Could not reach the skills command.",
+          "alreadyRunning": "Another skills command is still running.",
+          "invalidNames": "That skill name is not a valid package name.",
+          "invalidSource": "Enter a source like owner/repo, a GitHub URL, or a publisher domain.",
+          "invalidScope": "That project is no longer available.",
+          "unsafeCommandPath": "Could not run npx safely from this location."
+        },
+        "SkillDetail": {
+          "listingTruncated": "Only the first files in this skill are listed.",
+          "listingFailed": "Could not list the files in this skill.",
+          "update": "Update skill",
+          "remove": "Remove skill"
+        },
+        "SkillFileView": {
+          "invalidPath": "That file is no longer part of this skill.",
+          "binary": "This looks like a binary file, so there is nothing to show here.",
+          "unsupportedHost": "Reading skill files is only available on the local host.",
+          "unreadable": "Could not read this file from disk.",
+          "loading": "Reading file…",
+          "emptyBody": "This file is empty.",
+          "truncated": "This file is too large to show in full. Open it from disk to read the rest."
         }
       },
       "sidebar": {
@@ -2966,7 +3045,8 @@
           "1b5c41caee": "Yiru モバイル",
           "f323383e9a": "自動化",
           "d599269755": "サイドバーから隠す",
-          "home": "Home"
+          "home": "Home",
+          "skills": "Skills"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "クリア",
@@ -3183,7 +3263,14 @@
           "sleepWorkspaces": "{{count}} 個のワークスペースをスリープ",
           "deleteSelected": "選択項目を削除",
           "deleteOneWorkspace": "1 個のワークスペースを削除",
-          "deleteWorkspaces": "{{count}} 個のワークスペースを削除"
+          "deleteWorkspaces": "{{count}} 個のワークスペースを削除",
+          "debugLogs": "デバッグログ",
+          "viewDebugLogs": "ログを表示",
+          "clearDebugLogs": "ログをクリア",
+          "noDebugLogs": "この worktree にデバッグログはありません。",
+          "debugLogsCleared": "デバッグログをクリアしました。",
+          "viewDebugLogsFailed": "デバッグログを読み取れませんでした。",
+          "clearDebugLogsFailed": "デバッグログをクリアできませんでした。"
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",

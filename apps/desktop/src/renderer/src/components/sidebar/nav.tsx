@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   CalendarDots as CalendarClock,
   DeviceMobile as Smartphone,
   House
@@ -40,6 +41,7 @@ const SidebarNav = React.memo(function SidebarNav() {
   // translate() preserves Yiru's pseudo-localization behavior.
   useTranslation()
   const openHomePage = useAppStore((s) => s.openHomePage)
+  const openSkillsPage = useAppStore((s) => s.openSkillsPage)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
   const openMobilePage = useAppStore((s) => s.openMobilePage)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -47,6 +49,7 @@ const SidebarNav = React.memo(function SidebarNav() {
   const showAutomationsButton = useAppStore((s) => shouldShowAutomationsButton(s.settings))
   const showMobileButton = useAppStore((s) => shouldShowMobileButton(s.settings))
   const homeActive = activeView === 'home'
+  const skillsActive = activeView === 'skills'
   const automationsActive = activeView === 'automations'
   const mobileActive = activeView === 'mobile'
   const mobileOnboardingBadge = useMobileSidebarOnboardingBadge(showMobileButton)
@@ -79,6 +82,22 @@ const SidebarNav = React.memo(function SidebarNav() {
         </span>
       </Button>
       <SetupGuideSidebarEntry />
+      <Button
+        variant="ghost"
+        size="sidebar-row"
+        type="button"
+        onClick={openSkillsPage}
+        aria-current={skillsActive ? 'page' : undefined}
+        className={getSelectableControlStateClasses(skillsActive)}
+      >
+        <BookOpen
+          className={cn('size-4 shrink-0', !skillsActive && 'text-sidebar-foreground/30')}
+          strokeWidth={1.75}
+        />
+        <span className="flex-1">
+          {translate('auto.components.sidebar.SidebarNav.skills', 'Skills')}
+        </span>
+      </Button>
       {showAutomationsButton ? (
         <ContextMenu>
           <ContextMenuTrigger

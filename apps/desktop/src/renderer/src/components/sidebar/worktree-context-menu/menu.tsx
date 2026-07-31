@@ -9,6 +9,7 @@ import { ProjectGroupNameDialog } from '../project-group-name-dialog'
 import { isEventTargetInsideCurrentTarget } from '../worktree-card/dom-events'
 import { WorktreeParentPickerPopover } from '../worktree-parent-picker-popover'
 import { WorktreeContextMenuContent } from './content'
+import { useDebugLogMenuActions } from './debug-log-actions'
 import { useLifecycleMenuActions } from './lifecycle-actions'
 import { useLineageMenuActions } from './lineage-actions'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT, shouldUseNativeContextMenu } from './opening-policy'
@@ -51,6 +52,7 @@ function WorktreeContextMenuImplementation({
   const workspaceActions = useWorkspaceMenuActions({ state, setMenuOpenState })
   const lineageActions = useLineageMenuActions({ state, scopeRef, setMenuOpenState })
   const lifecycleActions = useLifecycleMenuActions({ state, scopeRef, setMenuOpenState })
+  const debugLogActions = useDebugLogMenuActions({ state, menuOpen })
 
   useEffect(() => {
     const closeMenu = (): void => setMenuOpenState(false)
@@ -88,6 +90,7 @@ function WorktreeContextMenuImplementation({
           workspaceActions={workspaceActions}
           lineageActions={lineageActions}
           lifecycleActions={lifecycleActions}
+          debugLogActions={debugLogActions}
         />
       </ContextMenu>
       <CoworkingWorktreeVisibilityDialog

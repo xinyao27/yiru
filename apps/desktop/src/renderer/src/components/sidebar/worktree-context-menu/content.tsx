@@ -1,6 +1,7 @@
 import {
   Bell,
   BellSlash as BellOff,
+  Bug,
   Copy,
   XCircle as CircleX,
   FolderOpen as FolderInput,
@@ -36,6 +37,7 @@ import { cn } from '@/lib/class-names'
 
 import { getWorkspaceStatusVisualMeta } from '../workspace-status'
 import { WorktreeOpenInContextSubMenu } from '../worktree-open-in-menu'
+import type { DebugLogMenuActions } from './debug-log-actions'
 import type { LifecycleMenuActions } from './lifecycle-actions'
 import type { LineageMenuActions } from './lineage-actions'
 import type { WorktreeContextMenuState } from './state'
@@ -46,6 +48,7 @@ type WorktreeContextMenuContentProps = {
   workspaceActions: WorkspaceMenuActions
   lineageActions: LineageMenuActions
   lifecycleActions: LifecycleMenuActions
+  debugLogActions: DebugLogMenuActions
 }
 
 function getParentPickerLabel(validParentWorktreeId: string | null): string {
@@ -64,7 +67,8 @@ export function WorktreeContextMenuContent({
   state,
   workspaceActions,
   lineageActions,
-  lifecycleActions
+  lifecycleActions,
+  debugLogActions
 }: WorktreeContextMenuContentProps): React.JSX.Element {
   const {
     contextWorkspaceStatus,
@@ -140,6 +144,26 @@ export function WorktreeContextMenuContent({
             <Copy className="size-3.5" />
             {translate('auto.components.sidebar.WorktreeContextMenu.3350101edb', 'Copy Path')}
           </ContextMenuItem>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger disabled={isDeleting || !debugLogActions.hasDebugLogs}>
+              <Bug className="size-3.5" />
+              {translate('auto.components.sidebar.WorktreeContextMenu.debugLogs', 'Debug Logs')}
+            </ContextMenuSubTrigger>
+            <ContextMenuSubContent className="w-44">
+              <ContextMenuItem onClick={debugLogActions.handleViewDebugLogs}>
+                {translate(
+                  'auto.components.sidebar.WorktreeContextMenu.viewDebugLogs',
+                  'View Logs'
+                )}
+              </ContextMenuItem>
+              <ContextMenuItem onClick={debugLogActions.handleClearDebugLogs}>
+                {translate(
+                  'auto.components.sidebar.WorktreeContextMenu.clearDebugLogs',
+                  'Clear Logs'
+                )}
+              </ContextMenuItem>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
           {coworkingOwnerWorktree ? (
             <ContextMenuItem
               onClick={workspaceActions.handleCoworkingVisibility}
