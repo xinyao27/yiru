@@ -5,10 +5,9 @@ import {
 import Constants from 'expo-constants'
 import { View, Text, Pressable, Linking, Platform } from 'react-native'
 
+import { MobileContentSection } from '~/components/content-section'
 import { GithubLogo, Globe } from '~/components/uniwind-icons'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { YiruLogo } from '../src/components/yiru-logo'
+import { YiruLogo } from '~/components/yiru-logo'
 
 // Why: read version + native build identifier from expo-constants at
 // runtime so the About screen never drifts out of sync with app.json.

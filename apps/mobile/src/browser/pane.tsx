@@ -15,6 +15,7 @@ import {
   type PanResponderGestureState
 } from 'react-native'
 
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
@@ -431,11 +432,21 @@ export function MobileBrowserPane({
       busyRef.current = false
       setBusy(false)
       if (screencastSupported === false) {
-        setError('Update desktop Yiru to stream browser tabs on mobile.')
+        setError(
+          translate(
+            'mobile.browser.updateDesktopToStream',
+            'Update desktop Yiru to stream browser tabs on mobile.'
+          )
+        )
       } else if (screencastSupported === null) {
-        setError('Checking desktop browser streaming support.')
+        setError(
+          translate(
+            'mobile.browser.checkingStreamSupport',
+            'Checking desktop browser streaming support.'
+          )
+        )
       } else if (!tab.browserPageId) {
-        setError('Browser page is not available yet.')
+        setError(translate('mobile.browser.pageUnavailable', 'Browser page is not available yet.'))
       }
       return
     }
@@ -447,7 +458,7 @@ export function MobileBrowserPane({
       }
       busyRef.current = false
       setBusy(false)
-      setError('Browser stream timed out.')
+      setError(translate('mobile.browser.streamTimedOut', 'Browser stream timed out.'))
     }, 15_000)
     const clearStartupTimer = (): void => {
       if (startupTimer) {
@@ -503,7 +514,8 @@ export function MobileBrowserPane({
         } else if (event.type === 'dialog') {
           setDialog({
             dialogType: event.dialogType ?? 'alert',
-            message: event.message ?? 'Browser dialog'
+            message:
+              event.message ?? translate('mobile.browser.dialogFallbackMessage', 'Browser dialog')
           })
         } else if (event.type === 'dialogClosed') {
           setDialog(null)
@@ -513,7 +525,10 @@ export function MobileBrowserPane({
             busyRef.current = false
             setBusy(false)
           }
-          const message = event.message ?? event.error?.message ?? 'Browser stream failed.'
+          const message =
+            event.message ??
+            event.error?.message ??
+            translate('mobile.browser.streamFailed', 'Browser stream failed.')
           if (shouldSurfaceBrowserError(message)) {
             if (readyRef.current) {
               readyRef.current = false
@@ -580,7 +595,10 @@ export function MobileBrowserPane({
         setError(null)
         return (response as RpcSuccess).result
       } catch (err) {
-        const message = browserErrorMessage(err, 'Browser command failed')
+        const message = browserErrorMessage(
+          err,
+          translate('mobile.browser.commandFailed', 'Browser command failed')
+        )
         if (!opts.suppressError && shouldSurfaceBrowserError(message)) {
           setError(message)
         }
@@ -598,7 +616,7 @@ export function MobileBrowserPane({
   const navigateToAddress = useCallback(async () => {
     const url = normalizeBrowserUrl(addressValue)
     if (!url) {
-      setError('Enter a valid URL.')
+      setError(translate('mobile.browser.invalidUrl', 'Enter a valid URL.'))
       return
     }
     const result = (await sendBrowserRequest(
@@ -795,7 +813,7 @@ export function MobileBrowserPane({
         }
         rightClickSentRef.current = true
         void sendPointerClick(point, 'right')
-        onToast('Right click')
+        onToast(translate('mobile.browser.rightClickToast', 'Right click'))
       }, LONG_PRESS_MS)
     },
     [clearLongPressTimer, frameGeometry, mapTouchPoint, onToast, sendPointerClick]
@@ -940,7 +958,7 @@ export function MobileBrowserPane({
       { suppressError: true }
     )
     if (result !== null) {
-      onToast('Sent')
+      onToast(translate('mobile.browser.sentToast', 'Sent'))
     } else {
       setKeyboardValue(text)
     }
@@ -1191,18 +1209,20 @@ export function MobileBrowserPane({
         {dialog ? (
           <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
             <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4" isFunctional>
-              <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
+              <Text className="text-foreground text-sm font-semibold">
+                {translate('mobile.browser.dialogTitle', 'Browser Dialog')}
+              </Text>
               <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
               <MobileGlassGroup className="mt-4 flex-row justify-end gap-2" spacing={8}>
                 {dialog.dialogType !== 'alert' ? (
                   <MobileGlassTextButton
-                    label="Cancel"
+                    label={translate('mobile.browser.dialogCancel', 'Cancel')}
                     onPress={() => void sendDialogCommand('browser.dialogDismiss')}
                   />
                 ) : null}
                 <MobileGlassTextButton
                   isProminent
-                  label="OK"
+                  label={translate('mobile.browser.dialogConfirm', 'OK')}
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
                 />
               </MobileGlassGroup>

@@ -51,7 +51,7 @@
     "sync:localization-catalog": "pnpm --filter yiru run sync:localization-catalog",
     "verify:localization-coverage": "pnpm --filter yiru run verify:localization-coverage",
     "typecheck": "pnpm --filter './packages/*' run typecheck && pnpm --filter yiru run typecheck && pnpm --filter yiru-mobile run typecheck",
-    "check": "vp check --fix && pnpm run typecheck && pnpm run verify:workspace-contracts && pnpm --filter yiru run verify:repository-contracts",
+    "check": "vp check --fix && pnpm run typecheck && pnpm run verify:workspace-contracts && pnpm --filter yiru run verify:repository-contracts && pnpm --filter yiru-mobile run verify:repository-contracts",
     "lint": "vp lint --fix",
     "fmt": "vp fmt",
     "up": "taze major -Ir",
@@ -62,6 +62,7 @@
     "oxlint-plugin-react-doctor": "catalog:",
     "taze": "catalog:",
     "typescript": "catalog:desktop",
+    "typescript-api": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "yaml": "catalog:"

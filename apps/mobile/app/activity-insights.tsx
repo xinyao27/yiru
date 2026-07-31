@@ -1,1 +1,1 @@
-export { MobileActivityInsightsScreen as default } from '../src/home/activity-insights-screen'
+export { MobileActivityInsightsScreen as default } from '~/home/activity-insights-screen'

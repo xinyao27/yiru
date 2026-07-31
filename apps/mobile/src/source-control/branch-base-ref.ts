@@ -1,5 +1,6 @@
+import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
+
 import type { RpcClient } from '../transport/rpc-client'
-import { getRepoIdFromMobileWorktreeId } from '../worktree-id'
 import { isMobileGitUnavailable } from './git-status'
 
 type RuntimeRepoSummary = {

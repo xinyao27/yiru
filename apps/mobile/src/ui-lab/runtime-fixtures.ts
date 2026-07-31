@@ -1,4 +1,4 @@
-import type { Worktree } from '../worktree/workspace-list-types'
+import type { Worktree } from '../workspace/list-types'
 import { UI_LAB_MARKDOWN, UI_LAB_WORKTREE_ID } from './fixtures'
 
 const UI_LAB_WORKTREE_PATH = '/ui-lab/ridley'

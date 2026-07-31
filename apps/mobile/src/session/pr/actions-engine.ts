@@ -1,8 +1,8 @@
 import type { GitHubPRMergeMethod, PRState } from '@yiru/workbench-model/review'
 
-import type { GitHubPrMutationOutcome } from '../github-pr-mutations'
-import type { GitHubPrRepoSlug } from '../github-pr-rpc'
 import { createOptimisticField, type OptimisticField } from '../optimistic-write-sequence'
+import type { GitHubPrMutationOutcome } from './github-mutations'
+import type { GitHubPrRepoSlug } from './github-rpc'
 import { classifyPrSidebarFailure } from './sidebar-state'
 
 // Pure (React-free) engine for the PR mutation actions: owns optimistic fields,

@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router'
 
-import { MobileAgentSessionHistoryPanel } from '~/agent-history/agent-session-history-panel'
+import { MobileAgentSessionHistoryPanel } from '~/agent-history/panel'
 import { firstParam } from '~/source-control/screen-state'
 
 export default function MobileAgentSessionHistoryScreen() {

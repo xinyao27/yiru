@@ -3,21 +3,20 @@ import { useCallback, useRef, useState } from 'react'
 import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { ConnectionLog } from '~/components/connection-log'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
-
-import { ConnectionLog } from '../src/components/connection-log'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassIconButton } from '../src/components/glass/icon-button'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { useCloseHost } from '../src/transport/client-context'
-import { resolvePairConfirmRouteState } from '../src/transport/pair-confirm-state'
+import { useCloseHost } from '~/transport/client-context'
+import { resolvePairConfirmRouteState } from '~/transport/pair-confirm-state'
 import {
   startPreProfilePairing,
   type PreProfilePairingAttempt
-} from '../src/transport/pre-profile-pairing-coordinator'
-import type { ConnectionLogEntry } from '../src/transport/types'
+} from '~/transport/pre-profile-pairing-coordinator'
+import type { ConnectionLogEntry } from '~/transport/types'
 
 type Status = 'awaiting-confirm' | 'connecting' | 'error'
 

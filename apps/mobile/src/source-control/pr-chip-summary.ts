@@ -4,7 +4,8 @@ import {
   prStateBadge,
   summarizePRChecks,
   type MobileStatusToken
-} from '../components/pr-sidebar/pr-checks-presentation'
+} from '~/session/pr/sidebar/checks-presentation'
+
 import type { PrSidebarState } from '../session/pr/sidebar-state'
 
 // Pure derivation of the branch-card PR chip from the shared PR sidebar state.

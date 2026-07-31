@@ -1,7 +1,8 @@
+import { openMobilePrUrl } from '~/session/pr/compose-sheet'
+
 import { ActionSheetModal, type ActionSheetAction } from '../components/action-sheet-modal'
 import { ConfirmModal } from '../components/confirm-modal'
 import { PickerModal } from '../components/picker-modal'
-import { openMobilePrUrl } from '../components/pr-compose-sheet'
 import { MobileBranchDiffPreviewDrawer } from './branch-diff-preview-drawer'
 import type { MobileSourceControlState } from './use-source-control-state'
 

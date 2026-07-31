@@ -7,7 +7,7 @@ import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import { readMobileBranchCompareResult, readMobileGitStatusResult } from '../diff/review-rpc'
-import { fetchGithubRepoSlug } from '../github-pr-rpc'
+import { fetchGithubRepoSlug } from './github-rpc'
 
 export type MobilePrBranchContext = {
   branch: string | null

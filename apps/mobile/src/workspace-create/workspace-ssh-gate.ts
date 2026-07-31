@@ -1,5 +1,7 @@
 import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 
+import { translate } from '../i18n/translate'
+
 export type WorkspaceSshGate = {
   status: SshConnectionStatus | null
   requiresConnection: boolean
@@ -13,27 +15,27 @@ function isWorkspaceSshConnectInProgress(status: SshConnectionStatus | null): bo
 
 export function workspaceSshStatusLabel(status: SshConnectionStatus | null): string {
   if (status === 'connected') {
-    return 'Connected'
+    return translate('mobile.newWorkspace.sshStatusConnected', 'Connected')
   }
   if (status === 'connecting') {
-    return 'Connecting'
+    return translate('mobile.newWorkspace.sshStatusConnecting', 'Connecting')
   }
   if (status === 'deploying-relay') {
-    return 'Deploying relay'
+    return translate('mobile.newWorkspace.sshStatusDeployingRelay', 'Deploying relay')
   }
   if (status === 'reconnecting') {
-    return 'Reconnecting'
+    return translate('mobile.newWorkspace.sshStatusReconnecting', 'Reconnecting')
   }
   if (status === 'auth-failed') {
-    return 'Authentication failed'
+    return translate('mobile.newWorkspace.sshStatusAuthFailed', 'Authentication failed')
   }
   if (status === 'reconnection-failed') {
-    return 'Reconnect failed'
+    return translate('mobile.newWorkspace.sshStatusReconnectFailed', 'Reconnect failed')
   }
   if (status === 'error') {
-    return 'Connection failed'
+    return translate('mobile.newWorkspace.sshStatusConnectionFailed', 'Connection failed')
   }
-  return 'Disconnected'
+  return translate('mobile.newWorkspace.sshStatusDisconnected', 'Disconnected')
 }
 
 export function deriveWorkspaceSshGate(args: {

@@ -1,0 +1,7086 @@
+[
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Yiru",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Pair with desktop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Settings",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Appearance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Troubleshooting",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Connection log",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "About",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/about.tsx",
+    "kind": "jsx-text",
+    "text": "Yiru",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/about.tsx",
+    "kind": "jsx-text",
+    "text": "Open-source agent IDE for 100x builders",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/about.tsx",
+    "kind": "jsx-text",
+    "text": "yiru.ai",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Yiru browser on desktop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "object-property:subtitle",
+    "text": "Open in the streamed browser from your paired desktop.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Phone browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "object-property:subtitle",
+    "text": "Open in Safari, Chrome, or another browser on this phone.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "jsx-text",
+    "text": "LINKS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Choose where HTTP(S) links tapped in terminal output open.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Open terminal links",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/browser-settings.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Open terminal links",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/connection-log.tsx",
+    "kind": "jsx-expression",
+    "text": "· attempt",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/connection-log.tsx",
+    "kind": "jsx-expression",
+    "text": "Copied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/connection-log.tsx",
+    "kind": "jsx-expression",
+    "text": "Copy diagnostics",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/connection-log.tsx",
+    "kind": "jsx-text",
+    "text": "No connection events yet this session. Events appear as the app dials this host.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/connection-log.tsx",
+    "kind": "jsx-text",
+    "text": "No paired hosts.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Edit host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Accounts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Source Control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Agent Session History",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/_layout.tsx",
+    "kind": "object-property:title",
+    "text": "Pull Request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "object-property:placeholder",
+    "text": "items-center gap-2 py-12",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "user-visible-call",
+    "text": "Could not switch account",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-text",
+    "text": "System default",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-text",
+    "text": "Use the agent's own login",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "5h",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "7d",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Refresh accounts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-text",
+    "text": "Connecting to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-text",
+    "text": "Loading accounts…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/accounts.tsx",
+    "kind": "jsx-text",
+    "text": "Add or re-authenticate accounts from desktop Settings → Accounts.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Save host",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Go back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Change the display name or connection address. Address edits only switch where this phone connects — they do not re-pair. Use this when the same desktop is reachable at a different IP (for example home LAN vs Tailscale).",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Host name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Address",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Address",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Accepts IP, host:port, or ws:// / wss://. Missing port defaults to the current port (or 6768).",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/edit.tsx",
+    "kind": "jsx-text",
+    "text": "Connects to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "user-visible-call",
+    "text": "Could not remove host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "user-visible-call",
+    "text": "Please try again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-text",
+    "text": "Delete Worktree",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-text",
+    "text": "Delete \"",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Delete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "object-property:label",
+    "text": "Sleep",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "object-property:label",
+    "text": "Delete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Remove Host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Remove \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/index.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "\"? You can re-pair later.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Open Yiru on the host to wake sleeping agents.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Input too large (max 256 KiB)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Terminal cleared",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Couldn't clear terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Copied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Couldn't copy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Selection cleared (scrolled out of buffer)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Edit this quick command before running it",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Desktop update required for mobile browser streaming",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Browser page is not available yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Detecting Agents",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "No Enabled Agents",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Agent Presets Unavailable",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back to workspaces",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open file explorer",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open source control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "More session actions",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-text",
+    "text": "Agent History",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-text",
+    "text": "Checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Reconnect to desktop",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "user-visible-call",
+    "text": "Checking desktop capabilities - try again in a moment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Dismiss workspace creation warning",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-text",
+    "text": "No tabs in this session",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Creating...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Create Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "New Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Markdown Note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Send Review Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Choose an agent session for the current notes.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Copy Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Refresh",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Copy Path",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Close",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Unsaved markdown changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Copy or discard phone drafts before leaving.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Copy All & Leave",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Discard & Leave",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Discard Changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Replace the phone draft with the latest desktop file?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Rename Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Terminal name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:title",
+    "text": "New Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Enter a URL, or leave blank for a new tab.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "https://example.com",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Remove this custom shortcut?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/h/[hostId]/session/[worktreeId].tsx",
+    "kind": "object-property:label",
+    "text": "Remove",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "user-visible-call",
+    "text": "Could not remove host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "user-visible-call",
+    "text": "Please try again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Connect your desktop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Pair with Yiru on your computer to check on your agents, jump into any terminal, and drive work from your phone.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Pair Desktop",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "How it works",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Desktops",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Resume",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Quick Actions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "New Workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-text",
+    "text": "Account usage",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "5h",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "7d",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:label",
+    "text": "Disconnect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:label",
+    "text": "Edit host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:label",
+    "text": "Remove",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Remove Host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Remove \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "\"? You can re-pair later.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:title",
+    "text": "Open Yiru desktop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:title",
+    "text": "Scan the code",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/index.tsx",
+    "kind": "object-property:title",
+    "text": "You're connected",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-text",
+    "text": "DEFAULT VIEW",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Choose how supported agent sessions open on this device. Terminal shows the raw CLI; Chat UI shows a chat interface like the desktop app. You can still switch any individual session from its long-press menu.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Open sessions in Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-expression",
+    "text": "On",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-expression",
+    "text": "Off",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/native-chat-settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open sessions in Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-text",
+    "text": "Yiru",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-text",
+    "text": "Notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-text",
+    "text": "Stay updated while away",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-text",
+    "text": "Get notified on this device when an agent needs your input or finishes a task.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Enable agent notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Enable notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Not now",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notification-opt-in.tsx",
+    "kind": "jsx-text",
+    "text": "You can change this any time in Settings.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/notifications.tsx",
+    "kind": "jsx-text",
+    "text": "Agent notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-confirm.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel pairing",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-confirm.tsx",
+    "kind": "jsx-text",
+    "text": "Pair with this desktop?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-confirm.tsx",
+    "kind": "jsx-text",
+    "text": "You opened a pairing link from your desktop. Confirm to add it to your hosts.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-confirm.tsx",
+    "kind": "jsx-text",
+    "text": "Connecting…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-expression",
+    "text": "Pair with desktop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-expression",
+    "text": "Camera Access Disabled",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-expression",
+    "text": "Scan the QR code from Yiru on your desktop, or paste the pairing code instead.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-expression",
+    "text": "Enable camera access in Settings, or paste the pairing code instead.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Continue",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Open Settings",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Paste code instead",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Paste pairing code",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Copy the code shown under the QR on your computer.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "yiru://pair?code=... or paste the code",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Open Yiru on your computer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Go to Settings → Mobile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Scan the QR code",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair-scan.tsx",
+    "kind": "jsx-text",
+    "text": "Connecting…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair.tsx",
+    "kind": "jsx-text",
+    "text": "Missing pairing code",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/pair.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Back to home",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Appearance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Appearance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Troubleshooting",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Troubleshooting",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "About",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "About",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Pairing credential cleanup",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-expression",
+    "text": "Cleanup still couldn't be confirmed. Try again later.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-expression",
+    "text": "Couldn't confirm cleanup for",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-expression",
+    "text": "credential",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-expression",
+    "text": "on this device.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-expression",
+    "text": "Couldn't check cleanup status on this device. Retry to be safe.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Retry clearing pairing credentials",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "DEV ONLY",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Privacy Policy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Privacy Policy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Support",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/settings.tsx",
+    "kind": "jsx-text",
+    "text": "Support",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Smallest (50%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Smaller (75%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Default (100%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Large (125%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Larger (150%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Largest (200%)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "Keep at phone size (default)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "After 1 minute",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "After 5 minutes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "object-property:label",
+    "text": "After 30 minutes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "WHEN YOU LEAVE THE APP",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "While you&apos;re using a terminal on your phone, Yiru shrinks it to fit your screen. When you close the app or switch away, this controls whether it stays at phone size (so interactive CLI tools don&apos;t reflow) or resizes back to your desktop. You can always use Restore this terminal or Restore all terminals on the banner to resize manually.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "No paired desktops yet. Pair one to control terminal behavior.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "TEXT SIZE",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal itself, which updates this setting. Per-device display only; doesn&apos;t change the desktop terminal.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Text size",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "KEYBOARD INPUT",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal command bar. Off by default so the keyboard never rewrites commands, flags, or paths. Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes, so suggestions don&apos;t apply there.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Autocomplete &amp; autocorrect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-expression",
+    "text": "On",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-expression",
+    "text": "Off",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Restore",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "app/terminal-settings.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Terminal text size",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "object-property:label",
+    "text": "Paired hosts",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "object-property:label",
+    "text": "Internet",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "object-property:label",
+    "text": "Hosts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "object-property:label",
+    "text": "Platform",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "jsx-expression",
+    "text": "Running…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "jsx-expression",
+    "text": "Run again",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "jsx-expression",
+    "text": "Run diagnostics",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "jsx-text",
+    "text": "View connection log",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "app/troubleshoot.tsx",
+    "kind": "jsx-text",
+    "text": "Common issues",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/list.tsx",
+    "kind": "jsx-expression",
+    "text": "message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/list.tsx",
+    "kind": "jsx-expression",
+    "text": "messages",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/list.tsx",
+    "kind": "jsx-text",
+    "text": "current worktree",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/list.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Resume agent session",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "object-property:label",
+    "text": "Workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "object-property:label",
+    "text": "Project",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "object-property:label",
+    "text": "All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "object-property:title",
+    "text": "History ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Refresh agent history",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Refresh agent sessions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-text",
+    "text": "Agent Session History Unavailable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-text",
+    "text": "Update Yiru on this host to browse agent session history.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-text",
+    "text": "Unable to Load",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Agent session scope",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-expression",
+    "text": "transcript",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-expression",
+    "text": "transcripts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-text",
+    "text": "skipped",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-text",
+    "text": "No agent sessions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-expression",
+    "text": "No sessions match your search.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/panel.tsx",
+    "kind": "jsx-expression",
+    "text": "No past agent sessions in this scope.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/search-control.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search sessions, repo:, path:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/search-control.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search sessions, repo:, path:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/use-agent-history-state.ts",
+    "kind": "object-property:message",
+    "text": "Waiting for host…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/worktree-navigation-actions.tsx",
+    "kind": "object-property:label",
+    "text": "Source Control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/agent-history/worktree-navigation-actions.tsx",
+    "kind": "object-property:label",
+    "text": "Agent Session History",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Forward",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reload",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "URL",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Esc",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type on page…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send text to browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Forward",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reload",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "URL",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type on page…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/chrome.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send text to browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/key-row.tsx",
+    "kind": "jsx-expression",
+    "text": "Esc",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/pointer-modifiers.tsx",
+    "kind": "object-property:label",
+    "text": "Cmd",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/pointer-modifiers.tsx",
+    "kind": "object-property:label",
+    "text": "Ctrl",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/pointer-modifiers.tsx",
+    "kind": "object-property:label",
+    "text": "Alt",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/pointer-modifiers.tsx",
+    "kind": "object-property:label",
+    "text": "Shift",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/pointer-modifiers.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "click modifier",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/view-mode-switch.tsx",
+    "kind": "object-property:label",
+    "text": "Web",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/view-mode-switch.tsx",
+    "kind": "object-property:label",
+    "text": "Mobile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/browser/view-mode-switch.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Website view",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/auth-failed-banner.tsx",
+    "kind": "jsx-text",
+    "text": "Authentication failed — try reconnecting first; if it keeps failing, re-pair from desktop.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/auth-failed-banner.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Re-pair",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/auth-failed-banner.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Remove",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/bottom-drawer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Dismiss drawer",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "src/components/connection-log.tsx",
+    "kind": "object-property:error",
+    "text": "text-red-500",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:label",
+    "text": "Ctrl",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:label",
+    "text": "Alt",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:label",
+    "text": "Shift",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:title",
+    "text": "Editing",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:title",
+    "text": "Navigation",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "object-property:title",
+    "text": "Function",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Shortcut Combo",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Build Ctrl, Alt, and Shift key chords",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Text Macro",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Send custom text command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Manage Shortcuts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Show, hide, or reorder shortcut keys",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Modifiers",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Key",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Label",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/custom-key-modal.tsx",
+    "kind": "jsx-text",
+    "text": "Press Enter",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/host-card.tsx",
+    "kind": "jsx-text",
+    "text": "Check that this phone can reach the selected LAN or private-network address",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/html-preview.tsx",
+    "kind": "object-property:label",
+    "text": "Preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/html-preview.tsx",
+    "kind": "object-property:label",
+    "text": "Source",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/html-preview.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "HTML view",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/new-workspace-agent-selection.ts",
+    "kind": "object-property:label",
+    "text": "Blank Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/new-workspace-fab.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "New workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/new-workspace-fab.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "New workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/protocol-block-screen.tsx",
+    "kind": "object-property:label",
+    "text": "Open TestFlight",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/protocol-block-screen.tsx",
+    "kind": "object-property:label",
+    "text": "Download APK",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/protocol-block-screen.tsx",
+    "kind": "object-property:label",
+    "text": "Open GitHub Releases",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/protocol-block-screen.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Back to hosts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Body",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "H1",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "H2",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "H3",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Bold",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Italic",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Strike",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Bullet list",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Numbered list",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Checklist",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Quote",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Link",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Image",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Inline code",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/rich-markdown-editor.tsx",
+    "kind": "object-property:label",
+    "text": "Code block",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "'s setup script changed",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "Run setup from",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "This repository's yiru.yaml runs before the workspace starts. Only run it if you trust this repository.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "New setup script",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "Setup script",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Run hooks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Always trust and run",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/setup-hook-trust-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Don't run",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-advanced-fields.tsx",
+    "kind": "jsx-text",
+    "text": "Name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-advanced-fields.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Workspace name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-advanced-fields.tsx",
+    "kind": "jsx-text",
+    "text": "Branch name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-advanced-fields.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Derived from name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-advanced-fields.tsx",
+    "kind": "jsx-text",
+    "text": "Reuse branch “",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Name or 'Create From'",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Done",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type a name or search a source",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "This item lives in",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Switch to",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Connect the repository to search sources.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "This SSH repo needs a GitHub remote to list pull requests.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-field.tsx",
+    "kind": "jsx-text",
+    "text": "[Optional]",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:title",
+    "text": "Use \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:subtitle",
+    "text": "Name this workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:title",
+    "text": "Create branch \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:subtitle",
+    "text": "New branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:subtitle",
+    "text": "PR #",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/smart-workspace-source-row.tsx",
+    "kind": "object-property:subtitle",
+    "text": "MR !",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "SHORTCUT BAR",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on the terminal shortcut bar.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Reset Defaults",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Show every built-in shortcut key in the original order",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "CUSTOM SHORTCUTS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "No custom shortcuts defined yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Delete",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Add Custom Shortcut…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/terminal-shortcut-settings.tsx",
+    "kind": "jsx-text",
+    "text": "Create key combo or text macro",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/text-input-modal.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/workspace-detail-placeholder.tsx",
+    "kind": "jsx-text",
+    "text": "No workspace open",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/workspace-detail-placeholder.tsx",
+    "kind": "jsx-text",
+    "text": "Pick a workspace from the sidebar to open its terminal here.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/workspace-list-row.tsx",
+    "kind": "jsx-expression",
+    "text": "child",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/components/workspace-list-row.tsx",
+    "kind": "jsx-expression",
+    "text": "children",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Different WiFi Networks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Firewall Blocking Port 6768",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Desktop App Not Running",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Connection Timeout",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Tailscale Host Unreachable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/diagnostics/troubleshoot-common-issues.tsx",
+    "kind": "object-property:title",
+    "text": "Other VPN Interference",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Close files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "jsx-text",
+    "text": "Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "jsx-expression",
+    "text": "- Showing first 5000",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "jsx-text",
+    "text": "No files found",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-panel.tsx",
+    "kind": "object-property:title",
+    "text": "Files ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-text",
+    "text": "Loading...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Retry loading",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open folder",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "unavailable on mobile",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Preview file",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-explorer-row.tsx",
+    "kind": "jsx-text",
+    "text": "Unavailable on mobile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-markdown-preview.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "View Markdown source",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-markdown-preview.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "View rendered Markdown preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-body.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-body.tsx",
+    "kind": "jsx-text",
+    "text": "Empty file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-body.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "image",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-editable-source.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "editor",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-request.ts",
+    "kind": "object-property:message",
+    "text": "File changed on desktop. Reload preview before saving",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "Binary preview unavailable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "File too large for mobile preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "Reload preview before saving",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "Unable to reach the desktop filesystem",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "File not found",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-response.ts",
+    "kind": "object-property:message",
+    "text": "Unable to load preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-route.ts",
+    "kind": "object-property:message",
+    "text": "Unable to load preview",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "object-property:message",
+    "text": "Loading preview...",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "object-property:message",
+    "text": "Waiting for desktop...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "user-visible-call",
+    "text": "Discard changes?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "user-visible-call",
+    "text": "Unsaved edits will be lost.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Save terminal artifact",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/files/file-preview-screen.tsx",
+    "kind": "object-property:message",
+    "text": "Unable to load preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-source-text.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "File preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/files/file-preview-source-text.tsx",
+    "kind": "jsx-text",
+    "text": "Preview truncated. File size:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Loading review...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Review Unavailable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Unable to Load Review",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "No Reviewable Changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Try a different review filter.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:text",
+    "text": "Loading diff...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-text",
+    "text": "Diff truncated for mobile preview.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Retry loading review",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/body.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Review Actions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "reviewed unstaged files can be staged",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Send Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Discard File",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Discard changes to \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "\"? This cannot be undone.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "New Agent Session",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Copy Notes",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Send Unsent Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Clear Sent Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Stage Reviewed Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Mark Unreviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "object-property:label",
+    "text": "Open in Session",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-expression",
+    "text": "Edit Note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-expression",
+    "text": "Add Note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-expression",
+    "text": "Line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-expression",
+    "text": "File note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Review note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Delete note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Delete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-text",
+    "text": "Review Complete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-text",
+    "text": "reviewed,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stage Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Stage reviewed files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send Notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/drawers.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send notes to agent",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-expression",
+    "text": "from",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-text",
+    "text": "Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-text",
+    "text": "Changed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-text",
+    "text": "stale",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Edit file note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/file-summary.tsx",
+    "kind": "jsx-text",
+    "text": "Stale",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stage",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unstage",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Discard",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Previous file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Mark Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Next file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Stage file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stage",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Unstage file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unstage",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Discard file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Discard",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Previous file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Add file note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Mark file reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Mark Reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/footer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Next file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.ios.tsx",
+    "kind": "object-property:title",
+    "text": "Filter review files ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.ios.tsx",
+    "kind": "jsx-text",
+    "text": "reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.ios.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Filter review files.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.ios.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "selected",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Filter ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.tsx",
+    "kind": "jsx-text",
+    "text": "reviewed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Show",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "review files",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/header.tsx",
+    "kind": "jsx-expression",
+    "text": "All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/hunk-navigation.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Hunk",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/hunk-navigation.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "hunk",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/hunk-navigation.tsx",
+    "kind": "jsx-text",
+    "text": "Hunk",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/line.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Add note on line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/line.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Edit note on line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/screen-view.tsx",
+    "kind": "object-property:title",
+    "text": "Changes ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/screen-view.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open pull request review",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/screen-view.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "More review actions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/screen-view.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open pull request sidebar",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/review/screen-view.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open review actions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Adding attachment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Add attachment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Camera",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Photos",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.tsx",
+    "kind": "object-property:title",
+    "text": "Camera",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.tsx",
+    "kind": "object-property:title",
+    "text": "Photos",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.tsx",
+    "kind": "object-property:title",
+    "text": "Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Adding attachment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/attachment-menu.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Add attachment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/browser-tab-action-sheet.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/browser-tab-action-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/browser-tab-action-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Forward",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/browser-tab-action-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Reload",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/browser-tab-action-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Close",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "diff line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Add note on line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-text",
+    "text": "Line",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Delete note on line",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Add review note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff-line-row.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff/review-loaders.ts",
+    "kind": "object-property:error",
+    "text": "Committed changes response was invalid",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff/review-loaders.ts",
+    "kind": "object-property:message",
+    "text": "Update Yiru desktop to review changes on mobile.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff/review-queue.ts",
+    "kind": "object-property:subtitle",
+    "text": "Committed on branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff/use-review-controller.ts",
+    "kind": "object-property:message",
+    "text": "Missing worktree",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/diff/use-review-controller.ts",
+    "kind": "object-property:message",
+    "text": "Waiting for desktop...",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-expression",
+    "text": "No review notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-expression",
+    "text": "review",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Copy review notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Copy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send review notes to AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "image",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/file-reader.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "preview",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/header-more-actions-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Agent History",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/header-more-actions-sheet.tsx",
+    "kind": "object-property:label",
+    "text": "Checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/markdown-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/markdown-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Copy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/markdown-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Refresh",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/markdown-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Discard",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/markdown-reader.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/ask-wizard.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Other…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/ask-wizard.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type your answer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/ask-wizard.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/ask-wizard.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send answer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/ask-wizard.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Next",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/composer-input.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stop the agent",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/composer-input.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/composer-input.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Stop the agent",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/composer-input.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/message.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": ". Show details",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/message.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Copy message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/message.tsx",
+    "kind": "jsx-text",
+    "text": "Queued",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/permission.ts",
+    "kind": "object-property:title",
+    "text": "Allow",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/permission.ts",
+    "kind": "object-property:label",
+    "text": "Allow",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/native-chat/permission.ts",
+    "kind": "object-property:label",
+    "text": "Deny",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/native-chat/permission.ts",
+    "kind": "object-property:title",
+    "text": "Permission requested",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/native-chat/permission.ts",
+    "kind": "object-property:label",
+    "text": "Allow always",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/question-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Submit selected options",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/question-card.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Submit",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/question-card.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Or type a reply…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/question-card.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type your reply…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/question-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send reply",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/tool-details-drawer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/tool-details-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Tool activity",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/tool-details-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "tool call",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/native-chat/tool-details-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "tool calls",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/base-picker.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "main",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/github-mutations.ts",
+    "kind": "object-property:error",
+    "text": "Failed to update title.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/github-mutations.ts",
+    "kind": "object-property:error",
+    "text": "Failed to update review thread.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:title",
+    "text": "Merge pull request?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:message",
+    "text": "This will merge #",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:message",
+    "text": "into its base branch.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:title",
+    "text": "Close pull request?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:message",
+    "text": "will be closed without merging.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:title",
+    "text": "Reopen pull request?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "object-property:message",
+    "text": "will be reopened.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Merge pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Merge pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-text",
+    "text": "Auto-merge when ready",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Toggle auto-merge",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Close",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reopen",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Close pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Reopen pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Unlink pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/actions-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unlink",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/check-detail.tsx",
+    "kind": "jsx-text",
+    "text": "No details available.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/pr/sidebar/check-detail.tsx",
+    "kind": "jsx-text",
+    "text": "Annotations",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/check-detail.tsx",
+    "kind": "jsx-text",
+    "text": "Showing first 20 annotations",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/check-detail.tsx",
+    "kind": "jsx-text",
+    "text": "Showing first 100 jobs",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "No checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Approved",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Changes requested",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Commented",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Dismissed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Pending",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-presentation.ts",
+    "kind": "object-property:label",
+    "text": "Reviewed",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Rerun failing checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-text",
+    "text": "failing check",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-text",
+    "text": "Inspect details or start an AI fix pass.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Fix failing checks with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Fixing…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Fix",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "check details",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/checks-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "on the web",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-audience.ts",
+    "kind": "object-property:label",
+    "text": "All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-audience.ts",
+    "kind": "object-property:label",
+    "text": "Humans",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-audience.ts",
+    "kind": "object-property:label",
+    "text": "Bots",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-text",
+    "text": "resolved",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open comment on GitHub",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Reply to comment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reply",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Unresolve thread",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Resolve thread",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unresolve",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Resolve",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-card.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Write a reply…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-composer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comment-composer.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Description",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "Could not load description. Tap refresh to try again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "No description provided.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Comments",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "Could not load comments. Tap refresh to try again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "No comments yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Comment audience",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Show",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "more",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Add a comment…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "Resolved",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-expression",
+    "text": "thread",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-expression",
+    "text": "comment",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/comments-section.tsx",
+    "kind": "jsx-text",
+    "text": "by",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-text",
+    "text": "New",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Generate",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "details with AI",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-expression",
+    "text": "Generating…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-expression",
+    "text": "Generate",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Title",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "title",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Description (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "description",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-text",
+    "text": "Generating title and description…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-text",
+    "text": "Base",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-text",
+    "text": "Create as draft",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Push & create draft",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Push & create",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Create draft",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/compose-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Create",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Conflicts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-text",
+    "text": "commit",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-text",
+    "text": "behind (base commit:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-text",
+    "text": "This branch has conflicts that must be resolved",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-text",
+    "text": "Run from this worktree",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Copy mergeability refresh commands",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Copied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Copy commands",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-text",
+    "text": "Conflicting files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Resolve conflicts with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Resolving…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/conflicting-files-section.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Resolve conflicts with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-text",
+    "text": "Pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Refresh pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Create pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Create PR",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "Linked PR #",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "unavailable",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "No open pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "Refresh to check again, or create a new PR for this branch.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "is not linked to an open PR.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-expression",
+    "text": "The current branch is not linked to an open PR.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Link an existing pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/create-empty-state.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Link an existing PR",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open pull request #",
+    "dynamic": true,
+    "count": 3
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "on the web",
+    "dynamic": true,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "in browser",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel editing title",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Save title",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Edit pull request title",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-text",
+    "text": "Link existing pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-text",
+    "text": "PR number or GitHub URL",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "#123 or https://github.com/owner/repo/pull/123",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Link #",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/link-pr-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Link pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/mermaid-diagram.tsx",
+    "kind": "jsx-text",
+    "text": "mermaid",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/pr/sidebar/panel.tsx",
+    "kind": "jsx-text",
+    "text": "Loading pull request…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Retry loading pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/panel.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewer-picker-drawer.tsx",
+    "kind": "object-property:message",
+    "text": "Failed to load people",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewer-picker-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Reviewers",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewer-picker-drawer.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search people",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewer-picker-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "No matching people",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Add or remove reviewers",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Reviewers",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-text",
+    "text": "Loading reviewers…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-text",
+    "text": "Could not load reviewers. Tap refresh to try again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-text",
+    "text": "No reviewers requested",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/reviewers-section.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Remove",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/view-panel.tsx",
+    "kind": "object-property:message",
+    "text": "Hosted review panel unavailable for this provider.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/sidebar/view-panel.tsx",
+    "kind": "object-property:message",
+    "text": "Current branch unavailable.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/pr/use-actions.ts",
+    "kind": "object-property:error",
+    "text": "Not connected",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Label",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Start dev server",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Action",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "object-property:label",
+    "text": "Terminal Command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "object-property:label",
+    "text": "Agent Prompt",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Agent",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Choose agent",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-expression",
+    "text": "Prompt",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-expression",
+    "text": "Command Text",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Ask the agent to investigate this workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "pnpm dev",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Supports skills, file paths, and built-in commands.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Advanced",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Append Enter",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Submit immediately instead of only inserting text.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-text",
+    "text": "Scope",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "object-property:label",
+    "text": "Global",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "object-property:label",
+    "text": "Project",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Save",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-command-editor-form.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Add Quick Command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search quick commands...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-text",
+    "text": "No quick commands yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-text",
+    "text": "No matching quick commands.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "This project",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Global",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-expression",
+    "text": "New quick command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-expression",
+    "text": "Quick command limit reached",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Run",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Edit",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-list.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Delete",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-sheet.tsx",
+    "kind": "user-visible-call",
+    "text": "Delete \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-sheet.tsx",
+    "kind": "user-visible-call",
+    "text": "This quick command will be removed from your saved list.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-sheet.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/quick-commands-sheet.tsx",
+    "kind": "jsx-text",
+    "text": "Save terminal commands or agent prompts for quick access.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/screen-class-names.ts",
+    "kind": "object-property:emptyText",
+    "text": "mb-4 text-sm text-muted-foreground",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/tab-strip.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "New tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/action-sheet-actions.ts",
+    "kind": "object-property:label",
+    "text": "Rename",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/action-sheet-actions.ts",
+    "kind": "object-property:label",
+    "text": "Clear Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/action-sheet-actions.ts",
+    "kind": "object-property:label",
+    "text": "Close",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.ios.tsx",
+    "kind": "jsx-text",
+    "text": "Live input",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.ios.tsx",
+    "kind": "jsx-text",
+    "text": "Uploading image to host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type a command…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Send command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.tsx",
+    "kind": "jsx-attribute:accessibilityHint",
+    "text": "Typed text is sent directly to the active terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Show keyboard for live terminal input",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Type a command…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/input-bar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Send command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/live-input-status.tsx",
+    "kind": "jsx-text",
+    "text": "Live input",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/live-input-status.tsx",
+    "kind": "jsx-text",
+    "text": "Uploading image to host",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/use-paste.ts",
+    "kind": "user-visible-call",
+    "text": "Paste too large (max 256 KiB)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/use-paste.ts",
+    "kind": "user-visible-call",
+    "text": "Paste failed (disconnected)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/use-paste.ts",
+    "kind": "user-visible-call",
+    "text": "Image too large to paste",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/terminal/use-paste.ts",
+    "kind": "user-visible-call",
+    "text": "Paste failed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-attachment-input-lease-gate.ts",
+    "kind": "user-visible-call",
+    "text": "Attach failed (reconnecting)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-diff-comments.ts",
+    "kind": "user-visible-call",
+    "text": "Note added",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-diff-comments.ts",
+    "kind": "user-visible-call",
+    "text": "Failed to save note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-diff-comments.ts",
+    "kind": "user-visible-call",
+    "text": "Failed to delete note",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-diff-comments.ts",
+    "kind": "user-visible-call",
+    "text": "Notes copied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-diff-comments.ts",
+    "kind": "user-visible-call",
+    "text": "Couldn't copy notes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Attach delivery unconfirmed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Attach failed",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Attach failed (disconnected)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Photo permission denied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Camera permission denied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-image-attachment.ts",
+    "kind": "user-visible-call",
+    "text": "Image too large to attach",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-markdown-docs.ts",
+    "kind": "object-property:message",
+    "text": "Couldn't load markdown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-markdown-docs.ts",
+    "kind": "user-visible-call",
+    "text": "Copied",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/session/use-markdown-docs.ts",
+    "kind": "user-visible-call",
+    "text": "Saved",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Commit",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Commit & Push",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Commit & Sync",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Create PR",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Push & Create PR",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Fetch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Publish Branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Rebase onto base",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Switch branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/actions.ts",
+    "kind": "object-property:label",
+    "text": "Commits",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-card.tsx",
+    "kind": "jsx-text",
+    "text": "changed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-card.tsx",
+    "kind": "jsx-text",
+    "text": "staged",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-card.tsx",
+    "kind": "jsx-text",
+    "text": "on branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-compare.ts",
+    "kind": "object-property:title",
+    "text": "Committed on Branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-diff-preview-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "..HEAD",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-diff-preview-drawer.tsx",
+    "kind": "jsx-expression",
+    "text": "Committed on branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-diff-preview-drawer.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Close committed diff preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-diff-preview-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Unable to Load Diff",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/branch-diff-preview-drawer.tsx",
+    "kind": "jsx-text",
+    "text": "Diff truncated for mobile preview.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stage All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unstage All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "More",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Stage All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Unstage All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/bulk-actions.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "More source control actions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Commit message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.ios.tsx",
+    "kind": "jsx-text",
+    "text": "No staged files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Cancel commit message generation",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Generate commit message with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Commit message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Commit message disabled. No staged files.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.tsx",
+    "kind": "jsx-text",
+    "text": "No staged files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Cancel commit message generation",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-bar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Generate commit message with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-text",
+    "text": "Commit failed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Fix commit failure with AI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Fix",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Hide commit failure details",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Show commit failure details",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-expression",
+    "text": "Hide details",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-failure-panel.tsx",
+    "kind": "jsx-expression",
+    "text": "Show details",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/commit-message-ai.ts",
+    "kind": "object-property:error",
+    "text": "Failed to generate commit message",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/content.tsx",
+    "kind": "jsx-text",
+    "text": "Reconnecting to desktop...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/content.tsx",
+    "kind": "jsx-text",
+    "text": "No local changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/content.tsx",
+    "kind": "jsx-text",
+    "text": "Working tree is clean.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/create-pr-action.ts",
+    "kind": "object-property:label",
+    "text": "Create Pull Request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open changed file",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-text",
+    "text": "from",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-text",
+    "text": "Unresolved conflict",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Unstage",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Stage",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Discard",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-text",
+    "text": "Committed on Branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-text",
+    "text": "Loading committed changes...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/file-rows.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open committed change",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/git-history-list.tsx",
+    "kind": "jsx-text",
+    "text": "No file changes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/git-history-list.tsx",
+    "kind": "jsx-expression",
+    "text": "Waiting for desktop...",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/git-history-list.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/git-history-list.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Retry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/git-history-list.tsx",
+    "kind": "jsx-text",
+    "text": "No commits.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Close source control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back to session",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-text",
+    "text": "Source Control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open pull request #",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "on the web",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Open pull request on the web",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/header.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Refresh source control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/hosted-review-create-intent.ts",
+    "kind": "object-property:error",
+    "text": "Resolve conflicts before creating a pull request.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/hosted-review-create-intent.ts",
+    "kind": "object-property:error",
+    "text": "Branch changed while preparing the pull request.",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "src/source-control/hosted-review-create-intent.ts",
+    "kind": "object-property:error",
+    "text": "Resolve or stage changes before creating a pull request.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/hosted-review-create-intent.ts",
+    "kind": "object-property:error",
+    "text": "Could not generate a commit message. Add one in Source Control, then retry.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/hosted-review-service.ts",
+    "kind": "object-property:error",
+    "text": "Push failed. Resolve the push error, then try again.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Source Control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Discard Change",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Discard changes to \"",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "\"? This cannot be undone.",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Switch Branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Pull Request Created",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Open it in your browser?",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/modals.tsx",
+    "kind": "jsx-attribute:message",
+    "text": "Open it in your browser?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/pr-chip.tsx",
+    "kind": "jsx-text",
+    "text": "Loading pull request…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/pr-chip.tsx",
+    "kind": "jsx-text",
+    "text": "Create pull request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/segments.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Source control view",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/use-loaders.ts",
+    "kind": "object-property:message",
+    "text": "Unable to resolve the base branch for comparison.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/source-control/use-loaders.ts",
+    "kind": "object-property:message",
+    "text": "Update Yiru desktop to use Source Control on mobile.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Esc",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Escape",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Enter",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Enter",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Shift+Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Shift Tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Space",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Space",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Backspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Del",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Forward delete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Arrow Up",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Arrow Down",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Arrow Left",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Arrow Right",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+C",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Interrupt terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+D",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Send EOF",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+L",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Clear screen",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+Z",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Suspend process",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+R",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Reverse search",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+A",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Start of line",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+E",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "End of line",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+W",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Delete word backward",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:label",
+    "text": "Ctrl+U",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/accessory-keys.ts",
+    "kind": "object-property:accessibilityLabel",
+    "text": "Clear line before cursor",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/webview/engine-error-state.tsx",
+    "kind": "jsx-text",
+    "text": "Terminal failed to load",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/terminal/webview/engine-error-state.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reload",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Auth failed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Connected",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Connecting…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Disconnected",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Can't reach desktop",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Can't connect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/connection-health.ts",
+    "kind": "object-property:label",
+    "text": "Reconnecting…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Enter a host address.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Port must be 1–65535.",
+    "dynamic": false,
+    "count": 3
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Use ws:// or wss:// (or host:port).",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Not a valid address.",
+    "dynamic": false,
+    "count": 5
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Host must not include a path or query.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Not a valid hostname.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/transport/host-endpoint.ts",
+    "kind": "object-property:error",
+    "text": "Missing hostname.",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/transport/rpc-client.ts",
+    "kind": "object-property:message",
+    "text": "Client closed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Chat transcript",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "Messages, Markdown, math, queued input, tool calls, and the composer.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Agent working",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "Streaming assistant text, activity indicator, and the Stop action.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Permission request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "A blocked agent with the real native permission card.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Empty chat",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "The first-message state inside the production session chrome.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Chat error",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "Transcript failure copy while the terminal remains connected.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "The production terminal canvas, accessory row, and command composer.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Markdown tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "A real session Markdown tab with tables, code, file paths, and math.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Browser tab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/fixtures.ts",
+    "kind": "object-property:description",
+    "text": "The production browser toolbar, viewport, address bar, and key controls.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-text",
+    "text": "Glass control layer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-text",
+    "text": "Native material on iOS 26; the same geometry uses opaque semantic surfaces elsewhere.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-expression",
+    "text": "Native effect active",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-expression",
+    "text": "Opaque fallback active",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-text",
+    "text": "preview taps",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Preview secondary glass action",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Preview prominent glass action",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/glass-catalog.tsx",
+    "kind": "jsx-text",
+    "text": "Opaque fallback preview",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/rpc-client.ts",
+    "kind": "object-property:message",
+    "text": "UI Lab does not mock",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/rpc-client.ts",
+    "kind": "object-property:title",
+    "text": "Codex fixture",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/rpc-client.ts",
+    "kind": "object-property:message",
+    "text": "Fixture transcript is unavailable.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/rpc-client.ts",
+    "kind": "object-property:title",
+    "text": "Yiru UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/runtime-fixtures.ts",
+    "kind": "object-property:message",
+    "text": "Refine mobile Liquid Glass chrome",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/runtime-fixtures.ts",
+    "kind": "object-property:message",
+    "text": "Add production-route UI Lab fixtures",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/runtime-fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Polish the mobile control layer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Settings",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "The production settings index.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Appearance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Theme and loader preferences.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Chat UI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Native chat display preferences.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Terminal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Terminal scale, input, and shortcut settings.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Browser",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Browser interaction preferences.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Notifications",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Push notification controls.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Troubleshooting",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Diagnostics and connection tools.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "About",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Version and product information.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Workspace list",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "The real host workspace route with activity, filters, and Glass chrome.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Source Control",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "Staged, unstaged, untracked, and committed changes with the real commit bar.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "The production file tree; file rows open the real preview route.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Agent History",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "A production history list with an expandable mocked Codex session.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "Diff Review",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:description",
+    "text": "The production review queue, diff viewer, filters, and floating controls.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "object-property:title",
+    "text": "UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Close UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-text",
+    "text": "Session surfaces",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-text",
+    "text": "Exercise the production session shell with deterministic terminal, chat, file, and browser states.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-text",
+    "text": "Workspace surfaces",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-text",
+    "text": "Inspect production data-heavy routes without pairing a desktop.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/screen.tsx",
+    "kind": "jsx-text",
+    "text": "System screens",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/session-fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Codex fixture",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/session-fixtures.ts",
+    "kind": "object-property:title",
+    "text": "markdown-fixture.md",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/session-fixtures.ts",
+    "kind": "object-property:title",
+    "text": "Yiru UI Lab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Smart",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "GitHub",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "GitLab",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Branch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Open",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Merged",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "Closed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace-create/smart-source-modes.ts",
+    "kind": "object-property:label",
+    "text": "All",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-chrome.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Back to hosts",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/workspace/list-chrome.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Reconnect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-chrome.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Accounts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reconnect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Accounts",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Hide sidebar",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Floating Workspace",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search workspaces…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.ios.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "New workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Reconnect",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Accounts",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Hide sidebar",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Floating Workspace",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Search workspaces…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "Search workspaces",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/list-toolbar.tsx",
+    "kind": "jsx-attribute:accessibilityLabel",
+    "text": "New workspace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/statuses.ts",
+    "kind": "object-property:label",
+    "text": "Done",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/statuses.ts",
+    "kind": "object-property:label",
+    "text": "In review",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/statuses.ts",
+    "kind": "object-property:label",
+    "text": "In progress",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/workspace/statuses.ts",
+    "kind": "object-property:label",
+    "text": "Todo",
+    "dynamic": false,
+    "count": 1
+  }
+]
