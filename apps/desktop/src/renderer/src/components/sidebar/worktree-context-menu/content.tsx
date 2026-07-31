@@ -145,7 +145,7 @@ export function WorktreeContextMenuContent({
             {translate('auto.components.sidebar.WorktreeContextMenu.3350101edb', 'Copy Path')}
           </ContextMenuItem>
           <ContextMenuSub>
-            <ContextMenuSubTrigger disabled={isDeleting}>
+            <ContextMenuSubTrigger disabled={isDeleting || !debugLogActions.hasDebugLogs}>
               <Bug className="size-3.5" />
               {translate('auto.components.sidebar.WorktreeContextMenu.debugLogs', 'Debug Logs')}
             </ContextMenuSubTrigger>

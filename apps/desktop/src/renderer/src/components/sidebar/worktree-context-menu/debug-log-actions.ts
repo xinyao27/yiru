@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -86,11 +86,46 @@ async function clearDebugLogs(args: {
   )
 }
 
-export function useDebugLogMenuActions(args: { state: WorktreeContextMenuState }) {
+export function useDebugLogMenuActions(args: {
+  state: WorktreeContextMenuState
+  menuOpen: boolean
+}) {
+  const { menuOpen } = args
   const { repo, worktree } = args.state
   const settings = useAppStore((store) => store.settings)
   const openFile = useAppStore((store) => store.openFile)
   const connectionId = repo?.connectionId ?? undefined
+  const [hasDebugLogs, setHasDebugLogs] = useState(false)
+
+  // Why: log presence lives on the worktree's host, so it can only be known
+  // asynchronously. Probe on each menu open and keep the entry disabled until
+  // the probe confirms there is something to view or clear.
+  useEffect(() => {
+    if (!menuOpen) {
+      return
+    }
+    let cancelled = false
+    const context: RuntimeFileOperationArgs = {
+      settings,
+      worktreeId: worktree.id,
+      worktreePath: worktree.path,
+      connectionId
+    }
+    listDebugLogFileNames(context, joinPath(worktree.path, WORKTREE_DEBUG_LOG_DIR))
+      .then((fileNames) => {
+        if (!cancelled) {
+          setHasDebugLogs(fileNames.length > 0)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasDebugLogs(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [connectionId, menuOpen, settings, worktree.id, worktree.path])
 
   const handleViewDebugLogs = useCallback(() => {
     const context: RuntimeFileOperationArgs = {
@@ -121,19 +156,22 @@ export function useDebugLogMenuActions(args: { state: WorktreeContextMenuState }
       worktreePath: worktree.path,
       connectionId
     }
-    clearDebugLogs({ context, worktreePath: worktree.path }).catch(() => {
-      toast.error(
-        translate(
-          'auto.components.sidebar.WorktreeContextMenu.clearDebugLogsFailed',
-          'Could not clear debug logs.'
+    clearDebugLogs({ context, worktreePath: worktree.path })
+      .then(() => setHasDebugLogs(false))
+      .catch(() => {
+        toast.error(
+          translate(
+            'auto.components.sidebar.WorktreeContextMenu.clearDebugLogsFailed',
+            'Could not clear debug logs.'
+          )
         )
-      )
-    })
+      })
   }, [connectionId, settings, worktree.id, worktree.path])
 
   return {
     handleClearDebugLogs,
-    handleViewDebugLogs
+    handleViewDebugLogs,
+    hasDebugLogs
   }
 }
 

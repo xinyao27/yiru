@@ -52,7 +52,7 @@ function WorktreeContextMenuImplementation({
   const workspaceActions = useWorkspaceMenuActions({ state, setMenuOpenState })
   const lineageActions = useLineageMenuActions({ state, scopeRef, setMenuOpenState })
   const lifecycleActions = useLifecycleMenuActions({ state, scopeRef, setMenuOpenState })
-  const debugLogActions = useDebugLogMenuActions({ state })
+  const debugLogActions = useDebugLogMenuActions({ state, menuOpen })
 
   useEffect(() => {
     const closeMenu = (): void => setMenuOpenState(false)
