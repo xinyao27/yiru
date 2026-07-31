@@ -67,6 +67,39 @@ export async function loadHomeSnapshot(): Promise<HomeSnapshot | null> {
 // (one per provider fetch finishing) doesn't hammer AsyncStorage.
 export function saveHomeSnapshot(snapshot: HomeSnapshot): void {
   memoryCache = snapshot
+  scheduleSnapshotWrite(snapshot)
+}
+
+// Why: host-scoped state must never outlive its host (AGENTS.md §7). Nothing
+// pruned these records, so a removed host's worktrees and account usage stayed
+// on disk forever and could be rehydrated onto the home screen after re-pairing
+// under a new id.
+export function forgetHomeSnapshotHost(hostId: string): void {
+  const snapshot = memoryCache
+  if (!snapshot) {
+    return
+  }
+  if (
+    !(hostId in snapshot.worktreeInfo) &&
+    !(hostId in snapshot.accountsByHost) &&
+    !(snapshot.statsByHost && hostId in snapshot.statsByHost)
+  ) {
+    return
+  }
+  const { [hostId]: _removedWorktrees, ...worktreeInfo } = snapshot.worktreeInfo
+  const { [hostId]: _removedAccounts, ...accountsByHost } = snapshot.accountsByHost
+  const { [hostId]: _removedStats, ...statsByHost } = snapshot.statsByHost ?? {}
+  const pruned: HomeSnapshot = {
+    worktreeInfo,
+    accountsByHost,
+    statsByHost,
+    savedAt: snapshot.savedAt
+  }
+  memoryCache = pruned
+  scheduleSnapshotWrite(pruned)
+}
+
+function scheduleSnapshotWrite(snapshot: HomeSnapshot): void {
   if (writeTimer) {
     clearTimeout(writeTimer)
   }

@@ -1,5 +1,4 @@
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
-import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
@@ -11,11 +10,23 @@ import { cn } from '~/style/class-names'
 
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcResponse, RpcSuccess } from '../transport/types'
+import type { RpcResponse } from '../transport/types'
 import { createBlankWorkspace } from '../workspace-create/blank-workspace-create'
 import {
+  readDetectedAgentIds,
+  readGlabInstalled,
+  readRepoHooks,
+  readSshConnectionState,
+  readTrustedYiruHooks,
+  readWorkspaceRepoList,
+  readWorkspaceRepos,
+  readWorkspaceRuntimeSettings,
+  type WorkspaceRepo as Repo,
+  type WorkspaceRuntimeSettings as RuntimeSettings,
+  type WorkspaceSetupRunPolicy as SetupRunPolicy
+} from '../workspace-create/rpc-payloads'
+import {
   isSetupHookTrusted,
-  normalizeSetupHookTrust,
   persistSetupHookTrustApproval,
   wasSetupHookPreviouslyApproved,
   type SetupHookTrust
@@ -65,31 +76,7 @@ import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { getSuggestedCreatureName } from './worktree-name-suggestion'
 
-type Repo = {
-  id: string
-  displayName: string
-  path: string
-  badgeColor?: string
-  connectionId?: string | null
-  kind?: 'git' | 'folder'
-  upstream?: { owner: string; repo: string } | null
-  gitRemoteIdentity?: { remoteUrl?: string; canonicalKey?: string } | null
-}
-
 type SetupDecision = 'inherit' | 'run' | 'skip'
-type SetupRunPolicy = 'ask' | 'run-by-default' | 'skip-by-default'
-type RuntimeSettings = {
-  defaultTuiAgent?: TuiAgent | 'blank' | null
-  disabledTuiAgents?: TuiAgent[]
-  agentCmdOverrides?: Record<string, string>
-}
-
-type RepoHooksResponse = {
-  hooks: { scripts?: { setup?: string } } | null
-  source: string | null
-  setupRunPolicy?: SetupRunPolicy
-  setupTrust?: SetupHookTrust
-}
 
 type SetupHookDetails = {
   repoId: string
@@ -186,7 +173,10 @@ function NewWorktreeModalContent({
   onCreated,
   onClose
 }: Props) {
-  const [initialRepos] = useState(() => (hostId ? (getCachedRepos(hostId) as Repo[] | null) : null))
+  const [initialRepos] = useState(() => {
+    const cached = hostId ? getCachedRepos(hostId) : null
+    return cached ? readWorkspaceRepos(cached) : null
+  })
   const [repos, setRepos] = useState<Repo[]>(initialRepos ?? [])
   const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null)
   const [drawerView, setDrawerView] = useState<NewWorktreeDrawerView>('form')
@@ -335,15 +325,15 @@ function NewWorktreeModalContent({
           return
         }
         if (repoResponse.ok) {
-          const result = (repoResponse as RpcSuccess).result as { repos: Repo[] }
-          setRepos(result.repos)
+          const nextRepos = readWorkspaceRepoList(repoResponse.result)
+          setRepos(nextRepos)
           if (hostId) {
-            setCachedRepos(hostId, result.repos)
+            setCachedRepos(hostId, nextRepos)
           }
           setSelectedRepo((current) => {
             // Why: the optimistic cache can include repos removed before the
             // fresh repo.list returns; never create against a stale repo id.
-            return refreshMobileNewWorkspaceDialogSelectedRepo(result.repos, current)
+            return refreshMobileNewWorkspaceDialogSelectedRepo(nextRepos, current)
           })
         }
       })
@@ -359,8 +349,12 @@ function NewWorktreeModalContent({
       })
 
     void (async () => {
-      const okResult = (entry: PromiseSettledResult<RpcResponse>): RpcSuccess | null =>
-        entry.status === 'fulfilled' && entry.value.ok ? (entry.value as RpcSuccess) : null
+      const okResult = (entry: PromiseSettledResult<RpcResponse>): unknown => {
+        if (entry.status !== 'fulfilled' || !entry.value.ok) {
+          return undefined
+        }
+        return entry.value.result
+      }
       const [settingsRes, uiRes, preflightRes] = await Promise.allSettled([
         client.sendRequest('settings.get'),
         client.sendRequest('ui.get'),
@@ -371,18 +365,14 @@ function NewWorktreeModalContent({
       }
 
       const settingsResult = okResult(settingsRes)
-      if (settingsResult) {
-        setRuntimeSettings((settingsResult.result as { settings: RuntimeSettings }).settings)
+      if (settingsResult !== undefined) {
+        setRuntimeSettings(readWorkspaceRuntimeSettings(settingsResult))
       }
       const uiResult = okResult(uiRes)
-      if (uiResult) {
-        const ui = (uiResult.result as { ui?: { trustedYiruHooks?: PersistedTrustedYiruHooks } }).ui
-        setTrustedYiruHooks(ui?.trustedYiruHooks ?? {})
+      if (uiResult !== undefined) {
+        setTrustedYiruHooks(readTrustedYiruHooks(uiResult))
       }
-      setGitLabAvailable(
-        (okResult(preflightRes)?.result as { glab?: { installed?: boolean } } | undefined)?.glab
-          ?.installed === true
-      )
+      setGitLabAvailable(readGlabInstalled(okResult(preflightRes)))
     })()
     return () => {
       stale = true
@@ -403,9 +393,8 @@ function NewWorktreeModalContent({
         if (!response.ok) {
           throw new Error(response.error.message)
         }
-        const state = (response as RpcSuccess).result as { state?: SshConnectionState | null }
         setSshState(
-          state.state ?? {
+          readSshConnectionState(response.result) ?? {
             targetId: selectedRepoConnectionId,
             status: 'disconnected',
             error: null,
@@ -448,7 +437,7 @@ function NewWorktreeModalContent({
         }
         setDetectedAgentIdsState({
           connectionId: selectedRepoConnectionId,
-          ids: response.ok ? new Set((response as RpcSuccess).result as string[]) : new Set()
+          ids: new Set(response.ok ? readDetectedAgentIds(response.result) : [])
         })
       } catch {
         if (!stale) {
@@ -475,19 +464,17 @@ function NewWorktreeModalContent({
           return
         }
         if (response.ok) {
-          const result = (response as RpcSuccess).result as RepoHooksResponse
-          const cmd = result.hooks?.scripts?.setup?.trim() || null
-          const policy = result.setupRunPolicy ?? 'run-by-default'
+          const hooks = readRepoHooks(response.result)
           setSetupHookDetails({
             repoId: selectedRepo.id,
-            command: cmd,
-            source: result.source,
-            trust: normalizeSetupHookTrust(result.setupTrust),
-            runPolicy: policy
+            command: hooks.setupCommand,
+            source: hooks.source,
+            trust: hooks.setupTrust,
+            runPolicy: hooks.setupRunPolicy
           })
           setSetupDecisionChoice(null)
-          setRunSetup(policy !== 'skip-by-default')
-          if (cmd && policy === 'ask') {
+          setRunSetup(hooks.setupRunPolicy !== 'skip-by-default')
+          if (hooks.setupCommand && hooks.setupRunPolicy === 'ask') {
             setShowAdvanced(true)
           }
         }
@@ -529,9 +516,8 @@ function NewWorktreeModalContent({
       if (!response.ok) {
         throw new Error(response.error.message)
       }
-      const result = (response as RpcSuccess).result as { state?: SshConnectionState | null }
       setSshState(
-        result.state ?? {
+        readSshConnectionState(response.result) ?? {
           targetId: selectedRepoConnectionId,
           status: 'connected',
           error: null,
@@ -567,9 +553,9 @@ function NewWorktreeModalContent({
       try {
         const settingsResponse = await client.sendRequest('settings.get')
         if (settingsResponse.ok) {
-          const result = (settingsResponse as RpcSuccess).result as { settings: RuntimeSettings }
-          latestRuntimeSettings = result.settings
-          setRuntimeSettings(result.settings)
+          const settings = readWorkspaceRuntimeSettings(settingsResponse.result)
+          latestRuntimeSettings = settings
+          setRuntimeSettings(settings)
         }
       } catch {
         // Best-effort refresh; the runtime validates the same setting before spawning.
@@ -683,20 +669,15 @@ function NewWorktreeModalContent({
     !creating &&
     !sshGate.requiresConnection &&
     (!needsSetupChoice || setupDecisionChoice != null)
-  const visibleAgentOptions =
-    detectedAgentIds === null
-      ? AGENT_OPTIONS.filter(
-          (agent) =>
-            agent.id !== '__blank__' &&
-            isMobileTuiAgentEnabled(agent.id, runtimeSettings?.disabledTuiAgents)
-        )
-      : AGENT_OPTIONS.filter(
-          (agent) =>
-            agent.id !== '__blank__' &&
-            detectedAgentIds.has(agent.id) &&
-            isMobileTuiAgentEnabled(agent.id, runtimeSettings?.disabledTuiAgents)
-        )
-  const pickerAgentOptions = [...visibleAgentOptions, BLANK_TERMINAL]
+  const pickerAgentOptions = useMemo<AgentOption[]>(() => {
+    const visible = AGENT_OPTIONS.filter(
+      (agent) =>
+        agent.id !== '__blank__' &&
+        (detectedAgentIds === null || detectedAgentIds.has(agent.id)) &&
+        isMobileTuiAgentEnabled(agent.id, runtimeSettings?.disabledTuiAgents)
+    )
+    return [...visible, BLANK_TERMINAL]
+  }, [detectedAgentIds, runtimeSettings?.disabledTuiAgents])
   const repoPickerItems = useMemo(
     () => repos.map((repo) => ({ id: repo.id, label: repo.displayName, repo })),
     [repos]

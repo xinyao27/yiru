@@ -429,13 +429,32 @@ export default function HomeScreen() {
   // Runs once per (hostId, client) pair and tears down when that pair
   // changes. The provider keeps the underlying socket open across
   // resubscription cycles so this is cheap.
+  // Why: depend on the host-id set AND each entry's client identity, so
+  // resubscriptions don't fire on every render that produces a new array
+  // reference, but DO fire when forceReconnect swaps the underlying client for a
+  // host (otherwise wireUp would keep firing on a closed client and never
+  // re-attach to the fresh one, leaving notifications/accounts subs broken until
+  // the user navigates).
+  const clientSubscriptionKey = useMemo(
+    () =>
+      allClients
+        .map((e) => `${e.hostId}:${clientKey(e.client)}`)
+        .sort()
+        .join(','),
+    [allClients]
+  )
   useEffect(() => {
     const cleanups: (() => void)[] = []
-    for (const entry of allClients) {
+    for (const entry of allClientsRef.current) {
       let unsubNotif: (() => void) | null = null
       let unsubAccounts: (() => void) | null = null
-      let statsFetched = false
+      let wiredState: ConnectionState | null = null
       const wireUp = (state: ConnectionState) => {
+        // Why: a host can drop and come back on the SAME client instance, so
+        // refetch on every transition INTO connected — a once-per-client flag
+        // left the home cards stale until the screen was refocused.
+        const reconnected = state === 'connected' && wiredState !== 'connected'
+        wiredState = state
         if (state === 'connected') {
           if (!unsubNotif) {
             unsubNotif = subscribeToDesktopNotifications(entry.client, entry.hostId)
@@ -451,8 +470,7 @@ export default function HomeScreen() {
               }
             })
           }
-          if (!statsFetched) {
-            statsFetched = true
+          if (reconnected) {
             void refreshHomeStatsForHost(entry.client, entry.hostId)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
@@ -467,7 +485,7 @@ export default function HomeScreen() {
           }
         }
       }
-      wireUp(entry.state)
+      wireUp(entry.client.getState())
       const unsubState = entry.client.onStateChange(wireUp)
       cleanups.push(() => {
         unsubState()
@@ -480,19 +498,7 @@ export default function HomeScreen() {
         c()
       }
     }
-    // Why: depend on the host-id set AND each entry's client identity, so
-    // resubscriptions don't fire on every render that produces a new
-    // array reference, but DO fire when forceReconnect swaps the
-    // underlying client for a host (otherwise wireUp would keep firing
-    // on a closed client and never re-attach to the fresh one, leaving
-    // notifications/accounts subs broken until the user navigates).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    allClients
-      .map((e) => `${e.hostId}:${clientKey(e.client)}`)
-      .sort()
-      .join(',')
-  ])
+  }, [clientSubscriptionKey])
 
   // Why: prefer the worktree the user last opened on this device so the
   // "Resume" card reflects their mobile session history, not just the

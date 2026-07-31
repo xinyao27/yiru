@@ -41,6 +41,59 @@ export async function saveLastSeenSeq(hostId: string, seq: number): Promise<void
   }
 }
 
+export type CatchUpWatermark = {
+  // Records a delivered event's seq (live or replay) and persists the advance.
+  observeDelivered: (seq: number | undefined) => void
+  value: () => number
+  // Reports a stream `ready`; readyCount is 1 for the cold-open stream.
+  notifyReady: (readyCount: number) => void
+}
+
+// Why: the persisted watermark loads asynchronously while `ready` can arrive at
+// any moment, and two catch-up cases were silently dropped — a ready that beat
+// the load never retried, and the first ready after a cold start never fetched
+// at all even though the watermark exists precisely to resume from it. This gate
+// owns that race so callers only report readiness.
+export function createCatchUpWatermark(hostId: string, runCatchUp: () => void): CatchUpWatermark {
+  let delivered = 0
+  let loaded = false
+  let pendingReadyCount = 0
+
+  function maybeRun(readyCount: number): void {
+    if (!loaded) {
+      pendingReadyCount = readyCount
+      return
+    }
+    pendingReadyCount = 0
+    // Why: without a persisted watermark (seq 0) there is no cut to fetch from,
+    // so a cold-open ready still skips catch-up and starts from the live stream.
+    if (readyCount > 1 || delivered > 0) {
+      runCatchUp()
+    }
+  }
+
+  void loadLastSeenSeq(hostId).then((seq) => {
+    delivered = Math.max(delivered, seq)
+    loaded = true
+    if (pendingReadyCount > 0) {
+      maybeRun(pendingReadyCount)
+    }
+  })
+
+  return {
+    observeDelivered(seq: number | undefined): void {
+      if (seq != null && seq > delivered) {
+        delivered = seq
+        void saveLastSeenSeq(hostId, delivered)
+      }
+    },
+    value(): number {
+      return delivered
+    },
+    notifyReady: maybeRun
+  }
+}
+
 // Why: bounded in-memory dedup window for notificationIds/dismiss ids observed
 // on the current connection. The desktop already dedupes by seq on replay, but
 // a socket that flickers background→foreground→background can deliver an event

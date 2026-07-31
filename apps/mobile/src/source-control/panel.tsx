@@ -66,17 +66,14 @@ export function MobileSourceControlPanel({
 
   // Deep-link / push with a different `tab` param should adopt the new segment
   // (expo-router can reuse the screen instance when only query params change).
-  useEffect(() => {
+  // Why: adopting during render keeps the first committed frame on the requested
+  // segment instead of painting the previous one and switching in an Effect.
+  const renderedInitialTabRef = useRef(initialTab)
+  if (renderedInitialTabRef.current !== initialTab) {
+    renderedInitialTabRef.current = initialTab
     setActiveTab(initialTab)
-    setVisitedTabs((prev) => {
-      if (prev.has(initialTab)) {
-        return prev
-      }
-      const next = new Set(prev)
-      next.add(initialTab)
-      return next
-    })
-  }, [initialTab])
+    setVisitedTabs((prev) => (prev.has(initialTab) ? prev : new Set(prev).add(initialTab)))
+  }
 
   const selectTab = useCallback((tab: SourceControlHubTab) => {
     setActiveTab(tab)
@@ -170,9 +167,12 @@ export function MobileSourceControlPanel({
   const ensurePrDetails = prController.ensurePrSidebarDetails
   // Refs so tab effects do not re-fire when headSha recreates load() (soft refresh).
   const refetchPrRef = useRef(refetchPr)
-  refetchPrRef.current = refetchPr
   const ensurePrDetailsRef = useRef(ensurePrDetails)
-  ensurePrDetailsRef.current = ensurePrDetails
+  // Declared before the tab effects below so they read this commit's callbacks.
+  useEffect(() => {
+    refetchPrRef.current = refetchPr
+    ensurePrDetailsRef.current = ensurePrDetails
+  }, [ensurePrDetails, refetchPr])
   useEffect(() => {
     // Why: source-control runners are created before the review controller;
     // this bridge lets remote completions refresh the current controller only.

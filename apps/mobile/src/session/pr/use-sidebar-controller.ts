@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { fetchWorktreeLinkedPR } from '~/source-control/pr-link'
 import type { RpcClient } from '~/transport/rpc-client'
@@ -52,11 +52,19 @@ export function useMobilePrSidebarController(input: PrSidebarControllerInput) {
   const { client, connState, worktreeId, branch, headSha } = input
   // The dedicated PR icon is available whenever the repo has a GitHub remote —
   // independent of whether the branch has an open PR (a no-PR branch shows an
-  // empty state rather than hiding the icon).
-  const [isGithubRepo, setIsGithubRepo] = useState(false)
+  // empty state rather than hiding the icon). The result carries the worktree it
+  // was probed for, so a worktree switch reads as "not probed yet" during render
+  // instead of being reset from an Effect — while a brief disconnect keeps the
+  // last answer (otherwise the hub hides the chip mid-session).
+  const [repoProbe, setRepoProbe] = useState<{
+    worktreeId: string
+    isGithubRepo: boolean
+  } | null>(null)
+  const activeRepoProbe = repoProbe?.worktreeId === worktreeId ? repoProbe : null
+  const isGithubRepo = activeRepoProbe?.isGithubRepo ?? false
   // False until the probe resolves for this worktree. Consumers gate "unavailable
   // for this provider" copy on it — isGithubRepo=false is meaningless mid-probe.
-  const [repoProbeLoaded, setRepoProbeLoaded] = useState(false)
+  const repoProbeLoaded = activeRepoProbe !== null
   const [state, setState] = useState<PrSidebarState>({ kind: 'hidden' })
   const [showPRSidebar, setShowPRSidebar] = useState(false)
   const loadSeqRef = useRef(0)
@@ -70,7 +78,11 @@ export function useMobilePrSidebarController(input: PrSidebarControllerInput) {
   const detailsInFlightRef = useRef<{ seq: number; prNumber: number } | null>(null)
   const stateIdentityRef = useRef<string | null>(null)
   const stateRef = useRef(state)
-  stateRef.current = state
+  // Why: load()/ensure() continuations read the committed state through this ref;
+  // writing it during render would publish a value from a discarded render.
+  useLayoutEffect(() => {
+    stateRef.current = state
+  }, [state])
   const headShaRef = useRef(headSha)
 
   // Repo eligibility (a GitHub remote) is independent of the branch, so the probe
@@ -79,6 +91,20 @@ export function useMobilePrSidebarController(input: PrSidebarControllerInput) {
   // forever spinner instead of the "Current branch unavailable" state.
   const probeReady = client !== null && connState === 'connected'
   const identity = buildMobilePrSidebarIdentity({ worktreeId, branch })
+
+  const renderedIdentityRef = useRef(identity)
+  if (renderedIdentityRef.current !== identity) {
+    renderedIdentityRef.current = identity
+    // Why: ready/loading data is scoped to branch. A branch switch must not let the
+    // open panel keep rendering the previous PR as "fresh", and wiping during render
+    // means no committed frame ever pairs the new identity with the old PR.
+    if (!identity || (stateIdentityRef.current !== null && stateIdentityRef.current !== identity)) {
+      loadSeqRef.current += 1
+      detailsSeqRef.current += 1
+      stateIdentityRef.current = null
+      setState({ kind: 'hidden' })
+    }
+  }
 
   const buildDeps = useCallback((): PrSidebarLoadDeps | null => {
     if (!client) {
@@ -94,13 +120,6 @@ export function useMobilePrSidebarController(input: PrSidebarControllerInput) {
   }, [client])
 
   // Probe whether this is a GitHub repo to decide icon availability (GitHub-only).
-  // Worktree change must reset eligibility; a brief disconnect must not — otherwise
-  // the hub shows "unavailable for this provider" and hides the chip mid-session.
-  useEffect(() => {
-    setIsGithubRepo(false)
-    setRepoProbeLoaded(false)
-  }, [worktreeId])
-
   useEffect(() => {
     let cancelled = false
     if (!probeReady || !client) {
@@ -109,40 +128,20 @@ export function useMobilePrSidebarController(input: PrSidebarControllerInput) {
     void fetchGithubRepoSlug(client, worktreeId)
       .then((outcome) => {
         if (!cancelled) {
-          setIsGithubRepo(outcome.ok && outcome.result !== null)
-          setRepoProbeLoaded(true)
+          setRepoProbe({ worktreeId, isGithubRepo: outcome.ok && outcome.result !== null })
         }
       })
       .catch(() => {
         // Why: sendGithubPrRead already normalizes throws, but a cancelled
         // unmount + any unexpected rejection must not surface as LogBox.
         if (!cancelled) {
-          setIsGithubRepo(false)
-          setRepoProbeLoaded(true)
+          setRepoProbe({ worktreeId, isGithubRepo: false })
         }
       })
     return () => {
       cancelled = true
     }
   }, [probeReady, client, worktreeId])
-
-  useEffect(() => {
-    if (!identity) {
-      loadSeqRef.current += 1
-      detailsSeqRef.current += 1
-      stateIdentityRef.current = null
-      setState({ kind: 'hidden' })
-      return
-    }
-    if (stateIdentityRef.current !== null && stateIdentityRef.current !== identity) {
-      // Why: ready/loading data is scoped to branch. A branch switch must not let
-      // the open panel keep rendering the previous PR as "fresh."
-      loadSeqRef.current += 1
-      detailsSeqRef.current += 1
-      stateIdentityRef.current = null
-      setState({ kind: 'hidden' })
-    }
-  }, [identity])
 
   const load = useCallback(
     async (options?: PrSidebarLoadOptions) => {

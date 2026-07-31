@@ -13,6 +13,7 @@ import {
 } from './markdown-blocks'
 import { isAllowedMarkdownLinkUrl } from './markdown-link-scheme'
 import { MermaidDiagram } from './mermaid-diagram'
+import { toStableKeys } from './stable-keys'
 
 type Props = {
   content: string
@@ -20,6 +21,35 @@ type Props = {
 }
 
 type CommentMarkdownVariant = NonNullable<Props['variant']>
+
+// Keys only need to separate siblings, so a prefix of the rendered text is enough
+// to identify a block without carrying a whole code fence around.
+const KEY_TEXT_LIMIT = 48
+
+function markdownBlockKeyPart(block: MarkdownBlock): string {
+  switch (block.kind) {
+    case 'heading':
+      return `heading:${block.level}:${block.text.slice(0, KEY_TEXT_LIMIT)}`
+    case 'code':
+      return `code:${block.lang}:${block.text.slice(0, KEY_TEXT_LIMIT)}`
+    case 'quote':
+      return `quote:${block.text.slice(0, KEY_TEXT_LIMIT)}`
+    case 'list':
+      return `list:${block.ordered}:${block.items.join('|').slice(0, KEY_TEXT_LIMIT)}`
+    case 'hr':
+      return 'hr'
+    case 'paragraph':
+      return `paragraph:${block.text.slice(0, KEY_TEXT_LIMIT)}`
+    case 'details':
+      return `details:${block.summary.slice(0, KEY_TEXT_LIMIT)}`
+    case 'table':
+      return `table:${block.headers.join('|').slice(0, KEY_TEXT_LIMIT)}`
+  }
+}
+
+function markdownBlockKeys(blocks: readonly MarkdownBlock[]): string[] {
+  return toStableKeys(blocks.map(markdownBlockKeyPart))
+}
 
 function bodyTextClassName(variant: CommentMarkdownVariant): string {
   return variant === 'document' ? 'text-base' : 'text-sm'
@@ -51,6 +81,7 @@ export function CommentMarkdown({ content, variant = 'comment' }: Props) {
       return null
     }
   }, [content])
+  const blockKeys = useMemo(() => markdownBlockKeys(blocks ?? []), [blocks])
 
   if (!blocks) {
     return <Text className={cn(styles.paragraph, bodyTextClassName(variant))}>{content}</Text>
@@ -59,7 +90,7 @@ export function CommentMarkdown({ content, variant = 'comment' }: Props) {
   return (
     <View>
       {blocks.map((block, index) => (
-        <BlockView key={index} block={block} variant={variant} />
+        <BlockView key={blockKeys[index]} block={block} variant={variant} />
       ))}
     </View>
   )
@@ -75,6 +106,7 @@ function DetailsBlock({
   variant: CommentMarkdownVariant
 }) {
   const [open, setOpen] = useState(false)
+  const bodyKeys = useMemo(() => markdownBlockKeys(body), [body])
   const Chevron = open ? ChevronDown : ChevronRight
   return (
     <View className="border-hairline border-border mb-2 overflow-hidden rounded-xl">
@@ -91,7 +123,7 @@ function DetailsBlock({
       {open ? (
         <View className="px-2 pt-1">
           {body.map((b, i) => (
-            <BlockView key={i} block={b} variant={variant} />
+            <BlockView key={bodyKeys[i]} block={b} variant={variant} />
           ))}
         </View>
       ) : null}
@@ -139,20 +171,7 @@ function BlockView({ block, variant }: { block: MarkdownBlock; variant: CommentM
     case 'hr':
       return <View className="bg-border my-2 h-px" />
     case 'list':
-      return (
-        <View className="mb-2">
-          {block.items.map((item, i) => (
-            <View key={i} className="flex-row gap-1">
-              <Text className={cn('text-muted-foreground', bodyTextClassName(variant))}>
-                {block.ordered ? `${i + 1}.` : '•'}
-              </Text>
-              <Text className={cn(styles.paragraph, 'flex-1 mb-1', bodyTextClassName(variant))}>
-                <Inline text={item} variant={variant} />
-              </Text>
-            </View>
-          ))}
-        </View>
-      )
+      return <ListBlock block={block} variant={variant} />
     case 'paragraph':
       return (
         <Text className={cn(styles.paragraph, bodyTextClassName(variant))}>
@@ -160,6 +179,33 @@ function BlockView({ block, variant }: { block: MarkdownBlock; variant: CommentM
         </Text>
       )
   }
+}
+
+function ListBlock({
+  block,
+  variant
+}: {
+  block: Extract<MarkdownBlock, { kind: 'list' }>
+  variant: CommentMarkdownVariant
+}) {
+  const itemKeys = useMemo(
+    () => toStableKeys(block.items.map((item) => item.slice(0, KEY_TEXT_LIMIT))),
+    [block.items]
+  )
+  return (
+    <View className="mb-2">
+      {block.items.map((item, i) => (
+        <View key={itemKeys[i]} className="flex-row gap-1">
+          <Text className={cn('text-muted-foreground', bodyTextClassName(variant))}>
+            {block.ordered ? `${i + 1}.` : '•'}
+          </Text>
+          <Text className={cn(styles.paragraph, 'flex-1 mb-1', bodyTextClassName(variant))}>
+            <Inline text={item} variant={variant} />
+          </Text>
+        </View>
+      ))}
+    </View>
+  )
 }
 
 function openMarkdownLink(url: string): void {
@@ -239,19 +285,24 @@ function Inline({ text, variant }: { text: string; variant: CommentMarkdownVaria
       return [{ kind: 'text', text }]
     }
   }, [text])
+  const tokenKeys = useMemo(
+    () =>
+      toStableKeys(tokens.map((token) => `${token.kind}:${token.text.slice(0, KEY_TEXT_LIMIT)}`)),
+    [tokens]
+  )
   return (
     <>
       {tokens.map((token, i) => {
         if (token.kind === 'bold') {
           return (
-            <Text key={i} className="font-bold">
+            <Text key={tokenKeys[i]} className="font-bold">
               {token.text}
             </Text>
           )
         }
         if (token.kind === 'italic') {
           return (
-            <Text key={i} className="italic">
+            <Text key={tokenKeys[i]} className="italic">
               {token.text}
             </Text>
           )
@@ -259,7 +310,7 @@ function Inline({ text, variant }: { text: string; variant: CommentMarkdownVaria
         if (token.kind === 'code') {
           return (
             <Text
-              key={i}
+              key={tokenKeys[i]}
               className={cn(
                 'text-foreground bg-secondary rounded font-mono',
                 codeTextClassName(variant)
@@ -272,7 +323,7 @@ function Inline({ text, variant }: { text: string; variant: CommentMarkdownVaria
         if (token.kind === 'link') {
           return (
             <Text
-              key={i}
+              key={tokenKeys[i]}
               className="text-foreground underline"
               onPress={() => openMarkdownLink(token.url)}
             >
@@ -280,7 +331,7 @@ function Inline({ text, variant }: { text: string; variant: CommentMarkdownVaria
             </Text>
           )
         }
-        return <Text key={i}>{token.text}</Text>
+        return <Text key={tokenKeys[i]}>{token.text}</Text>
       })}
     </>
   )
