@@ -2,6 +2,7 @@ import { Minus, Plus, Trash, ArrowCounterClockwise as Undo2 } from '@phosphor-ic
 import React from 'react'
 
 import { translate } from '../../../i18n/i18n'
+import { AccordionContent, AccordionItem } from '../../ui/accordion'
 import { Button } from '../../ui/button'
 import {
   getDiscardAllPaths,
@@ -11,7 +12,7 @@ import {
 import { ActionButton } from './action-button'
 import type { SourceControlController } from './controller'
 import { CONFLICTS_SECTION_LABEL, SECTION_LABELS } from './panel-constants'
-import { SourceControlSectionHeader as SectionHeader } from './section-header'
+import { SourceControlAccordionSectionHeader as SectionHeader } from './section-header'
 import { getSourceControlSectionViewAction } from './section-order'
 import { SourceControlUncommittedFileList } from './uncommitted-file-list'
 
@@ -24,7 +25,6 @@ function SourceControlUncommittedSections({
 }: SourceControlUncommittedSectionsProps): React.JSX.Element {
   const {
     activeWorktreeId,
-    collapsedSections,
     displaySections,
     handleStageAllPaths,
     handleUnstagePaths,
@@ -33,7 +33,6 @@ function SourceControlUncommittedSections({
     openAllDiffs,
     openConflictReview,
     requestDiscardAllInArea,
-    toggleSection,
     unfilteredDisplaySectionsById,
     workspacePanelTabId,
     worktreePath
@@ -43,7 +42,6 @@ function SourceControlUncommittedSections({
     <>
       {displaySections.map((section) => {
         const { area, id, items } = section
-        const isCollapsed = collapsedSections.has(id)
         // Why: bulk actions operate on the unfiltered group; hiding them under a filter avoids surprises.
         const actionSection = unfilteredDisplaySectionsById.get(id) ?? section
         const actionItems = actionSection.items
@@ -57,17 +55,15 @@ function SourceControlUncommittedSections({
         const sectionViewAction = getSourceControlSectionViewAction(actionSection)
 
         return (
-          <div key={id}>
+          <AccordionItem key={id} value={id} bordered={false}>
             <SectionHeader
               label={translate(sectionLabel.key, sectionLabel.fallback)}
               count={items.length}
               conflictCount={items.filter((entry) => entry.conflictStatus === 'unresolved').length}
-              isCollapsed={isCollapsed}
-              onToggle={() => toggleSection(id)}
               actions={
                 <>
                   {/* Why: no-hover and SSH users need persistent keyboard-reachable actions. */}
-                  <div className="can-hover:opacity-0 flex items-center transition-opacity group-hover/section:opacity-100 focus-within:opacity-100">
+                  <div className="can-hover:opacity-0 flex items-center transition-opacity group-focus-within/section:opacity-100 group-hover/section:opacity-100 focus-within:opacity-100">
                     {canRevertAll ? (
                       <ActionButton
                         icon={area === 'untracked' ? Trash : Undo2}
@@ -163,10 +159,10 @@ function SourceControlUncommittedSections({
                 </>
               }
             />
-            {isCollapsed ? null : (
+            <AccordionContent padding="none">
               <SourceControlUncommittedFileList controller={controller} sectionId={id} />
-            )}
-          </div>
+            </AccordionContent>
+          </AccordionItem>
         )
       })}
     </>

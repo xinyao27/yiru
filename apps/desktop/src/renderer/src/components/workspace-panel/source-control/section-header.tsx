@@ -3,7 +3,34 @@ import type React from 'react'
 
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
+import { AccordionTrigger } from '../../ui/accordion'
 import { Button } from '../../ui/button'
+
+type SourceControlSectionHeaderContentProps = {
+  label: string
+  count: number
+  conflictCount?: number
+}
+
+function SourceControlSectionHeaderContent({
+  label,
+  count,
+  conflictCount = 0
+}: SourceControlSectionHeaderContentProps): React.JSX.Element {
+  return (
+    <>
+      <span className="ml-0.5">{label}</span>
+      <span className="text-[11px] font-medium tabular-nums">{count}</span>
+      {conflictCount > 0 ? (
+        <span className="text-destructive/80 text-[11px] font-medium">
+          · {conflictCount}{' '}
+          {translate('auto.components.right.sidebar.SourceControl.413a3ba113', 'conflict')}
+          {conflictCount === 1 ? '' : 's'}
+        </span>
+      ) : null}
+    </>
+  )
+}
 
 export function SourceControlSectionHeader({
   label,
@@ -12,15 +39,11 @@ export function SourceControlSectionHeader({
   isCollapsed,
   onToggle,
   actions
-}: {
-  label: string
-  count: number
-  conflictCount?: number
+}: SourceControlSectionHeaderContentProps & {
   isCollapsed: boolean
   onToggle: () => void
   actions?: React.ReactNode
 }): React.JSX.Element {
-  // Why: local and projected Source Control sections must keep one hover and disclosure surface.
   return (
     <div className="pt-3 pb-1">
       <div className="group/section hover:bg-accent hover:text-accent-foreground flex items-center pr-2 pl-0.5">
@@ -38,18 +61,36 @@ export function SourceControlSectionHeader({
               isCollapsed && '-rotate-90'
             )}
           />
-          <span className="ml-0.5">{label}</span>
-          <span className="text-[11px] font-medium tabular-nums">{count}</span>
-          {conflictCount > 0 ? (
-            <span className="text-destructive/80 text-[11px] font-medium">
-              · {conflictCount}{' '}
-              {translate('auto.components.right.sidebar.SourceControl.413a3ba113', 'conflict')}
-              {conflictCount === 1 ? '' : 's'}
-            </span>
-          ) : null}
+          <SourceControlSectionHeaderContent
+            label={label}
+            count={count}
+            conflictCount={conflictCount}
+          />
         </Button>
         <div className="flex shrink-0 items-center">{actions}</div>
       </div>
+    </div>
+  )
+}
+
+export function SourceControlAccordionSectionHeader({
+  label,
+  count,
+  conflictCount = 0,
+  actions
+}: SourceControlSectionHeaderContentProps & {
+  actions?: React.ReactNode
+}): React.JSX.Element {
+  // Why: local and projected Source Control sections must keep one hover and disclosure surface.
+  return (
+    <div className="pt-3 pb-1">
+      <AccordionTrigger indicatorPosition="start" variant="section" actions={actions}>
+        <SourceControlSectionHeaderContent
+          label={label}
+          count={count}
+          conflictCount={conflictCount}
+        />
+      </AccordionTrigger>
     </div>
   )
 }
