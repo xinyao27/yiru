@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url'
 
 import { repairCacheMap, repairCatalog } from './locale-translation-policy.mjs'
 
-const LOCALES_DIR = path.join('src', 'renderer', 'src', 'i18n', 'locales')
+const LOCALES_DIR = path.join('src', 'renderer', 'i18n', 'locales')
 
 const LOCALE_CACHE_FILES = {
   ko: '.ko-catalog-cache.json',

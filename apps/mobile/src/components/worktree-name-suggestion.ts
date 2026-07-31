@@ -1,7 +1,7 @@
 import { MARINE_CREATURES } from '../constants/marine-creatures'
 
 // Why: matches the desktop fallback in
-// src/renderer/src/components/sidebar/worktree-name-suggestions.ts. The
+// src/renderer/components/sidebar/worktree-name-suggestions.ts. The
 // "already exists locally" collision is on the on-disk worktree directory
 // name (the path basename), not the user-facing displayName — so we derive
 // the used set from path basenames just like the desktop does.
@@ -11,7 +11,7 @@ function stripTrailingSeparators(p: string): string {
 }
 
 // Why: cross-platform path basename — handles both POSIX ("/") and Windows
-// ("\\") separators, mirroring src/renderer/src/lib/path.ts so the mobile
+// ("\\") separators, mirroring src/renderer/lib/path.ts so the mobile
 // suggestion logic agrees with the desktop's collision check.
 function pathBasename(p: string): string {
   const normalized = stripTrailingSeparators(p)

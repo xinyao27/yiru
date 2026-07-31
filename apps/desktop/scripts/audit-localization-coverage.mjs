@@ -363,7 +363,7 @@ function classifyStringNode(node) {
 }
 
 function areaForFile(relativePath) {
-  const rendererPrefix = 'src/renderer/src/'
+  const rendererPrefix = 'src/renderer/'
   if (!relativePath.startsWith(rendererPrefix)) {
     return relativePath.split('/').slice(0, 2).join('/')
   }
@@ -485,7 +485,7 @@ function parseArgs(argv) {
     check: false,
     format: 'summary',
     outputPath: null,
-    sourceRoot: path.join('src', 'renderer', 'src')
+    sourceRoot: path.join('src', 'renderer')
   }
 
   for (let index = 0; index < argv.length; index += 1) {

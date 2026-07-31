@@ -3,7 +3,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 
-const MAIN_CSS_PATH = 'src/renderer/src/assets/main.css'
+const MAIN_CSS_PATH = 'src/renderer/assets/main.css'
 const EXPECTED_THEME_TOKENS = new Set([
   '--color-background',
   '--color-foreground',

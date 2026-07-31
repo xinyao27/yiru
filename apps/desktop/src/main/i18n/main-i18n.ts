@@ -20,10 +20,10 @@ const LAZY_LOCALE_LOADERS: Record<
   Exclude<SupportedUiLocale, 'en'>,
   () => Promise<{ default: Record<string, unknown> }>
 > = {
-  es: () => import('../../renderer/src/i18n/locales/es.json'),
-  ja: () => import('../../renderer/src/i18n/locales/ja.json'),
-  ko: () => import('../../renderer/src/i18n/locales/ko.json'),
-  zh: () => import('../../renderer/src/i18n/locales/zh.json')
+  es: () => import('../../renderer/i18n/locales/es.json'),
+  ja: () => import('../../renderer/i18n/locales/ja.json'),
+  ko: () => import('../../renderer/i18n/locales/ko.json'),
+  zh: () => import('../../renderer/i18n/locales/zh.json')
 }
 
 const lazyLocaleBackend: BackendModule = {

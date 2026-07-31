@@ -2,7 +2,7 @@ import Svg, { Path } from 'react-native-svg'
 import { withUniwind } from 'uniwind'
 
 // Why: SVG paths sourced from the desktop codebase
-// (src/renderer/src/components/status-bar/icons.tsx) so mobile and desktop
+// (src/renderer/components/status-bar/icons.tsx) so mobile and desktop
 // stay visually identical for Claude/Codex branding.
 
 export function ClaudeIcon({ size = 16 }: { size?: number }) {

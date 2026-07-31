@@ -163,7 +163,7 @@ No `TODO` without an issue link. No commented-out code — git has it.
 Work runs on the local machine, in a WSL distro, over SSH, and through a relay. Every path that touches a filesystem, a process, or a git binary must work on all of them, on macOS, Linux, and Windows alike — code, commands, and scripts.
 
 - Resolve paths with `path.join` or Electron path utilities. Never assume `/` or `\`.
-- Route filesystem, git, terminal, and search operations through the runtime clients (`renderer/src/runtime/runtime-*-client.ts`, `main/runtime/`) instead of calling Node from a feature.
+- Route filesystem, git, terminal, and search operations through the runtime clients (`renderer/runtime/runtime-*-client.ts`, `main/runtime/`) instead of calling Node from a feature.
 - Scope cached host state — capabilities, versions, connection health — to the host that executes it. One host's answer must never leak into another's.
 - Keyboard shortcuts branch on platform: `navigator.userAgent.includes('Mac')` → `metaKey`, else `ctrlKey`. Electron menu accelerators use `CmdOrCtrl`.
 
@@ -200,7 +200,7 @@ Report results honestly: if something fails, show the output; if you skipped a s
 
 ## 11. Working in legacy areas
 
-Much of this repo predates these rules — hundreds of loose modules in `shared/` and `renderer/src/lib/`, flat feature folders, stuttering filenames, feature CSS in `main.css`, and a `max-lines` grandfather list. That is the state to move away from, not a precedent to copy.
+Much of this repo predates these rules — hundreds of loose modules in `shared/` and `renderer/lib/`, flat feature folders, stuttering filenames, feature CSS in `main.css`, and a `max-lines` grandfather list. That is the state to move away from, not a precedent to copy.
 
 - **New code follows this document**, without exception.
 - **When you touch a legacy area, move what you touch toward it**: pull the files you're already editing into the feature folder, drop the redundant prefixes. Don't launch an unrequested refactor beyond that.

@@ -13,10 +13,14 @@ export default defineConfig({
   define: {
     YIRU_FEATURE_WALL_ENABLED: 'true'
   },
+  // Why: stated explicitly rather than leaning on the bundler reading tsconfig
+  // paths, so the web build breaks loudly if an alias is added without it.
   resolve: {
     alias: {
-      '@renderer': resolve('src/renderer/src'),
-      '@': resolve('src/renderer/src')
+      '~renderer': resolve('src/renderer'),
+      '~shared': resolve('src/shared'),
+      '~main': resolve('src/main'),
+      '~preload': resolve('src/preload')
     }
   },
   build: {

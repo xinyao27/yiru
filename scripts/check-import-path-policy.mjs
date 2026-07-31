@@ -20,7 +20,7 @@ const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
 
 // Alias targets: only areas something imports into get an alias.
 const DESKTOP_AREAS = [
-  ['apps/desktop/src/renderer/src', '~renderer'],
+  ['apps/desktop/src/renderer', '~renderer'],
   ['apps/desktop/src/shared', '~shared'],
   ['apps/desktop/src/main', '~main'],
   ['apps/desktop/src/preload', '~preload']

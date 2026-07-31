@@ -17,8 +17,8 @@ Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic
 | --- | --- |
 | Desktop visual contract | `apps/desktop/DESIGN.md` |
 | Mobile visual contract | `apps/mobile/DESIGN.md` |
-| Tokens, base layer, global chrome | `apps/desktop/src/renderer/src/assets/main.css` |
-| Primitives | `apps/desktop/src/renderer/src/components/ui/` |
+| Tokens, base layer, global chrome | `apps/desktop/src/renderer/assets/main.css` |
+| Primitives | `apps/desktop/src/renderer/components/ui/` |
 | Primitive catalog and layering | `components/ui/README.md` |
 | Mobile token mirror (Uniwind) | `apps/mobile/global.css` |
 | Mobile headers, controls, and tabs | §12 of this guide |

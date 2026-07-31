@@ -195,7 +195,7 @@ async function localizeFile(root, filePath, catalog) {
 }
 
 async function collectCandidateFiles(root) {
-  const sourceRoot = path.join(root, 'src', 'renderer', 'src')
+  const sourceRoot = path.join(root, 'src', 'renderer')
   const reports = []
   const stack = [sourceRoot]
   while (stack.length > 0) {
@@ -226,7 +226,7 @@ async function collectCandidateFiles(root) {
 }
 
 export async function main(root = process.cwd()) {
-  const catalogPath = path.join(root, 'src', 'renderer', 'src', 'i18n', 'locales', 'en.json')
+  const catalogPath = path.join(root, 'src', 'renderer', 'i18n', 'locales', 'en.json')
   const catalog = JSON.parse(await fs.readFile(catalogPath, 'utf8'))
   const files = await collectCandidateFiles(root)
   let count = 0

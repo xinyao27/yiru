@@ -30,7 +30,7 @@
     "lint": "vp lint --fix",
     "check": "vp check --fix && pnpm run typecheck && pnpm run verify:repository-contracts",
     "preview": "pnpm run start",
-    "verify:repository-contracts": "node ../../scripts/run-vite-plus-lint-profile.mjs switch-exhaustiveness src/main src/preload src/shared src/relay src/cli src/renderer/src config scripts --quiet && node scripts/check-design-token-budget.mjs && node scripts/check-ui-style-drift.mjs && pnpm run verify:localization-catalog && pnpm run verify:localization-coverage",
+    "verify:repository-contracts": "node ../../scripts/run-vite-plus-lint-profile.mjs switch-exhaustiveness src/main src/preload src/shared src/relay src/cli src/renderer config scripts --quiet && node scripts/check-design-token-budget.mjs && node scripts/check-ui-style-drift.mjs && pnpm run verify:localization-catalog && pnpm run verify:localization-coverage",
     "typecheck:node": "tsc --noEmit -p config/tsconfig.node.json",
     "typecheck:cli": "tsc --noEmit -p config/tsconfig.tc.cli.json",
     "typecheck:web": "tsc --noEmit -p config/tsconfig.tc.web.json",

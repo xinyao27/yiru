@@ -12,7 +12,7 @@ import {
 } from './locale-translation-policy.mjs'
 
 const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g
-const LOCALES_DIR = path.join('src', 'renderer', 'src', 'i18n', 'locales')
+const LOCALES_DIR = path.join('src', 'renderer', 'i18n', 'locales')
 
 const LOCALE_CONFIG = {
   zh: {

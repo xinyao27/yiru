@@ -1540,7 +1540,7 @@ const api = {
   // purpose — the main-side validator (src/main/telemetry/validator.ts) is
   // the single enforcement point, not the preload types. The renderer gets
   // typed `track<N>()` / `setOptIn()` wrappers via
-  // src/renderer/src/lib/telemetry.ts, which is what call sites import.
+  // src/renderer/lib/telemetry.ts, which is what call sites import.
   telemetryTrack: (name: string, props: Record<string, unknown>): Promise<void> =>
     ipcRenderer.invoke('telemetry:track', name, props),
   telemetrySetOptIn: (optedIn: boolean): Promise<void> =>

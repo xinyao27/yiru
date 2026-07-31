@@ -20,7 +20,7 @@ const CROSS_CLIENT_WORKSPACE_PACKAGES = [
 // are leaf executables nothing imports into, so they deliberately get none —
 // and there is no bare '~', which is what keeps prefix matching unambiguous.
 const SOURCE_ALIASES = {
-  '~renderer': resolve('src/renderer/src'),
+  '~renderer': resolve('src/renderer'),
   '~shared': resolve('src/shared'),
   '~main': resolve('src/main'),
   '~preload': resolve('src/preload')
