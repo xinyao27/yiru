@@ -24,6 +24,7 @@ import {
 } from '../../right-sidebar-panel-source'
 import SourceControl from '../../source-control'
 import { DiffLineCounts } from '../entry-details'
+import { useAutoOpenAllDiffs } from './auto-open-all-diffs'
 import type { SourceControlPanelView } from './state'
 
 type SourceControlWorkspacePanelProps = {
@@ -57,6 +58,7 @@ export default function SourceControlWorkspacePanel({
   const setStoredView = useAppStore((state) => state.setSourceControlPanelView)
   const view = controlledView ?? storedView ?? 'changes'
   const { changeLineCounts, reviewDetails } = useSourceControlTabDetails(source)
+  useAutoOpenAllDiffs({ source, isVisible, workspacePanelTabId })
 
   const handleViewChange = (value: string): void => {
     if (value !== 'changes' && value !== 'review') {

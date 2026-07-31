@@ -6,6 +6,7 @@ import { useAppStore } from '@/store'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
 import { WorkspacePanelEditorEmptyState } from './workspace-panel-editor-empty-state'
+import { WorkspacePanelSidePanel } from './workspace-panel-side-panel'
 
 const EditorPanel = lazy(() => import('../editor/panel'))
 const GitGraphView = lazy(() => import('../workspace-panel/git-graph/view'))
@@ -33,7 +34,6 @@ export function WorkspacePanelTabContent({
   const isGitGraphOpen = useAppStore((state) =>
     panel === 'source-control' ? (state.gitGraphOpenByPanelTab[panelTabId] ?? false) : false
   )
-  const panelWidth = useAppStore((state) => state.rightSidebarWidth)
 
   return (
     <div
@@ -66,19 +66,7 @@ export function WorkspacePanelTabContent({
               />
             )}
           </div>
-          <div
-            // Why: the former right-sidebar width remains the user's preferred
-            // tree width, while the cap preserves usable editor space in splits.
-            className="bg-sidebar text-sidebar-foreground border-border flex min-h-0 shrink-0 border-l"
-            style={{ width: panelWidth, maxWidth: '50%' }}
-          >
-            <RightSidebarPanelContent
-              effectiveTab={panel}
-              rightSidebarOpen
-              isVisible
-              workspacePanelTabId={panelTabId}
-            />
-          </div>
+          <WorkspacePanelSidePanel panel={panel} panelTabId={panelTabId} />
         </>
       ) : (
         <RightSidebarPanelContent effectiveTab={panel} rightSidebarOpen isVisible />
