@@ -61,6 +61,10 @@ export const ONBOARDING_FINAL_STEP = 5
 export const ONBOARDING_FLOW_VERSION = 4
 
 export const YIRU_BROWSER_PARTITION = 'persist:yiru-browser'
+// Why: the Skills marketplace embeds skills.sh in a guest webview. It keeps its
+// own persistent jar so registry browsing never reads or writes the cookies of
+// the user's browser pane, and so main allowlists exactly one extra partition.
+export const SKILLS_MARKETPLACE_PARTITION = 'persist:skills-marketplace'
 // Why: the assistant PTY is local and long-lived but has no repository-backed
 // workspace, so it needs a stable synthetic owner across main and renderer.
 export const FRIDAY_WORKTREE_ID = 'friday'

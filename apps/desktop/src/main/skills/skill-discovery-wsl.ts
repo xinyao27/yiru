@@ -139,10 +139,12 @@ export function parseWslSkillDiscoveryOutput(
     }
     const directoryPath = pathPosix.dirname(skillFilePath)
     const summary = summarizeSkillMarkdown(markdown)
+    const folderName = pathPosix.basename(directoryPath)
     const sourceKind = sourceKindForSkill(root, skillFilePath, pathPosix)
     skillsByCanonicalPath.set(canonicalSkillFilePath, {
       id: stablePathId(canonicalSkillFilePath),
-      name: summary.name ?? pathPosix.basename(directoryPath),
+      name: summary.name ?? folderName,
+      folderName,
       description: summary.description,
       // Copy: `root.providers` is shared across every skill/source from this
       // root, so a later in-place merge must not mutate the aliased array.

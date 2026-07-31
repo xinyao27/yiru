@@ -2,7 +2,12 @@ import { useSyncExternalStore } from 'react'
 
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
-import type { SkillUpdateRun } from '../../../../shared/skill-freshness'
+import type {
+  SkillManageOperation,
+  SkillManageScope,
+  SkillUpdateRun,
+  SkillUpdateStartResult
+} from '../../../../shared/skill-freshness'
 import {
   getSkillFreshnessUpdateDialogRequest,
   subscribeSkillFreshnessUpdateDialog
@@ -40,7 +45,7 @@ function clearSuccessTimer(): void {
  */
 function scheduleSuccessLinger(): void {
   clearSuccessTimer()
-  if (run.state !== 'success' || getSkillFreshnessUpdateDialogRequest()) {
+  if (run.state !== 'success' || getSkillFreshnessUpdateDialogRequest() || resultHolders > 0) {
     return
   }
   successTimer = setTimeout(() => {
@@ -51,6 +56,19 @@ function scheduleSuccessLinger(): void {
 
 // Opening the dialog on a lingering success hands ownership back to it.
 subscribeSkillFreshnessUpdateDialog(scheduleSuccessLinger)
+
+let resultHolders = 0
+
+/** Same bargain the update dialog gets: while an install or remove surface is
+ *  open it owns the result, so the linger must not retire it mid-read. */
+export function holdSkillRunResult(): () => void {
+  resultHolders += 1
+  clearSuccessTimer()
+  return () => {
+    resultHolders = Math.max(0, resultHolders - 1)
+    scheduleSuccessLinger()
+  }
+}
 
 function setRun(next: SkillUpdateRun): void {
   const wasRunning = run.state === 'running'
@@ -94,6 +112,15 @@ export function useSkillUpdateRun(): SkillUpdateRun {
   return useSyncExternalStore(subscribeSkillUpdateRun, getSkillUpdateRun, getSkillUpdateRun)
 }
 
+const IDLE_RUN: SkillUpdateRun = { state: 'idle' }
+
+/** Why: one runner serves update, install, and remove, so a surface that only
+ *  speaks for its own verb must not narrate someone else's run. */
+export function useSkillRunForOperation(operation: SkillManageOperation): SkillUpdateRun {
+  const current = useSkillUpdateRun()
+  return current.state === 'idle' || current.operation === operation ? current : IDLE_RUN
+}
+
 // Why: every caller fires these from an event handler with `void`. Swallowing
 // here rather than at each call site keeps a dropped IPC from surfacing as an
 // unhandled rejection; the run state itself is pushed from main either way.
@@ -103,6 +130,35 @@ export async function startSkillUpdateRun(names: readonly string[]): Promise<voi
     await window.api.skills.startUpdateRun([...names])
   } catch (error) {
     console.error('Failed to start skill update run', error)
+  }
+}
+
+// Install and remove report their start result instead: the caller owns a form
+// whose input is what a rejection is about.
+export async function startSkillInstallRun(request: {
+  source: string
+  skillNames?: string[]
+  scope: SkillManageScope
+}): Promise<SkillUpdateStartResult | null> {
+  ensureSubscribed()
+  try {
+    return await window.api.skills.startInstallRun(request)
+  } catch (error) {
+    console.error('Failed to start skill install run', error)
+    return null
+  }
+}
+
+export async function startSkillRemoveRun(request: {
+  names: string[]
+  scope: SkillManageScope
+}): Promise<SkillUpdateStartResult | null> {
+  ensureSubscribed()
+  try {
+    return await window.api.skills.startRemoveRun(request)
+  } catch (error) {
+    console.error('Failed to start skill remove run', error)
+    return null
   }
 }
 

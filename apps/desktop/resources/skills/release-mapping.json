@@ -471,6 +471,17 @@
         "yiru-emulator-android": 2,
         "yiru-per-workspace-env": 3
       }
+    },
+    {
+      "appVersion": "0.0.16",
+      "skills": {
+        "computer-use": 5,
+        "orchestration": 26,
+        "yiru-cli": 33,
+        "yiru-emulator": 4,
+        "yiru-emulator-android": 2,
+        "yiru-per-workspace-env": 3
+      }
     }
   ]
 }

@@ -5,12 +5,12 @@ import { OnboardingInlineCommandTerminal } from '@/components/onboarding/inline-
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND } from '@/lib/agent-feature-install-commands'
+import { YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND } from '@/lib/agent-feature-install-commands'
 
 export function CliSkillSetupTerminal(): React.JSX.Element {
   const handleCopySkillCommand = async (): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND)
+      await window.api.ui.writeClipboardText(YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND)
       toast.success(
         translate(
           'auto.components.feature.tips.CliSkillSetupTerminal.b8ad063571',
@@ -33,7 +33,7 @@ export function CliSkillSetupTerminal(): React.JSX.Element {
     <div className="min-w-0">
       <div className="border-border bg-muted/35 flex min-w-0 items-center gap-2 border px-3 py-2">
         <code className="scrollbar-sleek text-muted-foreground min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap">
-          {YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND}
+          {YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND}
         </code>
         <Tooltip>
           <TooltipTrigger
@@ -61,7 +61,7 @@ export function CliSkillSetupTerminal(): React.JSX.Element {
         </Tooltip>
       </div>
       <OnboardingInlineCommandTerminal
-        command={YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND}
+        command={YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND}
         title={translate(
           'auto.components.feature.tips.CliSkillSetupTerminal.84e9576dac',
           'Skill setup'

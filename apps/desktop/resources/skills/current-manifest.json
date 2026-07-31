@@ -56,6 +56,24 @@
       ]
     },
     {
+      "name": "yiru-debug",
+      "sourcePath": "skills/yiru-debug",
+      "releaseRevision": 1,
+      "packageDigest": "2e4ee5a02617f8344a693c281be35802384bdedb7b0c12cd9ef1e6805bc872ad",
+      "gitTreeSha": "82b551317060afe1f62c0f9251a8cce43d121af5",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 6034,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "6beca763747750f3c8e8f2dfe8275e37edb64c20f4f8ba00148a6083f3b9ad82",
+          "textNormalizedSha256": "6beca763747750f3c8e8f2dfe8275e37edb64c20f4f8ba00148a6083f3b9ad82",
+          "identitySha256": "6beca763747750f3c8e8f2dfe8275e37edb64c20f4f8ba00148a6083f3b9ad82"
+        }
+      ]
+    },
+    {
       "name": "yiru-emulator",
       "sourcePath": "skills/yiru-emulator",
       "releaseRevision": 4,

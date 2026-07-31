@@ -2020,7 +2020,15 @@
             "stoppingLabel": "Stopping skill update",
             "runningLabel": "Updating skills",
             "successLabel": "Skills updated",
-            "errorLabel": "Skill update failed"
+            "errorLabel": "Skill update failed",
+            "installRunningLabel": "Installing skill",
+            "installStoppingLabel": "Stopping skill install",
+            "installSuccessLabel": "Skill installed",
+            "installErrorLabel": "Skill install failed",
+            "removeRunningLabel": "Removing skill",
+            "removeStoppingLabel": "Stopping skill removal",
+            "removeSuccessLabel": "Skill removed",
+            "removeErrorLabel": "Skill removal failed"
           },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "업데이트됨",
@@ -2552,10 +2560,7 @@
           "426be2aac6": "Codex",
           "39b6998ddb": "모든 제공업체",
           "a68dee6a32": "스킬 검색",
-          "e46e162e2e": "~에서",
-          "b088e0785d": "베타",
           "f43ad6edf3": "스킬",
-          "7e828fb2c6": "뒤로",
           "ea72d6185b": "로컬 스킬을 스캔할 수 없습니다.",
           "dc4c3328ee": "파일 표시",
           "9963dff6d3": "설명을 찾을 수 없습니다.",
@@ -2566,7 +2571,12 @@
           "6a62a0168c": "일치하는 항목 없음",
           "cd7893fbc1": "스킬 스캔 중",
           "35b9a724a0": "사용 가능",
-          "0c74e7ff34": "로컬"
+          "0c74e7ff34": "로컬",
+          "installedTab": "Installed",
+          "marketplaceTab": "Browse marketplace",
+          "closeSkills": "Close skills",
+          "closeShortcut": "Close · Esc",
+          "refreshSkills": "Refresh skills"
         },
         "SkillFreshnessNudge": {
           "titleOne": "설치된 Yiru 스킬이 오래되었습니다",
@@ -2606,7 +2616,6 @@
           "skippedReasonBrokenLink": "This copy is a shortcut to something that no longer exists, so Yiru left it out — you can safely delete it."
         },
         "SkillFreshnessUpdateDialog": {
-          "showLog": "Show log",
           "stoppingHeadline": "Stopping the update…",
           "runningOne": "Updating 1 skill…",
           "runningMany": "Updating {{value0}} skills…",
@@ -2647,6 +2656,76 @@
           "updateAvailable": "업데이트 가능",
           "upToDate": "최신 상태",
           "installed": "설치됨"
+        },
+        "SkillInstallDialog": {
+          "title": "Install skill",
+          "description": "Runs the skills CLI against a repository source such as owner/repo.",
+          "sourceLabel": "Source",
+          "sourcePlaceholder": "owner/repo",
+          "skillLabel": "Skill name (optional)",
+          "skillPlaceholder": "Leave empty to install every skill in the source",
+          "scopeLabel": "Install into",
+          "scopeGlobal": "All projects (global)",
+          "stoppingHeadline": "Stopping the install…",
+          "runningHeadline": "Installing…",
+          "success": "Skill installed",
+          "errorTitle": "The install didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "done": "Done",
+          "close": "Close",
+          "retry": "Retry install",
+          "install": "Install"
+        },
+        "SkillsMarketplace": {
+          "installFromSource": "Install from source",
+          "installCurrent": "Install this skill"
+        },
+        "SkillRemoveDialog": {
+          "title": "Remove skill",
+          "description": "Deletes {{value0}} from the global skill home shared by every project.",
+          "stoppingHeadline": "Stopping the removal…",
+          "runningHeadline": "Removing…",
+          "success": "Skill removed",
+          "errorTitle": "The removal didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "done": "Done",
+          "cancel": "Cancel",
+          "retry": "Retry removal",
+          "confirm": "Remove",
+          "folderName": "Removes the skill folder {{value0}}."
+        },
+        "SkillRunLog": {
+          "showLog": "Show log",
+          "unsafeCommandPath": "Could not run {{value0}} safely from this location.",
+          "launchFailed": "The skills command could not start: {{value0}}",
+          "commandExitedUnknown": "The skills command stopped unexpectedly.",
+          "commandExited": "The skills command exited with code {{value0}}.",
+          "incomplete": "The command finished, but the skills did not land on disk."
+        },
+        "startRejection": {
+          "unavailable": "Could not reach the skills command.",
+          "alreadyRunning": "Another skills command is still running.",
+          "invalidNames": "That skill name is not a valid package name.",
+          "invalidSource": "Enter a source like owner/repo, a GitHub URL, or a publisher domain.",
+          "invalidScope": "That project is no longer available.",
+          "unsafeCommandPath": "Could not run npx safely from this location."
+        },
+        "SkillDetail": {
+          "listingTruncated": "Only the first files in this skill are listed.",
+          "listingFailed": "Could not list the files in this skill.",
+          "update": "Update skill",
+          "remove": "Remove skill"
+        },
+        "SkillFileView": {
+          "invalidPath": "That file is no longer part of this skill.",
+          "binary": "This looks like a binary file, so there is nothing to show here.",
+          "unsupportedHost": "Reading skill files is only available on the local host.",
+          "unreadable": "Could not read this file from disk.",
+          "loading": "Reading file…",
+          "emptyBody": "This file is empty.",
+          "truncated": "This file is too large to show in full. Open it from disk to read the rest."
         }
       },
       "sidebar": {
@@ -2952,7 +3031,8 @@
           "1b5c41caee": "Yiru 모바일",
           "f323383e9a": "자동화",
           "d599269755": "사이드바에서 숨기기",
-          "home": "Home"
+          "home": "Home",
+          "skills": "Skills"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "지우기",
@@ -3169,7 +3249,14 @@
           "sleepWorkspaces": "워크스페이스 {{count}}개 절전",
           "deleteSelected": "선택 항목 삭제",
           "deleteOneWorkspace": "워크스페이스 1개 삭제",
-          "deleteWorkspaces": "워크스페이스 {{count}}개 삭제"
+          "deleteWorkspaces": "워크스페이스 {{count}}개 삭제",
+          "debugLogs": "디버그 로그",
+          "viewDebugLogs": "로그 보기",
+          "clearDebugLogs": "로그 지우기",
+          "noDebugLogs": "이 worktree에 디버그 로그가 없습니다.",
+          "debugLogsCleared": "디버그 로그를 지웠습니다.",
+          "viewDebugLogsFailed": "디버그 로그를 읽을 수 없습니다.",
+          "clearDebugLogsFailed": "디버그 로그를 지울 수 없습니다."
         },
         "WorktreeList": {
           "d880ea0744": "그룹을 만들고 이 프로젝트를 그룹으로 이동하세요.",

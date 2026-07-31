@@ -1,18 +1,22 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 
-import {
-  canonicalizeSkillUpdateNames,
-  type SkillUpdateFailure,
-  type SkillUpdateRun,
-  type SkillUpdateStartResult
+import type {
+  SkillUpdateFailure,
+  SkillUpdateRun,
+  SkillUpdateStartResult
 } from '../../shared/skill-freshness'
 import { killWithDescendantSweep } from '../pty-descendant-termination'
 import { resolveCliCommand } from '../runtime/cli-command'
 import { getSpawnArgsForWindows } from '../win32-utils'
+import {
+  buildSkillCliInvocation,
+  type SkillCliInvocation,
+  type SkillCliRequest
+} from './skill-cli-invocation'
 
-// Why: `skills update` prints ANSI colour and \r + erase-line progress. We show
-// this log verbatim to the user but never parse it — `update` has no --json
-// (that flag exists only on `list`), so stdout is not a contract.
+// Why: the `skills` CLI prints ANSI colour and \r + erase-line progress. We show
+// this log verbatim to the user but never parse it — the manage verbs have no
+// --json (that flag exists only on `list`), so stdout is not a contract.
 const ANSI_RE = /\x1b\[[0-9;?]*[A-Za-z]/g // eslint-disable-line no-control-regex
 
 // Keep the tail: failures land at the end, and an unbounded buffer would pin
@@ -28,11 +32,12 @@ const OUTPUT_FLUSH_MS = 100
 // while a slow-but-healthy sweep is still working.
 export const CANCEL_RELEASE_TIMEOUT_MS = 12_000
 
-export type SkillUpdateRunnerDeps = {
+export type SkillCliRunnerDeps = {
   spawnProcess?: typeof spawn
   resolveCommand?: (commandName: string) => string
-  /** Returns the subset of `names` that did not land, re-read from disk. */
-  rescanOutdatedNames?: (names: string[]) => Promise<string[]>
+  /** Names that did not land, re-read from disk; null when this operation and
+   *  scope cannot be judged from disk and only the exit code is available. */
+  rescanFailedNames?: (invocation: SkillCliInvocation) => Promise<string[] | null>
   killTree?: (pid: number, killRoot: () => void) => Promise<void>
   /** Injected so the Windows cmd.exe rail is reachable off Windows. */
   buildSpawnArgs?: typeof getSpawnArgsForWindows
@@ -49,7 +54,7 @@ function clampOutput(value: string): string {
 }
 
 /**
- * Runs `npx --yes skills update <names> --global -y` headlessly.
+ * Runs `npx --yes skills <update|add|remove> … -y` headlessly.
  *
  * Both `--yes` flags are load-bearing and distinct: `npx --yes` skips the
  * install-this-package prompt, and `skills … -y` takes the CLI's own
@@ -57,7 +62,7 @@ function clampOutput(value: string): string {
  * `options.yes || !process.stdin.isTTY`, and stdin is ignored below, so the run
  * cannot block on input that no one can answer.
  */
-export class SkillUpdateRunner {
+export class SkillCliRunner {
   private run: SkillUpdateRun = { state: 'idle' }
   private child: ChildProcess | null = null
   // Why: a failed spawn emits `error` *and* `close`, and a cancelled child still
@@ -67,9 +72,9 @@ export class SkillUpdateRunner {
   private runToken = 0
   private settling = false
   private killing = false
-  private readonly deps: Required<Pick<SkillUpdateRunnerDeps, 'now'>> & SkillUpdateRunnerDeps
+  private readonly deps: Required<Pick<SkillCliRunnerDeps, 'now'>> & SkillCliRunnerDeps
 
-  constructor(deps: SkillUpdateRunnerDeps = {}) {
+  constructor(deps: SkillCliRunnerDeps = {}) {
     this.deps = { now: () => Date.now(), ...deps }
   }
 
@@ -82,27 +87,32 @@ export class SkillUpdateRunner {
     this.deps.onState?.(next)
   }
 
-  start(names: readonly string[]): SkillUpdateStartResult {
+  start(request: SkillCliRequest): SkillUpdateStartResult {
     if (this.run.state === 'running') {
       return { started: false, reason: 'already-running' }
     }
-    const canonicalNames = canonicalizeSkillUpdateNames(names)
-    if (!canonicalNames) {
-      return { started: false, reason: 'invalid-names' }
+    const built = buildSkillCliInvocation(request)
+    if (!built.ok) {
+      return { started: false, reason: built.reason }
+    }
+    const invocation = built.invocation
+    const subject = {
+      operation: invocation.operation,
+      names: invocation.names,
+      ...(invocation.source ? { source: invocation.source } : {})
     }
 
     const resolveCommand = this.deps.resolveCommand ?? ((name: string) => resolveCliCommand(name))
     const spawnProcess = this.deps.spawnProcess ?? spawn
     const npxCommand = resolveCommand('npx')
-    const npxArgs = ['--yes', 'skills', 'update', ...canonicalNames, '--global', '-y']
 
     let spawnCmd: string
     let spawnArgs: string[]
     try {
       const buildSpawnArgs = this.deps.buildSpawnArgs ?? getSpawnArgsForWindows
-      ;({ spawnCmd, spawnArgs } = buildSpawnArgs(npxCommand, npxArgs))
+      ;({ spawnCmd, spawnArgs } = buildSpawnArgs(npxCommand, invocation.args))
     } catch {
-      // Why: the names are already canonical here, so this is the cmd.exe rail
+      // Why: the arguments are already canonical here, so this is the cmd.exe rail
       // rejecting the resolved npx *path* — a profile directory containing `&`,
       // `%` or `!` is enough. Publishing the failure keeps the dialog honest;
       // returning a bare `started: false` would leave the button dead and silent.
@@ -112,10 +122,10 @@ export class SkillUpdateRunner {
         state: 'error',
         kind: 'unsafe-command-path',
         command: npxCommand,
-        names: canonicalNames,
+        ...subject,
         finishedAt: this.deps.now(),
         output: '',
-        failedNames: canonicalNames
+        failedNames: invocation.names
       })
       return { started: false, reason: 'unsafe-command-path' }
     }
@@ -123,14 +133,17 @@ export class SkillUpdateRunner {
     const startedAt = this.deps.now()
     const token = ++this.runToken
     this.settling = false
-    this.publish({ state: 'running', names: canonicalNames, startedAt, output: '' })
+    this.publish({ state: 'running', ...subject, startedAt, output: '' })
 
     const child = spawnProcess(spawnCmd, spawnArgs, {
       // Why: stdin ignored keeps `process.stdin.isTTY` falsy in the child, which
       // is the second half of the CLI's non-interactive gate.
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
-      env: process.env
+      env: process.env,
+      // Why: a project-scoped install/remove is expressed purely as the absence
+      // of `-g` plus the checkout the CLI runs in.
+      ...(invocation.scope.kind === 'project' ? { cwd: invocation.scope.repoPath } : {})
     })
     this.child = child
 
@@ -171,15 +184,11 @@ export class SkillUpdateRunner {
 
     child.on('error', (error) => {
       drain()
-      this.settle(token, canonicalNames, { kind: 'launch-failed', detail: error.message })
+      this.settle(token, invocation, { kind: 'launch-failed', detail: error.message })
     })
     child.on('close', (code) => {
       drain()
-      this.settle(
-        token,
-        canonicalNames,
-        code === 0 ? null : { kind: 'command-exited', exitCode: code }
-      )
+      this.settle(token, invocation, code === 0 ? null : { kind: 'command-exited', exitCode: code })
     })
 
     return { started: true }
@@ -187,7 +196,7 @@ export class SkillUpdateRunner {
 
   private settle(
     token: number,
-    names: string[],
+    invocation: SkillCliInvocation,
     commandFailure: Exclude<
       SkillUpdateFailure,
       { kind: 'unsafe-command-path' | 'incomplete' }
@@ -200,12 +209,18 @@ export class SkillUpdateRunner {
     this.child = null
     const output = this.run.output
     const finishedAt = this.deps.now()
-    const rescan = this.deps.rescanOutdatedNames
+    const rescan = this.deps.rescanFailedNames
+    const names = invocation.names
+    const subject = {
+      operation: invocation.operation,
+      names,
+      ...(invocation.source ? { source: invocation.source } : {})
+    }
 
-    // Why: when the re-scan produces a verdict it *is* the answer — it re-hashes
+    // Why: when the re-scan produces a verdict it *is* the answer — it re-reads
     // what landed on disk, which is what the user actually cares about. The exit
-    // code only decides the outcome when no verdict is available, because
-    // `skills update` reports nothing else we can trust.
+    // code only decides the outcome when no verdict is available, because the
+    // `skills` CLI reports nothing else we can trust.
     const finish = (failedNames: string[] | null): void => {
       // The re-scan is slow enough that a cancel — or a whole replacement run —
       // can land while it is still in flight; its verdict is about a run that no
@@ -214,14 +229,17 @@ export class SkillUpdateRunner {
         return
       }
       const failed = failedNames ?? (commandFailure ? names : [])
-      if (failed.length === 0) {
-        this.publish({ state: 'success', names, finishedAt, output })
+      // An install of a whole source has no names to converge, so a bad exit code
+      // is the only evidence there is; it must not read as an empty success.
+      const unjudged = failedNames === null && commandFailure !== null
+      if (!unjudged && failed.length === 0) {
+        this.publish({ state: 'success', ...subject, finishedAt, output })
         return
       }
       this.publish({
         state: 'error',
         ...(commandFailure ?? { kind: 'incomplete' }),
-        names,
+        ...subject,
         finishedAt,
         output,
         failedNames: failed
@@ -232,7 +250,7 @@ export class SkillUpdateRunner {
       finish(null)
       return
     }
-    void rescan(names).then(
+    void rescan(invocation).then(
       (failedNames) => finish(failedNames),
       () => finish(null)
     )
@@ -256,8 +274,7 @@ export class SkillUpdateRunner {
 
     // Why: `npx` is a wrapper — on POSIX the `skills` process it execs is a
     // child, and on Windows the shim runs under cmd.exe. Killing only the direct
-    // child leaves the process that is actually writing to the global skill
-    // homes alive.
+    // child leaves the process that is actually writing to the skill homes alive.
     this.killing = true
     let hasReleased = false
     let releaseTimer: ReturnType<typeof setTimeout> | null = null
@@ -272,7 +289,7 @@ export class SkillUpdateRunner {
       this.killing = false
       // Why: stay `running` until the tree is actually dead. The sweep waits for
       // a descendant snapshot before it signals anything, so releasing on the
-      // synchronous path would let an immediate re-Update spawn a second npx
+      // synchronous path would let an immediate re-run spawn a second npx
       // writing the same bundles — the corruption the post-run verdict exists to
       // catch. `start()` already refuses while running, so holding the state is
       // the whole guard.

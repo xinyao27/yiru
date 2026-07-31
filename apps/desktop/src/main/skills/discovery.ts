@@ -198,10 +198,12 @@ async function scanRoot(root: SkillScanRoot): Promise<ScannedSkill[]> {
       if (!summary) {
         return null
       }
+      const folderName = basename(directoryPath)
       const sourceKind = sourceKindForSkill(root, skillFilePath, { relative, sep })
       return {
         id: stablePathId(canonicalSkillFilePath),
-        name: summary.name ?? basename(directoryPath),
+        name: summary.name ?? folderName,
+        folderName,
         description: summary.description,
         // Copy: `root.providers` is shared across every skill/source from this
         // root, so the dedup merge below must not mutate the aliased array.
