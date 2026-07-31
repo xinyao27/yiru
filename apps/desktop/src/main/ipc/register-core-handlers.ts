@@ -58,6 +58,8 @@ import { registerLocalhostWorktreeLabelHandlers } from '../ports/localhost-workt
 import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import { registerPreflightHandlers } from '../preflight/preflight'
 import { getPtyIdForPaneKey } from '../pty/pty'
+import { registerRateLimitResumeHandlers } from '../rate-limit-resume/ipc'
+import type { RateLimitResumeService } from '../rate-limit-resume/service'
 import { registerRateLimitHandlers } from '../rate-limits/rate-limits'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
@@ -108,7 +110,8 @@ export function registerCoreHandlers(
   agentAwakeService?: AgentAwakeService,
   crashReports?: CrashReportStore,
   keybindings?: KeybindingService,
-  lifecycleOptions: CoreHandlerLifecycleOptions = {}
+  lifecycleOptions: CoreHandlerLifecycleOptions = {},
+  rateLimitResumes?: RateLimitResumeService
 ): void {
   // Why: on macOS the app can stay alive after all windows close, then
   // openMainWindow() is called again on 'activate'. ipcMain.handle() throws
@@ -165,6 +168,9 @@ export function registerCoreHandlers(
   registerSkillsHandlers(store)
   if (automations) {
     registerAutomationHandlers(store, automations)
+  }
+  if (rateLimitResumes) {
+    registerRateLimitResumeHandlers(rateLimitResumes)
   }
   if (keybindings) {
     registerKeybindingHandlers(keybindings)

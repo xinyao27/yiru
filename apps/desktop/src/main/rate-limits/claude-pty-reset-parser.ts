@@ -1,6 +1,10 @@
 import type { RateLimitWindow } from '~shared/rate-limit-types'
 
-import { buildWallClockTimestamp } from './time-zone-wall-clock'
+import {
+  addCalendarDays,
+  buildWallClockTimestamp,
+  getWallClockCalendarDate
+} from './time-zone-wall-clock'
 
 const RESET_LINE_RE = /resets?\s+(?:at\s+|in\s+)?(.+)/i
 const MONTH_PATTERN =
@@ -186,21 +190,29 @@ function parseWeekdayResetTimestamp(resetDescription: string): number | null {
     return null
   }
 
-  const now = new Date()
   const hour = parseHour(match[2], match[4])
   const minute = Number(match[3] ?? 0)
   if (!isValidClockTime(hour, minute)) {
     return null
   }
 
-  const candidate = new Date(now)
-  const daysUntil = (weekdayIndex - now.getDay() + 7) % 7
-  candidate.setDate(now.getDate() + daysUntil)
-  candidate.setHours(hour, minute, 0, 0)
-  if (candidate.getTime() <= Date.now()) {
-    candidate.setDate(candidate.getDate() + 7)
+  // Why: "Fri 4am (America/Los_Angeles)" names a weekday and a clock time in the
+  // provider's zone. Resolving it against this machine's calendar lands hours
+  // off whenever the two zones disagree — and a resume fired early is refused.
+  const now = Date.now()
+  const timeZone = extractResetTimeZone(resetDescription)
+  const today = getWallClockCalendarDate(now, timeZone)
+  const currentWeekday = weekdayIndexOf(today)
+  const candidateDate = addCalendarDays(today, (weekdayIndex - currentWeekday + 7) % 7)
+  const candidate = buildWallClockTimestamp({ ...candidateDate, hour, minute }, timeZone)
+  if (candidate !== null && candidate > now) {
+    return candidate
   }
-  return candidate.getTime()
+  return buildWallClockTimestamp({ ...addCalendarDays(candidateDate, 7), hour, minute }, timeZone)
+}
+
+function weekdayIndexOf(date: { year: number; monthIndex: number; day: number }): number {
+  return new Date(Date.UTC(date.year, date.monthIndex, date.day)).getUTCDay()
 }
 
 function parseTimeOnlyResetTimestamp(resetDescription: string): number | null {
@@ -216,12 +228,16 @@ function parseTimeOnlyResetTimestamp(resetDescription: string): number | null {
     return null
   }
 
-  const candidate = new Date()
-  candidate.setHours(hour, minute, 0, 0)
-  if (candidate.getTime() <= Date.now()) {
-    candidate.setDate(candidate.getDate() + 1)
+  // Why: same zone correctness as the weekday form — "4am (America/Los_Angeles)"
+  // is 4am there, not 4am here.
+  const now = Date.now()
+  const timeZone = extractResetTimeZone(resetDescription)
+  const today = getWallClockCalendarDate(now, timeZone)
+  const candidate = buildWallClockTimestamp({ ...today, hour, minute }, timeZone)
+  if (candidate !== null && candidate > now) {
+    return candidate
   }
-  return candidate.getTime()
+  return buildWallClockTimestamp({ ...addCalendarDays(today, 1), hour, minute }, timeZone)
 }
 
 function parseHour(hourText: string, periodText: string): number {

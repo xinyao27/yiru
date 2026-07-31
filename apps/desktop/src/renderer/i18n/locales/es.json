@@ -12481,5 +12481,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "Cuota semanal",
+      "session": "Cuota de 5 horas",
+      "unknown": "Cuota del proveedor"
+    },
+    "title": {
+      "scheduled": "{{agent}} continuará en unos {{countdown}}",
+      "blocked": "{{agent}} no está disponible temporalmente"
+    },
+    "resumesIn": "en unos {{countdown}}",
+    "resumesUnknown": "desconocido",
+    "resumesAt": "Se reanuda a las",
+    "quotaWindow": "Ventana de cuota",
+    "action": {
+      "cancel": "Cancelar continuación automática",
+      "runNow": "Ejecutar ahora",
+      "retry": "Reintentar ahora",
+      "schedule": "Continuar en unos {{countdown}}",
+      "reveal": "Ver"
+    },
+    "workspace": "Espacio de trabajo"
   }
 }

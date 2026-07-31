@@ -12481,5 +12481,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "주간 할당량",
+      "session": "5 시간 할당량",
+      "unknown": "제공업체 할당량"
+    },
+    "title": {
+      "scheduled": "약 {{countdown}} 후에 {{agent}} 계속 실행이 예약되었습니다",
+      "blocked": "{{agent}}을(를) 일시적으로 사용할 수 없습니다"
+    },
+    "resumesIn": "약 {{countdown}} 후",
+    "resumesUnknown": "알 수 없음",
+    "resumesAt": "재개 시각",
+    "quotaWindow": "할당량 주기",
+    "action": {
+      "cancel": "자동 계속 취소",
+      "runNow": "지금 실행",
+      "retry": "지금 다시 시도",
+      "schedule": "약 {{countdown}} 후 계속",
+      "reveal": "보러 가기"
+    },
+    "workspace": "워크스페이스"
   }
 }

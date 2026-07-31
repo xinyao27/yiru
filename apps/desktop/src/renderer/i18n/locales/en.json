@@ -12481,5 +12481,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "Weekly quota",
+      "session": "5-hour quota",
+      "unknown": "Provider quota"
+    },
+    "title": {
+      "scheduled": "{{agent}} will continue in about {{countdown}}",
+      "blocked": "{{agent}} is temporarily unavailable"
+    },
+    "resumesIn": "in about {{countdown}}",
+    "resumesUnknown": "unknown",
+    "resumesAt": "Resumes at",
+    "quotaWindow": "Quota window",
+    "action": {
+      "cancel": "Cancel auto-continue",
+      "runNow": "Run now",
+      "retry": "Retry now",
+      "schedule": "Continue in about {{countdown}}",
+      "reveal": "Show me"
+    },
+    "workspace": "Workspace"
   }
 }

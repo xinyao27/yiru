@@ -41,6 +41,7 @@ import type {
   GlobalWindowsRuntimeDefault,
   LocalWindowsRuntimePreference
 } from './project-execution-runtime'
+import type { RateLimitResumeSchedule } from './rate-limit-resume/types'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
@@ -2676,6 +2677,9 @@ export type PersistedState = {
   legacyPaneKeyAliasEntries: LegacyPaneKeyAliasEntry[]
   automations: Automation[]
   automationRuns: AutomationRun[]
+  /** Pending and recently settled rate-limit resumes. Terminal entries are
+   *  pruned by age on load. */
+  rateLimitResumes?: RateLimitResumeSchedule[]
   onboarding: OnboardingState
   /** Main-owned telemetry de-dupe marker; never exposed through PersistedUIState. */
   featureInteractionTelemetryBuckets?: FeatureInteractionTelemetryBucketState

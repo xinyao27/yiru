@@ -12481,5 +12481,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "週次クォータ",
+      "session": "5 時間クォータ",
+      "unknown": "プロバイダークォータ"
+    },
+    "title": {
+      "scheduled": "{{agent}} を約 {{countdown}} 後に再開するよう予約しました",
+      "blocked": "{{agent}} は一時的に利用できません"
+    },
+    "resumesIn": "約 {{countdown}} 後",
+    "resumesUnknown": "不明",
+    "resumesAt": "再開時刻",
+    "quotaWindow": "クォータ周期",
+    "action": {
+      "cancel": "自動再開を取り消す",
+      "runNow": "今すぐ実行",
+      "retry": "今すぐ再試行",
+      "schedule": "約 {{countdown}} 後に再開",
+      "reveal": "表示する"
+    },
+    "workspace": "ワークスペース"
   }
 }
