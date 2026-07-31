@@ -93,9 +93,7 @@ export function SkillUpdateStatusSegment(): React.JSX.Element | null {
   const segment =
     run.state === 'running'
       ? {
-          icon: (
-            <RefreshCw className="text-muted-foreground size-3 animate-spin" />
-          ),
+          icon: <RefreshCw className="text-muted-foreground size-3 animate-spin" />,
           label: run.stopping ? labels.stopping : labels.running
         }
       : run.state === 'success'
