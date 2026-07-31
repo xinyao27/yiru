@@ -59,7 +59,7 @@ export function OnboardingFooter({
             disabled={Boolean(busyLabel)}
             onClick={onBack}
           >
-            <ChevronLeft weight="regular" className="size-4" />
+            <ChevronLeft className="size-4" />
             {translate('auto.components.onboarding.OnboardingFooter.ba58547306', 'Back')}
           </Button>
         )}
@@ -76,7 +76,7 @@ export function OnboardingFooter({
             {primaryLabel}
             <span className="border-primary-foreground/20 ml-1 inline-flex items-center gap-0.5 border px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
               <span>{shortcutModifierLabel}</span>
-              <CornerDownLeft weight="regular" className="size-3" />
+              <CornerDownLeft className="size-3" />
             </span>
           </Button>
         )}

@@ -238,7 +238,6 @@ export const CandidateRow = React.memo(function CandidateRow({
                     onClick={() => onToggleExpanded(candidate.worktreeId)}
                   >
                     <ChevronDown
-                      weight="regular"
                       className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
                     />
                   </Button>

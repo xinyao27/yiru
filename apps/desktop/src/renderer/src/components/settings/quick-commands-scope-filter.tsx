@@ -84,7 +84,7 @@ export function QuickCommandsScopeFilter({
                 effectiveSelection={effectiveSelection}
                 repos={repos}
               />
-              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+              <ChevronsUpDown className="size-3.5 opacity-50" />
             </Button>
           }
         />

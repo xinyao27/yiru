@@ -24,7 +24,6 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     createPrIntentInFlightRef,
     createPrIntentRunTokenRef,
     generateInFlightRef,
-    gitHistoryRequestByWorktreeRef,
     grouped,
     openSettingsPage,
     openSettingsTarget,
@@ -43,7 +42,6 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     setFilterQuery,
     setGenerateErrors,
     setGenerateInFlightByWorktree,
-    setGitHistoryByWorktree,
     setIsClearingDiffComments,
     setIsExecutingBulk,
     setPendingDiffCommentsClear,
@@ -136,7 +134,6 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     setGenerateErrors((prev) => pruneRecord(prev))
     setCreatePrIntentInFlightByWorktree((prev) => pruneRecord(prev))
     setCreatePrIntentNotices((prev) => pruneRecord(prev))
-    setGitHistoryByWorktree((prev) => pruneRecord(prev))
     // Refs don't need setState — mutate in place to drop stale keys.
     for (const key of Object.keys(commitInFlightRef.current)) {
       if (!worktreeMap.has(key)) {
@@ -159,18 +156,12 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
         delete createPrIntentRunTokenRef.current[key]
       }
     }
-    for (const key of Object.keys(gitHistoryRequestByWorktreeRef.current)) {
-      if (!worktreeMap.has(key)) {
-        delete gitHistoryRequestByWorktreeRef.current[key]
-      }
-    }
   }, [
     commitErrorsRef,
     commitInFlightRef,
     createPrIntentInFlightRef,
     createPrIntentRunTokenRef,
     generateInFlightRef,
-    gitHistoryRequestByWorktreeRef,
     remoteActionErrorSequenceByWorktreeRef,
     setAbortOperationInFlightByWorktree,
     setCommitErrors,
@@ -179,7 +170,6 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     setCreatePrIntentNotices,
     setGenerateErrors,
     setGenerateInFlightByWorktree,
-    setGitHistoryByWorktree,
     setRemoteActionErrors,
     updateCommitDrafts,
     worktreeMap

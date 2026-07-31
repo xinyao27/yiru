@@ -11,7 +11,6 @@ import {
   getCommitMessageGenerationRecordKey,
   type CommitMessageGenerationRecord
 } from '../../commit-message-generation-state'
-import type { GitHistoryPanelState } from '../../git-history-panel'
 import {
   getPullRequestGenerationRecordKey,
   getPullRequestGenerationSeedRestoreKey
@@ -23,7 +22,7 @@ import {
   type CreatePrIntentRunToken
 } from '../create-pr-intent-flow'
 import type { PendingDiscardConfirmation } from '../discard-dialog'
-import { EMPTY_GIT_HISTORY_STATE, createDefaultCollapsedSections } from '../panel-constants'
+import { createDefaultCollapsedSections } from '../panel-constants'
 import {
   normalizeSourceControlViewMode,
   readCommitDraftForWorktree,
@@ -36,6 +35,7 @@ import type {
   HostedReviewCreationState,
   SourceControlOperationTarget
 } from '../panel-types'
+import type { SourceControlScopeId } from '../scope-model'
 import { resolveSourceControlGroupOrder } from '../section-order'
 import { useSourceControlSubmoduleStatus } from '../use-submodule-status'
 import type { SourceControlStoreStateController } from './store-state'
@@ -60,6 +60,7 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
   )
   const sourceControlViewMode = persistedSourceControlViewMode
   const sourceControlGroupOrder = resolveSourceControlGroupOrder(settings?.sourceControlGroupOrder)
+  const [selectedScopeId, setSelectedScopeId] = useState<SourceControlScopeId | null>(null)
   const [collapsedTreeDirs, setCollapsedTreeDirs] = useState<Set<string>>(new Set())
   const [baseRefDialogOpen, setBaseRefDialogOpen] = useState(false)
   const [pendingDiscard, setPendingDiscard] = useState<PendingDiscardConfirmation | null>(null)
@@ -170,15 +171,6 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
   const activeRemoteActionSequence = activeWorktreeId
     ? (remoteActionErrorSequenceByWorktreeRef.current[activeWorktreeId] ?? null)
     : null
-  const [gitHistoryByWorktree, setGitHistoryByWorktree] = useState<
-    Record<string, GitHistoryPanelState>
-  >({})
-  const gitHistoryRequestSeqRef = useRef(0)
-  const gitHistoryRequestByWorktreeRef = useRef<Record<string, number>>({})
-  const gitHistoryState = activeWorktreeId
-    ? (gitHistoryByWorktree[activeWorktreeId] ?? EMPTY_GIT_HISTORY_STATE)
-    : EMPTY_GIT_HISTORY_STATE
-  const isGitHistoryExpanded = !collapsedSections.has('history')
   useEffect(() => {
     commitDraftsRef.current = commitDrafts
   }, [commitDrafts])
@@ -255,6 +247,8 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     ...scope,
     collapsedSections,
     setCollapsedSections,
+    selectedScopeId,
+    selectScope: setSelectedScopeId,
     persistedSourceControlViewMode,
     sourceControlViewMode,
     sourceControlGroupOrder,
@@ -324,12 +318,6 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     commitError,
     remoteActionError,
     activeRemoteActionSequence,
-    gitHistoryByWorktree,
-    setGitHistoryByWorktree,
-    gitHistoryRequestSeqRef,
-    gitHistoryRequestByWorktreeRef,
-    gitHistoryState,
-    isGitHistoryExpanded,
     updateCommitDrafts,
     setCommitErrorForWorktree,
     isFolder,

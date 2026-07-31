@@ -294,7 +294,6 @@ export function ChecksList({
                     onClick={() => toggleCheckExpanded(row)}
                   >
                     <ChevronRight
-                      weight="regular"
                       className={cn(
                         'size-3 shrink-0 text-muted-foreground transition-transform',
                         expanded && 'rotate-90'
@@ -326,7 +325,7 @@ export function ChecksList({
                                   window.api.shell.openUrl(openUrl)
                                 }}
                               >
-                                <ExternalLink weight="regular" className="size-3" />
+                                <ExternalLink className="size-3" />
                               </Button>
                             }
                           />

@@ -82,7 +82,7 @@ export function WorkspacesAction(props: { done: boolean }): React.JSX.Element | 
         })
       }}
     >
-      <ArrowUpRight weight="regular" className="size-3.5" />
+      <ArrowUpRight className="size-3.5" />
       {translate(
         'auto.components.feature.wall.FeatureWallSetupWorkflowActions.f0bbf7da77',
         'Try it out'

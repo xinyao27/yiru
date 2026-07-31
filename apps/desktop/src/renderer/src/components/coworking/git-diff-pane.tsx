@@ -40,7 +40,7 @@ export function CoworkingGitDiffPane({
     <section className="bg-background flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="border-border bg-sidebar text-sidebar-foreground flex min-h-9 shrink-0 items-center gap-2 border-b px-3 py-1">
         <Button type="button" size="xs" variant="ghost" onClick={onBack}>
-          <ChevronLeft weight="regular" aria-hidden="true" />
+          <ChevronLeft aria-hidden="true" />
           {translate('auto.components.coworking.CoworkingGitDiffPane.back', 'Back')}
         </Button>
         <GitCompareArrows aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />

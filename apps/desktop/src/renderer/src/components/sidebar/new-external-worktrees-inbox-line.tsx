@@ -81,7 +81,6 @@ export default function NewExternalWorktreesInboxLine({
           className="text-muted-foreground"
         >
           <ChevronRight
-            weight="regular"
             className={cn('size-3 transition-transform', isExpanded && 'rotate-90')}
             aria-hidden="true"
           />
@@ -115,7 +114,7 @@ export default function NewExternalWorktreesInboxLine({
                     onClick={onSuppress}
                     className="text-muted-foreground can-hover:pointer-events-none can-hover:opacity-0 can-hover:group-hover:pointer-events-auto can-hover:group-hover:opacity-100 can-hover:group-focus-within:pointer-events-auto can-hover:group-focus-within:opacity-100 absolute inset-0"
                   >
-                    <X weight="regular" className="size-3" aria-hidden="true" />
+                    <X className="size-3" aria-hidden="true" />
                   </Button>
                 }
               />

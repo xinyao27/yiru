@@ -65,7 +65,7 @@ export function MobileEmulatorExamples({
               {prompt}
               {translate('auto.components.settings.MobileEmulatorExamples.d151e25078', '"')}
             </p>
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={

@@ -85,7 +85,6 @@ function MarkdownTocRow({
             onClick={() => onToggleCollapsed(item.id)}
           >
             <ChevronRight
-              weight="regular"
               className={cn(
                 'size-3 shrink-0 text-muted-foreground transition-transform',
                 expanded && 'rotate-90'
@@ -250,7 +249,7 @@ export function MarkdownTableOfContentsPanel({
             )}
             onClick={onClose}
           >
-            <X weight="regular" className="size-3.5" />
+            <X className="size-3.5" />
           </Button>
         </div>
       </div>

@@ -156,7 +156,7 @@ export function NativeChatComposerField({
                       )}
                       className="text-muted-foreground flex size-4 transition-colors"
                     >
-                      <X weight="regular" className="size-3" />
+                      <X className="size-3" />
                     </Button>
                   </div>
                 ))}

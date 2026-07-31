@@ -102,7 +102,7 @@ function CoworkingAvailabilityStatusSegmentContent({
               disabled={retrying}
               onClick={() => void retryAvailability()}
             >
-              {retrying ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+              {retrying ? <LoadingIndicator /> : <RefreshCw />}
               {retrying
                 ? translate(
                     'auto.components.coworking.CoworkingAvailabilityStatusSegment.checking',

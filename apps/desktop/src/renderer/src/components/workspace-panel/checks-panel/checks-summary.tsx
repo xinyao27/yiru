@@ -42,7 +42,6 @@ export function ChecksSummary({
       aria-expanded={checksExpanded}
     >
       <ChevronDown
-        weight="regular"
         className={cn('size-3 shrink-0 transition-transform', !checksExpanded && '-rotate-90')}
       />
       {passingCount > 0 && (

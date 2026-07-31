@@ -269,11 +269,7 @@ function PortsHeader({ refreshing, onRefresh }: { refreshing: boolean; onRefresh
               disabled={refreshing}
               aria-label={refreshLabel}
             >
-              {refreshing ? (
-                <LoadingIndicator size={14} />
-              ) : (
-                <RefreshCw weight="regular" size={14} />
-              )}
+              {refreshing ? <LoadingIndicator size={14} /> : <RefreshCw size={14} />}
             </Button>
           }
         />

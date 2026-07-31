@@ -912,9 +912,9 @@ export function ClaudeSwitcherMenu({
             translate('auto.components.status.bar.StatusBar.c676918adc', 'System default')}
         </span>
         {accountsExpanded ? (
-          <ChevronDown weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronDown className="text-muted-foreground/85 ml-auto size-3.5" />
         ) : (
-          <ChevronRight weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronRight className="text-muted-foreground/85 ml-auto size-3.5" />
         )}
       </DropdownMenuItem>
       {accountsExpanded ? (
@@ -1099,11 +1099,7 @@ function InlineUsageSignInAction({
           onSignIn()
         }}
       >
-        {isSigningIn ? (
-          <LoadingIndicator className="size-3" />
-        ) : (
-          <RefreshCw weight="regular" className="size-3" />
-        )}
+        {isSigningIn ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
         {translate('auto.components.status.bar.StatusBar.c35af53b73', 'Sign in')}
       </Button>
     </div>
@@ -1469,7 +1465,7 @@ export function CodexSwitcherMenu({
               {isRedeemingReset ? (
                 <LoadingIndicator className="size-4" />
               ) : (
-                <RotateCcw weight="regular" className="size-4" />
+                <RotateCcw className="size-4" />
               )}
               {isRedeemingReset
                 ? translate('auto.components.status.bar.StatusBar.25d8bbde69', 'Using reset…')
@@ -1538,9 +1534,9 @@ export function CodexSwitcherMenu({
           </div>
         </div>
         {accountsExpanded ? (
-          <ChevronDown weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronDown className="text-muted-foreground/85 ml-auto size-3.5" />
         ) : (
-          <ChevronRight weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronRight className="text-muted-foreground/85 ml-auto size-3.5" />
         )}
       </DropdownMenuItem>
       {accountsExpanded ? (

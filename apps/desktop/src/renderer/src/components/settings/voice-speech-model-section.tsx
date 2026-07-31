@@ -152,7 +152,7 @@ export function VoiceSpeechModelSection({
               {selectedModel && selectedIsReady
                 ? selectedModel.label
                 : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
-              <ChevronDown weight="regular" className="size-3 opacity-50" />
+              <ChevronDown className="size-3 opacity-50" />
             </Button>
           }
         />

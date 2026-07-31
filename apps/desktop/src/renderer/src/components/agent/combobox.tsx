@@ -310,7 +310,7 @@ export default function AgentCombobox({
                   </span>
                 </span>
               )}
-              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+              <ChevronsUpDown className="size-3.5 opacity-50" />
             </Button>
           }
         />
@@ -385,7 +385,7 @@ export default function AgentCombobox({
                   className="text-muted-foreground h-9 w-full justify-start px-3 text-xs font-normal"
                 >
                   {translate('auto.components.agent.AgentCombobox.19522e25ee', 'Manage agents')}
-                  <ArrowRight weight="regular" className="ml-auto size-3" />
+                  <ArrowRight className="ml-auto size-3" />
                 </Button>
               </div>
             ) : null}

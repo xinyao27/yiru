@@ -24,7 +24,6 @@ export type FileSearchPanelModel = {
     query: string
     loading: boolean
     rows: ReturnType<typeof buildSearchRows>
-    scrollRef: React.RefObject<HTMLDivElement | null>
     onToggleCollapsedFile: (filePath: string) => void
     onMatchClick: (fileResult: SearchFileResult, match: SearchMatch) => void
   }
@@ -61,7 +60,6 @@ export function useFileSearchPanel(
   const clearFileSearch = useAppStore((s) => s.clearFileSearch)
 
   const inputRef = useRef<HTMLInputElement>(null)
-  const resultsScrollRef = useRef<HTMLDivElement>(null)
   const revealRafRef = useRef<number | null>(null)
   const revealInnerRafRef = useRef<number | null>(null)
   const seededInputSelectionRafRef = useRef<number | null>(null)
@@ -266,7 +264,6 @@ export function useFileSearchPanel(
       query: fileSearchQuery,
       loading: fileSearchLoading,
       rows: searchRows,
-      scrollRef: resultsScrollRef,
       onToggleCollapsedFile: toggleActiveCollapsedFile,
       onMatchClick: handleMatchClick
     }),

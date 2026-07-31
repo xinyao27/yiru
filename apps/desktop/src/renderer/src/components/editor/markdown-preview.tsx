@@ -1914,7 +1914,7 @@ export default function MarkdownPreview({
               )}
               className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
-              <ChevronUp weight="regular" size={14} />
+              <ChevronUp size={14} />
             </Button>
             <Button
               type="button"
@@ -1929,7 +1929,7 @@ export default function MarkdownPreview({
               )}
               className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
-              <ChevronDown weight="regular" size={14} />
+              <ChevronDown size={14} />
             </Button>
             <div className="bg-border mx-0.5 h-4 w-px" />
             <Button
@@ -1944,7 +1944,7 @@ export default function MarkdownPreview({
               )}
               className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
-              <X weight="regular" size={14} />
+              <X size={14} />
             </Button>
           </div>
         ) : null}
@@ -2178,7 +2178,7 @@ function MarkdownAnnotationComposer({
           {submitting
             ? translate('auto.components.editor.MarkdownPreview.d652c87c91', 'Saving…')
             : translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
-          {!submitting && <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />}
+          {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
         </Button>
       </div>
     </div>

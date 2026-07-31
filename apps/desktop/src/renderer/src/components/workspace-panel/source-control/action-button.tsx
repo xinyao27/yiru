@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 type ActionButtonProps = {
   icon: React.ComponentType<{ className?: string; weight?: IconProps['weight'] }>
-  iconWeight?: IconProps['weight']
   title: string
   onClick: (event: React.MouseEvent) => void
   disabled?: boolean
@@ -14,7 +13,7 @@ type ActionButtonProps = {
 }
 
 export function ActionButton(props: ActionButtonProps): React.JSX.Element {
-  const { icon: Icon, iconWeight, title, onClick, disabled, surface = 'header' } = props
+  const { icon: Icon, title, onClick, disabled, surface = 'header' } = props
   // Why: use the root tooltip provider for sibling delay handoff, and keep the
   // trigger interactive because Chromium suppresses tooltips on disabled buttons.
   return (
@@ -35,7 +34,7 @@ export function ActionButton(props: ActionButtonProps): React.JSX.Element {
               onClick(event)
             }}
           >
-            <Icon className="size-3.5" weight={iconWeight} />
+            <Icon className="size-3.5" />
           </Button>
         }
       />

@@ -264,7 +264,7 @@ export function LinkRoutingPreferenceDialogProvider({
 
           <DialogFooter className="border-border bg-muted/20 border-t px-6 py-4 sm:justify-between">
             <Button variant="outline" onClick={() => settleActiveRequest(false)}>
-              <ExternalLink weight="regular" className="size-4" />
+              <ExternalLink className="size-4" />
               {translate(
                 'auto.components.link.routing.preference.dialog.system.button',
                 'Use system browser'

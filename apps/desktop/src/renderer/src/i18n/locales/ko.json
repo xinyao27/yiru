@@ -1348,7 +1348,9 @@
                 "panel": {
                   "changes": "Changes",
                   "review": "Review",
-                  "views": "Changes and review"
+                  "views": "Changes and review",
+                  "mergeRequestNumber": "{{value0}} !{{value1}}",
+                  "pullRequestNumber": "{{value0}} #{{value1}}"
                 }
               }
             }
@@ -4694,10 +4696,6 @@
           "5f02e6fb21": "리치 에디터 모드에서 로컬 markdown 리뷰 노트 컨트롤을 표시합니다.",
           "51161d1647": "파일을 편집할 때 미니맵 개요를 표시합니다.",
           "6690b1ffb9": "미니맵",
-          "5a1ea6eaa2": "숨겨진",
-          "73a09aad63": "표시됨",
-          "1de48ad940": "기본 Diff 파일 트리",
-          "1b87897af9": "결합된 차이점 보기를 열 때 파일 트리를 표시하거나 숨깁니다.",
           "12cbc0d0d6": "나란히",
           "05b6df93b3": "인라인",
           "7311f67ee7": "기본 차이점 보기",
@@ -6920,13 +6918,7 @@
             "9c72990db8": "미니맵",
             "716a4dfb1f": "파일을 편집할 때 미니맵 개요를 표시합니다.",
             "6f584fcb48": "미니맵",
-            "19baae651b": "사이드바",
-            "973ed6bfbf": "결합된 차이",
-            "0a02059549": "파일 트리",
-            "2f42852568": "트리",
             "3b5733573e": "차이점",
-            "dec71988f0": "결합된 차이점 보기를 열 때 파일 트리를 표시하거나 숨깁니다.",
-            "adec13f2ef": "기본 Diff 파일 트리",
             "be24c7cd67": "분할",
             "233f7e2f37": "나란히",
             "0a5fa65926": "인라인",
@@ -8800,7 +8792,9 @@
               "a9bf7c171a": "푸시 실패",
               "834cb3f23d": "AI로 수정",
               "783a808870": "닫기"
-            }
+            },
+            "5abb0da297": "브랜치 검토",
+            "e7f8a9b0c1": "Git Graph"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "선택한 agent를 시작할 수 없습니다.",
@@ -10496,18 +10490,6 @@
           "28921f5bf9": "복사됨",
           "1f9f4def45": "코드 복사"
         },
-        "CombinedDiffFileTree": {
-          "f984289373": "현재 필터와 일치하는 파일이 없습니다.",
-          "eafe1aeb53": "필터 재설정",
-          "be119cb9d1": "본 파일",
-          "c00020f081": "파일 확장자",
-          "cd0e0ed79e": "차이점 파일 필터링",
-          "4cc7b83ffe": "파일 필터링...",
-          "21783df79f": "파일 트리 축소",
-          "481e63ca52": "파일",
-          "d5ac717d65": "commit 안 됨",
-          "39b6b9e4e4": "Committed on Branch"
-        },
         "CombinedDiffViewer": {
           "35cc27aeb2": "소스 제어에서",
           "e3b9a6ce02": "더",
@@ -10519,7 +10501,6 @@
           "0f806a2ab1": "취소",
           "80a286d8f5": "이 작업 트리에서?",
           "7e7ca60816": "변경된 파일",
-          "b6c3b84476": "파일 트리 표시",
           "39f8007549": "충돌 리뷰",
           "39e73e7181": "이 차이점 보기에서 제외되었습니다.",
           "689b99f8ad": "미해결 충돌",
@@ -10529,8 +10510,6 @@
           "45cf23b418": "메모를 지우지 못했습니다.",
           "0fb870a0fe": "메모",
           "8ab3248fd8": "메모",
-          "ec5053c7f5": "나란히",
-          "f786fd54e1": "인라인",
           "ea08dae15b": "모두 축소",
           "19c45cfdc0": "모두 확장",
           "982d14bfa5": "commit 되지 않은 Diff 열기",
@@ -10538,9 +10517,7 @@
           "8368d256ec": "결합 브랜치",
           "8f68ad9ca9": "{{value0}} AI {{value1}} 표시",
           "724a13568d": "{{value0}}에서",
-          "6094135eec": "대 {{value0}}",
-          "a4420ca1f7": "랩 온",
-          "dde325ddfe": "마무리"
+          "6094135eec": "대 {{value0}}"
         },
         "ConflictComponents": {
           "f338288514": "충돌 콘텐츠 로드 중...",
@@ -11108,6 +11085,16 @@
           "cancel": "Cancel",
           "apply": "Apply changes",
           "loading": "Loading preview…"
+        },
+        "combined": {
+          "diff": {
+            "viewer": {
+              "604195710f": "변경 사항을 인라인으로 표시",
+              "5b6c3f9596": "변경 사항을 나란히 표시",
+              "820b3e0422": "자동 줄바꿈 켜기",
+              "7b47fe46c8": "자동 줄바꿈 끄기"
+            }
+          }
         }
       },
       "diff": {
@@ -12077,6 +12064,75 @@
           "other": "기타",
           "refreshAriaLabel": "로컬 사용량 통계 새로 고침",
           "refresh": "사용량 새로 고침"
+        }
+      },
+      "workspace-panel": {
+        "GitGraphState": {
+          "f3a2c1d0e5": "Failed to load commits",
+          "a4b5c6d7e8": "Failed to load more commits"
+        },
+        "GitGraphView": {
+          "a1b2c3d4e5": "Git Graph",
+          "b2c3d4e5f6": "Close Git Graph",
+          "c3d4e5f6a7": "Loading commits…",
+          "d4e5f6a7b8": "No commits yet"
+        },
+        "git-graph": {
+          "BranchFilterDropdown": {
+            "a1b2c3d4e5": "All branches",
+            "b2c3d4e5f6": "{{value0}} branches",
+            "c3d4e5f6a7": "Filter branches…",
+            "d4e5f6a7b8": "Show all branches"
+          },
+          "CommitContextMenu": {
+            "a1b2c3d4e5": "Open commit in browser",
+            "b2c3d4e5f6": "Copy commit hash",
+            "c3d4e5f6a7": "Copy commit message",
+            "d4e5f6a7b8": "Explain changes"
+          },
+          "CommitDetails": {
+            "a1b2c3d4e5": "Failed to load commit files",
+            "b2c3d4e5f6": "Hash",
+            "c3d4e5f6a7": "Parents",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Loading files…",
+            "f6a7b8c9d0": "No file changes in this commit",
+            "a7b8c9d0e1": "Open all changes together"
+          },
+          "CommitTable": {
+            "b2c3d4e5f6": "Description",
+            "c3d4e5f6a7": "Date",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Commit",
+            "a1b2c3d4e5": "Load More Commits"
+          },
+          "ControlBar": {
+            "a1b2c3d4e5": "Show Remote Branches",
+            "b2c3d4e5f6": "Find commits",
+            "c3d4e5f6a7": "Refresh",
+            "d4e5f6a7b8": "Close Git Graph"
+          },
+          "FindWidget": {
+            "a1b2c3d4e5": "No results",
+            "b2c3d4e5f6": "{{value0}} of {{value1}}",
+            "c3d4e5f6a7": "Find by subject, author, or hash…",
+            "d4e5f6a7b8": "Previous match",
+            "e5f6a7b8c9": "Next match",
+            "f6a7b8c9d0": "Close find"
+          },
+          "UncommittedRow": {
+            "a1b2c3d4e5": "Uncommitted Changes"
+          },
+          "GitGraphView": {
+            "a1b2c3d4e5": "Loading commits…",
+            "b2c3d4e5f6": "No commits yet",
+            "c3d4e5f6a7": "No matching commits in the loaded history yet — load more to keep searching.",
+            "d4e5f6a7b8": "No commits found for the selected branches in the loaded history.",
+            "e5f6a7b8c9": "Load More Commits"
+          },
+          "useGitGraphView": {
+            "a1b2c3d4e6": "Could not find that commit in the loaded history"
+          }
         }
       }
     },

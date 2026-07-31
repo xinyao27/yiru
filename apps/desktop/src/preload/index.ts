@@ -2742,6 +2742,64 @@ const api = {
       ipcRenderer.invoke('git:abortMerge', args),
     abortRebase: (args: { worktreePath: string; connectionId?: string }): Promise<void> =>
       ipcRenderer.invoke('git:abortRebase', args),
+    abortRevert: (args: { worktreePath: string; connectionId?: string }): Promise<void> =>
+      ipcRenderer.invoke('git:abortRevert', args),
+    addTag: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      message?: string
+      force?: boolean
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:addTag', args),
+    createBranch: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      checkout?: boolean
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:createBranch', args),
+    checkoutCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:checkoutCommit', args),
+    cherryPick: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:cherryPick', args),
+    revertCommit: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:revertCommit', args),
+    dropCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:dropCommit', args),
+    mergeCommit: (args: {
+      worktreePath: string
+      commit: string
+      noFf?: boolean
+      squash?: boolean
+      message?: string
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:mergeCommit', args),
+    rebaseOntoCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:rebaseOntoCommit', args),
+    resetToCommit: (args: {
+      worktreePath: string
+      commit: string
+      mode: 'soft' | 'mixed' | 'hard'
+      connectionId?: string
+    }): Promise<unknown> => ipcRenderer.invoke('git:resetToCommit', args),
     diff: (args: {
       worktreePath: string
       filePath: string

@@ -21,14 +21,24 @@ export function buildActiveOpenFileSignature(
   return `${diffSource ?? 'edit'}${SIGNATURE_SEPARATOR}${relativePath}`
 }
 
+const COMBINED_DIFF_SIGNATURE_SOURCES: ReadonlySet<string> = new Set([
+  'combined-all',
+  'combined-uncommitted',
+  'combined-branch',
+  'combined-commit'
+])
+
 /**
  * Expand an active-open-file signature into the `${area}::${path}` row keys used
  * by the Source Control tree/list. Staged/unstaged diffs match their side; plain
- * edit tabs prefer working-tree rows and fall back to staged-only rows.
+ * edit tabs prefer working-tree rows and fall back to staged-only rows. A
+ * combined diff shows many files at once, so it highlights the row whose section
+ * was last revealed inside it instead of its own tab path.
  */
 export function buildActiveOpenRowKeys(
   signature: string | null,
-  availableRowKeys?: ReadonlySet<string>
+  availableRowKeys?: ReadonlySet<string>,
+  revealedRowKey?: string | null
 ): ReadonlySet<string> {
   if (!signature) {
     return EMPTY_OPEN_ROW_KEYS
@@ -43,6 +53,12 @@ export function buildActiveOpenRowKeys(
   const path = signature.slice(separatorIndex + SIGNATURE_SEPARATOR.length)
   if (path.length === 0) {
     return EMPTY_OPEN_ROW_KEYS
+  }
+
+  if (COMBINED_DIFF_SIGNATURE_SOURCES.has(diffSource)) {
+    return revealedRowKey
+      ? filterAvailableRowKeys([revealedRowKey], availableRowKeys)
+      : EMPTY_OPEN_ROW_KEYS
   }
 
   if (diffSource === 'staged') {

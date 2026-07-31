@@ -112,7 +112,7 @@ export default function HostedReviewActions({
   if (review.state === 'open') {
     return (
       <div className="space-y-1.5">
-        <TooltipProvider delay={300}>
+        <TooltipProvider>
           <div className={RIGHT_SIDEBAR_SPLIT_ACTION_ROW_CLASS}>
             <Tooltip>
               {/* Why: wrapping in a <span> so the tooltip trigger receives pointer
@@ -191,7 +191,7 @@ export default function HostedReviewActions({
                     {stateUpdating === 'closed' ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <ChevronDown weight="regular" className="size-3.5" />
+                      <ChevronDown className="size-3.5" />
                     )}
                   </Button>
                 }

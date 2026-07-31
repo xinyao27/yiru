@@ -21,20 +21,17 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
     activeWorktreeId,
     branchEntries,
     branchSummary,
-    compareBaseRef,
     entries,
     fetchUpstreamStatus,
     handleOpenDiff,
     isBranchVisible,
     isFolder,
-    isGitHistoryExpanded,
-    isGitHistoryVisible,
     openBranchDiff,
     openFile,
     pendingCommentEditorRevealFrameIdsRef,
     refreshActiveGitStatusAfterMutation,
-    refreshGitHistoryRef,
     resolveSplitTargetGroupId,
+    revealCombinedDiffSection,
     setCollapsedSections,
     setCollapsedTreeDirs,
     setEditorViewMode,
@@ -44,25 +41,6 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
     workspacePanelTabId,
     worktreePath
   } = scope
-  useEffect(() => {
-    // Why: history shells out to git. Defer the first load until the user
-    // expands Commits so source control stays cheap for large/remote repos.
-    if (!isBranchVisible || !isGitHistoryExpanded || !isGitHistoryVisible) {
-      return
-    }
-    void refreshGitHistoryRef.current()
-  }, [
-    // Why: history is fetched with compareBaseRef, so re-run when the upstream
-    // compare base changes — effectiveBaseRef can stay put while it moves.
-    activeWorktreeId,
-    compareBaseRef,
-    isBranchVisible,
-    isFolder,
-    isGitHistoryExpanded,
-    isGitHistoryVisible,
-    refreshGitHistoryRef,
-    worktreePath
-  ])
   useEffect(() => {
     // Why: avoid Git subprocesses while the sidebar is hidden; remote operations
     // already refresh upstream status before it becomes visible again.
@@ -124,6 +102,23 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       ) {
         return
       }
+      if (
+        revealCombinedDiffSection(
+          {
+            kind: 'branch',
+            entry,
+            compare: {
+              baseRef: branchSummary.baseRef,
+              baseOid: branchSummary.baseOid,
+              headOid: branchSummary.headOid,
+              mergeBase: branchSummary.mergeBase
+            }
+          },
+          event
+        )
+      ) {
+        return
+      }
       const targetGroupId = resolveSplitTargetGroupId(event)
       const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       openBranchDiff(
@@ -144,6 +139,7 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       branchSummary,
       openBranchDiff,
       resolveSplitTargetGroupId,
+      revealCombinedDiffSection,
       workspacePanelTabId,
       worktreePath
     ]
@@ -156,6 +152,22 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       workspacePanelTabId,
       resolveSplitTargetGroupId
     })
+  // Why: a diff row click may be answered by revealing a section inside an
+  // already-open combined diff, and that scroll lands two frames later — stamping
+  // the note target synchronously would be consumed first and then scrolled over.
+  const stampCommentScrollAfterReveal = useCallback(
+    (commentId: string | undefined) => {
+      if (!commentId) {
+        return
+      }
+      requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
+        requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
+          setScrollToDiffCommentId(commentId)
+        })
+      })
+    },
+    [pendingCommentEditorRevealFrameIdsRef, setScrollToDiffCommentId]
+  )
   const handleOpenComment = useCallback(
     (comment: DiffComment) => {
       if (!activeWorktreeId || !worktreePath) {
@@ -203,17 +215,13 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
         matches[0]
       if (uncommitted) {
         handleOpenDiff(uncommitted)
-        if (commentId) {
-          setScrollToDiffCommentId(commentId)
-        }
+        stampCommentScrollAfterReveal(commentId)
         return
       }
       const branchEntry = branchEntries.find((e) => e.path === filePath)
       if (branchEntry && branchSummary?.status === 'ready') {
         openCommittedDiff(branchEntry)
-        if (commentId) {
-          setScrollToDiffCommentId(commentId)
-        }
+        stampCommentScrollAfterReveal(commentId)
         return
       }
       // Why: stale notes may outlive both diff sources; open the normal editor
@@ -248,6 +256,7 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       setScrollToDiffCommentId,
       setMarkdownViewMode,
       setPendingEditorReveal,
+      stampCommentScrollAfterReveal,
       workspacePanelTabId,
       worktreePath
     ]

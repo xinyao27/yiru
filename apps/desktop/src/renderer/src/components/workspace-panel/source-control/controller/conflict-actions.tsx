@@ -11,6 +11,7 @@ import { translate } from '../../../../i18n/i18n'
 import { getConnectionId } from '../../../../lib/connection-context'
 import { openWorkspacePanelTab } from '../../../../lib/open-workspace-panel-tab'
 import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '../../../../runtime/git-client'
+import { useAppStore } from '../../../../store'
 import type {
   AbortConflictOperation,
   CreatedHostedReview,
@@ -39,7 +40,6 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
     linkedGiteaPR,
     refreshActiveGitStatusAfterMutation,
     refreshBranchCompareRef,
-    refreshGitHistoryRef,
     remoteStatus,
     remoteStatusForActions,
     runRemoteAction,
@@ -111,7 +111,7 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
         refreshSourceControlAfterRemoteAction({
           refreshGitStatus: refreshActiveGitStatusAfterMutation,
           refreshBranchCompare: refreshBranchCompareRef.current,
-          refreshGitHistory: refreshGitHistoryRef.current
+          refreshGitHistory: () => useAppStore.getState().refreshGitGraph(activeWorktreeId)
         })
       }
     },
@@ -123,7 +123,6 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
       isAbortingOperation,
       refreshBranchCompareRef,
       refreshActiveGitStatusAfterMutation,
-      refreshGitHistoryRef,
       setAbortOperationInFlightByWorktree,
       setRemoteActionErrors,
       worktreePath

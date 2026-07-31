@@ -5,7 +5,6 @@ import {
   markWorktreeSleepIntent
 } from '@/components/sidebar/worktree-sleep-intent'
 import { translate } from '@/i18n/i18n'
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 
 /**
@@ -70,7 +69,6 @@ function preserveSidebarWorktreePosition(worktreeId: string): () => void {
   if (!scroller || !row) {
     return () => {}
   }
-  scroller.dispatchEvent(new Event(VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT))
   const previousScrollTop = scroller.scrollTop
   const previousScrollHeight = scroller.scrollHeight
   const previousTop = row.getBoundingClientRect().top

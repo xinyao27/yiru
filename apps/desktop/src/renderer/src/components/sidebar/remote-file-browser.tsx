@@ -639,7 +639,7 @@ export function RemoteFileBrowser({
           disabled={resolvedPath === '/' || loading}
           className="focus-visible:bg-accent h-auto border-0 p-1 transition-colors disabled:cursor-default disabled:opacity-30"
         >
-          <ArrowUp weight="regular" className="size-3.5" />
+          <ArrowUp className="size-3.5" />
         </Button>
         <Button
           variant="ghost"
@@ -663,10 +663,7 @@ export function RemoteFileBrowser({
           </Button>
           {pathSegments.map((segment, i) => (
             <React.Fragment key={i}>
-              <ChevronRight
-                weight="regular"
-                className="text-muted-foreground/50 size-2.5 shrink-0"
-              />
+              <ChevronRight className="text-muted-foreground/50 size-2.5 shrink-0" />
               <Button
                 variant="ghost"
                 size="xs"
@@ -785,10 +782,7 @@ export function RemoteFileBrowser({
                   )}
                   <span className="min-w-0 flex-1 truncate">{entry.name}</span>
                   {entry.isDirectory && (
-                    <ChevronRight
-                      weight="regular"
-                      className="text-muted-foreground/60 size-3.5 shrink-0"
-                    />
+                    <ChevronRight className="text-muted-foreground/60 size-3.5 shrink-0" />
                   )}
                 </Button>
               )

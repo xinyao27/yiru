@@ -1,7 +1,6 @@
 import {
   GearSix as Settings2,
   type Icon as PhosphorIcon,
-  type IconProps,
   ArrowUp,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
@@ -109,7 +108,6 @@ export function CompareSummary({
           />
           <CompareSummaryToolbarButton
             icon={RefreshCw}
-            iconWeight="regular"
             label={translate('auto.components.right.sidebar.SourceControl.286dbda4d6', 'Retry')}
             onClick={onRetry}
           />
@@ -131,7 +129,7 @@ export function CompareSummary({
   return (
     <div className="text-muted-foreground flex items-center gap-2 text-xs">
       <span className="flex min-w-0 items-center gap-1" title={commitsAheadTitle}>
-        <ArrowUp weight="regular" className="size-3" />
+        <ArrowUp className="size-3" />
         <span>
           {commitsAhead}{' '}
           {translate('auto.components.right.sidebar.SourceControl.3278b2767b', 'ahead')}
@@ -148,7 +146,6 @@ export function CompareSummary({
         />
         <CompareSummaryToolbarButton
           icon={RefreshCw}
-          iconWeight="regular"
           label={translate(
             'auto.components.right.sidebar.SourceControl.ed34038d0d',
             'Refresh branch compare'
@@ -162,12 +159,10 @@ export function CompareSummary({
 
 export function CompareSummaryToolbarButton({
   icon: Icon,
-  iconWeight,
   label,
   onClick
 }: {
   icon: PhosphorIcon
-  iconWeight?: IconProps['weight']
   label: string
   onClick: () => void
 }): React.JSX.Element {
@@ -183,7 +178,7 @@ export function CompareSummaryToolbarButton({
             aria-label={label}
             onClick={onClick}
           >
-            <Icon className="size-3.5" weight={iconWeight} />
+            <Icon className="size-3.5" />
           </Button>
         }
       />
@@ -242,7 +237,7 @@ export function CompareUnavailable({
           </Button>
         )}
         <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={onRetry}>
-          <RefreshCw weight="regular" className="size-3.5" />
+          <RefreshCw className="size-3.5" />
           {translate('auto.components.right.sidebar.SourceControl.286dbda4d6', 'Retry')}
         </Button>
       </div>

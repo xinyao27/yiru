@@ -43,7 +43,7 @@ export function SidebarWorkspaceSearchButton({
             aria-label={label}
             className={cn('[-webkit-app-region:no-drag]', stretch && 'w-full min-w-0 flex-1')}
           >
-            <Search weight="regular" />
+            <Search />
           </Button>
         }
       />

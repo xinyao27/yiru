@@ -152,7 +152,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
           <CheckCircle2
-            weight="regular"
+           
             className="size-4 text-emerald-600 dark:text-emerald-400"
           />
           {run.names.length === 1
@@ -171,7 +171,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     if (run.state === 'error') {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
-          <AlertTriangle weight="regular" className="text-destructive size-4" />
+          <AlertTriangle className="text-destructive size-4" />
           {translate(
             'auto.components.skills.SkillFreshnessUpdateDialog.updatedPartial',
             'Updated {{value0}} of {{value1}} skills',
@@ -195,7 +195,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
       return (
         <div className="flex items-center gap-2 text-sm font-medium">
           <CheckCircle2
-            weight="regular"
+           
             className="size-4 text-emerald-600 dark:text-emerald-400"
           />
           {translate(
@@ -302,7 +302,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
                 onClick={() => void state.refresh()}
               >
                 <RefreshCw
-                  weight="regular"
+                 
                   className={state.loading ? 'animate-spin' : undefined}
                 />
                 {translate(
@@ -316,7 +316,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
             {run.state === 'error' ? (
               <>
                 <Button type="button" variant="ghost" size="sm" onClick={copyRetryCommand}>
-                  <Copy weight="regular" className="size-3.5" />
+                  <Copy className="size-3.5" />
                   {copied
                     ? translate(
                         'auto.components.skills.SkillFreshnessUpdateDialog.copied',

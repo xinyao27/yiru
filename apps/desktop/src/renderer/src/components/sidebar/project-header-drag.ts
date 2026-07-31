@@ -17,7 +17,7 @@ import {
 import { getWorktreeSidebarDragAutoscroll } from './worktree-sidebar-drag-autoscroll'
 
 // Why pointer events instead of HTML5 DnD: rows are absolutely-positioned by
-// react-virtual and unmount/remount as scroll changes, so DnD enter/leave fire
+// the list virtualizer and unmount/remount as scroll changes, so DnD enter/leave fire
 // against stale targets. With pointer events we cache the active set of repo
 // header positions and compute the drop index from the live pointer Y.
 

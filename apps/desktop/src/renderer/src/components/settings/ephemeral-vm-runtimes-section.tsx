@@ -205,7 +205,7 @@ export function EphemeralVmRuntimesSection(): React.JSX.Element {
           onClick={() => void refresh()}
           disabled={isLoading || cleaningId !== null}
         >
-          {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+          {isLoading ? <LoadingIndicator /> : <RefreshCw />}
         </Button>
       </div>
 

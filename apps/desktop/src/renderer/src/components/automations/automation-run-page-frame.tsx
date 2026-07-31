@@ -41,7 +41,7 @@ export function AutomationRunPageFrame({
               )}
               onClick={onBack}
             >
-              <ArrowLeft weight="regular" className="size-3.5" />
+              <ArrowLeft className="size-3.5" />
             </Button>
           </div>
           <div className="min-w-0 flex-1">

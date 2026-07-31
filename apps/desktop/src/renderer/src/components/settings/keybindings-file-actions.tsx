@@ -188,13 +188,13 @@ export function KeybindingsFileActions(): React.JSX.Element {
                 'Open keybindings file menu'
               )}
             >
-              <ChevronDown weight="regular" className="size-3" />
+              <ChevronDown className="size-3" />
             </Button>
           }
         />
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => void openKeybindingsFile()}>
-            <ExternalLink weight="regular" className="size-3.5" />
+            <ExternalLink className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.98f1a23e1c',
               'Open with Default App'
@@ -223,7 +223,7 @@ export function KeybindingsFileActions(): React.JSX.Element {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => void reloadKeybindings()}>
-            <RefreshCw weight="regular" className="size-3.5" />
+            <RefreshCw className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.abc49853fb',
               'Reload from Disk'

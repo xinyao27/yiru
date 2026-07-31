@@ -51,6 +51,13 @@ import { GIT_RESPONSE_STREAM_THRESHOLD } from '../protocol'
 import { forceDeletePreservedRelayBranch } from './handler-branch-cleanup'
 import { checkIgnoredPathsOp } from './handler-check-ignore'
 import { commitCompare as commitCompareOp, commitDiffEntry } from './handler-commit-diff-ops'
+import {
+  cherryPickOp,
+  dropCommitOp,
+  mergeCommitOp,
+  rebaseOntoCommitOp,
+  revertOp
+} from './handler-conflictable-write-ops'
 import { refreshLocalBaseRefForWorktreeCreateOp } from './handler-local-base-ref-refresh'
 import {
   computeDiff,
@@ -85,6 +92,7 @@ import {
   removeWorktreeOp,
   worktreeIsCleanOp
 } from './handler-worktree-ops'
+import { addTagOp, checkoutCommitOp, createBranchOp, resetToCommitOp } from './handler-write-ops'
 import { GitResponseStreamRegistry } from './response-stream'
 
 const execFileAsync = promisify(execFile)
@@ -218,6 +226,16 @@ export class GitHandler {
     this.dispatcher.onRequest('git.bulkUnstage', (p, context) => this.bulkUnstage(p, context))
     this.dispatcher.onRequest('git.abortMerge', (p) => this.abortMerge(p))
     this.dispatcher.onRequest('git.abortRebase', (p) => this.abortRebase(p))
+    this.dispatcher.onRequest('git.abortRevert', (p) => this.abortRevert(p))
+    this.dispatcher.onRequest('git.addTag', (p) => this.addTag(p))
+    this.dispatcher.onRequest('git.createBranch', (p) => this.createBranch(p))
+    this.dispatcher.onRequest('git.checkoutCommit', (p) => this.checkoutCommit(p))
+    this.dispatcher.onRequest('git.cherryPick', (p) => this.cherryPick(p))
+    this.dispatcher.onRequest('git.revertCommit', (p) => this.revertCommit(p))
+    this.dispatcher.onRequest('git.dropCommit', (p) => this.dropCommit(p))
+    this.dispatcher.onRequest('git.mergeCommit', (p) => this.mergeCommit(p))
+    this.dispatcher.onRequest('git.rebaseOntoCommit', (p) => this.rebaseOntoCommit(p))
+    this.dispatcher.onRequest('git.resetToCommit', (p) => this.resetToCommit(p))
     this.dispatcher.onRequest('git.checkout', (p) => this.checkout(p))
     this.dispatcher.onRequest('git.localBranches', (p) => this.localBranches(p))
     this.dispatcher.onRequest('git.discard', (p) => this.discard(p))
@@ -408,10 +426,21 @@ export class GitHandler {
 
   private async history(params: Record<string, unknown>) {
     const worktreePath = params.worktreePath as string
-    return loadGitHistoryFromExecutor(this.git.bind(this), worktreePath, {
-      limit: typeof params.limit === 'number' ? params.limit : undefined,
-      baseRef: typeof params.baseRef === 'string' ? params.baseRef : null
-    })
+    return loadGitHistoryFromExecutor(
+      this.git.bind(this),
+      worktreePath,
+      {
+        limit: typeof params.limit === 'number' ? params.limit : undefined,
+        baseRef: typeof params.baseRef === 'string' ? params.baseRef : null,
+        refScope: params.refScope === 'all' ? 'all' : undefined,
+        includeRemoteBranches:
+          typeof params.includeRemoteBranches === 'boolean'
+            ? params.includeRemoteBranches
+            : undefined,
+        skip: typeof params.skip === 'number' ? params.skip : undefined
+      },
+      this.gitCapabilities
+    )
   }
 
   private async getDiff(params: Record<string, unknown>, context?: RequestContext) {
@@ -590,6 +619,52 @@ export class GitHandler {
     } finally {
       this.clearGitMutationReadCaches()
     }
+  }
+
+  private async abortRevert(params: Record<string, unknown>) {
+    this.clearGitMutationReadCaches()
+    const worktreePath = params.worktreePath as string
+    try {
+      await this.git(['revert', '--abort'], worktreePath)
+    } finally {
+      this.clearGitMutationReadCaches()
+    }
+  }
+
+  private async addTag(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => addTagOp(this.git.bind(this), params))
+  }
+
+  private async createBranch(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => createBranchOp(this.git.bind(this), params))
+  }
+
+  private async checkoutCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => checkoutCommitOp(this.git.bind(this), params))
+  }
+
+  private async cherryPick(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => cherryPickOp(this.git.bind(this), params))
+  }
+
+  private async revertCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => revertOp(this.git.bind(this), params))
+  }
+
+  private async dropCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => dropCommitOp(this.git.bind(this), params))
+  }
+
+  private async mergeCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => mergeCommitOp(this.git.bind(this), params))
+  }
+
+  private async rebaseOntoCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => rebaseOntoCommitOp(this.git.bind(this), params))
+  }
+
+  private async resetToCommit(params: Record<string, unknown>) {
+    return this.runWithGitReadCacheClear(() => resetToCommitOp(this.git.bind(this), params))
   }
 
   private async checkout(params: Record<string, unknown>) {

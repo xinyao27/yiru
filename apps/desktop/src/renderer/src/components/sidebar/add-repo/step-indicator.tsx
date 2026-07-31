@@ -35,7 +35,7 @@ export function AddRepoStepIndicator({
         disabled={step === 'nested' && isAdding}
         onClick={onBack}
       >
-        <ArrowLeft weight="regular" className="size-3" />
+        <ArrowLeft className="size-3" />
         {translate('auto.components.sidebar.AddRepoStepIndicator.3bb655c117', 'Back')}
       </Button>
     </div>

@@ -273,9 +273,9 @@ function AppSection({
           aria-expanded={!isCollapsed}
         >
           {isCollapsed ? (
-            <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
+            <ChevronRight className="text-muted-foreground h-3 w-3" />
           ) : (
-            <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
+            <ChevronDown className="text-muted-foreground h-3 w-3" />
           )}
         </Button>
         <div className="flex min-w-0 flex-1 items-center justify-between py-2 pr-3">
@@ -438,7 +438,7 @@ function SessionRow({
             { value0: session.sessionId }
           )}
         >
-          <X weight="regular" className="size-3" />
+          <X className="size-3" />
         </Button>
       </span>
     </div>
@@ -520,9 +520,9 @@ export function WorktreeRow({
             }
           >
             {isCollapsed ? (
-              <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
+              <ChevronRight className="text-muted-foreground h-3 w-3" />
             ) : (
-              <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
+              <ChevronDown className="text-muted-foreground h-3 w-3" />
             )}
           </Button>
         ) : (
@@ -725,9 +725,9 @@ function ResourceTree({
                 }
               >
                 {repoCollapsed ? (
-                  <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
+                  <ChevronRight className="text-muted-foreground h-3 w-3" />
                 ) : (
-                  <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
+                  <ChevronDown className="text-muted-foreground h-3 w-3" />
                 )}
               </Button>
               <div className="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pr-3">
@@ -1317,7 +1317,7 @@ export function ResourceUsageStatusSegment({
                     )}
                     className="disabled:opacity-40"
                   >
-                    <RotateCw weight="regular" className="size-3" />
+                    <RotateCw className="size-3" />
                   </Button>
                 }
               />
@@ -1381,7 +1381,7 @@ export function ResourceUsageStatusSegment({
               onClick={() => daemonActions.setPending('restart')}
               disabled={daemonActions.isBusy}
             >
-              <RotateCw weight="regular" className="mr-1 size-3" />
+              <RotateCw className="mr-1 size-3" />
               {translate(
                 'auto.components.status.bar.ResourceUsageStatusSegment.93b0de3c21',
                 'Restart'
@@ -1620,7 +1620,6 @@ export function ResourceUsageStatusSegment({
               )}
             </span>
             <ChevronRight
-              weight="regular"
               className="text-muted-foreground absolute right-2.5 size-3.5"
               aria-hidden
             />

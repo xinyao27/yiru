@@ -91,7 +91,7 @@ export function SourceControlHeaderOverflowMenu({
           {translate('auto.components.right.sidebar.SourceControl.476b77745b', 'Change Base Ref')}…
         </DropdownMenuItem>
         <DropdownMenuItem disabled={branchCompareRefreshDisabled} onClick={onRefreshBranchCompare}>
-          <RefreshCw weight="regular" className="size-3.5" />
+          <RefreshCw className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.SourceControl.ed34038d0d',
             'Refresh branch compare'

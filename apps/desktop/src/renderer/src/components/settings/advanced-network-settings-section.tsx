@@ -247,7 +247,6 @@ export function AdvancedNetworkSettingsSection({
                 'Configure proxy'
               )}
               <ChevronDown
-                weight="regular"
                 className={cn('size-3.5 transition-transform', proxyConfigExpanded && 'rotate-180')}
               />
             </Button>

@@ -51,7 +51,7 @@ export default function ImageViewerPopup({
             className="border-border/60 h-auto py-1"
             onClick={() => onOpenChange(false)}
           >
-            <X weight="regular" size={14} />
+            <X size={14} />
             <span>{translate('auto.components.editor.ImageViewerPopup.535f4e2b56', 'Close')}</span>
           </Button>
         </div>

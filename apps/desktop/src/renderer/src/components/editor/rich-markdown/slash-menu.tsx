@@ -96,7 +96,7 @@ export function RichMarkdownSlashMenu({
                 >
                   <span className="text-muted-foreground inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]">
                     {command.icon.kind === 'component' ? (
-                      <command.icon.component className="size-3.5" weight={command.icon.weight} />
+                      <command.icon.component className="size-3.5" />
                     ) : (
                       <span className="text-sm leading-none">{command.icon.value}</span>
                     )}

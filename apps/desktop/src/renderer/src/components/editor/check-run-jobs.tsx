@@ -127,7 +127,6 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
             aria-expanded={showRest}
           >
             <ChevronDown
-              weight="regular"
               className={cn(
                 'size-3.5 shrink-0 transition-transform',
                 showRest ? 'rotate-0' : '-rotate-90'

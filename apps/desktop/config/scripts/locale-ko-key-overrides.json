@@ -644,9 +644,6 @@
   "auto.components.editor.CheckRunDetailsPanel.fd46a70f1a": {
     "ko": "시작됨"
   },
-  "auto.components.editor.CombinedDiffFileTree.d5ac717d65": {
-    "ko": "commit 안 됨"
-  },
   "auto.components.editor.CombinedDiffViewer.3d909843bb": {
     "ko": "브랜치 diff 열기"
   },

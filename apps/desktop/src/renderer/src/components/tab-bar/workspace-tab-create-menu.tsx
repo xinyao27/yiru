@@ -62,7 +62,7 @@ export function WorkspaceTabCreateMenu({
       }}
     >
       {/* Why: the glyph matches the adjacent titlebar actions without recreating a tab cell. */}
-      <Plus className="size-4" weight="regular" />
+      <Plus className="size-4" />
     </Button>
   )
   const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />

@@ -2,6 +2,17 @@ import type { CommitMessageDraftContext } from '../../shared/commit-message/gene
 import type { CommitMessagePlan } from '../../shared/commit-message/plan'
 import { gitExecMutatesRepository } from '../../shared/git/exec-mutation'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type {
+  GitAddTagResult,
+  GitCheckoutCommitResult,
+  GitCherryPickResult,
+  GitCreateBranchResult,
+  GitDropCommitResult,
+  GitMergeCommitResult,
+  GitRebaseOntoCommitResult,
+  GitResetToCommitResult,
+  GitRevertResult
+} from '../../shared/git/write-op-results'
 import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
 import type {
   GitStatusResult,
@@ -477,10 +488,124 @@ export class SshGitProvider implements IGitProvider {
     })
   }
 
+  async abortRevert(worktreePath: string): Promise<void> {
+    await this.runWithDiffDedupeClear(async () => {
+      await this.mux.request('git.abortRevert', { worktreePath })
+    })
+  }
+
   async checkoutBranch(worktreePath: string, branch: string): Promise<void> {
     await this.runWithDiffDedupeClear(async () => {
       await this.mux.request('git.checkout', { worktreePath, branch })
     })
+  }
+
+  async addTag(
+    worktreePath: string,
+    params: { name: string; commit: string; message?: string; force?: boolean }
+  ): Promise<GitAddTagResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.addTag', { worktreePath, ...params })) as GitAddTagResult
+    )
+  }
+
+  async createBranchFromCommit(
+    worktreePath: string,
+    params: { name: string; commit: string; checkout?: boolean }
+  ): Promise<GitCreateBranchResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.createBranch', {
+          worktreePath,
+          ...params
+        })) as GitCreateBranchResult
+    )
+  }
+
+  async checkoutCommit(worktreePath: string, commit: string): Promise<GitCheckoutCommitResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.checkoutCommit', {
+          worktreePath,
+          commit
+        })) as GitCheckoutCommitResult
+    )
+  }
+
+  async cherryPickCommit(
+    worktreePath: string,
+    params: { commit: string; mainline?: number }
+  ): Promise<GitCherryPickResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.cherryPick', {
+          worktreePath,
+          ...params
+        })) as GitCherryPickResult
+    )
+  }
+
+  async revertCommit(
+    worktreePath: string,
+    params: { commit: string; mainline?: number }
+  ): Promise<GitRevertResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.revertCommit', {
+          worktreePath,
+          ...params
+        })) as GitRevertResult
+    )
+  }
+
+  async dropCommit(worktreePath: string, params: { commit: string }): Promise<GitDropCommitResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.dropCommit', {
+          worktreePath,
+          ...params
+        })) as GitDropCommitResult
+    )
+  }
+
+  async mergeCommit(
+    worktreePath: string,
+    params: { commit: string; noFf?: boolean; squash?: boolean; message?: string }
+  ): Promise<GitMergeCommitResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.mergeCommit', {
+          worktreePath,
+          ...params
+        })) as GitMergeCommitResult
+    )
+  }
+
+  async rebaseOntoCommit(
+    worktreePath: string,
+    params: { commit: string }
+  ): Promise<GitRebaseOntoCommitResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.rebaseOntoCommit', {
+          worktreePath,
+          ...params
+        })) as GitRebaseOntoCommitResult
+    )
+  }
+
+  async resetToCommit(
+    worktreePath: string,
+    params: { commit: string; mode: 'soft' | 'mixed' | 'hard' }
+  ): Promise<GitResetToCommitResult> {
+    return this.runWithDiffDedupeClear(
+      async () =>
+        (await this.mux.request('git.resetToCommit', {
+          worktreePath,
+          ...params
+        })) as GitResetToCommitResult
+    )
   }
 
   async listLocalBranches(

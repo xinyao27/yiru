@@ -84,7 +84,7 @@ export function CoworkingGitSidebar({
             </p>
           </div>
           <Button type="button" size="xs" variant="ghost" disabled={loading} onClick={onRefresh}>
-            <RefreshCw weight="regular" aria-hidden="true" />
+            <RefreshCw aria-hidden="true" />
             {translate('auto.components.coworking.CoworkingGitSidebar.refresh', 'Refresh')}
           </Button>
         </div>

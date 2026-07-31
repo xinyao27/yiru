@@ -71,11 +71,7 @@ export function CreateHostedReviewComposerFields({
         <span className="text-foreground truncate font-mono" title={strippedBranch}>
           {strippedBranch}
         </span>
-        <ArrowDownUp
-          weight="regular"
-          className="size-3 shrink-0 rotate-90 opacity-60"
-          aria-hidden="true"
-        />
+        <ArrowDownUp className="size-3 shrink-0 rotate-90 opacity-60" aria-hidden="true" />
         <span
           className={cn(
             'truncate font-mono',
@@ -172,7 +168,6 @@ export function CreateHostedReviewComposerFields({
             className="font-mono"
           />
           <ChevronDown
-            weight="regular"
             className="text-muted-foreground pointer-events-none absolute top-1.5 right-1.5 size-3.5"
             aria-hidden="true"
           />

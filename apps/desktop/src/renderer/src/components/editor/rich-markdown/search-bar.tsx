@@ -110,11 +110,7 @@ export function RichMarkdownSearchBar({
         // find/replace stack.
         className="h-auto w-4 min-w-4 self-stretch p-0"
       >
-        {isReplaceMode ? (
-          <ChevronDown weight="regular" size={14} />
-        ) : (
-          <ChevronRight weight="regular" size={14} />
-        )}
+        {isReplaceMode ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
       </Button>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex min-w-0 items-center">
@@ -212,7 +208,7 @@ export function RichMarkdownSearchBar({
             )}
             className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
-            <ChevronUp weight="regular" size={14} />
+            <ChevronUp size={14} />
           </Button>
           <Button
             type="button"
@@ -231,7 +227,7 @@ export function RichMarkdownSearchBar({
             )}
             className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
-            <ChevronDown weight="regular" size={14} />
+            <ChevronDown size={14} />
           </Button>
           <div className="bg-border mx-0.5 h-4 w-px" />
           <Button
@@ -250,7 +246,7 @@ export function RichMarkdownSearchBar({
             )}
             className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
-            <X weight="regular" size={14} />
+            <X size={14} />
           </Button>
         </div>
         {isReplaceMode ? (
@@ -323,7 +319,7 @@ export function RichMarkdownSearchBar({
               )}
               className="h-[22px] w-[22px] min-w-[22px] p-0"
             >
-              <ReplaceAll weight="regular" size={14} />
+              <ReplaceAll size={14} />
             </Button>
             {replaceDisabled ? (
               <span id={readOnlyExplanationId} className="sr-only" role="status">

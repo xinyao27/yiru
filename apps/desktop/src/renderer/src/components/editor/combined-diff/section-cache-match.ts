@@ -1,16 +1,16 @@
 import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
 import type { DiffSection } from '../diff-section/types'
-import type { CombinedDiffFileTreeMode } from './file-tree-model'
-import { getCombinedDiffFileTreeSectionKey } from './file-tree-model'
+import type { CombinedDiffMode } from './section-model'
+import { getCombinedDiffEntrySectionKey } from './section-model'
 
 export function combinedDiffSectionsMatchEntryMetadata({
   entries,
   sections,
-  treeMode
+  mode
 }: {
   entries: readonly (GitStatusEntry | GitBranchChangeEntry)[]
   sections: readonly DiffSection[]
-  treeMode: CombinedDiffFileTreeMode
+  mode: CombinedDiffMode
 }): boolean {
   // Why: same-path combined sections can survive status refreshes; metadata
   // drift means restoring cached content would replay stale, partial diffs.
@@ -25,7 +25,7 @@ export function combinedDiffSectionsMatchEntryMetadata({
       const entryAdded = 'added' in entry ? entry.added : undefined
       const entryRemoved = 'removed' in entry ? entry.removed : undefined
       return (
-        section.key === getCombinedDiffFileTreeSectionKey(treeMode, entry) &&
+        section.key === getCombinedDiffEntrySectionKey(mode, entry) &&
         section.status === entry.status &&
         section.area === entryArea &&
         section.oldPath === entry.oldPath &&

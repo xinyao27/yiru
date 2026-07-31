@@ -94,7 +94,7 @@ export function MonacoGutterContextMenu({
             }
           }}
         >
-          <ExternalLink weight="regular" className="mr-1.5 h-3.5 w-3.5" />
+          <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
           {translate(
             'auto.components.editor.MonacoGutterContextMenu.7b57b1b468',
             'Copy Remote URL'

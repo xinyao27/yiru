@@ -104,7 +104,7 @@ export class RecoverableRenderErrorBoundary extends React.Component<Props, State
           </div>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={this.handleReset}>
-          <RotateCw weight="regular" className="size-3.5" />
+          <RotateCw className="size-3.5" />
           {translate(
             'auto.components.error.boundaries.RecoverableRenderErrorBoundary.55001880db',
             'Retry'

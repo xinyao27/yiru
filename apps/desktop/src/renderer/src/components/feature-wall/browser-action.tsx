@@ -58,7 +58,7 @@ export function BrowserAction(props: { done: boolean }): React.JSX.Element {
     <div className="flex flex-wrap items-center gap-2.5">
       {props.done ? null : (
         <Button type="button" size="sm" className="w-fit gap-2" onClick={handleTryIt}>
-          <ArrowUpRight weight="regular" className="size-3.5" />
+          <ArrowUpRight className="size-3.5" />
           {translate(
             'auto.components.feature.wall.FeatureWallBrowserAction.c9728107c5',
             'Try it out'

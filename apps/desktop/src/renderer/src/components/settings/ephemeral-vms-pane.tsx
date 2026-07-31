@@ -260,7 +260,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
             onClick={() => void refresh()}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+            {isLoading ? <LoadingIndicator /> : <RefreshCw />}
           </Button>
         </div>
 
@@ -298,7 +298,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
 function WhatItem({ text }: { text: string }): React.JSX.Element {
   return (
     <li className="text-muted-foreground flex items-start gap-2.5 text-sm">
-      <ArrowRight weight="regular" className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+      <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0" />
       <span>{text}</span>
     </li>
   )

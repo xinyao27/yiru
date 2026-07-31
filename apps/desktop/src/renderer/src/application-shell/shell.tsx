@@ -2232,7 +2232,6 @@ function App(): React.JSX.Element {
             {sidebarOpen ? (
               <SidebarWorkspaceSearchButton variant={titlebarControlVariant} stretch />
             ) : null}
-            {/* Why: compact history arrows use the quieter regular-weight chrome treatment. */}
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -2245,7 +2244,7 @@ function App(): React.JSX.Element {
                     disabled={!canGoBackWorktree}
                     aria-label={translate('auto.App.064bd07810', 'Go back')}
                   >
-                    <ArrowLeft weight="regular" />
+                    <ArrowLeft />
                   </Button>
                 }
               />
@@ -2270,7 +2269,7 @@ function App(): React.JSX.Element {
                     disabled={!canGoForwardWorktree}
                     aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
                   >
-                    <ArrowRight weight="regular" />
+                    <ArrowRight />
                   </Button>
                 }
               />
@@ -2313,7 +2312,7 @@ function App(): React.JSX.Element {
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}
               >
-                <Minimize2 weight="regular" className="size-3.5" />
+                <Minimize2 className="size-3.5" />
               </Button>
             }
           />
@@ -2367,7 +2366,7 @@ function App(): React.JSX.Element {
         } as React.CSSProperties
       }
     >
-      <TooltipProvider delay={400}>
+      <TooltipProvider>
         <ConfirmationDialogProvider>
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />

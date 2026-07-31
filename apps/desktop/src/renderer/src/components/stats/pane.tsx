@@ -179,11 +179,7 @@ export function StatsPane(): React.JSX.Element {
                     <UsageAnalyticsOptionIcon tab={activeUsageOption.id} />
                     <span className="truncate">{activeUsageOption.label}</span>
                   </span>
-                  <ChevronDown
-                    weight="regular"
-                    className="text-muted-foreground ml-1 size-3.5"
-                    aria-hidden
-                  />
+                  <ChevronDown className="text-muted-foreground ml-1 size-3.5" aria-hidden />
                 </Button>
               }
             />

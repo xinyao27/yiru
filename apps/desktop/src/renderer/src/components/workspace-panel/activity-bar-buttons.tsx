@@ -26,7 +26,6 @@ export type ActivityBarItem = {
     className?: string
     weight?: IconProps['weight']
   }>
-  iconWeight?: IconProps['weight']
   title: string
   shortcut: string
   /** When true, hidden for non-git (folder-mode) repos. */
@@ -101,7 +100,7 @@ export function TopActivityOverflowMenu({
               className={cn(active && 'bg-accent text-accent-foreground')}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={14} weight={item.iconWeight} />
+              <Icon size={14} />
               <span>{item.title}</span>
               {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
             </DropdownMenuItem>
@@ -150,7 +149,7 @@ export function ActivityBarButton({
             aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
             aria-current={active ? 'page' : undefined}
           >
-            <Icon className={isTop ? 'size-4' : 'size-[18px]'} weight={item.iconWeight} />
+            <Icon className={isTop ? 'size-4' : 'size-[18px]'} />
 
             {statusIndicator && statusIndicator !== 'neutral' && (
               <div

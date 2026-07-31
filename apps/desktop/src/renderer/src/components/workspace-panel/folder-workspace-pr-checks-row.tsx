@@ -78,7 +78,6 @@ export function FolderWorkspacePrChecksRow({
         aria-label={toggleDetailsLabel}
       >
         <ChevronRight
-          weight="regular"
           className={cn(
             'mt-0.5 size-3 shrink-0 text-muted-foreground transition-transform',
             expanded && 'rotate-90'
@@ -118,7 +117,7 @@ export function FolderWorkspacePrChecksRow({
                   }}
                   onKeyDown={(event) => event.stopPropagation()}
                 >
-                  <ExternalLink weight="regular" className="size-3.5" />
+                  <ExternalLink className="size-3.5" />
                 </Button>
               }
             />

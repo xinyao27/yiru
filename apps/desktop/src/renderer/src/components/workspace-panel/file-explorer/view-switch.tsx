@@ -57,15 +57,9 @@ export function FileExplorerViewSwitch({
           'auto.components.right.sidebar.FileExplorerViewSwitch.f8a2c4d1e0',
           'Explorer search mode'
         )}
-        className="border-sidebar-border bg-sidebar w-full border p-0.5 group-data-[orientation=horizontal]/tabs:h-7"
       >
         {options.map((option) => (
-          <TabsTrigger
-            key={option.view}
-            value={option.view}
-            aria-label={option.ariaLabel}
-            className="bg-sidebar data-active:bg-accent dark:data-active:bg-accent min-w-0 text-[11px]"
-          >
+          <TabsTrigger key={option.view} value={option.view} aria-label={option.ariaLabel}>
             {option.label}
           </TabsTrigger>
         ))}

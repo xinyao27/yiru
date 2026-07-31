@@ -1044,6 +1044,7 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
     })
 
     get().clearSourceControlPanelView(tabId)
+    get().clearGitGraphOpen(tabId)
 
     if (opts?.recordInteraction !== false) {
       get().recordFeatureInteraction?.('terminal-tabs')

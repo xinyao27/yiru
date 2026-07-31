@@ -61,10 +61,7 @@ export function AutomationSetupDecisionField({
           'auto.components.automations.AutomationSetupDecisionField.18f000ad4e',
           'Advanced'
         )}
-        <ChevronDown
-          weight="regular"
-          className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
-        />
+        <ChevronDown className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')} />
       </Button>
       <div
         className={cn(

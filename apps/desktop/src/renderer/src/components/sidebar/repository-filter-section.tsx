@@ -254,7 +254,7 @@ function SelectedProjectPills({
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onRemoveProject(repo.id)}
           >
-            <X weight="regular" className="size-2.5" strokeWidth={2.5} />
+            <X className="size-2.5" strokeWidth={2.5} />
           </Button>
         </Badge>
       ))}

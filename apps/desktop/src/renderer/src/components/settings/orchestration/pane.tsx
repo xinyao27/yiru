@@ -2,9 +2,7 @@ import {
   GitMerge,
   ListChecks,
   ArrowsLeftRight as ArrowRightLeft,
-  FlowArrow as Workflow,
-  type Icon as PhosphorIcon,
-  type IconProps
+  FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import { useState } from 'react'
 
@@ -46,11 +44,6 @@ const EXAMPLE_ICONS = {
   'child-parallel': GitMerge,
   'child-worktrees': Workflow
 } as const
-
-function getExampleIconWeight(Icon: PhosphorIcon): IconProps['weight'] {
-  // Why: both directional example glyphs follow the renderer-wide arrow rule.
-  return Icon === ArrowRightLeft || Icon === Workflow ? 'regular' : undefined
-}
 
 export function OrchestrationPane(): React.JSX.Element {
   const searchQuery = useAppStore((s) => s.settingsSearchQuery)
@@ -118,7 +111,7 @@ export function OrchestrationPane(): React.JSX.Element {
         loading={orchestrationSkillLoading}
         error={activeSkillRuntime.installDisabledReason ?? orchestrationSkillError}
         installDisabled={Boolean(activeSkillRuntime.installDisabledReason)}
-        icon={<Workflow weight="regular" className="size-5" />}
+        icon={<Workflow className="size-5" />}
         preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
         getPrerequisiteStatus={() =>
           activeSkillRuntime.agentRuntime?.runtime === 'wsl'
@@ -190,7 +183,6 @@ export function OrchestrationPane(): React.JSX.Element {
         <div className="grid gap-2 sm:grid-cols-2">
           {getOrchestrationUsageExamples().map((example) => {
             const Icon = EXAMPLE_ICONS[example.id as keyof typeof EXAMPLE_ICONS] ?? Workflow
-            const iconWeight = getExampleIconWeight(Icon)
             return (
               <Button
                 variant="outline"
@@ -202,7 +194,7 @@ export function OrchestrationPane(): React.JSX.Element {
               >
                 <div className="flex items-start gap-3">
                   <div className="border-border bg-background text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center border">
-                    <Icon className="size-4" weight={iconWeight} />
+                    <Icon className="size-4" />
                   </div>
                   <div className="min-w-0 space-y-1">
                     <p className="text-foreground text-sm font-medium">{example.title}</p>
@@ -219,13 +211,11 @@ export function OrchestrationPane(): React.JSX.Element {
 
       {getOrchestrationUsageExamples().map((example) => {
         const Icon = EXAMPLE_ICONS[example.id as keyof typeof EXAMPLE_ICONS] ?? Workflow
-        const iconWeight = getExampleIconWeight(Icon)
         return (
           <OrchestrationExampleDialog
             key={`${example.id}-dialog`}
             example={example}
             icon={Icon}
-            iconWeight={iconWeight}
             open={selectedExampleId === example.id}
             onOpenChange={(open) => setSelectedExampleId(open ? example.id : null)}
           />

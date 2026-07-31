@@ -63,7 +63,7 @@ function PortAction({
   )
 
   return (
-    <TooltipProvider delay={200}>
+    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
           render={disabled ? <span className="inline-flex">{button}</span> : button}
@@ -232,7 +232,7 @@ export function PortRow({
       </span>
       <div className="min-w-0 space-y-0.5">
         <div className="relative flex h-5 min-w-0 items-center">
-          <TooltipProvider delay={200}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -252,7 +252,7 @@ export function PortRow({
               tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}
               onClick={handleOpen}
             >
-              <ExternalLink weight="regular" className="size-3" />
+              <ExternalLink className="size-3" />
             </PortAction>
             <PortAction
               label={translate(

@@ -271,7 +271,7 @@ export function WorktreeSymlinksSection({
                       )}
                       className="size-4 shrink-0"
                     >
-                      <X weight="regular" className="size-3" />
+                      <X className="size-3" />
                     </Button>
                   </span>
                 ))}

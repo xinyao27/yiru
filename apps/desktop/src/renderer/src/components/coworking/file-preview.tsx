@@ -299,7 +299,7 @@ function FilePreviewMessage({
       {onBack ? (
         <header className="border-border bg-sidebar text-sidebar-foreground flex h-9 shrink-0 items-center border-b px-1.5">
           <Button type="button" size="xs" variant="ghost" onClick={onBack}>
-            <ChevronLeft weight="regular" aria-hidden="true" />
+            <ChevronLeft aria-hidden="true" />
             {translate('auto.components.coworking.CoworkingFilePreview.back', 'Back to files')}
           </Button>
         </header>

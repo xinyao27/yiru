@@ -26,7 +26,7 @@ export function MobilePageToolbar({ onClose }: MobilePageToolbarProps): React.JS
                 'Close Yiru Mobile'
               )}
             >
-              <X weight="regular" className="size-4" />
+              <X className="size-4" />
             </Button>
           }
         />

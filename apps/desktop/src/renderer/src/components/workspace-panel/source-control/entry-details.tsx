@@ -23,9 +23,8 @@ export function DiffLineCounts({
     return null
   }
   return (
-    <span className="shrink-0 text-[10px] tabular-nums">
+    <span className="inline-flex shrink-0 items-baseline gap-1 text-[10px] tabular-nums">
       {hasAdded && <span style={{ color: 'var(--git-decoration-added)' }}>+{added}</span>}
-      {hasAdded && hasRemoved && <span> </span>}
       {hasRemoved && <span style={{ color: 'var(--git-decoration-deleted)' }}>-{removed}</span>}
     </span>
   )

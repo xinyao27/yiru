@@ -86,7 +86,7 @@ export function TabBarMoreButton({
                   )}
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <MoreHorizontal weight="regular" />
+                  <MoreHorizontal />
                 </Button>
               }
             />
@@ -139,7 +139,7 @@ export function TabBarMoreButton({
                           'text-primary'
                       )}
                     >
-                      <Icon size={14} weight={panelTitlebar.itemIconWeight(item)} />
+                      <Icon size={14} />
                       <span>{item.kind === 'panel' ? item.panel.title : item.title}</span>
                       {shortcut &&
                       shortcut.keys.length > 0 &&
@@ -172,7 +172,7 @@ export function TabBarMoreButton({
           ) : null}
           {onClosePane ? (
             <DropdownMenuItem onClick={onClosePane}>
-              <X weight="regular" className="size-4" />
+              <X className="size-4" />
               {translate(
                 'auto.components.tab.group.TabGroupPanel.closePaneColumn',
                 'Close split pane'

@@ -145,11 +145,7 @@ export function AiVaultPanelHeader({
             aria-busy={loading}
             className={cn(RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME, 'size-6')}
           >
-            {loading ? (
-              <LoadingIndicator className="size-3" />
-            ) : (
-              <RefreshCw weight="regular" className="size-3" />
-            )}
+            {loading ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
           </Button>
         </div>
       </div>
@@ -190,7 +186,7 @@ export function AiVaultPanelHeader({
               'Clear search'
             )}
           >
-            <X weight="regular" className="size-3" />
+            <X className="size-3" />
           </Button>
         ) : null}
       </div>

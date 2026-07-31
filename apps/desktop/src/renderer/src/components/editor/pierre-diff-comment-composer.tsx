@@ -114,9 +114,7 @@ export function PierreDiffCommentComposer({
             </Button>
             <Button size="sm" disabled={!canSubmit} onClick={() => void submit()}>
               {submitting ? (submittingLabel ?? 'Saving…') : (submitLabel ?? 'Add note')}
-              {!submitting && (
-                <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />
-              )}
+              {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
             </Button>
           </div>
         </div>

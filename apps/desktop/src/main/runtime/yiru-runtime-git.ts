@@ -4,6 +4,17 @@ import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message/host-key'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type {
+  GitAddTagResult,
+  GitCheckoutCommitResult,
+  GitCherryPickResult,
+  GitCreateBranchResult,
+  GitDropCommitResult,
+  GitMergeCommitResult,
+  GitRebaseOntoCommitResult,
+  GitResetToCommitResult,
+  GitRevertResult
+} from '../../shared/git/write-op-results'
 import type { RuntimeGitCheckoutResult } from '../../shared/runtime-types'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
@@ -28,17 +39,26 @@ import type {
   TuiAgent,
   Worktree
 } from '../../shared/types'
+import { createBranchFromCommit } from '../git/branch-create'
 import { checkIgnoredPaths } from '../git/check-ignored-paths'
 import { checkoutBranch, listLocalBranches } from '../git/checkout'
+import { checkoutCommit } from '../git/checkout-commit'
+import { cherryPickCommit } from '../git/cherry-pick'
+import { dropCommit } from '../git/drop-commit'
 import { gitSyncForkDefaultBranch } from '../git/fork-sync'
 import { getHistory as getGitHistory } from '../git/history'
+import { mergeCommit } from '../git/merge-commit'
+import { rebaseOntoCommit } from '../git/rebase-onto-commit'
 import { gitFastForward, gitFetch, gitPull, gitPullRebaseFromBase, gitPush } from '../git/remote'
 import { getRemoteCommitUrl, getRemoteFileUrl } from '../git/repo'
+import { resetToCommit } from '../git/reset-to-commit'
+import { revertCommit } from '../git/revert'
 import { gitExecFileAsync } from '../git/runner'
 import type { GitRuntimeOptions } from '../git/runtime-options'
 import {
   abortMerge,
   abortRebase,
+  abortRevert,
   bulkDiscardChanges,
   bulkStageFiles,
   bulkUnstageFiles,
@@ -56,6 +76,7 @@ import {
   stageFile,
   unstageFile
 } from '../git/status'
+import { addTag } from '../git/tag'
 import { getUpstreamStatus } from '../git/upstream'
 import type { GitProviderStatusOptions } from '../providers/git-provider-status-options'
 import {
@@ -308,6 +329,155 @@ export class RuntimeGitCommands {
     }
     await checkoutBranch(target.worktree.path, branch, localGitOptionsForTarget(target))
     return { ok: true, branch }
+  }
+
+  async abortRuntimeGitRevert(worktreeSelector: string): Promise<{ ok: true }> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      await provider.abortRevert(target.worktree.path)
+      return { ok: true }
+    }
+    await abortRevert(target.worktree.path, localGitOptionsForTarget(target))
+    return { ok: true }
+  }
+
+  async addRuntimeGitTag(
+    worktreeSelector: string,
+    params: { name: string; commit: string; message?: string; force?: boolean }
+  ): Promise<GitAddTagResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.addTag(target.worktree.path, params)
+    }
+    return addTag(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async createRuntimeGitBranchFromCommit(
+    worktreeSelector: string,
+    params: { name: string; commit: string; checkout?: boolean }
+  ): Promise<GitCreateBranchResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.createBranchFromCommit(target.worktree.path, params)
+    }
+    return createBranchFromCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async checkoutRuntimeGitCommit(
+    worktreeSelector: string,
+    commit: string
+  ): Promise<GitCheckoutCommitResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.checkoutCommit(target.worktree.path, commit)
+    }
+    return checkoutCommit(target.worktree.path, commit, localGitOptionsForTarget(target))
+  }
+
+  async cherryPickRuntimeGitCommit(
+    worktreeSelector: string,
+    params: { commit: string; mainline?: number }
+  ): Promise<GitCherryPickResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.cherryPickCommit(target.worktree.path, params)
+    }
+    return cherryPickCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async revertRuntimeGitCommit(
+    worktreeSelector: string,
+    params: { commit: string; mainline?: number }
+  ): Promise<GitRevertResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.revertCommit(target.worktree.path, params)
+    }
+    return revertCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async dropRuntimeGitCommit(
+    worktreeSelector: string,
+    params: { commit: string }
+  ): Promise<GitDropCommitResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.dropCommit(target.worktree.path, params)
+    }
+    return dropCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async mergeRuntimeGitCommit(
+    worktreeSelector: string,
+    params: { commit: string; noFf?: boolean; squash?: boolean; message?: string }
+  ): Promise<GitMergeCommitResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.mergeCommit(target.worktree.path, params)
+    }
+    return mergeCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async rebaseRuntimeGitOntoCommit(
+    worktreeSelector: string,
+    params: { commit: string }
+  ): Promise<GitRebaseOntoCommitResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.rebaseOntoCommit(target.worktree.path, params)
+    }
+    return rebaseOntoCommit(target.worktree.path, params, localGitOptionsForTarget(target))
+  }
+
+  async resetRuntimeGitToCommit(
+    worktreeSelector: string,
+    params: { commit: string; mode: 'soft' | 'mixed' | 'hard' }
+  ): Promise<GitResetToCommitResult> {
+    const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
+    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
+    if (target.connectionId) {
+      if (!provider) {
+        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+      }
+      return provider.resetToCommit(target.worktree.path, params)
+    }
+    return resetToCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
   async listRuntimeGitLocalBranches(worktreeSelector: string): Promise<RuntimeGitLocalBranches> {

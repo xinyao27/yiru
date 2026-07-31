@@ -1,11 +1,21 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { GitStatusEntry } from '../../../../../../shared/types'
 import { detectLanguage } from '../../../../lib/language-detect'
 import { joinPath } from '../../../../lib/path'
 import { useAppStore } from '../../../../store'
 import { buildActiveOpenFileSignature, buildActiveOpenRowKeys } from '../active-open-file-keys'
+import {
+  dispatchCombinedDiffSectionReveal,
+  resolveCombinedDiffRevealTarget,
+  toRevealedSourceControlRowKey,
+  type CombinedDiffRevealRow
+} from '../combined-diff-reveal'
 import type { DropdownActionKind } from '../dropdown-items'
+import {
+  cancelSourceControlEditorRevealFrames,
+  requestSourceControlEditorRevealFrame
+} from '../editor-reveal'
 import { getNextSourceControlViewMode } from '../header-toolbar'
 import {
   isSourceControlSplitOpenModifier,
@@ -13,6 +23,8 @@ import {
   type SourceControlRowOpenEvent
 } from '../split-open'
 import type { SourceControlActionModelController } from './action-model'
+
+type RevealedSourceControlRow = { worktreeId: string; rowKey: string | null }
 
 export function useSourceControlFileOpen(scope: SourceControlActionModelController) {
   const {
@@ -108,6 +120,55 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     },
     [activeGroupIdByWorktree, activeWorktreeId, createEmptySplitGroup, groupsByWorktree, isMac]
   )
+  const [revealedRow, setRevealedRow] = useState<RevealedSourceControlRow | null>(null)
+  const revealFrameIdsRef = useRef<number[]>([])
+  const revealCombinedDiffSection = useCallback(
+    (row: CombinedDiffRevealRow, event?: SourceControlRowOpenEvent): boolean => {
+      if (!activeWorktreeId) {
+        return false
+      }
+      // Why: split and permanent (double-click) opens are explicit requests for a
+      // separate diff tab, so they keep the normal open path.
+      if (
+        event &&
+        (isSourceControlSplitOpenModifier(event, isMac) || event.openAsPermanent === true)
+      ) {
+        return false
+      }
+      const state = useAppStore.getState()
+      const groupId =
+        activeGroupIdByWorktree[activeWorktreeId] ?? groupsByWorktree[activeWorktreeId]?.[0]?.id
+      const target = resolveCombinedDiffRevealTarget({
+        worktreeId: activeWorktreeId,
+        row,
+        openFiles: state.openFiles,
+        workspacePanelFileId: workspacePanelTabId
+          ? state.workspacePanelEditorFileIdByTab[workspacePanelTabId]
+          : undefined,
+        findGroupTabIdForFile: (fileId) =>
+          groupId
+            ? (state.findTabForEntityInGroup(activeWorktreeId, groupId, fileId, 'diff')?.id ?? null)
+            : null
+      })
+      if (!target) {
+        return false
+      }
+      if (target.tabId) {
+        state.activateTab(target.tabId, { preservePreview: true })
+      }
+      setRevealedRow({ worktreeId: activeWorktreeId, rowKey: toRevealedSourceControlRowKey(row) })
+      cancelSourceControlEditorRevealFrames(revealFrameIdsRef)
+      // Why: activating the tab can mount the viewer this frame, so the reveal
+      // event has to wait until its window listener is attached.
+      requestSourceControlEditorRevealFrame(revealFrameIdsRef, () => {
+        requestSourceControlEditorRevealFrame(revealFrameIdsRef, () => {
+          dispatchCombinedDiffSectionReveal(row, activeWorktreeId)
+        })
+      })
+      return true
+    },
+    [activeGroupIdByWorktree, activeWorktreeId, groupsByWorktree, isMac, workspacePanelTabId]
+  )
   const activeOpenFileSignature = useAppStore((s) => {
     if (!activeWorktreeId) {
       return null
@@ -127,13 +188,18 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     }
     return buildActiveOpenFileSignature(activeFile.diffSource, activeFile.relativePath)
   })
+  const revealedRowKey =
+    revealedRow && revealedRow.worktreeId === activeWorktreeId ? revealedRow.rowKey : null
   const activeOpenRowKeys = useMemo(
-    () => buildActiveOpenRowKeys(activeOpenFileSignature, visibleFileRowKeys),
-    [activeOpenFileSignature, visibleFileRowKeys]
+    () => buildActiveOpenRowKeys(activeOpenFileSignature, visibleFileRowKeys, revealedRowKey),
+    [activeOpenFileSignature, revealedRowKey, visibleFileRowKeys]
   )
   const handleOpenDiff = useCallback(
     (entry: GitStatusEntry, event?: SourceControlRowOpenEvent) => {
       if (!activeWorktreeId || !worktreePath) {
+        return
+      }
+      if (revealCombinedDiffSection({ kind: 'uncommitted', entry }, event)) {
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
@@ -177,6 +243,7 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     [
       activeWorktreeId,
       worktreePath,
+      revealCombinedDiffSection,
       resolveSplitTargetGroupId,
       trackConflictPath,
       openConflictFile,
@@ -198,6 +265,7 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     ...scope,
     handleActionInvoke,
     resolveSplitTargetGroupId,
+    revealCombinedDiffSection,
     activeOpenFileSignature,
     activeOpenRowKeys,
     handleOpenDiff,

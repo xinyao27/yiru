@@ -18,15 +18,16 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
 }
 
 const tabsListVariants = cva(
-  'group/tabs-list inline-flex w-fit items-center justify-center p-[3px] text-muted-foreground group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
+  'group/tabs-list inline-flex items-center justify-center text-muted-foreground group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
   {
     variants: {
       variant: {
-        default: 'bg-muted',
-        line: 'gap-1 bg-transparent'
+        default:
+          'border-sidebar-border bg-sidebar w-full border p-0.5 group-data-[orientation=horizontal]/tabs:h-7',
+        line: 'w-fit gap-1 bg-transparent p-[3px] group-data-[orientation=horizontal]/tabs:h-9'
       },
       size: {
-        default: 'group-data-[orientation=horizontal]/tabs:h-9',
+        default: '',
         // Why: sidebar and panel toolbars need a denser strip without call-site h-* overrides.
         dense: 'group-data-[orientation=horizontal]/tabs:h-7 p-0.5'
       }
@@ -60,9 +61,9 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all outline-none group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start group-data-[size=dense]/tabs-list:px-1.5 group-data-[size=dense]/tabs-list:text-xs hover:text-foreground focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 group-data-[size=dense]/tabs-list:[&_svg:not([class*='size-'])]:size-3",
+        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all outline-none group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start group-data-[variant=default]/tabs-list:min-w-0 group-data-[variant=default]/tabs-list:bg-sidebar group-data-[variant=default]/tabs-list:text-[11px] group-data-[size=dense]/tabs-list:px-1.5 group-data-[size=dense]/tabs-list:text-xs hover:text-foreground focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 group-data-[size=dense]/tabs-list:[&_svg:not([class*='size-'])]:size-3",
         'group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent',
-        'data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-background dark:data-active:text-foreground',
+        'data-active:bg-background data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:bg-accent dark:data-active:border-input dark:data-active:bg-background dark:data-active:text-foreground dark:group-data-[variant=default]/tabs-list:data-active:bg-accent',
         'after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
         className
       )}

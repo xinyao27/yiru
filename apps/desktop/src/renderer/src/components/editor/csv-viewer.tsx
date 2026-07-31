@@ -1,6 +1,7 @@
-import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useMemo, useRef } from 'react'
+import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
+import React, { useMemo } from 'react'
 
+import { LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
 import { translate } from '@/i18n/i18n'
 
 import { detectCsvDelimiter, parseCsv } from './csv-parse'
@@ -11,21 +12,34 @@ type CsvViewerProps = {
 }
 
 const ROW_HEIGHT = 28
-const OVERSCAN = 12
 const MIN_COL_PX = 80
 const MAX_COL_PX = 320
 const ROW_NUMBER_COL_PX = 48
 const CHAR_PX = 7
 
-// Why: CsvViewer is the table counterpart to source-mode Monaco for .csv/.tsv
-// files. Row virtualization via @tanstack/react-virtual keeps large files
-// (100k+ rows) responsive. We use CSS grid with a shared grid-template-columns
-// rather than a <table>, because absolutely-positioned virtualized rows break
-// a table's column-width synchronization — the header would size itself
-// independently of the body, leaving values squashed together.
-export default function CsvViewer({ content, filePath }: CsvViewerProps): React.JSX.Element {
-  const scrollRef = useRef<HTMLDivElement>(null)
+// Why: every body row is exactly ROW_HEIGHT tall, so LegendList's first-paint
+// window is already exact and never needs a post-measure correction.
+const CSV_ROW_ESTIMATE_PX = ROW_HEIGHT
 
+// Why: the header shares the list's horizontal scrollport, so it must stay in
+// flow at the top of the content container rather than scroll away vertically.
+const CSV_HEADER_STYLE: React.CSSProperties = { position: 'sticky', top: 0, zIndex: 10 }
+
+// Why: the shared list scroll area defaults every list to overflow-x-hidden;
+// a CSV grid is wider than the pane and needs that axis back.
+const CSV_LIST_STYLE: React.CSSProperties = { overflowX: 'auto' }
+
+function getCsvRowKey(_row: string[], index: number): string {
+  return String(index)
+}
+
+// Why: CsvViewer is the table counterpart to source-mode Monaco for .csv/.tsv
+// files. Row virtualization via LegendList keeps large files (100k+ rows)
+// responsive. We use CSS grid with a shared grid-template-columns rather than a
+// <table>, because absolutely-positioned virtualized rows break a table's
+// column-width synchronization — the header would size itself independently of
+// the body, leaving values squashed together.
+export default function CsvViewer({ content, filePath }: CsvViewerProps): React.JSX.Element {
   const parsed = useMemo(() => {
     const delimiter = detectCsvDelimiter(filePath, content)
     return parseCsv(content, delimiter)
@@ -83,13 +97,47 @@ export default function CsvViewer({ content, filePath }: CsvViewerProps): React.
     [columnWidths]
   )
 
-  const virtualizer = useVirtualizer({
-    count: bodyRows.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: OVERSCAN,
-    getItemKey: (index) => index
-  })
+  // Why: LegendList positions rows absolutely against this container, so it has
+  // to be as wide as the grid — otherwise the rows are clipped at the viewport
+  // edge and the horizontal scrollport never extends past the visible columns.
+  const contentContainerStyle = useMemo<React.CSSProperties>(
+    () => ({
+      minWidth: '100%',
+      position: 'relative',
+      width: columnWidths.reduce((total, w) => total + w, ROW_NUMBER_COL_PX)
+    }),
+    [columnWidths]
+  )
+
+  const headerElement = useMemo(
+    () => (
+      <div
+        role="row"
+        aria-rowindex={1}
+        className="bg-muted grid"
+        style={{ gridTemplateColumns: gridTemplate, height: ROW_HEIGHT }}
+      >
+        <div
+          role="columnheader"
+          className="border-border/60 bg-muted/90 text-muted-foreground sticky left-0 z-20 flex items-center justify-end border-r border-b px-2 text-[10px] font-normal"
+        >
+          #
+        </div>
+        {header.map((cell, idx) => (
+          <div
+            role="columnheader"
+            key={idx}
+            className="border-border/60 text-foreground flex items-center overflow-hidden border-r border-b px-2 font-medium"
+          >
+            <span className="truncate" title={cell}>
+              {cell}
+            </span>
+          </div>
+        ))}
+      </div>
+    ),
+    [gridTemplate, header]
+  )
 
   if (parsed.rows.length === 0) {
     return (
@@ -99,86 +147,53 @@ export default function CsvViewer({ content, filePath }: CsvViewerProps): React.
     )
   }
 
-  const virtualRows = virtualizer.getVirtualItems()
-  const totalHeight = virtualizer.getTotalSize()
+  const renderRow = ({ item, index }: LegendListRenderItemProps<string[]>): React.ReactNode => (
+    <div
+      role="row"
+      aria-rowindex={index + 2}
+      data-index={index}
+      className="group hover:bg-accent/40 grid"
+      style={{ gridTemplateColumns: gridTemplate, height: ROW_HEIGHT }}
+    >
+      <div
+        role="rowheader"
+        className="border-border/40 bg-background text-muted-foreground group-hover:bg-accent/40 sticky left-0 z-[5] flex items-center justify-end border-r border-b px-2 text-[10px]"
+      >
+        {index + 1}
+      </div>
+      {Array.from({ length: columnCount }).map((_, colIdx) => (
+        <div
+          role="cell"
+          key={colIdx}
+          className="border-border/40 text-foreground flex items-center overflow-hidden border-r border-b px-2"
+          title={item[colIdx] ?? ''}
+        >
+          <span className="truncate">{item[colIdx] ?? ''}</span>
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div
-        ref={scrollRef}
-        className="scrollbar-editor relative min-h-0 flex-1 overflow-auto font-mono text-xs"
+        role="table"
+        aria-rowcount={parsed.rows.length}
+        aria-colcount={columnCount + 1}
+        className="min-h-0 flex-1 font-mono text-xs"
       >
-        <div
-          role="table"
-          aria-rowcount={parsed.rows.length}
-          aria-colcount={columnCount + 1}
-          className="inline-block min-w-full"
-          style={{ width: 'max-content' }}
-        >
-          <div
-            role="row"
-            aria-rowindex={1}
-            className="bg-muted sticky top-0 z-10 grid"
-            style={{ gridTemplateColumns: gridTemplate, height: ROW_HEIGHT }}
-          >
-            <div
-              role="columnheader"
-              className="border-border/60 bg-muted/90 text-muted-foreground sticky left-0 z-20 flex items-center justify-end border-r border-b px-2 text-[10px] font-normal"
-            >
-              #
-            </div>
-            {header.map((cell, idx) => (
-              <div
-                role="columnheader"
-                key={idx}
-                className="border-border/60 text-foreground flex items-center overflow-hidden border-r border-b px-2 font-medium"
-              >
-                <span className="truncate" title={cell}>
-                  {cell}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div style={{ height: totalHeight, position: 'relative' }}>
-            {virtualRows.map((vr) => {
-              const row = bodyRows[vr.index] ?? []
-              return (
-                <div
-                  role="row"
-                  aria-rowindex={vr.index + 2}
-                  key={vr.key}
-                  data-index={vr.index}
-                  className="group hover:bg-accent/40 grid"
-                  style={{
-                    gridTemplateColumns: gridTemplate,
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    height: ROW_HEIGHT,
-                    transform: `translateY(${vr.start}px)`
-                  }}
-                >
-                  <div
-                    role="rowheader"
-                    className="border-border/40 bg-background text-muted-foreground group-hover:bg-accent/40 sticky left-0 z-[5] flex items-center justify-end border-r border-b px-2 text-[10px]"
-                  >
-                    {vr.index + 1}
-                  </div>
-                  {Array.from({ length: columnCount }).map((_, colIdx) => (
-                    <div
-                      role="cell"
-                      key={colIdx}
-                      className="border-border/40 text-foreground flex items-center overflow-hidden border-r border-b px-2"
-                      title={row[colIdx] ?? ''}
-                    >
-                      <span className="truncate">{row[colIdx] ?? ''}</span>
-                    </div>
-                  ))}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <LegendList<string[]>
+          {...LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS}
+          className="scrollbar-editor"
+          contentContainerStyle={contentContainerStyle}
+          data={bodyRows}
+          keyExtractor={getCsvRowKey}
+          estimatedItemSize={CSV_ROW_ESTIMATE_PX}
+          ListHeaderComponent={headerElement}
+          ListHeaderComponentStyle={CSV_HEADER_STYLE}
+          renderItem={renderRow}
+          style={CSV_LIST_STYLE}
+        />
       </div>
       <div className="border-border/60 text-muted-foreground flex items-center gap-4 border-t px-3 py-1 text-xs">
         <span>

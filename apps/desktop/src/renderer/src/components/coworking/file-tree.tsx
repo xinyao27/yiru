@@ -1,8 +1,8 @@
+import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
 import { Trash as Trash2, FilePlus as FilePlus2, FolderPlus } from '@phosphor-icons/react'
-import { useVirtualizer } from '@tanstack/react-virtual'
 import type React from 'react'
-import { useRef } from 'react'
 
+import { LEGEND_LIST_SCROLL_AREA_PROPS } from '@/components/sidebar/list-scroll-area'
 import { Button } from '@/components/ui/button'
 import {
   ContextMenu,
@@ -11,7 +11,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 
 import type {
@@ -24,14 +23,19 @@ import { FileExplorerTreeRowButton } from '../workspace-panel/file-explorer/tree
 import { FileExplorerTreeStatus } from '../workspace-panel/file-explorer/tree-status'
 import type { TreeNode } from '../workspace-panel/file-explorer/types'
 import { useFileExplorerManualRefresh } from '../workspace-panel/file-explorer/use-manual-refresh'
-import { FileExplorerVirtualList } from '../workspace-panel/file-explorer/virtual-list'
 import { CoworkingTooltipIconButton } from './tooltip-icon-button'
 
 type CoworkingFileTreeRow =
   | { kind: 'entry'; entry: CoworkingFileTreeEntry; node: TreeNode }
   | { kind: 'error'; directory: string; depth: number }
 
-const FILE_EXPLORER_VIRTUALIZE_MIN_ROWS = 50
+// Why: a tree row is one 26px line; LegendList measures the real heights after
+// the first paint and only needs this hint for the initial window.
+const COWORKING_FILE_TREE_ROW_ESTIMATE_PX = 26
+
+function getCoworkingFileTreeRowKey(row: CoworkingFileTreeRow, index: number): string {
+  return row.kind === 'entry' ? row.entry.relativePath : `error:${row.directory ?? index}`
+}
 
 export function CoworkingFileTree({
   canControl,
@@ -72,20 +76,6 @@ export function CoworkingFileTree({
 }): React.JSX.Element {
   const rootListing = listings.get('') ?? null
   const rows = createCoworkingFileTreeRows(listings, expanded, showDotfiles, unavailableDirectories)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const virtualizeRows = rows.length >= FILE_EXPLORER_VIRTUALIZE_MIN_ROWS
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    enabled: virtualizeRows,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 26,
-    overscan: 20,
-    initialRect: { width: 0, height: 600 },
-    getItemKey: (index) => {
-      const row = rows[index]
-      return row?.kind === 'entry' ? row.entry.relativePath : `error:${row?.directory ?? index}`
-    }
-  })
   const refresh = useFileExplorerManualRefresh(onRefresh)
   const rootLoading = loadingDirectories.has('') && !rootListing
   const rootUnavailable = unavailableDirectories.has('') && !rootListing
@@ -132,43 +122,44 @@ export function CoworkingFileTree({
           ) : null
         }
       />
-      <ScrollArea
-        viewportRef={scrollRef}
-        viewportClassName="h-full min-h-0 py-2"
-        className="min-h-0 flex-1"
-      >
-        {rootLoading || rootUnavailable || isEmpty ? (
-          <FileExplorerTreeStatus
-            isLoading={rootLoading}
-            error={
-              rootUnavailable
-                ? translate(
-                    'auto.components.coworking.CoworkingFileTree.unavailable',
-                    'Files are unavailable.'
-                  )
-                : null
-            }
-            isEmpty={isEmpty}
-            emptyMessage={translate(
-              'auto.components.coworking.CoworkingFileTree.empty',
-              'This directory is empty.'
-            )}
-          />
-        ) : null}
-        <FileExplorerVirtualList
-          virtualizer={virtualizer}
-          plainRowCount={virtualizeRows ? undefined : rows.length}
-          getRowKey={(index) => {
-            const row = rows[index]
-            return row?.kind === 'entry'
-              ? row.entry.relativePath
-              : `error:${row?.directory ?? index}`
-          }}
-          renderRow={(index) => {
-            const row = rows[index]
-            if (!row) {
-              return null
-            }
+      <div className="min-h-0 flex-1">
+        <LegendList<CoworkingFileTreeRow>
+          {...LEGEND_LIST_SCROLL_AREA_PROPS}
+          className="py-2"
+          data={rows}
+          keyExtractor={getCoworkingFileTreeRowKey}
+          estimatedItemSize={COWORKING_FILE_TREE_ROW_ESTIMATE_PX}
+          ListHeaderComponent={
+            rootLoading || rootUnavailable || isEmpty ? (
+              <FileExplorerTreeStatus
+                isLoading={rootLoading}
+                error={
+                  rootUnavailable
+                    ? translate(
+                        'auto.components.coworking.CoworkingFileTree.unavailable',
+                        'Files are unavailable.'
+                      )
+                    : null
+                }
+                isEmpty={isEmpty}
+                emptyMessage={translate(
+                  'auto.components.coworking.CoworkingFileTree.empty',
+                  'This directory is empty.'
+                )}
+              />
+            ) : null
+          }
+          ListFooterComponent={
+            rootListing?.truncated || hasTruncatedDirectory ? (
+              <p className="text-muted-foreground px-4 py-2 text-[11px]">
+                {translate(
+                  'auto.components.coworking.CoworkingFileTree.truncated',
+                  'Only part of this directory is shown.'
+                )}
+              </p>
+            ) : null
+          }
+          renderItem={({ item: row }: LegendListRenderItemProps<CoworkingFileTreeRow>) => {
             if (row.kind === 'error') {
               return (
                 <div
@@ -246,15 +237,7 @@ export function CoworkingFileTree({
             )
           }}
         />
-        {rootListing?.truncated || hasTruncatedDirectory ? (
-          <p className="text-muted-foreground px-4 py-2 text-[11px]">
-            {translate(
-              'auto.components.coworking.CoworkingFileTree.truncated',
-              'Only part of this directory is shown.'
-            )}
-          </p>
-        ) : null}
-      </ScrollArea>
+      </div>
     </aside>
   )
 }

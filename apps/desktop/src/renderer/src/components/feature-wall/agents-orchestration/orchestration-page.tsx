@@ -329,14 +329,14 @@ export function OrchestrationPage(props: {
               '2 child workspaces'
             )}
           >
-            <Workflow weight="regular" className="size-2.5" aria-hidden />
+            <Workflow className="size-2.5" aria-hidden />
             <span className="truncate">
               {translate(
                 'auto.components.feature.wall.agents.orchestration.OrchestrationPage.30b509a467',
                 '2 children'
               )}
             </span>
-            <ChevronDown weight="regular" className="size-2.5" aria-hidden />
+            <ChevronDown className="size-2.5" aria-hidden />
           </span>
         </div>
 

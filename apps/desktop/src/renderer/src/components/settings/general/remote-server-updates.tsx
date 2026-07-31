@@ -122,7 +122,7 @@ export function GeneralRemoteServerUpdates(): React.JSX.Element | null {
           {checking || running ? (
             <LoadingIndicator className="size-3.5" />
           ) : (
-            <RefreshCw weight="regular" className="size-3.5" />
+            <RefreshCw className="size-3.5" />
           )}
           {running
             ? translate(

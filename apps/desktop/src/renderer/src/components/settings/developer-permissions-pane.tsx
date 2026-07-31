@@ -79,7 +79,7 @@ const PERMISSIONS: PermissionDefinition[] = [
       )
     },
     actionLabel: 'Open Settings',
-    icon: <MonitorUp weight="regular" className="size-4" />
+    icon: <MonitorUp className="size-4" />
   },
   {
     id: 'accessibility',
@@ -127,7 +127,7 @@ const PERMISSIONS: PermissionDefinition[] = [
       )
     },
     actionLabel: 'Trigger Prompt',
-    icon: <Workflow weight="regular" className="size-4" />
+    icon: <Workflow className="size-4" />
   },
   {
     id: 'local-network',
@@ -338,11 +338,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
           </p>
         </div>
         <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refresh()}>
-          {loading ? (
-            <LoadingIndicator className="size-3.5" />
-          ) : (
-            <RefreshCw weight="regular" className="size-3.5" />
-          )}
+          {loading ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
           {translate('auto.components.settings.DeveloperPermissionsPane.4c17304beb', 'Refresh')}
         </Button>
       </div>
@@ -378,7 +374,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
                 onClick={() => void request(permission.id)}
                 className="shrink-0 gap-1.5"
               >
-                <ExternalLink weight="regular" className="size-3.5" />
+                <ExternalLink className="size-3.5" />
                 {pending
                   ? translate(
                       'auto.components.settings.DeveloperPermissionsPane.dac08ec03e',

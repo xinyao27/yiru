@@ -840,7 +840,7 @@ export function AccountsPane({
                   onClick={() => void window.api.claudeAccounts.cancelPendingLogin()}
                   className="gap-1.5"
                 >
-                  <X weight="regular" className="size-3" />
+                  <X className="size-3" />
                   {translate('auto.components.settings.AccountsPane.dbb9626ed1', 'Cancel')}
                 </Button>
               ) : null}
@@ -999,7 +999,7 @@ export function AccountsPane({
                           {isReauthing ? (
                             <LoadingIndicator className="size-3" />
                           ) : (
-                            <RefreshCw weight="regular" className="size-3" />
+                            <RefreshCw className="size-3" />
                           )}
                           {translate(
                             'auto.components.settings.AccountsPane.8a0f870153',
@@ -1370,7 +1370,7 @@ export function AccountsPane({
                           {isReauthing ? (
                             <LoadingIndicator className="size-3" />
                           ) : (
-                            <RefreshCw weight="regular" className="size-3" />
+                            <RefreshCw className="size-3" />
                           )}
                           {translate(
                             'auto.components.settings.AccountsPane.8a0f870153',
@@ -1633,7 +1633,7 @@ export function AccountsPane({
             className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
           >
             {translate('auto.components.settings.AccountsPane.0d8e77bc40', 'Open console')}
-            <ExternalLink weight="regular" className="size-3" />
+            <ExternalLink className="size-3" />
           </a>
         </div>
 

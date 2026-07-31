@@ -56,6 +56,9 @@ export async function detectConflictOperation(worktreePath: string): Promise<str
     if (existsSync(path.join(gitDir, 'CHERRY_PICK_HEAD'))) {
       return 'cherry-pick'
     }
+    if (existsSync(path.join(gitDir, 'REVERT_HEAD'))) {
+      return 'revert'
+    }
   } catch {
     // fs error — treat as no conflict operation
   }

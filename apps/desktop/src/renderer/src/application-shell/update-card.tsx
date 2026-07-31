@@ -102,7 +102,7 @@ function CompactCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.a726967bd3', 'Dismiss')}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       )}
     </div>
@@ -621,7 +621,7 @@ export function UpdateCard() {
               onClick={markReassuranceSeen}
               aria-label={translate('auto.components.UpdateCard.7274ef6e59', 'Dismiss tip')}
             >
-              <X weight="regular" className="size-3.5" />
+              <X className="size-3.5" />
             </Button>
           </div>
         </Card>
@@ -684,7 +684,7 @@ function RichCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.318d3b4bc7', 'Dismiss update')}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       </div>
 
@@ -765,7 +765,7 @@ function SimpleCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.318d3b4bc7', 'Dismiss update')}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       </div>
 
@@ -979,7 +979,7 @@ function ErrorCardContent({
             {primaryAction.isPending ? (
               <LoadingIndicator className="size-3.5" />
             ) : isCompatibility ? (
-              <RotateCw weight="regular" className="size-3.5" />
+              <RotateCw className="size-3.5" />
             ) : null}
             {primaryAction.isPending && primaryAction.pendingLabel
               ? primaryAction.pendingLabel

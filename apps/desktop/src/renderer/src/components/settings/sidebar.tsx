@@ -188,7 +188,7 @@ export function SettingsSidebar({
           onClick={onBack}
           className="text-muted-foreground w-full justify-start gap-2 text-[13px]"
         >
-          <ArrowLeft weight="regular" className="size-4" />
+          <ArrowLeft className="size-4" />
           {translate('auto.components.settings.SettingsSidebar.60f8a673a7', 'Back to app')}
         </Button>
       </div>

@@ -1,5 +1,6 @@
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
 import { loadGitHistoryFromExecutor } from '../../shared/git/history'
+import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync } from './runner'
 import type { GitRuntimeOptions } from './runtime-options'
 import { gitOptionsForWorktree } from './runtime-options'
@@ -11,6 +12,7 @@ export async function getHistory(
   return loadGitHistoryFromExecutor(
     (args, cwd) => gitExecFileAsync(args, gitOptionsForWorktree(cwd, options)),
     worktreePath,
-    options
+    options,
+    getLocalGitCapabilityCache({ cwd: worktreePath, wslDistro: options.wslDistro })
   )
 }

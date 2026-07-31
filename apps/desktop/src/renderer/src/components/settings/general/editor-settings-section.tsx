@@ -288,60 +288,6 @@ export function GeneralEditorSettingsSection({
 
       <SearchableSetting
         title={translate(
-          'auto.components.settings.GeneralEditorSettingsSection.1de48ad940',
-          'Default Diff File Tree'
-        )}
-        description={translate(
-          'auto.components.settings.GeneralEditorSettingsSection.1b87897af9',
-          'Show or hide the file tree when opening combined diff views.'
-        )}
-        keywords={['diff', 'tree', 'file tree', 'combined diff', 'sidebar']}
-        className="flex items-center justify-between gap-4 py-2"
-      >
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <Label>
-            {translate(
-              'auto.components.settings.GeneralEditorSettingsSection.1de48ad940',
-              'Default Diff File Tree'
-            )}
-          </Label>
-          <p className="text-muted-foreground text-xs">
-            {translate(
-              'auto.components.settings.GeneralEditorSettingsSection.1b87897af9',
-              'Show or hide the file tree when opening combined diff views.'
-            )}
-          </p>
-        </div>
-        <SettingsSegmentedControl
-          ariaLabel={translate(
-            'auto.components.settings.GeneralEditorSettingsSection.1de48ad940',
-            'Default Diff File Tree'
-          )}
-          value={settings.combinedDiffFileTreeVisibleByDefault ? 'shown' : 'hidden'}
-          onChange={(option) =>
-            updateSettings({ combinedDiffFileTreeVisibleByDefault: option === 'shown' })
-          }
-          options={[
-            {
-              value: 'shown',
-              label: translate(
-                'auto.components.settings.GeneralEditorSettingsSection.73a09aad63',
-                'Shown'
-              )
-            },
-            {
-              value: 'hidden',
-              label: translate(
-                'auto.components.settings.GeneralEditorSettingsSection.5a1ea6eaa2',
-                'Hidden'
-              )
-            }
-          ]}
-        />
-      </SearchableSetting>
-
-      <SearchableSetting
-        title={translate(
           'auto.components.settings.GeneralEditorSettingsSection.6690b1ffb9',
           'Minimap'
         )}

@@ -74,10 +74,7 @@ export function RepositoryHooksAdvancedSection({
           }}
         >
           <div className="flex items-center gap-2">
-            <ChevronRight
-              weight="regular"
-              className="text-muted-foreground size-3.5 transition-transform group-open:rotate-90"
-            />
+            <ChevronRight className="text-muted-foreground size-3.5 transition-transform group-open:rotate-90" />
             <h5 className="text-sm font-semibold">
               {translate('auto.components.settings.RepositoryHooksSection.c9bc1bfd8f', 'Advanced')}
             </h5>

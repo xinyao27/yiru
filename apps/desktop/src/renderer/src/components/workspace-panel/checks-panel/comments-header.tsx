@@ -189,7 +189,7 @@ export function PRCommentsHeader({
                           )}
                           onClick={clearSelection}
                         >
-                          <X weight="regular" className="size-3" />
+                          <X className="size-3" />
                         </Button>
                       }
                     />

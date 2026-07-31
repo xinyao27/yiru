@@ -172,7 +172,7 @@ export function useNativeChatContextMenu({
           </DropdownMenuItem>
           {onNewConversation ? (
             <DropdownMenuItem onClick={onNewConversation}>
-              <ArrowClockwise weight="regular" />
+              <ArrowClockwise />
               {translate('components.friday.newConversation', 'New conversation')}
             </DropdownMenuItem>
           ) : null}
@@ -228,11 +228,7 @@ export function useNativeChatContextMenu({
           ) : null}
           {actions.canExpandPane ? (
             <DropdownMenuItem onClick={actions.onToggleExpand}>
-              {actions.isPaneExpanded ? (
-                <Minimize2 weight="regular" />
-              ) : (
-                <Maximize2 weight="regular" />
-              )}
+              {actions.isPaneExpanded ? <Minimize2 /> : <Maximize2 />}
               {actions.isPaneExpanded
                 ? translate(
                     'auto.components.terminal.pane.TerminalContextMenu.df766809e0',
@@ -270,7 +266,7 @@ export function useNativeChatContextMenu({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={actions.onClosePane}>
-                <X weight="regular" />
+                <X />
                 {translate(
                   'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
                   'Close Pane'

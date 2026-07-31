@@ -70,7 +70,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                     'HTTP/1.1 Compatibility'
                   )}
                 </Label>
-                <TooltipProvider delay={250}>
+                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger
                       render={
@@ -134,7 +134,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                 {http1CompatibilityRelaunching ? (
                   <LoadingIndicator className="size-3.5" />
                 ) : (
-                  <RotateCw weight="regular" className="size-3.5" />
+                  <RotateCw className="size-3.5" />
                 )}
                 {translate('auto.components.settings.AdvancedPane.40b29e0bf3', 'Restart')}
               </Button>

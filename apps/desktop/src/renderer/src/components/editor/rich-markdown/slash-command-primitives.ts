@@ -39,7 +39,7 @@ export type SlashCommandId =
   | 'emoji'
 
 export type SlashCommandIcon =
-  | { kind: 'component'; component: React.ComponentType<IconProps>; weight?: IconProps['weight'] }
+  | { kind: 'component'; component: React.ComponentType<IconProps> }
   | { kind: 'text'; value: string }
 
 export type SlashCommandGroup =
@@ -60,11 +60,8 @@ export type SlashCommand = {
   run: (editor: Editor) => void
 }
 
-export function icon(
-  component: React.ComponentType<IconProps>,
-  weight?: IconProps['weight']
-): SlashCommandIcon {
-  return { kind: 'component', component, weight }
+export function icon(component: React.ComponentType<IconProps>): SlashCommandIcon {
+  return { kind: 'component', component }
 }
 
 export function textIcon(value: string): SlashCommandIcon {

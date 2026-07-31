@@ -263,7 +263,7 @@ function StepBackButton({
 }): React.JSX.Element {
   return (
     <Button type="button" variant="ghost" size="sm" className="-ml-2 gap-2" onClick={onBack}>
-      <ArrowLeft weight="regular" className="size-4" />
+      <ArrowLeft className="size-4" />
       {label}
     </Button>
   )

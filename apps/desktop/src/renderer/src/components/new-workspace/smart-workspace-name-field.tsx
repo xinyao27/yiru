@@ -1269,7 +1269,7 @@ export default function SmartWorkspaceNameField({
                               'Open link in browser'
                             )}
                           >
-                            <ExternalLink weight="regular" className="size-3.5" />
+                            <ExternalLink className="size-3.5" />
                           </Button>
                         }
                       />
@@ -1295,7 +1295,7 @@ export default function SmartWorkspaceNameField({
                             'Clear selected source'
                           )}
                         >
-                          <X weight="regular" className="size-3.5" />
+                          <X className="size-3.5" />
                         </Button>
                       }
                     />

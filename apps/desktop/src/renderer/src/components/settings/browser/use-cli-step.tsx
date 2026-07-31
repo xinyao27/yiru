@@ -57,7 +57,7 @@ export function BrowserUseCliStep({
             <p className="text-[11px] text-amber-600 dark:text-amber-400">{cliStatus.detail}</p>
           ) : null}
         </div>
-        <TooltipProvider delay={250}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               render={

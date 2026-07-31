@@ -112,10 +112,10 @@ export function WorkspaceSpaceCompactPanel({
               progress?.state === 'cancelling' ? (
                 <LoadingIndicator className="size-3" />
               ) : (
-                <X weight="regular" className="size-3" />
+                <X className="size-3" />
               )
             ) : (
-              <RefreshCw weight="regular" className="size-3" />
+              <RefreshCw className="size-3" />
             )}
             {isScanning
               ? progress?.state === 'cancelling'

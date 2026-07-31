@@ -142,7 +142,7 @@ export function NativeChatComposerActions({
           {isWorking ? (
             <Square className="size-3.5 fill-current" />
           ) : (
-            <ArrowUp weight="regular" className="size-4" />
+            <ArrowUp className="size-4" />
           )}
         </Button>
       </div>

@@ -36,7 +36,7 @@ function DismissButton({ onDismiss }: DismissButtonProps): React.JSX.Element {
             className="text-muted-foreground -mr-1"
             onClick={onDismiss}
           >
-            <X weight="regular" className="size-3.5" />
+            <X className="size-3.5" />
           </Button>
         }
       />
@@ -230,7 +230,7 @@ export function InspectionErrorActions({
         className="h-7 flex-1 text-xs"
         onClick={onRetry}
       >
-        <RefreshCw weight="regular" className="size-3.5" />
+        <RefreshCw className="size-3.5" />
         <span className="truncate">
           {translate('auto.components.sidebar.SetupScriptPromptCardViews.4a98f907ae', 'Retry')}
         </span>

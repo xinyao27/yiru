@@ -1,10 +1,4 @@
-import {
-  ClockCounterClockwise,
-  Folder,
-  FolderOpen,
-  Play,
-  type IconProps
-} from '@phosphor-icons/react'
+import { ClockCounterClockwise, Folder, FolderOpen, Play } from '@phosphor-icons/react'
 
 import type { ActiveRightSidebarTab } from '@/components/editor/state'
 
@@ -39,11 +33,4 @@ export function resolveItemIcon(
     return Play
   }
   return resolvePanelIcon(item.panel, active)
-}
-
-export function itemIconWeight(item: WorkspaceTitlebarStripItem): IconProps['weight'] | undefined {
-  if (item.kind === 'open-in' || item.kind === 'commands') {
-    return 'regular'
-  }
-  return item.panel.iconWeight
 }

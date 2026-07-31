@@ -23,7 +23,6 @@ import { MARKUP_COLORS, MARKUP_FONT_SIZES, MARKUP_WIDTHS, type MarkupTool } from
 type ToolItem = {
   kind: MarkupTool
   icon: React.ComponentType<IconProps>
-  iconWeight?: IconProps['weight']
   label: string
 }
 
@@ -42,7 +41,6 @@ function toolItems(): ToolItem[] {
     {
       kind: 'arrow',
       icon: ArrowUpRight,
-      iconWeight: 'regular',
       label: translate('auto.components.browser-pane.markup.tool.arrow', 'Arrow')
     },
     {
@@ -95,7 +93,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
   onClear
 }: MarkupToolbarProps) {
   return (
-    <TooltipProvider delay={300}>
+    <TooltipProvider>
       <div className="border-border bg-card flex items-center gap-1 border px-1.5 py-1">
         {toolItems().map((item) => (
           <IconButton
@@ -104,7 +102,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
             active={tool === item.kind}
             onClick={() => onToolChange(item.kind)}
           >
-            <item.icon className="size-4" weight={item.iconWeight} />
+            <item.icon className="size-4" />
           </IconButton>
         ))}
 
@@ -247,14 +245,14 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
           disabled={!canUndo}
           onClick={onUndo}
         >
-          <Undo2 weight="regular" className="size-4" />
+          <Undo2 className="size-4" />
         </IconButton>
         <IconButton
           label={translate('auto.components.browser-pane.markup.redo', 'Redo')}
           disabled={!canRedo}
           onClick={onRedo}
         >
-          <Redo2 weight="regular" className="size-4" />
+          <Redo2 className="size-4" />
         </IconButton>
         <IconButton
           label={translate('auto.components.browser-pane.markup.clear', 'Clear all')}

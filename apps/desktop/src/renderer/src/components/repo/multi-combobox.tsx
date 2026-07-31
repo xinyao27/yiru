@@ -140,7 +140,7 @@ export default function RepoMultiCombobox({
             className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
           >
             {renderTriggerLabel(repos, selected)}
-            <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+            <ChevronsUpDown className="size-3.5 opacity-50" />
           </Button>
         }
       />

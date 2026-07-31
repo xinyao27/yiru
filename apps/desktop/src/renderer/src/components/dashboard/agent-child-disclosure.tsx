@@ -68,7 +68,6 @@ export function DashboardAgentChildDisclosure({
       aria-expanded={childAgentsExpanded}
     >
       <ChevronRight
-        weight="regular"
         className={cn(
           'size-3 transition-transform duration-150',
           childAgentsExpanded && 'rotate-90'

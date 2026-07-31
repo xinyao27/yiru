@@ -226,7 +226,6 @@ export function HostRemoveDialog({
             >
               {translate('auto.components.sidebar.HostRemoveDialog.advanced', 'Advanced')}
               <ChevronDown
-                weight="regular"
                 className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
               />
             </Button>

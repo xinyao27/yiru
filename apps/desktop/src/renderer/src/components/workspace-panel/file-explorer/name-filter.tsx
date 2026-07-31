@@ -57,7 +57,7 @@ export function FileExplorerNameFilter({
           )}
           onClick={onClear}
         >
-          <X weight="regular" className="size-3" />
+          <X className="size-3" />
         </Button>
       ) : null}
     </div>

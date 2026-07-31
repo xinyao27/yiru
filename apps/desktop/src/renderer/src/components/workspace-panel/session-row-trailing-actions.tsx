@@ -223,7 +223,6 @@ export function SessionRowTrailingActions({
               data-testid="ai-vault-session-toggle-details"
             >
               <ChevronDown
-                weight="regular"
                 className={cn('size-3.5 transition-transform', detailsExpanded && 'rotate-180')}
               />
             </Button>

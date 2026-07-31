@@ -125,7 +125,7 @@ export function SourceControlFixSplitButton({
                 title={chevronTitle}
                 aria-label={chevronAriaLabel}
               >
-                <ChevronDown weight="regular" className={iconClassName} />
+                <ChevronDown className={iconClassName} />
               </Button>
             }
           />

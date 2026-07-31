@@ -786,7 +786,7 @@ export function RuntimeEnvironmentsPane({
                 {remoteServerUpdatesChecking || remoteServerUpdatesRunning ? (
                   <LoadingIndicator />
                 ) : (
-                  <RefreshCw weight="regular" />
+                  <RefreshCw />
                 )}
                 {remoteServerUpdatesRunning
                   ? translate(
@@ -1100,7 +1100,6 @@ export function RuntimeEnvironmentsPane({
         >
           {translate('auto.components.settings.RuntimeEnvironmentsPane.advanced', 'Advanced')}
           <ChevronDown
-            weight="regular"
             className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
           />
         </Button>
@@ -1188,7 +1187,7 @@ export function RuntimeEnvironmentsPane({
                   onClick={() => void loadEnvironments()}
                   disabled={isLoading || isBusy}
                 >
-                  {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+                  {isLoading ? <LoadingIndicator /> : <RefreshCw />}
                 </Button>
               </div>
               {environments.length > 0 ? (

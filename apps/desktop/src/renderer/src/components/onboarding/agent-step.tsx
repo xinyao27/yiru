@@ -139,7 +139,7 @@ export function AgentStep({
             onClick={() => void window.api.shell.openUrl(selectedEntry.homepageUrl)}
           >
             {translate('auto.components.onboarding.AgentStep.9c163bb0e0', 'Install instructions')}
-            <ExternalLink weight="regular" className="size-3" />
+            <ExternalLink className="size-3" />
           </Button>
         </div>
       )}

@@ -1,23 +1,32 @@
 import {
+  GitAddTag,
   GitBranchCompare,
   GitBranchDiff,
   GitBulkPaths,
   GitCheckIgnored,
   GitCheckout,
+  GitCheckoutCommit,
+  GitCherryPick,
   GitCommit,
   GitCommitCompare,
   GitCommitDiff,
+  GitCreateBranch,
   GitDiscoverCommitMessageModels,
   GitDiff,
+  GitDropCommit,
   GitFilePath,
   GitForkSync,
   GitGenerateCommitMessage,
   GitGeneratePullRequestFields,
   GitHistory,
+  GitMergeCommit,
   GitPush,
   GitRebaseFromBase,
+  GitRebaseOntoCommit,
   GitRemoteCommitUrl,
   GitRemoteFileUrl,
+  GitResetToCommit,
+  GitRevertCommit,
   GitSubmoduleStatus,
   GitTargetedRemote,
   WorktreeSelector
@@ -128,7 +137,10 @@ export const GIT_METHODS: RpcMethod[] = [
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitHistory(params.worktree, {
         limit: params.limit,
-        baseRef: params.baseRef
+        baseRef: params.baseRef,
+        refScope: params.refScope,
+        includeRemoteBranches: params.includeRemoteBranches,
+        skip: params.skip
       })
   }),
   defineMethod({
@@ -148,6 +160,89 @@ export const GIT_METHODS: RpcMethod[] = [
     mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitRebase(params.worktree)
+  }),
+  defineMethod({
+    name: 'git.abortRevert',
+    mobile: true,
+    params: WorktreeSelector,
+    handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitRevert(params.worktree)
+  }),
+  defineMethod({
+    name: 'git.addTag',
+    params: GitAddTag,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.addRuntimeGitTag(params.worktree, {
+        name: params.name,
+        commit: params.commit,
+        message: params.message,
+        force: params.force
+      })
+  }),
+  defineMethod({
+    name: 'git.createBranch',
+    params: GitCreateBranch,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.createRuntimeGitBranchFromCommit(params.worktree, {
+        name: params.name,
+        commit: params.commit,
+        checkout: params.checkout
+      })
+  }),
+  defineMethod({
+    name: 'git.checkoutCommit',
+    params: GitCheckoutCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.checkoutRuntimeGitCommit(params.worktree, params.commit)
+  }),
+  defineMethod({
+    name: 'git.cherryPick',
+    params: GitCherryPick,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.cherryPickRuntimeGitCommit(params.worktree, {
+        commit: params.commit,
+        mainline: params.mainline
+      })
+  }),
+  defineMethod({
+    name: 'git.revertCommit',
+    params: GitRevertCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.revertRuntimeGitCommit(params.worktree, {
+        commit: params.commit,
+        mainline: params.mainline
+      })
+  }),
+  defineMethod({
+    name: 'git.dropCommit',
+    params: GitDropCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.dropRuntimeGitCommit(params.worktree, { commit: params.commit })
+  }),
+  defineMethod({
+    name: 'git.mergeCommit',
+    params: GitMergeCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.mergeRuntimeGitCommit(params.worktree, {
+        commit: params.commit,
+        noFf: params.noFf,
+        squash: params.squash,
+        message: params.message
+      })
+  }),
+  defineMethod({
+    name: 'git.rebaseOntoCommit',
+    params: GitRebaseOntoCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.rebaseRuntimeGitOntoCommit(params.worktree, { commit: params.commit })
+  }),
+  defineMethod({
+    name: 'git.resetToCommit',
+    params: GitResetToCommit,
+    handler: async (params, { gitCommands }) =>
+      gitCommands.resetRuntimeGitToCommit(params.worktree, {
+        commit: params.commit,
+        mode: params.mode
+      })
   }),
   defineMethod({
     name: 'git.checkout',

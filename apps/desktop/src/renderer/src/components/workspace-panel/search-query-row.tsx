@@ -78,7 +78,7 @@ export function SearchQueryRow({
           )}
           onClick={onClearSearch}
         >
-          <X weight="regular" className="size-3" />
+          <X className="size-3" />
         </Button>
       ) : null}
       <ToggleButton

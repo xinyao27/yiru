@@ -1,4 +1,4 @@
-import type { Icon as PhosphorIcon, IconProps } from '@phosphor-icons/react'
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React from 'react'
 
 import { Button } from '../../ui/button'
@@ -10,14 +10,12 @@ export function SourceControlHeaderIconButton({
   label,
   onClick,
   disabled,
-  iconWeight,
   variant = 'outline'
 }: {
   icon: PhosphorIcon
   label: string
   onClick: () => void
   disabled?: boolean
-  iconWeight?: IconProps['weight']
   variant?: 'ghost' | 'outline'
 }): React.JSX.Element {
   return (
@@ -27,14 +25,13 @@ export function SourceControlHeaderIconButton({
           <Button
             type="button"
             variant={variant}
-            size="icon-xs"
+            size="icon-toolbar"
             className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
             aria-label={label}
-            title={label}
             onClick={onClick}
             disabled={disabled}
           >
-            <Icon className="size-3.5" weight={iconWeight} />
+            <Icon className="size-3.5" />
           </Button>
         }
       />

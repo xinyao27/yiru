@@ -512,7 +512,7 @@ function PendingBrowserAnnotationCard({
             {translate('auto.components.browser.pane.BrowserPane.90d021f2ad', 'Add')}
             <span className="ml-1 inline-flex items-center gap-0.5 border border-current/20 px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
               <span>{submitModifierLabel}</span>
-              <CornerDownLeft weight="regular" className="size-3" />
+              <CornerDownLeft className="size-3" />
             </span>
           </Button>
         </div>
@@ -2589,7 +2589,7 @@ function RemoteBrowserPagePane({
           className="h-7 w-7"
           onClick={() => void runRemoteNavigation('browser.back')}
         >
-          <ArrowLeft weight="regular" className="size-4" />
+          <ArrowLeft className="size-4" />
         </Button>
         <Button
           size="icon"
@@ -2597,7 +2597,7 @@ function RemoteBrowserPagePane({
           className="h-7 w-7"
           onClick={() => void runRemoteNavigation('browser.forward')}
         >
-          <ArrowRight weight="regular" className="size-4" />
+          <ArrowRight className="size-4" />
         </Button>
         <Button
           size="icon"
@@ -2608,7 +2608,7 @@ function RemoteBrowserPagePane({
           {busy || browserTab.loading ? (
             <LoadingIndicator className="size-4" />
           ) : (
-            <RefreshCw weight="regular" className="size-4" />
+            <RefreshCw className="size-4" />
           )}
         </Button>
         <BrowserAddressBar
@@ -5150,7 +5150,7 @@ function BrowserPagePane({
             onClick={() => webviewRef.current?.goBack()}
             disabled={!browserTab.canGoBack}
           >
-            <ArrowLeft weight="regular" className="size-4" />
+            <ArrowLeft className="size-4" />
           </Button>
           <Button
             size="icon"
@@ -5159,7 +5159,7 @@ function BrowserPagePane({
             onClick={() => webviewRef.current?.goForward()}
             disabled={!browserTab.canGoForward}
           >
-            <ArrowRight weight="regular" className="size-4" />
+            <ArrowRight className="size-4" />
           </Button>
           <Button
             size="icon"
@@ -5182,7 +5182,7 @@ function BrowserPagePane({
             {browserTab.loading ? (
               <LoadingIndicator className="size-4" />
             ) : (
-              <RefreshCw weight="regular" className="size-4" />
+              <RefreshCw className="size-4" />
             )}
           </Button>
 
@@ -5311,7 +5311,7 @@ function BrowserPagePane({
             )}
             disabled={!externalUrl}
           >
-            <ExternalLink weight="regular" className="size-4" />
+            <ExternalLink className="size-4" />
           </Button>
 
           <BrowserToolbarMenu
@@ -5405,7 +5405,7 @@ function BrowserPagePane({
                             void handleOpenDownloadedFile(download)
                           }}
                         >
-                          <ExternalLink weight="regular" className="size-3" />
+                          <ExternalLink className="size-3" />
                           {translate('auto.components.browser.pane.BrowserPane.756bfc25c9', 'Open')}
                         </Button>
                         <Button
@@ -5429,7 +5429,7 @@ function BrowserPagePane({
                             'Dismiss'
                           )}
                         >
-                          <X weight="regular" className="size-3.5" />
+                          <X className="size-3.5" />
                         </Button>
                       </>
                     ) : (
@@ -5443,7 +5443,7 @@ function BrowserPagePane({
                           'Dismiss'
                         )}
                       >
-                        <X weight="regular" className="size-3.5" />
+                        <X className="size-3.5" />
                       </Button>
                     )}
                   </div>

@@ -106,7 +106,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
             {updateStatus.state === 'checking' ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <RefreshCw weight="regular" className="size-3.5" />
+              <RefreshCw className="size-3.5" />
             )}
             {translate(
               'auto.components.settings.GeneralUpdateSettingsSection.e1a647adc5',

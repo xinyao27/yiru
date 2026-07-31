@@ -187,7 +187,7 @@ export default function BrowserFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.browser.pane.BrowserFind.ca7aebbd7f', 'Previous match')}
       >
-        <ChevronUp weight="regular" size={14} />
+        <ChevronUp size={14} />
       </Button>
 
       <Button
@@ -198,7 +198,7 @@ export default function BrowserFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.browser.pane.BrowserFind.5c0c02ae76', 'Next match')}
       >
-        <ChevronDown weight="regular" size={14} />
+        <ChevronDown size={14} />
       </Button>
 
       <div className="mx-0.5 h-4 w-px bg-zinc-700" />
@@ -211,7 +211,7 @@ export default function BrowserFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.browser.pane.BrowserFind.c9d5f63fdc', 'Close')}
       >
-        <X weight="regular" size={14} />
+        <X size={14} />
       </Button>
     </div>
   )

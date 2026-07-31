@@ -312,7 +312,7 @@ export function ExternalAutomationRunTable({
             disabled={page === 0 || isLoading}
             onClick={() => handlePageChange(Math.max(0, page - 1))}
           >
-            <ChevronLeft weight="regular" className="size-3.5" />
+            <ChevronLeft className="size-3.5" />
           </Button>
           <div className="text-muted-foreground min-w-14 text-center text-xs">
             {page + 1} / {totalPages}
@@ -328,7 +328,7 @@ export function ExternalAutomationRunTable({
             disabled={page >= totalPages - 1 || isLoading}
             onClick={() => handlePageChange(Math.min(totalPages - 1, page + 1))}
           >
-            <ChevronRight weight="regular" className="size-3.5" />
+            <ChevronRight className="size-3.5" />
           </Button>
         </div>
       </div>

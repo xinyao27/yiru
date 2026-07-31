@@ -309,18 +309,18 @@ export default function BrowserTab({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-            <X weight="regular" className="size-4" />
+            <X className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-            <PanelRightClose weight="regular" className="size-4" />
+            <PanelRightClose className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
             disabled={!isHttpUrl}
           >
-            <ExternalLink weight="regular" className="size-4" />
+            <ExternalLink className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.6e0bc8f3a8', 'Open In Browser')}
           </DropdownMenuItem>
         </DropdownMenuContent>

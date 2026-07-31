@@ -191,7 +191,6 @@ export function AutoRenameBranchFromWorkSetting({
                 'Advanced'
               )}
               <ChevronDown
-                weight="regular"
                 className={cn('size-3.5 transition-transform', advancedOpen && 'rotate-180')}
               />
             </Button>

@@ -45,6 +45,11 @@ type LegendListScrollAreaProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'children' | 'onScroll' | 'style'
 > & {
+  /** Set by lists whose content is wider than the viewport (grids, tables) so
+   *  the horizontal thumb is rendered — the viewport otherwise hides it. */
+  showHorizontalScrollBar?: boolean
+  /** Set by lists that draw their own thumb over the viewport. */
+  hideScrollBar?: boolean
   children?: React.ReactNode
   contentContainerClassName?: string
   contentContainerStyle?: LegendListStyle
@@ -76,6 +81,7 @@ export function LegendListScrollArea({
   contentContainerClassName,
   contentContainerStyle,
   contentOffset,
+  hideScrollBar,
   horizontal: _horizontal,
   maintainVisibleContentPosition,
   onLayout,
@@ -83,6 +89,7 @@ export function LegendListScrollArea({
   refreshControl,
   ref: forwardedRef,
   scrollEventThrottle: _scrollEventThrottle,
+  showHorizontalScrollBar,
   style,
   ...viewportProps
 }: LegendListScrollAreaProps): React.JSX.Element {
@@ -209,8 +216,13 @@ export function LegendListScrollArea({
 
   return (
     <ScrollArea
+      horizontalScrollBar={showHorizontalScrollBar}
       className="h-full min-h-0"
-      viewportClassName={cn('overflow-x-hidden', className)}
+      hideScrollBar={hideScrollBar}
+      viewportClassName={cn(
+        showHorizontalScrollBar ? 'overflow-x-auto' : 'overflow-x-hidden',
+        className
+      )}
       viewportRef={viewportRef}
       viewportProps={resolvedViewportProps}
     >
@@ -223,4 +235,54 @@ export function LegendListScrollArea({
       </div>
     </ScrollArea>
   )
+}
+
+// Why: LegendList 3.3.3 supports this documented Web API at runtime but omits it
+// from the React entrypoint's prop override, so spreading keeps the remaining
+// props type-checked while every list renders inside the app's ScrollArea.
+export const LEGEND_LIST_SCROLL_AREA_PROPS = {
+  renderScrollComponent: LegendListScrollArea
+}
+
+function LegendListHorizontalScrollArea(props: LegendListScrollAreaProps): React.JSX.Element {
+  return <LegendListScrollArea {...props} showHorizontalScrollBar />
+}
+
+// Why: grids and tables scroll on both axes, and LegendList's prop type rejects
+// extra props, so the horizontal thumb ships as its own scroll component.
+export const LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS = {
+  renderScrollComponent: LegendListHorizontalScrollArea
+}
+
+function LegendListCustomScrollbarArea(props: LegendListScrollAreaProps): React.JSX.Element {
+  return <LegendListScrollArea {...props} hideScrollBar />
+}
+
+// Why: the combined diff paints its own overlay thumb beside the viewport, so
+// the shared scrollbar would double up on the same axis.
+export const LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS = {
+  renderScrollComponent: LegendListCustomScrollbarArea
+}
+
+type LegendListScrollHandle = {
+  getScrollableNode: () => HTMLElement | null
+}
+
+function isLegendListScrollHandle(value: unknown): value is LegendListScrollHandle {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'getScrollableNode' in value &&
+    typeof value.getScrollableNode === 'function'
+  )
+}
+
+/** Resolves the scroll element behind a `refScrollView` value, which LegendList
+ *  fills with either the DOM node or the scroll component's imperative handle. */
+export function getLegendListScrollElement(value: unknown): HTMLDivElement | null {
+  if (value instanceof HTMLDivElement) {
+    return value
+  }
+  const element = isLegendListScrollHandle(value) ? value.getScrollableNode() : null
+  return element instanceof HTMLDivElement ? element : null
 }

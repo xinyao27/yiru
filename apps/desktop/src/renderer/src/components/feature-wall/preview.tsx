@@ -94,7 +94,7 @@ export function RelatedFeatures(props: {
               className="focus-visible:bg-accent h-auto justify-start gap-1.5 border-0 p-0 text-left text-[13px] font-normal whitespace-normal hover:underline hover:underline-offset-2"
             >
               {tile.title}
-              <ChevronRight weight="regular" className="text-muted-foreground size-3" />
+              <ChevronRight className="text-muted-foreground size-3" />
             </Button>
           </li>
         ))}

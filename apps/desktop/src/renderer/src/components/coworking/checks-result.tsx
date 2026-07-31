@@ -48,7 +48,7 @@ export function CoworkingChecksResult({
               className="bg-sidebar text-sidebar-foreground dark:bg-sidebar"
               onClick={() => openOwnerUrl(reviewUrl)}
             >
-              <ExternalLink weight="regular" aria-hidden="true" className="size-3" />
+              <ExternalLink aria-hidden="true" className="size-3" />
               {translate('auto.components.coworking.CoworkingChecksPane.openReview', 'Open review')}
             </Button>
           ) : null}

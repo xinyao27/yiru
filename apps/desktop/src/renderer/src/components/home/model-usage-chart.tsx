@@ -141,7 +141,7 @@ function UsageRefreshButton(): React.JSX.Element {
             )}
             onClick={refreshUsage}
           >
-            <RefreshCw weight="regular" />
+            <RefreshCw />
           </Button>
         }
       />

@@ -1759,6 +1759,86 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
         worktree: toRuntimeWorktreeSelector(worktree.id)
       })
     },
+    abortRevert: async ({ worktreePath }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      await callRuntimeResult('git.abortRevert', {
+        worktree: toRuntimeWorktreeSelector(worktree.id)
+      })
+    },
+    addTag: async ({ worktreePath, name, commit, message, force }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.addTag', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        name,
+        commit,
+        message,
+        force
+      })
+    },
+    createBranch: async ({ worktreePath, name, commit, checkout }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.createBranch', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        name,
+        commit,
+        checkout
+      })
+    },
+    checkoutCommit: async ({ worktreePath, commit }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.checkoutCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit
+      })
+    },
+    cherryPick: async ({ worktreePath, commit, mainline }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.cherryPick', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit,
+        mainline
+      })
+    },
+    revertCommit: async ({ worktreePath, commit, mainline }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.revertCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit,
+        mainline
+      })
+    },
+    dropCommit: async ({ worktreePath, commit }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.dropCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit
+      })
+    },
+    mergeCommit: async ({ worktreePath, commit, noFf, squash, message }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.mergeCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit,
+        noFf,
+        squash,
+        message
+      })
+    },
+    rebaseOntoCommit: async ({ worktreePath, commit }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.rebaseOntoCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit
+      })
+    },
+    resetToCommit: async ({ worktreePath, commit, mode }) => {
+      const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
+      return callRuntimeResult('git.resetToCommit', {
+        worktree: toRuntimeWorktreeSelector(worktree.id),
+        commit,
+        mode
+      })
+    },
     diff: async ({ worktreePath, filePath, staged, compareAgainstHead }) => {
       const file = await resolveRuntimeFilePath(filePath, worktreePath)
       return callRuntimeResult('git.diff', {

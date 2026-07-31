@@ -236,7 +236,7 @@ export default function FolderWorkspacePrChecksPanel({
                   {isRefreshing ? (
                     <LoadingIndicator className="size-3.5" />
                   ) : (
-                    <RefreshCw weight="regular" className="size-3.5" />
+                    <RefreshCw className="size-3.5" />
                   )}
                 </Button>
               }

@@ -5,8 +5,7 @@ import {
   Check,
   CloudArrowUp as CloudUpload,
   GitPullRequest as GitPullRequestArrow,
-  Plus,
-  type IconProps
+  Plus
 } from '@phosphor-icons/react'
 import type React from 'react'
 
@@ -32,7 +31,6 @@ const PRIMARY_ICONS: Partial<
     React.ComponentType<{
       className?: string
       'aria-hidden'?: boolean | 'true' | 'false'
-      weight?: IconProps['weight']
     }>
   >
 > = {
@@ -63,12 +61,6 @@ export function SourceControlCommitActions({
   showSpinner: boolean
 }): React.JSX.Element {
   const PrimaryIcon = PRIMARY_ICONS[primaryAction.kind]
-  const primaryIconWeight =
-    primaryAction.kind === 'push' ||
-    primaryAction.kind === 'sync' ||
-    primaryAction.kind === 'publish'
-      ? 'regular'
-      : undefined
   const moreCommitAndRemoteActionsLabel = translate(
     'auto.components.right.sidebar.SourceControl.cc199ccc5f',
     'More commit and remote actions'
@@ -99,11 +91,7 @@ export function SourceControlCommitActions({
                   {showSpinner ? (
                     <LoadingIndicator className="size-3.5" />
                   ) : PrimaryIcon ? (
-                    <PrimaryIcon
-                      className="size-3.5"
-                      aria-hidden="true"
-                      weight={primaryIconWeight}
-                    />
+                    <PrimaryIcon className="size-3.5" aria-hidden="true" />
                   ) : null}
                   {primaryAction.label}
                 </Button>
@@ -132,7 +120,7 @@ export function SourceControlCommitActions({
                         {showChevronSpinner ? (
                           <LoadingIndicator className="size-3.5" />
                         ) : (
-                          <ChevronDown weight="regular" className="size-3.5" />
+                          <ChevronDown className="size-3.5" />
                         )}
                       </Button>
                     }

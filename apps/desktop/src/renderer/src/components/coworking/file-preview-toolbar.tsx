@@ -71,7 +71,7 @@ export function CoworkingFilePreviewToolbar({
           variant="ghost"
           onClick={onBack}
         >
-          <ChevronLeft weight="regular" aria-hidden="true" />
+          <ChevronLeft aria-hidden="true" />
         </CoworkingTooltipIconButton>
         <CoworkingTruncatedPathLabel
           path={file.relativePath}
@@ -81,7 +81,7 @@ export function CoworkingFilePreviewToolbar({
           label={translate('auto.components.coworking.CoworkingFilePreview.reload', 'Reload')}
           onClick={onRefresh}
         >
-          <RefreshCw weight="regular" aria-hidden="true" />
+          <RefreshCw aria-hidden="true" />
         </CoworkingTooltipIconButton>
         {file.encoding === 'utf8' ? (
           <CoworkingTooltipIconButton
@@ -185,7 +185,7 @@ export function CoworkingFilePreviewToolbar({
             disabled={!hasPreviousChunk}
             onClick={onPreviousChunk}
           >
-            <ChevronLeft weight="regular" aria-hidden="true" />
+            <ChevronLeft aria-hidden="true" />
           </CoworkingTooltipIconButton>
           <span className="text-muted-foreground min-w-0 flex-1 truncate text-center text-[11px]">
             {formatFileByteRange(file)}
@@ -198,7 +198,7 @@ export function CoworkingFilePreviewToolbar({
             disabled={!hasNextChunk}
             onClick={onNextChunk}
           >
-            <ChevronRight weight="regular" aria-hidden="true" />
+            <ChevronRight aria-hidden="true" />
           </CoworkingTooltipIconButton>
         </div>
       ) : null}

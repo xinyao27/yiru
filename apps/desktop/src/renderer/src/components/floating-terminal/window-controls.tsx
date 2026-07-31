@@ -184,11 +184,7 @@ export function FloatingTerminalWindowControls({
               aria-pressed={maximized}
               onClick={onToggleMaximized}
             >
-              {maximized ? (
-                <Minimize2 weight="regular" className="size-3.5" />
-              ) : (
-                <Maximize2 weight="regular" className="size-3.5" />
-              )}
+              {maximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
             </Button>
           }
         />
@@ -224,7 +220,7 @@ export function FloatingTerminalWindowControls({
               )}
               onClick={onMinimize}
             >
-              <Minus weight="regular" className="size-3.5" />
+              <Minus className="size-3.5" />
             </Button>
           }
         />

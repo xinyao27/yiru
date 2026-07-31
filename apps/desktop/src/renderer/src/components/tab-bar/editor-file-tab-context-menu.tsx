@@ -151,12 +151,12 @@ export function EditorFileTabContextMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
           {translate('auto.components.tab.bar.EditorFileTabContextMenu.1ba8492c5b', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onCloseAll}>
-          <ListX weight="regular" className="size-3.5" />
+          <ListX className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.ba1369dd24',
             'Close All Editor Tabs'
@@ -166,7 +166,7 @@ export function EditorFileTabContextMenu({
           ) : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-          <PanelRightClose weight="regular" className="size-3.5" />
+          <PanelRightClose className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.e5ff31ccaf',
             'Close Tabs To The Right'
@@ -234,7 +234,7 @@ export function EditorFileTabContextMenu({
             window.api.shell.openPath(file.filePath)
           }}
         >
-          <ExternalLink weight="regular" className="size-3.5" />
+          <ExternalLink className="size-3.5" />
           {revealLabel}
         </DropdownMenuItem>
       </DropdownMenuContent>

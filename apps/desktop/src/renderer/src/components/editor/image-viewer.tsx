@@ -329,7 +329,7 @@ export default function ImageViewer({
               disabled={inlineZoom === 1}
               title={translate('auto.components.editor.ImageViewer.6c89c73d9f', 'Reset zoom')}
             >
-              <RotateCcw weight="regular" size={14} />
+              <RotateCcw size={14} />
             </Button>
             <Button
               variant="ghost"

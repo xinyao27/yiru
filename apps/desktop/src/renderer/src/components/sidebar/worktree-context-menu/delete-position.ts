@@ -1,5 +1,3 @@
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
-
 const DELETE_POSITION_RESTORE_MAX_FRAMES = 180
 const DELETE_POSITION_RESTORE_STABLE_FRAMES = 6
 
@@ -78,9 +76,5 @@ function preserveDeleteSiblingPosition(scope: HTMLElement | null): () => void {
 }
 
 export function prepareDeleteSiblingPositionRestore(scope: HTMLElement | null): () => void {
-  const restoreSidebarPosition = preserveDeleteSiblingPosition(scope)
-  scope
-    ?.closest('[data-worktree-sidebar]')
-    ?.dispatchEvent(new Event(VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT))
-  return restoreSidebarPosition
+  return preserveDeleteSiblingPosition(scope)
 }

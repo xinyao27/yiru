@@ -189,7 +189,7 @@ export function FirstLaunchBanner({
         disabled={inFlight}
         className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground absolute top-1.5 right-1.5 h-auto w-auto border-0 p-1 transition-colors disabled:cursor-not-allowed"
       >
-        <X weight="regular" className="size-3.5" />
+        <X className="size-3.5" />
       </UiButton>
     </div>
   )

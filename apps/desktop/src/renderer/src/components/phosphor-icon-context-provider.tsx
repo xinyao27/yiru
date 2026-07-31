@@ -5,8 +5,8 @@ import type { JSX, PropsWithChildren } from 'react'
 // the same renderer-wide Phosphor defaults.
 const DEFAULT_ICON_CONTEXT_VALUE = {
   color: 'currentColor',
-  size: '1em',
-  weight: 'duotone',
+  size: '1.5em',
+  weight: 'regular',
   mirrored: false
 } as const
 

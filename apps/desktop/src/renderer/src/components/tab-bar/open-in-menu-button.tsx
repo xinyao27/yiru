@@ -148,7 +148,7 @@ export function TabBarOpenInMenuButton({
                     className="text-muted-foreground border-0"
                     aria-label={chooseLabel}
                   >
-                    <CaretDown weight="regular" />
+                    <CaretDown />
                   </Button>
                 }
               />

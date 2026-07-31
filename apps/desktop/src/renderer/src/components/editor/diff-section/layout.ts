@@ -4,7 +4,9 @@ import { countLinesLikeSplit, type DiffLineCounts } from '../large-diff-render-l
 const DIFF_LINE_HEIGHT = 19
 const DIFF_SECTION_PADDING_HEIGHT = 19
 const MIN_DIFF_SECTION_BODY_HEIGHT = 60
-const DIFF_SECTION_HEADER_HEIGHT = 28
+/** A collapsed section renders its header and nothing else, so this is also the
+ *  exact row height the combined diff can hand a virtualizer without measuring. */
+export const DIFF_SECTION_HEADER_HEIGHT = 28
 const DIFF_UNCHANGED_CONTEXT_LINE_ESTIMATE = 12
 const MAX_UNMEASURED_TEXT_BODY_LINES = 80
 const LARGE_DIFF_FALLBACK_BODY_HEIGHT = 160
@@ -61,36 +63,5 @@ export function getDiffSectionBodyHeight({
   return Math.max(
     MIN_DIFF_SECTION_BODY_HEIGHT,
     estimatedLineCount * DIFF_LINE_HEIGHT + DIFF_SECTION_PADDING_HEIGHT
-  )
-}
-
-export function getDiffSectionEstimatedHeight({
-  collapsed,
-  measuredContentHeight,
-  originalContent,
-  modifiedContent,
-  changedLineCount,
-  useIntrinsicImageHeight,
-  lineCounts,
-  isLargeDiffLimited = false
-}: DiffSectionBodyHeightInput & { collapsed: boolean; isLargeDiffLimited?: boolean }): number {
-  if (collapsed) {
-    return DIFF_SECTION_HEADER_HEIGHT
-  }
-
-  if (isLargeDiffLimited) {
-    return DIFF_SECTION_HEADER_HEIGHT + getLargeDiffFallbackBodyHeight()
-  }
-
-  return (
-    DIFF_SECTION_HEADER_HEIGHT +
-    (getDiffSectionBodyHeight({
-      measuredContentHeight,
-      originalContent,
-      modifiedContent,
-      changedLineCount,
-      useIntrinsicImageHeight,
-      lineCounts
-    }) ?? MIN_DIFF_SECTION_BODY_HEIGHT)
   )
 }

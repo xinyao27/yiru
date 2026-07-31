@@ -8,6 +8,7 @@ import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel
 import { WorkspacePanelEditorEmptyState } from './workspace-panel-editor-empty-state'
 
 const EditorPanel = lazy(() => import('../editor/panel'))
+const GitGraphView = lazy(() => import('../workspace-panel/git-graph/view'))
 
 export function WorkspacePanelTabContent({
   panel,
@@ -29,6 +30,9 @@ export function WorkspacePanelTabContent({
     const fileId = state.workspacePanelEditorFileIdByTab[panelTabId]
     return fileId && state.openFiles.some((file) => file.id === fileId) ? fileId : null
   })
+  const isGitGraphOpen = useAppStore((state) =>
+    panel === 'source-control' ? (state.gitGraphOpenByPanelTab[panelTabId] ?? false) : false
+  )
   const panelWidth = useAppStore((state) => state.rightSidebarWidth)
 
   return (
@@ -40,7 +44,11 @@ export function WorkspacePanelTabContent({
       {embedsEditor ? (
         <>
           <div className="bg-background flex min-h-0 min-w-0 flex-1">
-            {activeFileId ? (
+            {isGitGraphOpen ? (
+              <Suspense fallback={null}>
+                <GitGraphView worktreeId={worktreeId} workspacePanelTabId={panelTabId} />
+              </Suspense>
+            ) : activeFileId ? (
               <Suspense fallback={null}>
                 <EditorPanel
                   activeFileId={activeFileId}

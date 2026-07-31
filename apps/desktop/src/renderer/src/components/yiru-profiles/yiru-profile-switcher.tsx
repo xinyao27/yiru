@@ -166,11 +166,7 @@ export function YiruProfileSwitcher({
                         <span className="hidden max-w-[108px] truncate text-xs font-medium sm:inline">
                           {activeProfile.name}
                         </span>
-                        {switching ? (
-                          <LoadingIndicator className="size-3" />
-                        ) : (
-                          <ChevronDown weight="regular" />
-                        )}
+                        {switching ? <LoadingIndicator className="size-3" /> : <ChevronDown />}
                       </>
                     ) : null}
                   </Button>

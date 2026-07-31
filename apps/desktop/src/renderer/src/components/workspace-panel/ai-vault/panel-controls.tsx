@@ -72,7 +72,6 @@ export function VaultGroupHeader({
       aria-expanded={!collapsed}
     >
       <ChevronRight
-        weight="regular"
         className={cn(
           'size-3.5 shrink-0 text-foreground/80 transition-transform',
           !collapsed && 'rotate-90'

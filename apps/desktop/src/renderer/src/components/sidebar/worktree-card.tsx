@@ -954,9 +954,34 @@ const WorktreeCard = React.memo(function WorktreeCard({
         )}
       </div>
     ) : null
-  const titleRowIndicators = showTitleRowIndicators ? (
-    <div className="ml-auto flex shrink-0 items-center gap-1 pr-1.5">{detailsAndPortsContent}</div>
-  ) : null
+  // Why: details/ports and the unread bell share one trailing cluster so the
+  // bell sits next to the icons it follows instead of drifting to the row edge.
+  const titleRowIndicators =
+    showTitleRowIndicators || showUnreadEmphasis ? (
+      <div className="ml-auto flex shrink-0 items-center gap-1 pr-1.5">
+        {detailsAndPortsContent}
+        {showUnreadEmphasis ? (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span
+                  className="inline-flex shrink-0 items-center justify-center"
+                  data-worktree-unread-indicator=""
+                >
+                  <UnreadStatusIndicator />
+                  <span className="sr-only">
+                    {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
+                  </span>
+                </span>
+              }
+            />
+            <TooltipContent side="right" sideOffset={8}>
+              {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
+      </div>
+    ) : null
   const hasSecondaryCardContent =
     hasMetaRow ||
     !!remoteBranchConflict ||
@@ -1190,7 +1215,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
               </Tooltip>
             )}
 
-            {showTitleRowIndicators && titleRowIndicators}
+            {titleRowIndicators}
           </div>
 
           {showHeaderActions && (
@@ -1229,27 +1254,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
               )}
             </div>
           )}
-
-          {showUnreadEmphasis ? (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span
-                    className="ml-auto inline-flex shrink-0 items-center justify-center"
-                    data-worktree-unread-indicator=""
-                  >
-                    <UnreadStatusIndicator />
-                    <span className="sr-only">
-                      {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
-                    </span>
-                  </span>
-                }
-              />
-              <TooltipContent side="right" sideOffset={8}>
-                {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
-              </TooltipContent>
-            </Tooltip>
-          ) : null}
         </div>
 
         {hasMetaRow && (
@@ -1359,10 +1363,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     aria-expanded={!lineageCollapsed}
                     onClick={handleLineageToggleClick}
                   >
-                    <Workflow weight="regular" className="size-2.5" />
+                    <Workflow className="size-2.5" />
                     <span className="truncate">{childWorkspaceShortLabel}</span>
                     <ChevronDown
-                      weight="regular"
                       className={cn(
                         'size-2.5 transition-transform',
                         lineageCollapsed && '-rotate-90'

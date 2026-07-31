@@ -99,7 +99,7 @@ export default function WorktreeCreationPanel({
             onClick={dismiss}
             className="hover:bg-muted focus-visible:bg-muted flex size-4"
           >
-            <X weight="regular" className="size-3" />
+            <X className="size-3" />
           </Button>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function WorktreeCreationPanel({
               onClick={() => retryBackgroundWorktreeCreation(creationId)}
               className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
             >
-              <RotateCcw weight="regular" className="size-3" />
+              <RotateCcw className="size-3" />
               {translate(
                 'auto.components.worktree.creation.WorktreeCreationPanel.34dd5ee38b',
                 'Retry'
@@ -224,7 +224,7 @@ function VmProvisioningStatus({
                   onClick={onRetry}
                   className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
                 >
-                  <RotateCcw weight="regular" className="size-3" />
+                  <RotateCcw className="size-3" />
                   {translate(
                     'auto.components.worktree.creation.WorktreeCreationPanel.34dd5ee38b',
                     'Retry'

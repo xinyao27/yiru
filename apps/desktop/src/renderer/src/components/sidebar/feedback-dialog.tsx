@@ -185,7 +185,7 @@ export function SidebarFeedbackDialog({
                 'auto.components.sidebar.SidebarFeedbackDialog.d245c4ef6c',
                 'GitHub issues'
               )}
-              <ExternalLink weight="regular" className="size-3.5" />
+              <ExternalLink className="size-3.5" />
             </Button>
           </div>
         </div>

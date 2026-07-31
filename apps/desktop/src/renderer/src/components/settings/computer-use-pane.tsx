@@ -294,7 +294,7 @@ export function ComputerUsePane(): React.JSX.Element {
               {loading ? (
                 <LoadingIndicator className="size-3.5" />
               ) : (
-                <RefreshCw weight="regular" className="size-3.5" />
+                <RefreshCw className="size-3.5" />
               )}
               {translate('auto.components.settings.ComputerUsePane.d95d1cfab8', 'Refresh')}
             </Button>
@@ -345,7 +345,7 @@ export function ComputerUsePane(): React.JSX.Element {
                         onClick={() => void openPermission(permission.id)}
                         className="gap-1.5"
                       >
-                        <ExternalLink weight="regular" className="size-3.5" />
+                        <ExternalLink className="size-3.5" />
                         {translate('auto.components.settings.ComputerUsePane.45f8e22c2e', 'Open')}
                       </Button>
                     </div>

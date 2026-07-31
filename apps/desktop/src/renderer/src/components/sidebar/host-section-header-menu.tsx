@@ -258,7 +258,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
         )}
         {model.actions.includes('runtime-check-connection') && (
           <DropdownMenuItem onClick={() => void handleCheckConnection()}>
-            <RefreshCw weight="regular" className="size-3.5" />
+            <RefreshCw className="size-3.5" />
             {translate(
               'auto.components.sidebar.HostSectionHeaderMenu.2d3e4f5a6b',
               'Check connection'

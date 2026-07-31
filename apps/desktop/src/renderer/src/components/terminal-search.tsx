@@ -179,7 +179,7 @@ export default function TerminalSearch({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.TerminalSearch.0f3066256e', 'Previous match')}
       >
-        <ChevronUp weight="regular" size={14} />
+        <ChevronUp size={14} />
       </Button>
 
       <Button
@@ -190,7 +190,7 @@ export default function TerminalSearch({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.TerminalSearch.7cb40c04eb', 'Next match')}
       >
-        <ChevronDown weight="regular" size={14} />
+        <ChevronDown size={14} />
       </Button>
 
       <div className="mx-0.5 h-4 w-px bg-zinc-700" />
@@ -203,7 +203,7 @@ export default function TerminalSearch({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.TerminalSearch.db234b7519', 'Close')}
       >
-        <X weight="regular" size={14} />
+        <X size={14} />
       </Button>
     </div>
   )

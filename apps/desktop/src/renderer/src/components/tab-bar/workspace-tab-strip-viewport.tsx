@@ -125,7 +125,7 @@ function TabStripScrollButton({
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
           >
-            <Icon className="size-3.5" weight="regular" />
+            <Icon className="size-3.5" />
           </Button>
         }
       />

@@ -176,7 +176,7 @@ export function MobileEmulatorAvailabilityDetails({
                   onClick={() => void handleClear()}
                   className={sdkPathActionClassName}
                 >
-                  <X weight="regular" className="size-3" />
+                  <X className="size-3" />
                   {translate(
                     'auto.components.settings.MobileEmulatorSdkStatus.8c52684db8',
                     'Clear'

@@ -92,7 +92,7 @@ export function GrokUsagePane(): React.JSX.Element {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 self-start">
-          <TooltipProvider delay={250}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -109,7 +109,7 @@ export function GrokUsagePane(): React.JSX.Element {
                     {isFetching ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw weight="regular" className="size-3.5" />
+                      <RefreshCw className="size-3.5" />
                     )}
                   </Button>
                 }
@@ -150,7 +150,7 @@ export function GrokUsagePane(): React.JSX.Element {
           onClick={openGrokAccounts}
         >
           {translate('auto.components.stats.GrokUsagePane.a7b8c9d0e1', 'Grok account settings')}
-          <ExternalLink weight="regular" className="size-3" />
+          <ExternalLink className="size-3" />
         </Button>
       </div>
     </div>

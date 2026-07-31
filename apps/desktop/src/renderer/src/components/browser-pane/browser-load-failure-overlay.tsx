@@ -236,7 +236,7 @@ export function BrowserLoadFailureOverlay({
       disabled={actionsDisabled}
       onClick={onRetry}
     >
-      <RefreshCw weight="regular" className="size-4" />
+      <RefreshCw className="size-4" />
       {translate('browser.loadFailure.retry', 'Retry')}
     </Button>
   )
@@ -261,7 +261,7 @@ export function BrowserLoadFailureOverlay({
         disabled={actionsDisabled}
         onClick={() => onOpenExternal(externalUrl)}
       >
-        <ExternalLink weight="regular" className="size-4" />
+        <ExternalLink className="size-4" />
         {translate('browser.loadFailure.openExternally', 'Open Externally')}
       </Button>
     ) : null

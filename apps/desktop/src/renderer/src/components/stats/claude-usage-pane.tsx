@@ -149,7 +149,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
             <ShareUsageButton provider="claude" summary={summary} daily={daily} range={range} />
           )}
           <DropdownMenu>
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -204,7 +204,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <TooltipProvider delay={250}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -221,7 +221,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
                     {scanState.isScanning ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw weight="regular" className="size-3.5" />
+                      <RefreshCw className="size-3.5" />
                     )}
                   </Button>
                 }

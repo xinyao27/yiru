@@ -30,7 +30,6 @@ export function SidebarDisclosure({
   const icon = (
     <ChevronDown
       aria-hidden="true"
-      weight="regular"
       className={cn(
         'size-3.5 transition-transform motion-reduce:transition-none',
         !expanded && '-rotate-90'

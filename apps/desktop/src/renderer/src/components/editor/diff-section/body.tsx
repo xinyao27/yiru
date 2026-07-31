@@ -123,7 +123,7 @@ export function DiffSectionBody({
               onRetrySection(index)
             }}
           >
-            <RefreshCw weight="regular" className="size-3" />
+            <RefreshCw className="size-3" />
             {translate('auto.components.editor.DiffSectionBody.cef4cf0ff5', 'Retry')}
           </Button>
         </div>

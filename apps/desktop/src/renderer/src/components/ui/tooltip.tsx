@@ -10,12 +10,16 @@ function Tooltip({ disableHoverablePopup = true, ...props }: TooltipPrimitive.Ro
   // Why: app tooltips are non-interactive labels. Letting the floating popup
   // keep itself open can block the controls it is describing. Base UI has no
   // provider-level switch, so the guard lives per-Root instead.
+  // Why: delay lives on the provider only, so every Root carries one — a Root
+  // rendered outside a provider would otherwise wait Base UI's 600ms default.
   return (
-    <TooltipPrimitive.Root
-      data-slot="tooltip"
-      disableHoverablePopup={disableHoverablePopup}
-      {...props}
-    />
+    <TooltipProvider>
+      <TooltipPrimitive.Root
+        data-slot="tooltip"
+        disableHoverablePopup={disableHoverablePopup}
+        {...props}
+      />
+    </TooltipProvider>
   )
 }
 

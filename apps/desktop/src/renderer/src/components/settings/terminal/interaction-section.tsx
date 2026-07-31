@@ -179,7 +179,7 @@ export function TerminalInteractionSection({
                   })
                 }
               >
-                <RotateCcw weight="regular" className="size-3.5" />
+                <RotateCcw className="size-3.5" />
                 {translate('auto.components.settings.TerminalPane.scrollSpeed.reset', 'Reset')}
               </Button>
             </div>

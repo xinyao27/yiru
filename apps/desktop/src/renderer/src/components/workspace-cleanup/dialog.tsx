@@ -67,6 +67,7 @@ import {
   getReviewPillTone,
   shouldShowGitMetadataChip
 } from './candidate-row-data'
+import { WorkspaceCleanupListNotices } from './list-notices'
 import {
   filterWorkspaceCleanupCandidates,
   getWorkspaceCleanupReviewInfo,
@@ -215,7 +216,6 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
   const openRef = useRef(open)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set())
-  const [rowsScrollElement, setRowsScrollElement] = useState<HTMLDivElement | null>(null)
   const [activeView, setActiveView] = useState<WorkspaceCleanupView>('ready')
   const [confirming, setConfirming] = useState(false)
   const [confirmCandidates, setConfirmCandidates] = useState<WorkspaceCleanupCandidate[]>([])
@@ -712,7 +712,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                           {loading ? (
                             <LoadingIndicator className="size-3.5" />
                           ) : (
-                            <RefreshCcw weight="regular" className="size-3.5" />
+                            <RefreshCcw className="size-3.5" />
                           )}
                         </Button>
                       }
@@ -733,7 +733,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                     )}
                     onClick={() => closeModal()}
                   >
-                    <X weight="regular" className="size-4" />
+                    <X className="size-4" />
                   </Button>
                 </div>
               </div>
@@ -848,110 +848,50 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                     onRestoreIgnored={() => void resetDismissals()}
                   />
                 ) : null}
-                <ScrollArea className="min-h-0 flex-1" viewportRef={setRowsScrollElement}>
-                  <div>
-                    {initialLoading ? <SkeletonRows /> : null}
-                    {!loading && scan && candidates.length === 0 && !scanNoticeMessage ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.d3eef9463d',
-                          'No inactive workspaces to delete.'
-                        )}
-                      />
-                    ) : null}
-                    {!loading && scan && candidates.length === 0 && scanNoticeMessage ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.97c772c4fe',
-                          'No inactive workspaces found in checked repositories.'
-                        )}
-                      />
-                    ) : null}
-                    {!loading &&
-                    scan &&
-                    candidates.length > 0 &&
-                    filteredCandidates.length === 0 ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.a19040cd67',
-                          'No inactive workspaces match the selected repos.'
-                        )}
-                        actionLabel="Show all repos"
-                        onAction={() => setRepoSelection(new Set(eligibleRepoIds))}
-                      />
-                    ) : null}
-                    {!loading &&
-                    scan &&
-                    filteredCandidates.length > 0 &&
-                    visibleCandidates.length === 0 ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.4719327c9c',
-                          'All cleanup suggestions are ignored.'
-                        )}
-                        actionLabel="Review ignored workspaces"
-                        onAction={() => setActiveView('hidden')}
-                      />
-                    ) : null}
-                    {!loading &&
-                    scan &&
-                    activeRows.length === 0 &&
-                    activeBaseRows.length > 0 &&
-                    activeFilters ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.3d957ff117',
-                          'No workspaces match these filters.'
-                        )}
-                        actionLabel={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.e94b1f8bb4',
-                          'Clear filters'
-                        )}
-                        onAction={() => setFilters(DEFAULT_FILTERS)}
-                      />
-                    ) : null}
-                    {!loading &&
-                    scan &&
-                    activeRows.length === 0 &&
-                    visibleCandidates.length > 0 &&
-                    !activeFilters ? (
-                      <EmptyState
-                        title={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.f68d538c63',
-                          'No workspaces in this cleanup set.'
-                        )}
-                      />
-                    ) : null}
-                    <WorkspaceCleanupCandidateList
-                      rows={activeRows}
-                      scrollElement={rowsScrollElement}
-                      renderRow={(candidate, index) => (
-                        <CandidateRow
-                          key={candidate.worktreeId}
-                          candidate={candidate}
-                          reviewInfo={
-                            reviewInfoByWorktreeId.get(candidate.worktreeId) ?? EMPTY_REVIEW_INFO
-                          }
-                          last={activeRows.length > 1 && index === activeRows.length - 1}
-                          expanded={expandedRowIds.has(candidate.worktreeId)}
-                          lastActivityLabel={formatRelativeTime(candidate.lastActivityAt)}
-                          removing={loading || deletingWorktreeIds.has(candidate.worktreeId)}
-                          selected={
-                            selectedIds.has(candidate.worktreeId) &&
-                            !loading &&
-                            !deletingWorktreeIds.has(candidate.worktreeId)
-                          }
-                          failure={rowFailures[candidate.worktreeId]}
-                          onToggleExpanded={toggleExpandedRow}
-                          onToggleSelected={toggleSelectedRow}
-                          onView={handleViewCandidate}
-                          onIgnore={ignoreCandidate}
-                          onRemove={handleRemoveRow}
-                        />
-                      )}
+                <WorkspaceCleanupCandidateList
+                  rows={activeRows}
+                  header={
+                    <WorkspaceCleanupListNotices
+                      activeBaseRowCount={activeBaseRows.length}
+                      activeFilters={activeFilters}
+                      activeRowCount={activeRows.length}
+                      candidateCount={candidates.length}
+                      filteredCandidateCount={filteredCandidates.length}
+                      hasScan={scan != null}
+                      initialLoading={initialLoading}
+                      loading={loading}
+                      scanNoticeMessage={scanNoticeMessage}
+                      visibleCandidateCount={visibleCandidates.length}
+                      onClearFilters={() => setFilters(DEFAULT_FILTERS)}
+                      onShowAllRepos={() => setRepoSelection(new Set(eligibleRepoIds))}
+                      onShowIgnored={() => setActiveView('hidden')}
                     />
-                  </div>
-                </ScrollArea>
+                  }
+                  renderRow={(candidate, index) => (
+                    <CandidateRow
+                      key={candidate.worktreeId}
+                      candidate={candidate}
+                      reviewInfo={
+                        reviewInfoByWorktreeId.get(candidate.worktreeId) ?? EMPTY_REVIEW_INFO
+                      }
+                      last={activeRows.length > 1 && index === activeRows.length - 1}
+                      expanded={expandedRowIds.has(candidate.worktreeId)}
+                      lastActivityLabel={formatRelativeTime(candidate.lastActivityAt)}
+                      removing={loading || deletingWorktreeIds.has(candidate.worktreeId)}
+                      selected={
+                        selectedIds.has(candidate.worktreeId) &&
+                        !loading &&
+                        !deletingWorktreeIds.has(candidate.worktreeId)
+                      }
+                      failure={rowFailures[candidate.worktreeId]}
+                      onToggleExpanded={toggleExpandedRow}
+                      onToggleSelected={toggleSelectedRow}
+                      onView={handleViewCandidate}
+                      onIgnore={ignoreCandidate}
+                      onRemove={handleRemoveRow}
+                    />
+                  )}
+                />
               </div>
             </div>
           </>
@@ -1353,7 +1293,7 @@ function ConfirmRemove({
             )}
             onClick={onCancel}
           >
-            <X weight="regular" className="size-4" />
+            <X className="size-4" />
           </Button>
         </div>
       </DialogHeader>
@@ -1557,37 +1497,6 @@ function formatWorkspaceCleanupProgress(progress: WorkspaceCleanupScanProgress |
     {
       value0: progress.scannedWorktreeCount
     }
-  )
-}
-
-function SkeletonRows(): React.JSX.Element {
-  return (
-    <div className="space-y-2">
-      {[0, 1, 2].map((index) => (
-        <div key={index} className="border-border bg-muted/35 h-24 animate-pulse border" />
-      ))}
-    </div>
-  )
-}
-
-function EmptyState({
-  title,
-  actionLabel,
-  onAction
-}: {
-  title: string
-  actionLabel?: string
-  onAction?: () => void
-}): React.JSX.Element {
-  return (
-    <div className="border-border bg-muted/20 text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 border text-sm">
-      <span>{title}</span>
-      {actionLabel && onAction ? (
-        <Button variant="outline" size="sm" onClick={onAction}>
-          {actionLabel}
-        </Button>
-      ) : null}
-    </div>
   )
 }
 

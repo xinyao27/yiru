@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 import { getConnectionId } from '../../../../lib/connection-context'
 import { commitRuntimeGit } from '../../../../runtime/git-client'
+import { useAppStore } from '../../../../store'
 import { writeCommitDraftForWorktree } from '../panel-state'
 import type { SourceControlOperationTarget } from '../panel-types'
 import type { SourceControlLifecycleController } from './lifecycle'
@@ -18,7 +19,6 @@ export function useSourceControlCommitAction(scope: SourceControlLifecycleContro
     grouped,
     refreshActiveGitStatusAfterMutation,
     refreshBranchCompareRef,
-    refreshGitHistoryRef,
     setCommitErrorForWorktree,
     setCommitInFlightByWorktree,
     unresolvedConflicts,
@@ -105,7 +105,7 @@ export function useSourceControlCommitAction(scope: SourceControlLifecycleContro
         }
         if (!options?.target) {
           void refreshBranchCompareRef.current()
-          void refreshGitHistoryRef.current()
+          void useAppStore.getState().refreshGitGraph(target.worktreeId)
         }
         return true
       } catch (error) {
@@ -130,7 +130,6 @@ export function useSourceControlCommitAction(scope: SourceControlLifecycleContro
       grouped.staged.length,
       refreshBranchCompareRef,
       refreshActiveGitStatusAfterMutation,
-      refreshGitHistoryRef,
       setCommitErrorForWorktree,
       setCommitInFlightByWorktree,
       updateCommitDrafts,

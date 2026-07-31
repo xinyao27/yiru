@@ -57,7 +57,7 @@ export function BrowserUseExamples(): React.JSX.Element {
               {prompt}
               {translate('auto.components.settings.BrowserUseExamples.b84807f228', '"')}
             </p>
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={

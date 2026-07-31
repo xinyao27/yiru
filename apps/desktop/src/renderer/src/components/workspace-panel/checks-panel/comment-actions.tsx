@@ -234,7 +234,7 @@ export function CommentMoreMenu({
         {hasQueue && (hasGoToComment || hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasGoToComment && (
           <DropdownMenuItem onClick={() => window.api.shell.openUrl(comment.url)}>
-            <ExternalLink weight="regular" />
+            <ExternalLink />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.d3923d18fe',
               'Go to comment'

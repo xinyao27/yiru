@@ -1348,7 +1348,9 @@
                 "panel": {
                   "changes": "Changes",
                   "review": "Review",
-                  "views": "Changes and review"
+                  "views": "Changes and review",
+                  "mergeRequestNumber": "{{value0}} !{{value1}}",
+                  "pullRequestNumber": "{{value0}} #{{value1}}"
                 }
               }
             }
@@ -4694,10 +4696,6 @@
           "5f02e6fb21": "リッチ エディター モードでローカル markdown レビュー ノート コントロールを表示します。",
           "51161d1647": "ファイルの編集時にミニマップの概要を表示します。",
           "6690b1ffb9": "ミニマップ",
-          "5a1ea6eaa2": "隠れた",
-          "73a09aad63": "示されている",
-          "1de48ad940": "デフォルトの差分ファイル ツリー",
-          "1b87897af9": "結合された差分ビューを開くときにファイル ツリーを表示または非表示にします。",
           "12cbc0d0d6": "並んで",
           "05b6df93b3": "インライン",
           "7311f67ee7": "デフォルトの差分ビュー",
@@ -6957,13 +6955,7 @@
             "9c72990db8": "ミニマップ",
             "716a4dfb1f": "ファイルの編集時にミニマップの概要を表示します。",
             "6f584fcb48": "ミニマップ",
-            "19baae651b": "サイドバー",
-            "973ed6bfbf": "結合された差分",
-            "0a02059549": "ファイルツリー",
-            "2f42852568": "木",
             "3b5733573e": "差分",
-            "dec71988f0": "結合された差分ビューを開くときにファイル ツリーを表示または非表示にします。",
-            "adec13f2ef": "デフォルトの差分ファイル ツリー",
             "be24c7cd67": "分割",
             "233f7e2f37": "並んで",
             "0a5fa65926": "インライン",
@@ -8800,7 +8792,9 @@
               "a9bf7c171a": "プッシュ失敗",
               "834cb3f23d": "AIで修正",
               "783a808870": "閉じる"
-            }
+            },
+            "5abb0da297": "ブランチをレビュー",
+            "e7f8a9b0c1": "Git Graph"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "選択した agent を開始できませんでした。",
@@ -10496,18 +10490,6 @@
           "28921f5bf9": "コピーされました",
           "1f9f4def45": "コードをコピーする"
         },
-        "CombinedDiffFileTree": {
-          "f984289373": "現在のフィルターに一致するファイルはありません。",
-          "eafe1aeb53": "フィルターをリセットする",
-          "be119cb9d1": "閲覧したファイル",
-          "c00020f081": "ファイル拡張子",
-          "cd0e0ed79e": "差分ファイルのフィルタリング",
-          "4cc7b83ffe": "ファイルをフィルタリング...",
-          "21783df79f": "ファイルツリーを折りたたむ",
-          "481e63ca52": "ファイル",
-          "d5ac717d65": "commit されていない",
-          "39b6b9e4e4": "Committed on Branch"
-        },
         "CombinedDiffViewer": {
           "35cc27aeb2": "ソース管理内",
           "e3b9a6ce02": "もっと",
@@ -10519,7 +10501,6 @@
           "0f806a2ab1": "キャンセル",
           "80a286d8f5": "このワークツリーから?",
           "7e7ca60816": "変更されたファイル",
-          "b6c3b84476": "ファイルツリーを表示",
           "39f8007549": "競合をレビューする",
           "39e73e7181": "はこの差分ビューから除外されました。",
           "689b99f8ad": "未解決の競合",
@@ -10529,8 +10510,6 @@
           "45cf23b418": "メモを消去できませんでした。",
           "0fb870a0fe": "メモ",
           "8ab3248fd8": "注記",
-          "ec5053c7f5": "サイドバイサイド",
-          "f786fd54e1": "インライン",
           "ea08dae15b": "すべて折りたたむ",
           "19c45cfdc0": "すべて展開",
           "982d14bfa5": "commit されていない差分を開く",
@@ -10538,9 +10517,7 @@
           "8368d256ec": "結合分岐",
           "8f68ad9ca9": "{{value0}} AI {{value1}} を表示",
           "724a13568d": "{{value0}} に",
-          "6094135eec": "vs {{value0}}",
-          "a4420ca1f7": "ラップオン",
-          "dde325ddfe": "ラップオフ"
+          "6094135eec": "vs {{value0}}"
         },
         "ConflictComponents": {
           "f338288514": "競合するコンテンツを読み込んでいます...",
@@ -11108,6 +11085,16 @@
           "cancel": "Cancel",
           "apply": "Apply changes",
           "loading": "Loading preview…"
+        },
+        "combined": {
+          "diff": {
+            "viewer": {
+              "604195710f": "差分をインライン表示",
+              "5b6c3f9596": "差分を左右に並べて表示",
+              "820b3e0422": "折り返しを有効にする",
+              "7b47fe46c8": "折り返しを無効にする"
+            }
+          }
         }
       },
       "diff": {
@@ -12077,6 +12064,75 @@
           "other": "その他",
           "refreshAriaLabel": "ローカル使用統計を更新",
           "refresh": "使用状況を更新"
+        }
+      },
+      "workspace-panel": {
+        "GitGraphState": {
+          "f3a2c1d0e5": "Failed to load commits",
+          "a4b5c6d7e8": "Failed to load more commits"
+        },
+        "GitGraphView": {
+          "a1b2c3d4e5": "Git Graph",
+          "b2c3d4e5f6": "Close Git Graph",
+          "c3d4e5f6a7": "Loading commits…",
+          "d4e5f6a7b8": "No commits yet"
+        },
+        "git-graph": {
+          "BranchFilterDropdown": {
+            "a1b2c3d4e5": "All branches",
+            "b2c3d4e5f6": "{{value0}} branches",
+            "c3d4e5f6a7": "Filter branches…",
+            "d4e5f6a7b8": "Show all branches"
+          },
+          "CommitContextMenu": {
+            "a1b2c3d4e5": "Open commit in browser",
+            "b2c3d4e5f6": "Copy commit hash",
+            "c3d4e5f6a7": "Copy commit message",
+            "d4e5f6a7b8": "Explain changes"
+          },
+          "CommitDetails": {
+            "a1b2c3d4e5": "Failed to load commit files",
+            "b2c3d4e5f6": "Hash",
+            "c3d4e5f6a7": "Parents",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Loading files…",
+            "f6a7b8c9d0": "No file changes in this commit",
+            "a7b8c9d0e1": "Open all changes together"
+          },
+          "CommitTable": {
+            "b2c3d4e5f6": "Description",
+            "c3d4e5f6a7": "Date",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Commit",
+            "a1b2c3d4e5": "Load More Commits"
+          },
+          "ControlBar": {
+            "a1b2c3d4e5": "Show Remote Branches",
+            "b2c3d4e5f6": "Find commits",
+            "c3d4e5f6a7": "Refresh",
+            "d4e5f6a7b8": "Close Git Graph"
+          },
+          "FindWidget": {
+            "a1b2c3d4e5": "No results",
+            "b2c3d4e5f6": "{{value0}} of {{value1}}",
+            "c3d4e5f6a7": "Find by subject, author, or hash…",
+            "d4e5f6a7b8": "Previous match",
+            "e5f6a7b8c9": "Next match",
+            "f6a7b8c9d0": "Close find"
+          },
+          "UncommittedRow": {
+            "a1b2c3d4e5": "Uncommitted Changes"
+          },
+          "GitGraphView": {
+            "a1b2c3d4e5": "Loading commits…",
+            "b2c3d4e5f6": "No commits yet",
+            "c3d4e5f6a7": "No matching commits in the loaded history yet — load more to keep searching.",
+            "d4e5f6a7b8": "No commits found for the selected branches in the loaded history.",
+            "e5f6a7b8c9": "Load More Commits"
+          },
+          "useGitGraphView": {
+            "a1b2c3d4e6": "Could not find that commit in the loaded history"
+          }
         }
       }
     },

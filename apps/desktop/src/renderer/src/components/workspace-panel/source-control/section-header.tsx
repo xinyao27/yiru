@@ -3,7 +3,6 @@ import type React from 'react'
 
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
-import { AccordionTrigger } from '../../ui/accordion'
 import { Button } from '../../ui/button'
 
 type SourceControlSectionHeaderContentProps = {
@@ -55,7 +54,6 @@ export function SourceControlSectionHeader({
           onClick={onToggle}
         >
           <ChevronDown
-            weight="regular"
             className={cn(
               'text-muted-foreground group-hover/section:text-accent-foreground size-4 shrink-0 transition-transform',
               isCollapsed && '-rotate-90'
@@ -69,28 +67,6 @@ export function SourceControlSectionHeader({
         </Button>
         <div className="flex shrink-0 items-center">{actions}</div>
       </div>
-    </div>
-  )
-}
-
-export function SourceControlAccordionSectionHeader({
-  label,
-  count,
-  conflictCount = 0,
-  actions
-}: SourceControlSectionHeaderContentProps & {
-  actions?: React.ReactNode
-}): React.JSX.Element {
-  // Why: local and projected Source Control sections must keep one hover and disclosure surface.
-  return (
-    <div className="pt-3 pb-1">
-      <AccordionTrigger indicatorPosition="start" variant="section" actions={actions}>
-        <SourceControlSectionHeaderContent
-          label={label}
-          count={count}
-          conflictCount={conflictCount}
-        />
-      </AccordionTrigger>
     </div>
   )
 }

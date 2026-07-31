@@ -133,7 +133,7 @@ export function FileExplorerToolbar({
                 {refresh.showRefreshSpinner ? (
                   <LoadingIndicator className="size-3" />
                 ) : (
-                  <RefreshCw weight="regular" className="size-3" />
+                  <RefreshCw className="size-3" />
                 )}
               </Button>
             }
@@ -160,7 +160,7 @@ export function FileExplorerToolbar({
                         'More Explorer Actions'
                       )}
                     >
-                      <Ellipsis weight="regular" className="size-3" />
+                      <Ellipsis className="size-3" />
                     </Button>
                   }
                 />

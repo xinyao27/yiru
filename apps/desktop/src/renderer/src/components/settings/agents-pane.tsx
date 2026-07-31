@@ -561,7 +561,7 @@ function AgentRow({
             }
             className="text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:bg-muted/50 focus-visible:text-foreground flex size-7 items-center justify-center transition-colors outline-none"
           >
-            <ExternalLink weight="regular" className="size-3.5" />
+            <ExternalLink className="size-3.5" />
           </a>
 
           <div className="flex size-7 items-center justify-center">
@@ -585,7 +585,6 @@ function AgentRow({
                 className="size-7"
               >
                 <ChevronDown
-                  weight="regular"
                   className={cn('size-3.5 transition-transform', cmdOpen && 'rotate-180')}
                 />
               </Button>
@@ -865,7 +864,7 @@ export function AgentsPane({
                 {isRefreshing ? (
                   <LoadingIndicator className="size-3" />
                 ) : (
-                  <RefreshCw weight="regular" className="size-3" />
+                  <RefreshCw className="size-3" />
                 )}
                 {isRefreshing
                   ? translate('auto.components.settings.AgentsPane.c9b33eb5c0', 'Refreshing…')

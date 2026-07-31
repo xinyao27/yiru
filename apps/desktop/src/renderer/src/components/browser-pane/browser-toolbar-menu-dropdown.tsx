@@ -81,7 +81,7 @@ export function BrowserToolbarMenuDropdown({
               'Browser menu'
             )}
           >
-            <Ellipsis weight="regular" className="size-4" />
+            <Ellipsis className="size-4" />
           </Button>
         }
       />

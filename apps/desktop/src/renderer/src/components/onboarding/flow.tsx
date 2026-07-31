@@ -176,7 +176,7 @@ export default function OnboardingFlow({
   }, [requestSkipConfirmation, skipConfirmOpen])
 
   return (
-    <TooltipProvider delay={0} timeout={0}>
+    <TooltipProvider timeout={0}>
       {/* Why: modal backdrops intentionally reveal and dim the app beneath;
           unlike foreground surfaces, this alpha is part of the interaction. */}
       <div

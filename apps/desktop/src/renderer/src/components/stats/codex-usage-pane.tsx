@@ -151,7 +151,7 @@ export function CodexUsagePane(): React.JSX.Element {
             <ShareUsageButton provider="codex" summary={summary} daily={daily} range={range} />
           )}
           <DropdownMenu>
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -206,7 +206,7 @@ export function CodexUsagePane(): React.JSX.Element {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <TooltipProvider delay={250}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -223,7 +223,7 @@ export function CodexUsagePane(): React.JSX.Element {
                     {scanState.isScanning ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw weight="regular" className="size-3.5" />
+                      <RefreshCw className="size-3.5" />
                     )}
                   </Button>
                 }

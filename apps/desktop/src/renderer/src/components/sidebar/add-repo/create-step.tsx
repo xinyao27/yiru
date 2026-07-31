@@ -228,7 +228,6 @@ export function CreateStep({
               ) : null}
             </div>
             <ChevronDown
-              weight="regular"
               className={cn(
                 'size-4 shrink-0 self-center text-muted-foreground transition-transform',
                 advancedOpen && 'rotate-180'

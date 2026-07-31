@@ -46,7 +46,6 @@ export function AppearanceAdvancedDisclosure({
         className="text-foreground flex h-auto w-full justify-start gap-2 border-0 py-1 text-sm font-semibold whitespace-normal focus-visible:outline-none disabled:cursor-default"
       >
         <ChevronRight
-          weight="regular"
           className={cn(
             'size-3.5 text-muted-foreground transition-transform',
             expanded && 'rotate-90'

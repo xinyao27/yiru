@@ -312,7 +312,7 @@ export function HeroFlow({
                   {refreshingNetworkInterfaces ? (
                     <LoadingIndicator className="size-3.5" />
                   ) : (
-                    <RefreshCw weight="regular" className="size-3.5" />
+                    <RefreshCw className="size-3.5" />
                   )}
                 </MobileHeroButton>
               </div>
@@ -347,7 +347,7 @@ export function HeroFlow({
           className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.flowBack)}
           onClick={onBack}
         >
-          <ArrowLeft weight="regular" className="size-3" />
+          <ArrowLeft className="size-3" />
           {translate('auto.components.mobile.MobileHero.b622eba64d', 'Back')}
         </MobileHeroButton>
         {isLast ? (
@@ -362,7 +362,7 @@ export function HeroFlow({
               onClick={onDone}
             >
               {translate('auto.components.mobile.MobileHero.3f90dbd274', 'Done')}
-              <ArrowRight weight="regular" className="size-3.5" />
+              <ArrowRight className="size-3.5" />
             </MobileHeroButton>
           ) : (
             <span />
@@ -378,7 +378,7 @@ export function HeroFlow({
             onClick={onContinue}
           >
             {translate('auto.components.mobile.MobileHero.a8fb43cf1c', 'Continue')}
-            <ArrowRight weight="regular" className="size-3.5" />
+            <ArrowRight className="size-3.5" />
           </MobileHeroButton>
         )}
       </div>

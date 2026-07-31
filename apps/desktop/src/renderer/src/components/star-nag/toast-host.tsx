@@ -136,7 +136,7 @@ function StarNagToast({
           disabled={busy}
           aria-label={translate('auto.components.star.nag.StarNagToastHost.dismiss', 'Dismiss')}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       </div>
       <div className="mt-3 flex gap-2">
@@ -150,7 +150,7 @@ function StarNagToast({
           {busy ? (
             <LoadingIndicator className="size-3.5" />
           ) : mode === 'web' ? (
-            <ExternalLink weight="regular" className="size-3.5" />
+            <ExternalLink className="size-3.5" />
           ) : (
             <Star className="size-3.5" />
           )}

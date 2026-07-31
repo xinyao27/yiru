@@ -40,7 +40,7 @@ function WorkspacePanelIcon({
     case 'vault':
       return <ClockCounterClockwise className={className} />
     case 'workspaces':
-      return <Workflow weight="regular" className={className} />
+      return <Workflow className={className} />
     case 'pr-checks':
       return <ListChecks className={className} />
     case 'source-control':

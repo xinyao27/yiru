@@ -36,7 +36,7 @@ export function ShortcutRemoveButton({
             )}
             onClick={() => onRemove(actionId, bindingIndex)}
           >
-            <X weight="regular" className="size-3" />
+            <X className="size-3" />
           </Button>
         }
       />

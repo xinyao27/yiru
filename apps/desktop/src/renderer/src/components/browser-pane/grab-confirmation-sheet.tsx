@@ -140,7 +140,7 @@ export default function GrabConfirmationSheet({
           </span>
         </div>
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel}>
-          <X weight="regular" className="size-4" />
+          <X className="size-4" />
         </Button>
       </div>
 

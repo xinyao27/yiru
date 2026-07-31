@@ -1,23 +1,33 @@
 import {
+  LegendList,
+  type LegendListRef,
+  type LegendListRenderItemProps
+} from '@legendapp/list/react'
+import {
   Check,
   Copy,
+  ArrowsInLineVertical as CollapseSections,
+  ArrowsOutLineVertical as ExpandSections,
   Chat as MessageSquare,
-  SidebarSimple as PanelLeftOpen,
+  Columns as SideBySideColumns,
   Sparkle as Sparkles,
   Trash as Trash2,
   TextAlignLeft as WrapText
 } from '@phosphor-icons/react'
-import { elementScroll, useVirtualizer } from '@tanstack/react-virtual'
 import type { editor as monacoEditor } from 'monaco-editor'
 /* eslint-disable max-lines -- Why: combined diff behavior depends on one
 component-level state machine that coordinates lazy loading, inline editing,
 restore-on-remount caching, and scroll preservation. Splitting those pieces
 across smaller files would make the lifecycle edges harder to reason about and
 more error-prone than keeping the whole viewer flow together. */
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset virtualizer measurement and generation state in lockstep with external scroll restoration. */
-import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from 'react'
+/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset list measurement and generation state in lockstep with external scroll restoration. */
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react'
 import { toast } from 'sonner'
 
+import {
+  getLegendListScrollElement,
+  LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS
+} from '@/components/sidebar/list-scroll-area'
 import { useAppStore } from '@/store'
 
 import type {
@@ -26,11 +36,6 @@ import type {
   GitDiffResult,
   GitStatusEntry
 } from '../../../../../shared/types'
-import {
-  useVirtualizedScrollAnchor,
-  type VirtualizedScrollAnchor
-} from '../../../hooks/use-virtualized-scroll-anchor'
-import { getVirtualizedScrollAnchorForOffset } from '../../../hooks/virtualized-scroll-anchor-recording'
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
 import { getConnectionIdForFile } from '../../../lib/connection-context'
@@ -43,7 +48,6 @@ import {
   getRuntimeGitDiff
 } from '../../../runtime/git-client'
 import { settingsForRuntimeOwner } from '../../../runtime/rpc-client'
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '../../../runtime/virtualized-scroll-anchor-record-request'
 import { findWorktreeById } from '../../../store/slices/worktree-helpers'
 import { selectWorktreeDiffCommentsOrEmpty } from '../../../store/worktree-diff-comments-selector'
 import '../monaco-setup'
@@ -64,11 +68,10 @@ import { formatDiffComments } from '../diff-comments-format'
 import { DiffNotesSendMenu } from '../diff-notes-send-menu'
 import { removeDiffSectionMeasuredHeight } from '../diff-section/height-cache'
 import { DiffSectionItem } from '../diff-section/item'
-import { getDiffSectionEstimatedHeight, isIntrinsicHeightImageDiff } from '../diff-section/layout'
+import { DIFF_SECTION_HEADER_HEIGHT } from '../diff-section/layout'
 import type { DiffSection } from '../diff-section/types'
 import { getLargeDiffRenderLimit } from '../large-diff-render-limit'
 import { getStoredTextDiffContent, getStoredTextDiffResult } from '../large-diff-section-content'
-import { createProgrammaticScrollMarks } from '../programmatic-scroll-marks'
 import { setWithLRU } from '../scroll-cache'
 import type { OpenFile } from '../state'
 import { getCombinedDiffCommitMessageBody } from './commit-message'
@@ -78,12 +81,6 @@ import {
   resolveCombinedUncommittedSnapshotEntries,
   shouldAutoReloadCombinedDiffFromGitStatus
 } from './entries'
-import {
-  CombinedDiffFileTree,
-  createCombinedDiffSectionIndexMap,
-  handleCombinedDiffFileTreeNavigation
-} from './file-tree'
-import { getCombinedDiffFileTreeSectionKey } from './file-tree-model'
 import { getInitialCombinedDiffSectionLoadIndices } from './initial-section-load'
 import { createCombinedDiffLoadScheduler } from './load-scheduler'
 import {
@@ -92,6 +89,14 @@ import {
 } from './scrollbar-drag'
 import { combinedDiffSectionsMatchEntryMetadata } from './section-cache-match'
 import { getCombinedDiffSectionConnectionId } from './section-connection'
+import {
+  COMBINED_DIFF_REVEAL_SECTION_EVENT,
+  createCombinedDiffSectionIndexMap,
+  getCombinedDiffEntrySectionKey,
+  handleCombinedDiffSectionNavigation,
+  type CombinedDiffEntry,
+  type CombinedDiffRevealSectionRequest
+} from './section-model'
 
 type CachedCombinedDiffViewState = {
   entrySignature: string
@@ -111,7 +116,6 @@ type CombinedDiffScrollThumb = {
 
 const combinedDiffViewStateCache = new Map<string, CachedCombinedDiffViewState>()
 const combinedDiffScrollTopCache = new Map<string, number>()
-const combinedDiffScrollAnchorCache = new Map<string, VirtualizedScrollAnchor>()
 
 function buildCombinedGitStatusSignature(
   sections: readonly { path: string }[],
@@ -165,13 +169,17 @@ if (typeof window !== 'undefined') {
     }
   })
 }
-const COMBINED_DIFF_OVERSCAN = 5
+// Why: LegendList prerenders by distance, not row count. Rows here are whole
+// Monaco diffs, so this is deliberately under one viewport of extra work.
+const COMBINED_DIFF_DRAW_DISTANCE_PX = 800
+// Why: LegendList 3.3.3 takes one flat estimate for every unmeasured row; a
+// mid-size collapsed-context diff is the shape most combined diffs are made of.
+const COMBINED_DIFF_ESTIMATED_SECTION_HEIGHT = 220
 const COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT = 64
 const EMPTY_GIT_STATUS_ENTRIES: GitStatusEntry[] = []
 const EMPTY_GIT_BRANCH_ENTRIES: GitBranchChangeEntry[] = []
 let combinedDiffCollapsedPreference: boolean | null = null
 let combinedDiffSideBySidePreference: boolean | null = null
-let combinedDiffFileTreeCollapsedPreference: boolean | null = null
 // Why: local Electron IPC has no RPC timeout; a hung git diff should turn into
 // a retryable row error instead of leaving the editor in "Loading..." forever.
 const COMBINED_DIFF_SECTION_LOAD_TIMEOUT_MS = 30_000
@@ -210,14 +218,6 @@ function getDiffSectionLoadErrorMessage(error: unknown): string {
 
 function getInitialCombinedDiffSideBySide(diffDefaultView: string | undefined): boolean {
   return combinedDiffSideBySidePreference ?? diffDefaultView === 'side-by-side'
-}
-
-function getInitialCombinedDiffFileTreeCollapsed(
-  combinedDiffFileTreeVisibleByDefault: boolean | undefined
-): boolean {
-  // Why: the tree is opt-in for new sessions; only an explicit saved setting
-  // should make it the opening surface while settings are still loading.
-  return combinedDiffFileTreeCollapsedPreference ?? combinedDiffFileTreeVisibleByDefault !== true
 }
 
 export default function CombinedDiffViewer({
@@ -285,33 +285,22 @@ export default function CombinedDiffViewer({
   // Why: clipboard IPC can resolve after the combined diff unmounts; skip
   // copied feedback instead of starting a reset timer on a stale viewer.
   const notesCopyMountedRef = useRef(false)
-  const [fileTreeCollapsed, setFileTreeCollapsedState] = useState(() =>
-    getInitialCombinedDiffFileTreeCollapsed(settings?.combinedDiffFileTreeVisibleByDefault)
-  )
   // Why: `generation` is a state counter used as a React key to force remounting
   // DiffSectionItem components when the entry list changes. A separate ref
   // (`generationRef`) is kept in sync for stale-async-result detection inside
   // `loadSection`, where reading state would capture a stale closure value.
   const [generation, setGeneration] = useState(0)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<LegendListRef>(null)
+  // Why: LegendList owns the scroll container, so it only exists after its own
+  // commit; effects that observe it have to re-run when the element arrives.
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [scrollThumb, setScrollThumb] = useState<CombinedDiffScrollThumb>({
     visible: false,
     top: 0,
     height: COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT
   })
   const scrollOffsetRef = useRef(combinedDiffScrollTopCache.get(viewStateKey) ?? 0)
-  const scrollAnchorRef = useRef<VirtualizedScrollAnchor>(
-    combinedDiffScrollAnchorCache.get(viewStateKey) ?? null
-  )
-  const latestDomScrollAnchorRef = useRef<VirtualizedScrollAnchor>(
-    combinedDiffScrollAnchorCache.get(viewStateKey) ?? null
-  )
-  const directScrollInputUntilRef = useRef(0)
-  const [programmaticScrollMarks] = useState(createProgrammaticScrollMarks)
-  // Why: a scroll event pinned at a shrunken max is a browser clamp, not user
-  // input; bumping this asks the anchor restore to re-pin the viewport.
-  const [clampRestoreCount, setClampRestoreCount] = useState(0)
-  const lastScrollHeightRef = useRef(0)
   const activeScrollbarDragCleanupRef = useRef<CombinedDiffScrollbarDragCleanup | null>(null)
   const loadedIndicesRef = useRef<Set<number>>(new Set())
   const loadingIndicesRef = useRef<Set<number>>(new Set())
@@ -347,15 +336,6 @@ export default function CombinedDiffViewer({
     setScrollThumb({ visible: true, top, height })
   }, [])
 
-  const markDirectScrollInput = useCallback((): void => {
-    directScrollInputUntilRef.current = window.performance.now() + 250
-  }, [])
-
-  const hasDirectScrollInput = useCallback(
-    () => window.performance.now() < directScrollInputUntilRef.current,
-    []
-  )
-
   const clearNotesCopiedResetTimer = useCallback((): void => {
     if (notesCopiedResetTimerRef.current !== null) {
       window.clearTimeout(notesCopiedResetTimerRef.current)
@@ -367,13 +347,15 @@ export default function CombinedDiffViewer({
     activeScrollbarDragCleanupRef.current?.()
   }, [])
 
-  const setScrollContainerRef = useCallback(
-    (node: HTMLDivElement | null) => {
+  const setCombinedDiffScrollContainer = useCallback(
+    (value: unknown) => {
+      const node = getLegendListScrollElement(value)
       scrollContainerRef.current = node
+      setScrollContainer(node)
       notesCopyMountedRef.current = node !== null
       if (node === null) {
         // Why: copied feedback is tied to the combined-diff surface lifetime;
-        // the root ref unmount is the same boundary that disables stale feedback.
+        // the scroll-root unmount is the same boundary that disables stale feedback.
         clearNotesCopiedResetTimer()
         cleanupActiveScrollbarDrag()
         return
@@ -405,20 +387,6 @@ export default function CombinedDiffViewer({
       setSideBySide(settings.diffDefaultView === 'side-by-side')
     }
   }, [settings?.diffDefaultView])
-
-  useEffect(() => {
-    if (
-      settings?.combinedDiffFileTreeVisibleByDefault !== undefined &&
-      combinedDiffFileTreeCollapsedPreference === null
-    ) {
-      setFileTreeCollapsedState(settings.combinedDiffFileTreeVisibleByDefault === false)
-    }
-  }, [settings?.combinedDiffFileTreeVisibleByDefault])
-
-  const setFileTreeCollapsed = useCallback((collapsed: boolean) => {
-    combinedDiffFileTreeCollapsedPreference = collapsed
-    setFileTreeCollapsedState(collapsed)
-  }, [])
 
   const isBranchMode = file.diffSource === 'combined-branch'
   const isCommitMode = file.diffSource === 'combined-commit'
@@ -473,7 +441,7 @@ export default function CombinedDiffViewer({
       : isCommitMode
         ? commitEntries
         : uncommittedEntries
-  const treeMode = isAllMode
+  const combinedMode = isAllMode
     ? 'all'
     : isBranchMode
       ? 'branch'
@@ -482,7 +450,7 @@ export default function CombinedDiffViewer({
         : 'uncommitted'
   const hasUncommittedEntriesSnapshot = file.uncommittedEntriesSnapshot !== undefined
   const shouldAutoReloadFromGitStatus = shouldAutoReloadCombinedDiffFromGitStatus({
-    mode: treeMode,
+    mode: combinedMode,
     hasUncommittedEntriesSnapshot
   })
   const entrySignature = React.useMemo(
@@ -541,7 +509,7 @@ export default function CombinedDiffViewer({
       combinedDiffSectionsMatchEntryMetadata({
         entries,
         sections: cached.sections,
-        treeMode
+        mode: combinedMode
       })
     const canRestoreCachedSections =
       cached &&
@@ -567,17 +535,13 @@ export default function CombinedDiffViewer({
       )
       loadingIndicesRef.current.clear()
       scrollOffsetRef.current = combinedDiffScrollTopCache.get(viewStateKey) ?? cached.scrollTop
-      scrollAnchorRef.current = combinedDiffScrollAnchorCache.get(viewStateKey) ?? null
-      latestDomScrollAnchorRef.current = scrollAnchorRef.current
       return
     }
 
     scrollOffsetRef.current = combinedDiffScrollTopCache.get(viewStateKey) ?? 0
-    scrollAnchorRef.current = combinedDiffScrollAnchorCache.get(viewStateKey) ?? null
-    latestDomScrollAnchorRef.current = scrollAnchorRef.current
     setSections(
       entries.map((entry) => ({
-        key: getCombinedDiffFileTreeSectionKey(treeMode, entry),
+        key: getCombinedDiffEntrySectionKey(combinedMode, entry),
         path: entry.path,
         status: entry.status,
         area: 'area' in entry ? entry.area : undefined,
@@ -606,7 +570,7 @@ export default function CombinedDiffViewer({
     gitStatusEntries,
     hasUncommittedEntriesSnapshot,
     shouldAutoReloadFromGitStatus,
-    treeMode,
+    combinedMode,
     viewStateKey
   ])
 
@@ -838,171 +802,30 @@ export default function CombinedDiffViewer({
 
   const modifiedEditorsRef = useRef<Map<number, monacoEditor.IStandaloneCodeEditor>>(new Map())
 
-  const virtualizer = useVirtualizer({
-    count: sections.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => {
-      const section = sections[index]
-      if (!section) {
-        return 88
-      }
-
-      return getDiffSectionEstimatedHeight({
-        collapsed: section.collapsed,
-        measuredContentHeight: sectionHeights[index],
-        originalContent: section.originalContent,
-        modifiedContent: section.modifiedContent,
-        changedLineCount:
-          section.added === undefined && section.removed === undefined
-            ? undefined
-            : (section.added ?? 0) + (section.removed ?? 0),
-        useIntrinsicImageHeight: isIntrinsicHeightImageDiff(section.diffResult),
-        isLargeDiffLimited: section.largeDiffRenderLimit?.limited === true,
-        lineCounts: section.largeDiffRenderLimit?.lineCounts ?? undefined
-      })
-    },
-    overscan: COMBINED_DIFF_OVERSCAN,
-    initialOffset: () => scrollOffsetRef.current,
-    // Why: every scroll the virtualizer issues (scrollToIndex, measurement
-    // corrections) must be marked so scroll events can be attributed to the
-    // user only when this code didn't cause them.
-    scrollToFn: (offset, options, instance) => {
-      const target = offset + (options.adjustments ?? 0)
-      // Why: a write to the current position emits no scroll event; marking
-      // it would leave a stale mark that can claim a later user scroll.
-      if (instance.scrollElement?.scrollTop !== target) {
-        programmaticScrollMarks.mark(target)
-      }
-      elementScroll(offset, options, instance)
-    },
-    getItemKey: (index) => {
-      const section = sections[index]
-      if (!section) {
-        return `${index}:${generation}`
-      }
-      return `${section.key}:${section.collapsed ? 'collapsed' : 'expanded'}:${generation}`
-    }
-  })
-  const combinedDiffTotalSize = virtualizer.getTotalSize()
-  const getCombinedDiffSectionKey = useCallback((section: DiffSection): string => section.key, [])
-  const getCombinedDiffSectionElementKey = useCallback(
-    (element: Element): string | null =>
-      element instanceof HTMLElement ? (element.dataset.combinedDiffSectionKey ?? null) : null,
+  const getCombinedDiffSectionItemKey = useCallback(
+    (section: DiffSection): string =>
+      `${section.key}:${section.collapsed ? 'collapsed' : 'expanded'}:${generation}`,
+    [generation]
+  )
+  const getCombinedDiffSectionItemType = useCallback(
+    (section: DiffSection): string => (section.collapsed ? 'collapsed' : 'expanded'),
     []
   )
-  const recordCombinedDiffVirtualScrollAnchor = useCallback(
-    (scrollTop: number): void => {
-      scrollAnchorRef.current = getVirtualizedScrollAnchorForOffset({
-        getRowKey: getCombinedDiffSectionKey,
-        rows: sectionsRef.current,
-        scrollTop,
-        virtualItems: virtualizer.getVirtualItems()
-      })
-      latestDomScrollAnchorRef.current = null
-    },
-    [getCombinedDiffSectionKey, virtualizer]
+  const getCombinedDiffFixedItemSize = useCallback(
+    (_section: DiffSection, _index: number, type: string | undefined): number | undefined =>
+      // Why: a collapsed section is exactly its header. Every other row's height
+      // comes from Monaco, and a wrong fixed size is never corrected by
+      // measurement, so those rows must stay measured.
+      type === 'collapsed' ? DIFF_SECTION_HEADER_HEIGHT : undefined,
+    []
   )
-  const recordCombinedDiffDomScrollAnchor = useCallback((): boolean => {
-    const container = scrollContainerRef.current
-    if (!container) {
-      return false
-    }
-
-    const containerRect = container.getBoundingClientRect()
-    const visibleRows = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-combined-diff-section-row]')
-    )
-      .map((row) => {
-        const key = row.dataset.combinedDiffSectionKey
-        if (!key || !row.isConnected) {
-          return null
-        }
-        const rect = row.getBoundingClientRect()
-        if (
-          rect.height <= 0 ||
-          rect.bottom <= containerRect.top ||
-          rect.top >= containerRect.bottom
-        ) {
-          return null
-        }
-        return { key, rect }
-      })
-      .filter((row): row is { key: string; rect: DOMRect } => row !== null)
-      .sort((a, b) => a.rect.top - b.rect.top)
-
-    const firstVisible = visibleRows[0]
-    if (!firstVisible) {
-      return false
-    }
-
-    const anchor: NonNullable<VirtualizedScrollAnchor> = {
-      fallbackKeys: visibleRows.slice(1).map((row) => row.key),
-      key: firstVisible.key,
-      offset: Math.min(
-        firstVisible.rect.height,
-        Math.max(0, containerRect.top - firstVisible.rect.top)
-      ),
-      scrollTop: container.scrollTop
-    }
-    scrollAnchorRef.current = anchor
-    latestDomScrollAnchorRef.current = anchor
-    return true
-  }, [])
-  const writeCombinedDiffScrollAnchor = useCallback((): void => {
-    const anchor = scrollAnchorRef.current
-    if (anchor) {
-      setWithLRU(combinedDiffScrollAnchorCache, viewStateKey, anchor)
-    } else {
-      combinedDiffScrollAnchorCache.delete(viewStateKey)
-    }
-  }, [viewStateKey])
-  const persistCombinedDiffScrollAnchor = useCallback(
-    (refreshDomAnchor = true): void => {
-      if (refreshDomAnchor) {
-        recordCombinedDiffDomScrollAnchor()
-      }
-      writeCombinedDiffScrollAnchor()
-    },
-    [recordCombinedDiffDomScrollAnchor, writeCombinedDiffScrollAnchor]
-  )
-
-  // Why: restore only on structural changes (rows added/removed/collapsed,
-  // remount, layout-mode flips, clamp recovery). Measurement churn during
-  // scrolling is compensated by the virtualizer itself; restoring on it wrote
-  // scrollTop against active wheel input whenever main-thread jank outlived
-  // the direct-input window.
-  const combinedDiffRestoreSignal = useMemo(
-    () =>
-      `${generation}|${sideBySide ? 'sbs' : 'inline'}|${clampRestoreCount}|${sections
-        .map((section) => `${section.key}:${section.collapsed ? 'c' : 'e'}`)
-        .join(',')}`,
-    [clampRestoreCount, generation, sections, sideBySide]
-  )
-
-  useVirtualizedScrollAnchor({
-    anchorRef: scrollAnchorRef,
-    getItemElementKey: getCombinedDiffSectionElementKey,
-    getRowKey: getCombinedDiffSectionKey,
-    hasDirectScrollInput,
-    itemElementSelector: '[data-combined-diff-section-row]',
-    programmaticScrollMarks,
-    recordAnchorOnCleanup: false,
-    recordAnchorOnScroll: false,
-    restoreSignal: combinedDiffRestoreSignal,
-    rows: sections,
-    scrollElementRef: scrollContainerRef,
-    shouldSkipRestore: hasDirectScrollInput,
-    scrollOffsetRef,
-    totalSize: combinedDiffTotalSize,
-    virtualizer
-  })
 
   useLayoutEffect(() => {
     // Why: inline vs side-by-side can change Monaco content heights across
-    // every loaded row. Re-measure on this explicit mode change, not on every
-    // section load.
-    virtualizer.measure()
-  }, [sideBySide, virtualizer])
+    // every loaded row. Drop measured sizes on this explicit mode change, not
+    // on every section load.
+    listRef.current?.clearCaches({ mode: 'sizes' })
+  }, [sideBySide])
 
   const toggleSection = useCallback((index: number) => {
     const shouldLoadAfterExpand = sectionsRef.current[index]?.collapsed ?? false
@@ -1024,64 +847,40 @@ export default function CombinedDiffViewer({
     }
     retrySectionRef.current(index)
   }, [])
-  const [activeTreeSectionState, setActiveTreeSectionState] = useState<{
-    entrySignature: string
-    key: string | null
-  }>(() => ({ entrySignature, key: null }))
-  const activeTreeSectionKey =
-    activeTreeSectionState.entrySignature === entrySignature ? activeTreeSectionState.key : null
-  if (activeTreeSectionState.entrySignature !== entrySignature) {
-    // Why: the tree highlight belongs to one diff entry set and must not flash
-    // on another entry set before an Effect reset would run.
-    setActiveTreeSectionState({ entrySignature, key: null })
-  }
-  const viewedSectionKeys = React.useMemo(
-    () => new Set(sections.filter((section) => !section.loading).map((section) => section.key)),
-    [sections]
-  )
-  const handleTreeNavigate = useCallback(
-    (entry: GitStatusEntry | GitBranchChangeEntry) => {
-      markDirectScrollInput()
-      const navigatedIndex = handleCombinedDiffFileTreeNavigation({
-        mode: treeMode,
+  const revealSection = useCallback(
+    (entry: CombinedDiffEntry) => {
+      const navigatedIndex = handleCombinedDiffSectionNavigation({
+        mode: combinedMode,
         entry,
         sections: sectionsRef.current,
         sectionIndexByKey,
         toggleSection,
         scrollToIndex: (index) => {
-          scrollAnchorRef.current = null
-          latestDomScrollAnchorRef.current = null
-          virtualizer.scrollToIndex(index, { align: 'start' })
-          // Why: this jump is marked programmatic, so no scroll event records
-          // an anchor for it; snapshot the destination once layout settles.
-          window.requestAnimationFrame(() => {
-            scrollContainerRef.current?.dispatchEvent(
-              new Event(VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT)
-            )
-          })
+          void listRef.current?.scrollToIndex({ index, viewPosition: 0, animated: false })
         }
       })
       if (navigatedIndex !== null) {
-        // Why: tree navigation is also the user's explicit "show me this diff"
+        // Why: revealing a section is the user's explicit "show me this diff"
         // affordance. Re-selecting an already-loaded row must refetch in case
         // the file or git index changed while the section stayed mounted.
         requestCombinedDiffSectionReload(navigatedIndex)
-        setActiveTreeSectionState({
-          entrySignature,
-          key: sectionsRef.current[navigatedIndex]?.key ?? null
-        })
       }
     },
-    [
-      entrySignature,
-      markDirectScrollInput,
-      requestCombinedDiffSectionReload,
-      sectionIndexByKey,
-      toggleSection,
-      treeMode,
-      virtualizer
-    ]
+    [requestCombinedDiffSectionReload, sectionIndexByKey, toggleSection, combinedMode]
   )
+
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<CombinedDiffRevealSectionRequest>).detail
+      if (!detail || detail.worktreeId !== file.worktreeId) {
+        return
+      }
+      revealSection(detail.entry)
+    }
+    window.addEventListener(COMBINED_DIFF_REVEAL_SECTION_EVENT, handler as EventListener)
+    return () =>
+      window.removeEventListener(COMBINED_DIFF_REVEAL_SECTION_EVENT, handler as EventListener)
+  }, [file.worktreeId, revealSection])
 
   const combinedGitStatusSignature = React.useMemo(() => {
     if (!shouldAutoReloadFromGitStatus) {
@@ -1110,7 +909,7 @@ export default function CombinedDiffViewer({
   }, [combinedGitStatusSignature, requestCombinedDiffSectionReload, shouldAutoReloadFromGitStatus])
 
   useEffect(() => {
-    if (treeMode !== 'all' && treeMode !== 'uncommitted') {
+    if (combinedMode !== 'all' && combinedMode !== 'uncommitted') {
       return
     }
     const handler = (event: Event): void => {
@@ -1128,7 +927,7 @@ export default function CombinedDiffViewer({
         return
       }
       for (const area of ['unstaged', 'staged', 'untracked'] as const) {
-        const key = getCombinedDiffFileTreeSectionKey('uncommitted', {
+        const key = getCombinedDiffEntrySectionKey('uncommitted', {
           path: detail.relativePath,
           status: 'modified',
           area
@@ -1142,7 +941,7 @@ export default function CombinedDiffViewer({
     window.addEventListener(YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT, handler as EventListener)
     return () =>
       window.removeEventListener(YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT, handler as EventListener)
-  }, [file.runtimeEnvironmentId, file.worktreeId, requestCombinedDiffSectionReload, treeMode])
+  }, [file.runtimeEnvironmentId, file.worktreeId, requestCombinedDiffSectionReload, combinedMode])
 
   const setAllSectionsCollapsed = useCallback((collapsed: boolean) => {
     combinedDiffCollapsedPreference = collapsed
@@ -1322,7 +1121,7 @@ export default function CombinedDiffViewer({
   ])
 
   useLayoutEffect(() => {
-    const container = scrollContainerRef.current
+    const container = scrollContainer
     if (!container) {
       return
     }
@@ -1332,59 +1131,10 @@ export default function CombinedDiffViewer({
       scrollOffsetRef.current = combinedDiffScrollTopCache.get(viewStateKey) ?? cached.scrollTop
     }
 
-    let anchorIdleTimerId: number | null = null
-    let anchorFrameId: number | null = null
-    const cancelScheduledAnchorPersist = (): void => {
-      if (anchorIdleTimerId !== null) {
-        window.clearTimeout(anchorIdleTimerId)
-        anchorIdleTimerId = null
-      }
-      if (anchorFrameId !== null) {
-        window.cancelAnimationFrame(anchorFrameId)
-        anchorFrameId = null
-      }
-    }
-    const scheduleSettledAnchorPersist = (): void => {
-      cancelScheduledAnchorPersist()
-      anchorIdleTimerId = window.setTimeout(() => {
-        anchorIdleTimerId = null
-        if (hasDirectScrollInput()) {
-          // Why: the first idle timer can fire while wheel input is still
-          // active and TanStack may be showing a transitional virtual window.
-          scheduleSettledAnchorPersist()
-          return
-        }
-        anchorFrameId = window.requestAnimationFrame(() => {
-          anchorFrameId = null
-          persistCombinedDiffScrollAnchor()
-        })
-      }, 150)
-    }
-
-    const updateCachedScrollPosition = ({
-      recordDomAnchor,
-      scheduleSettled,
-      scrollTop,
-      writeAnchor
-    }: {
-      recordDomAnchor: boolean
-      scheduleSettled: boolean
-      scrollTop: number
-      writeAnchor: boolean
-    }): void => {
+    const updateCachedScrollPosition = (scrollTop: number): void => {
       const existing = combinedDiffViewStateCache.get(viewStateKey)
       scrollOffsetRef.current = scrollTop
       setWithLRU(combinedDiffScrollTopCache, viewStateKey, scrollTop)
-      if (writeAnchor) {
-        if (recordDomAnchor) {
-          persistCombinedDiffScrollAnchor()
-        } else {
-          writeCombinedDiffScrollAnchor()
-        }
-      }
-      if (scheduleSettled) {
-        scheduleSettledAnchorPersist()
-      }
       updateCombinedDiffScrollbar()
       if (!existing || existing.entrySignature !== entrySignature) {
         return
@@ -1394,38 +1144,7 @@ export default function CombinedDiffViewer({
         scrollTop
       })
     }
-    lastScrollHeightRef.current = container.scrollHeight
-    const handleScroll = (event: Event): void => {
-      const scrollTop = container.scrollTop
-      const scrollHeight = container.scrollHeight
-      const maxScrollTop = Math.max(0, scrollHeight - container.clientHeight)
-      const shrank = scrollHeight < lastScrollHeightRef.current - 1
-      lastScrollHeightRef.current = scrollHeight
-      if (programmaticScrollMarks.consume(event, scrollTop, maxScrollTop)) {
-        updateCombinedDiffScrollbar()
-        return
-      }
-      if (shrank && scrollTop >= maxScrollTop - 1 && scrollOffsetRef.current > maxScrollTop + 1) {
-        // Why: pinned at a max that just shrank, coming from an offset the new
-        // range can't reach, is the browser clamping the viewport, not user
-        // input (a user scroll to the bottom starts from an in-range offset);
-        // ask the anchor restore to re-pin instead of recording the clamped
-        // position as intentional.
-        setClampRestoreCount((count) => count + 1)
-        updateCombinedDiffScrollbar()
-        return
-      }
-      // Why: any unmarked scroll is the user's (wheel, momentum, keyboard,
-      // scrollbar drag) — including events whose input never reached the
-      // wheel handler because the main thread was janked past its window.
-      recordCombinedDiffVirtualScrollAnchor(scrollTop)
-      updateCachedScrollPosition({
-        recordDomAnchor: false,
-        scheduleSettled: true,
-        scrollTop,
-        writeAnchor: true
-      })
-    }
+    const handleScroll = (): void => updateCachedScrollPosition(container.scrollTop)
 
     // Why: React swaps the active editor DOM during tab changes. This listener
     // must detach in the layout phase so the outgoing tab snapshots its last
@@ -1436,62 +1155,15 @@ export default function CombinedDiffViewer({
     resizeObserver.observe(container)
     container.addEventListener('scroll', handleScroll)
     return () => {
-      cancelScheduledAnchorPersist()
-      if (latestDomScrollAnchorRef.current) {
-        scrollAnchorRef.current = latestDomScrollAnchorRef.current
-      }
-      updateCachedScrollPosition({
-        recordDomAnchor: false,
-        scheduleSettled: false,
-        scrollTop: scrollOffsetRef.current,
-        writeAnchor: true
-      })
+      updateCachedScrollPosition(scrollOffsetRef.current)
       resizeObserver.disconnect()
       container.removeEventListener('scroll', handleScroll)
     }
-  }, [
-    entrySignature,
-    hasDirectScrollInput,
-    persistCombinedDiffScrollAnchor,
-    programmaticScrollMarks,
-    recordCombinedDiffVirtualScrollAnchor,
-    sections.length,
-    updateCombinedDiffScrollbar,
-    writeCombinedDiffScrollAnchor,
-    viewStateKey
-  ])
+  }, [entrySignature, scrollContainer, updateCombinedDiffScrollbar, viewStateKey])
 
   useLayoutEffect(() => {
     updateCombinedDiffScrollbar()
-    const container = scrollContainerRef.current
-    if (!container || container.scrollTop <= 0) {
-      return
-    }
-
-    let frameId: number | null = null
-    const timerId = window.setTimeout(() => {
-      if (!container.isConnected || hasDirectScrollInput()) {
-        return
-      }
-      frameId = window.requestAnimationFrame(() => {
-        frameId = null
-        persistCombinedDiffScrollAnchor()
-      })
-    }, 300)
-
-    return () => {
-      window.clearTimeout(timerId)
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId)
-      }
-    }
-  }, [
-    hasDirectScrollInput,
-    persistCombinedDiffScrollAnchor,
-    sectionHeights,
-    sections,
-    updateCombinedDiffScrollbar
-  ])
+  }, [sectionHeights, sections, updateCombinedDiffScrollbar])
 
   const openAlternateDiff = useCallback(() => {
     if (!file.combinedAlternate) {
@@ -1518,7 +1190,6 @@ export default function CombinedDiffViewer({
       }
 
       event.preventDefault()
-      markDirectScrollInput()
       const track = event.currentTarget
       const thumb =
         event.target instanceof HTMLElement
@@ -1557,7 +1228,6 @@ export default function CombinedDiffViewer({
 
       const handlePointerMove = (moveEvent: PointerEvent): void => {
         moveEvent.preventDefault()
-        markDirectScrollInput()
         container.scrollTop = getScrollTopForPointer(moveEvent.clientY, grabOffset)
         updateCombinedDiffScrollbar()
       }
@@ -1575,7 +1245,7 @@ export default function CombinedDiffViewer({
       })
       activeScrollbarDragCleanupRef.current = cleanupPointerDrag
     },
-    [cleanupActiveScrollbarDrag, markDirectScrollInput, updateCombinedDiffScrollbar]
+    [cleanupActiveScrollbarDrag, updateCombinedDiffScrollbar]
   )
 
   const handleCopyNotes = useCallback(async (): Promise<void> => {
@@ -1630,6 +1300,13 @@ export default function CombinedDiffViewer({
     commitCompare?.message,
     commitCompare?.subject
   )
+  const diffLayoutLabel = sideBySide
+    ? translate('auto.components.editor.combined.diff.viewer.604195710f', 'Show inline diff')
+    : translate('auto.components.editor.combined.diff.viewer.5b6c3f9596', 'Show side-by-side diff')
+  const isDiffWordWrapEnabled = settings?.diffWordWrap === true
+  const diffWordWrapLabel = isDiffWordWrapEnabled
+    ? translate('auto.components.editor.combined.diff.viewer.7b47fe46c8', 'Turn word wrap off')
+    : translate('auto.components.editor.combined.diff.viewer.820b3e0422', 'Turn word wrap on')
   const commitHeader =
     isCommitMode && commitCompare ? (
       <div className="border-border bg-background border-b px-4 py-3">
@@ -1771,38 +1448,15 @@ export default function CombinedDiffViewer({
       </div>
     ) : null
   const allSectionsCollapsed = sections.every((section) => section.collapsed)
+  const collapseAllLabel = allSectionsCollapsed
+    ? translate('auto.components.editor.CombinedDiffViewer.19c45cfdc0', 'Expand All')
+    : translate('auto.components.editor.CombinedDiffViewer.ea08dae15b', 'Collapse All')
 
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="border-border bg-background/50 flex shrink-0 items-center justify-between gap-3 border-b px-3 py-1.5">
           <div className="flex min-w-0 items-center gap-2">
-            {fileTreeCollapsed && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={translate(
-                        'auto.components.editor.CombinedDiffViewer.b6c3b84476',
-                        'Show file tree'
-                      )}
-                      onClick={() => setFileTreeCollapsed(false)}
-                    >
-                      <PanelLeftOpen className="size-3.5" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate(
-                    'auto.components.editor.CombinedDiffViewer.b6c3b84476',
-                    'Show file tree'
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            )}
             <span className="text-muted-foreground truncate text-xs">
               {sections.length}{' '}
               {translate('auto.components.editor.CombinedDiffViewer.7e7ca60816', 'changed files')}
@@ -1893,137 +1547,151 @@ export default function CombinedDiffViewer({
                     )}
               </Button>
             )}
-            <Button
-              variant="quiet"
-              size="xs"
-              className="h-auto w-20 justify-start gap-0 border-0 p-0 text-left font-normal whitespace-normal"
-              onClick={() => setAllSectionsCollapsed(!allSectionsCollapsed)}
-            >
-              {allSectionsCollapsed
-                ? translate('auto.components.editor.CombinedDiffViewer.19c45cfdc0', 'Expand All')
-                : translate('auto.components.editor.CombinedDiffViewer.ea08dae15b', 'Collapse All')}
-            </Button>
-            <Button
-              variant="quiet"
-              size="xs"
-              className="h-auto w-24 py-0.5 text-center"
-              onClick={toggleSideBySide}
-            >
-              {sideBySide
-                ? translate('auto.components.editor.CombinedDiffViewer.f786fd54e1', 'Inline')
-                : translate('auto.components.editor.CombinedDiffViewer.ec5053c7f5', 'Side by Side')}
-            </Button>
-            <Button
-              variant="quiet"
-              size="xs"
-              className={cn(' ', ' ', settings?.diffWordWrap === true ? 'bg-accent' : '')}
-              onClick={toggleDiffWordWrap}
-              aria-pressed={settings?.diffWordWrap === true}
-            >
-              <WrapText className="size-3.5" />
-              {settings?.diffWordWrap === true
-                ? translate('auto.components.editor.CombinedDiffViewer.a4420ca1f7', 'Wrap On')
-                : translate('auto.components.editor.CombinedDiffViewer.dde325ddfe', 'Wrap Off')}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span className="inline-flex shrink-0">
+                    <Button
+                      type="button"
+                      variant="quiet"
+                      size="icon-xs"
+                      aria-label={collapseAllLabel}
+                      title={collapseAllLabel}
+                      onClick={() => setAllSectionsCollapsed(!allSectionsCollapsed)}
+                    >
+                      {allSectionsCollapsed ? (
+                        <ExpandSections className="size-3.5" />
+                      ) : (
+                        <CollapseSections className="size-3.5" />
+                      )}
+                    </Button>
+                  </span>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {collapseAllLabel}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span className="inline-flex shrink-0">
+                    <Button
+                      type="button"
+                      variant="quiet"
+                      size="icon-xs"
+                      className={cn(sideBySide ? 'bg-accent' : '')}
+                      aria-label={diffLayoutLabel}
+                      aria-pressed={sideBySide}
+                      title={diffLayoutLabel}
+                      onClick={toggleSideBySide}
+                    >
+                      <SideBySideColumns className="size-3.5" />
+                    </Button>
+                  </span>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {diffLayoutLabel}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span className="inline-flex shrink-0">
+                    <Button
+                      type="button"
+                      variant="quiet"
+                      size="icon-xs"
+                      className={cn(isDiffWordWrapEnabled ? 'bg-accent' : '')}
+                      aria-label={diffWordWrapLabel}
+                      aria-pressed={isDiffWordWrapEnabled}
+                      title={diffWordWrapLabel}
+                      onClick={toggleDiffWordWrap}
+                    >
+                      <WrapText className="size-3.5" />
+                    </Button>
+                  </span>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {diffWordWrapLabel}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
         {commitHeader}
-        <div className="flex min-h-0 flex-1">
-          <CombinedDiffFileTree
-            mode={treeMode}
-            worktreePath={file.filePath}
-            entries={entries}
-            sectionIndexByKey={sectionIndexByKey}
-            activeSectionKey={activeTreeSectionKey}
-            viewedSectionKeys={viewedSectionKeys}
-            collapsed={fileTreeCollapsed}
-            onCollapsedChange={setFileTreeCollapsed}
-            onNavigate={handleTreeNavigate}
-          />
-          <div className="relative min-w-0 flex-1">
-            <div
-              ref={setScrollContainerRef}
-              className="combined-diff-scroll-container scrollbar-editor h-full overflow-auto pr-5"
-              onWheel={markDirectScrollInput}
-              onTouchMove={markDirectScrollInput}
-            >
-              {skippedConflictNotice}
-              <div className="relative w-full" style={{ height: `${combinedDiffTotalSize}px` }}>
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                  const section = sections[virtualItem.index]
-                  if (!section) {
-                    return null
-                  }
-
-                  return (
-                    <div
-                      key={virtualItem.key}
-                      data-index={virtualItem.index}
-                      data-combined-diff-section-row
-                      data-combined-diff-section-key={section.key}
-                      ref={virtualizer.measureElement}
-                      className="absolute top-0 left-0 w-full"
-                      // Why: `top` preserves sticky file headers inside each row;
-                      // transform-based virtualization creates a containing block
-                      // that makes long-section headers feel jumpy while scrolling.
-                      style={{ top: `${virtualItem.start}px` }}
-                    >
-                      <DiffSectionItem
-                        section={section}
-                        index={virtualItem.index}
-                        isBranchMode={isBranchMode}
-                        sideBySide={sideBySide}
-                        isDark={isDark}
-                        settings={settings}
-                        sectionHeight={sectionHeights[virtualItem.index]}
-                        worktreeId={file.worktreeId}
-                        loadSection={loadSection}
-                        retrySection={retrySection}
-                        toggleSection={toggleSection}
-                        openSection={openSection}
-                        openSectionTitle={
-                          isAllMode || isBranchMode || isCommitMode ? 'Open diff' : 'Open in editor'
-                        }
-                        setSectionHeights={setSectionHeights}
-                        setSections={setSections}
-                        modifiedEditorsRef={modifiedEditorsRef}
-                        handleSectionSaveRef={handleSectionSaveRef}
-                        renderHeaderTrailingContent={(section) => {
-                          const fileNotes = diffCommentsForWorktree.filter(
-                            (comment) => comment.filePath === section.path
-                          )
-                          return fileNotes.length > 0 ? (
-                            <DiffNotesSendMenu
-                              worktreeId={file.worktreeId}
-                              groupId={activeGroupId ?? file.worktreeId}
-                              comments={diffCommentsForWorktree}
-                              filePath={section.path}
-                              showFileScope
-                              triggerClassName="p-0.5 can-hover:opacity-0 group-hover:opacity-100"
-                            />
-                          ) : null
-                        }}
-                      />
-                    </div>
+        <div className="relative min-h-0 min-w-0 flex-1">
+          <LegendList<DiffSection>
+            {...LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS}
+            ref={listRef}
+            refScrollView={setCombinedDiffScrollContainer}
+            className="combined-diff-scroll-container pr-5"
+            data={sections}
+            keyExtractor={getCombinedDiffSectionItemKey}
+            getItemType={getCombinedDiffSectionItemType}
+            getFixedItemSize={getCombinedDiffFixedItemSize}
+            estimatedItemSize={COMBINED_DIFF_ESTIMATED_SECTION_HEIGHT}
+            drawDistance={COMBINED_DIFF_DRAW_DISTANCE_PX}
+            initialScrollOffset={scrollOffsetRef.current}
+            // Why: rows grow as diffs load and shrink as sections collapse;
+            // anchoring on both size and data keeps the viewport where the user
+            // left it instead of sliding under them.
+            maintainVisibleContentPosition
+            ListHeaderComponent={skippedConflictNotice}
+            renderItem={({ item: section, index }: LegendListRenderItemProps<DiffSection>) => (
+              <DiffSectionItem
+                section={section}
+                index={index}
+                isBranchMode={isBranchMode}
+                sideBySide={sideBySide}
+                isDark={isDark}
+                settings={settings}
+                sectionHeight={sectionHeights[index]}
+                worktreeId={file.worktreeId}
+                loadSection={loadSection}
+                retrySection={retrySection}
+                toggleSection={toggleSection}
+                openSection={openSection}
+                openSectionTitle={
+                  isAllMode || isBranchMode || isCommitMode ? 'Open diff' : 'Open in editor'
+                }
+                setSectionHeights={setSectionHeights}
+                setSections={setSections}
+                modifiedEditorsRef={modifiedEditorsRef}
+                handleSectionSaveRef={handleSectionSaveRef}
+                renderHeaderTrailingContent={(section) => {
+                  const fileNotes = diffCommentsForWorktree.filter(
+                    (comment) => comment.filePath === section.path
                   )
-                })}
-              </div>
-            </div>
-            {scrollThumb.visible && (
-              <div
-                aria-hidden="true"
-                className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
-                onPointerDown={handleCombinedDiffScrollbarPointerDown}
-              >
-                <div
-                  data-combined-diff-scrollbar-thumb
-                  className="bg-muted-foreground/30 absolute right-0 left-1"
-                  style={{ top: scrollThumb.top, height: scrollThumb.height }}
-                />
-              </div>
+                  return fileNotes.length > 0 ? (
+                    <DiffNotesSendMenu
+                      worktreeId={file.worktreeId}
+                      groupId={activeGroupId ?? file.worktreeId}
+                      comments={diffCommentsForWorktree}
+                      filePath={section.path}
+                      showFileScope
+                      triggerClassName="p-0.5 can-hover:opacity-0 group-hover:opacity-100"
+                    />
+                  ) : null
+                }}
+              />
             )}
-          </div>
+          />
+          {scrollThumb.visible && (
+            <div
+              aria-hidden="true"
+              className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
+              onPointerDown={handleCombinedDiffScrollbarPointerDown}
+            >
+              <div
+                data-combined-diff-scrollbar-thumb
+                className="bg-muted-foreground/30 absolute right-0 left-1"
+                style={{ top: scrollThumb.top, height: scrollThumb.height }}
+              />
+            </div>
+          )}
         </div>
       </div>
       <Dialog

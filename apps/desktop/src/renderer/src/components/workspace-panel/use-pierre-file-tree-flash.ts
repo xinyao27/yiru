@@ -17,14 +17,22 @@ export function usePierreFileTreeFlash({
     if (!shadowRoot) {
       return
     }
-    const updateMarker = (): void => {
+    const clearMarker = (): void => {
       shadowRoot.querySelector('[data-yiru-flashing="true"]')?.removeAttribute('data-yiru-flashing')
-      const canonicalPath = flashingPath
-        ? treeData.canonicalPathByAbsolutePath.get(flashingPath)
-        : null
-      if (!canonicalPath) {
-        return
-      }
+    }
+    clearMarker()
+    const canonicalPath = flashingPath
+      ? treeData.canonicalPathByAbsolutePath.get(flashingPath)
+      : null
+    // Why: with no flash pending there is nothing to keep in sync, and an
+    // always-on observer would run this on every row mount for the whole
+    // session — the tree mutates constantly while scrolling.
+    if (!canonicalPath) {
+      return
+    }
+
+    const markRow = (): void => {
+      clearMarker()
       for (const row of shadowRoot.querySelectorAll<HTMLElement>('[data-type="item"]')) {
         if (row.dataset.itemPath === canonicalPath) {
           row.dataset.yiruFlashing = 'true'
@@ -32,14 +40,14 @@ export function usePierreFileTreeFlash({
         }
       }
     }
-    updateMarker()
+    markRow()
     // Why: reveal can scroll a virtual row into the Shadow DOM after React's
     // effect runs, so keep the marker in sync with row mount/unmount changes.
-    const observer = new MutationObserver(updateMarker)
+    const observer = new MutationObserver(markRow)
     observer.observe(shadowRoot, { childList: true, subtree: true })
     return () => {
       observer.disconnect()
-      shadowRoot.querySelector('[data-yiru-flashing="true"]')?.removeAttribute('data-yiru-flashing')
+      clearMarker()
     }
   }, [flashingPath, model, treeData.canonicalPathByAbsolutePath])
 }

@@ -116,11 +116,7 @@ function CollapsibleSection({
         onClick={() => setOpen((value) => !value)}
         className="text-foreground hover:bg-muted/40 focus-visible:bg-muted/40 flex w-full justify-start border-0 px-3 text-left text-xs font-semibold tracking-wide whitespace-normal uppercase transition-colors"
       >
-        {open ? (
-          <ChevronDown weight="regular" className="size-3.5" />
-        ) : (
-          <ChevronRight weight="regular" className="size-3.5" />
-        )}
+        {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         {Icon ? <Icon className={cn('size-3.5', iconClass ?? 'text-muted-foreground')} /> : null}
         {title}
       </Button>

@@ -345,7 +345,7 @@ export function RichMarkdownLinkBubble({
             disabled={!linkBubble.openEnabled}
             onClick={onOpen}
           >
-            <ExternalLink weight="regular" size={14} />
+            <ExternalLink size={14} />
           </LinkBubbleAction>
           <LinkBubbleAction
             label={translate('auto.components.editor.RichMarkdownLinkBubble.copyLink', 'Copy link')}

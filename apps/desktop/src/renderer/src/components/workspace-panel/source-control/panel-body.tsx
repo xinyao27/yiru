@@ -1,16 +1,12 @@
-import { Accordion } from '../../ui/accordion'
 import { ScrollArea } from '../../ui/scroll-area'
-import { isSourceControlBranchSectionVisible, SourceControlBranchSection } from './branch-section'
 import { CompareUnavailable } from './compare-summary'
 import type { SourceControlController } from './controller'
 import { shouldShowSourceControlCompareUnavailableCard } from './header-toolbar'
-import { SourceControlHistorySectionMemo } from './history-section'
+import { SourceControlListView } from './list-view'
 import { SourceControlPanelCommit } from './panel-commit'
 import { SourceControlPanelStatus } from './panel-status'
-import type { SourceControlDisplaySectionId } from './section-order'
-import { SourceControlUncommittedSectionsMemo } from './uncommitted-sections'
-
-type SourceControlAccordionSectionId = SourceControlDisplaySectionId | 'branch'
+import { SourceControlPierreBranchTree } from './pierre-tree'
+import { SourceControlUncommittedGroupsMemo } from './uncommitted-groups'
 
 export function SourceControlPanelBody({
   controller
@@ -18,18 +14,18 @@ export function SourceControlPanelBody({
   controller: SourceControlController
 }): React.JSX.Element {
   const {
+    activeScope,
+    activeWorktree,
     branchEntries,
     branchSummary,
-    collapsedSections,
-    displaySections,
     filteredBranchEntries,
     filteredGrouped,
     hasUncommittedEntries,
     normalizedFilter,
     refreshBranchCompare,
     setBaseRefDialogOpen,
-    setFileListScrollElement,
-    toggleSection
+    sourceControlViewMode,
+    worktreePath
   } = controller
   const hasFilteredUncommittedEntries =
     filteredGrouped.staged.length > 0 ||
@@ -38,56 +34,69 @@ export function SourceControlPanelBody({
   const hasFilteredBranchEntries = filteredBranchEntries.length > 0
   const showGenericEmptyState =
     !hasUncommittedEntries && branchSummary?.status === 'ready' && branchEntries.length === 0
-  const sectionIds: SourceControlAccordionSectionId[] = displaySections.map((section) => section.id)
-  if (isSourceControlBranchSectionVisible(controller)) {
-    sectionIds.push('branch')
-  }
-  const expandedSectionIds = sectionIds.filter((sectionId) => !collapsedSections.has(sectionId))
 
-  const handleExpandedSectionsChange = (nextExpandedSectionIds: string[]): void => {
-    const nextExpandedSections = new Set(nextExpandedSectionIds)
-    for (const sectionId of sectionIds) {
-      if (nextExpandedSections.has(sectionId) === collapsedSections.has(sectionId)) {
-        toggleSection(sectionId)
-      }
-    }
+  const status = (
+    <SourceControlPanelStatus
+      controller={controller}
+      hasFilteredBranchEntries={hasFilteredBranchEntries}
+      hasFilteredUncommittedEntries={hasFilteredUncommittedEntries}
+      showGenericEmptyState={showGenericEmptyState}
+    />
+  )
+  const commit = (
+    <SourceControlPanelCommit
+      controller={controller}
+      showGenericEmptyState={showGenericEmptyState}
+    />
+  )
+  const compareUnavailable =
+    shouldShowSourceControlCompareUnavailableCard(
+      branchSummary,
+      hasUncommittedEntries,
+      branchEntries.length > 0,
+      Boolean(normalizedFilter)
+    ) && branchSummary ? (
+      <CompareUnavailable
+        summary={branchSummary}
+        onChangeBaseRef={() => setBaseRefDialogOpen(true)}
+        onRetry={() => void refreshBranchCompare()}
+      />
+    ) : null
+
+  // Why: list view is one virtualized list that owns the panel scroller, with
+  // the status and commit chrome riding along as its header, so the groups stay
+  // rows of a single list instead of separate lists sharing one scroller.
+  if (sourceControlViewMode === 'list') {
+    return (
+      <div className="min-h-0 flex-1">
+        <SourceControlListView
+          controller={controller}
+          header={
+            <>
+              {status}
+              {commit}
+            </>
+          }
+          footer={compareUnavailable}
+        />
+      </div>
+    )
   }
 
   return (
-    <ScrollArea
-      className="min-h-0 flex-1"
-      viewportClassName="flex flex-col overflow-x-hidden pt-1"
-      viewportRef={setFileListScrollElement}
-    >
-      <SourceControlPanelStatus
-        controller={controller}
-        hasFilteredBranchEntries={hasFilteredBranchEntries}
-        hasFilteredUncommittedEntries={hasFilteredUncommittedEntries}
-        showGenericEmptyState={showGenericEmptyState}
-      />
-      <SourceControlPanelCommit
-        controller={controller}
-        showGenericEmptyState={showGenericEmptyState}
-      />
-      <Accordion multiple value={expandedSectionIds} onValueChange={handleExpandedSectionsChange}>
-        {hasFilteredUncommittedEntries ? (
-          <SourceControlUncommittedSectionsMemo controller={controller} />
-        ) : null}
-        <SourceControlBranchSection controller={controller} />
-      </Accordion>
-      {shouldShowSourceControlCompareUnavailableCard(
-        branchSummary,
-        hasUncommittedEntries,
-        branchEntries.length > 0,
-        Boolean(normalizedFilter)
-      ) && branchSummary ? (
-        <CompareUnavailable
-          summary={branchSummary}
-          onChangeBaseRef={() => setBaseRefDialogOpen(true)}
-          onRetry={() => void refreshBranchCompare()}
-        />
+    <ScrollArea className="min-h-0 flex-1" viewportClassName="flex flex-col overflow-x-hidden pt-1">
+      {status}
+      {commit}
+      {/* Why: the header's scope select picks the world on screen; inside the
+          working tree, staged/unstaged/untracked stay levels of the tree. */}
+      {activeScope?.id === 'branch' ? (
+        activeWorktree && worktreePath ? (
+          <SourceControlPierreBranchTree controller={controller} />
+        ) : null
+      ) : activeScope ? (
+        <SourceControlUncommittedGroupsMemo controller={controller} />
       ) : null}
-      <SourceControlHistorySectionMemo controller={controller} />
+      {compareUnavailable}
     </ScrollArea>
   )
 }

@@ -156,7 +156,7 @@ export function SourceControlEntryMenuContent({
                 ) : entry.command ? (
                   <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
                 ) : (
-                  <ExternalLink weight="regular" className="size-3.5" />
+                  <ExternalLink className="size-3.5" />
                 )}
                 <span className="min-w-0 truncate">{entry.label}</span>
                 {availability.metadata ? (

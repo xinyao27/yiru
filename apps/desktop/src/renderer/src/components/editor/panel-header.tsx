@@ -124,7 +124,7 @@ export function EditorPanelHeader({
         onOpenContainingFolder={onOpenContainingFolder}
       />
       {canOpenPreviewToSide && (
-        <TooltipProvider delay={300}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               render={
@@ -153,7 +153,7 @@ export function EditorPanelHeader({
         </TooltipProvider>
       )}
       {isSingleDiff && (
-        <TooltipProvider delay={300}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               render={
@@ -208,7 +208,7 @@ export function EditorPanelHeader({
       {isDiffSurface && (
         // Why: the adjacent diff controls use the same tooltip timing, so they
         // share one provider instead of creating redundant Radix contexts.
-        <TooltipProvider delay={300}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               render={
@@ -250,7 +250,7 @@ export function EditorPanelHeader({
                   )}
                   disabled={changeCount === 0}
                 >
-                  <ArrowUp weight="regular" size={14} />
+                  <ArrowUp size={14} />
                 </Button>
               }
             />
@@ -281,7 +281,7 @@ export function EditorPanelHeader({
                   )}
                   disabled={changeCount === 0}
                 >
-                  <ArrowDown weight="regular" size={14} />
+                  <ArrowDown size={14} />
                 </Button>
               }
             />
@@ -321,7 +321,7 @@ export function EditorPanelHeader({
             />
           )}
           {canShowMarkdownTableOfContents && (
-            <TooltipProvider delay={300}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={

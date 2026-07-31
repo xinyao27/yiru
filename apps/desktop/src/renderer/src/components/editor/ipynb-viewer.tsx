@@ -232,26 +232,26 @@ function NotebookCellHeader({
         disabled={!canMoveUp}
         onClick={onMoveUp}
       >
-        <MoveUp weight="regular" className="size-3.5" />
+        <MoveUp className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.27e064e2db', 'Move cell down')}
         disabled={!canMoveDown}
         onClick={onMoveDown}
       >
-        <MoveDown weight="regular" className="size-3.5" />
+        <MoveDown className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.53b839b8a0', 'Insert code cell above')}
         onClick={() => onInsertAbove('code')}
       >
-        <ArrowUpToLine weight="regular" className="size-3.5" />
+        <ArrowUpToLine className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.b4208cad7e', 'Insert code cell below')}
         onClick={() => onInsertBelow('code')}
       >
-        <ArrowDownToLine weight="regular" className="size-3.5" />
+        <ArrowDownToLine className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate(
@@ -262,7 +262,7 @@ function NotebookCellHeader({
       >
         <span className="relative size-4">
           <FileCode2 className="absolute top-0.5 left-0.5 size-3" />
-          <MoveUp weight="regular" className="absolute -top-0.5 -right-0.5 size-2.5" />
+          <MoveUp className="absolute -top-0.5 -right-0.5 size-2.5" />
         </span>
       </NotebookHeaderButton>
       <NotebookHeaderButton
@@ -274,7 +274,7 @@ function NotebookCellHeader({
       >
         <span className="relative size-4">
           <FileCode2 className="absolute top-0.5 left-0.5 size-3" />
-          <MoveDown weight="regular" className="absolute -right-0.5 -bottom-0.5 size-2.5" />
+          <MoveDown className="absolute -right-0.5 -bottom-0.5 size-2.5" />
         </span>
       </NotebookHeaderButton>
       <NotebookHeaderButton

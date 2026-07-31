@@ -62,7 +62,7 @@ export function MobileEmulatorTabIntroCallout(): React.JSX.Element {
                 className="text-muted-foreground size-6"
                 onClick={dismissIntro}
               >
-                <X weight="regular" className="size-3" />
+                <X className="size-3" />
               </Button>
             }
           />

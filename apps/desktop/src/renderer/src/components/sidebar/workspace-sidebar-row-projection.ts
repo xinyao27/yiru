@@ -1,11 +1,6 @@
-import { defaultRangeExtractor, type Range } from '@tanstack/react-virtual'
-
 import type { CoworkingSidebarRow } from './coworking-sidebar-rows'
 import type { RenderRow } from './worktree-list-virtual-rows'
-import {
-  estimateRenderRowSize,
-  extractWorktreeVirtualRowIndexes
-} from './worktree-list-virtual-rows'
+import { estimateRenderRowSize } from './worktree-list-virtual-rows'
 
 export type WorkspaceSidebarProjectedRow =
   | {
@@ -241,36 +236,4 @@ export function estimateWorkspaceSidebarRowSize(args: {
     return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
   }
   return 24
-}
-
-export function extractWorkspaceSidebarVirtualRowIndexes(args: {
-  range: Range
-  rows: readonly WorkspaceSidebarProjectedRow[]
-  stickyRows: readonly { type: string; projectGroupDepth?: number }[]
-  stickyHeaderIndexes: readonly number[]
-}): number[] {
-  const rangeStart = args.rows[args.range.startIndex]
-  // Why: matched remote rows inherit their local Project's sticky context;
-  // diagnostics and unmatched remote projects must not inherit the last header.
-  if (
-    rangeStart?.kind !== 'local' &&
-    !(rangeStart?.kind === 'coworking' && rangeStart.localProjectHeaderKey)
-  ) {
-    return defaultRangeExtractor(args.range)
-  }
-  return extractWorktreeVirtualRowIndexes({
-    range: args.range,
-    stickyHeaderIndexes: args.stickyHeaderIndexes,
-    rows: args.stickyRows
-  })
-}
-
-export function workspaceSidebarStickyRangeStart(
-  rangeStartIndex: number,
-  rows: readonly WorkspaceSidebarProjectedRow[]
-): number | null {
-  const row = rows[rangeStartIndex]
-  return row?.kind === 'local' || (row?.kind === 'coworking' && row.localProjectHeaderKey)
-    ? rangeStartIndex
-    : null
 }

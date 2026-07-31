@@ -304,7 +304,7 @@ export function CreateHostedReviewComposer({
                       'More actions'
                     )}
                   >
-                    <ChevronDown weight="regular" className="size-3.5" />
+                    <ChevronDown className="size-3.5" />
                   </Button>
                 }
               />

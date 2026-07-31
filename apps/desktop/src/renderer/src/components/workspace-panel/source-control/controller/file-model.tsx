@@ -6,8 +6,13 @@ import {
   filterSourceControlPathEntries,
   getSourceControlFileFilterState
 } from '../file-filter'
-import { SUBMODULE_EMPTY_LABEL, SUBMODULE_LOADING_LABEL } from '../panel-constants'
+import {
+  EMPTY_BRANCH_CHANGE_ENTRIES,
+  SUBMODULE_EMPTY_LABEL,
+  SUBMODULE_LOADING_LABEL
+} from '../panel-constants'
 import { deriveSourceControlPushRecovery } from '../push-recovery'
+import { buildSourceControlScopeOptions, resolveSourceControlActiveScope } from '../scope-model'
 import {
   buildSourceControlDisplaySections,
   SOURCE_CONTROL_AREAS,
@@ -34,9 +39,11 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
   const {
     activeRemoteActionSequence,
     activeRepo,
+    activeWorktree,
     activeWorktreeId,
     branchEntries,
     branchName,
+    branchSummary,
     collapsedSections,
     collapsedTreeDirs,
     enqueueGitHubPRRefresh,
@@ -53,6 +60,7 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     linkedGitLabMR,
     linkedGiteaPR,
     remoteActionError,
+    selectedScopeId,
     sourceControlGroupOrder,
     sourceControlViewMode,
     submoduleStatusByKey,
@@ -111,10 +119,6 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
   }, [entries])
   const fileFilterState = useMemo(() => getSourceControlFileFilterState(filterQuery), [filterQuery])
   const normalizedFilter = fileFilterState.normalizedFilter
-  const isGitHistoryVisible =
-    !normalizedFilter &&
-    !fileFilterState.tooLarge &&
-    Boolean(activeWorktreeId && worktreePath && !isFolder)
   const filteredGrouped = useMemo(
     () => filterSourceControlGroupedPathEntries(grouped, fileFilterState),
     [fileFilterState, grouped]
@@ -135,6 +139,22 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     () => filterSourceControlPathEntries(branchEntries, fileFilterState),
     [branchEntries, fileFilterState]
   )
+  const isBranchScopeAvailable = Boolean(
+    branchSummary?.status === 'ready' &&
+    filteredBranchEntries.length > 0 &&
+    activeWorktree &&
+    worktreePath
+  )
+  const scopeOptions = useMemo(
+    () =>
+      buildSourceControlScopeOptions({
+        displaySections,
+        branchEntries: isBranchScopeAvailable ? filteredBranchEntries : EMPTY_BRANCH_CHANGE_ENTRIES
+      }),
+    [displaySections, filteredBranchEntries, isBranchScopeAvailable]
+  )
+  const activeScope = resolveSourceControlActiveScope(scopeOptions, selectedScopeId)
+  const activeScopeId = activeScope?.id ?? null
   const treeRootsBySection = useMemo(() => {
     const roots: Partial<Record<SourceControlDisplaySectionId, GitStatusSourceControlTreeNode[]>> =
       {}
@@ -189,6 +209,11 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
   )
   const visibleFileRowKeys = useMemo(() => {
     const keys = new Set<string>()
+    // Why: the working-tree groups are only on screen in their own scope, so
+    // open-file bookkeeping must stay empty while commits are shown.
+    if (activeScopeId !== 'uncommitted') {
+      return keys
+    }
     // Why: open-file bookkeeping must use the same injected submodule rows
     // that the list view renders.
     if (sourceControlViewMode === 'list') {
@@ -217,6 +242,7 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     }
     return keys
   }, [
+    activeScopeId,
     collapsedSections,
     displaySections,
     sourceControlViewMode,
@@ -250,12 +276,14 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     grouped,
     fileFilterState,
     normalizedFilter,
-    isGitHistoryVisible,
     filteredGrouped,
     displaySections,
     unfilteredDisplaySections,
     unfilteredDisplaySectionsById,
     filteredBranchEntries,
+    scopeOptions,
+    activeScope,
+    activeScopeId,
     treeRootsBySection,
     visibleTreeRowsBySection,
     visibleListRowsBySection,

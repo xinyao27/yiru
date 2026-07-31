@@ -259,7 +259,7 @@ export function WorktreeContextMenuContent({
             <>
               {validParentWorktreeId && (
                 <ContextMenuItem onClick={lineageActions.handleOpenParent} disabled={isDeleting}>
-                  <Workflow weight="regular" className="size-3.5" />
+                  <Workflow className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.WorktreeContextMenu.8d9cd19d09',
                     'Open Parent Worktree'

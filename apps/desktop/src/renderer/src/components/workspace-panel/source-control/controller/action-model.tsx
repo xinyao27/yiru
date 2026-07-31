@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 
 import { translate } from '../../../../i18n/i18n'
 import { isStageableStatusEntry } from '../../discard-all-sequence'
-import { resolveVisibleCreatePrHeaderAction } from '../create-pr-intent-state'
 import { resolveDropdownItems, type DropdownEntry } from '../dropdown-items'
 import { resolveCommitAreaPrimaryAction, type PrimaryAction } from '../primary-action'
 import { resolveCreatePrHeaderAction } from '../primary-create-pr-intent-action'
@@ -160,9 +159,6 @@ export function useSourceControlActionModel(scope: SourceControlCreateReviewInte
     (!createPrHeaderAction.disabled || isCreatingPr || prGenerating)
       ? createPrHeaderAction
       : null
-  const visibleCreatePrHeaderAction = resolveVisibleCreatePrHeaderAction({
-    createPrHeaderAction
-  })
   const dropdownItems: DropdownEntry[] = useMemo(
     () =>
       resolveDropdownItems({
@@ -221,7 +217,6 @@ export function useSourceControlActionModel(scope: SourceControlCreateReviewInte
     primaryAction,
     createPrHeaderAction,
     directCreatePrAction,
-    visibleCreatePrHeaderAction,
     dropdownItems
   }
 }

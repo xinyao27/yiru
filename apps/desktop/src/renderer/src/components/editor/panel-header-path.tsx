@@ -211,7 +211,7 @@ export function EditorPanelHeaderPath({
           {canShowMarkdownPreview && <DropdownMenuSeparator />}
           {!isVirtualEditorTab && (
             <DropdownMenuItem onClick={onOpenContainingFolder}>
-              <ExternalLink weight="regular" className="mr-1.5 h-3.5 w-3.5" />
+              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
               {revealLabel}
             </DropdownMenuItem>
           )}

@@ -176,7 +176,7 @@ export function NativeChatQuestionCard({
                 aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
                 className="text-muted-foreground flex border transition-colors"
               >
-                <X weight="regular" className="size-4" />
+                <X className="size-4" />
               </Button>
             </div>
 

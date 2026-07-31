@@ -91,7 +91,7 @@ export function MobileEmulatorAgentSetupGuideSteps({
             <p className="text-muted-foreground text-[11px]">{setup.cliInstallStatus.detail}</p>
           ) : null}
         </div>
-        <TooltipProvider delay={250}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               render={

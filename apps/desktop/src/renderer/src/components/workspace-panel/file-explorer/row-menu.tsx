@@ -277,7 +277,7 @@ export function FileExplorerRowMenu({
         </ContextMenuItem>
       )}
       <ContextMenuItem onClick={handleReveal}>
-        <ExternalLink weight="regular" />
+        <ExternalLink />
         {revealLabel}
       </ContextMenuItem>
       <ContextMenuSeparator />

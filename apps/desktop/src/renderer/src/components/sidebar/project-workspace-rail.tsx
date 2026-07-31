@@ -1,4 +1,3 @@
-import type { VirtualItem } from '@tanstack/react-virtual'
 import type React from 'react'
 
 import type { WorkspaceSidebarProjectedRow } from './workspace-sidebar-row-projection'
@@ -8,13 +7,6 @@ type ProjectWorkspaceRail = {
   leftPx: number
   projectKey: string
   segment: 'header' | 'workspace'
-}
-
-type ProjectWorkspaceRailSpan = {
-  heightPx: number
-  key: string
-  leftPx: number
-  topPx: number
 }
 
 type ProjectWorkspaceRailStartProps = {
@@ -122,38 +114,6 @@ export function getProjectWorkspaceRails(
   finishProject()
 
   return rails
-}
-
-export function getVisibleProjectWorkspaceRailSpans(
-  rails: ReadonlyMap<number, ProjectWorkspaceRail>,
-  virtualItems: readonly VirtualItem[],
-  rowGapPx: number
-): ProjectWorkspaceRailSpan[] {
-  const spanByProjectKey = new Map<string, ProjectWorkspaceRailSpan>()
-  for (const virtualItem of virtualItems) {
-    const rail = rails.get(virtualItem.index)
-    if (rail?.segment !== 'workspace') {
-      continue
-    }
-    const current = spanByProjectKey.get(rail.projectKey)
-    const bottomPx = virtualItem.start + virtualItem.size
-    if (current) {
-      const currentBottomPx = current.topPx + current.heightPx
-      const nextTopPx = Math.min(current.topPx, virtualItem.start)
-      current.topPx = nextTopPx
-      current.heightPx = Math.max(currentBottomPx, bottomPx) - nextTopPx
-      continue
-    }
-    spanByProjectKey.set(rail.projectKey, {
-      // Why: TanStack positions the first workspace after the row gap; extend
-      // backward through it so the project header and workspace rail stay joined.
-      heightPx: virtualItem.size + rowGapPx,
-      key: rail.projectKey,
-      leftPx: rail.leftPx,
-      topPx: virtualItem.start - rowGapPx
-    })
-  }
-  return Array.from(spanByProjectKey.values())
 }
 
 export function ProjectWorkspaceRailStart(

@@ -93,7 +93,7 @@ export function PendingWorktreeRow({
           isError ? 'opacity-100' : 'can-hover:opacity-0 group-hover:opacity-100'
         )}
       >
-        <X weight="regular" className="size-3.5" />
+        <X className="size-3.5" />
       </Button>
     </div>
   )

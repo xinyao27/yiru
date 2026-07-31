@@ -43,7 +43,10 @@ import {
   getFolderWorkspacePathStatusTitle
 } from '@/components/sidebar/folder-workspace-path-status'
 import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
-import { LegendListScrollArea } from '@/components/sidebar/list-scroll-area'
+import {
+  getLegendListScrollElement,
+  LEGEND_LIST_SCROLL_AREA_PROPS
+} from '@/components/sidebar/list-scroll-area'
 import { deriveRunningAgentSendTargets } from '@/components/sidebar/running-agent-targets'
 import {
   SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
@@ -324,9 +327,10 @@ const EMPTY_TERMINAL_LAYOUTS_BY_TAB_ID: AppState['terminalLayoutsByTabId'] = {}
 const EMPTY_PTY_IDS_BY_TAB_ID: AppState['ptyIdsByTabId'] = {}
 const EMPTY_RUNTIME_PANE_TITLES_BY_TAB_ID: AppState['runtimePaneTitlesByTabId'] = {}
 const WORKTREE_SIDEBAR_ROW_GAP_PX = 2
+// Why: rows carry their own content insets, so the list content itself stays
+// flush with the sidebar edge and card backgrounds span the full row.
 const WORKTREE_SIDEBAR_CONTENT_STYLE: React.CSSProperties = {
   gap: WORKTREE_SIDEBAR_ROW_GAP_PX,
-  paddingLeft: 4,
   paddingTop: 1
 }
 const WORKTREE_SIDEBAR_SCROLL_STYLE: React.CSSProperties = {
@@ -334,12 +338,6 @@ const WORKTREE_SIDEBAR_SCROLL_STYLE: React.CSSProperties = {
   overflowX: 'hidden',
   overflowAnchor: 'none'
 }
-// Why: LegendList 3.3.3 supports this documented Web API at runtime but omits it from
-// the React entrypoint's prop override, so spreading keeps the remaining props type-checked.
-const LEGEND_LIST_SCROLL_AREA_PROPS = {
-  renderScrollComponent: LegendListScrollArea
-}
-
 export function resolvePendingSidebarReveal(args: {
   targetIndex: number
   targetWorktreeStillExists: boolean
@@ -850,7 +848,6 @@ function HostSectionHeader({
         </div>
         <div className="text-muted-foreground/60 can-hover:opacity-0 flex size-4 shrink-0 items-center justify-center transition-opacity group-hover/host-header:opacity-100">
           <ChevronDown
-            weight="regular"
             className={cn('size-3.5 transition-transform', row.collapsed && '-rotate-90')}
           />
         </div>
@@ -883,7 +880,7 @@ function FolderPathStatusIndicator({
             )}
             aria-label={title}
           >
-            <FolderX weight="regular" className="size-3.5" />
+            <FolderX className="size-3.5" />
           </span>
         }
       />
@@ -1269,27 +1266,6 @@ function getWorktreeDragIndexes(rows: readonly HostSectionRow[]): {
     groupIndexes.set(row.sectionKey, index + 1)
   }
   return { groupKeyByRowKey, groupIndexByRowKey }
-}
-
-type LegendListScrollHandle = {
-  getScrollableNode: () => HTMLElement | null
-}
-
-function isLegendListScrollHandle(value: unknown): value is LegendListScrollHandle {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'getScrollableNode' in value &&
-    typeof value.getScrollableNode === 'function'
-  )
-}
-
-function getLegendListScrollElement(value: unknown): HTMLDivElement | null {
-  if (value instanceof HTMLDivElement) {
-    return value
-  }
-  const element = isLegendListScrollHandle(value) ? value.getScrollableNode() : null
-  return element instanceof HTMLDivElement ? element : null
 }
 
 function getLegendListRowType(row: WorkspaceSidebarProjectedRow): string {
@@ -4177,7 +4153,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                           iconClassName="size-4"
                         />
                       ) : (
-                        <row.icon weight="regular" className="size-3" />
+                        <row.icon className="size-3" />
                       )
                     ) : undefined
                   }
@@ -4257,8 +4233,6 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                       ) : undefined
                     }
                   >
-                    {/* Why: only visible project-header actions use regular weight;
-                          portalled menu content keeps the renderer's duotone default. */}
                     {showHeaderCollapseAffordance ? (
                       <SidebarDisclosure
                         expanded={!isHeaderCollapsed}
@@ -4292,7 +4266,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                               onKeyDown={stopRepoHeaderKeyboardToggle}
                               onPointerDown={handleRepoHeaderActionPointerDown}
                             >
-                              <Ellipsis className="size-3.5" weight="regular" />
+                              <Ellipsis className="size-3.5" />
                             </Button>
                           }
                         />
@@ -4380,7 +4354,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                                 }
                               }}
                             >
-                              <Plus className="size-3" weight="regular" />
+                              <Plus className="size-3" />
                             </Button>
                           }
                         />
@@ -4418,7 +4392,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                                     onKeyDown={stopRepoHeaderKeyboardToggle}
                                     onPointerDown={handleRepoHeaderActionPointerDown}
                                   >
-                                    <Ellipsis className="size-3.5" weight="regular" />
+                                    <Ellipsis className="size-3.5" />
                                   </Button>
                                 }
                               />
@@ -4617,7 +4591,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                                   aria-label={createState.ariaLabel}
                                   disabled
                                 >
-                                  <Plus className="size-3" weight="regular" />
+                                  <Plus className="size-3" />
                                 </Button>
                               </span>
                             ) : (
@@ -4644,7 +4618,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                                   }
                                 }}
                               >
-                                <Plus className="size-3" weight="regular" />
+                                <Plus className="size-3" />
                               </Button>
                             )
                           }

@@ -102,7 +102,7 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => (editor ? insertToggle(editor) : undefined)}>
-          <ChevronRight weight="regular" className="size-3.5" />
+          <ChevronRight className="size-3.5" />
           {translate(
             'auto.components.editor.RichMarkdownToolbar.d1bbf9a835',
             'Collapsible section'

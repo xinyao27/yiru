@@ -105,7 +105,7 @@ export default function EditorViewToggle({
   // control to repaint when the active language changes.
   useTranslation()
   return (
-    <TooltipProvider delay={300}>
+    <TooltipProvider>
       <ToggleGroup
         size="sm"
         // shrink-0: on a narrow editor panel this segmented control must keep its

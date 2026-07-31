@@ -9,6 +9,7 @@ import {
 
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
+import { useAppStore } from '../../../store'
 import { DetachedHeadBadge } from '../../detached-head-badge'
 import { DiffNotesSendMenu } from '../../editor/diff-notes-send-menu'
 import { Button } from '../../ui/button'
@@ -22,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import type { SourceControlController } from './controller'
 import { DiffCommentsInlineList } from './diff-comments-inline-list'
 import { SourceControlHeaderToolbar } from './header-toolbar'
+import { SourceControlScopeToolbarActions, SourceControlScopeToolbarSelect } from './scope-toolbar'
 
 export function SourceControlPanelHeader({
   controller
@@ -33,7 +35,6 @@ export function SourceControlPanelHeader({
     activeTabId,
     activeWorktreeId,
     branchSummary,
-    compareBaseRef,
     deleteDiffComment,
     detachedHeadDisplay,
     diffCommentCount,
@@ -43,17 +44,10 @@ export function SourceControlPanelHeader({
     filterExpanded,
     filterQuery,
     handleCopyDiffComments,
-    handleCreatePrHeaderClick,
     handleOpenComment,
     handleToggleSourceControlViewMode,
-    hostedReview,
-    isCreatePrIntentInFlight,
-    isCreatingPr,
     isVisible,
-    manualReviewUrl,
-    prGenerating,
     refreshBranchCompare,
-    remoteStatus,
     setBaseRefDialogOpen,
     setDiffCommentsExpanded,
     setFilterExpanded,
@@ -61,10 +55,14 @@ export function SourceControlPanelHeader({
     setPendingDiffCommentsClear,
     settings,
     sourceControlViewMode,
-    visibleCreatePrHeaderAction,
     workspacePanelTabId,
     worktreePath
   } = controller
+  const gitGraphPanelTabId = workspacePanelTabId ?? activeTabId
+  const isGitGraphOpen = useAppStore(
+    (s) => s.gitGraphOpenByPanelTab[gitGraphPanelTabId ?? ''] ?? false
+  )
+  const toggleGitGraphOpen = useAppStore((s) => s.toggleGitGraphOpen)
 
   return (
     <>
@@ -73,11 +71,8 @@ export function SourceControlPanelHeader({
         filterExpanded={filterExpanded}
         onFilterQueryChange={setFilterQuery}
         onFilterExpandedChange={setFilterExpanded}
-        visibleCreatePrHeaderAction={visibleCreatePrHeaderAction}
-        hostedReview={hostedReview}
-        isCreatePrIntentInFlight={isCreatePrIntentInFlight}
-        isCreatingPr={isCreatingPr || prGenerating}
-        onCreatePrHeaderClick={handleCreatePrHeaderClick}
+        scopeSelect={<SourceControlScopeToolbarSelect controller={controller} />}
+        scopeActions={<SourceControlScopeToolbarActions controller={controller} />}
         sourceControlViewMode={sourceControlViewMode}
         viewModeToggleDisabled={settings === null}
         onToggleViewMode={handleToggleSourceControlViewMode}
@@ -86,10 +81,8 @@ export function SourceControlPanelHeader({
         branchCompareRefreshDisabled={!branchSummary || branchSummary.status === 'loading'}
         diffCommentCount={diffCommentCount}
         onExpandNotes={() => setDiffCommentsExpanded(true)}
-        branchSummary={branchSummary}
-        compareBaseRef={compareBaseRef}
-        upstreamStatus={remoteStatus}
-        manualReviewUrl={manualReviewUrl}
+        isGitGraphOpen={isGitGraphOpen}
+        onToggleGitGraph={() => toggleGitGraphOpen(gitGraphPanelTabId ?? '')}
       />
 
       {detachedHeadDisplay ? (
@@ -121,7 +114,6 @@ export function SourceControlPanelHeader({
               }
             >
               <ChevronDown
-                weight="regular"
                 className={cn(
                   'size-3 shrink-0 transition-transform',
                   !diffCommentsExpanded && '-rotate-90'
@@ -146,7 +138,7 @@ export function SourceControlPanelHeader({
                   isVisible && (!workspacePanelTabId || workspacePanelTabId === activeTabId)
                 }
               />
-              <TooltipProvider delay={400}>
+              <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger
                     render={
@@ -177,7 +169,7 @@ export function SourceControlPanelHeader({
                 </Tooltip>
               </TooltipProvider>
               <DropdownMenu>
-                <TooltipProvider delay={400}>
+                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger
                       render={

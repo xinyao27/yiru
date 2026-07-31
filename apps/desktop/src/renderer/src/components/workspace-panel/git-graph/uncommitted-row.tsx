@@ -1,0 +1,68 @@
+import type React from 'react'
+
+import { Button } from '@/components/ui/button'
+import { translate } from '@/i18n/i18n'
+
+import type { GitGraphColumnWidths } from './column-widths'
+
+// Why: pinned pseudo-row for the dirty worktree, rendered above the real
+// commit graph. It draws its own small grey vertex rather than participating
+// in the shared GitGraphSvg instance (owned by layout.ts/graph-svg.tsx) —
+// there is no real commit/parent edge for uncommitted changes to hang off of,
+// so folding it into the shared vertex/edge model would need a fabricated
+// commit node the layout algorithm was never designed to represent.
+export function GitGraphUncommittedRow({
+  graphColumnWidth,
+  columnWidths,
+  onOpen
+}: {
+  graphColumnWidth: number
+  columnWidths: GitGraphColumnWidths
+  onOpen: () => void
+}): React.JSX.Element {
+  const label = translate(
+    'auto.components.workspace-panel.git-graph.UncommittedRow.a1b2c3d4e5',
+    'Uncommitted Changes'
+  )
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={onOpen}
+      className="hover:bg-accent/40 focus-visible:bg-accent/40 border-border/60 h-auto w-full min-w-0 justify-start border-0 border-b px-0 text-left text-xs whitespace-normal"
+      style={{ height: 24 }}
+    >
+      <span
+        className="flex h-full shrink-0 items-center justify-center"
+        style={{ width: graphColumnWidth }}
+      >
+        <svg width="16" height="24" viewBox="0 0 16 24" aria-hidden="true">
+          <circle
+            cx="8"
+            cy="12"
+            r="4"
+            fill="none"
+            stroke="var(--muted-foreground)"
+            strokeWidth="1.5"
+          />
+          <line
+            x1="8"
+            y1="16"
+            x2="8"
+            y2="24"
+            stroke="var(--muted-foreground)"
+            strokeWidth="1.5"
+            strokeDasharray="2"
+          />
+        </svg>
+      </span>
+      <span
+        className="text-foreground min-w-0 truncate font-medium italic"
+        style={{ width: columnWidths.description }}
+      >
+        {label}
+      </span>
+    </Button>
+  )
+}

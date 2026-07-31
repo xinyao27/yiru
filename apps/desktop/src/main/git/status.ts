@@ -997,16 +997,19 @@ export async function detectConflictOperation(worktreePath: string): Promise<Git
   const gitDir = await resolveGitDir(worktreePath)
   const mergeHead = path.join(gitDir, 'MERGE_HEAD')
   const cherryPickHead = path.join(gitDir, 'CHERRY_PICK_HEAD')
+  const revertHead = path.join(gitDir, 'REVERT_HEAD')
   const rebaseMergeDir = path.join(gitDir, 'rebase-merge')
   const rebaseApplyDir = path.join(gitDir, 'rebase-apply')
 
   let hasMergeHead = false
   let hasCherryPickHead = false
+  let hasRevertHead = false
   let hasRebaseDir = false
 
   try {
     hasMergeHead = existsSync(mergeHead)
     hasCherryPickHead = existsSync(cherryPickHead)
+    hasRevertHead = existsSync(revertHead)
     hasRebaseDir = existsSync(rebaseMergeDir) || existsSync(rebaseApplyDir)
   } catch {
     return 'unknown'
@@ -1020,6 +1023,12 @@ export async function detectConflictOperation(worktreePath: string): Promise<Git
   }
   if (hasCherryPickHead) {
     return 'cherry-pick'
+  }
+  // Why: cherry-pick and revert both leave CHERRY_PICK_HEAD absent and their
+  // own head file present, but never both REVERT_HEAD and CHERRY_PICK_HEAD at
+  // once — check revert last since it's the rarer op.
+  if (hasRevertHead) {
+    return 'revert'
   }
   return 'unknown'
 }
@@ -1039,6 +1048,15 @@ export async function abortRebase(
 ): Promise<void> {
   await runWithGitReadCacheInvalidation(() =>
     gitExecFileAsync(['rebase', '--abort'], gitOptionsForWorktree(worktreePath, options))
+  )
+}
+
+export async function abortRevert(
+  worktreePath: string,
+  options: GitRuntimeOptions = {}
+): Promise<void> {
+  await runWithGitReadCacheInvalidation(() =>
+    gitExecFileAsync(['revert', '--abort'], gitOptionsForWorktree(worktreePath, options))
   )
 }
 

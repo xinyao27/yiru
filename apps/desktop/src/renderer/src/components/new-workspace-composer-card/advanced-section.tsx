@@ -87,7 +87,6 @@ export function AdvancedSection({
         >
           {translate('auto.components.NewWorkspaceComposerCard.f0470c7383', 'Advanced')}
           <ChevronDown
-            weight="regular"
             className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
           />
         </Button>

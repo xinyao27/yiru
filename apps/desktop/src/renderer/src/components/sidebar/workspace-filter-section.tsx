@@ -41,7 +41,7 @@ const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilter
         onChange={setHideDefaultBranchWorkspace}
       />
       <FilterToggleRow
-        icon={<Workflow weight="regular" className="size-3.5" />}
+        icon={<Workflow className="size-3.5" />}
         label={translate(
           'auto.components.sidebar.SidebarWorkspaceFilterSection.automationCreated',
           'Hide automation-created'

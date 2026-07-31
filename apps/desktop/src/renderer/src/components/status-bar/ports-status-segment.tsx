@@ -77,7 +77,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <TooltipProvider delay={150}>
+      <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
             render={
@@ -209,9 +209,9 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                   }}
                 >
                   {externalOpen ? (
-                    <ChevronDown weight="regular" className="size-3" />
+                    <ChevronDown className="size-3" />
                   ) : (
-                    <ChevronRight weight="regular" className="size-3" />
+                    <ChevronRight className="size-3" />
                   )}
                   <span>
                     {translate(

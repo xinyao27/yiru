@@ -117,10 +117,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
         disabled={state === 'loading'}
       >
         {state === 'web-fallback' ? (
-          <ExternalLink
-            weight="regular"
-            className="size-3.5 text-amber-600 transition-all duration-300 dark:text-amber-400/80"
-          />
+          <ExternalLink className="size-3.5 text-amber-600 transition-all duration-300 dark:text-amber-400/80" />
         ) : (
           <Star
             className={cn(
@@ -218,7 +215,7 @@ function PreflightBanner({
               onClick={() => window.api.shell.openUrl(issue.fixUrl)}
             >
               {issue.fixLabel}
-              <ExternalLink weight="regular" className="size-3" />
+              <ExternalLink className="size-3" />
             </Button>
           </div>
           {issue.dismissible && (
@@ -229,7 +226,7 @@ function PreflightBanner({
               onClick={() => dismiss(issue)}
               aria-label={translate('auto.components.Landing.preflightDismiss', 'Dismiss')}
             >
-              <X weight="regular" className="size-3.5" />
+              <X className="size-3.5" />
             </Button>
           )}
         </div>

@@ -70,7 +70,10 @@ export const GitCommitCompare = WorktreeSelector.extend({
 
 export const GitHistory = WorktreeSelector.extend({
   limit: z.number().int().min(1).max(200).optional(),
-  baseRef: z.string().nullable().optional()
+  baseRef: z.string().nullable().optional(),
+  refScope: z.enum(['head', 'all']).optional(),
+  includeRemoteBranches: z.boolean().optional(),
+  skip: z.number().int().min(0).optional()
 })
 
 export const GitBranchDiff = GitFilePath.extend({
@@ -263,4 +266,59 @@ export const GitRemoteCommitUrl = WorktreeSelector.extend({
     .unknown()
     .transform((v) => (typeof v === 'string' ? v : ''))
     .pipe(FullGitObjectId)
+})
+
+const GitRefName = z
+  .unknown()
+  .transform((v) => (typeof v === 'string' ? v : ''))
+  .pipe(
+    z
+      .string()
+      .min(1, 'Missing name')
+      // Why: never let a tag/branch name be parsed as a git flag (arg injection).
+      .refine((value) => !value.startsWith('-'), 'Name must not start with -')
+  )
+
+const GitCommitTarget = WorktreeSelector.extend({
+  commit: z
+    .unknown()
+    .transform((v) => (typeof v === 'string' ? v : ''))
+    .pipe(FullGitObjectId)
+})
+
+export const GitAddTag = GitCommitTarget.extend({
+  name: GitRefName,
+  message: z.string().optional(),
+  force: z.boolean().optional()
+})
+
+export const GitCreateBranch = GitCommitTarget.extend({
+  name: GitRefName,
+  checkout: z.boolean().optional()
+})
+
+export const GitCheckoutCommit = GitCommitTarget
+
+const GitMainlineOption = z.number().int().min(1).max(64).optional()
+
+export const GitCherryPick = GitCommitTarget.extend({
+  mainline: GitMainlineOption
+})
+
+export const GitRevertCommit = GitCommitTarget.extend({
+  mainline: GitMainlineOption
+})
+
+export const GitDropCommit = GitCommitTarget
+
+export const GitMergeCommit = GitCommitTarget.extend({
+  noFf: z.boolean().optional(),
+  squash: z.boolean().optional(),
+  message: z.string().optional()
+})
+
+export const GitRebaseOntoCommit = GitCommitTarget
+
+export const GitResetToCommit = GitCommitTarget.extend({
+  mode: z.enum(['soft', 'mixed', 'hard'])
 })

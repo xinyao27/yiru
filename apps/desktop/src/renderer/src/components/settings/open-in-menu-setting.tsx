@@ -311,7 +311,7 @@ export function OpenInMenuSetting({
                 className="h-8 shrink-0 gap-1.5"
               >
                 {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
-                <ChevronDown weight="regular" className="size-3.5" />
+                <ChevronDown className="size-3.5" />
               </Button>
             }
           />

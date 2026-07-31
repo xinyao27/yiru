@@ -58,7 +58,7 @@ export function RuntimeAccessGrantList({
                   'Refresh shared access'
                 )}
               >
-                {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+                {isLoading ? <LoadingIndicator /> : <RefreshCw />}
               </Button>
             }
           />

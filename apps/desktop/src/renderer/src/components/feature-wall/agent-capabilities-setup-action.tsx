@@ -164,7 +164,7 @@ const AGENT_CAPABILITY_SETUP_ROWS: readonly AgentCapabilitySetupRow[] = [
         'Let agents coordinate through Yiru to keep large, multi-step tasks moving to completion.'
       )
     },
-    icon: <Workflow weight="regular" className="size-4" />
+    icon: <Workflow className="size-4" />
   },
   {
     id: 'browserUse',

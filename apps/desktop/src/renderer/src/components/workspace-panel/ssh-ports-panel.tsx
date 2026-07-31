@@ -194,7 +194,6 @@ function PortSection({
         onClick={onToggle}
       >
         <ChevronRight
-          weight="regular"
           size={12}
           className={cn('text-muted-foreground transition-transform', !collapsed && 'rotate-90')}
         />

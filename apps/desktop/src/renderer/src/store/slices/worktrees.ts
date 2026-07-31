@@ -24,7 +24,6 @@ import { branchName } from '@/lib/git-utils'
 import { markInputQuietSchedulerInput, scheduleAfterInputQuiet } from '@/lib/input-quiet-scheduler'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scroll-anchor-record-request'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import type {
@@ -3533,13 +3532,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       detachedHeadAutoDerivedDisplayNames.delete(worktreeId)
       forgetForegroundTerminalTabs(tabIds)
       forgetAgentStartupDeliveriesForTabs(tabIds)
-
-      // Why: deletion is async (backend + terminal/browser teardown awaited
-      // above), so snapshot the sidebar's current top-row anchor in the same
-      // tick we remove the row. Recording at click time goes stale across the
-      // await, and this covers every delete entry point (modal, card, SSH,
-      // batch) rather than only the context menu.
-      requestVirtualizedScrollAnchorRecord('[data-worktree-sidebar]')
 
       // Why: explicit deletion provenance is available here before child
       // unmount cleanup; identity migration and recoverable remounts are not

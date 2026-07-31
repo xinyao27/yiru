@@ -1,4 +1,4 @@
-import { Copy, type Icon as PhosphorIcon, type IconProps } from '@phosphor-icons/react'
+import { Copy, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { Fragment } from 'react'
 import { toast } from 'sonner'
 
@@ -44,11 +44,10 @@ function OrchestrationExamplePromptText(props: { prompt: string }): React.JSX.El
 export function OrchestrationExampleDialog(props: {
   example: OrchestrationUsageExample
   icon?: PhosphorIcon
-  iconWeight?: IconProps['weight']
   open: boolean
   onOpenChange: (open: boolean) => void
 }): React.JSX.Element {
-  const { example, icon: Icon, iconWeight, open, onOpenChange } = props
+  const { example, icon: Icon, open, onOpenChange } = props
 
   const copyPrompt = async (prompt: string): Promise<void> => {
     try {
@@ -79,7 +78,7 @@ export function OrchestrationExampleDialog(props: {
             <div className="flex items-start gap-3">
               {Icon ? (
                 <div className="border-border/70 bg-muted/30 text-muted-foreground flex size-9 shrink-0 items-center justify-center border">
-                  <Icon className="size-4" weight={iconWeight} />
+                  <Icon className="size-4" />
                 </div>
               ) : null}
               <div className="min-w-0 space-y-1.5">

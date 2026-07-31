@@ -187,7 +187,7 @@ export function ContextualTourOverlaySurface({
           onClick={() => onSkip(activeTourId)}
           className="absolute top-2 right-2"
         >
-          <X weight="regular" />
+          <X />
         </Button>
         <h2 className="text-foreground pr-6 text-sm font-semibold tracking-tight">
           {renderState.title}
@@ -211,7 +211,7 @@ export function ContextualTourOverlaySurface({
                 )}
                 onClick={onBack}
               >
-                <ArrowLeft weight="regular" />
+                <ArrowLeft />
                 {translate(
                   'auto.components.contextual.tours.ContextualTourOverlaySurface.4a9568f773',
                   'Back'
@@ -240,9 +240,7 @@ export function ContextualTourOverlaySurface({
                 }
               >
                 {primaryAction.label}
-                {primaryAction.kind === 'next' && !renderState.isLastStep ? (
-                  <ArrowRight weight="regular" />
-                ) : null}
+                {primaryAction.kind === 'next' && !renderState.isLastStep ? <ArrowRight /> : null}
               </Button>
             ) : null}
           </div>

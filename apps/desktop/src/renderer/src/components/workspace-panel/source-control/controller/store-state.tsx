@@ -28,8 +28,6 @@ export type SourceControlControllerInput = {
 
 export function useSourceControlStoreState(scope: SourceControlControllerInput) {
   const refreshBranchCompareRef = useRef<() => Promise<void>>(async () => {})
-  const refreshGitHistoryRef = useRef<() => Promise<void>>(async () => {})
-  const [fileListScrollElement, setFileListScrollElement] = useState<HTMLDivElement | null>(null)
   const isMac = useMemo(() => navigator.userAgent.includes('Mac'), [])
   const pendingCommentEditorRevealFrameIdsRef = useRef<number[]>([])
   const commitInFlightRef = useRef<Record<string, boolean>>({})
@@ -252,8 +250,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
   const [filterExpanded, setFilterExpanded] = useState(false)
   return {
     ...scope,
-    fileListScrollElement,
-    setFileListScrollElement,
     isMac,
     pendingCommentEditorRevealFrameIdsRef,
     commitInFlightRef,
@@ -347,8 +343,7 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
     handleConfirmDiffCommentsClear,
     filterExpanded,
     setFilterExpanded,
-    refreshBranchCompareRef,
-    refreshGitHistoryRef
+    refreshBranchCompareRef
   }
 }
 

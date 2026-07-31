@@ -30,7 +30,7 @@ function getUncommittedActions(
           variant="destructive"
           onClick={() => controller.requestDiscardEntry(entry)}
         >
-          {entry.area === 'untracked' ? <Trash /> : <Undo2 weight="regular" />}
+          {entry.area === 'untracked' ? <Trash /> : <Undo2 />}
           {entry.area === 'untracked'
             ? translate(
                 'auto.components.right.sidebar.SourceControl.11463f7a98',
@@ -90,7 +90,7 @@ function getDirectoryActions(
             })
           }
         >
-          {node.area === 'untracked' ? <Trash /> : <Undo2 weight="regular" />}
+          {node.area === 'untracked' ? <Trash /> : <Undo2 />}
           {node.area === 'untracked'
             ? translate(
                 'auto.components.right.sidebar.SourceControl.9b367363b6',

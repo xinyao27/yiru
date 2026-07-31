@@ -14,6 +14,17 @@ import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-messa
 import { validateGitForkSyncExpectedUpstream } from '../../shared/git/fork-sync'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
 import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
+import type {
+  GitAddTagResult,
+  GitCheckoutCommitResult,
+  GitCherryPickResult,
+  GitCreateBranchResult,
+  GitDropCommitResult,
+  GitMergeCommitResult,
+  GitRebaseOntoCommitResult,
+  GitResetToCommitResult,
+  GitRevertResult
+} from '../../shared/git/write-op-results'
 import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control/ai'
 import {
   buildRgArgs,
@@ -44,22 +55,31 @@ import type {
 } from '../../shared/types'
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
+import { createBranchFromCommit } from '../git/branch-create'
 import { checkIgnoredPaths } from '../git/check-ignored-paths'
+import { checkoutCommit } from '../git/checkout-commit'
+import { cherryPickCommit } from '../git/cherry-pick'
+import { dropCommit } from '../git/drop-commit'
 import { gitSyncForkDefaultBranch } from '../git/fork-sync'
 import { getHistory } from '../git/history'
 import {
   appendFolderToGitignore,
   findKnownHugeFolderPathsToIgnore
 } from '../git/huge-folder-ignore'
+import { mergeCommit } from '../git/merge-commit'
 import { validateGitPushTarget } from '../git/push-target-validation'
+import { rebaseOntoCommit } from '../git/rebase-onto-commit'
 import { gitFastForward, gitFetch, gitPull, gitPullRebaseFromBase, gitPush } from '../git/remote'
 import { getRemoteCommitUrl, getRemoteFileUrl } from '../git/repo'
+import { resetToCommit } from '../git/reset-to-commit'
+import { revertCommit } from '../git/revert'
 import { gitExecFileAsync, wslAwareSpawn } from '../git/runner'
 import {
   getStatus,
   getSubmoduleStatus,
   abortMerge,
   abortRebase,
+  abortRevert,
   detectConflictOperation,
   getDiff,
   commitChanges,
@@ -75,6 +95,7 @@ import {
   getCommitCompare,
   getCommitDiff
 } from '../git/status'
+import { addTag } from '../git/tag'
 import { getUpstreamStatus } from '../git/upstream'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import type { Store } from '../persistence'
@@ -1324,6 +1345,276 @@ export function registerFilesystemHandlers(
         worktreePath
       )
       await abortRebase(worktreePath, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:abortRevert',
+    async (_event, args: { worktreePath: string; connectionId?: string }): Promise<void> => {
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(`No git provider for connection "${args.connectionId}"`)
+        }
+        return provider.abortRevert(args.worktreePath)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      await abortRevert(worktreePath, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:addTag',
+    async (
+      _event,
+      args: {
+        worktreePath: string
+        name: string
+        commit: string
+        message?: string
+        force?: boolean
+        connectionId?: string
+      }
+    ): Promise<GitAddTagResult> => {
+      const params = {
+        name: args.name,
+        commit: args.commit,
+        message: args.message,
+        force: args.force
+      }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.addTag(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return addTag(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:createBranch',
+    async (
+      _event,
+      args: {
+        worktreePath: string
+        name: string
+        commit: string
+        checkout?: boolean
+        connectionId?: string
+      }
+    ): Promise<GitCreateBranchResult> => {
+      const params = { name: args.name, commit: args.commit, checkout: args.checkout }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.createBranchFromCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return createBranchFromCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:checkoutCommit',
+    async (
+      _event,
+      args: { worktreePath: string; commit: string; connectionId?: string }
+    ): Promise<GitCheckoutCommitResult> => {
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.checkoutCommit(args.worktreePath, args.commit)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return checkoutCommit(worktreePath, args.commit, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:cherryPick',
+    async (
+      _event,
+      args: { worktreePath: string; commit: string; mainline?: number; connectionId?: string }
+    ): Promise<GitCherryPickResult> => {
+      const params = { commit: args.commit, mainline: args.mainline }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.cherryPickCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return cherryPickCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:revertCommit',
+    async (
+      _event,
+      args: { worktreePath: string; commit: string; mainline?: number; connectionId?: string }
+    ): Promise<GitRevertResult> => {
+      const params = { commit: args.commit, mainline: args.mainline }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.revertCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return revertCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:dropCommit',
+    async (
+      _event,
+      args: { worktreePath: string; commit: string; connectionId?: string }
+    ): Promise<GitDropCommitResult> => {
+      const params = { commit: args.commit }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.dropCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return dropCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:mergeCommit',
+    async (
+      _event,
+      args: {
+        worktreePath: string
+        commit: string
+        noFf?: boolean
+        squash?: boolean
+        message?: string
+        connectionId?: string
+      }
+    ): Promise<GitMergeCommitResult> => {
+      const params = {
+        commit: args.commit,
+        noFf: args.noFf,
+        squash: args.squash,
+        message: args.message
+      }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.mergeCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return mergeCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:rebaseOntoCommit',
+    async (
+      _event,
+      args: { worktreePath: string; commit: string; connectionId?: string }
+    ): Promise<GitRebaseOntoCommitResult> => {
+      const params = { commit: args.commit }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.rebaseOntoCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return rebaseOntoCommit(worktreePath, params, gitOptions)
+    }
+  )
+
+  ipcMain.handle(
+    'git:resetToCommit',
+    async (
+      _event,
+      args: {
+        worktreePath: string
+        commit: string
+        mode: 'soft' | 'mixed' | 'hard'
+        connectionId?: string
+      }
+    ): Promise<GitResetToCommitResult> => {
+      const params = { commit: args.commit, mode: args.mode }
+      if (args.connectionId) {
+        const provider = getSshGitProvider(args.connectionId)
+        if (!provider) {
+          throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
+        }
+        return provider.resetToCommit(args.worktreePath, params)
+      }
+      const worktreePath = await resolveRegisteredWorktreePath(args.worktreePath, store)
+      const gitOptions = getLocalGitOptionsForRegisteredWorktree(
+        store,
+        args.worktreePath,
+        worktreePath
+      )
+      return resetToCommit(worktreePath, params, gitOptions)
     }
   )
 

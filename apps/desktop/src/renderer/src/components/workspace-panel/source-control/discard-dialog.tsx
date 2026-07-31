@@ -119,10 +119,7 @@ export function SourceControlDiscardDialog({
             autoFocus
             onClick={onConfirm}
           >
-            <PendingDiscardIcon
-              className="size-4"
-              weight={pendingDiscardDeletes ? undefined : 'regular'}
-            />
+            <PendingDiscardIcon className="size-4" />
             {pendingDiscardCopy?.confirmLabel ??
               translate(
                 'auto.components.right.sidebar.source.control.discard.dialog.15efa778e3',

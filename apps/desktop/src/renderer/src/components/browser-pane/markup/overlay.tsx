@@ -145,7 +145,7 @@ export function MarkupOverlay({
             )}
           </span>
           <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
-            <X weight="regular" className="size-4" />
+            <X className="size-4" />
             {translate('auto.components.browser-pane.markup.cancel', 'Cancel')}
           </Button>
           <Button type="button" size="sm" onClick={handleDone} disabled={busy || !baseLoaded}>

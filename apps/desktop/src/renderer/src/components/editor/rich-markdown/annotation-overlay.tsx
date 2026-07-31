@@ -58,7 +58,7 @@ export function RichMarkdownAnnotationOverlay({
             onOpenPopover()
           }}
         >
-          <Plus className="size-3.5" strokeWidth={2.5} />
+          <Plus className="size-3.5" />
         </Button>
       ) : null}
       {popover ? (

@@ -343,7 +343,7 @@ function CheckButton({
         )}
       >
         {isChecked ? <Check className="size-3" strokeWidth={3} /> : null}
-        {isMixed ? <Minus className="size-3" strokeWidth={3} /> : null}
+        {isMixed ? <Minus className="size-3" /> : null}
       </span>
     </Button>
   )
@@ -361,11 +361,7 @@ function SortIndicator({
   if (sortKey !== activeKey) {
     return <Circle className="size-3 opacity-0" />
   }
-  return direction === 'asc' ? (
-    <ArrowUp weight="regular" className="size-3" />
-  ) : (
-    <ArrowDown weight="regular" className="size-3" />
-  )
+  return direction === 'asc' ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />
 }
 
 function StatusBadge({
@@ -704,7 +700,7 @@ function WorkspaceDecisionHoverCard({
           disabled={!details.canOpenWorkspace}
           className="shrink-0 gap-1.5"
         >
-          <ExternalLink weight="regular" className="size-3.5" />
+          <ExternalLink className="size-3.5" />
           {translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.c28643d3da',
             'Go to workspace'
@@ -1663,10 +1659,10 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
             progress?.state === 'cancelling' ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <X weight="regular" className="size-3.5" />
+              <X className="size-3.5" />
             )
           ) : (
-            <RefreshCw weight="regular" className="size-3.5" />
+            <RefreshCw className="size-3.5" />
           )}
           {isScanning
             ? progress?.state === 'cancelling'

@@ -111,7 +111,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
               </p>
             ) : null}
           </div>
-          <TooltipProvider delay={250}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={

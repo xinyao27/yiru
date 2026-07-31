@@ -238,7 +238,7 @@ export function MobileEmulatorSettingsPane({
                 {refreshing ? (
                   <LoadingIndicator className="size-3.5" />
                 ) : (
-                  <RefreshCw weight="regular" className="size-3.5" />
+                  <RefreshCw className="size-3.5" />
                 )}
               </Button>
             </div>

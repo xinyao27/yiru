@@ -53,9 +53,7 @@ export function ActionCard(props: ActionCardProps): React.JSX.Element {
           </span>
         ) : null}
       </span>
-      {canJump ? (
-        <ArrowSquareOut weight="regular" className="text-muted-foreground size-3.5 shrink-0" />
-      ) : null}
+      {canJump ? <ArrowSquareOut className="text-muted-foreground size-3.5 shrink-0" /> : null}
     </>
   )
 

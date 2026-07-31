@@ -72,8 +72,7 @@ const SidebarHeader = React.memo(function SidebarHeader() {
                 disabled={!canCreateWorkspace}
                 data-contextual-tour-target="workspace-create-control"
               >
-                {/* Why: this compact creation control is an intentional regular-weight exception. */}
-                <Plus className="size-3.5" weight="regular" />
+                <Plus className="size-3.5" />
               </Button>
             }
           />

@@ -80,7 +80,7 @@ export function AddRepoHostSelector({
                   {getSidebarHostHealthLabel(selectedHost.health)}
                 </span>
               ) : null}
-              <ChevronsUpDown weight="regular" className="size-3.5 shrink-0 opacity-50" />
+              <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
             </Button>
           }
         />
@@ -116,7 +116,7 @@ export function AddRepoHostSelector({
                             )}
                           </span>
                         </span>
-                        <ChevronRight weight="regular" className="mt-0.5 size-3.5 shrink-0" />
+                        <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
                       </CommandItem>
                     }
                   />

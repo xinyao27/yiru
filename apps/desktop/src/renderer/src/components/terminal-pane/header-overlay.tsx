@@ -374,7 +374,7 @@ export default function TerminalPaneHeaderOverlay({
                               { value0: title }
                             )}
                           >
-                            <X weight="regular" className="size-3" />
+                            <X className="size-3" />
                           </Button>
                         }
                       />
@@ -403,7 +403,7 @@ export default function TerminalPaneHeaderOverlay({
                               'Close Pane'
                             )}
                           >
-                            <X className="size-3" weight="regular" />
+                            <X className="size-3" />
                           </Button>
                         }
                       />

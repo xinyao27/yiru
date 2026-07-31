@@ -213,7 +213,7 @@ export function ShortcutCommandBlock({
                       )}
                       onClick={() => onResetAction(item.id)}
                     >
-                      <RotateCcw weight="regular" className="size-3" />
+                      <RotateCcw className="size-3" />
                     </Button>
                   }
                 />

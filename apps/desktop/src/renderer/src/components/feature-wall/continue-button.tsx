@@ -15,7 +15,7 @@ export function FeatureWallContinueButton(props: {
       {props.enableKeyboardShortcut ? (
         <span className="border-primary-foreground/20 ml-1 inline-flex items-center gap-0.5 border px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
           <span>{props.shortcutModifierLabel}</span>
-          <CornerDownLeft weight="regular" className="size-3" />
+          <CornerDownLeft className="size-3" />
         </span>
       ) : null}
     </Button>

@@ -72,7 +72,6 @@ export function FileExplorerTreeRowButton({
       {node.isDirectory ? (
         <>
           <ChevronRight
-            weight="regular"
             className={cn(
               'size-3 shrink-0 text-muted-foreground transition-transform',
               isExpanded && 'rotate-90'

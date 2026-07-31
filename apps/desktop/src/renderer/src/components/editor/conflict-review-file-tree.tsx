@@ -94,7 +94,7 @@ export function ConflictReviewFileTree({
             )}
             onClick={() => onCollapsedChange(true)}
           >
-            <PanelLeftClose weight="regular" className="size-3.5" />
+            <PanelLeftClose className="size-3.5" />
           </Button>
         </div>
       </div>
@@ -150,7 +150,6 @@ function ConflictReviewFileTreeRow({
         aria-expanded={!isCollapsed}
       >
         <ChevronDown
-          weight="regular"
           className={cn('size-3 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
         />
         {isCollapsed ? (

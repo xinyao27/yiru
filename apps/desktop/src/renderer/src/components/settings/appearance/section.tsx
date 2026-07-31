@@ -55,7 +55,6 @@ export function AppearanceSection({
           ) : null}
         </span>
         <ChevronRight
-          weight="regular"
           className={cn(
             'size-[18px] shrink-0 text-muted-foreground transition-transform',
             open && 'rotate-90 text-foreground'

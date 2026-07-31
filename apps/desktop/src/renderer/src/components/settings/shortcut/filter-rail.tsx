@@ -164,7 +164,7 @@ export function ShortcutFilterRail({
               onClick={() => onQueryChange('')}
               className="text-muted-foreground absolute top-1/2 right-1 -translate-y-1/2"
             >
-              <X weight="regular" className="size-3" />
+              <X className="size-3" />
             </Button>
           ) : null}
         </div>

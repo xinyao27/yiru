@@ -22,7 +22,7 @@ export function DeleteWorktreeLineageNotice({
   return (
     <div className="border-border/70 bg-muted/35 max-w-full min-w-0 overflow-hidden border px-3 py-2 text-xs">
       <div className="flex items-start gap-2">
-        <Workflow weight="regular" className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
+        <Workflow className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="text-foreground font-medium">
             {translate(

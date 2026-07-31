@@ -114,7 +114,7 @@ function FileLoadErrorView({
           </div>
           <div className="mt-1 break-words">{message}</div>
           <Button type="button" variant="outline" size="sm" className="mt-3" onClick={onRetry}>
-            <RefreshCw weight="regular" className="size-3.5" />
+            <RefreshCw className="size-3.5" />
             {translate('auto.components.editor.EditorContent.2a512bb46a', 'Retry')}
           </Button>
         </div>

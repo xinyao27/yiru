@@ -140,7 +140,6 @@ export default function ImportedWorktreesVisibilityLine({
           className="text-muted-foreground"
         >
           <ChevronRight
-            weight="regular"
             className={cn('size-3 transition-transform', isExpanded && 'rotate-90')}
             aria-hidden="true"
           />
@@ -159,7 +158,7 @@ export default function ImportedWorktreesVisibilityLine({
                   onClick={onKeepHidden}
                   className="text-muted-foreground"
                 >
-                  <X weight="regular" className="size-3" aria-hidden="true" />
+                  <X className="size-3" aria-hidden="true" />
                 </Button>
               }
             />

@@ -1,41 +1,22 @@
-import {
-  GitPullRequest as GitPullRequestArrow,
-  MagnifyingGlass as Search,
-  X
-} from '@phosphor-icons/react'
-import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { GitBranch, MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import type {
-  GitBranchCompareSummary,
-  GitUpstreamStatus,
-  SourceControlViewMode
-} from '../../../../../shared/types'
+import type { GitBranchCompareSummary, SourceControlViewMode } from '../../../../../shared/types'
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
-import { LoadingIndicator } from '../../loading-indicator'
 import { Button } from '../../ui/button'
 import { Input } from '../../ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
-import { HostedReviewHeaderLink, HostedReviewIcon } from '../hosted-review-header-chrome'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from '../right-sidebar-button-styles'
-import {
-  shouldShowSourceControlBranchContextRow,
-  SourceControlBranchContextRow
-} from './branch-context-row'
 import { SourceControlHeaderOverflowMenu } from './header-overflow-menu'
-import type { PrimaryAction } from './primary-action'
 
 type SourceControlHeaderToolbarProps = {
   filterQuery: string
   filterExpanded: boolean
   onFilterQueryChange: (value: string) => void
   onFilterExpandedChange: (expanded: boolean) => void
-  visibleCreatePrHeaderAction: PrimaryAction | null
-  hostedReview: HostedReviewInfo | null
-  isCreatePrIntentInFlight: boolean
-  isCreatingPr: boolean
-  onCreatePrHeaderClick: () => void
+  scopeSelect: React.ReactNode
+  scopeActions: React.ReactNode
   sourceControlViewMode: SourceControlViewMode
   viewModeToggleDisabled: boolean
   onToggleViewMode: () => void
@@ -44,71 +25,8 @@ type SourceControlHeaderToolbarProps = {
   branchCompareRefreshDisabled: boolean
   diffCommentCount: number
   onExpandNotes: () => void
-  branchSummary: GitBranchCompareSummary | null
-  compareBaseRef: string | null
-  upstreamStatus?: GitUpstreamStatus
-  manualReviewUrl?: string | null
-}
-
-function HostedReviewToolbarLink({
-  review,
-  compact
-}: {
-  review: HostedReviewInfo
-  compact?: boolean
-}): React.JSX.Element {
-  return (
-    <div
-      className={cn(
-        'flex min-w-0 items-center gap-1 text-xs leading-none',
-        compact ? 'max-w-[72px] shrink-0' : 'flex-1'
-      )}
-    >
-      <HostedReviewIcon review={review} className="size-3 shrink-0" />
-      <HostedReviewHeaderLink review={review} />
-    </div>
-  )
-}
-
-function CreatePrHeaderButton({
-  action,
-  isCreatePrIntentInFlight,
-  isCreatingPr,
-  onClick
-}: {
-  action: PrimaryAction
-  isCreatePrIntentInFlight: boolean
-  isCreatingPr: boolean
-  onClick: () => void
-}): React.JSX.Element {
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="inline-flex shrink-0">
-            <Button
-              type="button"
-              size="xs"
-              disabled={action.disabled}
-              onClick={onClick}
-              className="text-[11px]"
-              title={action.title}
-            >
-              {isCreatePrIntentInFlight || isCreatingPr ? (
-                <LoadingIndicator className="size-3.5" />
-              ) : (
-                <GitPullRequestArrow className="size-3.5" aria-hidden="true" />
-              )}
-              {action.label}
-            </Button>
-          </span>
-        }
-      />
-      <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
-        {action.title}
-      </TooltipContent>
-    </Tooltip>
-  )
+  isGitGraphOpen: boolean
+  onToggleGitGraph: () => void
 }
 
 function renderOverflowMenu(
@@ -132,11 +50,8 @@ export function SourceControlHeaderToolbar({
   filterExpanded,
   onFilterQueryChange,
   onFilterExpandedChange,
-  visibleCreatePrHeaderAction,
-  hostedReview,
-  isCreatePrIntentInFlight,
-  isCreatingPr,
-  onCreatePrHeaderClick,
+  scopeSelect,
+  scopeActions,
   sourceControlViewMode,
   viewModeToggleDisabled,
   onToggleViewMode,
@@ -145,10 +60,8 @@ export function SourceControlHeaderToolbar({
   branchCompareRefreshDisabled,
   diffCommentCount,
   onExpandNotes,
-  branchSummary,
-  compareBaseRef,
-  upstreamStatus,
-  manualReviewUrl
+  isGitGraphOpen,
+  onToggleGitGraph
 }: SourceControlHeaderToolbarProps): React.JSX.Element {
   const filterInputRef = useRef<HTMLInputElement>(null)
   const normalizedFilter = filterQuery.trim()
@@ -190,6 +103,14 @@ export function SourceControlHeaderToolbar({
         value0: filterQuery
       })
     : translate('auto.components.right.sidebar.SourceControl.b3c8f1a902', 'Filter files by name')
+  const gitGraphToggleTitle = translate(
+    'auto.components.right.sidebar.SourceControl.e7f8a9b0c1',
+    'Git Graph'
+  )
+  const clearFilterTitle = translate(
+    'auto.components.right.sidebar.SourceControl.d4f8c2a901',
+    'Clear and close filter'
+  )
 
   return (
     <div className="border-border border-b px-3 pt-1.5 pb-1">
@@ -199,42 +120,63 @@ export function SourceControlHeaderToolbar({
       >
         {showCollapsedToolbar ? (
           <>
-            {hostedReview ? (
-              <HostedReviewToolbarLink review={hostedReview} />
-            ) : visibleCreatePrHeaderAction ? (
-              <CreatePrHeaderButton
-                action={visibleCreatePrHeaderAction}
-                isCreatePrIntentInFlight={isCreatePrIntentInFlight}
-                isCreatingPr={isCreatingPr}
-                onClick={onCreatePrHeaderClick}
+            {scopeSelect}
+            {/* Why: the scope select keeps its natural width; every action stays
+                in one right-aligned group whatever that width is. */}
+            <span className="min-w-0 flex-1" aria-hidden="true" />
+            {scopeActions}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-toolbar"
+                    data-testid="source-control-git-graph-toggle"
+                    className={cn(
+                      RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                      isGitGraphOpen && 'bg-muted'
+                    )}
+                    onClick={onToggleGitGraph}
+                    aria-label={gitGraphToggleTitle}
+                    aria-pressed={isGitGraphOpen}
+                  >
+                    <GitBranch className="size-3.5" />
+                  </Button>
+                }
               />
-            ) : (
-              <span className="min-w-0 flex-1" aria-hidden="true" />
-            )}
-            {visibleCreatePrHeaderAction && !hostedReview ? (
-              // Why: keep filter/overflow pinned right without stretching Create PR.
-              <span className="min-w-0 flex-1" aria-hidden="true" />
-            ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-toolbar"
-              data-testid="source-control-filter-toggle"
-              className={cn(
-                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
-                'relative',
-                normalizedFilter && 'bg-muted'
-              )}
-              onClick={expandFilter}
-              aria-label={filterToggleTitle}
-              title={filterToggleTitle}
-              aria-expanded={false}
-            >
-              <Search className="size-3.5" />
-              {normalizedFilter ? (
-                <span className="bg-foreground absolute top-1 right-1 size-1.5" />
-              ) : null}
-            </Button>
+              <TooltipContent side="bottom" sideOffset={6}>
+                {gitGraphToggleTitle}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-toolbar"
+                    data-testid="source-control-filter-toggle"
+                    className={cn(
+                      RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                      'relative',
+                      normalizedFilter && 'bg-muted'
+                    )}
+                    onClick={expandFilter}
+                    aria-label={filterToggleTitle}
+                    aria-expanded={false}
+                  >
+                    <Search className="size-3.5" />
+                    {normalizedFilter ? (
+                      <span className="bg-foreground absolute top-1 right-1 size-1.5" />
+                    ) : null}
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {filterToggleTitle}
+              </TooltipContent>
+            </Tooltip>
             {renderOverflowMenu(overflowProps)}
           </>
         ) : (
@@ -268,38 +210,27 @@ export function SourceControlHeaderToolbar({
                 )}
               />
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-toolbar"
-              aria-label={translate(
-                'auto.components.right.sidebar.SourceControl.d4f8c2a901',
-                'Clear and close filter'
-              )}
-              title={translate(
-                'auto.components.right.sidebar.SourceControl.d4f8c2a901',
-                'Clear and close filter'
-              )}
-              onClick={clearAndCollapseFilter}
-            >
-              <X weight="regular" className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-toolbar"
+                    aria-label={clearFilterTitle}
+                    onClick={clearAndCollapseFilter}
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {clearFilterTitle}
+              </TooltipContent>
+            </Tooltip>
           </>
         )}
       </div>
-
-      {shouldShowSourceControlBranchContextRow(branchSummary, compareBaseRef) ? (
-        <div className="mt-1">
-          <SourceControlBranchContextRow
-            summary={branchSummary}
-            compareBaseRef={compareBaseRef}
-            upstreamStatus={upstreamStatus}
-            manualReviewUrl={manualReviewUrl}
-            onChangeBaseRef={onChangeBaseRef}
-            onRetry={onRefreshBranchCompare}
-          />
-        </div>
-      ) : null}
     </div>
   )
 }

@@ -68,7 +68,7 @@ export function SparsePresetDraftEditor({
           onClick={() => setDraft(null)}
           disabled={submitting}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       </div>
 

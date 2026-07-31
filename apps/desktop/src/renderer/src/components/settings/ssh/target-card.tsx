@@ -227,7 +227,7 @@ export function SshTargetCard({
             {resetInFlight ? (
               <LoadingIndicator className="size-3" />
             ) : (
-              <RotateCcw weight="regular" className="size-3" />
+              <RotateCcw className="size-3" />
             )}
           </Button>
         }

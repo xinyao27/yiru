@@ -136,7 +136,7 @@ export function DashboardAgentRowTrailingControls({
             )}
             title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
           >
-            <X weight="regular" className="size-3.5" />
+            <X className="size-3.5" />
           </Button>
         </span>
       )}
@@ -160,7 +160,7 @@ export function DashboardAgentRowTrailingControls({
           )}
           title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
         >
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
         </Button>
       )}
       {!hideExpand && (
@@ -186,7 +186,6 @@ export function DashboardAgentRowTrailingControls({
           aria-expanded={expanded}
         >
           <ChevronDown
-            weight="regular"
             className={cn('size-3.5 transition-transform duration-150', expanded && 'rotate-180')}
           />
         </Button>

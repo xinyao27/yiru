@@ -34,7 +34,8 @@ export function checksLabel(status: CheckStatus): string {
 export const CONFLICT_OPERATION_LABELS: Record<Exclude<GitConflictOperation, 'unknown'>, string> = {
   merge: 'Merging',
   rebase: 'Rebasing',
-  'cherry-pick': 'Cherry-picking'
+  'cherry-pick': 'Cherry-picking',
+  revert: 'Reverting'
 }
 
 // ── Stable empty arrays for tabs fallback ────────────────────────────

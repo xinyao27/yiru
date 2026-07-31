@@ -122,7 +122,7 @@ export function WorkspaceRunTargetCombobox({
                 )}
               </span>
             )}
-            <ChevronsUpDown weight="regular" className="size-3.5 shrink-0 opacity-50" />
+            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
           </Button>
         }
       />
@@ -189,10 +189,7 @@ export function WorkspaceRunTargetCombobox({
                           )}
                         </div>
                       </div>
-                      <ChevronRight
-                        weight="regular"
-                        className="text-muted-foreground size-3.5 shrink-0"
-                      />
+                      <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
                     </CommandItem>
                   }
                 />

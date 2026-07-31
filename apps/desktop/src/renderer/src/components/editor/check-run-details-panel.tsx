@@ -213,7 +213,7 @@ export function CheckRunDetailsPanel({
                 {loading ? (
                   <LoadingIndicator className="size-3.5" />
                 ) : (
-                  <RefreshCw weight="regular" className="size-3.5" />
+                  <RefreshCw className="size-3.5" />
                 )}
                 {translate('auto.components.editor.CheckRunDetailsPanel.b7f5e2c91a', 'Refresh')}
               </Button>
@@ -319,7 +319,7 @@ export function CheckRunDetailsPanel({
             onClick={() => window.api.shell.openUrl(openUrl)}
           >
             {translate('auto.components.editor.CheckRunDetailsPanel.a916648574', 'Open details')}
-            <ExternalLink weight="regular" className="size-3.5" />
+            <ExternalLink className="size-3.5" />
           </Button>
         </div>
       )}

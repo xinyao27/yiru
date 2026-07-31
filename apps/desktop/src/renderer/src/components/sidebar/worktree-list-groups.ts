@@ -69,7 +69,7 @@ export type GroupHeaderRow = {
   label: string
   count: number
   tone: string
-  icon?: React.ComponentType<{ className?: string; weight?: 'regular' }>
+  icon?: React.ComponentType<{ className?: string }>
   repo?: Repo
   projectGroup?: ProjectGroup | { id: null; name: 'Ungrouped'; tabOrder: number }
   projectGroupDepth?: number
@@ -345,7 +345,7 @@ export const PR_GROUP_META: Record<
   PRGroupKey,
   {
     label: string
-    icon: React.ComponentType<{ className?: string; weight?: 'regular' }>
+    icon: React.ComponentType<{ className?: string }>
     tone: string
   }
 > = {

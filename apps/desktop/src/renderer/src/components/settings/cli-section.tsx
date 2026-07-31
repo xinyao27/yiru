@@ -260,7 +260,7 @@ export function CliSection({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -274,7 +274,7 @@ export function CliSection({
                         'Refresh CLI status'
                       )}
                     >
-                      <RefreshCw weight="regular" className="size-3.5" />
+                      <RefreshCw className="size-3.5" />
                     </Button>
                   }
                 />

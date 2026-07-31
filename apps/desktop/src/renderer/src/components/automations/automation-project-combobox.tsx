@@ -234,7 +234,7 @@ export default function AutomationProjectCombobox({
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
-            <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+            <ChevronsUpDown className="size-3.5 opacity-50" />
           </Button>
         }
       />
@@ -338,7 +338,7 @@ export default function AutomationProjectCombobox({
                             onMouseDown={(event) => event.preventDefault()}
                             className="text-muted-foreground focus-visible:bg-accent flex h-auto w-7 border-0 p-0"
                           >
-                            <ChevronRight weight="regular" className="size-3.5" />
+                            <ChevronRight className="size-3.5" />
                           </Button>
                         }
                       />

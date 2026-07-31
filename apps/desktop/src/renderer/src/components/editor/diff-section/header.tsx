@@ -84,12 +84,12 @@ export function DiffSectionHeader({
           onClick={onOpenSection}
           title={openSectionTitle}
         >
-          <ExternalLink weight="regular" className="size-3.5" />
+          <ExternalLink className="size-3.5" />
         </Button>
         {collapsed ? (
-          <ChevronRight weight="regular" className="text-muted-foreground size-3.5 shrink-0" />
+          <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
         ) : (
-          <ChevronDown weight="regular" className="text-muted-foreground size-3.5 shrink-0" />
+          <ChevronDown className="text-muted-foreground size-3.5 shrink-0" />
         )}
       </div>
     </div>

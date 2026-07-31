@@ -100,7 +100,7 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
   })
 
   return (
-    <TooltipProvider delay={400}>
+    <TooltipProvider>
       <div
         ref={containerRef}
         data-native-file-drop-target={sidebarOpen ? nativeDropTarget : undefined}

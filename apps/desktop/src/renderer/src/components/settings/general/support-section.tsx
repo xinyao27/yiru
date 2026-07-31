@@ -190,7 +190,7 @@ function SupportRow({
           {state === 'starring' || state === 'opening-github' ? (
             <LoadingIndicator className="size-3.5" />
           ) : state === 'web-fallback' ? (
-            <ExternalLink weight="regular" className="size-3.5" />
+            <ExternalLink className="size-3.5" />
           ) : (
             <Star className="size-3.5 fill-amber-400 text-amber-400" />
           )}

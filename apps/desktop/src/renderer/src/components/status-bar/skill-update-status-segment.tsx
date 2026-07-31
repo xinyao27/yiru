@@ -94,17 +94,17 @@ export function SkillUpdateStatusSegment(): React.JSX.Element | null {
     run.state === 'running'
       ? {
           icon: (
-            <RefreshCw weight="regular" className="text-muted-foreground size-3 animate-spin" />
+            <RefreshCw className="text-muted-foreground size-3 animate-spin" />
           ),
           label: run.stopping ? labels.stopping : labels.running
         }
       : run.state === 'success'
         ? {
-            icon: <CheckCircle2 weight="regular" className="text-muted-foreground size-3" />,
+            icon: <CheckCircle2 className="text-muted-foreground size-3" />,
             label: labels.success
           }
         : {
-            icon: <AlertCircle weight="regular" className="text-destructive size-3" />,
+            icon: <AlertCircle className="text-destructive size-3" />,
             label: labels.error
           }
 

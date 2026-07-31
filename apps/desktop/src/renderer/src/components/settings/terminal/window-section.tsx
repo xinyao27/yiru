@@ -155,7 +155,7 @@ export function TerminalWindowSection({
                 {relaunchingBlur ? (
                   <LoadingIndicator className="size-3" />
                 ) : (
-                  <RotateCw weight="regular" className="size-3" />
+                  <RotateCw className="size-3" />
                 )}
                 {relaunchingBlur
                   ? translate(

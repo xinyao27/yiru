@@ -294,7 +294,7 @@ export function DiffCommentCard({
                 }
               >
                 {translate('auto.components.diff.comments.DiffCommentCard.109a791e7b', 'Save')}
-                <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />
+                <CornerDownLeft className="ml-1 size-3 opacity-70" />
               </Button>
             </div>
           </div>

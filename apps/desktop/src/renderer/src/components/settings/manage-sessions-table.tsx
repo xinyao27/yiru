@@ -62,7 +62,7 @@ export function ManageSessionsTable({
             )}
             className="text-muted-foreground"
           >
-            {isRefreshing ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
+            {isRefreshing ? <LoadingIndicator /> : <RefreshCw />}
           </Button>
         </div>
         <div className="flex items-center gap-1">
@@ -105,11 +105,7 @@ export function ManageSessionsTable({
                   )}
                   className="text-muted-foreground"
                 >
-                  {daemonBusyKind === 'restart' ? (
-                    <LoadingIndicator />
-                  ) : (
-                    <RotateCw weight="regular" />
-                  )}
+                  {daemonBusyKind === 'restart' ? <LoadingIndicator /> : <RotateCw />}
                 </Button>
               }
             />
@@ -191,7 +187,7 @@ export function ManageSessionsTable({
                         )}
                         className="text-muted-foreground hover:text-destructive"
                       >
-                        <X weight="regular" />
+                        <X />
                       </Button>
                     </td>
                   </tr>

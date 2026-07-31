@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { getConnectionId } from '../../../../lib/connection-context'
 import { isSyncPushStageError } from '../../../../lib/source-control-remote-error'
 import { cancelRuntimeGenerateCommitMessage } from '../../../../runtime/git-client'
+import { useAppStore } from '../../../../store'
 import { resolveCommitMessageGenerationCancel } from '../../commit-message-generation-state'
 import {
   captureSourceControlRecoveryEntrySnapshot,
@@ -34,7 +35,6 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
     rebaseFromBase,
     refreshActiveGitStatusAfterMutation,
     refreshBranchCompareRef,
-    refreshGitHistoryRef,
     remoteActionErrorSequenceByWorktreeRef,
     setRemoteActionErrors,
     syncBranch,
@@ -235,7 +235,7 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
           refreshSourceControlAfterRemoteAction({
             refreshGitStatus: refreshActiveGitStatusAfterMutation,
             refreshBranchCompare: refreshBranchCompareRef.current,
-            refreshGitHistory: refreshGitHistoryRef.current
+            refreshGitHistory: () => useAppStore.getState().refreshGitGraph(target.worktreeId)
           })
         }
       }
@@ -256,7 +256,6 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
       rebaseFromBase,
       refreshBranchCompareRef,
       refreshActiveGitStatusAfterMutation,
-      refreshGitHistoryRef,
       remoteActionErrorSequenceByWorktreeRef,
       setRemoteActionErrors,
       syncBranch,

@@ -94,6 +94,17 @@ import type {
 import type { FridaySession } from '../shared/friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type {
+  GitAddTagResult,
+  GitCheckoutCommitResult,
+  GitCherryPickResult,
+  GitCreateBranchResult,
+  GitDropCommitResult,
+  GitMergeCommitResult,
+  GitRebaseOntoCommitResult,
+  GitResetToCommitResult,
+  GitRevertResult
+} from '../shared/git/write-op-results'
+import type {
   HostLineageSnapshot,
   ListDesktopLineageForHostArgs
 } from '../shared/host-lineage-contract'
@@ -2314,6 +2325,63 @@ export type PreloadApi = {
     }) => Promise<GitConflictOperation>
     abortMerge: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
     abortRebase: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
+    abortRevert: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
+    addTag: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      message?: string
+      force?: boolean
+      connectionId?: string
+    }) => Promise<GitAddTagResult>
+    createBranch: (args: {
+      worktreePath: string
+      name: string
+      commit: string
+      checkout?: boolean
+      connectionId?: string
+    }) => Promise<GitCreateBranchResult>
+    checkoutCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitCheckoutCommitResult>
+    cherryPick: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }) => Promise<GitCherryPickResult>
+    revertCommit: (args: {
+      worktreePath: string
+      commit: string
+      mainline?: number
+      connectionId?: string
+    }) => Promise<GitRevertResult>
+    dropCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitDropCommitResult>
+    mergeCommit: (args: {
+      worktreePath: string
+      commit: string
+      noFf?: boolean
+      squash?: boolean
+      message?: string
+      connectionId?: string
+    }) => Promise<GitMergeCommitResult>
+    rebaseOntoCommit: (args: {
+      worktreePath: string
+      commit: string
+      connectionId?: string
+    }) => Promise<GitRebaseOntoCommitResult>
+    resetToCommit: (args: {
+      worktreePath: string
+      commit: string
+      mode: 'soft' | 'mixed' | 'hard'
+      connectionId?: string
+    }) => Promise<GitResetToCommitResult>
     diff: (args: {
       worktreePath: string
       filePath: string

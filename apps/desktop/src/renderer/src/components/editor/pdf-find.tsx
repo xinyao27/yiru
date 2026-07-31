@@ -153,7 +153,7 @@ export default function PdfFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.editor.PdfFind.30de726ad0', 'Previous match')}
       >
-        <ChevronUp weight="regular" size={14} />
+        <ChevronUp size={14} />
       </Button>
       <Button
         type="button"
@@ -163,7 +163,7 @@ export default function PdfFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.editor.PdfFind.eeba2547a1', 'Next match')}
       >
-        <ChevronDown weight="regular" size={14} />
+        <ChevronDown size={14} />
       </Button>
       <div className="mx-0.5 h-4 w-px bg-zinc-700" />
       <Button
@@ -174,7 +174,7 @@ export default function PdfFind({
         className="flex size-6 shrink-0 items-center justify-center text-zinc-400 hover:text-zinc-200"
         title={translate('auto.components.editor.PdfFind.cd65b1d6b0', 'Close')}
       >
-        <X weight="regular" size={14} />
+        <X size={14} />
       </Button>
     </div>
   )

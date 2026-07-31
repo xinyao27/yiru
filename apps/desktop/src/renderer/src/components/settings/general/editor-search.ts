@@ -81,26 +81,6 @@ export const getGeneralEditorSearchEntries = createLocalizedCatalog(() => [
     ]
   },
   {
-    title: translate(
-      'auto.components.settings.general.search.adec13f2ef',
-      'Default Diff File Tree'
-    ),
-    description: translate(
-      'auto.components.settings.general.search.dec71988f0',
-      'Show or hide the file tree when opening combined diff views.'
-    ),
-    keywords: [
-      ...translateSearchKeyword('auto.components.settings.general.search.3b5733573e', 'diff'),
-      ...translateSearchKeyword('auto.components.settings.general.search.2f42852568', 'tree'),
-      ...translateSearchKeyword('auto.components.settings.general.search.0a02059549', 'file tree'),
-      ...translateSearchKeyword(
-        'auto.components.settings.general.search.973ed6bfbf',
-        'combined diff'
-      ),
-      ...translateSearchKeyword('auto.components.settings.general.search.19baae651b', 'sidebar')
-    ]
-  },
-  {
     title: translate('auto.components.settings.general.search.6f584fcb48', 'Minimap'),
     description: translate(
       'auto.components.settings.general.search.716a4dfb1f',

@@ -65,7 +65,7 @@ export function CoworkingSessionContinuationNotice({
           phase === 'attach-error' ||
           phase === 'reconnect-error' ? (
           <Button type="button" size="xs" variant="outline" onClick={onRetry}>
-            <RotateCcw weight="regular" aria-hidden="true" />
+            <RotateCcw aria-hidden="true" />
             {phase === 'continue-error'
               ? translate(
                   'auto.components.coworking.CoworkingSessionPane.retryContinue',

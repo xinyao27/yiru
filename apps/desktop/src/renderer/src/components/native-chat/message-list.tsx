@@ -98,7 +98,7 @@ function AgentControls({
         title={translate('components.native-chat.scrollMessageToTop', 'Scroll this message to top')}
         className="text-muted-foreground flex border transition-colors"
       >
-        <ArrowUp weight="regular" className="size-3.5" />
+        <ArrowUp className="size-3.5" />
       </Button>
     </div>
   )
@@ -436,7 +436,7 @@ export function NativeChatMessageList({
           className="bg-card text-muted-foreground absolute left-1/2 flex h-auto w-auto -translate-x-1/2 gap-1.5 px-3 py-1.5"
           style={{ bottom: bottomInset + 12 }}
         >
-          <ArrowDown weight="regular" className="size-3.5" />
+          <ArrowDown className="size-3.5" />
           <span>{translate('components.native-chat.jumpToLatest', 'Jump to latest')}</span>
         </Button>
       ) : null}

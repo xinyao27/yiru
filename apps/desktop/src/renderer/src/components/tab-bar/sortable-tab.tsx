@@ -308,11 +308,7 @@ export default function SortableTab({
         isActive={isActive}
       />
       {isPinned && !isEditing && (
-        <Pin
-          weight="regular"
-          className="text-muted-foreground mr-1 size-3.5 shrink-0"
-          aria-hidden
-        />
+        <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />
       )}
       {isEditing ? (
         <Input
@@ -410,7 +406,7 @@ export default function SortableTab({
               'Collapse pane'
             )}
           >
-            <Minimize2 weight="regular" className="size-3.5" />
+            <Minimize2 className="size-3.5" />
           </Button>
         )}
       {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}

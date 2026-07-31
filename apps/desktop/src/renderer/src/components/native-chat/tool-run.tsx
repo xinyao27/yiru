@@ -88,7 +88,6 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
           // Chevron sits on the right; hidden until hover when collapsed, always
           // shown (pointing down) when expanded — mirrors Codex's disclosure affordance.
           <ChevronRight
-            weight="regular"
             className={cn(
               'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
               expanded ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'
@@ -165,7 +164,6 @@ function GenericToolRun({
         {/* Chevron on the right, revealed on hover when collapsed and pointing
             down when open — matches Codex's tool-run disclosure. */}
         <ChevronRight
-          weight="regular"
           className={cn(
             'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
             open ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'

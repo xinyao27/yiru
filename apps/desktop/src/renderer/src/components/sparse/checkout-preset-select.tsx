@@ -238,9 +238,9 @@ export default function SparseCheckoutPresetSelect({
             {isLoadingPresets ? (
               <LoadingIndicator className="size-3.5 opacity-60" />
             ) : hasPresetLoadError || !presetsLoaded ? (
-              <RefreshCcw weight="regular" className="size-3.5 opacity-60" />
+              <RefreshCcw className="size-3.5 opacity-60" />
             ) : (
-              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+              <ChevronsUpDown className="size-3.5 opacity-50" />
             )}
           </Button>
         }
@@ -276,7 +276,7 @@ export default function SparseCheckoutPresetSelect({
               className="focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full justify-start border-0 px-2 text-left text-xs font-normal whitespace-normal"
               onClick={handleRetryLoadPresets}
             >
-              <RefreshCcw weight="regular" className="text-muted-foreground size-3.5" />
+              <RefreshCcw className="text-muted-foreground size-3.5" />
               <span className="truncate">
                 {hasPresetLoadError
                   ? translate(

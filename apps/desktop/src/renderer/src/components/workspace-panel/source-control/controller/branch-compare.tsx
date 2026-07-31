@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 import { getConnectionId } from '../../../../lib/connection-context'
 import { installWindowVisibilityInterval } from '../../../../lib/window-visibility-interval'
-import { getRuntimeGitBranchCompare, getRuntimeGitHistory } from '../../../../runtime/git-client'
+import { getRuntimeGitBranchCompare } from '../../../../runtime/git-client'
 import { useAppStore } from '../../../../store'
 import { shouldClearBranchCompareForMissingBase } from '../base-ref'
 import {
@@ -26,17 +26,11 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
     branchName,
     clearGitBranchCompare,
     compareBaseRef,
-    gitHistoryRequestByWorktreeRef,
-    gitHistoryRequestSeqRef,
     isBranchVisible,
     isFolder,
-    isGitHistoryExpanded,
-    isGitHistoryVisible,
     refreshBranchCompareRef,
-    refreshGitHistoryRef,
     remoteStatus,
     setGitBranchCompareResult,
-    setGitHistoryByWorktree,
     worktreePath
   } = scope
   const runBranchCompare = useCallback(async () => {
@@ -134,77 +128,6 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
     runBranchCompare
   ])
   refreshBranchCompareRef.current = refreshBranchCompare
-  const refreshGitHistory = useCallback(async (): Promise<void> => {
-    if (
-      !activeWorktreeId ||
-      !worktreePath ||
-      isFolder ||
-      !isBranchVisible ||
-      !isGitHistoryExpanded ||
-      !isGitHistoryVisible
-    ) {
-      return
-    }
-
-    const worktreeId = activeWorktreeId
-    const requestId = gitHistoryRequestSeqRef.current + 1
-    gitHistoryRequestSeqRef.current = requestId
-    gitHistoryRequestByWorktreeRef.current[worktreeId] = requestId
-    setGitHistoryByWorktree((prev) => {
-      const previous = prev[worktreeId]
-      return {
-        ...prev,
-        [worktreeId]: previous?.result
-          ? { status: 'refreshing', result: previous.result }
-          : { status: 'loading' }
-      }
-    })
-
-    try {
-      const connectionId = getConnectionId(worktreeId) ?? undefined
-      const result = await getRuntimeGitHistory(
-        {
-          // Why: route the history read by the repo OWNER host, not the focused runtime.
-          settings: activeRepoSettings,
-          worktreeId,
-          worktreePath,
-          connectionId
-        },
-        { limit: 50, baseRef: compareBaseRef }
-      )
-      if (gitHistoryRequestByWorktreeRef.current[worktreeId] !== requestId) {
-        return
-      }
-      setGitHistoryByWorktree((prev) => ({ ...prev, [worktreeId]: { status: 'ready', result } }))
-    } catch (error) {
-      if (gitHistoryRequestByWorktreeRef.current[worktreeId] !== requestId) {
-        return
-      }
-      const message = error instanceof Error ? error.message : 'Failed to load commits'
-      setGitHistoryByWorktree((prev) => {
-        const previous = prev[worktreeId]
-        return {
-          ...prev,
-          [worktreeId]: previous?.result
-            ? { status: 'error', result: previous.result, error: message }
-            : { status: 'error', error: message }
-        }
-      })
-    }
-  }, [
-    activeRepoSettings,
-    activeWorktreeId,
-    gitHistoryRequestByWorktreeRef,
-    gitHistoryRequestSeqRef,
-    compareBaseRef,
-    isBranchVisible,
-    isFolder,
-    isGitHistoryExpanded,
-    isGitHistoryVisible,
-    setGitHistoryByWorktree,
-    worktreePath
-  ])
-  refreshGitHistoryRef.current = refreshGitHistory
   useEffect(() => {
     if (!activeWorktreeId || !worktreePath || !isBranchVisible || !compareBaseRef || isFolder) {
       branchCompareStatusHeadRef.current = null
@@ -295,7 +218,7 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
     }
     clearGitBranchCompare(activeWorktreeId)
   }, [activeWorktreeId, clearGitBranchCompare, compareBaseRef, isFolder, remoteStatus])
-  return { ...scope, runBranchCompare, refreshBranchCompare, refreshGitHistory }
+  return { ...scope, runBranchCompare, refreshBranchCompare }
 }
 
 export type SourceControlBranchCompareController = ReturnType<typeof useSourceControlBranchCompare>

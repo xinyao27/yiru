@@ -100,7 +100,7 @@ export function YiruProfileProjectTransferConfirmDialog({
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ArrowRightLeft weight="regular" className="text-muted-foreground size-4" />
+            <ArrowRightLeft className="text-muted-foreground size-4" />
             {mode === 'move'
               ? translate(
                   'auto.components.yiru.profiles.project.transfer.confirm.move.title',

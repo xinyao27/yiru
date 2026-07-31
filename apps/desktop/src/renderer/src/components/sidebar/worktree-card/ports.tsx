@@ -270,7 +270,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
             tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}
             onClick={handleOpen}
           >
-            <ExternalLink weight="regular" className="size-3" />
+            <ExternalLink className="size-3" />
           </PortAction>
           <PortAction
             label={translate(

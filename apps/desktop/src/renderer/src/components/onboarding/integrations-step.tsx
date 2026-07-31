@@ -89,7 +89,7 @@ export function GitHubRow(props: { compact?: boolean } = {}): React.JSX.Element 
               size="sm"
               onClick={() => window.api.shell.openUrl('https://cli.github.com')}
             >
-              <ExternalLink weight="regular" className="size-3.5" />
+              <ExternalLink className="size-3.5" />
               {translate('auto.components.onboarding.IntegrationsStep.bd5d976fb2', 'Install gh')}
             </Button>
           ) : null}

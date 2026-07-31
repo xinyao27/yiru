@@ -21,7 +21,7 @@ function EnvVarChips(): React.JSX.Element {
           'Available environment variables (hover for details):'
         )}
       </p>
-      <TooltipProvider delay={150}>
+      <TooltipProvider>
         <div className="flex flex-wrap gap-1.5">
           {envVars.map(({ name, description }) => (
             <Tooltip key={name}>

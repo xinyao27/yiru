@@ -181,7 +181,6 @@ export function CompactAgentSummaryButton({
         </>
       )}
       <ChevronDown
-        weight="regular"
         className={cn(
           'size-3 shrink-0 transition-transform duration-150',
           !expanded && '-rotate-90'

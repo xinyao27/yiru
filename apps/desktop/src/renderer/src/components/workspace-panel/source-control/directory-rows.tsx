@@ -61,7 +61,6 @@ function DirectoryRow(props: DirectoryRowProps): React.JSX.Element {
         aria-expanded={!isCollapsed}
       >
         <ChevronDown
-          weight="regular"
           className={cn('size-3 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
         />
         {isCollapsed ? (
@@ -111,7 +110,6 @@ export function SourceControlTreeDirectoryRow(
               <ActionButton
                 surface="row"
                 icon={node.area === 'untracked' ? Trash : Undo2}
-                iconWeight={node.area === 'untracked' ? undefined : 'regular'}
                 title={
                   node.area === 'untracked'
                     ? translate(

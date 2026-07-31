@@ -276,7 +276,7 @@ export function DiffCommentPopover({
           </Button>
           <Button size="sm" onClick={handleSubmit} disabled={submitting || !canSubmitComment}>
             {submitting ? submittingLabel : submitLabel}
-            {!submitting && <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />}
+            {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
           </Button>
         </div>
       </div>

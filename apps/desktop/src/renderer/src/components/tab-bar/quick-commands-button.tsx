@@ -301,7 +301,7 @@ export function TabBarQuickCommandsButton({
                 onClick={openPicker}
                 onPointerDown={pinDraggable ? startPinDrag : undefined}
               >
-                <Play className="size-3.5" weight="regular" />
+                <Play className="size-3.5" />
               </Button>
             }
           />

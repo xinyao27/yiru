@@ -157,7 +157,7 @@ export default function SkillsPage(): React.JSX.Element {
                     'Close skills'
                   )}
                 >
-                  <X weight="regular" className="size-4" />
+                  <X className="size-4" />
                 </Button>
               }
             />
@@ -188,7 +188,7 @@ export default function SkillsPage(): React.JSX.Element {
                   {loading ? (
                     <LoadingIndicator className="size-4" />
                   ) : (
-                    <RefreshCw weight="regular" className="size-4" />
+                    <RefreshCw className="size-4" />
                   )}
                 </Button>
               }

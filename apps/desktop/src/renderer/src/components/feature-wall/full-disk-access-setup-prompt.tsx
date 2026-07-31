@@ -82,7 +82,7 @@ function FullDiskAccessButtonIcon(props: FullDiskAccessButtonState): React.JSX.E
   if (props.ready) {
     return <Check className="size-3.5" />
   }
-  return <ExternalLink weight="regular" className="size-3.5" />
+  return <ExternalLink className="size-3.5" />
 }
 
 function useFullDiskAccessStatus(): FullDiskAccessStatusState & { refresh: () => void } {

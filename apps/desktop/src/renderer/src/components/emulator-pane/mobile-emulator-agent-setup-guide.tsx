@@ -113,11 +113,7 @@ export function MobileEmulatorAgentSetupGuide({
                       'auto.components.emulator.pane.MobileEmulatorAgentSetupGuide.ebceac65a4',
                       'Set up'
                     )}
-                {expanded ? (
-                  <ChevronUp weight="regular" className="size-3" />
-                ) : (
-                  <ChevronDown weight="regular" className="size-3" />
-                )}
+                {expanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
               </Button>
             </>
           )}

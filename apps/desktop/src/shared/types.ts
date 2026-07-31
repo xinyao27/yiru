@@ -1866,7 +1866,6 @@ export type GlobalSettings = {
   keybindings?: KeybindingOverrides
   diffDefaultView: 'inline' | 'side-by-side'
   diffWordWrap: boolean
-  combinedDiffFileTreeVisibleByDefault: boolean
   /** Comment author logins the user manually marked as bots (stored lowercased).
    *  Why: some review bots use regular user accounts that defeat both provider
    *  metadata and login heuristics, so the Humans/Bots comment filter needs a

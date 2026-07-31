@@ -50,7 +50,6 @@ function AccordionTrigger({
           'group-hover/section:text-accent-foreground group-focus-within/section:text-accent-foreground',
         indicatorPosition === 'start' && '-rotate-90'
       )}
-      weight="regular"
     />
   )
 

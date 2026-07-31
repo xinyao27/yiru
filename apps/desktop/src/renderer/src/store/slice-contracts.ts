@@ -14,6 +14,7 @@ import type { PaneForegroundAgentSlice } from '../components/terminal-pane/pane-
 import type { PinnedTabCloseConfirmSlice } from '../components/terminal-pane/pinned-tab-close-confirm-state'
 import type { WorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
 import type { CommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
+import type { GitGraphSlice } from '../components/workspace-panel/git-graph/state'
 import type { PullRequestGenerationSlice } from '../components/workspace-panel/pull-request-generation-state'
 import type { SourceControlPanelViewSlice } from '../components/workspace-panel/source-control/workspace-panel/state'
 import type { WorkspaceSpaceSlice } from '../components/workspace-space/state'
@@ -75,6 +76,7 @@ declare module './types' {
       PullRequestGenerationSlice,
       CommitMessageGenerationSlice,
       SourceControlPanelViewSlice,
+      GitGraphSlice,
       PinnedTabCloseConfirmSlice,
       RecentlyClosedTabsSlice,
       YiruProfilesSlice,

@@ -29,7 +29,7 @@ export function RepoForkIndicator({
             className={cn('inline-flex shrink-0 items-center text-muted-foreground', className)}
             aria-label={label}
           >
-            <GitFork weight="regular" className="size-3" aria-hidden="true" />
+            <GitFork className="size-3" aria-hidden="true" />
           </span>
         }
       />

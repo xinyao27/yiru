@@ -522,7 +522,7 @@ export function useDiffCommentDecorator({
       root.render(
         // Why: Monaco view zones are separate React roots outside the app root,
         // so app-level tooltip context does not reach these actions.
-        <TooltipProvider delay={400}>
+        <TooltipProvider>
           <DiffCommentCard
             lineNumber={comment.lineNumber}
             startLine={comment.startLine}

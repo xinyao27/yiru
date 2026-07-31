@@ -149,11 +149,7 @@ export function UsageRosterPanel({
                     'Refresh rate limits'
                   )}
                 >
-                  {isRefreshing ? (
-                    <LoadingIndicator className="size-3" />
-                  ) : (
-                    <RefreshCw weight="regular" />
-                  )}
+                  {isRefreshing ? <LoadingIndicator className="size-3" /> : <RefreshCw />}
                 </Button>
               }
             />
@@ -226,11 +222,11 @@ export function UsageRosterPanel({
       <DropdownMenuSeparator className="my-0" />
       <DropdownMenuItem onClick={onUsageDetails} className="w-full justify-between">
         {translate('auto.components.status.bar.UsageRosterPanel.usageDetails', 'Usage overview')}
-        <CaretRight weight="regular" className="text-muted-foreground" />
+        <CaretRight className="text-muted-foreground" />
       </DropdownMenuItem>
       <DropdownMenuItem onClick={onManageAccounts} className="w-full justify-between">
         {translate('auto.components.status.bar.StatusBar.75ded02687', 'Manage Accounts…')}
-        <CaretRight weight="regular" className="text-muted-foreground" />
+        <CaretRight className="text-muted-foreground" />
       </DropdownMenuItem>
     </div>
   )

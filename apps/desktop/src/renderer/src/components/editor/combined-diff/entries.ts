@@ -1,6 +1,6 @@
 import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../../shared/types'
 import type { OpenFile } from '../state'
-import type { CombinedDiffFileTreeMode } from './file-tree-model'
+import type { CombinedDiffMode } from './section-model'
 
 /**
  * Fallback filtering for combined-diff tabs that were opened before the
@@ -120,7 +120,7 @@ export function shouldAutoReloadCombinedDiffFromGitStatus({
   mode,
   hasUncommittedEntriesSnapshot
 }: {
-  mode: CombinedDiffFileTreeMode
+  mode: CombinedDiffMode
   hasUncommittedEntriesSnapshot: boolean
 }): boolean {
   // Why: snapshot-backed tabs preserve the tab-open file list while

@@ -70,7 +70,7 @@ export function FileResultRow({
   return (
     <div className="pt-1.5">
       {/* File header with context menu */}
-      <TooltipProvider delay={400}>
+      <TooltipProvider>
         <Tooltip>
           <ContextMenu>
             <ContextMenuTrigger
@@ -84,7 +84,6 @@ export function FileResultRow({
                       onClick={onToggleCollapse}
                     >
                       <ChevronRight
-                        weight="regular"
                         className={cn(
                           'size-3 flex-shrink-0 text-muted-foreground transition-transform',
                           !collapsed && 'rotate-90'

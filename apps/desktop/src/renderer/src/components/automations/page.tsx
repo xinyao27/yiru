@@ -2134,7 +2134,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     'Close automations'
                   )}
                 >
-                  <X weight="regular" className="size-4" />
+                  <X className="size-4" />
                 </Button>
               }
             />
@@ -2160,7 +2160,7 @@ export default function AutomationsPage(): React.JSX.Element {
                   onClick={() => openCreateDialog()}
                   data-contextual-tour-target="automations-create"
                 >
-                  <Plus weight="regular" className="size-4" />
+                  <Plus className="size-4" />
                 </Button>
               }
             />
@@ -2189,7 +2189,7 @@ export default function AutomationsPage(): React.JSX.Element {
                   {isLoading ? (
                     <LoadingIndicator className="size-4" />
                   ) : (
-                    <RefreshCw weight="regular" className="size-4" />
+                    <RefreshCw className="size-4" />
                   )}
                 </Button>
               }
@@ -2956,7 +2956,7 @@ export default function AutomationsPage(): React.JSX.Element {
                             {isSelectedAutomationRunPageRerunPending ? (
                               <LoadingIndicator className="size-3.5" />
                             ) : (
-                              <RefreshCw weight="regular" className="size-3.5" />
+                              <RefreshCw className="size-3.5" />
                             )}
                             {translate(
                               'auto.components.automations.AutomationsPage.295698292f',

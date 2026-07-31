@@ -65,7 +65,7 @@ export function CheckRunAnnotations({
                     className="group text-primary h-auto min-w-0 border-0 p-0 font-mono break-all hover:underline"
                   >
                     <span className="min-w-0 text-left break-all">{locationLabel}</span>
-                    <ExternalLink weight="regular" className="size-3 shrink-0 opacity-70" />
+                    <ExternalLink className="size-3 shrink-0 opacity-70" />
                   </Button>
                 ) : (
                   <span className="text-muted-foreground min-w-0 font-mono text-xs break-all">

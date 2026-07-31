@@ -18,9 +18,9 @@ export const LINEAGE_IMMEDIATE_PARENT_STEP =
 export const LINEAGE_NESTED_ROW_SURFACE_INSET = 0
 export const LINEAGE_CHILDREN_INLINE_OFFSET =
   LINEAGE_IMMEDIATE_PARENT_STEP - WORKTREE_CARD_SURFACE_MARGIN - FLUSH_CARD_MIN_CONTENT_INSET
-// Why: grouped workspace cards should move their surface inward without using
-// the full tree step, preserving the existing compact child-card rhythm.
-const GROUPED_WORKTREE_CARD_SURFACE_INDENT = 14
+// Why: grouped workspace cards keep a full-bleed surface like project headers;
+// the tree step lives in the card's content indent instead of the row inset.
+const GROUPED_WORKTREE_CARD_SURFACE_INDENT = 0
 export const PROJECT_GROUP_HEADER_BASE_PADDING = 10
 // Why: workspace/status headers and project headers occupy the same sidebar
 // row role, so their titles should not shift when switching grouping modes.

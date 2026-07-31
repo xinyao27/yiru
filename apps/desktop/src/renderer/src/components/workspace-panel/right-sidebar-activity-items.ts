@@ -24,7 +24,6 @@ export function createRightSidebarActivityItems(
     {
       id: 'workspaces',
       icon: Workflow,
-      iconWeight: 'regular',
       title: translate(
         'auto.components.right.sidebar.index.folderWorkspaces',
         'Attached worktrees'

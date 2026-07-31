@@ -210,7 +210,7 @@ export function RepositoryHostSetupActions({
           aria-label={translate('auto.components.settings.RepositoryPane.closeHostSetup', 'Close')}
           onClick={resetFlow}
         >
-          <X weight="regular" className="size-4" />
+          <X className="size-4" />
         </Button>
       </div>
 

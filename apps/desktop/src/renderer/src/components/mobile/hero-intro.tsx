@@ -58,7 +58,7 @@ export function HeroIntro({ onStart }: { onStart: () => void }): React.JSX.Eleme
           onClick={onStart}
         >
           {translate('auto.components.mobile.MobileHero.10d27b4cba', 'Get started')}
-          <ArrowRight weight="regular" className="size-3.5" />
+          <ArrowRight className="size-3.5" />
         </Button>
       </div>
     </div>

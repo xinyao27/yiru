@@ -68,7 +68,6 @@ export function LocalWorkspacePortSection({
         aria-controls={`local-port-section-${id}`}
       >
         <ChevronRight
-          weight="regular"
           size={12}
           className={cn('shrink-0 transition-transform', !collapsed && 'rotate-90')}
         />
@@ -196,14 +195,14 @@ function LocalWorkspacePortRow({
             </div>
           }
         />
-        <TooltipProvider delay={400}>
+        <TooltipProvider>
           <div className="can-hover:opacity-0 flex items-center gap-0.5 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
             <PortActionButton
               label={getPortOpenBrowserTooltipLabel(openBrowserLabel)}
               ariaLabel={openBrowserLabel}
               onClick={handleOpenBrowserButtonClick}
             >
-              <ExternalLink weight="regular" size={13} />
+              <ExternalLink size={13} />
             </PortActionButton>
             <PortActionButton
               label={translate(
@@ -238,7 +237,7 @@ function LocalWorkspacePortRow({
       <ContextMenuContent className={MENU_CONTENT_CLASS}>
         <ContextMenuLabel className={MENU_LABEL_CLASS}>{`:${port.port}`}</ContextMenuLabel>
         <ContextMenuItem className={MENU_ITEM_CLASS} onClick={() => handleOpenBrowser()}>
-          <ExternalLink weight="regular" size={13} />
+          <ExternalLink size={13} />
           {openBrowserLabel}
         </ContextMenuItem>
         <ContextMenuItem className={MENU_ITEM_CLASS} onClick={handleCopy}>

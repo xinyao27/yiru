@@ -63,7 +63,7 @@ export function EditorPanelMarkdownActionsMenu({
               'More actions'
             )}
           >
-            <MoreHorizontal className="size-3.5" weight="regular" />
+            <MoreHorizontal className="size-3.5" />
           </Button>
         }
       />

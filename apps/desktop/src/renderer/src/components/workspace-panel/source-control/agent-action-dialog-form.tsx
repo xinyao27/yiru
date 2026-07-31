@@ -234,7 +234,7 @@ export function SourceControlAgentActionDialogForm({
               disabled={commandTemplate === defaultCommandTemplate}
               onClick={() => onCommandTemplateChange(defaultCommandTemplate)}
             >
-              <RotateCcw weight="regular" className="size-3.5" />
+              <RotateCcw className="size-3.5" />
               {translate(
                 'auto.components.right.sidebar.SourceControlAgentActionDialogForm.7ec6abbf2a',
                 'Reset'

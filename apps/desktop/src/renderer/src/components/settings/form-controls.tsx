@@ -844,7 +844,7 @@ export function FontAutocomplete({
                     'Fonts'
                   )}
                 >
-                  <ChevronsUpDown weight="regular" className="size-3.5" />
+                  <ChevronsUpDown className="size-3.5" />
                 </Button>
               </div>
             </div>

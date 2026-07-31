@@ -270,7 +270,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
             onClick={zoomReset}
             title={translate('auto.components.editor.PdfViewer.c0119616d6', 'Fit to width')}
           >
-            <RotateCcw weight="regular" size={14} />
+            <RotateCcw size={14} />
           </Button>
           <Button
             variant="ghost"

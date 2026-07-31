@@ -1371,7 +1371,9 @@
                 "panel": {
                   "changes": "Changes",
                   "review": "Review",
-                  "views": "Changes and review"
+                  "views": "Changes and review",
+                  "mergeRequestNumber": "{{value0}} !{{value1}}",
+                  "pullRequestNumber": "{{value0}} #{{value1}}"
                 }
               }
             }
@@ -4732,10 +4734,6 @@
           "5f02e6fb21": "Show local markdown review note controls in rich editor mode.",
           "51161d1647": "Show the minimap overview when editing a file.",
           "6690b1ffb9": "Minimap",
-          "5a1ea6eaa2": "Hidden",
-          "73a09aad63": "Shown",
-          "1de48ad940": "Default Diff File Tree",
-          "1b87897af9": "Show or hide the file tree when opening combined diff views.",
           "12cbc0d0d6": "Side-by-side",
           "05b6df93b3": "Inline",
           "7311f67ee7": "Default Diff View",
@@ -6995,13 +6993,7 @@
             "9c72990db8": "minimap",
             "716a4dfb1f": "Show the minimap overview when editing a file.",
             "6f584fcb48": "Minimap",
-            "19baae651b": "sidebar",
-            "973ed6bfbf": "combined diff",
-            "0a02059549": "file tree",
-            "2f42852568": "tree",
             "3b5733573e": "diff",
-            "dec71988f0": "Show or hide the file tree when opening combined diff views.",
-            "adec13f2ef": "Default Diff File Tree",
             "be24c7cd67": "split",
             "233f7e2f37": "side-by-side",
             "0a5fa65926": "inline",
@@ -8823,7 +8815,9 @@
               "a9bf7c171a": "Push Failed",
               "834cb3f23d": "Fix with AI",
               "783a808870": "Close"
-            }
+            },
+            "5abb0da297": "Review Branch",
+            "e7f8a9b0c1": "Git Graph"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "Could not start the selected agent.",
@@ -10519,18 +10513,6 @@
           "28921f5bf9": "Copied",
           "1f9f4def45": "Copy code"
         },
-        "CombinedDiffFileTree": {
-          "f984289373": "No files match the current filters.",
-          "eafe1aeb53": "Reset filters",
-          "be119cb9d1": "Viewed files",
-          "c00020f081": "File extensions",
-          "cd0e0ed79e": "Filter diff files",
-          "4cc7b83ffe": "Filter files...",
-          "21783df79f": "Collapse file tree",
-          "481e63ca52": "Files",
-          "d5ac717d65": "uncommitted",
-          "39b6b9e4e4": "Committed on Branch"
-        },
         "CombinedDiffViewer": {
           "35cc27aeb2": "in Source Control",
           "e3b9a6ce02": "more",
@@ -10542,7 +10524,6 @@
           "0f806a2ab1": "Cancel",
           "80a286d8f5": "from this worktree?",
           "7e7ca60816": "changed files",
-          "b6c3b84476": "Show file tree",
           "39f8007549": "Review conflicts",
           "39e73e7181": "were excluded from this diff view.",
           "689b99f8ad": "unresolved conflict",
@@ -10552,8 +10533,6 @@
           "45cf23b418": "Failed to clear notes.",
           "0fb870a0fe": "notes",
           "8ab3248fd8": "note",
-          "ec5053c7f5": "Side by Side",
-          "f786fd54e1": "Inline",
           "ea08dae15b": "Collapse All",
           "19c45cfdc0": "Expand All",
           "982d14bfa5": "Open All Changes",
@@ -10561,9 +10540,7 @@
           "8368d256ec": "combined-branch",
           "8f68ad9ca9": "Show {{value0}} AI {{value1}}",
           "724a13568d": " in {{value0}}",
-          "6094135eec": " vs {{value0}}",
-          "a4420ca1f7": "Wrap On",
-          "dde325ddfe": "Wrap Off"
+          "6094135eec": " vs {{value0}}"
         },
         "ConflictComponents": {
           "f338288514": "Loading conflict contents...",
@@ -11131,6 +11108,16 @@
           "cancel": "Cancel",
           "apply": "Apply changes",
           "loading": "Loading preview…"
+        },
+        "combined": {
+          "diff": {
+            "viewer": {
+              "604195710f": "Show inline diff",
+              "5b6c3f9596": "Show side-by-side diff",
+              "820b3e0422": "Turn word wrap on",
+              "7b47fe46c8": "Turn word wrap off"
+            }
+          }
         }
       },
       "diff": {
@@ -12100,6 +12087,75 @@
           "other": "Other",
           "refreshAriaLabel": "Refresh local usage statistics",
           "refresh": "Refresh usage"
+        }
+      },
+      "workspace-panel": {
+        "GitGraphState": {
+          "f3a2c1d0e5": "Failed to load commits",
+          "a4b5c6d7e8": "Failed to load more commits"
+        },
+        "GitGraphView": {
+          "a1b2c3d4e5": "Git Graph",
+          "b2c3d4e5f6": "Close Git Graph",
+          "c3d4e5f6a7": "Loading commits…",
+          "d4e5f6a7b8": "No commits yet"
+        },
+        "git-graph": {
+          "BranchFilterDropdown": {
+            "a1b2c3d4e5": "All branches",
+            "b2c3d4e5f6": "{{value0}} branches",
+            "c3d4e5f6a7": "Filter branches…",
+            "d4e5f6a7b8": "Show all branches"
+          },
+          "CommitContextMenu": {
+            "a1b2c3d4e5": "Open commit in browser",
+            "b2c3d4e5f6": "Copy commit hash",
+            "c3d4e5f6a7": "Copy commit message",
+            "d4e5f6a7b8": "Explain changes"
+          },
+          "CommitDetails": {
+            "a1b2c3d4e5": "Failed to load commit files",
+            "b2c3d4e5f6": "Hash",
+            "c3d4e5f6a7": "Parents",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Loading files…",
+            "f6a7b8c9d0": "No file changes in this commit",
+            "a7b8c9d0e1": "Open all changes together"
+          },
+          "CommitTable": {
+            "b2c3d4e5f6": "Description",
+            "c3d4e5f6a7": "Date",
+            "d4e5f6a7b8": "Author",
+            "e5f6a7b8c9": "Commit",
+            "a1b2c3d4e5": "Load More Commits"
+          },
+          "ControlBar": {
+            "a1b2c3d4e5": "Show Remote Branches",
+            "b2c3d4e5f6": "Find commits",
+            "c3d4e5f6a7": "Refresh",
+            "d4e5f6a7b8": "Close Git Graph"
+          },
+          "FindWidget": {
+            "a1b2c3d4e5": "No results",
+            "b2c3d4e5f6": "{{value0}} of {{value1}}",
+            "c3d4e5f6a7": "Find by subject, author, or hash…",
+            "d4e5f6a7b8": "Previous match",
+            "e5f6a7b8c9": "Next match",
+            "f6a7b8c9d0": "Close find"
+          },
+          "UncommittedRow": {
+            "a1b2c3d4e5": "Uncommitted Changes"
+          },
+          "GitGraphView": {
+            "a1b2c3d4e5": "Loading commits…",
+            "b2c3d4e5f6": "No commits yet",
+            "c3d4e5f6a7": "No matching commits in the loaded history yet — load more to keep searching.",
+            "d4e5f6a7b8": "No commits found for the selected branches in the loaded history.",
+            "e5f6a7b8c9": "Load More Commits"
+          },
+          "useGitGraphView": {
+            "a1b2c3d4e6": "Could not find that commit in the loaded history"
+          }
         }
       }
     },

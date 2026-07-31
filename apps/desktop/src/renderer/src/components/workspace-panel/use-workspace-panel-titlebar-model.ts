@@ -1,4 +1,3 @@
-import type { IconProps } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo } from 'react'
 
@@ -25,7 +24,6 @@ import {
 } from '../../../../shared/workspace/panel-titlebar-pinned'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import {
-  itemIconWeight,
   resolveItemIcon,
   resolvePanelIcon,
   type WorkspacePanelTitlebarDropTarget,
@@ -52,7 +50,6 @@ export type WorkspacePanelTitlebarModel = {
   isPanelDragActive: boolean
   resolvePanelIcon: (item: ActivityBarItem, active: boolean) => ActivityBarItem['icon']
   resolveItemIcon: (item: WorkspaceTitlebarStripItem, active: boolean) => ActivityBarItem['icon']
-  itemIconWeight: (item: WorkspaceTitlebarStripItem) => IconProps['weight'] | undefined
   shortcutFor: (id: ActiveRightSidebarTab) => ShortcutKeyComboDetails | null
   togglePanel: (id: ActiveRightSidebarTab) => void
   activateItem: (item: WorkspaceTitlebarStripItem) => void
@@ -234,7 +231,6 @@ export function useWorkspacePanelTitlebarModel(
     isPanelDragActive,
     resolvePanelIcon,
     resolveItemIcon,
-    itemIconWeight,
     shortcutFor,
     togglePanel,
     activateItem,

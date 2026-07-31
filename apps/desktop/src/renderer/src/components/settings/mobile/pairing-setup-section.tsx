@@ -55,7 +55,7 @@ export function MobilePairingSetupSection({
         {loading ? (
           <LoadingIndicator className="size-3.5" />
         ) : hasQrCode ? (
-          <RefreshCw weight="regular" className="size-3.5" />
+          <RefreshCw className="size-3.5" />
         ) : (
           <QrCode className="size-3.5" />
         )}
@@ -104,11 +104,7 @@ export function MobilePairingSetupSection({
                   )}
                   className="text-muted-foreground"
                 >
-                  {refreshingNetworkInterfaces ? (
-                    <LoadingIndicator />
-                  ) : (
-                    <RefreshCw weight="regular" />
-                  )}
+                  {refreshingNetworkInterfaces ? <LoadingIndicator /> : <RefreshCw />}
                 </Button>
               }
             />
@@ -148,7 +144,7 @@ export function MobilePairingSetupSection({
                 'auto.components.settings.MobilePairingSetupSection.getTailscale',
                 'Get Tailscale'
               )}
-              <ExternalLink weight="regular" className="size-3" />
+              <ExternalLink className="size-3" />
             </Button>
           </AccordionContent>
         </AccordionItem>

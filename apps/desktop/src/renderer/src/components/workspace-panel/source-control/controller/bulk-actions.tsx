@@ -17,10 +17,8 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
   const {
     activeRepoSettings,
     activeWorktreeId,
-    createPrHeaderAction,
     grouped,
     handleActionInvoke,
-    handleCreatePullRequest,
     isExecutingBulk,
     primaryAction,
     refreshActiveGitStatusAfterMutation,
@@ -163,18 +161,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     remoteStatusForActions,
     runCreatePrIntent
   ])
-  const handleCreatePrHeaderClick = useCallback((): void => {
-    if (!createPrHeaderAction || createPrHeaderAction.disabled) {
-      return
-    }
-    if (createPrHeaderAction.kind === 'create_pr') {
-      void handleCreatePullRequest()
-      return
-    }
-    if (createPrHeaderAction.kind === 'create_pr_intent') {
-      void runCreatePrIntent()
-    }
-  }, [createPrHeaderAction, handleCreatePullRequest, runCreatePrIntent])
   const branchCompareInFlightRef = useRef(false)
   const branchCompareRerunRef = useRef(false)
   const branchCompareRunPromiseRef = useRef<Promise<void> | null>(null)
@@ -186,7 +172,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     handleUnstagePaths,
     handleStageAllPrimary,
     handlePrimaryClick,
-    handleCreatePrHeaderClick,
     branchCompareInFlightRef,
     branchCompareRerunRef,
     branchCompareRunPromiseRef,

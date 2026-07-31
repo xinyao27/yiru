@@ -129,7 +129,6 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
       >
         {onToggleSubmodule && (
           <ChevronDown
-            weight="regular"
             className={cn(
               'size-3 shrink-0 text-muted-foreground transition-transform',
               !isSubmoduleExpanded && '-rotate-90'
@@ -191,7 +190,6 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
             <ActionButton
               surface="row"
               icon={entry.area === 'untracked' ? Trash : Undo2}
-              iconWeight={entry.area === 'untracked' ? undefined : 'regular'}
               title={
                 entry.area === 'untracked'
                   ? translate(
@@ -284,7 +282,7 @@ export function ConflictBadge({ entry }: { entry: GitStatusEntry }): React.JSX.E
   }
 
   return (
-    <TooltipProvider delay={300}>
+    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger render={badge} />
         <TooltipContent side="left" sideOffset={6}>

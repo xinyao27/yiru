@@ -115,7 +115,7 @@ export function WarpThemeImportModal({
                 disabled={loading}
                 onClick={() => void handlePreviewSource({ kind: 'chooseFile' })}
               >
-                <FileUp weight="regular" className="size-4" />
+                <FileUp className="size-4" />
                 {translate(
                   'auto.components.settings.WarpThemeImportModal.choose_file',
                   'Choose File'

@@ -123,7 +123,7 @@ export function ForwardedPortRow({
       </div>
       <div className="can-hover:opacity-0 flex items-center gap-0.5 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
         <RowButton onClick={handleOpenBrowserButtonClick} title={openBrowserTitle}>
-          <ExternalLink weight="regular" size={13} />
+          <ExternalLink size={13} />
         </RowButton>
         <RowButton
           onClick={handleCopyButtonClick}

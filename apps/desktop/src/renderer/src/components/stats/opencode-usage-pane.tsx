@@ -162,7 +162,7 @@ export function OpenCodeUsagePane(): React.JSX.Element {
         </div>
         <div className="flex shrink-0 items-center gap-2 self-start">
           <DropdownMenu>
-            <TooltipProvider delay={250}>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -217,7 +217,7 @@ export function OpenCodeUsagePane(): React.JSX.Element {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <TooltipProvider delay={250}>
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -234,7 +234,7 @@ export function OpenCodeUsagePane(): React.JSX.Element {
                     {scanState.isScanning ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw weight="regular" className="size-3.5" />
+                      <RefreshCw className="size-3.5" />
                     )}
                   </Button>
                 }

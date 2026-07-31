@@ -133,7 +133,7 @@ export function TerminalErrorToast({
                 }}
                 className="focus-visible:bg-accent h-auto border-0 p-0"
               >
-                <X weight="regular" className="size-3.5" />
+                <X className="size-3.5" />
               </Button>
             }
           />

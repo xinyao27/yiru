@@ -224,7 +224,7 @@ export default function RepoCombobox({
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
               )}
-              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
+              <ChevronsUpDown className="size-3.5 opacity-50" />
             </Button>
           }
         />

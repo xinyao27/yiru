@@ -107,7 +107,6 @@
     "@pierre/trees": "catalog:",
     "@sanity/diff-match-patch": "catalog:",
     "@tailwindcss/vite": "catalog:",
-    "@tanstack/react-virtual": "catalog:",
     "@tiptap/core": "catalog:",
     "@tiptap/extension-code": "catalog:",
     "@tiptap/extension-code-block-lowlight": "catalog:",

@@ -194,7 +194,7 @@ export function CreateFromPicker({
                 </span>
                 <span className="truncate">{selectedLabel}</span>
               </span>
-              <ChevronsUpDown weight="regular" className="size-4 opacity-50" />
+              <ChevronsUpDown className="size-4 opacity-50" />
             </Button>
           }
         />

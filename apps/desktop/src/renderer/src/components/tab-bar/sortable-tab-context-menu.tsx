@@ -204,16 +204,16 @@ export function SortableTabContextMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
-          <X weight="regular" className="size-3.5" />
+          <X className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.89359a36f7', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
-          <ListX weight="regular" className="size-3.5" />
+          <ListX className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.8d16f9cd30', 'Close Others')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
-          <PanelRightClose weight="regular" className="size-3.5" />
+          <PanelRightClose className="size-3.5" />
           {translate(
             'auto.components.tab.bar.SortableTabContextMenu.c1ee099c7e',
             'Close Tabs To The Right'

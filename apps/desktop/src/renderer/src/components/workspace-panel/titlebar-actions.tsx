@@ -90,7 +90,7 @@ export function WorkspacePanelTitlebarActions({
                   onClick={() => togglePanel(item.id)}
                   onPointerDown={(event) => handleItemPointerDown(event, item.id, 'visible')}
                 >
-                  <Icon weight={item.panel.iconWeight} />
+                  <Icon />
                 </Button>
               }
             />

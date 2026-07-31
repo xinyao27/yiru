@@ -102,7 +102,7 @@ export function EmulatorPaneToolbar({
                 'Rotate'
               )}
             >
-              <RotateCw weight="regular" className="size-3.5" />
+              <RotateCw className="size-3.5" />
               <span className="hidden sm:inline">
                 {translate(
                   'auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a',

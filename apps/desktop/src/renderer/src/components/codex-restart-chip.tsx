@@ -147,7 +147,7 @@ function LoudRestartOverlay({
       <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-[30rem] flex-col gap-3 border p-6 pb-5">
         <div className="flex items-start gap-3">
           <div className="border-border bg-muted flex size-10 shrink-0 items-center justify-center border">
-            <RefreshCw weight="regular" className="text-foreground size-5" aria-hidden="true" />
+            <RefreshCw className="text-foreground size-5" aria-hidden="true" />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="text-foreground text-xs font-medium tracking-wide uppercase">
@@ -171,7 +171,7 @@ function LoudRestartOverlay({
         </div>
         <div className="mt-1 flex flex-wrap justify-end gap-2">
           <Button ref={restartRef} type="button" variant="default" size="sm" onClick={onRestart}>
-            <RefreshCw weight="regular" />
+            <RefreshCw />
             {translate('auto.components.CodexRestartChip.c72a5fb234', 'Restart')}
           </Button>
         </div>
