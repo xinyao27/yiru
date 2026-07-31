@@ -160,7 +160,7 @@ import {
   getLogicalRepoOrderRankById,
   getSidebarOrderedRepoHeaderIdsByBucket
 } from './project-header-drop'
-import { getProjectWorkspaceRails } from './project-workspace-rail'
+import { getProjectWorkspaceRails, ProjectWorkspaceRailEnd } from './project-workspace-rail'
 import {
   REPO_HEADER_ACTION_BUTTON_CLASS,
   REPO_HEADER_ACTION_REVEAL_CLASS
@@ -326,7 +326,10 @@ const EMPTY_TABS_BY_WORKTREE: AppState['tabsByWorktree'] = {}
 const EMPTY_TERMINAL_LAYOUTS_BY_TAB_ID: AppState['terminalLayoutsByTabId'] = {}
 const EMPTY_PTY_IDS_BY_TAB_ID: AppState['ptyIdsByTabId'] = {}
 const EMPTY_RUNTIME_PANE_TITLES_BY_TAB_ID: AppState['runtimePaneTitlesByTabId'] = {}
-const WORKTREE_SIDEBAR_ROW_GAP_PX = 2
+// Why: LegendList turns this gap into a per-row paddingBottom, so workspace rows
+// stack flush — their own card padding carries the breathing room, and a gap here
+// would break the tree rail that runs down the column between them.
+const WORKTREE_SIDEBAR_ROW_GAP_PX = 0
 // Why: rows carry their own content insets, so the list content itself stays
 // flush with the sidebar edge and card backgrounds span the full row.
 const WORKTREE_SIDEBAR_CONTENT_STYLE: React.CSSProperties = {
@@ -1303,7 +1306,16 @@ function areWorkspaceSidebarRowsEqual(
   }
 }
 
-function WorkspaceRail({ leftPx }: { leftPx: number }): React.JSX.Element {
+function WorkspaceRail({
+  leftPx,
+  elbowWidthPx
+}: {
+  leftPx: number
+  elbowWidthPx?: number
+}): React.JSX.Element {
+  if (elbowWidthPx !== undefined) {
+    return <ProjectWorkspaceRailEnd leftPx={leftPx} elbowWidthPx={elbowWidthPx} />
+  }
   return (
     <span
       aria-hidden="true"
@@ -3931,7 +3943,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 className="relative"
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail leftPx={projectRail.leftPx} />
+                  <WorkspaceRail
+                    leftPx={projectRail.leftPx}
+                    elbowWidthPx={projectRail.elbowWidthPx}
+                  />
                 ) : null}
                 <CoworkingSidebarProjectedRow
                   projected={projected}
@@ -4846,7 +4861,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 }}
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail leftPx={projectRail.leftPx} />
+                  <WorkspaceRail
+                    leftPx={projectRail.leftPx}
+                    elbowWidthPx={projectRail.elbowWidthPx}
+                  />
                 ) : null}
                 <div className="overflow-visible">
                   {parent
@@ -4980,7 +4998,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 }
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail leftPx={projectRail.leftPx} />
+                  <WorkspaceRail
+                    leftPx={projectRail.leftPx}
+                    elbowWidthPx={projectRail.elbowWidthPx}
+                  />
                 ) : null}
                 <div
                   className="relative"
@@ -5054,7 +5075,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
               }
             >
               {projectRail?.segment === 'workspace' ? (
-                <WorkspaceRail leftPx={projectRail.leftPx} />
+                <WorkspaceRail
+                  leftPx={projectRail.leftPx}
+                  elbowWidthPx={projectRail.elbowWidthPx}
+                />
               ) : null}
               {renderWorktreeRow(row, false)}
             </div>

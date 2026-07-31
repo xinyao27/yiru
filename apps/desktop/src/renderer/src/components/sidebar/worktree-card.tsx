@@ -55,6 +55,7 @@ import { WorktreeCardControlGrants } from './worktree-card/control-grants'
 import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
 import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
 import { CONFLICT_OPERATION_LABELS } from './worktree-card/helpers'
+import { InlineAgentRail } from './worktree-card/inline-agent-rail'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
@@ -940,6 +941,15 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const parentContentMarginLeft =
     flushSurface && hasLeadingStatusIcon ? getWorktreeCardLeadingStatusMarginLeft(contentIndent) : 0
   const cardStyle = cardPaddingLeft ? { paddingLeft: cardPaddingLeft } : undefined
+  // Why: the rail ends on the last compact agent row by measuring up from the
+  // card's bottom edge, so it only holds while that list is the card's last
+  // content — a child-workspace chip or nested lineage rows below it would move
+  // the anchor onto the wrong row.
+  const showInlineAgentRail =
+    compactInlineAgentRowsVisible &&
+    hasLeadingStatusIcon &&
+    !showLineageChildChip &&
+    lineageChildren === undefined
   const detailsAndPortsContent =
     hasDetails || hasPorts ? (
       <div className="flex shrink-0 items-center gap-1">
@@ -982,11 +992,17 @@ const WorktreeCard = React.memo(function WorktreeCard({
         ) : null}
       </div>
     ) : null
+  // Why: density must follow what actually renders. Keying the agent list off the
+  // 'inline-agents' card property alone kept every workspace row at the taller
+  // details padding even with zero agents, so single-line rows never matched the
+  // project header's row box.
+  const hasVisibleInlineAgentList =
+    agentActivityDisplayMode === 'compact' ? compactInlineAgentRowsVisible : showInlineAgentList
   const hasSecondaryCardContent =
     hasMetaRow ||
     !!remoteBranchConflict ||
     coworkingControlGrants.length > 0 ||
-    showInlineAgentList ||
+    hasVisibleInlineAgentList ||
     showLineageChildChip
   const titleOnlyCard = !hasSecondaryCardContent
 
@@ -1028,7 +1044,10 @@ const WorktreeCard = React.memo(function WorktreeCard({
         )}
       >
         {/* Header row: Title */}
-        <div className="flex min-w-0 items-center justify-between gap-2">
+        {/* Why: pin the title row to its 20px line box so a single-line card is
+            exactly the project header's row height, whatever badges or trailing
+            indicators it happens to carry. */}
+        <div className="flex h-5 min-w-0 items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             {showPinnedRepoIcon && (
               <RepoIdentityChip repo={repo}>
@@ -1170,7 +1189,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                   render={
                     <Badge
                       variant="outline"
-                      className="text-foreground/70 border-foreground/20 bg-foreground/[0.06] h-[16px] shrink-0 px-1.5 text-[10px] leading-none font-medium"
+                      className="text-foreground/70 border-foreground/20 bg-foreground/[0.06] h-[13px] shrink-0 px-1 text-[9px] leading-none font-medium"
                     >
                       {translate('auto.components.sidebar.WorktreeCard.7d517f82e2', 'primary')}
                     </Badge>
@@ -1463,6 +1482,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         </div>
       )}
+      {showInlineAgentRail ? <InlineAgentRail cardPaddingLeft={cardPaddingLeft ?? '0px'} /> : null}
       {parentCardBodyWithHoverDetails}
 
       {lineageChildren ? (

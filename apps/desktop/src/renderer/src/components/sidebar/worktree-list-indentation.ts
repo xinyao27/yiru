@@ -194,6 +194,38 @@ export function getFlushWorktreeCardPaddingLeft(
     : `${FLUSH_CARD_MIN_CONTENT_INSET}px`
 }
 
+// Why: flush cards draw a 1px transparent border, so every content anchor
+// measured from the row edge starts one pixel in.
+const WORKTREE_CARD_BORDER_PX = 1
+// Why: the leading status column is a fixed 20px slot; half of it is the only
+// way to land a tree line on the glyph rather than beside it.
+export const WORKTREE_CARD_STATUS_SLOT_WIDTH = 20
+// Why: title-only cards use `py-1`, so the status glyph centre sits one border
+// plus that padding below the row top — where the rail elbow has to meet it.
+export const WORKTREE_CARD_STATUS_ICON_CENTER_TOP =
+  WORKTREE_CARD_BORDER_PX + 4 + WORKTREE_CARD_STATUS_SLOT_WIDTH / 2
+
+// Why: status-slot.tsx nudges its 13px artwork one pixel right because
+// branch-style glyphs are optically left-heavy; tree lines must follow the nudge.
+export const WORKTREE_CARD_STATUS_GLYPH_NUDGE_PX = 1
+const WORKTREE_CARD_STATUS_GLYPH_INSET_PX =
+  (WORKTREE_CARD_STATUS_SLOT_WIDTH - 13) / 2 + WORKTREE_CARD_STATUS_GLYPH_NUDGE_PX
+
+/** Left edge of a card's leading status glyph, for its resolved content indent. */
+export function getWorktreeCardStatusGlyphLeft(contentIndent: number): number {
+  const statusInnerPadding = Math.max(
+    FLUSH_CARD_MIN_CONTENT_INSET,
+    contentIndent - FLUSH_CARD_CONTENT_PULLBACK - STATUS_ICON_TITLE_ANCHOR_PULLBACK_PX
+  )
+
+  return (
+    WORKTREE_CARD_BORDER_PX +
+    statusInnerPadding +
+    getWorktreeCardLeadingStatusMarginLeft(contentIndent) +
+    WORKTREE_CARD_STATUS_GLYPH_INSET_PX
+  )
+}
+
 export function getWorktreeCardLeadingStatusMarginLeft(contentIndent: number): number {
   if (contentIndent <= 0) {
     return 0

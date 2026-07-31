@@ -1,7 +1,10 @@
 import type { HostSectionRow } from './host-section-rows'
 import { PINNED_GROUP_KEY } from './worktree-list-groups'
 
-export const GROUP_HEADER_ROW_HEIGHT = 28
+// Why: project headers share the single-line workspace row box (see
+// project-header.tsx / worktree-card/surface.tsx); keep this in sync or the
+// virtualizer seeds every header slot at the wrong height.
+export const GROUP_HEADER_ROW_HEIGHT = 30
 export const HOST_HEADER_ROW_HEIGHT = 32
 const SECONDARY_GROUP_HEADER_TOP_MARGIN = 4
 const IMPORTED_WORKTREES_LINE_ROW_HEIGHT = 36

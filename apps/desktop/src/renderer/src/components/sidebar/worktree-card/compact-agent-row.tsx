@@ -1,7 +1,5 @@
-import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
-import { translate } from '../../../i18n/i18n'
 import { AgentIcon } from '../../../lib/agent-catalog'
 import { getAgentRowPrimaryText } from '../../../lib/agent-row-primary-text'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '../../../lib/agent-status'
@@ -9,7 +7,6 @@ import { cn } from '../../../lib/class-names'
 import { AgentStateDot, agentStateLabel } from '../../agent-state-dot'
 import { useAgentRowConversationName } from '../../dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '../../dashboard/use-dashboard-data'
-import { Button } from '../../ui/button'
 import CacheTimer, { usePromptCacheCountdownForPane } from '../cache-timer'
 import { getAgentDotState } from './agent-summary'
 
@@ -89,14 +86,6 @@ function getCompactAgentTime(agent: DashboardAgentRowData, now: number): string 
   return startedAt > 0 ? formatShortTimeAgo(startedAt, now) : null
 }
 
-function stopActivationKeyPropagation(e: React.KeyboardEvent): void {
-  // Why: the surrounding worktree list handles Enter/Space as row activation.
-  // Focused nested buttons need those keys to stay local.
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.stopPropagation()
-  }
-}
-
 type CompactAgentRowProps = {
   agent: DashboardAgentRowData
   now: number
@@ -106,18 +95,7 @@ type CompactAgentRowProps = {
   sendTargetStatus?: 'eligible' | 'disabled' | 'sending'
   sendTargetDisabledReason?: string
   onSendTargetClick?: (paneKey: string) => void
-  childAgentCount?: number
-  childAgentsExpanded?: boolean
-  // Why: takes the paneKey as an argument instead of being a per-row closure
-  // over it, so WorktreeCardAgentsBody can hand every row the same memoized
-  // callback — a fresh closure here would rebuild this React.memo row every
-  // time an agent's status streams in.
-  onToggleChildAgents?: (paneKey: string) => void
-  childAgentsToggleKey?: string
-  reserveDisclosureGutter?: boolean
   isFocusedPane?: boolean
-  hideIdentityIcon?: boolean
-  cacheTimerActive?: boolean
 }
 
 export const CompactAgentRow = React.memo(function CompactAgentRow({
@@ -127,30 +105,19 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   sendTargetStatus,
   sendTargetDisabledReason,
   onSendTargetClick,
-  childAgentCount,
-  childAgentsExpanded = false,
-  onToggleChildAgents,
-  childAgentsToggleKey,
-  reserveDisclosureGutter = false,
-  isFocusedPane = false,
-  hideIdentityIcon = false,
-  cacheTimerActive = true
+  isFocusedPane = false
 }: CompactAgentRowProps) {
-  const hasChildDisclosure =
-    typeof childAgentCount === 'number' &&
-    childAgentCount > 0 &&
-    typeof onToggleChildAgents === 'function'
   // Why: subagent child rows carry the child's NAME (e.g. "pr-reviewer") in
   // agentType, which is not an iconable agent and would render the unknown
   // "?" glyph. Nesting under the parent already conveys identity.
-  const hideIcon = hideIdentityIcon || agent.rowSource === 'subagent'
+  const hideIcon = agent.rowSource === 'subagent'
   const dotState = getAgentDotState(agent)
   const conversationName = useAgentRowConversationName(agent)
   const primary = getCompactAgentPrimary(agent, conversationName)
   const secondary = getCompactAgentSecondary(agent)
   const model = agent.entry.model?.trim() ?? ''
   const shortTime = getCompactAgentTime(agent, now)
-  const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey, cacheTimerActive)
+  const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey)
 
   const handleActivate = useCallback(
     (e: React.MouseEvent) => {
@@ -181,54 +148,8 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     },
     [agent.paneKey, onSendTargetClick, sendTargetStatus]
   )
-  // Why: onToggleChildAgents is stable and childAgentsToggleKey is a
-  // primitive, so this stays referentially stable across renders — matching
-  // this component's React.memo wrapper instead of silently defeating it with
-  // a new closure.
-  const handleToggleChildren = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (childAgentsToggleKey === undefined) {
-        return
-      }
-      onToggleChildAgents?.(childAgentsToggleKey)
-    },
-    [childAgentsToggleKey, onToggleChildAgents]
-  )
-
   const rowBody = (
     <>
-      {hasChildDisclosure ? (
-        <Button
-          variant="quiet"
-          size="icon-xs"
-          type="button"
-          className="flex size-4"
-          aria-label={translate(
-            'auto.components.sidebar.worktree.card.compact.agents.a128d7006b',
-            '{{value0}} {{value1}} child {{value2}}',
-            {
-              value0: childAgentsExpanded ? 'Hide' : 'Show',
-              value1: childAgentCount,
-              value2: childAgentCount === 1 ? 'agent' : 'agents'
-            }
-          )}
-          aria-expanded={childAgentsExpanded}
-          onClick={handleToggleChildren}
-          onKeyDown={stopActivationKeyPropagation}
-        >
-          <ChevronRight
-            className={cn(
-              'size-3 transition-transform duration-150',
-              childAgentsExpanded && 'rotate-90'
-            )}
-            aria-hidden
-          />
-        </Button>
-      ) : reserveDisclosureGutter ? (
-        <span className="size-4 shrink-0" aria-hidden />
-      ) : null}
       {!hideIcon && (
         <span className="inline-flex shrink-0" title={formatAgentTypeLabel(agent.agentType)}>
           <AgentIcon agent={agentTypeToIconAgent(agent.agentType)} size={13} />
@@ -237,11 +158,23 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       <span className="min-w-0 flex-1 truncate">
         {/* Why: the selected-row fill is strong enough to wash out the dimmed
             prompt/secondary text, so lift both toward full foreground when focused. */}
-        <span className={isFocusedPane ? 'text-foreground' : 'text-muted-foreground/90'}>
+        <span
+          className={
+            isFocusedPane
+              ? 'text-foreground'
+              : 'text-muted-foreground/90 group-hover/agent-row:text-foreground'
+          }
+        >
           {primary}
         </span>
         {secondary && (
-          <span className={isFocusedPane ? 'text-foreground/70' : 'text-muted-foreground/65'}>
+          <span
+            className={
+              isFocusedPane
+                ? 'text-foreground/70'
+                : 'text-muted-foreground/65 group-hover/agent-row:text-foreground/75'
+            }
+          >
             {' '}
             - {secondary}
           </span>
@@ -251,21 +184,13 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
         <span
           className={cn(
             'max-w-24 shrink-0 truncate font-mono text-[10px]',
-            isFocusedPane ? 'text-foreground/70' : 'text-muted-foreground/70'
+            isFocusedPane
+              ? 'text-foreground/70'
+              : 'text-muted-foreground/70 group-hover/agent-row:text-foreground/75'
           )}
           title={model}
         >
           {model}
-        </span>
-      )}
-      {hasChildDisclosure && !childAgentsExpanded && (
-        <span
-          className={cn(
-            'shrink-0 text-[10px] tabular-nums',
-            isFocusedPane ? 'text-foreground/70' : 'text-muted-foreground/70'
-          )}
-        >
-          +{childAgentCount}
         </span>
       )}
       {cacheTimer && <CacheTimer startedAt={cacheTimer.startedAt} ttlMs={cacheTimer.ttlMs} />}
@@ -274,7 +199,9 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
           className={cn(
             'shrink-0 text-[10px] tabular-nums',
             // Why: the muted timestamp drops out against the selected-row fill.
-            isFocusedPane ? 'text-foreground/70' : 'text-muted-foreground/60'
+            isFocusedPane
+              ? 'text-foreground/70'
+              : 'text-muted-foreground/60 group-hover/agent-row:text-foreground/75'
           )}
         >
           {shortTime}
@@ -288,9 +215,11 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     <div
       draggable={false}
       className={cn(
-        'min-w-0 cursor-pointer px-1 text-[11px] leading-none',
+        'group/agent-row min-w-0 cursor-pointer px-1 text-[11px] leading-none',
         'text-muted-foreground',
-        isFocusedPane ? 'bg-accent text-accent-foreground hover:bg-accent' : 'hover:bg-accent',
+        // Why: agent rows sit inside an already-filled workspace card, so hover
+        // lifts the row's text instead of stacking a second surface on top.
+        isFocusedPane && 'bg-accent text-accent-foreground',
         'flex h-6 items-center gap-1',
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',
         sendTargetStatus === 'disabled' && 'cursor-default opacity-60'
@@ -304,7 +233,6 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       data-agent-send-target={sendTargetStatus}
       role={agent.lineage ? 'treeitem' : undefined}
       aria-level={agent.lineage ? agent.lineage.depth + 1 : undefined}
-      aria-expanded={hasChildDisclosure ? childAgentsExpanded : undefined}
       title={sendTargetDisabledReason ?? `${primary}${secondary ? ` - ${secondary}` : ''}`}
     >
       {rowBody}

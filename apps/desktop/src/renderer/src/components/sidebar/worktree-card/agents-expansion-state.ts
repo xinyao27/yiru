@@ -3,18 +3,15 @@ import { useCallback, useState } from 'react'
 /**
  * Expand/collapse state for a WorktreeCard's inline agent list:
  *  - `collapsedLineageParents`: agent-lineage parent paneKeys the user folded.
- *  - `compactRootListExpanded`: whether the "N agents" compact summary is open.
  */
 export type WorktreeAgentExpansionState = {
   collapsedLineageParents: ReadonlySet<string>
-  compactRootListExpanded: boolean
 }
 
 const EMPTY_COLLAPSED_PARENTS: ReadonlySet<string> = new Set()
 
 const DEFAULT_EXPANSION_STATE: WorktreeAgentExpansionState = {
-  collapsedLineageParents: EMPTY_COLLAPSED_PARENTS,
-  compactRootListExpanded: false
+  collapsedLineageParents: EMPTY_COLLAPSED_PARENTS
 }
 
 // Why: the inline agent list's expand/collapse must outlive the WorktreeCard
@@ -47,7 +44,7 @@ function persistExpansionState(worktreeId: string, state: WorktreeAgentExpansion
   // Re-insert to refresh LRU order; drop entries that carry no non-default
   // state so idle worktrees never occupy a slot.
   expansionByWorktreeId.delete(worktreeId)
-  if (state.compactRootListExpanded || state.collapsedLineageParents.size > 0) {
+  if (state.collapsedLineageParents.size > 0) {
     expansionByWorktreeId.set(worktreeId, state)
     trimPersistedExpansions()
   }
@@ -55,11 +52,8 @@ function persistExpansionState(worktreeId: string, state: WorktreeAgentExpansion
 
 export type WorktreeAgentExpansionControls = {
   collapsedLineageParents: ReadonlySet<string>
-  compactRootListExpanded: boolean
   /** Fold/unfold a single agent-lineage parent by its paneKey. */
   toggleLineageParent: (paneKey: string) => void
-  /** Open/close the compact multi-agent summary panel. */
-  toggleCompactRootList: () => void
 }
 
 /**
@@ -101,15 +95,8 @@ export function useWorktreeAgentExpansionState(worktreeId: string): WorktreeAgen
     [commit, worktreeId]
   )
 
-  const toggleCompactRootList = useCallback(() => {
-    const base = readExpansionState(worktreeId)
-    commit({ ...base, compactRootListExpanded: !base.compactRootListExpanded })
-  }, [commit, worktreeId])
-
   return {
     collapsedLineageParents: current.collapsedLineageParents,
-    compactRootListExpanded: current.compactRootListExpanded,
-    toggleLineageParent,
-    toggleCompactRootList
+    toggleLineageParent
   }
 }

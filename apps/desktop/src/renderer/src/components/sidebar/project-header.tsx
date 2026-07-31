@@ -42,7 +42,10 @@ export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProj
       <div
         ref={ref}
         className={cn(
-          'group relative flex h-7 w-full items-center gap-1.5 pr-2 text-left transition-all outline-none hover:bg-accent focus-visible:bg-accent',
+          // Why: project headers and workspace rows are the same sidebar row
+          // role, so they share one row box: a 20px label line inside the
+          // workspace card's `py-1` and 1px border.
+          'group relative flex h-[30px] w-full items-center gap-1.5 pr-2 text-left transition-all outline-none hover:bg-accent focus-visible:bg-accent',
           className
         )}
         style={{ ...style, paddingLeft }}

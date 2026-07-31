@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useAppStore } from '@/store'
@@ -17,9 +17,8 @@ import { dismissStaleAgentRowByKey } from '../../terminal-pane/stale-agent-row'
 import { useFocusedAgentPaneKey } from '../focused-agent-row-highlight'
 import { deriveRunningAgentSendTargets } from '../running-agent-targets'
 import { useWorktreeAgentRows } from '../use-worktree-agent-rows'
-import { revealElementInScrollContainer } from '../worktree-sidebar-reveal'
 import { useWorktreeAgentExpansionState } from './agents-expansion-state'
-import { CompactAgentExpansion, CompactAgentRow, CompactAgentSummaryButton } from './compact-agents'
+import { CompactAgentRow } from './compact-agent-row'
 import { selectSendTargetControlInputs, selectSendTargetInputs } from './send-target-inputs'
 
 export const SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT =
@@ -27,15 +26,6 @@ export const SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT =
 
 const dispatchSuppressScrollAdjustment = () => {
   window.dispatchEvent(new CustomEvent(SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT))
-}
-
-function revealCompactAgentCard(agentListRoot: HTMLElement | null): void {
-  const sidebarElement = agentListRoot?.closest('[data-worktree-sidebar]')
-  const worktreeOptionElement = agentListRoot?.closest('[role="option"]')
-  if (!(sidebarElement instanceof HTMLElement) || !worktreeOptionElement) {
-    return
-  }
-  revealElementInScrollContainer(sidebarElement, worktreeOptionElement, 'auto')
 }
 
 type WorktreeCardAgentsProps = {
@@ -104,7 +94,6 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   const sendTargetInputs = useAppStore(useShallow((s) => selectSendTargetInputs(s, worktreeId)))
   const sendPromptToSidebarAgentTarget = useAppStore((s) => s.sendPromptToSidebarAgentTarget)
   const focusedAgentPaneKey = useFocusedAgentPaneKey(worktreeId)
-  const compactAgentListRootRef = useRef<HTMLDivElement | null>(null)
 
   // Why: subscribe to the ack map reference (Object.is equality) and derive
   // per-agent unvisited flags locally. Keeps the inline list's bold/mute
@@ -235,33 +224,9 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   // Why: keep disclosure state out of raw local useState so the WorktreeCard
   // remount that fires on virtualizer recycle or a sibling child-worktrees
   // toggle no longer resets it (which read as one section expanding the other).
-  const {
-    collapsedLineageParents,
-    compactRootListExpanded,
-    toggleLineageParent: toggleLineageParentState,
-    toggleCompactRootList
-  } = useWorktreeAgentExpansionState(worktreeId)
+  const { collapsedLineageParents, toggleLineageParent: toggleLineageParentState } =
+    useWorktreeAgentExpansionState(worktreeId)
 
-  // Why: reveal only on a genuine user collapse→expand within this mount.
-  // Seeding an already-expanded panel from the durable cache on a remount must
-  // not re-trigger the reveal scroll, or recycled cards would fight the scroll.
-  const previousCompactExpandedRef = useRef(compactRootListExpanded)
-  useLayoutEffect(() => {
-    const wasExpanded = previousCompactExpandedRef.current
-    previousCompactExpandedRef.current = compactRootListExpanded
-    if (!wasExpanded && compactRootListExpanded && agentActivityDisplayMode === 'compact') {
-      dispatchSuppressScrollAdjustment()
-      // Why: defer the reveal scroll out of the expand commit. Running it inline
-      // forces a synchronous sidebar layout that blocks the animation's opening
-      // frames (a visible jump); next-frame keeps the open smooth and the
-      // ScrollBehavior 'auto' still lands before the height transition finishes.
-      const handle = requestAnimationFrame(() => {
-        revealCompactAgentCard(compactAgentListRootRef.current)
-      })
-      return () => cancelAnimationFrame(handle)
-    }
-    return undefined
-  }, [agentActivityDisplayMode, compactRootListExpanded])
   const toggleLineageParent = useCallback(
     (paneKey: string) => {
       dispatchSuppressScrollAdjustment()
@@ -366,16 +331,12 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
 
   const renderCompactAgentBranch = (
     agent: DashboardAgentRowData,
-    ancestorPaneKeys: ReadonlySet<string> = new Set(),
-    cacheTimerActive = true
+    ancestorPaneKeys: ReadonlySet<string> = new Set()
   ): React.ReactNode => {
     if (ancestorPaneKeys.has(agent.paneKey)) {
       return null
     }
     const childAgents = childrenByParentPaneKey.get(agent.paneKey) ?? []
-    const hasChildAgents = childAgents.length > 0
-    const isRootAgent = ancestorPaneKeys.size === 0
-    const expanded = !collapsedLineageParents.has(agent.paneKey)
     const sendTarget = isAgentSendTargetModeActive
       ? (sendTargetsByPaneKey.get(agent.paneKey) ?? {
           status: 'disabled' as const,
@@ -386,6 +347,8 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
     descendantAncestorPaneKeys.add(agent.paneKey)
     return (
       <React.Fragment key={agent.paneKey}>
+        {/* Why: compact rows carry no disclosure — every agent under a workspace
+            stays laid out, so there is no collapsed state to toggle. */}
         <CompactAgentRow
           agent={agent}
           now={now}
@@ -395,49 +358,30 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           sendTargetStatus={sendTarget?.status}
           sendTargetDisabledReason={sendTarget?.disabledReason}
           onSendTargetClick={isAgentSendTargetModeActive ? handleSendTargetClick : undefined}
-          childAgentCount={hasChildAgents ? childAgents.length : undefined}
-          childAgentsExpanded={expanded}
-          // Why: same stable-reference rationale as the full-row branch above
-          // — toggleLineageParent takes paneKey as a parameter so the compact
-          // row shares one callback reference instead of rebuilding a closure
-          // per row on every streaming status update.
-          onToggleChildAgents={hasChildAgents ? toggleLineageParent : undefined}
-          childAgentsToggleKey={hasChildAgents ? agent.paneKey : undefined}
-          reserveDisclosureGutter={isRootAgent && anyRootHasChildren && !hasChildAgents}
           isFocusedPane={agent.paneKey === focusedAgentPaneKey}
-          cacheTimerActive={cacheTimerActive}
         />
-        {hasChildAgents ? (
-          <CompactAgentExpansion expanded={expanded}>
-            <div className="ml-3 flex flex-col gap-0.5 border-l border-l-[color:color-mix(in_srgb,var(--sidebar-foreground)_16%,transparent)] pl-1 dark:border-l-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
-              {childAgents.map((childAgent) =>
-                renderCompactAgentBranch(
-                  childAgent,
-                  descendantAncestorPaneKeys,
-                  cacheTimerActive && expanded
-                )
-              )}
-            </div>
-          </CompactAgentExpansion>
+        {childAgents.length > 0 ? (
+          <div className="ml-3 flex flex-col border-l border-l-[color:color-mix(in_srgb,var(--sidebar-foreground)_16%,transparent)] pl-1 dark:border-l-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
+            {childAgents.map((childAgent) =>
+              renderCompactAgentBranch(childAgent, descendantAncestorPaneKeys)
+            )}
+          </div>
         ) : null}
       </React.Fragment>
     )
   }
 
   if (agentActivityDisplayMode === 'compact') {
-    const summaryAgents = hasLineage ? rootAgents : agents
-    // Why: compact agent activity keeps multiple active agents to a single
-    // predictable status line, even when there are only two agents. In
-    // send-target mode, rows are the picker surface, so keep targets visible.
-    const shouldUseSummaryRow = summaryAgents.length > 1 && !isAgentSendTargetModeActive
-    const subjectLabel = `${hasLineage ? rootAgents.length : agents.length} agents`
-
     return (
       <div
-        ref={compactAgentListRootRef}
         className={cn(
-          'mt-1 flex flex-col gap-0.5',
-          hasLeadingStatusIcon ? '-ms-6 w-[calc(100%+1.5rem)]' : '-ms-2 w-[calc(100%+0.5rem)]',
+          // Why: compact rows read as one continuous tree column, so they stack
+          // flush — a gap between them breaks the rail that runs alongside.
+          'mt-1 flex flex-col',
+          // Why: rows pull back by their own `px-1` so each agent glyph's left
+          // edge lands on the workspace title's text edge above it, leaving the
+          // status column free for the rail that joins them.
+          hasLeadingStatusIcon ? '-ms-1 w-[calc(100%+0.25rem)]' : '-ms-2 w-[calc(100%+0.5rem)]',
           className
         )}
         onClick={stopBubble}
@@ -448,28 +392,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
         aria-label={translate('auto.components.sidebar.WorktreeCardAgents.1b0a156717', 'Agents')}
         data-compact-agent-list="true"
       >
-        {agents.length === 0 ? null : shouldUseSummaryRow ? (
-          // Why: the worktree card is already the surface. Expanded compact
-          // agents stay a quiet tree; only the collapsed summary reads as a pill.
-          <div className="bg-transparent p-0.5 transition-colors duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none">
-            <CompactAgentSummaryButton
-              agents={summaryAgents}
-              subjectLabel={subjectLabel}
-              expanded={compactRootListExpanded}
-              onToggle={() => {
-                dispatchSuppressScrollAdjustment()
-                toggleCompactRootList()
-              }}
-            />
-            <CompactAgentExpansion expanded={compactRootListExpanded}>
-              {rootAgents.map((rootAgent) =>
-                renderCompactAgentBranch(rootAgent, new Set(), compactRootListExpanded)
-              )}
-            </CompactAgentExpansion>
-          </div>
-        ) : (
-          rootAgents.map((rootAgent) => renderCompactAgentBranch(rootAgent))
-        )}
+        {rootAgents.map((rootAgent) => renderCompactAgentBranch(rootAgent))}
       </div>
     )
   }

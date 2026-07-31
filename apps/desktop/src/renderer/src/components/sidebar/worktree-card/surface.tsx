@@ -31,7 +31,9 @@ export function WorktreeCardSurface({
         'data-[worktree-card-active=primary]:border-[color:color-mix(in_srgb,var(--sidebar-border)_40%,transparent)] data-[worktree-card-active=primary]:bg-[color-mix(in_srgb,var(--sidebar-foreground)_8%,transparent)] dark:data-[worktree-card-active=primary]:bg-[color-mix(in_srgb,var(--sidebar-foreground)_10%,transparent)]',
         'data-[worktree-card-active=secondary]:border-[color:color-mix(in_srgb,var(--sidebar-ring)_25%,transparent)] data-[worktree-card-active=secondary]:bg-[color-mix(in_srgb,var(--sidebar-accent)_45%,transparent)] dark:data-[worktree-card-active=secondary]:border-[color:color-mix(in_srgb,var(--sidebar-ring)_28%,transparent)] dark:data-[worktree-card-active=secondary]:bg-[color-mix(in_srgb,var(--sidebar-accent)_34%,transparent)]',
         trailing ? 'pr-7' : 'pr-1.5',
-        density === 'title-only' ? 'py-2' : 'pt-1.25 pb-1.5',
+        // Why: single-line rows read as a dense tree under their project header,
+        // so they keep only enough padding to clear the 20px title line.
+        density === 'title-only' ? 'py-1' : 'pt-1.25 pb-1.5',
         // Why: flush workspace backgrounds share the full-row grid with project headers.
         flush ? 'w-full' : 'ml-1',
         dropTarget
