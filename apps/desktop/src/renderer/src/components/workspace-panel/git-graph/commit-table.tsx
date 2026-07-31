@@ -1,9 +1,10 @@
 import type React from 'react'
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 
 import type { GitHistoryItem } from '../../../../../shared/git/history'
@@ -13,7 +14,8 @@ import type { SourceControlRowOpenEvent } from '../source-control/split-open'
 import {
   clampGitGraphColumnWidth,
   type GitGraphColumnId,
-  type GitGraphColumnWidths
+  type GitGraphColumnWidths,
+  gitGraphColumnFlexStyle
 } from './column-widths'
 import { GitGraphCommitContextMenu } from './commit-context-menu'
 import { GitGraphCommitDetails } from './commit-details'
@@ -41,17 +43,17 @@ function gitGraphColumnLabel(columnId: GitGraphColumnId): string {
 
 function ColumnHeader({
   columnId,
-  width,
+  columnWidths,
   onResizeStart
 }: {
   columnId: GitGraphColumnId
-  width: number
+  columnWidths: GitGraphColumnWidths
   onResizeStart: (columnId: GitGraphColumnId, event: React.PointerEvent<HTMLDivElement>) => void
 }): React.JSX.Element {
   return (
     <div
       className="text-muted-foreground relative flex h-full shrink-0 items-center truncate px-2 text-[11px] font-semibold tracking-wide uppercase"
-      style={{ width }}
+      style={gitGraphColumnFlexStyle(columnId, columnWidths)}
     >
       {gitGraphColumnLabel(columnId)}
       <div
@@ -160,6 +162,7 @@ export function GitGraphCommitTable({
     },
     [onScrollNearBottom]
   )
+  const viewportProps = useMemo(() => ({ onScroll: handleScroll }), [handleScroll])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -169,89 +172,92 @@ export function GitGraphCommitTable({
           <ColumnHeader
             key={columnId}
             columnId={columnId}
-            width={columnWidths[columnId]}
+            columnWidths={columnWidths}
             onResizeStart={startResize}
           />
         ))}
       </div>
-      <div
-        className="scrollbar-sleek relative min-h-0 flex-1 overflow-y-auto"
-        onScroll={handleScroll}
-      >
-        {layout && (
-          <div
-            className="pointer-events-none absolute top-0 left-0"
-            style={{
-              width: layout.width,
-              height: items.length * GIT_GRAPH_DEFAULT_GRID.y + (rowGap?.height ?? 0)
-            }}
-          >
-            <GitGraphSvg layout={layout} rowGap={rowGap} />
-          </div>
-        )}
+      <ScrollArea className="min-h-0 flex-1" viewportProps={viewportProps}>
+        {/* Why: the graph SVG is absolutely positioned against the scrolled
+            content, so it needs a positioned ancestor inside the viewport —
+            the ScrollArea root itself stays fixed and would not scroll with it. */}
         <div className="relative">
-          {items.map((item) => {
-            const row = (
-              <GitGraphCommitRow
-                item={item}
-                graphColumnWidth={graphColumnWidth}
-                columnWidths={columnWidths}
-                isCurrent={item.id === currentCommitId}
-                isDetailsOpen={expandedCommitId === item.id}
-                isFindMatch={findMatchIds.has(item.id)}
-                isFindCurrent={currentFindCommitId === item.id}
-                onClick={() => onToggleExpand(item)}
-              />
-            )
-            return (
-              <div
-                key={item.id}
-                ref={(node) => {
-                  if (node) {
-                    rowRefs.current.set(item.id, node)
-                  } else {
-                    rowRefs.current.delete(item.id)
-                  }
-                }}
-              >
-                <ContextMenu>
-                  <ContextMenuTrigger render={row} />
-                  <GitGraphCommitContextMenu item={item} onAction={onCommitAction} />
-                </ContextMenu>
-                {expandedCommitId === item.id && (
-                  <GitGraphCommitDetails
-                    item={item}
-                    loadCommitFiles={loadCommitFiles}
-                    onOpenFile={onOpenFile}
-                    onOpenAllChanges={() => onOpenAllChanges(item)}
-                    onSelectParent={onSelectParent}
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-        {hasMore && (
-          <div className="flex justify-center py-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="xs"
-              disabled={isLoadingMore}
-              onClick={onLoadMore}
+          {layout && (
+            <div
+              className="pointer-events-none absolute top-0 left-0"
+              style={{
+                width: layout.width,
+                height: items.length * GIT_GRAPH_DEFAULT_GRID.y + (rowGap?.height ?? 0)
+              }}
             >
-              {isLoadingMore ? (
-                <LoadingIndicator className="size-3" />
-              ) : (
-                translate(
-                  'auto.components.workspace-panel.git-graph.CommitTable.a1b2c3d4e5',
-                  'Load More Commits'
-                )
-              )}
-            </Button>
+              <GitGraphSvg layout={layout} rowGap={rowGap} />
+            </div>
+          )}
+          <div className="relative">
+            {items.map((item) => {
+              const row = (
+                <GitGraphCommitRow
+                  item={item}
+                  graphColumnWidth={graphColumnWidth}
+                  columnWidths={columnWidths}
+                  isCurrent={item.id === currentCommitId}
+                  isDetailsOpen={expandedCommitId === item.id}
+                  isFindMatch={findMatchIds.has(item.id)}
+                  isFindCurrent={currentFindCommitId === item.id}
+                  onClick={() => onToggleExpand(item)}
+                />
+              )
+              return (
+                <div
+                  key={item.id}
+                  ref={(node) => {
+                    if (node) {
+                      rowRefs.current.set(item.id, node)
+                    } else {
+                      rowRefs.current.delete(item.id)
+                    }
+                  }}
+                >
+                  <ContextMenu>
+                    <ContextMenuTrigger render={row} />
+                    <GitGraphCommitContextMenu item={item} onAction={onCommitAction} />
+                  </ContextMenu>
+                  {expandedCommitId === item.id && (
+                    <GitGraphCommitDetails
+                      item={item}
+                      graphColumnWidth={graphColumnWidth}
+                      loadCommitFiles={loadCommitFiles}
+                      onOpenFile={onOpenFile}
+                      onOpenAllChanges={() => onOpenAllChanges(item)}
+                      onSelectParent={onSelectParent}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
-        )}
-      </div>
+          {hasMore && (
+            <div className="flex justify-center py-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                disabled={isLoadingMore}
+                onClick={onLoadMore}
+              >
+                {isLoadingMore ? (
+                  <LoadingIndicator className="size-3" />
+                ) : (
+                  translate(
+                    'auto.components.workspace-panel.git-graph.CommitTable.a1b2c3d4e5',
+                    'Load More Commits'
+                  )
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   )
 }

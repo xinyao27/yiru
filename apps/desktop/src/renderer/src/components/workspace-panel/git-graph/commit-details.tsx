@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { basename, dirname } from '@/lib/path'
@@ -66,12 +67,16 @@ function CommitFileRow({
 
 export function GitGraphCommitDetails({
   item,
+  graphColumnWidth,
   loadCommitFiles,
   onOpenFile,
   onOpenAllChanges,
   onSelectParent
 }: {
   item: GitHistoryItem
+  // Why: the graph SVG keeps drawing its lanes straight through the gap this
+  // block occupies, so the block starts after the lanes instead of under them.
+  graphColumnWidth: number
   loadCommitFiles: (item: GitHistoryItem) => Promise<GitBranchChangeEntry[]>
   onOpenFile: (entry: GitBranchChangeEntry, event?: SourceControlRowOpenEvent) => void
   onOpenAllChanges: () => void
@@ -109,110 +114,110 @@ export function GitGraphCommitDetails({
     // always matches the row-gap the graph SVG opened for it (buildGitGraphLayout's
     // rowGap.height) — content taller than that scrolls internally instead of
     // pushing the next row further than the graph lines expect.
-    <div
-      className="border-border/60 bg-muted/20 flex flex-col border-t text-[11px]"
-      style={{ height: GIT_GRAPH_EXPAND_HEIGHT }}
-    >
-      <div className="scrollbar-sleek min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-2">
-        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1">
-          <dt className="text-muted-foreground">
-            {translate(
-              'auto.components.workspace-panel.git-graph.CommitDetails.b2c3d4e5f6',
-              'Hash'
-            )}
-          </dt>
-          <dd className="text-foreground truncate font-mono">{item.id}</dd>
-          {item.parentIds.length > 0 && (
-            <>
-              <dt className="text-muted-foreground">
-                {translate(
-                  'auto.components.workspace-panel.git-graph.CommitDetails.c3d4e5f6a7',
-                  'Parents'
-                )}
-              </dt>
-              <dd className="flex flex-wrap gap-x-2 gap-y-0.5 font-mono">
-                {item.parentIds.map((parentId) => (
-                  <Button
-                    key={parentId}
-                    type="button"
-                    variant="link"
-                    size="xs"
-                    className="h-auto p-0 font-mono"
-                    onClick={() => onSelectParent(parentId)}
-                  >
-                    {parentId.slice(0, 8)}
-                  </Button>
-                ))}
-              </dd>
-            </>
-          )}
-          {item.author && (
-            <>
-              <dt className="text-muted-foreground">
-                {translate(
-                  'auto.components.workspace-panel.git-graph.CommitDetails.d4e5f6a7b8',
-                  'Author'
-                )}
-              </dt>
-              <dd className="text-foreground truncate">
-                {item.author}
-                {item.authorEmail ? ` <${item.authorEmail}>` : ''}
-                {item.timestamp ? ` · ${formatGitGraphFullDate(item.timestamp)}` : ''}
-              </dd>
-            </>
-          )}
-        </dl>
-        {messageBody && (
-          <p className="text-foreground border-border/60 border-t pt-2 whitespace-pre-wrap">
-            {messageBody}
-          </p>
-        )}
-        <div className="border-border/60 -mx-3 border-t">
-          {state.status === 'loading' && (
-            <div className="text-muted-foreground flex items-center gap-2 px-3 py-1.5">
-              <LoadingIndicator className="size-3" />
-              <span>
-                {translate(
-                  'auto.components.workspace-panel.git-graph.CommitDetails.e5f6a7b8c9',
-                  'Loading files…'
-                )}
-              </span>
-            </div>
-          )}
-          {state.status === 'error' && (
-            <div className="text-destructive px-3 py-1.5">{state.error}</div>
-          )}
-          {state.status === 'ready' && state.entries.length === 0 && (
-            <div className="text-muted-foreground px-3 py-1.5">
+    <div className="flex items-stretch" style={{ height: GIT_GRAPH_EXPAND_HEIGHT }}>
+      <div className="shrink-0" style={{ width: graphColumnWidth }} aria-hidden="true" />
+      <div className="border-border/60 bg-muted/20 flex min-w-0 flex-1 flex-col border-t text-[11px]">
+        <ScrollArea className="min-h-0 flex-1" viewportClassName="space-y-2 px-3 py-2">
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1">
+            <dt className="text-muted-foreground">
               {translate(
-                'auto.components.workspace-panel.git-graph.CommitDetails.f6a7b8c9d0',
-                'No file changes in this commit'
+                'auto.components.workspace-panel.git-graph.CommitDetails.b2c3d4e5f6',
+                'Hash'
               )}
-            </div>
+            </dt>
+            <dd className="text-foreground truncate font-mono">{item.id}</dd>
+            {item.parentIds.length > 0 && (
+              <>
+                <dt className="text-muted-foreground">
+                  {translate(
+                    'auto.components.workspace-panel.git-graph.CommitDetails.c3d4e5f6a7',
+                    'Parents'
+                  )}
+                </dt>
+                <dd className="flex flex-wrap gap-x-2 gap-y-0.5 font-mono">
+                  {item.parentIds.map((parentId) => (
+                    <Button
+                      key={parentId}
+                      type="button"
+                      variant="link"
+                      size="xs"
+                      className="h-auto p-0 font-mono"
+                      onClick={() => onSelectParent(parentId)}
+                    >
+                      {parentId.slice(0, 8)}
+                    </Button>
+                  ))}
+                </dd>
+              </>
+            )}
+            {item.author && (
+              <>
+                <dt className="text-muted-foreground">
+                  {translate(
+                    'auto.components.workspace-panel.git-graph.CommitDetails.d4e5f6a7b8',
+                    'Author'
+                  )}
+                </dt>
+                <dd className="text-foreground truncate">
+                  {item.author}
+                  {item.authorEmail ? ` <${item.authorEmail}>` : ''}
+                  {item.timestamp ? ` · ${formatGitGraphFullDate(item.timestamp)}` : ''}
+                </dd>
+              </>
+            )}
+          </dl>
+          {messageBody && (
+            <p className="text-foreground border-border/60 border-t pt-2 whitespace-pre-wrap">
+              {messageBody}
+            </p>
           )}
-          {state.status === 'ready' && state.entries.length > 0 && (
-            <>
-              {state.entries.map((entry) => (
-                <CommitFileRow key={entry.path} entry={entry} onOpen={onOpenFile} />
-              ))}
-              <Button
-                variant="quiet"
-                size="xs"
-                type="button"
-                className="flex h-auto w-full justify-start border-0 py-1 pl-2 text-left text-[11px] font-normal whitespace-normal"
-                onClick={onOpenAllChanges}
-              >
-                <ArrowUpRight className="size-3 shrink-0" />
+          <div className="border-border/60 -mx-3 border-t">
+            {state.status === 'loading' && (
+              <div className="text-muted-foreground flex items-center gap-2 px-3 py-1.5">
+                <LoadingIndicator className="size-3" />
                 <span>
                   {translate(
-                    'auto.components.workspace-panel.git-graph.CommitDetails.a7b8c9d0e1',
-                    'Open all changes together'
+                    'auto.components.workspace-panel.git-graph.CommitDetails.e5f6a7b8c9',
+                    'Loading files…'
                   )}
                 </span>
-              </Button>
-            </>
-          )}
-        </div>
+              </div>
+            )}
+            {state.status === 'error' && (
+              <div className="text-destructive px-3 py-1.5">{state.error}</div>
+            )}
+            {state.status === 'ready' && state.entries.length === 0 && (
+              <div className="text-muted-foreground px-3 py-1.5">
+                {translate(
+                  'auto.components.workspace-panel.git-graph.CommitDetails.f6a7b8c9d0',
+                  'No file changes in this commit'
+                )}
+              </div>
+            )}
+            {state.status === 'ready' && state.entries.length > 0 && (
+              <>
+                {state.entries.map((entry) => (
+                  <CommitFileRow key={entry.path} entry={entry} onOpen={onOpenFile} />
+                ))}
+                <Button
+                  variant="quiet"
+                  size="xs"
+                  type="button"
+                  className="flex h-auto w-full justify-start border-0 py-1 pl-2 text-left text-[11px] font-normal whitespace-normal"
+                  onClick={onOpenAllChanges}
+                >
+                  <ArrowUpRight className="size-3 shrink-0" />
+                  <span>
+                    {translate(
+                      'auto.components.workspace-panel.git-graph.CommitDetails.a7b8c9d0e1',
+                      'Open all changes together'
+                    )}
+                  </span>
+                </Button>
+              </>
+            )}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   )

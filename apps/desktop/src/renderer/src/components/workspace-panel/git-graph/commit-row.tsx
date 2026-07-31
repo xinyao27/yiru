@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/class-names'
 
 import type { GitHistoryItem } from '../../../../../shared/git/history'
-import type { GitGraphColumnWidths } from './column-widths'
+import { type GitGraphColumnWidths, gitGraphColumnFlexStyle } from './column-widths'
 import { formatGitGraphShortDate } from './format'
 import { GitGraphRefBadge } from './ref-badge'
 
@@ -52,17 +52,18 @@ export const GitGraphCommitRow = function GitGraphCommitRow({
         isFindCurrent && 'bg-primary/20'
       )}
       style={{ height: 24 }}
-      title={rowTooltip}
     >
       <span className="h-full shrink-0" style={{ width: graphColumnWidth }} aria-hidden="true" />
       <span
         className="flex min-w-0 shrink-0 items-center gap-1 overflow-hidden pr-2"
-        style={{ width: columnWidths.description }}
+        style={gitGraphColumnFlexStyle('description', columnWidths)}
       >
         {(item.references ?? []).map((ref) => (
           <GitGraphRefBadge key={ref.id} itemRef={ref} />
         ))}
-        <Tooltip>
+        {/* Why: a long commit body is the one tooltip worth hovering — the popup
+            keeps pointer events so its clamped, scrollable body can be read. */}
+        <Tooltip disableHoverablePopup={false}>
           <TooltipTrigger
             render={
               <span
@@ -75,26 +76,32 @@ export const GitGraphCommitRow = function GitGraphCommitRow({
               </span>
             }
           />
-          <TooltipContent side="bottom" sideOffset={6} className="max-w-96 whitespace-pre-wrap">
+          {/* Why: the popup is width-fit, so a ScrollArea (percentage-sized
+              viewport) cannot resolve its width here — scroll natively. */}
+          <TooltipContent
+            side="bottom"
+            sideOffset={6}
+            className="scrollbar-sleek pointer-events-auto max-h-64 max-w-96 overflow-y-auto whitespace-pre-wrap"
+          >
             {rowTooltip}
           </TooltipContent>
         </Tooltip>
       </span>
       <span
         className="text-muted-foreground shrink-0 truncate pr-2"
-        style={{ width: columnWidths.date }}
+        style={gitGraphColumnFlexStyle('date', columnWidths)}
       >
         {formatGitGraphShortDate(item.timestamp)}
       </span>
       <span
         className="text-muted-foreground shrink-0 truncate pr-2"
-        style={{ width: columnWidths.author }}
+        style={gitGraphColumnFlexStyle('author', columnWidths)}
       >
         {item.author ?? ''}
       </span>
       <span
         className="text-muted-foreground shrink-0 truncate pr-2 font-mono"
-        style={{ width: columnWidths.commit }}
+        style={gitGraphColumnFlexStyle('commit', columnWidths)}
       >
         {item.displayId ?? item.id.slice(0, 8)}
       </span>

@@ -3,7 +3,7 @@ import type React from 'react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
-import type { GitGraphColumnWidths } from './column-widths'
+import { type GitGraphColumnWidths, gitGraphColumnFlexStyle } from './column-widths'
 
 // Why: pinned pseudo-row for the dirty worktree, rendered above the real
 // commit graph. It draws its own small grey vertex rather than participating
@@ -59,7 +59,7 @@ export function GitGraphUncommittedRow({
       </span>
       <span
         className="text-foreground min-w-0 truncate font-medium italic"
-        style={{ width: columnWidths.description }}
+        style={gitGraphColumnFlexStyle('description', columnWidths)}
       >
         {label}
       </span>

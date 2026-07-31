@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 
 import type { GitGraphBranchOption } from './branch-filter'
@@ -81,7 +82,7 @@ export function GitGraphBranchFilterDropdown({
             className="flex-1"
           />
         </div>
-        <div className="scrollbar-sleek max-h-64 overflow-y-auto p-1">
+        <ScrollArea className="max-h-64" viewportClassName="p-1">
           <div
             role="menuitemcheckbox"
             aria-checked={showingAll}
@@ -123,7 +124,7 @@ export function GitGraphBranchFilterDropdown({
               </div>
             )
           })}
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   )
