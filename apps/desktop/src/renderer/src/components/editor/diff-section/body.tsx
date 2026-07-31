@@ -1,6 +1,6 @@
 import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import type { RefObject } from 'react'
+import { Suspense, type RefObject } from 'react'
 
 import { translate } from '../../../i18n/i18n'
 import { cn } from '../../../lib/class-names'
@@ -17,6 +17,17 @@ import type { DiffSection } from './types'
 import type { PierreDiffSectionCommentProps } from './use-comment-actions'
 
 const ImageDiffViewer = lazy(() => import('../image-diff-viewer'))
+
+function DiffSectionLoading(): React.JSX.Element {
+  return (
+    <div className="bg-muted/10 text-muted-foreground flex h-full items-center gap-2 px-3 text-[11px]">
+      <span className="bg-muted-foreground/50 h-1.5 w-1.5" />
+      <span>
+        {translate('auto.components.editor.DiffSectionBody.f5cf81cec2', 'Loading diff...')}
+      </span>
+    </div>
+  )
+}
 
 type DiffSectionBodyProps = {
   section: DiffSection
@@ -101,12 +112,7 @@ export function DiffSectionBody({
         />
       ) : null}
       {section.loading ? (
-        <div className="bg-muted/10 text-muted-foreground flex h-full items-center gap-2 px-3 text-[11px]">
-          <span className="bg-muted-foreground/50 h-1.5 w-1.5" />
-          <span>
-            {translate('auto.components.editor.DiffSectionBody.f5cf81cec2', 'Loading diff...')}
-          </span>
-        </div>
+        <DiffSectionLoading />
       ) : section.error ? (
         <div className="bg-muted/10 text-muted-foreground flex h-full items-center justify-between gap-3 px-3 text-[11px]">
           <div className="flex min-w-0 items-center gap-2">
@@ -129,14 +135,20 @@ export function DiffSectionBody({
         </div>
       ) : section.diffResult?.kind === 'binary' ? (
         section.diffResult.isImage ? (
-          <ImageDiffViewer
-            originalContent={section.diffResult.originalContent}
-            modifiedContent={section.diffResult.modifiedContent}
-            filePath={section.path}
-            mimeType={section.diffResult.mimeType}
-            sideBySide={sideBySide}
-            layout={useIntrinsicImageHeight ? 'intrinsic' : 'fill'}
-          />
+          // Why: without a boundary here the image chunk suspends the editor
+          // panel's Suspense, which destroys and replays the effects of every
+          // mounted Monaco diff editor — @monaco-editor/react disposes its
+          // editor on effect cleanup but then calls setModel on it again.
+          <Suspense fallback={<DiffSectionLoading />}>
+            <ImageDiffViewer
+              originalContent={section.diffResult.originalContent}
+              modifiedContent={section.diffResult.modifiedContent}
+              filePath={section.path}
+              mimeType={section.diffResult.mimeType}
+              sideBySide={sideBySide}
+              layout={useIntrinsicImageHeight ? 'intrinsic' : 'fill'}
+            />
+          </Suspense>
         ) : (
           <div className="flex h-full items-center justify-center px-6 text-center">
             <div className="space-y-2">

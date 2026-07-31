@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { GitGraphCommitTable } from './commit-table'
+import { GitGraphCommitWriteDialog } from './commit-write-dialog'
 import { GitGraphControlBar } from './control-bar'
 import { GitGraphFindWidget } from './find-widget'
 import { buildGitGraphLayout, GIT_GRAPH_EXPAND_HEIGHT, type GitGraphRowGap } from './layout'
@@ -164,6 +165,17 @@ export function GitGraphView({
           />
         )}
       </div>
+      {view.writeDialog && (
+        // Why: keyed by action + commit so switching actions remounts the form
+        // instead of carrying the previous action's field values over.
+        <GitGraphCommitWriteDialog
+          key={`${view.writeDialog.action}:${view.writeDialog.item.id}`}
+          state={view.writeDialog}
+          submitting={view.isWriting}
+          onClose={view.closeWriteDialog}
+          onSubmit={view.submitWriteDialog}
+        />
+      )}
     </div>
   )
 }

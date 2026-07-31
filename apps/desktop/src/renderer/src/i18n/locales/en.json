@@ -12155,6 +12155,81 @@
           },
           "useGitGraphView": {
             "a1b2c3d4e6": "Could not find that commit in the loaded history"
+          },
+          "CommitMenu": {
+            "addTag": "Add Tag…",
+            "createBranch": "Create Branch…",
+            "checkout": "Checkout…",
+            "cherryPick": "Cherry Pick…",
+            "revert": "Revert…",
+            "drop": "Drop…",
+            "merge": "Merge into current branch…",
+            "rebase": "Rebase current branch on this Commit…",
+            "reset": "Reset current branch to this Commit…",
+            "copySubject": "Copy commit subject"
+          },
+          "CommitWrite": {
+            "tagTitle": "Add tag",
+            "tagBody": "Create a tag pointing at commit {{commit}}.",
+            "tagConfirm": "Add Tag",
+            "branchTitle": "Create branch",
+            "branchBody": "Create a branch pointing at commit {{commit}}.",
+            "branchConfirm": "Create Branch",
+            "checkoutTitle": "Check out commit?",
+            "checkoutBody": "Check out {{commit}} directly. This leaves the worktree on a detached HEAD until you check out a branch again.",
+            "checkoutConfirm": "Checkout",
+            "cherryPickTitle": "Cherry pick commit?",
+            "cherryPickBody": "Apply the changes from {{commit}} on top of the current branch.",
+            "cherryPickConfirm": "Cherry Pick",
+            "revertTitle": "Revert commit?",
+            "revertBody": "Add a new commit on the current branch that undoes the changes in {{commit}}.",
+            "revertConfirm": "Revert",
+            "dropTitle": "Drop commit?",
+            "dropBody": "Rewrite the current branch to remove {{commit}}. Commits after it get new hashes, so anything already sharing them will need to be updated.",
+            "dropConfirm": "Drop Commit",
+            "mergeTitle": "Merge into current branch",
+            "mergeBody": "Merge {{commit}} into the branch checked out in this worktree.",
+            "mergeConfirm": "Merge",
+            "rebaseTitle": "Rebase current branch on commit?",
+            "rebaseBody": "Replay the current branch's commits on top of {{commit}}. The replayed commits get new hashes.",
+            "rebaseConfirm": "Rebase",
+            "resetTitle": "Reset current branch to commit",
+            "resetBody": "Move the current branch to {{commit}}. A hard reset also discards uncommitted changes.",
+            "resetConfirm": "Reset"
+          },
+          "CommitWriteDialog": {
+            "resetSoft": "Soft — keep the index and working tree",
+            "resetMixed": "Mixed — reset the index, keep the working tree",
+            "resetHard": "Hard — discard index and working tree changes",
+            "tagName": "Tag name",
+            "branchName": "Branch name",
+            "tagMessage": "Message (optional — creates an annotated tag)",
+            "force": "Replace an existing tag with this name",
+            "checkout": "Check out the new branch",
+            "noFf": "Always create a merge commit",
+            "squash": "Squash the merged commits into one",
+            "squashHint": "Git rejects squash together with a merge commit, so squash wins when both are set.",
+            "resetMode": "Reset mode",
+            "mainline": "Mainline parent — changes are measured against it",
+            "cancel": "Cancel"
+          },
+          "CommitWriteRun": {
+            "tagOk": "Tag {{name}} created",
+            "branchCheckedOut": "Branch {{name}} created and checked out",
+            "branchOk": "Branch {{name}} created",
+            "checkoutOk": "Checked out {{commit}}",
+            "cherryPickOk": "Cherry picked {{commit}}",
+            "revertOk": "Reverted {{commit}}",
+            "dropOk": "Dropped {{commit}}",
+            "mergeOk": "Merged {{commit}} into the current branch",
+            "rebaseOk": "Rebased the current branch onto {{commit}}",
+            "resetOk": "Reset the current branch to {{commit}}"
+          },
+          "CommitWriteActions": {
+            "conflicts": "Stopped with conflicts — resolve them in Source Control",
+            "failed": "Git command failed",
+            "subjectCopied": "Commit subject copied",
+            "subjectCopyFailed": "Failed to copy commit subject"
           }
         }
       }

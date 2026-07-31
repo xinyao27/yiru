@@ -18,6 +18,7 @@ import {
   stepGitGraphFindIndex
 } from './find-state'
 import { EMPTY_GIT_GRAPH_STATE } from './state'
+import { useGitGraphCommitWriteActions } from './use-commit-write-actions'
 
 // Why: bounds selectParent's auto-load-more loop (below) so a parent id that
 // can never surface — filtered out by the branch selector, or genuinely
@@ -143,13 +144,24 @@ export function useGitGraphView({
   }, [closeFind, findOpen])
 
   const resolveSplitTargetGroupId = useCallback((): string | undefined => undefined, [])
-  const { loadCommitFiles, openHistoryCommitDiff, openCommitFile, handleCommitAction } =
-    useGitHistoryCommitActions({
-      activeWorktreeId: worktreeId,
+  const {
+    loadCommitFiles,
+    openHistoryCommitDiff,
+    openCommitFile,
+    handleCommitAction: handleReadCommitAction
+  } = useGitHistoryCommitActions({
+    activeWorktreeId: worktreeId,
+    worktreePath,
+    activeRepoSettings,
+    workspacePanelTabId,
+    resolveSplitTargetGroupId
+  })
+  const { handleCommitAction, writeDialog, isWriting, closeWriteDialog, submitWriteDialog } =
+    useGitGraphCommitWriteActions({
+      worktreeId,
       worktreePath,
       activeRepoSettings,
-      workspacePanelTabId,
-      resolveSplitTargetGroupId
+      onReadAction: handleReadCommitAction
     })
 
   const openFile = useCallback(
@@ -269,6 +281,10 @@ export function useGitGraphView({
     openFile,
     openAllChanges,
     handleCommitAction,
+    writeDialog,
+    isWriting,
+    closeWriteDialog,
+    submitWriteDialog,
     findOpen,
     setFindOpen,
     findQuery,

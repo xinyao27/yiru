@@ -9,7 +9,6 @@ import { translate } from '@/i18n/i18n'
 
 import type { GitHistoryItem } from '../../../../../shared/git/history'
 import type { GitBranchChangeEntry } from '../../../../../shared/types'
-import type { GitHistoryCommitAction } from '../git-history-commit-context-menu'
 import type { SourceControlRowOpenEvent } from '../source-control/split-open'
 import {
   clampGitGraphColumnWidth,
@@ -20,6 +19,7 @@ import {
 import { GitGraphCommitContextMenu } from './commit-context-menu'
 import { GitGraphCommitDetails } from './commit-details'
 import { GitGraphCommitRow } from './commit-row'
+import type { GitGraphCommitAction } from './commit-write-action'
 import { GitGraphSvg } from './graph-svg'
 import { GIT_GRAPH_DEFAULT_GRID, type GitGraphLayout, type GitGraphRowGap } from './layout'
 
@@ -103,7 +103,7 @@ export function GitGraphCommitTable({
   loadCommitFiles: (item: GitHistoryItem) => Promise<GitBranchChangeEntry[]>
   onOpenFile: (entry: GitBranchChangeEntry, event?: SourceControlRowOpenEvent) => void
   onOpenAllChanges: (item: GitHistoryItem) => void
-  onCommitAction: (action: GitHistoryCommitAction, item: GitHistoryItem) => void
+  onCommitAction: (action: GitGraphCommitAction, item: GitHistoryItem) => void
   findMatchIds: ReadonlySet<string>
   currentFindCommitId: string | null
   rowRefs: React.MutableRefObject<Map<string, HTMLDivElement>>
