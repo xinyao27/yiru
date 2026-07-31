@@ -1289,7 +1289,11 @@ export default function SessionScreen() {
         client,
         {
           terminal: handle,
-          client: { id: deviceTokenRef.current!, type: 'mobile' as const },
+          // Why: the device token loads asynchronously and subscribe can fire first;
+          // omit the client identity rather than sending a null id as a string.
+          ...(deviceTokenRef.current
+            ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
+            : {}),
           viewport: viewportRef.current ?? undefined,
           capabilities: nativeChatTerminalStream.mobileNativeChatTerminalCapabilities(covered)
         },
@@ -1719,6 +1723,11 @@ export default function SessionScreen() {
         terminalTabs.length
       )
       setTerminalsLoaded(true)
+      if (nextTabs.length > 0) {
+        // Why: a worktree that hydrated with tabs must never auto-create later —
+        // otherwise closing the last tab silently resurrects a terminal.
+        initialEmptySessionAutoCreateRef.current = worktreeId
+      }
 
       const snapshotActive = nextTabs.find((tab) => tab.isActive) ?? nextTabs[0] ?? null
       const pendingActiveSessionTabId = pendingActiveSessionTabIdRef.current
@@ -1812,7 +1821,7 @@ export default function SessionScreen() {
         setActiveHandle(null)
       }
     },
-    [defaultTerminalHandlesToLiveInput, subscribeToTerminal, unsubscribeTerminal]
+    [defaultTerminalHandlesToLiveInput, subscribeToTerminal, unsubscribeTerminal, worktreeId]
   )
 
   const readMarkdownTab = useCallback(
@@ -1924,8 +1933,9 @@ export default function SessionScreen() {
   )
 
   const loadDiffComments = useCallback(async (): Promise<void> => {
+    // Why: keep the last-known review notes through a transient disconnect (the
+    // route-change effect owns clearing them) and refetch once reconnected.
     if (!client || connState !== 'connected' || !worktreeId || isFloatingWorkspaceRoute) {
-      setDiffComments([])
       return
     }
     const response = await client.sendRequest('worktree.show', {
@@ -2541,6 +2551,12 @@ export default function SessionScreen() {
     pendingBrowserFocusPageIdRef.current = null
     pendingTerminalActivationAttemptRef.current = null
     initialEmptySessionAutoCreateRef.current = null
+    // Why: a stale terminal count makes fetchTerminals' consecutive-empty guard
+    // swallow the next worktree's first legitimately-empty list.
+    lastKnownTerminalCountRef.current = 0
+    ptyModesRef.current.clear()
+    initialModesSeenRef.current.clear()
+    terminalGestureInputBucketsRef.current.clear()
     terminalDiagnosticsRef.current.resetRoute()
     appliedSnapshotMarkerRef.current = { epoch: null, version: -1 }
     closedTabTombstonesRef.current.clear()
@@ -2559,6 +2575,7 @@ export default function SessionScreen() {
     clearPendingLiveInputCommit()
     setMarkdownDocs(new Map())
     setFileDocs(new Map())
+    setDiffComments([])
     clearDelayedActionTimers()
     return () => {
       sessionTabActionSheetRequestSeqRef.current += 1
@@ -2763,6 +2780,17 @@ export default function SessionScreen() {
     }, [])
   )
 
+  // Why: a failed activate RPC must not latch the local selection, or every later
+  // snapshot keeps the stale pending tab and ignores desktop-driven tab changes.
+  const releasePendingTabSelection = useCallback((tabId: string, handle?: string) => {
+    if (pendingActiveSessionTabIdRef.current === tabId) {
+      pendingActiveSessionTabIdRef.current = null
+    }
+    if (handle && pendingActiveTerminalHandleRef.current === handle) {
+      pendingActiveTerminalHandleRef.current = null
+    }
+  }, [])
+
   // Why: unsubscribe the old terminal so the server restores its desktop dims
   // (clearing the phone-fit banner), then subscribe the new terminal with the
   // measured viewport so the server phone-fits it. Also call terminal.focus
@@ -2802,13 +2830,14 @@ export default function SessionScreen() {
             worktree: `id:${worktreeId}`,
             tabId: matchingTab.id,
             notifyClients: false
-          }).catch(() => {})
+          }).catch(() => releasePendingTabSelection(matchingTab.id, handle))
         }
       }
     },
     [
       client,
       defaultTerminalHandlesToLiveInput,
+      releasePendingTabSelection,
       sessionTabs,
       subscribeToTerminal,
       unsubscribeTerminal,
@@ -2841,7 +2870,7 @@ export default function SessionScreen() {
             worktree: `id:${worktreeId}`,
             tabId: tab.id,
             notifyClients: false
-          }).catch(() => {})
+          }).catch(() => releasePendingTabSelection(tab.id))
         }
         return
       }
@@ -2864,7 +2893,7 @@ export default function SessionScreen() {
           worktree: `id:${worktreeId}`,
           tabId: tab.id,
           notifyClients: false
-        }).catch(() => {})
+        }).catch(() => releasePendingTabSelection(tab.id))
       }
       if (tab.type === 'browser') {
         return
@@ -2881,7 +2910,16 @@ export default function SessionScreen() {
       // lightweight tab list. Re-read on revisit unless the phone has a draft.
       void readMarkdownTab(tab)
     },
-    [client, markdownDocs, readFileTab, readMarkdownTab, switchTab, unsubscribeTerminal, worktreeId]
+    [
+      client,
+      markdownDocs,
+      readFileTab,
+      readMarkdownTab,
+      releasePendingTabSelection,
+      switchTab,
+      unsubscribeTerminal,
+      worktreeId
+    ]
   )
   // Keep the ref pointing at the latest switchSessionTab so fetchSessionTabs can
   // activate a freshly-synced browser tab without a callback dependency cycle.
@@ -4090,6 +4128,15 @@ export default function SessionScreen() {
     if (!client) {
       return
     }
+    // Why: the session tab is the UI authority — route the action-sheet close
+    // through the tab path so it is tombstoned and the active tab stays in sync.
+    const owningTab = sessionTabsRef.current.find(
+      (candidate) => candidate.type === 'terminal' && candidate.terminal === target.handle
+    )
+    if (owningTab) {
+      await handleCloseSessionTab(owningTab)
+      return
+    }
 
     try {
       const response = await client.sendRequest('terminal.close', {
@@ -4134,15 +4181,32 @@ export default function SessionScreen() {
           terminalRefs.current.delete(terminalHandle)
           initializedHandlesRef.current.delete(terminalHandle)
           clearTerminalLiveInputDefault(terminalHandle)
+          const nextTerminals = terminalsRef.current.filter(
+            (terminal) => terminal.handle !== terminalHandle
+          )
+          terminalsRef.current = nextTerminals
+          setTerminals(nextTerminals)
         }
+        sessionTabsRef.current = sessionTabsRef.current.filter(
+          (candidate) => candidate.id !== tab.id
+        )
         setSessionTabs((prev) => prev.filter((candidate) => candidate.id !== tab.id))
         // Why: tombstone the closed tab and rely on the subscription/poll
         // snapshot (gated by snapshotVersion) instead of a blind 300ms refetch
         // that re-applied whatever the host had — often the not-yet-closed list.
         closedTabTombstonesRef.current.set(tab.id, Date.now() + 10_000)
-        if (activeSessionTabId === tab.id) {
+        // Why: clear the whole selection together — a half-switched tab/handle pair
+        // desyncs canSend and the dock until the next snapshot lands.
+        const closedActiveHandle =
+          tab.type === 'terminal' &&
+          typeof tab.terminal === 'string' &&
+          activeHandleRef.current === tab.terminal
+        if (activeSessionTabIdRef.current === tab.id || activeSessionTabId === tab.id) {
           activeSessionTabTypeRef.current = null
+          activeSessionTabIdRef.current = null
           setActiveSessionTabId(null)
+        }
+        if (closedActiveHandle) {
           activeHandleRef.current = null
           setActiveHandle(null)
         }

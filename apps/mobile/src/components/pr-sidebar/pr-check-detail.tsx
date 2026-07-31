@@ -2,6 +2,7 @@ import type { PRCheckRunDetails } from '@yiru/workbench-model/review'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 
 import { presentCheckDetail, type CheckDetailJob } from './pr-check-detail-content'
+import { toStableKeys } from './stable-keys'
 import { mobilePrSidebarStyles as styles } from './styles'
 
 // Per-check lazily-fetched detail. `loading`/`error` track the in-flight fetch;
@@ -39,6 +40,12 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
   }
 
   const content = presentCheckDetail(entry.details)
+  const summaryKeys = toStableKeys(content.summaryLines)
+  const annotationKeys = toStableKeys(
+    content.annotations.map(
+      (annotation) => `${annotation.locator}:${annotation.level ?? ''}:${annotation.title ?? ''}`
+    )
+  )
   const isEmpty =
     content.summaryLines.length === 0 &&
     content.annotations.length === 0 &&
@@ -51,7 +58,7 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
       ) : (
         <>
           {content.summaryLines.map((line, index) => (
-            <Text key={index} className={styles.checkDetailText}>
+            <Text key={summaryKeys[index]} className={styles.checkDetailText}>
               {line}
             </Text>
           ))}
@@ -59,7 +66,7 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
             <View className={styles.checkDetailGroup}>
               <Text className={styles.checkDetailGroupLabel}>Annotations</Text>
               {content.annotations.map((annotation, index) => (
-                <View key={index}>
+                <View key={annotationKeys[index]}>
                   <Text className="text-muted-foreground font-mono text-xs" numberOfLines={1}>
                     {annotation.locator}
                     {annotation.level ? ` · ${annotation.level}` : ''}

@@ -52,6 +52,10 @@ export default function PairScanScreen() {
   const processingRef = useRef(false)
   const mountedRef = useRef(true)
   const activePairingAttemptRef = useRef<PreProfilePairingAttempt | null>(null)
+  // Why: startPreProfilePairing emits log entries synchronously before it returns
+  // an attempt we could store, so "is this attempt still current?" keys on a token
+  // published *before* the attempt starts instead of the attempt's identity.
+  const activePairingTokenRef = useRef<object | null>(null)
 
   const setPairScanRootRef = useCallback((node: View | null): void => {
     if (node !== null) {
@@ -63,6 +67,7 @@ export default function PairScanScreen() {
     mountedRef.current = false
     activePairingAttemptRef.current?.dispose()
     activePairingAttemptRef.current = null
+    activePairingTokenRef.current = null
   }, [])
 
   const handleBarCodeScanned = useCallback(
@@ -121,13 +126,16 @@ export default function PairScanScreen() {
     logsRef.current = []
     setLogs([])
     activePairingAttemptRef.current?.dispose()
+    activePairingAttemptRef.current = null
+    const token = {}
+    activePairingTokenRef.current = token
 
     const attempt = startPreProfilePairing({
       offer,
       timeoutMs: PAIRING_OVERALL_TIMEOUT_MS,
       connectOptions: {
         onLog: (entry) => {
-          if (!mountedRef.current || activePairingAttemptRef.current !== attempt) {
+          if (!mountedRef.current || activePairingTokenRef.current !== token) {
             return
           }
           logsRef.current = [...logsRef.current, entry]
@@ -138,10 +146,11 @@ export default function PairScanScreen() {
     activePairingAttemptRef.current = attempt
     try {
       const { hostId } = await attempt.result
-      const attemptIsCurrent = activePairingAttemptRef.current === attempt
+      const attemptIsCurrent = activePairingTokenRef.current === token
       attempt.dispose()
-      if (activePairingAttemptRef.current === attempt) {
+      if (attemptIsCurrent) {
         activePairingAttemptRef.current = null
+        activePairingTokenRef.current = null
       }
       if (!mountedRef.current || !attemptIsCurrent) {
         return
@@ -164,10 +173,11 @@ export default function PairScanScreen() {
       )
     } catch (err) {
       const timedOut = attempt.timedOut
-      const attemptIsCurrent = activePairingAttemptRef.current === attempt
+      const attemptIsCurrent = activePairingTokenRef.current === token
       attempt.dispose()
-      if (activePairingAttemptRef.current === attempt) {
+      if (attemptIsCurrent) {
         activePairingAttemptRef.current = null
+        activePairingTokenRef.current = null
       }
       if (!mountedRef.current || !attemptIsCurrent) {
         return

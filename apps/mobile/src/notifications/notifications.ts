@@ -4,9 +4,8 @@ import { Platform } from 'react-native'
 import { loadPushNotificationsEnabled } from '../storage/preferences'
 import type { RpcClient } from '../transport/rpc-client'
 import {
+  createCatchUpWatermark,
   createSeenNotificationGuard,
-  loadLastSeenSeq,
-  saveLastSeenSeq,
   seenKeyForEvent
 } from './notification-reconnect-catchup'
 import { buildLocalNotificationData, type DesktopNotificationSource } from './notification-routing'
@@ -245,9 +244,6 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
 
   let subscriptionId: string | null = null
   let disposed = false
-  // Highest seq delivered on the live stream or replay for this connection.
-  // Persisted per-host so a cold app start still resumes from the right cut.
-  let lastDeliveredSeq = 0
   // Why: per-connection dedup guard applied ONLY to the replay path
   // (fetchMissed), never the live stream. The desktop already guarantees the
   // replay cannot contain an event with seq <= lastDeliveredSeq (both live and
@@ -262,10 +258,7 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
     type: 'notification' | 'dismiss',
     event: NotificationEvent | DismissNotificationEvent
   ): Promise<void> {
-    if (event.notificationSeq != null && event.notificationSeq > lastDeliveredSeq) {
-      lastDeliveredSeq = event.notificationSeq
-      void saveLastSeenSeq(hostId, lastDeliveredSeq)
-    }
+    watermark.observeDelivered(event.notificationSeq)
     // Why (#8129 dedup): mark the event seen on EVERY delivery path (live AND
     // replay) so a replay that re-includes an id already pushed live in this
     // connection is dropped instead of double-pushed. fetchMissed also
@@ -291,7 +284,7 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
       return
     }
     const missed = await client
-      .sendRequest('notifications.getMissedSince', { lastSeenSeq: lastDeliveredSeq })
+      .sendRequest('notifications.getMissedSince', { lastSeenSeq: watermark.value() })
       .then((response) => {
         if (!response.ok) {
           return []
@@ -317,14 +310,10 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
     }
   }
 
-  // Why: lazily seed the watermark from durable storage on first use so we
-  // don't block subscribe() on an AsyncStorage read. The first `ready` (cold
-  // open) does NOT need catch-up — the live stream starts fresh; only
-  // subsequent reconnect `ready` events fetch missed notifications.
-  let watermarkLoaded = false
-  void loadLastSeenSeq(hostId).then((seq) => {
-    lastDeliveredSeq = Math.max(lastDeliveredSeq, seq)
-    watermarkLoaded = true
+  // Why: the gate loads the persisted per-host watermark lazily (so subscribe()
+  // never blocks on AsyncStorage) and decides when a `ready` may catch up.
+  const watermark = createCatchUpWatermark(hostId, () => {
+    void fetchMissed()
   })
 
   function unsubscribeServer(id: string) {
@@ -348,13 +337,7 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
         unsubscribeStream()
         return
       }
-      // Why: first ready is the cold-open live stream — no catch-up needed.
-      // Every later ready is a reconnect; fetch what we missed from the
-      // watermark. Guard on watermarkLoaded so a fast reconnect doesn't
-      // fetch from a stale 0 watermark (which would re-push everything).
-      if (reconnectReadyCount > 1 && watermarkLoaded) {
-        void fetchMissed()
-      }
+      watermark.notifyReady(reconnectReadyCount)
       return
     }
     if (event.type === 'end') {

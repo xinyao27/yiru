@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: mobile browser state mirrors a remote desktop screencast session and CDP dialogs, which are external systems that cannot be derived during render. */
 // Why: import from 'buffer' (the npm polyfill), not 'node:buffer' — Metro
 // can't resolve Node's builtin in a React Native bundle.
 import { Buffer } from 'buffer'
@@ -253,10 +252,16 @@ export function MobileBrowserPane({
     zoomRef.current = zoom
   }, [dialog, frameMetadata, layout, zoom])
 
-  useEffect(() => {
+  const zoomResetKey = `${tab.browserPageId ?? ''} ${tab.url}`
+  const renderedZoomResetKeyRef = useRef(zoomResetKey)
+  if (renderedZoomResetKeyRef.current !== zoomResetKey) {
+    renderedZoomResetKeyRef.current = zoomResetKey
+    // Why: a new page or URL invalidates the pinch/pan transform. Resetting during
+    // render keeps the first committed frame at 1x instead of painting the previous
+    // page's zoom and snapping back from an Effect.
     lastZoomResetUrlRef.current = tab.url || 'about:blank'
     resetBrowserZoomState()
-  }, [resetBrowserZoomState, tab.browserPageId, tab.url])
+  }
 
   const pageParams = useCallback(() => {
     if (!tab.browserPageId) {
@@ -376,6 +381,9 @@ export function MobileBrowserPane({
     })
   }, [frameGeometry])
 
+  /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this effect owns
+     the screencast subscription itself. Busy/error/dialog describe the live remote
+     session, not a value derivable from the tab props that start or stop it. */
   useEffect(() => {
     streamGenerationRef.current += 1
     const generation = streamGenerationRef.current
@@ -544,6 +552,7 @@ export function MobileBrowserPane({
     tab.browserPageId,
     worktreeId
   ])
+  /* oxlint-enable react-doctor/no-adjust-state-on-prop-change */
 
   const sendBrowserRequest = useCallback(
     async (
@@ -1042,8 +1051,13 @@ export function MobileBrowserPane({
     },
     [browserViewMode, resetBrowserZoomState, tab.browserPageId, worktreeId]
   )
-  const renderedFrameSource =
-    frameUriRef.current || frameUri ? { uri: frameUriRef.current ?? frameUri! } : null
+  // Why: the committed source only has to mount an Image and survive re-renders —
+  // every later frame is pushed straight into the native view by applyFrame, and
+  // React leaves the native source alone while this prop keeps its value.
+  const renderedFrameSource = useMemo(() => (frameUri ? { uri: frameUri } : null), [frameUri])
+  // Why: layer visibility is owned imperatively by updateBrowserLayerVisibility so a
+  // frame swap costs no re-render; this only seeds the class for a freshly mounted
+  // layer, and the ref callback re-applies the authoritative opacity on attach.
   const frameLayerClassName = useCallback((layer: FrameLayer) => {
     return cn(
       'absolute inset-0 items-center justify-center',
