@@ -148,10 +148,16 @@ import type {
 } from '../shared/shell-open-types'
 import type {
   SkillFreshnessInventory,
+  SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
 } from '../shared/skill-freshness'
-import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
+import type {
+  SkillDirectoryListing,
+  SkillDiscoveryResult,
+  SkillDiscoveryTarget,
+  SkillFileReadResult
+} from '../shared/skills'
 import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
@@ -1912,6 +1918,21 @@ const api = {
       ipcRenderer.invoke('skills:freshnessInventory'),
     startUpdateRun: (names: string[]): Promise<SkillUpdateStartResult> =>
       ipcRenderer.invoke('skills:startUpdateRun', names),
+    startInstallRun: (request: {
+      source: string
+      skillNames?: string[]
+      scope: SkillManageScope
+    }): Promise<SkillUpdateStartResult> => ipcRenderer.invoke('skills:startInstallRun', request),
+    startRemoveRun: (request: {
+      names: string[]
+      scope: SkillManageScope
+    }): Promise<SkillUpdateStartResult> => ipcRenderer.invoke('skills:startRemoveRun', request),
+    listSkillFiles: (directoryPath: string): Promise<SkillDirectoryListing> =>
+      ipcRenderer.invoke('skills:listSkillFiles', directoryPath),
+    readSkillDirFile: (request: {
+      directoryPath: string
+      relativePath: string
+    }): Promise<SkillFileReadResult> => ipcRenderer.invoke('skills:readSkillDirFile', request),
     cancelUpdateRun: (): Promise<void> => ipcRenderer.invoke('skills:cancelUpdateRun'),
     acknowledgeUpdateRun: (): Promise<void> => ipcRenderer.invoke('skills:acknowledgeUpdateRun'),
     getUpdateRun: (): Promise<SkillUpdateRun> => ipcRenderer.invoke('skills:getUpdateRun'),

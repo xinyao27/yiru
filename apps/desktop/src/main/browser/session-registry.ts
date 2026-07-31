@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path'
 import { app, session } from 'electron'
 import type { Session } from 'electron'
 
-import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
+import { SKILLS_MARKETPLACE_PARTITION, YIRU_BROWSER_PARTITION } from '../../shared/constants'
 import type { BrowserSessionProfile, BrowserSessionProfileScope } from '../../shared/types'
 import {
   DEFAULT_LOCAL_YIRU_PROFILE_ID,
@@ -352,7 +352,10 @@ class BrowserSessionRegistry {
   }
 
   isAllowedPartition(partition: string): boolean {
-    if (partition === this.defaultPartition) {
+    // Why: the Skills marketplace guest is app-owned and pinned to one constant
+    // partition. Naming it here keeps the allowlist closed — the renderer still
+    // cannot invent a partition string — while giving that surface its own jar.
+    if (partition === this.defaultPartition || partition === SKILLS_MARKETPLACE_PARTITION) {
       return true
     }
     return [...this.profiles.values()].some((p) => p.partition === partition)

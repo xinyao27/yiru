@@ -151,10 +151,16 @@ import type {
 } from '../shared/shell-open-types'
 import type {
   SkillFreshnessInventory,
+  SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
 } from '../shared/skill-freshness'
-import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
+import type {
+  SkillDirectoryListing,
+  SkillDiscoveryResult,
+  SkillDiscoveryTarget,
+  SkillFileReadResult
+} from '../shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
 import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
 import type {
@@ -1953,6 +1959,20 @@ export type PreloadApi = {
     discover: (target?: SkillDiscoveryTarget) => Promise<SkillDiscoveryResult>
     freshnessInventory: () => Promise<SkillFreshnessInventory>
     startUpdateRun: (names: string[]) => Promise<SkillUpdateStartResult>
+    startInstallRun: (request: {
+      source: string
+      skillNames?: string[]
+      scope: SkillManageScope
+    }) => Promise<SkillUpdateStartResult>
+    startRemoveRun: (request: {
+      names: string[]
+      scope: SkillManageScope
+    }) => Promise<SkillUpdateStartResult>
+    listSkillFiles: (directoryPath: string) => Promise<SkillDirectoryListing>
+    readSkillDirFile: (request: {
+      directoryPath: string
+      relativePath: string
+    }) => Promise<SkillFileReadResult>
     cancelUpdateRun: () => Promise<void>
     acknowledgeUpdateRun: () => Promise<void>
     getUpdateRun: () => Promise<SkillUpdateRun>

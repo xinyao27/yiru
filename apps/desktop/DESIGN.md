@@ -89,6 +89,9 @@ section labels. Truncate metadata before shrinking primary text.
   hit targets in the reserved traffic-light region.
 - Each pane has one primary scroll owner. Do not nest full-height scroll regions or wrap host
   editors in a second scrolling component.
+- That scroll owner is `ScrollArea` from `components/ui/scroll-area.tsx`. A bare `overflow-y-auto`
+  container or a hand-rolled scrollbar class is drift. Surfaces that scroll themselves — terminal,
+  editor, and webview guests — keep their own scrolling and are never wrapped.
 - Keep working surfaces rectangular and allow them to use available space. Constrain readable prose
   rather than the terminal, editor, diff, or file tree.
 - When width is scarce, remove or overflow secondary actions before reducing type or primary

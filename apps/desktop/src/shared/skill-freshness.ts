@@ -107,24 +107,75 @@ export function buildTargetedSkillUpdateCommand(names: readonly string[]): strin
   return canonicalNames ? `npx skills update ${canonicalNames.join(' ')} --global` : null
 }
 
+/** The three `skills` CLI verbs Yiru drives headlessly. */
+export type SkillManageOperation = 'update' | 'install' | 'remove'
+
+/** Which skill home the CLI writes to: `~/.agents`, or one project checkout. */
+export type SkillManageScope = { kind: 'global' } | { kind: 'project'; repoPath: string }
+
+const SKILL_INSTALL_SOURCE_MAX_LENGTH = 200
+// Why: the source becomes an argv entry next to a resolved npx path that the
+// Windows rail re-quotes into cmd.exe. Whitelisting the characters a real
+// `owner/repo`, GitHub URL, or well-known domain needs keeps shell syntax out.
+const SKILL_INSTALL_SOURCE_CHARS_RE = /^[A-Za-z0-9._/:-]+$/
+const GITHUB_REPOSITORY_URL_RE =
+  /^https:\/\/github\.com\/([A-Za-z0-9][A-Za-z0-9._-]*)\/([A-Za-z0-9][A-Za-z0-9._-]*?)(?:\.git)?(?:\/.*)?$/
+const OWNER_REPOSITORY_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/
+const WELL_KNOWN_DOMAIN_RE = /^[A-Za-z0-9][A-Za-z0-9-]*(?:\.[A-Za-z0-9-]+)+$/
+
+/**
+ * `owner/repo`, a GitHub repository URL, or a well-known `domain.com` source,
+ * normalized to what `skills add` expects — or null when it is none of those.
+ */
+export function canonicalizeSkillInstallSource(input: string): string | null {
+  const trimmed = input.trim()
+  if (
+    trimmed.length === 0 ||
+    trimmed.length > SKILL_INSTALL_SOURCE_MAX_LENGTH ||
+    !SKILL_INSTALL_SOURCE_CHARS_RE.test(trimmed)
+  ) {
+    return null
+  }
+  const githubRepository = GITHUB_REPOSITORY_URL_RE.exec(trimmed)
+  if (githubRepository) {
+    return `${githubRepository[1]}/${githubRepository[2]}`
+  }
+  if (OWNER_REPOSITORY_RE.test(trimmed)) {
+    return trimmed
+  }
+  return WELL_KNOWN_DOMAIN_RE.test(trimmed) ? trimmed : null
+}
+
 export type SkillUpdateFailure =
   | { kind: 'unsafe-command-path'; command: string }
   | { kind: 'launch-failed'; detail: string }
   | { kind: 'command-exited'; exitCode: number | null }
   | { kind: 'incomplete' }
 
+/** Identifies what a settled or live run was doing; `source` is set on installs,
+ *  where the CLI target is a repository rather than a set of skill names. */
+type SkillRunSubject = { operation: SkillManageOperation; names: string[]; source?: string }
+
 export type SkillUpdateRun =
   | { state: 'idle' }
-  | { state: 'running'; names: string[]; startedAt: number; output: string; stopping?: boolean }
-  | { state: 'success'; names: string[]; finishedAt: number; output: string }
+  | ({ state: 'running'; startedAt: number; output: string; stopping?: boolean } & SkillRunSubject)
+  | ({ state: 'success'; finishedAt: number; output: string } & SkillRunSubject)
   | ({
       state: 'error'
-      names: string[]
       finishedAt: number
       output: string
       failedNames: string[]
-    } & SkillUpdateFailure)
+    } & SkillRunSubject &
+      SkillUpdateFailure)
 
 export type SkillUpdateStartResult =
   | { started: true }
-  | { started: false; reason: 'already-running' | 'invalid-names' | 'unsafe-command-path' }
+  | {
+      started: false
+      reason:
+        | 'already-running'
+        | 'invalid-names'
+        | 'invalid-source'
+        | 'invalid-scope'
+        | 'unsafe-command-path'
+    }

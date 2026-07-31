@@ -102,7 +102,11 @@ import type {
   SkillUpdateRun,
   SkillUpdateStartResult
 } from '../../../shared/skill-freshness'
-import type { SkillDiscoveryResult } from '../../../shared/skills'
+import type {
+  SkillDirectoryListing,
+  SkillDiscoveryResult,
+  SkillFileReadResult
+} from '../../../shared/skills'
 import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal/cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '../../../shared/terminal/custom-themes'
@@ -2581,6 +2585,18 @@ function createSkillsApi(): NonNullable<Partial<PreloadApi>['skills']> {
       }),
     startUpdateRun: (): Promise<SkillUpdateStartResult> =>
       Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
+    // Why: the manage rail spawns a CLI against a local skill home, which a
+    // browser client does not have.
+    startInstallRun: (): Promise<SkillUpdateStartResult> =>
+      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
+    startRemoveRun: (): Promise<SkillUpdateStartResult> =>
+      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
+    // Why: the runtime's file channel resolves paths inside a worktree, while a
+    // skill home sits outside every checkout — there is nothing to route to.
+    listSkillFiles: (): Promise<SkillDirectoryListing> =>
+      Promise.resolve({ ok: false, reason: 'unsupported-host' }),
+    readSkillDirFile: (): Promise<SkillFileReadResult> =>
+      Promise.resolve({ ok: false, reason: 'unsupported-host' }),
     cancelUpdateRun: () => Promise.resolve(),
     acknowledgeUpdateRun: () => Promise.resolve(),
     getUpdateRun: (): Promise<SkillUpdateRun> => Promise.resolve({ state: 'idle' }),

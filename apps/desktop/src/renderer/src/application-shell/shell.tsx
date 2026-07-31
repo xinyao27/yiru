@@ -1608,9 +1608,10 @@ function App(): React.JSX.Element {
     !hasActiveCoworkingWorkspace &&
     !hasTabBar &&
     effectiveActiveTabExpanded
-  // Why: Space and Skills are full-page navigation surfaces, so they remove the
-  // worktree sidebar just like Settings does.
-  const showSidebar = activeView !== 'settings' && activeView !== 'space' && activeView !== 'skills'
+  // Why: Space is a full-page navigation surface, so it removes the worktree
+  // sidebar just like Settings does. Skills keeps it — it is reached from the
+  // sidebar nav and behaves like Automations.
+  const showSidebar = activeView !== 'settings' && activeView !== 'space'
   const settingsChromeOverlayActive = activeView === 'settings'
   const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
@@ -1620,7 +1621,8 @@ function App(): React.JSX.Element {
     !workspaceChromeActive && !creationLayoutActive && showSidebar && sidebarOpen
   // Why: these pages already provide draggable top-row controls, so the shared
   // stacked titlebar would only add an empty strip above their content.
-  const stackedPageOwnsTitlebar = activeView === 'automations' || activeView === 'mobile'
+  const stackedPageOwnsTitlebar =
+    activeView === 'automations' || activeView === 'mobile' || activeView === 'skills'
   // Why: visible creation keeps only the top-left window chrome; workspace tabs
   // chrome remains gated by workspaceChromeActive.
   const leftTitlebarChromeLayout = resolveLeftTitlebarChromeLayout({

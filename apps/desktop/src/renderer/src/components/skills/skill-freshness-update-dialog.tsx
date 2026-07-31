@@ -1,7 +1,6 @@
 import {
   Warning as AlertTriangle,
   CheckCircle as CheckCircle2,
-  CaretDown as ChevronDown,
   Copy,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
@@ -9,7 +8,6 @@ import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
@@ -25,6 +24,7 @@ import {
   type SkillFreshnessInventory,
   type SkillUpdateRun
 } from '../../../../shared/skill-freshness'
+import { SkillRunLog } from './run-log'
 import { SkillFreshnessGroup } from './skill-freshness-group'
 import { groupSkillFreshness } from './skill-freshness-grouping'
 import {
@@ -36,35 +36,9 @@ import {
   acknowledgeSkillUpdateRun,
   cancelSkillUpdateRun,
   startSkillUpdateRun,
-  useSkillUpdateRun
+  useSkillRunForOperation
 } from './skill-update-run-store'
 import { useSkillFreshness } from './use-skill-freshness'
-
-function RunLog({ output }: { output: string }): React.JSX.Element | null {
-  if (!output.trim()) {
-    return null
-  }
-  return (
-    <Collapsible>
-      <CollapsibleTrigger
-        render={
-          <Button type="button" variant="ghost" size="xs" className="group -ml-2 gap-1.5">
-            <ChevronDown
-              weight="regular"
-              className="size-3.5 transition-transform group-data-[state=open]:rotate-180"
-            />
-            {translate('auto.components.skills.SkillFreshnessUpdateDialog.showLog', 'Show log')}
-          </Button>
-        }
-      />
-      <CollapsibleContent className="mt-1">
-        <pre className="scrollbar-sleek border-border bg-muted text-muted-foreground max-h-40 overflow-auto border px-3 py-2.5 font-mono text-[11px] leading-relaxed break-words whitespace-pre-wrap">
-          {output.trim()}
-        </pre>
-      </CollapsibleContent>
-    </Collapsible>
-  )
-}
 
 function describeSkillUpdateFailure(run: Extract<SkillUpdateRun, { state: 'error' }>): string {
   switch (run.kind) {
@@ -101,7 +75,7 @@ function describeSkillUpdateFailure(run: Extract<SkillUpdateRun, { state: 'error
 
 export function SkillFreshnessUpdateDialog(): React.JSX.Element {
   const state = useSkillFreshness()
-  const run = useSkillUpdateRun()
+  const run = useSkillRunForOperation('update')
   const open = useSyncExternalStore(
     subscribeSkillFreshnessUpdateDialog,
     getSkillFreshnessUpdateDialogRequest,
@@ -251,7 +225,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         aria-describedby={undefined}
-        className="scrollbar-sleek max-h-[85vh] overflow-y-auto sm:max-w-xl"
+        className="flex max-h-[85vh] flex-col sm:max-w-xl"
       >
         <DialogHeader>
           <DialogTitle>
@@ -259,42 +233,48 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
           </DialogTitle>
         </DialogHeader>
 
-        {state.error && !isRunning && !showResult ? (
-          <p className="text-destructive text-xs">{state.error}</p>
-        ) : (
-          headline
-        )}
-
-        {isRunning && !isStopping ? (
-          <p className="text-muted-foreground text-xs">
-            {translate(
-              'auto.components.skills.SkillFreshnessUpdateDialog.runningDescription',
-              'You can close this window — it keeps running in the background.'
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="space-y-4">
+            {state.error && !isRunning && !showResult ? (
+              <p className="text-destructive text-xs">{state.error}</p>
+            ) : (
+              headline
             )}
-          </p>
-        ) : null}
 
-        {groups.length > 0 ? (
-          <div className="border-border min-w-0 border-t pt-3">
-            {groups.map((group) => (
-              <SkillFreshnessGroup key={group.name} group={group} />
-            ))}
+            {isRunning && !isStopping ? (
+              <p className="text-muted-foreground text-xs">
+                {translate(
+                  'auto.components.skills.SkillFreshnessUpdateDialog.runningDescription',
+                  'You can close this window — it keeps running in the background.'
+                )}
+              </p>
+            ) : null}
+
+            {groups.length > 0 ? (
+              <div className="border-border min-w-0 border-t pt-3">
+                {groups.map((group) => (
+                  <SkillFreshnessGroup key={group.name} group={group} />
+                ))}
+              </div>
+            ) : null}
+
+            {run.state === 'error' ? (
+              <div className="border-destructive text-muted-foreground space-y-2 border p-3 text-xs">
+                <p className="text-foreground font-medium">
+                  {translate(
+                    'auto.components.skills.SkillFreshnessUpdateDialog.errorTitle',
+                    "The update didn't finish"
+                  )}
+                </p>
+                <p className="font-mono text-[11px] break-words">
+                  {describeSkillUpdateFailure(run)}
+                </p>
+              </div>
+            ) : null}
+
+            {isRunning || showResult ? <SkillRunLog output={run.output} /> : null}
           </div>
-        ) : null}
-
-        {run.state === 'error' ? (
-          <div className="border-destructive text-muted-foreground space-y-2 border p-3 text-xs">
-            <p className="text-foreground font-medium">
-              {translate(
-                'auto.components.skills.SkillFreshnessUpdateDialog.errorTitle',
-                "The update didn't finish"
-              )}
-            </p>
-            <p className="font-mono text-[11px] break-words">{describeSkillUpdateFailure(run)}</p>
-          </div>
-        ) : null}
-
-        {isRunning || showResult ? <RunLog output={run.output} /> : null}
+        </ScrollArea>
 
         <DialogFooter className="sm:justify-between">
           <div>

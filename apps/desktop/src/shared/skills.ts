@@ -11,6 +11,9 @@ export type SkillSourceKind = 'home' | 'repo' | 'bundled' | 'plugin'
 export type DiscoveredSkill = {
   id: string
   name: string
+  /** The install directory's own name. `skills add/remove/update` match on this
+   *  slug, while `name` may be a frontmatter display name like `React Native`. */
+  folderName: string
   description: string | null
   providers: SkillProvider[]
   sourceKind: SkillSourceKind
@@ -25,6 +28,38 @@ export type DiscoveredSkill = {
   fileCount: number
   updatedAt: number | null
 }
+
+/**
+ * The name to hand the `skills` CLI for this skill.
+ *
+ * Why the fallback: discovery can come from a relay whose build predates
+ * `folderName`, and the separator is the scanning host's, not this one's.
+ */
+export function skillDirectoryName(
+  skill: Pick<DiscoveredSkill, 'folderName' | 'directoryPath'>
+): string {
+  if (skill.folderName) {
+    return skill.folderName
+  }
+  const segments = skill.directoryPath.split(/[\\/]/).filter(Boolean)
+  return segments.at(-1) ?? skill.directoryPath
+}
+
+export type SkillDirectoryEntry = {
+  /** Slash-separated and relative to the skill's own directory. */
+  relativePath: string
+  size: number
+}
+
+/** Every file that ships with one skill, SKILL.md first. */
+export type SkillDirectoryListing =
+  | { ok: true; files: SkillDirectoryEntry[]; truncated: boolean }
+  | { ok: false; reason: 'invalid-path' | 'unreadable' | 'unsupported-host' }
+
+/** One file's text, for the preview surface. */
+export type SkillFileReadResult =
+  | { ok: true; content: string; truncated: boolean }
+  | { ok: false; reason: 'invalid-path' | 'unreadable' | 'binary' | 'unsupported-host' }
 
 export type SkillDiscoverySource = {
   id: string
