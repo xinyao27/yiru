@@ -1,14 +1,9 @@
 import { Copy, SelectionAll } from '@phosphor-icons/react'
 import { DIFFS_TAG_NAME, type FileDiffOptions } from '@pierre/diffs'
-import { MultiFileDiff, type DiffLineAnnotation, type SelectedLineRange } from '@pierre/diffs/react'
-import { CURSOR_DARK_THEME_NAME, CURSOR_LIGHT_THEME_NAME } from '@yiru/editor-themes/cursor'
+import { MultiFileDiff, type DiffLineAnnotation } from '@pierre/diffs/react'
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
-import {
-  CURSOR_PIERRE_UNSAFE_CSS,
-  registerCursorPierreThemes
-} from '~renderer/components/editor/cursor-pierre-theme'
-import { buildEditorFontFamily } from '~renderer/components/editor/font-family'
+import { registerCursorPierreThemes } from '~renderer/components/editor/cursor-pierre-theme'
 import { setWithLRU } from '~renderer/components/editor/scroll-cache'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
@@ -21,18 +16,18 @@ import {
 } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 
-import { PierreDiffCommentAnnotation } from './pierre-diff-comment-annotation'
-import { PierreDiffCommentComposer } from './pierre-diff-comment-composer'
+import {
+  buildDiffCodeViewAnnotations,
+  isCommentableRange,
+  renderDiffCodeViewAnnotation,
+  type DiffCodeViewAnnotation,
+  type DiffCodeViewComposer
+} from './diff-code-view/annotations'
+import {
+  buildDiffCodeViewCSSVariables,
+  buildDiffCodeViewRenderOptions
+} from './diff-code-view/options'
 import { resolvePierreDiffLanguage } from './pierre-diff-language'
-
-type CommentComposer = {
-  lineNumber: number
-  startLine?: number
-}
-
-type PierreDiffAnnotation =
-  | { kind: 'comment'; comment: DecoratedDiffComment }
-  | { kind: 'composer'; composer: CommentComposer }
 
 type HoveredDiffLine = {
   lineNumber: number
@@ -46,30 +41,6 @@ registerCursorPierreThemes()
 
 function formatNativeShortcut(isMac: boolean, key: string): string {
   return [isMac ? '⌘' : 'Ctrl', key].join(isMac ? '' : '+')
-}
-
-function isCommentableRange(
-  range: SelectedLineRange,
-  commentableLineNumbers: readonly number[] | undefined
-): boolean {
-  if (
-    (range.side && range.side !== 'additions') ||
-    (range.endSide && range.endSide !== 'additions')
-  ) {
-    return false
-  }
-  if (!commentableLineNumbers) {
-    return true
-  }
-  const allowed = new Set(commentableLineNumbers)
-  const start = Math.min(range.start, range.end)
-  const end = Math.max(range.start, range.end)
-  for (let line = start; line <= end; line += 1) {
-    if (!allowed.has(line)) {
-      return false
-    }
-  }
-  return true
 }
 
 function selectPierreDiffContents(container: HTMLElement | null): void {
@@ -140,7 +111,7 @@ export function PierreDiffViewer({
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const diffRef = useRef<HTMLDivElement | null>(null)
   const hoveredLineRef = useRef<HoveredDiffLine | null>(null)
-  const [composer, setComposer] = useState<CommentComposer | null>(null)
+  const [composer, setComposer] = useState<DiffCodeViewComposer | null>(null)
   const isMac = useMemo(() => navigator.userAgent.includes('Mac'), [])
   const copyShortcutLabel = formatNativeShortcut(isMac, 'C')
   const selectAllShortcutLabel = formatNativeShortcut(isMac, 'A')
@@ -181,16 +152,14 @@ export function PierreDiffViewer({
     [composer, onAddLineComment]
   )
 
-  const options = useMemo<FileDiffOptions<PierreDiffAnnotation>>(
+  const options = useMemo<FileDiffOptions<DiffCodeViewAnnotation>>(
     () => ({
-      theme: { dark: CURSOR_DARK_THEME_NAME, light: CURSOR_LIGHT_THEME_NAME },
-      themeType: isDark ? 'dark' : 'light',
-      diffStyle: sideBySide ? 'split' : 'unified',
-      diffIndicators: 'bars',
-      disableFileHeader: true,
-      hunkSeparators: 'line-info-basic',
-      lineDiffType: 'word-alt',
-      overflow: wordWrap ? 'wrap' : 'scroll',
+      ...buildDiffCodeViewRenderOptions({
+        isDark,
+        sideBySide,
+        wordWrap: wordWrap === true,
+        disableFileHeader: true
+      }),
       enableLineSelection: Boolean(onAddLineComment),
       enableGutterUtility: Boolean(onAddLineComment),
       lineHoverHighlight: onAddLineComment ? 'line' : 'disabled',
@@ -210,56 +179,28 @@ export function PierreDiffViewer({
       },
       onLineLeave: () => {
         hoveredLineRef.current = null
-      },
-      // Why: Pierre renders inside Shadow DOM, so app-wide geometry and exact
-      // Cursor line fills need a narrow library-owned override.
-      unsafeCSS: CURSOR_PIERRE_UNSAFE_CSS
+      }
     }),
     [commentableLineNumbers, isDark, onAddLineComment, sideBySide, wordWrap]
   )
 
-  const lineAnnotations = useMemo<DiffLineAnnotation<PierreDiffAnnotation>[]>(() => {
-    const annotations: DiffLineAnnotation<PierreDiffAnnotation>[] = comments.map((comment) => ({
-      side: 'additions' as const,
-      lineNumber: comment.lineNumber,
-      metadata: { kind: 'comment' as const, comment }
-    }))
-    if (composer) {
-      annotations.push({
-        side: 'additions',
-        lineNumber: composer.lineNumber,
-        metadata: { kind: 'composer', composer }
-      })
-    }
-    return annotations
-  }, [comments, composer])
+  const lineAnnotations = useMemo(
+    () => buildDiffCodeViewAnnotations(comments, composer),
+    [comments, composer]
+  )
 
   const renderAnnotation = useCallback(
-    (annotation: DiffLineAnnotation<PierreDiffAnnotation>) => {
-      const metadata = annotation.metadata
-      if (metadata.kind === 'composer') {
-        return (
-          <PierreDiffCommentComposer
-            {...metadata.composer}
-            placeholder={addLineCommentPlaceholder}
-            submitLabel={addLineCommentLabel}
-            submittingLabel="Posting…"
-            onCancel={() => setComposer(null)}
-            onSubmit={handleSubmitComment}
-          />
-        )
-      }
-      const comment = metadata.comment
-      return (
-        <PierreDiffCommentAnnotation
-          comment={comment}
-          relativePath={relativePath}
-          worktreeId={worktreeId}
-          onDeleteComment={onDeleteComment}
-          onUpdateComment={onUpdateComment}
-        />
-      )
-    },
+    (annotation: DiffLineAnnotation<DiffCodeViewAnnotation>) =>
+      renderDiffCodeViewAnnotation(annotation, {
+        relativePath,
+        worktreeId,
+        addLineCommentLabel,
+        addLineCommentPlaceholder,
+        onCancelComposer: () => setComposer(null),
+        onSubmitComposer: handleSubmitComment,
+        onDeleteComment,
+        onUpdateComment
+      }),
     [
       addLineCommentLabel,
       addLineCommentPlaceholder,
@@ -272,22 +213,7 @@ export function PierreDiffViewer({
   )
 
   const diffStyle = useMemo(
-    () =>
-      ({
-        '--diffs-light-bg': 'var(--background)',
-        '--diffs-dark-bg': 'var(--background)',
-        '--diffs-light': 'var(--foreground)',
-        '--diffs-dark': 'var(--foreground)',
-        '--diffs-font-family': buildEditorFontFamily(fontFamily),
-        '--diffs-header-font-family': 'var(--app-font-family)',
-        '--diffs-font-size': `${fontSize}px`,
-        '--diffs-line-height': `${Math.max(19, Math.round(fontSize * 1.5))}px`,
-        '--diffs-addition-color-override': 'var(--editor-diff-added-gutter)',
-        '--diffs-deletion-color-override': 'var(--editor-diff-deleted-gutter)',
-        '--diffs-modified-color-override': 'var(--editor-diff-modified-gutter)',
-        '--diffs-bg-addition-emphasis-override': 'var(--editor-diff-inserted-text-background)',
-        '--diffs-bg-deletion-emphasis-override': 'var(--editor-diff-removed-text-background)'
-      }) as React.CSSProperties,
+    () => buildDiffCodeViewCSSVariables({ fontFamily, fontSize }),
     [fontFamily, fontSize]
   )
 
