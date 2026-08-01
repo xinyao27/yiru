@@ -1,12 +1,11 @@
 import { Copy, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
-import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  useContextMenuPointAnchor
+} from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { getRuntimeGitRemoteFileUrl } from '~renderer/runtime/git-client'
@@ -32,22 +31,14 @@ export function MonacoGutterContextMenu({
   filePath,
   relativePath
 }: MonacoGutterContextMenuProps): React.JSX.Element {
+  // Why: Monaco reports the gutter right-click through its own onMouseDown API
+  // and cancels the DOM event, so there is no element for a trigger to anchor to.
+  const anchor = useContextMenuPointAnchor(point)
+
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px border-0 opacity-0"
-            style={{ left: point.x, top: point.y }}
-          />
-        }
-      />
-      <DropdownMenuContent sideOffset={0} align="start">
-        <DropdownMenuItem
+    <ContextMenu open={open} onOpenChange={onOpenChange}>
+      <ContextMenuContent anchor={anchor}>
+        <ContextMenuItem
           onClick={() => window.api.ui.writeClipboardText(formatPathLineReference(filePath, line))}
         >
           <Copy className="mr-1.5 h-3.5 w-3.5" />
@@ -55,8 +46,8 @@ export function MonacoGutterContextMenu({
             'auto.components.editor.MonacoGutterContextMenu.4eaa991bde',
             'Copy Path to Line'
           )}
-        </DropdownMenuItem>
-        <DropdownMenuItem
+        </ContextMenuItem>
+        <ContextMenuItem
           onClick={() =>
             window.api.ui.writeClipboardText(formatPathLineReference(relativePath, line))
           }
@@ -66,8 +57,8 @@ export function MonacoGutterContextMenu({
             'auto.components.editor.MonacoGutterContextMenu.2e0b1cdc05',
             'Copy Rel. Path to Line'
           )}
-        </DropdownMenuItem>
-        <DropdownMenuItem
+        </ContextMenuItem>
+        <ContextMenuItem
           onClick={async () => {
             const state = useAppStore.getState()
             const activeFile = state.openFiles.find((f) => f.filePath === filePath)
@@ -98,8 +89,8 @@ export function MonacoGutterContextMenu({
             'auto.components.editor.MonacoGutterContextMenu.7b57b1b468',
             'Copy Remote URL'
           )}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

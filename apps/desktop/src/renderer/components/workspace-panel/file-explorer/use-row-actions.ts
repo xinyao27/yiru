@@ -1,3 +1,4 @@
+import type { BaseUIEvent } from '@base-ui/react/types'
 import { useCallback, useMemo } from 'react'
 import type React from 'react'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
@@ -25,8 +26,6 @@ type UseFileExplorerRowActionsParams = {
   requestDeleteAll: (nodes: TreeNode[]) => void
   inlineInput: InlineInput | null
   startNew: (type: 'file' | 'folder', parentPath: string, depth: number) => void
-  setBgMenuOpen: (open: boolean) => void
-  setBgMenuPoint: (point: { x: number; y: number }) => void
 }
 
 export type FileExplorerRowActions = {
@@ -39,7 +38,7 @@ export type FileExplorerRowActions = {
   handlePierreRenameNode: (node: TreeNode, newName: string) => void
   handleCollapseAll: () => void
   handleToggleDotfiles: () => void
-  handleBackgroundContextMenu: (event: React.MouseEvent<HTMLDivElement>) => void
+  handleBackgroundContextMenu: (event: BaseUIEvent<React.MouseEvent<HTMLDivElement>>) => void
   handleBackgroundDoubleClick: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
@@ -59,9 +58,7 @@ export function useFileExplorerRowActions({
   requestDelete,
   requestDeleteAll,
   inlineInput,
-  startNew,
-  setBgMenuOpen,
-  setBgMenuPoint
+  startNew
 }: UseFileExplorerRowActionsParams): FileExplorerRowActions {
   const collapseAllDirs = useAppStore((state) => state.collapseAllDirs)
   const collapseDirSubtree = useAppStore((state) => state.collapseDirSubtree)
@@ -142,22 +139,23 @@ export function useFileExplorerRowActions({
     }
   }, [activeWorktreeId, toggleShowDotfilesForWorktree])
   const handleBackgroundContextMenu = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
+    (event: BaseUIEvent<React.MouseEvent<HTMLDivElement>>) => {
       const isTreeRow = event.nativeEvent
         .composedPath()
         .some((entry) => entry instanceof HTMLElement && entry.dataset.type === 'item')
+      // Why: rows own their own context menu. Let Base UI's trigger handler run
+      // only for clicks on the empty tree background.
       if (
         isTreeRow ||
-        (event.target as HTMLElement).closest('[data-slot="context-menu-trigger"]')
+        (event.target as HTMLElement).closest('[data-slot="context-menu-trigger"]') !==
+          event.currentTarget
       ) {
+        event.preventBaseUIHandler()
         return
       }
-      event.preventDefault()
       window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-      setBgMenuPoint({ x: event.clientX, y: event.clientY })
-      setBgMenuOpen(true)
     },
-    [setBgMenuOpen, setBgMenuPoint]
+    []
   )
   const handleBackgroundDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {

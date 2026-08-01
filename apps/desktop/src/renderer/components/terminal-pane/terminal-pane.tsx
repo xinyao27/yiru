@@ -34,6 +34,7 @@ import {
   TerminalQuickCommandDialog
 } from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '~renderer/components/terminal-search'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '~renderer/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '~renderer/lib/connection-context'
@@ -162,6 +163,7 @@ import {
 } from './terminal-clipboard-event-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
+import { createTerminalMenuOpenChangeHandler } from './terminal-context-menu-dismiss'
 import { TerminalErrorToast } from './terminal-error-toast'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
@@ -2638,7 +2640,6 @@ export default function TerminalPane({
     managerRef,
     paneTransportsRef,
     paneCwdRef,
-    containerRef,
     worktreeId,
     groupId: quickCommandGroupId,
     fallbackCwd: cwd ?? '',
@@ -2666,6 +2667,19 @@ export default function TerminalPane({
   }, [contextMenu.menuPaneId])
   const contextMenuLeafId = getContextMenuLeafId()
   const contextMenuIsChatView = effectiveChatViewMode && contextMenuLeafId === chatLeafId
+  const { setOpen: setContextMenuOpen, menuOpenedAtRef: contextMenuOpenedAtRef } = contextMenu
+  const handleContextMenuOpenChange = useMemo(
+    () =>
+      createTerminalMenuOpenChangeHandler({
+        menuOpenedAtRef: contextMenuOpenedAtRef,
+        setOpen: setContextMenuOpen
+      }),
+    [contextMenuOpenedAtRef, setContextMenuOpen]
+  )
+  const handleForceCloseContextMenu = useCallback(
+    () => setContextMenuOpen(false),
+    [setContextMenuOpen]
+  )
   const handleContextMenuToggleNativeChat = useCallback(() => {
     const leafId = getContextMenuLeafId()
     if (!leafId) {
@@ -3014,8 +3028,8 @@ export default function TerminalPane({
   const activePaneCanToggleChat = canToggleChatForLeaf(activePane?.leafId ?? null)
   const contextMenuCanToggleChat = canToggleChatForLeaf(contextMenuLeafId)
   return (
-    <>
-      <div
+    <ContextMenu open={contextMenu.open} onOpenChange={handleContextMenuOpenChange}>
+      <ContextMenuTrigger
         ref={setContainerRef}
         className="absolute inset-0 min-h-0 min-w-0"
         data-native-file-drop-target="terminal"
@@ -3023,7 +3037,7 @@ export default function TerminalPane({
         data-terminal-layout-leaf-ids={expectedLayoutLeafIdsAttr}
         data-pane-title-surface={titleUsesLightSurface ? 'light' : 'dark'}
         style={terminalContainerStyle}
-        onContextMenuCapture={contextMenu.onContextMenuCapture}
+        onContextMenu={contextMenu.onContextMenu}
         onMouseDownCapture={handlePrimarySelectionMiddleMouseDown}
         onAuxClickCapture={handlePrimarySelectionAuxClick}
         onDragOver={(e) => {
@@ -3148,10 +3162,7 @@ export default function TerminalPane({
           )
         : null}
       <TerminalContextMenu
-        open={contextMenu.open}
-        onOpenChange={contextMenu.setOpen}
-        menuPoint={contextMenu.point}
-        menuOpenedAtRef={contextMenu.menuOpenedAtRef}
+        onForceClose={handleForceCloseContextMenu}
         canClosePane={contextMenu.paneCount > 1}
         canExpandPane={contextMenu.paneCount > 1}
         canEqualizePaneSizes={contextMenu.paneCount > 1 && expandedPaneId === null}
@@ -3302,6 +3313,6 @@ export default function TerminalPane({
         onCancel={handleCancelClose}
         onConfirm={handleConfirmClose}
       />
-    </>
+    </ContextMenu>
   )
 }

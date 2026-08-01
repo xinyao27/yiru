@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
 import { canOpenMarkdownPreview } from '~renderer/components/editor/markdown-preview-controls'
 import { getUntitledFileRoot } from '~renderer/components/editor/untitled-file-rename-path'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
@@ -103,7 +104,6 @@ export default function EditorFileTab({
   })
   const openMarkdownPreview = useAppStore((s) => s.openMarkdownPreview)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
   const [isRenaming, setIsRenaming] = useState(false)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const renameFocusFrameRef = useRef<number | null>(null)
@@ -200,10 +200,9 @@ export default function EditorFileTab({
   }, [])
 
   // Why: Electron <webview> elements run in a separate process, so clicking
-  // inside one never dispatches a pointerdown on the renderer document. Radix
-  // DropdownMenu relies on document pointerdown for outside-click detection,
-  // so it misses webview clicks. Listening for window blur catches the moment
-  // focus leaves the renderer (including into a webview).
+  // inside one never dispatches a pointerdown on the renderer document, and
+  // Base UI's outside-click detection misses it. Listening for window blur
+  // catches the moment focus leaves the renderer (including into a webview).
   useEffect(() => {
     if (!menuOpen) {
       return
@@ -389,35 +388,32 @@ export default function EditorFileTab({
   )
 
   return (
-    <>
-      <div
-        className={TAB_CONTAINER_WIDTH_CLASSES}
-        onContextMenuCapture={(event) => {
-          event.preventDefault()
+    <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <ContextMenuTrigger
+        onContextMenu={() => {
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-          setMenuPoint({ x: event.clientX, y: event.clientY })
-          setMenuOpen(true)
         }}
-      >
-        {isRenaming || menuOpen ? (
-          tabRoot
-        ) : (
-          <Tooltip>
-            <TooltipTrigger render={tabRoot} />
-            <TooltipContent
-              side="bottom"
-              sideOffset={6}
-              className="max-w-80 text-left break-words whitespace-normal"
-            >
-              {tabLabel}
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+        render={
+          <div className={TAB_CONTAINER_WIDTH_CLASSES}>
+            {isRenaming || menuOpen ? (
+              tabRoot
+            ) : (
+              <Tooltip>
+                <TooltipTrigger render={tabRoot} />
+                <TooltipContent
+                  side="bottom"
+                  sideOffset={6}
+                  className="max-w-80 text-left break-words whitespace-normal"
+                >
+                  {tabLabel}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        }
+      />
 
       <EditorFileTabContextMenu
-        open={menuOpen}
-        menuPoint={menuPoint}
         file={file}
         unifiedTabId={dragData.unifiedTabId}
         groupId={dragData.groupId}
@@ -429,7 +425,6 @@ export default function EditorFileTab({
         resolvedLanguage={resolvedLanguage}
         repoConnectionId={repo?.connectionId ?? null}
         skipMenuFocusRestoreRef={skipMenuFocusRestoreRef}
-        onOpenChange={setMenuOpen}
         onActivate={onActivate}
         onOpenRenameInput={openRenameInput}
         onTogglePin={onTogglePin}
@@ -438,6 +433,6 @@ export default function EditorFileTab({
         onCloseToRight={onCloseToRight}
         onOpenMarkdownPreview={openMarkdownPreview}
       />
-    </>
+    </ContextMenu>
   )
 }

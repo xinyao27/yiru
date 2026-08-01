@@ -4,6 +4,7 @@ import { stripLeadingAgentTitleDecoration } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTabAgent } from '~renderer/components/tab-bar/use-tab-agent'
 import { Button } from '~renderer/components/ui/button'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
@@ -130,7 +131,6 @@ export default function SortableTab({
   // blue insertion bar moves. Siblings also don't shift (see
   // SortableContext in tab-bar.tsx, which omits a strategy for that reason).
   const [menuOpen, setMenuOpen] = useState(false)
-  const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
   const [isEditing, setIsEditing] = useState(false)
   // Why: a live working/needs-input state is newer and more specific than an
   // unread event from the prior turn. It owns the icon until the turn ends;
@@ -206,10 +206,9 @@ export default function SortableTab({
   }, [])
 
   // Why: Electron <webview> elements run in a separate process, so clicking
-  // inside one never dispatches a pointerdown on the renderer document. Radix
-  // DropdownMenu relies on document pointerdown for outside-click detection,
-  // so it misses webview clicks. Listening for window blur catches the moment
-  // focus leaves the renderer (including into a webview).
+  // inside one never dispatches a pointerdown on the renderer document, and
+  // Base UI's outside-click detection misses it. Listening for window blur
+  // catches the moment focus leaves the renderer (including into a webview).
   useEffect(() => {
     if (!menuOpen) {
       return
@@ -425,30 +424,22 @@ export default function SortableTab({
   )
 
   return (
-    <>
-      <div
-        className={TAB_CONTAINER_WIDTH_CLASSES}
-        onContextMenuCapture={(event) => {
-          event.preventDefault()
+    <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <ContextMenuTrigger
+        onContextMenu={() => {
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-          setMenuPoint({ x: event.clientX, y: event.clientY })
-          setMenuOpen(true)
         }}
-      >
-        {tabRoot}
-      </div>
+        render={<div className={TAB_CONTAINER_WIDTH_CLASSES}>{tabRoot}</div>}
+      />
 
       <SortableTabContextMenu
         tab={tab}
         unifiedTabId={unifiedTabId}
         groupId={groupId}
         isActive={isActive}
-        open={menuOpen}
-        point={menuPoint}
         tabCount={tabCount}
         hasTabsToRight={hasTabsToRight}
         isPinned={isPinned}
-        onOpenChange={setMenuOpen}
         onActivate={onActivate}
         onClose={onClose}
         onCloseOthers={onCloseOthers}
@@ -460,6 +451,6 @@ export default function SortableTab({
         isChatView={isChatView}
         onToggleViewMode={onToggleViewMode}
       />
-    </>
+    </ContextMenu>
   )
 }

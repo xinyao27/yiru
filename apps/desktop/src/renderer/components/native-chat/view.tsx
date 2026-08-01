@@ -1,6 +1,7 @@
 import type { NativeChatSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { useAppStore } from '~renderer/store'
 import type { TuiAgent } from '~shared/types'
 
@@ -369,99 +370,101 @@ function NativeChatResolvedView({
   const fontScale = useNativeChatFontScale(isConversation)
 
   return (
-    <div
-      ref={rootRef}
-      data-native-chat-root="true"
-      tabIndex={-1}
-      onPointerDownCapture={(event) => {
-        if (event.button === 2) {
-          contextMenu.onSelectionCapture()
+    <ContextMenu open={contextMenu.open} onOpenChange={contextMenu.setOpen}>
+      <ContextMenuTrigger
+        ref={rootRef}
+        data-native-chat-root="true"
+        tabIndex={-1}
+        onPointerDownCapture={(event) => {
+          if (event.button === 2) {
+            contextMenu.onSelectionCapture()
+            event.preventDefault()
+            event.stopPropagation()
+            return
+          }
+          if (event.button === 0 && shouldFocusNativeChatPaneFromPointerTarget(event.target)) {
+            rootRef.current?.focus({ preventScroll: true })
+          }
+        }}
+        onKeyDownCapture={(event) => {
+          // Backspace/Delete outside an input focuses the composer (like typing)
+          // but inserts nothing — let the now-focused field handle the keystroke.
+          if (shouldFocusNativeChatComposerFromEditingKey(event)) {
+            composerRef.current?.focus()
+            return
+          }
+          if (!shouldRedirectNativeChatTyping(event)) {
+            return
+          }
+          if (!composerRef.current?.insertTypedText(event.key)) {
+            return
+          }
           event.preventDefault()
           event.stopPropagation()
-          return
-        }
-        if (event.button === 0 && shouldFocusNativeChatPaneFromPointerTarget(event.target)) {
-          rootRef.current?.focus({ preventScroll: true })
-        }
-      }}
-      onKeyDownCapture={(event) => {
-        // Backspace/Delete outside an input focuses the composer (like typing)
-        // but inserts nothing — let the now-focused field handle the keystroke.
-        if (shouldFocusNativeChatComposerFromEditingKey(event)) {
-          composerRef.current?.focus()
-          return
-        }
-        if (!shouldRedirectNativeChatTyping(event)) {
-          return
-        }
-        if (!composerRef.current?.insertTypedText(event.key)) {
-          return
-        }
-        event.preventDefault()
-        event.stopPropagation()
-      }}
-      onMouseUpCapture={contextMenu.onSelectionCapture}
-      onKeyUpCapture={contextMenu.onSelectionCapture}
-      onContextMenuCapture={contextMenu.onContextMenuCapture}
-      className="bg-background text-foreground relative flex h-full min-h-0 w-full flex-col focus:outline-none"
-    >
-      <div className="flex min-h-0 flex-1 flex-col">
-        {viewState.kind === 'loading' ? (
-          <NativeChatEmptyState kind="loading" />
-        ) : viewState.kind === 'error' ? (
-          <NativeChatEmptyState kind="error" message={viewState.message} />
-        ) : viewState.kind === 'empty' ? (
-          <NativeChatEmptyState kind="empty" agent={agent} />
-        ) : (
-          <NativeChatMessageList
-            session={sessionWithPending}
-            isWorking={isWorking}
-            expandSignal={false}
-            fontScale={fontScale.scale}
-            onLinkClick={nativeChatFileLinkClick}
-            allowFileUriLinks={fileLinkContext !== null}
-            failedDeliveryMessageIds={failedLaunchPromptMessageIds}
-            bottomInset={inputRegionHeight}
-          />
-        )}
-      </div>
-      {/* Why: the input region overlays the transcript like Cursor's Agent
+        }}
+        onMouseUpCapture={contextMenu.onSelectionCapture}
+        onKeyUpCapture={contextMenu.onSelectionCapture}
+        onContextMenu={contextMenu.onContextMenu}
+        className="bg-background text-foreground relative flex h-full min-h-0 w-full flex-col focus:outline-none"
+      >
+        <div className="flex min-h-0 flex-1 flex-col">
+          {viewState.kind === 'loading' ? (
+            <NativeChatEmptyState kind="loading" />
+          ) : viewState.kind === 'error' ? (
+            <NativeChatEmptyState kind="error" message={viewState.message} />
+          ) : viewState.kind === 'empty' ? (
+            <NativeChatEmptyState kind="empty" agent={agent} />
+          ) : (
+            <NativeChatMessageList
+              session={sessionWithPending}
+              isWorking={isWorking}
+              expandSignal={false}
+              fontScale={fontScale.scale}
+              onLinkClick={nativeChatFileLinkClick}
+              allowFileUriLinks={fileLinkContext !== null}
+              failedDeliveryMessageIds={failedLaunchPromptMessageIds}
+              bottomInset={inputRegionHeight}
+            />
+          )}
+        </div>
+        {/* Why: the input region overlays the transcript like Cursor's Agent
           composer; its measured height keeps the final turn scrollable above it. */}
-      <NativeChatInputOverlay ref={inputRegionRef}>
-        {/* Pointer events are restored only by the centered input surfaces so
+        <NativeChatInputOverlay ref={inputRegionRef}>
+          {/* Pointer events are restored only by the centered input surfaces so
             the transcript scrollbar and side lanes remain usable underneath. */}
-        {/* A question card supplies its own answer input, so it fully replaces
+          {/* A question card supplies its own answer input, so it fully replaces
             the composer while active — no stray "Send a message". */}
-        <NativeChatInteractiveCard
-          paneKey={paneKey}
-          send={interactiveSend}
-          canSend={canSend}
-          onShowingQuestionChange={setQuestionActive}
-          answerInputRef={questionAnswerInputRef}
-        />
-        {/* canSend reflects the mobile presence-lock: when a mobile client holds
+          <NativeChatInteractiveCard
+            paneKey={paneKey}
+            send={interactiveSend}
+            canSend={canSend}
+            onShowingQuestionChange={setQuestionActive}
+            answerInputRef={questionAnswerInputRef}
+          />
+          {/* canSend reflects the mobile presence-lock: when a mobile client holds
             the pty, the composer shows its guarded state instead of racing the
             mobile driver (R8). */}
-        {questionActive ? null : (
-          <NativeChatComposer
-            ref={composerRef}
-            terminalTabId={terminalTabId}
-            paneKey={paneKey}
-            targetPtyId={targetPtyId}
-            agent={agent}
-            canSend={canSend}
-            isWorking={isWorking}
-            onStop={stopAgent}
-            onOptimisticSend={onOptimisticSend}
-            onOptimisticSendCanceled={onOptimisticSendCanceled}
-            onSlashCommand={onSlashCommand}
-            onSwitchToTerminal={onSwitchToTerminal}
-            {...(onRelaunchSession ? { onRelaunchSession } : {})}
-            readTerminalScreen={readTerminalScreen}
-          />
-        )}
-      </NativeChatInputOverlay>
+          {questionActive ? null : (
+            <NativeChatComposer
+              ref={composerRef}
+              terminalTabId={terminalTabId}
+              paneKey={paneKey}
+              targetPtyId={targetPtyId}
+              agent={agent}
+              canSend={canSend}
+              isWorking={isWorking}
+              onStop={stopAgent}
+              onOptimisticSend={onOptimisticSend}
+              onOptimisticSendCanceled={onOptimisticSendCanceled}
+              onSlashCommand={onSlashCommand}
+              onSwitchToTerminal={onSwitchToTerminal}
+              {...(onRelaunchSession ? { onRelaunchSession } : {})}
+              readTerminalScreen={readTerminalScreen}
+            />
+          )}
+        </NativeChatInputOverlay>
+      </ContextMenuTrigger>
       {contextMenu.menu}
-    </div>
+    </ContextMenu>
   )
 }

@@ -1,37 +1,25 @@
 import { FilePlus, FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
-import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem
+} from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
-
-function stopRightButtonMenuSelection(event: React.PointerEvent): void {
-  if (event.button !== 2) {
-    return
-  }
-  // Why: the synthetic trigger sits at the cursor; the right-button release
-  // can otherwise land on "New File" and select it immediately.
-  event.preventDefault()
-  event.stopPropagation()
-}
 
 export function FileExplorerBackgroundMenu({
   open,
   onOpenChange,
-  point,
   worktreePath,
-  onStartNew
+  onStartNew,
+  children
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  point: { x: number; y: number }
   worktreePath: string
   onStartNew: (type: 'file' | 'folder', dir: string, depth: number) => void
+  children: React.ReactNode
 }): React.JSX.Element {
   useEffect(() => {
     const close = (): void => onOpenChange(false)
@@ -40,41 +28,24 @@ export function FileExplorerBackgroundMenu({
   }, [onOpenChange])
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px border-0 opacity-0"
-            style={{ left: point.x, top: point.y }}
-          />
-        }
-      />
-      <DropdownMenuContent
-        className="w-48"
-        sideOffset={0}
-        align="start"
-        onPointerUpCapture={stopRightButtonMenuSelection}
-        finalFocus={false}
-      >
-        <DropdownMenuItem onClick={() => onStartNew('file', worktreePath, 0)}>
+    <ContextMenu open={open} onOpenChange={onOpenChange}>
+      {children}
+      <ContextMenuContent className="w-48" finalFocus={false}>
+        <ContextMenuItem onClick={() => onStartNew('file', worktreePath, 0)}>
           <FilePlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.21fe46ed36',
             'New File'
           )}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onStartNew('folder', worktreePath, 0)}>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onStartNew('folder', worktreePath, 0)}>
           <FolderPlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.3b5e2dcb8d',
             'New Folder'
           )}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

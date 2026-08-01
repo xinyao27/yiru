@@ -1,5 +1,6 @@
 /* eslint-disable max-lines -- Why: context-menu actions share pane refs, focus
  * recovery, inherited-cwd split behavior, and agent-fork state in one hook. */
+import type { BaseUIEvent } from '@base-ui/react/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -61,7 +62,6 @@ type UseTerminalPaneContextMenuDeps = {
   managerRef: React.RefObject<PaneManager | null>
   paneTransportsRef: React.RefObject<Map<number, PtyTransport>>
   paneCwdRef: React.RefObject<PaneCwdMap>
-  containerRef: React.RefObject<HTMLDivElement | null>
   tabId: string
   worktreeId: string
   groupId: string | null
@@ -81,12 +81,14 @@ type UseTerminalPaneContextMenuDeps = {
 type TerminalMenuState = {
   open: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
-  point: { x: number; y: number }
   menuOpenedAtRef: React.RefObject<number>
   paneCount: number
   menuPaneId: number | null
-  onContextMenuCapture: (event: React.MouseEvent<HTMLDivElement>) => void
-  onPaneTitleContextMenu: (event: React.MouseEvent<HTMLElement>, paneId: number) => void
+  onContextMenu: (event: BaseUIEvent<React.MouseEvent<HTMLDivElement>>) => void
+  onPaneTitleContextMenu: (
+    event: BaseUIEvent<React.MouseEvent<HTMLElement>>,
+    paneId: number
+  ) => void
   onCopy: () => Promise<void>
   onCopyTerminalId: () => Promise<void>
   onCopyPaneId: () => Promise<void>
@@ -111,7 +113,6 @@ export function useTerminalPaneContextMenu({
   managerRef,
   paneTransportsRef,
   paneCwdRef,
-  containerRef,
   tabId,
   worktreeId,
   groupId,
@@ -130,7 +131,6 @@ export function useTerminalPaneContextMenu({
   const contextPaneIdRef = useRef<number | null>(null)
   const menuOpenedAtRef = useRef(0)
   const [open, setOpen] = useState(false)
-  const [point, setPoint] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     const closeMenu = (): void => {
@@ -511,14 +511,13 @@ export function useTerminalPaneContextMenu({
   }
 
   const openContextMenu = (
-    event: React.MouseEvent<HTMLElement>,
-    clickedPaneId: number | null,
-    boundsElement: HTMLElement
+    event: BaseUIEvent<React.MouseEvent<HTMLElement>>,
+    clickedPaneId: number | null
   ): void => {
-    event.preventDefault()
     window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
     const manager = managerRef.current
     if (!manager) {
+      event.preventBaseUIHandler()
       contextPaneIdRef.current = null
       return
     }
@@ -531,6 +530,7 @@ export function useTerminalPaneContextMenu({
     // Why: when users opt into terminal-style right-click, a selection copies
     // and no selection pastes. Ctrl+right-click keeps the app menu reachable.
     if (rightClickToPaste && !event.ctrlKey) {
+      event.preventBaseUIHandler()
       event.stopPropagation()
       if (!clickedPane) {
         return
@@ -546,35 +546,25 @@ export function useTerminalPaneContextMenu({
     }
 
     menuOpenedAtRef.current = Date.now()
-    const bounds = boundsElement.getBoundingClientRect()
-    setPoint({ x: event.clientX - bounds.left, y: event.clientY - bounds.top })
-    setOpen(true)
   }
 
-  const onContextMenuCapture = (event: React.MouseEvent<HTMLDivElement>): void => {
+  const onContextMenu = (event: BaseUIEvent<React.MouseEvent<HTMLDivElement>>): void => {
     const manager = managerRef.current
-    if (!manager) {
-      event.preventDefault()
-      contextPaneIdRef.current = null
-      return
-    }
     const target = event.target
-    if (!(target instanceof Node)) {
-      event.preventDefault()
+    if (!manager || !(target instanceof Node)) {
+      event.preventBaseUIHandler()
       contextPaneIdRef.current = null
       return
     }
     const clickedPane = manager.getPanes().find((pane) => pane.container.contains(target)) ?? null
-    openContextMenu(event, clickedPane?.id ?? null, event.currentTarget)
+    openContextMenu(event, clickedPane?.id ?? null)
   }
 
-  const onPaneTitleContextMenu = (event: React.MouseEvent<HTMLElement>, paneId: number): void => {
-    const boundsElement = containerRef.current
-    if (!boundsElement) {
-      event.preventDefault()
-      return
-    }
-    openContextMenu(event, paneId, boundsElement)
+  const onPaneTitleContextMenu = (
+    event: BaseUIEvent<React.MouseEvent<HTMLElement>>,
+    paneId: number
+  ): void => {
+    openContextMenu(event, paneId)
   }
 
   // Why: PaneManager.getPanes() allocates public pane wrappers. Closed menus
@@ -586,11 +576,10 @@ export function useTerminalPaneContextMenu({
   return {
     open,
     setOpen,
-    point,
     menuOpenedAtRef,
     paneCount,
     menuPaneId,
-    onContextMenuCapture,
+    onContextMenu,
     onPaneTitleContextMenu,
     onCopy,
     onCopyTerminalId,
