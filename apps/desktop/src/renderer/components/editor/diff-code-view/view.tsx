@@ -42,6 +42,12 @@ export type DiffCodeViewFile = {
   commentableLineNumbers?: readonly number[]
 }
 
+/**
+ * Replaces Pierre's filename row for one file. Only reached when the surface
+ * leaves `disableFileHeader` off, since that is what mounts the header host.
+ */
+export type DiffCodeViewHeaderRenderer = (file: DiffCodeViewFile) => React.ReactNode
+
 type OpenComposer = {
   itemId: string
   lineNumber: number
@@ -82,7 +88,8 @@ export function DiffCodeView({
   pendingScrollCommentId,
   onPendingScrollConsumed,
   scrollCacheKey,
-  className
+  className,
+  renderFileHeader
 }: {
   files: readonly DiffCodeViewFile[]
   render: DiffCodeViewRenderAppearance
@@ -100,6 +107,7 @@ export function DiffCodeView({
   onPendingScrollConsumed?: () => void
   scrollCacheKey?: string
   className?: string
+  renderFileHeader?: DiffCodeViewHeaderRenderer
 }): React.JSX.Element {
   const handleRef = useRef<CodeViewHandle<DiffCodeViewAnnotation> | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -222,6 +230,14 @@ export function DiffCodeView({
     ]
   )
 
+  const renderCustomHeader = useCallback(
+    (item: { id: string }) => {
+      const file = fileById.get(item.id)
+      return file && renderFileHeader ? renderFileHeader(file) : null
+    },
+    [fileById, renderFileHeader]
+  )
+
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
 
   const handleScroll = useCallback(
@@ -311,6 +327,7 @@ export function DiffCodeView({
             items={items}
             options={options}
             renderAnnotation={renderAnnotation}
+            renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
             onScroll={handleScroll}
             className={className}
             style={style}
