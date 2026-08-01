@@ -2791,8 +2791,9 @@
           "distinguished": "{{value0}} +{{value1}}",
           "many": "{{value0}} directories"
         },
-        "SkillPlacementTable": {
-          "title": "Installed in"
+        "SkillDetailToolbar": {
+          "placementCount": "{{value0}} directories",
+          "fileCount": "{{value0}} files"
         }
       },
       "sidebar": {

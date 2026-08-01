@@ -2768,8 +2768,9 @@
           "distinguished": "{{value0}} +{{value1}}",
           "many": "{{value0}} 个目录"
         },
-        "SkillPlacementTable": {
-          "title": "安装位置"
+        "SkillDetailToolbar": {
+          "placementCount": "{{value0}} 个目录",
+          "fileCount": "{{value0}} 个文件"
         }
       },
       "sidebar": {

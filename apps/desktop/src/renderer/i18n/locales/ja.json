@@ -2768,8 +2768,9 @@
           "distinguished": "{{value0}} +{{value1}}",
           "many": "{{value0}} 個のディレクトリ"
         },
-        "SkillPlacementTable": {
-          "title": "インストール先"
+        "SkillDetailToolbar": {
+          "placementCount": "{{value0}} 個のディレクトリ",
+          "fileCount": "{{value0}} 個のファイル"
         }
       },
       "sidebar": {

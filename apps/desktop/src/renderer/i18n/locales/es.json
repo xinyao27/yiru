@@ -2768,8 +2768,9 @@
           "distinguished": "{{value0}} +{{value1}}",
           "many": "{{value0}} directorios"
         },
-        "SkillPlacementTable": {
-          "title": "Instalado en"
+        "SkillDetailToolbar": {
+          "placementCount": "{{value0}} directorios",
+          "fileCount": "{{value0}} archivos"
         }
       },
       "sidebar": {

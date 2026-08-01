@@ -2,6 +2,7 @@ import { ArrowRight, FolderOpen } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import type { SkillPlacement } from '~shared/skills'
@@ -29,7 +30,7 @@ async function revealPlacement(placement: SkillPlacement): Promise<void> {
 function SkillPlacementRow({ placement }: { placement: SkillPlacement }): React.JSX.Element {
   const TopologyIcon = placementTopologyIcons[placement.topology]
   return (
-    <li className="border-border/60 flex min-w-0 items-start gap-3 border-t px-5 py-2 first:border-t-0">
+    <li className="border-border/60 flex min-w-0 items-start gap-3 border-t px-3 py-2 first:border-t-0">
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="truncate font-mono text-[11px]" title={placement.directoryPath}>
           {placement.directoryPath}
@@ -92,15 +93,15 @@ function SkillPlacementRow({ placement }: { placement: SkillPlacement }): React.
 /** Every directory holding this skill, and how each one holds it. */
 export function SkillPlacementTable({ placements }: SkillPlacementTableProps): React.JSX.Element {
   return (
-    <section>
-      <h3 className="text-muted-foreground px-5 py-1.5 text-[10px] font-medium tracking-wide uppercase">
-        {translate('auto.components.skills.SkillPlacementTable.title', 'Installed in')}
-      </h3>
-      <ul>
+    // Why: the cap sits on the viewport — with only a max-height, the root has no
+    // definite height for the viewport's h-full to resolve against, so a skill
+    // installed in a dozen homes would overflow instead of scrolling.
+    <ScrollArea viewportClassName="max-h-80">
+      <ul className="py-1">
         {placements.map((placement) => (
           <SkillPlacementRow key={placement.id} placement={placement} />
         ))}
       </ul>
-    </section>
+    </ScrollArea>
   )
 }

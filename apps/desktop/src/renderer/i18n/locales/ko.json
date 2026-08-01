@@ -2768,8 +2768,9 @@
           "distinguished": "{{value0}} +{{value1}}",
           "many": "디렉터리 {{value0}}개"
         },
-        "SkillPlacementTable": {
-          "title": "설치 위치"
+        "SkillDetailToolbar": {
+          "placementCount": "디렉터리 {{value0}}개",
+          "fileCount": "파일 {{value0}}개"
         }
       },
       "sidebar": {
