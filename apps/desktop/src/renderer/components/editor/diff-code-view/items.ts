@@ -1,7 +1,10 @@
-import { parseDiffFromFile, type FileContents, type FileDiffMetadata } from '@pierre/diffs'
+import { parseDiffFromFile, type CodeViewDiffItem, type FileContents } from '@pierre/diffs'
+import type { DiffLineAnnotation } from '@pierre/diffs/react'
 import type { GitFileStatus } from '@yiru/workbench-model/review'
+import { useMemo, useRef } from 'react'
 
 import { resolvePierreDiffLanguage } from '../pierre-diff-language'
+import type { DiffCodeViewAnnotation } from './annotations'
 
 /** One changed file, in the shape our git layer already produces. */
 export type DiffCodeViewSource = {
@@ -46,7 +49,9 @@ function buildFileContents(
  * with no hunks rather than as errors. Returns null only if parsing genuinely
  * fails, so a single unreadable file cannot take the whole list down.
  */
-export function buildDiffCodeViewFileDiff(source: DiffCodeViewSource): FileDiffMetadata | null {
+export function buildDiffCodeViewFileDiff(
+  source: DiffCodeViewSource
+): CodeViewDiffItem['fileDiff'] | null {
   const isAdded = ADDED_STATUSES.has(source.status)
   const isDeleted = source.status === 'deleted'
   const previousPath = source.oldPath ?? source.path
@@ -75,4 +80,89 @@ export function buildDiffCodeViewFileDiff(source: DiffCodeViewSource): FileDiffM
     console.warn('[DiffCodeView] failed to parse diff', source.path, error)
     return null
   }
+}
+
+export type DiffCodeViewFileInput = {
+  source: DiffCodeViewSource
+  collapsed: boolean
+  annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
+}
+
+type CachedDiffCodeViewItem = {
+  source: DiffCodeViewSource
+  collapsed: boolean
+  annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
+  item: CodeViewDiffItem<DiffCodeViewAnnotation>
+}
+
+function isSameParsedSource(a: DiffCodeViewSource, b: DiffCodeViewSource): boolean {
+  // Why: content arrives as the same string reference until a refetch replaces
+  // it, so these comparisons short-circuit instead of walking the file.
+  return (
+    a.path === b.path &&
+    a.oldPath === b.oldPath &&
+    a.status === b.status &&
+    a.language === b.language &&
+    a.contentGeneration === b.contentGeneration &&
+    a.originalContent === b.originalContent &&
+    a.modifiedContent === b.modifiedContent
+  )
+}
+
+/**
+ * Keeps one stable `CodeViewDiffItem` per file.
+ *
+ * Why: controlled CodeView compares the incoming list item-by-item with `===`,
+ * so rebuilding item objects every render would replace the whole list instead
+ * of taking its append-only fast path — and it would reparse every diff. It
+ * also only adopts a changed payload when `version` moves, so the version has
+ * to advance in lockstep with the fields below.
+ */
+export function useDiffCodeViewItems(
+  files: readonly DiffCodeViewFileInput[]
+): CodeViewDiffItem<DiffCodeViewAnnotation>[] {
+  const cacheRef = useRef(new Map<string, CachedDiffCodeViewItem>())
+  return useMemo(() => {
+    const cache = cacheRef.current
+    const next = new Map<string, CachedDiffCodeViewItem>()
+    const items: CodeViewDiffItem<DiffCodeViewAnnotation>[] = []
+    for (const file of files) {
+      const id = file.source.key
+      const cached = cache.get(id)
+      const reusable =
+        cached !== undefined &&
+        cached.collapsed === file.collapsed &&
+        cached.annotations === file.annotations &&
+        isSameParsedSource(cached.source, file.source)
+      if (reusable) {
+        next.set(id, cached)
+        items.push(cached.item)
+        continue
+      }
+      const fileDiff =
+        cached && isSameParsedSource(cached.source, file.source)
+          ? cached.item.fileDiff
+          : buildDiffCodeViewFileDiff(file.source)
+      if (!fileDiff) {
+        continue
+      }
+      const entry: CachedDiffCodeViewItem = {
+        source: file.source,
+        collapsed: file.collapsed,
+        annotations: file.annotations,
+        item: {
+          id,
+          type: 'diff',
+          fileDiff,
+          annotations: file.annotations,
+          collapsed: file.collapsed,
+          version: (cached?.item.version ?? 0) + 1
+        }
+      }
+      next.set(id, entry)
+      items.push(entry.item)
+    }
+    cacheRef.current = next
+    return items
+  }, [files])
 }
