@@ -1,9 +1,10 @@
-import type { SelectedLineRange } from '@pierre/diffs'
+import type { LineAnnotation, SelectedLineRange } from '@pierre/diffs'
 import type { DiffLineAnnotation } from '@pierre/diffs/react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
 
 import { PierreDiffCommentAnnotation } from '../pierre-diff-comment-annotation'
 import { PierreDiffCommentComposer } from '../pierre-diff-comment-composer'
+import { DiffCodeViewNoticeContent, type DiffCodeViewNotice } from './notices'
 
 /** An open, unsaved comment anchored to a line or line range. */
 export type DiffCodeViewComposer = {
@@ -14,9 +15,25 @@ export type DiffCodeViewComposer = {
 export type DiffCodeViewAnnotation =
   | { kind: 'comment'; comment: DecoratedDiffComment }
   | { kind: 'composer'; composer: DiffCodeViewComposer }
+  | { kind: 'notice'; notice: DiffCodeViewNotice }
+
+/**
+ * Anchors a notice above a row's first line.
+ *
+ * Why: Pierre reads a side-less annotation on line 0 as file-level and gives it
+ * its own row. It still needs at least one rendered line to hang under, which
+ * is why notice rows ship as one-line file items rather than empty diffs.
+ */
+export function buildDiffCodeViewNoticeAnnotations(
+  notice: DiffCodeViewNotice
+): LineAnnotation<DiffCodeViewAnnotation>[] {
+  return [{ lineNumber: 0, metadata: { kind: 'notice', notice } }]
+}
 
 export type DiffCodeViewAnnotationHandlers = {
   relativePath: string
+  onRetry?: () => void
+  onSaveLimitedDiff?: () => void
   worktreeId?: string
   addLineCommentLabel?: string
   addLineCommentPlaceholder?: string
@@ -74,10 +91,22 @@ export function buildDiffCodeViewAnnotations(
 }
 
 export function renderDiffCodeViewAnnotation(
-  annotation: DiffLineAnnotation<DiffCodeViewAnnotation>,
+  annotation: DiffLineAnnotation<DiffCodeViewAnnotation> | LineAnnotation<DiffCodeViewAnnotation>,
   handlers: DiffCodeViewAnnotationHandlers
 ): React.JSX.Element {
   const metadata = annotation.metadata
+  if (metadata.kind === 'notice') {
+    return (
+      <DiffCodeViewNoticeContent
+        notice={metadata.notice}
+        handlers={{
+          filePath: handlers.relativePath,
+          onRetry: handlers.onRetry,
+          onSaveLimitedDiff: handlers.onSaveLimitedDiff
+        }}
+      />
+    )
+  }
   if (metadata.kind === 'composer') {
     return (
       <PierreDiffCommentComposer

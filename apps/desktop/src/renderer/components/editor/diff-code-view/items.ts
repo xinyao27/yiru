@@ -1,10 +1,17 @@
-import { parseDiffFromFile, type CodeViewDiffItem, type FileContents } from '@pierre/diffs'
+import {
+  parseDiffFromFile,
+  type CodeViewDiffItem,
+  type CodeViewFileItem,
+  type CodeViewItem,
+  type FileContents
+} from '@pierre/diffs'
 import type { DiffLineAnnotation } from '@pierre/diffs/react'
 import type { GitFileStatus } from '@yiru/workbench-model/review'
 import { useMemo, useRef } from 'react'
 
 import { resolvePierreDiffLanguage } from '../pierre-diff-language'
-import type { DiffCodeViewAnnotation } from './annotations'
+import { buildDiffCodeViewNoticeAnnotations, type DiffCodeViewAnnotation } from './annotations'
+import type { DiffCodeViewNotice } from './notices'
 
 /** One changed file, in the shape our git layer already produces. */
 export type DiffCodeViewSource = {
@@ -86,13 +93,40 @@ export type DiffCodeViewFileInput = {
   source: DiffCodeViewSource
   collapsed: boolean
   annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
+  /** Set for rows that carry something other than a text diff. */
+  notice?: DiffCodeViewNotice
+}
+
+// Why: a file-level annotation only renders when the row has at least one
+// rendered line, so a notice row ships as a one-line file item rather than an
+// empty diff, which would render nothing at all.
+const NOTICE_ANCHOR_CONTENTS = '\n'
+
+function buildNoticeItem(
+  input: DiffCodeViewFileInput,
+  notice: DiffCodeViewNotice,
+  version: number
+): CodeViewFileItem<DiffCodeViewAnnotation> {
+  return {
+    id: input.source.key,
+    type: 'file',
+    file: {
+      name: input.source.path,
+      contents: NOTICE_ANCHOR_CONTENTS,
+      cacheKey: `${input.source.key}:notice:${version}`
+    },
+    annotations: buildDiffCodeViewNoticeAnnotations(notice),
+    collapsed: input.collapsed,
+    version
+  }
 }
 
 type CachedDiffCodeViewItem = {
   source: DiffCodeViewSource
   collapsed: boolean
   annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
-  item: CodeViewDiffItem<DiffCodeViewAnnotation>
+  notice: DiffCodeViewNotice | undefined
+  item: CodeViewItem<DiffCodeViewAnnotation>
 }
 
 function isSameParsedSource(a: DiffCodeViewSource, b: DiffCodeViewSource): boolean {
@@ -120,12 +154,12 @@ function isSameParsedSource(a: DiffCodeViewSource, b: DiffCodeViewSource): boole
  */
 export function useDiffCodeViewItems(
   files: readonly DiffCodeViewFileInput[]
-): CodeViewDiffItem<DiffCodeViewAnnotation>[] {
+): CodeViewItem<DiffCodeViewAnnotation>[] {
   const cacheRef = useRef(new Map<string, CachedDiffCodeViewItem>())
   return useMemo(() => {
     const cache = cacheRef.current
     const next = new Map<string, CachedDiffCodeViewItem>()
-    const items: CodeViewDiffItem<DiffCodeViewAnnotation>[] = []
+    const items: CodeViewItem<DiffCodeViewAnnotation>[] = []
     for (const file of files) {
       const id = file.source.key
       const cached = cache.get(id)
@@ -133,34 +167,45 @@ export function useDiffCodeViewItems(
         cached !== undefined &&
         cached.collapsed === file.collapsed &&
         cached.annotations === file.annotations &&
+        cached.notice === file.notice &&
         isSameParsedSource(cached.source, file.source)
       if (reusable) {
         next.set(id, cached)
         items.push(cached.item)
         continue
       }
-      const fileDiff =
-        cached && isSameParsedSource(cached.source, file.source)
-          ? cached.item.fileDiff
-          : buildDiffCodeViewFileDiff(file.source)
-      if (!fileDiff) {
+      const version = (cached?.item.version ?? 0) + 1
+      let item: CodeViewItem<DiffCodeViewAnnotation> | null = null
+      if (file.notice) {
+        item = buildNoticeItem(file, file.notice, version)
+      } else {
+        const reusableDiff =
+          cached?.item.type === 'diff' && isSameParsedSource(cached.source, file.source)
+            ? cached.item.fileDiff
+            : buildDiffCodeViewFileDiff(file.source)
+        item = reusableDiff
+          ? {
+              id,
+              type: 'diff',
+              fileDiff: reusableDiff,
+              annotations: file.annotations,
+              collapsed: file.collapsed,
+              version
+            }
+          : null
+      }
+      if (!item) {
         continue
       }
       const entry: CachedDiffCodeViewItem = {
         source: file.source,
         collapsed: file.collapsed,
         annotations: file.annotations,
-        item: {
-          id,
-          type: 'diff',
-          fileDiff,
-          annotations: file.annotations,
-          collapsed: file.collapsed,
-          version: (cached?.item.version ?? 0) + 1
-        }
+        notice: file.notice,
+        item
       }
       next.set(id, entry)
-      items.push(entry.item)
+      items.push(item)
     }
     cacheRef.current = next
     return items

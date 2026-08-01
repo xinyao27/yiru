@@ -28,6 +28,7 @@ import {
   type DiffCodeViewAnnotation
 } from './annotations'
 import { useDiffCodeViewItems, type DiffCodeViewFileInput, type DiffCodeViewSource } from './items'
+import type { DiffCodeViewNotice } from './notices'
 import {
   buildDiffCodeViewCSSVariables,
   buildDiffCodeViewRenderOptions,
@@ -40,6 +41,9 @@ export type DiffCodeViewFile = {
   collapsed?: boolean
   comments?: readonly DecoratedDiffComment[]
   commentableLineNumbers?: readonly number[]
+  /** Set when this row carries a loading, error, binary, image or size notice
+   *  instead of a text diff. */
+  notice?: DiffCodeViewNotice
 }
 
 /**
@@ -85,6 +89,8 @@ export function DiffCodeView({
   onAddLineComment,
   onDeleteComment,
   onUpdateComment,
+  onRetryFile,
+  onSaveLimitedDiff,
   pendingScrollCommentId,
   onPendingScrollConsumed,
   scrollCacheKey,
@@ -103,6 +109,8 @@ export function DiffCodeView({
   ) => Promise<boolean>
   onDeleteComment?: (commentId: string) => void
   onUpdateComment?: (commentId: string, body: string) => Promise<boolean>
+  onRetryFile?: (fileKey: string) => void
+  onSaveLimitedDiff?: (fileKey: string) => void
   pendingScrollCommentId?: string | null
   onPendingScrollConsumed?: () => void
   scrollCacheKey?: string
@@ -140,7 +148,12 @@ export function DiffCodeView({
           ? cached.annotations
           : buildDiffCodeViewAnnotations(comments, fileComposer)
       next.set(id, { comments, composer: fileComposer, annotations })
-      return { source: file.source, collapsed: file.collapsed === true, annotations }
+      return {
+        source: file.source,
+        collapsed: file.collapsed === true,
+        annotations,
+        notice: file.notice
+      }
     })
     annotationCacheRef.current = next
     return inputs
@@ -211,6 +224,8 @@ export function DiffCodeView({
     (annotation: Parameters<typeof renderDiffCodeViewAnnotation>[0], item: { id: string }) =>
       renderDiffCodeViewAnnotation(annotation, {
         relativePath: fileById.get(item.id)?.source.path ?? '',
+        onRetry: onRetryFile ? () => onRetryFile(item.id) : undefined,
+        onSaveLimitedDiff: onSaveLimitedDiff ? () => onSaveLimitedDiff(item.id) : undefined,
         worktreeId,
         addLineCommentLabel,
         addLineCommentPlaceholder,
@@ -225,6 +240,8 @@ export function DiffCodeView({
       fileById,
       handleSubmitComment,
       onDeleteComment,
+      onRetryFile,
+      onSaveLimitedDiff,
       onUpdateComment,
       worktreeId
     ]
