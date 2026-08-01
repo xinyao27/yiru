@@ -1,5 +1,10 @@
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
-import type { DiscoveredSkill, SkillProvider, SkillSourceKind } from '~shared/skills'
+import {
+  skillPlacements,
+  type DiscoveredSkill,
+  type SkillProvider,
+  type SkillSourceKind
+} from '~shared/skills'
 
 export type SkillsFilterState = {
   query: string
@@ -29,7 +34,14 @@ export function filterSkills(
   }
   const query = normalize(filters.query)
   return skills.filter((skill) => {
-    if (filters.sourceKind !== 'all' && skill.sourceKind !== filters.sourceKind) {
+    const placements = skillPlacements(skill)
+    // Why: one row now spans every directory holding the skill, so a source or
+    // path filter has to match any of them — filtering on the row's primary
+    // placement alone would hide a repo copy behind its home twin.
+    if (
+      filters.sourceKind !== 'all' &&
+      !placements.some((placement) => placement.sourceKind === filters.sourceKind)
+    ) {
       return false
     }
     if (filters.provider !== 'all' && !skill.providers.includes(filters.provider)) {
@@ -40,25 +52,13 @@ export function filterSkills(
     }
     const haystack = [
       skill.name,
+      skill.folderName,
       skill.description ?? '',
-      skill.sourceLabel,
-      skill.directoryPath,
-      skill.providers.join(' ')
+      skill.providers.join(' '),
+      ...placements.map((placement) => `${placement.sourceLabel} ${placement.directoryPath}`)
     ]
       .join(' ')
       .toLowerCase()
     return haystack.includes(query)
   })
-}
-
-export function countSkillsBySource(
-  skills: readonly DiscoveredSkill[]
-): Record<SkillSourceKind, number> {
-  return skills.reduce<Record<SkillSourceKind, number>>(
-    (counts, skill) => {
-      counts[skill.sourceKind] += 1
-      return counts
-    },
-    { home: 0, repo: 0, bundled: 0, plugin: 0 }
-  )
 }

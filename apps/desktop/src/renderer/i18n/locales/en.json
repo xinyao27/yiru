@@ -2733,7 +2733,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "It is currently installed in:"
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2765,6 +2766,33 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "Canonical",
+          "providerAlias": "Linked",
+          "independentCopy": "Copy",
+          "externalLink": "External link",
+          "brokenLink": "Broken link",
+          "readOnly": "Read only",
+          "repoScope": "In repository",
+          "pluginCache": "From plugin",
+          "unknown": "Unclassified",
+          "canonicalCopyHint": "The shared agent skills home. Updates land here first.",
+          "providerAliasHint": "A link into the shared home, so this agent always sees the same files.",
+          "independentCopyHint": "Its own copy of the files. Editing it changes nothing anywhere else.",
+          "externalLinkHint": "A link to files outside the skill homes, owned by wherever it points.",
+          "brokenLinkHint": "The link has no target left. This agent cannot load the skill.",
+          "readOnlyHint": "These files cannot be written here, so updates will not reach it.",
+          "repoScopeHint": "Committed to a repository, so the checkout owns it rather than this machine.",
+          "pluginCacheHint": "Shipped inside an installed plugin, which owns updates to it.",
+          "unknownHint": "The host that scanned this directory did not report how it is held."
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "{{value0}} directories"
+        },
+        "SkillPlacementTable": {
+          "title": "Installed in"
         }
       },
       "sidebar": {

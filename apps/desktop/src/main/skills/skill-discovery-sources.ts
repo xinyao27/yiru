@@ -12,8 +12,20 @@ import type {
 } from '~shared/skills'
 import type { Repo } from '~shared/types'
 
-export type SkillScanRoot = Omit<SkillDiscoverySource, 'exists' | 'skippedReason'>
+export type SkillScanRoot = Omit<SkillDiscoverySource, 'exists' | 'skippedReason'> & {
+  /**
+   * Which installation scope this root belongs to.
+   *
+   * Placements only merge into one row inside a single scope: every global
+   * agent home shares `GLOBAL_SKILL_SCOPE`, each repository checkout gets its
+   * own, and so does each plugin cache. A repository's `code-review` is a
+   * different skill from the global one, and `skills remove -g` cannot touch it.
+   */
+  scopeKey: string
+}
 type SkillDiscoveryPathApi = Pick<typeof posix, 'basename' | 'join'>
+
+export const GLOBAL_SKILL_SCOPE = 'global'
 
 export function stablePathId(pathValue: string): string {
   return createHash('sha1').update(pathValue).digest('hex').slice(0, 16)
@@ -56,9 +68,10 @@ function source(
   path: string,
   sourceKind: SkillSourceKind,
   providers: SkillProvider[],
-  owner: AgentType | null
+  owner: AgentType | null,
+  scopeKey: string = GLOBAL_SKILL_SCOPE
 ): SkillScanRoot {
-  return { id, label, path, sourceKind, providers, owner }
+  return { id, label, path, sourceKind, providers, owner, scopeKey }
 }
 
 export function buildSkillDiscoverySources(
@@ -104,7 +117,8 @@ export function buildSkillDiscoverySources(
       pathApi.join(home, '.codex', 'plugins', 'cache'),
       'plugin',
       ['codex', 'agent-skills'],
-      'codex'
+      'codex',
+      'plugin:codex-plugin-cache'
     ),
     // Why: `npx skills add --global` writes into each agent's own home skills
     // directory, so coverage misses them unless we scan every provider root.
@@ -173,6 +187,9 @@ export function buildSkillDiscoverySources(
 
   for (const repoPath of projectPaths) {
     const label = `Repo ${pathApi.basename(repoPath)}`
+    // Why: one checkout's `.agents` and `.claude` roots hold the same
+    // repository-scoped skill, so they share a scope and merge into one row.
+    const scopeKey = `repo:${stablePathId(repoPath)}`
     roots.push(
       source(
         `repo-agents-${stablePathId(repoPath)}`,
@@ -180,7 +197,8 @@ export function buildSkillDiscoverySources(
         pathApi.join(repoPath, '.agents', 'skills'),
         'repo',
         ['agent-skills'],
-        null
+        null,
+        scopeKey
       ),
       source(
         `repo-claude-${stablePathId(repoPath)}`,
@@ -188,7 +206,8 @@ export function buildSkillDiscoverySources(
         pathApi.join(repoPath, '.claude', 'skills'),
         'repo',
         ['claude'],
-        'claude'
+        'claude',
+        scopeKey
       )
     )
   }

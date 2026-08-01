@@ -2710,7 +2710,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "Actualmente está instalado en:"
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2743,33 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "Copia canónica",
+          "providerAlias": "Enlazado",
+          "independentCopy": "Copia",
+          "externalLink": "Enlace externo",
+          "brokenLink": "Enlace roto",
+          "readOnly": "Solo lectura",
+          "repoScope": "En el repositorio",
+          "pluginCache": "De un complemento",
+          "unknown": "Sin clasificar",
+          "canonicalCopyHint": "La carpeta de skills compartida. Las actualizaciones llegan aquí primero.",
+          "providerAliasHint": "Un enlace a la carpeta compartida, así que este agente siempre ve los mismos archivos.",
+          "independentCopyHint": "Su propia copia de los archivos. Editarla no cambia nada en ningún otro sitio.",
+          "externalLinkHint": "Un enlace a archivos fuera de las carpetas de skills, gestionados por su destino.",
+          "brokenLinkHint": "El enlace ya no tiene destino. Este agente no puede cargar la skill.",
+          "readOnlyHint": "Aquí no se puede escribir, así que las actualizaciones no llegarán.",
+          "repoScopeHint": "Está confirmado en un repositorio, así que lo gestiona esa copia de trabajo y no este equipo.",
+          "pluginCacheHint": "Viene dentro de un complemento instalado, que gestiona sus actualizaciones.",
+          "unknownHint": "El host que analizó este directorio no informó de cómo lo guarda."
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "{{value0}} directorios"
+        },
+        "SkillPlacementTable": {
+          "title": "Instalado en"
         }
       },
       "sidebar": {

@@ -174,13 +174,17 @@ export function resolveClaudePluginSkillSources(args: {
     }
     const skillsPath = pathApi.join(install.installPath, 'skills')
     if (!roots.has(skillsPath)) {
+      const id = `claude-plugin-${stablePathId(skillsPath)}`
       roots.set(skillsPath, {
-        id: `claude-plugin-${stablePathId(skillsPath)}`,
+        id,
         label: `Claude plugin ${safePluginLabel(pluginId, pathApi)}`,
         path: skillsPath,
         sourceKind: 'plugin',
         providers: ['claude'],
-        owner: 'claude'
+        owner: 'claude',
+        // Why: each plugin ships its own skill set, so a name collision across
+        // two plugins is two different skills, not one row with two placements.
+        scopeKey: `plugin:${id}`
       })
     }
   }

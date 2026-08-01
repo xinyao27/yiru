@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import {
   skillDirectoryName,
+  skillPlacements,
   type DiscoveredSkill,
   type SkillDirectoryEntry,
   type SkillDirectoryListing
@@ -16,6 +17,7 @@ import {
 import { SkillFileTree } from './file-tree'
 import { SKILL_FILE_NAME } from './file-tree-model'
 import { formatUpdatedAt, providerLabels, sourceLabels } from './labels'
+import { SkillPlacementTable } from './placement-table'
 import { SkillFileView } from './skill-file-view'
 import { startSkillUpdateRun } from './skill-update-run-store'
 
@@ -120,6 +122,7 @@ export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
   const [listing, setListing] = useState<SkillDirectoryListing | null>(null)
   const [selectedRelativePath, setSelectedRelativePath] = useState(SKILL_FILE_NAME)
   const directoryPath = skill.directoryPath
+  const placements = skillPlacements(skill)
 
   useEffect(() => {
     let cancelled = false
@@ -180,6 +183,10 @@ export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
           <span>{skill.sourceLabel}</span>
           <span>{formatUpdatedAt(skill.updatedAt)}</span>
         </div>
+      </div>
+
+      <div className="border-border shrink-0 border-b py-1">
+        <SkillPlacementTable placements={placements} />
       </div>
 
       {listing && !listing.ok ? (

@@ -2710,7 +2710,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "現在インストールされている場所:"
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2743,33 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "正本",
+          "providerAlias": "リンク",
+          "independentCopy": "コピー",
+          "externalLink": "外部リンク",
+          "brokenLink": "リンク切れ",
+          "readOnly": "読み取り専用",
+          "repoScope": "リポジトリ内",
+          "pluginCache": "プラグイン由来",
+          "unknown": "未分類",
+          "canonicalCopyHint": "共有のスキルホームです。更新はまずここに反映されます。",
+          "providerAliasHint": "共有ホームへのリンクなので、このエージェントは常に同じファイルを見ます。",
+          "independentCopyHint": "独自のコピーです。ここを編集しても他の場所は変わりません。",
+          "externalLinkHint": "スキルホームの外へのリンクで、リンク先が管理しています。",
+          "brokenLinkHint": "リンク先が失われています。このエージェントはスキルを読み込めません。",
+          "readOnlyHint": "ここには書き込めないため、更新は届きません。",
+          "repoScopeHint": "リポジトリにコミットされており、このマシンではなくそのチェックアウトが管理します。",
+          "pluginCacheHint": "インストール済みプラグインに同梱されており、更新はプラグインが管理します。",
+          "unknownHint": "このディレクトリをスキャンしたホストが、保持形式を報告しませんでした。"
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "{{value0}} 個のディレクトリ"
+        },
+        "SkillPlacementTable": {
+          "title": "インストール先"
         }
       },
       "sidebar": {

@@ -2710,7 +2710,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "현재 설치된 위치:"
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2743,33 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "원본",
+          "providerAlias": "링크됨",
+          "independentCopy": "사본",
+          "externalLink": "외부 링크",
+          "brokenLink": "끊어진 링크",
+          "readOnly": "읽기 전용",
+          "repoScope": "저장소 안",
+          "pluginCache": "플러그인 제공",
+          "unknown": "미분류",
+          "canonicalCopyHint": "공유 스킬 홈입니다. 업데이트가 먼저 반영되는 곳입니다.",
+          "providerAliasHint": "공유 홈으로 연결된 링크라서 이 에이전트는 항상 같은 파일을 봅니다.",
+          "independentCopyHint": "자체 사본입니다. 여기를 고쳐도 다른 곳은 바뀌지 않습니다.",
+          "externalLinkHint": "스킬 홈 바깥을 가리키는 링크로, 가리키는 위치가 관리합니다.",
+          "brokenLinkHint": "링크 대상이 사라졌습니다. 이 에이전트는 스킬을 불러올 수 없습니다.",
+          "readOnlyHint": "여기에는 쓸 수 없어서 업데이트가 도달하지 않습니다.",
+          "repoScopeHint": "저장소에 커밋되어 있어 이 컴퓨터가 아니라 해당 체크아웃이 관리합니다.",
+          "pluginCacheHint": "설치된 플러그인에 포함되어 있으며 업데이트는 플러그인이 관리합니다.",
+          "unknownHint": "이 디렉터리를 스캔한 호스트가 보관 형태를 보고하지 않았습니다."
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "디렉터리 {{value0}}개"
+        },
+        "SkillPlacementTable": {
+          "title": "설치 위치"
         }
       },
       "sidebar": {

@@ -2710,7 +2710,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "当前安装在："
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2743,33 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "权威副本",
+          "providerAlias": "软链接",
+          "independentCopy": "独立拷贝",
+          "externalLink": "外部链接",
+          "brokenLink": "断链",
+          "readOnly": "只读",
+          "repoScope": "仓库内",
+          "pluginCache": "来自插件",
+          "unknown": "未分类",
+          "canonicalCopyHint": "共享的技能主目录，更新会先落到这里。",
+          "providerAliasHint": "指向共享主目录的链接，所以这个 Agent 看到的始终是同一份文件。",
+          "independentCopyHint": "自己的一份文件拷贝，改动它不会影响其他任何目录。",
+          "externalLinkHint": "指向技能主目录之外的链接，由它指向的位置负责维护。",
+          "brokenLinkHint": "链接的目标已经不存在，这个 Agent 无法加载该技能。",
+          "readOnlyHint": "这里的文件写不进去，更新不会到达它。",
+          "repoScopeHint": "已提交到仓库，由那个检出而不是本机负责维护。",
+          "pluginCacheHint": "随已安装的插件一起分发，更新由插件负责。",
+          "unknownHint": "扫描这个目录的主机没有报告它是以什么形式存在的。"
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "{{value0}} 个目录"
+        },
+        "SkillPlacementTable": {
+          "title": "安装位置"
         }
       },
       "sidebar": {
