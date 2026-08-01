@@ -7,11 +7,11 @@ import { useAppStore } from '~renderer/store'
 import { selectWorktreeDiffComments } from '~renderer/store/worktree-diff-comments-selector'
 import type { DiffComment } from '~shared/types'
 
+import { DiffCodeView, type DiffCodeViewFile } from './diff-code-view/view'
 import { getDiffViewerLargeDiffSaveAction } from './diff-viewer-large-diff-save-action'
 import type { DiffViewerProps } from './diff-viewer-props'
 import { LargeDiffFallback } from './large-diff-fallback'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
-import { PierreDiffViewer } from './pierre-diff-viewer'
 
 export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Element {
   const { onAddLineComment, relativePath, worktreeId } = props
@@ -66,6 +66,47 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
     [addDiffComment, onAddLineComment, relativePath, worktreeId]
   )
 
+  const files = useMemo<DiffCodeViewFile[]>(
+    () => [
+      {
+        source: {
+          key: props.modelKey,
+          path: relativePath,
+          // Why: the standalone viewer always renders a two-sided diff of one
+          // file, so the change type is a plain modification.
+          status: 'modified',
+          originalContent: props.originalContent,
+          modifiedContent: props.modifiedContent,
+          language: props.language
+        },
+        comments,
+        commentableLineNumbers: props.commentableLineNumbers
+      }
+    ],
+    [
+      comments,
+      props.commentableLineNumbers,
+      props.language,
+      props.modelKey,
+      props.modifiedContent,
+      props.originalContent,
+      relativePath
+    ]
+  )
+  const render = useMemo(
+    () => ({
+      isDark,
+      sideBySide: props.sideBySide,
+      wordWrap: settings?.diffWordWrap === true,
+      disableFileHeader: true
+    }),
+    [isDark, props.sideBySide, settings?.diffWordWrap]
+  )
+  const font = useMemo(
+    () => ({ fontSize, fontFamily: resolveEditorFontFamily(settings) }),
+    [fontSize, settings]
+  )
+
   if (renderLimit.limited) {
     return (
       <LargeDiffFallback
@@ -83,24 +124,18 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <PierreDiffViewer
-        modelKey={props.modelKey}
-        originalContent={props.originalContent}
-        modifiedContent={props.modifiedContent}
-        filePath={props.filePath}
-        relativePath={relativePath}
-        language={props.language}
-        sideBySide={props.sideBySide}
-        isDark={isDark}
-        fontSize={fontSize}
-        fontFamily={resolveEditorFontFamily(settings)}
-        wordWrap={settings?.diffWordWrap}
+      <DiffCodeView
+        files={files}
+        render={render}
+        font={font}
+        scrollCacheKey={props.modelKey}
+        className="h-full min-h-0"
         worktreeId={worktreeId}
-        comments={comments}
-        commentableLineNumbers={props.commentableLineNumbers}
         addLineCommentLabel={props.addLineCommentLabel}
         addLineCommentPlaceholder={props.addLineCommentPlaceholder}
-        onAddLineComment={worktreeId || onAddLineComment ? handleAddLineComment : undefined}
+        onAddLineComment={
+          worktreeId || onAddLineComment ? (_path, args) => handleAddLineComment(args) : undefined
+        }
         onDeleteComment={
           worktreeId
             ? (commentId) => {
