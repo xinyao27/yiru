@@ -6,7 +6,7 @@ import {
   type CodeViewReactOptions,
   type DiffLineAnnotation
 } from '@pierre/diffs/react'
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
@@ -52,6 +52,11 @@ export type DiffCodeViewFile = {
  */
 export type DiffCodeViewHeaderRenderer = (file: DiffCodeViewFile) => React.ReactNode
 
+/** Lets a surrounding surface drive the shared scroller. */
+export type DiffCodeViewHandle = {
+  scrollToFile: (fileKey: string) => void
+}
+
 type OpenComposer = {
   itemId: string
   lineNumber: number
@@ -95,7 +100,8 @@ export function DiffCodeView({
   onPendingScrollConsumed,
   scrollCacheKey,
   className,
-  renderFileHeader
+  renderFileHeader,
+  viewRef
 }: {
   files: readonly DiffCodeViewFile[]
   render: DiffCodeViewRenderAppearance
@@ -116,6 +122,7 @@ export function DiffCodeView({
   scrollCacheKey?: string
   className?: string
   renderFileHeader?: DiffCodeViewHeaderRenderer
+  viewRef?: React.Ref<DiffCodeViewHandle>
 }): React.JSX.Element {
   const handleRef = useRef<CodeViewHandle<DiffCodeViewAnnotation> | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -253,6 +260,16 @@ export function DiffCodeView({
       return file && renderFileHeader ? renderFileHeader(file) : null
     },
     [fileById, renderFileHeader]
+  )
+
+  useImperativeHandle(
+    viewRef,
+    () => ({
+      scrollToFile: (fileKey: string) => {
+        handleRef.current?.scrollTo({ type: 'item', id: fileKey, align: 'start' })
+      }
+    }),
+    []
   )
 
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
