@@ -5979,7 +5979,9 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
       if (selectedWorktreeIds.has(worktree.id) && selectedWorktreeIds.size > 1) {
         return selectedWorktrees
       }
-      setSelectedWorktreeIds(new Set([worktree.id]))
+      // Why: right-clicking outside a batch scopes the menu to one card without
+      // selecting it — the menu is already anchored to that card, and a ring
+      // left behind after the menu closes reads as a second active workspace.
       setSelectionAnchorId(worktree.id)
       return [worktree]
     },
