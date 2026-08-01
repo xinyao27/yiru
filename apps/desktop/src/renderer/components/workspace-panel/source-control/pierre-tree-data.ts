@@ -45,9 +45,11 @@ export type SourceControlPierreTarget =
   | SourceControlPierreBranchTarget
   | SourceControlPierrePlaceholderTarget
 
+// Why: disclosure state is deliberately absent — see
+// `resolveSourceControlPierreExpandedPaths`. Keeping it out is what lets `paths`
+// stay referentially stable while the user collapses directories.
 export type SourceControlPierreTreeData = {
   canonicalPathByRowKey: Map<string, string>
-  expandedPaths: string[]
   gitStatus: PierreGitStatusEntry[]
   paths: string[]
   targetByCanonicalPath: Map<string, SourceControlPierreTarget>
@@ -80,7 +82,6 @@ function addGitStatus(
 function createTreeData(): SourceControlPierreTreeData {
   return {
     canonicalPathByRowKey: new Map(),
-    expandedPaths: [],
     gitStatus: [],
     paths: [],
     targetByCanonicalPath: new Map()
@@ -88,22 +89,7 @@ function createTreeData(): SourceControlPierreTreeData {
 }
 
 function finalizeTreeData(data: SourceControlPierreTreeData): SourceControlPierreTreeData {
-  const expandedPaths = new Set(data.expandedPaths)
-  for (const [canonicalPath, target] of data.targetByCanonicalPath) {
-    if (target.kind !== 'directory' && !(target.kind === 'uncommitted' && target.isSubmodule)) {
-      continue
-    }
-    let separatorIndex = 0
-    while ((separatorIndex = canonicalPath.indexOf('/', separatorIndex)) >= 0) {
-      const ancestorPath = canonicalPath.slice(0, separatorIndex + 1)
-      separatorIndex += 1
-      if (ancestorPath !== canonicalPath && !data.targetByCanonicalPath.has(ancestorPath)) {
-        expandedPaths.add(ancestorPath)
-      }
-    }
-  }
   data.paths = [...new Set(data.paths)]
-  data.expandedPaths = [...expandedPaths]
   return data
 }
 
@@ -121,8 +107,7 @@ function addPlaceholder(
 function addImplicitDirectoryTargets(
   data: SourceControlPierreTreeData,
   entry: GitStatusEntry,
-  rootPath: string,
-  collapsedDirectoryKeys: ReadonlySet<string>
+  rootPath: string
 ): void {
   const normalizedPath = toCanonicalFilePath(entry.path)
   let separatorIndex = rootPath.length
@@ -132,23 +117,17 @@ function addImplicitDirectoryTargets(
     if (data.targetByCanonicalPath.has(canonicalPath)) {
       continue
     }
-    const collapseKey = `dir::${entry.area}::${relativePath}`
     data.targetByCanonicalPath.set(canonicalPath, {
       kind: 'directory',
       relativePath,
-      collapseKey
+      collapseKey: `dir::${entry.area}::${relativePath}`
     })
-    if (!collapsedDirectoryKeys.has(collapseKey)) {
-      data.expandedPaths.push(canonicalPath)
-    }
   }
 }
 
 function addUncommittedEntry(
   data: SourceControlPierreTreeData,
   entry: GitStatusEntry,
-  collapsedDirectoryKeys: ReadonlySet<string>,
-  expandedSubmoduleKeys: ReadonlySet<string>,
   submoduleStatusByKey: Readonly<Record<string, SubmoduleStatusState>>
 ): void {
   const isSubmodule = isExpandableSubmoduleEntry(entry)
@@ -164,11 +143,7 @@ function addUncommittedEntry(
     return
   }
 
-  const expansionKey = getSubmoduleExpansionKey(entry)
-  if (expandedSubmoduleKeys.has(expansionKey)) {
-    data.expandedPaths.push(canonicalPath)
-  }
-  const state = submoduleStatusByKey[expansionKey]
+  const state = submoduleStatusByKey[getSubmoduleExpansionKey(entry)]
   if (!state || state.status === 'loading') {
     addPlaceholder(data, canonicalPath, SUBMODULE_LOADING_LABEL, SUBMODULE_LOADING_LABEL)
     return
@@ -185,32 +160,18 @@ function addUncommittedEntry(
   const rootPath = normalizeRelativePath(entry.path)
   for (const innerEntry of state.entries) {
     const childEntry = buildSubmoduleChildEntry(entry.path, innerEntry, entry.area)
-    addImplicitDirectoryTargets(data, childEntry, rootPath, collapsedDirectoryKeys)
-    addUncommittedEntry(
-      data,
-      childEntry,
-      collapsedDirectoryKeys,
-      expandedSubmoduleKeys,
-      submoduleStatusByKey
-    )
+    addImplicitDirectoryTargets(data, childEntry, rootPath)
+    addUncommittedEntry(data, childEntry, submoduleStatusByKey)
   }
 }
 
 function addUncommittedNode(
   data: SourceControlPierreTreeData,
   node: SourceControlTreeNode<GitStatusEntry>,
-  collapsedDirectoryKeys: ReadonlySet<string>,
-  expandedSubmoduleKeys: ReadonlySet<string>,
   submoduleStatusByKey: Readonly<Record<string, SubmoduleStatusState>>
 ): void {
   if (node.type === 'file') {
-    addUncommittedEntry(
-      data,
-      node.entry,
-      collapsedDirectoryKeys,
-      expandedSubmoduleKeys,
-      submoduleStatusByKey
-    )
+    addUncommittedEntry(data, node.entry, submoduleStatusByKey)
     return
   }
 
@@ -222,43 +183,25 @@ function addUncommittedNode(
     collapseKey: node.key,
     node
   })
-  if (!collapsedDirectoryKeys.has(node.key)) {
-    data.expandedPaths.push(canonicalPath)
-  }
   for (const child of node.children) {
-    addUncommittedNode(
-      data,
-      child,
-      collapsedDirectoryKeys,
-      expandedSubmoduleKeys,
-      submoduleStatusByKey
-    )
+    addUncommittedNode(data, child, submoduleStatusByKey)
   }
 }
 
 export function buildUncommittedPierreTreeData(args: {
   roots: SourceControlTreeNode<GitStatusEntry>[]
-  collapsedDirectoryKeys: ReadonlySet<string>
-  expandedSubmoduleKeys: ReadonlySet<string>
   submoduleStatusByKey: Readonly<Record<string, SubmoduleStatusState>>
 }): SourceControlPierreTreeData {
   const data = createTreeData()
   for (const root of args.roots) {
-    addUncommittedNode(
-      data,
-      root,
-      args.collapsedDirectoryKeys,
-      args.expandedSubmoduleKeys,
-      args.submoduleStatusByKey
-    )
+    addUncommittedNode(data, root, args.submoduleStatusByKey)
   }
   return finalizeTreeData(data)
 }
 
 function addBranchNode(
   data: SourceControlPierreTreeData,
-  node: SourceControlTreeNode<GitBranchChangeEntry, 'branch'>,
-  collapsedDirectoryKeys: ReadonlySet<string>
+  node: SourceControlTreeNode<GitBranchChangeEntry, 'branch'>
 ): void {
   if (node.type === 'file') {
     const canonicalPath = toCanonicalFilePath(node.entry.path)
@@ -275,21 +218,17 @@ function addBranchNode(
     relativePath: node.path,
     collapseKey: node.key
   })
-  if (!collapsedDirectoryKeys.has(node.key)) {
-    data.expandedPaths.push(canonicalPath)
-  }
   for (const child of node.children) {
-    addBranchNode(data, child, collapsedDirectoryKeys)
+    addBranchNode(data, child)
   }
 }
 
 export function buildBranchPierreTreeData(
-  roots: SourceControlTreeNode<GitBranchChangeEntry, 'branch'>[],
-  collapsedDirectoryKeys: ReadonlySet<string>
+  roots: SourceControlTreeNode<GitBranchChangeEntry, 'branch'>[]
 ): SourceControlPierreTreeData {
   const data = createTreeData()
   for (const root of roots) {
-    addBranchNode(data, root, collapsedDirectoryKeys)
+    addBranchNode(data, root)
   }
   return finalizeTreeData(data)
 }

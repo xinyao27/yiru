@@ -1,6 +1,6 @@
 import type { DiffOnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor } from 'monaco-editor'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MutableRefObject, ReactNode } from 'react'
 import {
   getDiffCommentPopoverLeft,
@@ -30,7 +30,7 @@ import { useDiffSectionCommentActions } from './use-comment-actions'
 import { useDiffSectionFallbackCleanup } from './use-fallback-cleanup'
 import { useDiffSectionLayoutMetrics } from './use-layout-metrics'
 
-export function DiffSectionItem({
+function DiffSectionItemView({
   section,
   index,
   isBranchMode,
@@ -442,3 +442,9 @@ export function DiffSectionItem({
     </div>
   )
 }
+
+// Why: a combined diff keeps many of these mounted, each owning a Monaco diff
+// editor. The viewer re-renders whenever any section finishes loading or is
+// remeasured, so without this every mounted editor re-rendered for one
+// section's change. Sections keep their identity across those updates.
+export const DiffSectionItem = memo(DiffSectionItemView)

@@ -22,6 +22,7 @@ across smaller files would make the lifecycle edges harder to reason about and
 more error-prone than keeping the whole viewer flow together. */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset list measurement and generation state in lockstep with external scroll restoration. */
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react'
+import type { ReactNode } from 'react'
 import { toast } from 'sonner'
 import {
   getLegendListScrollElement,
@@ -108,11 +109,11 @@ type CachedCombinedDiffViewState = {
   sideBySide: boolean
 }
 
-type CombinedDiffScrollThumb = {
-  visible: boolean
-  top: number
-  height: number
-}
+// Why: the track starts hidden and `updateCombinedDiffScrollbar` reveals it in
+// the layout phase, so the overlay never flashes over a non-scrolling viewer.
+const COMBINED_DIFF_SCROLLBAR_TRACK_HIDDEN_STYLE = {
+  display: 'none'
+} satisfies React.CSSProperties
 
 const combinedDiffViewStateCache = new Map<string, CachedCombinedDiffViewState>()
 const combinedDiffScrollTopCache = new Map<string, number>()
@@ -295,11 +296,13 @@ export default function CombinedDiffViewer({
   // commit; effects that observe it have to re-run when the element arrives.
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-  const [scrollThumb, setScrollThumb] = useState<CombinedDiffScrollThumb>({
-    visible: false,
-    top: 0,
-    height: COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT
-  })
+  // Why: the overlay scrollbar is driven by a native `scroll` listener, a
+  // ResizeObserver and pointer drags. Holding its geometry in React state made
+  // each of those re-render the viewer — and with it every mounted Monaco diff
+  // section — so a Monaco relayout could feed the observer back into another
+  // render. Position the thumb imperatively; it renders nothing else.
+  const scrollbarTrackRef = useRef<HTMLDivElement | null>(null)
+  const scrollbarThumbRef = useRef<HTMLDivElement | null>(null)
   const scrollOffsetRef = useRef(combinedDiffScrollTopCache.get(viewStateKey) ?? 0)
   const activeScrollbarDragCleanupRef = useRef<CombinedDiffScrollbarDragCleanup | null>(null)
   const loadedIndicesRef = useRef<Set<number>>(new Set())
@@ -309,17 +312,14 @@ export default function CombinedDiffViewer({
   const loadSectionRef = useRef<(index: number) => Promise<void>>(async () => {})
   const retrySectionRef = useRef<(index: number) => void>(() => {})
   const updateCombinedDiffScrollbar = useCallback(() => {
+    const track = scrollbarTrackRef.current
+    const thumb = scrollbarThumbRef.current
+    if (!track || !thumb) {
+      return
+    }
     const container = scrollContainerRef.current
     if (!container || container.scrollHeight <= container.clientHeight + 1) {
-      setScrollThumb((prev) =>
-        prev.visible
-          ? {
-              visible: false,
-              top: 0,
-              height: COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT
-            }
-          : prev
-      )
+      track.style.display = 'none'
       return
     }
 
@@ -333,7 +333,9 @@ export default function CombinedDiffViewer({
       )
     )
     const top = ((trackHeight - height) * container.scrollTop) / maxScrollTop
-    setScrollThumb({ visible: true, top, height })
+    track.style.display = ''
+    thumb.style.top = `${top}px`
+    thumb.style.height = `${height}px`
   }, [])
 
   const clearNotesCopiedResetTimer = useCallback((): void => {
@@ -810,6 +812,26 @@ export default function CombinedDiffViewer({
   const getCombinedDiffSectionItemType = useCallback(
     (section: DiffSection): string => (section.collapsed ? 'collapsed' : 'expanded'),
     []
+  )
+  // Why: DiffSectionItem is memoized; an inline arrow here would hand every
+  // mounted section a new prop on each viewer render and defeat that.
+  const renderSectionHeaderTrailingContent = useCallback(
+    (section: DiffSection): ReactNode => {
+      const hasFileNotes = diffCommentsForWorktree.some(
+        (comment) => comment.filePath === section.path
+      )
+      return hasFileNotes ? (
+        <DiffNotesSendMenu
+          worktreeId={file.worktreeId}
+          groupId={activeGroupId ?? file.worktreeId}
+          comments={diffCommentsForWorktree}
+          filePath={section.path}
+          showFileScope
+          triggerClassName="p-0.5 can-hover:opacity-0 group-hover:opacity-100"
+        />
+      ) : null
+    },
+    [activeGroupId, diffCommentsForWorktree, file.worktreeId]
   )
   const getCombinedDiffFixedItemSize = useCallback(
     (_section: DiffSection, _index: number, type: string | undefined): number | undefined =>
@@ -1661,37 +1683,23 @@ export default function CombinedDiffViewer({
                 setSections={setSections}
                 modifiedEditorsRef={modifiedEditorsRef}
                 handleSectionSaveRef={handleSectionSaveRef}
-                renderHeaderTrailingContent={(section) => {
-                  const fileNotes = diffCommentsForWorktree.filter(
-                    (comment) => comment.filePath === section.path
-                  )
-                  return fileNotes.length > 0 ? (
-                    <DiffNotesSendMenu
-                      worktreeId={file.worktreeId}
-                      groupId={activeGroupId ?? file.worktreeId}
-                      comments={diffCommentsForWorktree}
-                      filePath={section.path}
-                      showFileScope
-                      triggerClassName="p-0.5 can-hover:opacity-0 group-hover:opacity-100"
-                    />
-                  ) : null
-                }}
+                renderHeaderTrailingContent={renderSectionHeaderTrailingContent}
               />
             )}
           />
-          {scrollThumb.visible && (
+          <div
+            ref={scrollbarTrackRef}
+            aria-hidden="true"
+            className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
+            style={COMBINED_DIFF_SCROLLBAR_TRACK_HIDDEN_STYLE}
+            onPointerDown={handleCombinedDiffScrollbarPointerDown}
+          >
             <div
-              aria-hidden="true"
-              className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
-              onPointerDown={handleCombinedDiffScrollbarPointerDown}
-            >
-              <div
-                data-combined-diff-scrollbar-thumb
-                className="bg-muted-foreground/30 absolute right-0 left-1"
-                style={{ top: scrollThumb.top, height: scrollThumb.height }}
-              />
-            </div>
-          )}
+              ref={scrollbarThumbRef}
+              data-combined-diff-scrollbar-thumb
+              className="bg-muted-foreground/30 absolute right-0 left-1"
+            />
+          </div>
         </div>
       </div>
       <Dialog
