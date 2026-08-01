@@ -162,7 +162,7 @@ import {
   getLogicalRepoOrderRankById,
   getSidebarOrderedRepoHeaderIdsByBucket
 } from './project-header-drop'
-import { getProjectWorkspaceRails, ProjectWorkspaceRailEnd } from './project-workspace-rail'
+import { getProjectWorkspaceRails, ProjectWorkspaceRailRow } from './project-workspace-rail'
 import {
   REPO_HEADER_ACTION_BUTTON_CLASS,
   REPO_HEADER_ACTION_REVEAL_CLASS
@@ -1306,25 +1306,6 @@ function areWorkspaceSidebarRowsEqual(
     case 'coworking-windows-firewall':
       return current.kind === 'coworking-windows-firewall'
   }
-}
-
-function WorkspaceRail({
-  leftPx,
-  elbowWidthPx
-}: {
-  leftPx: number
-  elbowWidthPx?: number
-}): React.JSX.Element {
-  if (elbowWidthPx !== undefined) {
-    return <ProjectWorkspaceRailEnd leftPx={leftPx} elbowWidthPx={elbowWidthPx} />
-  }
-  return (
-    <span
-      aria-hidden="true"
-      className="bg-sidebar-border pointer-events-none absolute -top-0.5 bottom-0 z-10 w-px"
-      style={{ left: leftPx }}
-    />
-  )
 }
 
 const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
@@ -3945,9 +3926,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 className="relative"
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail
+                  <ProjectWorkspaceRailRow
                     leftPx={projectRail.leftPx}
                     elbowWidthPx={projectRail.elbowWidthPx}
+                    endsSection={projectRail.endsSection}
                   />
                 ) : null}
                 <CoworkingSidebarProjectedRow
@@ -4863,9 +4845,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 }}
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail
+                  <ProjectWorkspaceRailRow
                     leftPx={projectRail.leftPx}
                     elbowWidthPx={projectRail.elbowWidthPx}
+                    endsSection={projectRail.endsSection}
                   />
                 ) : null}
                 <div className="overflow-visible">
@@ -5000,9 +4983,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 }
               >
                 {projectRail?.segment === 'workspace' ? (
-                  <WorkspaceRail
+                  <ProjectWorkspaceRailRow
                     leftPx={projectRail.leftPx}
                     elbowWidthPx={projectRail.elbowWidthPx}
+                    endsSection={projectRail.endsSection}
                   />
                 ) : null}
                 <div
@@ -5077,9 +5061,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
               }
             >
               {projectRail?.segment === 'workspace' ? (
-                <WorkspaceRail
+                <ProjectWorkspaceRailRow
                   leftPx={projectRail.leftPx}
                   elbowWidthPx={projectRail.elbowWidthPx}
+                  endsSection={projectRail.endsSection}
                 />
               ) : null}
               {renderWorktreeRow(row, false)}

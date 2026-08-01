@@ -1481,7 +1481,12 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         </div>
       )}
-      {showInlineAgentRail ? <InlineAgentRail cardPaddingLeft={cardPaddingLeft ?? '0px'} /> : null}
+      {showInlineAgentRail ? (
+        <InlineAgentRail
+          cardPaddingLeft={cardPaddingLeft ?? '0px'}
+          agents={compactInlineAgentRows}
+        />
+      ) : null}
       {parentCardBodyWithHoverDetails}
 
       {lineageChildren ? (
