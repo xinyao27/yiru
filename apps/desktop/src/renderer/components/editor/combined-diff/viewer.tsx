@@ -552,7 +552,11 @@ export default function CombinedDiffViewer({
         removed: 'removed' in entry ? entry.removed : undefined,
         originalContent: '',
         modifiedContent: '',
-        collapsed: combinedDiffCollapsedPreference ?? false,
+        // Why: opening the panel used to mount a Monaco diff editor per section
+        // before the user had asked for any of them. Start as a file list; the
+        // header's expand-all and each row's disclosure load on demand, and the
+        // session-sticky preference still wins once the user states one.
+        collapsed: combinedDiffCollapsedPreference ?? true,
         loading: true,
         error: undefined,
         dirty: false,
