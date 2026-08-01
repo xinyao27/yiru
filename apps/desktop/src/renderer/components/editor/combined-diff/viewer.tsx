@@ -26,7 +26,7 @@ import type { ReactNode } from 'react'
 import { toast } from 'sonner'
 import {
   getLegendListScrollElement,
-  LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS
+  LEGEND_LIST_SCROLL_AREA_PROPS
 } from '~renderer/components/sidebar/list-scroll-area'
 import { Button } from '~renderer/components/ui/button'
 import {
@@ -69,7 +69,7 @@ import { formatDiffComments } from '../diff-comments-format'
 import { DiffNotesSendMenu } from '../diff-notes-send-menu'
 import { removeDiffSectionMeasuredHeight } from '../diff-section/height-cache'
 import { DiffSectionItem } from '../diff-section/item'
-import { DIFF_SECTION_HEADER_HEIGHT } from '../diff-section/layout'
+import { DIFF_SECTION_COLLAPSED_ROW_HEIGHT } from '../diff-section/layout'
 import type { DiffSection } from '../diff-section/types'
 import { getLargeDiffRenderLimit } from '../large-diff-render-limit'
 import { getStoredTextDiffContent, getStoredTextDiffResult } from '../large-diff-section-content'
@@ -84,10 +84,6 @@ import {
 } from './entries'
 import { getInitialCombinedDiffSectionLoadIndices } from './initial-section-load'
 import { createCombinedDiffLoadScheduler } from './load-scheduler'
-import {
-  beginCombinedDiffScrollbarDrag,
-  type CombinedDiffScrollbarDragCleanup
-} from './scrollbar-drag'
 import { combinedDiffSectionsMatchEntryMetadata } from './section-cache-match'
 import { getCombinedDiffSectionConnectionId } from './section-connection'
 import {
@@ -108,12 +104,6 @@ type CachedCombinedDiffViewState = {
   scrollTop: number
   sideBySide: boolean
 }
-
-// Why: the track starts hidden and `updateCombinedDiffScrollbar` reveals it in
-// the layout phase, so the overlay never flashes over a non-scrolling viewer.
-const COMBINED_DIFF_SCROLLBAR_TRACK_HIDDEN_STYLE = {
-  display: 'none'
-} satisfies React.CSSProperties
 
 const combinedDiffViewStateCache = new Map<string, CachedCombinedDiffViewState>()
 const combinedDiffScrollTopCache = new Map<string, number>()
@@ -176,7 +166,6 @@ const COMBINED_DIFF_DRAW_DISTANCE_PX = 800
 // Why: LegendList 3.3.3 takes one flat estimate for every unmeasured row; a
 // mid-size collapsed-context diff is the shape most combined diffs are made of.
 const COMBINED_DIFF_ESTIMATED_SECTION_HEIGHT = 220
-const COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT = 64
 const EMPTY_GIT_STATUS_ENTRIES: GitStatusEntry[] = []
 const EMPTY_GIT_BRANCH_ENTRIES: GitBranchChangeEntry[] = []
 let combinedDiffCollapsedPreference: boolean | null = null
@@ -296,57 +285,18 @@ export default function CombinedDiffViewer({
   // commit; effects that observe it have to re-run when the element arrives.
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-  // Why: the overlay scrollbar is driven by a native `scroll` listener, a
-  // ResizeObserver and pointer drags. Holding its geometry in React state made
-  // each of those re-render the viewer — and with it every mounted Monaco diff
-  // section — so a Monaco relayout could feed the observer back into another
-  // render. Position the thumb imperatively; it renders nothing else.
-  const scrollbarTrackRef = useRef<HTMLDivElement | null>(null)
-  const scrollbarThumbRef = useRef<HTMLDivElement | null>(null)
   const scrollOffsetRef = useRef(combinedDiffScrollTopCache.get(viewStateKey) ?? 0)
-  const activeScrollbarDragCleanupRef = useRef<CombinedDiffScrollbarDragCleanup | null>(null)
   const loadedIndicesRef = useRef<Set<number>>(new Set())
   const loadingIndicesRef = useRef<Set<number>>(new Set())
   const sectionsRef = useRef<DiffSection[]>([])
   const generationRef = useRef(0)
   const loadSectionRef = useRef<(index: number) => Promise<void>>(async () => {})
   const retrySectionRef = useRef<(index: number) => void>(() => {})
-  const updateCombinedDiffScrollbar = useCallback(() => {
-    const track = scrollbarTrackRef.current
-    const thumb = scrollbarThumbRef.current
-    if (!track || !thumb) {
-      return
-    }
-    const container = scrollContainerRef.current
-    if (!container || container.scrollHeight <= container.clientHeight + 1) {
-      track.style.display = 'none'
-      return
-    }
-
-    const trackHeight = Math.max(1, container.clientHeight - 8)
-    const maxScrollTop = Math.max(1, container.scrollHeight - container.clientHeight)
-    const height = Math.min(
-      trackHeight,
-      Math.max(
-        COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT,
-        (container.clientHeight / container.scrollHeight) * trackHeight
-      )
-    )
-    const top = ((trackHeight - height) * container.scrollTop) / maxScrollTop
-    track.style.display = ''
-    thumb.style.top = `${top}px`
-    thumb.style.height = `${height}px`
-  }, [])
-
   const clearNotesCopiedResetTimer = useCallback((): void => {
     if (notesCopiedResetTimerRef.current !== null) {
       window.clearTimeout(notesCopiedResetTimerRef.current)
       notesCopiedResetTimerRef.current = null
     }
-  }, [])
-
-  const cleanupActiveScrollbarDrag = useCallback((): void => {
-    activeScrollbarDragCleanupRef.current?.()
   }, [])
 
   const setCombinedDiffScrollContainer = useCallback(
@@ -359,21 +309,17 @@ export default function CombinedDiffViewer({
         // Why: copied feedback is tied to the combined-diff surface lifetime;
         // the scroll-root unmount is the same boundary that disables stale feedback.
         clearNotesCopiedResetTimer()
-        cleanupActiveScrollbarDrag()
-        return
       }
-      window.requestAnimationFrame(updateCombinedDiffScrollbar)
     },
-    [cleanupActiveScrollbarDrag, clearNotesCopiedResetTimer, updateCombinedDiffScrollbar]
+    [clearNotesCopiedResetTimer]
   )
 
   useEffect(() => {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
-      cleanupActiveScrollbarDrag()
     }
-  }, [cleanupActiveScrollbarDrag])
+  }, [])
   const loadSchedulerRef = useRef(
     createCombinedDiffLoadScheduler({
       loadSection: (index) => loadSectionRef.current(index)
@@ -839,10 +785,10 @@ export default function CombinedDiffViewer({
   )
   const getCombinedDiffFixedItemSize = useCallback(
     (_section: DiffSection, _index: number, type: string | undefined): number | undefined =>
-      // Why: a collapsed section is exactly its header. Every other row's height
-      // comes from Monaco, and a wrong fixed size is never corrected by
-      // measurement, so those rows must stay measured.
-      type === 'collapsed' ? DIFF_SECTION_HEADER_HEIGHT : undefined,
+      // Why: a collapsed section is exactly its header plus the row rule. Every
+      // other row's height comes from Monaco, and a wrong fixed size is never
+      // corrected by measurement, so those rows must stay measured.
+      type === 'collapsed' ? DIFF_SECTION_COLLAPSED_ROW_HEIGHT : undefined,
     []
   )
 
@@ -1161,7 +1107,6 @@ export default function CombinedDiffViewer({
       const existing = combinedDiffViewStateCache.get(viewStateKey)
       scrollOffsetRef.current = scrollTop
       setWithLRU(combinedDiffScrollTopCache, viewStateKey, scrollTop)
-      updateCombinedDiffScrollbar()
       if (!existing || existing.entrySignature !== entrySignature) {
         return
       }
@@ -1176,20 +1121,12 @@ export default function CombinedDiffViewer({
     // must detach in the layout phase so the outgoing tab snapshots its last
     // real scroll position before the soon-to-be-removed container emits a
     // reset-to-top scroll event during teardown.
-    updateCombinedDiffScrollbar()
-    const resizeObserver = new ResizeObserver(updateCombinedDiffScrollbar)
-    resizeObserver.observe(container)
     container.addEventListener('scroll', handleScroll)
     return () => {
       updateCachedScrollPosition(scrollOffsetRef.current)
-      resizeObserver.disconnect()
       container.removeEventListener('scroll', handleScroll)
     }
-  }, [entrySignature, scrollContainer, updateCombinedDiffScrollbar, viewStateKey])
-
-  useLayoutEffect(() => {
-    updateCombinedDiffScrollbar()
-  }, [sectionHeights, sections, updateCombinedDiffScrollbar])
+  }, [entrySignature, scrollContainer, viewStateKey])
 
   const openAlternateDiff = useCallback(() => {
     if (!file.combinedAlternate) {
@@ -1207,72 +1144,6 @@ export default function CombinedDiffViewer({
       })
     }
   }, [branchSummary, file, openAllDiffs, openBranchAllDiffs])
-
-  const handleCombinedDiffScrollbarPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      const container = scrollContainerRef.current
-      if (!container) {
-        return
-      }
-
-      event.preventDefault()
-      const track = event.currentTarget
-      const thumb =
-        event.target instanceof HTMLElement
-          ? event.target.closest('[data-combined-diff-scrollbar-thumb]')
-          : null
-
-      const getLiveThumbHeight = (): number => {
-        const trackHeight = Math.max(1, track.getBoundingClientRect().height)
-        return Math.min(
-          trackHeight,
-          Math.max(
-            COMBINED_DIFF_SCROLLBAR_THUMB_MIN_HEIGHT,
-            (container.clientHeight / container.scrollHeight) * trackHeight
-          )
-        )
-      }
-
-      const getScrollTopForPointer = (clientY: number, grabOffset: number): number => {
-        const trackRect = track.getBoundingClientRect()
-        const trackHeight = Math.max(1, trackRect.height)
-        const thumbHeight = getLiveThumbHeight()
-        const maxThumbTop = Math.max(1, trackHeight - thumbHeight)
-        const maxScrollTop = Math.max(1, container.scrollHeight - container.clientHeight)
-        const thumbTop = Math.max(0, Math.min(maxThumbTop, clientY - trackRect.top - grabOffset))
-        return (thumbTop / maxThumbTop) * maxScrollTop
-      }
-
-      const grabOffset = thumb
-        ? event.clientY - thumb.getBoundingClientRect().top
-        : getLiveThumbHeight() / 2
-
-      if (!thumb) {
-        container.scrollTop = getScrollTopForPointer(event.clientY, grabOffset)
-        updateCombinedDiffScrollbar()
-      }
-
-      const handlePointerMove = (moveEvent: PointerEvent): void => {
-        moveEvent.preventDefault()
-        container.scrollTop = getScrollTopForPointer(moveEvent.clientY, grabOffset)
-        updateCombinedDiffScrollbar()
-      }
-      cleanupActiveScrollbarDrag()
-      let cleanupPointerDrag: CombinedDiffScrollbarDragCleanup
-      cleanupPointerDrag = beginCombinedDiffScrollbarDrag({
-        track,
-        pointerId: event.pointerId,
-        onPointerMove: handlePointerMove,
-        onEnd: () => {
-          if (activeScrollbarDragCleanupRef.current === cleanupPointerDrag) {
-            activeScrollbarDragCleanupRef.current = null
-          }
-        }
-      })
-      activeScrollbarDragCleanupRef.current = cleanupPointerDrag
-    },
-    [cleanupActiveScrollbarDrag, updateCombinedDiffScrollbar]
-  )
 
   const handleCopyNotes = useCallback(async (): Promise<void> => {
     if (diffCommentCount === 0) {
@@ -1650,10 +1521,9 @@ export default function CombinedDiffViewer({
         {commitHeader}
         <div className="relative min-h-0 min-w-0 flex-1">
           <LegendList<DiffSection>
-            {...LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS}
+            {...LEGEND_LIST_SCROLL_AREA_PROPS}
             ref={listRef}
             refScrollView={setCombinedDiffScrollContainer}
-            className="combined-diff-scroll-container pr-5"
             data={sections}
             keyExtractor={getCombinedDiffSectionItemKey}
             getItemType={getCombinedDiffSectionItemType}
@@ -1691,19 +1561,6 @@ export default function CombinedDiffViewer({
               />
             )}
           />
-          <div
-            ref={scrollbarTrackRef}
-            aria-hidden="true"
-            className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
-            style={COMBINED_DIFF_SCROLLBAR_TRACK_HIDDEN_STYLE}
-            onPointerDown={handleCombinedDiffScrollbarPointerDown}
-          >
-            <div
-              ref={scrollbarThumbRef}
-              data-combined-diff-scrollbar-thumb
-              className="bg-muted-foreground/30 absolute right-0 left-1"
-            />
-          </div>
         </div>
       </div>
       <Dialog

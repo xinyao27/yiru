@@ -5,9 +5,16 @@ import { countLinesLikeSplit, type DiffLineCounts } from '../large-diff-render-l
 const DIFF_LINE_HEIGHT = 19
 const DIFF_SECTION_PADDING_HEIGHT = 19
 const MIN_DIFF_SECTION_BODY_HEIGHT = 60
-/** A collapsed section renders its header and nothing else, so this is also the
- *  exact row height the combined diff can hand a virtualizer without measuring. */
-export const DIFF_SECTION_HEADER_HEIGHT = 28
+// `px-3 py-1.5 text-xs` on the header row: 6 + 16 + 6.
+const DIFF_SECTION_HEADER_HEIGHT = 28
+// Why: the section root carries the `border-b` rule between rows, and a fixed
+// row size that omits it makes every collapsed row overlap the next by a pixel.
+const DIFF_SECTION_ROW_RULE_HEIGHT = 1
+/** A collapsed section renders its header plus the row rule and nothing else, so
+ *  this is the exact row height the combined diff can hand a virtualizer without
+ *  measuring. Keep it in step with `DiffSectionHeader` and the section root. */
+export const DIFF_SECTION_COLLAPSED_ROW_HEIGHT =
+  DIFF_SECTION_HEADER_HEIGHT + DIFF_SECTION_ROW_RULE_HEIGHT
 const DIFF_UNCHANGED_CONTEXT_LINE_ESTIMATE = 12
 const MAX_UNMEASURED_TEXT_BODY_LINES = 80
 const LARGE_DIFF_FALLBACK_BODY_HEIGHT = 160
