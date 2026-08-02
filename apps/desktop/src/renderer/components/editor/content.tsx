@@ -30,14 +30,11 @@ import {
 } from './conflict-components'
 import { getDiffContentSignature } from './diff-content-signature'
 import { ExternalFileChangeBanner } from './external-file-change-banner'
+import { findGitConflictBlocks, getGitConflictMarkerLineLength } from './git-conflict-blocks'
 import { extractFrontMatter, prependFrontMatter } from './markdown-frontmatter'
 import { getMarkdownRenderMode } from './markdown-render-mode'
 import { getMarkdownRichModeUnsupportedMessage } from './markdown-rich-mode'
 import { exceedsMarkdownRichModeSizeLimit } from './markdown-rich-size-limit'
-import {
-  findGitConflictBlocks,
-  getGitConflictMarkerLineLength
-} from './monaco-conflict-decorations'
 import { RichMarkdownErrorBoundary } from './rich-markdown/error-boundary'
 import { useMarkdownDocuments } from './use-markdown-documents'
 
@@ -191,7 +188,7 @@ export function EditorContent({
     viewStateScopeId === activeFile.id
       ? `${activeFile.id}:preview`
       : `${activeFile.id}::${viewStateScopeId}:preview`
-  const monacoLanguage = resolvedLanguage === 'notebook' ? 'json' : resolvedLanguage
+  const codeLanguage = resolvedLanguage === 'notebook' ? 'json' : resolvedLanguage
 
   const openConflictReviewFile = useAppStore((s) => s.openConflictReviewFile)
   const openConflictReview = useAppStore((s) => s.openConflictReview)
@@ -327,7 +324,7 @@ export function EditorContent({
       viewStateKey={editorViewStateKey}
       relativePath={activeFile.relativePath}
       content={editBuffers[activeFile.id] ?? fc.content}
-      language={monacoLanguage}
+      language={codeLanguage}
       // Why: read-only tabs (AI Vault View Log) block edits in Monaco and no-op
       // the change/save callbacks so no draft, dirty state, or write can occur —
       // mirrors the conflict-review read-only rendering pattern.
@@ -538,7 +535,7 @@ export function EditorContent({
     }
 
     const selectedLanguage = detectLanguage(contentFile.relativePath)
-    const monacoSelectedLanguage = selectedLanguage === 'notebook' ? 'json' : selectedLanguage
+    const selectedCodeLanguage = selectedLanguage === 'notebook' ? 'json' : selectedLanguage
     const selectedViewStateKey = `${contentFile.filePath}::${viewStateScopeId}:${viewStateKeySuffix}`
     const selectedContent = editBuffers[contentFile.id] ?? fc.content
 
@@ -559,7 +556,7 @@ export function EditorContent({
             viewStateKey={selectedViewStateKey}
             relativePath={contentFile.relativePath}
             content={selectedContent}
-            language={monacoSelectedLanguage}
+            language={selectedCodeLanguage}
             onContentChange={
               readOnly ? () => {} : (content) => handleContentChangeForFile(contentFile, content)
             }
@@ -778,7 +775,7 @@ export function EditorContent({
           dc={diffContents[activeFile.id]}
           modifiedContent={editBuffers[activeFile.id] ?? fc.content}
           activeConflictEntry={activeConflictEntry}
-          resolvedLanguage={monacoLanguage}
+          resolvedLanguage={codeLanguage}
           sideBySide={sideBySide}
           viewStateScopeId={viewStateScopeId}
           diffViewStateKey={diffViewStateKey}
@@ -952,7 +949,7 @@ export function EditorContent({
       modifiedContent={modifiedDiffContent}
       largeDiffRenderLimit={dc.largeDiffRenderLimit}
       largeDiffSaveContentAvailable={largeDiffSaveContentAvailable}
-      language={monacoLanguage}
+      language={codeLanguage}
       filePath={activeFile.filePath}
       relativePath={activeFile.relativePath}
       sideBySide={sideBySide}

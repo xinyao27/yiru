@@ -36,7 +36,7 @@ function focusEditorContent(): void {
   }
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
-      const textarea = document.querySelector<HTMLTextAreaElement>('.monaco-editor textarea')
+      const textarea = document.querySelector<HTMLElement>('diffs-container')
       textarea?.focus()
     })
   })

@@ -1,6 +1,6 @@
 import type { LineAnnotation, SelectedLineRange } from '@pierre/diffs'
 import type { DiffLineAnnotation } from '@pierre/diffs/react'
-import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
+import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
 
 import { PierreDiffCommentAnnotation } from '../pierre-diff-comment-annotation'
 import { PierreDiffCommentComposer } from '../pierre-diff-comment-composer'

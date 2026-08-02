@@ -1,6 +1,3 @@
-import type { editor, IRange } from 'monaco-editor'
-import { cn } from '~renderer/lib/class-names'
-
 type ConflictBlock = {
   startLine: number
   baseLine?: number
@@ -13,70 +10,6 @@ type ParsedConflictBlock = ConflictBlock & {
   baseText?: string
   separatorText: string
   endText: string
-}
-
-type ConflictSection = 'current' | 'base' | 'incoming'
-
-function getLineEndColumn(line: string): number {
-  return line.length + 1
-}
-
-function makeWholeLineRange(startLineNumber: number, endLineNumber: number): IRange {
-  return {
-    startLineNumber,
-    startColumn: 1,
-    endLineNumber,
-    endColumn: 1
-  }
-}
-
-function makeMarkerRange(lineNumber: number, line: string): IRange {
-  return {
-    startLineNumber: lineNumber,
-    startColumn: 1,
-    endLineNumber: lineNumber,
-    endColumn: getLineEndColumn(line)
-  }
-}
-
-function makeMarkerDecoration(
-  lineNumber: number,
-  line: string,
-  label: string
-): editor.IModelDeltaDecoration {
-  return {
-    range: makeMarkerRange(lineNumber, line),
-    options: {
-      isWholeLine: true,
-      className: 'yiru-conflict-marker-line',
-      linesDecorationsClassName: 'yiru-conflict-line-decoration',
-      marginClassName: 'yiru-conflict-margin',
-      hoverMessage: { value: label },
-      linesDecorationsTooltip: label,
-      after: {
-        content: ` ${label}`,
-        inlineClassName: 'yiru-conflict-marker-label'
-      }
-    }
-  }
-}
-
-function makeSectionDecoration(
-  startLineNumber: number,
-  endLineNumber: number,
-  section: ConflictSection
-): editor.IModelDeltaDecoration | null {
-  if (startLineNumber > endLineNumber) {
-    return null
-  }
-
-  return {
-    range: makeWholeLineRange(startLineNumber, endLineNumber),
-    options: {
-      isWholeLine: true,
-      className: cn('yiru-conflict-section-line', `yiru-conflict-${section}-line`)
-    }
-  }
 }
 
 export function findGitConflictBlocks(content: string): ConflictBlock[] {
@@ -167,37 +100,6 @@ export function hasGitConflictMarkers(content: string): boolean {
     return found ? false : undefined
   })
   return found
-}
-
-export function buildGitConflictDecorations(content: string): editor.IModelDeltaDecoration[] {
-  const decorations: editor.IModelDeltaDecoration[] = []
-
-  for (const block of parseGitConflictBlocks(content)) {
-    const currentEndLine = (block.baseLine ?? block.separatorLine) - 1
-    const baseStartLine = block.baseLine ? block.baseLine + 1 : null
-    const sectionDecorations = [
-      makeSectionDecoration(block.startLine + 1, currentEndLine, 'current'),
-      baseStartLine ? makeSectionDecoration(baseStartLine, block.separatorLine - 1, 'base') : null,
-      makeSectionDecoration(block.separatorLine + 1, block.endLine - 1, 'incoming')
-    ]
-
-    for (const decoration of sectionDecorations) {
-      if (decoration) {
-        decorations.push(decoration)
-      }
-    }
-
-    decorations.push(
-      makeMarkerDecoration(block.startLine, block.startText, 'Current change'),
-      ...(block.baseLine
-        ? [makeMarkerDecoration(block.baseLine, block.baseText ?? '', 'Common ancestor')]
-        : []),
-      makeMarkerDecoration(block.separatorLine, block.separatorText, 'Incoming change'),
-      makeMarkerDecoration(block.endLine, block.endText, 'End conflict')
-    )
-  }
-
-  return decorations
 }
 
 function forEachLine(

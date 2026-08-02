@@ -7,7 +7,7 @@ import {
   type DiffLineAnnotation
 } from '@pierre/diffs/react'
 import { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
+import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
   ContextMenu,

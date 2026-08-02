@@ -1,5 +1,5 @@
+import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
 import { DiffCommentCard } from '~renderer/components/diff-comments/diff-comment-card'
-import type { DecoratedDiffComment } from '~renderer/components/diff-comments/use-diff-comment-decorator'
 import { getDiffCommentLineLabel } from '~renderer/components/editor/diff-comment-compat'
 import { formatDiffComments } from '~renderer/components/editor/diff-comments-format'
 import { translate } from '~renderer/i18n/i18n'
