@@ -73,6 +73,30 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
     },
     [onSave]
   )
+  // Why: DiffCodeView folds these into the options object CodeView diffs each
+  // render, so a fresh arrow here force-renders every mounted row.
+  const handleAddLineCommentForPath = useCallback(
+    (_path: string, args: { lineNumber: number; startLine?: number; body: string }) =>
+      handleAddLineComment(args),
+    [handleAddLineComment]
+  )
+  const handleDeleteComment = useCallback(
+    (commentId: string) => {
+      if (worktreeId) {
+        void deleteDiffComment(worktreeId, commentId)
+      }
+    },
+    [deleteDiffComment, worktreeId]
+  )
+  const handleUpdateComment = useCallback(
+    (commentId: string, body: string) =>
+      worktreeId ? updateDiffComment(worktreeId, commentId, body) : Promise.resolve(false),
+    [updateDiffComment, worktreeId]
+  )
+  const handlePendingScrollConsumed = useCallback(
+    () => setScrollToDiffCommentId(null),
+    [setScrollToDiffCommentId]
+  )
   const files = useMemo<DiffCodeViewFile[]>(
     () => [
       {
@@ -142,28 +166,16 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
         worktreeId={worktreeId}
         addLineCommentLabel={props.addLineCommentLabel}
         addLineCommentPlaceholder={props.addLineCommentPlaceholder}
-        onAddLineComment={
-          worktreeId || onAddLineComment ? (_path, args) => handleAddLineComment(args) : undefined
-        }
-        onDeleteComment={
-          worktreeId
-            ? (commentId) => {
-                void deleteDiffComment(worktreeId, commentId)
-              }
-            : undefined
-        }
-        onUpdateComment={
-          worktreeId
-            ? (commentId, body) => updateDiffComment(worktreeId, commentId, body)
-            : undefined
-        }
+        onAddLineComment={worktreeId || onAddLineComment ? handleAddLineCommentForPath : undefined}
+        onDeleteComment={worktreeId ? handleDeleteComment : undefined}
+        onUpdateComment={worktreeId ? handleUpdateComment : undefined}
         pendingScrollCommentId={
           comments.some((comment) => comment.id === scrollToDiffCommentId)
             ? scrollToDiffCommentId
             : null
         }
         onFileEditComplete={handleFileEditComplete}
-        onPendingScrollConsumed={() => setScrollToDiffCommentId(null)}
+        onPendingScrollConsumed={handlePendingScrollConsumed}
       />
     </div>
   )

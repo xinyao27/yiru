@@ -61,7 +61,7 @@ import {
 import { getDiffCommentLineLabel } from '../diff-comment-compat'
 import { formatDiffComments } from '../diff-comments-format'
 import { DiffNotesSendMenu } from '../diff-notes-send-menu'
-import { DiffSectionHeader } from '../diff-section/header'
+import { DIFF_SECTION_HEADER_HEIGHT_PX, DiffSectionHeader } from '../diff-section/header'
 import type { DiffSection } from '../diff-section/types'
 import { resolveEditorFontFamily } from '../font-family'
 import { computeDiffEditorFontSize } from '../font-zoom'
@@ -191,6 +191,31 @@ function resolveCombinedDiffNotice(
           'Text diff is unavailable for this file.'
         )
   }
+}
+
+/** Shallow equality over the notice union, so an unchanged row keeps its object. */
+function areCombinedDiffNoticesEqual(a: DiffCodeViewNotice, b: DiffCodeViewNotice): boolean {
+  if (a.kind !== b.kind) {
+    return false
+  }
+  if (a.kind === 'error' && b.kind === 'error') {
+    return a.message === b.message
+  }
+  if (a.kind === 'binary' && b.kind === 'binary') {
+    return a.reason === b.reason
+  }
+  if (a.kind === 'image' && b.kind === 'image') {
+    return (
+      a.originalContent === b.originalContent &&
+      a.modifiedContent === b.modifiedContent &&
+      a.mimeType === b.mimeType &&
+      a.sideBySide === b.sideBySide
+    )
+  }
+  if (a.kind === 'large-diff' && b.kind === 'large-diff') {
+    return a.renderLimit === b.renderLimit && a.saveLabel === b.saveLabel
+  }
+  return a.kind === 'loading'
 }
 
 const EMPTY_GIT_STATUS_ENTRIES: GitStatusEntry[] = []
@@ -1071,6 +1096,27 @@ export default function CombinedDiffViewer({
     }
     return map
   }, [diffCommentsForWorktree])
+  // Why: DiffCodeView compares notices by identity, so a fresh literal per
+  // render re-versions every still-loading row on each section load — O(n²)
+  // relayout while a large diff fills in. Reuse the object while it matches.
+  const noticeCacheRef = useRef(new Map<string, DiffCodeViewNotice>())
+  const resolveMemoizedNotice = useCallback(
+    (section: DiffSection, context: { isBranchMode: boolean; sideBySide: boolean }) => {
+      const next = resolveCombinedDiffNotice(section, context)
+      const cache = noticeCacheRef.current
+      const cached = cache.get(section.key)
+      if (!next) {
+        cache.delete(section.key)
+        return undefined
+      }
+      if (cached && areCombinedDiffNoticesEqual(cached, next)) {
+        return cached
+      }
+      cache.set(section.key, next)
+      return next
+    },
+    []
+  )
   const codeViewFiles = useMemo<DiffCodeViewFile[]>(
     () =>
       sections.map((section) => ({
@@ -1087,9 +1133,9 @@ export default function CombinedDiffViewer({
         // has no file on disk this surface may edit.
         editable: section.area === 'unstaged',
         comments: commentsByPath.get(section.path),
-        notice: resolveCombinedDiffNotice(section, { isBranchMode, sideBySide })
+        notice: resolveMemoizedNotice(section, { isBranchMode, sideBySide })
       })),
-    [commentsByPath, isBranchMode, sections, sideBySide]
+    [commentsByPath, isBranchMode, resolveMemoizedNotice, sections, sideBySide]
   )
   const codeViewRender = useMemo(
     () => ({
@@ -1559,6 +1605,7 @@ export default function CombinedDiffViewer({
             className="scrollbar-editor bg-background h-full min-h-0 overflow-x-hidden overflow-y-auto"
             scrollCacheKey={viewStateKey}
             renderFileHeader={renderCombinedDiffHeader}
+            headerHeight={DIFF_SECTION_HEADER_HEIGHT_PX}
             onRetryFile={handleRetryFile}
             onFileEditComplete={handleFileEditComplete}
           />

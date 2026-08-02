@@ -6,15 +6,7 @@ import {
   type CodeViewReactOptions,
   type DiffLineAnnotation
 } from '@pierre/diffs/react'
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
@@ -35,6 +27,7 @@ import {
   renderDiffCodeViewAnnotation,
   type DiffCodeViewAnnotation
 } from './annotations'
+import { useDiffCodeViewEditMirror } from './edit-mirror'
 import { DiffCodeViewEditProvider } from './edit-provider'
 import { useDiffCodeViewItems, type DiffCodeViewFileInput, type DiffCodeViewSource } from './items'
 import type { DiffCodeViewNotice } from './notices'
@@ -113,6 +106,7 @@ export function DiffCodeView({
   scrollCacheKey,
   className,
   renderFileHeader,
+  headerHeight,
   viewRef
 }: {
   files: readonly DiffCodeViewFile[]
@@ -135,6 +129,8 @@ export function DiffCodeView({
   scrollCacheKey?: string
   className?: string
   renderFileHeader?: DiffCodeViewHeaderRenderer
+  /** Measured height of `renderFileHeader`'s row, for Pierre's size estimates. */
+  headerHeight?: number
   viewRef?: React.Ref<DiffCodeViewHandle>
 }): React.JSX.Element {
   const handleRef = useRef<CodeViewHandle<DiffCodeViewAnnotation> | null>(null)
@@ -150,6 +146,11 @@ export function DiffCodeView({
     }
     return map
   }, [files])
+  // Why: CodeView diffs the whole options object per render and force-renders
+  // every mounted row when it differs, so nothing that changes with the file
+  // list may be captured in it. Callbacks reach the current list through here.
+  const fileByIdRef = useRef(fileById)
+  fileByIdRef.current = fileById
 
   // Why: CodeView adopts an item only when its object identity changes, so the
   // annotation array has to stay referentially stable while nothing about that
@@ -199,20 +200,29 @@ export function DiffCodeView({
     [composer, fileById, onAddLineComment]
   )
 
+  // Why: Pierre sizes unrendered rows from these before it can measure them.
+  // Both defaults are wrong here — the line height follows the editor font, and
+  // a surface that draws its own header is shorter than Pierre's 44px default,
+  // which would otherwise drift the scrollbar across a long list.
+  const itemMetrics = useMemo(
+    () => ({
+      lineHeight: Math.max(19, Math.round(font.fontSize * 1.5)),
+      ...(headerHeight === undefined ? {} : { diffHeaderHeight: headerHeight })
+    }),
+    [font.fontSize, headerHeight]
+  )
   const options = useMemo<CodeViewReactOptions<DiffCodeViewAnnotation>>(
     () => ({
       ...buildDiffCodeViewRenderOptions(render),
       stickyHeaders: !render.disableFileHeader,
-      // Why: Pierre estimates unrendered rows from these before measuring, and
-      // our line height is driven by the editor font size, not its default.
-      itemMetrics: { lineHeight: Math.max(19, Math.round(font.fontSize * 1.5)) },
+      itemMetrics,
       enableLineSelection: Boolean(onAddLineComment),
       enableGutterUtility: Boolean(onAddLineComment),
       lineHoverHighlight: onAddLineComment ? 'line' : 'disabled',
       // Why: Pierre treats this callback as a complete gutter API and rejects
       // pairing it with the React renderGutterUtility API.
       onGutterUtilityClick: (range, context) => {
-        const target = fileById.get(context.item.id)
+        const target = fileByIdRef.current.get(context.item.id)
         if (!target || !isCommentableRange(range, target.commentableLineNumbers)) {
           return
         }
@@ -238,13 +248,13 @@ export function DiffCodeView({
         hoveredLineRef.current = null
       }
     }),
-    [fileById, font.fontSize, onAddLineComment, render]
+    [itemMetrics, onAddLineComment, render]
   )
 
   const renderAnnotation = useCallback(
     (annotation: Parameters<typeof renderDiffCodeViewAnnotation>[0], item: { id: string }) =>
       renderDiffCodeViewAnnotation(annotation, {
-        relativePath: fileById.get(item.id)?.source.path ?? '',
+        relativePath: fileByIdRef.current.get(item.id)?.source.path ?? '',
         onRetry: onRetryFile ? () => onRetryFile(item.id) : undefined,
         onSaveLimitedDiff: onSaveLimitedDiff ? () => onSaveLimitedDiff(item.id) : undefined,
         worktreeId,
@@ -258,7 +268,6 @@ export function DiffCodeView({
     [
       addLineCommentLabel,
       addLineCommentPlaceholder,
-      fileById,
       handleSubmitComment,
       onDeleteComment,
       onRetryFile,
@@ -286,56 +295,43 @@ export function DiffCodeView({
     []
   )
 
-  // Why: CodeView ends an edit session on edit-off, collapse or removal, but
-  // NOT on teardown — reset() disposes every editor without reporting, and the
-  // React wrapper calls it on each detach. Mirroring the live document is what
-  // lets an unmount still write, so a closed tab cannot swallow an edit.
-  const pendingEditsRef = useRef(new Map<string, string>())
-  const onFileEditCompleteRef = useRef(onFileEditComplete)
-  onFileEditCompleteRef.current = onFileEditComplete
-
-  const handleItemEditChange = useCallback(
-    (item: { id: string }, editedFile: { contents: string }) => {
-      pendingEditsRef.current.set(item.id, editedFile.contents)
-    },
-    []
-  )
-  const handleItemEditComplete = useCallback(
-    (item: { id: string }, editedFile: { contents: string }) => {
-      pendingEditsRef.current.delete(item.id)
-      onFileEditComplete?.(item.id, editedFile.contents)
-    },
-    [onFileEditComplete]
-  )
-
-  useEffect(() => {
-    const pendingEdits = pendingEditsRef.current
-    return () => {
-      for (const [fileKey, contents] of pendingEdits) {
-        onFileEditCompleteRef.current?.(fileKey, contents)
-      }
-      pendingEdits.clear()
-    }
-  }, [])
+  const { onItemEditChange, onItemEditComplete } = useDiffCodeViewEditMirror(onFileEditComplete)
 
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
 
+  // Why: a cold mount has no rows yet, so a restore would clamp to zero, settle,
+  // and then have that zero written straight back over the saved offset by the
+  // resulting scroll event. Hold the target until the surface can actually reach
+  // it, and ignore scroll reports until then.
+  const pendingScrollRestoreRef = useRef<number | null>(null)
   const handleScroll = useCallback(
     (scrollTop: number) => {
-      if (scrollCacheKey) {
-        setWithLRU(diffCodeViewScrollCache, scrollCacheKey, scrollTop)
+      if (!scrollCacheKey || pendingScrollRestoreRef.current !== null) {
+        return
       }
+      setWithLRU(diffCodeViewScrollCache, scrollCacheKey, scrollTop)
     },
     [scrollCacheKey]
   )
 
   useLayoutEffect(() => {
     const cached = scrollCacheKey ? diffCodeViewScrollCache.get(scrollCacheKey) : undefined
-    if (cached === undefined || cached <= 0) {
+    pendingScrollRestoreRef.current = cached !== undefined && cached > 0 ? cached : null
+  }, [scrollCacheKey])
+
+  useLayoutEffect(() => {
+    const target = pendingScrollRestoreRef.current
+    const container = containerRef.current
+    if (target === null || !container) {
       return
     }
-    handleRef.current?.scrollTo({ type: 'position', position: cached })
-  }, [scrollCacheKey])
+    if (container.scrollHeight - container.clientHeight < target) {
+      // Content is still filling in; the next item change tries again.
+      return
+    }
+    handleRef.current?.scrollTo({ type: 'position', position: target })
+    pendingScrollRestoreRef.current = null
+  }, [items])
 
   useLayoutEffect(() => {
     if (!pendingScrollCommentId) {
@@ -412,8 +408,8 @@ export function DiffCodeView({
             items={items}
             options={options}
             renderAnnotation={renderAnnotation}
-            onItemEditChange={handleItemEditChange}
-            onItemEditComplete={handleItemEditComplete}
+            onItemEditChange={onItemEditChange}
+            onItemEditComplete={onItemEditComplete}
             renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
             onScroll={handleScroll}
             className={className}
