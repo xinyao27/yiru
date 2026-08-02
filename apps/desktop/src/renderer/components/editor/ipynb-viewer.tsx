@@ -67,6 +67,7 @@ import { cn } from '~renderer/lib/class-names'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { useAppStore } from '~renderer/store'
 
+import CodeExcerpt from './code-excerpt'
 import { getIpynbCodeCellEditorHeight, getIpynbCodeCellPreviewLines } from './ipynb-code-cell-lines'
 import {
   deleteIpynbCell,
@@ -80,7 +81,6 @@ import {
   type IpynbCellKind,
   type IpynbOutputItem
 } from './ipynb-parse'
-import MonacoCodeExcerpt from './monaco-code-excerpt'
 import { registerPendingEditorFlush } from './pending-flush'
 import {
   editorShortcutMatches,
@@ -416,12 +416,11 @@ function CodeCell({
           }
         }}
       >
-        <MonacoCodeExcerpt
+        <CodeExcerpt
           lines={lines}
           firstLineNumber={1}
           highlightedStartLine={-1}
           highlightedEndLine={-1}
-          language={cell.language}
         />
       </div>
     )
