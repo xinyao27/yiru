@@ -95,6 +95,8 @@ export type DiffCodeViewFileInput = {
   annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
   /** Set for rows that carry something other than a text diff. */
   notice?: DiffCodeViewNotice
+  /** Puts this row into Pierre's edit mode. Ignored while collapsed. */
+  editable?: boolean
 }
 
 // Why: a file-level annotation only renders when the row has at least one
@@ -126,6 +128,7 @@ type CachedDiffCodeViewItem = {
   collapsed: boolean
   annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
   notice: DiffCodeViewNotice | undefined
+  editable: boolean | undefined
   item: CodeViewItem<DiffCodeViewAnnotation>
 }
 
@@ -168,6 +171,7 @@ export function useDiffCodeViewItems(
         cached.collapsed === file.collapsed &&
         cached.annotations === file.annotations &&
         cached.notice === file.notice &&
+        cached.editable === file.editable &&
         isSameParsedSource(cached.source, file.source)
       if (reusable) {
         next.set(id, cached)
@@ -190,6 +194,7 @@ export function useDiffCodeViewItems(
               fileDiff: reusableDiff,
               annotations: file.annotations,
               collapsed: file.collapsed,
+              edit: file.editable === true,
               version
             }
           : null
@@ -202,6 +207,7 @@ export function useDiffCodeViewItems(
         collapsed: file.collapsed,
         annotations: file.annotations,
         notice: file.notice,
+        editable: file.editable,
         item
       }
       next.set(id, entry)

@@ -9,7 +9,6 @@ import {
   Trash as Trash2,
   TextAlignLeft as WrapText
 } from '@phosphor-icons/react'
-import type { editor as monacoEditor } from 'monaco-editor'
 /* eslint-disable max-lines -- Why: combined diff behavior depends on one
 component-level state machine that coordinates lazy loading, inline editing,
 restore-on-remount caching, and scroll preservation. Splitting those pieces
@@ -42,8 +41,6 @@ import {
   getRuntimeGitDiff
 } from '~renderer/runtime/git-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
-
-import '../monaco-setup'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
@@ -757,10 +754,8 @@ export default function CombinedDiffViewer({
   )
   retrySectionRef.current = retrySection
 
-  const modifiedEditorsRef = useRef<Map<number, monacoEditor.IStandaloneCodeEditor>>(new Map())
-
-  // Why: DiffSectionItem is memoized; an inline arrow here would hand every
-  // mounted section a new prop on each viewer render and defeat that.
+  // Why: this is handed to CodeView, which diffs its options on every render,
+  // so an inline arrow here would churn the whole surface.
   const renderSectionHeaderTrailingContent = useCallback(
     (section: DiffSection): ReactNode => {
       const hasFileNotes = diffCommentsForWorktree.some(
@@ -978,17 +973,11 @@ export default function CombinedDiffViewer({
   )
 
   const handleSectionSave = useCallback(
-    async (index: number) => {
+    async (index: number, content: string) => {
       const section = sections[index]
-      if (!section) {
+      if (!section || content === section.modifiedContent) {
         return
       }
-      const modifiedEditor = modifiedEditorsRef.current.get(index)
-      if (!modifiedEditor && !section.dirty) {
-        return
-      }
-
-      const content = modifiedEditor?.getValue() ?? section.modifiedContent
       const absolutePath = joinPath(file.filePath, section.path)
       try {
         const connectionId = getConnectionIdForFile(file.worktreeId, absolutePath) ?? undefined
@@ -1094,6 +1083,9 @@ export default function CombinedDiffViewer({
           modifiedContent: section.modifiedContent
         },
         collapsed: section.collapsed,
+        // Why: only the working tree is writable — a staged or committed side
+        // has no file on disk this surface may edit.
+        editable: section.area === 'unstaged',
         comments: commentsByPath.get(section.path),
         notice: resolveCombinedDiffNotice(section, { isBranchMode, sideBySide })
       })),
@@ -1152,6 +1144,12 @@ export default function CombinedDiffViewer({
       toggleSection
     ]
   )
+  const handleFileEditComplete = useCallback((fileKey: string, contents: string) => {
+    const index = sectionIndexByKeyRef.current.get(fileKey)
+    if (index !== undefined) {
+      void handleSectionSaveRef.current(index, contents)
+    }
+  }, [])
   const handleRetryFile = useCallback((fileKey: string) => {
     const index = sectionIndexByKeyRef.current.get(fileKey)
     if (index !== undefined) {
@@ -1562,6 +1560,7 @@ export default function CombinedDiffViewer({
             scrollCacheKey={viewStateKey}
             renderFileHeader={renderCombinedDiffHeader}
             onRetryFile={handleRetryFile}
+            onFileEditComplete={handleFileEditComplete}
           />
         </div>
       </div>

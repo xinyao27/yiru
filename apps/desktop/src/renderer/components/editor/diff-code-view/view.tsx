@@ -27,6 +27,7 @@ import {
   renderDiffCodeViewAnnotation,
   type DiffCodeViewAnnotation
 } from './annotations'
+import { DiffCodeViewEditProvider } from './edit-provider'
 import { useDiffCodeViewItems, type DiffCodeViewFileInput, type DiffCodeViewSource } from './items'
 import type { DiffCodeViewNotice } from './notices'
 import {
@@ -44,6 +45,8 @@ export type DiffCodeViewFile = {
   /** Set when this row carries a loading, error, binary, image or size notice
    *  instead of a text diff. */
   notice?: DiffCodeViewNotice
+  /** Lets the user edit this row in place. Requires onFileEditComplete. */
+  editable?: boolean
 }
 
 /**
@@ -96,6 +99,7 @@ export function DiffCodeView({
   onUpdateComment,
   onRetryFile,
   onSaveLimitedDiff,
+  onFileEditComplete,
   pendingScrollCommentId,
   onPendingScrollConsumed,
   scrollCacheKey,
@@ -117,6 +121,7 @@ export function DiffCodeView({
   onUpdateComment?: (commentId: string, body: string) => Promise<boolean>
   onRetryFile?: (fileKey: string) => void
   onSaveLimitedDiff?: (fileKey: string) => void
+  onFileEditComplete?: (fileKey: string, contents: string) => void
   pendingScrollCommentId?: string | null
   onPendingScrollConsumed?: () => void
   scrollCacheKey?: string
@@ -159,7 +164,8 @@ export function DiffCodeView({
         source: file.source,
         collapsed: file.collapsed === true,
         annotations,
-        notice: file.notice
+        notice: file.notice,
+        editable: file.editable
       }
     })
     annotationCacheRef.current = next
@@ -272,6 +278,16 @@ export function DiffCodeView({
     []
   )
 
+  // Why: CodeView reports the final contents once a row's edit session ends —
+  // edit turned off, row collapsed, or row removed — which is the only moment
+  // worth writing to disk. Mid-session changes stay in the editor.
+  const handleItemEditComplete = useCallback(
+    (item: { id: string }, editedFile: { contents: string }) => {
+      onFileEditComplete?.(item.id, editedFile.contents)
+    },
+    [onFileEditComplete]
+  )
+
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
 
   const handleScroll = useCallback(
@@ -346,41 +362,44 @@ export function DiffCodeView({
   }, [])
 
   return (
-    <ContextMenu
-      onOpenChange={(open) => {
-        if (open) {
-          window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-        }
-      }}
-    >
-      <ContextMenuTrigger
-        render={
-          <CodeView<DiffCodeViewAnnotation>
-            ref={handleRef}
-            containerRef={containerRef}
-            items={items}
-            options={options}
-            renderAnnotation={renderAnnotation}
-            renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
-            onScroll={handleScroll}
-            className={className}
-            style={style}
-          />
-        }
-      />
-      <ContextMenuContent className="w-56" finalFocus={false}>
-        <ContextMenuItem onClick={handleCopy}>
-          <Copy />
-          {translate('auto.components.editor.PierreDiffViewer.copy', 'Copy')}
-          <ContextMenuShortcut>{formatNativeShortcut(isMac, 'C')}</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleSelectAll}>
-          <SelectionAll />
-          {translate('auto.components.editor.PierreDiffViewer.selectAll', 'Select all')}
-          <ContextMenuShortcut>{formatNativeShortcut(isMac, 'A')}</ContextMenuShortcut>
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+    <DiffCodeViewEditProvider>
+      <ContextMenu
+        onOpenChange={(open) => {
+          if (open) {
+            window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
+          }
+        }}
+      >
+        <ContextMenuTrigger
+          render={
+            <CodeView<DiffCodeViewAnnotation>
+              ref={handleRef}
+              containerRef={containerRef}
+              items={items}
+              options={options}
+              renderAnnotation={renderAnnotation}
+              onItemEditComplete={handleItemEditComplete}
+              renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
+              onScroll={handleScroll}
+              className={className}
+              style={style}
+            />
+          }
+        />
+        <ContextMenuContent className="w-56" finalFocus={false}>
+          <ContextMenuItem onClick={handleCopy}>
+            <Copy />
+            {translate('auto.components.editor.PierreDiffViewer.copy', 'Copy')}
+            <ContextMenuShortcut>{formatNativeShortcut(isMac, 'C')}</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleSelectAll}>
+            <SelectionAll />
+            {translate('auto.components.editor.PierreDiffViewer.selectAll', 'Select all')}
+            <ContextMenuShortcut>{formatNativeShortcut(isMac, 'A')}</ContextMenuShortcut>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </DiffCodeViewEditProvider>
   )
 }
