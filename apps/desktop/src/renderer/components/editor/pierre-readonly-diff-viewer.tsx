@@ -66,6 +66,13 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
     [addDiffComment, onAddLineComment, relativePath, worktreeId]
   )
 
+  const onSave = props.onSave
+  const handleFileEditComplete = useCallback(
+    (_fileKey: string, contents: string) => {
+      onSave?.(contents)
+    },
+    [onSave]
+  )
   const files = useMemo<DiffCodeViewFile[]>(
     () => [
       {
@@ -80,12 +87,14 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
           language: props.language
         },
         comments,
-        commentableLineNumbers: props.commentableLineNumbers
+        commentableLineNumbers: props.commentableLineNumbers,
+        editable: props.editable === true
       }
     ],
     [
       comments,
       props.commentableLineNumbers,
+      props.editable,
       props.language,
       props.modelKey,
       props.modifiedContent,
@@ -153,6 +162,7 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
             ? scrollToDiffCommentId
             : null
         }
+        onFileEditComplete={handleFileEditComplete}
         onPendingScrollConsumed={() => setScrollToDiffCommentId(null)}
       />
     </div>
