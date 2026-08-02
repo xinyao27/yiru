@@ -120,7 +120,7 @@ export function SshDisconnectedDialog({
 
   useEffect(() => {
     // Window-level Enter handler. The dialog typically appears while focus
-    // is inside an embedded terminal (xterm) or editor (monaco) that
+    // is inside an embedded terminal (xterm) or code surface that
     // aggressively reclaims focus, so dialog-scoped key handlers never
     // fire. Listening on window (capture phase) catches Enter regardless
     // of where focus actually lives while the dialog is open.

@@ -2,7 +2,6 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
 import { normalizeAppIconId } from '~shared/app-icon'
 import { normalizeTerminalShortcutPolicy } from '~shared/keybindings'
-import { normalizeLanguageServerSettings } from '~shared/language-server'
 import { normalizeLoaderStyle } from '~shared/loader-style'
 import { normalizeOpenInApplications } from '~shared/open-in-applications'
 import {
@@ -156,9 +155,6 @@ function normalizeSettingsUpdate(
   }
   if ('loaderStyle' in updates) {
     normalized.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)
-  }
-  if ('languageServer' in updates) {
-    normalized.languageServer = normalizeLanguageServerSettings(updates.languageServer)
   }
   if ('uiLanguage' in updates) {
     normalized.uiLanguage = normalizeUiLanguage(updates.uiLanguage)

@@ -112,17 +112,6 @@ import type {
   ListReposForExecutionHostArgs
 } from '~shared/host-repo-catalog-contract'
 import type {
-  LanguageServerDocumentUriArgs,
-  LanguageServerDocumentUriResult,
-  LanguageServerEvent,
-  LanguageServerLocationArgs,
-  LanguageServerLocationResult,
-  LanguageServerLogsResult,
-  LanguageServerSendArgs,
-  LanguageServerStartArgs,
-  LanguageServerStartResult
-} from '~shared/language-server'
-import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
   LocalLogTailReadResult,
@@ -1827,17 +1816,6 @@ export type PreloadApi = {
      *  menu toggles) so the renderer can stay in sync with main's persisted
      *  state without round-tripping through settings:get. */
     onChanged: (callback: (updates: Partial<GlobalSettings>) => void) => () => void
-  }
-  languageServers: {
-    start: (args: LanguageServerStartArgs) => Promise<LanguageServerStartResult>
-    send: (args: LanguageServerSendArgs) => Promise<void>
-    stop: (args: { sessionId: string }) => Promise<void>
-    resolveDocumentUri: (
-      args: LanguageServerDocumentUriArgs
-    ) => Promise<LanguageServerDocumentUriResult>
-    resolveLocation: (args: LanguageServerLocationArgs) => Promise<LanguageServerLocationResult>
-    getLogs: (args: { sessionId: string }) => Promise<LanguageServerLogsResult>
-    onEvent: (callback: (event: LanguageServerEvent) => void) => () => void
   }
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>

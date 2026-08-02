@@ -15,7 +15,7 @@ import { resolveDiffCommentPopoverTop } from './diff-comment-popover-position'
 import './diff-comment-styles.css'
 
 // Why: rendered as a DOM sibling overlay inside the editor container rather
-// than as a Monaco content widget because it owns a React textarea with
+// than inside the code surface because it owns a React textarea with
 // auto-resize behaviour. Positioning mirrors what useDiffCommentDecorator does
 // for the "+" button so scroll updates from the parent keep the popover
 // aligned with its anchor line.
@@ -27,7 +27,7 @@ type Props = {
   left?: number
   // Height of the anchor line, used to flip the popover above it when it would
   // overflow the bottom of the viewport. Defaults to 0 for callers that don't
-  // anchor to a Monaco line (e.g. markdown annotations): the popover still
+  // anchor to a code line (e.g. markdown annotations): the popover still
   // clamps inside the viewport, it just doesn't offset by the line's height.
   lineHeight?: number
   title?: string
@@ -145,7 +145,7 @@ export function DiffCommentPopover({
     textarea?.focus()
   }, [])
 
-  // Why: Monaco's editor area does not bubble a synthetic React click up to
+  // Why: the editor area does not bubble a synthetic React click up to
   // the popover's onClick. Without a document-level mousedown listener, the
   // popover has no way to detect clicks outside its own bounds. We keep the
   // `onMouseDown={ev.stopPropagation()}` on the popover root so that this

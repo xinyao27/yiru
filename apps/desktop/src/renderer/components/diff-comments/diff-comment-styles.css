@@ -1,13 +1,10 @@
-/* Diff comment decorations — shared by DiffCommentCard, DiffCommentPopover,
-   and useDiffCommentDecorator (which mounts the "+" button and range
-   highlight directly into Monaco's DOM), plus the editor surfaces that render
-   those components (Monaco diff view, Pierre diff viewer, markdown preview,
-   rich markdown review notes). */
+/* Diff comment decorations — shared by DiffCommentCard and DiffCommentPopover,
+   plus the surfaces that render them (the Pierre code surfaces, markdown
+   preview, rich markdown review notes). */
 
-/* Why: the "+" button is appended into Monaco's editor DOM node by
-   useDiffCommentDecorator. Keep it visually subtle until hovered so it does
-   not distract from the diff itself. Left position overlaps the glyph margin
-   so the affordance reads as "add comment on this line". */
+/* Why: keep the "+" affordance visually subtle until hovered so it does not
+   distract from the diff itself. Left position overlaps the gutter so it reads
+   as "add comment on this line". */
 .yiru-diff-comment-add-btn {
   position: absolute;
   left: 4px;

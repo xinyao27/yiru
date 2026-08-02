@@ -29,7 +29,7 @@ function worktreeStillExists(state: AppState, worktreeId: string): boolean {
 
 function focusEditorContent(): void {
   // Why: land keyboard focus in the editor so Find/selection/copy work
-  // immediately. Double rAF lets the tab mount and Monaco attach its textarea
+  // immediately. Double rAF lets the tab mount and the code surface attach
   // before we focus it (mirrors the modal return-focus surface selector).
   if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
     return

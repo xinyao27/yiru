@@ -52,7 +52,7 @@ export function WorkspacePanelTabContent({
                 <EditorPanel
                   activeFileId={activeFileId}
                   // Why: one workspace panel previews many files; include the
-                  // file identity so Monaco does not reuse another file's view state.
+                  // file identity so the editor cannot reuse another file's view state.
                   activeViewStateId={`${panelTabId}:${activeFileId}`}
                 />
               </Suspense>

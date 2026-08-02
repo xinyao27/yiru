@@ -24,7 +24,7 @@ function ContextMenu({ ...props }: ContextMenuPrimitive.Root.Props) {
 /** Base UI virtual element: a zero-area rect in viewport space. */
 export type ContextMenuPointAnchor = { getBoundingClientRect: () => DOMRect }
 
-// Why: a few hosts swallow the right-click before React sees it — Monaco's
+// Why: a few hosts swallow the right-click before React sees it — the code
 // ContextMenuController stopPropagation()s gutter clicks, and a <webview> reports
 // them over IPC from another process — so ContextMenuTrigger has no element to
 // anchor to. Use this only there. Everywhere a real contextmenu event exists,

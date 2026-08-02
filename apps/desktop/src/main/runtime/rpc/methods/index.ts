@@ -19,7 +19,6 @@ import { GITHUB_METHODS } from './github'
 import { GITLAB_METHODS } from './gitlab'
 import { HOST_CAPABILITY_METHODS } from './host-capabilities'
 import { HOSTED_REVIEW_METHODS } from './hosted-review'
-import { LANGUAGE_SERVER_METHODS } from './language-servers'
 import { NATIVE_CHAT_METHODS } from './native-chat'
 import { NOTIFICATION_METHODS } from './notifications'
 import { ORCHESTRATION_METHODS } from './orchestration/methods'
@@ -78,6 +77,5 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...CLIENT_UI_METHODS,
   ...EMULATOR_METHODS,
   ...EXTERNAL_EDITOR_METHODS,
-  ...COWORKING_HOST_METHODS,
-  ...LANGUAGE_SERVER_METHODS
+  ...COWORKING_HOST_METHODS
 ]
