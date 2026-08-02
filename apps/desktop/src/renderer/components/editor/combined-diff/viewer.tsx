@@ -1556,7 +1556,7 @@ export default function CombinedDiffViewer({
             render={codeViewRender}
             font={codeViewFont}
             worktreeId={file.worktreeId}
-            className="h-full min-h-0 overflow-x-hidden overflow-y-auto"
+            className="scrollbar-editor bg-background h-full min-h-0 overflow-x-hidden overflow-y-auto"
             scrollCacheKey={viewStateKey}
             renderFileHeader={renderCombinedDiffHeader}
             onRetryFile={handleRetryFile}
