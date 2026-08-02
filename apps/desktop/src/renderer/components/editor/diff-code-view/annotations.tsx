@@ -90,6 +90,26 @@ export function buildDiffCodeViewAnnotations(
   return annotations
 }
 
+/**
+ * The same comment/composer model for a plain file row.
+ *
+ * Why: Pierre keys a diff annotation to a side because a diff has two; a file
+ * has one, and passing a side there would not resolve to a line.
+ */
+export function buildDiffCodeViewFileAnnotations(
+  comments: readonly DecoratedDiffComment[],
+  composer: DiffCodeViewComposer | null
+): LineAnnotation<DiffCodeViewAnnotation>[] {
+  const annotations: LineAnnotation<DiffCodeViewAnnotation>[] = comments.map((comment) => ({
+    lineNumber: comment.lineNumber,
+    metadata: { kind: 'comment' as const, comment }
+  }))
+  if (composer) {
+    annotations.push({ lineNumber: composer.lineNumber, metadata: { kind: 'composer', composer } })
+  }
+  return annotations
+}
+
 export function renderDiffCodeViewAnnotation(
   annotation: DiffLineAnnotation<DiffCodeViewAnnotation> | LineAnnotation<DiffCodeViewAnnotation>,
   handlers: DiffCodeViewAnnotationHandlers

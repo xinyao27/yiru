@@ -41,7 +41,7 @@ import {
 import { RichMarkdownErrorBoundary } from './rich-markdown/error-boundary'
 import { useMarkdownDocuments } from './use-markdown-documents'
 
-const MonacoEditor = lazy(() => import('./monaco-editor'))
+const FileCodeView = lazy(() => import('./file-code-view'))
 const DiffViewer = lazy(() => import('./diff-viewer'))
 const CombinedDiffViewer = lazy(() => import('./combined-diff/viewer'))
 const RichMarkdownEditor = lazy(() => import('./rich-markdown/editor'))
@@ -315,12 +315,12 @@ export function EditorContent({
   }
 
   const renderMonacoEditor = (fc: FileContent): React.JSX.Element => (
-    // Why: Without a key, React reuses the same MonacoEditor instance when
+    // Why: Without a key, React reuses the same editor instance when
     // switching tabs or split panes, just updating props. That means
     // useLayoutEffect cleanup (which snapshots scroll position) never fires.
     // Keying on the visible pane and path forces remount before a retained target
     // model mounts, so the old path cannot receive the new file's reconciliation.
-    <MonacoEditor
+    <FileCodeView
       key={`${viewStateScopeId}\u0000${activeFile.filePath}`}
       fileId={activeFile.id}
       filePath={activeFile.filePath}
@@ -336,25 +336,11 @@ export function EditorContent({
       onContentChange={activeFile.readOnly === true ? noopEditorContentChange : handleContentChange}
       onSave={activeFile.readOnly === true ? noopEditorSave : isMarkdown ? md.mdSave : handleSave}
       worktreeId={activeFile.worktreeId}
-      runtimeEnvironmentId={activeFile.runtimeEnvironmentId}
-      markdownAnnotationsEnabled={markdownAnnotationsEnabled && isMarkdown}
-      conflictDecorationsEnabled={activeFile.conflict?.conflictStatus === 'unresolved'}
       revealLine={
         matchesPendingEditorReveal(pendingEditorReveal, activeFile)
           ? pendingEditorReveal.line
           : undefined
       }
-      revealColumn={
-        matchesPendingEditorReveal(pendingEditorReveal, activeFile)
-          ? pendingEditorReveal.column
-          : undefined
-      }
-      revealMatchLength={
-        matchesPendingEditorReveal(pendingEditorReveal, activeFile)
-          ? pendingEditorReveal.matchLength
-          : undefined
-      }
-      markdownDocuments={isMarkdown ? md.markdownDocuments : undefined}
     />
   )
 
@@ -566,7 +552,7 @@ export function EditorContent({
           />
         )}
         <div className={autoHeight ? 'shrink-0' : 'min-h-0 flex-1'}>
-          <MonacoEditor
+          <FileCodeView
             key={`${viewStateScopeId}:${contentFile.id}:${viewStateKeySuffix}`}
             fileId={contentFile.id}
             filePath={contentFile.filePath}
@@ -579,24 +565,10 @@ export function EditorContent({
             }
             onSave={readOnly ? () => {} : (content) => handleSaveForFile(contentFile, content)}
             worktreeId={contentFile.worktreeId}
-            runtimeEnvironmentId={contentFile.runtimeEnvironmentId}
-            markdownAnnotationsEnabled={false}
-            conflictDecorationsEnabled={contentFile.conflict?.conflictStatus === 'unresolved'}
             readOnly={readOnly}
-            autoHeight={autoHeight}
             revealLine={
               matchesPendingEditorReveal(pendingEditorReveal, contentFile)
                 ? pendingEditorReveal.line
-                : undefined
-            }
-            revealColumn={
-              matchesPendingEditorReveal(pendingEditorReveal, contentFile)
-                ? pendingEditorReveal.column
-                : undefined
-            }
-            revealMatchLength={
-              matchesPendingEditorReveal(pendingEditorReveal, contentFile)
-                ? pendingEditorReveal.matchLength
                 : undefined
             }
           />
