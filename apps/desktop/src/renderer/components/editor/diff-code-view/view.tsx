@@ -6,7 +6,15 @@ import {
   type CodeViewReactOptions,
   type DiffLineAnnotation
 } from '@pierre/diffs/react'
-import { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
@@ -278,15 +286,37 @@ export function DiffCodeView({
     []
   )
 
-  // Why: CodeView reports the final contents once a row's edit session ends —
-  // edit turned off, row collapsed, or row removed — which is the only moment
-  // worth writing to disk. Mid-session changes stay in the editor.
+  // Why: CodeView ends an edit session on edit-off, collapse or removal, but
+  // NOT on teardown — reset() disposes every editor without reporting, and the
+  // React wrapper calls it on each detach. Mirroring the live document is what
+  // lets an unmount still write, so a closed tab cannot swallow an edit.
+  const pendingEditsRef = useRef(new Map<string, string>())
+  const onFileEditCompleteRef = useRef(onFileEditComplete)
+  onFileEditCompleteRef.current = onFileEditComplete
+
+  const handleItemEditChange = useCallback(
+    (item: { id: string }, editedFile: { contents: string }) => {
+      pendingEditsRef.current.set(item.id, editedFile.contents)
+    },
+    []
+  )
   const handleItemEditComplete = useCallback(
     (item: { id: string }, editedFile: { contents: string }) => {
+      pendingEditsRef.current.delete(item.id)
       onFileEditComplete?.(item.id, editedFile.contents)
     },
     [onFileEditComplete]
   )
+
+  useEffect(() => {
+    const pendingEdits = pendingEditsRef.current
+    return () => {
+      for (const [fileKey, contents] of pendingEdits) {
+        onFileEditCompleteRef.current?.(fileKey, contents)
+      }
+      pendingEdits.clear()
+    }
+  }, [])
 
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
 
@@ -370,22 +400,26 @@ export function DiffCodeView({
           }
         }}
       >
-        <ContextMenuTrigger
-          render={
-            <CodeView<DiffCodeViewAnnotation>
-              ref={handleRef}
-              containerRef={containerRef}
-              items={items}
-              options={options}
-              renderAnnotation={renderAnnotation}
-              onItemEditComplete={handleItemEditComplete}
-              renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
-              onScroll={handleScroll}
-              className={className}
-              style={style}
-            />
-          }
-        />
+        {/* Why: CodeView renders a bare div with only className/style/ref and
+            drops every other prop, so the trigger's handlers and ref would never
+            land on it. It needs a real element of its own to hang them on, which
+            also has to be the one that fills the pane so a right-click anywhere
+            over the code reaches it. */}
+        <ContextMenuTrigger render={<div className="contents" />}>
+          <CodeView<DiffCodeViewAnnotation>
+            ref={handleRef}
+            containerRef={containerRef}
+            items={items}
+            options={options}
+            renderAnnotation={renderAnnotation}
+            onItemEditChange={handleItemEditChange}
+            onItemEditComplete={handleItemEditComplete}
+            renderCustomHeader={renderFileHeader ? renderCustomHeader : undefined}
+            onScroll={handleScroll}
+            className={className}
+            style={style}
+          />
+        </ContextMenuTrigger>
         <ContextMenuContent className="w-56" finalFocus={false}>
           <ContextMenuItem onClick={handleCopy}>
             <Copy />

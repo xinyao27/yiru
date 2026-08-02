@@ -25,8 +25,6 @@ export type DiffCodeViewSource = {
   modifiedContent: string
   /** Editor-side language id, used only when the filename infers nothing. */
   language?: string
-  /** Bumped when refetched content replaces what a cache key already covered. */
-  contentGeneration?: number
 }
 
 // Why: git reports the two sides of a change through the status, not through
@@ -57,12 +55,12 @@ function buildFileContents(
  * fails, so a single unreadable file cannot take the whole list down.
  */
 export function buildDiffCodeViewFileDiff(
-  source: DiffCodeViewSource
+  source: DiffCodeViewSource,
+  generation: number
 ): CodeViewDiffItem['fileDiff'] | null {
   const isAdded = ADDED_STATUSES.has(source.status)
   const isDeleted = source.status === 'deleted'
   const previousPath = source.oldPath ?? source.path
-  const generation = source.contentGeneration ?? 0
   const oldFile = isAdded
     ? null
     : buildFileContents(
@@ -107,7 +105,8 @@ const NOTICE_ANCHOR_CONTENTS = '\n'
 function buildNoticeItem(
   input: DiffCodeViewFileInput,
   notice: DiffCodeViewNotice,
-  version: number
+  version: number,
+  generation: number
 ): CodeViewFileItem<DiffCodeViewAnnotation> {
   return {
     id: input.source.key,
@@ -115,7 +114,7 @@ function buildNoticeItem(
     file: {
       name: input.source.path,
       contents: NOTICE_ANCHOR_CONTENTS,
-      cacheKey: `${input.source.key}:notice:${version}`
+      cacheKey: `${input.source.key}:notice:${generation}`
     },
     annotations: buildDiffCodeViewNoticeAnnotations(notice),
     collapsed: input.collapsed,
@@ -129,6 +128,8 @@ type CachedDiffCodeViewItem = {
   annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
   notice: DiffCodeViewNotice | undefined
   editable: boolean | undefined
+  /** Advances whenever the content behind this row was reparsed. */
+  generation: number
   item: CodeViewItem<DiffCodeViewAnnotation>
 }
 
@@ -140,7 +141,6 @@ function isSameParsedSource(a: DiffCodeViewSource, b: DiffCodeViewSource): boole
     a.oldPath === b.oldPath &&
     a.status === b.status &&
     a.language === b.language &&
-    a.contentGeneration === b.contentGeneration &&
     a.originalContent === b.originalContent &&
     a.modifiedContent === b.modifiedContent
   )
@@ -179,14 +179,23 @@ export function useDiffCodeViewItems(
         continue
       }
       const version = (cached?.item.version ?? 0) + 1
+      const contentUnchanged =
+        cached !== undefined && isSameParsedSource(cached.source, file.source)
+      // Why: Pierre compares diff targets by cache key alone and never looks at
+      // the contents behind it, so a reparsed row has to arrive under a new key
+      // or the old render is kept. Owning the counter here means no caller can
+      // forget to advance it.
+      const generation = contentUnchanged
+        ? (cached?.generation ?? 0)
+        : (cached?.generation ?? 0) + 1
       let item: CodeViewItem<DiffCodeViewAnnotation> | null = null
       if (file.notice) {
-        item = buildNoticeItem(file, file.notice, version)
+        item = buildNoticeItem(file, file.notice, version, generation)
       } else {
         const reusableDiff =
-          cached?.item.type === 'diff' && isSameParsedSource(cached.source, file.source)
+          cached?.item.type === 'diff' && contentUnchanged
             ? cached.item.fileDiff
-            : buildDiffCodeViewFileDiff(file.source)
+            : buildDiffCodeViewFileDiff(file.source, generation)
         item = reusableDiff
           ? {
               id,
@@ -208,6 +217,7 @@ export function useDiffCodeViewItems(
         annotations: file.annotations,
         notice: file.notice,
         editable: file.editable,
+        generation,
         item
       }
       next.set(id, entry)

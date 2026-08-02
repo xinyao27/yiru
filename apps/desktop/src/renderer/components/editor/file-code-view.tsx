@@ -115,7 +115,10 @@ export default function FileCodeView({
           name: relativePath,
           contents: content,
           lang: pierreLanguage,
-          cacheKey: viewStateKey
+          // Why: Pierre keys its line cache on this alone and never rechecks the
+          // contents, so a constant key serves stale lines — and a shorter file
+          // then indexes past the cached array and throws.
+          cacheKey: `${viewStateKey}:${versionRef.current}`
         },
         annotations,
         edit: !readOnly,
