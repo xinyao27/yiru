@@ -38,14 +38,6 @@
   border-color: var(--primary);
 }
 
-.yiru-diff-comment-range-highlight {
-  background: rgba(59, 130, 246, 0.14);
-}
-
-.dark .yiru-diff-comment-range-highlight {
-  background: rgba(96, 165, 250, 0.18);
-}
-
 .yiru-diff-comment-inline {
   width: 100%;
   /* Why: Monaco's view-zone node already starts after the diff gutter. Avoid

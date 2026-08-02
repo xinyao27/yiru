@@ -140,9 +140,6 @@ catalog:
   unified: ^11.0.5
   vite: npm:@voidzero-dev/vite-plus-core@0.2.4
   vite-plus: 0.2.4
-  vscode-jsonrpc: ^9.0.1
-  vscode-oniguruma: ^2.0.1
-  vscode-textmate: ^9.3.2
   yaml: ^2.9.0
   zod: ~4.4.3
 catalogMode: strict

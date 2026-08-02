@@ -122,14 +122,12 @@ inline apps/desktop/src/renderer/components/automations/use-automation-dispatch-
 inline apps/desktop/src/renderer/components/browser-pane/browser-pane.tsx
 inline apps/desktop/src/renderer/components/browser-pane/state.ts
 inline apps/desktop/src/renderer/components/diff-comments/state.ts
-inline apps/desktop/src/renderer/components/diff-comments/use-diff-comment-decorator.tsx
 inline apps/desktop/src/renderer/components/editor/combined-diff/viewer.tsx
 inline apps/desktop/src/renderer/components/editor/autosave-controller.ts
 inline apps/desktop/src/renderer/components/editor/content.tsx
 inline apps/desktop/src/renderer/components/editor/ipynb-parse.ts
 inline apps/desktop/src/renderer/components/editor/ipynb-viewer.tsx
 inline apps/desktop/src/renderer/components/editor/markdown-preview.tsx
-inline apps/desktop/src/renderer/components/editor/monaco-editor.tsx
 inline apps/desktop/src/renderer/components/editor/state.ts
 inline apps/desktop/src/renderer/components/editor/use-editor-external-watch.ts
 inline apps/desktop/src/renderer/components/editor/use-editor-panel-content-state.ts

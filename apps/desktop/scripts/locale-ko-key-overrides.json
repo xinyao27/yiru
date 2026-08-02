@@ -686,12 +686,6 @@
   "auto.components.editor.MarkdownTableOfContentsPanel.8f4d2c1a9b": {
     "ko": "목차 크기 조절"
   },
-  "auto.components.editor.MonacoGutterContextMenu.2e0b1cdc05": {
-    "ko": "줄까지의 상대 경로 복사"
-  },
-  "auto.components.editor.MonacoGutterContextMenu.4eaa991bde": {
-    "ko": "줄까지의 경로 복사"
-  },
   "auto.components.editor.RichMarkdownCodeBlock.a209c57063": {
     "ko": "JavaScript"
   },

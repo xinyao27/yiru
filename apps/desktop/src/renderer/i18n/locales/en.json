@@ -611,14 +611,6 @@
             "de50bef680": "macOS is blocking Yiru notifications"
           }
         }
-      },
-      "MonacoLanguageServerSession": {
-        "restarting": "Restarting language server…"
-      },
-      "MonacoLanguageServerEditFeatures": {
-        "renameTitle": "Rename symbol to “{{value0}}”",
-        "commandDisabled": "Language server commands are not allowed.",
-        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -2239,20 +2231,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "LanguageServerStatusSegment": {
-            "aria": "Language server: {{value0}}",
-            "tooltip": "Language server — {{value0}}",
-            "title": "Language Server",
-            "configure": "Configure",
-            "idle": "Open a configured source file to start the server on its execution host.",
-            "loadingLogs": "Loading logs…",
-            "noLogs": "No server log output.",
-            "starting": "Starting",
-            "ready": "Ready",
-            "error": "Error",
-            "idleLabel": "Idle",
-            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -7089,9 +7067,7 @@
             "e61157e926": "Editor Word Wrap",
             "005be5c699": "Wrap long lines in file editors instead of requiring horizontal scrolling.",
             "editorFontFamily": "Editor Font Family",
-            "editorFontFamilyDesc": "Font used by file editors and diff views. Leave empty to follow the terminal font.",
-            "languageServer": "Language Server (Experimental)",
-            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
+            "editorFontFamilyDesc": "Font used by file editors and diff views. Leave empty to follow the terminal font."
           }
         },
         "git": {
@@ -8327,23 +8303,6 @@
           "githubReleases": "GitHub Releases",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
-        },
-        "LanguageServerSetting": {
-          "title": "Language Server (Experimental)",
-          "description": "Run one language server on the native, WSL, SSH, or runtime host that owns the code.",
-          "enable": "Enable Language Server",
-          "enableDescription": "Run the configured executable on the code’s execution host when a matching file is open.",
-          "command": "Executable",
-          "commandDescription": "A PATH command available on each execution host, or an absolute host-specific executable path.",
-          "commandRequired": "Enter an executable before opening a matching source file.",
-          "arguments": "Arguments",
-          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
-          "languages": "Monaco Language IDs",
-          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching editable models are shared.",
-          "localOnly": "Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.",
-          "commandPlaceholder": "clangd",
-          "argumentsPlaceholder": "--stdio\n--background-index",
-          "languagesPlaceholder": "c, cpp"
         },
         "VoiceSpeechModelSection": {
           "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
@@ -10612,7 +10571,6 @@
           "72f71f52eb": "Text diff is unavailable for this file.",
           "7ce8436458": "Text diff is unavailable for this file in branch compare.",
           "bdbf02d5df": "binary",
-          "b5675b0694": "Save",
           "593f2193f6": "This draft crossed the safe display limit, but it can still be saved."
         },
         "DiffSectionHeader": {
@@ -10651,9 +10609,7 @@
           "c98ce191da": "This diff has no modified-side file to open",
           "9b80bbe1de": "Open file tab",
           "f0fd4174b5": "Open file tab to use rich markdown editing",
-          "a10d9b8337": "Open file",
-          "2076ecfc9c": "Previous change",
-          "631dab0df3": "Next change"
+          "a10d9b8337": "Open file"
         },
         "EditorPanelMarkdownActionsMenu": {
           "3e0ce48c24": "Export as PDF",
@@ -10765,17 +10721,6 @@
         },
         "MermaidBlock": {
           "dcc132e691": "Diagram error:"
-        },
-        "MonacoEditor": {
-          "68cb83f4a7": "Add note on selected text",
-          "fd68ae03b3": "Search in Files",
-          "largePasteTooLarge": "Paste is too large.",
-          "goToDefinition": "Go to Definition"
-        },
-        "MonacoGutterContextMenu": {
-          "7b57b1b468": "Copy Remote URL",
-          "2e0b1cdc05": "Copy Rel. Path to Line",
-          "4eaa991bde": "Copy Path to Line"
         },
         "NotesSendMenu": {
           "44dc5e60a6": "Send notes",
@@ -11002,9 +10947,6 @@
             }
           }
         },
-        "useContextualCopySetup": {
-          "059bfb0d94": "Context copied"
-        },
         "useLocalImagePick": {
           "175cb8b8ce": "Failed to insert image.",
           "91d835dc88": "Worktree path not available."
@@ -11128,15 +11070,6 @@
           "copy": "Copy",
           "selectAll": "Select All",
           "copyPath": "Copy Path"
-        },
-        "LanguageServerWorkspaceEditDialog": {
-          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
-          "editCount": "{{value0}} edits",
-          "unsaved": " · unsaved buffer",
-          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
-          "cancel": "Cancel",
-          "apply": "Apply changes",
-          "loading": "Loading preview…"
         },
         "combined": {
           "diff": {

@@ -588,14 +588,6 @@
             "de50bef680": "macOS está bloqueando las notificaciones de Yiru"
           }
         }
-      },
-      "MonacoLanguageServerSession": {
-        "restarting": "Restarting language server…"
-      },
-      "MonacoLanguageServerEditFeatures": {
-        "renameTitle": "Rename symbol to “{{value0}}”",
-        "commandDisabled": "Language server commands are not allowed.",
-        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -2216,20 +2208,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "LanguageServerStatusSegment": {
-            "aria": "Language server: {{value0}}",
-            "tooltip": "Language server — {{value0}}",
-            "title": "Language Server",
-            "configure": "Configure",
-            "idle": "Open a configured source file to start the server on its execution host.",
-            "loadingLogs": "Loading logs…",
-            "noLogs": "No server log output.",
-            "starting": "Starting",
-            "ready": "Ready",
-            "error": "Error",
-            "idleLabel": "Idle",
-            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -7029,9 +7007,7 @@
             "e61157e926": "Ajuste de línea en el editor",
             "005be5c699": "Ajusta las líneas largas en editores de archivos en lugar de requerir desplazamiento horizontal.",
             "editorFontFamily": "Familia tipográfica del editor",
-            "editorFontFamilyDesc": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal.",
-            "languageServer": "Language Server (Experimental)",
-            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
+            "editorFontFamilyDesc": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal."
           }
         },
         "git": {
@@ -8304,23 +8280,6 @@
           "githubReleases": "GitHub Releases",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
-        },
-        "LanguageServerSetting": {
-          "title": "Language Server (Experimental)",
-          "description": "Run one language server on the native, WSL, SSH, or runtime host that owns the code.",
-          "enable": "Enable Language Server",
-          "enableDescription": "Run the configured executable on the code’s execution host when a matching file is open.",
-          "command": "Executable",
-          "commandDescription": "A PATH command available on each execution host, or an absolute host-specific executable path.",
-          "commandRequired": "Enter an executable before opening a matching source file.",
-          "arguments": "Arguments",
-          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
-          "languages": "Monaco Language IDs",
-          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching editable models are shared.",
-          "localOnly": "Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.",
-          "commandPlaceholder": "clangd",
-          "argumentsPlaceholder": "--stdio\n--background-index",
-          "languagesPlaceholder": "c, cpp"
         },
         "VoiceSpeechModelSection": {
           "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
@@ -10589,7 +10548,6 @@
           "72f71f52eb": "El diff de texto no está disponible para este archivo.",
           "7ce8436458": "El diff de texto no está disponible para este archivo en la comparación de ramas.",
           "bdbf02d5df": "binario",
-          "b5675b0694": "Guardar",
           "593f2193f6": "Este borrador superó el límite seguro de visualización, pero aún se puede guardar."
         },
         "DiffSectionHeader": {
@@ -10628,9 +10586,7 @@
           "c98ce191da": "Este diff no tiene ningún archivo del lado modificado para abrir",
           "9b80bbe1de": "Abrir pestaña de archivo",
           "f0fd4174b5": "Abre la pestaña de archivo para usar la edición enriquecida de Markdown",
-          "a10d9b8337": "Abrir archivo",
-          "2076ecfc9c": "Cambio anterior",
-          "631dab0df3": "Cambio siguiente"
+          "a10d9b8337": "Abrir archivo"
         },
         "EditorPanelMarkdownActionsMenu": {
           "3e0ce48c24": "Exportar como PDF",
@@ -10742,17 +10698,6 @@
         },
         "MermaidBlock": {
           "dcc132e691": "Error de diagrama:"
-        },
-        "MonacoEditor": {
-          "68cb83f4a7": "Agregar nota sobre el texto seleccionado",
-          "fd68ae03b3": "Buscar en archivos",
-          "largePasteTooLarge": "El contenido pegado es demasiado grande.",
-          "goToDefinition": "Go to Definition"
-        },
-        "MonacoGutterContextMenu": {
-          "7b57b1b468": "Copiar URL remota",
-          "2e0b1cdc05": "Copiar ruta relativa a la línea",
-          "4eaa991bde": "Copiar ruta a la línea"
         },
         "NotesSendMenu": {
           "44dc5e60a6": "Enviar notas",
@@ -10979,9 +10924,6 @@
             }
           }
         },
-        "useContextualCopySetup": {
-          "059bfb0d94": "Contexto copiado"
-        },
         "useLocalImagePick": {
           "175cb8b8ce": "No se pudo insertar la imagen.",
           "91d835dc88": "Ruta del worktree no disponible."
@@ -11105,15 +11047,6 @@
           "copy": "Copiar",
           "selectAll": "Seleccionar todo",
           "copyPath": "Copiar ruta"
-        },
-        "LanguageServerWorkspaceEditDialog": {
-          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
-          "editCount": "{{value0}} edits",
-          "unsaved": " · unsaved buffer",
-          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
-          "cancel": "Cancel",
-          "apply": "Apply changes",
-          "loading": "Loading preview…"
         },
         "combined": {
           "diff": {

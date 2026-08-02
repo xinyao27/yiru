@@ -57,7 +57,6 @@ export const TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY =
 // Why: older hosts lack the targeted settings RPCs and strip agentPrompt from
 // terminal creation, so mobile must hide Quick Commands unless both are present.
 export const TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY = 'terminal.quick-commands.v1' as const
-export const LANGUAGE_SERVER_RUNTIME_CAPABILITY = 'language-server.v1' as const
 
 export const RUNTIME_CAPABILITIES = [
   'runtime.status.compat.v1',
@@ -78,8 +77,7 @@ export const RUNTIME_CAPABILITIES = [
   AI_VAULT_RUNTIME_CAPABILITY,
   TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY,
   TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY,
-  REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY,
-  LANGUAGE_SERVER_RUNTIME_CAPABILITY
+  REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY
 ] as const
 
 export type RuntimeCapability = (typeof RUNTIME_CAPABILITIES)[number] | (string & {})

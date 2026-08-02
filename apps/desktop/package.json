@@ -86,7 +86,6 @@
     "ssh2": "catalog:",
     "thinking-orbs": "catalog:",
     "tweetnacl": "catalog:",
-    "vscode-jsonrpc": "catalog:",
     "ws": "catalog:desktop",
     "yaml": "catalog:",
     "zod": "catalog:"
@@ -176,8 +175,6 @@
     "unified": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vscode-oniguruma": "catalog:",
-    "vscode-textmate": "catalog:",
     "zustand": "catalog:desktop"
   },
   "optionalDependencies": {
