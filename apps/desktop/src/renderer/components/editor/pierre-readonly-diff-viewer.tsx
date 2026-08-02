@@ -138,7 +138,7 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
         render={render}
         font={font}
         scrollCacheKey={props.modelKey}
-        className="h-full min-h-0"
+        className="h-full min-h-0 overflow-x-hidden overflow-y-auto"
         worktreeId={worktreeId}
         addLineCommentLabel={props.addLineCommentLabel}
         addLineCommentPlaceholder={props.addLineCommentPlaceholder}
