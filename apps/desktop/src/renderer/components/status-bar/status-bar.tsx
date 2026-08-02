@@ -123,11 +123,6 @@ const PortsStatusSegment = lazyWithRetry(() =>
 const SshStatusSegment = lazyWithRetry(() =>
   import('./ssh-status-segment').then((module) => ({ default: module.SshStatusSegment }))
 )
-const LanguageServerStatusSegment = lazyWithRetry(() =>
-  import('./language-server-status-segment').then((module) => ({
-    default: module.LanguageServerStatusSegment
-  }))
-)
 
 export type CodexStatusRuntimeTarget = {
   runtime: 'host' | 'wsl'
@@ -2252,9 +2247,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
           <React.Suspense fallback={null}>
             {petEnabled ? <PetStatusSegment /> : null}
             {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
-            {settings?.languageServer?.enabled === true ? (
-              <LanguageServerStatusSegment iconOnly />
-            ) : null}
             {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
             {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
           </React.Suspense>

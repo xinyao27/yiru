@@ -3,13 +3,10 @@ import {
   Eye,
   FileText,
   TreeStructure as ListTree,
-  Rows as Rows2,
-  ArrowDown,
-  ArrowUp
+  Rows as Rows2
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
-import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { Toggle } from '~renderer/components/ui/toggle'
@@ -19,13 +16,11 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '~renderer/components/ui/tooltip'
-import { useShortcutKeyDetails } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
 
-import { useDiffNavigation } from './diff-navigation-context'
 import { DiffNotesSendMenu } from './diff-notes-send-menu'
 import type { EditorHeaderOpenFileState } from './header'
 import { EditorPanelHeaderPath } from './panel-header-path'
@@ -113,9 +108,6 @@ export function EditorPanelHeader({
     () => diffComments.filter((comment) => comment.filePath === activeFile.relativePath),
     [activeFile.relativePath, diffComments]
   )
-  const { changeCount, goToPreviousDiff, goToNextDiff } = useDiffNavigation()
-  const previousChangeShortcut = useShortcutKeyDetails('editor.previousChange')
-  const nextChangeShortcut = useShortcutKeyDetails('editor.nextChange')
 
   return (
     <div className="bg-background flex min-h-9 shrink-0 items-center gap-1 border-b border-b-[color-mix(in_srgb,var(--border)_72%,transparent)] px-3.5 py-1.5">
@@ -237,68 +229,6 @@ export function EditorPanelHeader({
                     'auto.components.editor.EditorPanelHeader.e836faacfa',
                     'Switch to side-by-side diff'
                   )}
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="quiet"
-                  size="icon-xs"
-                  className="size-6 shrink-0 [&_svg]:size-3.5"
-                  onClick={goToPreviousDiff}
-                  aria-label={translate(
-                    'auto.components.editor.EditorPanelHeader.2076ecfc9c',
-                    'Previous change'
-                  )}
-                  disabled={changeCount === 0}
-                >
-                  <ArrowUp size={14} />
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom" sideOffset={4}>
-              {translate('auto.components.editor.EditorPanelHeader.2076ecfc9c', 'Previous change')}
-              {previousChangeShortcut.keys.length > 0 && (
-                <ShortcutKeyCombo
-                  keys={previousChangeShortcut.keys}
-                  variant="inverted"
-                  doubleTap={previousChangeShortcut.doubleTap}
-                  className="ml-1.5"
-                />
-              )}
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="quiet"
-                  size="icon-xs"
-                  className="size-6 shrink-0 [&_svg]:size-3.5"
-                  onClick={goToNextDiff}
-                  aria-label={translate(
-                    'auto.components.editor.EditorPanelHeader.631dab0df3',
-                    'Next change'
-                  )}
-                  disabled={changeCount === 0}
-                >
-                  <ArrowDown size={14} />
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom" sideOffset={4}>
-              {translate('auto.components.editor.EditorPanelHeader.631dab0df3', 'Next change')}
-              {nextChangeShortcut.keys.length > 0 && (
-                <ShortcutKeyCombo
-                  keys={nextChangeShortcut.keys}
-                  variant="inverted"
-                  doubleTap={nextChangeShortcut.doubleTap}
-                  className="ml-1.5"
-                />
-              )}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
