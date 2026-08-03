@@ -57,7 +57,7 @@ import {
 import { repoColor } from '../workspace/repo-color'
 import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-repo'
 import { MobileAgentIcon } from './agent-icon'
-import { BottomDrawer, BottomDrawerModalHost, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
+import { BottomDrawer, BottomDrawerModalHost } from './bottom-drawer'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
 import { MobileGlassSurface } from './glass/surface'
@@ -96,11 +96,7 @@ type CreateOptions = {
   approvedSetupContentHash?: string
 }
 
-type NewWorktreeDrawerView = 'form' | 'transition' | 'source' | 'repo' | 'agent' | 'trust'
-
-// Why: iOS cannot reliably present a second native modal until the first drawer's
-// exit commits; one extra frame keeps transitions sequential on slower devices.
-const NEW_WORKTREE_DRAWER_TRANSITION_MS = BOTTOM_DRAWER_HIDE_MS + 16
+type NewWorktreeDrawerView = 'form' | 'source' | 'repo' | 'agent' | 'trust'
 
 function repoBadgeColor(repo: Repo | null): string {
   return repo?.badgeColor || repoColor(repo?.displayName ?? 'repository')
@@ -180,7 +176,6 @@ function NewWorkspaceModalContent({
   const [repos, setRepos] = useState<Repo[]>(initialRepos ?? [])
   const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null)
   const [drawerView, setDrawerView] = useState<NewWorktreeDrawerView>('form')
-  const drawerTransitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const createInFlightRef = useRef(false)
   const setupTrustActionInFlightRef = useRef(false)
   const [selectedAgentState, setSelectedAgent] = useState<AgentOption>(AGENT_OPTIONS[0]!)
@@ -211,23 +206,8 @@ function NewWorkspaceModalContent({
     [existingWorktrees, selectedRepo]
   )
 
-  useEffect(() => {
-    return () => {
-      if (drawerTransitionTimerRef.current) {
-        clearTimeout(drawerTransitionTimerRef.current)
-      }
-    }
-  }, [])
-
-  function transitionDrawer(nextView: Exclude<NewWorktreeDrawerView, 'transition'>): void {
-    if (drawerTransitionTimerRef.current) {
-      clearTimeout(drawerTransitionTimerRef.current)
-    }
-    setDrawerView('transition')
-    drawerTransitionTimerRef.current = setTimeout(() => {
-      drawerTransitionTimerRef.current = null
-      setDrawerView(nextView)
-    }, NEW_WORKTREE_DRAWER_TRANSITION_MS)
+  function transitionDrawer(nextView: NewWorktreeDrawerView): void {
+    setDrawerView(nextView)
   }
 
   // The Smart source picker owns the workspace name AND the linked-source
@@ -785,22 +765,12 @@ function NewWorkspaceModalContent({
   }
 
   return (
-    // Why: hosting the form and every picker in one persistent native Modal makes
-    // form → repo/agent transitions in-window view swaps, avoiding the iOS
-    // dismiss-then-present race that left the dropdowns unresponsive. Native back
-    // closes the flow from the form, routes the trust prompt through its in-flight
-    // guard, and otherwise returns to the form from a picker.
+    // Why: the form and its pickers swap content inside one native sheet, so no
+    // picker competes with a sheet that is still dismissing.
     <BottomDrawerModalHost
       visible={visible}
-      onRequestClose={() => {
-        if (drawerView === 'form') {
-          onClose()
-        } else if (drawerView === 'trust') {
-          closeSetupTrust()
-        } else {
-          transitionDrawer('form')
-        }
-      }}
+      dismissEnabled={drawerView !== 'trust' || !creating}
+      onRequestClose={onClose}
     >
       <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
         <View className="mb-3 px-1">
@@ -1074,8 +1044,8 @@ function NewWorkspaceModalContent({
         )}
       </BottomDrawer>
 
-      {/* Why: list drawers stay outside the form's ScrollView, and the transition
-          state lets each hosted overlay finish hiding before the next appears. */}
+      {/* Why: picker content stays outside the form ScrollView so the active step
+          owns the sheet's scrolling behavior. */}
       <SmartWorkspaceSourceDrawer
         visible={visible && drawerView === 'source'}
         client={client}

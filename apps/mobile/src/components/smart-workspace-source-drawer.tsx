@@ -20,7 +20,7 @@ import {
 } from '../workspace-create/smart-source-paste-intent'
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
-import { BottomDrawer, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
+import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
@@ -29,7 +29,7 @@ import { MobileGlassTextButton } from './glass/text-button'
 import { SmartSourceModeIcon } from './smart-source-mode-icon'
 import { SmartWorkspaceSourceRow } from './smart-workspace-source-row'
 
-type Props = {
+type SmartWorkspaceSourceDrawerProps = {
   visible: boolean
   client: RpcClient | null
   composer: MobileComposerSource
@@ -51,7 +51,7 @@ export function SmartWorkspaceSourceDrawer({
   sshReady,
   onRepoChange,
   onClose
-}: Props) {
+}: SmartWorkspaceSourceDrawerProps): React.JSX.Element {
   const availableModes = useMemo(() => resolveAvailableSmartModes(availability), [availability])
   const [mode, setMode] = useState<SmartNameMode>(() => resolveDefaultSmartMode(availability))
   const [mrStateFilter, setMrStateFilter] = useState<MrStateFilter>('opened')
@@ -92,10 +92,6 @@ export function SmartWorkspaceSourceDrawer({
     mrStateFilter,
     repos
   })
-
-  function closeSoon(): void {
-    setTimeout(onClose, BOTTOM_DRAWER_HIDE_MS)
-  }
 
   function handleSelectRow(row: SourceRow): void {
     switch (row.kind) {
@@ -152,7 +148,7 @@ export function SmartWorkspaceSourceDrawer({
           className="rounded-full"
           contentClassName="min-h-8 items-center justify-center rounded-full px-3"
           hitSlop={8}
-          onPress={closeSoon}
+          onPress={onClose}
         >
           <Text className="text-foreground text-sm font-semibold">Done</Text>
         </MobileGlassPressable>

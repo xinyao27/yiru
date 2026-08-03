@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-nat
 
 import type { ActionSheetAction } from '~/components/action-sheet-modal'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
-import { BottomDrawer } from '~/components/bottom-drawer'
+import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
@@ -24,33 +24,52 @@ import type { useMobileDiffReviewController } from '~/session/diff/use-review-co
 
 import { mobileDiffReviewStyles as styles } from './screen-styles'
 
-type Props = {
+type MobileDiffReviewDrawersProps = {
   controller: ReturnType<typeof useMobileDiffReviewController>
 }
 
-export function MobileDiffReviewDrawers({ controller }: Props) {
+export function MobileDiffReviewDrawers({
+  controller
+}: MobileDiffReviewDrawersProps): React.JSX.Element {
   const sendActions = useSendActions(controller)
   const overflowActions = useOverflowActions(controller)
   return (
     <>
-      <ActionSheetModal
-        visible={controller.showOverflow}
-        title="Review Actions"
-        message={
-          controller.reviewedUnstagedCount > 0
-            ? `${controller.reviewedUnstagedCount} reviewed unstaged files can be staged`
-            : undefined
+      <BottomDrawerModalHost
+        visible={
+          controller.showOverflow ||
+          controller.sendSheet !== null ||
+          controller.composer !== null ||
+          controller.showCompletion
         }
-        actions={overflowActions}
-        onClose={() => controller.setShowOverflow(false)}
-      />
-      <ActionSheetModal
-        visible={controller.sendSheet !== null}
-        title="Send Notes"
-        message={sendSheetMessage(controller)}
-        actions={sendActions}
-        onClose={() => controller.setSendSheet(null)}
-      />
+        onRequestClose={() => {
+          controller.setShowOverflow(false)
+          controller.setSendSheet(null)
+          controller.closeComposer()
+          controller.setShowCompletion(false)
+        }}
+      >
+        <ActionSheetModal
+          visible={controller.showOverflow}
+          title="Review Actions"
+          message={
+            controller.reviewedUnstagedCount > 0
+              ? `${controller.reviewedUnstagedCount} reviewed unstaged files can be staged`
+              : undefined
+          }
+          actions={overflowActions}
+          onClose={() => controller.setShowOverflow(false)}
+        />
+        <ActionSheetModal
+          visible={controller.sendSheet !== null}
+          title="Send Notes"
+          message={sendSheetMessage(controller)}
+          actions={sendActions}
+          onClose={() => controller.setSendSheet(null)}
+        />
+        <NoteComposerDrawer controller={controller} />
+        <CompletionDrawer controller={controller} />
+      </BottomDrawerModalHost>
       <ConfirmModal
         visible={controller.discardTarget !== null}
         title="Discard File"
@@ -70,8 +89,6 @@ export function MobileDiffReviewDrawers({ controller }: Props) {
         }}
         onCancel={() => controller.setDiscardTarget(null)}
       />
-      <NoteComposerDrawer controller={controller} />
-      <CompletionDrawer controller={controller} />
     </>
   )
 }
@@ -124,7 +141,10 @@ function useOverflowActions(controller: ReturnType<typeof useMobileDiffReviewCon
         icon: Send,
         disabled: controller.unsentComments.length === 0,
         skipAutoClose: true,
-        onPress: () => void controller.openSendSheet()
+        onPress: () => {
+          controller.setShowOverflow(false)
+          void controller.openSendSheet()
+        }
       },
       {
         label: 'Clear Sent Notes',
@@ -173,7 +193,7 @@ function sendSheetMessage(
       : `${controller.unsentComments.length} unsent notes`
 }
 
-function NoteComposerDrawer({ controller }: Props) {
+function NoteComposerDrawer({ controller }: MobileDiffReviewDrawersProps): React.JSX.Element {
   const composer = controller.composer
   return (
     <BottomDrawer visible={composer !== null} onClose={controller.closeComposer}>
@@ -259,7 +279,7 @@ function SaveNoteButton({
   )
 }
 
-function CompletionDrawer({ controller }: Props) {
+function CompletionDrawer({ controller }: MobileDiffReviewDrawersProps): React.JSX.Element {
   const noteCount =
     controller.screenState.kind === 'ready' ? controller.screenState.comments.length : 0
   return (
@@ -284,7 +304,10 @@ function CompletionDrawer({ controller }: Props) {
           disabled={controller.unsentComments.length === 0}
           isProminent
           label="Send Notes"
-          onPress={() => void controller.openSendSheet()}
+          onPress={() => {
+            controller.setShowCompletion(false)
+            void controller.openSendSheet()
+          }}
           accessibilityLabel="Send notes to agent"
           size="regular"
         />

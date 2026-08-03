@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 
 import { Check } from '~/components/uniwind-icons'
 import { cn } from '~/style/class-names'
 
-import { BottomDrawer, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
+import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
 
-type Props<T extends { id: string; label: string }> = {
+type PickerListDrawerProps<T extends { id: string; label: string }> = {
   visible: boolean
   title: string
   items: T[]
@@ -25,45 +25,9 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
   onSelect,
   onClose,
   renderIcon
-}: Props<T>) {
-  const [closing, setClosing] = useState(false)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const drawerVisible = visible && !closing
-
-  useEffect(() => {
-    if (visible) {
-      setClosing(false)
-    }
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current)
-        closeTimerRef.current = null
-      }
-    }
-  }, [visible])
-
-  const finishClose = useCallback(() => {
-    setClosing(false)
-    onClose()
-  }, [onClose])
-
-  const closeThenSelect = useCallback(
-    (item: T) => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current)
-      }
-      setClosing(true)
-      closeTimerRef.current = setTimeout(() => {
-        closeTimerRef.current = null
-        onClose()
-        onSelect(item)
-      }, BOTTOM_DRAWER_HIDE_MS)
-    },
-    [onClose, onSelect]
-  )
-
+}: PickerListDrawerProps<T>): React.JSX.Element {
   return (
-    <BottomDrawer visible={drawerVisible} onClose={finishClose} contentScrollable={false}>
+    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
       <View className="px-1 pb-2">
         <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>
@@ -80,7 +44,10 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
             return (
               <Pressable
                 className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-                onPress={() => closeThenSelect(item)}
+                onPress={() => {
+                  onSelect(item)
+                  onClose()
+                }}
               >
                 {renderIcon ? <View className="w-5 items-center">{renderIcon(item)}</View> : null}
                 <Text

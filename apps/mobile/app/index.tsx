@@ -14,21 +14,14 @@ import {
   hasRenderableUsage,
   UsageBar
 } from '~/components/account-usage'
-import { ActionSheetModal, type ActionSheetAction } from '~/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
-import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { MobileHostCard } from '~/components/host-card'
-import {
-  CaretRight as ChevronRight,
-  Terminal,
-  ArrowClockwise as RefreshCw,
-  Power as PowerOff,
-  PencilSimple as Edit3
-} from '~/components/uniwind-icons'
+import { CaretRight as ChevronRight, Terminal } from '~/components/uniwind-icons'
+import { HostActionsDrawer } from '~/home/host-actions-drawer'
 import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
@@ -51,15 +44,6 @@ import type { ConnectionState, HostProfile } from '~/transport/types'
 import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
 import { repoColor } from '~/workspace/repo-color'
 import { pickResumeWorktree } from '~/worktree/resume-pick'
-
-function endpointLabel(endpoint: string): string {
-  try {
-    const url = new URL(endpoint)
-    return `${url.hostname}${url.port ? `:${url.port}` : ''}`
-  } catch {
-    return endpoint
-  }
-}
 
 type WorktreeSummary = {
   worktreeId: string
@@ -869,77 +853,29 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* ─── Action sheets (shared by both states) ─── */}
-      <ActionSheetModal
-        visible={actionTarget != null}
-        title={actionTarget?.name}
-        message={actionTarget ? endpointLabel(actionTarget.endpoint) : undefined}
-        actions={(() => {
-          const host = actionTarget
-          if (!host) {
-            return []
-          }
-          const state = hostStates[host.id] ?? 'connecting'
-          const isLive =
-            state === 'connected' ||
-            state === 'connecting' ||
-            state === 'handshaking' ||
-            state === 'reconnecting'
-          // Why: "Reconnect" implies "you were connected, try again". If
-          // the client has never reached 'connected' this session (cold
-          // start, unreachable host, or after Disconnect) the action is
-          // functionally a fresh Connect — using the right verb makes
-          // the affordance match what tapping it actually does.
-          const hasEverConnected = (hostLastConnected[host.id] ?? null) != null
-          const items: ActionSheetAction[] = []
-          items.push({
-            label: hasEverConnected && isLive ? 'Reconnect' : 'Connect',
-            icon: RefreshCw,
-            onPress: () => {
-              setActionTarget(null)
-              void forceReconnectHost(host.id)
-            }
-          })
-          if (isLive) {
-            items.push({
-              label: 'Disconnect',
-              icon: PowerOff,
-              onPress: () => {
-                setActionTarget(null)
-                closeHostClient(host.id)
-              }
-            })
-          }
-          items.push({
-            label: 'Edit host',
-            icon: Edit3,
-            closeBeforePress: true,
-            onPress: () => {
-              setActionTarget(null)
-              router.push(`/h/${host.id}/edit`)
-            }
-          })
-          items.push({
-            label: 'Remove',
-            destructive: true,
-            closeBeforePress: true,
-            onPress: () => {
-              setConfirmRemove(host)
-            }
-          })
-          return items
-        })()}
-        onClose={() => setActionTarget(null)}
-      />
-
-      <ConfirmModal
-        visible={confirmRemove != null}
-        title="Remove Host"
-        message={`Remove "${confirmRemove?.name}"? You can re-pair later.`}
-        confirmLabel="Remove"
-        destructive
-        onConfirm={() => void handleRemove()}
-        onCancel={() => setConfirmRemove(null)}
+      <HostActionsDrawer
+        actionTarget={actionTarget}
+        confirmRemove={confirmRemove}
+        connectionState={actionTarget ? (hostStates[actionTarget.id] ?? 'connecting') : null}
+        hasEverConnected={
+          actionTarget ? (hostLastConnected[actionTarget.id] ?? null) !== null : false
+        }
+        onActionClose={() => setActionTarget(null)}
+        onCancelRemove={() => setConfirmRemove(null)}
+        onConfirmRemove={() => void handleRemove()}
+        onDisconnect={(hostId) => {
+          setActionTarget(null)
+          closeHostClient(hostId)
+        }}
+        onEdit={(hostId) => {
+          setActionTarget(null)
+          router.push(`/h/${hostId}/edit`)
+        }}
+        onReconnect={(hostId) => {
+          setActionTarget(null)
+          void forceReconnectHost(hostId)
+        }}
+        onRequestRemove={setConfirmRemove}
       />
     </View>
   )

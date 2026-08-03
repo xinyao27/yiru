@@ -15,7 +15,7 @@ export type PickerOption<T extends string = string> = {
   renderIcon?: (selected: boolean) => ReactNode
 }
 
-type Props<T extends string = string> = {
+type PickerModalProps<T extends string = string> = {
   visible: boolean
   title: string
   options: PickerOption<T>[]
@@ -26,7 +26,7 @@ type Props<T extends string = string> = {
 }
 
 type PickerModalContentProps<T extends string = string> = Pick<
-  Props<T>,
+  PickerModalProps<T>,
   'options' | 'selected' | 'onSelect' | 'onLongSelect' | 'onClose'
 >
 
@@ -38,7 +38,7 @@ export function PickerModal<T extends string = string>({
   onSelect,
   onLongSelect,
   onClose
-}: Props<T>) {
+}: PickerModalProps<T>): React.JSX.Element {
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
       <View className="px-1 pb-2">

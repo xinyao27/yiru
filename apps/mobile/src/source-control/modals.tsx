@@ -1,17 +1,21 @@
 import { openMobilePrUrl } from '~/session/pr/compose-sheet'
 
 import { ActionSheetModal, type ActionSheetAction } from '../components/action-sheet-modal'
+import { BottomDrawerModalHost } from '../components/bottom-drawer'
 import { ConfirmModal } from '../components/confirm-modal'
 import { PickerModal } from '../components/picker-modal'
 import { MobileBranchDiffPreviewDrawer } from './branch-diff-preview-drawer'
 import type { MobileSourceControlState } from './use-source-control-state'
 
-type Props = {
+type MobileSourceControlModalsProps = {
   state: MobileSourceControlState
   actionSheetActions: ActionSheetAction[]
 }
 
-export function MobileSourceControlModals({ state, actionSheetActions }: Props) {
+export function MobileSourceControlModals({
+  state,
+  actionSheetActions
+}: MobileSourceControlModalsProps): React.JSX.Element {
   const {
     branchDiffPreview,
     setBranchDiffPreview,
@@ -38,13 +42,40 @@ export function MobileSourceControlModals({ state, actionSheetActions }: Props) 
         onClose={() => setBranchDiffPreview(null)}
       />
 
-      <ActionSheetModal
-        visible={showActionSheet}
-        title="Source Control"
-        message={branchLabel}
-        actions={actionSheetActions}
-        onClose={() => setShowActionSheet(false)}
-      />
+      <BottomDrawerModalHost
+        visible={showActionSheet || showBranchPicker}
+        onRequestClose={() => {
+          setShowActionSheet(false)
+          setShowBranchPicker(false)
+        }}
+      >
+        <ActionSheetModal
+          visible={showActionSheet}
+          title="Source Control"
+          message={branchLabel}
+          actions={actionSheetActions}
+          onClose={() => setShowActionSheet(false)}
+        />
+
+        <PickerModal
+          visible={showBranchPicker}
+          title="Switch Branch"
+          options={(localBranches?.branches ?? []).map((b) => ({
+            value: b,
+            label: b,
+            subtitle: b === localBranches?.current ? 'current' : undefined
+          }))}
+          selected={localBranches?.current ?? ''}
+          onSelect={(branch) => {
+            if (branch !== localBranches?.current) {
+              void checkoutBranch(branch)
+            } else {
+              setShowBranchPicker(false)
+            }
+          }}
+          onClose={() => setShowBranchPicker(false)}
+        />
+      </BottomDrawerModalHost>
 
       <ConfirmModal
         visible={discardTarget !== null}
@@ -66,25 +97,6 @@ export function MobileSourceControlModals({ state, actionSheetActions }: Props) 
           setDiscardTarget(null)
         }}
         onCancel={() => setDiscardTarget(null)}
-      />
-
-      <PickerModal
-        visible={showBranchPicker}
-        title="Switch Branch"
-        options={(localBranches?.branches ?? []).map((b) => ({
-          value: b,
-          label: b,
-          subtitle: b === localBranches?.current ? 'current' : undefined
-        }))}
-        selected={localBranches?.current ?? ''}
-        onSelect={(branch) => {
-          if (branch !== localBranches?.current) {
-            void checkoutBranch(branch)
-          } else {
-            setShowBranchPicker(false)
-          }
-        }}
-        onClose={() => setShowBranchPicker(false)}
       />
 
       <ConfirmModal

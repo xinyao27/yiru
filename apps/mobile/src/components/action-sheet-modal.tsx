@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
 import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '~/components/uniwind-icons'
@@ -16,11 +16,10 @@ export type ActionSheetAction = {
   hint?: string
   loading?: boolean
   skipAutoClose?: boolean
-  closeBeforePress?: boolean
   onPress: () => void
 }
 
-type Props = {
+type ActionSheetModalProps = {
   visible: boolean
   title?: string
   message?: string
@@ -38,14 +37,19 @@ function iconForAction(label: string, destructive?: boolean, icon?: Icon): Icon 
   return Edit3
 }
 
-type ContentProps = {
+type ActionSheetContentProps = {
   title?: string
   message?: string
   actions: ActionSheetAction[]
   onClose?: () => void
 }
 
-export function ActionSheetContent({ title, message, actions, onClose }: ContentProps) {
+export function ActionSheetContent({
+  title,
+  message,
+  actions,
+  onClose
+}: ActionSheetContentProps): React.JSX.Element {
   return (
     <>
       {(title || message) && (
@@ -114,37 +118,16 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
   )
 }
 
-export function ActionSheetModal({ visible, title, message, actions, onClose }: Props) {
-  const pendingActionRef = useRef<(() => void) | null>(null)
-  const sequencedActions = actions.map((action) =>
-    action.closeBeforePress
-      ? {
-          ...action,
-          onPress: () => {
-            pendingActionRef.current = action.onPress
-          }
-        }
-      : action
-  )
-
+export function ActionSheetModal({
+  visible,
+  title,
+  message,
+  actions,
+  onClose
+}: ActionSheetModalProps): React.JSX.Element {
   return (
-    <BottomDrawer
-      visible={visible}
-      onClose={onClose}
-      onAfterClose={() => {
-        // Why: iOS cannot present a second native modal until the action
-        // sheet's native window has fully unmounted.
-        const pendingAction = pendingActionRef.current
-        pendingActionRef.current = null
-        pendingAction?.()
-      }}
-    >
-      <ActionSheetContent
-        title={title}
-        message={message}
-        actions={sequencedActions}
-        onClose={onClose}
-      />
+    <BottomDrawer visible={visible} onClose={onClose}>
+      <ActionSheetContent title={title} message={message} actions={actions} onClose={onClose} />
     </BottomDrawer>
   )
 }
