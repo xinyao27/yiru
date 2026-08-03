@@ -44,6 +44,9 @@ export type WorkspaceListRowItem = {
 
 type WorktreeRollupStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 
+const PROJECT_RAIL_STATUS_CENTER_TOP_PT = 16
+const PROJECT_RAIL_BASE_ELBOW_WIDTH_PT = 12
+
 type WorkspaceLeadingStatusProps = {
   branch: string
   linkedPR: WorkspaceListRowItem['linkedPR']
@@ -75,6 +78,7 @@ type Props<T extends WorkspaceListRowItem> = {
   // omits its own repo icon+name to avoid the redundant "📁 yiru" on every row.
   hideRepo?: boolean
   nestedUnderProject?: boolean
+  endsProjectRail?: boolean
   status: WorktreeRollupStatus
   onPress: (item: T) => void
   onLongPress?: (item: T) => void
@@ -88,6 +92,7 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
   repoIcon,
   hideRepo = false,
   nestedUnderProject = false,
+  endsProjectRail = false,
   status,
   onPress,
   onLongPress,
@@ -120,8 +125,22 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
       delayLongPress={400}
     >
       {nestedUnderProject ? (
-        <View className="-my-1.5 w-5 items-center self-stretch">
-          <View className="bg-muted-foreground/60 w-hairline flex-1" />
+        <View className="relative -my-1.5 w-5 self-stretch">
+          <View
+            pointerEvents="none"
+            className={cn('absolute inset-x-0 top-0 items-center', !endsProjectRail && 'bottom-0')}
+            style={endsProjectRail ? { height: PROJECT_RAIL_STATUS_CENTER_TOP_PT } : undefined}
+          >
+            <View className="bg-border w-hairline h-full" />
+          </View>
+          <View
+            pointerEvents="none"
+            className="bg-border h-hairline absolute left-1/2"
+            style={{
+              top: PROJECT_RAIL_STATUS_CENTER_TOP_PT,
+              width: PROJECT_RAIL_BASE_ELBOW_WIDTH_PT + spacing4 * lineageDepth
+            }}
+          />
         </View>
       ) : null}
 
@@ -167,7 +186,12 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
         {/* Only agents get a secondary activity line, matching desktop. A plain
             terminal's shell-output tail is intentionally not surfaced here. */}
         {item.agents && item.agents.length > 0 ? (
-          <WorkspaceAgentList agents={item.agents} now={now} unvisited={item.unread} />
+          <WorkspaceAgentList
+            agents={item.agents}
+            now={now}
+            railStartOffsetPt={folderMeta ? spacing4 : 0}
+            unvisited={item.unread}
+          />
         ) : null}
         {lineageChildCount > 0 && onToggleLineage ? (
           <MobileGlassPressable

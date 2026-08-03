@@ -855,7 +855,6 @@ export function HostScreen({
         />
       </MobileWorkspaceListChrome>
 
-      {/* Auth failed banner */}
       {connState === 'auth-failed' && (
         <AuthFailedBanner
           canRetry={!!hostId}
@@ -865,7 +864,6 @@ export function HostScreen({
         />
       )}
 
-      {/* Loading state */}
       {((connState === 'connecting' || connState === 'reconnecting') &&
         displayWorktrees.length === 0) ||
       (connState === 'connected' && !worktreesLoaded && displayWorktrees.length === 0) ? (
@@ -874,7 +872,6 @@ export function HostScreen({
         </View>
       ) : null}
 
-      {/* Empty state */}
       {connState === 'connected' && worktreesLoaded && sections.length === 0 && (
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
@@ -929,7 +926,7 @@ export function HostScreen({
                       pointerEvents="none"
                       className="absolute inset-x-0 top-8 bottom-0 items-center"
                     >
-                      <View className="bg-muted-foreground/60 w-hairline h-full" />
+                      <View className="bg-border w-hairline h-full" />
                     </View>
                   ) : null}
                   {section.icon === 'pin' ? (
@@ -940,7 +937,10 @@ export function HostScreen({
                   ) : null}
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-foreground shrink text-base leading-none" numberOfLines={1}>
+                  <Text
+                    className="text-foreground shrink text-base leading-none font-semibold"
+                    numberOfLines={1}
+                  >
                     {section.title}
                   </Text>
                 </View>
@@ -964,7 +964,7 @@ export function HostScreen({
               colorsClassName="accent-muted-foreground"
             />
           }
-          renderItem={({ item, section }) => (
+          renderItem={({ item, section, index }) => (
             <WorkspaceListRow
               item={item}
               isReadOnly={isReadOnly}
@@ -973,6 +973,7 @@ export function HostScreen({
               repoIcon={repoIconsByName.get(item.repo) ?? null}
               hideRepo={section.icon !== 'pin'}
               nestedUnderProject={section.icon !== 'pin'}
+              endsProjectRail={section.icon !== 'pin' && index === section.data.length - 1}
               onPress={openWorktreeSession}
               onLongPress={item.workspaceKind === 'folder-workspace' ? undefined : setActionTarget}
               onToggleLineage={(row) =>
@@ -983,7 +984,6 @@ export function HostScreen({
         />
       )}
 
-      {/* Floating "new workspace" button — phone only; embedded sidebars keep the toolbar +. */}
       {!embedded && (
         <NewWorkspaceFab onPress={openNewWorkspaceModal} disabled={connState !== 'connected'} />
       )}

@@ -27,7 +27,7 @@ export function WorkspaceAgentRow({ agent, depth, now, unvisited }: Props) {
 
   return (
     <View
-      className="mt-1 h-6 flex-row items-center gap-1"
+      className="h-6 flex-row items-center gap-1"
       style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}
     >
       {/* Agent identity logo (Claude/Codex/…), matching the desktop sidebar's
