@@ -1,4 +1,4 @@
-import { CaretRight as ChevronRight } from '@phosphor-icons/react'
+import { CaretRight as ChevronRight, X } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { AgentStateDot, agentStateLabel } from '~renderer/components/agent-state-dot'
 import { useAgentRowConversationName } from '~renderer/components/dashboard/use-agent-row-conversation-name'
@@ -103,6 +103,9 @@ type CompactAgentRowProps = {
   childAgentCount?: number
   childAgentsExpanded?: boolean
   onToggleChildAgents?: (paneKey: string) => void
+  /** Omitted for subagent child rows, which have no store entry of their own
+   *  to dismiss — offering the X would be a silent no-op. */
+  onDismiss?: (paneKey: string) => void
 }
 
 export const CompactAgentRow = React.memo(function CompactAgentRow({
@@ -115,7 +118,8 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   isFocusedPane = false,
   childAgentCount,
   childAgentsExpanded = false,
-  onToggleChildAgents
+  onToggleChildAgents,
+  onDismiss
 }: CompactAgentRowProps) {
   // Why: subagent child rows carry the child's NAME (e.g. "pr-reviewer") in
   // agentType, which is not an iconable agent and would render the unknown
@@ -177,6 +181,17 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     },
     [agent.paneKey, onToggleChildAgents]
   )
+  const handleDismiss = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onDismiss?.(agent.paneKey)
+    },
+    [agent.paneKey, onDismiss]
+  )
+  // Why: the send picker owns the whole row while it is active, so the X must
+  // not compete with it for the trailing slot.
+  const canDismiss = typeof onDismiss === 'function' && !sendTargetStatus
   const rowBody = (
     <>
       {!hideIcon && (
@@ -223,17 +238,46 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
         </span>
       )}
       {cacheTimer && <CacheTimer startedAt={cacheTimer.startedAt} ttlMs={cacheTimer.ttlMs} />}
-      {shortTime && (
-        <span
-          className={cn(
-            'shrink-0 text-[10px] tabular-nums',
-            // Why: the muted timestamp drops out against the selected-row fill.
-            isFocusedPane
-              ? 'text-foreground/70'
-              : 'text-muted-foreground/60 group-hover/agent-row:text-foreground/75'
+      {/* Why: timestamp and dismiss-X share one slot so the row keeps its
+          compact width — the same trade the dashboard row makes. On no-hover
+          devices the X is always visible, so the timestamp yields there. */}
+      {(shortTime || canDismiss) && (
+        <span className="relative grid shrink-0 grid-cols-1 grid-rows-1 items-center justify-items-end">
+          {shortTime && (
+            <span
+              className={cn(
+                '[grid-area:1/1] text-[10px] tabular-nums',
+                // Why: the muted timestamp drops out against the selected-row fill.
+                isFocusedPane
+                  ? 'text-foreground/70'
+                  : 'text-muted-foreground/60 group-hover/agent-row:text-foreground/75',
+                canDismiss &&
+                  'transition-opacity duration-150 group-hover/agent-row:opacity-0 [@media(hover:none)]:opacity-0'
+              )}
+            >
+              {shortTime}
+            </span>
           )}
-        >
-          {shortTime}
+          {canDismiss && (
+            <Button
+              variant="quiet"
+              size="icon-xs"
+              type="button"
+              onClick={handleDismiss}
+              className={cn(
+                '[grid-area:1/1] size-3.5 border-0 p-0',
+                'can-hover:opacity-0 transition-opacity duration-150',
+                'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
+              )}
+              aria-label={translate(
+                'auto.components.dashboard.DashboardAgentRow.b06e13fcf7',
+                'Dismiss agent'
+              )}
+              title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
+            >
+              <X className="size-3" />
+            </Button>
+          )}
         </span>
       )}
       <AgentStateDot state={dotState} size="sm" />

@@ -394,6 +394,10 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           childAgentCount={childBranches.length > 0 ? childBranches.length : undefined}
           childAgentsExpanded={isExpanded}
           onToggleChildAgents={childBranches.length > 0 ? toggleLineageParent : undefined}
+          // Why: retained completion rows outlive the tab they came from, so
+          // the compact list is the only surface left that can clear them.
+          // Without an X here a stale row has no user-reachable exit.
+          onDismiss={agent.rowSource === 'subagent' ? undefined : handleDismissAgent}
         />
         {childBranches.length > 0 ? (
           <div
