@@ -19,6 +19,7 @@ import type { CoworkingSharingIpcController } from './sharing'
 const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   status: 'unavailable',
   diagnostic: 'coworking_unavailable',
+  self: null,
   remoteDesktops: [],
   ownerWorktrees: [],
   ownerControlRequests: [],

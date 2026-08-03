@@ -217,7 +217,12 @@ export function createCoworkingOwnerComposition(
     gateway,
     ownerRuntimeId: options.ownerRuntimeId,
     ownerKeyFingerprint: keypair.fingerprint,
-    onUnavailable: (error) => void service?.reportIngressUnavailable(error)
+    onUnavailable: (error) => void service?.reportIngressUnavailable(error),
+    onSelfIdentity: (self) =>
+      service?.reportSelfIdentity({
+        nodeDisplayName: self.nodeDisplayName,
+        userDisplayName: self.userDisplayName
+      })
   })
   service = new CoworkingOwnerService({
     visibility,

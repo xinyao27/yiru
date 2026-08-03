@@ -3746,7 +3746,8 @@
           "suspendedHostUnavailable": "Host desconectado",
           "suspendedIncarnation": "Árbol de trabajo reemplazado",
           "suspendedOverlapping": "Recurso compartido superpuesto",
-          "suspendedUnknown": "No servido"
+          "suspendedUnknown": "No servido",
+          "sharingAs": "Compartiendo como {{node}}"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Se reparó la regla de Firewall de Windows.",

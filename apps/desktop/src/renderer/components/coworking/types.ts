@@ -5,6 +5,7 @@ import type {
   CoworkingOwnerControlRequestView,
   CoworkingOwnerWorktreeSharing,
   CoworkingRequesterControlView,
+  CoworkingSelfIdentity,
   CoworkingSharingSnapshot
 } from '~shared/coworking/ipc-contract'
 
@@ -20,6 +21,7 @@ export type CoworkingExpandedRefsByDesktop = ReadonlyMap<string, ReadonlySet<str
 export type CoworkingSharingState = {
   coworkingSharingStatus: CoworkingSharingSnapshot['status']
   coworkingSharingDiagnostic: string | null
+  coworkingSelfIdentity: CoworkingSelfIdentity | null
   coworkingRemoteDesktops: readonly CoworkingRemoteDesktop[]
   coworkingOwnerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   coworkingOwnerControlGrants: readonly CoworkingOwnerControlGrantView[]

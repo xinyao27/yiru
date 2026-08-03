@@ -3746,7 +3746,8 @@
           "suspendedHostUnavailable": "主机离线",
           "suspendedIncarnation": "工作区已被替换",
           "suspendedOverlapping": "共享路径重叠",
-          "suspendedUnknown": "未在提供服务"
+          "suspendedUnknown": "未在提供服务",
+          "sharingAs": "以 {{node}} 共享"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 防火墙规则已修复。",

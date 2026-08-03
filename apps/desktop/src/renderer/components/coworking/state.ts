@@ -33,6 +33,7 @@ function createInitialCoworkingSharingState(): CoworkingSharingState {
   return {
     coworkingSharingStatus: 'starting',
     coworkingSharingDiagnostic: null,
+    coworkingSelfIdentity: null,
     coworkingRemoteDesktops: [],
     coworkingOwnerWorktrees: [],
     coworkingOwnerControlGrants: [],
@@ -112,6 +113,7 @@ export const createCoworkingSharingSlice: StateCreator<AppState, [], [], Coworki
       return {
         coworkingSharingStatus: snapshot.status,
         coworkingSharingDiagnostic: snapshot.diagnostic,
+        coworkingSelfIdentity: snapshot.self,
         coworkingRemoteDesktops,
         coworkingOwnerWorktrees: [...snapshot.ownerWorktrees],
         coworkingOwnerControlGrants: [...snapshot.ownerControlGrants],

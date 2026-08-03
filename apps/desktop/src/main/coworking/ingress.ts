@@ -14,7 +14,12 @@ import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import { openCoworkingEncryptedConnection } from './ingress-encrypted-connection'
 import type { CoworkingProbeService } from './ingress-probe'
 import type { CoworkingRpcGateway } from './rpc/gateway'
-import type { TailnetControl, TailnetPrincipal, TailnetSnapshot } from './tailnet-control'
+import type {
+  TailnetControl,
+  TailnetNode,
+  TailnetPrincipal,
+  TailnetSnapshot
+} from './tailnet-control'
 import { normalizeTailnetIp } from './tailscale-json-projection'
 import type { CoworkingTicketAuthority } from './ticket-authority'
 
@@ -38,6 +43,9 @@ export type CoworkingIngressOptions = {
   ownerRuntimeId: string
   ownerKeyFingerprint: string
   onUnavailable?: (error: Error) => void
+  /** Why: `self` is read on every reconcile anyway, and the owner UI needs to
+   *  name the device it is sharing as. Reported here so nothing probes twice. */
+  onSelfIdentity?: (self: TailnetNode) => void
 }
 
 export class CoworkingIngress {
@@ -62,6 +70,7 @@ export class CoworkingIngress {
       return
     }
     const snapshot = await this.options.tailnet.readSnapshot()
+    this.options.onSelfIdentity?.(snapshot.self)
     this.started = true
     try {
       await this.reconcile(snapshot.self.addresses)
@@ -114,6 +123,7 @@ export class CoworkingIngress {
       // physical socket; the next interval retries address reconciliation.
       return
     }
+    this.options.onSelfIdentity?.(snapshot.self)
     try {
       await this.reconcile(snapshot.self.addresses)
     } catch (error) {

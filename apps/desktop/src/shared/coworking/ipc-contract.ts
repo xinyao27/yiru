@@ -147,9 +147,17 @@ export type CoworkingRequesterControlView = {
   approvedAt?: number
 }
 
+/** This desktop's own tailnet identity, so the owner UI can name the device it
+ *  is sharing as. Null until the first successful tailnet read. */
+export type CoworkingSelfIdentity = {
+  nodeDisplayName: string
+  userDisplayName: string
+}
+
 export type CoworkingSharingSnapshot = {
   status: 'starting' | 'ready' | 'unavailable'
   diagnostic: string | null
+  self: CoworkingSelfIdentity | null
   remoteDesktops: readonly CoworkingRemoteDesktop[]
   ownerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   ownerControlRequests: readonly CoworkingOwnerControlRequestView[]

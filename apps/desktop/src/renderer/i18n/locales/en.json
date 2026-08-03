@@ -3769,7 +3769,8 @@
           "suspendedHostUnavailable": "Host offline",
           "suspendedIncarnation": "Worktree replaced",
           "suspendedOverlapping": "Overlapping share",
-          "suspendedUnknown": "Not served"
+          "suspendedUnknown": "Not served",
+          "sharingAs": "Sharing as {{node}}"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",

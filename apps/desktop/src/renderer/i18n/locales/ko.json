@@ -3746,7 +3746,8 @@
           "suspendedHostUnavailable": "호스트 오프라인",
           "suspendedIncarnation": "워크트리가 교체됨",
           "suspendedOverlapping": "공유 경로 중복",
-          "suspendedUnknown": "제공되지 않음"
+          "suspendedUnknown": "제공되지 않음",
+          "sharingAs": "{{node}}(으)로 공유 중"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",

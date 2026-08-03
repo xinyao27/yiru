@@ -3746,7 +3746,8 @@
           "suspendedHostUnavailable": "ホストがオフライン",
           "suspendedIncarnation": "ワークツリーが置き換えられました",
           "suspendedOverlapping": "共有が重複",
-          "suspendedUnknown": "配信されていません"
+          "suspendedUnknown": "配信されていません",
+          "sharingAs": "{{node}} として共有中"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows ファイアウォール規則を修復しました。",

@@ -104,13 +104,32 @@ function CoworkingPresenceStatusSegment({
         {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
         className="w-80 max-w-[calc(100vw-2rem)] p-0"
       >
-        <div className="border-border flex items-center gap-1.5 border-b px-3 py-2 text-xs font-medium">
-          <UsersThree className="size-3.5 shrink-0" />
-          <span>{label}</span>
+        <div className="border-border flex flex-col gap-0.5 border-b px-3 py-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium">
+            <UsersThree className="size-3.5 shrink-0" />
+            <span>{label}</span>
+          </div>
+          <CoworkingSelfIdentityLine />
         </div>
         <CoworkingPresenceDetails sharedCount={sharedCount} />
       </PopoverContent>
     </Popover>
+  )
+}
+
+function CoworkingSelfIdentityLine(): React.JSX.Element | null {
+  const self = useAppStore((state) => state.coworkingSelfIdentity)
+  if (!self) {
+    return null
+  }
+  return (
+    <span className="text-muted-foreground text-[11px] leading-4">
+      {translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.sharingAs',
+        'Sharing as {{node}}',
+        { node: self.nodeDisplayName }
+      )}
+    </span>
   )
 }
 

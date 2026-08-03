@@ -10,6 +10,7 @@ import type {
   CoworkingRevokeControlArgs,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
+  CoworkingSelfIdentity,
   CoworkingSharingSnapshot
 } from '~shared/coworking/ipc-contract'
 import type {
@@ -38,6 +39,7 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
   private requests: readonly CoworkingControlRequest[] = []
   private grants: readonly CoworkingControlGrant[] = []
   private activeConnections: readonly AuthenticatedCoworkingPrincipal[] = []
+  private self: CoworkingSelfIdentity | null = null
   private status: CoworkingSharingSnapshot['status'] = 'starting'
   private diagnostic: string | null = null
   private stopped = false
@@ -152,6 +154,7 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
     return {
       status: this.status,
       diagnostic: this.diagnostic,
+      self: this.self,
       remoteDesktops: this.remoteSnapshot.desktops,
       ownerWorktrees: projectOwnerWorktrees(this.projectionContext),
       ownerControlRequests: this.requests.flatMap((request) => {
@@ -225,6 +228,17 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
     await this.options.visibility.reconcile({ kind: 'registered-roots-changed' })
     // Why: host suspension/recovery preserves the share epoch and therefore
     // does not emit an authority invalidation, but owner UI still needs the new status.
+    this.emit()
+  }
+
+  reportSelfIdentity(self: CoworkingSelfIdentity): void {
+    if (
+      this.self?.nodeDisplayName === self.nodeDisplayName &&
+      this.self?.userDisplayName === self.userDisplayName
+    ) {
+      return
+    }
+    this.self = self
     this.emit()
   }
 
