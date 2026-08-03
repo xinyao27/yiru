@@ -1,0 +1,210 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Why: 2px is the whole radius budget. react-grab keeps its boxes at 0-2px,
+     and the desktop app is rectilinear — soft corners fight both. */
+  --radius-chip: 2px;
+  --radius-control: 2px;
+  --radius-card: 2px;
+
+  --shadow-soft: 0 2px 3px #0003;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-label: var(--label);
+  --color-copy: var(--copy);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-hairline: var(--hairline);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-add-ink: var(--add-ink);
+  --color-del-ink: var(--del-ink);
+  --color-add-bg: var(--add-bg);
+  --color-del-bg: var(--del-bg);
+  --color-add-emphasis: var(--add-emphasis);
+  --color-del-emphasis: var(--del-emphasis);
+  --color-add-gutter-bg: var(--add-gutter-bg);
+  --color-del-gutter-bg: var(--del-gutter-bg);
+  --color-status-active: var(--status-active);
+  --color-status-working: var(--status-working);
+  --color-status-attention: var(--status-attention);
+  --color-status-idle: var(--status-idle);
+  --color-claude: var(--claude);
+}
+
+/* Why: dark is the base declaration, but the theme script follows the system
+   preference and opts into `.light`, matching how the reference sites behave. */
+:root {
+  --page: #0e0e0e;
+  --surface: #0e0e0e;
+  --raised: #0e0e0e;
+  --ink: #c6c6c6;
+  --label: #bfbfbf;
+  --copy: #848484;
+  --muted: #848484;
+  --faint: #515151;
+  --hairline: #1b1b1b;
+  --rule: #2a2a2a;
+  --rule-strong: #3a3a3a;
+  --accent: #599ce7;
+  --accent-ink: #0b1522;
+  --ok: #3fb950;
+  --warn: #d29922;
+  --add-ink: #3fa266;
+  --del-ink: #e34671;
+  --add-bg: #3fa26633;
+  --del-bg: #b8004933;
+  --add-emphasis: #3fa26622;
+  --del-emphasis: #b8004922;
+  --add-gutter-bg: #3fa2664d;
+  --del-gutter-bg: #b800494d;
+  --status-active: #10b981;
+  --status-working: #eab308;
+  --status-attention: #f59e0b;
+  --status-idle: #73737366;
+  --claude: #d97757;
+  /* Why: Claude's brand coral, as used in the desktop status-bar icons. */
+}
+
+.light {
+  --page: #fafafa;
+  --surface: #fafafa;
+  --raised: #fafafa;
+  --ink: #242424;
+  --label: #2a2a2a;
+  --copy: #616161;
+  --muted: #616161;
+  --faint: #9a9a9a;
+  --hairline: #e4e4e4;
+  --rule: #d4d4d4;
+  --rule-strong: #bcbcbc;
+  --accent: #2778c1;
+  --accent-ink: #ffffff;
+  --ok: #1a7f37;
+  --warn: #9a6700;
+  --add-ink: #007041;
+  --del-ink: #be1744;
+  --add-bg: #00af6624;
+  --del-bg: #ff617b38;
+  --add-emphasis: #00b06838;
+  --del-emphasis: #ff617b57;
+  --add-gutter-bg: #00af6640;
+  --del-gutter-bg: #ff617b57;
+  --status-active: #10b981;
+  --status-working: #eab308;
+  --status-attention: #f59e0b;
+  --status-idle: #73737366;
+  --claude: #d97757;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  html.light {
+    color-scheme: light;
+  }
+
+  /* Why: react-grab sets prose at regular and reserves weight for the one
+     title; medium throughout reads heavier than the reference. */
+  body {
+    @apply bg-page text-copy font-sans antialiased;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.status-pulse {
+  animation: status-pulse 1.8s ease-in-out infinite;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
