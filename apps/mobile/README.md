@@ -2,6 +2,10 @@
 
 React Native companion app for Yiru. Monitor worktrees, view terminal output, and send commands from your phone.
 
+The binding UI and component architecture is in [`DESIGN.md`](./DESIGN.md). Standard native
+controls use `@expo/ui` directly by default; shared mobile modules are reserved for repeated product
+behavior and real platform policy, not one-to-one wrappers around Expo controls.
+
 Local development uses two cooperating processes:
 
 - Yiru desktop/Electron. This hosts the mobile WebSocket RPC server.
