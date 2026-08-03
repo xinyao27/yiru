@@ -1,4 +1,4 @@
-import type { SshChannelMultiplexer } from './channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { RelayErrorCode, isGitResponseStreamMarker } from './relay/protocol'
 
 const SENTINEL_STREAM_ID = -1
@@ -40,7 +40,7 @@ type PendingFrame =
  *   marker check fails and we return it directly, i.e. today's behavior.
  */
 export function requestGitStreamable(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   method: string,
   params: Record<string, unknown>,
   options?: {

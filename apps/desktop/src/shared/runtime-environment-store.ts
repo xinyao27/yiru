@@ -9,7 +9,6 @@ import {
   KnownRuntimeEnvironmentSchema,
   RuntimeEnvironmentStoreSchema,
   type KnownRuntimeEnvironment,
-  type RuntimeEnvironmentSource,
   type RuntimeEnvironmentStore
 } from './runtime-environments'
 import { hardenExistingSecureFile, writeSecureJsonFile } from './secure-file'
@@ -38,7 +37,7 @@ export function listEnvironments(userDataPath: string): KnownRuntimeEnvironment[
 
 export function addEnvironmentFromPairingCode(
   userDataPath: string,
-  args: { name: string; pairingCode: string; now?: number; source?: RuntimeEnvironmentSource }
+  args: { name: string; pairingCode: string; now?: number }
 ): KnownRuntimeEnvironment {
   const offer = parsePairingCode(args.pairingCode)
   if (!offer) {
@@ -61,8 +60,7 @@ export function addEnvironmentFromPairingCode(
     name: args.name,
     now,
     offer,
-    runtimeId: null,
-    ...(args.source ? { source: args.source } : {})
+    runtimeId: null
   })
   const next = {
     version: 1 as const,
@@ -105,8 +103,7 @@ export function updateEnvironmentFromPairingCode(
     name: existing.name,
     now: existing.createdAt,
     offer,
-    runtimeId: existing.runtimeId,
-    ...(existing.source ? { source: existing.source } : {})
+    runtimeId: existing.runtimeId
   })
   const next = {
     ...environment,

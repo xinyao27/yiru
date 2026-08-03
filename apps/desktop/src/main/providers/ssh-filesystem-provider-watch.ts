@@ -2,7 +2,7 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { PromiseSettlementWaiters } from '~shared/promise-settlement-waiters'
 import type { FsChangeEvent } from '~shared/types'
 
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 
 let nextRemoteWatchId = 1
@@ -36,7 +36,7 @@ async function awaitSetupWithOptionalAbort(
 }
 
 export async function registerSshFilesystemWatch(args: {
-  mux: SshChannelMultiplexer
+  mux: ChannelMultiplexer
   disposed: () => boolean
   registrations: Map<string, WatchRegistration>
   rootPath: string
@@ -131,14 +131,14 @@ export async function registerSshFilesystemWatch(args: {
   }
 }
 
-export function notifySshFilesystemUnwatch(mux: SshChannelMultiplexer, rootPath: string): void {
+export function notifySshFilesystemUnwatch(mux: ChannelMultiplexer, rootPath: string): void {
   try {
     mux.notify('fs.unwatch', { rootPath })
   } catch {}
 }
 
 export async function closeSshFilesystemWatch(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   registrations: Map<string, WatchRegistration>,
   rootPath: string
 ): Promise<void> {
@@ -200,7 +200,7 @@ function assertActiveWatch(
 
 function createSshFilesystemWatchUnsubscribe(
   args: {
-    mux: SshChannelMultiplexer
+    mux: ChannelMultiplexer
     registrations: Map<string, WatchRegistration>
     rootPath: string
     callback: (events: FsChangeEvent[]) => void
@@ -214,7 +214,7 @@ function createSshFilesystemWatchUnsubscribe(
 
 function releaseSshFilesystemWatchCallback(
   args: {
-    mux: SshChannelMultiplexer
+    mux: ChannelMultiplexer
     registrations: Map<string, WatchRegistration>
     rootPath: string
     callback: (events: FsChangeEvent[]) => void
@@ -239,7 +239,7 @@ function releaseSshFilesystemWatchCallback(
 }
 
 export function stopSshFilesystemWatchRegistration(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   registration: WatchRegistration
 ): void {
   registration.stopping = true
@@ -248,7 +248,7 @@ export function stopSshFilesystemWatchRegistration(
 }
 
 function sendSshFilesystemUnwatchOnce(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   registration: WatchRegistration
 ): void {
   if (registration.unwatchSent) {

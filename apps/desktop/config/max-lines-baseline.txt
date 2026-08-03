@@ -53,6 +53,7 @@ inline apps/desktop/src/main/gitlab/work-item-details.ts
 inline apps/desktop/src/main/hermes/hook-service.ts
 inline apps/desktop/src/main/index.ts
 inline apps/desktop/src/main/browser/browser.ts
+inline apps/desktop/src/main/channel-multiplexer/multiplexer.ts
 inline apps/desktop/src/main/crash-reporting/crash-reporting.ts
 inline apps/desktop/src/main/filesystem/auth.ts
 inline apps/desktop/src/main/filesystem/mutations.ts
@@ -97,7 +98,6 @@ inline apps/desktop/src/main/runtime/yiru-runtime.ts
 inline apps/desktop/src/main/source-control/hosted-review-creation.ts
 inline apps/desktop/src/main/speech/model-manager.ts
 inline apps/desktop/src/main/speech/stt-service.ts
-inline apps/desktop/src/main/ssh/channel-multiplexer.ts
 inline apps/desktop/src/main/ssh/connection.ts
 inline apps/desktop/src/main/ssh/relay/deploy.ts
 inline apps/desktop/src/main/ssh/relay/session.ts

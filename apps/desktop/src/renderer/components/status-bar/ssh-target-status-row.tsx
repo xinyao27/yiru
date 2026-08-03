@@ -10,7 +10,7 @@ import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 import type { RemoteWorkspaceSyncStatus } from '~renderer/store/slices/ssh'
 
-import { STATUS_LABELS, statusColor } from '../settings/ssh/target-card'
+import { STATUS_LABELS, statusColor } from '../direct-ssh/connection-status-display'
 
 function isReconnectable(status: SshConnectionStatus): boolean {
   return ['disconnected', 'reconnection-failed', 'error', 'auth-failed'].includes(status)

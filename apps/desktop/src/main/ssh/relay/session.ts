@@ -20,6 +20,7 @@ import type { BrowserWindow } from 'electron'
 import { isAgentStatusHooksEnabled } from '~main/agent-hooks/managed-agent-hook-controls'
 import { installRemoteManagedAgentHooks } from '~main/agent-hooks/remote-managed-hook-installers'
 import { agentHookServer } from '~main/agent-hooks/server'
+import { ChannelMultiplexer } from '~main/channel-multiplexer/multiplexer'
 import { getOpenCodePluginSource } from '~main/opencode/hook-service'
 import type { Store } from '~main/persistence'
 import { getPiAgentStatusExtensionSource } from '~main/pi/agent-status-extension-source'
@@ -64,7 +65,6 @@ import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marke
 import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
 import { isValidTerminalTabId } from '~shared/terminal/tab-id'
 
-import { SshChannelMultiplexer } from '../channel-multiplexer'
 import type { SshConnection } from '../connection'
 import { shellEscape } from '../connection-utils'
 import type { SshPortForwardManager } from '../port-forward'
@@ -203,7 +203,7 @@ function normalizeRelayGracePeriodSeconds(graceTimeSeconds: number | undefined):
 
 export class SshRelaySession {
   private _state: RelaySessionState = 'idle'
-  private mux: SshChannelMultiplexer | null = null
+  private mux: ChannelMultiplexer | null = null
   private abortController: AbortController | null = null
   private muxDisposeCleanup: (() => void) | null = null
   // Why: store the notification-handler disposer so teardownProviders can
@@ -289,7 +289,7 @@ export class SshRelaySession {
     return this.currentConnection
   }
 
-  getMux(): SshChannelMultiplexer | null {
+  getMux(): ChannelMultiplexer | null {
     return this.mux
   }
 
@@ -354,12 +354,12 @@ export class SshRelaySession {
       // cleaned up — creating a mux and registering providers would leak
       // resources with no owner to dispose them.
       if (this.isDisposed()) {
-        const orphanMux = new SshChannelMultiplexer(transport)
+        const orphanMux = new ChannelMultiplexer(transport)
         orphanMux.dispose()
         throw new Error('Session disposed during establish')
       }
 
-      const mux = new SshChannelMultiplexer(transport)
+      const mux = new ChannelMultiplexer(transport)
       this.mux = mux
       const ownsAttempt = (): boolean => this.mux === mux && !this.isDisposed()
 
@@ -481,12 +481,12 @@ export class SshRelaySession {
         // Why: the relay is already running on the remote. Creating a temporary
         // multiplexer and immediately disposing it sends a clean shutdown to the
         // relay process so it doesn't linger until its grace timer expires.
-        const orphanMux = new SshChannelMultiplexer(transport)
+        const orphanMux = new ChannelMultiplexer(transport)
         orphanMux.dispose()
         return
       }
 
-      const mux = new SshChannelMultiplexer(transport)
+      const mux = new ChannelMultiplexer(transport)
       this.mux = mux
 
       const ownsAttempt = (): boolean =>
@@ -621,7 +621,7 @@ export class SshRelaySession {
   // automatic recovery — onStateChange only fires on SSH-level reconnects.
   // This watcher detects relay-level channel loss and fires onRelayLost
   // so ssh.ts can trigger session.reconnect() with the still-live SSH conn.
-  private watchMuxForRelayLoss(mux: SshChannelMultiplexer): void {
+  private watchMuxForRelayLoss(mux: ChannelMultiplexer): void {
     this.muxDisposeCleanup?.()
     this.muxDisposeCleanup = mux.onDispose((reason) => {
       if (reason === 'connection_lost' && this.mux === mux && !this.isDisposed()) {
@@ -636,7 +636,7 @@ export class SshRelaySession {
   // Why: shared by establish() and reconnect() — the exact same provider
   // registration sequence, eliminating the duplication that caused bugs.
   private async registerProviders(
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     shouldContinue?: () => boolean
   ): Promise<boolean> {
     await this.registerRelayRoots(mux)
@@ -722,7 +722,7 @@ export class SshRelaySession {
   }
 
   private configureRelayGraceTime(
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     graceTimeSeconds: number | undefined
   ): void {
     mux.notify(SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD, {
@@ -735,7 +735,7 @@ export class SshRelaySession {
   // files on the remote host to call Yiru's managed script. Install those
   // configs before registering the PTY provider so newly spawned agent panes
   // report status from their first prompt.
-  private async installManagedHooksOnRemote(mux: SshChannelMultiplexer): Promise<void> {
+  private async installManagedHooksOnRemote(mux: ChannelMultiplexer): Promise<void> {
     if (!isRemoteAgentHooksEnabled() || !this.areAgentStatusHooksEnabled()) {
       return
     }
@@ -821,7 +821,7 @@ export class SshRelaySession {
     }
   }
 
-  private wireUpRemoteYiruCli(mux: SshChannelMultiplexer): void {
+  private wireUpRemoteYiruCli(mux: ChannelMultiplexer): void {
     mux.onRequest('yiru.cli', async (params) => {
       if (!this.runtime) {
         throw new Error('Yiru runtime is unavailable')
@@ -861,7 +861,7 @@ export class SshRelaySession {
   // swallowed; the user just doesn't get OpenCode/Pi status reporting until
   // they upgrade. Hook-script-based agents use a separate explicit remote
   // installer flow because that mutates user-owned agent config files.
-  private async installPluginsOnRelay(mux: SshChannelMultiplexer): Promise<void> {
+  private async installPluginsOnRelay(mux: ChannelMultiplexer): Promise<void> {
     if (!isRemoteAgentHooksEnabled() || !this.areAgentStatusHooksEnabled()) {
       return
     }
@@ -897,7 +897,7 @@ export class SshRelaySession {
     return isAgentStatusHooksEnabled(store.getSettings?.())
   }
 
-  private wireUpRemoteWorkspaceEvents(mux: SshChannelMultiplexer): void {
+  private wireUpRemoteWorkspaceEvents(mux: ChannelMultiplexer): void {
     mux.onNotification((method, params) => {
       notifyRemoteWorkspaceHandlers(this.targetId, method, params)
     })
@@ -913,7 +913,7 @@ export class SshRelaySession {
   //
   // The Yiru-side mux's `notificationHandlers` is a flat array — each
   // handler must filter by method name itself.
-  private wireUpAgentHookEvents(mux: SshChannelMultiplexer): void {
+  private wireUpAgentHookEvents(mux: ChannelMultiplexer): void {
     if (!isRemoteAgentHooksEnabled()) {
       return
     }
@@ -1041,7 +1041,7 @@ export class SshRelaySession {
   // window — those still gate FS ops on registered roots. New relays no-op
   // these notifications. Tracked for removal once the relay-version floor
   // moves past the cutover (see docs/relay-fs-allowlist-removal.md).
-  private async registerRelayRoots(mux: SshChannelMultiplexer): Promise<void> {
+  private async registerRelayRoots(mux: ChannelMultiplexer): Promise<void> {
     const remoteRepos = this.store.getRepos().filter((r) => r.connectionId === this.targetId)
 
     for (const repo of remoteRepos) {

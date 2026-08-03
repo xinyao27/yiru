@@ -4,6 +4,8 @@ import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { YiruRuntimeService } from '../yiru-runtime'
+import type { RpcAccess } from './access'
+import { denyAccess } from './access-adjudication'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport
 // makes it unit-testable without spinning up a socket, and keeps
@@ -138,6 +140,12 @@ export class RpcDispatcher {
       clientId?: string
       clientKind?: 'mobile' | 'runtime'
       principal?: AuthenticatedRpcPrincipal
+      /**
+       * The authority this caller was granted, for callers whose admission
+       * carries one. Absent for `local` / `mobile` / `runtime`, which are the
+       * owner's own clients and are not scope-limited today.
+       */
+      grantedAccess?: RpcAccess
       sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
       registerBinaryStreamHandler?: (
         streamId: number,
@@ -159,6 +167,19 @@ export class RpcDispatcher {
     const migrationFence = orchestrationMigrationFence(request, meta)
     if (migrationFence) {
       reply(JSON.stringify(migrationFence))
+      return
+    }
+
+    // Why: the single adjudication point for `access`. Handlers must not repeat
+    // this — a check that lives in 450 handlers is a check that will be missed
+    // in the 451st. Denials are computed before params are even parsed so an
+    // unauthorized caller learns nothing about the method's shape.
+    const denial = denyAccess(method, meta, request.id, {
+      principal: options?.principal,
+      grantedAccess: options?.grantedAccess
+    })
+    if (denial) {
+      reply(JSON.stringify(denial))
       return
     }
 

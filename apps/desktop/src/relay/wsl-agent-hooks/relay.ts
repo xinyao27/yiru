@@ -16,16 +16,16 @@ import {
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
 } from '~shared/agent/hook-relay'
+import { RELAY_SENTINEL } from '~shared/relay-ready-handshake'
 import {
   sanitizeWslHookInstanceKey,
   WSL_HOOK_RELAY_INSTANCE_ENV,
   wslHookRelayEndpointDir
 } from '~shared/wsl-hook-relay-contract'
 
-import { RelayAgentHookServer } from './agent-hook-server'
-import { RelayDispatcher } from './dispatcher'
-import { RELAY_SENTINEL } from './protocol'
-import { registerWslHookFsHandlers } from './wsl-hook-fs-bridge'
+import { RelayAgentHookServer } from '../agent-hook-server'
+import { RelayDispatcher } from '../dispatcher'
+import { registerWslHookFsHandlers } from './fs-bridge'
 
 async function main(): Promise<void> {
   const windowsPort = Number(process.env.YIRU_AGENT_HOOK_PORT ?? '')

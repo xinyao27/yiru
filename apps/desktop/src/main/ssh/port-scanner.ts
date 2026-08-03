@@ -1,6 +1,6 @@
 import type { DetectedPort } from '@yiru/runtime-protocol/ssh-connection'
 
-import type { SshChannelMultiplexer } from './channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 
 // Why: every tick walks /proc/*/fd on the remote relay, so cadence is remote
 // CPU, not just a local timer. 12s cuts steady-state request volume 4x vs the
@@ -42,7 +42,7 @@ export class PortScanner {
 
   startScanning(
     targetId: string,
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     onChanged: (targetId: string, ports: DetectedPort[], platform: string) => void
   ): void {
     this.stopScanning(targetId)

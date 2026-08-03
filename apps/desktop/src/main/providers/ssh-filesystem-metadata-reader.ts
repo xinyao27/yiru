@@ -1,13 +1,13 @@
 import type { DirEntry } from '~shared/types'
 
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type { SftpFactory } from './ssh-filesystem-file-upload'
 import { lstatViaSftp } from './ssh-filesystem-provider-sftp'
 import type { FileStat } from './types'
 
 export async function readSshDirectory(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   dirPath: string,
   options: { limit?: number; signal?: AbortSignal }
 ): Promise<DirEntry[]> {
@@ -19,7 +19,7 @@ export async function readSshDirectory(
 }
 
 export async function readSshFileStat(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   signal?: AbortSignal
 ): Promise<FileStat> {
@@ -27,7 +27,7 @@ export async function readSshFileStat(
 }
 
 export async function readSshFileLstat(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   createSftp?: SftpFactory
 ): Promise<FileStat> {

@@ -7,7 +7,6 @@ import type { SshRepoReadoption } from '@yiru/runtime-protocol/ssh-connection'
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
-  isRuntimeOwnedSshTargetId,
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   toRuntimeExecutionHostId,
@@ -24,7 +23,6 @@ import type { StateCreator } from 'zustand'
 import { formatFolderWorkspaceCreateError } from '~renderer/components/sidebar/folder-workspace-path-status'
 import { filterSetupScriptPromptDismissalsToValidRepos } from '~renderer/components/sidebar/setup-script-prompt'
 import { translate } from '~renderer/i18n/i18n'
-import { cleanupEphemeralVmRuntimesForDeleted } from '~renderer/lib/ephemeral-vm-runtime-cleanup'
 import { syncRuntimeGitForkDefaultBranch } from '~renderer/runtime/git-client'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
@@ -2690,16 +2688,6 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         return
       }
       const ownerHostId = getRepoExecutionHostId(ownerRepo)
-      // Why: an SSH-mode per-workspace-env's workspace is the repo's main worktree, so deleting it
-      // routes here (project removal) rather than through removeWorktree. Tear down the backing
-      // ephemeral runtime (Docker/VM + hidden SSH target) first so it doesn't leak when the project
-      // is removed. Matches on the repo's runtime-owned connectionId and its known worktree ids.
-      if (isRuntimeOwnedSshTargetId(ownerRepo.connectionId)) {
-        await cleanupEphemeralVmRuntimesForDeleted({
-          workspaceIds: getKnownRepoWorktreeIds(get(), projectId, ownerHostId),
-          runtimeOwnedSshTargetIds: [ownerRepo.connectionId as string]
-        })
-      }
       // Why: derive the runtime target from the owner's own settings, passing the
       // explicit options.hostId so a duplicate repo id across hosts resolves to the
       // intended row. settingsForRepoOwner clears the focused runtime for SSH/local

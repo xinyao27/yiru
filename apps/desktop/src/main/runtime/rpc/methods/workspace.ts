@@ -16,6 +16,7 @@ export const WORKSPACE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'workspace.openPath',
     params: WorkspaceOpenPath,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => {
       try {
         return await runtime.openWorkspacePath(params.path, params.contextWorktree)

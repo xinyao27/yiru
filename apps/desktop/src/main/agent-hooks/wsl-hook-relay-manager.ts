@@ -10,7 +10,7 @@ import {
   wslHookRelayEndpointFilePath
 } from '~shared/wsl-hook-relay-contract'
 
-import { SshChannelMultiplexer, type MultiplexerTransport } from '../ssh/channel-multiplexer'
+import { ChannelMultiplexer, type MultiplexerTransport } from '../channel-multiplexer/multiplexer'
 import { installWslGuestHooks } from './wsl-hook-fs-adapter'
 import {
   wslHookRelayDeps,
@@ -32,7 +32,7 @@ type DistroState = {
   distro: string
   phase: 'starting' | 'running' | 'failed'
   child?: ChildProcessWithoutNullStreams
-  mux?: SshChannelMultiplexer
+  mux?: ChannelMultiplexer
   guestHome?: string
   guestEndpointFilePath?: string
   failures: number
@@ -191,7 +191,7 @@ export class WslHookRelayManager {
     child: ChildProcessWithoutNullStreams,
     instanceKey: string
   ): Promise<void> {
-    const mux = new SshChannelMultiplexer(transport)
+    const mux = new ChannelMultiplexer(transport)
     state.mux = mux
     wireWslRelayLink({
       mux,
@@ -256,7 +256,7 @@ export class WslHookRelayManager {
 
   private async runInstallers(
     state: DistroState,
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     guestHome: string
   ): Promise<void> {
     state.lastInstallAt = Date.now()

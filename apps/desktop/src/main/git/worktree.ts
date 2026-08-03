@@ -1024,7 +1024,7 @@ async function performAddWorktree(
     await persistWorktreeCreationBase(worktreePath, branch, effectiveBase, options)
   }
 
-  // SSH parity: src/relay/git/handler-worktree-ops.ts addWorktreeOp mirrors this exact
+  // SSH parity: the relay's `addWorktreeOp` git handler mirrors this exact
   // probe-and-write state machine. If you change the logic here, update
   // the relay handler in lockstep so local and SSH paths stay aligned.
   //

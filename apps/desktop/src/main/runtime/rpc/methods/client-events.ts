@@ -16,6 +16,10 @@ export const CLIENT_EVENT_METHODS: readonly RpcAnyMethod[] = [
     name: 'runtime.clientEvents.subscribe',
     mobile: true,
     params: null,
+    // Why: read-only, but the stream is host-wide — every repo/worktree id on
+    // the machine plus SSH target ids and worktree launch payloads flow here,
+    // so it can never be narrowed to a worktree-scoped grant.
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
         const unsubscribe = runtime.onClientEvent((event) => {
@@ -42,6 +46,7 @@ export const CLIENT_EVENT_METHODS: readonly RpcAnyMethod[] = [
     name: 'runtime.clientEvents.unsubscribe',
     mobile: true,
     params: ClientEventsUnsubscribeParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime, connectionId }) => {
       const expectedPrefix = `runtime-client-events-${connectionId ?? 'inproc'}-`
       if (!params.subscriptionId.startsWith(expectedPrefix)) {

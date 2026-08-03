@@ -18,8 +18,8 @@ import {
   WSL_HOOK_RELAY_VERSION_FILE
 } from '~shared/wsl-hook-relay-contract'
 
+import type { MultiplexerTransport } from '../channel-multiplexer/multiplexer'
 import { addYiruWslInteropEnv } from '../pty/wsl-yiru-env'
-import type { MultiplexerTransport } from '../ssh/channel-multiplexer'
 import {
   decodeWslText,
   MAX_STARTUP_BUFFER_BYTES,

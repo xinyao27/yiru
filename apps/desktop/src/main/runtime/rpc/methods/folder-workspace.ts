@@ -74,6 +74,7 @@ export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
     name: 'folderWorkspace.list',
     mobile: true,
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => ({
       folderWorkspaces: runtime.listFolderWorkspaces()
     })
@@ -81,6 +82,7 @@ export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'folderWorkspace.create',
     params: FolderWorkspaceCreate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       folderWorkspace: await runtime.createFolderWorkspace(params)
     })
@@ -88,6 +90,7 @@ export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'folderWorkspace.update',
     params: FolderWorkspaceUpdate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       folderWorkspace: await runtime.updateFolderWorkspace(params.folderWorkspaceId, params.updates)
     })
@@ -95,11 +98,13 @@ export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'folderWorkspace.delete',
     params: FolderWorkspaceSelector,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) => runtime.deleteFolderWorkspace(params.folderWorkspaceId)
   }),
   defineMethod({
     name: 'folderWorkspace.getPathStatus',
     params: FolderWorkspacePathStatus,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       status: await runtime.getFolderWorkspacePathStatus(params)
     })

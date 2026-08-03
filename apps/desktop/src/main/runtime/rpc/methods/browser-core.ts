@@ -18,24 +18,14 @@ import {
   Is,
   Keypress,
   LimitParam,
-  ProfileCreate,
-  ProfileDelete,
-  ProfileImportFromBrowser,
   Screenshot,
   Scroll,
   Select,
   SelectorPath,
-  TabCurrent,
-  TabSetProfile,
-  TabClose,
-  TabCreate,
-  TabList,
-  TabProfileClone,
-  TabShow,
-  TabSwitch,
   Upload,
   Wait
 } from './browser-schemas'
+import { BROWSER_TAB_PROFILE_METHODS } from './browser-tab-profiles'
 import { BROWSER_TEXT_METHODS } from './browser-text-rpc-methods'
 
 const CertificateProceed = BrowserTarget.extend({
@@ -46,22 +36,26 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'browser.snapshot',
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserSnapshot(params)
   }),
   defineMethod({
     name: 'browser.click',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserClick(params)
   }),
   defineMethod({
     name: 'browser.goto',
     mobile: true,
     params: Goto,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserGoto(params)
   }),
   defineMethod({
     name: 'browser.certificate.proceed',
     params: CertificateProceed,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) =>
       browserCommands.browserProceedCertificate(params)
   }),
@@ -69,233 +63,186 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'browser.select',
     params: Select,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserSelect(params)
   }),
   defineMethod({
     name: 'browser.scroll',
     params: Scroll,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserScroll(params)
   }),
   defineMethod({
     name: 'browser.back',
     mobile: true,
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserBack(params)
   }),
   defineMethod({
     name: 'browser.reload',
     mobile: true,
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserReload(params)
   }),
   defineMethod({
     name: 'browser.screenshot',
     params: Screenshot,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserScreenshot(params)
   }),
   defineMethod({
     name: 'browser.eval',
     params: Eval,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserEval(params)
-  }),
-  defineMethod({
-    name: 'browser.tabList',
-    params: TabList,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabList(params)
-  }),
-  defineMethod({
-    name: 'browser.tabShow',
-    params: TabShow,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabShow(params)
-  }),
-  defineMethod({
-    name: 'browser.tabCurrent',
-    params: TabCurrent,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabCurrent(params)
-  }),
-  defineMethod({
-    name: 'browser.tabSwitch',
-    params: TabSwitch,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabSwitch(params)
-  }),
-  defineMethod({
-    name: 'browser.tabCreate',
-    mobile: true,
-    params: TabCreate,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabCreate(params)
-  }),
-  defineMethod({
-    name: 'browser.tabSetProfile',
-    params: TabSetProfile,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabSetProfile(params)
-  }),
-  defineMethod({
-    name: 'browser.tabProfileShow',
-    params: TabShow,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabProfileShow(params)
-  }),
-  defineMethod({
-    name: 'browser.tabProfileClone',
-    params: TabProfileClone,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabProfileClone(params)
-  }),
-  defineMethod({
-    name: 'browser.tabClose',
-    params: TabClose,
-    handler: async (params, { browserCommands }) => browserCommands.browserTabClose(params)
-  }),
-  defineMethod({
-    name: 'browser.profileList',
-    params: null,
-    handler: async (_params, { browserCommands }) => browserCommands.browserProfileList()
-  }),
-  defineMethod({
-    name: 'browser.profileCreate',
-    params: ProfileCreate,
-    handler: async (params, { browserCommands }) => browserCommands.browserProfileCreate(params)
-  }),
-  defineMethod({
-    name: 'browser.profileDelete',
-    params: ProfileDelete,
-    handler: async (params, { browserCommands }) => browserCommands.browserProfileDelete(params)
-  }),
-  defineMethod({
-    name: 'browser.profileDetectBrowsers',
-    params: null,
-    handler: async (_params, { browserCommands }) => browserCommands.browserProfileDetectBrowsers()
-  }),
-  defineMethod({
-    name: 'browser.profileImportFromBrowser',
-    params: ProfileImportFromBrowser,
-    handler: async (params, { browserCommands }) =>
-      browserCommands.browserProfileImportFromBrowser(params)
-  }),
-  defineMethod({
-    name: 'browser.profileClearDefaultCookies',
-    params: null,
-    handler: async (_params, { browserCommands }) =>
-      browserCommands.browserProfileClearDefaultCookies()
   }),
   defineMethod({
     name: 'browser.hover',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserHover(params)
   }),
   defineMethod({
     name: 'browser.drag',
     params: Drag,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserDrag(params)
   }),
   defineMethod({
     name: 'browser.upload',
     params: Upload,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserUpload(params)
   }),
   defineMethod({
     name: 'browser.wait',
     params: Wait,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserWait(params)
   }),
   defineMethod({
     name: 'browser.check',
     params: Check,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserCheck(params)
   }),
   defineMethod({
     name: 'browser.focus',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserFocus(params)
   }),
   defineMethod({
     name: 'browser.clear',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserClear(params)
   }),
   defineMethod({
     name: 'browser.selectAll',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserSelectAll(params)
   }),
   defineMethod({
     name: 'browser.keypress',
     mobile: true,
     params: Keypress,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserKeypress(params)
   }),
   defineMethod({
     name: 'browser.pdf',
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserPdf(params)
   }),
   defineMethod({
     name: 'browser.fullScreenshot',
     params: FullScreenshot,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserFullScreenshot(params)
   }),
   defineMethod({
     name: 'browser.dblclick',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserDblclick(params)
   }),
   defineMethod({
     name: 'browser.forward',
     mobile: true,
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserForward(params)
   }),
   defineMethod({
     name: 'browser.scrollIntoView',
     params: Element,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserScrollIntoView(params)
   }),
   defineMethod({
     name: 'browser.get',
     params: Get,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserGet(params)
   }),
   defineMethod({
     name: 'browser.is',
     params: Is,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserIs(params)
   }),
   defineMethod({
     name: 'browser.find',
     params: Find,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserFind(params)
   }),
   defineMethod({
     name: 'browser.console',
     params: LimitParam,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserConsoleLog(params)
   }),
   defineMethod({
     name: 'browser.network',
     params: LimitParam,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserNetworkLog(params)
   }),
   defineMethod({
     name: 'browser.exec',
     params: Exec,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserExec(params)
   }),
   defineMethod({
     name: 'browser.capture.start',
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserCaptureStart(params)
   }),
   defineMethod({
     name: 'browser.capture.stop',
     params: BrowserTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserCaptureStop(params)
   }),
   defineMethod({
     name: 'browser.download',
     params: SelectorPath,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserDownload(params)
   }),
   defineMethod({
     name: 'browser.highlight',
     params: Highlight,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands }) => browserCommands.browserHighlight(params)
-  })
+  }),
+  ...BROWSER_TAB_PROFILE_METHODS
 ]

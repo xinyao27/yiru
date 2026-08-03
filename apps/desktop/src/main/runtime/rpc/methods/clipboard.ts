@@ -134,6 +134,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     name: 'clipboard.saveImageAsTempFile',
     mobile: true,
     params: SaveImageAsTempFile,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) =>
       saveClipboardImageBufferAsTempFile(Buffer.from(params.contentBase64, 'base64'), {
         connectionId: params.connectionId
@@ -143,6 +144,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     name: 'clipboard.startImageUpload',
     mobile: true,
     params: StartImageUpload,
+    access: { scope: 'host', tier: 'host' },
     handler: (params) => {
       pruneExpiredUploads()
       if (clipboardImageUploads.size >= CLIPBOARD_IMAGE_UPLOAD_MAX_CONCURRENT) {
@@ -164,6 +166,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     name: 'clipboard.appendImageUploadChunk',
     mobile: true,
     params: AppendImageUploadChunk,
+    access: { scope: 'host', tier: 'host' },
     handler: (params) => {
       const upload = getUpload(params.uploadId)
       if (params.offset !== upload.receivedBase64Length) {
@@ -183,6 +186,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     name: 'clipboard.commitImageUpload',
     mobile: true,
     params: CommitImageUpload,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       const upload = getUpload(params.uploadId)
       try {
@@ -205,6 +209,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     name: 'clipboard.abortImageUpload',
     mobile: true,
     params: AbortImageUpload,
+    access: { scope: 'host', tier: 'host' },
     handler: (params) => {
       deleteUpload(params.uploadId)
       return { aborted: true }

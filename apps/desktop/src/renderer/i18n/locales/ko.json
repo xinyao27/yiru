@@ -576,12 +576,6 @@
         "distroMissing": "선택한 WSL 배포판을 사용할 수 없습니다. 사용 가능한 배포판을 선택하거나 이 프로젝트를 Windows로 전환하세요.",
         "wslDefault": "WSL 기본값"
       },
-      "sidebarWorktreeActivation": {
-        "wakeEphemeralVmFailed": "임시 VM 워크트리 활성화 실패"
-      },
-      "ephemeralVmWorkspaceTarget": {
-        "projectRootRegistrationFailed": "런타임에서 레시피로 생성된 프로젝트 루트 등록 실패"
-      },
       "blocked": {
         "notification": {
           "fallback": {
@@ -647,8 +641,6 @@
         "d91ae31fbd": "macOS 권한",
         "95a1886d94": "휴대폰에서 terminals과 agents를 제어하세요.",
         "1cd25673df": "모바일",
-        "31e57d1c70": "SSH를 통해 기존 머신의 파일, terminals, Git, 워크스페이스를 사용합니다.",
-        "94a5afe910": "SSH 호스트",
         "40d80bad8a": "베타",
         "de0c2907a1": "원격 Yiru 서버",
         "b351014180": "Yiru 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
@@ -880,13 +872,8 @@
         "createMultiple": "더 만들기",
         "waitForSetupBeforeAgent": "agent를 시작하기 전에 설정이 완료될 때까지 기다리세요.",
         "waitForSetupBeforeAgentHelp": "설치 프로그램이 시작 중에 agent에 필요한 종속성, MCP 서버 또는 구성 파일을 설치할 때 이 기능을 켜십시오.",
-        "destroyDisabled": "비활성화된 파괴",
-        "destroyConfigured": "구성된 파괴",
-        "noDestroyConfigured": "파괴하지 마세요",
-        "ephemeralVm": "워크스페이스별 환경",
         "chooseRunTarget": "대상 선택",
         "noRunTargets": "이 프로젝트에는 실행 대상이 준비되어 있지 않습니다.",
-        "perWorkspaceEnvHint": "레시피에서 온디맨드 환경 프로비저닝",
         "branchName": "브랜치 이름",
         "branchNamePlaceholder": "feature/my-branch"
       },
@@ -1183,10 +1170,7 @@
             "ed2a664f8b": "작업 트리를 만들 수 없습니다.",
             "a3346fc6ed": "작업 트리 생성 취소",
             "532aea14ce": "취소",
-            "767951265d": "작업 트리를 만드는 중에 문제가 발생했습니다.",
-            "vmProvisioningTitle": "VM 프로비저닝",
-            "cancelProvisioning": "취소",
-            "vmProvisioningLogEmpty": "레시피 출력을 기다리는 중…"
+            "767951265d": "작업 트리를 만드는 중에 문제가 발생했습니다."
           }
         }
       },
@@ -3566,13 +3550,9 @@
           "ssh": "SSH",
           "connecting": "연결 중",
           "connect": "연결",
-          "addSshHost": "SSH 호스트 추가",
           "addRemoteServer": "원격 서버 추가",
-          "addRemoteHost": "원격 호스트 추가",
           "addRemoteHostTooltip": "로그인할 수 있는 시스템의 경우 SSH를 선택하고 Yiru 서버의 경우 원격 서버를 선택합니다.",
-          "addSshHostDetail": "SSH를 통해 기존 머신을 사용합니다.",
-          "addRemoteServerDetail": "다른 컴퓨터에서 실행 중인 Yiru와 페어링합니다.",
-          "addRemoteHostDetail": "SSH 호스트 또는 Yiru 서버"
+          "addRemoteServerDetail": "다른 컴퓨터에서 실행 중인 Yiru와 페어링합니다."
         },
         "sidebarHostOptions": {
           "3e102f111c": "모든 호스트",
@@ -3662,43 +3642,21 @@
           "connectionFailed": "SSH 연결에 실패했습니다."
         },
         "AddRemoteHostDialog": {
-          "sshHostRequired": "호스트 또는 SSH 구성 별칭이 필요합니다.",
-          "sshPortInvalid": "포트는 1에서 65535 사이여야 합니다.",
-          "sshRelayGraceInvalid": "Terminal 시간 초과는 60~{{value0}}초 사이여야 합니다.",
-          "sshSaved": "SSH 호스트가 추가되었습니다.",
-          "sshSaveFailed": "SSH 호스트를 추가하지 못했습니다.",
           "serverFieldsRequired": "서버 이름과 페어링 코드가 필요합니다.",
           "serverSaved": "원격 서버가 추가되었습니다.",
           "serverSaveFailed": "원격 서버를 추가하지 못했습니다.",
           "serverTitle": "원격 서버 추가",
-          "sshTitle": "SSH 호스트 추가",
           "serverDescription": "다른 컴퓨터에서 실행 중인 Yiru와 페어링합니다.",
-          "sshDescription": "SSH를 통해 로그인할 수 있는 영구 머신을 추가합니다.",
           "cancel": "취소",
           "saving": "저장 중...",
           "save": "저장",
-          "label": "레이블",
-          "sshLabelPlaceholder": "Dev box",
-          "sshHost": "호스트 또는 별칭",
-          "sshHostPlaceholder": "deploy@server:22",
-          "username": "사용자 이름",
-          "usernamePlaceholder": "deploy",
-          "port": "포트",
-          "identityFile": "신원 파일",
-          "identityFilePlaceholder": "~/.ssh/id_ed25519 (선택 사항)",
           "serverName": "서버 이름",
           "serverNamePlaceholder": "Dev box",
           "pairingCode": "페어링 코드",
           "pairingCodePlaceholder": "yiru://pair?code=...",
           "pairingHelpPrefix": "서버에서 실행",
           "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "한 다음 출력된 페어링 URL을 붙여넣으세요.",
-          "sshImportAlreadySynced": "~/.ssh/config가 이미 동기화되어 있습니다.",
-          "sshImportSynced": "{{value0}} 호스트{{value1}}을(를) 동기화했습니다.",
-          "sshImportFailed": "SSH 구성을 가져오지 못했습니다.",
-          "importing": "가져오는 중...",
-          "importSshConfig": "~/.ssh/config 가져오기",
-          "sshPersistenceDefault": "이 호스트의 원격 터미널은 종료하거나 릴레이를 재설정할 때까지 계속 실행됩니다."
+          "pairingHelpSuffix": "한 다음 출력된 페어링 URL을 붙여넣으세요."
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "재연결 실패",
@@ -5685,8 +5643,6 @@
           "65660d4548": "macOS 권한",
           "c6c01ac209": "휴대폰에서 terminals과 agents를 제어하세요.",
           "c40dadaac8": "모바일",
-          "c2ee313198": "SSH를 통해 기존 머신의 파일, terminals, Git, 워크스페이스를 사용합니다.",
-          "9b02492d1f": "SSH 호스트",
           "b5ee17826b": "지속 세션, 더 풍부한 원격 상태, 웹 또는 모바일 핸드오프를 위해 원격 Yiru 런타임을 페어링합니다.",
           "7686cb5c36": "이 브라우저를 저장된 Yiru 서버에 연결하세요.",
           "bd0181eeca": "원격 Yiru 서버",
@@ -5864,36 +5820,6 @@
           "68bbcd864a": "새로운",
           "2ef2b2674b": "{{value0}} 삭제"
         },
-        "SshDestructiveActionDialog": {
-          "895b216267": "취소"
-        },
-        "SshPane": {
-          "c0f1c80166": "구성된 SSH 대상이 없습니다.",
-          "639ceb3698": "대상 추가",
-          "51d7dba44d": "가져오기",
-          "a7d28dff81": "Yiru에서 연결할 원격 호스트를 추가합니다.",
-          "94c5284560": "대상",
-          "f495689b82": "가져오기 실패",
-          "f8050f6307": "동기화된 {{value0}} 서버{{value1}}",
-          "68c13b4589": "테스트 실패",
-          "81d08bcddf": "연결 성공",
-          "2c4ee7332b": "원격 릴레이를 재설정하지 못했습니다.",
-          "db2e48975e": "원격 릴레이 재설정",
-          "025e107643": "원격 terminal을 종료하지 못했습니다.",
-          "90e308c98b": "원격 terminal 종료됨",
-          "a43de1d3ee": "연결 해제 실패",
-          "e95d5ae10e": "연결 실패",
-          "c2a69510e3": "대상을 제거하지 못했습니다.",
-          "a0237eb1ca": "대상이 제거되었습니다.",
-          "2227ce47b6": "대상을 저장하지 못했습니다.",
-          "f602009125": "대상이 추가됨",
-          "b4ba0ce33d": "타겟이 업데이트되었습니다.",
-          "3879cbaa52": "terminals 시간 제한은 60~{{value0}}초 사이여야 하며, 그렇지 않으면 재설정될 때까지 terminals을 활성 상태로 유지해야 합니다.",
-          "4db9afce1c": "포트는 1에서 65535 사이여야 합니다.",
-          "0e5aa04161": "호스트 또는 SSH 구성 별칭이 필요합니다.",
-          "f1fc50dad2": "SSH 대상을 로드하지 못했습니다.",
-          "0cda732f43": "연결 테스트 실패"
-        },
         "SshPassphraseDialog": {
           "d5a234456f": "취소",
           "c3ce71aad6": "암호를 입력하세요",
@@ -5910,64 +5836,16 @@
           "106bd57f4a": "SSH 비밀번호"
         },
         "SshTargetCard": {
-          "ec6543cee9": "연결",
-          "0e53e9f8e8": "테스트",
-          "1810b51482": "연결 중",
-          "4c86f30877": "연결 해제",
-          "7f7b3d7ab4": "대상 제거",
-          "3d21a22d0e": "대상 제거",
-          "3d8af2949f": "대상 편집",
-          "762a48c662": "원격 릴레이 재설정",
-          "97dea4e8cf": "원격 릴레이 재설정",
-          "da16e108e6": "원격 terminals 종료",
-          "c77f1abfe3": "원격 terminals 종료 중",
+          "0d4da494f9": "연결 중…",
           "18968ede9e": "오류",
-          "f0871e6bfb": "연결",
           "47e94bd6ba": "연결됨",
-          "a883f5a00f": "terminal 시간 초과: {{value0}}",
-          "8ce71262f4": "재설정될 때까지 terminals"
-        },
-        "SshTargetDestructiveActions": {
-          "7e66942808": "그러면 이 SSH 대상에서 활성 terminal 세션이 중지됩니다. 다시 연결해도 복원되지 않습니다.",
-          "accf177a03": "원격 Terminals을 종료하시겠습니까?",
-          "26be00392d": "이 SSH 대상의 원격 릴레이를 강제로 중지합니다. 이 대상의 활성 원격 terminals과 포트 포워딩이 종료됩니다.",
-          "570a7a0574": "원격 릴레이를 재설정하시겠습니까?",
-          "3bb0cf0ee4": "그러면 대상이 제거되고 활성 원격 terminals이 종료됩니다.",
-          "4808966c41": "SSH 대상 제거"
-        },
-        "SshTargetForm": {
-          "fea9cb402e": "취소",
-          "1b19b00e93": "제한된 시간 초과는 60초에서 7일 사이여야 합니다.",
-          "137e88ce8d": "Yiru가 이 호스트에서 연결 해제된 뒤에도 원격 터미널은 계속 실행됩니다.",
-          "b574994adc": "중지하려면 원격 터미널 종료 또는 릴레이 재설정을 사용하세요.",
-          "71fc546097": "재설정할 때까지 터미널 유지",
-          "92f80edbfd": "원격 터미널 지속성",
-          "feae1d1e69": "선택 사항. ProxyJump / ssh -J와 동일합니다.",
-          "11bcb4507a": "bastion.example.com",
-          "b2ab248ded": "점프 호스트",
-          "3b01ca44a0": "선택 사항. 터널링에 사용됩니다(예: Cloudflare Access, ProxyCommand).",
-          "f42d844544": "예: cloudflared access ssh --hostname %h",
-          "c7d0e18ecb": "프록시 명령",
-          "cb91f6375c": "선택 사항. 기본적으로 SSH agent가 사용됩니다.",
-          "d6a5f2ee5c": "~/.ssh/id_ed25519(SSH agent를 사용하려면 비워 두세요)",
-          "63c0c145c1": "개인 키 파일",
-          "c94cfa634c": "포트",
-          "47e082bc17": "deploy",
-          "dc1dc52aaa": "사용자 이름",
-          "2ee9bcd2e8": "server, deploy@server:2222, ssh://server",
-          "ce370ce674": "호스트 또는 별칭 *",
-          "b8dab0aa7b": "내 서버",
-          "298de87a88": "레이블",
-          "9518545cb6": "대상 추가",
-          "a62b4cb39a": "변경 사항 저장",
-          "29af933cd5": "새로운 SSH 대상",
-          "f2331ce599": "SSH 대상 편집",
-          "7c13f58c91": "재설정할 때까지",
-          "55c56cf2c7": "연결 해제 후 시간 제한(초)",
-          "4a342f44c1": "고급 연결",
-          "e9609ddca6": "프록시, 점프 호스트, 연결 재사용",
-          "8c922dffba": "더 빠른 설정을 위해 SSH 연결 재사용",
-          "53e9aabfc0": "사용 가능한 경우 OpenSSH 멀티플렉싱을 사용합니다. 사용자 지정 SSH 제한이 있는 호스트에서는 끄세요."
+          "8df62d1912": "연결됨",
+          "8f14a926e0": "릴레이 배포 중…",
+          "a6d5b7a30b": "인증 실패",
+          "d4986d71b0": "다시 연결하는 중…",
+          "ec37738139": "재연결 실패",
+          "f0871e6bfb": "연결",
+          "fc028bdfa9": "연결 끊김"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "창 구분선의 두께입니다.",
@@ -7464,31 +7342,6 @@
             "f052906167": "Terminal의 단축키"
           }
         },
-        "ssh": {
-          "search": {
-            "d41f296f64": "핑",
-            "237b391f7c": "연결",
-            "8cb870b109": "테스트",
-            "7efd17e816": "SSH",
-            "96ca5d9a0b": "SSH 대상에 대한 연결을 테스트합니다.",
-            "a3058f3605": "연결 테스트",
-            "2cd40ba0d0": "호스트",
-            "5220501141": "구성",
-            "3b12e064a4": "가져오기",
-            "7f251a45a8": "~/.ssh/config에서 호스트를 가져옵니다.",
-            "41a3127094": "SSH 구성에서 가져오기",
-            "f9493b80c0": "서버",
-            "8fb1cc87cc": "호스트",
-            "09395490af": "대상",
-            "00d1fda01a": "새로운",
-            "f7b6383aec": "추가",
-            "62826efbe9": "새로운 원격 SSH 대상을 추가합니다.",
-            "f5a691bb6c": "SSH 대상 추가",
-            "d4bcd497c7": "원격",
-            "74c6d90d78": "원격 SSH 대상을 관리합니다.",
-            "380a788da7": "SSH 연결"
-          }
-        },
         "terminal": {
           "clipboard": {
             "search": {
@@ -8137,59 +7990,6 @@
           "notificationPlayground": "Notification playground",
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
           "devOnly": "Dev only"
-        },
-        "EphemeralVmRecipeRow": {
-          "useInWorkspace": "워크스페이스에서 사용"
-        },
-        "EphemeralVmRuntimesSection": {
-          "cleanupFailed": "정리 실패",
-          "cleanupRunning": "정리 실행 중",
-          "cleanupDisabled": "정리가 비활성화되었습니다.",
-          "running": "달리기",
-          "failed": "실패한",
-          "loadFailed": "임시 VM 런타임을 로드할 수 없습니다.",
-          "cleanupFailedToast": "임시 VM 런타임을 정리할 수 없습니다.",
-          "markedCleaned": "임시 VM 런타임을 정리된 것으로 표시했습니다.",
-          "cleaned": "임시 VM 런타임을 정리했습니다.",
-          "copiedCleanupCommand": "정리 명령을 복사했습니다.",
-          "copiedCleanupPayload": "정리 페이로드를 복사했습니다.",
-          "copyCleanupFailed": "정리 명령을 복사할 수 없습니다.",
-          "title": "임시 VM 런타임",
-          "description": "레시피로 생성된 런타임은 워크스페이스를 소유합니다. 충돌, 생성 실패 또는 수동 복구 후 오래된 항목을 정리합니다.",
-          "refresh": "임시 VM 런타임 새로 고침",
-          "loading": "임시 VM 런타임 확인 중…",
-          "empty": "임시 VM 런타임은 정리가 필요하지 않습니다.",
-          "copyCleanup": "복사 명령",
-          "retry": "정리 다시 시도",
-          "cleanup": "대청소"
-        },
-        "ephemeralVms": {
-          "search": {
-            "title": "워크스페이스별 환경",
-            "description": "repo 소유 레시피가 각 워크스페이스에 고유한 주문형 일회용 환경을 제공하는 방법을 알아보세요."
-          }
-        },
-        "EphemeralVmsPane": {
-          "loadError": "레시피를 로드할 수 없습니다.",
-          "copyError": "프롬프트를 복사할 수 없습니다.",
-          "skillTitle": "워크스페이스별 환경 기술",
-          "skillDescription": "repo 소유 환경 레시피를 설정, 빌드, 인증 및 검증합니다.",
-          "whatTitle": "당신과 함께 기술이 하는 일",
-          "whatScaffold": "Yiru 서버 또는 SSH를 통해 연결된 공급자를 위한 레시피 및 스크립트를 작성합니다.",
-          "whatBuild": "재사용 가능한 기본 이미지를 구축하고 agent에 로그인합니다.",
-          "whatValidate": "워크스페이스를 생성할 수 있도록 유효성을 검사합니다.",
-          "promptHint": "어떤 워크스페이스에서든 agent에게 다음과 같이 질문하세요.",
-          "copy": "복사",
-          "copied": "복사됨",
-          "recipes": "조리법",
-          "recipesHelp": "agent가 yiru.yaml에 추가하는 레시피가 여기에 표시되어 워크스페이스를 시작할 준비가 됩니다.",
-          "refresh": "임시 VM 레시피 새로 고침",
-          "checking": "레시피 확인 중...",
-          "none": "아직 레시피를 찾을 수 없습니다."
-        },
-        "ephemeralVmsExperimentalSetting": {
-          "description": "repo 소유 온디맨드 환경에 대한 설정 제어 및 워크스페이스 실행 대상을 표시합니다.",
-          "toggleLabel": "워크스페이스별 환경 전환"
         },
         "SourceControlActionRepoOverrideNote": {
           "agent": "에이전트",

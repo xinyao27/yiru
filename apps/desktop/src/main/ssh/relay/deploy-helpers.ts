@@ -1,6 +1,6 @@
 import type { ClientChannel } from 'ssh2'
+import type { MultiplexerTransport } from '~main/channel-multiplexer/multiplexer'
 
-import type { MultiplexerTransport } from '../channel-multiplexer'
 import { createSshOperationAbortError } from '../connection-utils'
 import { buildRelayVersionMismatchError } from './handshake-mismatch'
 import { RELAY_SENTINEL, RELAY_SENTINEL_TIMEOUT_MS } from './protocol'

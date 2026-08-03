@@ -1179,8 +1179,6 @@ export type YiruHooks = {
     archive?: string // Runs before worktree is archived
   }
   defaultTabs?: YiruDefaultTabTemplate[] // Terminal tabs to create once for a new worktree
-  environmentRecipes?: YiruVmRecipe[] // Project-scoped per-workspace environment recipes
-  environmentRecipeDiagnostics?: YiruVmRecipeDiagnostic[] // Non-fatal validation issues from environmentRecipes
   worktree?: {
     sharedDirectories: string[]
   }
@@ -1190,23 +1188,6 @@ export type YiruDefaultTabTemplate = {
   title?: string
   color?: string
   command?: string
-}
-
-export type YiruVmRecipe = {
-  id: string
-  name: string
-  create: string
-  description?: string
-  suspend?: string
-  resume?: string
-  destroy?: string
-  destroyDisabled?: boolean
-}
-
-export type YiruVmRecipeDiagnostic = {
-  index: number
-  field?: string
-  message: string
 }
 
 export type RepoHookSettings = {
@@ -2051,7 +2032,6 @@ export type GlobalSettings = {
   /** Milliseconds a completed agent must stay idle before hibernation can be considered. */
   agentHibernationIdleMs?: number
   /** Experimental: per-workspace on-demand environment recipes and setup surface. */
-  experimentalEphemeralVms?: boolean
   /** Active non-local runtime environment for client-routed RPC. `null`
    *  preserves the current local desktop behavior. */
   activeRuntimeEnvironmentId?: string | null

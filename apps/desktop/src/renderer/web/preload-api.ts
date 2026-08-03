@@ -2920,12 +2920,7 @@ function createSshApi(): NonNullable<Partial<PreloadApi>['ssh']> {
       )
       return labels
     },
-    addTarget: () =>
-      Promise.reject(new Error('SSH target management is unavailable in the web client.')),
-    updateTarget: () =>
-      Promise.reject(new Error('SSH target management is unavailable in the web client.')),
     removeTarget: () => Promise.resolve(),
-    importConfig: () => Promise.resolve({ targets: [], repoReadoptions: [] }),
     connect: async (args) => {
       const { state } = await callRuntimeResult<{ state: SshConnectionState | null }>(
         'ssh.connect',
@@ -2935,7 +2930,6 @@ function createSshApi(): NonNullable<Partial<PreloadApi>['ssh']> {
     },
     disconnect: () => Promise.resolve(),
     terminateSessions: () => Promise.resolve(),
-    resetRelay: () => Promise.resolve(),
     getState: async (args) => {
       if (!requireActiveEnvironmentOrNull()) {
         return null
@@ -2947,11 +2941,6 @@ function createSshApi(): NonNullable<Partial<PreloadApi>['ssh']> {
       return state
     },
     needsPassphrasePrompt: () => Promise.resolve(false),
-    testConnection: () =>
-      Promise.resolve({
-        success: false,
-        error: translate('auto.web.web.preload.api.31bfe8ae1a', 'Unavailable in the web client.')
-      }),
     onStateChanged: () => noopUnsubscribe,
     addPortForward: () =>
       Promise.reject(new Error('SSH port forwarding is unavailable in the web client.')),

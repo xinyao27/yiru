@@ -1,4 +1,4 @@
-import type { SshChannelMultiplexer } from './channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import {
   decodeSshStreamBase64,
   parseSshFileStreamMetadata,
@@ -28,7 +28,7 @@ export type SshFileStreamConsumerOptions = {
 }
 
 export function consumeSshFileStream(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   options: SshFileStreamConsumerOptions
 ): Promise<SshFileStreamMetadata> {

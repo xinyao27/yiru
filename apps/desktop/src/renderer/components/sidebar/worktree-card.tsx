@@ -9,7 +9,7 @@ import {
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
 import React, { useEffect, useCallback, useState } from 'react'
 import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
@@ -312,10 +312,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
   // SSH disconnected state
   const sshStatus = useAppStore((s) => {
-    // Why: runtime-owned (per-workspace-env) SSH targets are hidden and their relay health is
-    // owned by the runtime layer — Yiru suppresses their ssh:state-changed broadcasts, so their
-    // state is absent here. Don't show a false "disconnected" SSH chip for them.
-    if (!repo?.connectionId || isRuntimeOwnedSshTargetId(repo.connectionId)) {
+    if (!repo?.connectionId) {
       return null
     }
     const state = s.sshConnectionStates.get(repo.connectionId)
@@ -644,7 +641,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         sshDisconnected: isSshDisconnected
       })
       onImmediateActivate?.(worktree.id, activationRowKey)
-      void activateWorktreeFromSidebar(worktree.id)
+      activateWorktreeFromSidebar(worktree.id)
       // Why: clicking the card is a deliberate focus of this project, so the
       // blocking reconnect prompt is appropriate here (unlike auto-restore) —
       // but skip it when a terminal is active, since that pane already shows the

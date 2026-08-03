@@ -33,7 +33,6 @@ import { registerDeveloperPermissionHandlers } from '../developer-permissions'
 import { registerDiagnosticsHandlers } from '../diagnostics/diagnostics'
 import { registerEmulatorFrameStreamHandlers } from '../emulator/frame-stream'
 import { registerEmulatorVideoStreamHandlers } from '../emulator/video-stream'
-import { registerEphemeralVmHandlers } from '../ephemeral-vm/ephemeral-vm'
 import { registerExportHandlers } from '../export/export'
 import { registerFilesystemHandlers } from '../filesystem/filesystem'
 import { registerFilesystemWatcherHandlers } from '../filesystem/watcher'
@@ -193,7 +192,6 @@ export function registerCoreHandlers(
   registerFilesystemWatcherHandlers()
   registerRuntimeHandlers(runtime)
   registerRuntimeEnvironmentHandlers(store)
-  registerEphemeralVmHandlers(store)
   registerAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
     resolveClaudeProjectsDirs: lifecycleOptions.resolveAiVaultClaudeProjectsDirs,

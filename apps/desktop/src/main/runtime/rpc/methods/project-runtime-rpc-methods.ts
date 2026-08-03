@@ -94,6 +94,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'project.list',
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => {
       runtime.enrichMissingRepoGitRemoteIdentities?.()
       return { projects: runtime.listProjects() }
@@ -102,6 +103,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'project.update',
     params: ProjectUpdate,
+    access: { scope: 'project', tier: 'control' },
     handler: (params, { runtime }) => ({
       project: runtime.updateProject(params.projectId, params.updates)
     })
@@ -109,6 +111,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.list',
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => {
       runtime.enrichMissingRepoGitRemoteIdentities?.()
       return { setups: runtime.listProjectHostSetups() }
@@ -117,6 +120,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.create',
     params: ProjectHostSetupCreate,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => ({
       result: runtime.createProjectHostSetup(params)
     })
@@ -124,6 +128,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.setupExistingFolder',
     params: ProjectHostSetupExistingFolder,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       result: await runtime.setupProjectExistingFolder(params)
     })
@@ -131,6 +136,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.clone',
     params: ProjectHostSetupClone,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       result: await runtime.setupProjectClone(params)
     })
@@ -138,6 +144,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.update',
     params: ProjectHostSetupUpdate,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => ({
       result: runtime.updateProjectHostSetup(params)
     })
@@ -145,6 +152,7 @@ export const PROJECT_RUNTIME_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectHostSetup.delete',
     params: ProjectHostSetupDelete,
+    access: { scope: 'project', tier: 'host' },
     handler: (params, { runtime }) => ({
       result: runtime.deleteProjectHostSetup(params)
     })

@@ -6,6 +6,7 @@ import { defineMethod, type RpcMethod } from '../core'
 export const AI_VAULT_METHODS: RpcMethod[] = [
   defineMethod({
     contract: AI_VAULT_LIST_SESSIONS_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => {
       const result = await runtime.listAiVaultSessions({
         limit: params.limit,

@@ -34,6 +34,7 @@ import {
   AGENT_HOOK_REQUEST_REPLAY_METHOD
 } from '~shared/agent/hook-relay'
 import { detectPiAgentKindFromCommand } from '~shared/pi-agent-kind'
+import { RELAY_SENTINEL } from '~shared/relay-ready-handshake'
 import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
 
 import { AgentExecHandler } from './agent-exec-handler'
@@ -52,7 +53,6 @@ import { assertPluginSourceUnderByteCap } from './plugin-source-limit'
 import { PortScanHandler } from './port-scan-handler'
 import { PreflightHandler } from './preflight-handler'
 import {
-  RELAY_SENTINEL,
   FrameDecoder,
   MessageType,
   encodeJsonRpcFrame,

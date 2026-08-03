@@ -35,6 +35,7 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
     name: 'accounts.list',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'host' },
     handler: async (_params, { runtime }) => {
       // Why: ensure the snapshot reflects the latest provider state before
       // returning. Desktop polling pauses when the window is unfocused and
@@ -48,22 +49,26 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
     name: 'accounts.selectClaude',
     mobile: true,
     params: SelectAccountParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.selectClaudeAccount(params.accountId)
   }),
   defineMethod({
     name: 'accounts.selectCodex',
     mobile: true,
     params: SelectAccountParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.selectCodexAccount(params.accountId)
   }),
   defineMethod({
     name: 'accounts.removeClaude',
     params: RemoveAccountParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.removeClaudeAccount(params.accountId)
   }),
   defineMethod({
     name: 'accounts.removeCodex',
     params: RemoveAccountParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.removeCodexAccount(params.accountId)
   }),
   // Why: streaming counterpart so mobile usage bars refresh in place when the
@@ -73,6 +78,7 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
     name: 'accounts.subscribe',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'host' },
     handler: async (_params, { runtime, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
         const unsubscribe = runtime.onAccountsChanged((snapshot) => {
@@ -109,6 +115,7 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
     name: 'accounts.unsubscribe',
     mobile: true,
     params: AccountsUnsubscribeParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)
       return { unsubscribed: true }

@@ -576,12 +576,6 @@
         "distroMissing": "La distro WSL seleccionada no está disponible. Elige una disponible o cambia este proyecto a Windows.",
         "wslDefault": "WSL predeterminado"
       },
-      "sidebarWorktreeActivation": {
-        "wakeEphemeralVmFailed": "Error al activar el espacio de trabajo VM efímera"
-      },
-      "ephemeralVmWorkspaceTarget": {
-        "projectRootRegistrationFailed": "Error al registrar la raíz del proyecto creada por la receta en el entorno de ejecución"
-      },
       "blocked": {
         "notification": {
           "fallback": {
@@ -647,8 +641,6 @@
         "d91ae31fbd": "Permisos de macOS",
         "95a1886d94": "Controla terminales y agentes desde tu teléfono.",
         "1cd25673df": "Móvil",
-        "31e57d1c70": "Usa máquinas existentes por SSH para archivos, terminales, Git y espacios de trabajo.",
-        "94a5afe910": "Hosts SSH",
         "40d80bad8a": "Beta",
         "de0c2907a1": "Servidores remotos de Yiru",
         "b351014180": "Estadísticas de Yiru más análisis de tokens de Claude, Codex y OpenCode y uso de suscripción de Grok.",
@@ -880,13 +872,8 @@
         "createMultiple": "Crear más",
         "waitForSetupBeforeAgent": "Esperar a que termine el setup antes de iniciar el agente",
         "waitForSetupBeforeAgentHelp": "Activa esto cuando el setup instale dependencias, servidores MCP o archivos de configuración que el agente necesita al iniciar.",
-        "destroyDisabled": "destroy deshabilitado",
-        "destroyConfigured": "destroy configurado",
-        "noDestroyConfigured": "sin destroy",
-        "ephemeralVm": "Entorno por espacio de trabajo",
         "chooseRunTarget": "Elegir destino",
         "noRunTargets": "No hay destinos de ejecución listos para este proyecto.",
-        "perWorkspaceEnvHint": "Provisiona un entorno bajo demanda a partir de una receta",
         "branchName": "Nombre de rama",
         "branchNamePlaceholder": "feature/my-branch"
       },
@@ -1183,10 +1170,7 @@
             "ed2a664f8b": "No se pudo crear el worktree",
             "a3346fc6ed": "Cancelar creación del worktree",
             "532aea14ce": "Cancelar",
-            "767951265d": "Algo salió mal al crear el worktree.",
-            "vmProvisioningTitle": "Provisionando VM",
-            "cancelProvisioning": "Cancelar",
-            "vmProvisioningLogEmpty": "Esperando output de la receta..."
+            "767951265d": "Algo salió mal al crear el worktree."
           }
         }
       },
@@ -3566,13 +3550,9 @@
           "ssh": "SSH",
           "connecting": "Conectando",
           "connect": "Conectar",
-          "addSshHost": "Agregar host SSH",
           "addRemoteServer": "Agregar servidor remoto",
-          "addRemoteHost": "Agregar host remoto",
           "addRemoteHostTooltip": "Elige SSH para una máquina donde puedas iniciar sesión, o servidor remoto para un servidor de Yiru.",
-          "addSshHostDetail": "Usa una máquina existente mediante SSH.",
-          "addRemoteServerDetail": "Empareja con Yiru ejecutándose en otro equipo.",
-          "addRemoteHostDetail": "Host SSH o servidor Yiru"
+          "addRemoteServerDetail": "Empareja con Yiru ejecutándose en otro equipo."
         },
         "sidebarHostOptions": {
           "3e102f111c": "Todos los hosts",
@@ -3662,43 +3642,21 @@
           "connectionFailed": "La conexión SSH falló."
         },
         "AddRemoteHostDialog": {
-          "sshHostRequired": "Se requiere un host o alias de configuración SSH.",
-          "sshPortInvalid": "El puerto debe estar entre 1 y 65535.",
-          "sshRelayGraceInvalid": "El tiempo de espera del terminal debe estar entre 60 y {{value0}} segundos.",
-          "sshSaved": "Se agregó el host SSH.",
-          "sshSaveFailed": "No se pudo agregar el host SSH.",
           "serverFieldsRequired": "Se requieren el nombre del servidor y el código de emparejamiento.",
           "serverSaved": "Se agregó servidor remoto.",
           "serverSaveFailed": "No se pudo agregar el servidor remoto.",
           "serverTitle": "Agregar servidor remoto",
-          "sshTitle": "Agregar host SSH",
           "serverDescription": "Empareja con Yiru ejecutándose en otro equipo.",
-          "sshDescription": "Agrega una máquina persistente donde puedas iniciar sesión por SSH.",
           "cancel": "Cancelar",
           "saving": "Guardando...",
           "save": "Guardar",
-          "label": "Etiqueta",
-          "sshLabelPlaceholder": "Dev box",
-          "sshHost": "Host o alias",
-          "sshHostPlaceholder": "deploy@server:22",
-          "username": "Nombre de usuario",
-          "usernamePlaceholder": "deploy",
-          "port": "Puerto",
-          "identityFile": "Archivo de identidad",
-          "identityFilePlaceholder": "~/.ssh/id_ed25519 (opcional)",
           "serverName": "Nombre del servidor",
           "serverNamePlaceholder": "Dev box",
           "pairingCode": "Código de emparejamiento",
           "pairingCodePlaceholder": "yiru://pair?code=...",
           "pairingHelpPrefix": "Ejecuta",
           "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "en el servidor y pega la URL de emparejamiento impresa.",
-          "sshImportAlreadySynced": "~/.ssh/config ya está sincronizado.",
-          "sshImportSynced": "Se sincronizó {{value0}} host{{value1}}.",
-          "sshImportFailed": "No se pudo importar la configuración SSH.",
-          "importing": "Importando...",
-          "importSshConfig": "Importar ~/.ssh/config",
-          "sshPersistenceDefault": "Los terminales remotos en este host seguirán activos hasta que los cierres o restablezcas el relay."
+          "pairingHelpSuffix": "en el servidor y pega la URL de emparejamiento impresa."
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "Error de reconexión",
@@ -5700,8 +5658,6 @@
           "65660d4548": "Permisos de macOS",
           "c6c01ac209": "Controla terminales y agentes desde tu teléfono.",
           "c40dadaac8": "Móvil",
-          "c2ee313198": "Usa máquinas existentes por SSH para archivos, terminales, Git y espacios de trabajo.",
-          "9b02492d1f": "Hosts SSH",
           "b5ee17826b": "Empareja runtimes remotos de Yiru para sesiones persistentes, estado remoto más completo y traspaso web o móvil.",
           "7686cb5c36": "Conecta este navegador a un servidor Yiru guardado.",
           "bd0181eeca": "Servidores remotos de Yiru",
@@ -5879,36 +5835,6 @@
           "68bbcd864a": "nuevo",
           "2ef2b2674b": "Eliminar {{value0}}"
         },
-        "SshDestructiveActionDialog": {
-          "895b216267": "Cancelar"
-        },
-        "SshPane": {
-          "c0f1c80166": "No hay destinos SSH configurados.",
-          "639ceb3698": "Agregar destino",
-          "51d7dba44d": "Importar",
-          "a7d28dff81": "Agrega un host remoto para conectarte a él en Yiru.",
-          "94c5284560": "Destinos",
-          "f495689b82": "Error al importar",
-          "f8050f6307": "Sincronización completada: {{value0}} host{{value1}}",
-          "68c13b4589": "Prueba fallida",
-          "81d08bcddf": "Conexión exitosa",
-          "2c4ee7332b": "No se pudo restablecer el relé remoto",
-          "db2e48975e": "Relé remoto restablecido",
-          "025e107643": "No se pudieron finalizar los terminales remotos",
-          "90e308c98b": "Terminales remotos finalizados",
-          "a43de1d3ee": "Error al desconectar",
-          "e95d5ae10e": "Error de conexión",
-          "c2a69510e3": "No se pudo eliminar el destino",
-          "a0237eb1ca": "Destino eliminado",
-          "2227ce47b6": "No se pudo guardar el destino",
-          "f602009125": "Destino agregado",
-          "b4ba0ce33d": "Destino actualizado",
-          "3879cbaa52": "El tiempo de espera del terminal debe estar entre 60 y {{value0}} segundos, o mantener los terminales activos hasta restablecer.",
-          "4db9afce1c": "El puerto debe estar entre 1 y 65535",
-          "0e5aa04161": "Se requiere un host o alias de configuración SSH",
-          "f1fc50dad2": "No se pudieron cargar destinos SSH",
-          "0cda732f43": "La prueba de conexión falló"
-        },
         "SshPassphraseDialog": {
           "d5a234456f": "Cancelar",
           "c3ce71aad6": "Introduce la frase de contraseña",
@@ -5925,64 +5851,16 @@
           "106bd57f4a": "Contraseña SSH"
         },
         "SshTargetCard": {
-          "ec6543cee9": "Conectar",
-          "0e53e9f8e8": "Probar",
-          "1810b51482": "Conectando",
-          "4c86f30877": "Desconectar",
-          "7f7b3d7ab4": "Eliminar destino",
-          "3d21a22d0e": "Eliminando destino",
-          "3d8af2949f": "Editar destino",
-          "762a48c662": "Restablecer el relé remoto",
-          "97dea4e8cf": "Restableciendo el relé remoto",
-          "da16e108e6": "Finalizar terminales remotos",
-          "c77f1abfe3": "Finalizando terminales remotos",
+          "0d4da494f9": "Conectando…",
           "18968ede9e": "Error",
-          "f0871e6bfb": "conectar",
           "47e94bd6ba": "conectado",
-          "a883f5a00f": "tiempo de espera del terminal: {{value0}}",
-          "8ce71262f4": "terminales hasta el reinicio"
-        },
-        "SshTargetDestructiveActions": {
-          "7e66942808": "Esto detendrá las sesiones de terminal activas en este destino SSH. Volver a conectarse no las restaurará.",
-          "accf177a03": "¿Finalizar terminales remotos?",
-          "26be00392d": "Esto fuerza la detención del relé remoto para este destino SSH. Los terminales remotos activos y los reenvíos de puertos de este destino finalizarán.",
-          "570a7a0574": "¿Restablecer relé remoto?",
-          "3bb0cf0ee4": "Esto eliminará el destino y finalizará todos los terminales remotos activos.",
-          "4808966c41": "Eliminar destino SSH"
-        },
-        "SshTargetForm": {
-          "fea9cb402e": "Cancelar",
-          "1b19b00e93": "Los tiempos de espera acotados deben estar entre 60 segundos y 7 días.",
-          "137e88ce8d": "Los terminales remotos siguen ejecutándose después de que Yiru se desconecta de este host.",
-          "b574994adc": "Usa Finalizar terminales remotos o Restablecer relé cuando quieras detenerlos.",
-          "71fc546097": "Mantener los terminales activos hasta restablecer",
-          "92f80edbfd": "Persistencia de terminales remotos",
-          "feae1d1e69": "Opcional. Equivale a ProxyJump / ssh -J.",
-          "11bcb4507a": "bastion.example.com",
-          "b2ab248ded": "Host de salto",
-          "3b01ca44a0": "Opcional. Se usa para túneles (p. ej., Cloudflare Access, ProxyCommand).",
-          "f42d844544": "p. ej., cloudflared access ssh --hostname %h",
-          "c7d0e18ecb": "Comando proxy",
-          "cb91f6375c": "Opcional. Se usa el agente SSH de forma predeterminada.",
-          "d6a5f2ee5c": "~/.ssh/id_ed25519 (dejar vacío para el agente SSH)",
-          "63c0c145c1": "Archivo de identidad",
-          "c94cfa634c": "Puerto",
-          "47e082bc17": "deploy",
-          "dc1dc52aaa": "Nombre de usuario",
-          "2ee9bcd2e8": "server, deploy@server:2222, ssh://server",
-          "ce370ce674": "Host o alias *",
-          "b8dab0aa7b": "Mi servidor",
-          "298de87a88": "Etiqueta",
-          "9518545cb6": "Agregar destino",
-          "a62b4cb39a": "Guardar cambios",
-          "29af933cd5": "Nuevo destino SSH",
-          "f2331ce599": "Editar destino SSH",
-          "7c13f58c91": "Hasta restablecer",
-          "55c56cf2c7": "Tiempo de espera después de desconectar (segundos)",
-          "4a342f44c1": "Conexión avanzada",
-          "e9609ddca6": "Proxy, host de salto y reutilización de conexión",
-          "8c922dffba": "Reutilizar la conexión SSH para una configuración más rápida",
-          "53e9aabfc0": "Usa multiplexación de OpenSSH cuando está disponible. Desactívalo para hosts con restricciones SSH personalizadas."
+          "8df62d1912": "Conectado",
+          "8f14a926e0": "Desplegando el relay…",
+          "a6d5b7a30b": "Error de autenticación",
+          "d4986d71b0": "Reconectando…",
+          "ec37738139": "Error de reconexión",
+          "f0871e6bfb": "conectar",
+          "fc028bdfa9": "Desconectado"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "Grosor de la línea divisoria del panel.",
@@ -7479,31 +7357,6 @@
             "f052906167": "Atajos en terminal"
           }
         },
-        "ssh": {
-          "search": {
-            "d41f296f64": "ping",
-            "237b391f7c": "conexión",
-            "8cb870b109": "probar",
-            "7efd17e816": "SSH",
-            "96ca5d9a0b": "Pruebe la conectividad con un destino SSH.",
-            "a3058f3605": "Probar conexión",
-            "2cd40ba0d0": "hosts",
-            "5220501141": "configuración",
-            "3b12e064a4": "importar",
-            "7f251a45a8": "Importa hosts desde ~/.ssh/config.",
-            "41a3127094": "Importar desde SSH config",
-            "f9493b80c0": "servidor",
-            "8fb1cc87cc": "host",
-            "09395490af": "objetivo",
-            "00d1fda01a": "nuevo",
-            "f7b6383aec": "agregar",
-            "62826efbe9": "Agrega un nuevo host SSH.",
-            "f5a691bb6c": "Agregar destino SSH",
-            "d4bcd497c7": "remoto",
-            "74c6d90d78": "Administra hosts SSH.",
-            "380a788da7": "Conexiones SSH"
-          }
-        },
         "terminal": {
           "clipboard": {
             "search": {
@@ -8137,59 +7990,6 @@
           "notificationPlayground": "Panel de prueba de notificaciones",
           "notificationPlaygroundDescription": "Disparadores solo para desarrollo para comprobar el diseño de toasts, acciones de recuperación y ajuste de texto largo.",
           "devOnly": "Solo para desarrollo"
-        },
-        "EphemeralVmRecipeRow": {
-          "useInWorkspace": "Usar en el espacio de trabajo"
-        },
-        "EphemeralVmRuntimesSection": {
-          "cleanupFailed": "Error al limpiar",
-          "cleanupRunning": "Limpieza en curso",
-          "cleanupDisabled": "Limpieza deshabilitada",
-          "running": "En ejecución",
-          "failed": "Con error",
-          "loadFailed": "No se pudieron cargar los runtimes de VM temporales.",
-          "cleanupFailedToast": "No se pudo limpiar el runtime de VM temporal.",
-          "markedCleaned": "Runtime de VM temporal marcado como limpio.",
-          "cleaned": "Se limpió el runtime de VM temporal.",
-          "copiedCleanupCommand": "Comando de limpieza copiado.",
-          "copiedCleanupPayload": "Payload de limpieza copiado.",
-          "copyCleanupFailed": "No se pudo copiar el comando de limpieza.",
-          "title": "Runtimes de VM temporales",
-          "description": "Los runtimes creados por recetas pertenecen al espacio de trabajo. Limpia entradas obsoletas después de cierres inesperados, creaciones fallidas o recuperación manual.",
-          "refresh": "Actualizar runtimes de VM temporales",
-          "loading": "Comprobando runtimes de VM temporales…",
-          "empty": "No hay runtimes de VM temporales que limpiar.",
-          "copyCleanup": "Copiar comando",
-          "retry": "Reintentar limpieza",
-          "cleanup": "Limpiar"
-        },
-        "ephemeralVms": {
-          "search": {
-            "title": "Entornos por espacio de trabajo",
-            "description": "Aprende cómo las recetas del repositorio dan a cada espacio de trabajo su propio entorno desechable bajo demanda."
-          }
-        },
-        "EphemeralVmsPane": {
-          "loadError": "No se pudieron cargar las recetas.",
-          "copyError": "No se pudo copiar el prompt.",
-          "skillTitle": "Skill de entornos por espacio de trabajo",
-          "skillDescription": "Configura, construye, autentica y valida recetas de entornos del repositorio.",
-          "whatTitle": "Lo que la skill hace contigo",
-          "whatScaffold": "Escribe la receta y los scripts para tu proveedor, conectados mediante un servidor Yiru o SSH.",
-          "whatBuild": "Crea una imagen base reutilizable e inicia sesión con tu agente.",
-          "whatValidate": "Valida el entorno para que puedas crear un espacio de trabajo sobre él.",
-          "promptHint": "En cualquier espacio de trabajo, pídele a tu agente:",
-          "copy": "Copiar",
-          "copied": "Copiado",
-          "recipes": "Recetas",
-          "recipesHelp": "Las recetas que tu agente agrega a yiru.yaml aparecen aquí, listas para iniciar un espacio de trabajo.",
-          "refresh": "Actualizar recetas de VMs efímeras",
-          "checking": "Comprobando recetas…",
-          "none": "Aún no se han encontrado recetas."
-        },
-        "ephemeralVmsExperimentalSetting": {
-          "description": "Muestra controles de configuración y destinos de ejecución de espacios de trabajo para entornos bajo demanda del repositorio.",
-          "toggleLabel": "Activar o desactivar entornos por espacio de trabajo"
         },
         "SourceControlActionRepoOverrideNote": {
           "agent": "Agente",

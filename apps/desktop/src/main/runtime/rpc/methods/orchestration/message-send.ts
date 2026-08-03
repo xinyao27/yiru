@@ -18,6 +18,9 @@ export const ORCHESTRATION_MESSAGE_SEND_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.send',
     params: MessageSendParams,
+    // Why: `@all` resolves against runtime.listTerminals() with no project
+    // filter, so one send reaches every agent mailbox on the host.
+    access: { scope: 'host', tier: 'control' },
     handler: async (params, { runtime, orchestrationCapability }) => {
       const db = runtime.getOrchestrationDb()
       const from = params.from ?? 'unknown'

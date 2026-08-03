@@ -99,6 +99,7 @@ const RepoSparsePresetSave = RepoSelector.extend({
 export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     contract: REPO_LIST_CONTRACT,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => {
       runtime.enrichMissingRepoGitRemoteIdentities?.()
       return { repos: runtime.listRepos() }
@@ -109,11 +110,13 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'projectGroup.list',
     mobile: true,
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => ({ groups: runtime.listProjectGroups() })
   }),
   defineMethod({
     name: 'projectGroup.create',
     params: ProjectGroupCreate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       group: await runtime.createProjectGroup(params)
     })
@@ -121,6 +124,7 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectGroup.update',
     params: ProjectGroupUpdate,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => ({
       group: await runtime.updateProjectGroup(params.groupId, params.updates)
     })
@@ -128,11 +132,13 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectGroup.delete',
     params: ProjectGroupSelector,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => runtime.deleteProjectGroup(params.groupId)
   }),
   defineMethod({
     name: 'projectGroup.moveProject',
     params: ProjectGroupMoveProject,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => ({
       repo: await runtime.moveProjectToGroup(params.repo, params.groupId ?? null, params.order)
     })
@@ -141,17 +147,20 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'projectGroup.scanNested',
     params: ProjectGroupScanNested,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.scanNestedRepos(params.path)
   }),
   defineMethod({
     name: 'projectGroup.importNested',
     params: ProjectGroupImportNested,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.importNestedRepos(params)
   }),
   defineMethod({
     name: 'repo.sparsePresets',
     mobile: true,
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => ({
       presets: await runtime.listSparsePresets(params.repo)
     })
@@ -160,6 +169,7 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'repo.saveSparsePreset',
     mobile: true,
     params: RepoSparsePresetSave,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => ({
       preset: await runtime.saveSparsePreset(params.repo, {
         ...(params.id ? { id: params.id } : {}),
@@ -170,6 +180,7 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     contract: REPO_ADD_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       repo: await runtime.addRepo(params.path, params.kind)
     })
@@ -177,6 +188,7 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'repo.create',
     params: RepoCreate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.createRepo(params.parentPath, params.name, params.kind)
   }),
@@ -184,11 +196,13 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'repo.gitAvailable',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime }) => ({ available: await runtime.isGitAvailable() })
   }),
   defineMethod({
     name: 'repo.clone',
     params: RepoClone,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       repo: await runtime.cloneRepo(params.url, params.destination)
     })
@@ -196,12 +210,14 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'repo.show',
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => ({ repo: await runtime.showRepo(params.repo) })
   }),
   defineMethod({
     name: 'repo.update',
     mobile: true,
     params: RepoUpdate,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => ({
       repo: await runtime.updateRepo(
         params.repo,
@@ -212,16 +228,19 @@ export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'repo.rm',
     params: RepoSelector,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.removeProject(params.repo)
   }),
   defineMethod({
     name: 'repo.reorder',
     params: RepoReorder,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => runtime.reorderRepos(params.orderedIds)
   }),
   defineMethod({
     name: 'repo.setBaseRef',
     params: RepoSetBaseRef,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => ({
       repo: await runtime.setRepoBaseRef(params.repo, params.ref)
     })
@@ -230,10 +249,12 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'repo.baseRefDefault',
     mobile: true,
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.getRepoBaseRefDefault(params.repo)
   }),
   defineMethod({
     contract: REPO_SEARCH_REFS_CONTRACT,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.searchRepoRefs(params.repo, params.query, params.limit)
   }),
@@ -241,16 +262,19 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'repo.hooks',
     mobile: true,
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.getRepoHooks(params.repo)
   }),
   defineMethod({
     name: 'repo.hooksCheck',
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.checkRepoHooks(params.repo)
   }),
   defineMethod({
     name: 'repo.setupScriptImports',
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.inspectRepoSetupScriptImports(params.repo)
   })
 ]

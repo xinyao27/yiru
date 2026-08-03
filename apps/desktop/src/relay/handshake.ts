@@ -10,9 +10,10 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import type { Socket } from 'node:net'
 import { dirname, join } from 'node:path'
 
+import { RELAY_VERSION } from '~shared/relay-ready-handshake'
+
 import { relayLogLine } from './diagnostic-log'
 import {
-  RELAY_VERSION,
   MessageType,
   FrameDecoder,
   encodeHandshakeFrame,

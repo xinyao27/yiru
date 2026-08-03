@@ -11,6 +11,7 @@ export const STATS_METHODS: RpcMethod[] = [
     name: 'stats.summary',
     mobile: true,
     params: StatsSummaryParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
       return (await runtime.getStatsSummary(params.refreshUsage === true)) ?? {}
     }

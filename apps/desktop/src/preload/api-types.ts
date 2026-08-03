@@ -79,11 +79,6 @@ import type {
   ListDetectedWorktreesArgs,
   ProviderRequestId
 } from '~shared/detected-worktree-provider-contract'
-import type {
-  EphemeralVmRecipeDoctorResult,
-  EphemeralVmRecipeResultWarning
-} from '~shared/ephemeral-vm/recipes'
-import type { EphemeralVmRuntimeRecord } from '~shared/ephemeral-vm/runtimes'
 import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '~shared/feature-interactions'
 import type {
@@ -312,8 +307,6 @@ type RuntimeEnvironmentSubscriptionHandle = {
 }
 import type {
   SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
   SshTarget,
   PortForwardEntry,
   EnrichedDetectedPort
@@ -1981,70 +1974,6 @@ export type PreloadApi = {
     }>
     inspectSetupScriptImports: (args: { repoId: string }) => Promise<SetupScriptImportCandidate[]>
   }
-  ephemeralVm: {
-    listRecipes: (args: { repoId: string }) => Promise<{
-      status: 'ok' | 'error'
-      repoPath: string | null
-      recipes: YiruHooks['environmentRecipes']
-      diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
-      message?: string
-    }>
-    listRecipeCatalog: () => Promise<
-      {
-        repoId: string
-        repoName: string
-        repoPath: string
-        recipes: NonNullable<YiruHooks['environmentRecipes']>
-        diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
-      }[]
-    >
-    doctor: (args: { repoId: string; recipeId: string }) => Promise<EphemeralVmRecipeDoctorResult>
-    provision: (args: {
-      repoId: string
-      recipeId: string
-      workspaceName?: string
-      projectId?: string
-      workspaceId?: string
-      provisionId?: string
-    }) => Promise<
-      | {
-          ok: true
-          connectionType: 'yiru-server'
-          runtime: EphemeralVmRuntimeRecord
-          environment: PublicKnownRuntimeEnvironment
-          stderr: string
-          warnings: EphemeralVmRecipeResultWarning[]
-        }
-      | {
-          ok: true
-          connectionType: 'ssh'
-          runtime: EphemeralVmRuntimeRecord
-          sshTargetId: string
-          stderr: string
-          warnings: EphemeralVmRecipeResultWarning[]
-        }
-      | { ok: false; error: string; stderr: string; stdout: string }
-    >
-    cancelProvision: (args: { provisionId: string }) => Promise<{ cancelled: boolean }>
-    onProvisionEvent: (
-      callback: (event: { provisionId: string; stream: 'stdout' | 'stderr'; chunk: string }) => void
-    ) => () => void
-    listRuntimes: () => Promise<EphemeralVmRuntimeRecord[]>
-    attachWorkspace: (args: {
-      runtimeId: string
-      workspaceId: string
-    }) => Promise<EphemeralVmRuntimeRecord>
-    suspendWorkspace: (args: { workspaceId: string }) => Promise<EphemeralVmRuntimeRecord | null>
-    resumeWorkspace: (args: { workspaceId: string }) => Promise<EphemeralVmRuntimeRecord | null>
-    cleanup: (args: { runtimeId: string }) => Promise<EphemeralVmRuntimeRecord>
-    getCleanupCommand: (args: { runtimeId: string }) => Promise<{
-      runtimeId: string
-      command: string | null
-      payloadJson: string
-      cleanupDisabled: boolean
-      message?: string
-    }>
-  }
   cache: {
     getGitHub: () => Promise<{
       pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
@@ -2868,22 +2797,12 @@ export type PreloadApi = {
     // Removed-target id → last known label, for showing a friendly host name on
     // workspaces still pinned to a target that no longer exists.
     listRemovedTargetLabels: () => Promise<Record<string, string>>
-    addTarget: (args: { target: Omit<SshTarget, 'id'> }) => Promise<SshTargetAddResult>
-    updateTarget: (args: {
-      id: string
-      updates: Partial<Omit<SshTarget, 'id'>>
-    }) => Promise<SshTarget>
     removeTarget: (args: { id: string }) => Promise<void>
-    importConfig: (args?: { reAdopt?: boolean }) => Promise<SshConfigImportResult>
     connect: (args: { targetId: string }) => Promise<SshConnectionState | null>
     disconnect: (args: { targetId: string }) => Promise<void>
     terminateSessions: (args: { targetId: string }) => Promise<void>
-    resetRelay: (args: { targetId: string }) => Promise<void>
     getState: (args: { targetId: string }) => Promise<SshConnectionState | null>
     needsPassphrasePrompt: (args: { targetId: string }) => Promise<boolean>
-    testConnection: (args: {
-      targetId: string
-    }) => Promise<{ success: boolean; error?: string; state?: SshConnectionState }>
     onStateChanged: (
       callback: (data: { targetId: string; state: SshConnectionState }) => void
     ) => () => void

@@ -7,10 +7,10 @@ import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { AGENT_HOOK_NOTIFICATION_METHOD } from '~shared/agent/hook-relay'
 import { wslHookRelayConnectionId } from '~shared/wsl-hook-relay-contract'
 
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 
 export type WslRelayLinkOptions = {
-  mux: SshChannelMultiplexer
+  mux: ChannelMultiplexer
   child: ChildProcessWithoutNullStreams
   distro: string
   ingest: (envelope: Record<string, unknown>, connectionId: string) => void

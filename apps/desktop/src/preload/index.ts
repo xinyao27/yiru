@@ -2,8 +2,6 @@ import { electronAPI } from '@electron-toolkit/preload'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type {
   SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
   SshTarget,
   PortForwardEntry,
   EnrichedDetectedPort
@@ -169,7 +167,6 @@ import type {
   SpeechTranscriptEvent
 } from '~shared/speech-types'
 import {
-  admitSshConnectionState,
   admitSshConnectionStateForAuthorityReconciliation,
   admitSshDetectedPorts
 } from '~shared/ssh-retained-payload-admission'
@@ -2378,28 +2375,6 @@ const api = {
       ipcRenderer.invoke('hooks:inspectSetupScriptImports', args)
   },
 
-  ephemeralVm: {
-    listRecipes: (args) => ipcRenderer.invoke('ephemeralVm:listRecipes', args),
-    listRecipeCatalog: () => ipcRenderer.invoke('ephemeralVm:listRecipeCatalog'),
-    doctor: (args) => ipcRenderer.invoke('ephemeralVm:doctor', args),
-    provision: (args) => ipcRenderer.invoke('ephemeralVm:provision', args),
-    cancelProvision: (args) => ipcRenderer.invoke('ephemeralVm:cancelProvision', args),
-    onProvisionEvent: (callback) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        event: { provisionId: string; stream: 'stdout' | 'stderr'; chunk: string }
-      ): void => callback(event)
-      ipcRenderer.on('ephemeralVm:provisionEvent', listener)
-      return () => ipcRenderer.removeListener('ephemeralVm:provisionEvent', listener)
-    },
-    listRuntimes: () => ipcRenderer.invoke('ephemeralVm:listRuntimes'),
-    attachWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:attachWorkspace', args),
-    suspendWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:suspendWorkspace', args),
-    resumeWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:resumeWorkspace', args),
-    cleanup: (args) => ipcRenderer.invoke('ephemeralVm:cleanup', args),
-    getCleanupCommand: (args) => ipcRenderer.invoke('ephemeralVm:getCleanupCommand', args)
-  } satisfies PreloadApi['ephemeralVm'],
-
   cache: {
     getGitHub: () => ipcRenderer.invoke('cache:getGitHub'),
     setGitHub: (args) => ipcRenderer.invoke('cache:setGitHub', args)
@@ -3954,19 +3929,8 @@ const api = {
     listRemovedTargetLabels: (): Promise<Record<string, string>> =>
       ipcRenderer.invoke('ssh:listRemovedTargetLabels'),
 
-    addTarget: (args: { target: Omit<SshTarget, 'id'> }): Promise<SshTargetAddResult> =>
-      ipcRenderer.invoke('ssh:addTarget', args),
-
-    updateTarget: (args: {
-      id: string
-      updates: Partial<Omit<SshTarget, 'id'>>
-    }): Promise<SshTarget> => ipcRenderer.invoke('ssh:updateTarget', args),
-
     removeTarget: (args: { id: string }): Promise<void> =>
       ipcRenderer.invoke('ssh:removeTarget', args),
-
-    importConfig: (args?: { reAdopt?: boolean }): Promise<SshConfigImportResult> =>
-      ipcRenderer.invoke('ssh:importConfig', args),
 
     connect: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
       admitSshConnectionStateForAuthorityReconciliation(
@@ -3980,9 +3944,6 @@ const api = {
     terminateSessions: (args: { targetId: string }): Promise<void> =>
       ipcRenderer.invoke('ssh:terminateSessions', args),
 
-    resetRelay: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:resetRelay', args),
-
     getState: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
       admitSshConnectionStateForAuthorityReconciliation(
         await ipcRenderer.invoke('ssh:getState', args),
@@ -3991,22 +3952,6 @@ const api = {
 
     needsPassphrasePrompt: (args: { targetId: string }): Promise<boolean> =>
       ipcRenderer.invoke('ssh:needsPassphrasePrompt', args),
-
-    testConnection: (args: {
-      targetId: string
-    }): Promise<{ success: boolean; error?: string; state?: SshConnectionState }> =>
-      ipcRenderer.invoke('ssh:testConnection', args).then((result: unknown) => {
-        if (!result || typeof result !== 'object') {
-          return { success: false }
-        }
-        const retained = result as Record<string, unknown>
-        const state = admitSshConnectionState(retained.state, args.targetId)
-        return {
-          success: retained.success === true,
-          ...(typeof retained.error === 'string' ? { error: retained.error } : {}),
-          ...(state ? { state } : {})
-        }
-      }),
 
     onStateChanged: (
       callback: (data: { targetId: string; state: SshConnectionState }) => void

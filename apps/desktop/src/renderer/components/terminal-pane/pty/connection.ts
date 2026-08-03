@@ -13,7 +13,6 @@ import {
   type AgentType
 } from '@yiru/workbench-model/agent'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { directSshAuthoritiesEqual } from '~renderer/components/direct-ssh/terminal-recovery/authority-ledger'
 import type { DirectSshPaneRetryAttempt } from '~renderer/components/direct-ssh/terminal-recovery/binding-state'
 import { dispatchTerminalCommandFinishedEvent } from '~renderer/hooks/terminal-command-finished-event'
@@ -7393,12 +7392,11 @@ export function connectPanePty(
       // can only fail with "SSH target not found", which surfaces a red "file an
       // issue" banner for what is an expected user action. Skip reattach — the
       // terminal overlay already shows a "host removed" state with a remove
-      // action. Runtime-owned targets aren't user-managed, so they're exempt.
+      // action.
       // A target map that exists but omits this id means the target was removed.
       // (Guard the map's presence for minimal test stubs that omit it; an absent
       // map is "not hydrated", not "target gone".)
       if (
-        !isRuntimeOwnedSshTargetId(connectionId) &&
         storeState.sshTargetLabels instanceof Map &&
         !storeState.sshTargetLabels.has(connectionId)
       ) {

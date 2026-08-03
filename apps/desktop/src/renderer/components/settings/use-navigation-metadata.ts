@@ -6,7 +6,6 @@ import {
   Stack as Blocks,
   Robot as Bot,
   Bug,
-  PlugsConnected as Cable,
   Flask as FlaskConical,
   GitMerge,
   Globe,
@@ -72,7 +71,6 @@ import { getMobileEmulatorSearchEntries } from './mobile/emulator-search'
 import { getMobileSettingsPaneSearchEntries } from './mobile/settings-search'
 import { getOrchestrationPaneSearchEntries } from './orchestration/search'
 import { getRepositoryPaneSearchEntries } from './repository/search'
-import { getSshPaneSearchEntries } from './ssh/search'
 import { getTerminalPaneSearchEntries } from './terminal/search'
 
 export { isWebClientLocation } from '~renderer/lib/web-client-location'
@@ -400,21 +398,6 @@ export function buildSettingsNavigationMetadata({
       searchEntries: getFloatingWorkspaceSearchEntries(),
       group: 'workflows'
     },
-    ...(showDesktopOnlySettings
-      ? [
-          {
-            id: 'ssh',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.94a5afe910', 'SSH Hosts'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.31e57d1c70',
-              'Use existing machines over SSH for files, terminals, Git, and workspaces.'
-            ),
-            icon: Cable,
-            searchEntries: getSshPaneSearchEntries(),
-            group: 'remote'
-          }
-        ]
-      : []),
     {
       id: 'servers',
       title: translate(

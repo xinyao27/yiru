@@ -7,7 +7,7 @@ import {
   COWORKING_FILE_WRITE_MAX_BYTES
 } from '~shared/coworking/operation-contract'
 
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type {
   CoworkingVerifiedRemoteFileRead,
@@ -18,7 +18,7 @@ const VERIFIED_IO_UNAVAILABLE =
   'Remote verified file access is unavailable. Reconnect the SSH target and retry.'
 
 export function createSshCoworkingVerifiedFilesystem(
-  mux: SshChannelMultiplexer
+  mux: ChannelMultiplexer
 ): CoworkingVerifiedRemoteFilesystem {
   return {
     inspectDirectoryIdentity: async (directoryPath, signal) => {
@@ -180,7 +180,7 @@ function parseDirectoryPage(
 }
 
 async function verifiedRequest(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   method: string,
   params: Record<string, unknown>,
   signal?: AbortSignal

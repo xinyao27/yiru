@@ -1,11 +1,11 @@
 // Sentinel wait for the WSL agent-hook relay: consume the guest child's
 // stdout until the READY sentinel, then hand the remaining stdio over as a
-// MultiplexerTransport. WSL twin of the SSH deploy's waitForSentinel, over a
-// ChildProcess instead of a ClientChannel.
+// MultiplexerTransport for the channel multiplexer to drive.
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 
-import type { MultiplexerTransport } from '../ssh/channel-multiplexer'
-import { RELAY_SENTINEL, RELAY_SENTINEL_TIMEOUT_MS } from '../ssh/relay/protocol'
+import { RELAY_SENTINEL, RELAY_SENTINEL_TIMEOUT_MS } from '~shared/relay-ready-handshake'
+
+import type { MultiplexerTransport } from '../channel-multiplexer/multiplexer'
 
 export const MAX_STARTUP_BUFFER_BYTES = 64 * 1024
 
@@ -23,8 +23,8 @@ export type WslRelayStartupFailure = {
 }
 
 /** Wait for the relay's ready sentinel on the child's stdout, then hand the
- *  remaining stdio over as a MultiplexerTransport. WSL twin of the SSH
- *  deploy's waitForSentinel, over a ChildProcess instead of a ClientChannel. */
+ *  remaining stdio over as a MultiplexerTransport. Everything before the
+ *  sentinel is startup noise; everything after it is framed relay traffic. */
 export function waitForWslRelaySentinel(
   child: ChildProcessWithoutNullStreams
 ): Promise<MultiplexerTransport> {

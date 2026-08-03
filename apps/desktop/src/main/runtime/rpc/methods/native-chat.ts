@@ -183,6 +183,7 @@ export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
     name: 'nativeChat.readSession',
     mobile: true,
     params: NativeChatSession,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { clientKind }) => {
       const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
       const result = await readNativeChatTranscriptTail({
@@ -205,6 +206,7 @@ export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
     name: 'nativeChat.subscribe',
     mobile: true,
     params: NativeChatSession,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime, connectionId, clientKind }, emit) => {
       let closed = false
       let unsubscribe = (): void => {}
@@ -282,6 +284,7 @@ export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
     name: 'nativeChat.unsubscribe',
     mobile: true,
     params: NativeChatUnsubscribe,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, connectionId }) => {
       const connection = connectionId ?? 'local'
       if (params.subscriptionId) {

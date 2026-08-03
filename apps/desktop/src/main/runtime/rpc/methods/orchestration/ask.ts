@@ -11,6 +11,7 @@ export const ORCHESTRATION_ASK_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.ask',
     params: AskParams,
+    access: { scope: 'project', tier: 'control' },
     handler: async (
       params,
       { runtime, signal, orchestrationCapability, recordMutationReceipt }

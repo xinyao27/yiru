@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { basename, extname, join } from 'node:path'
+import { basename, extname, join, resolve, sep } from 'node:path'
 
 import { resolveNativeChatTranscriptAgent } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
@@ -51,6 +51,26 @@ export type ResolveSessionFileOptions = {
   transcriptPath?: string
 }
 
+// Why: `transcriptPath` reaches this resolver from an RPC parameter, not only
+// from the agent hook. Without a containment check any caller could name any
+// existing .jsonl on the machine and have its tail returned. Legitimate hook
+// paths always sit under one of the agent session roots, so bounding to those
+// keeps the fast path working while closing the arbitrary-read hole.
+function isInsideSessionRoots(candidate: string, options: ResolveSessionFileOptions): boolean {
+  const roots = [
+    options.claudeProjectsDir ?? claudeProjectsDir(),
+    ...(options.codexSessionsDirs ?? codexSessionsDirs()),
+    options.grokSessionsDir ?? grokSessionsDir()
+  ]
+  const resolvedCandidate = resolve(candidate)
+  return roots.some((root) => {
+    const resolvedRoot = resolve(root)
+    return (
+      resolvedCandidate === resolvedRoot || resolvedCandidate.startsWith(`${resolvedRoot}${sep}`)
+    )
+  })
+}
+
 /**
  * Resolve the on-disk JSONL transcript path for a given agent + session id.
  *
@@ -75,7 +95,12 @@ export async function resolveSessionFilePath(
   // stale/remote path falls through to the id-based search rather than returning
   // a non-existent file.
   const hookPath = options.transcriptPath?.trim()
-  if (hookPath && extname(hookPath) === '.jsonl' && existsSync(hookPath)) {
+  if (
+    hookPath &&
+    extname(hookPath) === '.jsonl' &&
+    isInsideSessionRoots(hookPath, options) &&
+    existsSync(hookPath)
+  ) {
     return hookPath
   }
 

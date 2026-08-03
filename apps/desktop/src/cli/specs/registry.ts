@@ -14,7 +14,6 @@ import { ORCHESTRATION_COMMAND_SPECS } from './orchestration'
 import { PROJECT_COMMAND_SPECS } from './project'
 import { SESSION_COMMAND_SPECS } from './sessions'
 import { SKILL_COMMAND_SPECS } from './skills'
-import { VM_COMMAND_SPECS } from './vm'
 
 export const COMMAND_SPECS: CommandSpec[] = [
   ...CORE_COMMAND_SPECS,
@@ -30,7 +29,6 @@ export const COMMAND_SPECS: CommandSpec[] = [
   ...DIAGNOSTICS_COMMAND_SPECS,
   ...INTROSPECTION_COMMAND_SPECS,
   ...ENVIRONMENT_COMMAND_SPECS,
-  ...VM_COMMAND_SPECS,
   ...EMULATOR_COMMAND_SPECS,
   ...SKILL_COMMAND_SPECS
 ]

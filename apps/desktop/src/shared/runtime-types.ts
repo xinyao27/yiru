@@ -44,7 +44,7 @@ export const HEADLESS_RUNTIME_WINDOW_ID = 0
 
 // Why: the access scope a paired device token grants. Lives in shared so
 // pairing offers, status.get, and the device registry use one vocabulary.
-export type DeviceScope = 'mobile' | 'runtime'
+export type DeviceScope = 'mobile' | 'runtime' | 'coworking-host'
 
 // Why: presence-lock driver state crosses main/preload/renderer IPC. Keep one
 // checked source so future variants cannot drift silently across layers.

@@ -16,7 +16,7 @@ import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
-import { statusColor } from '../settings/ssh/target-card'
+import { statusColor } from '../direct-ssh/connection-status-display'
 
 type SshDisconnectedDialogProps = {
   open: boolean

@@ -16,7 +16,7 @@ import { SessionFileDiscoveryLimitError } from '../ai-vault/session/scanner-disc
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from '../providers/types'
 import type { SshRelayAiVaultHostInfo } from '../ssh/relay/session'
-import { getActiveSshCoworkingHostInfo } from '../ssh/ssh'
+import { getActiveSshAiVaultHostInfo } from '../ssh/ssh'
 import { CoworkingExecutionError } from './execution-error'
 import type {
   CoworkingExecutionHostSessionReader,
@@ -130,7 +130,7 @@ function requireActiveSshInventoryHost(
   targetId: string,
   executionHostId: CoworkingExecutionHostSessionReadRequest['executionHostId']
 ): { hostInfo: SshRelayAiVaultHostInfo; provider: IFilesystemProvider } {
-  const hostInfo = getActiveSshCoworkingHostInfo(targetId)
+  const hostInfo = getActiveSshAiVaultHostInfo(targetId)
   const provider = getSshFilesystemProvider(targetId)
   if (
     !hostInfo ||

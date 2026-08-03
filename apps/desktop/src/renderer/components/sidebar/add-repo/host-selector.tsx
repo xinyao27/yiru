@@ -1,12 +1,6 @@
-import {
-  Check,
-  CaretRight as ChevronRight,
-  CaretUpDown as ChevronsUpDown,
-  Plus
-} from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown, Plus } from '@phosphor-icons/react'
 import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import { useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Command, CommandItem, CommandList } from '~renderer/components/ui/command'
@@ -25,7 +19,6 @@ type AddRepoHostSelectorProps = {
   onOpenChange: (open: boolean) => void
   onSelectHost: (hostId: ExecutionHostId) => void
   onConnectHost?: (hostId: ExecutionHostId) => void
-  onAddSshHost?: () => void
   onAddRemoteServer?: () => void
 }
 
@@ -43,11 +36,9 @@ export function AddRepoHostSelector({
   onOpenChange,
   onSelectHost,
   onConnectHost,
-  onAddSshHost,
   onAddRemoteServer
 }: AddRepoHostSelectorProps): React.JSX.Element | null {
-  const [addHostOpen, setAddHostOpen] = useState(false)
-  const showHostSetupActions = Boolean(onAddSshHost || onAddRemoteServer)
+  const showHostSetupActions = Boolean(onAddRemoteServer)
   if (!shouldShowHostScopeControls(hosts) && !showHostSetupActions) {
     return null
   }
@@ -90,91 +81,33 @@ export function AddRepoHostSelector({
         >
           <Command>
             <CommandList>
-              {showHostSetupActions ? (
-                <Popover open={addHostOpen} onOpenChange={setAddHostOpen}>
-                  <PopoverTrigger
-                    render={
-                      <CommandItem
-                        value="Add remote host SSH host Yiru server"
-                        onSelect={() => setAddHostOpen(true)}
-                        className="text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground items-start gap-2 px-3 py-2 text-xs"
-                      >
-                        <Plus className="mt-0.5 size-3 shrink-0" />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex min-w-0 items-center gap-2">
-                            <span className="truncate font-medium">
-                              {translate(
-                                'auto.components.sidebar.AddRepoHostSelector.addRemoteHost',
-                                'Add remote host'
-                              )}
-                            </span>
-                          </span>
-                          <span className="text-muted-foreground mt-0.5 block truncate text-[11px]">
-                            {translate(
-                              'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
-                              'SSH host or Yiru server'
-                            )}
-                          </span>
-                        </span>
-                        <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
-                      </CommandItem>
-                    }
-                  />
-                  <PopoverContent align="start" side="right" className="w-72 p-1" sideOffset={8}>
-                    {onAddSshHost ? (
-                      <Button
-                        variant="ghost"
-                        size="default"
-                        type="button"
-                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
-                        onClick={() => {
-                          setAddHostOpen(false)
-                          onOpenChange(false)
-                          onAddSshHost()
-                        }}
-                      >
-                        <span className="text-xs font-medium">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addSshHost',
-                            'Add SSH host'
-                          )}
-                        </span>
-                        <span className="text-muted-foreground mt-0.5 text-[11px]">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addSshHostDetail',
-                            'Use an existing machine over SSH.'
-                          )}
-                        </span>
-                      </Button>
-                    ) : null}
-                    {onAddRemoteServer ? (
-                      <Button
-                        variant="ghost"
-                        size="default"
-                        type="button"
-                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
-                        onClick={() => {
-                          setAddHostOpen(false)
-                          onOpenChange(false)
-                          onAddRemoteServer()
-                        }}
-                      >
-                        <span className="text-xs font-medium">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addRemoteServer',
-                            'Add remote server'
-                          )}
-                        </span>
-                        <span className="text-muted-foreground mt-0.5 text-[11px]">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
-                            'Pair with Yiru running on another computer.'
-                          )}
-                        </span>
-                      </Button>
-                    ) : null}
-                  </PopoverContent>
-                </Popover>
+              {onAddRemoteServer ? (
+                <CommandItem
+                  value="Add remote server Yiru pairing code"
+                  onSelect={() => {
+                    onOpenChange(false)
+                    onAddRemoteServer()
+                  }}
+                  className="text-muted-foreground items-start gap-2 px-3 py-2 text-xs"
+                >
+                  <Plus className="mt-0.5 size-3 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-medium">
+                        {translate(
+                          'auto.components.sidebar.AddRepoHostSelector.addRemoteServer',
+                          'Add remote server'
+                        )}
+                      </span>
+                    </span>
+                    <span className="text-muted-foreground mt-0.5 block truncate text-[11px]">
+                      {translate(
+                        'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
+                        'Pair with Yiru running on another computer.'
+                      )}
+                    </span>
+                  </span>
+                </CommandItem>
               ) : null}
               {hosts.map((host) => {
                 const selected = host.id === selectedHostId

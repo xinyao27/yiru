@@ -1031,6 +1031,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.list',
     mobile: true,
     params: TerminalListParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.listTerminals(params.worktree, params.limit, {
         requireFreshPtyLiveness: params.requireFreshPtyLiveness
@@ -1039,6 +1040,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.resolveActive',
     params: TerminalResolveActive,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => ({
       handle: await runtime.resolveActiveTerminal(params.worktree)
     })
@@ -1046,6 +1048,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.resolvePane',
     params: TerminalResolvePane,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       terminal: runtime.resolveTerminalPane(params.paneKey)
     })
@@ -1053,6 +1056,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.show',
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       terminal: await runtime.showTerminal(params.terminal)
     })
@@ -1061,6 +1065,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.read',
     mobile: true,
     params: TerminalRead,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       terminal: await runtime.readTerminal(params.terminal, {
         cursor: params.cursor,
@@ -1071,6 +1076,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.inspectProcess',
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       process: await runtime.inspectTerminalProcess(params.terminal)
     })
@@ -1079,6 +1085,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.isRunningAgent',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       isRunningAgent: await runtime.isTerminalRunningAgent(params.terminal)
     })
@@ -1087,6 +1094,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.agentStatus',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => ({
       agentStatus: await runtime.getTerminalAgentStatus(params.terminal)
     })
@@ -1095,6 +1103,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.rename',
     mobile: true,
     params: TerminalRename,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       rename: await runtime.renameTerminal(params.terminal, params.title || null)
     })
@@ -1103,6 +1112,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.clearBuffer',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       clear: await runtime.clearTerminalBuffer(params.terminal)
     })
@@ -1111,6 +1121,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.send',
     mobile: true,
     params: TerminalSend,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime, clientId }) => {
       await assertTerminalSendTextWithinLimit(params.text)
       const queryReplyClientId = clientId ?? params.client?.id
@@ -1320,6 +1331,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.wait',
     mobile: true,
     params: TerminalWait,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, signal }) => ({
       wait: await runtime.waitForTerminal(params.terminal, {
         condition: params.for,
@@ -1332,6 +1344,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.create',
     mobile: true,
     params: TerminalCreateParams,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       terminal: await runtime.createTerminal(params.worktree, {
         command: params.command,
@@ -1354,6 +1367,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.split',
     params: TerminalSplit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       split: await runtime.splitTerminal(params.terminal, {
         direction: params.direction,
@@ -1366,11 +1380,13 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.stop',
     params: TerminalStop,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => runtime.stopTerminalsForWorktree(params.worktree)
   }),
   defineMethod({
     name: 'terminal.stopExact',
     params: TerminalStopExact,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.stopExactTerminalsForWorktree(params.worktree, params.expectedPtyIds, {
         keepHistory: params.keepHistory,
@@ -1380,6 +1396,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.resizeForClient',
     params: TerminalResizeForClient,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle (pane's PTY replaced under it)
       // must fail with terminal_handle_stale instead of resizing the wrong PTY
@@ -1407,6 +1424,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.focus',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       focus: await runtime.focusTerminal(params.terminal)
     })
@@ -1415,6 +1433,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.close',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       close: await runtime.closeTerminal(params.terminal)
     })
@@ -1423,6 +1442,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.closeTab',
     mobile: true,
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       close: await runtime.closeTerminalTab(params.terminal)
     })
@@ -1431,6 +1451,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'agentTeams.tmuxCompat',
     mobile: true,
     params: AgentTeamsTmuxCompat,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       tmux: await runtime.handleAgentTeamsTmuxCompat(params)
     })
@@ -1439,6 +1460,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'agentTeams.prepareLaunch',
     mobile: true,
     params: AgentTeamsPrepareLaunch,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       launch: await runtime.prepareClaudeAgentTeamsLeader({
         paneKey: params.paneKey,
@@ -1450,6 +1472,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.setDisplayMode',
     mobile: true,
     params: TerminalSetDisplayMode,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle must fail with
       // terminal_handle_stale instead of mutating the wrong PTY's display
@@ -1475,6 +1498,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.restoreFit',
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle must fail with
       // terminal_handle_stale instead of reclaiming the wrong PTY back to
@@ -1489,6 +1513,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.getDisplayMode',
     params: TerminalHandle,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => {
       const leaf = runtime.resolveLeafForHandle(params.terminal)
       const mode = leaf?.ptyId ? runtime.getMobileDisplayMode(leaf.ptyId) : 'auto'
@@ -1500,6 +1525,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.updateViewport',
     mobile: true,
     params: TerminalUpdateViewport,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle must fail with
       // terminal_handle_stale instead of writing viewport state to the wrong
@@ -1530,6 +1556,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.multiplex',
     mobile: true,
     params: TerminalMultiplex,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (
       _params,
       { runtime, connectionId, sendBinary, registerBinaryStreamHandler, signal },
@@ -2408,6 +2435,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.subscribe',
     mobile: true,
     params: TerminalSubscribe,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (
       params,
       { runtime, connectionId, sendBinary, registerBinaryStreamHandler, signal },
@@ -3290,6 +3318,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.unsubscribe',
     mobile: true,
     params: TerminalUnsubscribe,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => {
       // Why: the subscribe handler now registers cleanup under a composite
       // key `${terminal}:${clientId}`. New mobile builds emit the composite
@@ -3308,6 +3337,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.getAutoRestoreFit',
     mobile: true,
     params: z.object({}),
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime }) => ({
       ms: runtime.getMobileAutoRestoreFitMs()
     })
@@ -3316,6 +3346,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
     name: 'terminal.setAutoRestoreFit',
     mobile: true,
     params: TerminalSetAutoRestoreFit,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       ms: runtime.setMobileAutoRestoreFitMs(params.ms)
     })

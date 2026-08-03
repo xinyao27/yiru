@@ -1,7 +1,7 @@
 import type { DirEntry, FsChangeEvent, SearchOptions, SearchResult } from '~shared/types'
 import type { WorkspaceSpaceDirectoryScanResult } from '~shared/workspace/space-types'
 
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import {
   consumeSessionInventoryJsonLines,
   isMethodNotFoundError
@@ -46,7 +46,7 @@ export class SshFilesystemProvider implements IFilesystemProvider {
   readonly coworkingVerifiedFiles: CoworkingVerifiedRemoteFilesystem
   readonly downloadFolder?: FolderDownloader
   private connectionId: string
-  private mux: SshChannelMultiplexer
+  private mux: ChannelMultiplexer
   private watchListeners = new Map<string, WatchRegistration>()
   private unsubscribeNotifications: (() => void) | null = null
   private tempDirPromise: Promise<string> | null = null
@@ -54,7 +54,7 @@ export class SshFilesystemProvider implements IFilesystemProvider {
 
   constructor(
     connectionId: string,
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     private readonly createSftp?: SftpFactory,
     private readonly rawTransfer?: SshRawTransferOptions,
     hostPlatform?: RemoteHostPlatform

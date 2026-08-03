@@ -145,14 +145,12 @@ function readTrustRepo(value: unknown): PersistedTrustedYiruHookRepo | null {
   const allApprovedAt = isRecord(value.all) ? readNumber(value.all.approvedAt) : undefined
   const setup = readTrustEntry(value.setup)
   const archive = readTrustEntry(value.archive)
-  const vmRecipe = readTrustEntry(value.vmRecipe)
-  // Why: mobile writes this whole record back through ui.set, so archive/vmRecipe
-  // approvals must survive the round trip even though only setup is read here.
+  // Why: mobile writes this whole record back through ui.set, so the archive
+  // approval must survive the round trip even though only setup is read here.
   return {
     ...(allApprovedAt !== undefined ? { all: { approvedAt: allApprovedAt } } : {}),
     ...(setup ? { setup } : {}),
-    ...(archive ? { archive } : {}),
-    ...(vmRecipe ? { vmRecipe } : {})
+    ...(archive ? { archive } : {})
   }
 }
 

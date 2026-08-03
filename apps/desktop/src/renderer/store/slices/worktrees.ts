@@ -10,7 +10,6 @@ import {
   getSettingsFocusedExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
@@ -24,7 +23,6 @@ import {
   forgetHugeRepoWarningDismissalsForWorktrees,
   migrateHugeRepoWarningDismissal
 } from '~renderer/components/workspace-panel/source-control/huge-repo-warning-dismissals'
-import { cleanupEphemeralVmRuntimesForDeleted } from '~renderer/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '~renderer/lib/foreground-terminal-tabs'
 import { branchName } from '~renderer/lib/git-utils'
 import {
@@ -1303,50 +1301,6 @@ async function persistWorktreeMeta(
     },
     { timeoutMs: 15_000 }
   )
-}
-
-// Why: an SSH-mode per-workspace-env registers a project whose host is the runtime-owned SSH
-// target. Once that runtime is destroyed the project points at a host that no longer exists, so it
-// must be removed — otherwise it lingers as a dead, never-connectable project in the composer.
-async function purgeOrphanedRuntimeSshProjects(
-  get: () => AppState,
-  destroyedSshTargetIds: string[]
-): Promise<void> {
-  if (destroyedSshTargetIds.length === 0) {
-    return
-  }
-  const destroyedTargetIds = new Set(destroyedSshTargetIds)
-  const destroyedHostIds = new Set<ExecutionHostId>(
-    destroyedSshTargetIds.map((id) => toSshExecutionHostId(id))
-  )
-  const orphanedSetupIds = get()
-    .projectHostSetups.filter((setup) => destroyedHostIds.has(setup.hostId))
-    .map((setup) => setup.id)
-  const purgedRepoIds = new Set<string>()
-  for (const setupId of orphanedSetupIds) {
-    try {
-      const result = await get().deleteProjectHostSetup({ setupId })
-      if (result?.repo) {
-        purgedRepoIds.add(result.repo.id)
-      }
-    } catch (error) {
-      console.error('Failed to purge orphaned per-workspace-env project:', error)
-    }
-  }
-  // A repo whose only host was the destroyed runtime can outlive its setup (the setup may be pruned
-  // by a projection refresh first). Remove it directly so no dead, never-connectable project lingers.
-  const orphanedRepoIds = get()
-    .repos.filter(
-      (repo) => destroyedTargetIds.has(repo.connectionId ?? '') && !purgedRepoIds.has(repo.id)
-    )
-    .map((repo) => repo.id)
-  for (const repoId of orphanedRepoIds) {
-    try {
-      await get().removeProject(repoId)
-    } catch (error) {
-      console.error('Failed to purge orphaned per-workspace-env repo:', error)
-    }
-  }
 }
 
 async function resolveGitHubReviewPushTarget(
@@ -3366,36 +3320,10 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     })
   },
 
-  removePendingWorktreeCreation: (creationId, options) => {
+  removePendingWorktreeCreation: (creationId) => {
     set((s) => {
-      const entry = s.pendingWorktreeCreations[creationId]
-      if (!entry) {
+      if (!s.pendingWorktreeCreations[creationId]) {
         return {}
-      }
-      const cleanupVm = options?.cleanupVm ?? true
-      if (
-        cleanupVm &&
-        entry.phase === 'provisioning-vm' &&
-        typeof window !== 'undefined' &&
-        window.api?.ephemeralVm?.cancelProvision
-      ) {
-        void window.api.ephemeralVm.cancelProvision({ provisionId: creationId }).catch(() => {
-          // Best effort: dismissing the pending surface should not be blocked by
-          // an already-finished or unreachable provisioning process.
-        })
-      }
-      if (
-        cleanupVm &&
-        entry.request.ephemeralVmRuntimeId &&
-        typeof window !== 'undefined' &&
-        window.api?.ephemeralVm?.cleanup
-      ) {
-        void window.api.ephemeralVm
-          .cleanup({ runtimeId: entry.request.ephemeralVmRuntimeId })
-          .catch(() => {
-            // Best effort: cancellation should not block on provider cleanup,
-            // and the Settings runtime list still exposes retry/manual cleanup.
-          })
       }
       const { [creationId]: _removed, ...rest } = s.pendingWorktreeCreations
       return {
@@ -3516,15 +3444,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       // can intercept them.
       await get().shutdownWorktreeBrowsers(worktreeId)
       await get().shutdownWorktreeTerminals(worktreeId)
-      // Why: dispose the runtime-owned SSH relay AFTER tearing down this workspace's terminals,
-      // so a still-mounted SSH terminal pane can't connect to an already-gone relay and surface a
-      // spurious "SSH connection is not active" toast during delete.
-      const destroyedRuntimeSshTargetIds = await cleanupEphemeralVmRuntimesForDeleted({
-        workspaceIds: [worktreeId]
-      })
-      // Remove the now-orphaned project that pointed at the destroyed runtime-owned SSH target so it
-      // can't surface as a dead, never-connectable project in the composer.
-      await purgeOrphanedRuntimeSshProjects(get, destroyedRuntimeSshTargetIds)
       const tabs = get().tabsByWorktree[worktreeId] ?? []
       const tabIds = new Set(tabs.map((t) => t.id))
 

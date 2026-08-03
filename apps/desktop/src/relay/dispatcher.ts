@@ -88,7 +88,7 @@ export class RelayDispatcher {
   // tearing down and reconstructing the entire dispatcher + handler tree.
   //
   // Why: sequence counters and decoder state must also reset because the new
-  // client's SshChannelMultiplexer starts at seq=1. Without resetting, the
+  // client's ChannelMultiplexer starts at seq=1. Without resetting, the
   // relay's highestReceivedSeq stays at the old client's last value, so it
   // never acks the new client's frames until the new client's seq catches
   // up - causing the client's unacked-timeout checker to accumulate stale

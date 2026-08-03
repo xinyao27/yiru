@@ -6,15 +6,15 @@
 import type { SFTPWrapper } from 'ssh2'
 import { WSL_HOOK_FS_METHODS, type WslFsResult } from '~shared/wsl-hook-relay-contract'
 
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { wslCodexRuntimeHomeForGuestHome } from '../pty/codex-home-wsl-env'
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import type { installRemoteManagedAgentHooks } from './remote-managed-hook-installers'
 
 /** Run the shared remote hook installers against a WSL guest over the relay's
  *  fs bridge. Codex is the one agent whose home Yiru redirects for WSL
  *  sessions, so its hooks go to the managed runtime home. */
 export async function installWslGuestHooks(options: {
-  mux: SshChannelMultiplexer
+  mux: ChannelMultiplexer
   guestHome: string
   distro: string
   installHooks: typeof installRemoteManagedAgentHooks
@@ -50,7 +50,7 @@ function toSftpError(failure: { errno?: string; message?: string }): Error {
   return err
 }
 
-export function createWslHookSftpAdapter(mux: SshChannelMultiplexer): SFTPWrapper {
+export function createWslHookSftpAdapter(mux: ChannelMultiplexer): SFTPWrapper {
   const call = <Wire extends object, Value>(
     method: string,
     params: Record<string, unknown>,

@@ -1,5 +1,5 @@
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { seedPowerlevel10kWizardEnv } from '../pty/powerlevel10k-wizard-env'
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { toAppSshPtyId, toRelaySshPtyId } from './ssh-pty-id'
 import type { IPtyProvider, PtyProcessInfo, PtySpawnOptions, PtySpawnResult } from './types'
 
@@ -33,7 +33,7 @@ export function isSshPtyIdentityMismatchError(err: unknown): boolean {
  * as LocalPtyProvider so the dispatch layer can route transparently.
  */
 export class SshPtyProvider implements IPtyProvider {
-  private mux: SshChannelMultiplexer
+  private mux: ChannelMultiplexer
   private connectionId: string
   private dataListeners = new Set<DataCallback>()
   private replayListeners = new Set<ReplayCallback>()
@@ -45,7 +45,7 @@ export class SshPtyProvider implements IPtyProvider {
 
   constructor(
     connectionId: string,
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     private readonly remoteCliBridgeEnv?: RemoteCliBridgeEnv
   ) {
     this.connectionId = connectionId

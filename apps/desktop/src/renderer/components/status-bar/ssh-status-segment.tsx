@@ -1,8 +1,5 @@
 import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
-import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId
-} from '@yiru/workbench-model/workspace'
+import { toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -15,7 +12,6 @@ import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from '~shared/remote-runtime/shared-control-types'
-import { isUserManagedRuntimeEnvironment } from '~shared/runtime-environments'
 
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './runtime-host-status-row'
 import { SshStatusTrigger } from './ssh-status-trigger'
@@ -171,33 +167,27 @@ export function SshStatusSegment({
   const recordFeatureInteraction = useAppStore((s) => s.recordFeatureInteraction)
 
   const hostLabelOverrides = useMemo(() => getHostDisplayLabelOverrides(settings), [settings])
-  const targets = Array.from(sshTargetLabels.entries())
-    // Why: runtime-owned (per-workspace-env) SSH targets are hidden — never list them
-    // as a user-facing SSH host in the status bar.
-    .filter(([id]) => !isRuntimeOwnedSshTargetId(id))
-    .map(([id, label]) => {
-      const state = sshConnectionStates.get(id)
-      return {
-        id,
-        label,
-        status: (state?.status ?? 'disconnected') as SshConnectionStatus,
-        syncStatus: remoteWorkspaceSyncStatusByTargetId[id]
-      }
-    })
-  const runtimeHosts = runtimeEnvironments
-    .filter(isUserManagedRuntimeEnvironment)
-    .map((environment) => {
-      const statusEntry = runtimeStatusByEnvironmentId.get(environment.id)
-      const override = hostLabelOverrides.get(toRuntimeExecutionHostId(environment.id))
-      return {
-        id: environment.id,
-        label: override || environment.name || environment.id,
-        hasStatus: Boolean(statusEntry),
-        online: Boolean(statusEntry?.status),
-        active: settings?.activeRuntimeEnvironmentId === environment.id,
-        remoteControl: statusEntry?.status?.remoteControl ?? null
-      }
-    })
+  const targets = Array.from(sshTargetLabels.entries()).map(([id, label]) => {
+    const state = sshConnectionStates.get(id)
+    return {
+      id,
+      label,
+      status: (state?.status ?? 'disconnected') as SshConnectionStatus,
+      syncStatus: remoteWorkspaceSyncStatusByTargetId[id]
+    }
+  })
+  const runtimeHosts = runtimeEnvironments.map((environment) => {
+    const statusEntry = runtimeStatusByEnvironmentId.get(environment.id)
+    const override = hostLabelOverrides.get(toRuntimeExecutionHostId(environment.id))
+    return {
+      id: environment.id,
+      label: override || environment.name || environment.id,
+      hasStatus: Boolean(statusEntry),
+      online: Boolean(statusEntry?.status),
+      active: settings?.activeRuntimeEnvironmentId === environment.id,
+      remoteControl: statusEntry?.status?.remoteControl ?? null
+    }
+  })
   const runtimeHostRows = runtimeHosts.map((host) => ({
     ...host,
     state: runtimeHostConnectionState(host)

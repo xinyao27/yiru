@@ -24,6 +24,7 @@ export const ORCHESTRATION_FEDERATION_ATTACH_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationAttachStart',
     params: FederationAttachStartParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, orchestrationMutation }) => {
       if (!orchestrationMutation) {
         throw new OrchestrationError(

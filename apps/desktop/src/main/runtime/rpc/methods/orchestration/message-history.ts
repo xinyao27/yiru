@@ -27,6 +27,7 @@ export const ORCHESTRATION_MESSAGE_HISTORY_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.reply',
     params: ReplyParams,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const original = db.getMessageById(params.id)
@@ -95,6 +96,7 @@ export const ORCHESTRATION_MESSAGE_HISTORY_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.inbox',
     params: InboxParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       // Why: stale/unknown handles return empty rather than error — historical rows survive handle deletion (design doc §3.3).

@@ -1,5 +1,9 @@
-/* eslint-disable max-lines -- Why: the SSH relay protocol state machine keeps
+/* eslint-disable max-lines -- Why: the relay protocol state machine keeps
    request, notification, keepalive, and cancellation semantics paired. */
+// Multiplexes logical JSON-RPC channels — requests, per-method notifications,
+// keepalives, cancellations — over one framed duplex byte transport. The
+// transport is supplied by the caller (a remote exec channel, a WSL child's
+// stdio), so nothing here knows how the far end was reached.
 import {
   FrameDecoder,
   MessageType,
@@ -13,7 +17,7 @@ import {
   type JsonRpcRequest,
   type JsonRpcResponse,
   type JsonRpcNotification
-} from './relay/protocol'
+} from './frame-codec'
 
 export type MultiplexerTransport = {
   write: (data: Buffer) => void
@@ -38,7 +42,7 @@ const REQUEST_TIMEOUT_MS = 30_000
 // (system sleep, App Nap timer throttling) — not that the link is dead (#7773).
 const WAKE_GAP_MS = KEEPALIVE_SEND_MS * 3
 
-export class SshChannelMultiplexer {
+export class ChannelMultiplexer {
   private decoder: FrameDecoder
   private transport: MultiplexerTransport
   private nextRequestId = 1
@@ -137,8 +141,8 @@ export class SshChannelMultiplexer {
   // Why: the session needs to know when the relay channel dies so it can
   // auto-reconnect. Without this, a relay channel close (e.g. --connect
   // bridge exits) leaves the session in 'ready' state with a dead mux
-  // and no recovery path — the SSH connection stays up so onStateChange
-  // never fires the reconnect logic.
+  // and no recovery path — the underlying connection stays up so
+  // onStateChange never fires the reconnect logic.
   onDispose(handler: (reason: 'shutdown' | 'connection_lost') => void): () => void {
     if (this.disposed) {
       return () => {}
@@ -193,7 +197,7 @@ export class SshChannelMultiplexer {
         }
         pending.cleanup()
         this.pendingRequests.delete(id)
-        // Why: Space scans can run long on SSH hosts. Let the relay stop its
+        // Why: Space scans can run long on remote hosts. Let the relay stop its
         // local filesystem work instead of only dropping the client promise.
         this.notify('rpc.cancel', { id })
         const error = new Error(`Request "${method}" was cancelled`) as Error & { name: string }
@@ -266,9 +270,9 @@ export class SshChannelMultiplexer {
     if (this.disposed) {
       return
     }
-    if (process.env.YIRU_SSH_MUX_DEBUG === '1') {
+    if (process.env.YIRU_CHANNEL_MUX_DEBUG === '1') {
       console.warn(
-        `[ssh-mux] Disposing multiplexer (reason: ${reason})`,
+        `[channel-mux] Disposing multiplexer (reason: ${reason})`,
         new Error('dispose trace').stack
       )
     }
@@ -282,7 +286,7 @@ export class SshChannelMultiplexer {
     // Why: the renderer uses the error code to distinguish temporary disconnects
     // (show reconnection overlay) from permanent shutdown (show error toast).
     const errorMessage =
-      reason === 'connection_lost' ? 'SSH connection lost, reconnecting...' : 'Multiplexer disposed'
+      reason === 'connection_lost' ? 'Connection lost, reconnecting...' : 'Multiplexer disposed'
     const errorCode = reason === 'connection_lost' ? 'CONNECTION_LOST' : 'DISPOSED'
 
     for (const waiter of this.livenessProbeWaiters.splice(0)) {
@@ -328,9 +332,9 @@ export class SshChannelMultiplexer {
     try {
       this.transport.write(frame)
     } catch (err) {
-      // Why: a remote reboot can make the SSH channel's stdin throw EPIPE
-      // from a timer/request path. Scope it to this mux instead of letting
-      // the Electron main process treat it as an uncaught exception.
+      // Why: a remote reboot can make the transport's stdin throw EPIPE from
+      // a timer/request path. Scope it to this mux instead of letting the
+      // Electron main process treat it as an uncaught exception.
       this.handleProtocolError(err)
     }
   }
@@ -346,7 +350,7 @@ export class SshChannelMultiplexer {
       this.transport.write(frame)
     } catch (err) {
       // Why: keepalive runs on an interval; without catching transport
-      // write failures here, a dead SSH host can terminate the whole app.
+      // write failures here, a dead host can terminate the whole app.
       this.handleProtocolError(err)
     }
   }
@@ -454,10 +458,10 @@ export class SshChannelMultiplexer {
       try {
         handler(msg.method, params)
       } catch (err) {
-        // Why: relay notifications arrive on the SSH stream callback; one
+        // Why: relay notifications arrive on the transport's data callback; one
         // bad subscriber must not escape as a main-process uncaught exception.
         console.warn(
-          `[ssh-mux] Notification handler failed for ${msg.method}: ${
+          `[channel-mux] Notification handler failed for ${msg.method}: ${
             err instanceof Error ? err.message : String(err)
           }`
         )
@@ -473,7 +477,7 @@ export class SshChannelMultiplexer {
           // Why: file-stream and PTY listeners are per-method subscribers; keep
           // the mux alive even if one consumer rejects a malformed notification.
           console.warn(
-            `[ssh-mux] Method notification handler failed for ${msg.method}: ${
+            `[channel-mux] Method notification handler failed for ${msg.method}: ${
               err instanceof Error ? err.message : String(err)
             }`
           )
@@ -532,7 +536,9 @@ export class SshChannelMultiplexer {
   }
 
   private handleProtocolError(err: unknown): void {
-    console.warn(`[ssh-mux] Protocol error: ${err instanceof Error ? err.message : String(err)}`)
+    console.warn(
+      `[channel-mux] Protocol error: ${err instanceof Error ? err.message : String(err)}`
+    )
     this.dispose('connection_lost')
   }
 }

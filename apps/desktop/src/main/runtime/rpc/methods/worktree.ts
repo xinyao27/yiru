@@ -28,20 +28,24 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.ps',
     mobile: true,
     params: WorktreePsParams,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.getWorktreePs(params.limit)
   }),
   defineMethod({
     contract: WORKTREE_LIST_CONTRACT,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.listManagedWorktrees(params.repo, params.limit)
   }),
   defineMethod({
     name: 'worktree.detectedList',
     params: WorktreeDetectedListParams,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.listDetectedManagedWorktrees(params.repo)
   }),
   defineMethod({
     name: 'worktree.lineageList',
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: async (_params, { runtime }) => ({
       lineage: await runtime.listWorktreeLineage(),
       workspaceLineage: await runtime.listWorkspaceLineage()
@@ -51,6 +55,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.show',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => ({
       worktree: await runtime.showManagedWorktree(params.worktree)
     })
@@ -59,12 +64,14 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.sleep',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => runtime.sleepManagedWorktree(params.worktree)
   }),
   defineMethod({
     name: 'worktree.activate',
     mobile: true,
     params: WorktreeActivate,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime, clientKind }) =>
       // Why: clientKind ('mobile'|'runtime') scopes the host-renderer slept-agent
       // wake to phones so web/desktop activation behavior is unchanged.
@@ -75,6 +82,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     contract: WORKTREE_CREATE_CONTRACT,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) => {
       const repo = await runtime.showRepo(params.repo)
       const automationProvenance = resolveAutomationWorkspaceProvenance({
@@ -153,6 +161,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.prefetchCreateBase',
     mobile: true,
     params: WorktreePrefetchCreateBase,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) => {
       await runtime.prefetchManagedWorktreeCreateBase({
         repoSelector: params.repo,
@@ -163,6 +172,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     contract: WORKTREE_SET_CONTRACT,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => ({
       worktree: await runtime.updateManagedWorktreeMeta(params.worktree, {
         displayName: params.displayName,
@@ -200,6 +210,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'worktree.persistSortOrder',
     params: WorktreeSortOrder,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.persistManagedWorktreeSortOrder(params.orderedIds)
   }),
@@ -207,6 +218,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.resolvePrBase',
     mobile: true,
     params: WorktreeResolvePrBase,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.resolveManagedPrBase({
         repoSelector: params.repo,
@@ -220,6 +232,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.resolveMrBase',
     mobile: true,
     params: WorktreeResolveMrBase,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.resolveManagedMrBase({
         repoSelector: params.repo,
@@ -231,6 +244,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     contract: WORKTREE_REMOVE_CONTRACT,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) => {
       const result = await runtime.removeManagedWorktree(
         params.worktree,
@@ -244,6 +258,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     name: 'worktree.forceDeleteBranch',
     mobile: true,
     params: WorktreeForceDeleteBranch,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.forceDeletePreservedBranch(params.worktree, params.branchName, params.expectedHead)
   })

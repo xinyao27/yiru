@@ -36,6 +36,7 @@ export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.runCreate',
     params: RunCreateParams,
+    access: { scope: 'project', tier: 'host' },
     handler: (params, { runtime }) => {
       const paneKey = requireCallerPane(runtime, params.from)
       const db = runtime.getOrchestrationDb()
@@ -54,6 +55,7 @@ export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.runUse',
     params: RunUseParams,
+    access: { scope: 'project', tier: 'host' },
     handler: (params, { runtime }) => {
       const paneKey = requireCallerPane(runtime, params.from)
       const db = runtime.getOrchestrationDb()
@@ -79,6 +81,7 @@ export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.runCurrent',
     params: RunCurrentParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const paneKey = requireCallerPane(runtime, params.from)
       return { run: runtime.getOrchestrationDb().getCurrentRunForPane(paneKey) ?? null }
@@ -87,11 +90,13 @@ export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.runList',
     params: RunListParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => ({ runs: runtime.getOrchestrationDb().listRuns() })
   }),
   defineMethod({
     name: 'orchestration.runShow',
     params: RunShowParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const run = runtime.getOrchestrationDb().getRun(params.id)
       if (!run) {

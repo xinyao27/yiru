@@ -31,9 +31,8 @@ export default function WorktreeCreationPanel({
 }): React.JSX.Element | null {
   const entry = useAppStore((s) => s.pendingWorktreeCreations[creationId])
   const [now, setNow] = React.useState(() => Date.now())
-  // Why: depend on the primitive status only — provisioning appends a log to the
-  // entry on every stderr chunk, giving a fresh `entry` reference each tick that
-  // would otherwise tear down and recreate this interval before it can fire.
+  // Why: depend on the primitive status only, so a fresh `entry` reference does
+  // not tear down and recreate this interval before it can fire.
   const entryStatus = entry?.status
   React.useEffect(() => {
     if (entryStatus !== 'creating') {
@@ -49,9 +48,6 @@ export default function WorktreeCreationPanel({
 
   const dismiss = (): void => useAppStore.getState().removePendingWorktreeCreation(creationId)
   const isError = entry.status === 'error'
-  // VM creations keep the 'provisioning-vm' phase even on failure, so the failure renders in the
-  // same centered layout as provisioning (just with the error header) rather than the generic block.
-  const isVmCreation = entry.phase === 'provisioning-vm'
   const title = entry.request.displayName || entry.request.name
   const elapsedLabel = formatElapsedTime(now - entry.startedAt)
 
@@ -107,26 +103,7 @@ export default function WorktreeCreationPanel({
           fill — the same spot terminal output appears — so creation → terminal
           reads as one frame filling in. */}
       <div className="min-h-0 flex-1 p-3">
-        {isVmCreation ? (
-          // Why: keep the same centered layout for provisioning AND failure so the recipe log stays
-          // put — on failure the spinner header just swaps to the error + Retry/Dismiss.
-          <VmProvisioningStatus
-            elapsedLabel={elapsedLabel}
-            log={entry.provisioningLog ?? ''}
-            error={
-              isError
-                ? (entry.error ??
-                  translate(
-                    'auto.components.worktree.creation.WorktreeCreationPanel.767951265d',
-                    'Something went wrong while creating the worktree.'
-                  ))
-                : null
-            }
-            onCancel={dismiss}
-            onRetry={() => retryBackgroundWorktreeCreation(creationId)}
-            onDismiss={dismiss}
-          />
-        ) : isError ? (
+        {isError ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
             <span className="text-destructive font-medium">
               {translate(
@@ -178,145 +155,6 @@ export default function WorktreeCreationPanel({
         )}
       </div>
     </div>
-  )
-}
-
-function VmProvisioningStatus({
-  elapsedLabel,
-  log,
-  error,
-  onCancel,
-  onRetry,
-  onDismiss
-}: {
-  elapsedLabel: string
-  log: string
-  // When set, the recipe failed: keep the same centered layout + log, but swap the
-  // spinner header for the error and Retry/Dismiss so nothing shifts on failure.
-  error?: string | null
-  onCancel?: () => void
-  onRetry?: () => void
-  onDismiss?: () => void
-}): React.JSX.Element {
-  const isError = error !== undefined && error !== null
-  return (
-    <div className="flex min-h-full justify-center pt-12">
-      <div className="flex w-full max-w-2xl flex-col gap-4">
-        <div className="flex flex-col items-center gap-2 text-center">
-          {isError ? (
-            <>
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-medium">
-                <AlertTriangle className="text-destructive size-4 shrink-0" />
-                <span className="text-destructive">
-                  {translate(
-                    'auto.components.worktree.creation.WorktreeCreationPanel.ed2a664f8b',
-                    'Couldn’t create worktree'
-                  )}
-                </span>
-                <span className="text-muted-foreground font-normal">{error}</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  type="button"
-                  onClick={onRetry}
-                  className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
-                >
-                  <RotateCcw className="size-3" />
-                  {translate(
-                    'auto.components.worktree.creation.WorktreeCreationPanel.34dd5ee38b',
-                    'Retry'
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  type="button"
-                  onClick={onDismiss}
-                  className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
-                >
-                  {translate(
-                    'auto.components.worktree.creation.WorktreeCreationPanel.dabd226118',
-                    'Dismiss'
-                  )}
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-foreground flex items-center gap-2 text-sm font-medium">
-                <LoadingIndicator className="text-muted-foreground size-4 shrink-0" />
-                <span>
-                  {translate(
-                    'auto.components.worktree.creation.WorktreeCreationPanel.vmProvisioningTitle',
-                    'Provisioning VM'
-                  )}
-                </span>
-                <span className="text-muted-foreground text-xs font-normal">{elapsedLabel}</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="xs"
-                type="button"
-                onClick={onCancel}
-                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
-              >
-                {translate(
-                  'auto.components.worktree.creation.WorktreeCreationPanel.cancelProvisioning',
-                  'Cancel'
-                )}
-              </Button>
-            </>
-          )}
-        </div>
-        <RecipeOutputLog
-          log={log}
-          emptyLabel={translate(
-            'auto.components.worktree.creation.WorktreeCreationPanel.vmProvisioningLogEmpty',
-            'Waiting for recipe output…'
-          )}
-        />
-      </div>
-    </div>
-  )
-}
-
-// Why: the recipe's stderr is the only thing that explains a failure or a slow
-// provision, so it gets the same fixed-height log surface whether provisioning is
-// in progress or has failed.
-function RecipeOutputLog({
-  log,
-  emptyLabel
-}: {
-  log: string
-  emptyLabel: string
-}): React.JSX.Element {
-  const ref = React.useRef<HTMLPreElement>(null)
-  // Why: follow the tail as output streams in, but stop following the moment the user scrolls up so
-  // they can read earlier output. Resume following once they scroll back to the bottom.
-  const pinnedToBottomRef = React.useRef(true)
-  const handleScroll = React.useCallback((): void => {
-    const el = ref.current
-    if (!el) {
-      return
-    }
-    pinnedToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 8
-  }, [])
-  React.useEffect(() => {
-    const el = ref.current
-    if (el && pinnedToBottomRef.current) {
-      el.scrollTop = el.scrollHeight
-    }
-  }, [log])
-  return (
-    <pre
-      ref={ref}
-      onScroll={handleScroll}
-      className="scrollbar-sleek bg-muted/40 text-muted-foreground h-72 overflow-auto p-3 font-mono text-[11px] leading-4 whitespace-pre-wrap"
-    >
-      {log || <span className="text-muted-foreground/60">{emptyLabel}</span>}
-    </pre>
   )
 }
 

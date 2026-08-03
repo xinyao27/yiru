@@ -12,6 +12,7 @@ export const ORCHESTRATION_WORKER_STOP_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.workerStop',
     params: WorkerDispatchParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, orchestrationMutation }) => {
       const db = runtime.getOrchestrationDb()
       const federated = db.getFederatedDispatch(params.dispatch)

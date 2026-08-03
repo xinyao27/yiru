@@ -21,7 +21,7 @@ import type {
 
 import { AdvancedSection } from './advanced-section'
 import { AgentSection } from './agent-section'
-import type { EphemeralVmRecipeOption, RepoOption } from './card-types'
+import type { RepoOption } from './card-types'
 import { useComposerFileDragOver } from './file-drag'
 import { NameSection } from './name-section'
 import { ProjectSection } from './project-section'
@@ -29,7 +29,6 @@ import { SubmitFooter } from './submit-footer'
 
 const EMPTY_PROJECT_OPTIONS: NewWorkspaceProjectOption[] = []
 const EMPTY_PROJECT_HOST_SETUP_OPTIONS: ProjectHostSetupOption[] = []
-const EMPTY_EPHEMERAL_VM_RECIPES: EphemeralVmRecipeOption[] = []
 
 type NewWorkspaceComposerCardProps = {
   contextualTourSource?: string
@@ -49,10 +48,6 @@ type NewWorkspaceComposerCardProps = {
   projectHostSetupOptions?: ProjectHostSetupOption[]
   selectedProjectHostSetupId?: string | null
   onProjectHostSetupChange?: (setupId: string) => void
-  ephemeralVmRecipes?: EphemeralVmRecipeOption[]
-  selectedEphemeralVmRecipeId?: string | null
-  onEphemeralVmRecipeChange?: (recipeId: string | null) => void
-  ephemeralVmRecipeError?: string | null
   repoBackedSearchRepos?: RepoOption[]
   repoBackedSourcesDisabled?: boolean
   allowSmartNameAddProject?: boolean
@@ -138,10 +133,6 @@ export function NewWorkspaceComposerCard({
   projectHostSetupOptions = EMPTY_PROJECT_HOST_SETUP_OPTIONS,
   selectedProjectHostSetupId = null,
   onProjectHostSetupChange,
-  ephemeralVmRecipes = EMPTY_EPHEMERAL_VM_RECIPES,
-  selectedEphemeralVmRecipeId = null,
-  onEphemeralVmRecipeChange,
-  ephemeralVmRecipeError = null,
   repoBackedSearchRepos,
   repoBackedSourcesDisabled = false,
   allowSmartNameAddProject = true,
@@ -293,10 +284,6 @@ export function NewWorkspaceComposerCard({
           projectHostSetupOptions={projectHostSetupOptions}
           selectedProjectHostSetupId={selectedProjectHostSetupId}
           onProjectHostSetupChange={onProjectHostSetupChange}
-          ephemeralVmRecipes={ephemeralVmRecipes}
-          selectedEphemeralVmRecipeId={selectedEphemeralVmRecipeId}
-          onEphemeralVmRecipeChange={onEphemeralVmRecipeChange}
-          ephemeralVmRecipeError={ephemeralVmRecipeError}
           eligibleRepos={eligibleRepos}
           repoId={repoId}
           selectedRepoRequiresConnection={selectedRepoRequiresConnection}

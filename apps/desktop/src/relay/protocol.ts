@@ -1,8 +1,7 @@
-// Self-contained relay protocol — mirrors src/main/ssh/relay/protocol.ts
-// but has no Electron dependencies. Deployed standalone to remote hosts.
-
-export const RELAY_VERSION = '0.1.0'
-export const RELAY_SENTINEL = `YIRU-RELAY v${RELAY_VERSION} READY\n`
+// Self-contained relay wire protocol — no Electron dependencies, so it can be
+// bundled and deployed standalone to a remote host or a WSL distribution. The
+// version string and the ready sentinel live in `~shared/relay-ready-handshake`
+// because the launching host has to agree on them.
 
 export const HEADER_LENGTH = 13
 export const MAX_MESSAGE_SIZE = 16 * 1024 * 1024

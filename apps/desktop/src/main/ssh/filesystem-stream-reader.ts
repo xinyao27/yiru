@@ -6,8 +6,8 @@ import {
   COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
 } from '~shared/coworking/resource-limits'
 
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import type { FileReadResult } from '../providers/types'
-import type { SshChannelMultiplexer } from './channel-multiplexer'
 import {
   consumeSshFileStream,
   StreamProtocolError,
@@ -20,7 +20,7 @@ const MAX_PREVIEWABLE_BINARY_SIZE = 50 * 1024 * 1024
 const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024
 
 export async function readFileViaStream(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   signal?: AbortSignal
 ): Promise<FileReadResult> {
@@ -59,7 +59,7 @@ export async function readFileViaStream(
 }
 
 export async function consumeSessionInventoryJsonLines(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   consumeLine: (line: string) => void,
   signal?: AbortSignal

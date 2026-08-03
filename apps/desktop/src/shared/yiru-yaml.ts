@@ -1,11 +1,6 @@
 import { parse } from 'yaml'
 
-import type {
-  YiruDefaultTabTemplate,
-  YiruHooks,
-  YiruVmRecipe,
-  YiruVmRecipeDiagnostic
-} from './types'
+import type { YiruDefaultTabTemplate, YiruHooks } from './types'
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -78,80 +73,6 @@ function normalizeDefaultTabs(value: unknown): YiruDefaultTabTemplate[] {
     .filter((entry): entry is YiruDefaultTabTemplate => entry !== null)
 }
 
-type VmRecipeParseResult = {
-  recipes: YiruVmRecipe[]
-  diagnostics: YiruVmRecipeDiagnostic[]
-}
-
-function normalizeVmRecipes(value: unknown): VmRecipeParseResult {
-  const diagnostics: YiruVmRecipeDiagnostic[] = []
-  if (!Array.isArray(value)) {
-    return { recipes: [], diagnostics }
-  }
-
-  const seenIds = new Set<string>()
-  const recipes = value
-    .map((entry, index) => {
-      const record = asRecord(entry)
-      if (!record) {
-        diagnostics.push({
-          index,
-          message: 'Recipe entry must be a mapping.'
-        })
-        return null
-      }
-      const id = asTrimmedString(record.id)
-      const name = asTrimmedString(record.name)
-      const create = asTrimmedString(record.create) ?? asTrimmedString(record.command)
-      if (!id) {
-        diagnostics.push({ index, field: 'id', message: 'Recipe id is required.' })
-        return null
-      }
-      if (!YIRU_VM_RECIPE_ID_PATTERN.test(id)) {
-        diagnostics.push({
-          index,
-          field: 'id',
-          message: `Invalid recipe id "${id}". ${YIRU_VM_RECIPE_ID_RULE}`
-        })
-        return null
-      }
-      if (seenIds.has(id)) {
-        diagnostics.push({
-          index,
-          field: 'id',
-          message: `Duplicate recipe id "${id}". Recipe ids must be unique.`
-        })
-        return null
-      }
-      if (!name) {
-        diagnostics.push({ index, field: 'name', message: `Recipe "${id}" is missing name.` })
-        return null
-      }
-      if (!create) {
-        diagnostics.push({ index, field: 'create', message: `Recipe "${id}" is missing create.` })
-        return null
-      }
-      seenIds.add(id)
-      const description = asTrimmedString(record.description)
-      const suspend = asTrimmedString(record.suspend)
-      const resume = asTrimmedString(record.resume)
-      const destroyValue = asTrimmedString(record.destroy) ?? asTrimmedString(record.cleanup)
-      const destroyDisabled = destroyValue === 'none'
-      return {
-        id,
-        name,
-        create,
-        ...(description ? { description } : {}),
-        ...(suspend ? { suspend } : {}),
-        ...(resume ? { resume } : {}),
-        ...(destroyValue && !destroyDisabled ? { destroy: destroyValue } : {}),
-        ...(destroyDisabled ? { destroyDisabled: true } : {})
-      }
-    })
-    .filter((entry): entry is YiruVmRecipe => entry !== null)
-  return { recipes, diagnostics }
-}
-
 /**
  * Parse the supported project defaults from `yiru.yaml`.
  */
@@ -172,22 +93,12 @@ export function parseYiruYaml(content: string): YiruHooks | null {
   const setup = scriptsRecord ? asTrimmedString(scriptsRecord.setup) : undefined
   const archive = scriptsRecord ? asTrimmedString(scriptsRecord.archive) : undefined
   const defaultTabs = normalizeDefaultTabs(record.defaultTabs)
-  const environmentRecipeParse = normalizeVmRecipes(record.environmentRecipes)
-  const environmentRecipes = environmentRecipeParse.recipes
-  const environmentRecipeDiagnostics = environmentRecipeParse.diagnostics
   const worktreeRecord = asRecord(record.worktree)
   const sharedDirectories = worktreeRecord
     ? normalizeSharedDirectories(worktreeRecord.sharedDirectories)
     : []
 
-  if (
-    !setup &&
-    !archive &&
-    defaultTabs.length === 0 &&
-    environmentRecipes.length === 0 &&
-    environmentRecipeDiagnostics.length === 0 &&
-    sharedDirectories.length === 0
-  ) {
+  if (!setup && !archive && defaultTabs.length === 0 && sharedDirectories.length === 0) {
     return null
   }
 
@@ -197,8 +108,6 @@ export function parseYiruYaml(content: string): YiruHooks | null {
       ...(archive ? { archive } : {})
     },
     ...(defaultTabs.length > 0 ? { defaultTabs } : {}),
-    ...(environmentRecipes.length > 0 ? { environmentRecipes } : {}),
-    ...(environmentRecipeDiagnostics.length > 0 ? { environmentRecipeDiagnostics } : {}),
     ...(sharedDirectories.length > 0 ? { worktree: { sharedDirectories } } : {})
   }
 }

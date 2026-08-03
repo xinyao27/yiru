@@ -11,8 +11,8 @@ import {
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS
 } from '@yiru/runtime-protocol/ssh-connection'
 import { app } from 'electron'
+import type { MultiplexerTransport } from '~main/channel-multiplexer/multiplexer'
 
-import type { MultiplexerTransport } from '../channel-multiplexer'
 import type { SshConnection } from '../connection'
 import { createSshOperationAbortError, shellEscape } from '../connection-utils'
 import {

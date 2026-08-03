@@ -33,10 +33,7 @@ import {
 } from '~renderer/lib/update-check-click-options'
 import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
-import {
-  isUserManagedRuntimeEnvironment,
-  type PublicKnownRuntimeEnvironment
-} from '~shared/runtime-environments'
+import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type { RuntimeStatus } from '~shared/runtime-types'
 import type { GlobalSettings } from '~shared/types'
 
@@ -52,7 +49,6 @@ import {
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { EphemeralVmRuntimesSection } from './ephemeral-vm-runtimes-section'
 import {
   getRemoteServerManualUpdateHelp,
   RemoteServerUpdateStatus
@@ -304,15 +300,14 @@ export function RuntimeEnvironmentsPane({
     }
     try {
       const nextEnvironments = await window.api.runtimeEnvironments.list()
-      const visibleEnvironments = nextEnvironments.filter(isUserManagedRuntimeEnvironment)
       // Why: drop store status for servers no longer saved so stale hosts don't
       // linger in the sidebar registry.
       useAppStore.getState().setRuntimeEnvironments(nextEnvironments)
       if (mountedRef.current) {
-        setEnvironments(visibleEnvironments)
+        setEnvironments(nextEnvironments)
         setDetailsByEnvironmentId((current) => {
           const next: Record<string, RuntimeHostDetails> = {}
-          for (const environment of visibleEnvironments) {
+          for (const environment of nextEnvironments) {
             next[environment.id] = current[environment.id] ?? {
               status: 'loading',
               runtimeStatus: null,
@@ -324,7 +319,7 @@ export function RuntimeEnvironmentsPane({
         })
       }
       await Promise.allSettled(
-        visibleEnvironments.map(async (environment) => {
+        nextEnvironments.map(async (environment) => {
           try {
             const response = await window.api.runtimeEnvironments.getStatus({
               selector: environment.id,
@@ -1089,8 +1084,6 @@ export function RuntimeEnvironmentsPane({
           )}
         </div>
       </div>
-
-      <EphemeralVmRuntimesSection />
 
       <div data-settings-section="default-runtime">
         <Button

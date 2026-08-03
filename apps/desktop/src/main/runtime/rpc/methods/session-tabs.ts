@@ -17,12 +17,14 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.list',
     mobile: true,
     params: WorktreeTabSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => runtime.listMobileSessionTabs(params.worktree)
   }),
   defineMethod({
     name: 'session.tabs.listAll',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime }) => ({
       snapshots: await runtime.listAllMobileSessionTabs()
     })
@@ -31,6 +33,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.activate',
     mobile: true,
     params: ActivateTab,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.activateMobileSessionTab(params.worktree, params.tabId, params.leafId, {
         notifyClients: params.notifyClients !== false
@@ -40,6 +43,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.close',
     mobile: true,
     params: ActivateTab,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.closeMobileSessionTab(params.worktree, params.tabId)
   }),
@@ -47,6 +51,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.createTerminal',
     mobile: true,
     params: CreateTerminalTab,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime, signal }) =>
       runtime.createMobileSessionTerminal(params.worktree, {
         afterTabId: params.afterTabId,
@@ -73,6 +78,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.move',
     mobile: true,
     params: MoveTab,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) => {
       const base = {
         tabId: params.tabId,
@@ -102,6 +108,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'session.tabs.updatePaneLayout',
     params: UpdatePaneLayout,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.updateMobileSessionPaneLayout(params.worktree, {
         tabId: params.tabId,
@@ -113,6 +120,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'session.tabs.setTabProps',
     params: SetTabProps,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.setMobileSessionTabProps(params.worktree, {
         tabId: params.tabId,
@@ -125,6 +133,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.subscribe',
     mobile: true,
     params: WorktreeTabSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, connectionId, requestId }, emit) => {
       let subscribedWorktree: string | null = null
       let unsubscribe = (): void => {}
@@ -173,6 +182,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.unsubscribe',
     mobile: true,
     params: SessionTabsUnsubscribe,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, connectionId }) => {
       const snapshot = await runtime.listMobileSessionTabs(params.worktree)
       const connection = connectionId ?? 'local'
@@ -192,6 +202,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'session.tabs.subscribeAll',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime, connectionId, requestId }, emit) => {
       let unsubscribe = (): void => {}
       let closed = false
@@ -243,6 +254,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
         subscriptionId: z.string().min(1).optional()
       })
       .nullish(),
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, connectionId }) => {
       const cleanupPrefix = `session.tabs:${connectionId ?? 'local'}:*`
       if (params?.subscriptionId) {
@@ -258,6 +270,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'markdown.readTab',
     mobile: true,
     params: ActivateTab,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.readMobileMarkdownTab(params.worktree, params.tabId)
   }),
@@ -265,6 +278,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
     name: 'markdown.saveTab',
     mobile: true,
     params: SaveMarkdownTab,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { runtime }) =>
       runtime.saveMobileMarkdownTab(
         params.worktree,

@@ -9,7 +9,6 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   getLocalExecutionHostLabel,
   getSettingsFocusedExecutionHostId,
-  isRuntimeOwnedSshTargetId,
   parseExecutionHostId,
   toRuntimeExecutionHostId,
   toSshExecutionHostId,
@@ -17,7 +16,6 @@ import {
   type ExecutionHostKind
 } from '@yiru/workbench-model/workspace'
 
-import type { RuntimeEnvironmentSource } from './runtime-environments'
 import type { RuntimeStatus } from './runtime-types'
 import type { GlobalSettings, Repo } from './types'
 
@@ -43,13 +41,11 @@ export type ExecutionHostRegistryEntry = {
   minCompatibleClientVersion?: number | null
   platform?: NodeJS.Platform | null
   remoteControlState?: RuntimeStatus['remoteControl']
-  source?: RuntimeEnvironmentSource
 }
 
 type RuntimeEnvironmentSummary = {
   id: string
   name?: string | null
-  source?: RuntimeEnvironmentSource
 }
 
 type RuntimeHostStatus = {
@@ -146,14 +142,13 @@ function setHost(
   // (named) registration is authoritative for the label — runtime envs are
   // seeded with a friendly name before the id-labeled status/focus/repo
   // fallbacks run, so keep the existing label on a health-only upgrade.
-  hosts.set(entry.id, { ...entry, label: existing.label, source: existing.source ?? entry.source })
+  hosts.set(entry.id, { ...entry, label: existing.label })
 }
 
 function addRuntimeHost(
   hosts: Map<ExecutionHostId, ExecutionHostRegistryEntry>,
   environmentId: string,
   label: string,
-  source: RuntimeEnvironmentSource | undefined,
   statusByEnvironmentId: RuntimeStatusByEnvironmentId | undefined
 ): void {
   const hostId = toRuntimeExecutionHostId(environmentId)
@@ -174,8 +169,7 @@ function addRuntimeHost(
     minCompatibleClientVersion:
       status?.minCompatibleRuntimeClientVersion ?? status?.minCompatibleMobileVersion ?? null,
     platform: status?.hostPlatform ?? null,
-    remoteControlState: status?.remoteControl ?? null,
-    ...(source ? { source } : {})
+    remoteControlState: status?.remoteControl ?? null
   })
 }
 
@@ -208,18 +202,11 @@ export function buildExecutionHostRegistry(args: {
       hosts,
       environmentId,
       normalizeHostPart(environment.name) ?? environmentId,
-      environment.source,
       args.runtimeStatusByEnvironmentId
     )
   }
   for (const environmentId of args.runtimeStatusByEnvironmentId?.keys() ?? []) {
-    addRuntimeHost(
-      hosts,
-      environmentId,
-      environmentId,
-      undefined,
-      args.runtimeStatusByEnvironmentId
-    )
+    addRuntimeHost(hosts, environmentId, environmentId, args.runtimeStatusByEnvironmentId)
   }
 
   const focusedHost = getSettingsFocusedExecutionHostId(args.settings)
@@ -229,7 +216,6 @@ export function buildExecutionHostRegistry(args: {
       hosts,
       parsedFocusedHost.environmentId,
       parsedFocusedHost.environmentId,
-      undefined,
       args.runtimeStatusByEnvironmentId
     )
   }
@@ -242,25 +228,22 @@ export function buildExecutionHostRegistry(args: {
         hosts,
         parsedHost.environmentId,
         parsedHost.environmentId,
-        undefined,
         args.runtimeStatusByEnvironmentId
       )
     }
-    // Why: a VM-backed repo's executionHostId is `ssh:runtime-ssh-<id>`. Runtime-owned
-    // targets are hidden, so they must not become visible SSH run-target hosts here.
-    if (parsedHost?.kind === 'ssh' && !isRuntimeOwnedSshTargetId(parsedHost.targetId)) {
+    if (parsedHost?.kind === 'ssh') {
       sshTargetIds.add(parsedHost.targetId)
     }
   }
   for (const targetId of args.sshTargetLabels?.keys() ?? []) {
     const normalized = normalizeHostPart(targetId)
-    if (normalized && !isRuntimeOwnedSshTargetId(normalized)) {
+    if (normalized) {
       sshTargetIds.add(normalized)
     }
   }
   for (const repo of args.repos) {
     const targetId = normalizeHostPart(repo.connectionId)
-    if (targetId && !isRuntimeOwnedSshTargetId(targetId)) {
+    if (targetId) {
       sshTargetIds.add(targetId)
     }
   }

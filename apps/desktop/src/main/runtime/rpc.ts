@@ -25,6 +25,7 @@ import { DeviceRegistry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
+import { grantedAccessForDevice } from './rpc/access-adjudication'
 import type { RpcRequest, RpcResponse } from './rpc/core'
 import { RpcDispatcher } from './rpc/dispatcher'
 import { errorResponse, successResponse } from './rpc/errors'
@@ -256,7 +257,7 @@ export class YiruRuntimeRpcServer {
 
     const endpoint = resolvePairingEndpoint(rawEndpoint, args.address)
     const deviceName = args.name ?? `CLI ${new Date().toLocaleDateString()}`
-    const scope = args.scope ?? 'runtime'
+    const scope = args.scope === 'mobile' ? 'mobile' : 'runtime'
     const device = args.rotate
       ? this.deviceRegistry.rotatePendingDevice(deviceName, scope)
       : this.deviceRegistry.getOrCreatePendingDevice(deviceName, scope)
@@ -766,6 +767,12 @@ export class YiruRuntimeRpcServer {
         : reply
 
     const connectionId = ws ? this.mobileSocketWiring?.getConnectionId(ws) : undefined
+    // Why: resolved per request rather than cached at connect time, so a revoked
+    // or downgraded grant takes effect on the next call instead of surviving for
+    // the life of the socket.
+    const grantedAccess = grantedAccessForDevice(
+      this.deviceRegistry?.getDevice(device.deviceId) ?? null
+    )
     try {
       await this.dispatcher.dispatchStreaming(request, replyForRequest, {
         connectionId,
@@ -777,7 +784,8 @@ export class YiruRuntimeRpcServer {
         },
         // Why: gates the mobile-only payload diet (native-chat char clipping) so
         // full-screen web/desktop runtime clients aren't truncated.
-        clientKind: device.scope,
+        clientKind: device.scope === 'mobile' ? 'mobile' : 'runtime',
+        ...(grantedAccess ? { grantedAccess } : {}),
         signal: abortRegistration?.signal,
         sendBinary,
         registerBinaryStreamHandler: (streamId, handler) =>

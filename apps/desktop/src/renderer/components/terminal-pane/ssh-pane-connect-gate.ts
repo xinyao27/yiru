@@ -1,4 +1,3 @@
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
 export type SshPaneConnectGate = {
@@ -39,13 +38,9 @@ export function resolveSshPaneConnectGate(input: {
       : null
   const pendingSessionId =
     input.restoredLeafSessionId ?? input.deferredTabSessionId ?? fallbackTabSessionId ?? null
-  // Why: runtime-owned targets are excluded — their relay health is owned by
-  // the runtime layer and users cannot connect to them directly.
-  const needsConnectBeforeSpawn = !sshConnected && !isRuntimeOwnedSshTargetId(input.connectionId)
   return {
     pendingSessionId,
-    enterDeferredFlow:
-      Boolean(pendingSessionId) || input.isDeferredTarget || needsConnectBeforeSpawn,
+    enterDeferredFlow: Boolean(pendingSessionId) || input.isDeferredTarget || !sshConnected,
     sshConnected
   }
 }

@@ -19,7 +19,7 @@ import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 import { getAllWorktreesFromState } from '~renderer/store/selectors'
 
-import { removeSshTargetWithBestEffortCleanup } from '../settings/ssh/target-remove'
+import { removeSshTargetWithBestEffortCleanup } from '../direct-ssh/target-remove'
 import { clearHostRename } from './host-rename-remove'
 import type { HostRemovalTarget } from './host-rename-remove'
 import { resolveSshHostRemoval } from './ssh-host-remove-resolution'

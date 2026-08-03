@@ -49,6 +49,7 @@ export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
     name: 'hostedReview.forBranch',
     mobile: true,
     params: HostedReviewForBranch,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => {
       const fallbackGitHubPR =
         params.linkedGitHubPR == null ? (params.fallbackGitHubPR ?? null) : null
@@ -69,6 +70,7 @@ export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
     name: 'hostedReview.getCreationEligibility',
     mobile: true,
     params: HostedReviewCreationEligibility,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => {
       const fallbackGitHubPR =
         params.linkedGitHubPR == null ? (params.fallbackGitHubPR ?? null) : null
@@ -94,6 +96,7 @@ export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
     name: 'hostedReview.create',
     mobile: true,
     params: HostedReviewCreate,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.createHostedReview({
         repoSelector: params.repo,

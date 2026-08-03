@@ -6,6 +6,7 @@ import { defineMethod, type RpcMethod } from '../core'
 export const STATUS_METHODS: RpcMethod[] = [
   defineMethod({
     contract: STATUS_GET_CONTRACT,
+    access: { scope: 'host', tier: 'read' },
     handler: (_params, { runtime }) => {
       const snapshot = getRemoteServerUpdaterSnapshot(runtime.getRuntimeId())
       return {

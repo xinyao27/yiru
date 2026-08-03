@@ -1,5 +1,4 @@
 import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import type { Repo } from '~shared/types'
 
 /**
@@ -26,9 +25,7 @@ export function resolveSshWorkspaceForget(args: {
   sshTargetLabels: ReadonlyMap<string, string>
 }): SshWorkspaceForgetResolution {
   const connectionId = args.repo?.connectionId?.trim()
-  // Why: runtime-owned (ephemeral-VM) SSH targets manage their own lifecycle and
-  // are never user-facing ghosts, so they take the normal delete path.
-  if (!connectionId || isRuntimeOwnedSshTargetId(connectionId)) {
+  if (!connectionId) {
     return { kind: 'not-ssh' }
   }
 

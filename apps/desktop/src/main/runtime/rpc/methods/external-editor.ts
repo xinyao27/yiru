@@ -7,6 +7,7 @@ import { defineMethod, type RpcMethod } from '../core'
 export const EXTERNAL_EDITOR_METHODS: RpcMethod[] = [
   defineMethod({
     contract: EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => {
       // Why: the method exists in every build, but headless hosts must never
       // launch an editor merely because a client skipped capability probing.

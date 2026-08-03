@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 
-import type { EphemeralVmRecipeOption, RepoOption } from './card-types'
+import type { RepoOption } from './card-types'
 import { WorkspaceRunTargetCombobox } from './run-target-combobox'
 import { getSshStatusLabel } from './ssh-status'
 
@@ -27,10 +27,6 @@ type ProjectSectionProps = {
   projectHostSetupOptions: ProjectHostSetupOption[]
   selectedProjectHostSetupId: string | null
   onProjectHostSetupChange?: (setupId: string) => void
-  ephemeralVmRecipes: EphemeralVmRecipeOption[]
-  selectedEphemeralVmRecipeId: string | null
-  onEphemeralVmRecipeChange?: (recipeId: string | null) => void
-  ephemeralVmRecipeError: string | null
   eligibleRepos: RepoOption[]
   repoId: string
   selectedRepoRequiresConnection: boolean
@@ -53,10 +49,6 @@ export function ProjectSection({
   projectHostSetupOptions,
   selectedProjectHostSetupId,
   onProjectHostSetupChange,
-  ephemeralVmRecipes,
-  selectedEphemeralVmRecipeId,
-  onEphemeralVmRecipeChange,
-  ephemeralVmRecipeError,
   eligibleRepos,
   repoId,
   selectedRepoRequiresConnection,
@@ -156,7 +148,7 @@ export function ProjectSection({
             )}
         </p>
       ) : null}
-      {readyProjectHostSetupOptions.length > 1 || ephemeralVmRecipes.length > 0 ? (
+      {readyProjectHostSetupOptions.length > 1 ? (
         <div className="space-y-1">
           <label className="text-muted-foreground block min-w-0 truncate text-xs font-medium">
             {translate('auto.components.NewWorkspaceComposerCard.runOn', 'Run on')}
@@ -165,18 +157,8 @@ export function ProjectSection({
             hostOptions={readyProjectHostSetupOptions}
             hostValue={selectedProjectHostSetupId ?? null}
             onHostChange={onProjectHostSetupChange}
-            recipes={ephemeralVmRecipes}
-            recipeValue={selectedEphemeralVmRecipeId}
-            onRecipeChange={onEphemeralVmRecipeChange}
           />
-          {ephemeralVmRecipeError ? (
-            <p className="text-destructive text-[11px] whitespace-pre-line">
-              {ephemeralVmRecipeError}
-            </p>
-          ) : null}
         </div>
-      ) : ephemeralVmRecipeError ? (
-        <p className="text-destructive text-[11px] whitespace-pre-line">{ephemeralVmRecipeError}</p>
       ) : null}
       {selectedRepoRequiresConnection && selectedRepoConnectionId ? (
         <div

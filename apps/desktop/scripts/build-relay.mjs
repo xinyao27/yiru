@@ -101,7 +101,7 @@ for (const platform of PLATFORMS) {
 // so a single platform-independent bundle suffices; it ships inside the
 // Windows app via the same out/relay extraResources mapping.
 {
-  const wslEntry = join(ROOT, 'src', 'relay', 'wsl-agent-hook-relay.ts')
+  const wslEntry = join(ROOT, 'src', 'relay', 'wsl-agent-hooks', 'relay.ts')
   const outDir = join(ROOT, 'out', 'relay', 'wsl')
   mkdirSync(outDir, { recursive: true })
   await bundleNodeEntry(wslEntry, join(outDir, 'wsl-agent-hook-relay.js'))

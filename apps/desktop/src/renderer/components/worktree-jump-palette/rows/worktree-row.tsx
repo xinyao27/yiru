@@ -1,5 +1,4 @@
 import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 import { getPaletteHostBadge } from '~renderer/components/cmd-j/palette-host-badge'
 import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
@@ -61,10 +60,7 @@ export function WorktreeRow({
   )
   const statusLabel = getWorktreeStatusLabel(status)
   const isCurrentWorktree = activeWorktreeId === worktree.id
-  // Runtime-owned (per-workspace-env) SSH targets are hidden and their relay health is
-  // owned by the runtime layer (broadcasts suppressed) — don't show a false disconnected.
-  const sshConnectionId =
-    repo?.connectionId && !isRuntimeOwnedSshTargetId(repo.connectionId) ? repo.connectionId : null
+  const sshConnectionId = repo?.connectionId || null
   const sshStatus = sshConnectionId
     ? (sshConnectionStates.get(sshConnectionId)?.status ?? 'disconnected')
     : null

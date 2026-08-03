@@ -20,11 +20,13 @@ export const WORKSPACE_PORT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'workspacePorts.scan',
     params: WorkspacePortScanParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.scanWorkspacePorts(params.repoId)
   }),
   defineMethod({
     name: 'workspacePorts.kill',
     params: WorkspacePortKillParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.killWorkspacePort({
         repoId: params.repoId,

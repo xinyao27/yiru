@@ -17,24 +17,28 @@ export const SSH_METHODS: RpcMethod[] = [
     name: 'ssh.getState',
     mobile: true,
     params: SshTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: (params) => ({ state: getRegisteredSshState(params.targetId) ?? null })
   }),
   defineMethod({
     name: 'ssh.connect',
     mobile: true,
     params: SshTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => ({ state: await connectRegisteredSshTarget(params.targetId) })
   }),
   defineMethod({
     name: 'ssh.listTargets',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'host' },
     handler: () => ({ targets: listRegisteredSshTargets() })
   }),
   defineMethod({
     name: 'ssh.listRemovedTargetLabels',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'host' },
     handler: () => ({ labels: listRegisteredRemovedSshTargetLabels() })
   })
 ]

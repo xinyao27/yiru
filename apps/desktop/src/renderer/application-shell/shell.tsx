@@ -5,11 +5,7 @@ import {
   ArrowRight,
   ArrowsIn as Minimize2
 } from '@phosphor-icons/react'
-import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '@yiru/workbench-model/workspace'
+import { toRuntimeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
   Suspense,
@@ -378,7 +374,7 @@ const DictationController = lazy(() =>
   }))
 )
 const SshPassphraseDialog = lazy(() =>
-  import('../components/settings/ssh/passphrase-dialog').then((module) => ({
+  import('../components/direct-ssh/passphrase-dialog').then((module) => ({
     default: module.SshPassphraseDialog
   }))
 )
@@ -1096,13 +1092,7 @@ function App(): React.JSX.Element {
           // tabs through pty.attach on the relay. Passphrase-protected targets
           // are deferred to tab focus to avoid stacking credential dialogs at
           // startup before the user has context.
-          // Why: runtime-owned (ephemeral-VM) targets must never be dialed from
-          // the renderer — ssh.connect would dispose the runtime layer's live
-          // relay session. Main's windowless-promotion path can persist such
-          // ids into this list, so filter at the consumption boundary too.
-          const connectionIds = (sessionRead.session.activeConnectionIdsAtShutdown ?? []).filter(
-            (targetId) => !isRuntimeOwnedSshTargetId(targetId)
-          )
+          const connectionIds = sessionRead.session.activeConnectionIdsAtShutdown ?? []
           if (connectionIds.length > 0) {
             try {
               const SSH_RECONNECT_TIMEOUT_MS = 15_000

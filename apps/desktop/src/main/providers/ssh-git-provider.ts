@@ -29,16 +29,16 @@ import type {
   RemoveWorktreeResult
 } from '~shared/types'
 
+/* eslint-disable max-lines -- Why: this provider mirrors IGitProvider one
+   method per RPC call (~16 methods). Splitting it would only add
+   indirection — every method is a 1:1 forwarder to a relay RPC plus a
+   small amount of param plumbing. */
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { buildHostedRemoteCommitUrl, buildHostedRemoteFileUrl } from '../git/hosted-remote-url'
 import {
   describeMaxBufferOverflowError,
   isMaxBufferOverflowError
 } from '../git/max-buffer-overflow'
-/* eslint-disable max-lines -- Why: this provider mirrors IGitProvider one
-   method per RPC call (~16 methods). Splitting it would only add
-   indirection — every method is a 1:1 forwarder to a relay RPC plus a
-   small amount of param plumbing. */
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { requestGitStreamable } from '../ssh/git-response-stream-reader'
 import { JsonRpcErrorCode } from '../ssh/relay/protocol'
 import type { RemoteHostPlatform } from '../ssh/remote/platform'
@@ -78,7 +78,7 @@ export class SshGitProvider implements IGitProvider {
   private readonly gitDiffReadDedupe = new InFlightPromiseDedupe<GitDiffResult | GitDiffResult[]>()
 
   private connectionId: string
-  private mux: SshChannelMultiplexer
+  private mux: ChannelMultiplexer
   private nonInteractiveExecQueues = new Map<string, NonInteractiveExecQueueEntry[]>()
 
   private async runWithDiffDedupeClear<T>(run: () => Promise<T>): Promise<T> {
@@ -95,7 +95,7 @@ export class SshGitProvider implements IGitProvider {
 
   constructor(
     connectionId: string,
-    mux: SshChannelMultiplexer,
+    mux: ChannelMultiplexer,
     private readonly hostPlatform: RemoteHostPlatform | null = null
   ) {
     this.connectionId = connectionId

@@ -2,9 +2,9 @@
    it owns app lifecycle, service wiring, window creation, and hook/daemon
    startup. Splitting by line count would fragment tightly coupled startup
    logic across files without a cleaner ownership seam. */
-import { existsSync, statSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import os from 'node:os'
-import { isAbsolute, join } from 'node:path'
+import { join } from 'node:path'
 
 import { electronApp, is } from '@electron-toolkit/utils'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
@@ -125,6 +125,7 @@ import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
 import { initObservability, shutdownObservability } from './observability/service'
 import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode/usage/store'
+import { removeOrphanedRuntimeOwnedSshTargets } from './orphaned-runtime-ssh-target-cleanup'
 import {
   Store,
   initDataPath,
@@ -1532,8 +1533,6 @@ type ServeOptions = {
   pairingAddress: string | null
   noPairing: boolean
   mobilePairing: boolean
-  recipeJson: boolean
-  projectRoot: string | null
 }
 
 function getServeOptions(argv = process.argv): ServeOptions {
@@ -1559,9 +1558,7 @@ function getServeOptions(argv = process.argv): ServeOptions {
     ...(wsPort !== undefined ? { wsPort } : {}),
     pairingAddress: valueAfter('--serve-pairing-address'),
     noPairing: argv.includes('--serve-no-pairing'),
-    mobilePairing: argv.includes('--serve-mobile-pairing'),
-    recipeJson: argv.includes('--serve-recipe-json'),
-    projectRoot: valueAfter('--serve-project-root')
+    mobilePairing: argv.includes('--serve-mobile-pairing')
   }
 }
 
@@ -1588,18 +1585,6 @@ async function printServeReady(options: ServeOptions): Promise<void> {
   if (!runtime || !runtimeRpc) {
     throw new Error('Runtime server must be initialized before printing serve readiness')
   }
-  if (options.recipeJson) {
-    if (!options.projectRoot) {
-      throw new Error('--serve-recipe-json requires --serve-project-root')
-    }
-    if (!isAbsolute(options.projectRoot)) {
-      throw new Error(`--serve-project-root must be absolute: ${options.projectRoot}`)
-    }
-    const projectRootStats = statSync(options.projectRoot)
-    if (!projectRootStats.isDirectory()) {
-      throw new Error(`--serve-project-root must be a directory: ${options.projectRoot}`)
-    }
-  }
   const endpoint = runtimeRpc.getWebSocketEndpoint()
   const pairing = options.noPairing
     ? ({ available: false } as const)
@@ -1612,19 +1597,6 @@ async function printServeReady(options: ServeOptions): Promise<void> {
     pairing.available && options.mobilePairing
       ? await renderTerminalPairingQr(pairing.pairingUrl)
       : null
-  if (options.recipeJson) {
-    if (!pairing.available) {
-      throw new Error('Recipe JSON output requires runtime pairing to be available')
-    }
-    console.log(
-      JSON.stringify({
-        schemaVersion: 1,
-        pairingCode: pairing.pairingUrl,
-        projectRoot: options.projectRoot
-      })
-    )
-    return
-  }
   if (options.json) {
     console.log(
       JSON.stringify({
@@ -1937,6 +1909,7 @@ app.whenReady().then(async () => {
     )
   }
   selfHealRuntimeEnvironmentFocus({ store, userDataPath: app.getPath('userData') })
+  removeOrphanedRuntimeOwnedSshTargets({ store })
   applyAppIcon(store.getSettings().appIcon)
   if (shouldSuppressDevEducation({ isDev: is.dev })) {
     suppressDevEducationForStore(store)

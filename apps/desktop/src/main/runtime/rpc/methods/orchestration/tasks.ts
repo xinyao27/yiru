@@ -63,6 +63,7 @@ export const ORCHESTRATION_TASK_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.taskCreate',
     params: TaskCreateParams,
+    access: { scope: 'project', tier: 'control' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       let deps: string[] | undefined
@@ -97,6 +98,7 @@ export const ORCHESTRATION_TASK_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.taskList',
     params: TaskListParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const explicitRun = params.run ? db.getRun(params.run) : undefined
@@ -133,6 +135,7 @@ export const ORCHESTRATION_TASK_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.taskUpdate',
     params: TaskUpdateParams,
+    access: { scope: 'project', tier: 'control' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const run = resolveRunScope(runtime, {

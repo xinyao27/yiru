@@ -14,6 +14,7 @@ export const SKILL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'skills.discover',
     params: SkillDiscoveryTargetSchema.default({}),
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
       const executionHost = parseExecutionHostId(params.executionHostId)
       if (executionHost?.kind === 'ssh') {

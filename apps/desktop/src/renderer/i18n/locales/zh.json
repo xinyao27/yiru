@@ -576,12 +576,6 @@
         "distroMissing": "所选 WSL 发行版不可用。请选择可用发行版，或将此项目切换到 Windows。",
         "wslDefault": "WSL 默认"
       },
-      "sidebarWorktreeActivation": {
-        "wakeEphemeralVmFailed": "唤醒临时虚拟机工作区失败"
-      },
-      "ephemeralVmWorkspaceTarget": {
-        "projectRootRegistrationFailed": "在运行时上注册环境模板创建的项目根目录失败"
-      },
       "blocked": {
         "notification": {
           "fallback": {
@@ -647,8 +641,6 @@
         "d91ae31fbd": "macOS 权限",
         "95a1886d94": "通过手机控制终端和 Agent。",
         "1cd25673df": "移动端",
-        "31e57d1c70": "通过 SSH 使用已有机器处理文件、终端、Git 和工作区。",
-        "94a5afe910": "SSH 主机",
         "40d80bad8a": "测试版",
         "de0c2907a1": "远程 Yiru 服务器",
         "b351014180": "Yiru 统计，以及 Claude、Codex、OpenCode Token 分析和 Grok 订阅使用量。",
@@ -880,13 +872,8 @@
         "createMultiple": "创建更多",
         "waitForSetupBeforeAgent": "等待设置完成后再启动 Agent",
         "waitForSetupBeforeAgentHelp": "如果设置会安装依赖、MCP 服务器或 Agent 启动时需要的配置文件，请开启此选项。",
-        "destroyDisabled": "已禁用销毁",
-        "destroyConfigured": "已配置销毁",
-        "noDestroyConfigured": "未配置销毁",
-        "ephemeralVm": "工作区专属环境",
         "chooseRunTarget": "选择目标",
         "noRunTargets": "此项目还没有可用的运行目标。",
-        "perWorkspaceEnvHint": "通过环境模板按需创建环境",
         "branchName": "分支名称",
         "branchNamePlaceholder": "feature/my-branch"
       },
@@ -1183,10 +1170,7 @@
             "ed2a664f8b": "无法创建工作树",
             "a3346fc6ed": "取消工作树创建",
             "532aea14ce": "取消",
-            "767951265d": "创建工作树时出现问题。",
-            "vmProvisioningTitle": "正在预配虚拟机",
-            "cancelProvisioning": "取消",
-            "vmProvisioningLogEmpty": "正在等待环境模板输出…"
+            "767951265d": "创建工作树时出现问题。"
           }
         }
       },
@@ -3566,13 +3550,9 @@
           "ssh": "SSH",
           "connecting": "正在连接",
           "connect": "连接",
-          "addSshHost": "添加 SSH 主机",
           "addRemoteServer": "添加远程服务器",
-          "addRemoteHost": "添加远程主机",
           "addRemoteHostTooltip": "可选择能通过 SSH 登录的机器，也可选择运行 Yiru 的远程服务器。",
-          "addSshHostDetail": "通过 SSH 使用现有机器。",
-          "addRemoteServerDetail": "与另一台电脑上运行的 Yiru 配对。",
-          "addRemoteHostDetail": "SSH 主机或 Yiru 服务器"
+          "addRemoteServerDetail": "与另一台电脑上运行的 Yiru 配对。"
         },
         "sidebarHostOptions": {
           "3e102f111c": "所有主机",
@@ -3662,43 +3642,21 @@
           "connectionFailed": "SSH 连接失败。"
         },
         "AddRemoteHostDialog": {
-          "sshHostRequired": "必须填写主机或 SSH 配置别名。",
-          "sshPortInvalid": "端口必须介于 1 到 65535 之间。",
-          "sshRelayGraceInvalid": "终端超时时间必须介于 60 到 {{value0}} 秒之间。",
-          "sshSaved": "已添加 SSH 主机。",
-          "sshSaveFailed": "添加 SSH 主机失败。",
           "serverFieldsRequired": "必须填写服务器名称和配对码。",
           "serverSaved": "已添加远程服务器。",
           "serverSaveFailed": "添加远程服务器失败。",
           "serverTitle": "添加远程服务器",
-          "sshTitle": "添加 SSH 主机",
           "serverDescription": "与另一台电脑上运行的 Yiru 配对。",
-          "sshDescription": "添加一台可通过 SSH 登录并持久保存的机器。",
           "cancel": "取消",
           "saving": "正在保存...",
           "save": "保存",
-          "label": "标签",
-          "sshLabelPlaceholder": "开发机",
-          "sshHost": "主机或别名",
-          "sshHostPlaceholder": "deploy@server:22",
-          "username": "用户名",
-          "usernamePlaceholder": "deploy",
-          "port": "端口",
-          "identityFile": "身份文件",
-          "identityFilePlaceholder": "~/.ssh/id_ed25519（可选）",
           "serverName": "服务器名称",
           "serverNamePlaceholder": "开发机",
           "pairingCode": "配对码",
           "pairingCodePlaceholder": "yiru://pair?code=...",
           "pairingHelpPrefix": "在服务器上运行",
           "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "，然后粘贴打印出的配对 URL。",
-          "sshImportAlreadySynced": "~/.ssh/config 已同步。",
-          "sshImportSynced": "已同步 {{value0}} 个主机{{value1}}。",
-          "sshImportFailed": "导入 SSH 配置失败。",
-          "importing": "正在导入...",
-          "importSshConfig": "导入 ~/.ssh/config",
-          "sshPersistenceDefault": "此主机上的远程终端会保持运行，直到你结束它们或重置中继。"
+          "pairingHelpSuffix": "，然后粘贴打印出的配对 URL。"
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "重新连接失败",
@@ -5685,8 +5643,6 @@
           "65660d4548": "macOS 权限",
           "c6c01ac209": "通过手机控制终端和 Agent。",
           "c40dadaac8": "移动端",
-          "c2ee313198": "通过 SSH 使用已有机器处理文件、终端、Git 和工作区。",
-          "9b02492d1f": "SSH 远程主机",
           "b5ee17826b": "配对远程 Yiru 运行时，以获得持久会话、更丰富的远程状态，以及 Web 或移动端接续。",
           "7686cb5c36": "将此浏览器连接到已保存的 Yiru 服务器。",
           "bd0181eeca": "远程 Yiru 服务器",
@@ -5864,36 +5820,6 @@
           "68bbcd864a": "新的",
           "2ef2b2674b": "删除 {{value0}}"
         },
-        "SshDestructiveActionDialog": {
-          "895b216267": "取消"
-        },
-        "SshPane": {
-          "c0f1c80166": "未配置 SSH 目标。",
-          "639ceb3698": "添加目标",
-          "51d7dba44d": "导入",
-          "a7d28dff81": "添加远程主机以在 Yiru 中连接到它。",
-          "94c5284560": "目标",
-          "f495689b82": "导入失败",
-          "f8050f6307": "已同步 {{value0}} 服务器{{value1}}",
-          "68c13b4589": "测试失败",
-          "81d08bcddf": "连接成功",
-          "2c4ee7332b": "远程继电器复位失败",
-          "db2e48975e": "远程继电器复位",
-          "025e107643": "无法结束远程终端",
-          "90e308c98b": "远程终端结束",
-          "a43de1d3ee": "断开连接失败",
-          "e95d5ae10e": "连接失败",
-          "c2a69510e3": "删除目标失败",
-          "a0237eb1ca": "目标已移除",
-          "2227ce47b6": "保存目标失败",
-          "f602009125": "目标已添加",
-          "b4ba0ce33d": "目标已更新",
-          "3879cbaa52": "终端超时时间必须介于 60 到 {{value0}} 秒之间，或保持终端运行直到重置。",
-          "4db9afce1c": "端口必须介于 1 和 65535 之间",
-          "0e5aa04161": "需要主机或 SSH 配置别名",
-          "f1fc50dad2": "无法加载 SSH 目标",
-          "0cda732f43": "连接测试失败"
-        },
         "SshPassphraseDialog": {
           "d5a234456f": "取消",
           "c3ce71aad6": "输入密码",
@@ -5910,64 +5836,16 @@
           "106bd57f4a": "SSH 密码"
         },
         "SshTargetCard": {
-          "ec6543cee9": "连接",
-          "0e53e9f8e8": "测试",
-          "1810b51482": "连接中",
-          "4c86f30877": "断开连接",
-          "7f7b3d7ab4": "删除目标",
-          "3d21a22d0e": "移除目标",
-          "3d8af2949f": "编辑目标",
-          "762a48c662": "重置远程继电器",
-          "97dea4e8cf": "重置远程继电器",
-          "da16e108e6": "结束远程终端",
-          "c77f1abfe3": "结束远程终端",
+          "0d4da494f9": "正在连接…",
           "18968ede9e": "错误",
-          "f0871e6bfb": "连接",
           "47e94bd6ba": "已连接",
-          "a883f5a00f": "终端超时：{{value0}}",
-          "8ce71262f4": "终端保持运行直到重置"
-        },
-        "SshTargetDestructiveActions": {
-          "7e66942808": "这将停止此 SSH 目标上的活动终端会话。重新连接不会恢复它们。",
-          "accf177a03": "结束远程终端？",
-          "26be00392d": "这将强制停止此 SSH 目标的远程中继。该目标的活动远程终端和端口转发将结束。",
-          "570a7a0574": "重置远程继电器？",
-          "3bb0cf0ee4": "这将删除目标并结束任何活动的远程终端。",
-          "4808966c41": "删除 SSH 目标"
-        },
-        "SshTargetForm": {
-          "fea9cb402e": "取消",
-          "1b19b00e93": "有限超时时间必须介于 60 秒到 7 天之间。",
-          "137e88ce8d": "Yiru 与此主机断开连接后，远程终端会继续运行。",
-          "b574994adc": "需要停止它们时，请使用“结束远程终端”或“重置中继”。",
-          "71fc546097": "保持终端运行直到重置",
-          "92f80edbfd": "远程终端持久化",
-          "feae1d1e69": "可选。相当于 ProxyJump / ssh -J。",
-          "11bcb4507a": "bastion.example.com",
-          "b2ab248ded": "跳板主机",
-          "3b01ca44a0": "可选。用于隧道（例如 Cloudflare Access、ProxyCommand）。",
-          "f42d844544": "例如 cloudflared access ssh --hostname %h",
-          "c7d0e18ecb": "代理命令",
-          "cb91f6375c": "可选。默认使用 SSH Agent。",
-          "d6a5f2ee5c": "~/.ssh/id_ed25519（SSH Agent 留空）",
-          "63c0c145c1": "身份文件",
-          "c94cfa634c": "端口",
-          "47e082bc17": "部署",
-          "dc1dc52aaa": "用户名",
-          "2ee9bcd2e8": "服务器，部署@服务器：2222，ssh：//服务器",
-          "ce370ce674": "主机或别名 *",
-          "b8dab0aa7b": "我的服务器",
-          "298de87a88": "标签",
-          "9518545cb6": "添加目标",
-          "a62b4cb39a": "保存更改",
-          "29af933cd5": "新的 SSH 目标",
-          "f2331ce599": "编辑 SSH 目标",
-          "7c13f58c91": "直到重置",
-          "55c56cf2c7": "断开连接后的超时时间（秒）",
-          "4a342f44c1": "高级连接",
-          "e9609ddca6": "代理、跳板主机和连接复用",
-          "8c922dffba": "复用 SSH 连接以加快设置",
-          "53e9aabfc0": "可用时使用 OpenSSH 多路复用。对于有自定义 SSH 限制的主机，请关闭此项。"
+          "8df62d1912": "已连接",
+          "8f14a926e0": "正在部署中继…",
+          "a6d5b7a30b": "验证失败",
+          "d4986d71b0": "正在重新连接…",
+          "ec37738139": "重新连接失败",
+          "f0871e6bfb": "连接",
+          "fc028bdfa9": "已断开连接"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "窗格分隔线的厚度。",
@@ -7464,31 +7342,6 @@
             "f052906167": "终端中的快捷键"
           }
         },
-        "ssh": {
-          "search": {
-            "d41f296f64": "平",
-            "237b391f7c": "联系",
-            "8cb870b109": "测试",
-            "7efd17e816": "SSH",
-            "96ca5d9a0b": "测试与 SSH 目标的连接。",
-            "a3058f3605": "测试连接",
-            "2cd40ba0d0": "主机",
-            "5220501141": "配置",
-            "3b12e064a4": "导入",
-            "7f251a45a8": "从 ~/.ssh/config 导入主机。",
-            "41a3127094": "从 SSH 配置导入",
-            "f9493b80c0": "服务器",
-            "8fb1cc87cc": "主机",
-            "09395490af": "目标",
-            "00d1fda01a": "新的",
-            "f7b6383aec": "添加",
-            "62826efbe9": "添加新的远程 SSH 目标。",
-            "f5a691bb6c": "添加 SSH 目标",
-            "d4bcd497c7": "偏僻的",
-            "74c6d90d78": "管理远程 SSH 目标。",
-            "380a788da7": "SSH 连接"
-          }
-        },
         "terminal": {
           "clipboard": {
             "search": {
@@ -8137,59 +7990,6 @@
           "notificationPlayground": "通知测试面板",
           "notificationPlaygroundDescription": "用于检查提示布局、恢复操作和长文案换行的开发触发器。",
           "devOnly": "仅开发"
-        },
-        "EphemeralVmRecipeRow": {
-          "useInWorkspace": "在工作区中使用"
-        },
-        "EphemeralVmRuntimesSection": {
-          "cleanupFailed": "清理失败",
-          "cleanupRunning": "正在清理",
-          "cleanupDisabled": "清理已禁用",
-          "running": "运行中",
-          "failed": "失败",
-          "loadFailed": "无法加载临时 VM 运行时。",
-          "cleanupFailedToast": "无法清理临时 VM 运行时。",
-          "markedCleaned": "已将临时 VM 运行时标记为已清理。",
-          "cleaned": "已清理临时 VM 运行时。",
-          "copiedCleanupCommand": "已复制清理命令。",
-          "copiedCleanupPayload": "已复制清理载荷。",
-          "copyCleanupFailed": "无法复制清理命令。",
-          "title": "临时 VM 运行时",
-          "description": "由环境模板创建的运行时归工作区所有。崩溃、创建失败或手动恢复后，请清理过期条目。",
-          "refresh": "刷新临时 VM 运行时",
-          "loading": "正在检查临时 VM 运行时…",
-          "empty": "没有需要清理的临时 VM 运行时。",
-          "copyCleanup": "复制命令",
-          "retry": "重试清理",
-          "cleanup": "清理"
-        },
-        "ephemeralVms": {
-          "search": {
-            "title": "工作区专属环境",
-            "description": "了解仓库自带的环境模板如何为每个工作区提供按需创建、可丢弃的独立环境。"
-          }
-        },
-        "EphemeralVmsPane": {
-          "loadError": "无法加载环境模板。",
-          "copyError": "无法复制提示词。",
-          "skillTitle": "工作区专属环境技能",
-          "skillDescription": "设置、构建、认证并验证仓库自带的环境模板。",
-          "whatTitle": "此技能会与你一起完成",
-          "whatScaffold": "为你的提供商编写环境模板和脚本，可通过 Yiru 服务器或 SSH 连接。",
-          "whatBuild": "构建可复用的基础镜像，并让 Agent 完成登录。",
-          "whatValidate": "验证环境，以便你可以在其上创建工作区。",
-          "promptHint": "在任意工作区中，可以这样询问 Agent：",
-          "copy": "复制",
-          "copied": "已复制",
-          "recipes": "环境模板",
-          "recipesHelp": "Agent 添加到 yiru.yaml 的环境模板会显示在这里，可用于启动工作区。",
-          "refresh": "刷新临时 VM 环境模板",
-          "checking": "正在检查环境模板...",
-          "none": "还没有找到环境模板。"
-        },
-        "ephemeralVmsExperimentalSetting": {
-          "description": "显示仓库自带按需环境的设置控件和工作区运行目标。",
-          "toggleLabel": "切换工作区专属环境"
         },
         "SourceControlActionRepoOverrideNote": {
           "agent": "Agent",

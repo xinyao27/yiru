@@ -1,11 +1,11 @@
-import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import { isMethodNotFoundError, readFileViaStream } from '../ssh/filesystem-stream-reader'
 import type { FileReadResult } from './types'
 
-const warnedLegacyRelays = new WeakSet<SshChannelMultiplexer>()
+const warnedLegacyRelays = new WeakSet<ChannelMultiplexer>()
 
 export async function readSshFilesystemFile(
-  mux: SshChannelMultiplexer,
+  mux: ChannelMultiplexer,
   filePath: string,
   signal?: AbortSignal
 ): Promise<FileReadResult> {

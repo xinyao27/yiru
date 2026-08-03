@@ -150,16 +150,19 @@ export const AUTOMATION_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'automation.list',
     params: null,
+    access: { scope: 'project', tier: 'read' },
     handler: (_params, { runtime }) => ({ automations: runtime.listAutomations() })
   }),
   defineMethod({
     name: 'automation.show',
     params: AutomationId,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => ({ automation: runtime.showAutomation(params.id) })
   }),
   defineMethod({
     name: 'automation.create',
     params: AutomationCreate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       automation: await runtime.createAutomation(params)
     })
@@ -167,6 +170,7 @@ export const AUTOMATION_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'automation.update',
     params: AutomationUpdate,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({
       automation: await runtime.updateAutomation(params.id, params.updates)
     })
@@ -174,16 +178,19 @@ export const AUTOMATION_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'automation.delete',
     params: AutomationId,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => runtime.deleteAutomation(params.id)
   }),
   defineMethod({
     name: 'automation.runNow',
     params: AutomationId,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => ({ run: await runtime.runAutomationNow(params.id) })
   }),
   defineMethod({
     name: 'automation.runs',
     params: AutomationRuns,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => ({
       runs: runtime.listAutomationRuns(params.automationId)
     })

@@ -3,7 +3,6 @@ import {
   assertClipboardTextWithinLimitWithYield,
   type ReadClipboardTextOptions
 } from '@yiru/workbench-model/ui'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: terminal pane component co-locates title state, layout serialization, and portal rendering to keep pane lifecycle consistent. */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -343,15 +342,9 @@ export default function TerminalPane({
   const isRendererVisible = isVisible && isWorktreeActive
   const isVisibleRef = useRef(isRendererVisible)
   isVisibleRef.current = isRendererVisible
-  const sshReconnectTargetId = useAppStore((store) => {
-    const connectionId = getConnectionIdFromState(store, worktreeId)
-    // Why: runtime-owned SSH targets are internal plumbing users can't connect
-    // to directly, so a reconnect prompt would offer a misleading action.
-    if (!connectionId || isRuntimeOwnedSshTargetId(connectionId)) {
-      return null
-    }
-    return connectionId
-  })
+  const sshReconnectTargetId = useAppStore(
+    (store) => getConnectionIdFromState(store, worktreeId) || null
+  )
   const nativeChatTranscriptIsLocalReadable = useAppStore((store) =>
     isNativeChatTranscriptLocalReadable(getConnectionIdFromState(store, worktreeId))
   )

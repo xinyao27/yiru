@@ -3,17 +3,16 @@ import type {
   DetectedPort,
   EnrichedDetectedPort,
   SavedPortForward,
-  SshRepoReadoption,
   SshTarget,
   SshConnectionStatus,
   SshConnectionState
 } from '@yiru/runtime-protocol/ssh-connection'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines -- Why: co-locates SSH IPC handlers, port-forward
 broadcasting, and session lifecycle in one file to keep the data flow obvious. */
 import { ipcMain, powerMonitor, type BrowserWindow } from 'electron'
 import { SSH_TERMINATE_RECONNECT_REQUIRED } from '~shared/constants'
 
+import type { ChannelMultiplexer } from '../channel-multiplexer/multiplexer'
 import type { Store } from '../persistence'
 import { advertisedUrlWatcher } from '../ports/advertised-url-watcher'
 import {
@@ -32,7 +31,6 @@ import {
 } from '../pty/pty'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { registerSshBrowseHandler } from './browse'
-import type { SshChannelMultiplexer } from './channel-multiplexer'
 import { SshConnectionManager, type SshConnectionCallbacks } from './connection'
 import { initializeSshConnectionGenerationSession } from './connection-generation'
 import { SshConnectionStore } from './connection-store'
@@ -44,7 +42,6 @@ import {
   isCurrentSshProviderAuthority,
   rotateSshProviderAuthority
 } from './provider-authority'
-import { forceStopRelayForTarget } from './relay/reset'
 import { SshRelaySession, type SshRelayAiVaultHostInfo } from './relay/session'
 import type { RemoteHostPlatform } from './remote/platform'
 
@@ -62,17 +59,12 @@ let currentRuntime: YiruRuntimeService | undefined
 const SSH_IPC_CHANNELS = [
   'ssh:listTargets',
   'ssh:listRemovedTargetLabels',
-  'ssh:addTarget',
-  'ssh:updateTarget',
   'ssh:removeTarget',
-  'ssh:importConfig',
   'ssh:connect',
   'ssh:disconnect',
   'ssh:terminateSessions',
-  'ssh:resetRelay',
   'ssh:getState',
   'ssh:needsPassphrasePrompt',
-  'ssh:testConnection',
   'ssh:addPortForward',
   'ssh:updatePortForward',
   'ssh:removePortForward',
@@ -153,22 +145,11 @@ export async function removeRegisteredSshTarget(targetId: string): Promise<void>
 const activeSessions = new Map<string, SshRelaySession>()
 
 export function getActiveSshAiVaultHostInfo(targetId: string): SshRelayAiVaultHostInfo | null {
-  if (isRuntimeOwnedSshTargetId(targetId)) {
-    return null
-  }
-  return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
-}
-
-/** Owner-only Coworking lookup; runtime-owned targets stay hidden from every renderer API. */
-export function getActiveSshCoworkingHostInfo(targetId: string): SshRelayAiVaultHostInfo | null {
   return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
 }
 
 export function getActiveSshAiVaultHostInfos(): SshRelayAiVaultHostInfo[] {
   return [...activeSessions.values()].flatMap((session) => {
-    if (isRuntimeOwnedSshTargetId(session.targetId)) {
-      return []
-    }
     const info = session.getAiVaultHostInfo()
     return info ? [info] : []
   })
@@ -268,12 +249,6 @@ function broadcastSshState(
   targetId: string,
   state: SshConnectionState
 ): void {
-  // Why: runtime-owned (ephemeral-VM) targets are hidden from the renderer, which
-  // has no surface for them. Broadcasting their state would make the renderer fire
-  // a listTargets() lookup per event (incl. each relay-lost reconnect) for nothing.
-  if (isRuntimeOwnedSshTargetId(targetId)) {
-    return
-  }
   const enrichedState = withSshRemotePlatform(targetId, state)
   const win = getMainWindow()
   if (win && !win.isDestroyed()) {
@@ -803,24 +778,6 @@ export function registerSshHandlers(
   // Why: SSH target add/import can re-adopt workspaces orphaned on a removed
   // target id (see ssh-target-readoption). When that re-points repos, the
   // renderer must refresh its repo list to surface the reattached workspaces.
-  function takeRepoReadoptions(): SshRepoReadoption[] {
-    if (!sshStore || sshStore.lastRepoReadoptions.length === 0) {
-      return []
-    }
-    const repoReadoptions = sshStore.lastRepoReadoptions
-    sshStore.lastRepoReadoptions = []
-    for (const targetId of new Set(
-      repoReadoptions.flatMap(({ oldTargetId, newTargetId }) => [oldTargetId, newTargetId])
-    )) {
-      rotateSshProviderAuthority(targetId)
-    }
-    const win = getCurrentMainWindow()
-    if (win && !win.isDestroyed()) {
-      win.webContents.send('repos:changed')
-    }
-    return repoReadoptions
-  }
-
   ipcMain.handle('ssh:listTargets', () => {
     return sshStore!.listTargets()
   })
@@ -829,30 +786,8 @@ export function registerSshHandlers(
     return sshStore!.listRemovedTargetLabels()
   })
 
-  ipcMain.handle('ssh:addTarget', (_event, args: { target: Omit<SshTarget, 'id'> }) => {
-    const target = sshStore!.addTarget(args.target)
-    // Why: re-adding a removed host can re-adopt orphaned workspaces (re-point
-    // repos/worktrees off the dead id). Refresh the renderer's repo list so the
-    // reattached workspaces move from grey ghosts back onto the live host.
-    const repoReadoptions = takeRepoReadoptions()
-    return { target, repoReadoptions }
-  })
-
-  ipcMain.handle(
-    'ssh:updateTarget',
-    (_event, args: { id: string; updates: Partial<Omit<SshTarget, 'id'>> }) => {
-      return sshStore!.updateTarget(args.id, args.updates)
-    }
-  )
-
   ipcMain.handle('ssh:removeTarget', async (_event, args: { id: string }) => {
     await removeRegisteredSshTarget(args.id)
-  })
-
-  ipcMain.handle('ssh:importConfig', (_event, args?: { reAdopt?: boolean }) => {
-    const targets = sshStore!.importFromSshConfig(args)
-    const repoReadoptions = takeRepoReadoptions()
-    return { targets, repoReadoptions }
   })
 
   // ── Connection lifecycle ───────────────────────────────────────────
@@ -1108,80 +1043,6 @@ export function registerSshHandlers(
     await connectionManager!.disconnect(args.targetId)
   })
 
-  async function doResetRelay(targetId: string, target: SshTarget): Promise<void> {
-    rotateSshProviderAuthority(targetId)
-    const inFlightConnect = connectInFlight.get(targetId)
-    if (inFlightConnect) {
-      try {
-        // Why: reset tears down activeSessions; doing that while doConnect is
-        // still deploying can dispose the session doConnect is about to use.
-        await inFlightConnect.promise
-      } catch {
-        // The reset can still recover a stale remote relay after a failed connect.
-      }
-    }
-
-    const session = activeSessions.get(targetId)
-    if (session) {
-      await portForwardManager!.removeAllForwards(targetId)
-      // Why: reset has its own stale-relay lease semantics below. dispose()
-      // records clean PTY termination, which hides reset-affected leases.
-      session.detach()
-      activeSessions.delete(targetId)
-      clearRelayLostBackoff(targetId)
-    }
-
-    const existingConn = connectionManager!.getConnection(targetId)
-    const conn = existingConn ?? (await connectionManager!.connect(target))
-    try {
-      await forceStopRelayForTarget(conn, targetId)
-    } finally {
-      const ptyIds = new Set(getPtyIdsForConnection(targetId))
-      for (const lease of persistedStore!.getSshRemotePtyLeases(targetId)) {
-        if (lease.state !== 'terminated' && lease.state !== 'expired') {
-          ptyIds.add(lease.ptyId)
-          persistedStore!.markSshRemotePtyLease(targetId, lease.ptyId, 'expired')
-        }
-      }
-      // Why: reset force-kills the remote relay daemon, so every local PTY
-      // handle owned by that relay is stale even if the reset command failed
-      // after the remote process accepted SIGTERM.
-      for (const ptyId of ptyIds) {
-        const appPtyId = toAppSshPtyId(targetId, ptyId)
-        clearProviderPtyState(appPtyId)
-        deletePtyOwnership(appPtyId)
-      }
-      // Why: reset's connect() can trip onCredentialRequest, which adds to
-      // credentialRequestedForTarget. Without this delete, a later doConnect
-      // that doesn't prompt would still persist lastRequiredPassphrase=true.
-      credentialRequestedForTarget.delete(targetId)
-      await connectionManager!.disconnect(targetId)
-    }
-  }
-
-  ipcMain.handle('ssh:resetRelay', (_event, args: { targetId: string }) => {
-    const existingReset = resetRelayInFlight.get(args.targetId)
-    if (existingReset) {
-      return existingReset
-    }
-
-    const target = sshStore!.getTarget(args.targetId)
-    if (!target) {
-      throw new Error(`SSH target "${args.targetId}" not found`)
-    }
-
-    let resetPromise: Promise<void>
-    resetPromise = Promise.resolve()
-      .then(() => doResetRelay(args.targetId, target))
-      .finally(() => {
-        if (resetRelayInFlight.get(args.targetId) === resetPromise) {
-          resetRelayInFlight.delete(args.targetId)
-        }
-      })
-    resetRelayInFlight.set(args.targetId, resetPromise)
-    return resetPromise
-  })
-
   ipcMain.handle('ssh:getState', (_event, args: { targetId: string }) => {
     return getPublicSshState(args.targetId)
   })
@@ -1199,65 +1060,6 @@ export function registerSshHandlers(
     }
     const conn = connectionManager!.getConnection(args.targetId)
     return !conn?.hasCachedCredential()
-  })
-
-  ipcMain.handle('ssh:testConnection', async (_event, args: { targetId: string }) => {
-    const target = sshStore!.getTarget(args.targetId)
-    if (!target) {
-      throw new Error(`SSH target "${args.targetId}" not found`)
-    }
-
-    // Why: testConnection calls connect() then disconnect(). If the target
-    // already has an active relay session, connect() would reuse the connection
-    // but disconnect() would tear down the entire relay stack — killing all
-    // active PTYs and file watchers for a "test" that was supposed to be safe.
-    // Also guard 'reconnecting' — disconnect() would kill the SSH connection
-    // that the in-flight reconnect is using for relay deployment.
-    const existingSession = activeSessions.get(args.targetId)
-    const sessionState = existingSession?.getState()
-    if (
-      sessionState === 'ready' ||
-      sessionState === 'deploying' ||
-      sessionState === 'reconnecting'
-    ) {
-      return { success: true, state: connectionManager!.getState(args.targetId) }
-    }
-
-    // Why: if a real ssh:connect is in flight for this target, testConnection's
-    // disconnect() call would tear down the connection that doConnect is using
-    // for relay deployment. Wait for the in-flight connect to finish instead.
-    const inFlight = connectInFlight.get(args.targetId)
-    if (inFlight) {
-      try {
-        const state = await inFlight.promise
-        return { success: true, state }
-      } catch (err) {
-        return {
-          success: false,
-          error: err instanceof Error ? err.message : String(err)
-        }
-      }
-    }
-
-    testingTargets.add(args.targetId)
-    try {
-      const conn = await connectionManager!.connect(target)
-      const state = conn.getState()
-      await connectionManager!.disconnect(args.targetId)
-      return { success: true, state }
-    } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : String(err)
-      }
-    } finally {
-      testingTargets.delete(args.targetId)
-      // Why: the shared onCredentialRequest callback adds to this set for
-      // any connect() call, including testConnection. Without clearing it,
-      // a later real connect that doesn't prompt would persist
-      // lastRequiredPassphrase=true, causing startup to defer this target.
-      credentialRequestedForTarget.delete(args.targetId)
-    }
   })
 
   // ── Port forwarding ─────────────────────────────────────────────────
@@ -1369,7 +1171,7 @@ export function getSshConnectionStore(): SshConnectionStore | null {
   return sshStore
 }
 
-export function getActiveMultiplexer(connectionId: string): SshChannelMultiplexer | undefined {
+export function getActiveMultiplexer(connectionId: string): ChannelMultiplexer | undefined {
   return activeSessions.get(connectionId)?.getMux() ?? undefined
 }
 

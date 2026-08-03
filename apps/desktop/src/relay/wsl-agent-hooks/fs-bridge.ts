@@ -12,7 +12,7 @@ import {
   type WslFsResult
 } from '~shared/wsl-hook-relay-contract'
 
-import type { RelayDispatcher } from './dispatcher'
+import type { RelayDispatcher } from '../dispatcher'
 
 function failure(err: unknown): WslFsFailure {
   const e = err as NodeJS.ErrnoException

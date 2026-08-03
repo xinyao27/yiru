@@ -34,6 +34,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
     name: 'notifications.subscribe',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime, mobileNotifications, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
         const unsubscribe = mobileNotifications.subscribe((event) => {
@@ -62,6 +63,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
     name: 'notifications.unsubscribe',
     mobile: true,
     params: NotificationUnsubscribeParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)
       return { unsubscribed: true }
@@ -71,6 +73,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
     name: 'notifications.getMissedSince',
     mobile: true,
     params: NotificationGetMissedSinceParams,
+    access: { scope: 'host', tier: 'read' },
     // Why: returns only notifications with seq > lastSeenSeq. The runtime owns
     // the monotonic seq, so this is the single source of truth for what the
     // client missed while its socket was reaped.
