@@ -36,44 +36,44 @@ export function MobileGlassPressable({
   ...pressableProps
 }: MobileGlassPressableProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
-  const resolvedHitSlop =
-    hitSlop ?? (size === 'large' ? 0 : size === 'regular' ? 4 : size === 'small' ? 6 : 6)
+  const resolvedHitSlop = hitSlop ?? (size ? 0 : 6)
 
-  const surface = (
-    <MobileGlassSurface
-      className={cn('overflow-hidden', className)}
-      fallbackClassName={fallbackClassName}
-      isFunctional
-      isInteractive={!disabled}
-      tintColorClassName={tintColorClassName}
+  return (
+    <Pressable
+      {...pressableProps}
+      accessibilityRole={accessibilityRole}
+      className={size ? cn('min-h-11 min-w-11 justify-center', containerClassName) : undefined}
+      disabled={disabled}
+      hitSlop={resolvedHitSlop}
+      onPress={onPress}
     >
-      <Pressable
-        {...pressableProps}
-        accessibilityRole={accessibilityRole}
-        className={cn(
-          !disabled && !isGlassAvailable && 'active:bg-accent',
-          disabled && 'opacity-40',
-          size === 'large'
-            ? 'min-h-11'
-            : size === 'regular'
-              ? 'min-h-9'
-              : size === 'small'
-                ? 'min-h-8'
-                : undefined,
-          contentClassName
-        )}
-        disabled={disabled}
-        hitSlop={resolvedHitSlop}
-        onPress={onPress}
-      >
-        {children}
-      </Pressable>
-    </MobileGlassSurface>
+      {({ pressed }) => (
+        <MobileGlassSurface
+          className={cn('overflow-hidden', className)}
+          fallbackClassName={fallbackClassName}
+          isFunctional
+          isInteractive={!disabled}
+          pointerEvents="none"
+          tintColorClassName={tintColorClassName}
+        >
+          <View
+            className={cn(
+              pressed && !disabled && !isGlassAvailable && 'bg-accent',
+              disabled && 'opacity-40',
+              size === 'large'
+                ? 'min-h-11'
+                : size === 'regular'
+                  ? 'min-h-9'
+                  : size === 'small'
+                    ? 'min-h-8'
+                    : undefined,
+              contentClassName
+            )}
+          >
+            {children}
+          </View>
+        </MobileGlassSurface>
+      )}
+    </Pressable>
   )
-
-  if (!size) {
-    return surface
-  }
-
-  return <View className={cn('min-h-11 justify-center', containerClassName)}>{surface}</View>
 }
