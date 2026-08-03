@@ -4,6 +4,7 @@ import { AgentStateDot, agentStateLabel } from '~renderer/components/agent-state
 import { useAgentRowConversationName } from '~renderer/components/dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
 import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '~renderer/lib/agent-row-primary-text'
@@ -131,6 +132,13 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     typeof childAgentCount === 'number' &&
     childAgentCount > 0 &&
     typeof onToggleChildAgents === 'function'
+  const childDisclosureLabel = hasChildDisclosure
+    ? translate(
+        'auto.components.right.sidebar.AiVaultSessionSubagents.subagentsCount',
+        'Subagents ({{value0}})',
+        { value0: childAgentCount }
+      )
+    : ''
 
   const handleActivate = useCallback(
     (e: React.MouseEvent) => {
@@ -230,26 +238,38 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       )}
       <AgentStateDot state={dotState} size="sm" />
       {hasChildDisclosure ? (
-        <Button
-          variant="quiet"
-          size="xs"
-          type="button"
-          onClick={handleToggleChildAgents}
-          aria-label={translate(
-            'auto.components.right.sidebar.AiVaultSessionSubagents.subagentsCount',
-            'Subagents ({{value0}})',
-            { value0: childAgentCount }
-          )}
-          aria-expanded={childAgentsExpanded}
-        >
-          <span className="text-[10px] tabular-nums">{childAgentCount}</span>
-          <ChevronRight
-            className={cn(
-              'size-3 transition-transform duration-150',
-              childAgentsExpanded && 'rotate-90'
-            )}
-          />
-        </Button>
+        <>
+          {/* Why: the count remains part of row activation; only the trailing
+              chevron owns disclosure, unlike the dashboard's leading control. */}
+          <span className="text-[10px] tabular-nums" aria-hidden="true">
+            {childAgentCount}
+          </span>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="quiet"
+                  size="icon-xs"
+                  type="button"
+                  onClick={handleToggleChildAgents}
+                  aria-label={childDisclosureLabel}
+                  aria-expanded={childAgentsExpanded}
+                >
+                  <ChevronRight
+                    weight="regular"
+                    className={cn(
+                      'size-3 transition-transform duration-150 motion-reduce:transition-none',
+                      childAgentsExpanded && 'rotate-90'
+                    )}
+                  />
+                </Button>
+              }
+            />
+            <TooltipContent side="top" sideOffset={4}>
+              {childDisclosureLabel}
+            </TooltipContent>
+          </Tooltip>
+        </>
       ) : null}
     </>
   )

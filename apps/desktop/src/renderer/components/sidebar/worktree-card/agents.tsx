@@ -18,6 +18,7 @@ import { deriveRunningAgentSendTargets } from '../running-agent-targets'
 import { useWorktreeAgentRows } from '../use-worktree-agent-rows'
 import { useWorktreeAgentExpansionState } from './agents-expansion-state'
 import { CompactAgentRow } from './compact-agent-row'
+import { buildCompactAgentBranches, type CompactAgentBranch } from './compact-agent-tree'
 import { InlineAgentRail } from './inline-agent-rail'
 import { selectSendTargetControlInputs, selectSendTargetInputs } from './send-target-inputs'
 
@@ -235,6 +236,14 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   // toggle no longer resets it (which read as one section expanding the other).
   const { collapsedLineageParents, toggleLineageParent: toggleLineageParentState } =
     useWorktreeAgentExpansionState(worktreeId)
+  const compactRootBranches = useMemo(
+    () => buildCompactAgentBranches(agents, collapsedLineageParents),
+    [agents, collapsedLineageParents]
+  )
+  const compactRootRowVisibleCounts = useMemo(
+    () => compactRootBranches.map((branch) => branch.visibleRowCount),
+    [compactRootBranches]
+  )
 
   const toggleLineageParent = useCallback(
     (paneKey: string) => {
@@ -339,23 +348,16 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   }
 
   const renderCompactAgentBranch = (
-    agent: DashboardAgentRowData,
-    ancestorPaneKeys: ReadonlySet<string> = new Set(),
+    branch: CompactAgentBranch,
     siblingPosition?: 'middle' | 'last'
   ): React.ReactNode => {
-    if (ancestorPaneKeys.has(agent.paneKey)) {
-      return null
-    }
-    const childAgents = childrenByParentPaneKey.get(agent.paneKey) ?? []
-    const expanded = !collapsedLineageParents.has(agent.paneKey)
+    const { agent, children: childBranches, isExpanded } = branch
     const sendTarget = isAgentSendTargetModeActive
       ? (sendTargetsByPaneKey.get(agent.paneKey) ?? {
           status: 'disabled' as const,
           disabledReason: 'Agent is not available'
         })
       : undefined
-    const descendantAncestorPaneKeys = new Set(ancestorPaneKeys)
-    descendantAncestorPaneKeys.add(agent.paneKey)
     return (
       <div className="relative" key={agent.paneKey}>
         {siblingPosition ? (
@@ -385,19 +387,29 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           sendTargetDisabledReason={sendTarget?.disabledReason}
           onSendTargetClick={isAgentSendTargetModeActive ? handleSendTargetClick : undefined}
           isFocusedPane={agent.paneKey === focusedAgentPaneKey}
-          childAgentCount={childAgents.length > 0 ? childAgents.length : undefined}
-          childAgentsExpanded={expanded}
-          onToggleChildAgents={childAgents.length > 0 ? toggleLineageParent : undefined}
+          childAgentCount={childBranches.length > 0 ? childBranches.length : undefined}
+          childAgentsExpanded={isExpanded}
+          onToggleChildAgents={childBranches.length > 0 ? toggleLineageParent : undefined}
         />
-        {childAgents.length > 0 && expanded ? (
-          <div className="ml-3 flex flex-col pl-1">
-            {childAgents.map((childAgent, index) =>
-              renderCompactAgentBranch(
-                childAgent,
-                descendantAncestorPaneKeys,
-                index === childAgents.length - 1 ? 'last' : 'middle'
-              )
+        {childBranches.length > 0 ? (
+          <div
+            className={cn(
+              'ml-3 grid transition-[grid-template-rows] duration-150 ease-out motion-reduce:transition-none',
+              isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             )}
+            aria-hidden={!isExpanded}
+            inert={!isExpanded}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="flex flex-col pl-1">
+                {childBranches.map((childBranch, index) =>
+                  renderCompactAgentBranch(
+                    childBranch,
+                    index === childBranches.length - 1 ? 'last' : 'middle'
+                  )
+                )}
+              </div>
+            </div>
           </div>
         ) : null}
       </div>
@@ -410,8 +422,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
         {inlineRailCardPaddingLeft ? (
           <InlineAgentRail
             cardPaddingLeft={inlineRailCardPaddingLeft}
-            agents={agents}
-            collapsedParentPaneKeys={collapsedLineageParents}
+            rootRowVisibleCounts={compactRootRowVisibleCounts}
           />
         ) : null}
         <div
@@ -433,7 +444,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           aria-label={translate('auto.components.sidebar.WorktreeCardAgents.1b0a156717', 'Agents')}
           data-compact-agent-list="true"
         >
-          {rootAgents.map((rootAgent) => renderCompactAgentBranch(rootAgent))}
+          {compactRootBranches.map((rootBranch) => renderCompactAgentBranch(rootBranch))}
         </div>
       </>
     )
