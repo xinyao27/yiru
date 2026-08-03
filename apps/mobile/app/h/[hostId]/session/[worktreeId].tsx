@@ -52,6 +52,7 @@ import {
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { isFileExistsErrorMessage } from '~/files/file-exists-error'
 import { resolveMobileFileTabDoc } from '~/files/file-tab-doc'
+import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import {
   triggerMediumImpact,
@@ -187,6 +188,10 @@ import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '~/transport/types'
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
+const BROWSER_STREAMING_UNAVAILABLE_MESSAGE = translate(
+  'mobile.session.browserStreamingUnavailable',
+  'Desktop update required for mobile browser streaming'
+)
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
 export default function SessionScreen() {
@@ -2479,7 +2484,7 @@ export default function SessionScreen() {
     // Why: read via ref so a tap that fires before the capability probe resolves
     // (or from a stale callback) still sees the live support value.
     if (browserScreencastSupportedRef.current !== true) {
-      showToast('Desktop update required for mobile browser streaming', 1600)
+      showToast(BROWSER_STREAMING_UNAVAILABLE_MESSAGE, 1600)
       return false
     }
     const url = normalizeBrowserUrl(rawUrl)
@@ -3539,9 +3544,7 @@ export default function SessionScreen() {
               }
             })
           }}
-          onBrowserUnavailable={() => {
-            showToast('Desktop update required for mobile browser streaming', 1600)
-          }}
+          onBrowserUnavailable={() => showToast(BROWSER_STREAMING_UNAVAILABLE_MESSAGE, 1600)}
           onCreateMarkdown={() => void handleCreateMarkdownNote()}
           onCreateTerminal={() => void handleCreateTerminal()}
           onOpenBrowserInput={() => setShowCreateBrowserModal(true)}
