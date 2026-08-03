@@ -67,7 +67,7 @@ jobs:
           git diff --exit-code package.json apps/desktop/package.json apps/mobile/package.json packages/editor-themes/package.json pnpm-workspace.yaml pnpm-lock.yaml
 
       - name: Lint
-        run: pnpm exec vp lint --format github
+        run: pnpm lint:check --format github
 
       # Why: feature work must reuse the closed shadcn vocabulary instead of
       # growing one-off color, state, or floating-surface tokens.

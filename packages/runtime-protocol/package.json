@@ -90,12 +90,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
-    "fmt": "pnpm --workspace-root exec vp fmt packages/runtime-protocol",
-    "lint": "pnpm --workspace-root exec vp lint packages/runtime-protocol --fix",
+    "fmt": "vp fmt .",
+    "lint": "vp lint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@yiru/workbench-model": "catalog:",
+    "@yiru/workbench-model": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

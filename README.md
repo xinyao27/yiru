@@ -76,9 +76,16 @@ Useful commands:
 ```bash
 pnpm dev:mobile   # Start the Expo mobile app
 pnpm typecheck    # Type-check all workspace projects
-pnpm test         # Run the test suite
+pnpm check        # Lint, format, typecheck, and repository contracts
 pnpm lint         # Run and fix lint checks
 pnpm fmt          # Format the repository
+```
+
+Any package task is reachable from the repository root with `vp run <package>#<task>`:
+
+```bash
+vp run yiru#build:mac        # Package the desktop app for macOS
+vp run yiru-landing#deploy   # Build and deploy the landing page
 ```
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for repository conventions, platform setup, and contribution guidance.
