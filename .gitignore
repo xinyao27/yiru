@@ -30,6 +30,9 @@ apps/desktop/native/**/.build/
 .pnpm-store/
 package-lock.json
 
+# Wrangler
+.wrangler/
+
 # Environment
 .env
 .env.local

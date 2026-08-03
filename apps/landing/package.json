@@ -23,7 +23,9 @@
     "dev": "vp dev",
     "build": "vp build",
     "preview": "vp preview",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "deploy": "pnpm run build && wrangler deploy",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.worker.json"
   },
   "dependencies": {
     "@phosphor-icons/react": "catalog:",
@@ -34,6 +36,7 @@
     "thinking-orbs": "catalog:"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -41,6 +44,7 @@
     "@vitejs/plugin-react": "catalog:",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
-    "typescript": "catalog:desktop"
+    "typescript": "catalog:desktop",
+    "wrangler": "catalog:"
   }
 }

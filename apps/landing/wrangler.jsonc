@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "yiru-landing",
+  "main": "worker/site.ts",
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // Why: the landing page is one client-rendered document, so any unmatched
+    // path must fall back to index.html instead of a 404.
+    "not_found_handling": "single-page-application",
+    // Why: the www redirect in worker/site.ts only fires if the Worker runs
+    // before the asset router, which short-circuits every matching path.
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "yiru.ai", "custom_domain": true },
+    { "pattern": "www.yiru.ai", "custom_domain": true }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

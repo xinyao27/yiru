@@ -1,0 +1,64 @@
+name: Landing Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/landing/**'
+      # Why: the landing page renders product URLs straight out of the shared
+      # workbench model, so a link change there must reach production too.
+      - 'packages/workbench-model/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/landing-deploy.yml'
+  # Why: a redeploy must be possible without an empty commit — rollbacks and
+  # Cloudflare-side incidents do not come with a source change.
+  workflow_dispatch:
+
+# Why: two overlapping deploys race to publish the same Worker, and the loser
+# can land last. Serialize them and let the newer commit win.
+concurrency:
+  group: landing-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Why: yiru-landing imports @yiru/workbench-model from workspace source,
+      # which only resolves once that package has emitted its build output.
+      - name: Build cross-client packages
+        run: pnpm run build:cross-client-packages
+
+      - name: Typecheck
+        run: pnpm --filter yiru-landing run typecheck
+
+      - name: Build
+        run: pnpm --filter yiru-landing run build
+
+      - name: Deploy to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm --filter yiru-landing exec wrangler deploy

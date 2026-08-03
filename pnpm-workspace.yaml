@@ -3,6 +3,7 @@ packages:
   - packages/*
 catalog:
   '@base-ui/react': 1.6.0
+  '@cloudflare/workers-types': ^5.20260801.1
   '@dnd-kit/core': ^6.3.1
   '@dnd-kit/sortable': ^10.0.0
   '@electron-toolkit/preload': ^3.0.2
@@ -148,6 +149,7 @@ catalog:
   vscode-jsonrpc: ^9.0.1
   vscode-oniguruma: ^2.0.1
   vscode-textmate: ^9.3.2
+  wrangler: ^4.118.0
   yaml: ^2.9.0
   zod: ~4.4.3
 catalogMode: strict
@@ -246,6 +248,7 @@ allowBuilds:
   node-pty: true
   sherpa-onnx: true
   ssh2: false
+  workerd: true
 overrides:
   monaco-editor>dompurify: catalog:overrides
   vite: 'catalog:'

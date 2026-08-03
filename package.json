@@ -40,6 +40,7 @@
     "build:electron-vite": "pnpm --filter yiru run build:electron-vite",
     "build:web": "pnpm --filter yiru run build:web",
     "build:landing": "pnpm --filter yiru-landing run build",
+    "deploy:landing": "pnpm run build:cross-client-packages && pnpm --filter yiru-landing run deploy",
     "ensure:electron-runtime": "pnpm --filter yiru run ensure:electron-runtime",
     "verify:computer-native": "pnpm --filter yiru run verify:computer-native",
     "verify:repository-contracts": "pnpm --filter yiru run verify:repository-contracts",
