@@ -24,8 +24,6 @@ import { registerRepoHandlers } from '../project-groups/repos'
 import { registerDaemonManagementHandlers } from '../pty/management'
 import { getLocalPtyProvider, registerPtyHandlers } from '../pty/pty'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import { registerRemoteWorkspaceHandlers } from '../ssh/remote/workspace'
-import { registerSshHandlers } from '../ssh/ssh'
 import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
 import {
@@ -137,8 +135,6 @@ export function attachMainWindowServices(
         )
       })
   }
-  registerSshHandlers(store, () => mainWindow, runtime)
-  registerRemoteWorkspaceHandlers(store, () => mainWindow)
   registerFileDropRelay(mainWindow)
   // Why: setupAutoUpdater's first getAutoUpdater() call synchronously
   // require()s electron-updater in packaged builds — seconds on a cold

@@ -27,8 +27,7 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
 
   constructor(
     private readonly runtime: CoworkingSessionRuntime,
-    private readonly pairedRuntime?: CoworkingExecutionHostSessionReader,
-    private readonly ssh?: CoworkingExecutionHostSessionReader
+    private readonly pairedRuntime?: CoworkingExecutionHostSessionReader
   ) {}
 
   registerPublicWorktree(request: CoworkingExecutionHostSessionReadRequest): void {
@@ -76,9 +75,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
       return await this.requirePairedRuntime().listAiVaultSessionPage(request, cursor, signal)
     }
     if (host.kind === 'ssh') {
-      if (this.ssh) {
-        return await this.ssh.listAiVaultSessionPage(request, cursor, signal)
-      }
       // Why: owner-local AI Vault data must never be projected as an SSH host's history.
       throw new CoworkingExecutionError('resource_unavailable')
     }
@@ -116,7 +112,7 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
       return
     }
     if (host.kind === 'ssh') {
-      await this.ssh?.releaseAiVaultSessionPage(request, cursor)
+      // Why: nothing was ever opened for an SSH host, so there is no page to release.
       return
     }
     releaseLocalCoworkingSessionInventoryPage({
@@ -140,11 +136,9 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
       listener(snapshot, this.resolveLocalReadRequest(snapshot))
     )
     const unsubscribeRuntime = this.pairedRuntime?.subscribe?.(listener) ?? (() => {})
-    const unsubscribeSsh = this.ssh?.subscribe?.(listener) ?? (() => {})
     return () => {
       unsubscribeLocal()
       unsubscribeRuntime()
-      unsubscribeSsh()
     }
   }
 

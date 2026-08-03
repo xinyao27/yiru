@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
   detectRemoteAgents,
-  detectRemoteWindowsTerminalCapabilities,
   detectInstalledAgentsWithShellPathHydration,
   refreshShellPathAndDetectAgents,
   runPreflightCheck
@@ -13,9 +12,6 @@ const PreflightCheck = z.object({
   force: z.boolean().optional()
 })
 const PreflightDetectRemoteAgents = z.object({
-  connectionId: z.string().min(1)
-})
-const PreflightDetectRemoteWindowsTerminalCapabilities = z.object({
   connectionId: z.string().min(1)
 })
 
@@ -40,12 +36,6 @@ export const PREFLIGHT_METHODS: RpcMethod[] = [
     params: PreflightDetectRemoteAgents,
     access: { scope: 'host', tier: 'read' },
     handler: async (params) => detectRemoteAgents(params)
-  }),
-  defineMethod({
-    name: 'preflight.detectRemoteWindowsTerminalCapabilities',
-    params: PreflightDetectRemoteWindowsTerminalCapabilities,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (params) => detectRemoteWindowsTerminalCapabilities(params)
   }),
   defineMethod({
     name: 'preflight.refreshAgents',

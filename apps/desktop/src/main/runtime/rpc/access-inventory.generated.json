@@ -1,5 +1,5 @@
 {
-  "methodCount": 450,
+  "methodCount": 445,
   "methods": [
     {
       "method": "<contract:AI_VAULT_LIST_SESSIONS_CONTRACT>",
@@ -2055,12 +2055,6 @@
       "tier": "read"
     },
     {
-      "method": "preflight.detectRemoteWindowsTerminalCapabilities",
-      "file": "src/main/runtime/rpc/methods/preflight.ts",
-      "scope": "host",
-      "tier": "read"
-    },
-    {
       "method": "preflight.refreshAgents",
       "file": "src/main/runtime/rpc/methods/preflight.ts",
       "scope": "host",
@@ -2407,30 +2401,6 @@
       "file": "src/main/runtime/rpc/methods/speech.ts",
       "scope": "host",
       "tier": "read"
-    },
-    {
-      "method": "ssh.connect",
-      "file": "src/main/runtime/rpc/methods/ssh.ts",
-      "scope": "host",
-      "tier": "host"
-    },
-    {
-      "method": "ssh.getState",
-      "file": "src/main/runtime/rpc/methods/ssh.ts",
-      "scope": "host",
-      "tier": "host"
-    },
-    {
-      "method": "ssh.listRemovedTargetLabels",
-      "file": "src/main/runtime/rpc/methods/ssh.ts",
-      "scope": "host",
-      "tier": "host"
-    },
-    {
-      "method": "ssh.listTargets",
-      "file": "src/main/runtime/rpc/methods/ssh.ts",
-      "scope": "host",
-      "tier": "host"
     },
     {
       "method": "stats.summary",

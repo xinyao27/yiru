@@ -28,7 +28,6 @@ import { REPO_METHODS } from './repo'
 import { SESSION_TAB_METHODS } from './session-tabs'
 import { SKILL_METHODS } from './skills'
 import { SPEECH_METHODS } from './speech'
-import { SSH_METHODS } from './ssh'
 import { STATS_METHODS } from './stats'
 import { STATUS_METHODS } from './status'
 import { TERMINAL_METHODS } from './terminal'
@@ -67,7 +66,6 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...GITHUB_METHODS,
   ...GITLAB_METHODS,
   ...HOSTED_REVIEW_METHODS,
-  ...SSH_METHODS,
   ...SPEECH_METHODS,
   ...WORKSPACE_PORT_METHODS,
   ...SKILL_METHODS,

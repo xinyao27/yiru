@@ -5,19 +5,16 @@ import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron'
 import type {
-  DirectSshDetectedWorktreeRequest,
   HostQualifiedDetectedWorktreeResult,
   ListDetectedWorktreesArgs,
   ProviderRequestId
 } from '~shared/detected-worktree-provider-contract'
-import { PROVIDER_REQUEST_ID_MAX_UTF8_BYTES } from '~shared/detected-worktree-provider-contract'
 import type {
   HostLineageSnapshot,
   ListDesktopLineageForHostArgs
@@ -25,7 +22,6 @@ import type {
 import { getProjectHostSetupWorktreeMeta } from '~shared/project-host-setup-projection'
 import { isFolderRepo } from '~shared/repo-kind'
 import { inspectSetupScriptImportCandidates } from '~shared/setup/script-imports'
-import { isAdmissibleDirectSshAuthority } from '~shared/ssh-retained-payload-admission'
 import { workspaceSourceSchema, type WorkspaceSource } from '~shared/telemetry-events'
 import type {
   AutomationWorkspaceProvenance,
@@ -92,10 +88,6 @@ import { listRepoWorktrees } from '../repo-worktrees'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import { killAllProcessesForWorktree } from '../runtime/worktree-teardown'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import {
-  isCurrentSshProviderAuthority,
-  registerSshProviderRequestAbort
-} from '../ssh/provider-authority'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
@@ -105,7 +97,6 @@ import { registerWorktreeChangeInvalidator } from './change-invalidators'
 import {
   mergeWorktree,
   parseWorktreeId,
-  areWorktreePathsEqual,
   formatWorktreeRemovalError,
   isOrphanCompatiblePreflightError,
   isOrphanedWorktreeError
@@ -498,9 +489,7 @@ function getPreservedBranchCleanupTarget(
 
 const loggedUnavailableSshGitProviders = new Set<string>()
 const loggedWorktreeListFailures = new Set<string>()
-const loggedMalformedWorktreeMetaKeys = new Set<string>()
 const detectedWorktreeProviderAborts = new Map<ProviderRequestId, AbortController>()
-const DETECTED_WORKTREE_PROVIDER_TIMEOUT_MS = 30_000
 // Why: absorb renderer polling bursts while keeping external worktree-change
 // lag bounded to one short refresh window.
 const DETECTED_WORKTREE_SCAN_CACHE_TTL_MS = 5_000
@@ -519,123 +508,6 @@ function rejectedDetectedWorktreeResult(
   }
 }
 
-function hasValidProviderRequestId(value: string): value is ProviderRequestId {
-  return value.length > 0 && Buffer.byteLength(value, 'utf8') <= PROVIDER_REQUEST_ID_MAX_UTF8_BYTES
-}
-
-async function listDirectSshDetectedWorktrees(
-  store: Store,
-  args: DirectSshDetectedWorktreeRequest
-): Promise<HostQualifiedDetectedWorktreeResult> {
-  const parsedHost = parseExecutionHostId(args.executionHostId)
-  if (
-    !hasValidProviderRequestId(args.providerRequestId) ||
-    parsedHost?.kind !== 'ssh' ||
-    parsedHost.targetId !== args.expectedAuthority.targetId ||
-    !isAdmissibleDirectSshAuthority(args.expectedAuthority)
-  ) {
-    return rejectedDetectedWorktreeResult(args, 'rejected')
-  }
-  if (!isCurrentSshProviderAuthority(args.expectedAuthority)) {
-    return rejectedDetectedWorktreeResult(args, 'stale')
-  }
-  const repos = store
-    .getRepos()
-    .filter(
-      (repo) => repo.id === args.repoId && getRepoExecutionHostId(repo) === args.executionHostId
-    )
-  if (repos.length !== 1) {
-    return rejectedDetectedWorktreeResult(args, 'ambiguous-owner')
-  }
-  const repo = repos[0]
-  if (repo.connectionId !== args.expectedAuthority.targetId) {
-    return rejectedDetectedWorktreeResult(args, 'rejected')
-  }
-  const provider = getSshGitProvider(repo.connectionId)
-  if (!provider) {
-    return rejectedDetectedWorktreeResult(args, 'authority-unknown')
-  }
-
-  const controller = new AbortController()
-  let abortStatus: 'canceled' | 'timed-out' = 'canceled'
-  const unregisterAbort = registerSshProviderRequestAbort(args.expectedAuthority, controller)
-  detectedWorktreeProviderAborts.set(args.providerRequestId, controller)
-  const timeout = setTimeout(() => {
-    abortStatus = 'timed-out'
-    controller.abort()
-  }, DETECTED_WORKTREE_PROVIDER_TIMEOUT_MS)
-  try {
-    const gitWorktrees = await provider.listWorktrees(repo.path, { signal: controller.signal })
-    if (controller.signal.aborted) {
-      return rejectedDetectedWorktreeResult(args, abortStatus)
-    }
-    const currentRepo = store
-      .getRepos()
-      .filter(
-        (candidate) =>
-          candidate.id === repo.id && getRepoExecutionHostId(candidate) === args.executionHostId
-      )
-    if (
-      currentRepo.length !== 1 ||
-      currentRepo[0].path !== repo.path ||
-      getSshGitProvider(repo.connectionId) !== provider ||
-      !isCurrentSshProviderAuthority(args.expectedAuthority)
-    ) {
-      return rejectedDetectedWorktreeResult(args, 'stale')
-    }
-    return {
-      status: 'complete',
-      providerRequestId: args.providerRequestId,
-      repoId: repo.id,
-      authority: {
-        kind: 'direct-ssh',
-        executionHostId: args.executionHostId,
-        ...args.expectedAuthority
-      },
-      result: {
-        repoId: repo.id,
-        authoritative: true,
-        source: 'git',
-        worktrees: buildDetectedGitWorktrees(store, repo, gitWorktrees)
-      }
-    }
-  } catch {
-    if (controller.signal.aborted) {
-      return rejectedDetectedWorktreeResult(args, abortStatus)
-    }
-    if (!isCurrentSshProviderAuthority(args.expectedAuthority)) {
-      return rejectedDetectedWorktreeResult(args, 'stale')
-    }
-    const worktrees = listDisconnectedSshWorktrees(
-      store,
-      repo,
-      createSshWorktreeMetaIndex(Object.entries(store.getAllWorktreeMeta()))
-    )
-    return {
-      status: 'non-authoritative',
-      providerRequestId: args.providerRequestId,
-      repoId: repo.id,
-      authority: {
-        kind: 'direct-ssh',
-        executionHostId: args.executionHostId,
-        ...args.expectedAuthority
-      },
-      result: {
-        repoId: repo.id,
-        authoritative: false,
-        source: 'metadata-fallback',
-        worktrees: buildDisconnectedDetectedWorktrees(store, repo, worktrees)
-      }
-    }
-  } finally {
-    clearTimeout(timeout)
-    unregisterAbort()
-    if (detectedWorktreeProviderAborts.get(args.providerRequestId) === controller) {
-      detectedWorktreeProviderAborts.delete(args.providerRequestId)
-    }
-  }
-}
-
 function listLineageForHost(
   store: Store,
   args: ListDesktopLineageForHostArgs
@@ -651,16 +523,12 @@ function listLineageForHost(
   if (!parsedHost || parsedHost.kind === 'runtime') {
     return rejected('rejected')
   }
+  // Why: vouching for a remote lineage snapshot needed a live provider generation
+  // to re-check against. Report stale rather than claim authority we cannot prove.
   if (parsedHost.kind === 'ssh') {
-    if (
-      !('expectedAuthority' in args) ||
-      args.expectedAuthority.targetId !== parsedHost.targetId ||
-      !isAdmissibleDirectSshAuthority(args.expectedAuthority) ||
-      !isCurrentSshProviderAuthority(args.expectedAuthority)
-    ) {
-      return rejected('stale')
-    }
-  } else if ('expectedAuthority' in args) {
+    return rejected('stale')
+  }
+  if ('expectedAuthority' in args) {
     return rejected('rejected')
   }
 
@@ -686,35 +554,19 @@ function listLineageForHost(
         return ownsWorktree(scope.worktreeId)
       }
       if (scope?.type === 'folder') {
-        return store
-          .getFolderWorkspaces()
-          .some(
-            (folder) =>
-              folder.id === scope.folderWorkspaceId &&
-              toSshExecutionHostId(folder.connectionId ?? '') === parsedHost.id
-          )
+        return store.getFolderWorkspaces().some(
+          (folder) =>
+            // Why: this snapshot is only ever built for the local host now, so a
+            // folder belongs to it exactly when it carries no remote connection.
+            folder.id === scope.folderWorkspaceId && !folder.connectionId
+        )
       }
       return false
     })
   )
-  if (parsedHost.kind === 'local') {
-    return {
-      authoritative: true,
-      authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
-      worktreeLineageById,
-      workspaceLineageByChildKey
-    }
-  }
-  if (!('expectedAuthority' in args)) {
-    return rejected('rejected')
-  }
   return {
     authoritative: true,
-    authority: {
-      kind: 'direct-ssh',
-      executionHostId: parsedHost.id,
-      ...args.expectedAuthority
-    },
+    authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
     worktreeLineageById,
     workspaceLineageByChildKey
   }
@@ -886,78 +738,6 @@ function pruneLineageForMissingRepoWorktrees(
       }
     }
   }
-}
-
-type SshWorktreeMetaCandidate = {
-  id: string
-  path: string
-  meta: WorktreeMeta
-}
-
-type SshWorktreeMetaIndex = Map<string, SshWorktreeMetaCandidate[]>
-
-function createSshWorktreeMetaIndex(entries: [string, WorktreeMeta][]): SshWorktreeMetaIndex {
-  const index: SshWorktreeMetaIndex = new Map()
-  for (const [worktreeId, meta] of entries) {
-    let parsed: { repoId: string; worktreePath: string }
-    try {
-      parsed = parseWorktreeId(worktreeId)
-    } catch (err) {
-      warnOnce(
-        loggedMalformedWorktreeMetaKeys,
-        worktreeId,
-        `[worktrees] ignoring malformed persisted worktree metadata key "${worktreeId}"`,
-        err
-      )
-      continue
-    }
-
-    const candidates = index.get(parsed.repoId) ?? []
-    candidates.push({ id: worktreeId, path: parsed.worktreePath, meta })
-    index.set(parsed.repoId, candidates)
-  }
-  return index
-}
-
-function synthesizeSshGitWorktree(repo: Repo, path: string, meta: WorktreeMeta): GitWorktreeInfo {
-  return {
-    path,
-    head: '',
-    branch: '',
-    isBare: false,
-    isMainWorktree: areWorktreePathsEqual(path, repo.path),
-    ...(meta.sparseDirectories !== undefined ||
-    meta.sparseBaseRef !== undefined ||
-    meta.sparsePresetId !== undefined
-      ? { isSparse: true }
-      : {})
-  }
-}
-
-function listDisconnectedSshWorktrees(
-  store: Store,
-  repo: Repo,
-  metaIndex: SshWorktreeMetaIndex
-): ReturnType<typeof mergeWorktree>[] {
-  const byWorktreeId = new Map<string, ReturnType<typeof mergeWorktree>>()
-  for (const candidate of metaIndex.get(repo.id) ?? []) {
-    const ownershipUpdates = getProjectHostSetupMetaUpdates(store, repo, candidate.meta)
-    const meta =
-      Object.keys(ownershipUpdates).length > 0
-        ? { ...candidate.meta, ...ownershipUpdates }
-        : candidate.meta
-    if (Object.keys(ownershipUpdates).length > 0) {
-      store.setWorktreeMeta(candidate.id, ownershipUpdates)
-    }
-    const worktree = mergeWorktree(
-      repo.id,
-      synthesizeSshGitWorktree(repo, candidate.path, meta),
-      meta
-    )
-    byWorktreeId.delete(worktree.id)
-    byWorktreeId.set(worktree.id, worktree)
-  }
-  return [...byWorktreeId.values()]
 }
 
 function buildDetectedGitWorktrees(
@@ -1166,30 +946,6 @@ function createFolderWorkspace(
   return { worktree: mergeFolderWorkspace(repo, worktreeId, meta) }
 }
 
-function buildDisconnectedDetectedWorktrees(
-  store: Store,
-  repo: Repo,
-  worktrees: Worktree[]
-): DetectedWorktree[] {
-  const settings = store.getSettings()
-  return worktrees.map((worktree) => {
-    const meta = store.getWorktreeMeta(worktree.id)
-    const detected = toDetectedWorktree({
-      repo,
-      worktree,
-      meta,
-      settings,
-      knownYiruLayouts: [],
-      isLegacyRepoForVisibility: true
-    })
-    return {
-      ...detected,
-      visible: true,
-      ownership: detected.ownership === 'yiru-managed' ? 'yiru-managed' : 'unknown-legacy'
-    }
-  })
-}
-
 export function registerWorktreeHandlers(
   mainWindow: BrowserWindow,
   store: Store,
@@ -1219,10 +975,6 @@ export function registerWorktreeHandlers(
 
   ipcMain.handle('worktrees:listAll', async () => {
     const repos = store.getRepos()
-    const sshWorktreeMetaIndex = repos.some((repo) => repo.connectionId)
-      ? createSshWorktreeMetaIndex(Object.entries(store.getAllWorktreeMeta()))
-      : new Map()
-
     // Why: each local repo listing can spawn `git worktree list`; cap fan-out
     // so large repo fleets don't start unbounded subprocesses at once.
     const results = await mapWithConcurrency(repos, WORKTREE_LIST_ALL_CONCURRENCY, async (repo) => {
@@ -1239,7 +991,7 @@ export function registerWorktreeHandlers(
               `${repo.connectionId}:${repo.id}`,
               `[worktrees] SSH git provider unavailable; skipping worktree list for repo "${repo.displayName}" (${repo.id}) at ${repo.path} on connection ${repo.connectionId}`
             )
-            return listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
+            return []
           }
           loggedUnavailableSshGitProviders.delete(`${repo.connectionId}:${repo.id}`)
           try {
@@ -1251,7 +1003,7 @@ export function registerWorktreeHandlers(
               `[worktrees] failed to list worktrees for repo "${repo.displayName}" (${repo.id}) at ${repo.path}`,
               err
             )
-            return listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
+            return []
           }
         } else {
           const scan = await listDetectedGitWorktrees(store, repo)
@@ -1292,10 +1044,6 @@ export function registerWorktreeHandlers(
     if (!repo) {
       return []
     }
-    const sshWorktreeMetaIndex = repo.connectionId
-      ? createSshWorktreeMetaIndex(Object.entries(store.getAllWorktreeMeta()))
-      : new Map()
-
     try {
       let gitWorktrees
       let freshScan = true
@@ -1309,7 +1057,7 @@ export function registerWorktreeHandlers(
             `${repo.connectionId}:${repo.id}`,
             `[worktrees] SSH git provider unavailable; skipping worktree list for repo "${repo.displayName}" (${repo.id}) at ${repo.path} on connection ${repo.connectionId}`
           )
-          return listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
+          return []
         }
         loggedUnavailableSshGitProviders.delete(`${repo.connectionId}:${repo.id}`)
         try {
@@ -1321,7 +1069,7 @@ export function registerWorktreeHandlers(
             `[worktrees] failed to list worktrees for repo "${repo.displayName}" (${repo.id}) at ${repo.path}`,
             err
           )
-          return listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
+          return []
         }
       } else {
         const scan = await listDetectedGitWorktrees(store, repo)
@@ -1356,9 +1104,6 @@ export function registerWorktreeHandlers(
       args: { repoId: string } | ListDetectedWorktreesArgs
     ): Promise<DetectedWorktreeListResult | HostQualifiedDetectedWorktreeResult> => {
       if ('providerRequestId' in args) {
-        if (args.executionHostId !== 'local') {
-          return listDirectSshDetectedWorktrees(store, args)
-        }
         return rejectedDetectedWorktreeResult(args, 'rejected')
       }
       const repo = store.getRepo(args.repoId)
@@ -1370,10 +1115,6 @@ export function registerWorktreeHandlers(
           worktrees: []
         }
       }
-      const sshWorktreeMetaIndex = repo.connectionId
-        ? createSshWorktreeMetaIndex(Object.entries(store.getAllWorktreeMeta()))
-        : new Map()
-
       try {
         let gitWorktrees: GitWorktreeInfo[]
         let freshScan = true
@@ -1387,12 +1128,11 @@ export function registerWorktreeHandlers(
         } else if (repo.connectionId) {
           const provider = getSshGitProvider(repo.connectionId)
           if (!provider) {
-            const worktrees = listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
             return {
               repoId: repo.id,
               authoritative: false,
               source: 'metadata-fallback',
-              worktrees: buildDisconnectedDetectedWorktrees(store, repo, worktrees)
+              worktrees: []
             }
           }
           gitWorktrees = await provider.listWorktrees(repo.path)
@@ -1420,12 +1160,11 @@ export function registerWorktreeHandlers(
           err
         )
         if (repo.connectionId) {
-          const worktrees = listDisconnectedSshWorktrees(store, repo, sshWorktreeMetaIndex)
           return {
             repoId: repo.id,
             authoritative: false,
             source: 'metadata-fallback',
-            worktrees: buildDisconnectedDetectedWorktrees(store, repo, worktrees)
+            worktrees: []
           }
         }
         return { repoId: repo.id, authoritative: false, source: 'metadata-fallback', worktrees: [] }

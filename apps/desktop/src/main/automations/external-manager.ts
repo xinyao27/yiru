@@ -19,8 +19,6 @@ import type {
 } from '~shared/automations-types'
 
 import type { Store } from '../persistence'
-import { isRuntimeOwnedSshTarget } from '../ssh/connection-store'
-import { getActiveMultiplexer } from '../ssh/ssh'
 import { mapHermesJobs, mapOpenClawJobs } from './external-job-mappers'
 import {
   clearHermesCronOutputRunCountCache,
@@ -34,6 +32,8 @@ const OPENCLAW_JOBS_FILE = join(homedir(), '.openclaw', 'cron', 'jobs.json')
 const EXTERNAL_JOB_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/
 const LOCAL_COMMAND_LOOKUP_TIMEOUT_MS = 5_000
 const LOCAL_AUTOMATION_COMMAND_TIMEOUT_MS = 30_000
+const REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE =
+  'External automations on remote hosts are no longer supported.'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -223,97 +223,40 @@ async function listLocalOpenClawManager(): Promise<ExternalAutomationManager | n
   }
 }
 
-function remoteRelayErrorMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error)
-  if (message.includes('-32601') || /method not found/i.test(message)) {
-    return 'Remote relay does not support external automation management. Reconnect the SSH target to deploy the latest relay.'
-  }
-  return message
-}
-
-async function listRemoteHermesManager(target: SshTarget): Promise<ExternalAutomationManager> {
-  return listRemoteManager(target, 'hermes')
-}
-
-async function listRemoteOpenClawManager(target: SshTarget): Promise<ExternalAutomationManager> {
-  return listRemoteManager(target, 'openclaw')
-}
-
-async function listRemoteManager(
+// Why: SSH hosts stay in the manager list so their jobs do not vanish without
+// explanation, but the transport that read them is gone — every entry reports
+// unavailable rather than an empty job list that reads as "nothing scheduled".
+function unreachableRemoteManager(
   target: SshTarget,
   provider: ExternalAutomationProvider
-): Promise<ExternalAutomationManager> {
+): ExternalAutomationManager {
   const providerLabel = provider === 'hermes' ? 'Hermes' : 'OpenClaw'
-  const managerProviderId = `${provider}:ssh:${target.id}`
-  const mux = getActiveMultiplexer(target.id)
-  if (!mux || mux.isDisposed()) {
-    return {
-      id: managerProviderId,
-      provider,
-      label: `${providerLabel} on ${target.label}`,
-      targetLabel: target.label,
-      target: { type: 'ssh', connectionId: target.id },
-      status: 'unavailable',
-      error: 'SSH target is not connected.',
-      canManage: false,
-      jobs: []
-    }
-  }
-  try {
-    const result = (await mux.request('externalAutomations.list', { provider })) as {
-      jobs?: unknown[]
-      hermesAvailable?: boolean
-      openclawAvailable?: boolean
-      error?: string | null
-    }
-    const commandAvailable =
-      provider === 'hermes' ? result.hermesAvailable === true : result.openclawAvailable === true
-    const readError = result.error ?? null
-    return {
-      id: managerProviderId,
-      provider,
-      label: `${providerLabel} on ${target.label}`,
-      targetLabel: target.label,
-      target: { type: 'ssh', connectionId: target.id },
-      status: readError ? 'unavailable' : 'available',
-      error:
-        readError ?? (commandAvailable ? null : `${providerLabel} CLI is not on the remote PATH.`),
-      canManage: !readError && commandAvailable,
-      jobs:
-        provider === 'hermes'
-          ? mapHermesJobs(managerProviderId, result.jobs ?? [])
-          : mapOpenClawJobs(managerProviderId, result.jobs ?? [])
-    }
-  } catch (error) {
-    return {
-      id: managerProviderId,
-      provider,
-      label: `${providerLabel} on ${target.label}`,
-      targetLabel: target.label,
-      target: { type: 'ssh', connectionId: target.id },
-      status: 'unavailable',
-      error: remoteRelayErrorMessage(error),
-      canManage: false,
-      jobs: []
-    }
+  return {
+    id: `${provider}:ssh:${target.id}`,
+    provider,
+    label: `${providerLabel} on ${target.label}`,
+    targetLabel: target.label,
+    target: { type: 'ssh', connectionId: target.id },
+    status: 'unavailable',
+    error: 'External automations are no longer readable on remote hosts.',
+    canManage: false,
+    jobs: []
   }
 }
 
 export async function listExternalAutomationManagers(
   store: Store
 ): Promise<ExternalAutomationManager[]> {
-  const [localHermes, localOpenClaw, remote] = await Promise.all([
+  const [localHermes, localOpenClaw] = await Promise.all([
     listLocalHermesManager(),
-    listLocalOpenClawManager(),
-    Promise.all(
-      store
-        .getSshTargets()
-        // Why: runtime-owned hidden targets are excluded from SSH/run-target
-        // surfaces; don't probe them for external automations either.
-        .filter((target) => !isRuntimeOwnedSshTarget(target))
-        .flatMap((target) => [listRemoteHermesManager(target), listRemoteOpenClawManager(target)])
-    )
+    listLocalOpenClawManager()
   ])
+  const remote = store
+    .getSshTargets()
+    .flatMap((target) => [
+      unreachableRemoteManager(target, 'hermes'),
+      unreachableRemoteManager(target, 'openclaw')
+    ])
   return [
     ...(localHermes ? [localHermes] : []),
     ...(localOpenClaw ? [localOpenClaw] : []),
@@ -356,27 +299,7 @@ export async function listExternalAutomationRuns(
       runs: mapHermesJobs(input.managerId, [{ id: input.jobId, runs: result.runs }])[0]?.runs ?? []
     }
   }
-  const mux = getActiveMultiplexer(input.target.connectionId)
-  if (!mux || mux.isDisposed()) {
-    throw new Error(`SSH target "${input.target.connectionId}" is not connected.`)
-  }
-  const result = (await mux.request('externalAutomations.runs', {
-    provider: input.provider,
-    jobId: input.jobId,
-    page,
-    pageSize
-  })) as { total?: number; runs?: unknown[] }
-  return {
-    managerId: input.managerId,
-    provider: input.provider,
-    target: input.target,
-    jobId: input.jobId,
-    page,
-    pageSize,
-    total: typeof result.total === 'number' && Number.isFinite(result.total) ? result.total : 0,
-    runs:
-      mapHermesJobs(input.managerId, [{ id: input.jobId, runs: result.runs ?? [] }])[0]?.runs ?? []
-  }
+  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }
 
 function hermesCommandForAction(action: ExternalAutomationAction): string {
@@ -489,14 +412,7 @@ export async function createExternalAutomation(
     clearHermesCronOutputRunCountCache()
     return
   }
-  const mux = getActiveMultiplexer(input.target.connectionId)
-  if (!mux || mux.isDisposed()) {
-    throw new Error(`SSH target "${input.target.connectionId}" is not connected.`)
-  }
-  await mux.request('externalAutomations.create', {
-    provider: input.provider,
-    ...normalized
-  })
+  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }
 
 export async function updateExternalAutomation(
@@ -511,15 +427,7 @@ export async function updateExternalAutomation(
     clearHermesCronOutputRunCountCache(input.jobId)
     return
   }
-  const mux = getActiveMultiplexer(input.target.connectionId)
-  if (!mux || mux.isDisposed()) {
-    throw new Error(`SSH target "${input.target.connectionId}" is not connected.`)
-  }
-  await mux.request('externalAutomations.update', {
-    provider: input.provider,
-    jobId: input.jobId,
-    ...normalized
-  })
+  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }
 
 export async function runExternalAutomationAction(
@@ -539,13 +447,5 @@ export async function runExternalAutomationAction(
     }
     return
   }
-  const mux = getActiveMultiplexer(input.target.connectionId)
-  if (!mux || mux.isDisposed()) {
-    throw new Error(`SSH target "${input.target.connectionId}" is not connected.`)
-  }
-  await mux.request('externalAutomations.act', {
-    provider: input.provider,
-    action: input.action,
-    jobId: input.jobId
-  })
+  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }

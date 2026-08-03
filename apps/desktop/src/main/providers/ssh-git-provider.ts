@@ -29,7 +29,7 @@ import type {
   RemoveWorktreeResult
 } from '~shared/types'
 
-/* eslint-disable max-lines -- Why: this provider mirrors IGitProvider one
+/* eslint-disable max-lines -- Why: this provider mirrors IRemoteGitProvider one
    method per RPC call (~16 methods). Splitting it would only add
    indirection — every method is a 1:1 forwarder to a relay RPC plus a
    small amount of param plumbing. */
@@ -44,7 +44,8 @@ import { JsonRpcErrorCode } from '../ssh/relay/protocol'
 import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import type { RemoteCommitMessageExecResult } from '../text-generation/commit-message-text-generation'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
-import type { GitProviderMutationOptions, IGitProvider } from './types'
+import type { IRemoteGitProvider } from './remote-git-provider-contract'
+import type { GitProviderMutationOptions } from './types'
 
 type NonInteractiveExecQueueEntry = {
   started: boolean
@@ -74,7 +75,7 @@ function filterUntrackedPorcelainStatus(stdout: string | undefined): string | un
   return trackedLines.length > 0 ? trackedLines.join('\n') : undefined
 }
 
-export class SshGitProvider implements IGitProvider {
+export class SshGitProvider implements IRemoteGitProvider {
   private readonly gitDiffReadDedupe = new InFlightPromiseDedupe<GitDiffResult | GitDiffResult[]>()
 
   private connectionId: string

@@ -92,9 +92,7 @@ import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identit
 import { enrichRepoGitUsernames } from '../repo-git-username-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
 import { normalizeSparseDirectories } from '../sparse-checkout-directories'
-import { isCurrentSshProviderAuthority } from '../ssh/provider-authority'
 import { joinRemotePath } from '../ssh/remote/platform'
-import { getActiveMultiplexer } from '../ssh/ssh'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
@@ -167,34 +165,10 @@ async function listReposForExecutionHost(
       repos: structuredClone(repos)
     }
   }
-  if (
-    !('expectedAuthority' in args) ||
-    args.expectedAuthority.targetId !== parsedHost.targetId ||
-    !isCurrentSshProviderAuthority(args.expectedAuthority)
-  ) {
-    return rejected('stale')
-  }
-  const provider = getSshGitProvider(parsedHost.targetId)
-  if (!provider) {
-    return rejected('unavailable')
-  }
-  const snapshot = structuredClone(repos)
-  await Promise.resolve()
-  if (
-    provider !== getSshGitProvider(parsedHost.targetId) ||
-    !isCurrentSshProviderAuthority(args.expectedAuthority)
-  ) {
-    return rejected('stale')
-  }
-  return {
-    authoritative: true,
-    authority: {
-      kind: 'direct-ssh',
-      executionHostId: parsedHost.id,
-      ...args.expectedAuthority
-    },
-    repos: snapshot
-  }
+  // Why: a remote catalog was only ever authoritative behind a live SSH provider
+  // whose generation we could re-check after the await. With no way to prove the
+  // snapshot is current, report unavailable rather than claim authority.
+  return rejected('unavailable')
 }
 
 function buildProjectHostSetupResult(store: Store, repo: Repo): ProjectHostSetupResult {
@@ -394,11 +368,6 @@ async function addRemoteRepoFromPath(
   }
 
   store.addRepo(repo)
-  const mux = getActiveMultiplexer(args.connectionId)
-  if (mux) {
-    mux.notify('session.registerRoot', { rootPath: resolvedPath })
-  }
-
   return { repo, alreadyExisted: false }
 }
 
@@ -506,9 +475,6 @@ async function cloneRemoteRepo(
     })
     if (updated) {
       emitRepoAdded('clone_url', false)
-      getActiveMultiplexer(args.connectionId)?.notify('session.registerRoot', {
-        rootPath: clonePath
-      })
       return updated
     }
   }
@@ -664,22 +630,11 @@ async function createRemoteRepo(
   return { repo: result.repo }
 }
 
-async function resolveRemoteHomePath(connectionId: string, path: string): Promise<string> {
-  if (path !== '~' && path !== '~/' && !path.startsWith('~/')) {
-    return path
-  }
-  const mux = getActiveMultiplexer(connectionId)
-  if (!mux) {
-    return path
-  }
-  try {
-    const result = (await mux.request('session.resolveHome', { path })) as { resolvedPath: string }
-    return result.resolvedPath
-  } catch {
-    // Why: older relays may not support this yet; callers will surface the
-    // original path validation error instead of failing during resolution.
-    return path
-  }
+// Why: no transport can expand `~` on a remote host any more. Returning the
+// tilde unchanged lets the caller's absolute-path validation reject it with a
+// message about the path, instead of silently resolving it against this machine.
+async function resolveRemoteHomePath(_connectionId: string, path: string): Promise<string> {
+  return path
 }
 
 type ActiveCloneMetadata = {
@@ -1061,20 +1016,8 @@ function sanitizeNestedRepoImportError(context: string, error: unknown): string 
   return 'Repository could not be imported'
 }
 
-async function resolveSshProjectGroupPath(connectionId: string, path: string): Promise<string> {
-  if (path === '~' || path === '~/' || path.startsWith('~/')) {
-    const mux = getActiveMultiplexer(connectionId)
-    if (mux) {
-      try {
-        const result = (await mux.request('session.resolveHome', { path })) as {
-          resolvedPath: string
-        }
-        return result.resolvedPath
-      } catch {
-        return path
-      }
-    }
-  }
+// Why: see resolveRemoteHomePath — remote `~` expansion has no transport left.
+async function resolveSshProjectGroupPath(_connectionId: string, path: string): Promise<string> {
   return path
 }
 
@@ -1673,11 +1616,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
           }
           store.addRepo(repo)
           await prepareLocalWorktreeRootForRepo(store, repo)
-          if (args.connectionId) {
-            getActiveMultiplexer(args.connectionId)?.notify('session.registerRoot', {
-              rootPath: importRepoPath
-            })
-          }
           importedProjectIdsByRepoPath.set(normalizedImportRepoPath, repo.id)
           results.push({ path: repoPath, projectId: repo.id, status: 'imported' })
           // Why: nested-repo import only reaches here after the isGitRepo /

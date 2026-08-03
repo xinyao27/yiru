@@ -1,5 +1,5 @@
 import { gitExecFileAsync } from '../git/runner'
-import type { SshGitProvider } from '../providers/ssh-git-provider'
+import type { IRemoteGitProvider } from '../providers/remote-git-provider-contract'
 
 type LocalGitExecOptions = {
   cwd: string
@@ -10,7 +10,7 @@ type LocalGitExecOptions = {
 // must use the dedicated git.fetchRemoteTrackingRef RPC.
 export async function fetchPrHeadTrackingRef(
   repo: { path: string; connectionId?: string | null },
-  sshGitProvider: SshGitProvider | null | undefined,
+  sshGitProvider: IRemoteGitProvider | null | undefined,
   remote: string,
   branch: string,
   options: { localGitExecOptions?: LocalGitExecOptions } = {}

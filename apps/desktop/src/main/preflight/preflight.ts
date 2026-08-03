@@ -5,7 +5,6 @@ import { getAzureDevOpsAuthStatus } from '../azure-devops/client'
 import { getBitbucketAuthStatus } from '../bitbucket/client'
 import { getGiteaAuthStatus } from '../gitea/client'
 import { clearKnownHostsCache } from '../gitlab/gl-utils'
-import { getActiveMultiplexer } from '../ssh/ssh'
 import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 import { hydrateShellPathForAgentDetection } from './agent-detection-shell-path'
 import {
@@ -16,10 +15,6 @@ import {
   shellQuote
 } from './command-exec'
 import { detectCommandsInInstallDirs } from './local-agent-install-dir-detection'
-import {
-  detectRemoteWindowsTerminalCapabilities,
-  type RemoteWindowsTerminalCapabilities
-} from './remote-windows-terminal-capabilities'
 import { getPreflightWslTarget, type PreflightRuntimeContext } from './runtime-target'
 import {
   getTuiAgentDetectionProbeCommands,
@@ -53,16 +48,9 @@ export type PreflightStatus = {
   }
 }
 
-export { detectRemoteWindowsTerminalCapabilities }
-export type { RemoteWindowsTerminalCapabilities }
-
 // Why: cache the result so repeated Landing mounts don't re-spawn processes.
 // The check only runs once per app session — relaunch to re-check.
 let cached: PreflightStatus | null = null
-
-function uniqueAgentIds(ids: Iterable<string>): string[] {
-  return [...new Set(ids)]
-}
 
 async function detectCommandRuntime(
   command: string,
@@ -172,17 +160,11 @@ export async function refreshShellPathAndDetectAgents(
   }
 }
 
-export async function detectRemoteAgents(args: { connectionId: string }): Promise<string[]> {
-  const mux = getActiveMultiplexer(args.connectionId)
-  if (!mux || mux.isDisposed()) {
-    // Why: remote agent detection is passive UI polling. A disconnected host has
-    // no detectable agents until reconnect, but should not spam IPC errors.
-    return []
-  }
-  const result = (await mux.request('preflight.detectAgents', {
-    commands: KNOWN_TUI_AGENT_DETECTION_COMMANDS
-  })) as { agents: string[] }
-  return uniqueAgentIds(result.agents)
+// Why: kept as the fail-safe side of a passive UI poll. The only transport that
+// ever answered it is gone, and an empty list is what callers already handle for
+// a host that is not reachable — throwing here would spam the agent pickers.
+export async function detectRemoteAgents(_args: { connectionId: string }): Promise<string[]> {
+  return []
 }
 
 async function isGhAuthenticated(wslTarget?: WslPreflightTarget): Promise<boolean> {
@@ -288,21 +270,10 @@ export function registerPreflightHandlers(): void {
     return refreshShellPathAndDetectAgents(args)
   })
 
-  // Why: remote worktrees need agent detection on the SSH host, not the local
-  // machine. This handler forwards the same KNOWN_AGENT_COMMANDS list to the
-  // relay's preflight.detectAgents RPC, whose lookup command is selected on
-  // the remote host so native Windows OpenSSH does not require a POSIX shell.
   ipcMain.handle(
     'preflight:detectRemoteAgents',
     async (_event, args: { connectionId: string }): Promise<string[]> => {
       return detectRemoteAgents(args)
-    }
-  )
-
-  ipcMain.handle(
-    'preflight:detectRemoteWindowsTerminalCapabilities',
-    async (_event, args: { connectionId: string }): Promise<RemoteWindowsTerminalCapabilities> => {
-      return detectRemoteWindowsTerminalCapabilities(args)
     }
   )
 }

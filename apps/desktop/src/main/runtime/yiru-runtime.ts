@@ -512,7 +512,6 @@ import { getSshGitProvider, requireSshGitProvider } from '../providers/ssh-git-d
 import type { PtyProviderBufferSnapshot } from '../providers/types'
 import type { IPtyProvider, PtyProcessInfo, PtyTransientFact } from '../providers/types'
 import type { RateLimitService } from '../rate-limits/service'
-import { markRemoteAgentWorkspaceTrusted } from '../remote-agent-trust-presets'
 import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identity-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
 import { listRepoWorktrees } from '../repo-worktrees'
@@ -13635,22 +13634,6 @@ export class YiruRuntimeService {
     }
   }
 
-  private async markRemoteWorkspaceTrustedForAgent(
-    agent: TuiAgent,
-    connectionId: string,
-    workspacePath: string
-  ): Promise<void> {
-    const preset = TUI_AGENT_CONFIG[agent].preflightTrust
-    if (!preset) {
-      return
-    }
-    try {
-      await markRemoteAgentWorkspaceTrusted({ preset, connectionId, workspacePath })
-    } catch {
-      // Best-effort: the user can still accept the remote agent trust prompt manually.
-    }
-  }
-
   private recordCreatedWorktreeLineage(
     worktree: Pick<Worktree, 'id' | 'instanceId'>,
     lineageResolution: WorktreeLineageResolution
@@ -15152,14 +15135,6 @@ export class YiruRuntimeService {
 
     if (sequencedStartup && this.ptyController?.spawn) {
       try {
-        const startupTrustAgent = args.startupDraftPaste?.agent ?? args.createdWithAgent
-        if (startupTrustAgent) {
-          await this.markRemoteWorkspaceTrustedForAgent(
-            startupTrustAgent,
-            repo.connectionId!,
-            result.worktree.path
-          )
-        }
         const terminal = await this.createTerminal(`path:${result.worktree.path}`, {
           command: sequencedStartup.command,
           ...(result.setup && args.startup
@@ -17003,9 +16978,7 @@ export class YiruRuntimeService {
     }
 
     await opts.beforeAgentTrust?.()
-    if (workspace.connectionId) {
-      await this.markRemoteWorkspaceTrustedForAgent(agent, workspace.connectionId, workspace.path)
-    } else {
+    if (!workspace.connectionId) {
       this.markLocalWorkspaceTrustedForAgent(agent, workspace.path)
     }
 
@@ -17322,9 +17295,7 @@ export class YiruRuntimeService {
       throw new Error('Repository for the selected workspace is no longer available.')
     }
     const startup = this.buildStartupForAgent(repo, opts.agent, opts.prompt)
-    if (repo.connectionId) {
-      await this.markRemoteWorkspaceTrustedForAgent(opts.agent, repo.connectionId, worktree.path)
-    } else {
+    if (!repo.connectionId) {
       this.markLocalWorkspaceTrustedForAgent(opts.agent, worktree.path)
     }
     return await this.createTerminal(`id:${worktree.id}`, {
@@ -17356,13 +17327,7 @@ export class YiruRuntimeService {
     const startup = this.buildStartupForAgent(repo, opts.agent, '')
     // Why: remote control can be revoked while agent settings and host routing are resolved.
     await opts.beforeAgentTrust?.()
-    if (workspace.connectionId) {
-      await this.markRemoteWorkspaceTrustedForAgent(
-        opts.agent,
-        workspace.connectionId,
-        workspace.path
-      )
-    } else {
+    if (!workspace.connectionId) {
       this.markLocalWorkspaceTrustedForAgent(opts.agent, workspace.path)
     }
     return await this.createTerminal(`id:${workspace.id}`, {
@@ -17692,13 +17657,7 @@ export class YiruRuntimeService {
     if (opts.agentPrompt && startupPlan.followupPrompt) {
       throw new Error(`Agent ${opts.agent} does not support startup prompt quick commands.`)
     }
-    if (workspace.connectionId) {
-      await this.markRemoteWorkspaceTrustedForAgent(
-        opts.agent,
-        workspace.connectionId,
-        workspace.path
-      )
-    } else {
+    if (!workspace.connectionId) {
       this.markLocalWorkspaceTrustedForAgent(opts.agent, workspace.path)
     }
     return {

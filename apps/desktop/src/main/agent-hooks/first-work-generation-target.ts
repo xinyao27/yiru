@@ -1,4 +1,4 @@
-import type { SshGitProvider } from '../providers/ssh-git-provider'
+import type { IRemoteGitProvider } from '../providers/remote-git-provider-contract'
 import {
   prepareLocalCommitMessageAgentEnv,
   type CommitMessageAgentEnvironmentResolvers
@@ -10,7 +10,7 @@ import type { CommitMessageGenerationTarget } from '../text-generation/commit-me
 export async function resolveGenerationTarget(
   worktreePath: string,
   agentId: string,
-  provider: SshGitProvider | null,
+  provider: IRemoteGitProvider | null,
   deps: { getAgentEnvResolvers: () => CommitMessageAgentEnvironmentResolvers | undefined }
 ): Promise<CommitMessageGenerationTarget | null> {
   if (provider) {

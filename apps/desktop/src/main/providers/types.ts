@@ -383,7 +383,13 @@ export type IGitProvider = IGitMutationProvider &
     exec(
       args: string[],
       cwd: string,
-      options?: { signal?: AbortSignal; timeoutMs?: number }
+      options?: {
+        signal?: AbortSignal
+        timeoutMs?: number
+        disableOptionalLocks?: boolean
+        nonInteractive?: boolean
+        maxBuffer?: number
+      }
     ): Promise<{ stdout: string; stderr: string }>
     getRemoteFileUrl(
       worktreePath: string,

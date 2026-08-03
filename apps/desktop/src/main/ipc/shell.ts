@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { constants, copyFile, readFile, stat } from 'node:fs/promises'
-import { basename, extname, isAbsolute, normalize, posix, win32 } from 'node:path'
+import { basename, extname, isAbsolute, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { MAX_REPO_ICON_UPLOAD_BYTES } from '@yiru/workbench-model/workspace'
@@ -14,11 +14,8 @@ import type {
 import {
   EXTERNAL_EDITOR_CLI_COMMAND,
   resolveExternalEditorLaunchSpec,
-  resolveVsCodeRemoteSshLaunchSpec,
   type ExternalEditorLaunchSpec
 } from '../external-editor-launch'
-import { getRegisteredSshTarget } from '../ssh/ssh'
-import { resolveVsCodeSshAuthority } from '../ssh/vscode-ssh-authority'
 import { getSpawnArgsForWindows } from '../win32-utils'
 
 export { EXTERNAL_EDITOR_CLI_COMMAND }
@@ -110,33 +107,10 @@ async function launchExternalEditor(launchSpec: ExternalEditorLaunchSpec): Promi
 export async function openInExternalEditor(
   request: ShellOpenExternalEditorRequest
 ): Promise<ShellOpenExternalEditorResult> {
-  const connectionId = request.connectionId?.trim()
-  if (connectionId) {
-    const sshTarget = getRegisteredSshTarget(connectionId)
-    if (!sshTarget) {
-      return { ok: false, reason: 'ssh-target-not-found' }
-    }
-    if (!posix.isAbsolute(request.path) && !win32.isAbsolute(request.path)) {
-      return { ok: false, reason: 'not-absolute' }
-    }
-    const authority = resolveVsCodeSshAuthority(sshTarget)
-    if (!authority.ok) {
-      return authority
-    }
-    const launchSpec = resolveVsCodeRemoteSshLaunchSpec(
-      request.command,
-      request.path,
-      authority.authority
-    )
-    if (!launchSpec) {
-      return { ok: false, reason: 'remote-editor-unsupported' }
-    }
-    try {
-      await launchExternalEditor(launchSpec)
-      return { ok: true }
-    } catch {
-      return { ok: false, reason: 'launch-failed' }
-    }
+  // Why: a connectionId only ever named an SSH host, and its VS Code Remote-SSH
+  // authority is gone. Refuse rather than resolving the remote path locally.
+  if (request.connectionId?.trim()) {
+    return { ok: false, reason: 'remote-runtime-unsupported' }
   }
 
   const target = await validateLocalPathTarget(request.path)

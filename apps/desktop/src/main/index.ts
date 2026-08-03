@@ -147,7 +147,6 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
-import { parseCursorRateLimitsResponse } from './runtime/cursor-usage/client'
 import { resolveCursorUsageRuntimeTarget } from './runtime/cursor-usage/target'
 import { callRuntimeEnvironment } from './runtime/environment-transport-routing'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
@@ -164,7 +163,6 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
-import { getActiveMultiplexer } from './ssh/ssh'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -2021,27 +2019,6 @@ app.whenReady().then(async () => {
       throw new Error(response.error.message)
     }
     return response.result
-  })
-  rateLimits.setSshCursorUsageFetcher(async (connectionId, signal) => {
-    if (signal?.aborted) {
-      throw new Error('Rate-limit fetch aborted')
-    }
-    const multiplexer = getActiveMultiplexer(connectionId)
-    if (!multiplexer || multiplexer.isDisposed()) {
-      throw new Error('SSH runtime is unavailable')
-    }
-    const result: unknown = await multiplexer.request('usage.cursor', undefined, {
-      signal,
-      timeoutMs: 40_000
-    })
-    if (signal?.aborted) {
-      throw new Error('Rate-limit fetch aborted')
-    }
-    const cursorRateLimits = parseCursorRateLimitsResponse(result)
-    if (!cursorRateLimits) {
-      throw new Error('SSH runtime returned invalid Cursor usage data')
-    }
-    return cursorRateLimits
   })
   rateLimits.setClaudeAuthPreparationResolver((target) =>
     claudeRuntimeAuth!.prepareForRateLimitFetch(target)

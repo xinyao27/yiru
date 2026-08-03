@@ -23,7 +23,6 @@ import type { Store } from '../persistence'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { authorizeExternalPath, resolveAuthorizedPath, isENOENT } from './auth'
 import { resolveLocalDroppedPathsForAgent } from './dropped-path-resolution'
-import { importExternalPathsSsh } from './import-ssh'
 
 /**
  * Re-throw filesystem errors with user-friendly messages.
@@ -157,15 +156,13 @@ export function registerFilesystemMutationHandlers(store: Store): void {
       args: { sourcePaths: string[]; destDir: string; connectionId?: string; ensureDir?: boolean }
     ): Promise<{ results: ImportItemResult[] }> => {
       if (args.connectionId) {
-        return importExternalPathsSsh(args.sourcePaths, args.destDir, args.connectionId, {
-          ensureDir: args.ensureDir
-        })
+        // Why: a connectionId only ever named an SSH host. Fail loudly instead of
+        // authorizing a remote destination path against this machine's roots.
+        throw new Error('Importing files into a remote host is no longer supported')
       }
 
       // Why: destDir must be authorized before any copy work begins. If the
       // destination is outside allowed roots, the entire import fails.
-      // This only applies to local imports — remote paths are authorized by
-      // the SSH connection boundary (see importExternalPathsSsh).
       const resolvedDest = await resolveAuthorizedPath(args.destDir, store)
 
       const results: ImportItemResult[] = []
@@ -198,11 +195,9 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   )
 
   // Why: terminal drag-and-drop resolver. Local worktrees pass paths through
-  // unchanged (reference-in-place; preserves zero-latency drop). SSH worktrees
-  // upload each path into `${worktreePath}/.yiru/drops/` and return remote
-  // paths the remote agent can read. Kept as a separate IPC from
-  // fs:importExternalPaths because terminal semantics differ from the
-  // explorer's "copy into user-picked destDir". See docs/terminal-drop-ssh.md.
+  // unchanged (reference-in-place; preserves zero-latency drop). Kept as a
+  // separate IPC from fs:importExternalPaths because terminal semantics differ
+  // from the explorer's "copy into user-picked destDir".
   ipcMain.handle(
     'fs:resolveDroppedPathsForAgent',
     async (
@@ -211,32 +206,14 @@ export function registerFilesystemMutationHandlers(store: Store): void {
     ): Promise<ResolveDroppedPathsResult> => {
       // Why: `== null` (not `!args.connectionId`) so an empty string is
       // treated as a renderer error, not silently routed to the local branch.
-      if (args.connectionId == null) {
-        return {
-          resolvedPaths: resolveLocalDroppedPathsForAgent(args.paths, args.worktreePath),
-          skipped: [],
-          failed: []
-        }
+      if (args.connectionId != null) {
+        throw new Error('Uploading dropped files to a remote host is no longer supported')
       }
-      const worktreePath = args.worktreePath.replace(/\/+$/, '')
-      const destDir = `${worktreePath}/.yiru/drops`
-      const { results } = await importExternalPathsSsh(args.paths, destDir, args.connectionId, {
-        ensureDir: true
-      })
-      const resolvedPaths: string[] = []
-      const skipped: { sourcePath: string; reason: ImportSkipReason }[] = []
-      const failed: { sourcePath: string; reason: string }[] = []
-      // Iterate in input order so injected paths align with the user's drop order.
-      for (const r of results) {
-        if (r.status === 'imported') {
-          resolvedPaths.push(r.destPath)
-        } else if (r.status === 'skipped') {
-          skipped.push({ sourcePath: r.sourcePath, reason: r.reason })
-        } else {
-          failed.push({ sourcePath: r.sourcePath, reason: r.reason })
-        }
+      return {
+        resolvedPaths: resolveLocalDroppedPathsForAgent(args.paths, args.worktreePath),
+        skipped: [],
+        failed: []
       }
-      return { resolvedPaths, skipped, failed }
     }
   )
 }

@@ -12,23 +12,17 @@ import {
   normalizeExecutionHostScope,
   parseExecutionHostId,
   toRuntimeExecutionHostId,
-  toSshExecutionHostId,
+  type ExecutionHostId,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
 import { app, ipcMain } from 'electron'
 
-import {
-  getSshFilesystemProvider,
-  SSH_FILESYSTEM_PROVIDER_UNAVAILABLE_MESSAGE
-} from '../providers/ssh-filesystem-dispatch'
-import { getActiveSshAiVaultHostInfo, getActiveSshAiVaultHostInfos } from '../ssh/ssh'
 import {
   configureAiVaultSessionSources,
   getAiVaultWslHomeDirs,
   listAiVaultSessions as listCachedLocalAiVaultSessions,
   type AiVaultSessionSources
 } from './cached-session-list'
-import { scanRemoteAiVaultSessions } from './remote-session-scanner'
 import { aiVaultScanIssueResult, mergeAiVaultListResults } from './session/list-results'
 import { listClaudeSubagentSessions } from './session/scanner-claude-subagents'
 import { claudeProjectsRootDirs } from './session/scanner-source-discovery'
@@ -37,6 +31,10 @@ const AI_VAULT_CACHE_TTL_MS = 15_000
 const AI_VAULT_ALL_HOST_RUNTIME_TIMEOUT_MS = 3_000
 
 type AiVaultHandlerOptions = AiVaultSessionSources & {
+  // Why: hosts this process can no longer read transcripts from. The "all hosts"
+  // merge must still name them, or their sessions disappear from the result with
+  // no trace and the user reads it as "nothing was recorded on that machine".
+  getUnscannableAiVaultHostIds?: () => readonly ExecutionHostId[]
   getActiveRuntimeAiVaultHostInfos?: () => readonly RuntimeAiVaultHostInfo[]
   scanRuntimeAiVaultSessions?: (
     environmentId: string,
@@ -72,7 +70,7 @@ async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListR
   // Why: local-scope scans go straight to the shared cache module (also used by
   // the runtime RPC method), so the desktop panel and a paired mobile client
   // never double-scan the same transcripts; the cache below only has to dedupe
-  // the multi-host (ssh/runtime/all) merges that exist on the desktop side.
+  // the multi-host (runtime/all) merges that exist on the desktop side.
   if (executionHostScope === LOCAL_EXECUTION_HOST_ID) {
     return scanLocalAiVaultSessions(args)
   }
@@ -123,24 +121,19 @@ async function scanAiVaultSessionsByHostScope(
     return mergeAiVaultListResults(
       await Promise.all([
         scanLocalAiVaultSessions(args),
-        ...getActiveSshAiVaultHostInfos().map((hostInfo) =>
-          scanSshAiVaultSessions(hostInfo.targetId, args)
-        ),
         ...runtimeHosts.hostInfos.map((hostInfo) =>
           scanRuntimeAiVaultSessions(hostInfo, args, {
             timeoutMs: AI_VAULT_ALL_HOST_RUNTIME_TIMEOUT_MS
           })
         ),
-        ...runtimeResults
+        ...runtimeResults,
+        ...unscannableHostIssueResults()
       ]),
       args?.limit
     )
   }
 
   const parsed = parseExecutionHostId(executionHostScope)
-  if (parsed?.kind === 'ssh') {
-    return scanSshAiVaultSessions(parsed.targetId, args)
-  }
   if (parsed?.kind === 'runtime') {
     return scanRuntimeAiVaultSessions(
       {
@@ -156,6 +149,19 @@ async function scanAiVaultSessionsByHostScope(
     path: executionHostScope,
     message: 'Agent Session History is not available for this execution host.'
   })
+}
+
+const UNSCANNABLE_AI_VAULT_HOST_MESSAGE =
+  'Agent Session History is not available for this execution host, so its sessions are missing from this list.'
+
+function unscannableHostIssueResults(): AiVaultListResult[] {
+  return (handlerOptions.getUnscannableAiVaultHostIds?.() ?? []).map((executionHostId) =>
+    aiVaultScanIssueResult({
+      executionHostId,
+      path: executionHostId,
+      message: UNSCANNABLE_AI_VAULT_HOST_MESSAGE
+    })
+  )
 }
 
 function getActiveRuntimeAiVaultHostInfos(): readonly RuntimeAiVaultHostInfo[] {
@@ -233,42 +239,6 @@ async function scanLocalAiVaultSessions(args?: AiVaultListArgs): Promise<AiVault
     limit: args?.limit,
     force: args?.force,
     scopePaths: args?.scopePaths
-  })
-}
-
-async function scanSshAiVaultSessions(
-  targetId: string,
-  args?: AiVaultListArgs
-): Promise<AiVaultListResult> {
-  const executionHostId = toSshExecutionHostId(targetId)
-  const hostInfo = getActiveSshAiVaultHostInfo(targetId)
-  const provider = getSshFilesystemProvider(targetId)
-  if (!hostInfo || !provider) {
-    return sshScanIssueResult({
-      executionHostId,
-      targetId,
-      message: SSH_FILESYSTEM_PROVIDER_UNAVAILABLE_MESSAGE
-    })
-  }
-  return scanRemoteAiVaultSessions({
-    provider,
-    executionHostId: hostInfo.executionHostId,
-    remoteHome: hostInfo.remoteHome,
-    hostPlatform: hostInfo.hostPlatform,
-    limit: args?.limit,
-    scopePaths: args?.scopePaths
-  })
-}
-
-function sshScanIssueResult(args: {
-  executionHostId: `ssh:${string}`
-  targetId: string
-  message: string
-}): AiVaultListResult {
-  return aiVaultScanIssueResult({
-    executionHostId: args.executionHostId,
-    path: args.targetId,
-    message: args.message
   })
 }
 

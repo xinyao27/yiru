@@ -1,4 +1,4 @@
-import type { SshGitProvider } from '../providers/ssh-git-provider'
+import type { IGitProvider } from '../providers/types'
 import { parseHostedRemote } from './hosted-remote-url'
 import { resolveDefaultBaseRefViaExec } from './repo'
 import { extractExecError, ghExecFileAsync, gitExecFileAsync } from './runner'
@@ -37,10 +37,7 @@ export function normalizeGitUsername(value: string): string {
  */
 export type ResolvedGitUsername = { username: string; authoritative: boolean }
 
-export async function getSshGitUsername(
-  provider: SshGitProvider,
-  repoPath: string
-): Promise<string> {
+export async function getSshGitUsername(provider: IGitProvider, repoPath: string): Promise<string> {
   // Why: SSH targets cannot rely on the local `gh` account, and git email/name
   // are author identity rather than hosted-account usernames.
   for (const key of EXPLICIT_USERNAME_CONFIG_KEYS) {
