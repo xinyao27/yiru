@@ -1,6 +1,7 @@
 import type { TailnetPrincipal } from '../rpc-principal'
 import type { CoworkingRemoteDesktop } from './catalog-contract'
 import { isCoworkingMutationKind } from './operation-contract'
+import type { CoworkingPublicationSuspensionReason } from './publication-suspension'
 import { COWORKING_RPC_ERROR_CODES, type CoworkingRpcErrorCode } from './wire-contract'
 
 export const COWORKING_REQUESTER_INVOKE_METHODS = [
@@ -106,6 +107,10 @@ export type CoworkingOwnerWorktreeSharing = {
   visibility: 'public' | 'private'
   publicationStatus: 'pending-validation' | 'private' | 'published' | 'suspended'
   shareEpoch: string | null
+  /** Why: 'suspended' alone cannot be acted on — the owner needs to know
+   *  whether the host went away, the worktree was re-created, or two shares
+   *  overlap on one root. */
+  suspensionReason?: CoworkingPublicationSuspensionReason
 }
 
 export type CoworkingOwnerControlRequestView = {

@@ -118,6 +118,7 @@ import { SkillFreshnessNudge } from '../components/skills/skill-freshness-nudge'
 import { StarNagCard } from '../components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
 import { StarNagToastHost } from '../components/star-nag/toast-host'
+import { CoworkingPresenceFooter } from '../components/status-bar/coworking-presence-footer'
 import RecentTabSwitcher from '../components/tab-bar/recent-tab-switcher'
 import PinnedTabCloseDialog from '../components/terminal-pane/pinned-tab-close-dialog'
 import { publishTerminalViewAttributesAtAppStart } from '../components/terminal-pane/terminal-appearance'
@@ -2636,6 +2637,7 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}
+            {statusBarVisible && hasActiveCoworkingWorkspace ? <CoworkingPresenceFooter /> : null}
             {statusBarVisible && !hasActiveCoworkingWorkspace ? (
               <Suspense
                 fallback={

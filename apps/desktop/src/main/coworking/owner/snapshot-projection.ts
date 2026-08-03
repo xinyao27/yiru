@@ -38,7 +38,8 @@ export function projectOwnerWorktrees(
             displayName: descriptor.displayName,
             visibility: entry.visibility,
             publicationStatus: entry.publicationStatus,
-            shareEpoch: entry.shareEpoch
+            shareEpoch: entry.shareEpoch,
+            ...(entry.suspensionReason ? { suspensionReason: entry.suspensionReason } : {})
           }
         ]
       : []

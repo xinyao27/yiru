@@ -3763,7 +3763,13 @@
           "sharedWorktrees": "{{count}} worktree(s) published to your tailnet.",
           "noSharedWorktrees": "No worktrees are published. Peers cannot see anything yet.",
           "hasControl": "Can edit",
-          "readOnly": "Read-only"
+          "readOnly": "Read-only",
+          "windowsFirewallUnavailable": "Windows Firewall is blocking the Coworking listener on TCP port {{port}}.",
+          "repairFirewall": "Repair firewall rule",
+          "suspendedHostUnavailable": "Host offline",
+          "suspendedIncarnation": "Worktree replaced",
+          "suspendedOverlapping": "Overlapping share",
+          "suspendedUnknown": "Not served"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",

@@ -3740,7 +3740,13 @@
           "sharedWorktrees": "워크트리 {{count}}개를 tailnet에 공개했습니다.",
           "noSharedWorktrees": "공개된 워크트리가 없습니다. 상대방에게 아무것도 표시되지 않습니다.",
           "hasControl": "편집 가능",
-          "readOnly": "읽기 전용"
+          "readOnly": "읽기 전용",
+          "windowsFirewallUnavailable": "Windows 방화벽이 TCP 포트 {{port}}의 Coworking 리스너를 차단하고 있습니다.",
+          "repairFirewall": "방화벽 규칙 복구",
+          "suspendedHostUnavailable": "호스트 오프라인",
+          "suspendedIncarnation": "워크트리가 교체됨",
+          "suspendedOverlapping": "공유 경로 중복",
+          "suspendedUnknown": "제공되지 않음"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",

@@ -3740,7 +3740,13 @@
           "sharedWorktrees": "{{count}} árbol(es) de trabajo publicado(s) en tu tailnet.",
           "noSharedWorktrees": "No hay árboles de trabajo publicados. Los colaboradores aún no ven nada.",
           "hasControl": "Puede editar",
-          "readOnly": "Solo lectura"
+          "readOnly": "Solo lectura",
+          "windowsFirewallUnavailable": "El Firewall de Windows está bloqueando el listener de Coworking en el puerto TCP {{port}}.",
+          "repairFirewall": "Reparar regla del firewall",
+          "suspendedHostUnavailable": "Host desconectado",
+          "suspendedIncarnation": "Árbol de trabajo reemplazado",
+          "suspendedOverlapping": "Recurso compartido superpuesto",
+          "suspendedUnknown": "No servido"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Se reparó la regla de Firewall de Windows.",

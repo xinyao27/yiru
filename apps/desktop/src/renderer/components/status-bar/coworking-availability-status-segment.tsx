@@ -21,6 +21,7 @@ import {
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
+import type { CoworkingPublicationSuspensionReason } from '~shared/coworking/publication-suspension'
 import { COWORKING_INGRESS_PORT } from '~shared/coworking/wire-contract'
 
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
@@ -115,6 +116,11 @@ function CoworkingPresenceStatusSegment({
 
 function CoworkingPresenceDetails({ sharedCount }: { sharedCount: number }): React.JSX.Element {
   const connections = useAppStore((state) => state.coworkingOwnerActiveConnections)
+  // Why: a suspended share still reads as public in the sidebar, so without this
+  // the owner believes they are sharing something no peer can actually open.
+  const suspended = useAppStore((state) =>
+    state.coworkingOwnerWorktrees.filter((worktree) => worktree.publicationStatus === 'suspended')
+  )
 
   return (
     <div className="flex flex-col gap-2 px-3 py-3">
@@ -130,6 +136,22 @@ function CoworkingPresenceDetails({ sharedCount }: { sharedCount: number }): Rea
               'No worktrees are published. Peers cannot see anything yet.'
             )}
       </p>
+      {suspended.length === 0 ? null : (
+        <ul className="flex flex-col gap-1">
+          {suspended.map((worktree) => (
+            <li
+              key={worktree.worktreeId}
+              className="flex min-w-0 items-center gap-2 text-xs leading-5"
+            >
+              <WarningCircle className="size-3 shrink-0 text-amber-500" />
+              <span className="min-w-0 flex-1 truncate">{worktree.displayName}</span>
+              <span className="text-muted-foreground shrink-0">
+                {getSuspensionLabel(worktree.suspensionReason)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       {connections.length === 0 ? null : (
         <ul className="flex flex-col gap-1">
           {connections.map((connection) => (
@@ -162,6 +184,31 @@ function CoworkingPresenceDetails({ sharedCount }: { sharedCount: number }): Rea
       )}
     </div>
   )
+}
+
+function getSuspensionLabel(reason: CoworkingPublicationSuspensionReason | undefined): string {
+  switch (reason) {
+    case 'host-unavailable':
+      return translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.suspendedHostUnavailable',
+        'Host offline'
+      )
+    case 'incarnation-unavailable':
+      return translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.suspendedIncarnation',
+        'Worktree replaced'
+      )
+    case 'overlapping-root':
+      return translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.suspendedOverlapping',
+        'Overlapping share'
+      )
+    case undefined:
+      return translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.suspendedUnknown',
+        'Not served'
+      )
+  }
 }
 
 function getPresenceLabel(state: {
@@ -210,14 +257,20 @@ function CoworkingAvailabilityStatusSegmentContent({
     'Coworking is unavailable'
   )
 
-  async function retryAvailability(): Promise<void> {
+  // Why: a blocked firewall rule cannot be cleared by re-probing, so that one
+  // diagnostic offers the repair the Coworking panel notice would have run.
+  const needsFirewallRepair = diagnostic === 'coworking_windows_firewall_unavailable'
+
+  async function recover(): Promise<void> {
     if (retryInFlightRef.current) {
       return
     }
     retryInFlightRef.current = true
     setRetrying(true)
     try {
-      await window.api.coworkingSharing.retryAvailability()
+      await (needsFirewallRepair
+        ? window.api.coworkingSharing.repairWindowsFirewall()
+        : window.api.coworkingSharing.retryAvailability())
     } catch {
       // Why: keep host-sensitive Electron errors out of the UI; the sanitized
       // diagnostic remains visible as the recovery feedback.
@@ -264,22 +317,22 @@ function CoworkingAvailabilityStatusSegmentContent({
             {getAvailabilityDescription(diagnostic)}
           </p>
           <div className="mt-3 flex justify-end">
-            <Button
-              type="button"
-              size="xs"
-              disabled={retrying}
-              onClick={() => void retryAvailability()}
-            >
+            <Button type="button" size="xs" disabled={retrying} onClick={() => void recover()}>
               {retrying ? <LoadingIndicator /> : <RefreshCw />}
               {retrying
                 ? translate(
                     'auto.components.coworking.CoworkingAvailabilityStatusSegment.checking',
                     'Checking…'
                   )
-                : translate(
-                    'auto.components.coworking.CoworkingAvailabilityStatusSegment.checkAgain',
-                    'Check again'
-                  )}
+                : needsFirewallRepair
+                  ? translate(
+                      'auto.components.coworking.CoworkingAvailabilityStatusSegment.repairFirewall',
+                      'Repair firewall rule'
+                    )
+                  : translate(
+                      'auto.components.coworking.CoworkingAvailabilityStatusSegment.checkAgain',
+                      'Check again'
+                    )}
             </Button>
           </div>
         </div>
@@ -330,6 +383,12 @@ function getAvailabilityDescription(diagnostic: CoworkingAvailabilityDiagnostic)
       return translate(
         'auto.components.coworking.CoworkingAvailabilityStatusSegment.persistenceUnavailable',
         'Coworking could not safely load sharing settings, so sharing remains off.'
+      )
+    case 'coworking_windows_firewall_unavailable':
+      return translate(
+        'auto.components.coworking.CoworkingAvailabilityStatusSegment.windowsFirewallUnavailable',
+        'Windows Firewall is blocking the Coworking listener on TCP port {{port}}.',
+        { port: COWORKING_INGRESS_PORT }
       )
     case 'coworking_unavailable':
       return translate(
