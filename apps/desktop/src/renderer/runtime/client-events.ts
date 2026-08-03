@@ -63,7 +63,6 @@ function isRuntimeClientEvent(
   return (
     message.type === 'reposChanged' ||
     message.type === 'worktreesChanged' ||
-    message.type === 'sshStateChanged' ||
     message.type === 'activateWorktree'
   )
 }

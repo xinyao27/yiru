@@ -71,10 +71,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runti
 import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
 import { destroyPersistentWebview } from '~renderer/runtime/browser-webview-registry'
 import { subscribeRuntimeClientEvents } from '~renderer/runtime/client-events'
-import {
-  applyRuntimeEnvironmentSshStateChanged,
-  hydrateRuntimeEnvironmentSshState
-} from '~renderer/runtime/environment-ssh-state'
+import { hydrateRuntimeEnvironmentSshState } from '~renderer/runtime/environment-ssh-state'
 import { attachMobileMarkdownBridge } from '~renderer/runtime/mobile-markdown-bridge'
 import { closeMobileSessionTabInStore } from '~renderer/runtime/mobile-session-tab-close'
 import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
@@ -105,8 +102,6 @@ import { makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, UpdateStatus } from '~shared/types'
 import { isWslHookRelayConnectionId } from '~shared/wsl-hook-relay-contract'
 
-import { isDirectSshRemoteWorkspaceApplyInProgress } from '../components/direct-ssh/remote-workspace/target-sync'
-import { createDirectSshRuntimeController } from '../components/direct-ssh/runtime-controller'
 import { runWorktreeDelete } from '../components/sidebar/delete-worktree/flow'
 import { resolveAgentStatusTerminalTitle } from '../components/terminal-pane/agent/status-terminal-title'
 import { useAppStore } from '../store'
@@ -405,10 +400,6 @@ function activateExistingLeafInLayout(
   }
 }
 
-export function isRemoteWorkspaceSnapshotApplyInProgress(): boolean {
-  return isDirectSshRemoteWorkspaceApplyInProgress()
-}
-
 type BrowserSessionTabTarget =
   | { kind: 'unified-browser'; unifiedTabId: string; workspaceId: string; groupId: string }
   | { kind: 'fallback-browser'; workspaceId: string }
@@ -557,7 +548,6 @@ function getWorktreeRuntimeEnvironmentId(worktreeId: string | null | undefined):
 export function useIpcEvents(): void {
   useEffect(() => {
     const unsubs: (() => void)[] = []
-    const directSshRuntimeController = createDirectSshRuntimeController()
     const backgroundSleepingAgentWakeDispatcher = createBackgroundSleepingAgentWakeDispatcher()
     unsubs.push(backgroundSleepingAgentWakeDispatcher.dispose)
     type AgentStatusApplyResult = 'applied' | 'pending' | 'dropped'
@@ -713,21 +703,6 @@ export function useIpcEvents(): void {
     const handleRuntimeClientEvent = (environmentId: string, event: RuntimeClientEvent): void => {
       if (event.type === 'reposChanged') {
         runtimeProjectRefreshScheduler.request(environmentId)
-        return
-      }
-      if (event.type === 'sshStateChanged') {
-        // Why: a paired web client mirrors host SSH state in the global store —
-        // its whole ssh.* API routes to that one host (STA-1468). A desktop
-        // client owns a local SSH surface those maps must keep describing, so a
-        // remote host's state goes into that environment's own bucket instead.
-        if (isPairedWebClientWindow()) {
-          directSshRuntimeController.handleStateChangedEvent({
-            targetId: event.targetId,
-            state: event.state
-          })
-        } else {
-          applyRuntimeEnvironmentSshStateChanged(environmentId, event.targetId, event.state)
-        }
         return
       }
       if (event.type === 'worktreesChanged') {
@@ -2404,8 +2379,6 @@ export function useIpcEvents(): void {
       unsubs.push(unsubscribeWorkspaceSpaceProgress)
     }
 
-    directSshRuntimeController.start()
-
     // Zoom handling for menu accelerators and keyboard fallback paths.
     unsubs.push(
       window.api.ui.onTerminalZoom((direction) => {
@@ -2980,7 +2953,6 @@ export function useIpcEvents(): void {
       pendingAgentStatusEvents.length = 0
       mobileStateHydrationDisposed = true
       pendingMobileStateEvents.length = 0
-      directSshRuntimeController.stop()
       unsubs.forEach((fn) => fn())
       resetAgentHookCompletionNotificationCoordinators()
     }

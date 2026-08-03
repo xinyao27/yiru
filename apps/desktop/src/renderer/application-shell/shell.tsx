@@ -73,7 +73,6 @@ import {
   toModifierDoubleTapEvent
 } from '~shared/modifier-double-tap-detector'
 import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
-import type { RemoteWorkspacePatchResult } from '~shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '~shared/types'
 
 import logo from '../../../resources/yiru-wordmark.png?url'
@@ -178,7 +177,7 @@ import { shouldShowWorktreeHistoryControls } from './titlebar-worktree-history-c
 import { useAppMenuPaste } from './use-app-menu-paste'
 import { useAutoAckViewedAgent } from './use-auto-ack-viewed-agent'
 import { useGlobalFileDrop } from './use-global-file-drop'
-import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './use-ipc-events'
+import { useIpcEvents } from './use-ipc-events'
 import { useLargeTextControlPaste } from './use-large-text-control-paste'
 import { usePrimarySelectionPaste } from './use-primary-selection-paste'
 import { useRadixBodyPointerEventsRecovery } from './use-radix-body-pointer-events-recovery'
@@ -415,36 +414,6 @@ const PetOverlay = lazy(() => import('../components/pet/overlay'))
 // past first-launch. The gate `shouldShowOnboarding` lives in its own tiny
 // module so no eager import path pulls OnboardingFlow into the main chunk.
 const OnboardingFlow = lazy(() => import('../components/onboarding/flow'))
-
-function applyRemoteWorkspacePatchStatus(
-  targetId: string,
-  result: RemoteWorkspacePatchResult
-): void {
-  const store = useAppStore.getState()
-  if (result.ok) {
-    store.setRemoteWorkspaceSyncStatus(targetId, {
-      phase: 'synced',
-      direction: 'push',
-      revision: result.snapshot.revision,
-      updatedAt: result.snapshot.updatedAt,
-      lastSyncedAt: Date.now(),
-      message: translate('auto.App.332dbfa497', 'Workspace uploaded')
-    })
-    return
-  }
-  store.setRemoteWorkspaceSyncStatus(targetId, {
-    phase: result.reason === 'stale-revision' ? 'conflict' : 'offline',
-    direction: 'push',
-    revision: result.snapshot?.revision,
-    updatedAt: result.snapshot?.updatedAt,
-    lastSyncedAt: Date.now(),
-    message:
-      result.message ??
-      (result.reason === 'stale-revision'
-        ? 'Workspace changed on another device'
-        : 'Remote workspace sync unavailable')
-  })
-}
 
 function shouldMountUpdateCardForStatus(status: UpdateStatus): boolean {
   if (status.state === 'idle') {
@@ -1389,35 +1358,12 @@ function App(): React.JSX.Element {
   useEffect(() => {
     return createSessionWriteSubscriber({
       store: useAppStore,
-      shouldSchedulePersist: () => !isRemoteWorkspaceSnapshotApplyInProgress(),
       persist: ({ patch }) => {
         const state = useAppStore.getState()
         // Why: route each runtime host's worktree-scoped slice to its own
         // partition; the returned promise is the local write so the
         // remote-workspace upload chain below keeps its ordering.
-        const localWrite = patchWorkspaceSessionByHost(window.api.session, patch, state)
-        void localWrite
-        const hydratedTargetIds = Array.from(state.remoteWorkspaceHydratedTargetIds).filter(
-          (targetId) => state.remoteWorkspaceSyncStatusByTargetId[targetId]?.phase !== 'conflict'
-        )
-        if (hydratedTargetIds.length > 0) {
-          void localWrite
-            .then(() => window.api.remoteWorkspace?.setForConnectedTargets({ hydratedTargetIds }))
-            .then((results) => {
-              for (const { targetId, result } of results ?? []) {
-                applyRemoteWorkspacePatchStatus(targetId, result)
-              }
-            })
-            .catch((err) => {
-              for (const targetId of hydratedTargetIds) {
-                useAppStore.getState().setRemoteWorkspaceSyncStatus(targetId, {
-                  phase: 'error',
-                  direction: 'push',
-                  message: err instanceof Error ? err.message : 'Workspace upload failed'
-                })
-              }
-            })
-        }
+        void patchWorkspaceSessionByHost(window.api.session, patch, state)
       }
     })
   }, [])

@@ -120,7 +120,6 @@ import type {
   RateLimitRuntimeTarget,
   RateLimitState
 } from '~shared/rate-limit-types'
-import type { RemoteWorkspaceChangedEvent } from '~shared/remote-workspace-types'
 import {
   richMarkdownContextMenuCommandChannel,
   type RichMarkdownContextMenuCommandPayload
@@ -2385,23 +2384,6 @@ const api = {
       ipcRenderer.sendSync('session:set-sync', args, hostId)
     }
   } satisfies PreloadApi['session'],
-
-  remoteWorkspace: {
-    get: (args) => ipcRenderer.invoke('remoteWorkspace:get', args),
-    setForConnectedTargets: (args) =>
-      ipcRenderer.invoke('remoteWorkspace:setForConnectedTargets', args),
-    listEnabledConnectedTargets: () =>
-      ipcRenderer.invoke('remoteWorkspace:listEnabledConnectedTargets'),
-    listConnectedClients: (args) =>
-      ipcRenderer.invoke('remoteWorkspace:listConnectedClients', args),
-    clientId: () => ipcRenderer.invoke('remoteWorkspace:clientId'),
-    onChanged: (callback) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: RemoteWorkspaceChangedEvent) =>
-        callback(data)
-      ipcRenderer.on('remoteWorkspace:changed', listener)
-      return () => ipcRenderer.removeListener('remoteWorkspace:changed', listener)
-    }
-  } satisfies PreloadApi['remoteWorkspace'],
 
   updater: {
     getStatus: () => ipcRenderer.invoke('updater:getStatus'),

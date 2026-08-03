@@ -1,5 +1,3 @@
-import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
-
 import type {
   CreateWorktreeResult,
   WorktreeDefaultTabsLaunch,
@@ -10,10 +8,6 @@ import type {
 export type RuntimeClientEvent =
   | { type: 'reposChanged' }
   | { type: 'worktreesChanged'; repoId: string }
-  // Why: SSH connections live on the runtime host; paired clients have no IPC
-  // channel for ssh:state-changed, so without this event their reconnect
-  // overlays never learn the host connected (STA-1468).
-  | { type: 'sshStateChanged'; targetId: string; state: SshConnectionState }
   | {
       type: 'activateWorktree'
       repoId: string

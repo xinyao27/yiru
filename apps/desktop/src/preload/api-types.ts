@@ -397,12 +397,6 @@ import type {
   RateLimitState
 } from '~shared/rate-limit-types'
 import type {
-  RemoteWorkspaceChangedEvent,
-  RemoteWorkspaceConnectedClient,
-  RemoteWorkspacePatchResult,
-  RemoteWorkspaceSnapshot
-} from '~shared/remote-workspace-types'
-import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
   SpeechModelManifest,
@@ -1986,19 +1980,6 @@ export type PreloadApi = {
     flush: () => Promise<void>
     readTerminalScrollback: (args: { ref: string }) => string | null
     setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
-  }
-  remoteWorkspace: {
-    get: (args: { targetId: string }) => Promise<RemoteWorkspaceSnapshot | null>
-    setForConnectedTargets: (args: {
-      session?: WorkspaceSessionState
-      hydratedTargetIds?: string[]
-    }) => Promise<{ targetId: string; result: RemoteWorkspacePatchResult }[]>
-    listEnabledConnectedTargets: () => Promise<string[]>
-    listConnectedClients: (args?: {
-      targetIds?: string[]
-    }) => Promise<{ targetId: string; clients: RemoteWorkspaceConnectedClient[] }[]>
-    clientId: () => Promise<string>
-    onChanged: (callback: (event: RemoteWorkspaceChangedEvent) => void) => () => void
   }
   updater: {
     getVersion: () => Promise<string>
