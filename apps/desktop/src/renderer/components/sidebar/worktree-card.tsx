@@ -14,6 +14,7 @@ import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useCallback, useState } from 'react'
 import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { RateLimitResumeWorkspaceIndicator } from '~renderer/components/rate-limit-resume/workspace-indicator'
 import { RepoIconGlyph } from '~renderer/components/repo/icon'
 import { activateWorktreeFromSidebar } from '~renderer/components/sidebar/worktree-activation'
 import { Badge } from '~renderer/components/ui/badge'
@@ -1142,6 +1143,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
                 affiliateListMode ? undefined : () => setRenamingWorktreeId(null)
               }
             />
+
+            <RateLimitResumeWorkspaceIndicator worktreeId={worktree.id} />
 
             {typeof worktree.firstAgentMessageRenameError === 'string' &&
             worktree.firstAgentMessageRenameError.length > 0 &&

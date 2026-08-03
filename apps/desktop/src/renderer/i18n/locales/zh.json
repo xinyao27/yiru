@@ -12265,6 +12265,7 @@
       "schedule": "约 {{countdown}} 后继续",
       "reveal": "去看看"
     },
-    "workspace": "工作区"
+    "workspace": "工作区",
+    "workspaceIndicator": "{{agent}} 将于 {{time}} 自动继续运行"
   }
 }

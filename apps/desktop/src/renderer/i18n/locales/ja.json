@@ -12265,6 +12265,7 @@
       "schedule": "約 {{countdown}} 後に再開",
       "reveal": "表示する"
     },
-    "workspace": "ワークスペース"
+    "workspace": "ワークスペース",
+    "workspaceIndicator": "{{agent}} は {{time}} に自動的に再開します"
   }
 }
