@@ -316,47 +316,38 @@ function MountedBottomDrawer({
           pointerEvents="box-none"
         >
           <Animated.View
-            className="overflow-hidden rounded-t-3xl px-3"
+            className="overflow-hidden rounded-t-3xl"
             style={[
               {
                 width: '100%',
-                maxWidth: isWideLayout ? modalMaxWidth : undefined,
-                maxHeight: screenHeight - insets.top - spacing4,
-                paddingBottom: insets.bottom + spacing4
+                maxWidth: isWideLayout ? modalMaxWidth : undefined
               },
               drawerStyle
             ]}
           >
+            {/* Why: the native GlassView must participate in layout. An empty
+                absolute background can mount before it has dimensions and stay blank. */}
             <MobileGlassSurface
               {...BOTTOM_DRAWER_GLASS_APPEARANCE}
-              className="absolute inset-0 rounded-t-3xl"
+              className="overflow-hidden rounded-t-3xl px-3"
               isFunctional
-              pointerEvents="none"
-            />
-            {!contentScrollable ? (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className="items-center pt-2 pb-3"
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
-                  >
-                    <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
-                  </Animated.View>
-                </GestureDetector>
+              style={{
+                maxHeight: screenHeight - insets.top - spacing4,
+                paddingBottom: insets.bottom + spacing4
+              }}
+            >
+              <GestureDetector gesture={handlePanGesture}>
+                <Animated.View
+                  className="items-center pt-2 pb-3"
+                  accessibilityRole="button"
+                  accessibilityLabel="Dismiss drawer"
+                >
+                  <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
+                </Animated.View>
+              </GestureDetector>
+              {!contentScrollable ? (
                 <View className="min-h-0">{children}</View>
-              </>
-            ) : dragContentToDismiss ? (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className="items-center pt-2 pb-3"
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
-                  >
-                    <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
-                  </Animated.View>
-                </GestureDetector>
+              ) : dragContentToDismiss ? (
                 <GestureDetector gesture={contentPanGesture}>
                   <Animated.View collapsable={false}>
                     <GestureDetector gesture={scrollGesture}>
@@ -372,18 +363,7 @@ function MountedBottomDrawer({
                     </GestureDetector>
                   </Animated.View>
                 </GestureDetector>
-              </>
-            ) : (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className="items-center pt-2 pb-3"
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
-                  >
-                    <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
-                  </Animated.View>
-                </GestureDetector>
+              ) : (
                 <ScrollView
                   bounces={false}
                   keyboardShouldPersistTaps="handled"
@@ -391,8 +371,8 @@ function MountedBottomDrawer({
                 >
                   {children}
                 </ScrollView>
-              </>
-            )}
+              )}
+            </MobileGlassSurface>
             <MobileGlassSurface
               {...BOTTOM_DRAWER_GLASS_APPEARANCE}
               className="absolute top-full right-0 left-0 h-screen"
