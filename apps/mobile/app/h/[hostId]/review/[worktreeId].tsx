@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 
-import { MobileDiffReviewScreenView } from '~/components/diff-review-screen-view'
+import { MobileDiffReviewScreenView } from '~/review/screen-view'
 import { normalizeReviewAreaParam } from '~/session/diff/review-positioning'
 import { firstReviewParam, normalizeReviewFilterParam } from '~/session/diff/review-screen-model'
 import { useMobileDiffReviewController } from '~/session/diff/use-review-controller'

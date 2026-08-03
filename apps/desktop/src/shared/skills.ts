@@ -8,6 +8,48 @@ export type SkillProvider = 'codex' | 'claude' | 'agent-skills'
 
 export type SkillSourceKind = 'home' | 'repo' | 'bundled' | 'plugin'
 
+/**
+ * How one directory holds a skill.
+ *
+ * Why it matters to discovery and not only to freshness: `npx skills add
+ * --global` writes an independent copy into every agent home, while other
+ * installers symlink one directory into all of them. Both look identical in a
+ * flat list, and only this distinction says whether editing one edits the rest.
+ */
+export type SkillInstallationTopology =
+  | 'canonical-copy'
+  | 'provider-alias'
+  | 'independent-copy'
+  | 'external-link'
+  | 'broken-link'
+  | 'read-only'
+  | 'repo-scope'
+  | 'plugin-cache'
+  /** A host that reported the skill without classifying its directory. */
+  | 'unknown'
+
+/** One directory holding one skill, as the agent owning that root sees it. */
+export type SkillPlacement = {
+  /** Stable identity of this directory, independent of scan order. */
+  id: string
+  rootId: string
+  rootPath: string
+  rootLabel: string
+  /** Agent that owns this root; null is the explicit shared-skills scope. */
+  owner: AgentType | null
+  providers: SkillProvider[]
+  sourceKind: SkillSourceKind
+  sourceLabel: string
+  /** The path the agent reads, before any symlink is followed. */
+  directoryPath: string
+  skillFilePath: string
+  /** Where a linked directory actually lives; null when it is a real one. */
+  linkTargetPath: string | null
+  topology: SkillInstallationTopology
+  fileCount: number
+  updatedAt: number | null
+}
+
 export type DiscoveredSkill = {
   id: string
   name: string
@@ -19,14 +61,46 @@ export type DiscoveredSkill = {
   sourceKind: SkillSourceKind
   sourceLabel: string
   rootPath: string
-  /** Every root that reached this file. Canonical-path dedup keeps one row but
-   *  must not erase co-owning roots, or shared symlinked skills lose agents. */
-  rootPaths?: string[]
+  /** Every directory holding this exact skill, within one scope. Grouping keeps
+   *  one row per skill, but must not erase co-owning roots, or a copied or
+   *  symlinked skill loses the agents that can actually see it. Optional so a
+   *  relay whose build predates placements still parses. */
+  placements?: SkillPlacement[]
   directoryPath: string
   skillFilePath: string
   installed: boolean
   fileCount: number
   updatedAt: number | null
+}
+
+/**
+ * Every directory this row covers.
+ *
+ * Why the fallback: discovery can come from a relay whose build predates
+ * placements, and a single-directory row is what that payload actually means.
+ */
+export function skillPlacements(skill: DiscoveredSkill): SkillPlacement[] {
+  if (skill.placements?.length) {
+    return skill.placements
+  }
+  return [
+    {
+      id: skill.id,
+      rootId: skill.rootPath,
+      rootPath: skill.rootPath,
+      rootLabel: skill.sourceLabel,
+      owner: null,
+      providers: skill.providers,
+      sourceKind: skill.sourceKind,
+      sourceLabel: skill.sourceLabel,
+      directoryPath: skill.directoryPath,
+      skillFilePath: skill.skillFilePath,
+      linkTargetPath: null,
+      topology: 'unknown',
+      fileCount: skill.fileCount,
+      updatedAt: skill.updatedAt
+    }
+  ]
 }
 
 /**

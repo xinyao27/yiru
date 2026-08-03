@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
 import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger
+} from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
 import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
@@ -47,7 +47,6 @@ export function EditorPanelHeaderPath({
   onOpenContainingFolder
 }: EditorPanelHeaderPathProps): React.JSX.Element {
   const [pathMenuOpen, setPathMenuOpen] = useState(false)
-  const [pathMenuPoint, setPathMenuPoint] = useState({ x: 0, y: 0 })
   const skipMenuFocusRestoreRef = useRef(false)
   const headerCopyState = getEditorHeaderCopyState(activeFile)
   const canCopyHeaderPath = headerCopyState.copyText !== null
@@ -70,15 +69,12 @@ export function EditorPanelHeaderPath({
   }, [])
 
   return (
-    <div className="min-w-0 flex-1">
-      <div
-        className="flex min-w-0 items-center gap-2"
-        onContextMenuCapture={(event) => {
-          event.preventDefault()
+    <ContextMenu open={pathMenuOpen} onOpenChange={setPathMenuOpen}>
+      <ContextMenuTrigger
+        onContextMenu={() => {
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-          setPathMenuPoint({ x: event.clientX, y: event.clientY })
-          setPathMenuOpen(true)
         }}
+        render={<div className="flex min-w-0 flex-1 items-center gap-2" />}
       >
         {isRenaming ? (
           <Input
@@ -135,87 +131,71 @@ export function EditorPanelHeaderPath({
         >
           {headerCopyState.copyToastLabel}
         </span>
-      </div>
-      <DropdownMenu open={pathMenuOpen} onOpenChange={setPathMenuOpen} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-hidden
-              tabIndex={-1}
-              className="pointer-events-none fixed size-px border-0 opacity-0"
-              style={{ left: pathMenuPoint.x, top: pathMenuPoint.y }}
-            />
+      </ContextMenuTrigger>
+      <ContextMenuContent
+        className="w-56"
+        finalFocus={() => {
+          if (!skipMenuFocusRestoreRef.current) {
+            return
           }
-        />
-        <DropdownMenuContent
-          className="w-56"
-          sideOffset={0}
-          align="start"
-          finalFocus={() => {
-            if (!skipMenuFocusRestoreRef.current) {
-              return
-            }
-            skipMenuFocusRestoreRef.current = false
-            // Return false to suppress the default focus restore.
-            return false
+          skipMenuFocusRestoreRef.current = false
+          // Return false to suppress the default focus restore.
+          return false
+        }}
+      >
+        <ContextMenuItem
+          disabled={!canRename}
+          onClick={() => {
+            skipMenuFocusRestoreRef.current = true
+            openRenameInput()
           }}
         >
-          <DropdownMenuItem
-            disabled={!canRename}
-            onClick={() => {
-              skipMenuFocusRestoreRef.current = true
-              openRenameInput()
-            }}
-          >
-            <Pencil className="mr-1.5 h-3.5 w-3.5" />
-            {translate('auto.components.editor.EditorPanelHeader.84cdc0794b', 'Rename')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {!isVirtualEditorTab && (
-            <>
-              <DropdownMenuItem
-                onClick={() => {
-                  void window.api.ui.writeClipboardText(activeFile.filePath)
-                }}
-              >
-                <Copy className="mr-1.5 h-3.5 w-3.5" />
-                {translate('auto.components.editor.EditorPanelHeader.7c08a1f990', 'Copy Path')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  void window.api.ui.writeClipboardText(activeFile.relativePath)
-                }}
-              >
-                <Copy className="mr-1.5 h-3.5 w-3.5" />
-                {translate(
-                  'auto.components.editor.EditorPanelHeader.269ce4842b',
-                  'Copy Relative Path'
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          {canShowMarkdownPreview && (
-            <DropdownMenuItem onClick={onOpenMarkdownPreview}>
-              <Eye className="mr-1.5 h-3.5 w-3.5" />
+          <Pencil className="mr-1.5 h-3.5 w-3.5" />
+          {translate('auto.components.editor.EditorPanelHeader.84cdc0794b', 'Rename')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        {!isVirtualEditorTab && (
+          <>
+            <ContextMenuItem
+              onClick={() => {
+                void window.api.ui.writeClipboardText(activeFile.filePath)
+              }}
+            >
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
+              {translate('auto.components.editor.EditorPanelHeader.7c08a1f990', 'Copy Path')}
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => {
+                void window.api.ui.writeClipboardText(activeFile.relativePath)
+              }}
+            >
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
               {translate(
-                'auto.components.editor.EditorPanelHeader.4157f3cbf3',
-                'Open Markdown Preview'
+                'auto.components.editor.EditorPanelHeader.269ce4842b',
+                'Copy Relative Path'
               )}
-              <DropdownMenuShortcut>{markdownPreviewShortcutLabel}</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          )}
-          {canShowMarkdownPreview && <DropdownMenuSeparator />}
-          {!isVirtualEditorTab && (
-            <DropdownMenuItem onClick={onOpenContainingFolder}>
-              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-              {revealLabel}
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+          </>
+        )}
+        {canShowMarkdownPreview && (
+          <ContextMenuItem onClick={onOpenMarkdownPreview}>
+            <Eye className="mr-1.5 h-3.5 w-3.5" />
+            {translate(
+              'auto.components.editor.EditorPanelHeader.4157f3cbf3',
+              'Open Markdown Preview'
+            )}
+            <ContextMenuShortcut>{markdownPreviewShortcutLabel}</ContextMenuShortcut>
+          </ContextMenuItem>
+        )}
+        {canShowMarkdownPreview && <ContextMenuSeparator />}
+        {!isVirtualEditorTab && (
+          <ContextMenuItem onClick={onOpenContainingFolder}>
+            <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+            {revealLabel}
+          </ContextMenuItem>
+        )}
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

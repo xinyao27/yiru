@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: mobile browser state mirrors a remote desktop screencast session and CDP dialogs, which are external systems that cannot be derived during render. */
 // Why: import from 'buffer' (the npm polyfill), not 'node:buffer' — Metro
 // can't resolve Node's builtin in a React Native bundle.
 import { Buffer } from 'buffer'
@@ -16,6 +15,7 @@ import {
   type PanResponderGestureState
 } from 'react-native'
 
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
@@ -253,10 +253,16 @@ export function MobileBrowserPane({
     zoomRef.current = zoom
   }, [dialog, frameMetadata, layout, zoom])
 
-  useEffect(() => {
+  const zoomResetKey = `${tab.browserPageId ?? ''} ${tab.url}`
+  const renderedZoomResetKeyRef = useRef(zoomResetKey)
+  if (renderedZoomResetKeyRef.current !== zoomResetKey) {
+    renderedZoomResetKeyRef.current = zoomResetKey
+    // Why: a new page or URL invalidates the pinch/pan transform. Resetting during
+    // render keeps the first committed frame at 1x instead of painting the previous
+    // page's zoom and snapping back from an Effect.
     lastZoomResetUrlRef.current = tab.url || 'about:blank'
     resetBrowserZoomState()
-  }, [resetBrowserZoomState, tab.browserPageId, tab.url])
+  }
 
   const pageParams = useCallback(() => {
     if (!tab.browserPageId) {
@@ -376,6 +382,9 @@ export function MobileBrowserPane({
     })
   }, [frameGeometry])
 
+  /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this effect owns
+     the screencast subscription itself. Busy/error/dialog describe the live remote
+     session, not a value derivable from the tab props that start or stop it. */
   useEffect(() => {
     streamGenerationRef.current += 1
     const generation = streamGenerationRef.current
@@ -423,11 +432,21 @@ export function MobileBrowserPane({
       busyRef.current = false
       setBusy(false)
       if (screencastSupported === false) {
-        setError('Update desktop Yiru to stream browser tabs on mobile.')
+        setError(
+          translate(
+            'mobile.browser.updateDesktopToStream',
+            'Update desktop Yiru to stream browser tabs on mobile.'
+          )
+        )
       } else if (screencastSupported === null) {
-        setError('Checking desktop browser streaming support.')
+        setError(
+          translate(
+            'mobile.browser.checkingStreamSupport',
+            'Checking desktop browser streaming support.'
+          )
+        )
       } else if (!tab.browserPageId) {
-        setError('Browser page is not available yet.')
+        setError(translate('mobile.browser.pageUnavailable', 'Browser page is not available yet.'))
       }
       return
     }
@@ -439,7 +458,7 @@ export function MobileBrowserPane({
       }
       busyRef.current = false
       setBusy(false)
-      setError('Browser stream timed out.')
+      setError(translate('mobile.browser.streamTimedOut', 'Browser stream timed out.'))
     }, 15_000)
     const clearStartupTimer = (): void => {
       if (startupTimer) {
@@ -495,7 +514,8 @@ export function MobileBrowserPane({
         } else if (event.type === 'dialog') {
           setDialog({
             dialogType: event.dialogType ?? 'alert',
-            message: event.message ?? 'Browser dialog'
+            message:
+              event.message ?? translate('mobile.browser.dialogFallbackMessage', 'Browser dialog')
           })
         } else if (event.type === 'dialogClosed') {
           setDialog(null)
@@ -505,7 +525,10 @@ export function MobileBrowserPane({
             busyRef.current = false
             setBusy(false)
           }
-          const message = event.message ?? event.error?.message ?? 'Browser stream failed.'
+          const message =
+            event.message ??
+            event.error?.message ??
+            translate('mobile.browser.streamFailed', 'Browser stream failed.')
           if (shouldSurfaceBrowserError(message)) {
             if (readyRef.current) {
               readyRef.current = false
@@ -544,6 +567,7 @@ export function MobileBrowserPane({
     tab.browserPageId,
     worktreeId
   ])
+  /* oxlint-enable react-doctor/no-adjust-state-on-prop-change */
 
   const sendBrowserRequest = useCallback(
     async (
@@ -571,7 +595,10 @@ export function MobileBrowserPane({
         setError(null)
         return (response as RpcSuccess).result
       } catch (err) {
-        const message = browserErrorMessage(err, 'Browser command failed')
+        const message = browserErrorMessage(
+          err,
+          translate('mobile.browser.commandFailed', 'Browser command failed')
+        )
         if (!opts.suppressError && shouldSurfaceBrowserError(message)) {
           setError(message)
         }
@@ -589,7 +616,7 @@ export function MobileBrowserPane({
   const navigateToAddress = useCallback(async () => {
     const url = normalizeBrowserUrl(addressValue)
     if (!url) {
-      setError('Enter a valid URL.')
+      setError(translate('mobile.browser.invalidUrl', 'Enter a valid URL.'))
       return
     }
     const result = (await sendBrowserRequest(
@@ -786,7 +813,7 @@ export function MobileBrowserPane({
         }
         rightClickSentRef.current = true
         void sendPointerClick(point, 'right')
-        onToast('Right click')
+        onToast(translate('mobile.browser.rightClickToast', 'Right click'))
       }, LONG_PRESS_MS)
     },
     [clearLongPressTimer, frameGeometry, mapTouchPoint, onToast, sendPointerClick]
@@ -931,7 +958,7 @@ export function MobileBrowserPane({
       { suppressError: true }
     )
     if (result !== null) {
-      onToast('Sent')
+      onToast(translate('mobile.browser.sentToast', 'Sent'))
     } else {
       setKeyboardValue(text)
     }
@@ -1042,8 +1069,13 @@ export function MobileBrowserPane({
     },
     [browserViewMode, resetBrowserZoomState, tab.browserPageId, worktreeId]
   )
-  const renderedFrameSource =
-    frameUriRef.current || frameUri ? { uri: frameUriRef.current ?? frameUri! } : null
+  // Why: the committed source only has to mount an Image and survive re-renders —
+  // every later frame is pushed straight into the native view by applyFrame, and
+  // React leaves the native source alone while this prop keeps its value.
+  const renderedFrameSource = useMemo(() => (frameUri ? { uri: frameUri } : null), [frameUri])
+  // Why: layer visibility is owned imperatively by updateBrowserLayerVisibility so a
+  // frame swap costs no re-render; this only seeds the class for a freshly mounted
+  // layer, and the ref callback re-applies the authoritative opacity on attach.
   const frameLayerClassName = useCallback((layer: FrameLayer) => {
     return cn(
       'absolute inset-0 items-center justify-center',
@@ -1177,18 +1209,20 @@ export function MobileBrowserPane({
         {dialog ? (
           <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
             <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4" isFunctional>
-              <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
+              <Text className="text-foreground text-sm font-semibold">
+                {translate('mobile.browser.dialogTitle', 'Browser Dialog')}
+              </Text>
               <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
               <MobileGlassGroup className="mt-4 flex-row justify-end gap-2" spacing={8}>
                 {dialog.dialogType !== 'alert' ? (
                   <MobileGlassTextButton
-                    label="Cancel"
+                    label={translate('mobile.browser.dialogCancel', 'Cancel')}
                     onPress={() => void sendDialogCommand('browser.dialogDismiss')}
                   />
                 ) : null}
                 <MobileGlassTextButton
                   isProminent
-                  label="OK"
+                  label={translate('mobile.browser.dialogConfirm', 'OK')}
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
                 />
               </MobileGlassGroup>

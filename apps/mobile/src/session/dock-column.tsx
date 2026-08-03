@@ -1,7 +1,8 @@
 import { memo } from 'react'
 import { View } from 'react-native'
 
-import { mobilePrSidebarStyles } from '../components/pr-sidebar/styles'
+import { mobilePrSidebarStyles } from '~/session/pr/sidebar/styles'
+
 import { MobileFileExplorerPanel } from '../files/file-explorer-panel'
 import { MobileSourceControlPanel } from '../source-control/panel'
 import type { ActivePanel } from './panel-host'

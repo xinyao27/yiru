@@ -47,8 +47,6 @@ type LegendListScrollAreaProps = Omit<
   /** Set by lists whose content is wider than the viewport (grids, tables) so
    *  the horizontal thumb is rendered — the viewport otherwise hides it. */
   showHorizontalScrollBar?: boolean
-  /** Set by lists that draw their own thumb over the viewport. */
-  hideScrollBar?: boolean
   children?: React.ReactNode
   contentContainerClassName?: string
   contentContainerStyle?: LegendListStyle
@@ -80,7 +78,6 @@ export function LegendListScrollArea({
   contentContainerClassName,
   contentContainerStyle,
   contentOffset,
-  hideScrollBar,
   horizontal: _horizontal,
   maintainVisibleContentPosition,
   onLayout,
@@ -217,7 +214,6 @@ export function LegendListScrollArea({
     <ScrollArea
       horizontalScrollBar={showHorizontalScrollBar}
       className="h-full min-h-0"
-      hideScrollBar={hideScrollBar}
       viewportClassName={cn(
         showHorizontalScrollBar ? 'overflow-x-auto' : 'overflow-x-hidden',
         className
@@ -251,16 +247,6 @@ function LegendListHorizontalScrollArea(props: LegendListScrollAreaProps): React
 // extra props, so the horizontal thumb ships as its own scroll component.
 export const LEGEND_LIST_HORIZONTAL_SCROLL_AREA_PROPS = {
   renderScrollComponent: LegendListHorizontalScrollArea
-}
-
-function LegendListCustomScrollbarArea(props: LegendListScrollAreaProps): React.JSX.Element {
-  return <LegendListScrollArea {...props} hideScrollBar />
-}
-
-// Why: the combined diff paints its own overlay thumb beside the viewport, so
-// the shared scrollbar would double up on the same axis.
-export const LEGEND_LIST_CUSTOM_SCROLLBAR_AREA_PROPS = {
-  renderScrollComponent: LegendListCustomScrollbarArea
 }
 
 type LegendListScrollHandle = {

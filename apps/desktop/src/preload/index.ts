@@ -78,7 +78,6 @@ import type { AppStarSource } from '~shared/gh-star-source'
 import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 import type { GhAuthDiagnostic } from '~shared/github-auth-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
-import type { LanguageServerEvent } from '~shared/language-server'
 import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
@@ -111,6 +110,11 @@ import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
 } from '~shared/pty-renderer-delivery-health'
+import type {
+  RateLimitBannerReport,
+  RateLimitHit,
+  RateLimitResumeSchedule
+} from '~shared/rate-limit-resume/types'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
@@ -1596,21 +1600,6 @@ const api = {
       return () => ipcRenderer.removeListener('settings:changed', listener)
     }
   },
-
-  languageServers: {
-    start: (args) => ipcRenderer.invoke('languageServers:start', args),
-    send: (args) => ipcRenderer.invoke('languageServers:send', args),
-    stop: (args) => ipcRenderer.invoke('languageServers:stop', args),
-    resolveDocumentUri: (args) => ipcRenderer.invoke('languageServers:resolveDocumentUri', args),
-    resolveLocation: (args) => ipcRenderer.invoke('languageServers:resolveLocation', args),
-    getLogs: (args) => ipcRenderer.invoke('languageServers:getLogs', args),
-    onEvent: (callback: (event: LanguageServerEvent) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, payload: LanguageServerEvent): void =>
-        callback(payload)
-      ipcRenderer.on('languageServers:event', listener)
-      return () => ipcRenderer.removeListener('languageServers:event', listener)
-    }
-  } satisfies PreloadApi['languageServers'],
 
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute): Promise<LocalhostWorktreeLabelResult> =>
@@ -4159,6 +4148,31 @@ const api = {
         callback(request)
       ipcRenderer.on('automations:dispatchRequested', listener)
       return () => ipcRenderer.removeListener('automations:dispatchRequested', listener)
+    }
+  },
+
+  rateLimitResume: {
+    report: (report: RateLimitBannerReport): Promise<RateLimitHit> =>
+      ipcRenderer.invoke('rateLimitResume:report', report),
+    list: (): Promise<RateLimitResumeSchedule[]> => ipcRenderer.invoke('rateLimitResume:list'),
+    schedule: (hit: RateLimitHit): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:schedule', hit),
+    cancel: (args: { id: string }): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:cancel', args),
+    runNow: (args: { id: string }): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:runNow', args),
+    markFired: (args: { id: string }): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:markFired', args),
+    markFailed: (args: { id: string; reason: string }): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:markFailed', args),
+    markStale: (args: { id: string }): Promise<RateLimitResumeSchedule> =>
+      ipcRenderer.invoke('rateLimitResume:markStale', args),
+    rendererReady: (): Promise<void> => ipcRenderer.invoke('rateLimitResume:rendererReady'),
+    onDispatchRequested: (callback: (schedule: RateLimitResumeSchedule) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, schedule: RateLimitResumeSchedule) =>
+        callback(schedule)
+      ipcRenderer.on('rateLimitResume:dispatchRequested', listener)
+      return () => ipcRenderer.removeListener('rateLimitResume:dispatchRequested', listener)
     }
   },
 

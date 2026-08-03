@@ -298,7 +298,7 @@ export function connect(
     return new Promise((resolve, reject) => {
       const waiter: ConnectWaiter = { resolve, reject, timeout: null }
       if (timeoutMs !== undefined) {
-        // Why: explicit per-request timeouts must include offline/reconnect
+        // Why: a request's timeout budget must include offline/reconnect
         // waiting, not only the RPC after the socket becomes connected.
         waiter.timeout = setTimeout(
           () => {
@@ -427,11 +427,17 @@ export function connect(
       }, HANDSHAKE_TIMEOUT_MS)
     }
 
+    // Why: binary frames decode asynchronously (Blob → bytes), so unqueued
+    // handling can apply frame N+1 before N and corrupt terminal deltas. One
+    // chain per socket keeps string and binary messages in arrival order.
+    let messageChain: Promise<void> = Promise.resolve()
+
     ws.onmessage = (event) => {
       if (ignoreStaleSocketEvent('message')) {
         return
       }
-      void handleSocketMessage(event.data)
+      const data = event.data
+      messageChain = messageChain.then(() => handleSocketMessage(data)).catch(() => {})
     }
 
     async function handleSocketMessage(rawData: unknown) {
@@ -674,8 +680,13 @@ export function connect(
         eventKeys: closeEvent.keys,
         eventStr: closeEvent.json
       })
-      lastWsClosedAt = closeAt
-      currentWsOpenedAt = null
+      // Why: a stale socket's close must not clobber the live attempt's
+      // diagnostics — mutate only when this socket is still the current one,
+      // the same identity guard the other handlers use.
+      if (ws === openingWs) {
+        lastWsClosedAt = closeAt
+        currentWsOpenedAt = null
+      }
       handleSocketClosed(openingWs)
     }
 
@@ -763,7 +774,9 @@ export function connect(
       sharedKey = null
       // Why: close cleanup stale-bails here, so mark active streams for replay.
       markStreamsForReplay()
-      rejectAllPending(reason)
+      // Why: in-flight requests were already written to the wire, so losing
+      // their response is ambiguous — same marker as every other socket-loss path.
+      rejectAllPending(reason, { deliveryUnknown: true })
       if (closing) {
         closing.close()
       }
@@ -779,7 +792,7 @@ export function connect(
     ws?.close()
     ws = null
     setState('auth-failed')
-    rejectAllPending(reason)
+    rejectAllPending(reason, { deliveryUnknown: true })
   }
 
   function scheduleReconnect() {
@@ -1069,7 +1082,11 @@ export function connect(
     ): Promise<RpcResponse> {
       const waitStart = Date.now()
       const wasConnected = state === 'connected'
-      await waitForConnected(options?.timeoutMs)
+      // Why: without a default here the connect-wait phase had no timer at all,
+      // so an offline caller hung until the reconnect retry cap (~6 min). One
+      // deadline now covers connect-wait plus the RPC itself.
+      const deadlineMs = options?.timeoutMs ?? REQUEST_TIMEOUT_MS
+      await waitForConnected(deadlineMs)
       if (!wasConnected) {
         console.log('[net] sendRequest waited for connect', {
           method,
@@ -1079,7 +1096,7 @@ export function connect(
 
       return new Promise((resolve, reject) => {
         const id = nextId()
-        const timeoutMs = options?.timeoutMs ?? REQUEST_TIMEOUT_MS
+        const timeoutMs = Math.max(1, deadlineMs - (Date.now() - waitStart))
         const timeout = setTimeout(() => {
           pending.delete(id)
           console.log('[net] sendRequest TIMEOUT', {
@@ -1115,6 +1132,12 @@ export function connect(
       onData: StreamingListener,
       options?: SubscribeOptions
     ): () => void {
+      if (intentionallyClosed) {
+        // Why: a closed client never reconnects, so a queued stream would never
+        // emit anything — fail fast instead of hanging the caller's UI.
+        queueMicrotask(() => onData({ type: 'error', message: 'Client closed' }))
+        return () => {}
+      }
       const id = nextId()
       const stream: StreamRequest = {
         method,
@@ -1262,6 +1285,13 @@ export function connect(
       sharedKey = null
       setState('disconnected')
       rejectAllPending('Client closed', { deliveryUnknown: true })
+      // Why: close() used to leave stream subscribers with no terminal event at
+      // all, so their screens sat on a loading state forever.
+      const openStreams = Array.from(streamListeners)
+      for (const [id, stream] of openStreams) {
+        emitStreamError(stream, 'Client closed')
+        removeStreamListener(id)
+      }
     }
   }
 }

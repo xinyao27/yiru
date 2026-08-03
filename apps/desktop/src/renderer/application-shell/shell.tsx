@@ -26,6 +26,9 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import { LinkRoutingPreferenceDialogProvider } from '~renderer/components/link-routing-preference-dialog'
 import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
+import { useRateLimitResumeDetector } from '~renderer/components/rate-limit-resume/detector'
+import { useRateLimitResumeDispatch } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
+import { useRateLimitResumeNotifications } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-notifications'
 import { getRendererAppPlatform } from '~renderer/components/settings/renderer-app-platform'
 import { syncZoomCSSVar } from '~renderer/components/settings/ui-zoom'
 import { requestScrollToCurrentWorkspaceRevealAndRename } from '~renderer/components/sidebar/scroll-to-current-workspace-status'
@@ -86,7 +89,6 @@ import { CrashReportDialog } from '../components/crash-report/dialog'
 import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
 import { applyDocumentTheme } from '../components/editor/document-theme'
 import { getSelectedTextForFileSearch } from '../components/editor/file-search-selection'
-import { LanguageServerWorkspaceEditDialog } from '../components/editor/language-server/workspace-edit-dialog'
 import { MarkdownTemplatePicker } from '../components/editor/markdown-template-picker'
 import { useEditorExternalWatch } from '../components/editor/use-editor-external-watch'
 import {
@@ -813,6 +815,13 @@ function App(): React.JSX.Element {
   // Subscribe to IPC push events
   useIpcEvents()
   useAutomationDispatchEvents()
+  // Why: both watch every agent pane, so they must run above any pane subtree
+  // that unmounts when the user switches tabs. Neither subscribes reactively —
+  // the detector uses a plain store listener — so App does not re-render on
+  // pane churn.
+  useRateLimitResumeDetector()
+  useRateLimitResumeDispatch()
+  useRateLimitResumeNotifications()
   // Why: retention must run at App level so the inline per-card agents list
   // always sees retained entries. If retention ran inside the sidebar-card
   // subtree, "done" agents would vanish any time the user collapsed a card's
@@ -2378,7 +2387,6 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <CoworkingControlRequestDialog />
-            <LanguageServerWorkspaceEditDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />

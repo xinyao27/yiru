@@ -2,8 +2,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Linking, Text, View } from 'react-native'
 
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { extractPairingCodeFromUrl } from '../src/transport/pairing'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { extractPairingCodeFromUrl } from '~/transport/pairing'
 
 export default function PairRedirectScreen() {
   const router = useRouter()

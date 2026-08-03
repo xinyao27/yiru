@@ -30,8 +30,13 @@ export function updateWorktreeSelection(params: {
 }): WorktreeSelectionResult {
   const { visibleIds, previousSelectedIds, previousAnchorId, targetId, intent } = params
 
+  // Why: a plain click navigates, and the active-workspace fill already says
+  // which card that is. Selecting it too would paint a second, competing
+  // highlight that outlives the click — nothing clears it when the workspace
+  // is switched by keyboard, palette, or reveal. Selection stays a modifier
+  // gesture: the ring means "in the batch", never "current".
   if (intent === 'replace') {
-    return { selectedIds: new Set([targetId]), anchorId: targetId }
+    return { selectedIds: new Set(), anchorId: targetId }
   }
 
   if (intent === 'toggle') {

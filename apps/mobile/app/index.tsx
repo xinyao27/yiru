@@ -3,17 +3,8 @@ import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
-import {
-  CaretRight as ChevronRight,
-  Terminal,
-  ArrowClockwise as RefreshCw,
-  Power as PowerOff,
-  PencilSimple as Edit3
-} from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
-
-import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
-import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'
+import { loadHomeSnapshot, saveHomeSnapshot } from '~/cache/home-snapshot-cache'
+import { setCachedWorktrees, getCachedWorktrees } from '~/cache/worktree-cache'
 import {
   type AccountsSnapshot,
   type ProviderKey,
@@ -22,36 +13,44 @@ import {
   hasActiveProviderUsage,
   hasRenderableUsage,
   UsageBar
-} from '../src/components/account-usage'
-import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
-import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
-import { ConfirmModal } from '../src/components/confirm-modal'
-import { MobileContentSection } from '../src/components/content-section'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassIconButton } from '../src/components/glass/icon-button'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { MobileHostCard } from '../src/components/host-card'
-import { refreshHomeStatsForHost } from '../src/home/stats-refresh'
+} from '~/components/account-usage'
+import { ActionSheetModal, type ActionSheetAction } from '~/components/action-sheet-modal'
+import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
+import { ConfirmModal } from '~/components/confirm-modal'
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { MobileHostCard } from '~/components/host-card'
+import {
+  CaretRight as ChevronRight,
+  Terminal,
+  ArrowClockwise as RefreshCw,
+  Power as PowerOff,
+  PencilSimple as Edit3
+} from '~/components/uniwind-icons'
+import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
   hydrateHomeStatsByHost,
   subscribeHomeStatsByHost
-} from '../src/home/stats-state'
-import { translate } from '../src/i18n/translate'
-import { useResponsiveLayout } from '../src/layout/responsive-layout'
-import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
-import { triggerMediumImpact } from '../src/platform/haptics'
-import { useAllHostClients } from '../src/transport/all-host-clients'
-import { useCloseHost, useForceReconnect, usePrimeHosts } from '../src/transport/client-context'
-import { classifyConnection } from '../src/transport/connection-health'
-import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycle'
-import { loadHosts } from '../src/transport/host-store'
-import type { RpcClient } from '../src/transport/rpc-client'
-import type { ConnectionState, HostProfile } from '../src/transport/types'
-import { scheduleWidgetSnapshotUpdate } from '../src/widgets/snapshot-sync'
-import { repoColor } from '../src/worktree/repo-color'
-import { pickResumeWorktree } from '../src/worktree/resume-worktree'
+} from '~/home/stats-state'
+import { translate } from '~/i18n/translate'
+import { useResponsiveLayout } from '~/layout/responsive-layout'
+import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
+import { subscribeToDesktopNotifications } from '~/notifications/notifications'
+import { triggerMediumImpact } from '~/platform/haptics'
+import { cn } from '~/style/class-names'
+import { useAllHostClients } from '~/transport/all-host-clients'
+import { useCloseHost, useForceReconnect, usePrimeHosts } from '~/transport/client-context'
+import { classifyConnection } from '~/transport/connection-health'
+import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { ConnectionState, HostProfile } from '~/transport/types'
+import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
+import { repoColor } from '~/workspace/repo-color'
+import { pickResumeWorktree } from '~/worktree/resume-pick'
 
 function endpointLabel(endpoint: string): string {
   try {
@@ -429,13 +428,32 @@ export default function HomeScreen() {
   // Runs once per (hostId, client) pair and tears down when that pair
   // changes. The provider keeps the underlying socket open across
   // resubscription cycles so this is cheap.
+  // Why: depend on the host-id set AND each entry's client identity, so
+  // resubscriptions don't fire on every render that produces a new array
+  // reference, but DO fire when forceReconnect swaps the underlying client for a
+  // host (otherwise wireUp would keep firing on a closed client and never
+  // re-attach to the fresh one, leaving notifications/accounts subs broken until
+  // the user navigates).
+  const clientSubscriptionKey = useMemo(
+    () =>
+      allClients
+        .map((e) => `${e.hostId}:${clientKey(e.client)}`)
+        .sort()
+        .join(','),
+    [allClients]
+  )
   useEffect(() => {
     const cleanups: (() => void)[] = []
-    for (const entry of allClients) {
+    for (const entry of allClientsRef.current) {
       let unsubNotif: (() => void) | null = null
       let unsubAccounts: (() => void) | null = null
-      let statsFetched = false
+      let wiredState: ConnectionState | null = null
       const wireUp = (state: ConnectionState) => {
+        // Why: a host can drop and come back on the SAME client instance, so
+        // refetch on every transition INTO connected — a once-per-client flag
+        // left the home cards stale until the screen was refocused.
+        const reconnected = state === 'connected' && wiredState !== 'connected'
+        wiredState = state
         if (state === 'connected') {
           if (!unsubNotif) {
             unsubNotif = subscribeToDesktopNotifications(entry.client, entry.hostId)
@@ -451,8 +469,7 @@ export default function HomeScreen() {
               }
             })
           }
-          if (!statsFetched) {
-            statsFetched = true
+          if (reconnected) {
             void refreshHomeStatsForHost(entry.client, entry.hostId)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
@@ -467,7 +484,7 @@ export default function HomeScreen() {
           }
         }
       }
-      wireUp(entry.state)
+      wireUp(entry.client.getState())
       const unsubState = entry.client.onStateChange(wireUp)
       cleanups.push(() => {
         unsubState()
@@ -480,19 +497,7 @@ export default function HomeScreen() {
         c()
       }
     }
-    // Why: depend on the host-id set AND each entry's client identity, so
-    // resubscriptions don't fire on every render that produces a new
-    // array reference, but DO fire when forceReconnect swaps the
-    // underlying client for a host (otherwise wireUp would keep firing
-    // on a closed client and never re-attach to the fresh one, leaving
-    // notifications/accounts subs broken until the user navigates).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    allClients
-      .map((e) => `${e.hostId}:${clientKey(e.client)}`)
-      .sort()
-      .join(',')
-  ])
+  }, [clientSubscriptionKey])
 
   // Why: prefer the worktree the user last opened on this device so the
   // "Resume" card reflects their mobile session history, not just the

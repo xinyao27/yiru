@@ -9,23 +9,19 @@ function createMaxLinesRule(max: number): MaxLinesRule {
 export const mobileMaxLinesRatchets = [
   {
     files: ['app/h/*/session/*.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(5_015) }
+    rules: { 'max-lines': createMaxLinesRule(3_377) }
   },
   {
     files: ['src/terminal/web-view.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(379) }
+    rules: { 'max-lines': createMaxLinesRule(373) }
   },
   {
     files: ['src/terminal/webview/html.ts'],
-    rules: { 'max-lines': createMaxLinesRule(1_784) }
-  },
-  {
-    files: ['app/h/*/source-control/*.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(2_152) }
+    rules: { 'max-lines': createMaxLinesRule(1_764) }
   },
   {
     files: ['app/h/*/index.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(1_603) }
+    rules: { 'max-lines': createMaxLinesRule(959) }
   },
   {
     files: ['src/browser/pane.tsx'],
@@ -33,42 +29,22 @@ export const mobileMaxLinesRatchets = [
   },
   {
     files: ['app/index.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(1_422) }
+    rules: { 'max-lines': createMaxLinesRule(851) }
   },
   {
-    files: ['src/components/new-worktree-modal.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(1_263) }
+    files: ['src/components/new-workspace-modal.tsx'],
+    rules: { 'max-lines': createMaxLinesRule(1_039) }
   },
   {
     files: ['src/transport/rpc-client.ts'],
-    rules: { 'max-lines': createMaxLinesRule(1_074) }
+    rules: { 'max-lines': createMaxLinesRule(1_058) }
   },
   {
     files: ['src/components/rich-markdown-editor-html.ts'],
     rules: { 'max-lines': createMaxLinesRule(648) }
   },
   {
-    files: ['src/components/custom-key-modal.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(645) }
-  },
-  {
-    files: ['app/pair-scan.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(531) }
-  },
-  {
-    files: ['app/terminal-settings.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(514) }
-  },
-  {
     files: ['src/terminal/accessory-keys.ts'],
-    rules: { 'max-lines': createMaxLinesRule(388) }
-  },
-  {
-    files: ['app/troubleshoot.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(436) }
-  },
-  {
-    files: ['app/h/*/files/*.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(402) }
+    rules: { 'max-lines': createMaxLinesRule(378) }
   }
 ]

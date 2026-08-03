@@ -21,7 +21,7 @@ export function isEditableKeyboardTarget(target: EventTarget | EditableTargetLik
       'select',
       '[contenteditable=""]',
       '[contenteditable="true"]',
-      '.monaco-editor',
+      'diffs-container',
       '.diff-editor',
       '.rich-markdown-editor',
       '.rich-markdown-editor-shell'

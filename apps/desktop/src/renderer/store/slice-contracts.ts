@@ -24,6 +24,7 @@ import type { DetectedAgentsSlice } from './slices/detected-agents'
 import type { HostedReviewSlice } from './slices/hosted-review'
 import type { KeybindingsSlice } from './slices/keybindings'
 import type { PreflightSlice } from './slices/preflight'
+import type { RateLimitResumeSlice } from './slices/rate-limit-resume'
 import type { RateLimitSlice } from './slices/rate-limits'
 import type { RecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import type { RemoteServerUpdatesSlice } from './slices/remote-server-updates'
@@ -62,6 +63,7 @@ declare module './types' {
       OpenCodeUsageSlice,
       BrowserSlice,
       RateLimitSlice,
+      RateLimitResumeSlice,
       RemoteServerUpdatesSlice,
       SshSlice,
       RuntimeEnvironmentSshSlice,

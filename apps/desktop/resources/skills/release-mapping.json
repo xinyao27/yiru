@@ -482,6 +482,12 @@
         "yiru-emulator-android": 2,
         "yiru-per-workspace-env": 3
       }
+    },
+    {
+      "appVersion": "0.0.18",
+      "skills": {
+        "yiru-debug": 1
+      }
     }
   ]
 }

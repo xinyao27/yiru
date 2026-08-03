@@ -4,8 +4,8 @@ import { triggerError, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState } from '~/transport/types'
 
-import { fetchUpdatePRTitle, type GitHubPrMutationOutcome } from '../github-pr-mutations'
-import type { GitHubPrRepoSlug } from '../github-pr-rpc'
+import { fetchUpdatePRTitle, type GitHubPrMutationOutcome } from './github-mutations'
+import type { GitHubPrRepoSlug } from './github-rpc'
 import { buildUpdatePRTitleParams } from './title-edit'
 
 type PrTitleMutations = {

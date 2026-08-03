@@ -2,7 +2,6 @@ import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
 import { normalizeAppIconId } from '~shared/app-icon'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
 import { getDefaultSettings, getDefaultVoiceSettings } from '~shared/constants'
-import { normalizeLanguageServerSettings } from '~shared/language-server'
 import { normalizeLoaderStyle } from '~shared/loader-style'
 import { normalizeOpenInApplications } from '~shared/open-in-applications'
 import { deriveGlobalWindowsRuntimeDefaultFromLegacySettings } from '~shared/project-execution-runtime'
@@ -116,7 +115,6 @@ export function decodePersistedSettings(
       uiLanguage: normalizeUiLanguage(raw.uiLanguage),
       appIcon: normalizeAppIconId(raw.appIcon),
       loaderStyle: normalizeLoaderStyle(raw.loaderStyle),
-      languageServer: normalizeLanguageServerSettings(raw.languageServer),
       openInApplications: normalizeOpenInApplications(raw.openInApplications, {
         seedDefaults: true
       }),

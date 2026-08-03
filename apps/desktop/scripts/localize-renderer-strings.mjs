@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url'
 // TypeScript 7 is a native CLI; AST consumers still need the legacy JavaScript API.
 import ts from 'typescript-api'
 
-import { collectLocalizationCandidates } from './audit-localization-coverage.mjs'
+import { collectLocalizationCandidates } from '../../../scripts/collect-localization-candidates.mjs'
 
 const TRANSLATE_IMPORT = "import { translate } from '@/i18n/i18n'\n"
 

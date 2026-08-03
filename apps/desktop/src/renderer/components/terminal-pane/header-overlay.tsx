@@ -1,3 +1,4 @@
+import type { BaseUIEvent } from '@base-ui/react/types'
 import {
   ChatCentered as MessageSquarePlus,
   Chat as MessageSquare,
@@ -6,13 +7,14 @@ import {
   X
 } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
+import { Button } from '~renderer/components/ui/button'
 
 // Why: this file is the only place that renders `.pane-title-bar` /
 // `.pane-title-overlay-layer` / `[data-pane-title-surface]`, and it is only
 // reachable through the terminal-pane lazy chunk — keeping the stylesheet
 // here instead of main.css keeps title-bar chrome out of eager first-paint CSS.
 import './pane-title.css'
-import { Button } from '~renderer/components/ui/button'
+import { ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
@@ -63,7 +65,10 @@ type TerminalPaneHeaderOverlayProps = {
   onSplitPane: (pane: ManagedPane, direction: 'vertical' | 'horizontal') => void
   onBeginPaneDrag: (paneId: number, handle: HTMLElement, event: PointerEvent) => void
   onActivatePaneTitleInteraction: (paneId: number) => void
-  onPaneTitleContextMenu: (event: React.MouseEvent<HTMLElement>, paneId: number) => void
+  onPaneTitleContextMenu: (
+    event: BaseUIEvent<React.MouseEvent<HTMLElement>>,
+    paneId: number
+  ) => void
   onStartRename: (paneId: number) => void
   onRemoveTitle: (paneId: number) => void
   onClosePane: (paneId: number) => void
@@ -137,7 +142,9 @@ export default function TerminalPaneHeaderOverlay({
         }
 
         return (
-          <div
+          // Why: the pane header renders outside the terminal container, so it
+          // needs its own trigger to reach the shared pane context menu.
+          <ContextMenuTrigger
             key={`pane-title-${pane.leafId}`}
             className="pane-title-bar"
             data-native-file-drop-target="terminal"
@@ -177,7 +184,7 @@ export default function TerminalPaneHeaderOverlay({
                 dropTarget: event.target
               })
             }}
-            onContextMenuCapture={(event) => onPaneTitleContextMenu(event, pane.id)}
+            onContextMenu={(event) => onPaneTitleContextMenu(event, pane.id)}
             style={{
               left: overlayRect.left,
               top: overlayRect.top,
@@ -412,7 +419,7 @@ export default function TerminalPaneHeaderOverlay({
                 </div>
               </>
             )}
-          </div>
+          </ContextMenuTrigger>
         )
       })}
     </div>

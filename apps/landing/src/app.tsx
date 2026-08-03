@@ -1,7 +1,7 @@
-import { DownloadMenu } from '@/chrome/download-menu'
-import { ThemeToggle } from '@/chrome/theme-toggle'
-import { siteLinks } from '@/site-links'
-import { Demo } from '@/ui/demo/demo'
+import { DownloadMenu } from './chrome/download-menu'
+import { ThemeToggle } from './chrome/theme-toggle'
+import { siteLinks } from './site-links'
+import { Demo } from './ui/demo/demo'
 
 // Why: the architecture is a choice rather than a second download, because
 // browsers report "Intel Mac OS X" even on Apple Silicon — detecting it would

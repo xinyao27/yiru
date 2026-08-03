@@ -4,22 +4,21 @@ import { useState, useRef, useCallback } from 'react'
 import { View, Text, ActivityIndicator, Linking, type LayoutChangeEvent } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { ConnectionLog } from '~/components/connection-log'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { TextInputModal } from '~/components/text-input-modal'
 import { UniwindCameraView } from '~/components/uniwind-camera-view'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
-
-import { ConnectionLog } from '../src/components/connection-log'
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { TextInputModal } from '../src/components/text-input-modal'
-import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { useCloseHost } from '../src/transport/client-context'
-import { decodePairingUrl, parsePairingCode } from '../src/transport/pairing'
+import { useCloseHost } from '~/transport/client-context'
+import { decodePairingUrl, parsePairingCode } from '~/transport/pairing'
 import {
   startPreProfilePairing,
   type PreProfilePairingAttempt
-} from '../src/transport/pre-profile-pairing-coordinator'
-import type { ConnectionLogEntry, PairingOffer } from '../src/transport/types'
+} from '~/transport/pre-profile-pairing-coordinator'
+import type { ConnectionLogEntry, PairingOffer } from '~/transport/types'
 
 // Why: see pair-confirm.tsx — cap initial-pair "Connecting…" so a broken
 // route surfaces as a real error with the log visible instead of a
@@ -52,6 +51,10 @@ export default function PairScanScreen() {
   const processingRef = useRef(false)
   const mountedRef = useRef(true)
   const activePairingAttemptRef = useRef<PreProfilePairingAttempt | null>(null)
+  // Why: startPreProfilePairing emits log entries synchronously before it returns
+  // an attempt we could store, so "is this attempt still current?" keys on a token
+  // published *before* the attempt starts instead of the attempt's identity.
+  const activePairingTokenRef = useRef<object | null>(null)
 
   const setPairScanRootRef = useCallback((node: View | null): void => {
     if (node !== null) {
@@ -63,6 +66,7 @@ export default function PairScanScreen() {
     mountedRef.current = false
     activePairingAttemptRef.current?.dispose()
     activePairingAttemptRef.current = null
+    activePairingTokenRef.current = null
   }, [])
 
   const handleBarCodeScanned = useCallback(
@@ -121,13 +125,16 @@ export default function PairScanScreen() {
     logsRef.current = []
     setLogs([])
     activePairingAttemptRef.current?.dispose()
+    activePairingAttemptRef.current = null
+    const token = {}
+    activePairingTokenRef.current = token
 
     const attempt = startPreProfilePairing({
       offer,
       timeoutMs: PAIRING_OVERALL_TIMEOUT_MS,
       connectOptions: {
         onLog: (entry) => {
-          if (!mountedRef.current || activePairingAttemptRef.current !== attempt) {
+          if (!mountedRef.current || activePairingTokenRef.current !== token) {
             return
           }
           logsRef.current = [...logsRef.current, entry]
@@ -138,10 +145,11 @@ export default function PairScanScreen() {
     activePairingAttemptRef.current = attempt
     try {
       const { hostId } = await attempt.result
-      const attemptIsCurrent = activePairingAttemptRef.current === attempt
+      const attemptIsCurrent = activePairingTokenRef.current === token
       attempt.dispose()
-      if (activePairingAttemptRef.current === attempt) {
+      if (attemptIsCurrent) {
         activePairingAttemptRef.current = null
+        activePairingTokenRef.current = null
       }
       if (!mountedRef.current || !attemptIsCurrent) {
         return
@@ -164,10 +172,11 @@ export default function PairScanScreen() {
       )
     } catch (err) {
       const timedOut = attempt.timedOut
-      const attemptIsCurrent = activePairingAttemptRef.current === attempt
+      const attemptIsCurrent = activePairingTokenRef.current === token
       attempt.dispose()
-      if (activePairingAttemptRef.current === attempt) {
+      if (attemptIsCurrent) {
         activePairingAttemptRef.current = null
+        activePairingTokenRef.current = null
       }
       if (!mountedRef.current || !attemptIsCurrent) {
         return

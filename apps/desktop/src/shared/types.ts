@@ -33,7 +33,6 @@ import type { FeatureTipId } from './feature-tips'
 import type { ForkSyncMode } from './git/fork-sync'
 import type { GitRemoteIdentity } from './git/remote-identity'
 import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
-import type { LanguageServerSettings } from './language-server'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
 import type { LoaderStyle } from './loader-style'
 import type { PersistedNativeChatSessionOptions } from './native-chat/session-options'
@@ -41,6 +40,7 @@ import type {
   GlobalWindowsRuntimeDefault,
   LocalWindowsRuntimePreference
 } from './project-execution-runtime'
+import type { RateLimitResumeSchedule } from './rate-limit-resume/types'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
@@ -1667,7 +1667,6 @@ export type GlobalSettings = {
   /** Opt-in code-editor font; empty (the default) keeps following `terminalFontFamily`. */
   editorFontFamily?: string
   /** Explicit local-only command configuration for Stage 1 editor language intelligence. */
-  languageServer?: LanguageServerSettings
   /** Defaults on for profiles saved before file-editor wrapping became configurable. */
   editorWordWrap?: boolean
   /** Persisted opt-out for browser spellcheck noise in rich Markdown editing surfaces. */
@@ -2676,6 +2675,9 @@ export type PersistedState = {
   legacyPaneKeyAliasEntries: LegacyPaneKeyAliasEntry[]
   automations: Automation[]
   automationRuns: AutomationRun[]
+  /** Pending and recently settled rate-limit resumes. Terminal entries are
+   *  pruned by age on load. */
+  rateLimitResumes?: RateLimitResumeSchedule[]
   onboarding: OnboardingState
   /** Main-owned telemetry de-dupe marker; never exposed through PersistedUIState. */
   featureInteractionTelemetryBuckets?: FeatureInteractionTelemetryBucketState

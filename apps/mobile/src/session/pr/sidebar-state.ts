@@ -1,6 +1,6 @@
 import type { GitHubWorkItemDetails, PRCheckDetail, PRInfo } from '@yiru/workbench-model/review'
 
-import type { GitHubPrReadOutcome, GitHubPrRepoSlug } from '../github-pr-rpc'
+import type { GitHubPrReadOutcome, GitHubPrRepoSlug } from './github-rpc'
 import { resolveLinkedPrNumber } from './sidebar-resolve'
 
 // Pure state machine for the mobile PR sidebar, independent of React and native rendering.

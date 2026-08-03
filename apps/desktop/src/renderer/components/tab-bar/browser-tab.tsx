@@ -9,14 +9,13 @@ import {
   X
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from '~renderer/components/ui/context-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -142,7 +141,6 @@ export default function BrowserTab({
     data: dragData
   })
   const [menuOpen, setMenuOpen] = useState(false)
-  const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
 
   // Why: about:blank and other non-http URLs should not be sent to the
   // system browser. Disable the context menu item instead of silently
@@ -164,10 +162,9 @@ export default function BrowserTab({
   }, [])
 
   // Why: Electron <webview> elements run in a separate process, so clicking
-  // inside one never dispatches a pointerdown on the renderer document. Radix
-  // DropdownMenu relies on document pointerdown for outside-click detection,
-  // so it misses webview clicks. Listening for window blur catches the moment
-  // focus leaves the renderer (including into a webview).
+  // inside one never dispatches a pointerdown on the renderer document, and
+  // Base UI's outside-click detection misses it. Listening for window blur
+  // catches the moment focus leaves the renderer (including into a webview).
   useEffect(() => {
     if (!menuOpen) {
       return
@@ -259,71 +256,48 @@ export default function BrowserTab({
   )
 
   return (
-    <>
-      <div
-        className={TAB_CONTAINER_WIDTH_CLASSES}
-        onContextMenuCapture={(event) => {
-          event.preventDefault()
+    <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <ContextMenuTrigger
+        onContextMenu={() => {
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-          setMenuPoint({ x: event.clientX, y: event.clientY })
-          setMenuOpen(true)
         }}
-      >
-        {tabRoot}
-      </div>
+        render={<div className={TAB_CONTAINER_WIDTH_CLASSES}>{tabRoot}</div>}
+      />
 
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-hidden
-              tabIndex={-1}
-              className="pointer-events-none fixed size-px border-0 opacity-0"
-              style={{ left: menuPoint.x, top: menuPoint.y }}
-            />
-          }
+      <ContextMenuContent className="border-border/80 min-w-[11rem] p-1">
+        <TabWorkspaceLayoutMenuSection
+          unifiedTabId={dragData.unifiedTabId}
+          groupId={dragData.groupId}
+          trailingSeparator
         />
-        <DropdownMenuContent
-          className="border-border/80 min-w-[11rem] p-1"
-          sideOffset={0}
-          align="start"
+        <ContextMenuItem onClick={onDuplicate}>
+          <Copy className="size-4" />
+          {translate('auto.components.tab.bar.BrowserTab.5d6e89891f', 'Duplicate Tab')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={onTogglePin}>
+          {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+          {isPinned
+            ? translate('auto.components.tab.bar.BrowserTab.c5aaee8c39', 'Unpin Tab')
+            : translate('auto.components.tab.bar.BrowserTab.911542656f', 'Pin Tab')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
+          <X className="size-4" />
+          {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
+          <PanelRightClose className="size-4" />
+          {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
+          disabled={!isHttpUrl}
         >
-          <TabWorkspaceLayoutMenuSection
-            unifiedTabId={dragData.unifiedTabId}
-            groupId={dragData.groupId}
-            trailingSeparator
-          />
-          <DropdownMenuItem onClick={onDuplicate}>
-            <Copy className="size-4" />
-            {translate('auto.components.tab.bar.BrowserTab.5d6e89891f', 'Duplicate Tab')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onTogglePin}>
-            {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
-            {isPinned
-              ? translate('auto.components.tab.bar.BrowserTab.c5aaee8c39', 'Unpin Tab')
-              : translate('auto.components.tab.bar.BrowserTab.911542656f', 'Pin Tab')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-            <X className="size-4" />
-            {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-            <PanelRightClose className="size-4" />
-            {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
-            disabled={!isHttpUrl}
-          >
-            <ExternalLink className="size-4" />
-            {translate('auto.components.tab.bar.BrowserTab.6e0bc8f3a8', 'Open In Browser')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+          <ExternalLink className="size-4" />
+          {translate('auto.components.tab.bar.BrowserTab.6e0bc8f3a8', 'Open In Browser')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

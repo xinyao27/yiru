@@ -1,15 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
-import type { DiffComment } from '@yiru/workbench-model/workspace'
 import * as Clipboard from 'expo-clipboard'
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Animated, AppState, Linking, type AppStateStatus } from 'react-native'
 import {
   BackHandler,
-  FlatList,
-  Image,
   View,
   Text,
   ScrollView,
@@ -19,18 +15,15 @@ import {
   Platform,
   ActivityIndicator,
   type KeyboardEvent,
-  type LayoutChangeEvent,
-  type ListRenderItem
+  type LayoutChangeEvent
 } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { MOBILE_AI_VAULT_CAPABILITY } from '~/agent-history/capability'
 import { MobileBrowserPane } from '~/browser/pane'
 import { normalizeBrowserUrl } from '~/browser/url'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
 import { MobileAgentIcon } from '~/components/agent-icon'
 import { ConfirmModal } from '~/components/confirm-modal'
-import { MobileContentSection } from '~/components/content-section'
 import {
   CustomKeyModal,
   loadCustomKeys,
@@ -42,10 +35,7 @@ import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { MobileHtmlPreview } from '~/components/html-preview'
-import { MobileRichMarkdownEditor } from '~/components/rich-markdown-editor'
 import { StatusDot } from '~/components/status-dot'
-import { MobileSyntaxSegments } from '~/components/syntax-segments'
 import { TextInputModal } from '~/components/text-input-modal'
 import {
   Warning as AlertTriangle,
@@ -56,9 +46,7 @@ import {
   FileText,
   GitMerge,
   Globe,
-  Chat as MessageSquare,
   DotsThree as MoreHorizontal,
-  Plus,
   ArrowClockwise as RefreshCw,
   TerminalWindow as SquareTerminal
 } from '~/components/uniwind-icons'
@@ -73,38 +61,23 @@ import {
   triggerError,
   triggerEdgeBump
 } from '~/platform/haptics'
+import { headlessActivationNeedsHostRenderer } from '~/session/activation-result'
 import { MobileBrowserTabActionSheet } from '~/session/browser-tab-action-sheet'
 import { sendMobileBufferedTerminalInput } from '~/session/buffered-terminal-send'
+import { resolveMobileSessionConnectionHealth } from '~/session/connection-health'
 import {
   createMobileSessionCreateWarningState,
   dismissMobileSessionCreateWarningState,
   reconcileMobileSessionCreateWarningState
 } from '~/session/create-warning-state'
-import {
-  addMobileDiffComment,
-  formatDiffComments,
-  normalizeMobileDiffComments,
-  removeDeliveredMobileDiffComments,
-  removeMobileDiffComments
-} from '~/session/diff/comments'
 import { SessionDockColumn } from '~/session/dock-column'
-import {
-  buildPlainMobileDiffSyntaxLines,
-  highlightMobileCode,
-  highlightMobileDiffLines,
-  resolveMobileSyntaxLanguage
-} from '~/session/file-syntax'
+import { FileReader } from '~/session/file-reader'
 import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
 import { MobileSessionHeaderIconButton } from '~/session/header-icon-button'
 import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
-import {
-  buildMarkdownDiskFallbackDoc,
-  shouldReadMarkdownFromDiskAfterReadTabFailure
-} from '~/session/markdown-disk-fallback'
-import { resolveMarkdownFloatingActionsBottom } from '~/session/markdown-floating-actions-layout'
+import { MarkdownReader } from '~/session/markdown-reader'
 import { MobileNativeChatOverlay } from '~/session/native-chat/overlay'
-import * as nativeChatTerminalStream from '~/session/native-chat/terminal-stream'
 import { useMobileNativeChatController } from '~/session/native-chat/use-controller'
 import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
 import { useMobileNativeChatReadability } from '~/session/native-chat/use-readability'
@@ -123,56 +96,38 @@ import { useMobilePrBranchContext } from '~/session/pr/use-branch-context'
 import { QuickCommandsSheet } from '~/session/quick-commands-sheet'
 import { sessionScreenClassNames as styles } from '~/session/screen-class-names'
 import type {
-  DiffCommentActions,
-  DiffNotesDelivery,
-  DiffSyntaxState,
   DirtyMarkdownDraft,
   FileDocState,
-  FileSyntaxState,
-  MarkdownDocState,
   MobileDisplayMode,
   MobileNewTabAgentLoadState,
   MobileSessionTab,
-  MobileSessionTabType,
-  RenderableDiffLine,
   RuntimeRepoSummary,
-  RuntimeStatusResult,
   SessionTabsResult,
   Terminal,
   TerminalCreateResult,
   TerminalGestureInputBucket,
   TerminalGestureInputQueue
 } from '~/session/screen-state'
-import { MOBILE_SESSION_STATUS_LABELS } from '~/session/status-labels'
 import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
-import {
-  acceptSessionSnapshot,
-  applyClosedTabTombstones,
-  confirmsMirroredTabSelection,
-  type AppliedSnapshotMarker
-} from '~/session/tab-snapshot-gate'
 import { MobileSessionTabStrip } from '~/session/tab-strip'
 import { MobileTerminalAccessoryKey } from '~/session/terminal/accessory-key'
 import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
-import { MobileTerminalDiagnostics } from '~/session/terminal/diagnostics'
 import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
 import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
 import { TerminalPaneView } from '~/session/terminal/pane-view'
-import {
-  getActiveTabIdForHandle,
-  getTerminalRecordsFromSessionTabs,
-  mergeTerminalListWithKnownRecords,
-  mergeTerminalRecordsByCurrentOrder,
-  mobileSessionTabsEqual,
-  terminalRecordsEqual,
-  updateTerminalCwdFromStreamEvent
-} from '~/session/terminal/records'
-import { subscribeMobileTerminalSafely } from '~/session/terminal/stream-subscribe'
+import { mergeTerminalListWithKnownRecords, terminalRecordsEqual } from '~/session/terminal/records'
+import { useMobileTerminalForegroundRecovery } from '~/session/terminal/use-foreground-recovery'
 import { useTerminalLiveInputModePreference } from '~/session/terminal/use-live-input-mode-preference'
 import { useMobileTerminalPaste } from '~/session/terminal/use-paste'
+import { useMobileTerminalStreams } from '~/session/terminal/use-terminal-streams'
 import { useMobileAttachmentInputLeaseGate } from '~/session/use-attachment-input-lease-gate'
+import { useMobileDiffComments } from '~/session/use-diff-comments'
+import { useMobileHostCapabilities } from '~/session/use-host-capabilities'
 import { useMobileImageAttachment } from '~/session/use-image-attachment'
 import { useLiveWorktreeName } from '~/session/use-live-worktree-name'
+import { useMobileMarkdownDocs } from '~/session/use-markdown-docs'
+import { useMobileSessionTabSnapshot } from '~/session/use-session-tab-snapshot'
+import { useMobileSessionTabsStore } from '~/session/use-session-tabs'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalLinkOpenMode,
@@ -181,17 +136,12 @@ import {
   saveTerminalTextScale,
   type MobileTerminalLinkOpenMode
 } from '~/storage/preferences'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 import {
   getDefaultTerminalAccessoryBuiltInIds,
   getVisibleTerminalAccessoryKeys,
   loadTerminalAccessoryLayout
 } from '~/terminal/accessory-layout'
-import {
-  recoverActiveTerminalAfterForeground,
-  shouldRecoverTerminalOnAppStateChange
-} from '~/terminal/foreground-recovery'
 import {
   countTerminalGestureInputSequences,
   isGestureMouseTrackingMode,
@@ -213,12 +163,10 @@ import {
 } from '~/terminal/live/input'
 import type { TerminalLiveInputSender } from '~/terminal/live/input-sender'
 import { useTerminalLiveInputCommit } from '~/terminal/live/use-input-commit'
-import { isTerminalOscLinkRanges } from '~/terminal/osc-link-ranges'
 import { sendMobileTerminalQueryReply } from '~/terminal/query-reply'
 import {
   buildMobileQuickCommandLaunch,
   shouldShowMobileQuickCommandsAction,
-  supportsMobileQuickCommands,
   type MobileQuickCommandLaunch
 } from '~/terminal/quick-commands'
 import { isTerminalSendRpcAccepted } from '~/terminal/send-rpc-response'
@@ -234,549 +182,12 @@ import {
   useLastConnectedAt,
   useReconnectAttempt
 } from '~/transport/client-context-connection-metrics'
-import { classifyConnection, verdictDisplayLabel } from '~/transport/connection-health'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '~/transport/types'
-import { getRepoIdFromMobileWorktreeId } from '~/worktree-id'
-import { headlessActivationNeedsHostRenderer } from '~/worktree/activation-result'
+import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
-
-function MarkdownReader({
-  documentId,
-  doc,
-  onRefresh,
-  onChange,
-  onSave,
-  onCopy,
-  onDiscard,
-  keyboardLift
-}: {
-  documentId: string
-  doc: MarkdownDocState | undefined
-  onRefresh: () => void
-  onChange: (content: string) => void
-  onSave: () => void
-  onCopy: () => void
-  onDiscard: () => void
-  keyboardLift: number
-}) {
-  const [spacing3Value, spacing4Value] = useCSSVariable(['--spacing-3', '--spacing-4'])
-  const spacing3 = resolveCssNumber(spacing3Value)
-  const spacing4 = resolveCssNumber(spacing4Value)
-  // The editor lives in a WebView; native Keyboard events under-report its
-  // covered area, so prefer the inset measured inside the WebView when larger.
-  const [webviewKeyboardInset, setWebviewKeyboardInset] = useState(0)
-  const effectiveKeyboardLift = Math.max(keyboardLift, webviewKeyboardInset)
-  if (!doc || doc.status === 'loading') {
-    return (
-      <View className={styles.markdownState}>
-        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-      </View>
-    )
-  }
-  if (doc.status === 'error') {
-    return (
-      <View className={styles.markdownState}>
-        <Text className={styles.markdownError}>{doc.message}</Text>
-        <MobileGlassTextButton label="Retry" onPress={onRefresh} size="small" />
-      </View>
-    )
-  }
-
-  const statusText = doc.saveError
-    ? doc.saveError
-    : doc.readOnlyReason
-      ? 'Read only'
-      : doc.stale
-        ? 'Changed on desktop'
-        : null
-  const showRefresh = (doc.stale && !doc.isDirty) || !doc.editable
-  const showCopy = doc.saveError || !doc.editable
-  const showSave = doc.isDirty || doc.saving
-  const showFloatingActions = statusText || showRefresh || showCopy || showSave
-
-  return (
-    <View className={styles.markdownEditor}>
-      <MobileRichMarkdownEditor
-        key={documentId}
-        content={doc.localContent}
-        editable={doc.editable && !doc.saving}
-        onChange={onChange}
-        onKeyboardInsetChange={setWebviewKeyboardInset}
-      />
-      {showFloatingActions ? (
-        <View
-          pointerEvents="box-none"
-          className="absolute right-3 bottom-4 left-3 items-end gap-1"
-          style={[
-            {
-              bottom: resolveMarkdownFloatingActionsBottom({
-                keyboardLift: effectiveKeyboardLift,
-                restingBottom: spacing4,
-                liftedClearance: spacing3
-              })
-            }
-          ]}
-        >
-          {statusText ? (
-            <MobileGlassSurface
-              className="max-w-full self-end overflow-hidden rounded-xl px-2 py-1"
-              isFunctional
-            >
-              <Text
-                className={cn(
-                  'text-muted-foreground text-xs',
-                  doc.saveError ? styles.markdownError : null
-                )}
-                numberOfLines={2}
-              >
-                {statusText}
-              </Text>
-            </MobileGlassSurface>
-          ) : null}
-          <MobileGlassGroup className="flex-row flex-wrap justify-end gap-2" spacing={8}>
-            {showCopy ? <MobileGlassTextButton label="Copy" onPress={onCopy} size="small" /> : null}
-            {showRefresh ? (
-              <MobileGlassTextButton label="Refresh" onPress={onRefresh} size="small" />
-            ) : null}
-            {doc.isDirty ? (
-              <MobileGlassTextButton
-                isDestructive
-                label="Discard"
-                onPress={onDiscard}
-                size="small"
-              />
-            ) : null}
-            {showSave ? (
-              doc.saving ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : (
-                <MobileGlassTextButton
-                  disabled={!doc.editable || !doc.isDirty}
-                  isProminent
-                  label="Save"
-                  onPress={onSave}
-                  size="small"
-                />
-              )
-            ) : null}
-          </MobileGlassGroup>
-        </View>
-      ) : null}
-    </View>
-  )
-}
-
-function DiffLineRow({
-  line,
-  title,
-  index,
-  comments,
-  activeCommentLine,
-  commentDraft,
-  commentsBusy,
-  onStartComment,
-  onCancelComment,
-  onDraftChange,
-  onSubmitComment,
-  onDeleteComment
-}: {
-  line: RenderableDiffLine
-  title: string
-  index: number
-  comments: DiffComment[]
-  activeCommentLine: number | null
-  commentDraft: string
-  commentsBusy: boolean
-  onStartComment: (lineNumber: number) => void
-  onCancelComment: () => void
-  onDraftChange: (value: string) => void
-  onSubmitComment: (lineNumber: number) => void
-  onDeleteComment: (commentId: string) => void
-}) {
-  const commentLine = line.newLineNumber
-  const isCommenting = commentLine !== undefined && activeCommentLine === commentLine
-  const canComment = commentLine !== undefined
-  // Why: review notes are anchored to the modified side, so the single mobile
-  // gutter should show the same line number the note will reference.
-  const gutterLineNumber = line.newLineNumber ?? line.oldLineNumber ?? ''
-  return (
-    <View className="mb-1">
-      <View
-        className={cn(
-          'flex-row items-start border-l-2 border-editor-surface pr-2',
-          line.kind === 'add' && 'bg-diff-inserted border-git-added',
-          line.kind === 'delete' && 'bg-diff-removed border-git-deleted'
-        )}
-      >
-        <Text className="text-muted-foreground w-11 pr-2 text-right font-mono text-xs leading-6">
-          {gutterLineNumber}
-        </Text>
-        <Text
-          selectable
-          className="text-foreground flex-1 font-mono text-sm leading-6"
-          accessibilityLabel={`${title} diff line ${index + 1}`}
-        >
-          <Text
-            className={cn(
-              'text-muted-foreground',
-              line.kind === 'add' && 'text-git-added',
-              line.kind === 'delete' && 'text-git-deleted'
-            )}
-          >
-            {line.kind === 'add' ? '+ ' : line.kind === 'delete' ? '- ' : '  '}
-          </Text>
-          <MobileSyntaxSegments segments={line.segments} />
-        </Text>
-        {canComment ? (
-          <Pressable
-            className={cn(
-              'w-7 h-6 items-center justify-center',
-              'active:bg-accent',
-              commentsBusy && styles.diffCommentButtonDisabled
-            )}
-            disabled={commentsBusy}
-            onPress={() => {
-              if (commentLine !== undefined) {
-                onStartComment(commentLine)
-              }
-            }}
-            accessibilityLabel={`Add note on line ${commentLine}`}
-          >
-            <Plus size={12} colorClassName="accent-muted-foreground" />
-          </Pressable>
-        ) : null}
-      </View>
-      {comments.length > 0 ? (
-        <View className="mt-1 mr-2 ml-11 gap-1">
-          {comments.map((comment) => (
-            <MobileContentSection key={comment.id} className="rounded-xl px-2 py-1">
-              <View className="mb-1 flex-row items-center gap-1">
-                <MessageSquare size={12} colorClassName="accent-muted-foreground" />
-                <Text className="text-muted-foreground flex-1 text-xs font-semibold">
-                  Line {comment.lineNumber}
-                </Text>
-                <MobileGlassIconButton
-                  accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
-                  disabled={commentsBusy}
-                  icon="close"
-                  onPress={() => onDeleteComment(comment.id)}
-                  size="small"
-                />
-              </View>
-              <Text className="text-foreground text-xs leading-5">{comment.body}</Text>
-            </MobileContentSection>
-          ))}
-        </View>
-      ) : null}
-      {isCommenting ? (
-        <MobileGlassSurface className="mt-1 mr-2 ml-11 gap-2 rounded-xl p-2" isFunctional>
-          <TextInput
-            className="text-foreground mr-0 h-20 min-h-20 flex-1 px-3 py-2 font-mono text-sm"
-            value={commentDraft}
-            onChangeText={onDraftChange}
-            placeholder="Add review note"
-            placeholderTextColorClassName="accent-muted-foreground"
-            editable={!commentsBusy}
-            multiline
-            textAlignVertical="top"
-            autoFocus
-          />
-          <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
-            <MobileGlassTextButton
-              disabled={commentsBusy}
-              label="Cancel"
-              onPress={onCancelComment}
-              size="small"
-            />
-            <MobileGlassTextButton
-              disabled={!commentDraft.trim() || commentsBusy}
-              isProminent
-              label="Save note"
-              onPress={() => {
-                if (commentLine !== undefined) {
-                  onSubmitComment(commentLine)
-                }
-              }}
-              size="small"
-            />
-          </MobileGlassGroup>
-        </MobileGlassSurface>
-      ) : null}
-    </View>
-  )
-}
-
-function FileReader({
-  doc,
-  title,
-  relativePath,
-  language,
-  diffCommentActions
-}: {
-  doc: FileDocState | undefined
-  title: string
-  relativePath: string
-  language?: string
-  diffCommentActions?: DiffCommentActions
-}) {
-  const syntaxLanguage = useMemo(
-    () => resolveMobileSyntaxLanguage(relativePath || title, language),
-    [language, relativePath, title]
-  )
-  const [fileSyntax, setFileSyntax] = useState<FileSyntaxState | null>(null)
-  const [diffSyntax, setDiffSyntax] = useState<DiffSyntaxState | null>(null)
-  const [activeCommentLine, setActiveCommentLine] = useState<number | null>(null)
-  const [commentDraft, setCommentDraft] = useState('')
-  const plainDiffLines = useMemo(
-    () =>
-      doc?.status === 'ready' && doc.kind === 'diff'
-        ? buildPlainMobileDiffSyntaxLines(doc.lines)
-        : [],
-    [doc]
-  )
-  const diffCommentsForFile = useMemo(
-    () =>
-      diffCommentActions?.comments.filter(
-        (comment) => comment.filePath === relativePath && comment.source !== 'markdown'
-      ) ?? [],
-    [diffCommentActions?.comments, relativePath]
-  )
-  const diffCommentsByLine = useMemo(() => {
-    const map = new Map<number, DiffComment[]>()
-    for (const comment of diffCommentsForFile) {
-      const list = map.get(comment.lineNumber) ?? []
-      list.push(comment)
-      map.set(comment.lineNumber, list)
-    }
-    for (const list of map.values()) {
-      list.sort((a, b) => a.createdAt - b.createdAt)
-    }
-    return map
-  }, [diffCommentsForFile])
-
-  const startComment = useCallback((lineNumber: number) => {
-    setActiveCommentLine(lineNumber)
-    setCommentDraft('')
-  }, [])
-
-  const cancelComment = useCallback(() => {
-    setActiveCommentLine(null)
-    setCommentDraft('')
-  }, [])
-
-  const submitComment = useCallback(
-    (lineNumber: number) => {
-      if (!diffCommentActions) {
-        return
-      }
-      void diffCommentActions.onAdd(relativePath, lineNumber, commentDraft).then((added) => {
-        if (added) {
-          setActiveCommentLine(null)
-          setCommentDraft('')
-        }
-      })
-    },
-    [commentDraft, diffCommentActions, relativePath]
-  )
-
-  const renderDiffLine: ListRenderItem<RenderableDiffLine> = useCallback(
-    ({ item, index }) => (
-      <DiffLineRow
-        line={item}
-        title={title}
-        index={index}
-        comments={
-          item.newLineNumber !== undefined ? (diffCommentsByLine.get(item.newLineNumber) ?? []) : []
-        }
-        activeCommentLine={activeCommentLine}
-        commentDraft={commentDraft}
-        commentsBusy={diffCommentActions?.busy === true}
-        onStartComment={startComment}
-        onCancelComment={cancelComment}
-        onDraftChange={setCommentDraft}
-        onSubmitComment={submitComment}
-        onDeleteComment={(commentId) => {
-          if (diffCommentActions) {
-            void diffCommentActions.onDelete(commentId)
-          }
-        }}
-      />
-    ),
-    [
-      activeCommentLine,
-      cancelComment,
-      commentDraft,
-      diffCommentActions,
-      diffCommentsByLine,
-      startComment,
-      submitComment,
-      title
-    ]
-  )
-
-  useEffect(() => {
-    if (doc?.status !== 'ready') {
-      return undefined
-    }
-
-    // Why: highlighting can create many nested Text nodes; defer it one tick so
-    // large files show immediately as plain text before colors are applied.
-    const timer = setTimeout(() => {
-      // file + html share the syntax-segment source view (html's "Source" toggle).
-      if (doc.kind === 'file' || doc.kind === 'html') {
-        setFileSyntax({
-          doc,
-          language: syntaxLanguage,
-          segments: highlightMobileCode(doc.content, syntaxLanguage).segments
-        })
-        return
-      }
-      if (doc.kind === 'diff') {
-        setDiffSyntax({
-          doc,
-          language: syntaxLanguage,
-          lines: highlightMobileDiffLines(doc.lines, syntaxLanguage)
-        })
-      }
-      // image: no syntax highlighting.
-    }, 0)
-
-    return () => clearTimeout(timer)
-  }, [doc, syntaxLanguage])
-
-  if (!doc || doc.status === 'loading') {
-    return (
-      <View className={styles.markdownState}>
-        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-      </View>
-    )
-  }
-  if (doc.status === 'error') {
-    return (
-      <View className={styles.markdownState}>
-        <Text className={styles.markdownError}>{doc.message}</Text>
-      </View>
-    )
-  }
-
-  if (doc.kind === 'diff') {
-    const activeDiffSyntax =
-      diffSyntax?.doc === doc && diffSyntax.language === syntaxLanguage ? diffSyntax.lines : null
-    const commentCount = diffCommentActions?.comments.length ?? 0
-    const unsentCommentCount =
-      diffCommentActions?.comments.filter((comment) => !comment.sentAt).length ?? 0
-    const commentsBusy = diffCommentActions?.busy === true
-    const canCopyNotes = commentCount > 0 && !commentsBusy
-    const canSendNotes = unsentCommentCount > 0 && !commentsBusy
-    return (
-      <View className={styles.markdownEditor}>
-        {diffCommentActions ? (
-          <MobileGlassSurface
-            className="flex-row items-center justify-between gap-2 px-4 py-2"
-            isInteractive
-          >
-            <View className="min-w-0 flex-1 flex-row items-center gap-1">
-              <MessageSquare size={14} colorClassName="accent-muted-foreground" />
-              <Text className="text-muted-foreground text-xs font-semibold">
-                {commentCount === 0
-                  ? 'No review notes'
-                  : `${commentCount} review ${commentCount === 1 ? 'note' : 'notes'}`}
-              </Text>
-            </View>
-            <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-              <MobileGlassTextButton
-                accessibilityLabel="Copy review notes"
-                disabled={!canCopyNotes}
-                label="Copy"
-                onPress={() => void diffCommentActions.onCopyAll()}
-                size="small"
-              />
-              <MobileGlassTextButton
-                accessibilityLabel="Send review notes to AI"
-                disabled={!canSendNotes}
-                isProminent
-                label="Send"
-                onPress={diffCommentActions.onSendAll}
-                size="small"
-              />
-            </MobileGlassGroup>
-          </MobileGlassSurface>
-        ) : null}
-        <FlatList
-          data={activeDiffSyntax ?? plainDiffLines}
-          className={styles.filePreviewScroll}
-          contentContainerClassName={styles.filePreviewContent}
-          keyExtractor={(line, index) =>
-            `${index}:${line.kind}:${line.oldLineNumber ?? ''}:${line.newLineNumber ?? ''}`
-          }
-          renderItem={renderDiffLine}
-          initialNumToRender={32}
-          maxToRenderPerBatch={48}
-          windowSize={7}
-          removeClippedSubviews={Platform.OS !== 'web'}
-          keyboardShouldPersistTaps="handled"
-        />
-      </View>
-    )
-  }
-
-  if (doc.kind === 'image') {
-    return (
-      <View className="bg-editor-surface min-h-0 flex-1">
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="grow items-center justify-center p-4"
-          maximumZoomScale={4}
-          minimumZoomScale={1}
-          centerContent
-        >
-          <Image
-            source={{ uri: doc.dataUri }}
-            className="h-full min-h-50 w-full"
-            resizeMode="contain"
-            accessibilityLabel={`${title} image`}
-          />
-        </ScrollView>
-      </View>
-    )
-  }
-
-  const renderSourceText = (content: string) => (
-    <View className={styles.markdownEditor}>
-      <ScrollView
-        className={styles.filePreviewScroll}
-        contentContainerClassName={styles.filePreviewContent}
-      >
-        <Text
-          selectable
-          className="text-foreground font-mono text-sm leading-6"
-          accessibilityLabel={`${title} preview`}
-        >
-          <MobileSyntaxSegments
-            segments={
-              fileSyntax?.doc === doc && fileSyntax.language === syntaxLanguage
-                ? fileSyntax.segments
-                : [{ text: content, kind: 'plain' }]
-            }
-          />
-        </Text>
-      </ScrollView>
-    </View>
-  )
-
-  if (doc.kind === 'html') {
-    return (
-      <View className={styles.markdownEditor}>
-        <MobileHtmlPreview html={doc.content} renderSource={() => renderSourceText(doc.content)} />
-      </View>
-    )
-  }
-
-  return renderSourceText(doc.content)
-}
 
 export default function SessionScreen() {
   const {
@@ -851,18 +262,22 @@ export default function SessionScreen() {
   const initialCreateWarning = typeof createdWarning === 'string' ? createdWarning.trim() : ''
   const [terminals, setTerminals] = useState<Terminal[]>([])
   const terminalsRef = useRef<Terminal[]>([])
-  const [sessionTabs, setSessionTabs] = useState<MobileSessionTab[]>([])
-  const sessionTabsRef = useRef<MobileSessionTab[]>([])
-  // Why: subscription, 2s polling, and post-mutation refetch race to apply tab
-  // snapshots. Track the last applied (publicationEpoch, snapshotVersion) so a
-  // late-arriving older snapshot from the same publisher can't overwrite (and
-  // resurrect closed tabs in) a newer one. See session-tab-snapshot-gate.
-  const appliedSnapshotMarkerRef = useRef<AppliedSnapshotMarker>({ epoch: null, version: -1 })
-  // Why: after an optimistic local close, suppress the tab until the publisher
-  // confirms its absence, so an in-flight snapshot generated before the close
-  // propagated (and thus newer by version) can't flash the tab back. Maps tab id
-  // to an expiry timestamp so a failed host-side close can't hide a tab forever.
-  const closedTabTombstonesRef = useRef<Map<string, number>>(new Map())
+  const sessionTabsStore = useMobileSessionTabsStore()
+  const {
+    activeSessionTab,
+    activeSessionTabId,
+    activeSessionTabIdRef,
+    activeSessionTabTypeRef,
+    closedTabTombstonesRef,
+    pendingActiveSessionTabIdRef,
+    pendingActiveTerminalHandleRef,
+    releasePendingTabSelection,
+    resetForRoute: resetSessionTabsForRoute,
+    sessionTabs,
+    sessionTabsRef,
+    setActiveSessionTabId,
+    setSessionTabs
+  } = sessionTabsStore
   const [terminalsLoaded, setTerminalsLoaded] = useState(false)
   const [input, setInput] = useState('')
   // Why: baseline terminal zoom, reloaded on focus so a Settings → Terminal change
@@ -883,18 +298,7 @@ export default function SessionScreen() {
     toggleTerminalLiveInput
   } = useTerminalLiveInputModePreference({ hostId, worktreeId })
   const [activeHandle, setActiveHandle] = useState<string | null>(null)
-  const [activeSessionTabId, setActiveSessionTabId] = useState<string | null>(null)
-  const activeSessionTabIdRef = useRef<string | null>(null)
-  // Auto-scroll the tab strip so the active tab (synced from desktop on
-  // worktree entry) is revealed without a manual scroll.
-  const [markdownDocs, setMarkdownDocs] = useState<Map<string, MarkdownDocState>>(new Map())
-  const markdownDocsRef = useRef<Map<string, MarkdownDocState>>(new Map())
   const [fileDocs, setFileDocs] = useState<Map<string, FileDocState>>(new Map())
-  const [diffComments, setDiffComments] = useState<DiffComment[]>([])
-  const diffCommentsRef = useRef<DiffComment[]>([])
-  const [diffCommentBusy, setDiffCommentBusy] = useState(false)
-  const [pendingDiffNotesDelivery, setPendingDiffNotesDelivery] =
-    useState<DiffNotesDelivery | null>(null)
   const [creating, setCreating] = useState(false)
   // Why: React state isn't a synchronous lock — a fast double-tap can fire two
   // creates before `creating` re-renders. This ref blocks the second one in the
@@ -925,10 +329,6 @@ export default function SessionScreen() {
   const [browserActionTarget, setBrowserActionTarget] = useState<Extract<
     MobileSessionTab,
     { type: 'browser' }
-  > | null>(null)
-  const [discardMarkdownTarget, setDiscardMarkdownTarget] = useState<Extract<
-    MobileSessionTab,
-    { type: 'markdown' }
   > | null>(null)
   const [leaveDrafts, setLeaveDrafts] = useState<DirtyMarkdownDraft[] | null>(null)
   const [renameTarget, setRenameTarget] = useState<Terminal | null>(null)
@@ -966,7 +366,6 @@ export default function SessionScreen() {
   const terminalGestureInputBucketsRef = useRef<Map<string, TerminalGestureInputBucket>>(new Map())
   const terminalGestureInputQueuesRef = useRef<Map<string, TerminalGestureInputQueue>>(new Map())
   const terminalGestureInputInFlightRef = useRef<Set<string>>(new Set())
-  const terminalCwdRef = useRef<Map<string, string>>(new Map())
   const initialModesSeenRef = useRef<Set<string>>(new Set())
   const deviceTokenRef = useRef<string | null>(null)
   // Why: state (not a ref) — the connection verdict needs a re-render once
@@ -974,11 +373,6 @@ export default function SessionScreen() {
   const [hostEndpoint, setHostEndpoint] = useState<string | null>(null)
   const clientRef = useRef<RpcClient | null>(null)
   const connStateRef = useRef<ConnectionState>(connState)
-  // Why: measured once from TerminalWebView on mount, then passed with every
-  // subscribe call so the server can auto-fit the PTY to phone dimensions.
-  const viewportRef = useRef<{ cols: number; rows: number } | null>(null)
-  const viewportMeasuredRef = useRef(false)
-  const terminalRefs = useRef<Map<string, TerminalWebViewHandle>>(new Map())
   const liveInputRef = useRef<TextInput>(null)
   const commandInputRef = useRef<TextInput>(null)
   const liveInputFocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -987,19 +381,7 @@ export default function SessionScreen() {
     typeof Keyboard.addListener
   > | null>(null)
   const sessionTabActionSheetRequestSeqRef = useRef(0)
-  const terminalUnsubsRef = useRef<Map<string, () => void>>(new Map())
-  const subscribingHandlesRef = useRef<Set<string>>(new Set())
-  const initializedHandlesRef = useRef<Set<string>>(new Set())
-  const terminalDiagnosticsRef = useRef(new MobileTerminalDiagnostics())
-  // Why: WebViews load xterm.js from CDN asynchronously. Hidden WebViews
-  // (opacity:0) may have delayed JS execution on iOS. We must not subscribe
-  // until the WebView has fired web-ready, otherwise init() messages queue
-  // and may not render reliably.
-  const webReadyHandlesRef = useRef<Set<string>>(new Set())
   const activeHandleRef = useRef<string | null>(null)
-  const activeSessionTabTypeRef = useRef<MobileSessionTabType | null>(null)
-  const pendingActiveSessionTabIdRef = useRef<string | null>(null)
-  const pendingActiveTerminalHandleRef = useRef<string | null>(null)
   // Why: a browser tab opened from a terminal-tapped HTML must be focused as an
   // Yiru session tab (bridge auto-activate only flags the live webContents, not
   // the app-level active tab). We remember the page id and, once its session tab
@@ -1016,30 +398,15 @@ export default function SessionScreen() {
   const handleCreateBrowserRef = useRef<((rawUrl?: string) => Promise<boolean>) | null>(null)
 
   const initialEmptySessionAutoCreateRef = useRef<string | null>(null)
-  const markdownSaveSeqRef = useRef<Map<string, number>>(new Map())
-  const markdownSaveInFlightRef = useRef<Set<string>>(new Set())
-  const subscribeSeqRef = useRef<Map<string, number>>(new Map())
   // Why: post-RPC refresh timers capture this screen and must not survive
   // route reuse or unmount.
   const delayedActionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-  // Why: server-side layout state machine emits a monotonic seq on every
-  // applyLayout. Track the highest seq we've observed per handle and drop
-  // any scrollback/resized event with a strictly older seq — these are
-  // late-arriving events from a superseded layout (e.g. phone-fit dims
-  // landing after the user toggled to desktop). Drops below `>20`-window
-  // gap reset (treat as a fresh subscription, e.g. server restart).
-  const layoutSeqRef = useRef<Map<string, number>>(new Map())
   const sendingRef = useRef(false)
-  // Why: tracks the pixel height of the terminal frame so measureFitDimensions
-  // can use the exact container height instead of relying on window.innerHeight,
-  // which can overstate the visible area due to layout timing.
-  const terminalFrameHeightRef = useRef<number>(0)
   // Why: the terminal frame's width changes when EITHER sidebar is resized (the
   // left worktree sidebar shrinks the detail pane; the right dock takes a slice of
   // the row) without any window-dim change. Tracking the measured width lets the
   // refit hook re-fit the PTY on those resizes — see terminal-viewport-refit.ts.
   const [terminalFrameWidth, setTerminalFrameWidth] = useState(0)
-  const activeSessionTab = sessionTabs.find((tab) => tab.id === activeSessionTabId) ?? null
   const {
     clearPendingLiveInputCommit,
     flushPendingLiveInputBeforeExternalSend,
@@ -1065,26 +432,18 @@ export default function SessionScreen() {
     activeSessionTab?.type !== 'file' &&
     activeSessionTab?.type !== 'browser'
   const liveInputEnabled = activeHandle ? liveInputTerminalHandles.has(activeHandle) : false
-  const [browserScreencastSupported, setBrowserScreencastSupported] = useState<boolean | null>(null)
-  // Why: hosts without aiVault.v1 reject aiVault.listSessions, so the header
-  // entry stays hidden there (mirrors the gated host-list action) instead of
-  // opening a dead-end "update this host" panel.
-  const [agentSessionHistorySupported, setAgentSessionHistorySupported] = useState<boolean | null>(
-    null
-  )
-  const [quickCommandsSupported, setQuickCommandsSupported] = useState<boolean | null>(null)
-  // Why: stable callbacks (handleFileTap) read the live value via this ref, since
-  // the capability probe resolves after the callbacks are created.
-  const browserScreencastSupportedRef = useRef(browserScreencastSupported)
-  browserScreencastSupportedRef.current = browserScreencastSupported
+  const closeQuickCommands = useCallback(() => setShowQuickCommands(false), [])
+  const {
+    agentSessionHistorySupported,
+    browserScreencastSupported,
+    browserScreencastSupportedRef,
+    hostQueryReplyInputSupportedRef,
+    quickCommandsSupported
+  } = useMobileHostCapabilities({ client, connState, onCapabilitiesReset: closeQuickCommands })
   // Why: terminal gesture/input callbacks are intentionally stable and
   // imperative; keep their refs current before commit instead of one effect later.
   clientRef.current = client
   connStateRef.current = connState
-  activeSessionTabTypeRef.current = activeSessionTab?.type ?? null
-  sessionTabsRef.current = sessionTabs
-  activeSessionTabIdRef.current = activeSessionTabId
-  markdownDocsRef.current = markdownDocs
   const reconciledCreateWarningState = reconcileMobileSessionCreateWarningState(
     createWarningState,
     initialCreateWarning
@@ -1153,6 +512,39 @@ export default function SessionScreen() {
     (message: string) => showToast(message, 1600),
     [showToast]
   )
+  const {
+    confirmDiscardMarkdown,
+    copyMarkdownLocalContent,
+    discardMarkdownLocalContent,
+    discardMarkdownTarget,
+    getDirtyMarkdownDrafts,
+    markdownDocs,
+    markdownDocsRef,
+    markMarkdownTabStale,
+    readMarkdownTab,
+    saveMarkdownTab,
+    setDiscardMarkdownTarget,
+    setMarkdownDocs,
+    updateMarkdownLocalContent
+  } = useMobileMarkdownDocs({ client, worktreeId, sessionTabs, showToast })
+  const {
+    addDiffCommentForFile,
+    clearDeliveredDiffComments,
+    copyDiffCommentsToClipboard,
+    deleteDiffCommentForFile,
+    diffCommentBusy,
+    diffComments,
+    pendingDiffNotesDelivery,
+    sendDiffCommentsToAgent,
+    setDiffComments,
+    setPendingDiffNotesDelivery
+  } = useMobileDiffComments({
+    client,
+    connState,
+    worktreeId,
+    isFloatingWorkspaceRoute,
+    showToast
+  })
   const nativeChatTranscriptIsLocalReadable = useMobileNativeChatReadability(client, worktreeId)
   const {
     ready: nativeChatInputLeaseReady,
@@ -1178,339 +570,33 @@ export default function SessionScreen() {
   })
   const { toggleTabChatView, showNativeChat, showNativeChatRef } = nativeChatController
 
-  useEffect(() => {
-    diffCommentsRef.current = diffComments
-  }, [diffComments])
-
-  const getTerminalRef = useCallback((handle: string | null) => {
-    return handle ? terminalRefs.current.get(handle) : undefined
-  }, [])
-
-  const unsubscribeTerminal = useCallback(
-    (handle: string) => {
-      terminalUnsubsRef.current.get(handle)?.()
-      terminalUnsubsRef.current.delete(handle)
-      subscribingHandlesRef.current.delete(handle)
-      terminalDiagnosticsRef.current.terminalUnsubscribed(handle)
-      subscribeSeqRef.current.set(handle, (subscribeSeqRef.current.get(handle) ?? 0) + 1)
-      // Why: a fresh subscription will land on a new server-side state machine
-      // run (or the same one with a higher seq); reset the high-water mark so
-      // the first scrollback isn't accidentally dropped as stale.
-      layoutSeqRef.current.delete(handle)
-      clearNativeChatInputLease(handle)
-    },
-    [clearNativeChatInputLease]
-  )
-  const unsubscribeTerminalRef = useRef(unsubscribeTerminal)
-  unsubscribeTerminalRef.current = unsubscribeTerminal
-
-  const clearTerminalCache = useCallback(() => {
-    terminalUnsubsRef.current.forEach((unsub) => unsub())
-    clearNativeChatInputLease()
-    terminalUnsubsRef.current.clear()
-    subscribingHandlesRef.current.clear()
-    initializedHandlesRef.current.clear()
-    terminalDiagnosticsRef.current.clearTerminalCache()
-    webReadyHandlesRef.current.clear()
-    subscribeSeqRef.current.clear()
-    layoutSeqRef.current.clear()
-    terminalCwdRef.current.clear()
-    setTerminalKeyboardMetrics(new Map())
-    for (const term of terminalRefs.current.values()) {
-      term.clear()
-    }
-  }, [clearNativeChatInputLease])
-
-  // Why: measures the phone viewport once from the first available TerminalWebView.
-  // The viewport dims are passed with every subscribe call so the server can
-  // auto-fit the PTY without a separate RPC round-trip.
-  const measureViewportOnce = useCallback(
-    async (handle: string) => {
-      if (viewportMeasuredRef.current) {
-        return
-      }
-      const dims = await getTerminalRef(handle)?.measureFitDimensions(
-        terminalFrameHeightRef.current || undefined
-      )
-      terminalDiagnosticsRef.current.viewportMeasured(handle, dims, terminalFrameHeightRef.current)
-      if (dims) {
-        viewportRef.current = dims
-        viewportMeasuredRef.current = true
-      }
-    },
-    [getTerminalRef]
-  )
-
-  const subscribeToTerminal = useCallback(
-    (handle: string) => {
-      const diagnostics = terminalDiagnosticsRef.current
-      const logSkippedGate = (reason: string) =>
-        diagnostics.streamSkipped(handle, reason, handle === activeHandleRef.current)
-      if (!client) {
-        logSkippedGate('no-client')
-        return
-      }
-      if (terminalUnsubsRef.current.has(handle)) {
-        logSkippedGate('already-subscribed')
-        return
-      }
-      if (subscribingHandlesRef.current.has(handle)) {
-        logSkippedGate('subscribe-in-flight')
-        return
-      }
-      const covered = nativeChatTerminalStream.isTerminalCoveredByNativeChat(
-        showNativeChatRef.current,
-        activeHandleRef.current,
-        handle
-      )
-      // Why: a native-chat-covered terminal subscribes as the input-floor lease
-      // without a mounted xterm webview, so only gate on the webview when NOT covered.
-      if (!covered) {
-        if (!getTerminalRef(handle)) {
-          logSkippedGate('no-webview-ref')
-          return
-        }
-        if (!webReadyHandlesRef.current.has(handle)) {
-          logSkippedGate('webview-not-ready')
-          return
-        }
-      }
-
-      subscribingHandlesRef.current.add(handle)
-      const seq = (subscribeSeqRef.current.get(handle) ?? 0) + 1
-      subscribeSeqRef.current.set(handle, seq)
-      diagnostics.streamArmed(handle, seq, viewportRef.current)
-
-      // Why: server handles auto-fit on subscribe — no terminal.focus call needed.
-      // The viewport is embedded in the subscribe params so the server resizes
-      // the PTY before serializing scrollback. This eliminates the focus→safeFit
-      // race and the measure→resize→resubscribe pipeline.
-      const unsub = subscribeMobileTerminalSafely(
-        client,
-        {
-          terminal: handle,
-          client: { id: deviceTokenRef.current!, type: 'mobile' as const },
-          viewport: viewportRef.current ?? undefined,
-          capabilities: nativeChatTerminalStream.mobileNativeChatTerminalCapabilities(covered)
-        },
-        (result) => {
-          if (subscribeSeqRef.current.get(handle) !== seq) {
-            return
-          }
-          const data = result as Record<string, unknown>
-          diagnostics.firstStreamEvent(handle, seq, data.type)
-          if (data.type === 'end' || data.type === 'error') {
-            unsubscribeTerminalRef.current(handle)
-            return
-          }
-          if (data.type === 'subscribed') {
-            markNativeChatInputLeaseReady(handle)
-            return
-          }
-          // Why: retain the subscription as the mobile input-floor lease, but
-          // do not mutate covered xterm state; return-to-terminal resubscribes.
-          if (
-            nativeChatTerminalStream.isTerminalCoveredByNativeChat(
-              showNativeChatRef.current,
-              activeHandleRef.current,
-              handle
-            )
-          ) {
-            return
-          }
-          // Why: stale-event filter. Server-side state machine bumps a
-          // monotonic seq on every applyLayout. Drop `resized` events
-          // whose seq is strictly older than what we've already observed
-          // for this handle — they're late-arriving from a superseded
-          // layout. `scrollback` is the response to a fresh subscribe,
-          // so it always resets the high-water mark regardless of seq
-          // (post-WS-reconnect or post-resubscribe the server may emit
-          // scrollback at a seq lower than what we'd seen pre-reconnect;
-          // dropping it would leave the user with a blank terminal).
-          const eventSeq = typeof data.seq === 'number' ? data.seq : null
-          if (eventSeq != null && data.type === 'resized') {
-            const last = layoutSeqRef.current.get(handle)
-            if (last != null && eventSeq < last && last - eventSeq <= 20) {
-              console.log('[fit][session] DROP-stale-seq', {
-                handle: handle.slice(-8),
-                type: data.type,
-                eventSeq,
-                lastSeq: last,
-                cols: data.cols,
-                rows: data.rows,
-                displayMode: data.displayMode
-              })
-              return
-            }
-            layoutSeqRef.current.set(handle, eventSeq)
-          } else if (eventSeq != null && data.type === 'scrollback') {
-            layoutSeqRef.current.set(handle, eventSeq)
-          }
-          if (data.type === 'scrollback') {
-            diagnostics.streamScrollback(handle, seq, eventSeq, data)
-            if (initializedHandlesRef.current.has(handle)) {
-              return
-            }
-            updateTerminalCwdFromStreamEvent(handle, data, terminalCwdRef.current)
-            const cols = (data.cols as number) || 80
-            const rows = (data.rows as number) || 24
-            const scrollbackCols = cols
-            const scrollbackRows = rows
-            const initialData =
-              typeof data.serialized === 'string' && data.serialized.length > 0
-                ? data.serialized
-                : ''
-            const oscLinks = isTerminalOscLinkRanges(data.oscLinks) ? data.oscLinks : undefined
-            const ref = getTerminalRef(handle)
-            // Why: previously we set `initializedHandlesRef` even when the
-            // WebView wasn't mounted yet (ref=null). The init message went
-            // nowhere, but the flag stayed true, so any subsequent scrollback
-            // for THIS handle was silently dropped → blank terminal. Only
-            // mark initialized if init() actually reached the WebView.
-            if (!ref) {
-              console.log('[fit][session] scrollback DROPPED — no terminal ref', {
-                handle: handle.slice(-8),
-                cols,
-                rows
-              })
-              return
-            }
-            ref.init(cols, rows, initialData, false, oscLinks)
-            initializedHandlesRef.current.add(handle)
-            if (data.displayMode) {
-              setTerminalModes((prev) =>
-                new Map(prev).set(handle, data.displayMode as MobileDisplayMode)
-              )
-            }
-            // Why: belt-and-suspenders cold-start fit. The applyFitScale
-            // queued by init() runs after writes drain, but on cold start
-            // xterm's scrollWidth can still be transient when it commits.
-            // Re-fire after a short delay so it runs against a settled DOM.
-            // Mirrors the 'resized' handler below.
-            scheduleDelayedAction(() => getTerminalRef(handle)?.resetZoom(), 200)
-            // Why: viewport measurement needs xterm to be initialized (cell
-            // dimensions come from the renderer). On the first subscribe the
-            // WebView hasn't loaded yet, so viewportRef is null and the server
-            // can't auto-fit. After the first init we can measure, then
-            // resubscribe so the server gets the viewport and phone-fits.
-            // If viewport was measured by a parallel path BUT the scrollback
-            // we just received came back at desktop dims, our subscribe
-            // beat the measure; the server still has a null viewport for
-            // this subscriber record — resubscribe so it gets stored.
-            const needsResubscribe =
-              !viewportMeasuredRef.current ||
-              (viewportRef.current != null &&
-                (scrollbackCols !== viewportRef.current.cols ||
-                  scrollbackRows !== viewportRef.current.rows))
-            if (needsResubscribe) {
-              void (async () => {
-                // Why: wait for the WebView's init() rAF chain to fully
-                // run (term.open → renderService population → first
-                // paint) before measuring. Without this, the measure
-                // postMessage races ahead of init's async work and
-                // returns null (term not ready / cells size 0), the
-                // resubscribe never fires, and the server never gets
-                // phone dims. See log dump 2026-05-06 confirming the
-                // race + measure-result null pattern.
-                await getTerminalRef(handle)?.awaitReady()
-                if (subscribeSeqRef.current.get(handle) !== seq) {
-                  return
-                }
-                const dims = await getTerminalRef(handle)?.measureFitDimensions(
-                  terminalFrameHeightRef.current || undefined
-                )
-                // Why: re-check seq after the awaits — awaitReady (up to
-                // 3s) and measureFitDimensions can take hundreds of ms,
-                // during which a newer subscribe cycle may have armed
-                // its own subscription. Tearing it down here would reset
-                // the freshly-armed initialized flag and re-subscribe a
-                // stale generation.
-                if (subscribeSeqRef.current.get(handle) !== seq) {
-                  return
-                }
-                if (!getTerminalRef(handle)) {
-                  return
-                }
-                // Why: we just got `scrollback` with cols=80 (server's
-                // default fallback for null viewport). That means the
-                // server-side subscriber record was registered before we
-                // could send viewport. Even if `viewportMeasuredRef`
-                // raced ahead via a parallel `measureViewportOnce`, the
-                // server still has a null viewport for THIS subscriber
-                // record — we MUST resubscribe so the server stores it.
-                if (dims) {
-                  diagnostics.streamResubscribing(handle, seq, dims)
-                  viewportRef.current = dims
-                  viewportMeasuredRef.current = true
-                  unsubscribeTerminal(handle)
-                  initializedHandlesRef.current.delete(handle)
-                  subscribeToTerminal(handle)
-                }
-              })()
-            }
-          } else if (data.type === 'metadata') {
-            updateTerminalCwdFromStreamEvent(handle, data, terminalCwdRef.current)
-          } else if (data.type === 'data') {
-            updateTerminalCwdFromStreamEvent(handle, data, terminalCwdRef.current)
-            // Why: log when data arrives but the WebView ref is missing
-            // — this is the most likely cause of "blank but input works":
-            // server stream is alive, sends flow, but writes are dropped
-            // because the WebView ref disappeared (unmount mid-flight) or
-            // the scrollback never landed (so xterm has no buffer).
-            const dataRef = getTerminalRef(handle)
-            if (!dataRef) {
-              console.log('[fit][session] data DROPPED — no terminal ref', {
-                handle: handle.slice(-8),
-                chunkLen: typeof data.chunk === 'string' ? data.chunk.length : 0,
-                initialized: initializedHandlesRef.current.has(handle)
-              })
-              return
-            }
-            if (!initializedHandlesRef.current.has(handle)) {
-              console.log('[fit][session] data RECEIVED before scrollback', {
-                handle: handle.slice(-8),
-                chunkLen: typeof data.chunk === 'string' ? data.chunk.length : 0
-              })
-            }
-            dataRef.write(data.chunk as string)
-          } else if (data.type === 'resized') {
-            updateTerminalCwdFromStreamEvent(handle, data, terminalCwdRef.current)
-            // Why: inline resize event — the server changed the PTY dimensions
-            // (mode toggle, desktop restore, or a width reflow). When the server
-            // includes a fresh full-buffer snapshot (width reflow), reinitialize
-            // xterm at the new dims so the hard-wrapped scrollback rewraps;
-            // preserve the reader's scroll position across the replay. Otherwise
-            // resize xterm geometry and let the TUI's own redraw repaint.
-            const cols = (data.cols as number) || 80
-            const rows = (data.rows as number) || 24
-            const serialized = typeof data.serialized === 'string' ? data.serialized : null
-            diagnostics.streamResized(handle, seq, eventSeq, data, getTerminalRef(handle) != null)
-            const oscLinks = isTerminalOscLinkRanges(data.oscLinks) ? data.oscLinks : undefined
-            if (serialized != null) {
-              getTerminalRef(handle)?.init(cols, rows, serialized, true, oscLinks)
-            } else {
-              getTerminalRef(handle)?.resize(cols, rows)
-            }
-            if (data.displayMode) {
-              setTerminalModes((prev) =>
-                new Map(prev).set(handle, data.displayMode as MobileDisplayMode)
-              )
-            }
-            scheduleDelayedAction(() => getTerminalRef(handle)?.resetZoom(), 200)
-          }
-        },
-        () => unsubscribeTerminalRef.current(handle)
-      )
-
-      if (subscribeSeqRef.current.get(handle) === seq) {
-        terminalUnsubsRef.current.set(handle, unsub)
-      } else {
-        unsub()
-      }
-      subscribingHandlesRef.current.delete(handle)
-    },
-    [client, getTerminalRef, markNativeChatInputLeaseReady, scheduleDelayedAction]
-  )
+  const {
+    clearTerminalCache,
+    getTerminalRef,
+    initializedHandlesRef,
+    measureViewportOnce,
+    subscribeToTerminal,
+    subscribingHandlesRef,
+    terminalCwdRef,
+    terminalDiagnosticsRef,
+    terminalFrameHeightRef,
+    terminalRefs,
+    terminalUnsubsRef,
+    unsubscribeTerminal,
+    viewportMeasuredRef,
+    viewportRef,
+    webReadyHandlesRef
+  } = useMobileTerminalStreams({
+    client,
+    activeHandleRef,
+    deviceTokenRef,
+    showNativeChatRef,
+    markNativeChatInputLeaseReady,
+    clearNativeChatInputLease,
+    scheduleDelayedAction,
+    setTerminalModes,
+    setTerminalKeyboardMetrics
+  })
 
   const notifyTerminalWebReady = useMobileNativeChatTerminalStream({
     showNativeChat,
@@ -1665,229 +751,23 @@ export default function SessionScreen() {
     ]
   )
 
-  const applySessionTabs = useCallback(
-    (result: SessionTabsResult) => {
-      const diagnostics = terminalDiagnosticsRef.current
-      // Reject out-of-order snapshots, then suppress just-closed tabs until the
-      // publisher confirms their absence. See session-tab-snapshot-gate.
-      if (!acceptSessionSnapshot(result, appliedSnapshotMarkerRef.current)) {
-        return
-      }
-      let nextTabs = applyClosedTabTombstones(
-        result.tabs,
-        closedTabTombstonesRef.current,
-        Date.now()
-      )
-      const presentTabIds = new Set(nextTabs.map((tab) => tab.id))
-      const orphanedDraftTabs: MobileSessionTab[] = []
-      const currentMarkdownDocs = markdownDocsRef.current
-      const currentSessionTabs = sessionTabsRef.current
-      for (const [tabId, doc] of currentMarkdownDocs) {
-        if (doc.status !== 'ready' || !doc.isDirty || presentTabIds.has(tabId)) {
-          continue
-        }
-        const draftTab = currentSessionTabs.find(
-          (tab): tab is Extract<MobileSessionTab, { type: 'markdown' }> =>
-            tab.type === 'markdown' && tab.id === tabId
-        )
-        if (draftTab) {
-          // Why: save-only mobile edits live only on the phone until Save. If the
-          // desktop tab disappears, keep every local draft reachable for copy/discard.
-          orphanedDraftTabs.push({ ...draftTab, isActive: tabId === activeSessionTabIdRef.current })
-        }
-      }
-      if (orphanedDraftTabs.length > 0) {
-        nextTabs = [...orphanedDraftTabs, ...nextTabs]
-      }
-      sessionTabsRef.current = nextTabs
-      // Why: subscribe snapshots often repeat identical tab payloads. Avoid a
-      // render loop where the subscription effect tears down and replays itself.
-      setSessionTabs((prev) => (mobileSessionTabsEqual(prev, nextTabs) ? prev : nextTabs))
-      const terminalTabs = getTerminalRecordsFromSessionTabs(nextTabs)
-      const terminalTabHandles = terminalTabs.map((terminal) => terminal.handle)
-      defaultTerminalHandlesToLiveInput(terminalTabHandles)
-      const mergedTerminalsForActive = mergeTerminalRecordsByCurrentOrder(
-        terminalTabs,
-        terminalsRef.current
-      )
-      terminalsRef.current = mergedTerminalsForActive
-      setTerminals((prev) =>
-        terminalRecordsEqual(prev, mergedTerminalsForActive) ? prev : mergedTerminalsForActive
-      )
-      lastKnownTerminalCountRef.current = Math.max(
-        lastKnownTerminalCountRef.current,
-        terminalTabs.length
-      )
-      setTerminalsLoaded(true)
-
-      const snapshotActive = nextTabs.find((tab) => tab.isActive) ?? nextTabs[0] ?? null
-      const pendingActiveSessionTabId = pendingActiveSessionTabIdRef.current
-      const pendingActiveTerminalHandle = pendingActiveTerminalHandleRef.current
-      let active = snapshotActive
-      let selectionSource = 'snapshot'
-      if (pendingActiveSessionTabId) {
-        if (snapshotActive?.id === pendingActiveSessionTabId) {
-          if (confirmsMirroredTabSelection(result.publicationEpoch)) {
-            pendingActiveSessionTabIdRef.current = null
-          } else {
-            selectionSource = 'pending-tab-local-ack'
-          }
-        } else {
-          const pendingTab = nextTabs.find((tab) => tab.id === pendingActiveSessionTabId)
-          if (pendingTab) {
-            // Why: desktop tab snapshots can lag a mobile tap while activate RPC
-            // is in flight. Keep the locally selected tab to avoid snapping back.
-            active = pendingTab
-            selectionSource = 'pending-tab'
-          } else {
-            pendingActiveSessionTabIdRef.current = null
-          }
-        }
-      }
-      if (pendingActiveTerminalHandle) {
-        const pendingTerminalTab = nextTabs.find(
-          (tab): tab is Extract<MobileSessionTab, { type: 'terminal' }> =>
-            tab.type === 'terminal' && tab.terminal === pendingActiveTerminalHandle
-        )
-        const pendingTerminalExists = mergedTerminalsForActive.some(
-          (terminal) => terminal.handle === pendingActiveTerminalHandle
-        )
-        if (
-          snapshotActive?.type === 'terminal' &&
-          snapshotActive.terminal === pendingActiveTerminalHandle
-        ) {
-          if (confirmsMirroredTabSelection(result.publicationEpoch)) {
-            pendingActiveTerminalHandleRef.current = null
-          } else {
-            selectionSource = 'pending-handle-local-ack'
-          }
-        } else if (pendingTerminalTab) {
-          // Why: desktop active flags can lag a mobile terminal tap. Key by
-          // terminal handle too, because fallback PTY tabs may not yet have a
-          // stable session tab id during new-worktree startup.
-          active = pendingTerminalTab
-          selectionSource = 'pending-handle-tab'
-        } else if (pendingTerminalExists) {
-          const nextActiveTabId = getActiveTabIdForHandle(nextTabs, pendingActiveTerminalHandle)
-          activeSessionTabIdRef.current = nextActiveTabId
-          setActiveSessionTabId(nextActiveTabId)
-          activeSessionTabTypeRef.current = 'terminal'
-          setActiveHandle(pendingActiveTerminalHandle)
-          subscribeToTerminal(pendingActiveTerminalHandle)
-          return
-        } else {
-          pendingActiveTerminalHandleRef.current = null
-        }
-      }
-      diagnostics.tabsApplied(result, nextTabs, active, selectionSource)
-      activeSessionTabTypeRef.current = active?.type ?? null
-      activeSessionTabIdRef.current = active?.id ?? null
-      setActiveSessionTabId(active?.id ?? null)
-      if (active?.type === 'terminal') {
-        if (typeof active.terminal !== 'string') {
-          const previous = activeHandleRef.current
-          if (previous) {
-            unsubscribeTerminal(previous)
-            initializedHandlesRef.current.delete(previous)
-          }
-          activeHandleRef.current = null
-          setActiveHandle(null)
-          return
-        }
-        const previous = activeHandleRef.current
-        if (previous && previous !== active.terminal) {
-          unsubscribeTerminal(previous)
-          initializedHandlesRef.current.delete(previous)
-        }
-        activeHandleRef.current = active.terminal
-        setActiveHandle(active.terminal)
-        subscribeToTerminal(active.terminal)
-      } else if (active) {
-        const previous = activeHandleRef.current
-        if (previous) {
-          unsubscribeTerminal(previous)
-          initializedHandlesRef.current.delete(previous)
-        }
-        activeHandleRef.current = null
-        setActiveHandle(null)
-      }
-    },
-    [defaultTerminalHandlesToLiveInput, subscribeToTerminal, unsubscribeTerminal]
-  )
-
-  const readMarkdownTab = useCallback(
-    async (tab: Extract<MobileSessionTab, { type: 'markdown' }>) => {
-      if (!client) {
-        return
-      }
-      setMarkdownDocs((prev) => new Map(prev).set(tab.id, { status: 'loading' }))
-      try {
-        const response = await client.sendRequest('markdown.readTab', {
-          worktree: `id:${worktreeId}`,
-          tabId: tab.id
-        })
-        if (response.ok) {
-          const result = (response as RpcSuccess).result as {
-            content: string
-            version: string
-            isDirty: boolean
-            editable?: boolean
-            readOnlyReason?: string
-          }
-          setMarkdownDocs((prev) =>
-            new Map(prev).set(tab.id, {
-              status: 'ready',
-              content: result.content,
-              localContent: result.content,
-              baseVersion: result.version,
-              isDirty: false,
-              editable: result.editable === true,
-              stale: result.isDirty,
-              readOnlyReason: result.readOnlyReason
-            })
-          )
-          return
-        }
-        if (!shouldReadMarkdownFromDiskAfterReadTabFailure(response as RpcFailure)) {
-          throw new Error((response as RpcFailure).error.message)
-        }
-        // Why: a headless host (no desktop renderer) can't serve the live editor
-        // document and fails markdown.readTab with renderer_unavailable. Fall back
-        // to the on-disk file so markdown still renders read-only, matching how
-        // other file types load via files.read.
-        const fallback = await client.sendRequest('files.read', {
-          worktree: `id:${worktreeId}`,
-          relativePath: tab.relativePath
-        })
-        if (!fallback.ok) {
-          throw new Error('Unable to read markdown')
-        }
-        const fileResult = (fallback as RpcSuccess).result as {
-          content: string
-          truncated: boolean
-          byteLength: number
-        }
-        setMarkdownDocs((prev) =>
-          new Map(prev).set(
-            tab.id,
-            buildMarkdownDiskFallbackDoc({
-              content: fileResult.content,
-              truncated: fileResult.truncated,
-              tabIsDirty: tab.isDirty
-            })
-          )
-        )
-      } catch {
-        setMarkdownDocs((prev) =>
-          new Map(prev).set(tab.id, {
-            status: 'error',
-            message: "Couldn't load markdown"
-          })
-        )
-      }
-    },
-    [client, worktreeId]
-  )
+  const applySessionTabs = useMobileSessionTabSnapshot({
+    store: sessionTabsStore,
+    worktreeId,
+    diagnosticsRef: terminalDiagnosticsRef,
+    markdownDocsRef,
+    terminalsRef,
+    lastKnownTerminalCountRef,
+    activeHandleRef,
+    initializedHandlesRef,
+    initialEmptySessionAutoCreateRef,
+    setTerminals,
+    setTerminalsLoaded,
+    setActiveHandle,
+    defaultTerminalHandlesToLiveInput,
+    subscribeToTerminal,
+    unsubscribeTerminal
+  })
 
   const readFileTab = useCallback(
     async (tab: Extract<MobileSessionTab, { type: 'file' }>) => {
@@ -1923,193 +803,6 @@ export default function SessionScreen() {
     [client, worktreeId]
   )
 
-  const loadDiffComments = useCallback(async (): Promise<void> => {
-    if (!client || connState !== 'connected' || !worktreeId || isFloatingWorkspaceRoute) {
-      setDiffComments([])
-      return
-    }
-    const response = await client.sendRequest('worktree.show', {
-      worktree: `id:${worktreeId}`
-    })
-    if (!response.ok) {
-      return
-    }
-    const result = (response as RpcSuccess).result as {
-      worktree?: { diffComments?: unknown }
-    }
-    setDiffComments(normalizeMobileDiffComments(result.worktree?.diffComments, worktreeId))
-  }, [client, connState, isFloatingWorkspaceRoute, worktreeId])
-
-  const persistDiffComments = useCallback(
-    async (comments: readonly DiffComment[]): Promise<void> => {
-      if (!client || connState !== 'connected') {
-        throw new Error('Waiting for desktop...')
-      }
-      const response = await client.sendRequest('worktree.set', {
-        worktree: `id:${worktreeId}`,
-        diffComments: comments
-      })
-      if (!response.ok) {
-        throw new Error((response as RpcFailure).error.message || 'Failed to save review notes')
-      }
-    },
-    [client, connState, worktreeId]
-  )
-
-  useEffect(() => {
-    void loadDiffComments()
-  }, [loadDiffComments])
-
-  const addDiffCommentForFile = useCallback(
-    async (filePath: string, lineNumber: number, body: string): Promise<boolean> => {
-      if (diffCommentBusy) {
-        return false
-      }
-      const nextId = `mobile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-      const result = addMobileDiffComment(diffCommentsRef.current, {
-        id: nextId,
-        worktreeId,
-        filePath,
-        lineNumber,
-        body,
-        createdAt: Date.now()
-      })
-      if (!result.comment) {
-        return false
-      }
-      const previous = diffCommentsRef.current
-      setDiffCommentBusy(true)
-      setDiffComments(result.comments)
-      try {
-        await persistDiffComments(result.comments)
-        triggerSuccess()
-        showToast('Note added')
-        return true
-      } catch (err) {
-        setDiffComments(previous)
-        triggerError()
-        showToast(err instanceof Error ? err.message : 'Failed to save note', 1600)
-        return false
-      } finally {
-        setDiffCommentBusy(false)
-      }
-    },
-    [diffCommentBusy, persistDiffComments, showToast, worktreeId]
-  )
-
-  const deleteDiffCommentForFile = useCallback(
-    async (commentId: string): Promise<void> => {
-      if (diffCommentBusy) {
-        return
-      }
-      const previous = diffCommentsRef.current
-      const next = removeMobileDiffComments(previous, new Set([commentId]))
-      if (next.length === previous.length) {
-        return
-      }
-      setDiffCommentBusy(true)
-      setDiffComments(next)
-      try {
-        await persistDiffComments(next)
-        triggerSelection()
-      } catch (err) {
-        setDiffComments(previous)
-        triggerError()
-        showToast(err instanceof Error ? err.message : 'Failed to delete note', 1600)
-      } finally {
-        setDiffCommentBusy(false)
-      }
-    },
-    [diffCommentBusy, persistDiffComments, showToast]
-  )
-
-  const copyDiffCommentsToClipboard = useCallback(async (): Promise<void> => {
-    const comments = diffCommentsRef.current
-    if (comments.length === 0) {
-      return
-    }
-    try {
-      await Clipboard.setStringAsync(formatDiffComments(comments))
-      triggerSuccess()
-      showToast('Notes copied')
-    } catch {
-      triggerError()
-      showToast("Couldn't copy notes", 1600)
-    }
-  }, [showToast])
-
-  const sendDiffCommentsToAgent = useCallback((): void => {
-    const comments = diffCommentsRef.current.filter((comment) => !comment.sentAt)
-    if (comments.length === 0) {
-      return
-    }
-    setPendingDiffNotesDelivery({
-      comments: [...comments],
-      prompt: formatDiffComments(comments)
-    })
-  }, [])
-
-  const clearDeliveredDiffComments = useCallback(
-    async (delivered: readonly DiffComment[]): Promise<void> => {
-      const previous = diffCommentsRef.current
-      const next = removeDeliveredMobileDiffComments(previous, delivered)
-      if (next.length === previous.length) {
-        return
-      }
-      setDiffCommentBusy(true)
-      setDiffComments(next)
-      try {
-        await persistDiffComments(next)
-      } catch {
-        setDiffComments(previous)
-      } finally {
-        setDiffCommentBusy(false)
-      }
-    },
-    [persistDiffComments]
-  )
-
-  const updateMarkdownLocalContent = useCallback((tabId: string, content: string) => {
-    setMarkdownDocs((prev) => {
-      const current = prev.get(tabId)
-      if (current?.status !== 'ready') {
-        return prev
-      }
-      const next = new Map(prev)
-      next.set(tabId, {
-        ...current,
-        localContent: content,
-        isDirty: content !== current.content,
-        saveError: undefined
-      })
-      return next
-    })
-  }, [])
-
-  const copyMarkdownLocalContent = useCallback(
-    async (tabId: string) => {
-      const current = markdownDocs.get(tabId)
-      if (current?.status !== 'ready') {
-        return
-      }
-      await Clipboard.setStringAsync(current.localContent)
-      triggerSuccess()
-      showToast('Copied')
-    },
-    [markdownDocs, showToast]
-  )
-
-  const getDirtyMarkdownDrafts = useCallback(() => {
-    const drafts: DirtyMarkdownDraft[] = []
-    for (const [tabId, doc] of markdownDocs) {
-      if (doc.status === 'ready' && doc.isDirty) {
-        const tab = sessionTabs.find((candidate) => candidate.id === tabId)
-        drafts.push({ tabId, title: tab?.title || 'Markdown', content: doc.localContent })
-      }
-    }
-    return drafts
-  }, [markdownDocs, sessionTabs])
-
   const leaveSession = useCallback(() => {
     if (router.canGoBack()) {
       router.back()
@@ -2137,107 +830,6 @@ export default function SessionScreen() {
     })
     return () => subscription.remove()
   }, [requestLeaveSession])
-
-  const discardMarkdownLocalContent = useCallback(
-    (tab: Extract<MobileSessionTab, { type: 'markdown' }>) => {
-      const current = markdownDocs.get(tab.id)
-      if (current?.status !== 'ready') {
-        return
-      }
-      if (!current.isDirty) {
-        void readMarkdownTab(tab)
-        return
-      }
-      Keyboard.dismiss()
-      setDiscardMarkdownTarget(tab)
-    },
-    [markdownDocs, readMarkdownTab]
-  )
-
-  const confirmDiscardMarkdown = useCallback(() => {
-    const target = discardMarkdownTarget
-    setDiscardMarkdownTarget(null)
-    if (target) {
-      void readMarkdownTab(target)
-    }
-  }, [discardMarkdownTarget, readMarkdownTab])
-
-  const saveMarkdownTab = useCallback(
-    async (tab: Extract<MobileSessionTab, { type: 'markdown' }>) => {
-      if (!client) {
-        return
-      }
-      const current = markdownDocs.get(tab.id)
-      if (current?.status !== 'ready' || current.saving || !current.editable) {
-        return
-      }
-      if (markdownSaveInFlightRef.current.has(tab.id)) {
-        return
-      }
-      markdownSaveInFlightRef.current.add(tab.id)
-      const saveSeq = (markdownSaveSeqRef.current.get(tab.id) ?? 0) + 1
-      markdownSaveSeqRef.current.set(tab.id, saveSeq)
-      setMarkdownDocs((prev) => {
-        const existing = prev.get(tab.id)
-        if (existing?.status !== 'ready') {
-          return prev
-        }
-        return new Map(prev).set(tab.id, { ...existing, saving: true, saveError: undefined })
-      })
-      try {
-        const response = await client.sendRequest('markdown.saveTab', {
-          worktree: `id:${worktreeId}`,
-          tabId: tab.id,
-          baseVersion: current.baseVersion,
-          content: current.localContent
-        })
-        if (!response.ok) {
-          throw new Error((response as RpcFailure).error.message)
-        }
-        const result = (response as RpcSuccess).result as {
-          content: string
-          version: string
-          isDirty: false
-        }
-        if (markdownSaveSeqRef.current.get(tab.id) !== saveSeq) {
-          return
-        }
-        setMarkdownDocs((prev) =>
-          new Map(prev).set(tab.id, {
-            status: 'ready',
-            content: result.content,
-            localContent: result.content,
-            baseVersion: result.version,
-            isDirty: false,
-            editable: true
-          })
-        )
-        markdownSaveSeqRef.current.delete(tab.id)
-        triggerSuccess()
-        showToast('Saved')
-      } catch (error) {
-        triggerError()
-        const message = error instanceof Error ? error.message : 'Save failed'
-        if (markdownSaveSeqRef.current.get(tab.id) !== saveSeq) {
-          return
-        }
-        setMarkdownDocs((prev) => {
-          const existing = prev.get(tab.id)
-          if (existing?.status !== 'ready') {
-            return prev
-          }
-          return new Map(prev).set(tab.id, {
-            ...existing,
-            saving: false,
-            saveError: message || 'Save failed'
-          })
-        })
-      } finally {
-        markdownSaveInFlightRef.current.delete(tab.id)
-      }
-    },
-    [client, markdownDocs, showToast, worktreeId]
-  )
 
   const fetchSessionTabsInFlightRef = useRef(false)
 
@@ -2295,54 +887,6 @@ export default function SessionScreen() {
     terminalGestureInputQueuesRef.current.clear()
     terminalGestureInputInFlightRef.current.clear()
   }, [connState])
-
-  const hostQueryReplyInputSupportedRef = useRef(false)
-
-  useEffect(() => {
-    if (!client || connState !== 'connected') {
-      setBrowserScreencastSupported(null)
-      setAgentSessionHistorySupported(null)
-      setQuickCommandsSupported(null)
-      setShowQuickCommands(false)
-      hostQueryReplyInputSupportedRef.current = false
-      return
-    }
-    // Why: a client swap may stay connected while moving to an older host.
-    setQuickCommandsSupported(null)
-    setShowQuickCommands(false)
-    let stale = false
-    void client
-      .sendRequest('status.get')
-      .then((response) => {
-        if (stale || !response.ok) {
-          return
-        }
-        const status = (response as RpcSuccess).result as RuntimeStatusResult
-        setBrowserScreencastSupported(
-          status.capabilities?.includes('browser.screencast.v1') === true
-        )
-        setAgentSessionHistorySupported(
-          status.capabilities?.includes(MOBILE_AI_VAULT_CAPABILITY) === true
-        )
-        setQuickCommandsSupported(supportsMobileQuickCommands(status.capabilities))
-        // Why: hosts without this capability strip inputKind from terminal.send,
-        // so a forwarded xterm reply would become floor-stealing shell input.
-        hostQueryReplyInputSupportedRef.current =
-          status.capabilities?.includes(TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY) === true
-      })
-      .catch(() => {
-        if (!stale) {
-          setBrowserScreencastSupported(false)
-          setAgentSessionHistorySupported(false)
-          setQuickCommandsSupported(false)
-          setShowQuickCommands(false)
-          hostQueryReplyInputSupportedRef.current = false
-        }
-      })
-    return () => {
-      stale = true
-    }
-  }, [client, connState])
 
   // Why: deviceToken is read from host record so feature code can pass
   // `client.id` on subscribe/send for driver-state-machine identity.
@@ -2406,63 +950,16 @@ export default function SessionScreen() {
     }
   }, [])
 
-  const pendingForegroundRecoveryRef = useRef(false)
-  useEffect(() => {
-    let previousAppState: AppStateStatus | null = AppState.currentState
-    const sub = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      const shouldRecover = shouldRecoverTerminalOnAppStateChange(
-        previousAppState,
-        nextAppState,
-        Platform.OS
-      )
-      previousAppState = nextAppState
-      if (!shouldRecover) {
-        return
-      }
-      for (const terminalRef of terminalRefs.current.values()) {
-        terminalRef.prepareForForegroundRecovery()
-      }
-      // Why: iOS can resume a live WKWebView with a blank xterm backing store
-      // without firing web-ready/reconnect; invalidate the native readiness
-      // latch before replay so init waits for the document's pong.
-      const outcome = recoverActiveTerminalAfterForeground({
-        activeHandleRef,
-        terminalRefs,
-        initializedHandlesRef,
-        connStateRef,
-        unsubscribeTerminal,
-        subscribeToTerminal,
-        schedule: scheduleDelayedAction
-      })
-      pendingForegroundRecoveryRef.current = outcome === 'deferred'
-    })
-    return () => {
-      sub.remove()
-    }
-  }, [scheduleDelayedAction, subscribeToTerminal, unsubscribeTerminal])
-
-  // Why: resume usually lands mid-reconnect (the socket dies after ~60-80s of
-  // background), so the recovery above defers. Re-run it once the connection
-  // is back; otherwise a blanked WKWebView whose socket was merely probed (no
-  // stream replay) stays stale until a manual tab switch.
-  useEffect(() => {
-    if (connState !== 'connected' || !pendingForegroundRecoveryRef.current) {
-      return
-    }
-    pendingForegroundRecoveryRef.current = false
-    if (AppState.currentState !== 'active') {
-      return
-    }
-    recoverActiveTerminalAfterForeground({
-      activeHandleRef,
-      terminalRefs,
-      initializedHandlesRef,
-      connStateRef,
-      unsubscribeTerminal,
-      subscribeToTerminal,
-      schedule: scheduleDelayedAction
-    })
-  }, [connState, scheduleDelayedAction, subscribeToTerminal, unsubscribeTerminal])
+  useMobileTerminalForegroundRecovery({
+    connState,
+    connStateRef,
+    activeHandleRef,
+    terminalRefs,
+    initializedHandlesRef,
+    scheduleDelayedAction,
+    subscribeToTerminal,
+    unsubscribeTerminal
+  })
 
   // Why: viewport refits for layout changes outside the subscribe path
   // (tab strip toggling, fold/unfold, rotation) live in a dedicated hook —
@@ -2535,15 +1032,17 @@ export default function SessionScreen() {
     sessionTabActionSheetKeyboardHideSubRef.current = null
     clearTerminalCache()
     activeHandleRef.current = null
-    activeSessionTabTypeRef.current = null
-    pendingActiveSessionTabIdRef.current = null
-    pendingActiveTerminalHandleRef.current = null
+    resetSessionTabsForRoute()
     pendingBrowserFocusPageIdRef.current = null
     pendingTerminalActivationAttemptRef.current = null
     initialEmptySessionAutoCreateRef.current = null
+    // Why: a stale terminal count makes fetchTerminals' consecutive-empty guard
+    // swallow the next worktree's first legitimately-empty list.
+    lastKnownTerminalCountRef.current = 0
+    ptyModesRef.current.clear()
+    initialModesSeenRef.current.clear()
+    terminalGestureInputBucketsRef.current.clear()
     terminalDiagnosticsRef.current.resetRoute()
-    appliedSnapshotMarkerRef.current = { epoch: null, version: -1 }
-    closedTabTombstonesRef.current.clear()
     for (const queued of terminalGestureInputQueuesRef.current.values()) {
       if (queued.timer) {
         clearTimeout(queued.timer)
@@ -2554,11 +1053,10 @@ export default function SessionScreen() {
     setActiveHandle(null)
     setTerminals([])
     terminalsRef.current = []
-    setSessionTabs([])
-    setActiveSessionTabId(null)
     clearPendingLiveInputCommit()
     setMarkdownDocs(new Map())
     setFileDocs(new Map())
+    setDiffComments([])
     clearDelayedActionTimers()
     return () => {
       sessionTabActionSheetRequestSeqRef.current += 1
@@ -2571,6 +1069,7 @@ export default function SessionScreen() {
     clearPendingLiveInputCommit,
     clearTerminalCache,
     hostId,
+    resetSessionTabsForRoute,
     worktreeId
   ])
 
@@ -2683,22 +1182,14 @@ export default function SessionScreen() {
             (tab): tab is Extract<MobileSessionTab, { type: 'markdown' }> =>
               tab.type === 'markdown' && tab.isActive
           )
-          if (activeMarkdown) {
-            setMarkdownDocs((prev) => {
-              const current = prev.get(activeMarkdown.id)
-              if (current?.status === 'ready' && activeMarkdown.isDirty && !current.isDirty) {
-                const next = new Map(prev)
-                next.set(activeMarkdown.id, { ...current, stale: true })
-                return next
-              }
-              return prev
-            })
+          if (activeMarkdown?.isDirty) {
+            markMarkdownTabStale(activeMarkdown.id)
           }
         }
       }
     )
     return () => unsubscribe()
-  }, [applySessionTabs, client, connState, worktreeId])
+  }, [applySessionTabs, client, connState, markMarkdownTabStale, worktreeId])
 
   useFocusEffect(
     useCallback(() => {
@@ -2802,13 +1293,14 @@ export default function SessionScreen() {
             worktree: `id:${worktreeId}`,
             tabId: matchingTab.id,
             notifyClients: false
-          }).catch(() => {})
+          }).catch(() => releasePendingTabSelection(matchingTab.id, handle))
         }
       }
     },
     [
       client,
       defaultTerminalHandlesToLiveInput,
+      releasePendingTabSelection,
       sessionTabs,
       subscribeToTerminal,
       unsubscribeTerminal,
@@ -2841,7 +1333,7 @@ export default function SessionScreen() {
             worktree: `id:${worktreeId}`,
             tabId: tab.id,
             notifyClients: false
-          }).catch(() => {})
+          }).catch(() => releasePendingTabSelection(tab.id))
         }
         return
       }
@@ -2864,7 +1356,7 @@ export default function SessionScreen() {
           worktree: `id:${worktreeId}`,
           tabId: tab.id,
           notifyClients: false
-        }).catch(() => {})
+        }).catch(() => releasePendingTabSelection(tab.id))
       }
       if (tab.type === 'browser') {
         return
@@ -2881,7 +1373,16 @@ export default function SessionScreen() {
       // lightweight tab list. Re-read on revisit unless the phone has a draft.
       void readMarkdownTab(tab)
     },
-    [client, markdownDocs, readFileTab, readMarkdownTab, switchTab, unsubscribeTerminal, worktreeId]
+    [
+      client,
+      markdownDocs,
+      readFileTab,
+      readMarkdownTab,
+      releasePendingTabSelection,
+      switchTab,
+      unsubscribeTerminal,
+      worktreeId
+    ]
   )
   // Keep the ref pointing at the latest switchSessionTab so fetchSessionTabs can
   // activate a freshly-synced browser tab without a callback dependency cycle.
@@ -4090,6 +2591,15 @@ export default function SessionScreen() {
     if (!client) {
       return
     }
+    // Why: the session tab is the UI authority — route the action-sheet close
+    // through the tab path so it is tombstoned and the active tab stays in sync.
+    const owningTab = sessionTabsRef.current.find(
+      (candidate) => candidate.type === 'terminal' && candidate.terminal === target.handle
+    )
+    if (owningTab) {
+      await handleCloseSessionTab(owningTab)
+      return
+    }
 
     try {
       const response = await client.sendRequest('terminal.close', {
@@ -4134,15 +2644,32 @@ export default function SessionScreen() {
           terminalRefs.current.delete(terminalHandle)
           initializedHandlesRef.current.delete(terminalHandle)
           clearTerminalLiveInputDefault(terminalHandle)
+          const nextTerminals = terminalsRef.current.filter(
+            (terminal) => terminal.handle !== terminalHandle
+          )
+          terminalsRef.current = nextTerminals
+          setTerminals(nextTerminals)
         }
+        sessionTabsRef.current = sessionTabsRef.current.filter(
+          (candidate) => candidate.id !== tab.id
+        )
         setSessionTabs((prev) => prev.filter((candidate) => candidate.id !== tab.id))
         // Why: tombstone the closed tab and rely on the subscription/poll
         // snapshot (gated by snapshotVersion) instead of a blind 300ms refetch
         // that re-applied whatever the host had — often the not-yet-closed list.
         closedTabTombstonesRef.current.set(tab.id, Date.now() + 10_000)
-        if (activeSessionTabId === tab.id) {
+        // Why: clear the whole selection together — a half-switched tab/handle pair
+        // desyncs canSend and the dock until the next snapshot lands.
+        const closedActiveHandle =
+          tab.type === 'terminal' &&
+          typeof tab.terminal === 'string' &&
+          activeHandleRef.current === tab.terminal
+        if (activeSessionTabIdRef.current === tab.id || activeSessionTabId === tab.id) {
           activeSessionTabTypeRef.current = null
+          activeSessionTabIdRef.current = null
           setActiveSessionTabId(null)
+        }
+        if (closedActiveHandle) {
           activeHandleRef.current = null
           setActiveHandle(null)
         }
@@ -4237,28 +2764,14 @@ export default function SessionScreen() {
     void handleCreateTerminal()
   }, [client, creating, creatingBrowser, creatingMarkdown, showEmptyState, worktreeId])
 
-  // Why: the reconnect loop slows to a 90s trickle at its give-up cap;
-  // surface tap-to-retry once the verdict escalates so recovery doesn't
-  // wait out the trickle timer (issue #5049).
-  const connectionVerdict = classifyConnection({
-    state: connState,
+  const { showConnectionRetry, terminalSummary } = resolveMobileSessionConnectionHealth({
+    connState,
     reconnectAttempts,
     lastConnectedAt,
-    endpoint: hostEndpoint
+    endpoint: hostEndpoint,
+    showLoadingState,
+    visibleTabCount: visibleTabs.length
   })
-  const showConnectionRetry =
-    connectionVerdict.kind === 'warning' || connectionVerdict.kind === 'unreachable'
-
-  const terminalSummary =
-    connState === 'connected'
-      ? showLoadingState
-        ? 'Loading tabs'
-        : visibleTabs.length === 1
-          ? '1 tab'
-          : `${visibleTabs.length} tabs`
-      : showConnectionRetry
-        ? `${verdictDisplayLabel(connectionVerdict)} — tap to retry`
-        : MOBILE_SESSION_STATUS_LABELS[connState]
 
   // Why: keep safe-area padding in layout at all times, then visually translate
   // the controls over the terminal when the keyboard appears. iOS keyboard
@@ -4445,7 +2958,7 @@ export default function SessionScreen() {
         <>
           <Stack.Toolbar placement="left">
             <Stack.Toolbar.Button
-              accessibilityLabel="Back to worktrees"
+              accessibilityLabel="Back to workspaces"
               icon="chevron.left"
               onPress={requestLeaveSession}
             />
@@ -4494,7 +3007,7 @@ export default function SessionScreen() {
           <MobileGlassHeader includesTopInset>
             <View className="min-h-15 flex-row items-center gap-2 px-3 py-1">
               <MobileSessionHeaderIconButton
-                accessibilityLabel="Back to worktrees"
+                accessibilityLabel="Back to workspaces"
                 icon={ChevronLeft}
                 onPress={requestLeaveSession}
               />

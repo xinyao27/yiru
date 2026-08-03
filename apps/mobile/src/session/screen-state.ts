@@ -60,10 +60,6 @@ export type SessionTabsResult = {
   activeTabType: MobileSessionTabType | null
 }
 
-export type RuntimeStatusResult = {
-  capabilities?: string[]
-}
-
 export type MarkdownDocState =
   | { status: 'loading' }
   | {

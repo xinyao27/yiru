@@ -3,15 +3,14 @@ import {
   Layout as PanelBottom,
   Layout as PanelTop
 } from '@phosphor-icons/react'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { Button } from '~renderer/components/ui/button'
+import { useMemo, useState } from 'react'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 import type { FloatingTerminalTriggerLocation } from '~shared/types'
@@ -31,17 +30,6 @@ export function FloatingTerminalIconContextMenu({
 }: FloatingTerminalIconContextMenuProps): React.JSX.Element {
   const updateSettings = useAppStore((s) => s.updateSettings)
   const [open, setOpen] = useState(false)
-  const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
-  const reopenFrameRef = useRef<number | null>(null)
-
-  const setTriggerRef = useCallback((node: HTMLSpanElement | null): void => {
-    if (node === null) {
-      if (reopenFrameRef.current !== null) {
-        window.cancelAnimationFrame(reopenFrameRef.current)
-        reopenFrameRef.current = null
-      }
-    }
-  }, [])
 
   const moveAction = useMemo(() => {
     if (currentLocation === 'floating-button') {
@@ -65,73 +53,41 @@ export function FloatingTerminalIconContextMenu({
   }, [currentLocation])
 
   return (
-    <>
-      <span
-        ref={setTriggerRef}
-        className={className}
-        style={style}
-        data-floating-terminal-toggle
-        onContextMenuCapture={(event) => {
-          // Why: workspace cards use DropdownMenu anchored at the cursor for
-          // right-click menus; match that style instead of Radix ContextMenu.
-          event.preventDefault()
-          event.stopPropagation()
-          setMenuPoint({ x: event.clientX, y: event.clientY })
-          setOpen(false)
-          if (reopenFrameRef.current !== null) {
-            window.cancelAnimationFrame(reopenFrameRef.current)
-          }
-          reopenFrameRef.current = window.requestAnimationFrame(() => {
-            reopenFrameRef.current = null
-            setOpen(true)
-          })
-        }}
-        onContextMenu={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-        }}
-      >
-        {children}
-      </span>
-      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-hidden
-              tabIndex={-1}
-              className="pointer-events-none fixed size-px border-0 opacity-0"
-              style={{ left: menuPoint.x, top: menuPoint.y }}
-            />
-          }
-        />
-        <DropdownMenuContent className="w-52" sideOffset={0} align="start">
-          <DropdownMenuItem
-            className="whitespace-nowrap"
-            onClick={() => {
-              void updateSettings({ floatingTerminalTriggerLocation: moveAction.location })
-            }}
-          >
-            {moveAction.icon}
-            {moveAction.label}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="whitespace-nowrap"
-            onClick={() => {
-              useAppStore.getState().recordFeatureInteraction('floating-workspace-hidden')
-              void updateSettings({ floatingTerminalEnabled: false })
-            }}
-          >
-            <EyeOff className="size-3.5" />
-            {translate(
-              'auto.components.floating.terminal.FloatingTerminalIconContextMenu.8e7d775287',
-              'Hide Floating Workspace'
-            )}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+    <ContextMenu open={open} onOpenChange={setOpen}>
+      {/* Why: the status bar behind this icon is also a trigger; Base UI stops
+          the event at the inner one, so only this menu opens. */}
+      <ContextMenuTrigger
+        render={
+          <span className={className} style={style} data-floating-terminal-toggle>
+            {children}
+          </span>
+        }
+      />
+      <ContextMenuContent className="w-52">
+        <ContextMenuItem
+          className="whitespace-nowrap"
+          onClick={() => {
+            void updateSettings({ floatingTerminalTriggerLocation: moveAction.location })
+          }}
+        >
+          {moveAction.icon}
+          {moveAction.label}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          className="whitespace-nowrap"
+          onClick={() => {
+            useAppStore.getState().recordFeatureInteraction('floating-workspace-hidden')
+            void updateSettings({ floatingTerminalEnabled: false })
+          }}
+        >
+          <EyeOff className="size-3.5" />
+          {translate(
+            'auto.components.floating.terminal.FloatingTerminalIconContextMenu.8e7d775287',
+            'Hide Floating Workspace'
+          )}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

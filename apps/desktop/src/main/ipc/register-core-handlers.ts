@@ -42,7 +42,6 @@ import { registerGitLabHandlers } from '../gitlab/gitlab'
 import { registerGrokAccountHandlers } from '../grok/accounts/grok-accounts'
 import type { KeybindingService } from '../keybindings/keybinding-service'
 import { registerKeybindingHandlers } from '../keybindings/keybindings'
-import { registerLanguageServerHandlers } from '../language-servers'
 import { registerMemoryHandlers } from '../memory/memory'
 import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
 import { registerNativeChatHandlers } from '../native-chat/native-chat'
@@ -58,6 +57,8 @@ import { registerLocalhostWorktreeLabelHandlers } from '../ports/localhost-workt
 import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import { registerPreflightHandlers } from '../preflight/preflight'
 import { getPtyIdForPaneKey } from '../pty/pty'
+import { registerRateLimitResumeHandlers } from '../rate-limit-resume/ipc'
+import type { RateLimitResumeService } from '../rate-limit-resume/service'
 import { registerRateLimitHandlers } from '../rate-limits/rate-limits'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
@@ -108,7 +109,8 @@ export function registerCoreHandlers(
   agentAwakeService?: AgentAwakeService,
   crashReports?: CrashReportStore,
   keybindings?: KeybindingService,
-  lifecycleOptions: CoreHandlerLifecycleOptions = {}
+  lifecycleOptions: CoreHandlerLifecycleOptions = {},
+  rateLimitResumes?: RateLimitResumeService
 ): void {
   // Why: on macOS the app can stay alive after all windows close, then
   // openMainWindow() is called again on 'activate'. ipcMain.handle() throws
@@ -152,7 +154,6 @@ export function registerCoreHandlers(
   registerMemoryHandlers(store)
   registerNotificationHandlers(store, runtime)
   registerNotebookHandlers(store)
-  registerLanguageServerHandlers(store)
   registerOnboardingHandlers(store)
   registerDeveloperPermissionHandlers()
   // Why: diagnostics handlers are wired alongside telemetry but the two
@@ -165,6 +166,9 @@ export function registerCoreHandlers(
   registerSkillsHandlers(store)
   if (automations) {
     registerAutomationHandlers(store, automations)
+  }
+  if (rateLimitResumes) {
+    registerRateLimitResumeHandlers(rateLimitResumes)
   }
   if (keybindings) {
     registerKeybindingHandlers(keybindings)

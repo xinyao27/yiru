@@ -190,7 +190,7 @@ export function openDetectedFilePath(
       // path alone can identify multiple open tabs on different hosts.
       const fileId = openedStore.activeFileIdByWorktree[worktreeId] ?? filePath
       if (language === 'markdown') {
-        // Why: rendered Markdown has no line-reveal consumer; source mode mounts Monaco.
+        // Why: rendered Markdown has no line-reveal consumer; source mode does.
         openedStore.setMarkdownViewMode(fileId, 'source')
       }
       const targetColumn = column ?? 1

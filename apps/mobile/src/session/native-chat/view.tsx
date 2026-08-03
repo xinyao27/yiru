@@ -15,6 +15,7 @@ import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { GestureDetector, GestureHandlerRootView } from '~/components/uniwind-native-components'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { translate } from '~/i18n/translate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import type { MobileImageSource } from '../image-source-picker'
@@ -306,7 +307,7 @@ export function MobileNativeChatView({
                   <View className="items-center py-3">
                     <MobileGlassTextButton
                       disabled={loadingEarlier}
-                      label="Load earlier messages"
+                      label={translate('mobile.session.chat.loadEarlier', 'Load earlier messages')}
                       onPress={() => onLoadEarlier?.()}
                       size="small"
                     />
@@ -334,7 +335,10 @@ export function MobileNativeChatView({
               style={{ bottom: bottomChromeHeight + bottomPad + jumpButtonGap }}
             >
               <MobileGlassIconButton
-                accessibilityLabel="Scroll to latest"
+                accessibilityLabel={translate(
+                  'mobile.session.chat.scrollToLatest',
+                  'Scroll to latest'
+                )}
                 icon="down"
                 onPress={handleJumpToLatest}
               />
@@ -390,10 +394,10 @@ export function MobileNativeChatView({
           disabled={lockReason !== null}
           placeholder={
             lockReason === 'disconnected'
-              ? 'Reconnecting…'
+              ? translate('mobile.session.chat.reconnecting', 'Reconnecting…')
               : lockReason === 'waiting'
-                ? 'Waiting for terminal…'
-                : 'Message'
+                ? translate('mobile.session.chat.waitingForTerminal', 'Waiting for terminal…')
+                : translate('mobile.session.chat.composerPlaceholder', 'Message')
           }
           filePaths={filePaths}
           onNeedFiles={onNeedFiles}
@@ -402,8 +406,11 @@ export function MobileNativeChatView({
           sendFailureMessage={
             sendFailed
               ? rawLockReason === 'disconnected'
-                ? 'Message not sent — reconnecting…'
-                : 'Message not sent'
+                ? translate(
+                    'mobile.session.chat.sendFailedReconnecting',
+                    'Message not sent — reconnecting…'
+                  )
+                : translate('mobile.session.chat.sendFailed', 'Message not sent')
               : null
           }
         />

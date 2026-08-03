@@ -8,15 +8,12 @@ import {
   List as ListX,
   X
 } from '@phosphor-icons/react'
-import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut
+} from '~renderer/components/ui/context-menu'
 import { formatShortcutLabel, useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -93,12 +90,9 @@ type SortableTabContextMenuProps = {
   unifiedTabId: string
   groupId: string
   isActive: boolean
-  open: boolean
-  point: { x: number; y: number }
   tabCount: number
   hasTabsToRight: boolean
   isPinned: boolean
-  onOpenChange: (open: boolean) => void
   onActivate: (tabId: string) => void
   onClose: (tabId: string) => void
   onCloseOthers: (tabId: string) => void
@@ -121,12 +115,9 @@ export function SortableTabContextMenu({
   unifiedTabId,
   groupId,
   isActive,
-  open,
-  point,
   tabCount,
   hasTabsToRight,
   isPinned,
-  onOpenChange,
   onActivate,
   onClose,
   onCloseOthers,
@@ -146,117 +137,103 @@ export function SortableTabContextMenu({
   const renameShortcut = useOptionalShortcutLabel('tab.rename')
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px border-0 opacity-0"
-            style={{ left: point.x, top: point.y }}
-          />
-        }
+    <ContextMenuContent className="w-56">
+      <TerminalTabSplitMenuSection
+        unifiedTabId={unifiedTabId}
+        groupId={groupId}
+        tabId={tab.id}
+        isActive={isActive}
+        onActivate={onActivate}
+        splitRightShortcut={splitRightShortcut}
+        splitDownShortcut={splitDownShortcut}
       />
-      <DropdownMenuContent className="w-56" sideOffset={0} align="start">
-        <TerminalTabSplitMenuSection
-          unifiedTabId={unifiedTabId}
-          groupId={groupId}
-          tabId={tab.id}
-          isActive={isActive}
-          onActivate={onActivate}
-          splitRightShortcut={splitRightShortcut}
-          splitDownShortcut={splitDownShortcut}
-        />
-        {canToggleViewMode && onToggleViewMode ? (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onToggleViewMode}>
-              {isChatView ? (
-                <SquareTerminal className="size-3.5 shrink-0" />
-              ) : (
-                <MessageSquare className="size-3.5 shrink-0" />
-              )}
-              {isChatView
-                ? translate(
-                    'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
-                    'Switch to terminal view'
-                  )
-                : translate(
-                    'components.tab.bar.SortableTabContextMenu.switchToChatView',
-                    'Switch to chat view'
-                  )}
-            </DropdownMenuItem>
-          </>
-        ) : null}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onTogglePin}>
-          {isPinned ? (
-            <PinOff className="size-3.5 shrink-0" />
-          ) : (
-            <Pin className="size-3.5 shrink-0" />
-          )}
-          {isPinned
-            ? translate('auto.components.tab.bar.SortableTabContextMenu.417722e9c2', 'Unpin Tab')
-            : translate('auto.components.tab.bar.SortableTabContextMenu.60f958ec75', 'Pin Tab')}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
-          <X className="size-3.5" />
-          {translate('auto.components.tab.bar.SortableTabContextMenu.89359a36f7', 'Close')}
-          {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
-          <ListX className="size-3.5" />
-          {translate('auto.components.tab.bar.SortableTabContextMenu.8d16f9cd30', 'Close Others')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
-          <PanelRightClose className="size-3.5" />
-          {translate(
-            'auto.components.tab.bar.SortableTabContextMenu.c1ee099c7e',
-            'Close Tabs To The Right'
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onRenameOpen}>
-          <Pencil className="size-3.5" />
-          {translate('auto.components.tab.bar.SortableTabContextMenu.2f697b3c31', 'Change Title')}
-          {renameShortcut ? <DropdownMenuShortcut>{renameShortcut}</DropdownMenuShortcut> : null}
-        </DropdownMenuItem>
-        <div className="px-2 pt-1.5 pb-1">
-          <div className="text-muted-foreground mb-1.5 text-xs font-medium">
-            {translate('auto.components.tab.bar.SortableTabContextMenu.35e8892fd0', 'Tab Color')}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {TAB_COLORS.map((color) => {
-              const isSelected = tab.color === color.value
-              return (
-                <DropdownMenuItem
-                  key={color.label}
-                  className={cn(
-                    'relative h-4 w-4 min-w-4 p-0 border',
-                    // Why: selection reuses the existing edge because Yiru does not use CSS outlines.
-                    isSelected
-                      ? 'border-ring'
-                      : color.value
-                        ? 'border-transparent'
-                        : 'border-muted-foreground/50 bg-transparent'
-                  )}
-                  style={color.value ? { backgroundColor: color.value } : undefined}
-                  onClick={() => {
-                    onSetTabColor(tab.id, color.value)
-                  }}
-                >
-                  {color.value === null && (
-                    <span className="bg-muted-foreground/80 absolute block h-px w-3 rotate-45" />
-                  )}
-                </DropdownMenuItem>
-              )
-            })}
-          </div>
+      {canToggleViewMode && onToggleViewMode ? (
+        <>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={onToggleViewMode}>
+            {isChatView ? (
+              <SquareTerminal className="size-3.5 shrink-0" />
+            ) : (
+              <MessageSquare className="size-3.5 shrink-0" />
+            )}
+            {isChatView
+              ? translate(
+                  'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
+                  'Switch to terminal view'
+                )
+              : translate(
+                  'components.tab.bar.SortableTabContextMenu.switchToChatView',
+                  'Switch to chat view'
+                )}
+          </ContextMenuItem>
+        </>
+      ) : null}
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={onTogglePin}>
+        {isPinned ? (
+          <PinOff className="size-3.5 shrink-0" />
+        ) : (
+          <Pin className="size-3.5 shrink-0" />
+        )}
+        {isPinned
+          ? translate('auto.components.tab.bar.SortableTabContextMenu.417722e9c2', 'Unpin Tab')
+          : translate('auto.components.tab.bar.SortableTabContextMenu.60f958ec75', 'Pin Tab')}
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
+        <X className="size-3.5" />
+        {translate('auto.components.tab.bar.SortableTabContextMenu.89359a36f7', 'Close')}
+        {closeShortcut ? <ContextMenuShortcut>{closeShortcut}</ContextMenuShortcut> : null}
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
+        <ListX className="size-3.5" />
+        {translate('auto.components.tab.bar.SortableTabContextMenu.8d16f9cd30', 'Close Others')}
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
+        <PanelRightClose className="size-3.5" />
+        {translate(
+          'auto.components.tab.bar.SortableTabContextMenu.c1ee099c7e',
+          'Close Tabs To The Right'
+        )}
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={onRenameOpen}>
+        <Pencil className="size-3.5" />
+        {translate('auto.components.tab.bar.SortableTabContextMenu.2f697b3c31', 'Change Title')}
+        {renameShortcut ? <ContextMenuShortcut>{renameShortcut}</ContextMenuShortcut> : null}
+      </ContextMenuItem>
+      <div className="px-2 pt-1.5 pb-1">
+        <div className="text-muted-foreground mb-1.5 text-xs font-medium">
+          {translate('auto.components.tab.bar.SortableTabContextMenu.35e8892fd0', 'Tab Color')}
         </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <div className="flex flex-wrap gap-2">
+          {TAB_COLORS.map((color) => {
+            const isSelected = tab.color === color.value
+            return (
+              <ContextMenuItem
+                key={color.label}
+                className={cn(
+                  'relative h-4 w-4 min-w-4 p-0 border',
+                  // Why: selection reuses the existing edge because Yiru does not use CSS outlines.
+                  isSelected
+                    ? 'border-ring'
+                    : color.value
+                      ? 'border-transparent'
+                      : 'border-muted-foreground/50 bg-transparent'
+                )}
+                style={color.value ? { backgroundColor: color.value } : undefined}
+                onClick={() => {
+                  onSetTabColor(tab.id, color.value)
+                }}
+              >
+                {color.value === null && (
+                  <span className="bg-muted-foreground/80 absolute block h-px w-3 rotate-45" />
+                )}
+              </ContextMenuItem>
+            )
+          })}
+        </div>
+      </div>
+    </ContextMenuContent>
   )
 }

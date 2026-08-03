@@ -58,6 +58,16 @@ export default function SourceControlWorkspacePanel({
   const view = controlledView ?? storedView ?? 'changes'
   const { changeLineCounts, reviewDetails } = useSourceControlTabDetails(source)
   useAutoOpenAllDiffs({ source, isVisible, workspacePanelTabId })
+  // Why: Base UI unmounts an inactive panel, so every Changes/Review switch tore
+  // down and rebuilt both controller hook chains, their git/review effects and
+  // the file trees. Keep a panel alive once visited — `isVisible` already stops
+  // the hidden side from polling, so the cost of staying mounted is idle state.
+  const [visitedViews, setVisitedViews] = React.useState<ReadonlySet<SourceControlPanelView>>(
+    () => new Set([view])
+  )
+  if (!visitedViews.has(view)) {
+    setVisitedViews(new Set(visitedViews).add(view))
+  }
 
   const handleViewChange = (value: string): void => {
     if (value !== 'changes' && value !== 'review') {
@@ -102,14 +112,22 @@ export default function SourceControlWorkspacePanel({
           </TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="changes" className="min-h-0 overflow-hidden">
+      <TabsContent
+        value="changes"
+        className="min-h-0 overflow-hidden"
+        keepMounted={visitedViews.has('changes')}
+      >
         <SourceControl
           source={source}
           isVisible={isVisible && view === 'changes'}
           workspacePanelTabId={workspacePanelTabId}
         />
       </TabsContent>
-      <TabsContent value="review" className="min-h-0 overflow-hidden">
+      <TabsContent
+        value="review"
+        className="min-h-0 overflow-hidden"
+        keepMounted={visitedViews.has('review')}
+      >
         <ChecksPanel
           source={source}
           isVisible={isVisible && view === 'review'}

@@ -1,4 +1,4 @@
-import type { SkillProvider, SkillSourceKind } from './skills'
+import type { SkillInstallationTopology, SkillProvider, SkillSourceKind } from './skills'
 
 export type SkillBundleFileIdentity = {
   path: string
@@ -45,16 +45,6 @@ export type SkillFreshnessStatus =
   | 'newer-known'
   | 'unrecognized'
   | 'inaccessible'
-
-export type SkillInstallationTopology =
-  | 'canonical-copy'
-  | 'provider-alias'
-  | 'independent-copy'
-  | 'external-link'
-  | 'broken-link'
-  | 'read-only'
-  | 'repo-scope'
-  | 'plugin-cache'
 
 // Why: eligibility and the explanation copy must agree on which placements the
 // validated npx rail can converge; a drifted copy would blame a phantom sibling.

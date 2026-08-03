@@ -1,4 +1,3 @@
-import Editor, { type OnMount } from '@monaco-editor/react'
 import {
   WarningCircle as AlertCircle,
   BracketsCurly as Braces,
@@ -11,6 +10,7 @@ import {
   ArrowDown as MoveDown,
   ArrowUp as MoveUp
 } from '@phosphor-icons/react'
+import { DIFFS_TAG_NAME } from '@pierre/diffs'
 import DOMPurify from 'dompurify'
 /* eslint-disable max-lines -- Why: notebook editing, output rendering, and cell
 controls share one parsed document/update path for this first notebook editor
@@ -30,13 +30,8 @@ import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-import { resolveDocumentTheme } from '~renderer/components/editor/document-theme'
-import {
-  resolveEditorFontFamily,
-  resolveEditorFontFamilyOrInherit
-} from '~renderer/components/editor/font-family'
+import { resolveEditorFontFamilyOrInherit } from '~renderer/components/editor/font-family'
 import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
-import { monaco, resolveCursorThemeName } from '~renderer/components/editor/monaco-setup'
 import { scrollTopCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
@@ -67,6 +62,8 @@ import { cn } from '~renderer/lib/class-names'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { useAppStore } from '~renderer/store'
 
+import CodeExcerpt from './code-excerpt'
+import FileCodeView from './file-code-view'
 import { getIpynbCodeCellEditorHeight, getIpynbCodeCellPreviewLines } from './ipynb-code-cell-lines'
 import {
   deleteIpynbCell,
@@ -80,13 +77,8 @@ import {
   type IpynbCellKind,
   type IpynbOutputItem
 } from './ipynb-parse'
-import MonacoCodeExcerpt from './monaco-code-excerpt'
 import { registerPendingEditorFlush } from './pending-flush'
-import {
-  editorShortcutMatches,
-  installEditorSaveShortcut,
-  installMonacoEditorFindShortcut
-} from './shortcuts'
+import { editorShortcutMatches } from './shortcuts'
 
 type IpynbViewerProps = {
   content: string
@@ -367,41 +359,16 @@ function CodeCell({
   const editorFontZoomLevel = useAppStore((s) => s.editorFontZoomLevel)
   const onDeactivateRef = useRef(onDeactivate)
   const onSaveRequestRef = useRef(onSaveRequest)
-  // Why: Monaco commands/listeners are installed once on mount and need the
-  // latest callbacks without rebuilding the embedded editor.
+  // Why: listeners are installed once on mount and need the latest callbacks
+  // without rebuilding the embedded editor.
   onDeactivateRef.current = onDeactivate
   onSaveRequestRef.current = onSaveRequest
   const fontSize = computeEditorFontSize(settings?.terminalFontSize ?? 13, editorFontZoomLevel)
   const editorHeight = getIpynbCodeCellEditorHeight(source, fontSize)
-  const isDark = resolveDocumentTheme(settings?.theme ?? 'system')
   const lines = useMemo(() => getIpynbCodeCellPreviewLines(source), [source])
-  const handleMount: OnMount = useCallback((editorInstance, monacoInstance) => {
-    editorInstance.focus()
-    const cleanupSaveShortcut = installEditorSaveShortcut(
-      editorInstance.getContainerDomNode(),
-      () => {
-        void onSaveRequestRef.current()
-      }
-    )
-    const cleanupFindShortcut = installMonacoEditorFindShortcut(editorInstance)
-    const blurSub = editorInstance.onDidBlurEditorWidget(() => {
-      onDeactivateRef.current()
-    })
-    editorInstance.onDidDispose(() => {
-      // Why: the inline source editor owns its shortcut bridges and blur
-      // subscription for the lifetime of this Monaco editor instance.
-      cleanupSaveShortcut()
-      cleanupFindShortcut()
-      blurSub.dispose()
-    })
-    editorInstance.addCommand(monacoInstance.KeyCode.Escape, () => {
-      onDeactivateRef.current()
-    })
-  }, [])
-
-  useEffect(() => {
-    monaco.editor.setTheme(resolveCursorThemeName(isDark))
-  }, [isDark])
+  // Why: cells carry an optional notebook id; fall back to the language so the
+  // surface still gets a stable key for its editor state.
+  const cellEditorId = `ipynb-cell:${cell.id ?? cell.language}`
 
   if (!active) {
     return (
@@ -416,12 +383,11 @@ function CodeCell({
           }
         }}
       >
-        <MonacoCodeExcerpt
+        <CodeExcerpt
           lines={lines}
           firstLineNumber={1}
           highlightedStartLine={-1}
           highlightedEndLine={-1}
-          language={cell.language}
         />
       </div>
     )
@@ -429,27 +395,34 @@ function CodeCell({
 
   return (
     <div className="bg-background">
-      <Editor
-        height={editorHeight}
-        defaultLanguage={cell.language}
-        language={cell.language}
-        theme={resolveCursorThemeName(isDark)}
-        value={source}
-        onMount={handleMount}
-        onChange={(value) => onChange(value ?? '')}
-        options={{
-          automaticLayout: true,
-          fontFamily: resolveEditorFontFamily(settings),
-          fontSize,
-          glyphMargin: false,
-          lineNumbersMinChars: 3,
-          minimap: { enabled: false },
-          overviewRulerLanes: 0,
-          renderLineHighlight: 'none',
-          scrollBeyondLastLine: false,
-          wordWrap: 'off'
+      {/* Why: the cell owns deactivation, and Pierre's editor ships no command
+          layer, so Escape and focus-out are handled on the host element. */}
+      <div
+        style={{ height: editorHeight }}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            onDeactivateRef.current()
+          }
         }}
-      />
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            onDeactivateRef.current()
+          }
+        }}
+      >
+        <FileCodeView
+          fileId={cellEditorId}
+          filePath={cellEditorId}
+          viewStateKey={cellEditorId}
+          relativePath={cellEditorId}
+          content={source}
+          language={cell.language}
+          onContentChange={onChange}
+          onSave={() => {
+            void onSaveRequestRef.current()
+          }}
+        />
+      </div>
     </div>
   )
 }
@@ -784,7 +757,7 @@ export default function IpynbViewer({
         return
       }
       const target = event.target instanceof Element ? event.target : null
-      if (target?.closest('.monaco-editor')) {
+      if (target?.closest(DIFFS_TAG_NAME)) {
         return
       }
       setEditingCellKey(null)

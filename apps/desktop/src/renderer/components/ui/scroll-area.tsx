@@ -4,7 +4,6 @@ import { cn } from '~renderer/lib/class-names'
 
 function ScrollArea({
   className,
-  hideScrollBar,
   horizontalScrollBar,
   viewportClassName,
   viewportRef,
@@ -13,8 +12,6 @@ function ScrollArea({
   children,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
-  /** Set by surfaces that draw their own thumb over the viewport (combined diff). */
-  hideScrollBar?: boolean
   viewportClassName?: string
   viewportRef?: React.Ref<HTMLDivElement>
   /** Renders the horizontal track for content that scrolls on both axes (grids,
@@ -42,8 +39,8 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      {hideScrollBar ? null : <ScrollBar />}
-      {horizontalScrollBar && !hideScrollBar ? <ScrollBar orientation="horizontal" /> : null}
+      <ScrollBar />
+      {horizontalScrollBar ? <ScrollBar orientation="horizontal" /> : null}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )

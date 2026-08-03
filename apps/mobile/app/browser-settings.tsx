@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
+import { MobileContentSection } from '~/components/content-section'
+import { PickerModal, type PickerOption } from '~/components/picker-modal'
 import { CaretRight as ChevronRight, Globe } from '~/components/uniwind-icons'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
   loadTerminalLinkOpenMode,
   saveTerminalLinkOpenMode,
   type MobileTerminalLinkOpenMode
-} from '../src/storage/preferences'
+} from '~/storage/preferences'
 
 const LINK_MODE_OPTIONS: PickerOption<MobileTerminalLinkOpenMode>[] = [
   {

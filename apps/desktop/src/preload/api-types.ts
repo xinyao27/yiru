@@ -112,17 +112,6 @@ import type {
   ListReposForExecutionHostArgs
 } from '~shared/host-repo-catalog-contract'
 import type {
-  LanguageServerDocumentUriArgs,
-  LanguageServerDocumentUriResult,
-  LanguageServerEvent,
-  LanguageServerLocationArgs,
-  LanguageServerLocationResult,
-  LanguageServerLogsResult,
-  LanguageServerSendArgs,
-  LanguageServerStartArgs,
-  LanguageServerStartResult
-} from '~shared/language-server'
-import type {
   LocalLogTailChangedPayload,
   LocalLogTailReadArgs,
   LocalLogTailReadResult,
@@ -402,6 +391,11 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '~shared/opencode-usage-types'
+import type {
+  RateLimitBannerReport,
+  RateLimitHit,
+  RateLimitResumeSchedule
+} from '~shared/rate-limit-resume/types'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
@@ -1823,17 +1817,6 @@ export type PreloadApi = {
      *  state without round-tripping through settings:get. */
     onChanged: (callback: (updates: Partial<GlobalSettings>) => void) => () => void
   }
-  languageServers: {
-    start: (args: LanguageServerStartArgs) => Promise<LanguageServerStartResult>
-    send: (args: LanguageServerSendArgs) => Promise<void>
-    stop: (args: { sessionId: string }) => Promise<void>
-    resolveDocumentUri: (
-      args: LanguageServerDocumentUriArgs
-    ) => Promise<LanguageServerDocumentUriResult>
-    resolveLocation: (args: LanguageServerLocationArgs) => Promise<LanguageServerLocationResult>
-    getLogs: (args: { sessionId: string }) => Promise<LanguageServerLogsResult>
-    onEvent: (callback: (event: LanguageServerEvent) => void) => () => void
-  }
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
   }
@@ -2963,6 +2946,18 @@ export type PreloadApi = {
     snapshotWorkspaceName: (args: { workspaceId: string; displayName: string }) => Promise<number>
     rendererReady: () => Promise<void>
     onDispatchRequested: (callback: (request: AutomationDispatchRequest) => void) => () => void
+  }
+  rateLimitResume: {
+    report: (report: RateLimitBannerReport) => Promise<RateLimitHit>
+    list: () => Promise<RateLimitResumeSchedule[]>
+    schedule: (hit: RateLimitHit) => Promise<RateLimitResumeSchedule>
+    cancel: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    runNow: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    markFired: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    markFailed: (args: { id: string; reason: string }) => Promise<RateLimitResumeSchedule>
+    markStale: (args: { id: string }) => Promise<RateLimitResumeSchedule>
+    rendererReady: () => Promise<void>
+    onDispatchRequested: (callback: (schedule: RateLimitResumeSchedule) => void) => () => void
   }
   wsl: {
     isAvailable: () => Promise<boolean>

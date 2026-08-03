@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { dirname, normalizeRelativePath } from '~renderer/lib/path'
@@ -40,7 +41,8 @@ function FileExplorerTreeContent({
 
   return (
     <div className="relative min-h-0 flex-1 overflow-hidden">
-      <div
+      <ContextMenuTrigger
+        onContextMenu={interactions.actions.handleBackgroundContextMenu}
         className={cn(
           'h-full min-h-0 bg-sidebar py-2',
           view.explorerView !== 'files' && 'pointer-events-none invisible',
@@ -63,7 +65,6 @@ function FileExplorerTreeContent({
           dragDrop.stopDragEdgeScroll()
           dragDrop.setDropTargetDir(null)
         }}
-        onContextMenuCapture={interactions.actions.handleBackgroundContextMenu}
         onDoubleClick={interactions.actions.handleBackgroundDoubleClick}
       >
         {!showTree && (
@@ -189,7 +190,7 @@ function FileExplorerTreeContent({
             }}
           />
         )}
-      </div>
+      </ContextMenuTrigger>
       <div
         className={cn(
           'absolute inset-0 flex min-h-0 flex-col',

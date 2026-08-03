@@ -3,7 +3,7 @@ import { aiVaultAgentLabel } from '@yiru/workbench-model/agent'
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 
-import { formatTimeAgo } from '../worktree/agent-row-display'
+import { formatTimeAgo } from '../workspace/agent-row-display'
 
 export type MobileAgentHistoryCard = {
   id: string

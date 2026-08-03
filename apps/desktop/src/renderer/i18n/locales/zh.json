@@ -588,14 +588,6 @@
             "de50bef680": "macOS 正在阻止 Yiru 通知"
           }
         }
-      },
-      "MonacoLanguageServerSession": {
-        "restarting": "Restarting language server…"
-      },
-      "MonacoLanguageServerEditFeatures": {
-        "renameTitle": "Rename symbol to “{{value0}}”",
-        "commandDisabled": "Language server commands are not allowed.",
-        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -2216,20 +2208,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "LanguageServerStatusSegment": {
-            "aria": "Language server: {{value0}}",
-            "tooltip": "Language server — {{value0}}",
-            "title": "Language Server",
-            "configure": "Configure",
-            "idle": "Open a configured source file to start the server on its execution host.",
-            "loadingLogs": "Loading logs…",
-            "noLogs": "No server log output.",
-            "starting": "Starting",
-            "ready": "Ready",
-            "error": "Error",
-            "idleLabel": "Idle",
-            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -2710,7 +2688,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "当前安装在："
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2721,34 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "权威副本",
+          "providerAlias": "软链接",
+          "independentCopy": "独立拷贝",
+          "externalLink": "外部链接",
+          "brokenLink": "断链",
+          "readOnly": "只读",
+          "repoScope": "仓库内",
+          "pluginCache": "来自插件",
+          "unknown": "未分类",
+          "canonicalCopyHint": "共享的技能主目录，更新会先落到这里。",
+          "providerAliasHint": "指向共享主目录的链接，所以这个 Agent 看到的始终是同一份文件。",
+          "independentCopyHint": "自己的一份文件拷贝，改动它不会影响其他任何目录。",
+          "externalLinkHint": "指向技能主目录之外的链接，由它指向的位置负责维护。",
+          "brokenLinkHint": "链接的目标已经不存在，这个 Agent 无法加载该技能。",
+          "readOnlyHint": "这里的文件写不进去，更新不会到达它。",
+          "repoScopeHint": "已提交到仓库，由那个检出而不是本机负责维护。",
+          "pluginCacheHint": "随已安装的插件一起分发，更新由插件负责。",
+          "unknownHint": "扫描这个目录的主机没有报告它是以什么形式存在的。"
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "{{value0}} 个目录"
+        },
+        "SkillDetailToolbar": {
+          "placementCount": "{{value0}} 个目录",
+          "fileCount": "{{value0}} 个文件"
         }
       },
       "sidebar": {
@@ -6985,9 +6992,7 @@
             "e61157e926": "编辑器自动换行",
             "005be5c699": "在文件编辑器中自动换行长行，而无需水平滚动。",
             "editorFontFamily": "编辑器字体",
-            "editorFontFamilyDesc": "文件编辑器和差异视图使用的字体。留空则使用终端字体。",
-            "languageServer": "Language Server (Experimental)",
-            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
+            "editorFontFamilyDesc": "文件编辑器和差异视图使用的字体。留空则使用终端字体。"
           }
         },
         "git": {
@@ -8275,23 +8280,6 @@
           "githubReleases": "GitHub 发布",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
-        },
-        "LanguageServerSetting": {
-          "title": "Language Server (Experimental)",
-          "description": "Run one language server on the native, WSL, SSH, or runtime host that owns the code.",
-          "enable": "Enable Language Server",
-          "enableDescription": "Run the configured executable on the code’s execution host when a matching file is open.",
-          "command": "Executable",
-          "commandDescription": "A PATH command available on each execution host, or an absolute host-specific executable path.",
-          "commandRequired": "Enter an executable before opening a matching source file.",
-          "arguments": "Arguments",
-          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
-          "languages": "Monaco Language IDs",
-          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching editable models are shared.",
-          "localOnly": "Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.",
-          "commandPlaceholder": "clangd",
-          "argumentsPlaceholder": "--stdio\n--background-index",
-          "languagesPlaceholder": "c, cpp"
         },
         "VoiceSpeechModelSection": {
           "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
@@ -10560,7 +10548,6 @@
           "72f71f52eb": "此文件的文本差异不可用。",
           "7ce8436458": "分支比较中此文件的文本差异不可用。",
           "bdbf02d5df": "二进制",
-          "b5675b0694": "保存",
           "593f2193f6": "此草稿已超过安全显示限制，但仍可保存。"
         },
         "DiffSectionHeader": {
@@ -10599,9 +10586,7 @@
           "c98ce191da": "此差异没有可打开的修改端文件",
           "9b80bbe1de": "打开文件选项卡",
           "f0fd4174b5": "打开文件选项卡以使用丰富的 Markdown 编辑",
-          "a10d9b8337": "打开文件",
-          "2076ecfc9c": "上一个更改",
-          "631dab0df3": "下一个更改"
+          "a10d9b8337": "打开文件"
         },
         "EditorPanelMarkdownActionsMenu": {
           "3e0ce48c24": "导出为 PDF",
@@ -10713,17 +10698,6 @@
         },
         "MermaidBlock": {
           "dcc132e691": "图表错误："
-        },
-        "MonacoEditor": {
-          "68cb83f4a7": "在选定的文本上添加注释",
-          "fd68ae03b3": "在文件中搜索",
-          "largePasteTooLarge": "粘贴内容过大。",
-          "goToDefinition": "Go to Definition"
-        },
-        "MonacoGutterContextMenu": {
-          "7b57b1b468": "复制远程 URL",
-          "2e0b1cdc05": "复制相对路径到行",
-          "4eaa991bde": "复制路径到行"
         },
         "NotesSendMenu": {
           "44dc5e60a6": "发送笔记",
@@ -10950,9 +10924,6 @@
             }
           }
         },
-        "useContextualCopySetup": {
-          "059bfb0d94": "上下文已复制"
-        },
         "useLocalImagePick": {
           "175cb8b8ce": "插入图片失败。",
           "91d835dc88": "工作树路径不可用。"
@@ -11076,15 +11047,6 @@
           "copy": "复制",
           "selectAll": "全选",
           "copyPath": "复制路径"
-        },
-        "LanguageServerWorkspaceEditDialog": {
-          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
-          "editCount": "{{value0}} edits",
-          "unsaved": " · unsaved buffer",
-          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
-          "cancel": "Cancel",
-          "apply": "Apply changes",
-          "loading": "Loading preview…"
         },
         "combined": {
           "diff": {
@@ -12481,5 +12443,28 @@
       "manualOne": "Copy it in manually if this workspace needs it.",
       "manualMany": "Copy them in manually if this workspace needs them."
     }
+  },
+  "rateLimitResume": {
+    "window": {
+      "weekly": "每周额度",
+      "session": "5 小时额度",
+      "unknown": "服务商额度"
+    },
+    "title": {
+      "scheduled": "已安排 {{agent}} 在约 {{countdown}} 后继续运行",
+      "blocked": "{{agent}} 暂时不可用"
+    },
+    "resumesIn": "约 {{countdown}} 后",
+    "resumesUnknown": "未知",
+    "resumesAt": "恢复时间",
+    "quotaWindow": "额度周期",
+    "action": {
+      "cancel": "取消自动继续",
+      "runNow": "立即运行",
+      "retry": "立即重试",
+      "schedule": "约 {{countdown}} 后继续",
+      "reveal": "去看看"
+    },
+    "workspace": "工作区"
   }
 }

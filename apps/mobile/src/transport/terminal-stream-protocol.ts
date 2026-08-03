@@ -2,15 +2,19 @@ const TERMINAL_STREAM_KIND = 0x74
 const TERMINAL_STREAM_VERSION = 1
 const HEADER_BYTES = 16
 
-export enum TerminalStreamOpcode {
-  Output = 1,
-  SnapshotStart = 2,
-  SnapshotChunk = 3,
-  SnapshotEnd = 4,
-  Resized = 5,
-  Error = 6,
-  Metadata = 12
-}
+// Why: `enum` is forbidden (erasableSyntaxOnly) — a const object plus a union of
+// its literal values keeps the same call sites working with erasable types.
+export const TerminalStreamOpcode = {
+  Output: 1,
+  SnapshotStart: 2,
+  SnapshotChunk: 3,
+  SnapshotEnd: 4,
+  Resized: 5,
+  Error: 6,
+  Metadata: 12
+} as const
+
+export type TerminalStreamOpcode = (typeof TerminalStreamOpcode)[keyof typeof TerminalStreamOpcode]
 
 export type TerminalStreamFrame = {
   opcode: TerminalStreamOpcode

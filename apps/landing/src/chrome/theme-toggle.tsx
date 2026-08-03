@@ -1,6 +1,6 @@
 import { Moon, Sun } from '@phosphor-icons/react'
 
-import { useTheme } from '@/theme'
+import { useTheme } from '../theme'
 
 /** Why: an icon button rather than a text link — the footer row is already all
     words, and the control is recognisable without one. */

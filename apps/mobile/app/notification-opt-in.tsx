@@ -2,14 +2,13 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, BackHandler, ScrollView, Text, View } from 'react-native'
 
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { BellRinging as BellRing } from '~/components/uniwind-icons'
 import { SafeAreaView } from '~/components/uniwind-native-components'
-
-import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassTextButton } from '../src/components/glass/text-button'
-import { YiruLogo } from '../src/components/yiru-logo'
-import { ensureNotificationPermissions } from '../src/notifications/notifications'
-import { savePushNotificationsEnabled } from '../src/storage/preferences'
+import { YiruLogo } from '~/components/yiru-logo'
+import { ensureNotificationPermissions } from '~/notifications/notifications'
+import { savePushNotificationsEnabled } from '~/storage/preferences'
 
 export default function NotificationOptInScreen() {
   const router = useRouter()

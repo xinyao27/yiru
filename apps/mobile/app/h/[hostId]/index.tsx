@@ -22,7 +22,7 @@ import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { NewWorkspaceFab } from '~/components/new-workspace-fab'
-import { NewWorktreeModalController } from '~/components/new-worktree-modal-controller'
+import { NewWorkspaceModalController } from '~/components/new-workspace-modal-controller'
 import { ProtocolBlockScreen } from '~/components/protocol-block-screen'
 import { MobileRepoIcon } from '~/components/repo-icon'
 import {
@@ -32,15 +32,13 @@ import {
   Moon
 } from '~/components/uniwind-icons'
 import { WorkspaceDetailPlaceholder } from '~/components/workspace-detail-placeholder'
-import { WorktreeListRow } from '~/components/worktree-list-row'
-import { useActiveWorktreeScroll } from '~/hooks/use-active-worktree-scroll'
-import { useNow } from '~/hooks/use-now'
+import { WorkspaceListRow } from '~/components/workspace-list-row'
 import {
   createInitialHostRouteActionState,
   resolveHostRouteActionState,
   setHostRouteNewWorktreeVisible
-} from '~/host-route-action-state'
-import { leaveHostRoute } from '~/host-route-exit'
+} from '~/host-route/action-state'
+import { leaveHostRoute } from '~/host-route/exit'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
 import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
@@ -52,37 +50,54 @@ import {
 } from '~/transport/client-context-connection-metrics'
 import { classifyConnection, type ConnectionVerdict } from '~/transport/connection-health'
 import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
+import type { RepoSummary } from '~/transport/host-rpc-types'
 import { useHostStatusGates } from '~/transport/host-status-gates'
 import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
-import type { RepoSummary } from '~/worktree/host-worktree-rpc-types'
-import { MobileWorkspaceListChrome } from '~/worktree/list-chrome'
-import { areWorktreeListsEqual } from '~/worktree/list-snapshot'
-import { MobileWorkspaceListToolbar } from '~/worktree/list-toolbar'
-import { repoColor } from '~/worktree/repo-color'
-import { useWorkspaceSections } from '~/worktree/use-workspace-sections'
-import { getMobileWorkspaceLineageGroupKey } from '~/worktree/workspace-lineage'
+import { getMobileWorkspaceLineageGroupKey } from '~/workspace/lineage'
+import { MobileWorkspaceListChrome } from '~/workspace/list-chrome'
 import {
   getWorktreeStatus,
   isWorktreePinned,
   type FilterState,
   type Worktree
-} from '~/worktree/workspace-list-sections'
-import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/worktree/workspace-statuses'
+} from '~/workspace/list-sections'
+import { areWorktreeListsEqual } from '~/workspace/list-snapshot'
+import { MobileWorkspaceListToolbar } from '~/workspace/list-toolbar'
+import { repoColor } from '~/workspace/repo-color'
+import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/workspace/statuses'
+import { useActiveWorktreeScroll } from '~/workspace/use-active-scroll'
+import { useWorkspaceSections } from '~/workspace/use-list-sections'
+import { useNow } from '~/workspace/use-now'
 import {
   applyDesktopViewSettings,
   type MobileSortMode,
   type MobileViewState,
   type WorkspaceViewSettings
-} from '~/worktree/workspace-view-settings'
+} from '~/workspace/view-settings'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return v.kind === 'warning' || v.kind === 'unreachable' || v.kind === 'auth-failed'
 }
 
 const REPO_METADATA_REFRESH_MS = 60_000
+
+// Why: a worktree.ps snapshot in flight predates a pin/unpin the user just made,
+// so pending intents win until their worktree.set RPC settles.
+function applyPendingPinChanges(
+  worktrees: Worktree[],
+  pending: ReadonlyMap<string, boolean>
+): Worktree[] {
+  if (pending.size === 0) {
+    return worktrees
+  }
+  return worktrees.map((w) => {
+    const isPinned = pending.get(w.worktreeId)
+    return isPinned === undefined || isPinned === w.isPinned ? w : { ...w, isPinned }
+  })
+}
 
 type HostScreenProps = {
   // Why: when true, this worktree list is rendered as the persistent tablet
@@ -178,6 +193,10 @@ export function HostScreen({
     leaveHostRoute(router)
   }, [router])
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set())
+  // Why: the 3s worktree.ps poll overwrites pinnedIds (and persists it) from the
+  // server snapshot, which would undo an optimistic pin/unpin still in flight.
+  // Holds worktreeId → intended isPinned until the worktree.set RPC settles.
+  const pendingPinChangesRef = useRef<Map<string, boolean>>(new Map())
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   // Why: snapshot of the synced view settings so the focus-effect ui.get merge
   // and the optimistic ui.set writes read the latest values without forcing the
@@ -242,7 +261,7 @@ export function HostScreen({
     [client, applyViewState]
   )
 
-  const openNewWorktreeModal = useCallback(() => {
+  const openNewWorkspaceModal = useCallback(() => {
     const modal = newWorktreeModalRef.current
     if (!modal) {
       return
@@ -437,14 +456,18 @@ export function HostScreen({
         }
         if (response.ok) {
           const result = (response as RpcSuccess).result as { worktrees: Worktree[] }
+          const worktreeSnapshot = applyPendingPinChanges(
+            result.worktrees,
+            pendingPinChangesRef.current
+          )
           // Why: large hosts can return identical worktree.ps snapshots every
           // poll. Preserving the existing array keeps SectionList/sort rebuilds
           // off the JS tap path unless something actually changed.
           setWorktrees((current) =>
-            areWorktreeListsEqual(current, result.worktrees) ? current : result.worktrees
+            areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
           )
           setLastKnownWorktrees((current) =>
-            areWorktreeListsEqual(current, result.worktrees) ? current : result.worktrees
+            areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
           )
           setWorktreesLoaded(true)
           // Why (#8498): the host detail screen seeds its list from the
@@ -453,13 +476,13 @@ export function HostScreen({
           // the same cache so a reconnect refetch (or a remount) can't serve a
           // stale worktree list.
           if (hostId) {
-            setCachedWorktrees(hostId, result.worktrees)
+            setCachedWorktrees(hostId, worktreeSnapshot)
           }
           // Drop the optimistic active override once the host confirms it (the
           // activate RPC has landed and worktree.ps now reports it active), so we
           // stop overriding and respect any later desktop-driven change.
           setOptimisticActiveWorktreeId((pending) =>
-            pending && result.worktrees.some((w) => w.worktreeId === pending && w.isActive)
+            pending && worktreeSnapshot.some((w) => w.worktreeId === pending && w.isActive)
               ? null
               : pending
           )
@@ -472,7 +495,7 @@ export function HostScreen({
             }
             const still = new Set<string>()
             for (const id of prev) {
-              const wt = result.worktrees.find((w) => w.worktreeId === id)
+              const wt = worktreeSnapshot.find((w) => w.worktreeId === id)
               if (wt && wt.liveTerminalCount > 0) {
                 still.add(id)
               }
@@ -483,7 +506,7 @@ export function HostScreen({
           // Sync local pin state from server so desktop-initiated pins/unpins
           // are reflected without relying on stale AsyncStorage.
           const serverPinned = new Set(
-            result.worktrees.filter((w) => w.isPinned).map((w) => w.worktreeId)
+            worktreeSnapshot.filter((w) => w.isPinned).map((w) => w.worktreeId)
           )
           setPinnedIds((prev) => {
             if (serverPinned.size === prev.size && [...serverPinned].every((id) => prev.has(id))) {
@@ -601,12 +624,19 @@ export function HostScreen({
       updateLocalPins(worktreeId, newPinned)
 
       if (client) {
+        pendingPinChangesRef.current.set(worktreeId, newPinned)
+        const clearPending = () => {
+          if (pendingPinChangesRef.current.get(worktreeId) === newPinned) {
+            pendingPinChangesRef.current.delete(worktreeId)
+          }
+        }
         client
           .sendRequest('worktree.set', {
             worktree: `id:${worktreeId}`,
             isPinned: newPinned
           })
-          .catch(() => {})
+          .then(clearPending)
+          .catch(clearPending)
       }
     },
     [client, worktrees, pinnedIds, updateLocalPins]
@@ -623,19 +653,26 @@ export function HostScreen({
       setWorktrees(removeFromList)
       setLastKnownWorktrees(removeFromList)
 
+      // Why: a poll can land between the optimistic removal and the failure
+      // path and re-add the row from the server, so a blind append would
+      // duplicate worktreeId — the SectionList key — and break the render.
+      const restoreToList = (list: Worktree[]) =>
+        list.some((w) => w.worktreeId === item.worktreeId) ? list : [...list, item]
+
       try {
         const response = await client.sendRequest('worktree.rm', {
           worktree: `id:${item.worktreeId}`,
           force: true
         })
         if (!response.ok) {
-          setWorktrees((prev) => [...prev, item])
-          setLastKnownWorktrees((prev) => [...prev, item])
+          setWorktrees(restoreToList)
+          setLastKnownWorktrees(restoreToList)
+          return
         }
         void fetchWorktrees()
       } catch {
-        setWorktrees((prev) => [...prev, item])
-        setLastKnownWorktrees((prev) => [...prev, item])
+        setWorktrees(restoreToList)
+        setLastKnownWorktrees(restoreToList)
       }
     },
     [client, fetchWorktrees]
@@ -813,7 +850,7 @@ export function HostScreen({
           search={search}
           onAccounts={openAccounts}
           onFloatingWorkspace={openFloatingWorkspace}
-          onNewWorkspace={openNewWorktreeModal}
+          onNewWorkspace={openNewWorkspaceModal}
           onSearchChange={setSearch}
         />
       </MobileWorkspaceListChrome>
@@ -842,10 +879,10 @@ export function HostScreen({
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
             {search
-              ? 'No matching worktrees'
+              ? 'No matching workspaces'
               : activeFilterCount > 0
-                ? 'No worktrees match filters'
-                : 'No worktrees'}
+                ? 'No workspaces match filters'
+                : 'No workspaces'}
           </Text>
         </View>
       )}
@@ -928,7 +965,7 @@ export function HostScreen({
             />
           }
           renderItem={({ item, section }) => (
-            <WorktreeListRow
+            <WorkspaceListRow
               item={item}
               isReadOnly={isReadOnly}
               now={now}
@@ -948,7 +985,7 @@ export function HostScreen({
 
       {/* Floating "new workspace" button — phone only; embedded sidebars keep the toolbar +. */}
       {!embedded && (
-        <NewWorkspaceFab onPress={openNewWorktreeModal} disabled={connState !== 'connected'} />
+        <NewWorkspaceFab onPress={openNewWorkspaceModal} disabled={connState !== 'connected'} />
       )}
 
       {/* Worktree long-press action sheet (inline confirm to avoid double-Modal lag) */}
@@ -1049,7 +1086,7 @@ export function HostScreen({
         onCancel={() => setConfirmRemoveHost(false)}
       />
 
-      <NewWorktreeModalController
+      <NewWorkspaceModalController
         ref={newWorktreeModalRef}
         routeVisible={showNewWorktree}
         client={client}

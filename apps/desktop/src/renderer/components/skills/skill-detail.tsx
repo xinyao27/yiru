@@ -8,14 +8,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import {
   skillDirectoryName,
+  skillPlacements,
   type DiscoveredSkill,
   type SkillDirectoryEntry,
   type SkillDirectoryListing
 } from '~shared/skills'
 
-import { SkillFileTree } from './file-tree'
+import { SkillDetailToolbar } from './detail-toolbar'
 import { SKILL_FILE_NAME } from './file-tree-model'
-import { formatUpdatedAt, providerLabels, sourceLabels } from './labels'
+import { providerLabels, sourceLabels } from './labels'
 import { SkillFileView } from './skill-file-view'
 import { startSkillUpdateRun } from './skill-update-run-store'
 
@@ -120,6 +121,7 @@ export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
   const [listing, setListing] = useState<SkillDirectoryListing | null>(null)
   const [selectedRelativePath, setSelectedRelativePath] = useState(SKILL_FILE_NAME)
   const directoryPath = skill.directoryPath
+  const placements = skillPlacements(skill)
 
   useEffect(() => {
     let cancelled = false
@@ -145,68 +147,38 @@ export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="border-border shrink-0 space-y-2 border-b px-5 py-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <h2 className="min-w-0 truncate text-sm font-semibold">{skill.name}</h2>
-              <Badge
-                variant={skill.installed ? 'secondary' : 'outline'}
-                className="h-5 text-[10px]"
-              >
-                {skill.installed
-                  ? translate('auto.components.skills.SkillsPage.0c74e7ff34', 'Local')
-                  : translate('auto.components.skills.SkillsPage.35b9a724a0', 'Available')}
-              </Badge>
-              <Badge variant="outline" className="h-5 text-[10px]">
-                {sourceLabels[skill.sourceKind]}
-              </Badge>
-              {skill.providers.map((provider) => (
-                <Badge key={provider} variant="outline" className="h-5 text-[10px]">
-                  {providerLabels[provider]}
-                </Badge>
-              ))}
-            </div>
-            <p
-              className="text-muted-foreground truncate font-mono text-[11px]"
-              title={skill.skillFilePath}
-            >
-              {skill.skillFilePath}
-            </p>
-          </div>
-          <SkillDetailActions {...props} />
+      {/* Why: the skill's own text is what this pane exists to show, so the
+          chrome above it stays at two rows — identity, then one toolbar whose
+          pickers hold the file tree and the install locations. */}
+      <header className="border-border flex min-w-0 shrink-0 items-center gap-3 border-b px-5 py-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <h2 className="min-w-0 truncate text-sm font-semibold">{skill.name}</h2>
+          <Badge variant={skill.installed ? 'secondary' : 'outline'} className="h-5 text-[10px]">
+            {skill.installed
+              ? translate('auto.components.skills.SkillsPage.0c74e7ff34', 'Local')
+              : translate('auto.components.skills.SkillsPage.35b9a724a0', 'Available')}
+          </Badge>
+          <Badge variant="outline" className="h-5 text-[10px]">
+            {sourceLabels[skill.sourceKind]}
+          </Badge>
+          {skill.providers.map((provider) => (
+            <Badge key={provider} variant="outline" className="h-5 text-[10px]">
+              {providerLabels[provider]}
+            </Badge>
+          ))}
         </div>
-        <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-[11px]">
-          <span>{skill.sourceLabel}</span>
-          <span>{formatUpdatedAt(skill.updatedAt)}</span>
-        </div>
-      </div>
+        <SkillDetailActions {...props} />
+      </header>
 
-      {listing && !listing.ok ? (
-        <p className="text-muted-foreground border-border shrink-0 border-b px-5 py-2 text-xs">
-          {translate(
-            'auto.components.skills.SkillDetail.listingFailed',
-            'Could not list the files in this skill.'
-          )}
-        </p>
-      ) : null}
-      {files.length > 0 ? (
-        <div className="border-border shrink-0 border-b">
-          <SkillFileTree
-            files={files}
-            selectedRelativePath={selectedRelativePath}
-            onSelect={setSelectedRelativePath}
-          />
-          {listing?.ok === true && listing.truncated ? (
-            <p className="text-muted-foreground px-3 pb-2 text-[11px]">
-              {translate(
-                'auto.components.skills.SkillDetail.listingTruncated',
-                'Only the first files in this skill are listed.'
-              )}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      <SkillDetailToolbar
+        placements={placements}
+        files={files}
+        listing={listing}
+        selectedRelativePath={selectedRelativePath}
+        onSelectFile={setSelectedRelativePath}
+        sourceLabel={skill.sourceLabel}
+        updatedAt={skill.updatedAt}
+      />
 
       <ScrollArea className="min-h-0 flex-1">
         <div className="px-5 py-4">

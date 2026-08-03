@@ -36,6 +36,8 @@ type StoreEntry = {
   unsubState: () => void
 }
 
+type DeferredAcquire = { cancelled: boolean }
+
 type RpcClientProviderProps = {
   children: ReactNode
   createClientOverride?: (hostId: string) => RpcClient | null
@@ -86,6 +88,11 @@ export function RpcClientProvider({
   // the second loadHosts() inside openEntry. Without this we'd serialize
   // two Keychain passes on cold start.
   const primedHostsRef = useRef<Map<string, HostProfile>>(new Map())
+
+  // Why: acquire() bumps the refcount only after its async open resolves. A
+  // release() in that gap must cancel the deferred increment, otherwise the
+  // entry stays permanently over-counted for the app's lifetime.
+  const deferredAcquiresRef = useRef<Map<string, DeferredAcquire[]>>(new Map())
 
   function notifyHostState(hostId: string, state: ConnectionState) {
     const set = stateListenersRef.current.get(hostId)
@@ -166,6 +173,9 @@ export function RpcClientProvider({
         }
 
         if (pendingOpen.cancelled) {
+          // Why: an injected client is constructed before this check, so a
+          // cancellation in the microtask gap would leak its open transport.
+          client?.close()
           return null
         }
 
@@ -237,8 +247,19 @@ export function RpcClientProvider({
       // Trigger async open. The acquire-side will return null this tick and
       // try again once the state listener fires; consumers are expected to
       // call acquire() inside an effect that re-runs on state changes.
+      const deferred: DeferredAcquire = { cancelled: false }
+      const queue = deferredAcquiresRef.current.get(hostId) ?? []
+      queue.push(deferred)
+      deferredAcquiresRef.current.set(hostId, queue)
       void openEntry(hostId).then((entry) => {
-        if (!entry) {
+        const current = deferredAcquiresRef.current.get(hostId) ?? []
+        const remaining = current.filter((candidate) => candidate !== deferred)
+        if (remaining.length > 0) {
+          deferredAcquiresRef.current.set(hostId, remaining)
+        } else {
+          deferredAcquiresRef.current.delete(hostId)
+        }
+        if (deferred.cancelled || !entry) {
           return
         }
         entry.refCount += 1
@@ -263,6 +284,15 @@ export function RpcClientProvider({
   // app backgrounding (OS-level socket suspension), and provider
   // unmount (app shutdown).
   const release = useCallback((hostId: string) => {
+    // Why: a still-queued deferred acquire has not incremented yet — cancel it
+    // instead of decrementing, so the increment never lands after the release.
+    const pending = deferredAcquiresRef.current
+      .get(hostId)
+      ?.find((candidate) => !candidate.cancelled)
+    if (pending) {
+      pending.cancelled = true
+      return
+    }
     const entry = storeRef.current.get(hostId)
     if (!entry) {
       return

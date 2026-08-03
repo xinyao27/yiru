@@ -6,27 +6,26 @@ import Animated, {
   useSharedValue
 } from 'react-native-reanimated'
 
+import { MobileContentSection } from '~/components/content-section'
+import { PickerModal, type PickerOption } from '~/components/picker-modal'
+import { TerminalShortcutSettings } from '~/components/terminal-shortcut-settings'
 import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
   TextT as Type
 } from '~/components/uniwind-icons'
 import { GestureHandlerRootView } from '~/components/uniwind-native-components'
-
-import { MobileContentSection } from '../src/components/content-section'
-import { PickerModal, type PickerOption } from '../src/components/picker-modal'
-import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalTextScale,
   saveTerminalAutocompleteEnabled,
   saveTerminalTextScale
-} from '../src/storage/preferences'
-import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/auto-restore-fit-state'
-import { useAllHostClients } from '../src/transport/all-host-clients'
-import { loadHosts } from '../src/transport/host-store'
-import type { RpcClient } from '../src/transport/rpc-client'
-import type { HostProfile } from '../src/transport/types'
+} from '~/storage/preferences'
+import { setTerminalAutoRestoreFitMsForHost } from '~/terminal/auto-restore-fit-state'
+import { useAllHostClients } from '~/transport/all-host-clients'
+import { loadHosts } from '~/transport/host-store'
+import type { RpcClient } from '~/transport/rpc-client'
+import type { HostProfile } from '~/transport/types'
 
 type RestoreValue = 'indefinite' | '60s' | '5m' | '30m'
 
@@ -94,6 +93,13 @@ function autoRestoreSummary(ms: number | null | undefined): string {
   }
   const exact = AUTO_RESTORE_FIT_OPTIONS.find((o) => o.ms === ms)
   return exact ? exact.label : `After ${Math.round(ms / 1000)}s`
+}
+
+// Why: sendRequest resolves with the raw RpcResponse envelope and never throws
+// on {ok:false}, so the ms payload must be read out of `result` — reading it off
+// the envelope always yields undefined and silently falls back to the default.
+function autoRestoreFitMsFromResult(result: unknown): number | null | undefined {
+  return (result as { ms?: number | null } | null)?.ms
 }
 
 function HostFitRow({
@@ -195,7 +201,9 @@ export default function TerminalSettingsScreen() {
           if (cancelled) {
             return
           }
-          const value = (resp as { ms?: number | null } | null)?.ms
+          // Why: a rejected read must fall back to the default the same way a
+          // transport rejection does — {ok:false} never reaches the catch below.
+          const value = resp.ok ? autoRestoreFitMsFromResult(resp.result) : null
           // Why: reconnect/status ticks can replay the same value; preserving
           // object identity avoids rerendering every settings row again.
           setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, host.id, value))
@@ -220,21 +228,33 @@ export default function TerminalSettingsScreen() {
     if (!opt) {
       return
     }
+    const previousMs = hostMs[hostId]
     setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, opt.ms))
     try {
-      const resp = (await client.sendRequest('terminal.setAutoRestoreFit', {
-        ms: opt.ms
-      })) as { ms?: number | null } | null
-      setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, resp?.ms))
-    } catch {
-      try {
-        const resp = (await client.sendRequest('terminal.getAutoRestoreFit')) as {
-          ms?: number | null
-        } | null
-        setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, resp?.ms))
-      } catch {
-        // give up silently — the next mount retries
+      const resp = await client.sendRequest('terminal.setAutoRestoreFit', { ms: opt.ms })
+      if (resp.ok) {
+        setHostMs((prev) =>
+          setTerminalAutoRestoreFitMsForHost(prev, hostId, autoRestoreFitMsFromResult(resp.result))
+        )
+        return
       }
+    } catch {
+      // fall through to the re-read below
+    }
+    // Why: the write was rejected (or the transport failed), so re-read the
+    // authoritative value; if that fails too, restore what was on screen rather
+    // than leaving the optimistic value the host never accepted.
+    try {
+      const resp = await client.sendRequest('terminal.getAutoRestoreFit')
+      setHostMs((prev) =>
+        setTerminalAutoRestoreFitMsForHost(
+          prev,
+          hostId,
+          resp.ok ? autoRestoreFitMsFromResult(resp.result) : previousMs
+        )
+      )
+    } catch {
+      setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, previousMs))
     }
   }
 

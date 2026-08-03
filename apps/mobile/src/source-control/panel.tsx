@@ -6,10 +6,11 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { translate } from '~/i18n/translate'
+import { openMobilePrUrl } from '~/session/pr/compose-sheet'
+import { MobilePrViewPanelBody } from '~/session/pr/sidebar/view-panel'
 import { cn } from '~/style/class-names'
 
-import { openMobilePrUrl } from '../components/pr-compose-sheet'
-import { MobilePrViewPanelBody } from '../components/pr-sidebar/pr-view-panel'
 import { prSidebarDetailsNeedFetch } from '../session/pr/sidebar-state'
 import { useMobilePrSidebarController } from '../session/pr/use-sidebar-controller'
 import { MobileSourceControlBranchCard } from './branch-card'
@@ -66,17 +67,14 @@ export function MobileSourceControlPanel({
 
   // Deep-link / push with a different `tab` param should adopt the new segment
   // (expo-router can reuse the screen instance when only query params change).
-  useEffect(() => {
+  // Why: adopting during render keeps the first committed frame on the requested
+  // segment instead of painting the previous one and switching in an Effect.
+  const renderedInitialTabRef = useRef(initialTab)
+  if (renderedInitialTabRef.current !== initialTab) {
+    renderedInitialTabRef.current = initialTab
     setActiveTab(initialTab)
-    setVisitedTabs((prev) => {
-      if (prev.has(initialTab)) {
-        return prev
-      }
-      const next = new Set(prev)
-      next.add(initialTab)
-      return next
-    })
-  }, [initialTab])
+    setVisitedTabs((prev) => (prev.has(initialTab) ? prev : new Set(prev).add(initialTab)))
+  }
 
   const selectTab = useCallback((tab: SourceControlHubTab) => {
     setActiveTab(tab)
@@ -170,9 +168,12 @@ export function MobileSourceControlPanel({
   const ensurePrDetails = prController.ensurePrSidebarDetails
   // Refs so tab effects do not re-fire when headSha recreates load() (soft refresh).
   const refetchPrRef = useRef(refetchPr)
-  refetchPrRef.current = refetchPr
   const ensurePrDetailsRef = useRef(ensurePrDetails)
-  ensurePrDetailsRef.current = ensurePrDetails
+  // Declared before the tab effects below so they read this commit's callbacks.
+  useEffect(() => {
+    refetchPrRef.current = refetchPr
+    ensurePrDetailsRef.current = ensurePrDetails
+  }, [ensurePrDetails, refetchPr])
   useEffect(() => {
     // Why: source-control runners are created before the review controller;
     // this bridge lets remote completions refresh the current controller only.
@@ -291,13 +292,15 @@ export function MobileSourceControlPanel({
     ) : screenState.kind === 'error' || screenState.kind === 'unavailable' ? (
       <View className={styles.state}>
         <Text className={styles.stateTitle}>
-          {screenState.kind === 'unavailable' ? 'Source Control Unavailable' : 'Unable to Load'}
+          {screenState.kind === 'unavailable'
+            ? translate('mobile.sourceControl.unavailableTitle', 'Source Control Unavailable')
+            : translate('mobile.sourceControl.loadErrorTitle', 'Unable to Load')}
         </Text>
         <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
           <MobileGlassTextButton
             className="mt-3"
-            label="Retry"
+            label={translate('mobile.sourceControl.retry', 'Retry')}
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -333,7 +336,9 @@ export function MobileSourceControlPanel({
       {!embedded ? (
         <Stack.Screen
           options={{
-            title: `Source Control · ${worktreeLabel}`,
+            title: translate('mobile.sourceControl.screenTitle', 'Source Control · {{worktree}}', {
+              worktree: worktreeLabel
+            }),
             headerRight:
               Platform.OS === 'ios'
                 ? undefined
@@ -341,13 +346,19 @@ export function MobileSourceControlPanel({
                     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                       {prWebUrl ? (
                         <MobileGlassIconButton
-                          accessibilityLabel="Open pull request on the web"
+                          accessibilityLabel={translate(
+                            'mobile.sourceControl.openPrOnWeb',
+                            'Open pull request on the web'
+                          )}
                           icon="external"
                           onPress={() => openMobilePrUrl(prWebUrl)}
                         />
                       ) : null}
                       <MobileGlassIconButton
-                        accessibilityLabel="Refresh source control"
+                        accessibilityLabel={translate(
+                          'mobile.sourceControl.refresh',
+                          'Refresh source control'
+                        )}
                         disabled={ioBusy}
                         icon="refresh"
                         onPress={onRefresh}
@@ -362,15 +373,19 @@ export function MobileSourceControlPanel({
           <Stack.Toolbar.Button
             accessibilityLabel={
               prWebNumber != null
-                ? `Open pull request #${prWebNumber} on the web`
-                : 'Open pull request on the web'
+                ? translate(
+                    'mobile.sourceControl.openPrNumberOnWeb',
+                    'Open pull request #{{number}} on the web',
+                    { number: prWebNumber }
+                  )
+                : translate('mobile.sourceControl.openPrOnWeb', 'Open pull request on the web')
             }
             hidden={!prWebUrl}
             icon="arrow.up.right.square"
             onPress={prWebUrl ? () => openMobilePrUrl(prWebUrl) : undefined}
           />
           <Stack.Toolbar.Button
-            accessibilityLabel="Refresh source control"
+            accessibilityLabel={translate('mobile.sourceControl.refresh', 'Refresh source control')}
             disabled={ioBusy}
             icon="arrow.clockwise"
             onPress={onRefresh}
