@@ -12,6 +12,8 @@ type InlineAgentRailProps = {
   cardPaddingLeft: string
   /** The rows the inline list renders, so the rail can tick each root agent. */
   agents: readonly DashboardAgentRow[]
+  /** Parent rows whose descendants are currently hidden. */
+  collapsedParentPaneKeys: ReadonlySet<string>
 }
 
 // Why: absolute children are placed against the card's padding box, so every
@@ -49,15 +51,18 @@ const RAIL_ELBOW_WIDTH_PX =
 const COMPACT_AGENT_ROW_HEIGHT_PX = 24
 
 // Why: mirrors the pre-order walk (and the cycle guard) that agents.tsx renders
-// for compact branches — descendants are always laid out, never collapsed — so
-// the rail counts exactly the rows that end up on screen.
+// for compact branches so the rail counts exactly the rows visible on screen.
 function countRenderedRows(
   paneKey: string,
   childrenByParentPaneKey: ReadonlyMap<string, readonly DashboardAgentRow[]>,
-  ancestorPaneKeys: ReadonlySet<string>
+  ancestorPaneKeys: ReadonlySet<string>,
+  collapsedParentPaneKeys: ReadonlySet<string>
 ): number {
   if (ancestorPaneKeys.has(paneKey)) {
     return 0
+  }
+  if (collapsedParentPaneKeys.has(paneKey)) {
+    return 1
   }
   const descendantAncestorPaneKeys = new Set(ancestorPaneKeys)
   descendantAncestorPaneKeys.add(paneKey)
@@ -67,17 +72,21 @@ function countRenderedRows(
     renderedRows += countRenderedRows(
       child.paneKey,
       childrenByParentPaneKey,
-      descendantAncestorPaneKeys
+      descendantAncestorPaneKeys,
+      collapsedParentPaneKeys
     )
   }
   return renderedRows
 }
 
 /** Each root agent row's glyph-centre distance from the card's bottom edge. */
-function getRootRowCentersFromBottom(agents: readonly DashboardAgentRow[]): number[] {
+function getRootRowCentersFromBottom(
+  agents: readonly DashboardAgentRow[],
+  collapsedParentPaneKeys: ReadonlySet<string>
+): number[] {
   const { rootRows, childrenByParentPaneKey } = buildAgentRowLineageTree(agents)
   const renderedRowCounts = rootRows.map((rootRow) =>
-    countRenderedRows(rootRow.paneKey, childrenByParentPaneKey, new Set())
+    countRenderedRows(rootRow.paneKey, childrenByParentPaneKey, new Set(), collapsedParentPaneKeys)
   )
   const totalRenderedRows = renderedRowCounts.reduce((total, count) => total + count, 0)
 
@@ -95,11 +104,11 @@ function getRootRowCentersFromBottom(agents: readonly DashboardAgentRow[]): numb
  * stopping at the last of them.
  */
 export function InlineAgentRail(props: InlineAgentRailProps): React.JSX.Element {
-  const { cardPaddingLeft, agents } = props
+  const { cardPaddingLeft, agents, collapsedParentPaneKeys } = props
   const left = `calc(${cardPaddingLeft} + ${STATUS_ICON_CENTER_LEFT_PX}px)`
   const rootRowCentersFromBottom = React.useMemo(
-    () => getRootRowCentersFromBottom(agents),
-    [agents]
+    () => getRootRowCentersFromBottom(agents, collapsedParentPaneKeys),
+    [agents, collapsedParentPaneKeys]
   )
   const lastRootRowCenterFromBottom =
     rootRowCentersFromBottom.at(-1) ?? LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX

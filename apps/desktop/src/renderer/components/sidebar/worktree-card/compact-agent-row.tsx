@@ -1,7 +1,10 @@
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { AgentStateDot, agentStateLabel } from '~renderer/components/agent-state-dot'
 import { useAgentRowConversationName } from '~renderer/components/dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '~renderer/lib/agent-row-primary-text'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '~renderer/lib/agent-status'
@@ -96,6 +99,9 @@ type CompactAgentRowProps = {
   sendTargetDisabledReason?: string
   onSendTargetClick?: (paneKey: string) => void
   isFocusedPane?: boolean
+  childAgentCount?: number
+  childAgentsExpanded?: boolean
+  onToggleChildAgents?: (paneKey: string) => void
 }
 
 export const CompactAgentRow = React.memo(function CompactAgentRow({
@@ -105,7 +111,10 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   sendTargetStatus,
   sendTargetDisabledReason,
   onSendTargetClick,
-  isFocusedPane = false
+  isFocusedPane = false,
+  childAgentCount,
+  childAgentsExpanded = false,
+  onToggleChildAgents
 }: CompactAgentRowProps) {
   // Why: subagent child rows carry the child's NAME (e.g. "pr-reviewer") in
   // agentType, which is not an iconable agent and would render the unknown
@@ -118,6 +127,10 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   const model = agent.entry.model?.trim() ?? ''
   const shortTime = getCompactAgentTime(agent, now)
   const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey)
+  const hasChildDisclosure =
+    typeof childAgentCount === 'number' &&
+    childAgentCount > 0 &&
+    typeof onToggleChildAgents === 'function'
 
   const handleActivate = useCallback(
     (e: React.MouseEvent) => {
@@ -147,6 +160,14 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       }
     },
     [agent.paneKey, onSendTargetClick, sendTargetStatus]
+  )
+  const handleToggleChildAgents = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onToggleChildAgents?.(agent.paneKey)
+    },
+    [agent.paneKey, onToggleChildAgents]
   )
   const rowBody = (
     <>
@@ -208,6 +229,28 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
         </span>
       )}
       <AgentStateDot state={dotState} size="sm" />
+      {hasChildDisclosure ? (
+        <Button
+          variant="quiet"
+          size="xs"
+          type="button"
+          onClick={handleToggleChildAgents}
+          aria-label={translate(
+            'auto.components.right.sidebar.AiVaultSessionSubagents.subagentsCount',
+            'Subagents ({{value0}})',
+            { value0: childAgentCount }
+          )}
+          aria-expanded={childAgentsExpanded}
+        >
+          <span className="text-[10px] tabular-nums">{childAgentCount}</span>
+          <ChevronRight
+            className={cn(
+              'size-3 transition-transform duration-150',
+              childAgentsExpanded && 'rotate-90'
+            )}
+          />
+        </Button>
+      ) : null}
     </>
   )
 
