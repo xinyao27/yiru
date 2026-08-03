@@ -6,7 +6,7 @@ import process from 'node:process'
 
 const workspaceRoot = path.resolve(import.meta.dirname, '..')
 const developmentDesktopCli = path.join(workspaceRoot, 'apps', 'desktop', 'scripts', 'yiru-dev.mjs')
-const result = spawnSync('pnpm', ['-r', '--parallel', 'run', 'dev'], {
+const result = spawnSync('vp', ['run', '--parallel', '--filter', './apps/*', 'dev'], {
   cwd: workspaceRoot,
   env: {
     ...process.env,

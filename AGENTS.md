@@ -194,6 +194,12 @@ Delete existing unit, integration, snapshot, and end-to-end tests instead of rep
 
 `pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, source path references, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
 
+**Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run yiru#build:mac`, `vp run yiru-mobile#dev`. The root `package.json` no longer keeps a forwarding script per package task; it holds only what the whole workspace shares. Inside a package, one script calls another with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
+
+A script that needs its workspace dependencies built first says so itself, with `vp run --filter '{.}^...' build` — the filter resolves this package's own dependencies from the workspace graph, so no caller has to remember the order and no package list gets hardcoded. Keep such work in `package.json`: a task defined in `vite.config.ts` is unreachable from `pnpm run`, which strands every call site that isn't already inside Vite+.
+
+That graph is built from `workspace:*` dependencies only. A workspace package pulled in through `catalog:` is invisible to it — the filter silently selects nothing and the ordering disappears — so cross-package deps here are always declared `workspace:*`.
+
 Report results honestly: if something fails, show the output; if you skipped a step, say which.
 
 ---

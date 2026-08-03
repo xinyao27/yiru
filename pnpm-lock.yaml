@@ -150,18 +150,6 @@ catalogs:
     '@xterm/headless':
       specifier: 6.1.0-beta.287
       version: 6.1.0-beta.287
-    '@yiru/editor-themes':
-      specifier: 0.0.1
-      version: 0.0.1
-    '@yiru/mobile-relay-protocol':
-      specifier: 0.0.1
-      version: 0.0.1
-    '@yiru/runtime-protocol':
-      specifier: 0.0.1
-      version: 0.0.1
-    '@yiru/workbench-model':
-      specifier: 0.0.1
-      version: 0.0.1
     agent-browser:
       specifier: ~0.32.2
       version: 0.32.2
@@ -624,16 +612,16 @@ importers:
         specifier: 'catalog:'
         version: 6.1.0-beta.287
       '@yiru/editor-themes':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/editor-themes
       '@yiru/mobile-relay-protocol':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/mobile-relay-protocol
       '@yiru/runtime-protocol':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/runtime-protocol
       '@yiru/workbench-model':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/workbench-model
       agent-browser:
         specifier: 'catalog:'
@@ -1050,16 +1038,16 @@ importers:
         specifier: catalog:mobile
         version: 6.1.0-beta.285
       '@yiru/editor-themes':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/editor-themes
       '@yiru/mobile-relay-protocol':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/mobile-relay-protocol
       '@yiru/runtime-protocol':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/runtime-protocol
       '@yiru/workbench-model':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../../packages/workbench-model
       buffer:
         specifier: catalog:mobile
@@ -1256,7 +1244,7 @@ importers:
   packages/runtime-protocol:
     dependencies:
       '@yiru/workbench-model':
-        specifier: 'catalog:'
+        specifier: workspace:*
         version: link:../workbench-model
       zod:
         specifier: 'catalog:'

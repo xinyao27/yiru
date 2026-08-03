@@ -18,8 +18,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
-    "fmt": "pnpm --workspace-root exec vp fmt packages/editor-themes",
-    "lint": "pnpm --workspace-root exec vp lint packages/editor-themes --fix",
+    "fmt": "vp fmt .",
+    "lint": "vp lint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
