@@ -1,7 +1,8 @@
 # Expo UI refactor plan
 
-Status: code migration complete. Static checks and iOS, Android, and web exports pass.
-Device-level accessibility and visual inspection remain the release gate for closing this document.
+Status: code migration complete. Static checks and iOS, Android, and web exports pass. Android
+emulator visual and interaction inspection passes; iOS runtime and manual screen-reader inspection
+remain the release gate for closing this document.
 
 Execution checkpoint (2026-08-03):
 
@@ -29,6 +30,13 @@ Execution checkpoint (2026-08-03):
   across 425 signatures;
 - no newly introduced ordinary layout uses inline `style`; remaining style props are dynamic,
   animated, native-only, or required by a third-party Host API.
+- Android 17 on the `Pixel_10` emulator now records UI Lab light/dark and 1.3 font-scale evidence,
+  semantic checked/disabled states, Picker and segmented selection changes, and 44pt control bounds;
+- Terminal Settings records BottomDrawer semantic paint in light/dark appearance, selected radio
+  state, large-font layout, and select, scrim, and pan-down dismissal;
+- runtime inspection caught and removed a Glass icon-button negative margin that reduced one axis of
+  the nominal 44pt target, and moved Expo UI Switch labels to the React Native semantic row because
+  the package-owned Android label paints black in dark appearance.
 
 ## Problem statement
 
@@ -70,7 +78,7 @@ The first Switch and segmented-control spike proved that package-level “Univer
 guarantee equivalent behavior in every supported environment:
 
 - Expo UI 57.0.8 Switch labels do not provide a reliable accessible name for the Android switch or
-  the web checkbox.
+  the web checkbox, and its Android native label paints black in dark appearance.
 - A root Host cannot wrap the Expo Router/React Native tree. Host is a rendered native layout
   bridge, so ownership must stay with a contiguous native island.
 - Web Host safe-area padding and inline-flex Switch layout differ unless the local host contract
@@ -478,9 +486,10 @@ are explicit:
 - Item 34 is satisfied by the native attachment menu and Expo Router native session toolbar menu.
   The hint-bearing non-native header sheet deliberately remains an ActionSheet because Community
   Menu cannot preserve its richer content or web behavior.
-- Item 41 is complete for formatting, lint, typecheck, repository contracts, and iOS/Android/web
-  exports. Runtime inspection remains pending because this worktree currently has no booted iOS
-  Simulator or attached Android emulator/device. Bundle success is not recorded as runtime proof.
+- Item 41 is complete for formatting, lint, typecheck, repository contracts, iOS/Android/web
+  exports, and the recorded Android emulator matrix. iOS runtime remains pending because this
+  worktree has no booted iOS Simulator. Automated Android semantics inspection is not recorded as
+  manual TalkBack or VoiceOver proof.
 - Item 42 retains this plan until the runtime matrix below is recorded. The code migration is not a
   reason to weaken that release gate.
 
@@ -489,7 +498,8 @@ are explicit:
 - Expo UI is preferred by behavior, not by component count.
 - Host is a local native bridge, never a root Provider.
 - Direct Expo UI calls are the default; Switch is a temporary exception because version 57.0.8
-  does not provide reliable Android/web accessible naming.
+  does not provide reliable Android/web accessible naming and its Android label is not dark-theme
+  safe.
 - The Switch exception is a full product row, not a naked control facade.
 - Typed segmented selection remains a deep module; fixed cross-platform native heights do not.
 - BottomDrawer, Glass, search, selection drawer, confirmation, and text-entry flows remain deep
@@ -532,6 +542,19 @@ Runtime gate for every migrated native control:
 - long labels, dynamic type/font scaling, 44pt interaction region, and RTL where practical;
 - keyboard open/close, focus restoration, sheet dismissal, and nested scrolling where applicable;
 - Reduce Transparency for Glass paths.
+
+Recorded Android evidence (2026-08-03):
+
+- Android 17 `Pixel_10`, 1080×2424 at 420 dpi, in light and dark appearance;
+- UI Lab native Switch, disabled/long-label Switch, Picker, product toggle row, and segmented
+  selection render and update semantic state; 1.3 font scale does not clip their labels;
+- the UI Lab close button exposes a 116×116 px interaction bound after the Glass target correction,
+  corresponding to 44×44 dp at the emulator density;
+- Terminal Settings BottomDrawer has visible semantic background paint in light and dark
+  appearance, preserves radio selection, fits all choices at 1.3 font scale, and closes after
+  selection, scrim press, and pan-down gesture;
+- iOS Simulator, VoiceOver, TalkBack speech/focus order, RTL, keyboard-specific sheet flows, and
+  Reduce Transparency remain unrecorded and cannot be inferred from Android hierarchy output.
 
 A platform control does not graduate from pilot to broad migration until its runtime gate is
 recorded as passed. Bundle success alone is insufficient. The rejected ListItem pilot remains

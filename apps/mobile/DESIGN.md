@@ -56,7 +56,8 @@ Choose the first matching form:
 scheme and semantic primary token into the native environment. The feature chooses only the closed
 `inline` or `fill` layout; the adapter owns `matchContents`, safe-area, and transparent paint. It is
 a rendered native bridge, not a React context provider, so it cannot wrap the Expo Router or React
-Native tree at the app root. Use one host around a complete, contiguous native control cluster
+Native tree at the app root. `inline` matches native content on both axes; `fill` owns the available
+width while matching native content height. Use one host around a complete, contiguous native control cluster
 instead of one host per child control. Do not put React Native children directly in a native tree;
 use `RNHostView` only when a cluster genuinely needs embedded React Native content.
 
@@ -75,9 +76,10 @@ modules such as the Glass family, `BottomDrawer`, and typed segmented selection.
 one-to-one shadows such as `MobileButton`, `MobileText`, `MobilePicker`, or `MobileSwitch` that only
 rename an Expo control and mirror its props.
 
-Expo UI 57.0.8 does not give its Android/web Universal Switch a reliable accessible name. Until the
-package closes that gap, standard boolean settings use the complete `SettingsToggleRow` product
-interaction; feature code must not create a naked Switch facade or directly repeat the workaround.
+Expo UI 57.0.8 does not give its Android/web Universal Switch a reliable accessible name, and its
+Android-owned label paints black in dark appearance. Until the package closes both gaps, standard
+boolean settings use the complete `SettingsToggleRow` product interaction; feature code must not
+create a naked Switch facade or directly repeat the workaround.
 The same behavior-equivalence gate keeps closed product choices and navigation links in React
 Native until Universal Picker exposes an accessible name and a 44pt web target, and Universal
 ListItem exposes a 44pt iOS target plus link semantics. These are reviewed platform exceptions, not

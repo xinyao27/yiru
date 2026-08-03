@@ -1,11 +1,12 @@
-import { Column, Picker, Switch } from '@expo/ui'
+import { Picker, Switch } from '@expo/ui'
 import { useState } from 'react'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 import { ExpoUiHost } from '~/components/expo-ui-host'
 import { MobileSegmentedControl } from '~/components/segmented-control'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { translate } from '~/i18n/translate'
+import { cn } from '~/style/class-names'
 
 type CatalogSegment = 'first' | 'second'
 
@@ -38,22 +39,22 @@ export function MobileUiLabNativeControlCatalog(): React.JSX.Element {
       </Text>
 
       <View className="border-border bg-card mt-3 gap-3 rounded-2xl border p-3">
-        <ExpoUiHost layout="fill">
-          <Column spacing={12}>
-            <Switch
-              label={translate('mobile.uiLab.nativeControls.switch.label', 'Native switch')}
-              onValueChange={setIsEnabled}
-              value={isEnabled}
-            />
-            <Switch
-              disabled
-              label={translate(
-                'mobile.uiLab.nativeControls.longSwitch.label',
-                'Disabled switch with a deliberately long label for layout inspection'
-              )}
-              onValueChange={() => {}}
-              value
-            />
+        <View className="gap-3">
+          <ExpoUiCatalogSwitchRow
+            label={translate('mobile.uiLab.nativeControls.switch.label', 'Native switch')}
+            onValueChange={setIsEnabled}
+            value={isEnabled}
+          />
+          <ExpoUiCatalogSwitchRow
+            disabled
+            label={translate(
+              'mobile.uiLab.nativeControls.longSwitch.label',
+              'Disabled switch with a deliberately long label for layout inspection'
+            )}
+            onValueChange={() => {}}
+            value
+          />
+          <ExpoUiHost layout="fill">
             <Picker selectedValue={pickerValue} onValueChange={setPickerValue}>
               <Picker.Item
                 label={translate('mobile.uiLab.nativeControls.picker.system', 'System')}
@@ -64,8 +65,8 @@ export function MobileUiLabNativeControlCatalog(): React.JSX.Element {
                 value="alternate"
               />
             </Picker>
-          </Column>
-        </ExpoUiHost>
+          </ExpoUiHost>
+        </View>
 
         <View className="border-border -mx-3 border-y">
           <SettingsToggleRow
@@ -102,5 +103,45 @@ export function MobileUiLabNativeControlCatalog(): React.JSX.Element {
         />
       </View>
     </View>
+  )
+}
+
+type ExpoUiCatalogSwitchRowProps = {
+  disabled?: boolean
+  label: string
+  onValueChange: (value: boolean) => void
+  value: boolean
+}
+
+function ExpoUiCatalogSwitchRow({
+  disabled = false,
+  label,
+  onValueChange,
+  value
+}: ExpoUiCatalogSwitchRowProps): React.JSX.Element {
+  return (
+    <Pressable
+      accessible
+      accessibilityLabel={label}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value, disabled }}
+      className="min-h-11 flex-row items-center gap-3"
+      disabled={disabled}
+      onPress={() => onValueChange(!value)}
+    >
+      <Text className={cn('text-foreground min-w-0 flex-1 text-base', disabled && 'opacity-50')}>
+        {label}
+      </Text>
+      <View
+        accessibilityElementsHidden
+        className={disabled ? 'opacity-50' : undefined}
+        importantForAccessibility="no-hide-descendants"
+        pointerEvents="none"
+      >
+        <ExpoUiHost>
+          <Switch disabled={disabled} onValueChange={onValueChange} value={value} />
+        </ExpoUiHost>
+      </View>
+    </Pressable>
   )
 }

@@ -353,11 +353,14 @@ deleting it would duplicate a product invariant or platform rule across callers.
 Expo UI Universal controls render inside `ExpoUiHost`, which maps Yiru's semantic theme into the
 native environment. A Host is a native layout bridge, not a root React provider: put one around a
 contiguous native control cluster and never wrap the Expo Router or an arbitrary React Native tree
-with it. Community controls expose a React Native boundary and do not need this outer Host.
+with it. Inline hosts match native content on both axes; fill hosts own the available width and
+match native content height. Community controls expose a React Native boundary and do not need this
+outer Host.
 
 Expo UI 57.0.8 Switch is a temporary direct-call exception because Android/web do not reliably
-associate its visible label with the switch semantics. Use Yiru's complete settings-toggle row until
-that package behavior is fixed; do not introduce a generic Switch facade.
+associate its visible label with the switch semantics and the Android-owned label paints black in
+dark appearance. Use Yiru's complete settings-toggle row until that package behavior is fixed; do
+not introduce a generic Switch facade.
 
 Use `className` for static layout, spacing, color, typography, and interaction states. Reserve
 `style` for animated or runtime-computed values, native bridge requirements, and platform-only

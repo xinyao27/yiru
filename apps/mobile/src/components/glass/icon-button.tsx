@@ -151,10 +151,7 @@ export function MobileGlassIconButton({
         'rounded-full',
         size === 'large' ? 'h-11 w-11' : size === 'small' ? 'h-8 w-8' : 'h-9 w-9'
       )}
-      containerClassName={cn(
-        'w-11 items-center',
-        size === 'small' ? '-mx-1.5' : size === 'regular' ? '-mx-1' : undefined
-      )}
+      containerClassName="w-11 items-center"
       contentClassName="h-full w-full items-center justify-center rounded-full"
       disabled={disabled}
       fallbackClassName={hasPrimaryFill ? 'bg-primary' : undefined}

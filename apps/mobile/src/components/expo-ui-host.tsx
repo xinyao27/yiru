@@ -22,7 +22,7 @@ export function ExpoUiHost({ children, layout = 'inline' }: ExpoUiHostProps): Re
       className={layout === 'fill' ? 'w-full bg-transparent' : 'bg-transparent'}
       colorScheme={theme}
       ignoreSafeArea="all"
-      matchContents={{ vertical: true }}
+      matchContents={layout === 'inline' ? true : { vertical: true }}
       seedColor={primaryColor}
     >
       {children}
