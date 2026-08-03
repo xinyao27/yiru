@@ -3,6 +3,13 @@
   "name": "yiru-landing",
   "main": "worker/site.ts",
   "compatibility_date": "2026-08-01",
+  // Why: the yiru.ai zone lives in this account, and pinning it keeps a CI
+  // deploy from landing wherever the API token's default account happens to be.
+  "account_id": "d0a04266246b5b2d59b897c8dd088776",
+  "routes": [
+    { "pattern": "yiru.ai", "custom_domain": true },
+    { "pattern": "www.yiru.ai", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -13,10 +20,6 @@
     // before the asset router, which short-circuits every matching path.
     "run_worker_first": true
   },
-  "routes": [
-    { "pattern": "yiru.ai", "custom_domain": true },
-    { "pattern": "www.yiru.ai", "custom_domain": true }
-  ],
   "observability": {
     "enabled": true
   }

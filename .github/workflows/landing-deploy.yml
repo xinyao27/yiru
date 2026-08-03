@@ -58,7 +58,8 @@ jobs:
         run: pnpm --filter yiru-landing run build
 
       - name: Deploy to Cloudflare Workers
+        # Why: the target account is pinned in apps/landing/wrangler.jsonc, so CI
+        # only needs the credential — one source of truth for where this lands.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: pnpm --filter yiru-landing exec wrangler deploy
