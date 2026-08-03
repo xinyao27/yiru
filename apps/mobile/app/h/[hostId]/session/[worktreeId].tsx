@@ -23,6 +23,7 @@ import { MobileBrowserPane } from '~/browser/pane'
 import { normalizeBrowserUrl } from '~/browser/url'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
 import { MobileAgentIcon } from '~/components/agent-icon'
+import { BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
 import {
   CustomKeyModal,
@@ -45,10 +46,8 @@ import {
   Folder,
   FileText,
   GitMerge,
-  Globe,
   DotsThree as MoreHorizontal,
-  ArrowClockwise as RefreshCw,
-  TerminalWindow as SquareTerminal
+  ArrowClockwise as RefreshCw
 } from '~/components/uniwind-icons'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { isFileExistsErrorMessage } from '~/files/file-exists-error'
@@ -65,6 +64,7 @@ import { headlessActivationNeedsHostRenderer } from '~/session/activation-result
 import { MobileBrowserTabActionSheet } from '~/session/browser-tab-action-sheet'
 import { sendMobileBufferedTerminalInput } from '~/session/buffered-terminal-send'
 import { resolveMobileSessionConnectionHealth } from '~/session/connection-health'
+import { CreateTabDrawers } from '~/session/create-tab-drawers'
 import {
   createMobileSessionCreateWarningState,
   dismissMobileSessionCreateWarningState,
@@ -3498,243 +3498,232 @@ export default function SessionScreen() {
         onLaunch={launchQuickCommand}
       />
 
-      <ActionSheetModal
-        visible={showCreateTabDrawer}
-        title="New Tab"
-        actions={[
-          ...createTabAgentActions,
-          {
-            label: 'Terminal',
-            icon: SquareTerminal,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              void handleCreateTerminal()
-            }
-          },
-          // Why: these RPCs resolve a real worktree; the floating sentinel is terminal-only.
-          ...(isFloatingWorkspaceRoute
-            ? []
-            : [
-                {
-                  label: 'Browser',
-                  icon: Globe,
-                  onPress: () => {
-                    setShowCreateTabDrawer(false)
-                    if (browserScreencastSupported !== true) {
-                      showToast('Desktop update required for mobile browser streaming', 1600)
-                      return
-                    }
-                    setShowCreateBrowserModal(true)
-                  }
-                },
-                {
-                  label: 'Markdown Note',
-                  icon: FileText,
-                  onPress: () => {
-                    setShowCreateTabDrawer(false)
-                    void handleCreateMarkdownNote()
-                  }
-                }
-              ])
-        ]}
-        onClose={() => setShowCreateTabDrawer(false)}
-      />
-
-      <ActionSheetModal
-        visible={pendingDiffNotesDelivery !== null}
-        title="Send Review Notes"
-        message="Choose an agent session for the current notes."
-        actions={[
-          ...sendDiffNotesAgentActions,
-          {
-            label: 'Copy Notes',
-            icon: Copy,
-            onPress: () => {
-              const delivery = pendingDiffNotesDelivery
-              setPendingDiffNotesDelivery(null)
-              if (!delivery) {
-                return
-              }
-              void Clipboard.setStringAsync(delivery.prompt)
-                .then(() => {
-                  triggerSuccess()
-                  showToast('Notes copied')
-                })
-                .catch(() => {
-                  triggerError()
-                  showToast("Couldn't copy notes", 1500)
-                })
-            }
-          }
-        ]}
-        onClose={() => setPendingDiffNotesDelivery(null)}
-      />
-
-      <ActionSheetModal
-        visible={actionTarget != null}
-        title={actionTarget?.title || 'Terminal'}
-        actions={getMobileTerminalActionSheetActions({
-          target: actionTarget,
-          tabs: sessionTabs.filter((tab) => tab.type === 'terminal'),
-          isTabChatView: nativeChatController.isTabChatView,
-          nativeChatTranscriptIsLocalReadable,
-          onDismiss: () => setActionTarget(null),
-          onToggleChat: toggleTabChatView,
-          isPhoneMode,
-          onToggleDisplayMode: (handle) => void toggleDisplayMode(handle),
-          onRename: setRenameTarget,
-          onClear: (target) => void handleClearTerminal(target),
-          onClose: (target) => void handleCloseTerminal(target)
-        })}
-        onClose={() => setActionTarget(null)}
-      />
-      <ActionSheetModal
-        visible={markdownActionTarget != null}
-        title={markdownActionTarget?.title || 'Markdown'}
-        actions={[
-          {
-            label: 'Refresh',
-            icon: RefreshCw,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                discardMarkdownLocalContent(target)
-              }
-            }
-          },
-          {
-            label: 'Copy Path',
-            icon: FileText,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                void Clipboard.setStringAsync(target.relativePath || target.filePath)
-                showToast('Path copied')
-              }
-            }
-          },
-          {
-            label: 'Close',
-            destructive: true,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                void handleCloseSessionTab(target)
-              }
-            }
-          }
-        ]}
-        onClose={() => setMarkdownActionTarget(null)}
-      />
-      <ActionSheetModal
-        visible={fileActionTarget != null}
-        title={fileActionTarget?.title || 'File'}
-        actions={[
-          {
-            label: 'Refresh',
-            icon: RefreshCw,
-            onPress: () => {
-              const target = fileActionTarget
-              setFileActionTarget(null)
-              if (target) {
-                void readFileTab(target)
-              }
-            }
-          },
-          {
-            label: 'Close',
-            destructive: true,
-            onPress: () => {
-              const target = fileActionTarget
-              setFileActionTarget(null)
-              if (target) {
-                void handleCloseSessionTab(target)
-              }
-            }
-          }
-        ]}
-        onClose={() => setFileActionTarget(null)}
-      />
-      <MobileBrowserTabActionSheet
-        target={browserActionTarget}
-        onClose={() => setBrowserActionTarget(null)}
-        onNavigate={handleBrowserNavigationCommand}
-        onCloseTab={handleCloseSessionTab}
-      />
-      <ActionSheetModal
-        visible={leaveDrafts != null}
-        title="Unsaved markdown changes"
-        message="Copy or discard phone drafts before leaving."
-        actions={[
-          {
-            label: 'Copy All & Leave',
-            icon: FileText,
-            onPress: () => {
-              const drafts = leaveDrafts ?? []
-              const combined = drafts
-                .map((draft) => `# ${draft.title}\n\n${draft.content}`)
-                .join('\n\n---\n\n')
-              void Clipboard.setStringAsync(combined)
-                .then(() => {
-                  setLeaveDrafts(null)
-                  leaveSession()
-                })
-                .catch(() => {
-                  triggerError()
-                  showToast("Couldn't copy drafts", 1500)
-                })
-            }
-          },
-          {
-            label: 'Discard & Leave',
-            destructive: true,
-            onPress: () => {
-              setLeaveDrafts(null)
-              leaveSession()
-            }
-          }
-        ]}
-        onClose={() => setLeaveDrafts(null)}
-      />
-      <ConfirmModal
-        visible={discardMarkdownTarget != null}
-        title="Discard Changes"
-        message="Replace the phone draft with the latest desktop file?"
-        confirmLabel="Discard"
-        destructive
-        onConfirm={confirmDiscardMarkdown}
-        onCancel={() => setDiscardMarkdownTarget(null)}
-      />
-      <TextInputModal
-        visible={renameTarget != null}
-        title="Rename Terminal"
-        defaultValue={renameTarget?.title || 'Terminal'}
-        placeholder="Terminal name"
-        onSubmit={(value) => void handleRenameTerminal(value)}
-        onCancel={() => setRenameTarget(null)}
-      />
-      <TextInputModal
-        visible={showCreateBrowserModal}
-        title="New Browser"
-        message="Enter a URL, or leave blank for a new tab."
-        defaultValue=""
-        placeholder="https://example.com"
-        submitLabel="Open"
-        allowEmpty
-        selectTextOnFocus
-        keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
-        onSubmit={(value) => {
-          void handleCreateBrowser(value).then((created) => {
-            if (created) {
-              setShowCreateBrowserModal(false)
-            }
-          })
+      <BottomDrawerModalHost
+        visible={
+          showCreateTabDrawer ||
+          showCreateBrowserModal ||
+          pendingDiffNotesDelivery !== null ||
+          actionTarget !== null ||
+          renameTarget !== null ||
+          markdownActionTarget !== null ||
+          discardMarkdownTarget !== null ||
+          fileActionTarget !== null ||
+          browserActionTarget !== null ||
+          leaveDrafts !== null
+        }
+        onRequestClose={() => {
+          setShowCreateTabDrawer(false)
+          setShowCreateBrowserModal(false)
+          setPendingDiffNotesDelivery(null)
+          setActionTarget(null)
+          setRenameTarget(null)
+          setMarkdownActionTarget(null)
+          setDiscardMarkdownTarget(null)
+          setFileActionTarget(null)
+          setBrowserActionTarget(null)
+          setLeaveDrafts(null)
         }}
-        onCancel={() => setShowCreateBrowserModal(false)}
-      />
+      >
+        <CreateTabDrawers
+          actionVisible={showCreateTabDrawer}
+          browserInputVisible={showCreateBrowserModal}
+          agentActions={createTabAgentActions}
+          browserSupported={browserScreencastSupported === true}
+          isFloatingWorkspace={isFloatingWorkspaceRoute}
+          onActionClose={() => setShowCreateTabDrawer(false)}
+          onBrowserInputClose={() => setShowCreateBrowserModal(false)}
+          onBrowserSubmit={(value) => {
+            void handleCreateBrowser(value).then((created) => {
+              if (created) {
+                setShowCreateBrowserModal(false)
+              }
+            })
+          }}
+          onBrowserUnavailable={() => {
+            showToast('Desktop update required for mobile browser streaming', 1600)
+          }}
+          onCreateMarkdown={() => void handleCreateMarkdownNote()}
+          onCreateTerminal={() => void handleCreateTerminal()}
+          onOpenBrowserInput={() => setShowCreateBrowserModal(true)}
+        />
+
+        <ActionSheetModal
+          visible={pendingDiffNotesDelivery !== null}
+          title="Send Review Notes"
+          message="Choose an agent session for the current notes."
+          actions={[
+            ...sendDiffNotesAgentActions,
+            {
+              label: 'Copy Notes',
+              icon: Copy,
+              onPress: () => {
+                const delivery = pendingDiffNotesDelivery
+                setPendingDiffNotesDelivery(null)
+                if (!delivery) {
+                  return
+                }
+                void Clipboard.setStringAsync(delivery.prompt)
+                  .then(() => {
+                    triggerSuccess()
+                    showToast('Notes copied')
+                  })
+                  .catch(() => {
+                    triggerError()
+                    showToast("Couldn't copy notes", 1500)
+                  })
+              }
+            }
+          ]}
+          onClose={() => setPendingDiffNotesDelivery(null)}
+        />
+
+        <ActionSheetModal
+          visible={actionTarget != null}
+          title={actionTarget?.title || 'Terminal'}
+          actions={getMobileTerminalActionSheetActions({
+            target: actionTarget,
+            tabs: sessionTabs.filter((tab) => tab.type === 'terminal'),
+            isTabChatView: nativeChatController.isTabChatView,
+            nativeChatTranscriptIsLocalReadable,
+            onDismiss: () => setActionTarget(null),
+            onToggleChat: toggleTabChatView,
+            isPhoneMode,
+            onToggleDisplayMode: (handle) => void toggleDisplayMode(handle),
+            onRename: setRenameTarget,
+            onClear: (target) => void handleClearTerminal(target),
+            onClose: (target) => void handleCloseTerminal(target)
+          })}
+          onClose={() => setActionTarget(null)}
+        />
+        <ActionSheetModal
+          visible={markdownActionTarget != null}
+          title={markdownActionTarget?.title || 'Markdown'}
+          actions={[
+            {
+              label: 'Refresh',
+              icon: RefreshCw,
+              onPress: () => {
+                const target = markdownActionTarget
+                setMarkdownActionTarget(null)
+                if (target) {
+                  discardMarkdownLocalContent(target)
+                }
+              }
+            },
+            {
+              label: 'Copy Path',
+              icon: FileText,
+              onPress: () => {
+                const target = markdownActionTarget
+                setMarkdownActionTarget(null)
+                if (target) {
+                  void Clipboard.setStringAsync(target.relativePath || target.filePath)
+                  showToast('Path copied')
+                }
+              }
+            },
+            {
+              label: 'Close',
+              destructive: true,
+              onPress: () => {
+                const target = markdownActionTarget
+                setMarkdownActionTarget(null)
+                if (target) {
+                  void handleCloseSessionTab(target)
+                }
+              }
+            }
+          ]}
+          onClose={() => setMarkdownActionTarget(null)}
+        />
+        <ActionSheetModal
+          visible={fileActionTarget != null}
+          title={fileActionTarget?.title || 'File'}
+          actions={[
+            {
+              label: 'Refresh',
+              icon: RefreshCw,
+              onPress: () => {
+                const target = fileActionTarget
+                setFileActionTarget(null)
+                if (target) {
+                  void readFileTab(target)
+                }
+              }
+            },
+            {
+              label: 'Close',
+              destructive: true,
+              onPress: () => {
+                const target = fileActionTarget
+                setFileActionTarget(null)
+                if (target) {
+                  void handleCloseSessionTab(target)
+                }
+              }
+            }
+          ]}
+          onClose={() => setFileActionTarget(null)}
+        />
+        <MobileBrowserTabActionSheet
+          target={browserActionTarget}
+          onClose={() => setBrowserActionTarget(null)}
+          onNavigate={handleBrowserNavigationCommand}
+          onCloseTab={handleCloseSessionTab}
+        />
+        <ActionSheetModal
+          visible={leaveDrafts != null}
+          title="Unsaved markdown changes"
+          message="Copy or discard phone drafts before leaving."
+          actions={[
+            {
+              label: 'Copy All & Leave',
+              icon: FileText,
+              onPress: () => {
+                const drafts = leaveDrafts ?? []
+                const combined = drafts
+                  .map((draft) => `# ${draft.title}\n\n${draft.content}`)
+                  .join('\n\n---\n\n')
+                void Clipboard.setStringAsync(combined)
+                  .then(() => {
+                    setLeaveDrafts(null)
+                    leaveSession()
+                  })
+                  .catch(() => {
+                    triggerError()
+                    showToast("Couldn't copy drafts", 1500)
+                  })
+              }
+            },
+            {
+              label: 'Discard & Leave',
+              destructive: true,
+              onPress: () => {
+                setLeaveDrafts(null)
+                leaveSession()
+              }
+            }
+          ]}
+          onClose={() => setLeaveDrafts(null)}
+        />
+        <ConfirmModal
+          visible={discardMarkdownTarget != null}
+          title="Discard Changes"
+          message="Replace the phone draft with the latest desktop file?"
+          confirmLabel="Discard"
+          destructive
+          onConfirm={confirmDiscardMarkdown}
+          onCancel={() => setDiscardMarkdownTarget(null)}
+        />
+        <TextInputModal
+          visible={renameTarget != null}
+          title="Rename Terminal"
+          defaultValue={renameTarget?.title || 'Terminal'}
+          placeholder="Terminal name"
+          onSubmit={(value) => void handleRenameTerminal(value)}
+          onCancel={() => setRenameTarget(null)}
+        />
+      </BottomDrawerModalHost>
       <CustomKeyModal
         visible={showCustomKeyModal}
         onClose={() => setShowCustomKeyModal(false)}

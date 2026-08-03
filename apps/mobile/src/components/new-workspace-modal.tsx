@@ -104,7 +104,7 @@ function repoBadgeColor(repo: Repo | null): string {
 
 // ── Main modal ──────────────────────────────────────────────────────
 
-type Props = {
+type NewWorkspaceModalProps = {
   visible: boolean
   client: RpcClient | null
   hostId?: string
@@ -129,7 +129,7 @@ export function NewWorkspaceModal({
   existingWorktrees,
   onCreated,
   onClose
-}: Props) {
+}: NewWorkspaceModalProps): React.JSX.Element {
   const openEpochRef = useRef(0)
   const wasVisibleRef = useRef(false)
   const clientEpochRef = useRef({ client, epoch: 0 })
@@ -168,7 +168,7 @@ function NewWorkspaceModalContent({
   existingWorktrees,
   onCreated,
   onClose
-}: Props) {
+}: NewWorkspaceModalProps): React.JSX.Element {
   const [initialRepos] = useState(() => {
     const cached = hostId ? getCachedRepos(hostId) : null
     return cached ? readWorkspaceRepos(cached) : null
