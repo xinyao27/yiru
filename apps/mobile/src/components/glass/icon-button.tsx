@@ -64,6 +64,7 @@ type MobileGlassIconButtonProps = {
   disabled?: boolean
   icon: MobileGlassIconName
   isDestructive?: boolean
+  isProminent?: boolean
   isSelected?: boolean
   onPress: NonNullable<PressableProps['onPress']>
   size?: 'large' | 'regular' | 'small'
@@ -129,12 +130,14 @@ export function MobileGlassIconButton({
   disabled = false,
   icon,
   isDestructive = false,
+  isProminent = false,
   isSelected,
   onPress,
   size = 'regular'
 }: MobileGlassIconButtonProps): React.JSX.Element {
   const Icon = iconForName(icon)
   const selected = isSelected === true
+  const hasPrimaryFill = !isDestructive && (selected || isProminent)
 
   return (
     <MobileGlassPressable
@@ -154,10 +157,11 @@ export function MobileGlassIconButton({
       )}
       contentClassName="h-full w-full items-center justify-center rounded-full"
       disabled={disabled}
+      fallbackClassName={hasPrimaryFill ? 'bg-primary' : undefined}
       onPress={onPress}
       size={size}
       tintColorClassName={
-        isDestructive ? 'accent-destructive' : selected ? 'accent-primary' : undefined
+        isDestructive ? 'accent-destructive' : hasPrimaryFill ? 'accent-primary' : undefined
       }
     >
       <Icon
@@ -165,7 +169,7 @@ export function MobileGlassIconButton({
         colorClassName={
           isDestructive
             ? 'accent-destructive'
-            : selected
+            : hasPrimaryFill
               ? 'accent-primary-foreground'
               : 'accent-muted-foreground'
         }

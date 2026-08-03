@@ -1,6 +1,7 @@
 import { View } from 'react-native'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { translate } from '~/i18n/translate'
 
 type NewWorkspaceFabProps = {
   onPress: () => void
@@ -11,9 +12,10 @@ export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): Re
   return (
     <View className="bottom-safe-offset-6 absolute right-4">
       <MobileGlassIconButton
-        accessibilityLabel="New workspace"
+        accessibilityLabel={translate('mobile.workspace.actions.newWorkspace', 'New workspace')}
         disabled={disabled}
         icon="plus"
+        isProminent
         onPress={onPress}
         size="large"
       />

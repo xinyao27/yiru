@@ -64,7 +64,8 @@ export function MobileWorkspaceListHeaderActions({
     () => [
       controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable),
-      buttonBorderShape('capsule')
+      buttonBorderShape('capsule'),
+      frame({ minHeight: 44, alignment: 'center' })
     ],
     [isGlassAvailable]
   )
@@ -145,7 +146,7 @@ export function MobileWorkspaceListToolbar({
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
           label={translate('mobile.workspace.actions.floatingWorkspace', 'Floating Workspace')}
-          size="large"
+          size="regular"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />
@@ -166,7 +167,7 @@ export function MobileWorkspaceListToolbar({
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
           label={translate('mobile.workspace.actions.floatingWorkspace', 'Floating Workspace')}
-          size="large"
+          size="regular"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />

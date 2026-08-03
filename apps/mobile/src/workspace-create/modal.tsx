@@ -5,6 +5,13 @@ import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { View, Text, TextInput, Pressable, ActivityIndicator, Keyboard } from 'react-native'
 
+import { MobileAgentIcon } from '~/components/agent-icon'
+import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
@@ -13,12 +20,22 @@ import { cn } from '~/style/class-names'
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcResponse } from '../transport/types'
-import { createBlankWorkspace } from '../workspace-create/blank-workspace-create'
+import { repoColor } from '../workspace/repo-color'
+import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-repo'
+import {
+  NEW_WORKSPACE_AGENT_OPTIONS as AGENT_OPTIONS,
+  NEW_WORKSPACE_BLANK_AGENT as BLANK_TERMINAL,
+  pickPreferredNewWorkspaceAgent,
+  resolveNewWorkspaceAgentSelection,
+  type NewWorkspaceAgentOption as AgentOption
+} from './agent-selection'
+import { createBlankWorkspace } from './blank-workspace-create'
 import {
   getMobileNewWorkspaceDialogEligibleRepos,
   refreshMobileNewWorkspaceDialogSelectedRepo,
   resolveMobileNewWorkspaceDialogRepoId
-} from '../workspace-create/dialog-repo-selection'
+} from './dialog-repo-selection'
+import { getSuggestedCreatureName } from './name-suggestion'
 import {
   readDetectedAgentIds,
   readGlabInstalled,
@@ -31,51 +48,28 @@ import {
   type WorkspaceRepo as Repo,
   type WorkspaceRuntimeSettings as RuntimeSettings,
   type WorkspaceSetupRunPolicy as SetupRunPolicy
-} from '../workspace-create/rpc-payloads'
+} from './rpc-payloads'
 import {
   isSetupHookTrusted,
   persistSetupHookTrustApproval,
   wasSetupHookPreviouslyApproved,
   type SetupHookTrust
-} from '../workspace-create/setup-hook-trust'
-import type { SmartModeAvailabilityInput } from '../workspace-create/smart-source-modes'
-import {
-  deriveRepoSlug,
-  type PasteRepoCandidate
-} from '../workspace-create/smart-source-paste-intent'
-import { SmartWorkspaceAdvancedFields } from '../workspace-create/smart-workspace-advanced-fields'
-import { SmartWorkspaceSourceDrawer } from '../workspace-create/smart-workspace-source-drawer'
-import { SmartWorkspaceSourceField } from '../workspace-create/smart-workspace-source-field'
-import { createWorkspaceFromComposerSource } from '../workspace-create/source-workspace-create'
+} from './setup-hook-trust'
+import { SetupHookTrustDrawer, type SetupTrustPrompt } from './setup-hook-trust-drawer'
+import type { SmartModeAvailabilityInput } from './smart-source-modes'
+import { deriveRepoSlug, type PasteRepoCandidate } from './smart-source-paste-intent'
+import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
+import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
+import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
+import { createWorkspaceFromComposerSource } from './source-workspace-create'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
   MOBILE_TUI_AGENT_LAUNCH_COMMANDS
-} from '../workspace-create/tui-agents'
-import { useMobileComposerSource } from '../workspace-create/use-composer-source'
-import { normalizeWorkspaceAgent } from '../workspace-create/workspace-agent-selection'
-import {
-  deriveWorkspaceSshGate,
-  workspaceSshStatusLabel
-} from '../workspace-create/workspace-ssh-gate'
-import { repoColor } from '../workspace/repo-color'
-import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-repo'
-import { MobileAgentIcon } from './agent-icon'
-import { BottomDrawer, BottomDrawerModalHost } from './bottom-drawer'
-import { MobileGlassGroup } from './glass/group'
-import { MobileGlassPressable } from './glass/pressable'
-import { MobileGlassSurface } from './glass/surface'
-import { MobileGlassTextButton } from './glass/text-button'
-import {
-  NEW_WORKSPACE_AGENT_OPTIONS as AGENT_OPTIONS,
-  NEW_WORKSPACE_BLANK_AGENT as BLANK_TERMINAL,
-  pickPreferredNewWorkspaceAgent,
-  resolveNewWorkspaceAgentSelection,
-  type NewWorkspaceAgentOption as AgentOption
-} from './new-workspace-agent-selection'
-import { SelectionDrawer, type SelectionDrawerOption } from './selection-drawer'
-import { SetupHookTrustDrawer, type SetupTrustPrompt } from './setup-hook-trust-drawer'
-import { getSuggestedCreatureName } from './workspace-name-suggestion'
+} from './tui-agents'
+import { useMobileComposerSource } from './use-composer-source'
+import { normalizeWorkspaceAgent } from './workspace-agent-selection'
+import { deriveWorkspaceSshGate, workspaceSshStatusLabel } from './workspace-ssh-gate'
 
 type SetupDecision = 'inherit' | 'run' | 'skip'
 
@@ -927,7 +921,7 @@ function NewWorkspaceModalContent({
             </View>
 
             <Pressable
-              className="mb-1 flex-row items-center gap-1 py-2"
+              className="mb-1 min-h-11 flex-row items-center gap-1 py-2"
               onPress={() => setShowAdvanced(!showAdvanced)}
             >
               <Text className="text-muted-foreground text-sm font-medium">
@@ -984,24 +978,22 @@ function NewWorkspaceModalContent({
                       {setupRunPolicy === 'ask' ? (
                         <MobileGlassGroup className="mb-2 flex-row gap-2" spacing={8}>
                           <MobileGlassPressable
-                            className="flex-1 rounded-full"
+                            className="w-full rounded-full"
+                            containerClassName="flex-1"
                             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
+                            isSelected={setupDecisionChoice === 'run'}
                             onPress={() => setSetupDecisionChoice('run')}
-                            tintColorClassName={
-                              setupDecisionChoice === 'run' ? 'accent-primary' : undefined
-                            }
                           >
                             <Text className="text-foreground text-sm">
                               {translate('mobile.newWorkspace.setupRun', 'Run')}
                             </Text>
                           </MobileGlassPressable>
                           <MobileGlassPressable
-                            className="flex-1 rounded-full"
+                            className="w-full rounded-full"
+                            containerClassName="flex-1"
                             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
+                            isSelected={setupDecisionChoice === 'skip'}
                             onPress={() => setSetupDecisionChoice('skip')}
-                            tintColorClassName={
-                              setupDecisionChoice === 'skip' ? 'accent-primary' : undefined
-                            }
                           >
                             <Text className="text-foreground text-sm">
                               {translate('mobile.newWorkspace.setupSkip', 'Skip')}

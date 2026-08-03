@@ -36,9 +36,10 @@ function MobileSourceControlBulkAction({
   const isGlassAvailable = useMobileGlassAvailable()
   const modifiers = useMemo<ViewModifier[]>(
     () => [
-      controlSize('large'),
+      controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable),
       buttonBorderShape('capsule'),
+      frame({ minHeight: 44, alignment: 'center' }),
       disabledModifier(disabled)
     ],
     [disabled, isGlassAvailable]
@@ -100,7 +101,7 @@ export function MobileSourceControlBulkActions({
             disabled={actionsDisabled}
             label={translate('mobile.common.more', 'More')}
             onPress={onMore}
-            size="large"
+            size="regular"
             systemImage="ellipsis"
           />
         </HStack>

@@ -1,28 +1,32 @@
 # Expo UI refactor plan
 
-Status: implementation checkpoint complete. Static checks and iOS, Android, and web exports pass.
-Device-level accessibility and visual inspection remain the release gate for graduating the
-Universal ListItem pilot and closing this document.
+Status: code migration complete. Static checks and iOS, Android, and web exports pass.
+Device-level accessibility and visual inspection remain the release gate for closing this document.
 
 Execution checkpoint (2026-08-03):
 
 - the AST native-control contract, closed `ExpoUiHost`, and UI Lab matrix are implemented;
+- the catalog uses Expo UI 57.0.8, including its fitted iPad Community Bottom Sheet sizing fix;
 - standard boolean rows now use the reviewed `SettingsToggleRow` seam;
 - typed segmented selection uses intrinsic native height and a 44pt minimum interaction region;
 - the two legacy picker drawers are replaced by one virtualized `SelectionDrawer`;
-- every BottomDrawer now uses the Expo UI Community Bottom Sheet with semantic popover paint;
+- every BottomDrawer now uses the Expo UI Community Bottom Sheet, retaining native iOS system
+  material while Android and web receive semantic popover paint;
 - every ActionSheet action has a stable ID, explicit icon, and explicit dismiss owner;
 - Glass availability, grouping, and surfaces have platform implementations, while leaf Host islands
   and shallow button wrappers have been removed;
-- the settings navigation group is the bounded Universal ListItem/Icon pilot; external links retain
-  React Native link semantics, and product Pickers remain deferred because Expo UI 57.0.7 cannot
-  expose the required accessible name or a 44pt web target;
+- settings navigation and external links use Expo Router `Link` with React Native content rows so
+  native opening, real web href semantics, and 44pt targets remain intact; product Pickers and
+  Universal ListItem are closed React Native exceptions because Expo UI 57.0.8 cannot meet their
+  accessibility and target-size contracts;
 - native attachment, review-filter, and host actions use Expo UI or Expo Router menus, with usable
   web fallbacks where Community Menu has no implementation;
 - workspace creation owns its Smart Source modules and uses the typed segmented control;
+- home, workspace, workspace creation, and terminal now own their feature-only components instead
+  of leaving them in the global component directory;
 - touched controls have 44pt interaction regions and localized accessible names; all localization
-  candidates were removed from the touched surface, reducing the legacy baseline to 579 candidates
-  across 537 signatures;
+  candidates were removed from the touched surface, reducing the legacy baseline to 467 candidates
+  across 425 signatures;
 - no newly introduced ordinary layout uses inline `style`; remaining style props are dynamic,
   animated, native-only, or required by a third-party Host API.
 
@@ -65,7 +69,7 @@ The current mobile tree contains 620 TypeScript/TSX source files. The initial in
 The first Switch and segmented-control spike proved that package-level “Universal” does not yet
 guarantee equivalent behavior in every supported environment:
 
-- Expo UI 57.0.7 Switch labels do not provide a reliable accessible name for the Android switch or
+- Expo UI 57.0.8 Switch labels do not provide a reliable accessible name for the Android switch or
   the web checkbox.
 - A root Host cannot wrap the Expo Router/React Native tree. Host is a rendered native layout
   bridge, so ownership must stay with a contiguous native island.
@@ -81,6 +85,15 @@ guarantee equivalent behavior in every supported environment:
   clean the whole touched surface, not only newly added strings.
 
 These findings make Phase 0 a release gate rather than optional cleanup.
+
+### Expo UI 57.0.8 capability closure
+
+The catalog now uses Expo UI 57.0.8. Its published Universal Picker API still has no accessible-name
+prop and its web implementation fixes the select height at 40pt. Universal ListItem has no link
+destination or cross-platform accessibility-role prop, and its plain iOS HStack does not establish
+a 44pt minimum target. Therefore Picker items 22 and 23 and ListItem item 24 are closed React Native
+exceptions; item 25 uses the higher-priority Expo Router `Link` path. Re-open either migration only
+when the package API can satisfy the direct-call contract; a version bump alone is not evidence.
 
 ## Solution
 
@@ -147,7 +160,7 @@ Scope:
 - restrict platform imports to platform implementations and reject re-export/namespace bypasses;
 - add a UI Lab native-control matrix for Host, Switch, Picker, segmented selection, disabled state,
   long labels, and light/dark appearance;
-- document temporary Expo UI 57.0.7 exceptions and the condition for deleting each adapter.
+- document temporary Expo UI 57.0.8 exceptions and the condition for deleting each adapter.
 
 Decisions:
 
@@ -169,8 +182,8 @@ preference routes. The owner does not edit shared component implementations.
 
 Direct candidates:
 
-- static navigation and external-link rows using Universal ListItem/Text/Icon where current icons
-  have a native equivalent;
+- static navigation and external-link rows using Expo Router `Link` with semantic React Native
+  content rows;
 - simple closed choice menus such as browser link mode and terminal text size;
 - a pilot Universal FieldGroup only on a screen without Reanimated scrolling, drag/reorder, nested
   Community hosts, or product-state rows.
@@ -181,21 +194,20 @@ Deep adapter:
   label, optional supporting text, value, disabled state, 44pt hit region, trailing alignment, long
   label behavior, and Android/web accessible naming;
 - its platform implementations may use Expo UI Switch/Toggle where semantics are complete and a
-  React Native fallback where Expo UI 57.0.7 cannot meet accessibility.
+  React Native fallback where Expo UI 57.0.8 cannot meet accessibility.
 
 Keep React Native:
 
 - animated terminal preference scrolling and drag/reorder rows;
 - credential cleanup, spinner/retry, and other product-state rows;
-- mixed custom-icon rows until Universal ListItem accessory bridging works on both native
-  platforms;
+- navigation rows until Universal ListItem supplies 44pt iOS targets and link semantics;
 - complex controlled fields.
 
 Exit gate:
 
 - the smallest static preference screens establish the row grammar first;
-- Universal Picker and ListItem pilots pass long-label, large-text, VoiceOver/TalkBack, and Android
-  anchor-width inspection before additional screens migrate.
+- Universal Picker pilots pass long-label, large-text, VoiceOver/TalkBack, and Android anchor-width
+  inspection before additional screens migrate.
 
 ### Module 2: selection controls and selection drawers
 
@@ -386,7 +398,7 @@ The intended sequence is deliberately small:
 2. Replace regex import checks with AST-based import and JSX-host checks; remove the generic Modal
    ban.
 3. Finalize the cross-platform inline/fill `ExpoUiHost` contract with no runtime platform branch.
-4. Add the UI Lab native-control matrix and document the Expo UI 57.0.7 observed gaps.
+4. Add the UI Lab native-control matrix and document the Expo UI 57.0.8 observed gaps.
 5. Resolve or discard the initial direct-Switch spike so no known accessibility/layout regression
    remains in the working tree.
 
@@ -440,8 +452,8 @@ The intended sequence is deliberately small:
 35. Convert the simplest host action sheet to Community Menu while retaining confirmation flow.
 36. Apply stabilized segmented selection to source control, review comments, browser view mode,
     history scope, HTML preview, and contribution metrics in separate feature commits.
-37. Apply only proven ListItem/Picker patterns to remaining static settings; stop when a screen
-    requires nested scrolling, custom content, or mixed native/RN state.
+37. Apply only proven Picker patterns to remaining static settings; stop when a screen requires
+    nested scrolling, custom content, or mixed native/RN state.
 
 ### Phase 6: close the migration
 
@@ -449,19 +461,20 @@ The intended sequence is deliberately small:
 39. Localize every visible/accessibility string in all touched files without expanding the baseline.
 40. Run the architecture review and correct module ownership or cross-feature imports.
 41. Run the complete static, bundle, and runtime verification matrix.
-42. Update this plan with completed/deferred decisions and remove it when no active migration work
+42. Update this plan with completed/exception decisions and remove it when no active migration work
     remains.
 
 ## Completion ledger
 
-As of 2026-08-03, items 1–7, 9–21, 24, 26–33, and 35–40 are implemented. The remaining decisions
+As of 2026-08-03, items 1–7, 9–21, 25–33, and 35–40 are implemented. The remaining decisions
 are explicit:
 
-- Item 8 is superseded. Expo UI 57.0.7 does not reliably expose an Android/web Switch accessible
+- Item 8 is superseded. Expo UI 57.0.8 does not reliably expose an Android/web Switch accessible
   name, so `SettingsToggleRow` keeps the reviewed React Native fallback on those platforms.
-- Items 22, 23, and 25 are deferred. Universal Picker cannot currently meet the accessible-name and
-  44pt web-target contract, while Universal ListItem cannot preserve external-link semantics. The
-  settings navigation group remains the only bounded ListItem pilot until device inspection passes.
+- Items 22–24 are closed as deliberate React Native exceptions, not migration backlog. Universal
+  Picker cannot meet the accessible-name and 44pt web-target contract; Universal ListItem cannot
+  guarantee a 44pt iOS target or preserve link semantics. Item 25 uses Expo Router `Link` for both
+  internal and external navigation.
 - Item 34 is satisfied by the native attachment menu and Expo Router native session toolbar menu.
   The hint-bearing non-native header sheet deliberately remains an ActionSheet because Community
   Menu cannot preserve its richer content or web behavior.
@@ -475,7 +488,7 @@ are explicit:
 
 - Expo UI is preferred by behavior, not by component count.
 - Host is a local native bridge, never a root Provider.
-- Direct Expo UI calls are the default; Switch is a temporary exception because version 57.0.7
+- Direct Expo UI calls are the default; Switch is a temporary exception because version 57.0.8
   does not provide reliable Android/web accessible naming.
 - The Switch exception is a full product row, not a naked control facade.
 - Typed segmented selection remains a deep module; fixed cross-platform native heights do not.
@@ -483,8 +496,8 @@ are explicit:
   modules.
 - Complex controlled TextInput, terminal/editor input, WebView, virtualized lists, gestures, and
   content rows remain React Native.
-- Universal FieldGroup/ListItem/Picker adoption begins with pilots and expands only after native
-  accessory, scrolling, accessibility, and anchor-layout gates pass.
+- Universal FieldGroup/Picker adoption begins with pilots and expands only after native accessory,
+  scrolling, accessibility, and anchor-layout gates pass.
 - Community Menu replaces only simple anchored action sheets. Rich sheets remain product overlays.
 - Platform imports live only in platform implementations. Cross-platform files do not branch to
   choose UI toolkits.
@@ -521,7 +534,8 @@ Runtime gate for every migrated native control:
 - Reduce Transparency for Glass paths.
 
 A platform control does not graduate from pilot to broad migration until its runtime gate is
-recorded as passed. Bundle success alone is insufficient.
+recorded as passed. Bundle success alone is insufficient. The rejected ListItem pilot remains
+closed until its package-level 44pt and link-semantics gaps are fixed.
 
 ## Out of scope
 
@@ -531,6 +545,5 @@ recorded as passed. Bundle success alone is insufficient.
 - redesigning feature workflows while changing their control implementation;
 - introducing a complete Yiru UI facade over Expo UI;
 - changing desktop components or tokens;
-- upgrading Expo UI as part of the migration unless a separately reviewed upgrade removes a known
-  blocker;
+- upgrading Expo UI again unless a separately reviewed package change removes a known blocker;
 - adding tests, snapshots, or test infrastructure.

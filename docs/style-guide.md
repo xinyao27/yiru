@@ -355,9 +355,13 @@ native environment. A Host is a native layout bridge, not a root React provider:
 contiguous native control cluster and never wrap the Expo Router or an arbitrary React Native tree
 with it. Community controls expose a React Native boundary and do not need this outer Host.
 
-Expo UI 57.0.7 Switch is a temporary direct-call exception because Android/web do not reliably
+Expo UI 57.0.8 Switch is a temporary direct-call exception because Android/web do not reliably
 associate its visible label with the switch semantics. Use Yiru's complete settings-toggle row until
 that package behavior is fixed; do not introduce a generic Switch facade.
+
+Use `className` for static layout, spacing, color, typography, and interaction states. Reserve
+`style` for animated or runtime-computed values, native bridge requirements, and platform-only
+numeric properties that cannot be expressed through Uniwind.
 
 This hierarchy follows Apple's guidance to keep custom toolbars consistent with system behavior,
 use tab bars for navigation rather than actions, and give buttons a 44×44pt hit region. Expo UI's

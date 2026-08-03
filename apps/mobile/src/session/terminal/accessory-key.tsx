@@ -79,8 +79,9 @@ export function MobileTerminalAccessoryKey({
       className="rounded-full"
       contentClassName="min-h-8 min-w-10 items-center justify-center rounded-full px-3 py-1"
       disabled={disabled}
+      isSelected={isSelected === true}
       onPress={onPress}
-      tintColorClassName={isSelected === true ? 'accent-primary' : 'accent-secondary'}
+      tintColorClassName="accent-secondary"
     >
       {icon ? <MobileTerminalAccessoryIconView icon={icon} /> : null}
       {label ? <Text className="text-muted-foreground font-mono text-xs">{label}</Text> : null}

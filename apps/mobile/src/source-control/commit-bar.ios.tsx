@@ -188,7 +188,7 @@ export function MobileSourceControlCommitBar({
                     )
               }
               onPress={onGenerate}
-              size="large"
+              size="regular"
               systemImage={generatingMessage ? 'xmark' : 'sparkles'}
             />
           ) : null}

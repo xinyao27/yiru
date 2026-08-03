@@ -3,6 +3,7 @@ import { InteractionManager, Pressable, TextInput, View, type TextInputProps } f
 
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MagnifyingGlass as Search, X } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 // Why: toolbar/list chrome paints and settles after the open tap; native
 // autoFocus alone often fails to raise the soft keyboard on iOS/Android.
@@ -36,7 +37,7 @@ export function MobileSearchField({
   placeholder,
   onClear,
   showClear,
-  clearAccessibilityLabel = 'Clear search',
+  clearAccessibilityLabel = translate('mobile.search.clear', 'Clear search'),
   autoFocus = false,
   focusKey,
   returnKeyType = 'search',
@@ -89,7 +90,6 @@ export function MobileSearchField({
     <MobileGlassSurface
       className="ios:py-2 min-h-11 flex-row items-center gap-2 overflow-hidden rounded-full py-2 pr-1 pl-3"
       isFunctional
-      isInteractive={editable}
     >
       <Search
         size={15}

@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { StatusDot } from '~/components/status-dot'
 import { CaretRight as ChevronRight, Monitor } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
@@ -10,7 +11,6 @@ import { verdictDisplayLabel } from '../transport/connection-health'
 import { mobileConnectionPathLabel } from '../transport/connection-path-label'
 import type { MobileConnectionPath } from '../transport/stable-logical-rpc-client'
 import type { ConnectionState, HostProfile } from '../transport/types'
-import { StatusDot } from './status-dot'
 
 export function MobileHostCard(props: {
   host: HostProfile

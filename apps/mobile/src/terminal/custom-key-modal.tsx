@@ -2,20 +2,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput } from 'react-native'
 
+import { BottomDrawer } from '~/components/bottom-drawer'
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { cn } from '~/style/class-names'
 
 import {
   buildTerminalShortcutKey,
   normalizeShortcutKeyInput,
   type TerminalShortcutModifier
-} from '../terminal/accessory-keys'
-import { BottomDrawer } from './bottom-drawer'
+} from './accessory-keys'
 import {
   CUSTOM_KEY_BY_ID,
   CUSTOM_KEY_COPY,
@@ -25,7 +26,6 @@ import {
   translatedCustomKeyAccessibilityLabel,
   translatedCustomKeyLabel
 } from './custom-key-options'
-import { SettingsToggleRow } from './settings-toggle-row'
 
 const CUSTOM_ACCESSORY_KEYS_STORAGE_KEY = 'yiru:custom-accessory-keys'
 
@@ -265,12 +265,14 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
                 return (
                   <MobileGlassPressable
                     key={modifier.id}
-                    className="h-10 flex-1 rounded-xl"
+                    className="h-9 w-full rounded-xl"
+                    containerClassName="flex-1"
                     contentClassName="h-full flex-row items-center justify-center gap-1 rounded-xl"
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
+                    isSelected={selected}
                     onPress={() => toggleShortcutModifier(modifier.id)}
-                    tintColorClassName={selected ? 'accent-primary' : undefined}
+                    size="regular"
                   >
                     <Text
                       className={cn('text-muted-foreground text-sm', selected && 'text-foreground')}
@@ -348,12 +350,13 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
                       className={cn('px-1 py-1', group.columns === 4 ? 'basis-1/4' : 'basis-1/6')}
                     >
                       <MobileGlassPressable
-                        className="h-10 rounded-xl"
+                        className="h-9 rounded-xl"
                         contentClassName="h-full items-center justify-center rounded-xl"
                         accessibilityLabel={translatedCustomKeyAccessibilityLabel(key)}
                         accessibilityState={{ selected }}
+                        isSelected={selected}
                         onPress={() => handleSpecialKeyPick(id)}
-                        tintColorClassName={selected ? 'accent-primary' : undefined}
+                        size="regular"
                       >
                         <Text className="text-foreground font-mono text-xs">
                           {translatedCustomKeyLabel(key)}

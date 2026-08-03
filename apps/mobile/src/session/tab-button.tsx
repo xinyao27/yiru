@@ -1,8 +1,8 @@
 import type { LayoutChangeEvent } from 'react-native'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 import { MobileAgentIcon } from '~/components/agent-icon'
-import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import { File, FileText, Globe } from '~/components/uniwind-icons'
 import type { MobileSessionTab } from '~/session/screen-state'
 import {
@@ -52,24 +52,20 @@ export function MobileSessionTabButton({
   onLongPress
 }: MobileSessionTabButtonProps): React.JSX.Element {
   return (
-    <MobileGlassSurface
-      className="overflow-hidden rounded-full"
-      fallbackClassName={active ? 'border-ring bg-accent' : undefined}
-      isInteractive
+    <MobileGlassPressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      className="max-w-40 min-w-24 rounded-full"
+      contentClassName="min-h-9 items-center justify-center rounded-full px-3"
+      delayLongPress={400}
+      fallbackClassName={active ? 'border-ring' : undefined}
+      isSelected={active}
       onLayout={onLayout}
-      tintColorClassName={active ? 'accent-primary' : undefined}
+      onLongPress={onLongPress}
+      onPress={onPress}
+      size="regular"
     >
-      <Pressable
-        accessibilityRole="tab"
-        accessibilityState={{ selected: active }}
-        className="active:bg-accent min-h-9 max-w-40 min-w-24 items-center justify-center rounded-full px-3"
-        hitSlop={4}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        delayLongPress={400}
-      >
-        <MobileSessionTabLabel tab={tab} active={active} />
-      </Pressable>
-    </MobileGlassSurface>
+      <MobileSessionTabLabel tab={tab} active={active} />
+    </MobileGlassPressable>
   )
 }

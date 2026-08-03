@@ -9,7 +9,6 @@ import Animated, {
 import { MobileContentSection } from '~/components/content-section'
 import { SelectionDrawer } from '~/components/selection-drawer'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
-import { TerminalShortcutSettings } from '~/components/terminal-shortcut-settings'
 import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
@@ -34,6 +33,7 @@ import {
   type TextSizeValue,
   valueFromMs
 } from '~/terminal/settings-options'
+import { TerminalShortcutSettings } from '~/terminal/shortcut-settings'
 import { useAllHostClients } from '~/transport/all-host-clients'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'

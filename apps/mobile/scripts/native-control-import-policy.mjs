@@ -28,6 +28,7 @@ export const universalJsxControls = new Set([
 const expoUiHostPath = path.join(mobileRoot, 'src', 'components', 'expo-ui-host.tsx')
 export const bottomDrawerPaths = new Set([
   path.join(mobileRoot, 'src', 'components', 'bottom-drawer.tsx'),
+  path.join(mobileRoot, 'src', 'components', 'bottom-drawer-sheet.ios.tsx'),
   path.join(mobileRoot, 'src', 'components', 'bottom-drawer-sheet.tsx'),
   path.join(mobileRoot, 'src', 'components', 'bottom-drawer-sheet.native.tsx')
 ])
@@ -44,6 +45,7 @@ export const reactNativeControlAdapterAllowlist = new Map([
   [settingsToggleRowPath, new Set(['Switch'])]
 ])
 export const universalControlImportAllowlist = new Map([
+  ['Picker', new Set([nativeControlCatalogPath])],
   ['Switch', new Set([nativeControlCatalogPath])]
 ])
 // Why: adapter files may need to assemble a Universal control before exposing a

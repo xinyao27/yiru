@@ -75,18 +75,23 @@ modules such as the Glass family, `BottomDrawer`, and typed segmented selection.
 one-to-one shadows such as `MobileButton`, `MobileText`, `MobilePicker`, or `MobileSwitch` that only
 rename an Expo control and mirror its props.
 
-Expo UI 57.0.7 does not give its Android/web Universal Switch a reliable accessible name. Until the
+Expo UI 57.0.8 does not give its Android/web Universal Switch a reliable accessible name. Until the
 package closes that gap, standard boolean settings use the complete `SettingsToggleRow` product
 interaction; feature code must not create a naked Switch facade or directly repeat the workaround.
+The same behavior-equivalence gate keeps closed product choices and navigation links in React
+Native until Universal Picker exposes an accessible name and a 44pt web target, and Universal
+ListItem exposes a 44pt iOS target plus link semantics. These are reviewed platform exceptions, not
+reasons to add Expo UI facades. The native-control repository contract limits Universal Picker to
+UI Lab and rejects product ListItem imports until those package gates are removed here.
 
 Shared interfaces use product semantics and stay closed. They do not expose arbitrary Expo
 `modifiers`, colors, or a generic style escape hatch unless layout is part of the module's job.
 Feature copy and business state stay in the feature. Platform files exist only for two real
 implementations, not in anticipation of a future difference.
 
-Use `className` for feature and React Native layout. Use `style` only where an Expo/native modifier
-or third-party API has no `className` path, or where the API requires a numeric native measurement.
-Keep that exception inside the owning adapter whenever possible.
+Use `className` for feature and React Native layout. Use `style` only for animated/runtime-computed
+values, or where an Expo/native or third-party API has no `className` path and requires a numeric
+native measurement. Keep that exception inside the owning adapter whenever possible.
 
 Universal imports come from `@expo/ui`. Community controls come from their explicit
 `@expo/ui/community/*` entry point. SwiftUI and Compose imports are allowed only in `.ios.tsx` and

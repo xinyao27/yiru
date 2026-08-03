@@ -23,6 +23,7 @@ import {
   type Icon
 } from '~/components/uniwind-icons'
 import { UniwindWebView } from '~/components/uniwind-web-view'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 
@@ -103,21 +104,45 @@ type ToolbarItem = {
 }
 
 const TOOLBAR_ITEMS: ToolbarItem[] = [
-  { command: 'paragraph', label: 'Body', icon: Pilcrow },
-  { command: 'heading1', label: 'H1', icon: Heading1 },
-  { command: 'heading2', label: 'H2', icon: Heading2 },
-  { command: 'heading3', label: 'H3', icon: Heading3 },
-  { command: 'bold', label: 'Bold', icon: Bold },
-  { command: 'italic', label: 'Italic', icon: Italic },
-  { command: 'strike', label: 'Strike', icon: Strikethrough },
-  { command: 'bulletList', label: 'Bullet list', icon: List },
-  { command: 'orderedList', label: 'Numbered list', icon: ListOrdered },
-  { command: 'taskList', label: 'Checklist', icon: ListTodo },
-  { command: 'quote', label: 'Quote', icon: Quote },
-  { command: 'link', label: 'Link', icon: Link },
-  { command: 'image', label: 'Image', icon: ImageIcon },
-  { command: 'inlineCode', label: 'Inline code', icon: Code2 },
-  { command: 'codeBlock', label: 'Code block', icon: FileCode2 }
+  { command: 'paragraph', label: translate('mobile.editor.toolbar.body', 'Body'), icon: Pilcrow },
+  { command: 'heading1', label: translate('mobile.editor.toolbar.heading1', 'H1'), icon: Heading1 },
+  { command: 'heading2', label: translate('mobile.editor.toolbar.heading2', 'H2'), icon: Heading2 },
+  { command: 'heading3', label: translate('mobile.editor.toolbar.heading3', 'H3'), icon: Heading3 },
+  { command: 'bold', label: translate('mobile.editor.toolbar.bold', 'Bold'), icon: Bold },
+  { command: 'italic', label: translate('mobile.editor.toolbar.italic', 'Italic'), icon: Italic },
+  {
+    command: 'strike',
+    label: translate('mobile.editor.toolbar.strike', 'Strike'),
+    icon: Strikethrough
+  },
+  {
+    command: 'bulletList',
+    label: translate('mobile.editor.toolbar.bulletList', 'Bullet list'),
+    icon: List
+  },
+  {
+    command: 'orderedList',
+    label: translate('mobile.editor.toolbar.numberedList', 'Numbered list'),
+    icon: ListOrdered
+  },
+  {
+    command: 'taskList',
+    label: translate('mobile.editor.toolbar.checklist', 'Checklist'),
+    icon: ListTodo
+  },
+  { command: 'quote', label: translate('mobile.editor.toolbar.quote', 'Quote'), icon: Quote },
+  { command: 'link', label: translate('mobile.editor.toolbar.link', 'Link'), icon: Link },
+  { command: 'image', label: translate('mobile.editor.toolbar.image', 'Image'), icon: ImageIcon },
+  {
+    command: 'inlineCode',
+    label: translate('mobile.editor.toolbar.inlineCode', 'Inline code'),
+    icon: Code2
+  },
+  {
+    command: 'codeBlock',
+    label: translate('mobile.editor.toolbar.codeBlock', 'Code block'),
+    icon: FileCode2
+  }
 ]
 
 function MobileRichMarkdownEditorInner({
@@ -310,11 +335,11 @@ function MobileRichMarkdownEditorInner({
 
   return (
     <View className="bg-background min-h-0 flex-1">
-      <MobileGlassSurface className="min-h-11" isInteractive>
+      <MobileGlassSurface className="min-h-11" isFunctional>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="items-center gap-2 px-2 py-2"
+          contentContainerClassName="items-center gap-2 px-2"
           keyboardShouldPersistTaps="handled"
         >
           {TOOLBAR_ITEMS.map((item) => {
@@ -327,7 +352,7 @@ function MobileRichMarkdownEditorInner({
                 accessibilityLabel={item.label}
                 onPress={() => runCommand(item.command)}
                 className={cn(
-                  'min-w-8 h-8 items-center justify-center px-1',
+                  'min-h-11 min-w-11 items-center justify-center px-1',
                   editable && 'active:bg-accent',
                   !editable ? 'opacity-60' : null
                 )}

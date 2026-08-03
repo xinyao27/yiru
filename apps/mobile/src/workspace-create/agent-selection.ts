@@ -1,8 +1,10 @@
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
-import { MOBILE_AGENT_CATALOG } from '../workspace-create/agent-catalog'
-import { isMobileTuiAgentEnabled } from '../workspace-create/tui-agents'
-import { pickWorkspaceAgent } from '../workspace-create/workspace-agent-selection'
+import { translate } from '~/i18n/translate'
+
+import { MOBILE_AGENT_CATALOG } from './agent-catalog'
+import { isMobileTuiAgentEnabled } from './tui-agents'
+import { pickWorkspaceAgent } from './workspace-agent-selection'
 
 export type NewWorkspaceRuntimeSettings = {
   defaultTuiAgent?: TuiAgent | 'blank' | null
@@ -19,7 +21,7 @@ export const NEW_WORKSPACE_AGENT_OPTIONS: NewWorkspaceAgentOption[] = MOBILE_AGE
 
 export const NEW_WORKSPACE_BLANK_AGENT: NewWorkspaceAgentOption = {
   id: '__blank__',
-  label: 'Blank Terminal'
+  label: translate('mobile.newWorkspace.agent.blankTerminal', 'Blank Terminal')
 }
 
 export function newWorkspaceAgentOptionFor(id: string | null | undefined): NewWorkspaceAgentOption {

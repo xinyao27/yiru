@@ -12,9 +12,9 @@ import { MobileGlassPressable } from '../components/glass/pressable'
 import { MobileGlassSurface } from '../components/glass/surface'
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import { MobileSegmentedControl } from '../components/segmented-control'
-import { SmartSourceModeIcon } from '../components/smart-source-mode-icon'
 import type { RpcClient } from '../transport/rpc-client'
 import type { MrStateFilter, SmartNameMode } from './composer-source-types'
+import { SmartSourceModeIcon } from './smart-source-mode-icon'
 import {
   MR_STATE_FILTER_OPTIONS,
   resolveAvailableSmartModes,
@@ -174,8 +174,8 @@ export function SmartWorkspaceSourceDrawer({
               className="rounded-full"
               contentClassName="min-h-11 flex-row items-center gap-1 rounded-full px-3"
               hitSlop={0}
+              isSelected={selected}
               onPress={() => setMode(option.id)}
-              tintColorClassName={selected ? 'accent-primary' : undefined}
             >
               <SmartSourceModeIcon
                 icon={option.icon}

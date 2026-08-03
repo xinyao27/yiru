@@ -4,6 +4,7 @@ import { Platform, Pressable, TextInput, View } from 'react-native'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { ArrowUp, Keyboard as KeyboardIcon } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 import { getTerminalCommandKeyboardType } from '~/terminal/keyboard-type'
 
@@ -45,10 +46,17 @@ export function MobileTerminalInputBar({
           onSelect={onAttachImage}
         />
         <MobileGlassPressable
-          accessibilityHint="Typed text is sent directly to the active terminal"
-          accessibilityLabel="Show keyboard for live terminal input"
+          accessibilityHint={translate(
+            'mobile.terminal.liveInput.accessibilityHint',
+            'Typed text is sent directly to the active terminal'
+          )}
+          accessibilityLabel={translate(
+            'mobile.terminal.liveInput.accessibilityLabel',
+            'Show keyboard for live terminal input'
+          )}
           accessibilityRole="button"
-          className="min-h-12 flex-1 rounded-full"
+          className="min-h-12 w-full rounded-full"
+          containerClassName="flex-1"
           contentClassName="min-h-12 flex-1 flex-row items-center gap-3 rounded-full px-4"
           disabled={!canSend}
           onPress={onFocusLiveInput}
@@ -69,11 +77,11 @@ export function MobileTerminalInputBar({
         onSelect={onAttachImage}
       />
       <MobileGlassSurface
-        className="h-10 flex-1 overflow-hidden rounded-full"
+        className="h-11 flex-1 overflow-hidden rounded-full"
         isFunctional
         tintColorClassName="accent-secondary"
       >
-        <View className="h-10 flex-row items-center">
+        <View className="h-11 flex-row items-center">
           <TextInput
             ref={commandInputRef}
             key={
@@ -83,10 +91,10 @@ export function MobileTerminalInputBar({
                   : 'cmd-input-ac-off'
                 : 'cmd-input'
             }
-            className="text-foreground h-10 min-w-0 flex-1 py-0 pr-2 pl-4 font-mono text-sm"
+            className="text-foreground h-11 min-w-0 flex-1 py-0 pr-2 pl-4 font-mono text-sm"
             value={input}
             onChangeText={onChangeText}
-            placeholder="Type a command…"
+            placeholder={translate('mobile.terminal.commandPlaceholder', 'Type a command…')}
             placeholderTextColorClassName="accent-muted-foreground"
             autoCapitalize="none"
             autoCorrect={autocompleteEnabled}
@@ -99,15 +107,20 @@ export function MobileTerminalInputBar({
             onSubmitEditing={onSend}
           />
           <Pressable
-            className={cn(
-              'bg-foreground m-1 h-8 w-8 items-center justify-center rounded-full',
-              canSend ? 'active:bg-accent' : 'opacity-40'
-            )}
+            accessibilityRole="button"
+            className={cn('h-11 w-11 items-center justify-center', canSend && 'active:opacity-70')}
             disabled={!canSend}
             onPress={onSend}
-            accessibilityLabel="Send command"
+            accessibilityLabel={translate('mobile.terminal.sendCommand', 'Send command')}
           >
-            <ArrowUp size={16} colorClassName="accent-background" />
+            <View
+              className={cn(
+                'bg-foreground h-8 w-8 items-center justify-center rounded-full',
+                !canSend && 'opacity-40'
+              )}
+            >
+              <ArrowUp size={16} colorClassName="accent-background" />
+            </View>
           </Pressable>
         </View>
       </MobileGlassSurface>

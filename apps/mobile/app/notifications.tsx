@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { AppState, Linking, View } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
@@ -23,12 +23,19 @@ const DEFAULT_PERMISSION_STATE: NotificationPermissionState = {
 export default function NotificationsScreen() {
   const [pushEnabled, setPushEnabled] = useState(false)
   const [permissionState, setPermissionState] = useState(DEFAULT_PERMISSION_STATE)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const isUpdatingRef = useRef(false)
+  const refreshGenerationRef = useRef(0)
 
   const refreshSettings = useCallback(async () => {
+    const generation = ++refreshGenerationRef.current
     const [enabled, permission] = await Promise.all([
       loadPushNotificationsEnabled(),
       getNotificationPermissionState()
     ])
+    if (generation !== refreshGenerationRef.current || isUpdatingRef.current) {
+      return
+    }
     setPushEnabled(enabled)
     setPermissionState(permission)
   }, [])
@@ -36,6 +43,9 @@ export default function NotificationsScreen() {
   useFocusEffect(
     useCallback(() => {
       void refreshSettings()
+      return () => {
+        refreshGenerationRef.current += 1
+      }
     }, [refreshSettings])
   )
 
@@ -49,18 +59,35 @@ export default function NotificationsScreen() {
   }, [refreshSettings])
 
   const togglePush = async (value: boolean) => {
-    if (value) {
-      const granted = await ensureNotificationPermissions()
-      const permission = await getNotificationPermissionState()
-      setPermissionState(permission)
-      if (!granted) {
-        setPushEnabled(false)
-        await savePushNotificationsEnabled(false)
-        return
+    if (isUpdatingRef.current) {
+      return
+    }
+    isUpdatingRef.current = true
+    refreshGenerationRef.current += 1
+    setIsUpdating(true)
+    let shouldRefresh = false
+    try {
+      if (value) {
+        const granted = await ensureNotificationPermissions()
+        const permission = await getNotificationPermissionState()
+        setPermissionState(permission)
+        if (!granted) {
+          await savePushNotificationsEnabled(false)
+          setPushEnabled(false)
+          return
+        }
+      }
+      await savePushNotificationsEnabled(value)
+      setPushEnabled(value)
+    } catch {
+      shouldRefresh = true
+    } finally {
+      isUpdatingRef.current = false
+      setIsUpdating(false)
+      if (shouldRefresh) {
+        void refreshSettings()
       }
     }
-    setPushEnabled(value)
-    await savePushNotificationsEnabled(value)
   }
 
   const switchEnabled = pushEnabled && permissionState.granted
@@ -79,7 +106,7 @@ export default function NotificationsScreen() {
     <View className="bg-background flex-1 p-4">
       <MobileContentSection>
         <SettingsToggleRow
-          disabled={notificationsBlocked}
+          disabled={notificationsBlocked || isUpdating}
           label={translate('mobile.notifications.agentNotifications.label', 'Agent notifications')}
           onValueChange={(value) => void togglePush(value)}
           supportingText={hint}

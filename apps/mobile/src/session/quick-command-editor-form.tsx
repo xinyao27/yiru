@@ -50,11 +50,13 @@ function ChoiceToggle({
             key={option.value}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled: option.disabled }}
-            className="h-10 flex-1 rounded-full"
+            className="h-9 w-full rounded-full"
+            containerClassName="flex-1"
             contentClassName="h-full items-center justify-center rounded-full px-3"
             disabled={option.disabled}
+            isSelected={selected}
             onPress={() => onChange(option.value)}
-            tintColorClassName={selected ? 'accent-primary' : undefined}
+            size="regular"
           >
             <Text className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}>
               {option.label}
@@ -195,7 +197,7 @@ export function QuickCommandEditorForm({
       </View>
       <View className="gap-2">
         <Pressable
-          className="active:bg-accent flex-row items-center gap-1 py-1"
+          className="active:bg-accent min-h-11 flex-row items-center gap-1 py-1"
           onPress={() => setAdvancedOpen((open) => !open)}
           accessibilityState={{ expanded: advancedOpen }}
         >

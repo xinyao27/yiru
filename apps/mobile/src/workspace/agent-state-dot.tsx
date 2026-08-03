@@ -1,9 +1,9 @@
 import { View } from 'react-native'
 
+import { LoadingIndicator } from '~/components/loading-indicator'
 import { cn } from '~/style/class-names'
 
-import type { AgentDotState } from '../workspace/agent-row-display'
-import { LoadingIndicator } from './loading-indicator'
+import type { AgentDotState } from './agent-row-display'
 
 // Per-agent state indicator, 1:1 with desktop AgentStateDot
 // (src/renderer/components/agent-state-dot.tsx): the configured loader for

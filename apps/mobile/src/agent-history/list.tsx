@@ -5,12 +5,13 @@ import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View }
 
 import { MobileAgentIcon } from '~/components/agent-icon'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { translate } from '~/i18n/translate'
 
 import type { MobileAgentHistorySection } from './sections'
 import type { MobileAgentHistoryCard } from './session-card'
 import { styles } from './styles'
 
-// Lazy-render at most this many preview turns when a card is tapped — the
+// Why: lazy-render at most this many preview turns when a card is tapped — the
 // scanner already bounds preview text, but rendering them only on tap keeps the
 // list cheap.
 const PREVIEW_TURN_LIMIT = 5
@@ -132,20 +133,31 @@ function AgentHistoryCardRow({
       <View className="mt-1 flex-row flex-wrap items-center gap-2">
         <Text className={styles.cardMetaText}>{card.agentLabel}</Text>
         <Text className={styles.cardMetaText}>
-          {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
+          {card.messageCount === 1
+            ? translate('mobile.agentHistory.card.oneMessage', '{{count}} message', {
+                count: card.messageCount
+              })
+            : translate('mobile.agentHistory.card.messages', '{{count}} messages', {
+                count: card.messageCount
+              })}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
           <View className="bg-secondary rounded-full px-2 py-1">
-            <Text className="text-primary text-xs">current worktree</Text>
+            <Text className="text-primary text-xs">
+              {translate('mobile.agentHistory.card.currentWorktree', 'current worktree')}
+            </Text>
           </View>
         ) : null}
         {session && onResume ? (
-          <View className="ml-auto h-8 w-8 items-center justify-center">
+          <View className="ml-auto h-11 w-11 items-center justify-center">
             {resumeActionState?.loading ? (
               <ActivityIndicator size="small" colorClassName="accent-foreground" />
             ) : (
               <MobileGlassIconButton
-                accessibilityLabel="Resume agent session"
+                accessibilityLabel={translate(
+                  'mobile.agentHistory.card.resumeAccessibilityLabel',
+                  'Resume agent session'
+                )}
                 disabled={resumeActionState?.disabled}
                 icon="play"
                 onPress={(event) => {

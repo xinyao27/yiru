@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native'
 import { GitMerge, Sparkle as Sparkles } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 
-import { SourceProviderLogo } from '../components/source-provider-logo'
+import { SourceProviderLogo } from './source-provider-logo'
 
 type Props = {
   row: SourceRow

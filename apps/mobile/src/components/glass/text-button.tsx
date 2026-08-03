@@ -31,7 +31,7 @@ export function MobileGlassTextButton({
     <MobileGlassPressable
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityRole="button"
-      className={cn('rounded-full', isFullWidth && 'self-stretch')}
+      className="rounded-full"
       containerClassName={cn(isFullWidth && 'self-stretch', className)}
       contentClassName={cn(
         'items-center justify-center rounded-full px-4',

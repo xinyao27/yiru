@@ -3,6 +3,8 @@ import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { MobileGlassPressable } from '~/components/glass/pressable'
+import { MobileRepoIcon } from '~/components/repo-icon'
 import {
   BellSimple,
   CaretDown as ChevronDown,
@@ -10,15 +12,14 @@ import {
   GitMerge,
   GitPullRequest
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'
+import { WorkspaceAgentList } from './agent-list'
 import { AgentSpinner } from './agent-spinner'
-import { MobileGlassPressable } from './glass/pressable'
-import { MobileRepoIcon } from './repo-icon'
-import { WorkspaceAgentList } from './workspace-agent-list'
-import { WorkspaceMetaGlyphs, prStateColorClasses } from './workspace-meta-glyphs'
+import { WorkspaceMetaGlyphs, prStateColorClasses } from './meta-glyphs'
 
 // Minimal row shape needed for rendering — a structural subset of the screen's
 // Worktree so this component stays decoupled from the screen's local type.
@@ -100,13 +101,15 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
 }: Props<T>) {
   const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const isFolderWorkspace = item.workspaceKind === 'folder-workspace'
-  const folderMeta = isFolderWorkspace ? item.comment?.trim() || item.path || 'Folder' : null
+  const folderMeta = isFolderWorkspace
+    ? item.comment?.trim() || item.path || translate('mobile.workspace.folder', 'Folder')
+    : null
   const lineageDepth = Math.max(0, item.lineageDepth ?? 0)
   const lineageChildCount = item.lineageChildCount ?? 0
 
   return (
     <Pressable
-      className="active:bg-accent flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5"
+      className="active:bg-accent min-h-11 flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5"
       style={
         lineageDepth > 0 && !nestedUnderProject
           ? { paddingLeft: spacing4 * (lineageDepth + 1) }
@@ -195,7 +198,8 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
         ) : null}
         {lineageChildCount > 0 && onToggleLineage ? (
           <MobileGlassPressable
-            className="mt-1 self-start rounded-full"
+            className="rounded-full"
+            containerClassName="mt-1 self-start"
             contentClassName="flex-row items-center gap-1 rounded-full px-2 py-1"
             onPress={(event) => {
               event.stopPropagation()
@@ -209,7 +213,13 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
             )}
             <GitMerge size={12} colorClassName="accent-muted-foreground" />
             <Text className="text-muted-foreground text-xs">
-              {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
+              {lineageChildCount === 1
+                ? translate('mobile.workspace.lineage.childCount', '{{count}} child', {
+                    count: lineageChildCount
+                  })
+                : translate('mobile.workspace.lineage.childrenCount', '{{count}} children', {
+                    count: lineageChildCount
+                  })}
             </Text>
           </MobileGlassPressable>
         ) : null}

@@ -16,8 +16,6 @@ import { setCachedRepos } from '~/cache/repo-cache'
 import { getCachedWorktrees, setCachedWorktrees } from '~/cache/worktree-cache'
 import { AuthFailedBanner } from '~/components/auth-failed-banner'
 import { ConfirmModal } from '~/components/confirm-modal'
-import { NewWorkspaceFab } from '~/components/new-workspace-fab'
-import { NewWorkspaceModalController } from '~/components/new-workspace-modal-controller'
 import { ProtocolBlockScreen } from '~/components/protocol-block-screen'
 import { MobileRepoIcon } from '~/components/repo-icon'
 import {
@@ -25,8 +23,6 @@ import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight
 } from '~/components/uniwind-icons'
-import { WorkspaceDetailPlaceholder } from '~/components/workspace-detail-placeholder'
-import { WorkspaceListRow } from '~/components/workspace-list-row'
 import {
   createInitialHostRouteActionState,
   resolveHostRouteActionState,
@@ -51,8 +47,12 @@ import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
+import { NewWorkspaceFab } from '~/workspace-create/fab'
+import { NewWorkspaceModalController } from '~/workspace-create/modal-controller'
+import { WorkspaceDetailPlaceholder } from '~/workspace/detail-placeholder'
 import { getMobileWorkspaceLineageGroupKey } from '~/workspace/lineage'
 import { MobileWorkspaceListChrome } from '~/workspace/list-chrome'
+import { WorkspaceListRow } from '~/workspace/list-row'
 import {
   getWorktreeStatus,
   isWorktreePinned,
@@ -363,7 +363,7 @@ export function HostScreen({
       }
       const host = hosts.find((h) => h.id === hostId)
       if (!host) {
-        setError('Host not found')
+        setError(translate('mobile.host.notFound', 'Host not found'))
         return
       }
       setHostName(host.name)
@@ -874,10 +874,10 @@ export function HostScreen({
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
             {search
-              ? 'No matching workspaces'
+              ? translate('mobile.workspaces.noSearchMatches', 'No matching workspaces')
               : activeFilterCount > 0
-                ? 'No workspaces match filters'
-                : 'No workspaces'}
+                ? translate('mobile.workspaces.noFilterMatches', 'No workspaces match filters')
+                : translate('mobile.workspaces.empty', 'No workspaces')}
           </Text>
         </View>
       )}

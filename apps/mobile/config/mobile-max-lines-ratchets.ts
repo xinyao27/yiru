@@ -32,7 +32,7 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(851) }
   },
   {
-    files: ['src/components/new-workspace-modal.tsx'],
+    files: ['src/workspace-create/modal.tsx'],
     rules: { 'max-lines': createMaxLinesRule(1_039) }
   },
   {

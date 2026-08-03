@@ -82,7 +82,7 @@ export function MobileWorkspaceListToolbar({
           disabled={!canUseHost}
           icon="terminal"
           onPress={onFloatingWorkspace}
-          size="large"
+          size="regular"
         />
       ) : null}
       <View className="flex-1">
@@ -102,7 +102,7 @@ export function MobileWorkspaceListToolbar({
           disabled={!canUseHost}
           icon="terminal"
           onPress={onFloatingWorkspace}
-          size="large"
+          size="regular"
         />
       ) : null}
     </MobileGlassGroup>

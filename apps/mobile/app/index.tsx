@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Stack, useRouter, useFocusEffect } from 'expo-router'
+import { Link, Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
@@ -19,9 +19,9 @@ import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { MobileHostCard } from '~/components/host-card'
 import { CaretRight as ChevronRight, Terminal } from '~/components/uniwind-icons'
 import { HostActionsDrawer } from '~/home/host-actions-drawer'
+import { MobileHostCard } from '~/home/host-card'
 import { HostMenu } from '~/home/host-menu'
 import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
@@ -726,38 +726,35 @@ export default function HomeScreen(): React.JSX.Element {
                 <View className="gap-2">
                   <SectionHeading>{translate('mobile.home.resume', 'Resume')}</SectionHeading>
                   <MobileContentSection>
-                    <Pressable
-                      accessibilityRole="button"
-                      className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-                      onPress={() =>
-                        router.push(
-                          `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
-                        )
-                      }
+                    <Link
+                      href={`/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`}
+                      asChild
                     >
-                      <View className="h-8 w-5 items-center justify-center">
-                        <Terminal size={20} colorClassName="accent-muted-foreground" />
-                      </View>
-                      <View className="min-w-0 flex-1">
-                        <Text className="text-foreground" numberOfLines={1}>
-                          {resumeWorktree.worktree.displayName}
-                        </Text>
-                        <View className="mt-1 flex-row items-center gap-2">
-                          <View
-                            className="h-2 w-2"
-                            style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
-                          />
-                          <Text className="text-muted-foreground flex-1" numberOfLines={1}>
-                            {resumeWorktree.worktree.repo}
-                            {'  ·  '}
-                            {resumeWorktree.worktree.branch}
-                          </Text>
+                      <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3">
+                        <View className="h-8 w-5 items-center justify-center">
+                          <Terminal size={20} colorClassName="accent-muted-foreground" />
                         </View>
-                      </View>
-                      <View className="h-6 w-5 items-center justify-center">
-                        <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-                      </View>
-                    </Pressable>
+                        <View className="min-w-0 flex-1">
+                          <Text className="text-foreground" numberOfLines={1}>
+                            {resumeWorktree.worktree.displayName}
+                          </Text>
+                          <View className="mt-1 flex-row items-center gap-2">
+                            <View
+                              className="h-2 w-2"
+                              style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
+                            />
+                            <Text className="text-muted-foreground flex-1" numberOfLines={1}>
+                              {resumeWorktree.worktree.repo}
+                              {'  ·  '}
+                              {resumeWorktree.worktree.branch}
+                            </Text>
+                          </View>
+                        </View>
+                        <View className="h-6 w-5 items-center justify-center">
+                          <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                        </View>
+                      </Pressable>
+                    </Link>
                   </MobileContentSection>
                 </View>
               ) : null}
@@ -803,72 +800,71 @@ export default function HomeScreen(): React.JSX.Element {
                         snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
                       const showHostName = accountsHosts.length > 1
                       return (
-                        <Pressable
-                          key={host.id}
-                          accessibilityRole="button"
-                          className={cn(
-                            'active:bg-accent gap-3 px-3 py-3',
-                            index > 0 && 'border-t-hairline border-border'
-                          )}
-                          onPress={() => router.push(`/h/${host.id}/accounts`)}
-                        >
-                          {showHostName ? (
-                            <Text
-                              className="text-muted-foreground tracking-wide uppercase"
-                              numberOfLines={1}
-                            >
-                              {host.name}
-                            </Text>
-                          ) : null}
-                          {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
-                            const active = provider === 'claude' ? claudeActive : codexActive
-                            const accounts =
-                              provider === 'claude'
-                                ? snapshot.claude.accounts
-                                : snapshot.codex.accounts
-                            const limits = getActiveProviderRateLimits(snapshot, provider)
-                            // Why: with no managed accounts, still render a
-                            // "System default" row when the active target has
-                            // live usage data; the row label already falls back
-                            // to "System default" below.
-                            if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
-                              return null
-                            }
-                            const sessionBar = getUsageBarState(limits, 'session')
-                            const weeklyBar = getUsageBarState(limits, 'weekly')
-                            return (
-                              <View key={provider} className="flex-row items-start gap-3">
-                                <View className="h-6 w-8 items-center justify-center">
-                                  {provider === 'claude' ? (
-                                    <ClaudeIcon size={18} />
-                                  ) : (
-                                    <OpenAIIcon size={18} colorClassName="accent-foreground" />
-                                  )}
-                                </View>
-                                <View className="min-w-0 flex-1 gap-1">
-                                  <Text className="text-foreground" numberOfLines={1}>
-                                    {active?.email ??
-                                      translate('mobile.home.systemDefault', 'System default')}
-                                  </Text>
-                                  <View className="gap-1">
-                                    <UsageBar
-                                      label={translate('mobile.home.usage.fiveHours', '5h')}
-                                      usedPercent={sessionBar.usedPercent}
-                                      unavailable={sessionBar.unavailable}
-                                      loading={sessionBar.loading}
-                                    />
-                                    <UsageBar
-                                      label={translate('mobile.home.usage.sevenDays', '7d')}
-                                      usedPercent={weeklyBar.usedPercent}
-                                      unavailable={weeklyBar.unavailable}
-                                      loading={weeklyBar.loading}
-                                    />
+                        <Link key={host.id} href={`/h/${host.id}/accounts`} asChild>
+                          <Pressable
+                            className={cn(
+                              'active:bg-accent gap-3 px-3 py-3',
+                              index > 0 && 'border-t-hairline border-border'
+                            )}
+                          >
+                            {showHostName ? (
+                              <Text
+                                className="text-muted-foreground tracking-wide uppercase"
+                                numberOfLines={1}
+                              >
+                                {host.name}
+                              </Text>
+                            ) : null}
+                            {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
+                              const active = provider === 'claude' ? claudeActive : codexActive
+                              const accounts =
+                                provider === 'claude'
+                                  ? snapshot.claude.accounts
+                                  : snapshot.codex.accounts
+                              const limits = getActiveProviderRateLimits(snapshot, provider)
+                              // Why: with no managed accounts, still render a
+                              // "System default" row when the active target has
+                              // live usage data; the row label already falls back
+                              // to "System default" below.
+                              if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
+                                return null
+                              }
+                              const sessionBar = getUsageBarState(limits, 'session')
+                              const weeklyBar = getUsageBarState(limits, 'weekly')
+                              return (
+                                <View key={provider} className="flex-row items-start gap-3">
+                                  <View className="h-6 w-8 items-center justify-center">
+                                    {provider === 'claude' ? (
+                                      <ClaudeIcon size={18} />
+                                    ) : (
+                                      <OpenAIIcon size={18} colorClassName="accent-foreground" />
+                                    )}
+                                  </View>
+                                  <View className="min-w-0 flex-1 gap-1">
+                                    <Text className="text-foreground" numberOfLines={1}>
+                                      {active?.email ??
+                                        translate('mobile.home.systemDefault', 'System default')}
+                                    </Text>
+                                    <View className="gap-1">
+                                      <UsageBar
+                                        label={translate('mobile.home.usage.fiveHours', '5h')}
+                                        usedPercent={sessionBar.usedPercent}
+                                        unavailable={sessionBar.unavailable}
+                                        loading={sessionBar.loading}
+                                      />
+                                      <UsageBar
+                                        label={translate('mobile.home.usage.sevenDays', '7d')}
+                                        usedPercent={weeklyBar.usedPercent}
+                                        unavailable={weeklyBar.unavailable}
+                                        loading={weeklyBar.loading}
+                                      />
+                                    </View>
                                   </View>
                                 </View>
-                              </View>
-                            )
-                          })}
-                        </Pressable>
+                              )
+                            })}
+                          </Pressable>
+                        </Link>
                       )
                     })}
                   </MobileContentSection>

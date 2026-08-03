@@ -4,6 +4,7 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { Minus, Plus, type Icon } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import type { MobileSourceControlBulkActionsProps } from './bulk-actions-props'
 
@@ -23,12 +24,13 @@ function MobileSourceControlBulkAction({
   return (
     <MobileGlassPressable
       accessibilityLabel={label}
-      className="flex-1 rounded-full"
-      contentClassName="min-h-11 flex-row items-center justify-center gap-1 rounded-full px-3"
+      className="w-full rounded-full"
+      containerClassName="flex-1"
+      contentClassName="h-9 flex-row items-center justify-center gap-1 rounded-full px-3"
       disabled={disabled}
       fallbackClassName="bg-secondary"
-      hitSlop={4}
       onPress={onPress}
+      size="regular"
       tintColorClassName="accent-accent"
     >
       {loading ? (
@@ -56,23 +58,26 @@ export function MobileSourceControlBulkActions({
       <MobileSourceControlBulkAction
         disabled={stageDisabled}
         icon={Plus}
-        label="Stage All"
+        label={translate('mobile.sourceControl.stageAll', 'Stage All')}
         loading={stageLoading}
         onPress={onStageAll}
       />
       <MobileSourceControlBulkAction
         disabled={unstageDisabled}
         icon={Minus}
-        label="Unstage All"
+        label={translate('mobile.sourceControl.unstageAll', 'Unstage All')}
         loading={unstageLoading}
         onPress={onUnstageAll}
       />
       <MobileGlassIconButton
-        accessibilityLabel="More source control actions"
+        accessibilityLabel={translate(
+          'mobile.sourceControl.moreActions',
+          'More source control actions'
+        )}
         disabled={actionsDisabled}
         icon="more"
         onPress={onMore}
-        size="large"
+        size="regular"
       />
     </MobileGlassGroup>
   )

@@ -52,9 +52,9 @@ export function MobileDiffReviewHeader({
               accessibilityState={{ selected: filter === item }}
               className="rounded-full"
               contentClassName="items-center justify-center rounded-full px-3"
+              isSelected={filter === item}
               onPress={() => onSelectFilter(item)}
               size="small"
-              tintColorClassName={filter === item ? 'accent-secondary' : undefined}
             >
               <Text
                 className={cn(

@@ -1,10 +1,10 @@
 import { Pressable, Text, View } from 'react-native'
 
+import { BottomDrawer } from '~/components/bottom-drawer'
+import { MobileContentSection } from '~/components/content-section'
 import { Check } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
-
-import { BottomDrawer } from './bottom-drawer'
-import { MobileContentSection } from './content-section'
 
 export type SetupTrustPrompt = {
   repoId: string
@@ -24,9 +24,8 @@ type Props = {
   onClose: () => void
 }
 
-// The repo-owned yiru.yaml setup-hook trust prompt, shown before a workspace
-// create that would run an untrusted setup script. Extracted from NewWorkspaceModal
-// to keep that file focused; the async persist/create logic stays with the caller.
+// Why: trust persistence and workspace creation stay with the modal, while this
+// feature-owned drawer contains the closed choice the user must review.
 export function SetupHookTrustDrawer({
   visible,
   prompt,
@@ -43,18 +42,28 @@ export function SetupHookTrustDrawer({
           <View className="mb-3 px-1">
             <Text className="text-foreground text-sm font-semibold">
               {prompt.previouslyApproved
-                ? `${prompt.repoName}'s setup script changed`
-                : `Run setup from ${prompt.repoName}?`}
+                ? translate(
+                    'mobile.newWorkspace.setupTrust.changedTitle',
+                    "{{repo}}'s setup script changed",
+                    { repo: prompt.repoName }
+                  )
+                : translate('mobile.newWorkspace.setupTrust.title', 'Run setup from {{repo}}?', {
+                    repo: prompt.repoName
+                  })}
             </Text>
             <Text className="text-muted-foreground mt-1 text-xs">
-              This repository's yiru.yaml runs before the workspace starts. Only run it if you trust
-              this repository.
+              {translate(
+                'mobile.newWorkspace.setupTrust.description',
+                "This repository's yiru.yaml runs before the workspace starts. Only run it if you trust this repository."
+              )}
             </Text>
           </View>
 
           <View className="border-border bg-secondary mb-3 rounded-2xl border p-3">
             <Text className="text-muted-foreground mb-2 text-xs font-semibold">
-              {prompt.previouslyApproved ? 'New setup script' : 'Setup script'}
+              {prompt.previouslyApproved
+                ? translate('mobile.newWorkspace.setupTrust.newScript', 'New setup script')
+                : translate('mobile.newWorkspace.setupTrust.script', 'Setup script')}
             </Text>
             <Text className="text-foreground font-mono text-xs">{prompt.scriptContent}</Text>
           </View>
@@ -62,16 +71,22 @@ export function SetupHookTrustDrawer({
           <MobileContentSection>
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
               <Check size={16} colorClassName="accent-foreground" />
-              <Text className={styles.trustActionText}>Run hooks</Text>
+              <Text className={styles.trustActionText}>
+                {translate('mobile.newWorkspace.setupTrust.runOnce', 'Run hooks')}
+              </Text>
             </Pressable>
             <View className={styles.trustActionSeparator} />
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onAlwaysTrust}>
               <Check size={16} colorClassName="accent-foreground" />
-              <Text className={styles.trustActionText}>Always trust and run</Text>
+              <Text className={styles.trustActionText}>
+                {translate('mobile.newWorkspace.setupTrust.alwaysTrust', 'Always trust and run')}
+              </Text>
             </Pressable>
             <View className={styles.trustActionSeparator} />
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onDontRun}>
-              <Text className={styles.trustActionText}>Don't run</Text>
+              <Text className={styles.trustActionText}>
+                {translate('mobile.newWorkspace.setupTrust.dontRun', "Don't run")}
+              </Text>
             </Pressable>
           </MobileContentSection>
         </View>

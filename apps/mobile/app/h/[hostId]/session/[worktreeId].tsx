@@ -8,7 +8,6 @@ import {
   BackHandler,
   View,
   Text,
-  ScrollView,
   TextInput,
   Pressable,
   Keyboard,
@@ -24,12 +23,6 @@ import { normalizeBrowserUrl } from '~/browser/url'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
 import { BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
-import {
-  CustomKeyModal,
-  loadCustomKeys,
-  saveCustomKeys,
-  type CustomKey
-} from '~/components/custom-key-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
@@ -112,7 +105,7 @@ import type {
 } from '~/session/screen-state'
 import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
 import { MobileSessionTabStrip } from '~/session/tab-strip'
-import { MobileTerminalAccessoryKey } from '~/session/terminal/accessory-key'
+import { MobileTerminalAccessoryBar } from '~/session/terminal/accessory-bar'
 import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
 import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
 import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
@@ -144,6 +137,12 @@ import {
   getVisibleTerminalAccessoryKeys,
   loadTerminalAccessoryLayout
 } from '~/terminal/accessory-layout'
+import {
+  CustomKeyModal,
+  loadCustomKeys,
+  saveCustomKeys,
+  type CustomKey
+} from '~/terminal/custom-key-modal'
 import {
   countTerminalGestureInputSequences,
   isGestureMouseTrackingMode,
@@ -792,12 +791,12 @@ export default function SessionScreen(): React.JSX.Element {
         const message = err instanceof Error ? err.message : ''
         const previewMessage =
           message === 'binary_file'
-            ? 'Binary preview unavailable'
+            ? translate('mobile.files.binaryPreviewUnavailable', 'Binary preview unavailable')
             : message === 'file_too_large'
-              ? 'File too large for mobile preview'
+              ? translate('mobile.files.previewTooLarge', 'File too large for mobile preview')
               : tab.diffSource === 'staged' || tab.diffSource === 'unstaged'
-                ? "Couldn't load diff preview"
-                : "Couldn't load file preview"
+                ? translate('mobile.files.diffPreviewFailed', "Couldn't load diff preview")
+                : translate('mobile.files.previewFailed', "Couldn't load file preview")
         setFileDocs((prev) =>
           new Map(prev).set(tab.id, {
             status: 'error',
@@ -2338,7 +2337,10 @@ export default function SessionScreen(): React.JSX.Element {
             const existing = prev.find((terminal) => terminal.handle === createdHandle)
             const createdTerminal: Terminal = {
               handle: createdHandle,
-              title: created.title || existing?.title || 'Terminal',
+              title:
+                created.title ||
+                existing?.title ||
+                translate('mobile.terminal.defaultTitle', 'Terminal'),
               terminalTheme: created.terminalTheme ?? existing?.terminalTheme,
               isActive: true
             }
@@ -2367,24 +2369,34 @@ export default function SessionScreen(): React.JSX.Element {
               .then((sendResponse) => {
                 if (!sendResponse.ok) {
                   throw new Error(
-                    (sendResponse as RpcFailure).error.message || 'Failed to send notes'
+                    (sendResponse as RpcFailure).error.message ||
+                      translate('mobile.terminal.sendNotesFailed', 'Failed to send notes')
                   )
                 }
                 const result = (sendResponse as RpcSuccess).result as {
                   send?: { accepted?: boolean }
                 }
                 if (result.send?.accepted === false) {
-                  throw new Error('Terminal input is locked by another client.')
+                  throw new Error(
+                    translate(
+                      'mobile.terminal.inputLocked',
+                      'Terminal input is locked by another client.'
+                    )
+                  )
                 }
                 triggerSuccess()
-                showToast(options.successToast ?? 'Notes sent')
+                showToast(
+                  options.successToast ?? translate('mobile.terminal.notesSent', 'Notes sent')
+                )
                 options.onPromptSent?.()
               })
               .catch((err) => {
                 triggerError()
                 showToast(
                   options.errorToast ??
-                    (err instanceof Error ? err.message : "Couldn't send notes"),
+                    (err instanceof Error
+                      ? err.message
+                      : translate('mobile.terminal.sendNotesError', "Couldn't send notes")),
                   1800
                 )
               })
@@ -2401,7 +2413,9 @@ export default function SessionScreen(): React.JSX.Element {
         }
         scheduleDelayedAction(() => void fetchSessionTabs(), 500)
       } else {
-        const message = options?.errorToast ?? 'Failed to create terminal'
+        const message =
+          options?.errorToast ??
+          translate('mobile.terminal.createFailed', 'Failed to create terminal')
         setCreateError(message)
         if (options?.errorToast) {
           triggerError()
@@ -2409,7 +2423,9 @@ export default function SessionScreen(): React.JSX.Element {
         }
       }
     } catch {
-      const message = options?.errorToast ?? 'Failed to create terminal'
+      const message =
+        options?.errorToast ??
+        translate('mobile.terminal.createFailed', 'Failed to create terminal')
       setCreateError(message)
       if (options?.errorToast) {
         triggerError()
@@ -2445,10 +2461,11 @@ export default function SessionScreen(): React.JSX.Element {
       )
       return false
     }
-    const label = command.label.trim() || 'Quick command'
+    const label =
+      command.label.trim() || translate('mobile.quickCommand.defaultLabel', 'Quick command')
     void handleCreateTerminal(launch.agent, {
       ...launch.options,
-      errorToast: `Couldn't run ${label}`
+      errorToast: translate('mobile.quickCommand.runFailed', "Couldn't run {{label}}", { label })
     })
     return true
   }
@@ -2475,7 +2492,9 @@ export default function SessionScreen(): React.JSX.Element {
           if (isFileExistsErrorMessage(message) && attempt < 100) {
             continue
           }
-          throw new Error(message || 'Failed to create markdown note')
+          throw new Error(
+            message || translate('mobile.markdown.createFailed', 'Failed to create markdown note')
+          )
         }
 
         const openResponse = await client.sendRequest(
@@ -2489,9 +2508,14 @@ export default function SessionScreen(): React.JSX.Element {
         scheduleDelayedAction(() => void fetchSessionTabs(), 300)
         return
       }
-      throw new Error('Unable to create untitled markdown note')
+      throw new Error(
+        translate('mobile.markdown.createUntitledFailed', 'Unable to create untitled markdown note')
+      )
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create markdown note'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.markdown.createFailed', 'Failed to create markdown note')
       setCreateError(message)
       showToast(message, 1800)
     } finally {
@@ -2511,7 +2535,7 @@ export default function SessionScreen(): React.JSX.Element {
     }
     const url = normalizeBrowserUrl(rawUrl)
     if (!url) {
-      const message = 'Enter a valid URL'
+      const message = translate('mobile.browser.enterValidUrl', 'Enter a valid URL')
       setCreateError(message)
       showToast(message, 1400)
       return false
@@ -2545,7 +2569,10 @@ export default function SessionScreen(): React.JSX.Element {
       scheduleDelayedAction(() => void fetchSessionTabs(), 1200)
       return true
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create browser'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.browser.createFailed', 'Failed to create browser')
       setCreateError(message)
       showToast(message, 1800)
       return false
@@ -2582,7 +2609,10 @@ export default function SessionScreen(): React.JSX.Element {
       }
       scheduleDelayedAction(() => void fetchSessionTabs(), 250)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Browser command failed'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.browser.commandFailed', 'Browser command failed')
       showToast(message, 1600)
     }
   }
@@ -2604,7 +2634,10 @@ export default function SessionScreen(): React.JSX.Element {
         setTerminals((prev) => {
           const next = prev.map((terminal) =>
             terminal.handle === target.handle
-              ? { ...terminal, title: title || 'Terminal' }
+              ? {
+                  ...terminal,
+                  title: title || translate('mobile.terminal.defaultTitle', 'Terminal')
+                }
               : terminal
           )
           terminalsRef.current = next
@@ -3161,7 +3194,7 @@ export default function SessionScreen(): React.JSX.Element {
               <View className={styles.markdownFrame}>
                 <FileReader
                   doc={fileDocs.get(activeFileTab.id)}
-                  title={activeFileTab.title || 'File'}
+                  title={activeFileTab.title || translate('mobile.files.defaultTitle', 'File')}
                   relativePath={activeFileTab.relativePath}
                   language={activeFileTab.language}
                   diffCommentActions={
@@ -3215,7 +3248,8 @@ export default function SessionScreen(): React.JSX.Element {
               <View className={styles.emptyState}>
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 <Text className={styles.emptyText}>
-                  {activePendingTerminalTab.title || 'Loading terminal'}
+                  {activePendingTerminalTab.title ||
+                    translate('mobile.terminal.loading', 'Loading terminal')}
                 </Text>
               </View>
             ) : (
@@ -3292,112 +3326,31 @@ export default function SessionScreen(): React.JSX.Element {
                   }
                 ]}
               >
-                {/* Accessory keys */}
-                <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-                  {/* Why: a fixed, always-visible escape hatch from the open
-                  keyboard. Kept outside the horizontal ScrollView so it does
-                  not scroll away, and out of the terminal-byte shortcut path so
-                  it cannot be hidden by user shortcut customization (#5106). */}
-                  {keyboardLift > 0 && (
-                    <MobileTerminalAccessoryKey
-                      icon="dismiss-keyboard"
-                      onPress={dismissSoftwareKeyboard}
-                      hitSlop={8}
-                      accessibilityLabel="Dismiss keyboard"
-                      accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
-                    />
-                  )}
-                  {/* Why: with default tap handling the first tap on any accessory
-                  key dismisses the open keyboard and is swallowed, so live
-                  input lost its keyboard on every Esc/Tab press (#5106). */}
-                  <ScrollView
-                    className="min-w-0 flex-1 overflow-visible"
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerClassName="gap-2 py-2"
-                    keyboardShouldPersistTaps="always"
-                  >
-                    <MobileTerminalAccessoryKey
-                      disabled={!canSend}
-                      icon={isPhoneMode(activeHandle) ? 'desktop' : 'phone'}
-                      onPress={() => {
-                        if (activeHandle) {
-                          void toggleDisplayMode(activeHandle)
-                        }
-                      }}
-                      accessibilityLabel={
-                        isPhoneMode(activeHandle)
-                          ? 'Switch to desktop mode'
-                          : 'Switch to phone mode'
-                      }
-                    />
-                    <MobileTerminalAccessoryKey
-                      disabled={!canSend}
-                      icon="live-input"
-                      isSelected={liveInputEnabled}
-                      onPress={toggleLiveInput}
-                      accessibilityLabel={
-                        liveInputEnabled
-                          ? 'Switch to buffered command input'
-                          : 'Switch to live terminal input'
-                      }
-                    />
-                    {canPaste && (
-                      <MobileTerminalAccessoryKey
-                        disabled={!canSend}
-                        label="Paste"
-                        onPress={() => void handlePaste()}
-                        accessibilityLabel="Paste from clipboard"
-                      />
-                    )}
-                    {visibleBuiltInAccessoryKeys.map((key) => (
-                      <MobileTerminalAccessoryKey
-                        key={key.id}
-                        disabled={!canSend}
-                        label={key.label}
-                        onPressIn={() => {
-                          if (!key.repeatable) {
-                            return
-                          }
-                          const input = createTerminalLiveAccessoryInput(key)
-                          void handleAccessoryKey(input)
-                          startAccessoryRepeat(input)
-                        }}
-                        onPressOut={() => {
-                          if (key.repeatable) {
-                            stopAccessoryRepeat()
-                          }
-                        }}
-                        onPress={() => {
-                          if (key.repeatable) {
-                            return
-                          }
-                          void handleAccessoryKey(createTerminalLiveAccessoryInput(key))
-                        }}
-                        accessibilityLabel={key.accessibilityLabel ?? `Send ${key.label}`}
-                      />
-                    ))}
-                    {customKeys.map((key) => (
-                      <MobileTerminalAccessoryKey
-                        key={key.id}
-                        disabled={!canSend}
-                        label={key.label}
-                        onPress={() => void handleAccessoryKey({ bytes: key.bytes })}
-                        onLongPress={() => {
-                          triggerMediumImpact()
-                          setDeleteKeyTarget(key)
-                        }}
-                        delayLongPress={400}
-                        accessibilityLabel={`Send ${key.label}`}
-                      />
-                    ))}
-                    <MobileTerminalAccessoryKey
-                      icon="add"
-                      onPress={() => setShowCustomKeyModal(true)}
-                      accessibilityLabel="Add custom shortcut"
-                    />
-                  </ScrollView>
-                </MobileGlassGroup>
+                <MobileTerminalAccessoryBar
+                  builtInKeys={visibleBuiltInAccessoryKeys}
+                  canPaste={canPaste}
+                  canSend={canSend}
+                  customKeys={customKeys}
+                  isKeyboardVisible={keyboardLift > 0}
+                  isPhoneDisplayMode={isPhoneMode(activeHandle)}
+                  liveInputEnabled={liveInputEnabled}
+                  onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
+                  onAddCustomKey={() => setShowCustomKeyModal(true)}
+                  onCustomKeyLongPress={(key) => {
+                    triggerMediumImpact()
+                    setDeleteKeyTarget(key)
+                  }}
+                  onDismissKeyboard={dismissSoftwareKeyboard}
+                  onPaste={() => void handlePaste()}
+                  onRepeatStart={startAccessoryRepeat}
+                  onRepeatStop={stopAccessoryRepeat}
+                  onToggleDisplayMode={() => {
+                    if (activeHandle) {
+                      void toggleDisplayMode(activeHandle)
+                    }
+                  }}
+                  onToggleLiveInput={toggleLiveInput}
+                />
 
                 {/* Input bar */}
                 <MobileTerminalInputBar

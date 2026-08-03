@@ -16,12 +16,15 @@ type MobileGlassPressableProps = Omit<
   contentClassName?: string
   disabled?: boolean
   fallbackClassName?: string
+  isProminent?: boolean
+  isSelected?: boolean
   onPress: NonNullable<PressableProps['onPress']>
   size?: 'large' | 'regular' | 'small'
   tintColorClassName?: string
 }
 
 export function MobileGlassPressable({
+  accessibilityState,
   accessibilityRole = 'button',
   children,
   className,
@@ -30,31 +33,44 @@ export function MobileGlassPressable({
   disabled = false,
   fallbackClassName,
   hitSlop,
+  isProminent = false,
+  isSelected,
   onPress,
   size,
   tintColorClassName,
   ...pressableProps
 }: MobileGlassPressableProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
-  const resolvedHitSlop = hitSlop ?? (size ? 0 : 6)
+  const resolvedFallbackClassName = cn(
+    isProminent && 'border-transparent bg-primary',
+    isSelected && !isProminent && 'bg-accent',
+    fallbackClassName
+  )
+  const resolvedTintColorClassName =
+    isProminent || isSelected ? 'accent-primary' : tintColorClassName
 
   return (
     <Pressable
       {...pressableProps}
       accessibilityRole={accessibilityRole}
-      className={size ? cn('min-h-11 min-w-11 justify-center', containerClassName) : undefined}
+      accessibilityState={{
+        ...accessibilityState,
+        disabled,
+        ...(isSelected === undefined ? {} : { selected: isSelected })
+      }}
+      className={cn('min-h-11 min-w-11 justify-center', containerClassName)}
       disabled={disabled}
-      hitSlop={resolvedHitSlop}
+      hitSlop={hitSlop}
       onPress={onPress}
     >
       {({ pressed }) => (
         <MobileGlassSurface
           className={cn('overflow-hidden', className)}
-          fallbackClassName={fallbackClassName}
+          fallbackClassName={resolvedFallbackClassName}
           isFunctional
           isInteractive={!disabled}
           pointerEvents="none"
-          tintColorClassName={tintColorClassName}
+          tintColorClassName={resolvedTintColorClassName}
         >
           <View
             className={cn(

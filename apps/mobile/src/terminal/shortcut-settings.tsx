@@ -4,11 +4,14 @@ import { AppState, View, Text, Pressable, type AppStateStatus } from 'react-nati
 import type Animated from 'react-native-reanimated'
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
 
+import { MobileContentSection } from '~/components/content-section'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
-import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from '../terminal/accessory-keys'
+import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from './accessory-keys'
 import {
   getDefaultTerminalAccessoryLayout,
   loadTerminalAccessoryLayout,
@@ -16,12 +19,9 @@ import {
   saveTerminalAccessoryLayout,
   setTerminalAccessoryBuiltInVisible,
   type TerminalAccessoryLayout
-} from '../terminal/accessory-layout'
-import { MobileContentSection } from './content-section'
+} from './accessory-layout'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
-import { MobileGlassIconButton } from './glass/icon-button'
-import { SettingsToggleRow } from './settings-toggle-row'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
 // reorderable section must share one fixed height.

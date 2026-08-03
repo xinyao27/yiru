@@ -1,8 +1,7 @@
 import { View } from 'react-native'
 
+import { LoadingIndicator } from '~/components/loading-indicator'
 import { cn } from '~/style/class-names'
-
-import { LoadingIndicator } from './loading-indicator'
 
 type WorktreeStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 

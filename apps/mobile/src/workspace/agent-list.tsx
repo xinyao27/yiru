@@ -2,8 +2,8 @@ import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runt
 import { useMemo } from 'react'
 import { View } from 'react-native'
 
-import { flattenAgentRowLineage } from '../workspace/agent-row-lineage'
-import { WorkspaceAgentRow } from './workspace-agent-row'
+import { WorkspaceAgentRow } from './agent-row'
+import { flattenAgentRowLineage } from './agent-row-lineage'
 
 type Props = {
   agents: RuntimeWorktreeAgentRow[]

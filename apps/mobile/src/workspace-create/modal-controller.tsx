@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 
 import type { RpcClient } from '../transport/rpc-client'
-import { NewWorkspaceModal } from './new-workspace-modal'
+import { NewWorkspaceModal } from './modal'
 
 export type NewWorkspaceModalControllerHandle = {
   open: () => void

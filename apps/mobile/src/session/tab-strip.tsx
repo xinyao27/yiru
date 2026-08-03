@@ -3,6 +3,7 @@ import { ScrollView, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { translate } from '~/i18n/translate'
 
 import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type { MobileSessionTab } from './screen-state'
@@ -64,13 +65,13 @@ export function MobileSessionTabStrip({
 
   return (
     <MobileGlassGroup className="mx-2 my-1 flex-row items-center gap-2 py-1" spacing={8}>
-      <View className="min-w-0 flex-1 overflow-hidden">
+      <View className="min-h-11 min-w-0 flex-1 overflow-hidden">
         <ScrollView
           ref={scrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="max-h-9"
-          contentContainerClassName="gap-2"
+          className="h-11"
+          contentContainerClassName="items-center gap-2"
           keyboardShouldPersistTaps="handled"
           scrollEventThrottle={16}
           onScroll={(event) => {
@@ -104,7 +105,7 @@ export function MobileSessionTabStrip({
         </ScrollView>
       </View>
       <MobileGlassIconButton
-        accessibilityLabel="New tab"
+        accessibilityLabel={translate('mobile.session.newTab', 'New tab')}
         disabled={disabled}
         icon="plus"
         onPress={onNewTabPress}
