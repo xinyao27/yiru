@@ -1,29 +1,16 @@
 import type { IFilesystemProvider } from './types'
 
-const sshProviders = new Map<string, IFilesystemProvider>()
-
 export const SSH_FILESYSTEM_PROVIDER_UNAVAILABLE_MESSAGE =
   'Remote connection dropped. Click Reconnect on the SSH target before retrying.'
 
-export function registerSshFilesystemProvider(
-  connectionId: string,
-  provider: IFilesystemProvider
-): void {
-  sshProviders.set(connectionId, provider)
+// Why: the SSH transport that used to register providers here is gone, so this
+// registry is permanently empty. It stays as the single seam every remote-fs
+// call site already funnels through — collapsing ~40 callers onto their local
+// branch is P3c-5's job, not something to smear across them one at a time.
+export function getSshFilesystemProvider(_connectionId: string): IFilesystemProvider | undefined {
+  return undefined
 }
 
-export function unregisterSshFilesystemProvider(connectionId: string): void {
-  sshProviders.delete(connectionId)
-}
-
-export function getSshFilesystemProvider(connectionId: string): IFilesystemProvider | undefined {
-  return sshProviders.get(connectionId)
-}
-
-export function requireSshFilesystemProvider(connectionId: string): IFilesystemProvider {
-  const provider = getSshFilesystemProvider(connectionId)
-  if (!provider) {
-    throw new Error(SSH_FILESYSTEM_PROVIDER_UNAVAILABLE_MESSAGE)
-  }
-  return provider
+export function requireSshFilesystemProvider(_connectionId: string): IFilesystemProvider {
+  throw new Error(SSH_FILESYSTEM_PROVIDER_UNAVAILABLE_MESSAGE)
 }

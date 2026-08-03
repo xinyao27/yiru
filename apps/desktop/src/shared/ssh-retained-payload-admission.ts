@@ -1,5 +1,4 @@
 import type {
-  DirectSshAuthority,
   EnrichedDetectedPort,
   SshConnectionState,
   SshConnectionStatus,
@@ -8,14 +7,13 @@ import type {
 
 import { clampUtf8TextPrefix, measureUtf8ByteLength } from './utf8-byte-limits'
 
-export const SSH_RETAINED_IDENTIFIER_MAX_UTF8_BYTES = 1024
-export const SSH_CONNECTION_ERROR_MAX_UTF8_BYTES = 16 * 1024
-export const SSH_PROVIDER_EPOCH_MAX_UTF8_BYTES = 128
-export const SSH_CREDENTIAL_DETAIL_MAX_UTF8_BYTES = 16 * 1024
-export const SSH_DETECTED_PORTS_MAX_ENTRIES = 50
-export const SSH_DETECTED_PORT_HOST_MAX_UTF8_BYTES = 1024
-export const SSH_DETECTED_PORT_PROCESS_NAME_MAX_UTF8_BYTES = 4 * 1024
-export const SSH_DETECTED_PORT_ADVERTISED_URL_MAX_UTF8_BYTES = 2048
+const SSH_RETAINED_IDENTIFIER_MAX_UTF8_BYTES = 1024
+const SSH_CONNECTION_ERROR_MAX_UTF8_BYTES = 16 * 1024
+const SSH_PROVIDER_EPOCH_MAX_UTF8_BYTES = 128
+const SSH_DETECTED_PORTS_MAX_ENTRIES = 50
+const SSH_DETECTED_PORT_HOST_MAX_UTF8_BYTES = 1024
+const SSH_DETECTED_PORT_PROCESS_NAME_MAX_UTF8_BYTES = 4 * 1024
+const SSH_DETECTED_PORT_ADVERTISED_URL_MAX_UTF8_BYTES = 2048
 
 const CONNECTION_STATUSES = new Set<SshConnectionStatus>([
   'disconnected',
@@ -28,7 +26,7 @@ const CONNECTION_STATUSES = new Set<SshConnectionStatus>([
   'error'
 ])
 
-export function isSshRetainedIdentifier(value: unknown): value is string {
+function isSshRetainedIdentifier(value: unknown): value is string {
   return (
     typeof value === 'string' &&
     value.length > 0 &&
@@ -38,19 +36,7 @@ export function isSshRetainedIdentifier(value: unknown): value is string {
   )
 }
 
-export function isAdmissibleDirectSshAuthority(value: unknown): value is DirectSshAuthority {
-  if (!value || typeof value !== 'object') {
-    return false
-  }
-  const authority = value as Record<string, unknown>
-  return (
-    isSshRetainedIdentifier(authority.targetId) &&
-    isSshProviderEpoch(authority.providerEpoch) &&
-    isNonNegativeSafeInteger(authority.connectionGeneration)
-  )
-}
-
-export function admitSshConnectionState(
+function admitSshConnectionState(
   value: unknown,
   expectedTargetId: string
 ): SshConnectionState | null {
@@ -135,7 +121,7 @@ function isSshProviderEpoch(value: unknown): value is SshProviderEpoch {
   )
 }
 
-export function clampSshConnectionError(error: string | null): string | null {
+function clampSshConnectionError(error: string | null): string | null {
   return typeof error === 'string'
     ? clampUtf8TextPrefix(error, SSH_CONNECTION_ERROR_MAX_UTF8_BYTES)
     : null
