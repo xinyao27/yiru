@@ -15,7 +15,6 @@ import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-mo
 import {
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
@@ -146,10 +145,6 @@ import {
   normalizePersistedMigrationUnsupportedPtyEntries as normalizeMigrationUnsupportedPtyEntries
 } from './persisted-state/persisted-terminal-session-codec'
 import { applyPersistedUiUpdate, readPersistedUi } from './persisted-state/persisted-ui-mutations'
-import {
-  migrateUiHostScopeSshTargetId,
-  migrateWorkspaceSessionSshTargetId
-} from './persisted-state/ssh-target-id-migration'
 import {
   removeRepoFromWorkspaceSessionsForHost,
   removeWorkspaceSessionOwner
@@ -4077,115 +4072,6 @@ export class Store {
     }
     this.state.removedSshTargetTombstones = existing.filter((t) => t.oldTargetId !== oldTargetId)
     this.scheduleSave()
-  }
-
-  /**
-   * Re-point every repo and worktree meta pinned to a removed SSH target id
-   * onto a re-added target's id, so orphaned workspaces reattach to the live
-   * host instead of remaining un-removable ghosts. Returns the ids of repos
-   * re-pointed (empty when nothing referenced the old id).
-   */
-  reassignSshTargetId(oldTargetId: string, newTargetId: string): string[] {
-    if (oldTargetId === newTargetId) {
-      return []
-    }
-    const oldHostId = toSshExecutionHostId(oldTargetId)
-    const newHostId = toSshExecutionHostId(newTargetId)
-    const repoIds = new Set<string>()
-    for (const repo of this.state.repos) {
-      const matchesConnection = repo.connectionId === oldTargetId
-      const matchesHost = repo.executionHostId === oldHostId
-      if (!matchesConnection && !matchesHost) {
-        continue
-      }
-      if (matchesConnection) {
-        repo.connectionId = newTargetId
-      }
-      // Why: only rewrite executionHostId when it was actually set to the old
-      // SSH host. SSH repos created via addRemoteRepoFromPath leave it unset and
-      // derive the host from connectionId, so we must not stamp a value where
-      // there wasn't one.
-      if (matchesHost) {
-        repo.executionHostId = newHostId
-      }
-      repoIds.add(repo.id)
-    }
-    // Re-point worktree metas whose hostId pointed at the old SSH host.
-    let metaChanged = false
-    for (const meta of Object.values(this.state.worktreeMeta)) {
-      if (meta.hostId === oldHostId) {
-        meta.hostId = newHostId
-        metaChanged = true
-      }
-    }
-    // Why: the old id also survives in session pty ids, the startup reconnect
-    // list, sleeping-agent records, host setups, host-scope UI, and pty leases;
-    // any un-migrated carrier later throws `SSH target not found` (STA-1468).
-    let carrierChanged = migrateWorkspaceSessionSshTargetId(
-      this.state.workspaceSession,
-      oldTargetId,
-      newTargetId
-    )
-    for (const session of Object.values(this.state.workspaceSessionsByHostId ?? {})) {
-      if (session && migrateWorkspaceSessionSshTargetId(session, oldTargetId, newTargetId)) {
-        carrierChanged = true
-      }
-    }
-    // Why: partitions are read by host id, so one stored under the removed id
-    // would be orphaned. No writer keys partitions by ssh host today, but the
-    // schema tolerates it — re-key rather than strand it. If the new key
-    // already has a partition, that one is live; drop the dead old one.
-    const partitions = this.state.workspaceSessionsByHostId
-    const oldPartition = partitions?.[oldHostId]
-    if (partitions && oldPartition) {
-      delete partitions[oldHostId]
-      partitions[newHostId] ??= oldPartition
-      carrierChanged = true
-    }
-    if (migrateUiHostScopeSshTargetId(this.state.ui, oldTargetId, newTargetId)) {
-      carrierChanged = true
-    }
-    for (const lease of this.state.sshRemotePtyLeases ?? []) {
-      if (lease.targetId === oldTargetId) {
-        lease.targetId = newTargetId
-        carrierChanged = true
-      }
-    }
-    let setupsChanged = false
-    const keptSetups: ProjectHostSetup[] = []
-    for (const setup of this.state.projectHostSetups) {
-      if (setup.hostId !== oldHostId) {
-        keptSetups.push(setup)
-        continue
-      }
-      const duplicate = this.state.projectHostSetups.some(
-        (entry) =>
-          entry !== setup && entry.projectId === setup.projectId && entry.hostId === newHostId
-      )
-      // Why: a setup already exists for the re-added host — the old row is a
-      // stale ghost that would violate the (projectId, hostId) uniqueness.
-      if (duplicate) {
-        setupsChanged = true
-        continue
-      }
-      setup.hostId = newHostId
-      setup.updatedAt = Date.now()
-      keptSetups.push(setup)
-      setupsChanged = true
-    }
-    if (setupsChanged) {
-      this.state.projectHostSetups = keptSetups
-    }
-    // Why: repo-row and host-setup rewrites can affect host-setup compatibility,
-    // but meta-only rewrites cannot — keep that sync under this gate. Persist
-    // whenever anything changed, so partial re-points aren't lost on quit.
-    if (repoIds.size > 0 || setupsChanged) {
-      this.syncProjectHostSetupCompatibilityState()
-    }
-    if (repoIds.size > 0 || metaChanged || carrierChanged || setupsChanged) {
-      this.scheduleSave()
-    }
-    return [...repoIds]
   }
 
   // ── SSH Remote PTY Leases ──────────────────────────────────────────
