@@ -149,6 +149,6 @@ function handleRuntimeLine(line, finishResolve) {
       finishResolve(pairingUrl)
     }
   } catch {
-    // Ignore non-JSON log lines from Electron startup.
+    // Why: Electron startup shares stdout with the JSON pairing event.
   }
 }

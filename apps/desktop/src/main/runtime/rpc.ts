@@ -9,6 +9,11 @@ import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 import type { WebSocket } from 'ws'
+import {
+  MOBILE_DEVELOPMENT_PAIRING_METHOD,
+  MobileDevelopmentPairingParamsSchema,
+  type MobileDevelopmentPairingResult
+} from '~shared/mobile-development-pairing/contract'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '~shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,
@@ -49,8 +54,11 @@ type YiruRuntimeRpcServerOptions = {
   // Distinguishes that pin from the DEFAULT_WS_PORT default so transport bind
   // order can prefer the pin over a stale STA-1511 fallback (issue #8535).
   preferPinnedWsPort?: boolean
+  enableDevelopmentMobilePairing?: boolean
   webClientRoot?: string
 }
+
+type PairingCredentialPolicy = 'reuse-pending' | 'rotate-pending' | 'reuse-named'
 
 // Why: long-poll slot cap. With keepalives a `check --wait --timeout-ms
 // 600000` can hold a connection for up to 10 minutes; unbounded that would
@@ -142,6 +150,7 @@ export class YiruRuntimeRpcServer {
   private readonly enableWebSocket: boolean
   private readonly wsPort: number
   private readonly preferPinnedWsPort: boolean
+  private readonly enableDevelopmentMobilePairing: boolean
   private readonly webClientRoot: string | undefined
   private readonly authToken = randomBytes(24).toString('hex')
   private deviceRegistry: DeviceRegistry | null = null
@@ -175,6 +184,7 @@ export class YiruRuntimeRpcServer {
     enableWebSocket = false,
     wsPort = DEFAULT_WS_PORT,
     preferPinnedWsPort = false,
+    enableDevelopmentMobilePairing = false,
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
@@ -185,6 +195,7 @@ export class YiruRuntimeRpcServer {
     this.enableWebSocket = enableWebSocket
     this.wsPort = wsPort
     this.preferPinnedWsPort = preferPinnedWsPort
+    this.enableDevelopmentMobilePairing = enableDevelopmentMobilePairing
     this.webClientRoot = webClientRoot
   }
 
@@ -237,8 +248,8 @@ export class YiruRuntimeRpcServer {
   createPairingOffer(args: {
     address?: string | null
     name?: string
-    rotate?: boolean
     scope?: DeviceScope
+    credentialPolicy?: PairingCredentialPolicy
   }):
     | { available: false }
     | {
@@ -257,9 +268,13 @@ export class YiruRuntimeRpcServer {
     const endpoint = resolvePairingEndpoint(rawEndpoint, args.address)
     const deviceName = args.name ?? `CLI ${new Date().toLocaleDateString()}`
     const scope = args.scope ?? 'runtime'
-    const device = args.rotate
-      ? this.deviceRegistry.rotatePendingDevice(deviceName, scope)
-      : this.deviceRegistry.getOrCreatePendingDevice(deviceName, scope)
+    const credentialPolicy = args.credentialPolicy ?? 'reuse-pending'
+    const device =
+      credentialPolicy === 'reuse-named'
+        ? this.deviceRegistry.getOrCreateNamedDevice(deviceName, scope)
+        : credentialPolicy === 'rotate-pending'
+          ? this.deviceRegistry.rotatePendingDevice(deviceName, scope)
+          : this.deviceRegistry.getOrCreatePendingDevice(deviceName, scope)
     const pairingUrl = encodePairingOffer({
       v: PAIRING_OFFER_VERSION,
       endpoint,
@@ -280,7 +295,7 @@ export class YiruRuntimeRpcServer {
   createMobilePairingOffer(args: {
     address?: string | null
     name?: string
-    rotate?: boolean
+    credentialPolicy?: PairingCredentialPolicy
   }): ReturnType<YiruRuntimeRpcServer['createPairingOffer']> {
     // Why: Yiru Mobile is direct-only; the advertised address may still be a
     // LAN, Tailscale, ZeroTier, or user-provided private-network endpoint.
@@ -592,6 +607,10 @@ export class YiruRuntimeRpcServer {
     }
     const request = parsed.request
 
+    if (request.method === MOBILE_DEVELOPMENT_PAIRING_METHOD) {
+      return this.handleDevelopmentMobilePairing(request)
+    }
+
     // Why: long-poll admission fence. Short RPCs bypass the counter entirely
     // — it only guards handlers that can block for minutes. See §7 risk #2.
     const longPoll = isLongPollRequest(request)
@@ -618,6 +637,38 @@ export class YiruRuntimeRpcServer {
         this.activeLongPolls = Math.max(0, this.activeLongPolls - 1)
       }
     }
+  }
+
+  private handleDevelopmentMobilePairing(request: RpcRequest): RpcResponse {
+    if (!this.enableDevelopmentMobilePairing) {
+      return this.buildError(request.id, 'method_not_found', `Unknown method: ${request.method}`)
+    }
+    const params = MobileDevelopmentPairingParamsSchema.safeParse(request.params ?? {})
+    if (!params.success) {
+      return this.buildError(
+        request.id,
+        'invalid_argument',
+        'Expected a valid --address and non-empty --device-name'
+      )
+    }
+    const offer = this.createMobilePairingOffer({
+      address: params.data.address,
+      name: params.data.deviceName,
+      credentialPolicy: 'reuse-named'
+    })
+    if (!offer.available) {
+      return this.buildError(
+        request.id,
+        'runtime_unavailable',
+        'Mobile WebSocket transport is unavailable'
+      )
+    }
+    const result: MobileDevelopmentPairingResult = {
+      pairingUrl: offer.pairingUrl,
+      endpoint: offer.endpoint,
+      deviceId: offer.deviceId
+    }
+    return successResponse(request.id, { runtimeId: this.runtime.getRuntimeId() }, result)
   }
 
   private parseAndAuth(rawMessage: string): { request: RpcRequest } | { error: RpcResponse } {
