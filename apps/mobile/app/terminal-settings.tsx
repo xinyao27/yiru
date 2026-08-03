@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View, Text, Pressable, Switch } from 'react-native'
+import { View, Text, Pressable } from 'react-native'
 import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
@@ -7,14 +7,15 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { MobileContentSection } from '~/components/content-section'
-import { PickerModal, type PickerOption } from '~/components/picker-modal'
-import { TerminalShortcutSettings } from '~/components/terminal-shortcut-settings'
+import { SelectionDrawer } from '~/components/selection-drawer'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
   TextT as Type
 } from '~/components/uniwind-icons'
 import { GestureHandlerRootView } from '~/components/uniwind-native-components'
+import { translate } from '~/i18n/translate'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalTextScale,
@@ -22,78 +23,21 @@ import {
   saveTerminalTextScale
 } from '~/storage/preferences'
 import { setTerminalAutoRestoreFitMsForHost } from '~/terminal/auto-restore-fit-state'
+import {
+  AUTO_RESTORE_FIT_OPTIONS,
+  autoRestoreSummary,
+  type RestoreValue,
+  TEXT_SIZE_OPTIONS,
+  textSizeSummary,
+  textSizeValueFromScale,
+  type TextSizeValue,
+  valueFromMs
+} from '~/terminal/settings-options'
+import { TerminalShortcutSettings } from '~/terminal/shortcut-settings'
 import { useAllHostClients } from '~/transport/all-host-clients'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { HostProfile } from '~/transport/types'
-
-type RestoreValue = 'indefinite' | '60s' | '5m' | '30m'
-
-type TextSizeValue = 'smallest' | 'smaller' | 'default' | 'large' | 'larger' | 'largest'
-
-// scale = baseline zoom the terminal WebView applies on top of fit-to-width.
-// Keep in sync with TERMINAL_TEXT_SCALES; pinch-to-zoom snaps to these values.
-const TEXT_SIZE_OPTIONS: (PickerOption<TextSizeValue> & { scale: number })[] = [
-  { value: 'smallest', label: 'Smallest (50%)', scale: 0.5 },
-  { value: 'smaller', label: 'Smaller (75%)', scale: 0.75 },
-  { value: 'default', label: 'Default (100%)', scale: 1 },
-  { value: 'large', label: 'Large (125%)', scale: 1.25 },
-  { value: 'larger', label: 'Larger (150%)', scale: 1.5 },
-  { value: 'largest', label: 'Largest (200%)', scale: 2 }
-]
-
-function textSizeValueFromScale(scale: number): TextSizeValue {
-  return TEXT_SIZE_OPTIONS.find((o) => o.scale === scale)?.value ?? 'default'
-}
-
-function textSizeSummary(scale: number): string {
-  return (TEXT_SIZE_OPTIONS.find((o) => o.scale === scale) ?? TEXT_SIZE_OPTIONS[0]!).label
-}
-
-const AUTO_RESTORE_FIT_OPTIONS: (PickerOption<RestoreValue> & { ms: number | null })[] = [
-  { value: 'indefinite', label: 'Keep at phone size (default)', ms: null },
-  { value: '60s', label: 'After 1 minute', ms: 60_000 },
-  { value: '5m', label: 'After 5 minutes', ms: 5 * 60_000 },
-  { value: '30m', label: 'After 30 minutes', ms: 30 * 60_000 }
-]
-
-function valueFromMs(ms: number | null | undefined): RestoreValue {
-  if (ms == null) {
-    return 'indefinite'
-  }
-  const exact = AUTO_RESTORE_FIT_OPTIONS.find((o) => o.ms === ms)
-  if (exact) {
-    return exact.value
-  }
-  // Why: server may return a non-preset ms (custom value, future preset,
-  // or server-side clamp). Snap to the closest finite preset so the
-  // picker's selected radio agrees with the row sublabel rendered by
-  // autoRestoreSummary ("After Xs").
-  let closest: (typeof AUTO_RESTORE_FIT_OPTIONS)[number] | null = null
-  let bestDelta = Infinity
-  for (const opt of AUTO_RESTORE_FIT_OPTIONS) {
-    if (opt.ms == null) {
-      continue
-    }
-    const delta = Math.abs(opt.ms - ms)
-    if (delta < bestDelta) {
-      bestDelta = delta
-      closest = opt
-    }
-  }
-  return closest ? closest.value : 'indefinite'
-}
-
-function autoRestoreSummary(ms: number | null | undefined): string {
-  if (ms === undefined) {
-    return '…'
-  }
-  if (ms === null) {
-    return AUTO_RESTORE_FIT_OPTIONS[0]!.label
-  }
-  const exact = AUTO_RESTORE_FIT_OPTIONS.find((o) => o.ms === ms)
-  return exact ? exact.label : `After ${Math.round(ms / 1000)}s`
-}
 
 // Why: sendRequest resolves with the raw RpcResponse envelope and never throws
 // on {ok:false}, so the ms payload must be read out of `result` — reading it off
@@ -133,7 +77,7 @@ function HostFitRow({
   )
 }
 
-export default function TerminalSettingsScreen() {
+export default function TerminalSettingsScreen(): React.JSX.Element {
   const [hosts, setHosts] = useState<HostProfile[]>([])
   useEffect(() => {
     void loadHosts().then(setHosts)
@@ -147,7 +91,7 @@ export default function TerminalSettingsScreen() {
 
   // Why: per-host current value, lazily fetched. We keep state at the
   // screen level rather than per-row so the picker can render at root
-  // level — embedding PickerModal inside a row clipped its BottomDrawer
+  // level — embedding SelectionDrawer inside a row clipped its BottomDrawer
   // absoluteFill backdrop to the ScrollView content frame and made the
   // drawer appear cut-off.
   const [hostMs, setHostMs] = useState<Record<string, number | null | undefined>>({})
@@ -292,19 +236,22 @@ export default function TerminalSettingsScreen() {
         }}
       >
         <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
-          WHEN YOU LEAVE THE APP
+          {translate('mobile.terminalSettings.autoRestore.heading', 'WHEN YOU LEAVE THE APP')}
         </Text>
         <Text className="text-muted-foreground px-1 text-xs leading-5">
-          While you&apos;re using a terminal on your phone, Yiru shrinks it to fit your screen. When
-          you close the app or switch away, this controls whether it stays at phone size (so
-          interactive CLI tools don&apos;t reflow) or resizes back to your desktop. You can always
-          use Restore this terminal or Restore all terminals on the banner to resize manually.
+          {translate(
+            'mobile.terminalSettings.autoRestore.description',
+            "While you're using a terminal on your phone, Yiru shrinks it to fit your screen. When you close the app or switch away, this controls whether it stays at phone size (so interactive CLI tools don't reflow) or resizes back to your desktop. You can always use Restore this terminal or Restore all terminals on the banner to resize manually."
+          )}
         </Text>
 
         {hosts.length === 0 ? (
           <MobileContentSection className="mt-2">
             <Text className="text-muted-foreground p-3 text-sm">
-              No paired desktops yet. Pair one to control terminal behavior.
+              {translate(
+                'mobile.terminalSettings.autoRestore.noHosts',
+                'No paired desktops yet. Pair one to control terminal behavior.'
+              )}
             </Text>
           </MobileContentSection>
         ) : (
@@ -327,16 +274,18 @@ export default function TerminalSettingsScreen() {
         )}
 
         <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
-          TEXT SIZE
+          {translate('mobile.terminalSettings.textSize.heading', 'TEXT SIZE')}
         </Text>
         <Text className="text-muted-foreground px-1 text-xs leading-5">
-          Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes
-          show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal
-          itself, which updates this setting. Per-device display only; doesn&apos;t change the
-          desktop terminal.
+          {translate(
+            'mobile.terminalSettings.textSize.description',
+            "Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal itself, which updates this setting. Per-device display only; doesn't change the desktop terminal."
+          )}
         </Text>
         <MobileContentSection className="mt-2">
           <Pressable
+            accessibilityLabel={translate('mobile.terminalSettings.textSize.label', 'Text size')}
+            accessibilityRole="button"
             className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setTextSizePickerOpen(true)}
           >
@@ -344,7 +293,9 @@ export default function TerminalSettingsScreen() {
               <Type size={16} colorClassName="accent-muted-foreground" />
             </View>
             <View className="flex-1">
-              <Text className="text-foreground text-sm">Text size</Text>
+              <Text className="text-foreground text-sm">
+                {translate('mobile.terminalSettings.textSize.label', 'Text size')}
+              </Text>
               <Text className="text-muted-foreground mt-1 text-xs">
                 {textSizeSummary(textScale)}
               </Text>
@@ -356,31 +307,23 @@ export default function TerminalSettingsScreen() {
         </MobileContentSection>
 
         <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
-          KEYBOARD INPUT
+          {translate('mobile.terminalSettings.keyboard.heading', 'KEYBOARD INPUT')}
         </Text>
         <Text className="text-muted-foreground px-1 text-xs leading-5">
-          Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal
-          command bar. Off by default so the keyboard never rewrites commands, flags, or paths.
-          Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes,
-          so suggestions don&apos;t apply there.
+          {translate(
+            'mobile.terminalSettings.keyboard.description',
+            "Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal command bar. Off by default so the keyboard never rewrites commands, flags, or paths. Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes, so suggestions don't apply there."
+          )}
         </Text>
         <MobileContentSection className="mt-2">
-          <View className="flex-row items-center gap-2 px-3 py-3">
-            <View className="flex-1">
-              <Text className="text-foreground text-sm">Autocomplete &amp; autocorrect</Text>
-              <Text className="text-muted-foreground mt-1 text-xs">
-                {autocompleteEnabled ? 'On' : 'Off'}
-              </Text>
-            </View>
-            <Switch
-              value={autocompleteEnabled}
-              onValueChange={toggleAutocomplete}
-              trackColorOffClassName="accent-accent"
-              trackColorOnClassName="accent-muted-foreground"
-              thumbColorClassName="accent-foreground"
-              ios_backgroundColorClassName="accent-accent"
-            />
-          </View>
+          <SettingsToggleRow
+            label={translate(
+              'mobile.terminalSettings.autocomplete.label',
+              'Autocomplete & autocorrect'
+            )}
+            onValueChange={toggleAutocomplete}
+            value={autocompleteEnabled}
+          />
         </MobileContentSection>
 
         <TerminalShortcutSettings
@@ -391,11 +334,17 @@ export default function TerminalSettingsScreen() {
         />
       </Animated.ScrollView>
 
-      <PickerModal<RestoreValue>
+      <SelectionDrawer<RestoreValue, RestoreValue>
         visible={pickerHost != null}
-        title={pickerHost ? `Restore ${pickerHost.name}` : ''}
+        title={
+          pickerHost
+            ? translate('mobile.terminalSettings.autoRestore.pickerTitle', 'Restore {{host}}', {
+                host: pickerHost.name
+              })
+            : ''
+        }
         options={AUTO_RESTORE_FIT_OPTIONS}
-        selected={valueFromMs(pickerHost ? hostMs[pickerHost.id] : null)}
+        selectedId={valueFromMs(pickerHost ? hostMs[pickerHost.id] : null)}
         onSelect={(v) => {
           if (pickerHost) {
             void selectValue(pickerHost.id, v)
@@ -404,11 +353,11 @@ export default function TerminalSettingsScreen() {
         onClose={() => setPickerHostId(null)}
       />
 
-      <PickerModal<TextSizeValue>
+      <SelectionDrawer<TextSizeValue, TextSizeValue>
         visible={textSizePickerOpen}
-        title="Terminal text size"
+        title={translate('mobile.terminalSettings.textSize.pickerTitle', 'Terminal text size')}
         options={TEXT_SIZE_OPTIONS}
-        selected={textSizeValueFromScale(textScale)}
+        selectedId={textSizeValueFromScale(textScale)}
         onSelect={selectTextSize}
         onClose={() => setTextSizePickerOpen(false)}
       />

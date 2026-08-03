@@ -1,4 +1,4 @@
-import { cn } from '~/style/class-names'
+import { cn } from 'cnfast'
 
 // Styles for the hub's segmented control and the branch-card PR chip. Split from
 // mobile-source-control-styles.ts so neither file crosses the line limit.

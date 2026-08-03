@@ -1,4 +1,5 @@
 import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
+import { cn } from 'cnfast'
 import * as Clipboard from 'expo-clipboard'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
@@ -7,7 +8,6 @@ import { useCSSVariable } from 'uniwind'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileMarkdown } from '~/components/markdown'
 import { ImageSquare } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { isImageRefBlock, isTextBlock, splitNativeChatBlocks } from './blocks'

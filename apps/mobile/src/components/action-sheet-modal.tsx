@@ -1,26 +1,31 @@
-import { useRef, type ReactNode } from 'react'
+import { cn } from 'cnfast'
+import { useState, type ReactNode } from 'react'
 import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
-import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import type { Icon } from '~/components/uniwind-icons'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
 
+type ActionSheetActionIcon =
+  | { icon: Icon; renderIcon?: never }
+  | { icon?: never; renderIcon: () => ReactNode }
+
+type ActionSheetActionDismiss =
+  | { dismiss: 'immediate' | 'manual'; onPress: () => void | Promise<void> }
+  | { dismiss: 'on-success'; onPress: () => boolean | Promise<boolean> }
+
 export type ActionSheetAction = {
+  id: string
   label: string
-  icon?: Icon
-  renderIcon?: () => ReactNode
   destructive?: boolean
   disabled?: boolean
   hint?: string
   loading?: boolean
-  skipAutoClose?: boolean
-  closeBeforePress?: boolean
-  onPress: () => void
-}
+} & ActionSheetActionIcon &
+  ActionSheetActionDismiss
 
-type Props = {
+type ActionSheetModalProps = {
   visible: boolean
   title?: string
   message?: string
@@ -28,24 +33,41 @@ type Props = {
   onClose: () => void
 }
 
-function iconForAction(label: string, destructive?: boolean, icon?: Icon): Icon {
-  if (icon) {
-    return icon
-  }
-  if (destructive || /delete|remove/i.test(label)) {
-    return Trash2
-  }
-  return Edit3
-}
-
-type ContentProps = {
+type ActionSheetContentProps = {
   title?: string
   message?: string
   actions: ActionSheetAction[]
   onClose?: () => void
 }
 
-export function ActionSheetContent({ title, message, actions, onClose }: ContentProps) {
+export function ActionSheetContent({
+  title,
+  message,
+  actions,
+  onClose
+}: ActionSheetContentProps): React.JSX.Element {
+  const [pendingActionId, setPendingActionId] = useState<string | null>(null)
+
+  async function runAction(action: ActionSheetAction): Promise<void> {
+    if (action.dismiss === 'immediate') {
+      onClose?.()
+      await action.onPress()
+      return
+    }
+    if (action.dismiss === 'manual') {
+      await action.onPress()
+      return
+    }
+    setPendingActionId(action.id)
+    try {
+      if (await action.onPress()) {
+        onClose?.()
+      }
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
   return (
     <>
       {(title || message) && (
@@ -61,33 +83,35 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
 
       <MobileContentSection>
         {actions.map((action, i) => {
-          const Icon = iconForAction(action.label, action.destructive, action.icon)
+          const Icon = action.icon
           const customIcon = action.renderIcon?.()
+          const isPending = pendingActionId === action.id
           return (
-            <View key={action.label}>
+            <View key={action.id}>
               {i > 0 && <View className="h-hairline bg-border mx-3" />}
               <Pressable
+                accessibilityRole="button"
+                accessibilityState={{
+                  busy: action.loading || isPending,
+                  disabled: action.disabled || action.loading || pendingActionId !== null
+                }}
                 className={cn(
                   'flex-row items-center gap-2 py-3 px-3',
                   action.disabled && 'opacity-60',
-                  !action.disabled && !action.loading && 'active:bg-accent'
+                  !action.disabled && !action.loading && !isPending && 'active:bg-accent'
                 )}
-                disabled={action.disabled || action.loading}
-                onPress={() => {
-                  action.onPress()
-                  if (!action.skipAutoClose && onClose) {
-                    onClose()
-                  }
-                }}
+                disabled={action.disabled || action.loading || pendingActionId !== null}
+                onPress={() => void runAction(action)}
               >
-                {customIcon ?? (
-                  <Icon
-                    size={16}
-                    colorClassName={
-                      action.destructive ? 'accent-destructive' : 'accent-muted-foreground'
-                    }
-                  />
-                )}
+                {customIcon ??
+                  (Icon ? (
+                    <Icon
+                      size={16}
+                      colorClassName={
+                        action.destructive ? 'accent-destructive' : 'accent-muted-foreground'
+                      }
+                    />
+                  ) : null)}
                 <View className="min-w-0 flex-1">
                   <Text
                     className={cn(
@@ -102,7 +126,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
                     <Text className="text-muted-foreground mt-1 text-xs">{action.hint}</Text>
                   ) : null}
                 </View>
-                {action.loading ? (
+                {action.loading || isPending ? (
                   <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 ) : null}
               </Pressable>
@@ -114,38 +138,16 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
   )
 }
 
-export function ActionSheetModal({ visible, title, message, actions, onClose }: Props) {
-  const pendingActionRef = useRef<(() => void) | null>(null)
-  const sequencedActions = actions.map((action) =>
-    action.closeBeforePress
-      ? {
-          ...action,
-          onPress: () => {
-            pendingActionRef.current = action.onPress
-          }
-        }
-      : action
-  )
-
+export function ActionSheetModal({
+  visible,
+  title,
+  message,
+  actions,
+  onClose
+}: ActionSheetModalProps): React.JSX.Element {
   return (
-    <BottomDrawer
-      visible={visible}
-      onClose={onClose}
-      onAfterClose={() => {
-        // Why: iOS cannot present a second native modal until the action
-        // sheet's native window has fully unmounted.
-        const pendingAction = pendingActionRef.current
-        pendingActionRef.current = null
-        pendingAction?.()
-      }}
-      dragContentToDismiss
-    >
-      <ActionSheetContent
-        title={title}
-        message={message}
-        actions={sequencedActions}
-        onClose={onClose}
-      />
+    <BottomDrawer visible={visible} onClose={onClose}>
+      <ActionSheetContent title={title} message={message} actions={actions} onClose={onClose} />
     </BottomDrawer>
   )
 }

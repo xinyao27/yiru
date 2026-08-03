@@ -1,4 +1,5 @@
 import { GitMerge } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import type { ActionSheetAction } from '../components/action-sheet-modal'
 import { MOBILE_AI_VAULT_CAPABILITY } from './capability'
@@ -21,8 +22,10 @@ type Args = {
 export function buildWorktreeNavigationActions(args: Args): ActionSheetAction[] {
   const actions: ActionSheetAction[] = [
     {
-      label: 'Source Control',
+      id: 'source-control',
+      label: translate('mobile.workspace.actions.sourceControl', 'Source Control'),
       icon: GitMerge,
+      dismiss: 'manual',
       onPress: () => {
         const params = new URLSearchParams({ name: args.worktreeName, origin: 'host' })
         args.navigate(
@@ -34,10 +37,12 @@ export function buildWorktreeNavigationActions(args: Args): ActionSheetAction[] 
   ]
   if (args.hostCapabilities.includes(MOBILE_AI_VAULT_CAPABILITY)) {
     actions.push({
-      label: 'Agent Session History',
+      id: 'agent-history',
+      label: translate('mobile.workspace.actions.agentHistory', 'Agent Session History'),
       renderIcon: () => (
         <MobileAgentSessionHistoryIcon size={16} colorClassName="accent-muted-foreground" />
       ),
+      dismiss: 'manual',
       onPress: () => {
         const params = new URLSearchParams({ name: args.worktreeName })
         args.navigate(

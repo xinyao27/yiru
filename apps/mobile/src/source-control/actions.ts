@@ -1,3 +1,4 @@
+import { translate } from '../i18n/translate'
 import type { MobileGitUpstreamStatus } from './git-status'
 
 // Icon identifier resolved to a Phosphor component by the screen. Kept as a
@@ -15,12 +16,13 @@ export type MobileSourceControlActionIcon =
   | 'history'
 
 export type MobileSourceControlAction = {
+  id: string
   label: string
   iconKey: MobileSourceControlActionIcon
+  dismiss: 'manual'
   disabled?: boolean
   hint?: string
   loading?: boolean
-  skipAutoClose?: boolean
   onPress: () => void
 }
 
@@ -51,9 +53,8 @@ export type MobileSourceControlActionArgs = {
   }
 }
 
-// Builds the source-control bottom-sheet action list. Pure (no hooks) so it can
-// be unit-tested and keeps the screen file lean. Enable/disable rules mirror the
-// desktop primary-action gating.
+// Builds the source-control bottom-sheet action list. Enable/disable rules
+// mirror the desktop primary-action gating.
 export function buildMobileSourceControlActions(
   args: MobileSourceControlActionArgs
 ): MobileSourceControlAction[] {
@@ -66,159 +67,215 @@ export function buildMobileSourceControlActions(
   const busy =
     args.busyAction !== null || args.openingPath !== null || args.openingBranchPath !== null
   const commitHint = !hasStaged
-    ? 'Stage at least one file'
+    ? translate('mobile.sourceControl.actions.stageFirst', 'Stage at least one file')
     : !hasMessage
-      ? 'Enter a commit message'
+      ? translate('mobile.sourceControl.actions.enterMessage', 'Enter a commit message')
       : undefined
   const remoteHint = !upstreamKnown
-    ? 'Checking branch status...'
+    ? translate('mobile.sourceControl.actions.checkingBranch', 'Checking branch status...')
     : hasUpstream
       ? undefined
-      : 'Publish Branch first'
+      : translate('mobile.sourceControl.actions.publishFirst', 'Publish Branch first')
   const prHint = !upstreamKnown
-    ? 'Checking branch status...'
+    ? translate('mobile.sourceControl.actions.checkingBranch', 'Checking branch status...')
     : !args.prAvailable
-      ? 'Pull requests are not available for this repo'
+      ? translate(
+          'mobile.sourceControl.actions.prUnavailable',
+          'Pull requests are not available for this repo'
+        )
       : undefined
 
   return [
     {
-      label: 'Commit',
+      id: 'commit',
+      label: translate('mobile.sourceControl.actions.commit', 'Commit'),
       iconKey: 'commit',
+      dismiss: 'manual',
       disabled: busy || !!commitHint,
       hint: commitHint,
       loading: args.busyAction === 'commit',
-      skipAutoClose: true,
       onPress: handlers.commit
     },
     {
-      label: 'Commit & Push',
+      id: 'commit-push',
+      label: translate('mobile.sourceControl.actions.commitPush', 'Commit & Push'),
       iconKey: 'push',
+      dismiss: 'manual',
       disabled: busy || !!commitHint || !upstreamKnown || !hasUpstream,
       hint: commitHint ?? remoteHint,
       loading: args.busyAction === 'commit-push',
-      skipAutoClose: true,
       onPress: handlers.commitPush
     },
     {
-      label: 'Commit & Sync',
+      id: 'commit-sync',
+      label: translate('mobile.sourceControl.actions.commitSync', 'Commit & Sync'),
       iconKey: 'sync',
+      dismiss: 'manual',
       disabled: busy || !!commitHint || !upstreamKnown || !hasUpstream || behind === 0,
       hint:
         commitHint ??
         (!upstreamKnown || !hasUpstream
           ? remoteHint
           : behind === 0
-            ? 'Nothing to pull'
+            ? translate('mobile.sourceControl.actions.nothingToPull', 'Nothing to pull')
             : undefined),
       loading: args.busyAction === 'commit-sync',
-      skipAutoClose: true,
       onPress: handlers.commitSync
     },
     {
-      label: ahead > 0 ? `Push (${ahead})` : 'Push',
+      id: 'push',
+      label:
+        ahead > 0
+          ? translate('mobile.sourceControl.actions.pushCount', 'Push ({{count}})', {
+              count: ahead
+            })
+          : translate('mobile.sourceControl.actions.push', 'Push'),
       iconKey: 'push',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || !hasUpstream || ahead === 0,
-      hint: !hasUpstream ? remoteHint : ahead === 0 ? 'Nothing to push' : undefined,
+      hint: !hasUpstream
+        ? remoteHint
+        : ahead === 0
+          ? translate('mobile.sourceControl.actions.nothingToPush', 'Nothing to push')
+          : undefined,
       loading: args.busyAction === 'push',
-      skipAutoClose: true,
       onPress: handlers.push
     },
     {
-      label: 'Create PR',
+      id: 'create-pr',
+      label: translate('mobile.sourceControl.actions.createPr', 'Create PR'),
       iconKey: 'pr',
+      dismiss: 'manual',
       disabled: busy || !args.prAvailable,
       hint: prHint,
       loading: args.busyAction === 'create-pr',
-      skipAutoClose: true,
       onPress: handlers.createPr
     },
     {
-      label: 'Push & Create PR',
+      id: 'push-create-pr',
+      label: translate('mobile.sourceControl.actions.pushCreatePr', 'Push & Create PR'),
       iconKey: 'pr',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || !hasUpstream || ahead === 0 || !args.prAvailable,
       hint: prHint ?? (!hasUpstream ? remoteHint : undefined),
       loading: args.busyAction === 'push-create-pr',
-      skipAutoClose: true,
       onPress: handlers.pushAndCreatePr
     },
     {
-      label: behind > 0 ? `Pull (${behind})` : 'Pull',
+      id: 'pull',
+      label:
+        behind > 0
+          ? translate('mobile.sourceControl.actions.pullCount', 'Pull ({{count}})', {
+              count: behind
+            })
+          : translate('mobile.sourceControl.actions.pull', 'Pull'),
       iconKey: 'pull',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || !hasUpstream || behind === 0,
-      hint: !hasUpstream ? remoteHint : behind === 0 ? 'Nothing to pull' : undefined,
+      hint: !hasUpstream
+        ? remoteHint
+        : behind === 0
+          ? translate('mobile.sourceControl.actions.nothingToPull', 'Nothing to pull')
+          : undefined,
       loading: args.busyAction === 'pull',
-      skipAutoClose: true,
       onPress: handlers.pull
     },
     {
-      label: ahead > 0 || behind > 0 ? `Sync (↓${behind} ↑${ahead})` : 'Sync',
+      id: 'sync',
+      label:
+        ahead > 0 || behind > 0
+          ? translate('mobile.sourceControl.actions.syncCounts', 'Sync (↓{{behind}} ↑{{ahead}})', {
+              ahead,
+              behind
+            })
+          : translate('mobile.sourceControl.actions.sync', 'Sync'),
       iconKey: 'sync',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || !hasUpstream || (ahead === 0 && behind === 0),
       hint:
         !upstreamKnown || !hasUpstream
           ? remoteHint
           : ahead === 0 && behind === 0
-            ? 'Branch is up to date'
+            ? translate('mobile.sourceControl.actions.upToDate', 'Branch is up to date')
             : undefined,
       loading: args.busyAction === 'sync',
-      skipAutoClose: true,
       onPress: handlers.sync
     },
     {
-      label: 'Fetch',
+      id: 'fetch',
+      label: translate('mobile.sourceControl.actions.fetch', 'Fetch'),
       iconKey: 'fetch',
+      dismiss: 'manual',
       disabled: busy,
       loading: args.busyAction === 'fetch',
-      skipAutoClose: true,
       onPress: handlers.fetch
     },
     {
-      label: 'Publish Branch',
+      id: 'publish',
+      label: translate('mobile.sourceControl.actions.publishBranch', 'Publish Branch'),
       iconKey: 'publish',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || hasUpstream,
       hint: !upstreamKnown
-        ? 'Checking branch status...'
+        ? translate('mobile.sourceControl.actions.checkingBranch', 'Checking branch status...')
         : hasUpstream
-          ? 'Branch is already published'
+          ? translate(
+              'mobile.sourceControl.actions.alreadyPublished',
+              'Branch is already published'
+            )
           : undefined,
       loading: args.busyAction === 'publish',
-      skipAutoClose: true,
       onPress: handlers.publish
     },
     {
-      label: behind > 0 ? `Fast-forward (${behind})` : 'Fast-forward',
+      id: 'fast-forward',
+      label:
+        behind > 0
+          ? translate('mobile.sourceControl.actions.fastForwardCount', 'Fast-forward ({{count}})', {
+              count: behind
+            })
+          : translate('mobile.sourceControl.actions.fastForward', 'Fast-forward'),
       iconKey: 'pull',
+      dismiss: 'manual',
       disabled: busy || !upstreamKnown || !hasUpstream || behind === 0 || ahead > 0,
       hint: !hasUpstream
         ? remoteHint
         : behind === 0
-          ? 'Nothing to fast-forward'
+          ? translate(
+              'mobile.sourceControl.actions.nothingToFastForward',
+              'Nothing to fast-forward'
+            )
           : ahead > 0
-            ? 'Local commits would be lost; pull instead'
+            ? translate(
+                'mobile.sourceControl.actions.fastForwardWouldLoseCommits',
+                'Local commits would be lost; pull instead'
+              )
             : undefined,
       loading: args.busyAction === 'fast-forward',
-      skipAutoClose: true,
       onPress: handlers.fastForward
     },
     {
-      label: 'Rebase onto base',
+      id: 'rebase',
+      label: translate('mobile.sourceControl.actions.rebaseOntoBase', 'Rebase onto base'),
       iconKey: 'branch',
+      dismiss: 'manual',
       disabled: busy,
       loading: args.busyAction === 'rebase',
-      skipAutoClose: true,
       onPress: handlers.rebase
     },
     {
-      label: 'Switch branch',
+      id: 'checkout',
+      label: translate('mobile.sourceControl.actions.switchBranch', 'Switch branch'),
       iconKey: 'branch',
+      dismiss: 'manual',
       disabled: busy,
-      skipAutoClose: true,
       onPress: handlers.checkout
     },
     {
-      label: 'Commits',
+      id: 'history',
+      label: translate('mobile.sourceControl.actions.commits', 'Commits'),
       iconKey: 'history',
+      dismiss: 'manual',
       disabled: busy,
       onPress: handlers.history
     }

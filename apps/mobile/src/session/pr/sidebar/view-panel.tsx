@@ -1,6 +1,6 @@
 import { View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import type { MobilePrSidebarController } from '~/session/pr/use-sidebar-controller'
 import type { MobileGitStatusResult } from '~/source-control/git-status'
 import type { RpcClient } from '~/transport/rpc-client'

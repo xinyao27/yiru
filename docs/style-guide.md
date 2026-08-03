@@ -168,7 +168,11 @@ Cohesion beats indirection — a reader should see a component's appearance in t
 
 `assets/main.css` is global-only: imports, `@font-face`, custom variants, `@theme inline`, `:root`/`.dark` tokens, `@layer base`, scrollbar utilities, titlebar and layout chrome. Feature CSS does not go there. The feature-wall, feature-tour, and diff-comment blocks currently sitting in it predate this rule — move them into their feature folder when you next touch them; don't add to them.
 
-Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no desktop-style primitive layer; its shared components live in `apps/mobile/src/components/`. Native Glass imports stay inside `apps/mobile/src/components/glass/`, whose components own availability checks, grouping, interaction, and fallback paint. Business features consume those wrappers and keep layout classes at the TSX call site.
+Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no
+desktop-style primitive layer: business features import behaviorally equivalent `@expo/ui`
+controls directly. `apps/mobile/src/components/` contains product interactions and platform
+adapters, not a shadow catalog of Expo controls. Native Glass modules own availability, grouping,
+interaction, and fallback paint; features keep layout classes at the TSX call site.
 
 ---
 
@@ -329,14 +333,38 @@ Check `components/ui/README.md` for a primitive that already encodes the pattern
 
 ## 12. Mobile chrome
 
-These rules are canonical for mobile headers, toolbars, tabs, segmented selectors, and Liquid
-Glass controls. Use platform controls before reproducing their appearance:
+These rules are canonical for mobile controls, headers, toolbars, tabs, segmented selectors, and
+Liquid Glass. Use platform controls before reproducing their behavior or appearance:
 
 1. Expo Router native headers and `Stack.Toolbar` for route navigation.
-2. Expo UI SwiftUI controls on iOS: `Button`, `ControlGroup`, `Picker`, `Menu`, and their semantic
-   `controlSize` and `buttonStyle` modifiers.
-3. Shared wrappers in `apps/mobile/src/components/glass/` for custom chrome and non-iOS fallback.
-4. Feature-local layout only after the choices above are exhausted.
+2. Expo UI Universal controls, imported directly from `@expo/ui`, for equivalent iOS and Android
+   behavior.
+3. Expo UI Community controls, imported directly from their `@expo/ui/community/*` entry point,
+   when Universal does not expose the required behavior.
+4. Direct SwiftUI or Compose controls in platform files when the platforms genuinely differ.
+5. A shared Yiru module only for repeated product behavior, theme/platform policy, or lifecycle.
+6. React Native for content, layout, virtualized lists, gestures, editors, WebViews, and controls
+   without a behaviorally equivalent Expo UI implementation.
+
+Do not create `MobileButton`, `MobileSwitch`, `MobilePicker`, or a similar one-to-one wrapper that
+renames an Expo control and mirrors its props. A shared module earns its existence only when
+deleting it would duplicate a product invariant or platform rule across callers.
+
+Expo UI Universal controls render inside `ExpoUiHost`, which maps Yiru's semantic theme into the
+native environment. A Host is a native layout bridge, not a root React provider: put one around a
+contiguous native control cluster and never wrap the Expo Router or an arbitrary React Native tree
+with it. Inline hosts match native content on both axes; fill hosts own the available width and
+match native content height. Community controls expose a React Native boundary and do not need this
+outer Host.
+
+Expo UI 57.0.8 Switch is a temporary direct-call exception because Android/web do not reliably
+associate its visible label with the switch semantics and the Android-owned label paints black in
+dark appearance. Use Yiru's complete settings-toggle row until that package behavior is fixed; do
+not introduce a generic Switch facade.
+
+Use `className` for static layout, spacing, color, typography, and interaction states. Reserve
+`style` for animated or runtime-computed values, native bridge requirements, and platform-only
+numeric properties that cannot be expressed through Uniwind.
 
 This hierarchy follows Apple's guidance to keep custom toolbars consistent with system behavior,
 use tab bars for navigation rather than actions, and give buttons a 44×44pt hit region. Expo UI's
@@ -447,11 +475,16 @@ button or switch rather than tab.
 ### Implementation rules
 
 - `apps/mobile/src/components/glass/` owns availability, native and fallback paint, control
-  dimensions, glyph dimensions, hit regions, grouping, and segmented-control selection treatment.
+  dimensions, glyph dimensions, hit regions, and grouping.
 - Features own placement and product copy. Their TSX may specify flex behavior, safe-area placement,
   width, and the standard 8pt gap; it must not restyle a shared control.
+- Universal controls use `ExpoUiHost`; SwiftUI and Compose imports stay in `.ios.tsx` and
+  `.android.tsx` files. `verify:native-control-imports` enforces these boundaries.
 - Keep one-off layout utilities directly on the TSX element. Do not create `const styles = { ... }`
   for strings used once.
+- Prefer `className` for feature and React Native layout. `style` is reserved for native modifiers,
+  third-party controls without a class-name bridge, and required numeric native measurements; keep
+  those exceptions inside the owning adapter.
 - Use regular-weight mobile icons. Use SF Symbols through Expo UI on iOS and the shared icon mapping
   elsewhere.
 - Verify every new chrome variant in UI Lab in light and dark appearance, with native glass and the

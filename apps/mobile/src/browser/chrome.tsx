@@ -1,18 +1,12 @@
 import { Platform, TextInput, View } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '~/components/uniwind-icons'
-
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileGlassSurface } from '../components/glass/surface'
+import { translate } from '../i18n/translate'
 import { MobileBrowserKeyRow } from './key-row'
 import { MobileBrowserPointerModifiers, type BrowserPointerModifier } from './pointer-modifiers'
 import type { MobileBrowserViewMode } from './screencast-request'
-import { MobileBrowserToolbarIconButton } from './toolbar-icon-button'
 import { MobileBrowserViewModeSwitch } from './view-mode-switch'
 
 export type MobileBrowserTopChromeProps = {
@@ -63,31 +57,31 @@ export function MobileBrowserTopChrome({
       <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
         {!addressFocused ? (
           <View className="flex-row items-center gap-2">
-            <MobileBrowserToolbarIconButton
+            <MobileGlassIconButton
+              accessibilityLabel={translate('mobile.browser.actions.back', 'Back')}
               disabled={disabled || !canGoBack}
-              label="Back"
+              icon="back"
               onPress={onBackPress}
-            >
-              <ChevronLeft size={16} colorClassName="accent-muted-foreground" />
-            </MobileBrowserToolbarIconButton>
-            <MobileBrowserToolbarIconButton
+              size="small"
+            />
+            <MobileGlassIconButton
+              accessibilityLabel={translate('mobile.browser.actions.forward', 'Forward')}
               disabled={disabled || !canGoForward}
-              label="Forward"
+              icon="forward"
               onPress={onForwardPress}
-            >
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </MobileBrowserToolbarIconButton>
-            <MobileBrowserToolbarIconButton
+              size="small"
+            />
+            <MobileGlassIconButton
+              accessibilityLabel={translate('mobile.browser.actions.reload', 'Reload')}
               disabled={disabled}
-              label="Reload"
+              icon="refresh"
               onPress={onReloadPress}
-            >
-              <RefreshCw size={16} colorClassName="accent-muted-foreground" />
-            </MobileBrowserToolbarIconButton>
+              size="small"
+            />
           </View>
         ) : null}
         <MobileGlassSurface
-          className="h-8 min-w-0 flex-1 overflow-hidden rounded-full"
+          className="min-h-11 min-w-0 flex-1 overflow-hidden rounded-full"
           isFunctional
           isInteractive={!disabled}
         >
@@ -106,7 +100,7 @@ export function MobileBrowserTopChrome({
             keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
             numberOfLines={1}
             returnKeyType="go"
-            placeholder="URL"
+            placeholder={translate('mobile.browser.address.placeholder', 'URL')}
             placeholderTextColorClassName="accent-muted-foreground"
             editable={!disabled}
           />
@@ -147,12 +141,12 @@ export function MobileBrowserKeyboardChrome({
       />
       <MobileBrowserKeyRow disabled={disabled} onKeypress={onKeyPress} />
       <MobileGlassGroup className="flex-row items-center gap-2 px-3 pt-1 pb-2" spacing={8}>
-        <MobileGlassSurface className="h-9 flex-1 overflow-hidden rounded-full" isInteractive>
+        <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-full" isInteractive>
           <TextInput
             className="text-foreground h-full flex-1 px-3 font-mono text-sm"
             value={keyboardValue}
             onChangeText={onKeyboardValueChange}
-            placeholder="Type on page…"
+            placeholder={translate('mobile.browser.keyboard.placeholder', 'Type on page…')}
             placeholderTextColorClassName="accent-muted-foreground"
             autoCapitalize="none"
             autoCorrect={false}
@@ -161,7 +155,10 @@ export function MobileBrowserKeyboardChrome({
           />
         </MobileGlassSurface>
         <MobileGlassIconButton
-          accessibilityLabel="Send text to browser"
+          accessibilityLabel={translate(
+            'mobile.browser.keyboard.send.accessibilityLabel',
+            'Send text to browser'
+          )}
           disabled={disabled || !keyboardValue}
           icon="send"
           onPress={onSendPress}

@@ -118,7 +118,11 @@ import {
   updateGroup
 } from './tab-group-state'
 import { clearTransientTerminalState, emptyLayoutSnapshot } from './terminal-helpers'
-import { buildOrphanTerminalCleanupPatch, getOrphanTerminalIds } from './terminal-orphan-helpers'
+import {
+  buildOrphanTerminalCleanupPatch,
+  dropOrphanTerminalAgentStatus,
+  getOrphanTerminalIds
+} from './terminal-orphan-helpers'
 import {
   buildTerminalSessionOwnerIndexes,
   buildTerminalSessionTabIndex
@@ -1037,8 +1041,10 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
 
   createTab: (worktreeId, targetGroupId, shellOverride, options) => {
     let tab!: TerminalTab
+    let sweptOrphanTerminalIds: ReadonlySet<string> = new Set<string>()
     set((s) => {
       const orphanTerminalIds = getOrphanTerminalIds(s, worktreeId)
+      sweptOrphanTerminalIds = orphanTerminalIds
       const orphanCleanupPatch = buildOrphanTerminalCleanupPatch(s, worktreeId, orphanTerminalIds)
       const existing = (s.tabsByWorktree[worktreeId] ?? []).filter(
         (entry) => !orphanTerminalIds.has(entry.id)
@@ -1249,6 +1255,9 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         }
       }
     })
+    // Why: the patch above removed the orphan tabs, so their agent rows must be
+    // torn down the same way closeTab tears down a closed tab's rows.
+    dropOrphanTerminalAgentStatus(get(), worktreeId, sweptOrphanTerminalIds)
     const shouldRecordInteraction =
       options?.recordInteraction ?? (!options?.pendingActivationSpawn && !options?.initialPtyId)
     if (shouldRecordInteraction) {

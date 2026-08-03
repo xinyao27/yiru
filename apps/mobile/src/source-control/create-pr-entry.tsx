@@ -1,8 +1,8 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Text, View } from 'react-native'
 
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { GitPullRequest as GitPullRequestArrow } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import type { MobileCreatePrAction } from './create-pr-action'
 

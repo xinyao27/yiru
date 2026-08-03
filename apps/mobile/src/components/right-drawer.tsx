@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { View, Pressable, useWindowDimensions, Keyboard, BackHandler } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,14 +11,10 @@ import Animated, {
   interpolate,
   Extrapolation
 } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCSSVariable } from 'uniwind'
 
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView
-} from '~/components/uniwind-native-components'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { GestureHandlerRootView } from '~/components/uniwind-native-components'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'

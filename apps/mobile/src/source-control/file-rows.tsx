@@ -1,10 +1,10 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import type { SectionListRenderItem } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import { formatMobileBranchEntryMeta } from './branch-entry-format'
 import { MOBILE_GIT_STATUS_LABELS, type MobileSourceControlSection } from './git-status'

@@ -2,12 +2,18 @@
 
 React Native companion app for Yiru. Monitor worktrees, view terminal output, and send commands from your phone.
 
-Local development uses two processes:
+The binding UI and component architecture is in [`DESIGN.md`](./DESIGN.md). Standard native
+controls use `@expo/ui` directly by default; shared mobile modules are reserved for repeated product
+behavior and real platform policy, not one-to-one wrappers around Expo controls.
 
-- Yiru desktop/Electron from the repo root. This hosts the mobile WebSocket RPC server on port `6768`.
+Local development uses two cooperating processes:
+
+- Yiru desktop/Electron. This hosts the mobile WebSocket RPC server.
 - Expo Metro from `apps/mobile/`. This serves the React Native app on port `8081`.
 
-Unless a command says otherwise, run mobile app commands from the `apps/mobile/` directory.
+On macOS, the root development command starts both and automatically pairs an iOS Simulator with
+the visible development desktop. The desktop port is discovered at runtime because development and
+fallback ports are not always `6768`.
 
 ## Prerequisites
 
@@ -17,7 +23,7 @@ Unless a command says otherwise, run mobile app commands from the `apps/mobile/`
 - Expo Go on your phone, or a development client build when native modules are needed
 - Phone and desktop on the same LAN when testing a physical phone
 
-## Start Desktop Yiru
+## Start Desktop And iOS Simulator
 
 From the repository root:
 
@@ -26,15 +32,23 @@ pnpm install
 pnpm dev
 ```
 
-Confirm the mobile RPC server is listening:
+The mobile development process waits for Desktop, boots the default iOS Simulator, installs the
+native development client if it is missing, starts Metro, opens the app, and confirms the pairing
+prompt through a development-only loopback path. Repeated starts reuse the same simulator credential
+instead of adding another paired device.
+
+The first run can take longer because Xcode must build the native development client. Later runs use
+the installed client and Metro Fast Refresh.
+
+To start Desktop plus plain Metro without booting or pairing a simulator:
 
 ```bash
-lsof -nP -iTCP:6768 -sTCP:LISTEN
+YIRU_MOBILE_AUTO_PAIR=0 pnpm dev
 ```
 
 Restart `pnpm dev` after changing Electron main-process code. Metro hot reload only applies to the mobile JavaScript bundle.
 
-## Start The Mobile App
+## Start Only The Mobile App
 
 ```bash
 cd apps/mobile
@@ -67,12 +81,17 @@ the UI needs real host or worktree data.
 
 ## Pair With Desktop Yiru
 
+`pnpm dev` performs these steps automatically for the iOS Simulator. For a physical phone, Android
+emulator, or manual fallback:
+
 1. Open Yiru desktop.
 2. Go to Settings > Mobile.
 3. Scan the pairing QR code from the mobile app.
-4. Confirm the mobile host endpoint is `ws://<desktop-ip>:6768`.
+4. Confirm the mobile host endpoint shown by Desktop.
 
-For the Android emulator, use `ws://10.0.2.2:6768`. For a physical phone, use the desktop LAN IP, for example `ws://192.168.0.179:6768`.
+For the Android emulator, replace the host in Desktop's endpoint with `10.0.2.2` and keep its
+actual port. For a physical phone, replace the host with the desktop LAN IP and likewise keep the
+displayed port.
 
 If the phone has a stale host entry, remove it from the app and pair again.
 
@@ -88,7 +107,8 @@ If the phone has a stale host entry, remove it from the app and pair again.
 ### iOS Simulator
 
 1. Install Xcode from the App Store
-2. Run `pnpm start --ios` to open in iOS Simulator
+2. Run `pnpm dev` from the repository root for automatic Desktop pairing
+3. Run `pnpm start --ios` from `apps/mobile` when only Metro and the simulator are needed
 
 ## Physical Phone Debugging
 

@@ -1,5 +1,12 @@
 import type { ActionSheetAction } from '~/components/action-sheet-modal'
-import { Eraser, Monitor, DeviceMobile as Smartphone } from '~/components/uniwind-icons'
+import {
+  Eraser,
+  Monitor,
+  PencilSimple,
+  DeviceMobile as Smartphone,
+  X
+} from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import type { MobileNativeChatTab } from '../native-chat/eligibility'
 import { getMobileNativeChatToggleActions } from '../native-chat/toggle-action'
@@ -13,7 +20,6 @@ export function getMobileTerminalActionSheetActions<Target extends { handle: str
   tabs: readonly TerminalTab[]
   isTabChatView: (tabId: string) => boolean
   nativeChatTranscriptIsLocalReadable: boolean
-  onDismiss: () => void
   onToggleChat: (tabId: string) => void
   isPhoneMode: (handle: string) => boolean
   onToggleDisplayMode: (handle: string) => void
@@ -32,39 +38,38 @@ export function getMobileTerminalActionSheetActions<Target extends { handle: str
       tabs: args.tabs,
       isTabChatView: args.isTabChatView,
       nativeChatTranscriptIsLocalReadable: args.nativeChatTranscriptIsLocalReadable,
-      onClose: args.onDismiss,
       onToggle: args.onToggleChat
     }),
     {
-      label: phoneMode ? 'Switch to Desktop' : 'Switch to Phone',
+      id: 'toggle-display-mode',
+      label: phoneMode
+        ? translate('mobile.session.terminalActions.switchToDesktop', 'Switch to Desktop')
+        : translate('mobile.session.terminalActions.switchToPhone', 'Switch to Phone'),
       icon: phoneMode ? Monitor : Smartphone,
-      onPress: () => {
-        args.onDismiss()
-        args.onToggleDisplayMode(target.handle)
-      }
+      dismiss: 'immediate',
+      onPress: () => args.onToggleDisplayMode(target.handle)
     },
     {
-      label: 'Rename',
-      onPress: () => {
-        args.onDismiss()
-        args.onRename(target)
-      }
+      id: 'rename-terminal',
+      label: translate('mobile.session.terminalActions.rename', 'Rename'),
+      icon: PencilSimple,
+      dismiss: 'immediate',
+      onPress: () => args.onRename(target)
     },
     {
-      label: 'Clear Terminal',
+      id: 'clear-terminal',
+      label: translate('mobile.session.terminalActions.clear', 'Clear Terminal'),
       icon: Eraser,
-      onPress: () => {
-        args.onDismiss()
-        args.onClear(target)
-      }
+      destructive: true,
+      dismiss: 'immediate',
+      onPress: () => args.onClear(target)
     },
     {
-      label: 'Close',
-      destructive: true,
-      onPress: () => {
-        args.onDismiss()
-        args.onClose(target)
-      }
+      id: 'close-terminal',
+      label: translate('mobile.session.terminalActions.close', 'Close'),
+      icon: X,
+      dismiss: 'immediate',
+      onPress: () => args.onClose(target)
     }
   ]
 }

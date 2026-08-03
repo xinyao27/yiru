@@ -1,4 +1,13 @@
-import { Button, Host, HStack, Image, TextField, useNativeState, VStack } from '@expo/ui/swift-ui'
+import {
+  Button,
+  GlassEffectContainer,
+  Host,
+  HStack,
+  Image,
+  TextField,
+  useNativeState,
+  VStack
+} from '@expo/ui/swift-ui'
 import {
   autocorrectionDisabled,
   buttonBorderShape,
@@ -15,10 +24,10 @@ import { useCSSVariable, useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '../components/glass/availability'
 import {
   MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassInputShell,
   mobileSwiftUiGlassButtonStyle
-} from '../components/glass/swift-ui.ios'
+} from '../components/glass/swift-ui-button.ios'
+import { MobileSwiftUiGlassInputShell } from '../components/glass/swift-ui-input-shell.ios'
+import { translate } from '../i18n/translate'
 import { resolveCssString } from '../style/resolve-css-variable'
 
 type MobileWorkspaceListToolbarProps = {
@@ -55,22 +64,27 @@ export function MobileWorkspaceListHeaderActions({
     () => [
       controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable),
-      buttonBorderShape('capsule')
+      buttonBorderShape('capsule'),
+      frame({ minHeight: 44, alignment: 'center' })
     ],
     [isGlassAvailable]
   )
 
   return (
     <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
-      <MobileSwiftUiGlassGroup spacing={8}>
+      <GlassEffectContainer spacing={8}>
         <HStack spacing={8}>
           {showReconnect ? (
-            <Button label="Reconnect" modifiers={reconnectModifiers} onPress={onReconnect} />
+            <Button
+              label={translate('mobile.home.reconnectHost', 'Reconnect')}
+              modifiers={reconnectModifiers}
+              onPress={onReconnect}
+            />
           ) : null}
           {!embedded && !showReconnect ? (
             <MobileSwiftUiGlassCircleButton
               disabled={!canUseHost}
-              label="Accounts"
+              label={translate('mobile.workspace.actions.accounts', 'Accounts')}
               size="regular"
               systemImage="person.crop.circle"
               onPress={onAccounts}
@@ -78,14 +92,14 @@ export function MobileWorkspaceListHeaderActions({
           ) : null}
           {embedded && onHideSidebar ? (
             <MobileSwiftUiGlassCircleButton
-              label="Hide sidebar"
+              label={translate('mobile.workspace.actions.hideSidebar', 'Hide sidebar')}
               size="regular"
               systemImage="sidebar.left"
               onPress={onHideSidebar}
             />
           ) : null}
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }
@@ -131,8 +145,8 @@ export function MobileWorkspaceListToolbar({
       {embedded && floatingWorkspaceEnabled ? (
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
-          label="Floating Workspace"
-          size="large"
+          label={translate('mobile.workspace.actions.floatingWorkspace', 'Floating Workspace')}
+          size="regular"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />
@@ -145,15 +159,15 @@ export function MobileWorkspaceListToolbar({
             nativeSearchRef.current = nextValue
             onSearchChange(nextValue)
           }}
-          placeholder="Search workspaces…"
+          placeholder={translate('mobile.workspace.search.placeholder', 'Search workspaces…')}
           text={nativeSearch}
         />
       </MobileSwiftUiGlassInputShell>
       {!embedded && floatingWorkspaceEnabled ? (
         <MobileSwiftUiGlassCircleButton
           disabled={!canUseHost}
-          label="Floating Workspace"
-          size="large"
+          label={translate('mobile.workspace.actions.floatingWorkspace', 'Floating Workspace')}
+          size="regular"
           systemImage="terminal"
           onPress={onFloatingWorkspace}
         />
@@ -167,21 +181,21 @@ export function MobileWorkspaceListToolbar({
       matchContents={{ vertical: true }}
       style={{ width: '100%', backgroundColor: 'transparent' }}
     >
-      <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
+      <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
         {embedded ? (
           <VStack alignment="leading" spacing={8} modifiers={fullWidthModifiers}>
             {primaryControls}
             <HStack spacing={8} modifiers={fullWidthModifiers}>
               <MobileSwiftUiGlassCircleButton
                 disabled={!canUseHost}
-                label="Accounts"
+                label={translate('mobile.workspace.actions.accounts', 'Accounts')}
                 size="regular"
                 systemImage="person.crop.circle"
                 onPress={onAccounts}
               />
               <MobileSwiftUiGlassCircleButton
                 disabled={!canUseHost}
-                label="New workspace"
+                label={translate('mobile.workspace.actions.newWorkspace', 'New workspace')}
                 size="regular"
                 systemImage="plus"
                 onPress={onNewWorkspace}
@@ -191,7 +205,7 @@ export function MobileWorkspaceListToolbar({
         ) : (
           primaryControls
         )}
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

@@ -1,3 +1,5 @@
+import { translate } from '~/i18n/translate'
+
 import type { MrStateFilter, SmartNameMode } from './composer-source-types'
 
 export type SmartModeIcon =
@@ -11,11 +13,31 @@ export type SmartModeOption = {
 }
 
 export const SMART_MODE_OPTIONS: readonly SmartModeOption[] = [
-  { id: 'smart', label: 'Smart', icon: { type: 'phosphor', name: 'sparkles' } },
-  { id: 'github', label: 'GitHub', icon: { type: 'provider', provider: 'github' } },
-  { id: 'gitlab', label: 'GitLab', icon: { type: 'provider', provider: 'gitlab' } },
-  { id: 'branches', label: 'Branch', icon: { type: 'phosphor', name: 'git-merge' } },
-  { id: 'text', label: 'Name', icon: { type: 'phosphor', name: 'case-sensitive' } }
+  {
+    id: 'smart',
+    label: translate('mobile.newWorkspace.source.mode.smart', 'Smart'),
+    icon: { type: 'phosphor', name: 'sparkles' }
+  },
+  {
+    id: 'github',
+    label: translate('mobile.newWorkspace.source.mode.github', 'GitHub'),
+    icon: { type: 'provider', provider: 'github' }
+  },
+  {
+    id: 'gitlab',
+    label: translate('mobile.newWorkspace.source.mode.gitlab', 'GitLab'),
+    icon: { type: 'provider', provider: 'gitlab' }
+  },
+  {
+    id: 'branches',
+    label: translate('mobile.newWorkspace.source.mode.branch', 'Branch'),
+    icon: { type: 'phosphor', name: 'git-merge' }
+  },
+  {
+    id: 'text',
+    label: translate('mobile.newWorkspace.source.mode.name', 'Name'),
+    icon: { type: 'phosphor', name: 'case-sensitive' }
+  }
 ]
 
 export type SmartModeAvailabilityInput = {
@@ -61,10 +83,10 @@ export function normalizeSmartMode(
 export type MrStateFilterOption = { id: MrStateFilter; label: string }
 
 export const MR_STATE_FILTER_OPTIONS: readonly MrStateFilterOption[] = [
-  { id: 'opened', label: 'Open' },
-  { id: 'merged', label: 'Merged' },
-  { id: 'closed', label: 'Closed' },
-  { id: 'all', label: 'All' }
+  { id: 'opened', label: translate('mobile.newWorkspace.source.state.open', 'Open') },
+  { id: 'merged', label: translate('mobile.newWorkspace.source.state.merged', 'Merged') },
+  { id: 'closed', label: translate('mobile.newWorkspace.source.state.closed', 'Closed') },
+  { id: 'all', label: translate('mobile.newWorkspace.source.state.all', 'All') }
 ]
 
 export const DEFAULT_MR_STATE_FILTER: MrStateFilter = 'opened'

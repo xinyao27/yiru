@@ -17,6 +17,7 @@ import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { MobileHtmlPreview } from '~/components/html-preview'
 import { MobileSyntaxSegments } from '~/components/syntax-segments'
 import { Chat as MessageSquare } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import { DiffLineRow } from './diff-line-row'
 import {
@@ -201,29 +202,41 @@ export function FileReader({
         {diffCommentActions ? (
           <MobileGlassSurface
             className="flex-row items-center justify-between gap-2 px-4 py-2"
-            isInteractive
+            isFunctional
           >
             <View className="min-w-0 flex-1 flex-row items-center gap-1">
               <MessageSquare size={14} colorClassName="accent-muted-foreground" />
               <Text className="text-muted-foreground text-xs font-semibold">
                 {commentCount === 0
-                  ? 'No review notes'
-                  : `${commentCount} review ${commentCount === 1 ? 'note' : 'notes'}`}
+                  ? translate('mobile.files.reviewNotes.none', 'No review notes')
+                  : commentCount === 1
+                    ? translate('mobile.files.reviewNotes.one', '{{count}} review note', {
+                        count: commentCount
+                      })
+                    : translate('mobile.files.reviewNotes.many', '{{count}} review notes', {
+                        count: commentCount
+                      })}
               </Text>
             </View>
             <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
               <MobileGlassTextButton
-                accessibilityLabel="Copy review notes"
+                accessibilityLabel={translate(
+                  'mobile.files.reviewNotes.copyAccessibilityLabel',
+                  'Copy review notes'
+                )}
                 disabled={!canCopyNotes}
-                label="Copy"
+                label={translate('mobile.common.copy', 'Copy')}
                 onPress={() => void diffCommentActions.onCopyAll()}
                 size="small"
               />
               <MobileGlassTextButton
-                accessibilityLabel="Send review notes to AI"
+                accessibilityLabel={translate(
+                  'mobile.files.reviewNotes.sendAccessibilityLabel',
+                  'Send review notes to AI'
+                )}
                 disabled={!canSendNotes}
                 isProminent
-                label="Send"
+                label={translate('mobile.common.send', 'Send')}
                 onPress={diffCommentActions.onSendAll}
                 size="small"
               />
@@ -262,7 +275,13 @@ export function FileReader({
             source={{ uri: doc.dataUri }}
             className="h-full min-h-50 w-full"
             resizeMode="contain"
-            accessibilityLabel={`${title} image`}
+            accessibilityLabel={translate(
+              'mobile.files.imageAccessibilityLabel',
+              '{{title}} image',
+              {
+                title
+              }
+            )}
           />
         </ScrollView>
       </View>
@@ -278,7 +297,11 @@ export function FileReader({
         <Text
           selectable
           className="text-foreground font-mono text-sm leading-6"
-          accessibilityLabel={`${title} preview`}
+          accessibilityLabel={translate(
+            'mobile.files.previewAccessibilityLabel',
+            '{{title}} preview',
+            { title }
+          )}
         >
           <MobileSyntaxSegments
             segments={

@@ -1,7 +1,6 @@
+import { cn } from 'cnfast'
 import { useRef } from 'react'
 import { ScrollView, Text, View } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import type { ConnectionLogEntry } from '../transport/types'
 import { MobileContentSection } from './content-section'

@@ -103,7 +103,7 @@ export function registerMobileHandlers(
       // one so the new QR carries a different credential.
       const offer = await rpcServer.createMobilePairingOffer({
         address: ip,
-        rotate: args?.rotate,
+        credentialPolicy: args?.rotate ? 'rotate-pending' : 'reuse-pending',
         name: `Mobile ${new Date().toLocaleDateString()}`
       })
       if (!offer.available) {
@@ -140,7 +140,7 @@ export function registerMobileHandlers(
       // mobile allowlist used by phone QR pairing.
       const offer = rpcServer.createPairingOffer({
         address: ip,
-        rotate: args?.rotate,
+        credentialPolicy: args?.rotate ? 'rotate-pending' : 'reuse-pending',
         name: `Runtime ${new Date().toLocaleDateString()}`,
         scope: 'runtime'
       })

@@ -22,7 +22,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "node scripts/start-expo.mjs",
-    "dev": "node scripts/start-expo.mjs",
+    "dev": "node scripts/emulator/start-development.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "postinstall": "node scripts/build-terminal-webview-engine.mjs",
@@ -31,15 +31,17 @@
     "format": "vp fmt .",
     "lint": "vp lint . --fix",
     "check": "vp run lint && vp run fmt && vp run typecheck && vp run verify:repository-contracts",
-    "verify:repository-contracts": "vp run verify:localization-coverage",
+    "verify:repository-contracts": "vp run verify:localization-coverage && vp run verify:native-control-imports",
     "verify:localization-coverage": "node scripts/audit-localization-coverage.mjs --check",
+    "verify:native-control-imports": "node scripts/check-native-control-imports.mjs",
     "sync:localization-coverage-baseline": "node scripts/audit-localization-coverage.mjs --write-baseline",
     "up": "taze major -Ir",
     "format:check": "vp fmt . --check",
-    "start:emulator": "node scripts/start-emulator.mjs",
-    "start:ui": "node scripts/start-emulator.mjs --ui-lab"
+    "start:emulator": "node scripts/emulator/start.mjs",
+    "start:ui": "node scripts/emulator/start.mjs --ui-lab"
   },
   "dependencies": {
+    "@expo/material-symbols": "catalog:mobile",
     "@expo/ui": "catalog:mobile",
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",

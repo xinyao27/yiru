@@ -1,5 +1,6 @@
 import {
   Button,
+  GlassEffectContainer,
   Host,
   HStack,
   Image,
@@ -29,10 +30,10 @@ import { useCSSVariable, useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassInputShell
-} from '~/components/glass/swift-ui.ios'
+  MobileSwiftUiGlassCircleButton
+} from '~/components/glass/swift-ui-button.ios'
+import { MobileSwiftUiGlassInputShell } from '~/components/glass/swift-ui-input-shell.ios'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import { MobileAttachmentMenu } from '../attachment-menu'
@@ -110,7 +111,7 @@ export function MobileTerminalInputBar({
       matchContents={{ vertical: true }}
       style={{ width: '100%' }}
     >
-      <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
+      <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
         <HStack alignment="center" spacing={8} modifiers={fullWidthModifiers}>
           <MobileAttachmentMenu
             disabled={!canSend || isAttaching}
@@ -123,11 +124,20 @@ export function MobileTerminalInputBar({
                 <Image systemName="keyboard" size={20} color={mutedForegroundColor} />
                 {isAttaching ? (
                   <VStack alignment="leading" spacing={0}>
-                    <Text modifiers={liveInputTitleModifiers}>Live input</Text>
-                    <Text modifiers={liveInputDetailModifiers}>Uploading image to host</Text>
+                    <Text modifiers={liveInputTitleModifiers}>
+                      {translate('mobile.session.terminal.liveInput', 'Live input')}
+                    </Text>
+                    <Text modifiers={liveInputDetailModifiers}>
+                      {translate(
+                        'mobile.session.terminal.uploadingImage',
+                        'Uploading image to host'
+                      )}
+                    </Text>
                   </VStack>
                 ) : (
-                  <Text modifiers={liveInputTitleModifiers}>Live input</Text>
+                  <Text modifiers={liveInputTitleModifiers}>
+                    {translate('mobile.session.terminal.liveInput', 'Live input')}
+                  </Text>
                 )}
                 <Spacer />
               </HStack>
@@ -135,7 +145,10 @@ export function MobileTerminalInputBar({
           ) : (
             <MobileSwiftUiGlassInputShell hasTrailingAction>
               <TextField
-                placeholder="Type a command…"
+                placeholder={translate(
+                  'mobile.session.terminal.commandPlaceholder',
+                  'Type a command…'
+                )}
                 modifiers={inputModifiers}
                 text={nativeText}
                 onTextChange={(nextValue) => {
@@ -146,7 +159,7 @@ export function MobileTerminalInputBar({
               <MobileSwiftUiGlassCircleButton
                 disabled={!canSend}
                 isProminent
-                label="Send command"
+                label={translate('mobile.session.terminal.sendCommand', 'Send command')}
                 size="small"
                 systemImage="arrow.up"
                 tintColor={foregroundColor}
@@ -155,7 +168,7 @@ export function MobileTerminalInputBar({
             </MobileSwiftUiGlassInputShell>
           )}
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

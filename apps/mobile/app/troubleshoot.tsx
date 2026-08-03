@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useRouter } from 'expo-router'
 import { useState, useCallback, useRef } from 'react'
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native'
@@ -24,7 +25,6 @@ import {
   unreachableHostDetail
 } from '~/diagnostics/host-reachability'
 import { troubleshootCommonIssues } from '~/diagnostics/troubleshoot-common-issues'
-import { cn } from '~/style/class-names'
 import { loadHosts } from '~/transport/host-store'
 
 type DiagnosticStatus = 'idle' | 'running' | 'done'

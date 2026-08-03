@@ -1,7 +1,6 @@
+import { cn } from 'cnfast'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
-
-import { cn } from '../style/class-names'
 
 type MobileContentSectionProps = {
   children: ReactNode

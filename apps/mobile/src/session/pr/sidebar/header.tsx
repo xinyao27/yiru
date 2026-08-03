@@ -1,4 +1,5 @@
 import type { GitHubWorkItemDetails, PRInfo } from '@yiru/workbench-model/review'
+import { cn } from 'cnfast'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
@@ -8,10 +9,10 @@ import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { ArrowRight, Pencil } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { openMobilePrUrl } from '~/session/pr/compose-sheet'
 import { canEditPRTitle } from '~/session/pr/title-edit'
 import type { MobilePrTitleAction } from '~/session/pr/use-title-action'
-import { cn } from '~/style/class-names'
 
 import { prStateBadge } from './checks-presentation'
 import { statusColorClasses } from './status-color'
@@ -54,29 +55,37 @@ export function PRSidebarHeader({
           <Pressable
             onPress={openPr}
             disabled={!openPr}
-            accessibilityRole="link"
-            accessibilityLabel={`Open pull request #${pr.number} on the web`}
-            className={cn(
-              'border-hairline self-start rounded-full bg-secondary px-2 py-1',
-              badgeColors.border,
-              'active:bg-accent'
-            )}
+            accessibilityRole={openPr ? 'link' : undefined}
+            accessibilityLabel={
+              openPr
+                ? translate(
+                    'mobile.pullRequest.openOnWebAccessibility',
+                    'Open pull request #{{number}} on the web',
+                    { number: pr.number }
+                  )
+                : undefined
+            }
+            className="min-h-11 flex-row items-center gap-1 active:opacity-70"
           >
-            <Text className={cn('text-xs font-bold', badgeColors.text)}>{badge.label}</Text>
+            <View
+              className={cn(
+                'border-hairline rounded-full bg-secondary px-2 py-1',
+                badgeColors.border
+              )}
+            >
+              <Text className={cn('text-xs font-bold', badgeColors.text)}>{badge.label}</Text>
+            </View>
+            <Text className="text-foreground text-xs font-semibold">#{pr.number}</Text>
           </Pressable>
-          <Text
-            className="text-foreground text-xs font-semibold"
-            onPress={openPr}
-            accessibilityRole="link"
-            accessibilityLabel={`Open pull request #${pr.number} on the web`}
-          >
-            #{pr.number}
-          </Text>
           {author ? <Text className="text-muted-foreground text-xs">· {author}</Text> : null}
         </View>
         {showOpenOnWeb && openPr ? (
           <MobileGlassIconButton
-            accessibilityLabel={`Open pull request #${pr.number} in browser`}
+            accessibilityLabel={translate(
+              'mobile.pullRequest.openInBrowserAccessibility',
+              'Open pull request #{{number}} in browser',
+              { number: pr.number }
+            )}
             icon="external"
             onPress={openPr}
             size="small"
@@ -157,9 +166,12 @@ function PRTitle({
         ) : null}
         <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
           <MobileGlassTextButton
-            accessibilityLabel="Cancel editing title"
+            accessibilityLabel={translate(
+              'mobile.pullRequest.title.cancelAccessibility',
+              'Cancel editing title'
+            )}
             disabled={titleAction.saving}
-            label="Cancel"
+            label={translate('mobile.common.cancel', 'Cancel')}
             onPress={cancel}
             size="regular"
           />
@@ -167,9 +179,12 @@ function PRTitle({
             <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           ) : (
             <MobileGlassTextButton
-              accessibilityLabel="Save title"
+              accessibilityLabel={translate(
+                'mobile.pullRequest.title.saveAccessibility',
+                'Save title'
+              )}
               isProminent
-              label="Save"
+              label={translate('mobile.common.save', 'Save')}
               onPress={() => void save()}
               size="regular"
             />
@@ -181,15 +196,22 @@ function PRTitle({
 
   return (
     <Pressable
-      className="flex-row items-start gap-1"
+      className={cn(
+        'flex-row gap-1',
+        editable ? 'min-h-11 items-center active:opacity-70' : 'items-start'
+      )}
       onPress={editable ? startEdit : undefined}
       disabled={!editable}
       accessibilityRole={editable ? 'button' : undefined}
-      accessibilityLabel={editable ? 'Edit pull request title' : undefined}
+      accessibilityLabel={
+        editable
+          ? translate('mobile.pullRequest.title.editAccessibility', 'Edit pull request title')
+          : undefined
+      }
     >
       <Text className="text-foreground flex-1 text-sm leading-6 font-bold">{title}</Text>
       {editable ? (
-        <View className="min-h-7 min-w-7 items-center justify-center">
+        <View className="h-11 w-11 items-center justify-center">
           <Pencil size={14} colorClassName="accent-muted-foreground" />
         </View>
       ) : null}

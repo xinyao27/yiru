@@ -1,7 +1,7 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Text, View } from 'react-native'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
-import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import { MobileSyntaxSegments } from '../components/syntax-segments'
@@ -20,12 +20,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
   }
   const entry = branchDiffPreview.entry
   return (
-    <BottomDrawer
-      visible={branchDiffPreview !== null}
-      onClose={onClose}
-      dragContentToDismiss={false}
-      zIndex={1100}
-    >
+    <BottomDrawer visible={branchDiffPreview !== null} onClose={onClose}>
       <View className="border-b-hairline border-b-border flex-row items-center gap-3 pb-3">
         <View className="min-w-0 flex-1">
           <Text className="text-foreground text-sm font-bold" numberOfLines={1}>

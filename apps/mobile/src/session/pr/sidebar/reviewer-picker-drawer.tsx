@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-nativ
 import { BottomDrawer } from '~/components/bottom-drawer'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { Check } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { fetchAssignableUsers } from '~/session/pr/github-rpc'
 import type { RpcClient } from '~/transport/rpc-client'
 
@@ -63,7 +64,10 @@ export function ReviewerPickerDrawer({
       })
       .catch(() => {
         if (!cancelled) {
-          setLoad({ status: 'error', message: 'Failed to load people' })
+          setLoad({
+            status: 'error',
+            message: translate('mobile.pullRequest.reviewers.loadFailed', 'Failed to load people')
+          })
         }
       })
     return () => {
@@ -92,14 +96,16 @@ export function ReviewerPickerDrawer({
   }, [load, seededLogins, query])
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
-      <Text className="text-foreground mb-2 text-sm font-bold">Reviewers</Text>
-      <MobileGlassSurface className="mb-2 min-h-10 overflow-hidden rounded-xl" isInteractive>
+    <BottomDrawer visible={visible} onClose={onClose}>
+      <Text className="text-foreground mb-2 text-sm font-bold">
+        {translate('mobile.pullRequest.reviewers.title', 'Reviewers')}
+      </Text>
+      <MobileGlassSurface className="mb-2 min-h-11 overflow-hidden rounded-xl" isInteractive>
         <TextInput
-          className="text-foreground min-h-10 px-3 text-sm"
+          className="text-foreground min-h-11 px-3 text-sm"
           value={query}
           onChangeText={setQuery}
-          placeholder="Search people"
+          placeholder={translate('mobile.pullRequest.reviewers.searchPlaceholder', 'Search people')}
           placeholderTextColorClassName="accent-muted-foreground"
           autoCapitalize="none"
           autoCorrect={false}
@@ -115,7 +121,9 @@ export function ReviewerPickerDrawer({
         </View>
       ) : ordered.length === 0 ? (
         <View className={styles.pickerStateArea}>
-          <Text className={styles.emptyText}>No matching people</Text>
+          <Text className={styles.emptyText}>
+            {translate('mobile.pullRequest.reviewers.noMatches', 'No matching people')}
+          </Text>
         </View>
       ) : (
         <View className="gap-0">
@@ -128,7 +136,19 @@ export function ReviewerPickerDrawer({
                 onPress={() => onToggle(item.login)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: requested }}
-                accessibilityLabel={`${requested ? 'Remove' : 'Request'} ${item.login}`}
+                accessibilityLabel={
+                  requested
+                    ? translate(
+                        'mobile.pullRequest.reviewers.removeAccessibility',
+                        'Remove {{login}}',
+                        { login: item.login }
+                      )
+                    : translate(
+                        'mobile.pullRequest.reviewers.requestAccessibility',
+                        'Request {{login}}',
+                        { login: item.login }
+                      )
+                }
               >
                 <View className={styles.rowTrailing}>
                   {requested ? <Check size={16} colorClassName="accent-foreground" /> : null}

@@ -1,5 +1,6 @@
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { useFocusEffect, useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
@@ -12,37 +13,27 @@ import {
   RefreshControl
 } from 'react-native'
 
-import { buildWorktreeNavigationActions } from '~/agent-history/worktree-navigation-actions'
 import { setCachedRepos } from '~/cache/repo-cache'
 import { getCachedWorktrees, setCachedWorktrees } from '~/cache/worktree-cache'
-import { ActionSheetContent } from '~/components/action-sheet-modal'
 import { AuthFailedBanner } from '~/components/auth-failed-banner'
-import { BottomDrawer } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
-import { MobileGlassGroup } from '~/components/glass/group'
-import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { NewWorkspaceFab } from '~/components/new-workspace-fab'
-import { NewWorkspaceModalController } from '~/components/new-workspace-modal-controller'
 import { ProtocolBlockScreen } from '~/components/protocol-block-screen'
 import { MobileRepoIcon } from '~/components/repo-icon'
 import {
   PushPin as Pin,
   CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  Moon
+  CaretRight as ChevronRight
 } from '~/components/uniwind-icons'
-import { WorkspaceDetailPlaceholder } from '~/components/workspace-detail-placeholder'
-import { WorkspaceListRow } from '~/components/workspace-list-row'
 import {
   createInitialHostRouteActionState,
   resolveHostRouteActionState,
   setHostRouteNewWorktreeVisible
 } from '~/host-route/action-state'
 import { leaveHostRoute } from '~/host-route/exit'
+import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
 import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
-import { cn } from '~/style/class-names'
 import { useHostClient, useCloseHost, useForceReconnect } from '~/transport/client-context'
 import {
   useLastConnectedAt,
@@ -56,8 +47,12 @@ import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
+import { NewWorkspaceFab } from '~/workspace-create/fab'
+import { NewWorkspaceModalController } from '~/workspace-create/modal-controller'
+import { WorkspaceDetailPlaceholder } from '~/workspace/detail-placeholder'
 import { getMobileWorkspaceLineageGroupKey } from '~/workspace/lineage'
 import { MobileWorkspaceListChrome } from '~/workspace/list-chrome'
+import { WorkspaceListRow } from '~/workspace/list-row'
 import {
   getWorktreeStatus,
   isWorktreePinned,
@@ -77,6 +72,7 @@ import {
   type MobileViewState,
   type WorkspaceViewSettings
 } from '~/workspace/view-settings'
+import { MobileWorktreeActionsDrawer } from '~/workspace/worktree-actions-drawer'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return v.kind === 'warning' || v.kind === 'unreachable' || v.kind === 'auth-failed'
@@ -182,7 +178,6 @@ export function HostScreen({
     client,
     connState
   })
-  const [confirmDelete, setConfirmDelete] = useState<Worktree | null>(null)
   const [confirmRemoveHost, setConfirmRemoveHost] = useState(false)
   const [routeActionState, setRouteActionState] = useState(() =>
     createInitialHostRouteActionState(action)
@@ -368,7 +363,7 @@ export function HostScreen({
       }
       const host = hosts.find((h) => h.id === hostId)
       if (!host) {
-        setError('Host not found')
+        setError(translate('mobile.host.notFound', 'Host not found'))
         return
       }
       setHostName(host.name)
@@ -687,9 +682,12 @@ export function HostScreen({
       leaveHost()
     } catch {
       // Why: metadata commit can fail while the host is still paired; keep the
-      // screen mounted and re-open confirm (ConfirmModal closes on confirm).
+      // screen mounted and confirmation open for retry.
       setConfirmRemoveHost(true)
-      Alert.alert('Could not remove host', 'Please try again.')
+      Alert.alert(
+        translate('mobile.home.removeHostError.title', 'Could not remove host'),
+        translate('mobile.common.tryAgain', 'Please try again.')
+      )
     }
   }, [hostId, leaveHost, closeHostClient])
 
@@ -855,7 +853,6 @@ export function HostScreen({
         />
       </MobileWorkspaceListChrome>
 
-      {/* Auth failed banner */}
       {connState === 'auth-failed' && (
         <AuthFailedBanner
           canRetry={!!hostId}
@@ -865,7 +862,6 @@ export function HostScreen({
         />
       )}
 
-      {/* Loading state */}
       {((connState === 'connecting' || connState === 'reconnecting') &&
         displayWorktrees.length === 0) ||
       (connState === 'connected' && !worktreesLoaded && displayWorktrees.length === 0) ? (
@@ -874,15 +870,14 @@ export function HostScreen({
         </View>
       ) : null}
 
-      {/* Empty state */}
       {connState === 'connected' && worktreesLoaded && sections.length === 0 && (
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
             {search
-              ? 'No matching workspaces'
+              ? translate('mobile.workspaces.noSearchMatches', 'No matching workspaces')
               : activeFilterCount > 0
-                ? 'No workspaces match filters'
-                : 'No workspaces'}
+                ? translate('mobile.workspaces.noFilterMatches', 'No workspaces match filters')
+                : translate('mobile.workspaces.empty', 'No workspaces')}
           </Text>
         </View>
       )}
@@ -929,7 +924,7 @@ export function HostScreen({
                       pointerEvents="none"
                       className="absolute inset-x-0 top-8 bottom-0 items-center"
                     >
-                      <View className="bg-muted-foreground/60 w-hairline h-full" />
+                      <View className="bg-border w-hairline h-full" />
                     </View>
                   ) : null}
                   {section.icon === 'pin' ? (
@@ -940,7 +935,10 @@ export function HostScreen({
                   ) : null}
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-foreground shrink text-base leading-none" numberOfLines={1}>
+                  <Text
+                    className="text-foreground shrink text-base leading-none font-semibold"
+                    numberOfLines={1}
+                  >
                     {section.title}
                   </Text>
                 </View>
@@ -964,7 +962,7 @@ export function HostScreen({
               colorsClassName="accent-muted-foreground"
             />
           }
-          renderItem={({ item, section }) => (
+          renderItem={({ item, section, index }) => (
             <WorkspaceListRow
               item={item}
               isReadOnly={isReadOnly}
@@ -973,6 +971,7 @@ export function HostScreen({
               repoIcon={repoIconsByName.get(item.repo) ?? null}
               hideRepo={section.icon !== 'pin'}
               nestedUnderProject={section.icon !== 'pin'}
+              endsProjectRail={section.icon !== 'pin' && index === section.data.length - 1}
               onPress={openWorktreeSession}
               onLongPress={item.workspaceKind === 'folder-workspace' ? undefined : setActionTarget}
               onToggleLineage={(row) =>
@@ -983,104 +982,39 @@ export function HostScreen({
         />
       )}
 
-      {/* Floating "new workspace" button — phone only; embedded sidebars keep the toolbar +. */}
       {!embedded && (
         <NewWorkspaceFab onPress={openNewWorkspaceModal} disabled={connState !== 'connected'} />
       )}
 
-      {/* Worktree long-press action sheet (inline confirm to avoid double-Modal lag) */}
-      <BottomDrawer
-        visible={actionTarget != null}
-        onClose={() => {
-          setConfirmDelete(null)
-          setActionTarget(null)
+      <MobileWorktreeActionsDrawer
+        hostCapabilities={hostCapabilities}
+        hostId={hostId}
+        isPinned={actionTarget ? isWorktreePinned(actionTarget, pinnedIds) : false}
+        navigate={navigateFromHostList}
+        target={actionTarget}
+        onClose={() => setActionTarget(null)}
+        onDelete={handleDeleteWorktree}
+        onSleep={(target) => {
+          if (client) {
+            setSleptIds((previous) => new Set(previous).add(target.worktreeId))
+            void client
+              .sendRequest('worktree.sleep', { worktree: `id:${target.worktreeId}` })
+              .catch(() => null)
+          }
         }}
-      >
-        {confirmDelete ? (
-          <View>
-            <View className="pb-4">
-              <Text className="text-foreground text-sm">Delete Worktree</Text>
-              <Text className="text-muted-foreground mt-1 text-sm leading-5">
-                Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
-              </Text>
-            </View>
-            <MobileGlassGroup className="flex-row gap-2" spacing={8}>
-              <MobileGlassTextButton
-                className="flex-1"
-                isFullWidth
-                label="Cancel"
-                onPress={() => setConfirmDelete(null)}
-              />
-              <MobileGlassTextButton
-                className="flex-1"
-                isDestructive
-                isFullWidth
-                label="Delete"
-                onPress={() => {
-                  if (confirmDelete) {
-                    void handleDeleteWorktree(confirmDelete)
-                  }
-                  setConfirmDelete(null)
-                  setActionTarget(null)
-                }}
-              />
-            </MobileGlassGroup>
-          </View>
-        ) : (
-          <ActionSheetContent
-            title={actionTarget ? actionTarget.displayName || actionTarget.repo : undefined}
-            message={actionTarget?.branch}
-            actions={
-              actionTarget
-                ? [
-                    ...buildWorktreeNavigationActions({
-                      hostId,
-                      worktreeId: actionTarget.worktreeId,
-                      worktreeName: actionTarget.displayName || actionTarget.repo,
-                      hostCapabilities: hostCapabilities ?? [],
-                      navigate: navigateFromHostList,
-                      onDone: () => setActionTarget(null)
-                    }),
-                    {
-                      label: 'Sleep',
-                      icon: Moon,
-                      onPress: () => {
-                        if (client) {
-                          setSleptIds((prev) => new Set(prev).add(actionTarget.worktreeId))
-                          void client
-                            .sendRequest('worktree.sleep', {
-                              worktree: `id:${actionTarget.worktreeId}`
-                            })
-                            .catch(() => null)
-                        }
-                        setActionTarget(null)
-                      }
-                    },
-                    {
-                      label: isWorktreePinned(actionTarget, pinnedIds) ? 'Unpin' : 'Pin',
-                      onPress: () => {
-                        togglePin(actionTarget.worktreeId)
-                        setActionTarget(null)
-                      }
-                    },
-                    {
-                      label: 'Delete',
-                      destructive: true,
-                      onPress: () => setConfirmDelete(actionTarget)
-                    }
-                  ]
-                : []
-            }
-          />
-        )}
-      </BottomDrawer>
+        onTogglePin={(target) => togglePin(target.worktreeId)}
+      />
 
       {/* Host remove confirmation */}
       <ConfirmModal
         visible={confirmRemoveHost}
-        title="Remove Host"
-        message={`Remove "${hostName}"? You can re-pair later.`}
-        confirmLabel="Remove"
+        title={translate('mobile.home.removeHostTitle', 'Remove Host')}
+        message={translate(
+          'mobile.home.removeHostMessage',
+          'Remove "{{name}}"? You can re-pair later.',
+          { name: hostName }
+        )}
+        confirmLabel={translate('mobile.home.removeHost', 'Remove')}
         destructive
         onConfirm={() => void handleRemoveHost()}
         onCancel={() => setConfirmRemoveHost(false)}

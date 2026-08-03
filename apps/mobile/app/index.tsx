@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Stack, useRouter, useFocusEffect } from 'expo-router'
+import { cn } from 'cnfast'
+import { Link, Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
@@ -14,21 +15,15 @@ import {
   hasRenderableUsage,
   UsageBar
 } from '~/components/account-usage'
-import { ActionSheetModal, type ActionSheetAction } from '~/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
-import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { MobileHostCard } from '~/components/host-card'
-import {
-  CaretRight as ChevronRight,
-  Terminal,
-  ArrowClockwise as RefreshCw,
-  Power as PowerOff,
-  PencilSimple as Edit3
-} from '~/components/uniwind-icons'
+import { CaretRight as ChevronRight, Terminal } from '~/components/uniwind-icons'
+import { HostActionsDrawer } from '~/home/host-actions-drawer'
+import { MobileHostCard } from '~/home/host-card'
+import { HostMenu } from '~/home/host-menu'
 import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
@@ -40,7 +35,6 @@ import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '~/notifications/notifications'
 import { triggerMediumImpact } from '~/platform/haptics'
-import { cn } from '~/style/class-names'
 import { useAllHostClients } from '~/transport/all-host-clients'
 import { useCloseHost, useForceReconnect, usePrimeHosts } from '~/transport/client-context'
 import { classifyConnection } from '~/transport/connection-health'
@@ -51,15 +45,6 @@ import type { ConnectionState, HostProfile } from '~/transport/types'
 import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
 import { repoColor } from '~/workspace/repo-color'
 import { pickResumeWorktree } from '~/worktree/resume-pick'
-
-function endpointLabel(endpoint: string): string {
-  try {
-    const url = new URL(endpoint)
-    return `${url.hostname}${url.port ? `:${url.port}` : ''}`
-  } catch {
-    return endpoint
-  }
-}
 
 type WorktreeSummary = {
   worktreeId: string
@@ -197,7 +182,7 @@ function fetchAccountsSnapshot(
     .catch(() => {})
 }
 
-export default function HomeScreen() {
+export default function HomeScreen(): React.JSX.Element {
   const router = useRouter()
 
   // Why: cap and center content on wide/tablet canvases so cards don't stretch
@@ -571,10 +556,13 @@ export default function HomeScreen() {
       setConfirmRemove(null)
       setHosts(await loadHosts())
     } catch {
-      // Why: ConfirmModal closes on confirm; re-open for retry and surface the
-      // failure instead of silently leaving the host listed.
+      // Why: keep the confirmation open for retry and surface the failure
+      // instead of silently leaving the host listed.
       setConfirmRemove(hostToRemove)
-      Alert.alert('Could not remove host', 'Please try again.')
+      Alert.alert(
+        translate('mobile.home.removeHostError.title', 'Could not remove host'),
+        translate('mobile.common.tryAgain', 'Please try again.')
+      )
     }
   }
 
@@ -630,14 +618,18 @@ export default function HomeScreen() {
           }
         >
           <View className="flex-1 items-center justify-center px-8 pb-10">
-            <Text className="text-foreground mb-3 text-center font-bold">Connect your desktop</Text>
+            <Text className="text-foreground mb-3 text-center font-bold">
+              {translate('mobile.home.onboarding.connectDesktop', 'Connect your desktop')}
+            </Text>
             <Text className="text-muted-foreground mb-8 text-center leading-6">
-              Pair with Yiru on your computer to check on your agents, jump into any terminal, and
-              drive work from your phone.
+              {translate(
+                'mobile.home.onboarding.description',
+                'Pair with Yiru on your computer to check on your agents, jump into any terminal, and drive work from your phone.'
+              )}
             </Text>
             <MobileGlassTextButton
               isProminent
-              label="Pair Desktop"
+              label={translate('mobile.home.pairDesktop', 'Pair Desktop')}
               onPress={() => router.push('/pair-scan')}
               size="large"
             />
@@ -645,7 +637,7 @@ export default function HomeScreen() {
 
           <View className="px-6">
             <Text className="text-muted-foreground mb-2 px-1 font-semibold tracking-wide uppercase">
-              How it works
+              {translate('mobile.home.onboarding.howItWorks', 'How it works')}
             </Text>
             {ONBOARDING_STEPS.map((step, i) => (
               <View
@@ -680,7 +672,7 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View className="pt-2 pb-2">
-              <SectionHeading>Desktops</SectionHeading>
+              <SectionHeading>{translate('mobile.home.desktops', 'Desktops')}</SectionHeading>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -696,22 +688,35 @@ export default function HomeScreen() {
               endpoint: item.endpoint
             })
             return (
-              <MobileContentSection>
-                <MobileHostCard
-                  host={item}
-                  state={state}
-                  verdict={verdict}
-                  path={hostPaths[item.id] ?? 'lan'}
-                  worktreeCounts={
-                    info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
-                  }
-                  onPress={() => router.push(`/h/${item.id}`)}
-                  onLongPress={() => {
-                    triggerMediumImpact()
-                    setActionTarget(item)
-                  }}
-                />
-              </MobileContentSection>
+              <HostMenu
+                connectionState={state}
+                hasEverConnected={lastConnectedAt !== null}
+                host={item}
+                onDisconnect={() => closeHostClient(item.id)}
+                onEdit={() => router.push(`/h/${item.id}/edit`)}
+                onOpenFallback={() => {
+                  triggerMediumImpact()
+                  setActionTarget(item)
+                }}
+                onReconnect={() => void forceReconnectHost(item.id)}
+                onRequestRemove={() => setConfirmRemove(item)}
+              >
+                {(menuTriggerProps) => (
+                  <MobileContentSection>
+                    <MobileHostCard
+                      host={item}
+                      state={state}
+                      verdict={verdict}
+                      path={hostPaths[item.id] ?? 'lan'}
+                      worktreeCounts={
+                        info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
+                      }
+                      onPress={() => router.push(`/h/${item.id}`)}
+                      {...menuTriggerProps}
+                    />
+                  </MobileContentSection>
+                )}
+              </HostMenu>
             )
           }}
           ListFooterComponent={
@@ -719,57 +724,56 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <View className="gap-2">
-                  <SectionHeading>Resume</SectionHeading>
+                  <SectionHeading>{translate('mobile.home.resume', 'Resume')}</SectionHeading>
                   <MobileContentSection>
-                    <Pressable
-                      accessibilityRole="button"
-                      className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-                      onPress={() =>
-                        router.push(
-                          `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
-                        )
-                      }
+                    <Link
+                      href={`/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`}
+                      asChild
                     >
-                      <View className="h-8 w-5 items-center justify-center">
-                        <Terminal size={20} colorClassName="accent-muted-foreground" />
-                      </View>
-                      <View className="min-w-0 flex-1">
-                        <Text className="text-foreground" numberOfLines={1}>
-                          {resumeWorktree.worktree.displayName}
-                        </Text>
-                        <View className="mt-1 flex-row items-center gap-2">
-                          <View
-                            className="h-2 w-2"
-                            style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
-                          />
-                          <Text className="text-muted-foreground flex-1" numberOfLines={1}>
-                            {resumeWorktree.worktree.repo}
-                            {'  ·  '}
-                            {resumeWorktree.worktree.branch}
-                          </Text>
+                      <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3">
+                        <View className="h-8 w-5 items-center justify-center">
+                          <Terminal size={20} colorClassName="accent-muted-foreground" />
                         </View>
-                      </View>
-                      <View className="h-6 w-5 items-center justify-center">
-                        <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-                      </View>
-                    </Pressable>
+                        <View className="min-w-0 flex-1">
+                          <Text className="text-foreground" numberOfLines={1}>
+                            {resumeWorktree.worktree.displayName}
+                          </Text>
+                          <View className="mt-1 flex-row items-center gap-2">
+                            <View
+                              className="h-2 w-2"
+                              style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
+                            />
+                            <Text className="text-muted-foreground flex-1" numberOfLines={1}>
+                              {resumeWorktree.worktree.repo}
+                              {'  ·  '}
+                              {resumeWorktree.worktree.branch}
+                            </Text>
+                          </View>
+                        </View>
+                        <View className="h-6 w-5 items-center justify-center">
+                          <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                        </View>
+                      </Pressable>
+                    </Link>
                   </MobileContentSection>
                 </View>
               ) : null}
 
               {/* ─── Quick actions ─── */}
               <View className="gap-2">
-                <SectionHeading>Quick Actions</SectionHeading>
+                <SectionHeading>
+                  {translate('mobile.home.quickActions', 'Quick Actions')}
+                </SectionHeading>
                 <MobileContentSection className="p-3">
                   <MobileGlassGroup className="flex-row gap-2" spacing={8}>
                     <MobileGlassTextButton
-                      label="Pair Desktop"
+                      label={translate('mobile.home.pairDesktop', 'Pair Desktop')}
                       onPress={() => router.push('/pair-scan')}
                     />
                     <MobileGlassTextButton
                       disabled={!primaryConnectedHost}
                       isProminent
-                      label="New Workspace"
+                      label={translate('mobile.home.newWorkspace', 'New Workspace')}
                       onPress={() => {
                         if (primaryConnectedHost) {
                           router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
@@ -783,7 +787,9 @@ export default function HomeScreen() {
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <View className="gap-2">
-                  <SectionHeading>Account usage</SectionHeading>
+                  <SectionHeading>
+                    {translate('mobile.home.accountUsage', 'Account usage')}
+                  </SectionHeading>
                   <MobileContentSection>
                     {accountsHosts.map(({ host, snapshot }, index) => {
                       const claudeActiveId = snapshot.claude.activeAccountId
@@ -794,71 +800,71 @@ export default function HomeScreen() {
                         snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
                       const showHostName = accountsHosts.length > 1
                       return (
-                        <Pressable
-                          key={host.id}
-                          accessibilityRole="button"
-                          className={cn(
-                            'active:bg-accent gap-3 px-3 py-3',
-                            index > 0 && 'border-t-hairline border-border'
-                          )}
-                          onPress={() => router.push(`/h/${host.id}/accounts`)}
-                        >
-                          {showHostName ? (
-                            <Text
-                              className="text-muted-foreground tracking-wide uppercase"
-                              numberOfLines={1}
-                            >
-                              {host.name}
-                            </Text>
-                          ) : null}
-                          {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
-                            const active = provider === 'claude' ? claudeActive : codexActive
-                            const accounts =
-                              provider === 'claude'
-                                ? snapshot.claude.accounts
-                                : snapshot.codex.accounts
-                            const limits = getActiveProviderRateLimits(snapshot, provider)
-                            // Why: with no managed accounts, still render a
-                            // "System default" row when the active target has
-                            // live usage data; the row label already falls back
-                            // to "System default" below.
-                            if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
-                              return null
-                            }
-                            const sessionBar = getUsageBarState(limits, 'session')
-                            const weeklyBar = getUsageBarState(limits, 'weekly')
-                            return (
-                              <View key={provider} className="flex-row items-start gap-3">
-                                <View className="h-6 w-8 items-center justify-center">
-                                  {provider === 'claude' ? (
-                                    <ClaudeIcon size={18} />
-                                  ) : (
-                                    <OpenAIIcon size={18} colorClassName="accent-foreground" />
-                                  )}
-                                </View>
-                                <View className="min-w-0 flex-1 gap-1">
-                                  <Text className="text-foreground" numberOfLines={1}>
-                                    {active?.email ?? 'System default'}
-                                  </Text>
-                                  <View className="gap-1">
-                                    <UsageBar
-                                      label="5h"
-                                      usedPercent={sessionBar.usedPercent}
-                                      unavailable={sessionBar.unavailable}
-                                      loading={sessionBar.loading}
-                                    />
-                                    <UsageBar
-                                      label="7d"
-                                      usedPercent={weeklyBar.usedPercent}
-                                      unavailable={weeklyBar.unavailable}
-                                      loading={weeklyBar.loading}
-                                    />
+                        <Link key={host.id} href={`/h/${host.id}/accounts`} asChild>
+                          <Pressable
+                            className={cn(
+                              'active:bg-accent gap-3 px-3 py-3',
+                              index > 0 && 'border-t-hairline border-border'
+                            )}
+                          >
+                            {showHostName ? (
+                              <Text
+                                className="text-muted-foreground tracking-wide uppercase"
+                                numberOfLines={1}
+                              >
+                                {host.name}
+                              </Text>
+                            ) : null}
+                            {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
+                              const active = provider === 'claude' ? claudeActive : codexActive
+                              const accounts =
+                                provider === 'claude'
+                                  ? snapshot.claude.accounts
+                                  : snapshot.codex.accounts
+                              const limits = getActiveProviderRateLimits(snapshot, provider)
+                              // Why: with no managed accounts, still render a
+                              // "System default" row when the active target has
+                              // live usage data; the row label already falls back
+                              // to "System default" below.
+                              if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
+                                return null
+                              }
+                              const sessionBar = getUsageBarState(limits, 'session')
+                              const weeklyBar = getUsageBarState(limits, 'weekly')
+                              return (
+                                <View key={provider} className="flex-row items-start gap-3">
+                                  <View className="h-6 w-8 items-center justify-center">
+                                    {provider === 'claude' ? (
+                                      <ClaudeIcon size={18} />
+                                    ) : (
+                                      <OpenAIIcon size={18} colorClassName="accent-foreground" />
+                                    )}
+                                  </View>
+                                  <View className="min-w-0 flex-1 gap-1">
+                                    <Text className="text-foreground" numberOfLines={1}>
+                                      {active?.email ??
+                                        translate('mobile.home.systemDefault', 'System default')}
+                                    </Text>
+                                    <View className="gap-1">
+                                      <UsageBar
+                                        label={translate('mobile.home.usage.fiveHours', '5h')}
+                                        usedPercent={sessionBar.usedPercent}
+                                        unavailable={sessionBar.unavailable}
+                                        loading={sessionBar.loading}
+                                      />
+                                      <UsageBar
+                                        label={translate('mobile.home.usage.sevenDays', '7d')}
+                                        usedPercent={weeklyBar.usedPercent}
+                                        unavailable={weeklyBar.unavailable}
+                                        loading={weeklyBar.loading}
+                                      />
+                                    </View>
                                   </View>
                                 </View>
-                              </View>
-                            )
-                          })}
-                        </Pressable>
+                              )
+                            })}
+                          </Pressable>
+                        </Link>
                       )
                     })}
                   </MobileContentSection>
@@ -869,83 +875,35 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* ─── Action sheets (shared by both states) ─── */}
-      <ActionSheetModal
-        visible={actionTarget != null}
-        title={actionTarget?.name}
-        message={actionTarget ? endpointLabel(actionTarget.endpoint) : undefined}
-        actions={(() => {
-          const host = actionTarget
-          if (!host) {
-            return []
-          }
-          const state = hostStates[host.id] ?? 'connecting'
-          const isLive =
-            state === 'connected' ||
-            state === 'connecting' ||
-            state === 'handshaking' ||
-            state === 'reconnecting'
-          // Why: "Reconnect" implies "you were connected, try again". If
-          // the client has never reached 'connected' this session (cold
-          // start, unreachable host, or after Disconnect) the action is
-          // functionally a fresh Connect — using the right verb makes
-          // the affordance match what tapping it actually does.
-          const hasEverConnected = (hostLastConnected[host.id] ?? null) != null
-          const items: ActionSheetAction[] = []
-          items.push({
-            label: hasEverConnected && isLive ? 'Reconnect' : 'Connect',
-            icon: RefreshCw,
-            onPress: () => {
-              setActionTarget(null)
-              void forceReconnectHost(host.id)
-            }
-          })
-          if (isLive) {
-            items.push({
-              label: 'Disconnect',
-              icon: PowerOff,
-              onPress: () => {
-                setActionTarget(null)
-                closeHostClient(host.id)
-              }
-            })
-          }
-          items.push({
-            label: 'Edit host',
-            icon: Edit3,
-            closeBeforePress: true,
-            onPress: () => {
-              setActionTarget(null)
-              router.push(`/h/${host.id}/edit`)
-            }
-          })
-          items.push({
-            label: 'Remove',
-            destructive: true,
-            closeBeforePress: true,
-            onPress: () => {
-              setConfirmRemove(host)
-            }
-          })
-          return items
-        })()}
-        onClose={() => setActionTarget(null)}
-      />
-
-      <ConfirmModal
-        visible={confirmRemove != null}
-        title="Remove Host"
-        message={`Remove "${confirmRemove?.name}"? You can re-pair later.`}
-        confirmLabel="Remove"
-        destructive
-        onConfirm={() => void handleRemove()}
-        onCancel={() => setConfirmRemove(null)}
+      <HostActionsDrawer
+        actionTarget={actionTarget}
+        confirmRemove={confirmRemove}
+        connectionState={actionTarget ? (hostStates[actionTarget.id] ?? 'connecting') : null}
+        hasEverConnected={
+          actionTarget ? (hostLastConnected[actionTarget.id] ?? null) !== null : false
+        }
+        onActionClose={() => setActionTarget(null)}
+        onCancelRemove={() => setConfirmRemove(null)}
+        onConfirmRemove={() => void handleRemove()}
+        onDisconnect={(hostId) => {
+          setActionTarget(null)
+          closeHostClient(hostId)
+        }}
+        onEdit={(hostId) => {
+          setActionTarget(null)
+          router.push(`/h/${hostId}/edit`)
+        }}
+        onReconnect={(hostId) => {
+          setActionTarget(null)
+          void forceReconnectHost(hostId)
+        }}
+        onRequestRemove={setConfirmRemove}
       />
     </View>
   )
 }
 
-function CardGap() {
+function CardGap(): React.JSX.Element {
   return <View className="h-1" />
 }
 
@@ -959,15 +917,24 @@ function SectionHeading({ children }: { children: string }): React.JSX.Element {
 
 const ONBOARDING_STEPS = [
   {
-    title: 'Open Yiru desktop',
-    desc: 'Go to Settings → Mobile and generate a pairing QR code.'
+    title: translate('mobile.home.onboarding.openDesktop.title', 'Open Yiru desktop'),
+    desc: translate(
+      'mobile.home.onboarding.openDesktop.description',
+      'Go to Settings → Mobile and generate a pairing QR code.'
+    )
   },
   {
-    title: 'Scan the code',
-    desc: 'Tap the button above to open the scanner. Point at the QR code on your screen.'
+    title: translate('mobile.home.onboarding.scanCode.title', 'Scan the code'),
+    desc: translate(
+      'mobile.home.onboarding.scanCode.description',
+      'Tap the button above to open the scanner. Point at the QR code on your screen.'
+    )
   },
   {
-    title: "You're connected",
-    desc: 'Your desktop will appear here. Everything is encrypted end-to-end.'
+    title: translate('mobile.home.onboarding.connected.title', "You're connected"),
+    desc: translate(
+      'mobile.home.onboarding.connected.description',
+      'Your desktop will appear here. Everything is encrypted end-to-end.'
+    )
   }
 ]

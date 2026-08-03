@@ -2,10 +2,10 @@ import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/revie
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { MobileSegmentedControl, type MobileSegmentOption } from '~/components/segmented-control'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { canAddRootComment } from '~/session/pr/comment-actions'
 import { isPrSidebarDetailsPlaceholder } from '~/session/pr/sidebar-state'
 import type { MobilePrCommentActions } from '~/session/pr/use-comment-actions'
@@ -87,7 +87,7 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
     () => getPRCommentAudienceCounts(comments, botAuthorOverrides),
     [botAuthorOverrides, comments]
   )
-  const audienceOptions = useMemo<MobileGlassSegmentOption<PRCommentAudienceFilter>[]>(
+  const audienceOptions = useMemo<MobileSegmentOption<PRCommentAudienceFilter>[]>(
     () =>
       PR_COMMENT_AUDIENCE_FILTERS.map((option) => ({
         label: `${option.label} ${counts[option.value]}`,
@@ -117,22 +117,27 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
 
   return (
     <>
-      <PRSection title="Description">
+      <PRSection title={translate('mobile.pullRequest.description.title', 'Description')}>
         {loadingDetails ? (
           <ActivityIndicator colorClassName="accent-muted-foreground" />
         ) : detailsFailed ? (
           <Text className={styles.noDescription}>
-            Could not load description. Tap refresh to try again.
+            {translate(
+              'mobile.pullRequest.description.loadError',
+              'Could not load description. Tap refresh to try again.'
+            )}
           </Text>
         ) : body.trim() ? (
           <CommentMarkdown content={body} variant="document" />
         ) : (
-          <Text className={styles.noDescription}>No description provided.</Text>
+          <Text className={styles.noDescription}>
+            {translate('mobile.pullRequest.description.empty', 'No description provided.')}
+          </Text>
         )}
       </PRSection>
 
       <PRSection
-        title="Comments"
+        title={translate('mobile.pullRequest.comments.title', 'Comments')}
         trailing={
           comments.length > 0 ? (
             <View className="border-hairline border-border bg-secondary rounded-full px-2 py-1">
@@ -144,18 +149,27 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         {loadingDetails ? (
           <ActivityIndicator colorClassName="accent-muted-foreground" />
         ) : detailsFailed ? (
-          <Text className={styles.empty}>Could not load comments. Tap refresh to try again.</Text>
+          <Text className={styles.empty}>
+            {translate(
+              'mobile.pullRequest.comments.loadError',
+              'Could not load comments. Tap refresh to try again.'
+            )}
+          </Text>
         ) : (
           <View className="gap-2">
             {comments.length === 0 ? (
-              <Text className={styles.empty}>No comments yet.</Text>
+              <Text className={styles.empty}>
+                {translate('mobile.pullRequest.comments.empty', 'No comments yet.')}
+              </Text>
             ) : (
               <>
                 {isPr ? (
-                  <MobileGlassSegmentedControl
-                    accessibilityLabel="Comment audience"
+                  <MobileSegmentedControl
+                    accessibilityLabel={translate(
+                      'mobile.pullRequest.comments.audience.label',
+                      'Comment audience'
+                    )}
                     options={audienceOptions}
-                    size="small"
                     value={filter}
                     onChange={selectFilter}
                   />
@@ -174,9 +188,22 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                     {remaining > 0 ? (
                       <MobileGlassTextButton
                         isFullWidth
-                        label={`Show ${Math.min(remaining, COMMENT_PAGE)} more${
-                          remaining > COMMENT_PAGE ? ` of ${remaining}` : ''
-                        }`}
+                        label={
+                          remaining > COMMENT_PAGE
+                            ? translate(
+                                'mobile.pullRequest.comments.showMoreWithTotal',
+                                'Show {{count}} more of {{total}}',
+                                {
+                                  count: Math.min(remaining, COMMENT_PAGE),
+                                  total: remaining
+                                }
+                              )
+                            : translate(
+                                'mobile.pullRequest.comments.showMore',
+                                'Show {{count}} more',
+                                { count: Math.min(remaining, COMMENT_PAGE) }
+                              )
+                        }
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
                         size="regular"
                       />
@@ -191,8 +218,11 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
             {canComment && actions ? (
               <View className="gap-2">
                 <PRCommentComposer
-                  placeholder="Add a comment…"
-                  submitLabel="Comment"
+                  placeholder={translate(
+                    'mobile.pullRequest.comments.composer.placeholder',
+                    'Add a comment…'
+                  )}
+                  submitLabel={translate('mobile.pullRequest.comments.composer.submit', 'Comment')}
                   submitting={actions.isRootBusy}
                   onSubmit={actions.addRootComment}
                 />
@@ -239,8 +269,18 @@ function CommentGroupView({
         onPress={() => setExpanded((value) => !value)}
       >
         <Text className="text-muted-foreground min-w-0 flex-1 text-xs" numberOfLines={1}>
-          Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
-          {count > 1 ? ` (${count})` : ''}
+          {translate(
+            'mobile.pullRequest.comments.resolvedSummary',
+            'Resolved {{kind}} by {{author}}{{count}}',
+            {
+              kind:
+                group.kind === 'thread'
+                  ? translate('mobile.pullRequest.comments.thread', 'thread')
+                  : translate('mobile.pullRequest.comments.comment', 'comment'),
+              author: root.author,
+              count: count > 1 ? ` (${count})` : ''
+            }
+          )}
         </Text>
         <View className="w-5 items-center">
           <Chevron size={14} colorClassName="accent-muted-foreground" />

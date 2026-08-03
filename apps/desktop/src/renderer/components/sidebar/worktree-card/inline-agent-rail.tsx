@@ -1,6 +1,4 @@
 import React from 'react'
-import { buildAgentRowLineageTree } from '~renderer/components/dashboard/agent-row-lineage-model'
-import type { DashboardAgentRow } from '~renderer/components/dashboard/use-dashboard-data'
 
 import {
   WORKTREE_CARD_STATUS_GLYPH_NUDGE_PX,
@@ -10,8 +8,18 @@ import {
 type InlineAgentRailProps = {
   /** The card's own padding-left, so the rail can offset from the status column. */
   cardPaddingLeft: string
-  /** The rows the inline list renders, so the rail can tick each root agent. */
-  agents: readonly DashboardAgentRow[]
+  /** Why: visible row totals keep every root elbow aligned while a subtree folds. */
+  rootRows: readonly InlineAgentRailRootRow[]
+}
+
+export type InlineAgentRailRootRow = {
+  paneKey: string
+  visibleRowCount: number
+}
+
+type RootRowCenter = {
+  paneKey: string
+  centerFromBottom: number
 }
 
 // Why: absolute children are placed against the card's padding box, so every
@@ -48,44 +56,19 @@ const RAIL_ELBOW_WIDTH_PX =
 // pure function of how many rows the list renders below it.
 const COMPACT_AGENT_ROW_HEIGHT_PX = 24
 
-// Why: mirrors the pre-order walk (and the cycle guard) that agents.tsx renders
-// for compact branches — descendants are always laid out, never collapsed — so
-// the rail counts exactly the rows that end up on screen.
-function countRenderedRows(
-  paneKey: string,
-  childrenByParentPaneKey: ReadonlyMap<string, readonly DashboardAgentRow[]>,
-  ancestorPaneKeys: ReadonlySet<string>
-): number {
-  if (ancestorPaneKeys.has(paneKey)) {
-    return 0
-  }
-  const descendantAncestorPaneKeys = new Set(ancestorPaneKeys)
-  descendantAncestorPaneKeys.add(paneKey)
-
-  let renderedRows = 1
-  for (const child of childrenByParentPaneKey.get(paneKey) ?? []) {
-    renderedRows += countRenderedRows(
-      child.paneKey,
-      childrenByParentPaneKey,
-      descendantAncestorPaneKeys
-    )
-  }
-  return renderedRows
-}
-
 /** Each root agent row's glyph-centre distance from the card's bottom edge. */
-function getRootRowCentersFromBottom(agents: readonly DashboardAgentRow[]): number[] {
-  const { rootRows, childrenByParentPaneKey } = buildAgentRowLineageTree(agents)
-  const renderedRowCounts = rootRows.map((rootRow) =>
-    countRenderedRows(rootRow.paneKey, childrenByParentPaneKey, new Set())
-  )
-  const totalRenderedRows = renderedRowCounts.reduce((total, count) => total + count, 0)
+function getRootRowCentersFromBottom(rootRows: readonly InlineAgentRailRootRow[]): RootRowCenter[] {
+  const totalRenderedRows = rootRows.reduce((total, row) => total + row.visibleRowCount, 0)
 
   let rowsAbove = 0
-  return renderedRowCounts.map((renderedRowCount) => {
+  return rootRows.map((row) => {
     const rowsBelow = totalRenderedRows - rowsAbove - 1
-    rowsAbove += renderedRowCount
-    return LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX + rowsBelow * COMPACT_AGENT_ROW_HEIGHT_PX
+    rowsAbove += row.visibleRowCount
+    return {
+      paneKey: row.paneKey,
+      centerFromBottom:
+        LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX + rowsBelow * COMPACT_AGENT_ROW_HEIGHT_PX
+    }
   })
 }
 
@@ -95,34 +78,34 @@ function getRootRowCentersFromBottom(agents: readonly DashboardAgentRow[]): numb
  * stopping at the last of them.
  */
 export function InlineAgentRail(props: InlineAgentRailProps): React.JSX.Element {
-  const { cardPaddingLeft, agents } = props
+  const { cardPaddingLeft, rootRows } = props
   const left = `calc(${cardPaddingLeft} + ${STATUS_ICON_CENTER_LEFT_PX}px)`
   const rootRowCentersFromBottom = React.useMemo(
-    () => getRootRowCentersFromBottom(agents),
-    [agents]
+    () => getRootRowCentersFromBottom(rootRows),
+    [rootRows]
   )
   const lastRootRowCenterFromBottom =
-    rootRowCentersFromBottom.at(-1) ?? LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX
+    rootRowCentersFromBottom.at(-1)?.centerFromBottom ?? LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX
 
   return (
     <>
       <span
         aria-hidden="true"
-        className="bg-sidebar-border pointer-events-none absolute z-10 w-px"
+        className="bg-sidebar-border pointer-events-none absolute z-10 w-px transition-[bottom] duration-150 ease-out motion-reduce:transition-none"
         style={{
           left,
           top: RAIL_TOP_PX,
           bottom: lastRootRowCenterFromBottom
         }}
       />
-      {rootRowCentersFromBottom.map((centerFromBottom) => (
+      {rootRowCentersFromBottom.map((rootRow) => (
         <span
-          key={centerFromBottom}
+          key={rootRow.paneKey}
           aria-hidden="true"
-          className="bg-sidebar-border pointer-events-none absolute z-10 h-px"
+          className="bg-sidebar-border pointer-events-none absolute z-10 h-px transition-[bottom] duration-150 ease-out motion-reduce:transition-none"
           style={{
             left,
-            bottom: centerFromBottom,
+            bottom: rootRow.centerFromBottom,
             width: RAIL_ELBOW_WIDTH_PX
           }}
         />

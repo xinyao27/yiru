@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
@@ -8,7 +9,7 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { Copy, Check } from '~/components/uniwind-icons'
 import { buildConnectionDiagnosticsReport } from '~/diagnostics/connection-diagnostics-report'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 import { useHostClient } from '~/transport/client-context'
 import {
   useLastConnectedAt,
@@ -88,8 +89,8 @@ export default function ConnectionLogScreen() {
               key={host.id}
               className="rounded-full"
               contentClassName="rounded-full px-3 py-2"
+              isSelected={host.id === selectedId}
               onPress={() => setSelectedId(host.id)}
-              tintColorClassName={host.id === selectedId ? 'accent-primary' : undefined}
             >
               <Text
                 className={cn(
@@ -110,7 +111,11 @@ export default function ConnectionLogScreen() {
           <View className="mb-2 flex-row items-center justify-between">
             <Text className="text-muted-foreground text-xs">
               {state}
-              {reconnectAttempts > 0 ? ` · attempt ${reconnectAttempts}` : ''}
+              {reconnectAttempts > 0
+                ? translate('mobile.connectionLog.attempt', ' · attempt {{count}}', {
+                    count: reconnectAttempts
+                  })
+                : ''}
             </Text>
             <MobileGlassPressable
               className="rounded-full"
@@ -123,7 +128,9 @@ export default function ConnectionLogScreen() {
                 <Copy size={16} colorClassName="accent-muted-foreground" />
               )}
               <Text className="text-foreground text-xs">
-                {copied ? 'Copied' : 'Copy diagnostics'}
+                {copied
+                  ? translate('mobile.connectionLog.copied', 'Copied')
+                  : translate('mobile.connectionLog.copyDiagnostics', 'Copy diagnostics')}
               </Text>
             </MobileGlassPressable>
           </View>
@@ -131,12 +138,17 @@ export default function ConnectionLogScreen() {
             <ConnectionLog entries={[...entries]} title={selected.name} />
           ) : (
             <Text className="text-muted-foreground text-xs leading-5">
-              No connection events yet this session. Events appear as the app dials this host.
+              {translate(
+                'mobile.connectionLog.empty',
+                'No connection events yet this session. Events appear as the app dials this host.'
+              )}
             </Text>
           )}
         </>
       ) : (
-        <Text className="text-muted-foreground text-xs leading-5">No paired hosts.</Text>
+        <Text className="text-muted-foreground text-xs leading-5">
+          {translate('mobile.connectionLog.noHosts', 'No paired hosts.')}
+        </Text>
       )}
     </View>
   )

@@ -1,4 +1,4 @@
-import { cn } from '~/style/class-names'
+import { cn } from 'cnfast'
 
 // Fixed inline-dock width (KTD2/U4): leaves the diff >= ~380px within the 700px
 // breakpoint where docking engages.

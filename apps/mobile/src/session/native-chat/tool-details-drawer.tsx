@@ -127,7 +127,7 @@ export function MobileNativeChatToolDetailsDrawer({
   const diffLineLimit = Math.max(1, Math.floor(MAX_TOOL_RUN_DIFF_ROWS / (pairs.length * 2 || 1)))
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
+    <BottomDrawer visible={visible} onClose={onClose}>
       <View className="border-b-hairline border-border pb-3">
         <Text className="text-foreground text-base font-semibold">Tool activity</Text>
         <Text className="text-muted-foreground text-sm">

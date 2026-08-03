@@ -1,4 +1,9 @@
+import { ArrowCounterClockwise } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { showOnboardingFromRenderer } from '~renderer/components/onboarding/show-onboarding-event'
+import { Button } from '~renderer/components/ui/button'
+import { translate } from '~renderer/i18n/i18n'
 import {
   getFeatureWallSetupSteps,
   getFirstIncompleteFeatureWallSetupStepId
@@ -11,6 +16,7 @@ import { useSettingsSetupGuideFullProgress } from './setup-guide-progress'
 export function SettingsSetupGuidePane(): React.JSX.Element {
   const setupSteps = useMemo(() => getFeatureWallSetupSteps(), [])
   const [userSelectedStep, setUserSelectedStep] = useState(false)
+  const [isRestartingOnboarding, setIsRestartingOnboarding] = useState(false)
   const [orchestrationSkillInstalled, setOrchestrationSkillInstalled] = useState(false)
   const [browserUseSkillInstalled, setBrowserUseSkillInstalled] = useState(false)
   const progress = useSettingsSetupGuideFullProgress(
@@ -45,16 +51,67 @@ export function SettingsSetupGuidePane(): React.JSX.Element {
     setActiveStepId(id)
   }
 
+  const handleRestartOnboarding = async (): Promise<void> => {
+    if (isRestartingOnboarding) {
+      return
+    }
+    setIsRestartingOnboarding(true)
+    try {
+      await showOnboardingFromRenderer()
+    } catch {
+      toast.error(
+        translate(
+          'auto.components.settings.SettingsSetupGuidePane.restartOnboardingError',
+          "Couldn't restart onboarding."
+        )
+      )
+    } finally {
+      setIsRestartingOnboarding(false)
+    }
+  }
+
   return (
-    <div className="h-[min(740px,calc(100vh-14rem))] min-h-[540px] px-7 py-6">
-      <FeatureWallSetupChecklist
-        layout="embedded"
-        activeStep={activeStep}
-        progress={progress}
-        onSelectStep={handleSelectStep}
-        onOrchestrationSkillInstalledChange={setOrchestrationSkillInstalled}
-        onBrowserUseSkillInstalledChange={setBrowserUseSkillInstalled}
-      />
+    <div className="flex h-[min(740px,calc(100vh-14rem))] min-h-[540px] flex-col px-7 py-6">
+      <div className="border-border/60 mb-6 flex shrink-0 flex-wrap items-center justify-between gap-4 border-b pb-5">
+        <div className="min-w-0 space-y-1">
+          <h3 className="text-foreground text-sm font-semibold">
+            {translate(
+              'auto.components.settings.SettingsSetupGuidePane.restartOnboardingTitle',
+              'Run onboarding again'
+            )}
+          </h3>
+          <p className="text-muted-foreground text-xs leading-5">
+            {translate(
+              'auto.components.settings.SettingsSetupGuidePane.restartOnboardingDescription',
+              'Reset the onboarding wizard and reopen it from the first step. Your checklist progress stays intact.'
+            )}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          disabled={isRestartingOnboarding}
+          onClick={() => void handleRestartOnboarding()}
+        >
+          <ArrowCounterClockwise className="size-3.5" />
+          {translate(
+            'auto.components.settings.SettingsSetupGuidePane.restartOnboardingButton',
+            'Restart onboarding'
+          )}
+        </Button>
+      </div>
+      <div className="min-h-0 flex-1">
+        <FeatureWallSetupChecklist
+          layout="embedded"
+          activeStep={activeStep}
+          progress={progress}
+          onSelectStep={handleSelectStep}
+          onOrchestrationSkillInstalledChange={setOrchestrationSkillInstalled}
+          onBrowserUseSkillInstalledChange={setBrowserUseSkillInstalled}
+        />
+      </div>
     </div>
   )
 }

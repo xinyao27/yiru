@@ -1,7 +1,11 @@
+import { CaretRight as ChevronRight, X } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { AgentStateDot, agentStateLabel } from '~renderer/components/agent-state-dot'
 import { useAgentRowConversationName } from '~renderer/components/dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
+import { Button } from '~renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '~renderer/lib/agent-row-primary-text'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '~renderer/lib/agent-status'
@@ -96,6 +100,12 @@ type CompactAgentRowProps = {
   sendTargetDisabledReason?: string
   onSendTargetClick?: (paneKey: string) => void
   isFocusedPane?: boolean
+  childAgentCount?: number
+  childAgentsExpanded?: boolean
+  onToggleChildAgents?: (paneKey: string) => void
+  /** Omitted for subagent child rows, which have no store entry of their own
+   *  to dismiss — offering the X would be a silent no-op. */
+  onDismiss?: (paneKey: string) => void
 }
 
 export const CompactAgentRow = React.memo(function CompactAgentRow({
@@ -105,7 +115,11 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   sendTargetStatus,
   sendTargetDisabledReason,
   onSendTargetClick,
-  isFocusedPane = false
+  isFocusedPane = false,
+  childAgentCount,
+  childAgentsExpanded = false,
+  onToggleChildAgents,
+  onDismiss
 }: CompactAgentRowProps) {
   // Why: subagent child rows carry the child's NAME (e.g. "pr-reviewer") in
   // agentType, which is not an iconable agent and would render the unknown
@@ -118,6 +132,17 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   const model = agent.entry.model?.trim() ?? ''
   const shortTime = getCompactAgentTime(agent, now)
   const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey)
+  const hasChildDisclosure =
+    typeof childAgentCount === 'number' &&
+    childAgentCount > 0 &&
+    typeof onToggleChildAgents === 'function'
+  const childDisclosureLabel = hasChildDisclosure
+    ? translate(
+        'auto.components.right.sidebar.AiVaultSessionSubagents.subagentsCount',
+        'Subagents ({{value0}})',
+        { value0: childAgentCount }
+      )
+    : ''
 
   const handleActivate = useCallback(
     (e: React.MouseEvent) => {
@@ -148,6 +173,25 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     },
     [agent.paneKey, onSendTargetClick, sendTargetStatus]
   )
+  const handleToggleChildAgents = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onToggleChildAgents?.(agent.paneKey)
+    },
+    [agent.paneKey, onToggleChildAgents]
+  )
+  const handleDismiss = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onDismiss?.(agent.paneKey)
+    },
+    [agent.paneKey, onDismiss]
+  )
+  // Why: the send picker owns the whole row while it is active, so the X must
+  // not compete with it for the trailing slot.
+  const canDismiss = typeof onDismiss === 'function' && !sendTargetStatus
   const rowBody = (
     <>
       {!hideIcon && (
@@ -194,20 +238,83 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
         </span>
       )}
       {cacheTimer && <CacheTimer startedAt={cacheTimer.startedAt} ttlMs={cacheTimer.ttlMs} />}
-      {shortTime && (
-        <span
-          className={cn(
-            'shrink-0 text-[10px] tabular-nums',
-            // Why: the muted timestamp drops out against the selected-row fill.
-            isFocusedPane
-              ? 'text-foreground/70'
-              : 'text-muted-foreground/60 group-hover/agent-row:text-foreground/75'
+      {/* Why: timestamp and dismiss-X share one slot so the row keeps its
+          compact width — the same trade the dashboard row makes. On no-hover
+          devices the X is always visible, so the timestamp yields there. */}
+      {(shortTime || canDismiss) && (
+        <span className="relative grid shrink-0 grid-cols-1 grid-rows-1 items-center justify-items-end">
+          {shortTime && (
+            <span
+              className={cn(
+                '[grid-area:1/1] text-[10px] tabular-nums',
+                // Why: the muted timestamp drops out against the selected-row fill.
+                isFocusedPane
+                  ? 'text-foreground/70'
+                  : 'text-muted-foreground/60 group-hover/agent-row:text-foreground/75',
+                canDismiss &&
+                  'transition-opacity duration-150 group-hover/agent-row:opacity-0 [@media(hover:none)]:opacity-0'
+              )}
+            >
+              {shortTime}
+            </span>
           )}
-        >
-          {shortTime}
+          {canDismiss && (
+            <Button
+              variant="quiet"
+              size="icon-xs"
+              type="button"
+              onClick={handleDismiss}
+              className={cn(
+                '[grid-area:1/1] size-3.5 border-0 p-0',
+                'can-hover:opacity-0 transition-opacity duration-150',
+                'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
+              )}
+              aria-label={translate(
+                'auto.components.dashboard.DashboardAgentRow.b06e13fcf7',
+                'Dismiss agent'
+              )}
+              title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
+            >
+              <X className="size-3" />
+            </Button>
+          )}
         </span>
       )}
       <AgentStateDot state={dotState} size="sm" />
+      {hasChildDisclosure ? (
+        <>
+          {/* Why: the count remains part of row activation; only the trailing
+              chevron owns disclosure, unlike the dashboard's leading control. */}
+          <span className="text-[10px] tabular-nums" aria-hidden="true">
+            {childAgentCount}
+          </span>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="quiet"
+                  size="icon-xs"
+                  type="button"
+                  onClick={handleToggleChildAgents}
+                  aria-label={childDisclosureLabel}
+                  aria-expanded={childAgentsExpanded}
+                >
+                  <ChevronRight
+                    weight="regular"
+                    className={cn(
+                      'size-3 transition-transform duration-150 motion-reduce:transition-none',
+                      childAgentsExpanded && 'rotate-90'
+                    )}
+                  />
+                </Button>
+              }
+            />
+            <TooltipContent side="top" sideOffset={4}>
+              {childDisclosureLabel}
+            </TooltipContent>
+          </Tooltip>
+        </>
+      ) : null}
     </>
   )
 

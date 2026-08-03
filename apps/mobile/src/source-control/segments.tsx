@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '../components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '../components/glass/segmented-control-props'
+import { MobileSegmentedControl, type MobileSegmentOption } from '../components/segmented-control'
+import { translate } from '../i18n/translate'
 import {
   SOURCE_CONTROL_HUB_TABS,
   SOURCE_CONTROL_HUB_TAB_LABELS,
@@ -13,7 +13,7 @@ type Props = {
   onSelect: (tab: SourceControlHubTab) => void
 }
 
-const SOURCE_CONTROL_SEGMENTS: MobileGlassSegmentOption<SourceControlHubTab>[] =
+const SOURCE_CONTROL_SEGMENTS: MobileSegmentOption<SourceControlHubTab>[] =
   SOURCE_CONTROL_HUB_TABS.map((value) => ({
     label: SOURCE_CONTROL_HUB_TAB_LABELS[value],
     value
@@ -24,8 +24,11 @@ const SOURCE_CONTROL_SEGMENTS: MobileGlassSegmentOption<SourceControlHubTab>[] =
 export function MobileSourceControlSegments({ active, onSelect }: Props) {
   return (
     <View className="mx-4 mt-3">
-      <MobileGlassSegmentedControl
-        accessibilityLabel="Source control view"
+      <MobileSegmentedControl
+        accessibilityLabel={translate(
+          'mobile.sourceControl.segmentedView.label',
+          'Source control view'
+        )}
         options={SOURCE_CONTROL_SEGMENTS}
         value={active}
         onChange={onSelect}

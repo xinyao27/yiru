@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
-import { MobileGlassSurface } from '~/components/glass/surface'
+import { MobileGlassGroup } from '~/components/glass/group'
+import { MobileGlassPressable } from '~/components/glass/pressable'
 import { Code, Pencil } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import { MobileMarkdown } from '../components/markdown'
 import {
@@ -42,35 +43,41 @@ export function MobileFileMarkdownPreview({
 
   return (
     <View className="bg-editor-surface flex-1">
-      <MobileGlassSurface
-        className="mx-3 my-2 flex-row self-start overflow-hidden rounded-xl p-1"
-        isInteractive
-      >
-        <Pressable
-          className={cn(styles.modeToggle, sourceSelected && styles.modeToggleActive)}
-          onPress={() => setMode('source')}
+      <MobileGlassGroup className="mx-3 my-2 flex-row gap-2 self-start" spacing={8}>
+        <MobileGlassPressable
           accessibilityRole="button"
           accessibilityState={{ selected: sourceSelected }}
-          accessibilityLabel="View Markdown source"
+          accessibilityLabel={translate('mobile.files.markdown.viewSource', 'View Markdown source')}
+          className="rounded-lg"
+          contentClassName="h-8 w-9 items-center justify-center rounded-lg"
+          isSelected={sourceSelected}
+          onPress={() => setMode('source')}
+          size="small"
         >
           <Code
             size={15}
             colorClassName={sourceSelected ? 'accent-foreground' : 'accent-muted-foreground'}
           />
-        </Pressable>
-        <Pressable
-          className={cn(styles.modeToggle, previewSelected && styles.modeToggleActive)}
-          onPress={() => setMode('preview')}
+        </MobileGlassPressable>
+        <MobileGlassPressable
           accessibilityRole="button"
           accessibilityState={{ selected: previewSelected }}
-          accessibilityLabel="View rendered Markdown preview"
+          accessibilityLabel={translate(
+            'mobile.files.markdown.viewPreview',
+            'View rendered Markdown preview'
+          )}
+          className="rounded-lg"
+          contentClassName="h-8 w-9 items-center justify-center rounded-lg"
+          isSelected={previewSelected}
+          onPress={() => setMode('preview')}
+          size="small"
         >
           <Pencil
             size={15}
             colorClassName={previewSelected ? 'accent-foreground' : 'accent-muted-foreground'}
           />
-        </Pressable>
-      </MobileGlassSurface>
+        </MobileGlassPressable>
+      </MobileGlassGroup>
       {mode === 'preview' ? (
         <ScrollView className={styles.scroll} contentContainerClassName="p-3 pb-6">
           {truncated ? <MobileFilePreviewTruncatedNote byteLength={byteLength} /> : null}

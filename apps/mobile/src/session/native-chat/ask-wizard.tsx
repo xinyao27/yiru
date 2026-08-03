@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
@@ -6,7 +7,7 @@ import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { Check } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import type { AskAnswerSelection, AskPrompt } from './ask'
 
@@ -112,8 +113,8 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
                 key={`${qq.header}:${qq.question}`}
                 className="rounded-full"
                 contentClassName="min-h-8 flex-row items-center gap-1 rounded-full px-3 py-1"
+                isSelected={questionIndex === index}
                 onPress={() => setIndex(questionIndex)}
-                tintColorClassName={questionIndex === index ? 'accent-primary' : undefined}
               >
                 <Text
                   className={cn(
@@ -122,7 +123,10 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
                   )}
                   numberOfLines={1}
                 >
-                  {qq.header || `Step ${questionIndex + 1}`}
+                  {qq.header ||
+                    translate('mobile.nativeChat.ask.step', 'Step {{number}}', {
+                      number: questionIndex + 1
+                    })}
                 </Text>
                 {isAnswered(questionIndex) ? (
                   <Check size={11} colorClassName="accent-green-500" />
@@ -146,7 +150,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           />
         ))}
         <OptionRow
-          label="Other…"
+          label={translate('mobile.nativeChat.ask.other', 'Other…')}
           selected={otherSelected}
           multi={q.multiSelect}
           onPress={() => toggle(index, OTHER, q.multiSelect)}
@@ -157,7 +161,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
               className="text-foreground min-h-11 p-2 text-sm"
               value={otherText[index]}
               onChangeText={(value) => setOther(index, value)}
-              placeholder="Type your answer"
+              placeholder={translate('mobile.nativeChat.ask.answerPlaceholder', 'Type your answer')}
               placeholderTextColorClassName="accent-muted-foreground"
               multiline
               autoFocus
@@ -172,7 +176,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
       >
         <MobileGlassTextButton
           disabled={submitting}
-          label="Cancel"
+          label={translate('mobile.common.cancel', 'Cancel')}
           onPress={async () => {
             if (!submittingRef.current && onCancel) {
               submittingRef.current = true
@@ -195,7 +199,11 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         <MobileGlassTextButton
           disabled={!canAdvance}
           isProminent
-          label={isLast ? 'Send answer' : 'Next'}
+          label={
+            isLast
+              ? translate('mobile.nativeChat.ask.sendAnswer', 'Send answer')
+              : translate('mobile.common.next', 'Next')
+          }
           onPress={() => void advance()}
           size="small"
         />
@@ -221,7 +229,10 @@ function OptionRow({
     <Pressable
       accessibilityRole={multi ? 'checkbox' : 'radio'}
       accessibilityState={multi ? { checked: selected } : { selected }}
-      className={cn('mb-1 flex-row gap-2 rounded-xl p-2 active:bg-accent', selected && 'bg-accent')}
+      className={cn(
+        'mb-1 min-h-11 flex-row items-center gap-2 rounded-xl p-2 active:bg-accent',
+        selected && 'bg-accent'
+      )}
       onPress={onPress}
     >
       <View

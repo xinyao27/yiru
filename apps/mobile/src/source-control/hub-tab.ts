@@ -2,6 +2,8 @@
 // React/native imports) so tab parsing is unit-testable and the deep-link `tab`
 // query param and the segmented control share one source of truth.
 
+import { translate } from '~/i18n/translate'
+
 export type SourceControlHubTab = 'changes' | 'pr' | 'history'
 
 export const SOURCE_CONTROL_HUB_TABS: readonly SourceControlHubTab[] = [
@@ -11,9 +13,9 @@ export const SOURCE_CONTROL_HUB_TABS: readonly SourceControlHubTab[] = [
 ] as const
 
 export const SOURCE_CONTROL_HUB_TAB_LABELS: Record<SourceControlHubTab, string> = {
-  changes: 'Changes',
-  pr: 'Pull Request',
-  history: 'Commits'
+  changes: translate('mobile.sourceControl.tabs.changes', 'Changes'),
+  pr: translate('mobile.sourceControl.tabs.pullRequest', 'Pull Request'),
+  history: translate('mobile.sourceControl.tabs.commits', 'Commits')
 }
 
 // Normalize a route param (possibly an array from expo-router, possibly unknown)

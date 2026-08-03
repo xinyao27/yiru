@@ -1,4 +1,5 @@
 import type { PRCheckDetail } from '@yiru/workbench-model/review'
+import { cn } from 'cnfast'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 
@@ -7,7 +8,6 @@ import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '~/session/pr/github-rpc'
 import type { MobilePrActions } from '~/session/pr/use-actions'
-import { cn } from '~/style/class-names'
 import type { RpcClient } from '~/transport/rpc-client'
 
 import { prAiTriageStyles as triageStyles } from './ai-triage-styles'

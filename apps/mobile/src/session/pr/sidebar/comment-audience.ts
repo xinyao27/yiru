@@ -4,17 +4,18 @@ import {
 } from '@yiru/workbench-model/review'
 import type { PRComment } from '@yiru/workbench-model/review'
 
+import { translate } from '~/i18n/translate'
+
 export { createBotAuthorOverrideSet }
 
-// Audience filtering for the PR comment timeline, ported from the desktop helper
-// without its i18n wrapper. Classification must match so the same comment reads
-// as human or bot on both surfaces.
+// Audience filtering for the PR comment timeline, ported from the desktop helper.
+// Classification must match so the same comment reads as human or bot on both surfaces.
 export type PRCommentAudienceFilter = 'all' | 'human' | 'bot'
 
 export const PR_COMMENT_AUDIENCE_FILTERS: { value: PRCommentAudienceFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'human', label: 'Humans' },
-  { value: 'bot', label: 'Bots' }
+  { value: 'all', label: translate('mobile.pullRequest.comments.audience.all', 'All') },
+  { value: 'human', label: translate('mobile.pullRequest.comments.audience.humans', 'Humans') },
+  { value: 'bot', label: translate('mobile.pullRequest.comments.audience.bots', 'Bots') }
 ]
 
 const BOT_LOGIN_SUFFIX = '[bot]'
@@ -98,10 +99,10 @@ export function filterPRCommentsByAudience(
 export function getPRCommentAudienceEmptyLabel(filter: PRCommentAudienceFilter): string {
   switch (filter) {
     case 'bot':
-      return 'No bot comments.'
+      return translate('mobile.pullRequest.comments.emptyBots', 'No bot comments.')
     case 'human':
-      return 'No human comments.'
+      return translate('mobile.pullRequest.comments.emptyHumans', 'No human comments.')
     case 'all':
-      return 'No comments yet.'
+      return translate('mobile.pullRequest.comments.empty', 'No comments yet.')
   }
 }

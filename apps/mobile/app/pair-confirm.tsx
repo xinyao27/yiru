@@ -1,13 +1,13 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCSSVariable } from 'uniwind'
 
 import { ConnectionLog } from '~/components/connection-log'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { shouldPresentNotificationOptIn } from '~/notifications/notification-opt-in-gate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 import { useCloseHost } from '~/transport/client-context'
@@ -26,6 +26,15 @@ type Status = 'awaiting-confirm' | 'connecting' | 'error'
 // route surfaces an actionable error with the log visible, instead of
 // spinning silently. ~25s allows for one full connect-timeout + a retry.
 const PAIRING_OVERALL_TIMEOUT_MS = 25_000
+const IS_DEVELOPMENT_LOOPBACK_AUTO_PAIR = __DEV__ && process.env.EXPO_PUBLIC_YIRU_AUTO_PAIR === '1'
+
+function isLoopbackPairingEndpoint(endpoint: string): boolean {
+  try {
+    return new URL(endpoint).hostname === '127.0.0.1'
+  } catch {
+    return false
+  }
+}
 
 export default function PairConfirmScreen() {
   const router = useRouter()
@@ -78,7 +87,7 @@ export default function PairConfirmScreen() {
     activePairingAttemptRef.current = null
   }, [])
 
-  async function confirm() {
+  const confirm = useCallback(async () => {
     if (!offer) {
       return
     }
@@ -145,7 +154,21 @@ export default function PairConfirmScreen() {
           : `Pairing failed: ${err instanceof Error ? err.message : String(err)}`
       )
     }
-  }
+  }, [closeHost, offer, router])
+
+  const didAutoConfirmRef = useRef(false)
+  useEffect(() => {
+    if (
+      !IS_DEVELOPMENT_LOOPBACK_AUTO_PAIR ||
+      didAutoConfirmRef.current ||
+      !offer ||
+      !isLoopbackPairingEndpoint(offer.endpoint)
+    ) {
+      return
+    }
+    didAutoConfirmRef.current = true
+    void confirm()
+  }, [confirm, offer])
 
   const containerPadding = { paddingTop: insets.top + spacing2 }
 

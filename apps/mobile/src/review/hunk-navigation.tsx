@@ -3,6 +3,7 @@ import { Text } from 'react-native'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { ArrowDown, ArrowUp, type Icon } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import type { MobileDiffReviewHunkNavigationProps } from './hunk-navigation-props'
 
@@ -17,17 +18,23 @@ function HunkButton({
 }): React.JSX.Element {
   return (
     <MobileGlassPressable
-      accessibilityLabel={`${direction === 'previous' ? 'Previous' : 'Next'} hunk`}
+      accessibilityLabel={
+        direction === 'previous'
+          ? translate('mobile.review.hunks.previous', 'Previous hunk')
+          : translate('mobile.review.hunks.next', 'Next hunk')
+      }
       accessibilityRole="button"
       className="rounded-full"
-      contentClassName="min-h-8 flex-row items-center justify-center gap-1 rounded-full px-3"
+      contentClassName="flex-row items-center justify-center gap-1 rounded-full px-3"
       disabled={disabled}
       fallbackClassName="bg-card"
-      hitSlop={6}
       onPress={() => onJumpHunk(direction)}
+      size="small"
     >
       <Icon size={16} colorClassName="accent-muted-foreground" />
-      <Text className="text-muted-foreground text-sm">Hunk</Text>
+      <Text className="text-muted-foreground text-sm">
+        {translate('mobile.review.hunks.label', 'Hunk')}
+      </Text>
     </MobileGlassPressable>
   )
 }

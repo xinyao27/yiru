@@ -1,13 +1,13 @@
 import type { RuntimeStatsSummary } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench-model/ui'
 import { buildContributionCalendar, getContributionTotals } from '@yiru/workbench-model/ui'
+import { cn } from 'cnfast'
 import { useMemo, useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { MobileContentSection } from '../components/content-section'
-import { MobileGlassSegmentedControl } from '../components/glass/segmented-control'
+import { MobileSegmentedControl } from '../components/segmented-control'
 import { translate } from '../i18n/translate'
-import { cn } from '../style/class-names'
 import {
   type ContributionDisplayMetric,
   formatMetricValue,
@@ -106,11 +106,10 @@ export function MobileContributionCard({
           </Text>
         </View>
         <View className="w-36">
-          <MobileGlassSegmentedControl
+          <MobileSegmentedControl
             accessibilityLabel={translate('mobile.home.metricSelector', 'Contribution metric')}
             onChange={chooseMetric}
             options={CONTRIBUTION_METRIC_OPTIONS}
-            size="small"
             value={metric === 'activity' ? 'activity' : 'tokens'}
           />
         </View>
