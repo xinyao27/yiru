@@ -9,7 +9,17 @@ type InlineAgentRailProps = {
   /** The card's own padding-left, so the rail can offset from the status column. */
   cardPaddingLeft: string
   /** Why: visible row totals keep every root elbow aligned while a subtree folds. */
-  rootRowVisibleCounts: readonly number[]
+  rootRows: readonly InlineAgentRailRootRow[]
+}
+
+export type InlineAgentRailRootRow = {
+  paneKey: string
+  visibleRowCount: number
+}
+
+type RootRowCenter = {
+  paneKey: string
+  centerFromBottom: number
 }
 
 // Why: absolute children are placed against the card's padding box, so every
@@ -47,14 +57,18 @@ const RAIL_ELBOW_WIDTH_PX =
 const COMPACT_AGENT_ROW_HEIGHT_PX = 24
 
 /** Each root agent row's glyph-centre distance from the card's bottom edge. */
-function getRootRowCentersFromBottom(rootRowVisibleCounts: readonly number[]): number[] {
-  const totalRenderedRows = rootRowVisibleCounts.reduce((total, count) => total + count, 0)
+function getRootRowCentersFromBottom(rootRows: readonly InlineAgentRailRootRow[]): RootRowCenter[] {
+  const totalRenderedRows = rootRows.reduce((total, row) => total + row.visibleRowCount, 0)
 
   let rowsAbove = 0
-  return rootRowVisibleCounts.map((renderedRowCount) => {
+  return rootRows.map((row) => {
     const rowsBelow = totalRenderedRows - rowsAbove - 1
-    rowsAbove += renderedRowCount
-    return LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX + rowsBelow * COMPACT_AGENT_ROW_HEIGHT_PX
+    rowsAbove += row.visibleRowCount
+    return {
+      paneKey: row.paneKey,
+      centerFromBottom:
+        LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX + rowsBelow * COMPACT_AGENT_ROW_HEIGHT_PX
+    }
   })
 }
 
@@ -64,14 +78,14 @@ function getRootRowCentersFromBottom(rootRowVisibleCounts: readonly number[]): n
  * stopping at the last of them.
  */
 export function InlineAgentRail(props: InlineAgentRailProps): React.JSX.Element {
-  const { cardPaddingLeft, rootRowVisibleCounts } = props
+  const { cardPaddingLeft, rootRows } = props
   const left = `calc(${cardPaddingLeft} + ${STATUS_ICON_CENTER_LEFT_PX}px)`
   const rootRowCentersFromBottom = React.useMemo(
-    () => getRootRowCentersFromBottom(rootRowVisibleCounts),
-    [rootRowVisibleCounts]
+    () => getRootRowCentersFromBottom(rootRows),
+    [rootRows]
   )
   const lastRootRowCenterFromBottom =
-    rootRowCentersFromBottom.at(-1) ?? LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX
+    rootRowCentersFromBottom.at(-1)?.centerFromBottom ?? LAST_AGENT_ROW_CENTER_FROM_BOTTOM_PX
 
   return (
     <>
@@ -84,14 +98,14 @@ export function InlineAgentRail(props: InlineAgentRailProps): React.JSX.Element 
           bottom: lastRootRowCenterFromBottom
         }}
       />
-      {rootRowCentersFromBottom.map((centerFromBottom) => (
+      {rootRowCentersFromBottom.map((rootRow) => (
         <span
-          key={centerFromBottom}
+          key={rootRow.paneKey}
           aria-hidden="true"
           className="bg-sidebar-border pointer-events-none absolute z-10 h-px transition-[bottom] duration-150 ease-out motion-reduce:transition-none"
           style={{
             left,
-            bottom: centerFromBottom,
+            bottom: rootRow.centerFromBottom,
             width: RAIL_ELBOW_WIDTH_PX
           }}
         />

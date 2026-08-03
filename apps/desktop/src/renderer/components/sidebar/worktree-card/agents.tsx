@@ -19,7 +19,7 @@ import { useWorktreeAgentRows } from '../use-worktree-agent-rows'
 import { useWorktreeAgentExpansionState } from './agents-expansion-state'
 import { CompactAgentRow } from './compact-agent-row'
 import { buildCompactAgentBranches, type CompactAgentBranch } from './compact-agent-tree'
-import { InlineAgentRail } from './inline-agent-rail'
+import { InlineAgentRail, type InlineAgentRailRootRow } from './inline-agent-rail'
 import { selectSendTargetControlInputs, selectSendTargetInputs } from './send-target-inputs'
 
 export const SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT =
@@ -240,8 +240,12 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
     () => buildCompactAgentBranches(agents, collapsedLineageParents),
     [agents, collapsedLineageParents]
   )
-  const compactRootRowVisibleCounts = useMemo(
-    () => compactRootBranches.map((branch) => branch.visibleRowCount),
+  const compactRootRailRows = useMemo<InlineAgentRailRootRow[]>(
+    () =>
+      compactRootBranches.map((branch) => ({
+        paneKey: branch.agent.paneKey,
+        visibleRowCount: branch.visibleRowCount
+      })),
     [compactRootBranches]
   )
 
@@ -422,7 +426,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
         {inlineRailCardPaddingLeft ? (
           <InlineAgentRail
             cardPaddingLeft={inlineRailCardPaddingLeft}
-            rootRowVisibleCounts={compactRootRowVisibleCounts}
+            rootRows={compactRootRailRows}
           />
         ) : null}
         <div
