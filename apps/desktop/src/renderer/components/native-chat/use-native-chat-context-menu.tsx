@@ -22,22 +22,18 @@ import {
   type MouseEventHandler,
   type RefObject
 } from 'react'
-import { Button } from '~renderer/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger
-} from '~renderer/components/ui/dropdown-menu'
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut
+} from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 
 import { isMacPlatform, nativeChatToggleShortcutLabel } from './shortcut'
 
 type NativeChatContextMenuState = {
   open: boolean
-  point: { x: number; y: number }
   selectedText: string
 }
 
@@ -92,7 +88,9 @@ export function useNativeChatContextMenu({
   onNewConversation,
   actions
 }: UseNativeChatContextMenuArgs): {
-  onContextMenuCapture: MouseEventHandler<HTMLElement>
+  open: boolean
+  setOpen: (open: boolean) => void
+  onContextMenu: MouseEventHandler<HTMLElement>
   onSelectionCapture: () => void
   menu: React.JSX.Element
 } {
@@ -100,7 +98,6 @@ export function useNativeChatContextMenu({
   const lastSelectedTextRef = useRef('')
   const [state, setState] = useState<NativeChatContextMenuState>({
     open: false,
-    point: { x: 0, y: 0 },
     selectedText: ''
   })
   const shortcutLabel = useMemo(() => nativeChatToggleShortcutLabel(isMacPlatform()), [])
@@ -117,17 +114,14 @@ export function useNativeChatContextMenu({
     return () => document.removeEventListener('selectionchange', rememberCurrentSelection)
   }, [rememberCurrentSelection])
 
-  const onContextMenuCapture = useCallback(
+  // Why: Base UI's trigger owns opening and pointer anchoring; this only
+  // snapshots the selection the menu's Copy item acts on.
+  const onContextMenu = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
-      event.preventDefault()
       event.stopPropagation()
       menuOpenedAtRef.current = Date.now()
       const selectedText = getNativeChatSelectedText(rootRef.current) || lastSelectedTextRef.current
-      setState({
-        open: true,
-        point: { x: event.clientX, y: event.clientY },
-        selectedText
-      })
+      setState((prev) => ({ ...prev, selectedText }))
     },
     [rootRef]
   )
@@ -140,141 +134,126 @@ export function useNativeChatContextMenu({
   }, [])
 
   return {
-    onContextMenuCapture,
+    open: state.open,
+    setOpen,
+    onContextMenu,
     onSelectionCapture: rememberCurrentSelection,
     menu: (
-      <DropdownMenu open={state.open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-hidden
-              tabIndex={-1}
-              className="pointer-events-none fixed size-px border-0 opacity-0"
-              style={{ left: state.point.x, top: state.point.y }}
-            />
-          }
-        />
-        <DropdownMenuContent className="w-56" sideOffset={0} align="start" finalFocus={false}>
-          <DropdownMenuItem
-            disabled={state.selectedText.trim().length === 0}
-            onClick={() => void window.api.ui.writeClipboardText(state.selectedText)}
-          >
-            <Copy />
-            {translate('auto.components.nativeChat.contextMenu.copy', 'Copy')}
-            <DropdownMenuShortcut>{isMacPlatform() ? '⌘C' : 'Ctrl+C'}</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={actions.onPaste}>
-            <Clipboard />
-            {translate('auto.components.terminal.pane.TerminalContextMenu.0a917b591a', 'Paste')}
-          </DropdownMenuItem>
-          {onNewConversation ? (
-            <DropdownMenuItem onClick={onNewConversation}>
-              <ArrowClockwise />
-              {translate('components.friday.newConversation', 'New conversation')}
-            </DropdownMenuItem>
-          ) : null}
-          {onSwitchToTerminal ? (
-            <DropdownMenuItem onClick={onSwitchToTerminal}>
-              <SquareTerminal />
-              {translate(
-                'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
-                'Switch to terminal view'
-              )}
-              <DropdownMenuShortcut>{shortcutLabel}</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          ) : null}
-          {actions.canContinueAgentSessionInNewSession ? (
-            <DropdownMenuItem onClick={actions.onContinueAgentSessionInNewSession}>
-              <MessageSquarePlus />
-              {translate(
-                'components.agentSessionContinuation.continueInNewSession',
-                'Continue in New Session…'
-              )}
-            </DropdownMenuItem>
-          ) : null}
-          <DropdownMenuItem onClick={actions.onForkAgentSession}>
-            <GitFork />
+      <ContextMenuContent className="w-56" finalFocus={false}>
+        <ContextMenuItem
+          disabled={state.selectedText.trim().length === 0}
+          onClick={() => void window.api.ui.writeClipboardText(state.selectedText)}
+        >
+          <Copy />
+          {translate('auto.components.nativeChat.contextMenu.copy', 'Copy')}
+          <ContextMenuShortcut>{isMacPlatform() ? '⌘C' : 'Ctrl+C'}</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={actions.onPaste}>
+          <Clipboard />
+          {translate('auto.components.terminal.pane.TerminalContextMenu.0a917b591a', 'Paste')}
+        </ContextMenuItem>
+        {onNewConversation ? (
+          <ContextMenuItem onClick={onNewConversation}>
+            <ArrowClockwise />
+            {translate('components.friday.newConversation', 'New conversation')}
+          </ContextMenuItem>
+        ) : null}
+        {onSwitchToTerminal ? (
+          <ContextMenuItem onClick={onSwitchToTerminal}>
+            <SquareTerminal />
             {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.8a7ddb8b8a',
-              'Fork Agent Session…'
+              'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
+              'Switch to terminal view'
             )}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={actions.onSplitRight}>
-            <PanelRightClose />
+            <ContextMenuShortcut>{shortcutLabel}</ContextMenuShortcut>
+          </ContextMenuItem>
+        ) : null}
+        {actions.canContinueAgentSessionInNewSession ? (
+          <ContextMenuItem onClick={actions.onContinueAgentSessionInNewSession}>
+            <MessageSquarePlus />
             {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.20e565d865',
-              'Split Terminal Right'
+              'components.agentSessionContinuation.continueInNewSession',
+              'Continue in New Session…'
             )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={actions.onSplitDown}>
-            <PanelBottomClose />
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuItem onClick={actions.onForkAgentSession}>
+          <GitFork />
+          {translate(
+            'auto.components.terminal.pane.TerminalContextMenu.8a7ddb8b8a',
+            'Fork Agent Session…'
+          )}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={actions.onSplitRight}>
+          <PanelRightClose />
+          {translate(
+            'auto.components.terminal.pane.TerminalContextMenu.20e565d865',
+            'Split Terminal Right'
+          )}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={actions.onSplitDown}>
+          <PanelBottomClose />
+          {translate(
+            'auto.components.terminal.pane.TerminalContextMenu.98bccf4fa2',
+            'Split Terminal Down'
+          )}
+        </ContextMenuItem>
+        {actions.canEqualizePaneSizes ? (
+          <ContextMenuItem onClick={actions.onEqualizePaneSizes}>
+            <PanelsTopLeft />
             {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.98bccf4fa2',
-              'Split Terminal Down'
+              'auto.components.terminal.pane.TerminalContextMenu.06c2b0f043',
+              'Equalize Pane Sizes'
             )}
-          </DropdownMenuItem>
-          {actions.canEqualizePaneSizes ? (
-            <DropdownMenuItem onClick={actions.onEqualizePaneSizes}>
-              <PanelsTopLeft />
-              {translate(
-                'auto.components.terminal.pane.TerminalContextMenu.06c2b0f043',
-                'Equalize Pane Sizes'
-              )}
-            </DropdownMenuItem>
-          ) : null}
-          {actions.canExpandPane ? (
-            <DropdownMenuItem onClick={actions.onToggleExpand}>
-              {actions.isPaneExpanded ? <Minimize2 /> : <Maximize2 />}
-              {actions.isPaneExpanded
-                ? translate(
-                    'auto.components.terminal.pane.TerminalContextMenu.df766809e0',
-                    'Collapse Pane'
-                  )
-                : translate(
-                    'auto.components.terminal.pane.TerminalContextMenu.925f49f210',
-                    'Expand Pane'
-                  )}
-            </DropdownMenuItem>
-          ) : null}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={actions.onSetTitle}>
-            <Pencil />
-            {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.39809d152f',
-              'Set Title…'
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={actions.onCopyTerminalId}>
-            <Copy />
-            {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.copyTerminalId',
-              'Copy Terminal ID'
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={actions.onCopyPaneId}>
-            <Copy />
-            {translate(
-              'auto.components.terminal.pane.TerminalContextMenu.2cf85a6a55',
-              'Copy Pane ID'
-            )}
-          </DropdownMenuItem>
-          {actions.canClosePane ? (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={actions.onClosePane}>
-                <X />
-                {translate(
-                  'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
-                  'Close Pane'
+          </ContextMenuItem>
+        ) : null}
+        {actions.canExpandPane ? (
+          <ContextMenuItem onClick={actions.onToggleExpand}>
+            {actions.isPaneExpanded ? <Minimize2 /> : <Maximize2 />}
+            {actions.isPaneExpanded
+              ? translate(
+                  'auto.components.terminal.pane.TerminalContextMenu.df766809e0',
+                  'Collapse Pane'
+                )
+              : translate(
+                  'auto.components.terminal.pane.TerminalContextMenu.925f49f210',
+                  'Expand Pane'
                 )}
-              </DropdownMenuItem>
-            </>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={actions.onSetTitle}>
+          <Pencil />
+          {translate('auto.components.terminal.pane.TerminalContextMenu.39809d152f', 'Set Title…')}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={actions.onCopyTerminalId}>
+          <Copy />
+          {translate(
+            'auto.components.terminal.pane.TerminalContextMenu.copyTerminalId',
+            'Copy Terminal ID'
+          )}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={actions.onCopyPaneId}>
+          <Copy />
+          {translate(
+            'auto.components.terminal.pane.TerminalContextMenu.2cf85a6a55',
+            'Copy Pane ID'
+          )}
+        </ContextMenuItem>
+        {actions.canClosePane ? (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem variant="destructive" onClick={actions.onClosePane}>
+              <X />
+              {translate(
+                'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
+                'Close Pane'
+              )}
+            </ContextMenuItem>
+          </>
+        ) : null}
+      </ContextMenuContent>
     )
   }
 }

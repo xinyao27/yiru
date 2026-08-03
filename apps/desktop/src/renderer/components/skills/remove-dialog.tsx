@@ -13,8 +13,9 @@ import {
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { translate } from '~renderer/i18n/i18n'
 import type { SkillUpdateRun } from '~shared/skill-freshness'
-import { skillDirectoryName, type DiscoveredSkill } from '~shared/skills'
+import { skillDirectoryName, skillPlacements, type DiscoveredSkill } from '~shared/skills'
 
+import { placementTopologyLabel } from './placement-labels'
 import { describeSkillRunFailure, SkillRunLog } from './run-log'
 import {
   acknowledgeSkillUpdateRun,
@@ -41,6 +42,7 @@ export function SkillRemoveDialog({
   // Why: the CLI matches the install directory, which a frontmatter display
   // name can differ from — `name: React Native` in `react-native/SKILL.md`.
   const folderName = skillDirectoryName(skill)
+  const placements = skillPlacements(skill)
   const liveRun = useSkillRunForOperation('remove')
   // Why: a stale settled run belongs to whoever started it, but a removal still
   // in flight is exactly what this dialog should be narrating.
@@ -99,7 +101,22 @@ export function SkillRemoveDialog({
                   )}
                 </p>
               )}
-              <p className="font-mono break-words">{skill.directoryPath}</p>
+              {/* Why: one row can span several agent homes, so naming only the
+                  primary directory would understate what the removal touches. */}
+              <p>
+                {translate(
+                  'auto.components.skills.SkillRemoveDialog.placements',
+                  'It is currently installed in:'
+                )}
+              </p>
+              <ul className="space-y-0.5">
+                {placements.map((placement) => (
+                  <li key={placement.id} className="flex min-w-0 items-baseline gap-2">
+                    <span className="font-mono break-words">{placement.directoryPath}</span>
+                    <span className="shrink-0">{placementTopologyLabel(placement.topology)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {rejection ? <p className="text-destructive text-xs">{rejection}</p> : null}

@@ -466,7 +466,6 @@ import {
   runHook,
   shouldRunSetupForCreate
 } from '../hooks'
-import { LanguageServerManager } from '../language-server-manager'
 import { resolveLocalProjectRuntimeForWorktreeId } from '../local-project-runtime-resolution'
 import {
   getLocalWorktreePathAccess,
@@ -752,7 +751,6 @@ type RuntimeStore = {
     mobileEmulatorDefaultDeviceUdid?: string | null
     voice?: VoiceSettings
     claudeAgentTeamsMode?: GlobalSettings['claudeAgentTeamsMode']
-    languageServer?: GlobalSettings['languageServer']
     // Why: Phase-5 query responder kill switches — read per chunk in
     // onPtyData to capture reply ownership at ingestion.
     terminalMainSideEffectAuthority?: GlobalSettings['terminalMainSideEffectAuthority']
@@ -1958,7 +1956,6 @@ export class YiruRuntimeService {
     TerminalWaiter,
     MessageWaiter
   >
-  private languageServerManager: LanguageServerManager | null = null
   private mobileSessionTabsByWorktree = new Map<string, RuntimeMobileSessionTabsSnapshot>()
   // Why: idempotency map for mobile terminal creation — a retried create with the
   // same clientMutationId returns the in-flight operation instead of duplicating.
@@ -2208,14 +2205,6 @@ export class YiruRuntimeService {
 
   getLocalProvider(): IPtyProvider | null {
     return this.getLocalProviderFn ? this.getLocalProviderFn() : null
-  }
-
-  getLanguageServerManager(): LanguageServerManager {
-    if (!this.store) {
-      throw new Error('Language server runtime storage is unavailable.')
-    }
-    this.languageServerManager ??= new LanguageServerManager(this.store)
-    return this.languageServerManager
   }
 
   private async stopPtysForDestructiveWorktreeRemoval(

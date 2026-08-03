@@ -52,6 +52,11 @@ function locationChip(installation: SkillFreshnessInstallation): SkillLocationCh
       // Why: a supported location only needs a chip when it's already up to date,
       // to explain why the update won't touch it; the out-of-date main copy is bare.
       return installation.status === 'current' ? 'current' : null
+    // Why: the freshness scan always classifies what it reads, so this is the
+    // unreachable half of the shared topology union — claiming a chip here
+    // would put a label on a location nothing actually looked at.
+    case 'unknown':
+      return null
   }
 }
 

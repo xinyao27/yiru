@@ -165,7 +165,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       if (!e.repeat && matchShortcut('editor.save')) {
         const target = e.target as HTMLElement | null
         const inEditor =
-          target?.closest('.monaco-editor, [contenteditable]') !== null ||
+          target?.closest('diffs-container, [contenteditable]') !== null ||
           target?.closest('textarea:not(.xterm-helper-textarea), input') !== null
         if (!inEditor) {
           const state = useAppStore.getState()

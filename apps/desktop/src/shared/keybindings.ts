@@ -88,9 +88,6 @@ export type KeybindingActionId =
   | 'editor.replace'
   | 'editor.save'
   | 'editor.markdownPreview'
-  | 'editor.copyContext'
-  | 'editor.previousChange'
-  | 'editor.nextChange'
   | 'editor.addReviewNote'
   | 'sourceControl.sendReviewNotes'
   | 'fileExplorer.undo'
@@ -814,34 +811,6 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     scope: 'editor',
     searchKeywords: ['shortcut', 'editor', 'markdown', 'preview'],
     defaultBindings: platformBindings(['Mod+Shift+V'])
-  },
-  {
-    id: 'editor.copyContext',
-    title: 'Copy Context',
-    group: 'Editors',
-    scope: 'editor',
-    searchKeywords: ['shortcut', 'editor', 'copy', 'context'],
-    defaultBindings: platformBindings(['Mod+Alt+C'])
-  },
-  // Why: F7 / Shift+F7 gives VS Code / JetBrains diff-change navigation. Function
-  // keys are safe as bare / Shift bindings, so both opt into allowBareKeybindings.
-  {
-    id: 'editor.previousChange',
-    title: 'Go to Previous Change',
-    group: 'Editors',
-    scope: 'editor',
-    searchKeywords: ['shortcut', 'editor', 'diff', 'change', 'hunk', 'previous'],
-    defaultBindings: platformBindings(['Shift+F7']),
-    allowBareKeybindings: true
-  },
-  {
-    id: 'editor.nextChange',
-    title: 'Go to Next Change',
-    group: 'Editors',
-    scope: 'editor',
-    searchKeywords: ['shortcut', 'editor', 'diff', 'change', 'hunk', 'next'],
-    defaultBindings: platformBindings(['F7']),
-    allowBareKeybindings: true
   },
   {
     id: 'editor.addReviewNote',

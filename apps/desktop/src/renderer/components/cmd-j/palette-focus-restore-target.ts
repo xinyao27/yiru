@@ -14,6 +14,6 @@ export function resolvePaletteFocusRestoreTarget(
   if (xterm instanceof HTMLElement) {
     return xterm
   }
-  const monaco = doc.querySelector('.monaco-editor textarea')
-  return monaco instanceof HTMLElement ? monaco : null
+  const codeSurface = doc.querySelector('diffs-container')
+  return codeSurface instanceof HTMLElement ? codeSurface : null
 }

@@ -89,7 +89,6 @@ import { CrashReportDialog } from '../components/crash-report/dialog'
 import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
 import { applyDocumentTheme } from '../components/editor/document-theme'
 import { getSelectedTextForFileSearch } from '../components/editor/file-search-selection'
-import { LanguageServerWorkspaceEditDialog } from '../components/editor/language-server/workspace-edit-dialog'
 import { MarkdownTemplatePicker } from '../components/editor/markdown-template-picker'
 import { useEditorExternalWatch } from '../components/editor/use-editor-external-watch'
 import {
@@ -2388,7 +2387,6 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <CoworkingControlRequestDialog />
-            <LanguageServerWorkspaceEditDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />

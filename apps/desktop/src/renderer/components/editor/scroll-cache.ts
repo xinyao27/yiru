@@ -1,5 +1,3 @@
-import type { editor } from 'monaco-editor'
-
 // Why: 20 entries covers a typical working set of open/recently-viewed files.
 // Eviction only means losing a scroll position (user sees top of file), not a
 // correctness bug, so a conservative cap is fine.
@@ -44,4 +42,3 @@ export const cursorPositionCache = new Map<string, { lineNumber: number; column:
 // working context. Monaco's diff view state also carries cursor/selection state
 // for both sides plus diff model state, which matches VS Code's restore path
 // more closely than Yiru's previous scroll-only cache.
-export const diffViewStateCache = new Map<string, editor.IDiffEditorViewState>()

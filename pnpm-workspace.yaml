@@ -12,7 +12,6 @@ catalog:
   '@electron/rebuild': ^4.2.0
   '@floating-ui/dom': 1.7.6
   '@legendapp/list': 3.3.3
-  '@monaco-editor/react': ^4.7.0
   '@noble/hashes': 1.8.0
   '@parcel/watcher': ^2.5.6
   '@phosphor-icons/react': ^2.1.10
@@ -93,7 +92,6 @@ catalog:
   lowlight: ^3.3.0
   marked: ^17.0.6
   mermaid: ^11.16.0
-  monaco-editor: ^0.55.1
   node-pty: ^1.1.0
   oxlint-plugin-react-doctor: 0.2.10
   pdfjs-dist: ^6.1.200
@@ -142,9 +140,6 @@ catalog:
   unified: ^11.0.5
   vite: npm:@voidzero-dev/vite-plus-core@0.2.4
   vite-plus: 0.2.4
-  vscode-jsonrpc: ^9.0.1
-  vscode-oniguruma: ^2.0.1
-  vscode-textmate: ^9.3.2
   yaml: ^2.9.0
   zod: ~4.4.3
 catalogMode: strict
@@ -244,7 +239,6 @@ allowBuilds:
   sherpa-onnx: true
   ssh2: false
 overrides:
-  monaco-editor>dompurify: catalog:overrides
   vite: 'catalog:'
 patchedDependencies:
   '@pierre/diffs@1.3.0': apps/desktop/config/patches/@pierre__diffs@1.3.0.patch

@@ -588,14 +588,6 @@
             "de50bef680": "macOS가 Yiru 알림을 차단하고 있습니다"
           }
         }
-      },
-      "MonacoLanguageServerSession": {
-        "restarting": "Restarting language server…"
-      },
-      "MonacoLanguageServerEditFeatures": {
-        "renameTitle": "Rename symbol to “{{value0}}”",
-        "commandDisabled": "Language server commands are not allowed.",
-        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -2216,20 +2208,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "LanguageServerStatusSegment": {
-            "aria": "Language server: {{value0}}",
-            "tooltip": "Language server — {{value0}}",
-            "title": "Language Server",
-            "configure": "Configure",
-            "idle": "Open a configured source file to start the server on its execution host.",
-            "loadingLogs": "Loading logs…",
-            "noLogs": "No server log output.",
-            "starting": "Starting",
-            "ready": "Ready",
-            "error": "Error",
-            "idleLabel": "Idle",
-            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -2710,7 +2688,8 @@
           "cancel": "Cancel",
           "retry": "Retry removal",
           "confirm": "Remove",
-          "folderName": "Removes the skill folder {{value0}}."
+          "folderName": "Removes the skill folder {{value0}}.",
+          "placements": "현재 설치된 위치:"
         },
         "SkillRunLog": {
           "showLog": "Show log",
@@ -2742,6 +2721,34 @@
           "loading": "Reading file…",
           "emptyBody": "This file is empty.",
           "truncated": "This file is too large to show in full. Open it from disk to read the rest."
+        },
+        "topology": {
+          "canonicalCopy": "원본",
+          "providerAlias": "링크됨",
+          "independentCopy": "사본",
+          "externalLink": "외부 링크",
+          "brokenLink": "끊어진 링크",
+          "readOnly": "읽기 전용",
+          "repoScope": "저장소 안",
+          "pluginCache": "플러그인 제공",
+          "unknown": "미분류",
+          "canonicalCopyHint": "공유 스킬 홈입니다. 업데이트가 먼저 반영되는 곳입니다.",
+          "providerAliasHint": "공유 홈으로 연결된 링크라서 이 에이전트는 항상 같은 파일을 봅니다.",
+          "independentCopyHint": "자체 사본입니다. 여기를 고쳐도 다른 곳은 바뀌지 않습니다.",
+          "externalLinkHint": "스킬 홈 바깥을 가리키는 링크로, 가리키는 위치가 관리합니다.",
+          "brokenLinkHint": "링크 대상이 사라졌습니다. 이 에이전트는 스킬을 불러올 수 없습니다.",
+          "readOnlyHint": "여기에는 쓸 수 없어서 업데이트가 도달하지 않습니다.",
+          "repoScopeHint": "저장소에 커밋되어 있어 이 컴퓨터가 아니라 해당 체크아웃이 관리합니다.",
+          "pluginCacheHint": "설치된 플러그인에 포함되어 있으며 업데이트는 플러그인이 관리합니다.",
+          "unknownHint": "이 디렉터리를 스캔한 호스트가 보관 형태를 보고하지 않았습니다."
+        },
+        "placements": {
+          "distinguished": "{{value0}} +{{value1}}",
+          "many": "디렉터리 {{value0}}개"
+        },
+        "SkillDetailToolbar": {
+          "placementCount": "디렉터리 {{value0}}개",
+          "fileCount": "파일 {{value0}}개"
         }
       },
       "sidebar": {
@@ -6985,9 +6992,7 @@
             "e61157e926": "편집기 자동 줄 바꿈",
             "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다.",
             "editorFontFamily": "편집기 글꼴",
-            "editorFontFamilyDesc": "파일 편집기와 차이 보기에 사용할 글꼴입니다. 비워 두면 터미널 글꼴을 사용합니다.",
-            "languageServer": "Language Server (Experimental)",
-            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
+            "editorFontFamilyDesc": "파일 편집기와 차이 보기에 사용할 글꼴입니다. 비워 두면 터미널 글꼴을 사용합니다."
           }
         },
         "git": {
@@ -8275,23 +8280,6 @@
           "githubReleases": "GitHub 릴리스",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
-        },
-        "LanguageServerSetting": {
-          "title": "Language Server (Experimental)",
-          "description": "Run one language server on the native, WSL, SSH, or runtime host that owns the code.",
-          "enable": "Enable Language Server",
-          "enableDescription": "Run the configured executable on the code’s execution host when a matching file is open.",
-          "command": "Executable",
-          "commandDescription": "A PATH command available on each execution host, or an absolute host-specific executable path.",
-          "commandRequired": "Enter an executable before opening a matching source file.",
-          "arguments": "Arguments",
-          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
-          "languages": "Monaco Language IDs",
-          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching editable models are shared.",
-          "localOnly": "Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.",
-          "commandPlaceholder": "clangd",
-          "argumentsPlaceholder": "--stdio\n--background-index",
-          "languagesPlaceholder": "c, cpp"
         },
         "VoiceSpeechModelSection": {
           "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
@@ -10560,7 +10548,6 @@
           "72f71f52eb": "이 파일에는 텍스트 비교를 사용할 수 없습니다.",
           "7ce8436458": "브랜치 비교에서는 이 파일에 대해 텍스트 비교를 사용할 수 없습니다.",
           "bdbf02d5df": "바이너리",
-          "b5675b0694": "저장",
           "593f2193f6": "이 초안은 안전한 표시 한도를 초과했지만 계속 저장할 수 있습니다."
         },
         "DiffSectionHeader": {
@@ -10599,9 +10586,7 @@
           "c98ce191da": "이 차이점에는 열 수 있는 수정된 측면 파일이 없습니다.",
           "9b80bbe1de": "파일 탭 열기",
           "f0fd4174b5": "풍부한 markdown 편집을 사용하려면 파일 탭을 엽니다.",
-          "a10d9b8337": "파일 열기",
-          "2076ecfc9c": "이전 변경",
-          "631dab0df3": "다음 변경"
+          "a10d9b8337": "파일 열기"
         },
         "EditorPanelMarkdownActionsMenu": {
           "3e0ce48c24": "PDF로 내보내기",
@@ -10713,17 +10698,6 @@
         },
         "MermaidBlock": {
           "dcc132e691": "다이어그램 오류:"
-        },
-        "MonacoEditor": {
-          "68cb83f4a7": "선택한 텍스트에 메모 추가",
-          "fd68ae03b3": "파일에서 검색",
-          "largePasteTooLarge": "붙여넣기 내용이 너무 큽니다.",
-          "goToDefinition": "Go to Definition"
-        },
-        "MonacoGutterContextMenu": {
-          "7b57b1b468": "원격 URL 복사",
-          "2e0b1cdc05": "줄까지의 상대 경로 복사",
-          "4eaa991bde": "줄까지의 경로 복사"
         },
         "NotesSendMenu": {
           "44dc5e60a6": "메모 보내기",
@@ -10950,9 +10924,6 @@
             }
           }
         },
-        "useContextualCopySetup": {
-          "059bfb0d94": "컨텍스트가 복사되었습니다."
-        },
         "useLocalImagePick": {
           "175cb8b8ce": "이미지를 삽입하지 못했습니다.",
           "91d835dc88": "작업 트리 경로를 사용할 수 없습니다."
@@ -11076,15 +11047,6 @@
           "copy": "복사",
           "selectAll": "모두 선택",
           "copyPath": "경로 복사"
-        },
-        "LanguageServerWorkspaceEditDialog": {
-          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
-          "editCount": "{{value0}} edits",
-          "unsaved": " · unsaved buffer",
-          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
-          "cancel": "Cancel",
-          "apply": "Apply changes",
-          "loading": "Loading preview…"
         },
         "combined": {
           "diff": {

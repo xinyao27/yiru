@@ -42,7 +42,6 @@ import { registerGitLabHandlers } from '../gitlab/gitlab'
 import { registerGrokAccountHandlers } from '../grok/accounts/grok-accounts'
 import type { KeybindingService } from '../keybindings/keybinding-service'
 import { registerKeybindingHandlers } from '../keybindings/keybindings'
-import { registerLanguageServerHandlers } from '../language-servers'
 import { registerMemoryHandlers } from '../memory/memory'
 import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
 import { registerNativeChatHandlers } from '../native-chat/native-chat'
@@ -155,7 +154,6 @@ export function registerCoreHandlers(
   registerMemoryHandlers(store)
   registerNotificationHandlers(store, runtime)
   registerNotebookHandlers(store)
-  registerLanguageServerHandlers(store)
   registerOnboardingHandlers(store)
   registerDeveloperPermissionHandlers()
   // Why: diagnostics handlers are wired alongside telemetry but the two

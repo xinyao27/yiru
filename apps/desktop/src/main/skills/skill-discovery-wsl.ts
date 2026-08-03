@@ -2,18 +2,23 @@ import { execFile } from 'node:child_process'
 import { posix as pathPosix } from 'node:path'
 
 import { summarizeSkillMarkdown } from '~shared/skill-metadata'
-import type { DiscoveredSkill, SkillDiscoveryResult, SkillDiscoverySource } from '~shared/skills'
+import type { SkillDiscoveryResult, SkillDiscoverySource } from '~shared/skills'
 
 import { buildEncodedWslBashCommand, quoteBashString } from '../wsl-bash-command'
 import { discoverClaudePluginSkillSourcesInWsl } from './claude-plugin-skill-sources-wsl'
 import {
   buildSkillDiscoverySources,
-  compareSkills,
   sourceKindForSkill,
   sourceLabelForSkill,
   stablePathId,
   type SkillScanRoot
 } from './skill-discovery-sources'
+import { classifySkillPlacementTopology } from './skill-installation-topology'
+import {
+  groupSkillPlacements,
+  skillContentDigest,
+  type SkillPlacementCandidate
+} from './skill-placement-grouping'
 
 const MAX_MARKDOWN_BYTES = 256 * 1024
 const MAX_PACKAGE_FILES = 200
@@ -29,13 +34,20 @@ export function buildWslSkillDiscoveryCommand(roots: readonly SkillScanRoot[]): 
     '  root_path=$2',
     '  max_depth=$3',
     '  if [ ! -d "$root_path" ]; then',
-    `    printf '%s\\0%s\\0%s\\0' R "$root_index" 0`,
+    `    printf '%s\\0%s\\0%s\\0%s\\0' R "$root_index" 0 ''`,
     '    return',
     '  fi',
-    `  printf '%s\\0%s\\0%s\\0' R "$root_index" 1`,
+    // The distro resolves its own roots: the shared agent-skills home is where
+    // provider aliases land, and a root that resolves elsewhere aliases
+    // everything under it.
+    `  root_resolved=$(realpath -- "$root_path" 2>/dev/null || printf '%s' "$root_path")`,
+    `  printf '%s\\0%s\\0%s\\0%s\\0' R "$root_index" 1 "$root_resolved"`,
     `  while IFS= read -r -d '' skill_file; do`,
-    `    canonical_path=$(realpath -- "$skill_file" 2>/dev/null || printf '%s' "$skill_file")`,
     `    directory_path=\${skill_file%/*}`,
+    `    resolved_directory=$(realpath -- "$directory_path" 2>/dev/null || printf '%s' "$directory_path")`,
+    `    if [ -L "$directory_path" ]; then directory_linked=1; else directory_linked=0; fi`,
+    `    parent_directory=\${resolved_directory%/*}`,
+    `    if [ -r "$resolved_directory" ] && [ -w "$resolved_directory" ] && [ -w "\${parent_directory:-/}" ]; then writable=1; else writable=0; fi`,
     `    updated_at=$(stat -c '%Y' -- "$skill_file" 2>/dev/null || true)`,
     `    encoded_markdown=$(head -c ${MAX_MARKDOWN_BYTES} -- "$skill_file" 2>/dev/null | base64 | tr -d '\\n') || continue`,
     '    file_count=0',
@@ -43,7 +55,7 @@ export function buildWslSkillDiscoveryCommand(roots: readonly SkillScanRoot[]): 
     '      file_count=$((file_count + 1))',
     `      [ "$file_count" -ge ${MAX_PACKAGE_FILES} ] && break`,
     `    done < <(find -L "$directory_path" -type f -print0 2>/dev/null)`,
-    `    printf '%s\\0%s\\0%s\\0%s\\0%s\\0%s\\0' S "$root_index" "$skill_file" "$canonical_path" "$updated_at" "$file_count"`,
+    `    printf '%s\\0%s\\0%s\\0%s\\0%s\\0%s\\0%s\\0%s\\0' S "$root_index" "$skill_file" "$resolved_directory" "$directory_linked" "$writable" "$updated_at" "$file_count"`,
     `    printf '%s' "$encoded_markdown"`,
     `    printf '\\0'`,
     `  done < <(find -L "$root_path" -mindepth 1 -maxdepth "$max_depth" -type f -name 'SKILL.md' -print0 2>/dev/null)`,
@@ -86,14 +98,71 @@ function readProtocolField(fields: string[], index: number): string {
   return value
 }
 
+type ScannedRoot = { exists: boolean; resolvedPath: string }
+
+type SkillRecord = {
+  skillFilePath: string
+  resolvedDirectoryPath: string
+  directoryIsLinked: boolean
+  writable: boolean
+  updatedAtSeconds: number
+  fileCount: number
+  markdown: Buffer
+}
+
+function buildWslPlacementCandidate(
+  root: SkillScanRoot,
+  record: SkillRecord,
+  context: { canonicalRootPath: string; rootIsLinked: boolean }
+): SkillPlacementCandidate {
+  const directoryPath = pathPosix.dirname(record.skillFilePath)
+  const summary = summarizeSkillMarkdown(record.markdown.toString('utf8'))
+  const folderName = pathPosix.basename(directoryPath)
+  const sourceKind = sourceKindForSkill(root, record.skillFilePath, pathPosix)
+  return {
+    placement: {
+      id: stablePathId(directoryPath),
+      rootId: root.id,
+      rootPath: root.path,
+      rootLabel: root.label,
+      owner: root.owner,
+      // Copy: `root.providers` is shared across every skill and source from this
+      // root, so a later union must not mutate the aliased array.
+      providers: [...root.providers],
+      sourceKind,
+      sourceLabel: sourceLabelForSkill(root, sourceKind),
+      directoryPath,
+      skillFilePath: record.skillFilePath,
+      linkTargetPath:
+        record.resolvedDirectoryPath === directoryPath ? null : record.resolvedDirectoryPath,
+      topology: classifySkillPlacementTopology({
+        rootId: root.id,
+        sourceKind: root.sourceKind,
+        directoryIsLinked: record.directoryIsLinked,
+        rootIsLinked: context.rootIsLinked,
+        resolvedParentPath: pathPosix.dirname(record.resolvedDirectoryPath),
+        canonicalRootPath: context.canonicalRootPath,
+        writable: record.writable
+      }),
+      fileCount: Number.isFinite(record.fileCount) ? record.fileCount : 0,
+      updatedAt: Number.isFinite(record.updatedAtSeconds) ? record.updatedAtSeconds * 1000 : null
+    },
+    folderName,
+    name: summary.name ?? folderName,
+    description: summary.description,
+    scopeKey: root.scopeKey,
+    contentDigest: skillContentDigest(record.markdown)
+  }
+}
+
 export function parseWslSkillDiscoveryOutput(
   output: string,
   roots: readonly SkillScanRoot[],
   scannedAt = Date.now()
 ): SkillDiscoveryResult {
   const fields = output.split('\0')
-  const rootExists = new Map<number, boolean>()
-  const skillsByCanonicalPath = new Map<string, DiscoveredSkill>()
+  const scannedRoots = new Map<number, ScannedRoot>()
+  const pending: { root: SkillScanRoot; record: SkillRecord }[] = []
   let index = 0
   while (index < fields.length && fields[index]) {
     const recordKind = fields[index++]
@@ -103,72 +172,63 @@ export function parseWslSkillDiscoveryOutput(
       throw new Error('WSL skill discovery returned an unknown source.')
     }
     if (recordKind === 'R') {
-      rootExists.set(rootIndex, readProtocolField(fields, index++) === '1')
+      const exists = readProtocolField(fields, index++) === '1'
+      scannedRoots.set(rootIndex, { exists, resolvedPath: readProtocolField(fields, index++) })
       continue
     }
     if (recordKind !== 'S') {
       throw new Error('WSL skill discovery returned an invalid response.')
     }
-
-    const skillFilePath = readProtocolField(fields, index++)
-    const canonicalSkillFilePath = readProtocolField(fields, index++)
-    const updatedAtSeconds = Number.parseInt(readProtocolField(fields, index++), 10)
-    const fileCount = Number.parseInt(readProtocolField(fields, index++), 10)
-    const markdown = Buffer.from(readProtocolField(fields, index++), 'base64').toString('utf8')
-    const existing = skillsByCanonicalPath.get(canonicalSkillFilePath)
-    if (existing) {
-      // Why: dedup keeps one row, but every contributing root must survive so
-      // per-agent visibility does not depend on root scan order. providers is
-      // per-agent visibility too, so union it rather than keeping only the first.
-      if (existing.rootPaths && !existing.rootPaths.includes(root.path)) {
-        existing.rootPaths.push(root.path)
+    pending.push({
+      root,
+      record: {
+        skillFilePath: readProtocolField(fields, index++),
+        resolvedDirectoryPath: readProtocolField(fields, index++),
+        directoryIsLinked: readProtocolField(fields, index++) === '1',
+        writable: readProtocolField(fields, index++) === '1',
+        updatedAtSeconds: Number.parseInt(readProtocolField(fields, index++), 10),
+        fileCount: Number.parseInt(readProtocolField(fields, index++), 10),
+        markdown: Buffer.from(readProtocolField(fields, index++), 'base64')
       }
-      // Reassign a fresh array — `providers` aliases the scan root's array, so
-      // pushing in place would mutate the root and sibling skills/sources.
-      const mergedProviders = [...existing.providers]
-      for (const provider of root.providers) {
-        if (!mergedProviders.includes(provider)) {
-          mergedProviders.push(provider)
-        }
-      }
-      existing.providers = mergedProviders
-      continue
-    }
-    const directoryPath = pathPosix.dirname(skillFilePath)
-    const summary = summarizeSkillMarkdown(markdown)
-    const folderName = pathPosix.basename(directoryPath)
-    const sourceKind = sourceKindForSkill(root, skillFilePath, pathPosix)
-    skillsByCanonicalPath.set(canonicalSkillFilePath, {
-      id: stablePathId(canonicalSkillFilePath),
-      name: summary.name ?? folderName,
-      folderName,
-      description: summary.description,
-      // Copy: `root.providers` is shared across every skill/source from this
-      // root, so a later in-place merge must not mutate the aliased array.
-      providers: [...root.providers],
-      sourceKind,
-      sourceLabel: sourceLabelForSkill(root, sourceKind),
-      rootPath: root.path,
-      rootPaths: [root.path],
-      directoryPath,
-      skillFilePath,
-      installed: true,
-      fileCount: Number.isFinite(fileCount) ? fileCount : 0,
-      updatedAt: Number.isFinite(updatedAtSeconds) ? updatedAtSeconds * 1000 : null
     })
   }
 
+  const canonicalRootPath =
+    roots
+      .map((root, rootIndex) => ({ root, scanned: scannedRoots.get(rootIndex) }))
+      .find(({ root }) => root.id === 'home-agents')?.scanned?.resolvedPath ?? ''
+  const rootResolvedPaths = new Map(
+    roots.map((root, rootIndex) => [
+      root.id,
+      scannedRoots.get(rootIndex)?.resolvedPath ?? root.path
+    ])
+  )
+  const skills = groupSkillPlacements(
+    pending.map(({ root, record }) =>
+      buildWslPlacementCandidate(root, record, {
+        canonicalRootPath,
+        // Why: the distro owns path identity, so "this root is a link" is a
+        // realpath comparison there rather than an ancestor walk here.
+        rootIsLinked: rootResolvedPaths.get(root.id) !== root.path
+      })
+    )
+  )
+
   const sources: SkillDiscoverySource[] = roots.map((root, rootIndex) => {
-    const exists = rootExists.get(rootIndex) ?? false
+    const exists = scannedRoots.get(rootIndex)?.exists ?? false
     return {
-      ...root,
+      id: root.id,
+      label: root.label,
+      path: root.path,
+      sourceKind: root.sourceKind,
       providers: [...root.providers],
+      owner: root.owner,
       exists,
       skippedReason: exists ? undefined : 'missing'
     }
   })
   return {
-    skills: [...skillsByCanonicalPath.values()].sort(compareSkills),
+    skills,
     sources: sources.sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
     ),

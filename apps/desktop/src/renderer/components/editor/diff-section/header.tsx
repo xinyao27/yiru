@@ -7,6 +7,10 @@ import type { MouseEvent, ReactElement, ReactNode } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 
+/** `px-3 py-1.5 text-xs` on the row below: 6 + 16 + 6. Pierre sizes unrendered
+ *  rows from this, so it has to track the class list. */
+export const DIFF_SECTION_HEADER_HEIGHT_PX = 28
+
 export function DiffSectionHeader({
   path,
   dirty,

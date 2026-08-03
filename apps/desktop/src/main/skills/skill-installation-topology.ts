@@ -3,7 +3,7 @@ import { constants } from 'node:fs'
 import { access, lstat, realpath, stat } from 'node:fs/promises'
 import { dirname, normalize, resolve } from 'node:path'
 
-import type { SkillInstallationTopology } from '~shared/skill-freshness'
+import type { SkillInstallationTopology, SkillSourceKind } from '~shared/skills'
 
 import type { SkillScanRoot } from './skill-discovery-sources'
 
@@ -49,11 +49,59 @@ export function skillTopologyPriority(topology: SkillInstallationTopology): numb
     case 'read-only':
     case 'repo-scope':
     case 'plugin-cache':
+    case 'unknown':
       return 0
   }
 }
 
-async function writableDestination(path: string): Promise<boolean> {
+export type SkillPlacementTopologyInput = {
+  rootId: string
+  /** The scan root's kind, so a `.system` bundled subtree keeps home rules. */
+  sourceKind: SkillSourceKind
+  /** The skill directory entry is itself a symlink. */
+  directoryIsLinked: boolean
+  /** The scan root (or a parent) is a link, so everything under it is aliased. */
+  rootIsLinked: boolean
+  /** Parent of the directory the entry actually resolves to. */
+  resolvedParentPath: string
+  /** The shared `~/.agents/skills` home that provider aliases point into. */
+  canonicalRootPath: string
+  writable: boolean
+}
+
+/**
+ * The single rule set for what a skill directory is.
+ *
+ * Why it is pure: the native scanner learns these inputs from `node:fs` and the
+ * WSL scanner from a bash probe, and the two must not drift into disagreeing
+ * about what counts as a provider alias.
+ */
+export function classifySkillPlacementTopology(
+  input: SkillPlacementTopologyInput
+): SkillInstallationTopology {
+  if (input.sourceKind === 'repo') {
+    return 'repo-scope'
+  }
+  if (input.sourceKind === 'plugin') {
+    return 'plugin-cache'
+  }
+  const isCanonicalTarget =
+    normalizedSkillIdentityPath(input.resolvedParentPath) ===
+    normalizedSkillIdentityPath(input.canonicalRootPath)
+  let topology: SkillInstallationTopology
+  if (input.directoryIsLinked) {
+    topology = isCanonicalTarget ? 'provider-alias' : 'external-link'
+  } else if (input.rootIsLinked) {
+    topology = 'external-link'
+  } else {
+    topology = input.rootId === 'home-agents' ? 'canonical-copy' : 'independent-copy'
+  }
+  // Why: an external link is owned elsewhere, so its writability says nothing
+  // about whether this host can manage the placement.
+  return topology !== 'external-link' && !input.writable ? 'read-only' : topology
+}
+
+export async function writableDestination(path: string): Promise<boolean> {
   try {
     await Promise.all([
       access(path, constants.R_OK | constants.W_OK),
@@ -65,7 +113,7 @@ async function writableDestination(path: string): Promise<boolean> {
   }
 }
 
-async function hasSymlinkedAncestor(path: string, boundary: string): Promise<boolean> {
+export async function hasSymlinkedAncestor(path: string, boundary: string): Promise<boolean> {
   let current = resolve(path)
   const stop = resolve(boundary)
   for (;;) {
@@ -129,21 +177,15 @@ export async function classifyHomeSkillTopology(
   const identity = skillPhysicalIdentity(resolvedPath, resolvedStat)
   const canonicalRoot = await realpath(canonicalRootPath).catch(() => resolve(canonicalRootPath))
   const homeBoundary = dirname(dirname(canonicalRootPath))
-  const rootOrProviderParentLinked = await hasSymlinkedAncestor(root.path, homeBoundary)
-  const isCanonicalTarget =
-    normalizedSkillIdentityPath(dirname(resolvedPath)) ===
-    normalizedSkillIdentityPath(canonicalRoot)
-  let topology: SkillInstallationTopology
-  if (linked) {
-    topology = isCanonicalTarget ? 'provider-alias' : 'external-link'
-  } else if (rootOrProviderParentLinked) {
-    topology = 'external-link'
-  } else {
-    topology = root.id === 'home-agents' ? 'canonical-copy' : 'independent-copy'
-  }
-  if (topology !== 'external-link' && !(await writableDestination(resolvedPath))) {
-    topology = 'read-only'
-  }
+  const topology = classifySkillPlacementTopology({
+    rootId: root.id,
+    sourceKind: root.sourceKind,
+    directoryIsLinked: linked,
+    rootIsLinked: await hasSymlinkedAncestor(root.path, homeBoundary),
+    resolvedParentPath: dirname(resolvedPath),
+    canonicalRootPath: canonicalRoot,
+    writable: await writableDestination(resolvedPath)
+  })
   return { topology, resolvedPath, identity, errorCategory: null }
 }
 

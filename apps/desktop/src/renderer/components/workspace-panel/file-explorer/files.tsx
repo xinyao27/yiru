@@ -35,7 +35,12 @@ function FileExplorerFiles({
   }
 
   return (
-    <>
+    <FileExplorerBackgroundMenu
+      open={interactions.menu.bgMenuOpen}
+      onOpenChange={interactions.menu.setBgMenuOpen}
+      worktreePath={owner.worktreePath}
+      onStartNew={interactions.inline.startNew}
+    >
       {/* Why: all tree states keep one drop surface so empty/error views accept imports. */}
       <div
         ref={interactions.refs.setExplorerShellRef}
@@ -50,14 +55,7 @@ function FileExplorerFiles({
         <FileExplorerQueryHeaderMemo model={model} interactions={interactions} />
         <FileExplorerTreeContentMemo model={model} interactions={interactions} />
       </div>
-      <FileExplorerBackgroundMenu
-        open={interactions.menu.bgMenuOpen}
-        onOpenChange={interactions.menu.setBgMenuOpen}
-        point={interactions.menu.bgMenuPoint}
-        worktreePath={owner.worktreePath}
-        onStartNew={interactions.inline.startNew}
-      />
-    </>
+    </FileExplorerBackgroundMenu>
   )
 }
 

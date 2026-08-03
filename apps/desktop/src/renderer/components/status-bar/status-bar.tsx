@@ -23,6 +23,12 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
+  ContextMenu,
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuTrigger
+} from '~renderer/components/ui/context-menu'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -32,7 +38,6 @@ import {
 } from '~renderer/components/ui/dialog'
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -117,11 +122,6 @@ const PortsStatusSegment = lazyWithRetry(() =>
 )
 const SshStatusSegment = lazyWithRetry(() =>
   import('./ssh-status-segment').then((module) => ({ default: module.SshStatusSegment }))
-)
-const LanguageServerStatusSegment = lazyWithRetry(() =>
-  import('./language-server-status-segment').then((module) => ({
-    default: module.LanguageServerStatusSegment
-  }))
 )
 
 export type CodexStatusRuntimeTarget = {
@@ -1852,7 +1852,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const mountedRef = useRef(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
 
   const [containerWidth, setContainerWidth] = useState(900)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
@@ -2111,349 +2110,331 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const showFloatingWorkspaceAttentionDot = !floatingTerminalOpen && hasFloatingUnread
 
   return (
-    // Why: the footer extends supported native window material across the same
-    // chrome layer as the workspace titlebar, with an opaque fallback elsewhere.
-    <div
-      ref={containerRefCallback}
-      className="border-border bg-background relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t pr-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
-      onContextMenuCapture={(event) => {
-        if (!shouldOpenStatusBarContextMenu(event.target)) {
-          return
-        }
-        // Why: mirror the right-click pattern used across the app
-        // (WorktreeContextMenu, TerminalContextMenu, tab bar) — dispatch the
-        // global close event so peer menus dismiss, then place a hidden
-        // trigger at the cursor so the menu anchors there. This also lets a
-        // second right-click reposition the menu instead of leaving it where
-        // it first opened.
-        event.preventDefault()
-        window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-        const bounds = event.currentTarget.getBoundingClientRect()
-        setMenuPoint({ x: event.clientX - bounds.left, y: event.clientY - bounds.top })
-        setMenuOpen(true)
-      }}
-    >
-      <div className="flex h-full min-w-0 items-center gap-2">
-        {showUsageGroup ? (
-          <div className="flex h-full min-w-0 items-center">
-            {showEmptyUsageCta ? (
-              <StatusBarUsageEmptyCta />
-            ) : (
-              // Why: one-time usage-display change callout anchors to this cluster so
-              // it sits next to the meters the user is confused by, not a global toast.
-              <UsagePercentageDisplayChangeNotice hasVisibleUsageMeters={hasVisibleUsageMeters}>
-                <DropdownMenu
-                  open={usageMenuOpen}
-                  onOpenChange={handleUsageMenuOpenChange}
-                  modal={false}
-                >
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        type="button"
-                        variant="status-bar"
-                        size="status-bar"
-                        className="gap-3"
-                        aria-label={translate(
-                          'auto.components.status.bar.UsageRosterPanel.title',
-                          'Usage'
-                        )}
-                      >
-                        {rosterProviders.map((provider) =>
-                          iconOnly ? (
-                            <ProviderLetterBadge key={provider.provider} limits={provider} />
-                          ) : (
-                            <ProviderUsageSegment
-                              key={provider.provider}
-                              limits={provider}
-                              compact={compact}
-                              display={usagePercentageDisplay}
-                              mode={statusBarUsageMode}
-                            />
-                          )
-                        )}
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent
-                    {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                    side="top"
-                    align="start"
-                    sideOffset={8}
-                    className="w-[360px] p-0"
-                    finalFocus={usageMenuFocusHandoff.finalFocus}
-                  >
-                    <UsageRosterPanel
-                      providers={rosterProviders}
-                      display={usagePercentageDisplay}
-                      statusBarUsageMode={statusBarUsageMode}
-                      onStatusBarUsageModeChange={setStatusBarUsageMode}
-                      isRefreshing={isRefreshing || anyFetching}
-                      onRefresh={handleRefresh}
-                      onOpenProvider={handleOpenProviderAccounts}
-                      onSignIn={handleOpenProviderAccounts}
-                      canSignIn={(provider) => getUsageProviderAccountsSectionId(provider) !== null}
-                      onManageAccounts={handleManageAccounts}
-                      onUsageDetails={handleUsageDetails}
-                      renderRow={(provider, row) => {
-                        if (provider.provider === 'claude') {
-                          return (
-                            <ClaudeSwitcherMenu
-                              claude={provider}
-                              compact={compact}
-                              iconOnly={false}
-                              asSubmenu
-                              triggerContent={row}
-                            />
-                          )
-                        }
-                        if (provider.provider === 'codex') {
-                          return (
-                            <CodexSwitcherMenu
-                              codex={provider}
-                              compact={compact}
-                              iconOnly={false}
-                              asSubmenu
-                              triggerContent={row}
-                            />
-                          )
-                        }
-                        return (
-                          <ProviderDetailsMenu
-                            provider={provider}
-                            compact={compact}
-                            iconOnly={false}
-                            asSubmenu
-                            triggerContent={row}
-                            ariaLabel={translate(
-                              'auto.components.status.bar.UsageRosterPanel.openDetails',
-                              'Open usage details'
-                            )}
-                          />
-                        )
-                      }}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </UsagePercentageDisplayChangeNotice>
-            )}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="flex-1" />
-
-      {/* Why: workspace panel toggles moved to the titlebar; the trailing status
-          edge now owns system icons (resource usage, ports, floating workspace). */}
-      <div className="flex h-full shrink-0 items-center gap-0.5">
-        <SkillUpdateStatusSegment />
-        <RemoteServerUpdateStatusSegment iconOnly />
-        <UpdateStatusSegment compact={compact} iconOnly />
-        <React.Suspense fallback={null}>
-          {petEnabled ? <PetStatusSegment /> : null}
-          {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
-          {settings?.languageServer?.enabled === true ? (
-            <LanguageServerStatusSegment iconOnly />
-          ) : null}
-          {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
-          {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
-        </React.Suspense>
-        <CoworkingAvailabilityStatusSegment />
-        {showFloatingTerminalToggle && (
-          <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative h-full">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  // Why: match neighboring status-bar icon chrome (borderless quiet
-                  // hover) so the floating-workspace toggle doesn't read as a boxed card.
-                  <Button
-                    variant="status-bar-icon"
-                    size="icon-status-bar-wide"
-                    type="button"
-                    className="relative"
-                    aria-label={
-                      showFloatingWorkspaceAttentionDot
-                        ? `${floatingTerminalActionLabel}, new activity`
-                        : floatingTerminalActionLabel
-                    }
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
-                    }}
-                  >
-                    <PanelsTopLeft className="size-3.5" />
-                    {showFloatingWorkspaceAttentionDot ? (
-                      // Why: amber = Yiru's "needs attention" convention.
-                      <span
-                        aria-hidden
-                        data-floating-terminal-attention
-                        className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
-                      />
-                    ) : null}
-                  </Button>
-                }
-              />
-              <TooltipContent side="top" sideOffset={6}>
-                {floatingTerminalActionLabel} ({floatingTerminalShortcut})
-              </TooltipContent>
-            </Tooltip>
-          </FloatingTerminalIconContextMenu>
-        )}
-      </div>
-
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-hidden
-              tabIndex={-1}
-              className="pointer-events-none absolute size-px border-0 opacity-0"
-              style={{ left: menuPoint.x, top: menuPoint.y }}
-            />
+    <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      {/* Why: the footer extends supported native window material across the same
+          chrome layer as the workspace titlebar, with an opaque fallback elsewhere. */}
+      <ContextMenuTrigger
+        ref={containerRefCallback}
+        className="border-border bg-background relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t pr-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
+        onContextMenu={(event) => {
+          // Why: status-bar widgets own their own menus; only bare footer
+          // chrome opens this one.
+          if (!shouldOpenStatusBarContextMenu(event.target)) {
+            event.preventBaseUIHandler()
+            return
           }
-        />
-        <DropdownMenuContent className="w-fit min-w-0" sideOffset={0} align="start">
-          {isStatusBarItemAvailable('claude', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('claude')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('claude')
-              }}
-            >
-              <ClaudeIcon size={14} />
-              {translate('auto.components.status.bar.StatusBar.3885eb74d8', 'Claude Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          {isStatusBarItemAvailable('codex', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('codex')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('codex')
-              }}
-            >
-              <OpenAIIcon size={14} />
-              {translate('auto.components.status.bar.StatusBar.c0909c686e', 'Codex Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          {isStatusBarItemAvailable('cursor', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('cursor')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('cursor')
-              }}
-            >
-              <AgentIcon agent="cursor" size={14} />
-              {translate('auto.components.status.bar.StatusBar.cursorUsage', 'Cursor Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          {isStatusBarItemAvailable('gemini', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('gemini')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('gemini')
-              }}
-            >
-              <GeminiIcon size={14} />
-              {translate('auto.components.status.bar.StatusBar.c1df0d67ec', 'Gemini Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          {isStatusBarItemAvailable('antigravity', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('antigravity')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('antigravity')
-              }}
-            >
-              <AgentIcon agent="antigravity" size={14} />
-              {translate(
-                'auto.components.status.bar.StatusBar.antigravityUsage',
-                'Antigravity Usage'
+          window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
+        }}
+      >
+        <div className="flex h-full min-w-0 items-center gap-2">
+          {showUsageGroup ? (
+            <div className="flex h-full min-w-0 items-center">
+              {showEmptyUsageCta ? (
+                <StatusBarUsageEmptyCta />
+              ) : (
+                // Why: one-time usage-display change callout anchors to this cluster so
+                // it sits next to the meters the user is confused by, not a global toast.
+                <UsagePercentageDisplayChangeNotice hasVisibleUsageMeters={hasVisibleUsageMeters}>
+                  <DropdownMenu
+                    open={usageMenuOpen}
+                    onOpenChange={handleUsageMenuOpenChange}
+                    modal={false}
+                  >
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="status-bar"
+                          size="status-bar"
+                          className="gap-3"
+                          aria-label={translate(
+                            'auto.components.status.bar.UsageRosterPanel.title',
+                            'Usage'
+                          )}
+                        >
+                          {rosterProviders.map((provider) =>
+                            iconOnly ? (
+                              <ProviderLetterBadge key={provider.provider} limits={provider} />
+                            ) : (
+                              <ProviderUsageSegment
+                                key={provider.provider}
+                                limits={provider}
+                                compact={compact}
+                                display={usagePercentageDisplay}
+                                mode={statusBarUsageMode}
+                              />
+                            )
+                          )}
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent
+                      {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
+                      side="top"
+                      align="start"
+                      sideOffset={8}
+                      className="w-[360px] p-0"
+                      finalFocus={usageMenuFocusHandoff.finalFocus}
+                    >
+                      <UsageRosterPanel
+                        providers={rosterProviders}
+                        display={usagePercentageDisplay}
+                        statusBarUsageMode={statusBarUsageMode}
+                        onStatusBarUsageModeChange={setStatusBarUsageMode}
+                        isRefreshing={isRefreshing || anyFetching}
+                        onRefresh={handleRefresh}
+                        onOpenProvider={handleOpenProviderAccounts}
+                        onSignIn={handleOpenProviderAccounts}
+                        canSignIn={(provider) =>
+                          getUsageProviderAccountsSectionId(provider) !== null
+                        }
+                        onManageAccounts={handleManageAccounts}
+                        onUsageDetails={handleUsageDetails}
+                        renderRow={(provider, row) => {
+                          if (provider.provider === 'claude') {
+                            return (
+                              <ClaudeSwitcherMenu
+                                claude={provider}
+                                compact={compact}
+                                iconOnly={false}
+                                asSubmenu
+                                triggerContent={row}
+                              />
+                            )
+                          }
+                          if (provider.provider === 'codex') {
+                            return (
+                              <CodexSwitcherMenu
+                                codex={provider}
+                                compact={compact}
+                                iconOnly={false}
+                                asSubmenu
+                                triggerContent={row}
+                              />
+                            )
+                          }
+                          return (
+                            <ProviderDetailsMenu
+                              provider={provider}
+                              compact={compact}
+                              iconOnly={false}
+                              asSubmenu
+                              triggerContent={row}
+                              ariaLabel={translate(
+                                'auto.components.status.bar.UsageRosterPanel.openDetails',
+                                'Open usage details'
+                              )}
+                            />
+                          )
+                        }}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </UsagePercentageDisplayChangeNotice>
               )}
-            </DropdownMenuCheckboxItem>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Why: workspace panel toggles moved to the titlebar; the trailing status
+          edge now owns system icons (resource usage, ports, floating workspace). */}
+        <div className="flex h-full shrink-0 items-center gap-0.5">
+          <SkillUpdateStatusSegment />
+          <RemoteServerUpdateStatusSegment iconOnly />
+          <UpdateStatusSegment compact={compact} iconOnly />
+          <React.Suspense fallback={null}>
+            {petEnabled ? <PetStatusSegment /> : null}
+            {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
+            {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
+            {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
+          </React.Suspense>
+          <CoworkingAvailabilityStatusSegment />
+          {showFloatingTerminalToggle && (
+            <FloatingTerminalIconContextMenu
+              currentLocation="status-bar"
+              className="relative h-full"
+            >
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    // Why: match neighboring status-bar icon chrome (borderless quiet
+                    // hover) so the floating-workspace toggle doesn't read as a boxed card.
+                    <Button
+                      variant="status-bar-icon"
+                      size="icon-status-bar-wide"
+                      type="button"
+                      className="relative"
+                      aria-label={
+                        showFloatingWorkspaceAttentionDot
+                          ? `${floatingTerminalActionLabel}, new activity`
+                          : floatingTerminalActionLabel
+                      }
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
+                      }}
+                    >
+                      <PanelsTopLeft className="size-3.5" />
+                      {showFloatingWorkspaceAttentionDot ? (
+                        // Why: amber = Yiru's "needs attention" convention.
+                        <span
+                          aria-hidden
+                          data-floating-terminal-attention
+                          className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
+                        />
+                      ) : null}
+                    </Button>
+                  }
+                />
+                <TooltipContent side="top" sideOffset={6}>
+                  {floatingTerminalActionLabel} ({floatingTerminalShortcut})
+                </TooltipContent>
+              </Tooltip>
+            </FloatingTerminalIconContextMenu>
           )}
-          <DropdownMenuCheckboxItem
-            checked={statusBarItems.includes('opencode-go')}
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-fit min-w-0">
+        {isStatusBarItemAvailable('claude', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('claude')}
             onCheckedChange={() => {
               recordFeatureInteraction('usage-tracking')
-              toggleStatusBarItem('opencode-go')
+              toggleStatusBarItem('claude')
             }}
           >
-            <OpenCodeGoIcon size={14} />
-            {translate('auto.components.status.bar.StatusBar.8c86cd77b0', 'OpenCode Go Usage')}
-          </DropdownMenuCheckboxItem>
-          {isStatusBarItemAvailable('kimi', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('kimi')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('kimi')
-              }}
-            >
-              <AgentIcon agent="kimi" size={14} />
-              {translate('auto.components.status.bar.StatusBar.5e59007df4', 'Kimi Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          <DropdownMenuCheckboxItem
-            checked={statusBarItems.includes('minimax')}
+            <ClaudeIcon size={14} />
+            {translate('auto.components.status.bar.StatusBar.3885eb74d8', 'Claude Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        {isStatusBarItemAvailable('codex', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('codex')}
             onCheckedChange={() => {
               recordFeatureInteraction('usage-tracking')
-              toggleStatusBarItem('minimax')
+              toggleStatusBarItem('codex')
             }}
           >
-            <MiniMaxIcon size={14} />
-            {translate('auto.components.status.bar.StatusBar.3bbf140864', 'MiniMax Usage')}
-          </DropdownMenuCheckboxItem>
-          {isStatusBarItemAvailable('grok', detectedAgentIds) && (
-            <DropdownMenuCheckboxItem
-              checked={statusBarItems.includes('grok')}
-              onCheckedChange={() => {
-                recordFeatureInteraction('usage-tracking')
-                toggleStatusBarItem('grok')
-              }}
-            >
-              <AgentIcon agent="grok" size={14} />
-              {translate('auto.components.status.bar.StatusBar.grokUsageMenu', 'Grok Usage')}
-            </DropdownMenuCheckboxItem>
-          )}
-          <DropdownMenuCheckboxItem
-            checked={statusBarItems.includes('ssh')}
+            <OpenAIIcon size={14} />
+            {translate('auto.components.status.bar.StatusBar.c0909c686e', 'Codex Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        {isStatusBarItemAvailable('cursor', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('cursor')}
             onCheckedChange={() => {
-              recordFeatureInteraction('ssh')
-              toggleStatusBarItem('ssh')
+              recordFeatureInteraction('usage-tracking')
+              toggleStatusBarItem('cursor')
             }}
           >
-            <Server className="size-3.5" />
-            {translate('auto.components.status.bar.StatusBar.24ac89df1a', 'Remote Hosts')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={statusBarItems.includes('resource-usage')}
+            <AgentIcon agent="cursor" size={14} />
+            {translate('auto.components.status.bar.StatusBar.cursorUsage', 'Cursor Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        {isStatusBarItemAvailable('gemini', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('gemini')}
             onCheckedChange={() => {
-              recordFeatureInteraction('resource-manager')
-              toggleStatusBarItem('resource-usage')
+              recordFeatureInteraction('usage-tracking')
+              toggleStatusBarItem('gemini')
             }}
           >
-            <Activity className="size-3.5" />
-            {translate('auto.components.status.bar.StatusBar.d1e1a7a6bf', 'Resource Manager')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={statusBarItems.includes('ports')}
+            <GeminiIcon size={14} />
+            {translate('auto.components.status.bar.StatusBar.c1df0d67ec', 'Gemini Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        {isStatusBarItemAvailable('antigravity', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('antigravity')}
             onCheckedChange={() => {
-              recordFeatureInteraction('ports')
-              toggleStatusBarItem('ports')
+              recordFeatureInteraction('usage-tracking')
+              toggleStatusBarItem('antigravity')
             }}
           >
-            <Plug className="size-3.5" />
-            {translate('auto.components.status.bar.StatusBar.9659e38343', 'Ports')}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            <AgentIcon agent="antigravity" size={14} />
+            {translate(
+              'auto.components.status.bar.StatusBar.antigravityUsage',
+              'Antigravity Usage'
+            )}
+          </ContextMenuCheckboxItem>
+        )}
+        <ContextMenuCheckboxItem
+          checked={statusBarItems.includes('opencode-go')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('usage-tracking')
+            toggleStatusBarItem('opencode-go')
+          }}
+        >
+          <OpenCodeGoIcon size={14} />
+          {translate('auto.components.status.bar.StatusBar.8c86cd77b0', 'OpenCode Go Usage')}
+        </ContextMenuCheckboxItem>
+        {isStatusBarItemAvailable('kimi', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('kimi')}
+            onCheckedChange={() => {
+              recordFeatureInteraction('usage-tracking')
+              toggleStatusBarItem('kimi')
+            }}
+          >
+            <AgentIcon agent="kimi" size={14} />
+            {translate('auto.components.status.bar.StatusBar.5e59007df4', 'Kimi Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        <ContextMenuCheckboxItem
+          checked={statusBarItems.includes('minimax')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('usage-tracking')
+            toggleStatusBarItem('minimax')
+          }}
+        >
+          <MiniMaxIcon size={14} />
+          {translate('auto.components.status.bar.StatusBar.3bbf140864', 'MiniMax Usage')}
+        </ContextMenuCheckboxItem>
+        {isStatusBarItemAvailable('grok', detectedAgentIds) && (
+          <ContextMenuCheckboxItem
+            checked={statusBarItems.includes('grok')}
+            onCheckedChange={() => {
+              recordFeatureInteraction('usage-tracking')
+              toggleStatusBarItem('grok')
+            }}
+          >
+            <AgentIcon agent="grok" size={14} />
+            {translate('auto.components.status.bar.StatusBar.grokUsageMenu', 'Grok Usage')}
+          </ContextMenuCheckboxItem>
+        )}
+        <ContextMenuCheckboxItem
+          checked={statusBarItems.includes('ssh')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('ssh')
+            toggleStatusBarItem('ssh')
+          }}
+        >
+          <Server className="size-3.5" />
+          {translate('auto.components.status.bar.StatusBar.24ac89df1a', 'Remote Hosts')}
+        </ContextMenuCheckboxItem>
+        <ContextMenuCheckboxItem
+          checked={statusBarItems.includes('resource-usage')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('resource-manager')
+            toggleStatusBarItem('resource-usage')
+          }}
+        >
+          <Activity className="size-3.5" />
+          {translate('auto.components.status.bar.StatusBar.d1e1a7a6bf', 'Resource Manager')}
+        </ContextMenuCheckboxItem>
+        <ContextMenuCheckboxItem
+          checked={statusBarItems.includes('ports')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('ports')
+            toggleStatusBarItem('ports')
+          }}
+        >
+          <Plug className="size-3.5" />
+          {translate('auto.components.status.bar.StatusBar.9659e38343', 'Ports')}
+        </ContextMenuCheckboxItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }
 

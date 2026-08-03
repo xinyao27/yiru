@@ -23,7 +23,6 @@ import {
   SettingsSubsectionHeader,
   SettingsSwitchRow
 } from '../form-controls'
-import { LanguageServerSetting } from '../language-server-setting'
 import { RichMarkdownSpellcheckSetting } from '../rich-markdown-spellcheck-setting'
 import { SearchableSetting } from '../searchable-setting'
 
@@ -339,8 +338,6 @@ export function GeneralEditorSettingsSection({
           }
         />
       </SearchableSetting>
-
-      <LanguageServerSetting settings={settings} updateSettings={updateSettings} />
     </section>
   )
 }

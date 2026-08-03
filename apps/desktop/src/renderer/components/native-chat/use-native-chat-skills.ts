@@ -5,7 +5,7 @@ import { emitNativeChatSkillDiscovery } from '~renderer/components/native-chat/t
 import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import { getNativeChatAgentProfile } from '~shared/native-chat/agent-profiles'
-import type { DiscoveredSkill, SkillDiscoveryResult } from '~shared/skills'
+import { skillPlacements, type DiscoveredSkill, type SkillDiscoveryResult } from '~shared/skills'
 
 import {
   resolveNativeChatSkillDiscoveryContext,
@@ -61,12 +61,11 @@ export function isNativeChatSkillForAgent(
       (skill.providers.includes('codex') || skill.providers.includes('agent-skills'))
     )
   }
-  // Why: canonical-path dedup keeps one row per file, but a symlinked skill can
-  // be reachable through several roots; any shared or agent-owned root grants
-  // visibility regardless of which root the scanner happened to list first.
-  const rootPaths = skill.rootPaths?.length ? skill.rootPaths : [skill.rootPath]
-  return rootPaths.some((rootPath) => {
-    const source = result.sources.find((entry) => entry.path === rootPath)
+  // Why: grouping keeps one row per skill, but a copied or symlinked skill sits
+  // in several roots; any shared or agent-owned placement grants visibility
+  // regardless of which root the scanner happened to list first.
+  return skillPlacements(skill).some((placement) => {
+    const source = result.sources.find((entry) => entry.path === placement.rootPath)
     return source?.owner === null || source?.owner === profile.skillSourceOwner
   })
 }

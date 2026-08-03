@@ -36,7 +36,6 @@ export function useFileExplorerInteractions(
 
   const [flashingPath, setFlashingPath] = useState<string | null>(null)
   const [bgMenuOpen, setBgMenuOpen] = useState(false)
-  const [bgMenuPoint, setBgMenuPoint] = useState({ x: 0, y: 0 })
   const scrollRef = useRef<HTMLDivElement>(null)
   const pierreTreeRef = useRef<PierreFileExplorerTreeHandle>(null)
   const explorerShellRef = useRef<HTMLDivElement | null>(null)
@@ -242,9 +241,7 @@ export function useFileExplorerInteractions(
     requestDelete: deletion.requestDelete,
     requestDeleteAll: deletion.requestDeleteAll,
     inlineInput: inline.inlineInput,
-    startNew: inline.startNew,
-    setBgMenuOpen,
-    setBgMenuPoint
+    startNew: inline.startNew
   })
 
   // Why: useFileExplorerSelection returns a fresh object literal every call
@@ -283,10 +280,7 @@ export function useFileExplorerInteractions(
     () => ({ scrollRef, pierreTreeRef, setExplorerShellRef }),
     [setExplorerShellRef]
   )
-  const menuGroup = useMemo(
-    () => ({ bgMenuOpen, setBgMenuOpen, bgMenuPoint }),
-    [bgMenuOpen, setBgMenuOpen, bgMenuPoint]
-  )
+  const menuGroup = useMemo(() => ({ bgMenuOpen, setBgMenuOpen }), [bgMenuOpen, setBgMenuOpen])
   const displayGroup = useMemo(() => ({ flashingPath, activeFileId }), [flashingPath, activeFileId])
   const actionsGroup = useMemo(() => ({ ...rowActions, toggleDir }), [rowActions, toggleDir])
 

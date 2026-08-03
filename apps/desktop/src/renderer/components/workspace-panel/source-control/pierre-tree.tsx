@@ -13,6 +13,7 @@ import {
   type SourceControlPierreTreeData
 } from './pierre-tree-data'
 import { getSourceControlPierreRowDecoration } from './pierre-tree-decoration'
+import { resolveSourceControlPierreExpandedPaths } from './pierre-tree-expansion'
 import { SourceControlPierreTreeMenu } from './pierre-tree-menu'
 import type { SourceControlDisplaySectionId } from './section-order'
 import { toPermanentSourceControlRowOpenEvent } from './split-open'
@@ -86,11 +87,13 @@ function openTarget(
 function SourceControlPierreTree({
   controller,
   data,
+  expandedPaths,
   selectedRowKeys,
   nested = false
 }: {
   controller: SourceControlController
   data: SourceControlPierreTreeData
+  expandedPaths: string[]
   selectedRowKeys: ReadonlySet<string>
   nested?: boolean
 }): React.JSX.Element {
@@ -98,6 +101,10 @@ function SourceControlPierreTree({
   const [visibleRowCount, setVisibleRowCount] = useState(1)
   const callbacksRef = useRef({ controller, data })
   callbacksRef.current = { controller, data }
+  // Why: the path reset must seed Pierre with the current disclosure state
+  // without taking it as a dependency, or a collapse toggle would reset paths.
+  const expandedPathsRef = useRef(expandedPaths)
+  expandedPathsRef.current = expandedPaths
   const resettingRef = useRef(false)
   const selectedCanonicalPaths = useMemo(
     () =>
@@ -111,7 +118,7 @@ function SourceControlPierreTree({
     paths: data.paths,
     flattenEmptyDirectories: true,
     initialExpansion: 'closed',
-    initialExpandedPaths: data.expandedPaths,
+    initialExpandedPaths: expandedPaths,
     initialSelectedPaths: selectedCanonicalPaths,
     itemHeight: SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX,
     overscan: 20,
@@ -146,18 +153,27 @@ function SourceControlPierreTree({
       ? `${SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS}${SOURCE_CONTROL_PIERRE_TREE_NESTED_UNSAFE_CSS}`
       : SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS
   })
+  // Why: `resetPaths` reparses and resorts every path, drops all item handles
+  // and rebuilds the projection, so it must run only when the path set itself
+  // changes — never for a disclosure change, which the effect below handles.
   useLayoutEffect(() => {
     resettingRef.current = true
-    model.resetPaths(data.paths, { initialExpandedPaths: data.expandedPaths })
-    const expandedPaths = new Set(data.expandedPaths)
+    model.resetPaths(data.paths, { initialExpandedPaths: expandedPathsRef.current })
+    resettingRef.current = false
+    setVisibleRowCount(model.getVisibleCount())
+  }, [data.paths, model])
+
+  useLayoutEffect(() => {
+    const expanded = new Set(expandedPaths)
+    resettingRef.current = true
     for (const path of data.targetByCanonicalPath.keys()) {
       const item = model.getItem(path)
-      if (!item || !('isExpanded' in item) || item.isExpanded() === expandedPaths.has(path)) {
+      if (!item || !('isExpanded' in item) || item.isExpanded() === expanded.has(path)) {
         continue
       }
       // Why: the panel height follows controlled collapse state, so Pierre's
-      // disclosure state must match it immediately after a path reset.
-      if (expandedPaths.has(path)) {
+      // disclosure state must match it.
+      if (expanded.has(path)) {
         item.expand()
       } else {
         item.collapse()
@@ -165,7 +181,7 @@ function SourceControlPierreTree({
     }
     resettingRef.current = false
     setVisibleRowCount(model.getVisibleCount())
-  }, [data.expandedPaths, data.paths, data.targetByCanonicalPath, model])
+  }, [data.targetByCanonicalPath, expandedPaths, model])
 
   useLayoutEffect(() => {
     model.setGitStatus(data.gitStatus)
@@ -285,6 +301,8 @@ function SourceControlPierreTree({
 }
 
 const EMPTY_SELECTED_ROW_KEYS: ReadonlySet<string> = new Set()
+// Why: branch trees have no submodule rows to disclose.
+const EMPTY_EXPANDED_SUBMODULE_KEYS: ReadonlySet<string> = new Set()
 
 export function SourceControlPierreUncommittedTree({
   controller,
@@ -294,25 +312,31 @@ export function SourceControlPierreUncommittedTree({
   sectionId: SourceControlDisplaySectionId
 }): React.JSX.Element {
   const roots = controller.treeRootsBySection[sectionId]
+  // Why: collapse state is deliberately not a dependency here — it cannot change
+  // the path set, and rebuilding this would force a full Pierre store reset on
+  // every directory toggle.
   const data = useMemo(
     () =>
       buildUncommittedPierreTreeData({
         roots: roots ?? [],
-        collapsedDirectoryKeys: controller.collapsedTreeDirs,
-        expandedSubmoduleKeys: controller.expandedSubmoduleKeys,
         submoduleStatusByKey: controller.submoduleStatusByKey
       }),
-    [
-      controller.collapsedTreeDirs,
-      controller.expandedSubmoduleKeys,
-      controller.submoduleStatusByKey,
-      roots
-    ]
+    [controller.submoduleStatusByKey, roots]
+  )
+  const expandedPaths = useMemo(
+    () =>
+      resolveSourceControlPierreExpandedPaths(
+        data,
+        controller.collapsedTreeDirs,
+        controller.expandedSubmoduleKeys
+      ),
+    [controller.collapsedTreeDirs, controller.expandedSubmoduleKeys, data]
   )
   return (
     <SourceControlPierreTree
       controller={controller}
       data={data}
+      expandedPaths={expandedPaths}
       selectedRowKeys={controller.activeOpenRowKeys}
       nested
     />
@@ -325,13 +349,23 @@ export function SourceControlPierreBranchTree({
   controller: SourceControlController
 }): React.JSX.Element {
   const data = useMemo(
-    () => buildBranchPierreTreeData(controller.branchTreeRoots, controller.collapsedTreeDirs),
-    [controller.branchTreeRoots, controller.collapsedTreeDirs]
+    () => buildBranchPierreTreeData(controller.branchTreeRoots),
+    [controller.branchTreeRoots]
+  )
+  const expandedPaths = useMemo(
+    () =>
+      resolveSourceControlPierreExpandedPaths(
+        data,
+        controller.collapsedTreeDirs,
+        EMPTY_EXPANDED_SUBMODULE_KEYS
+      ),
+    [controller.collapsedTreeDirs, data]
   )
   return (
     <SourceControlPierreTree
       controller={controller}
       data={data}
+      expandedPaths={expandedPaths}
       selectedRowKeys={EMPTY_SELECTED_ROW_KEYS}
     />
   )

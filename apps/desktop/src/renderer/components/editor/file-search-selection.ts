@@ -1,16 +1,7 @@
-export type FileSearchSelectedTextProvider = () => string | null | undefined
-export const FILE_SEARCH_SELECTED_TEXT_MAX_CHARS = 2 * 1024
+const FILE_SEARCH_SELECTED_TEXT_MAX_CHARS = 2 * 1024
 
 const LINE_FEED_CODE_UNIT = 10
 const CARRIAGE_RETURN_CODE_UNIT = 13
-
-type ProviderEntry = {
-  id: number
-  provider: FileSearchSelectedTextProvider
-}
-
-const selectedTextProviders: ProviderEntry[] = []
-let nextProviderId = 1
 
 export function normalizeSelectedTextForFileSearch(text: string | null | undefined): string | null {
   if (!text) {
@@ -78,27 +69,14 @@ function findSelectedTextLineTrimEnd(text: string, lineStart: number, lineEnd: n
   return index
 }
 
-export function registerFileSearchSelectedTextProvider(
-  provider: FileSearchSelectedTextProvider
-): () => void {
-  const entry = { id: nextProviderId++, provider }
-  selectedTextProviders.push(entry)
-  return () => {
-    const index = selectedTextProviders.findIndex((candidate) => candidate.id === entry.id)
-    if (index !== -1) {
-      selectedTextProviders.splice(index, 1)
-    }
-  }
-}
-
+/**
+ * Seeds file search from whatever the user has selected.
+ *
+ * Why: this used to consult a provider registry because Monaco's selection was
+ * a model concept with no DOM selection behind it. Pierre renders real text
+ * inside an open shadow root, which the native selection already reaches.
+ */
 export function getSelectedTextForFileSearch(): string | null {
-  for (let index = selectedTextProviders.length - 1; index >= 0; index -= 1) {
-    const selectedText = normalizeSelectedTextForFileSearch(selectedTextProviders[index].provider())
-    if (selectedText) {
-      return selectedText
-    }
-  }
-
   if (typeof window === 'undefined') {
     return null
   }

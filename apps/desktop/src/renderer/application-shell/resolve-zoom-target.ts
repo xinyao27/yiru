@@ -30,7 +30,7 @@ export function resolveZoomTarget(args: {
           closest: (selector: string) => Element | null
         }
       ).closest(
-        '.monaco-editor, .diff-editor, .markdown-preview, .rich-markdown-editor, .rich-markdown-editor-shell'
+        'diffs-container, .diff-editor, .markdown-preview, .rich-markdown-editor, .rich-markdown-editor-shell'
       )
     )
 

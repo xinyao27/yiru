@@ -1,5 +1,5 @@
 import { BookOpen } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
@@ -10,7 +10,14 @@ import { SkillsEmptyState } from './empty-state'
 import type { SkillsFilterState } from './filter'
 import { SkillsFilterBar } from './filter-bar'
 import { sourceLabels } from './labels'
+import {
+  describeSkillPlacements,
+  summarizeSkillPlacements,
+  type SkillPlacementSummary
+} from './placement-summary'
 import { SkillDetail } from './skill-detail'
+
+const SINGLE_PLACEMENT: SkillPlacementSummary = { count: 1, distinguishingLabel: null }
 
 export type SkillsInstalledPaneProps = {
   /** Everything discovery found, used to tell "no skills" from "no matches". */
@@ -28,13 +35,16 @@ export type SkillsInstalledPaneProps = {
 
 function SkillRow({
   skill,
+  placements,
   selected,
   onSelect
 }: {
   skill: DiscoveredSkill
+  placements: SkillPlacementSummary
   selected: boolean
   onSelect: (skill: DiscoveredSkill) => void
 }): React.JSX.Element {
+  const placementBadge = describeSkillPlacements(placements)
   return (
     <Button
       type="button"
@@ -49,6 +59,11 @@ function SkillRow({
       <span className="min-w-0 flex-1 space-y-0.5">
         <span className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 flex-1 truncate text-sm font-medium">{skill.name}</span>
+          {placementBadge ? (
+            <Badge variant="outline" className="h-4 shrink-0 text-[10px]">
+              {placementBadge}
+            </Badge>
+          ) : null}
           <Badge variant="outline" className="h-4 shrink-0 text-[10px]">
             {sourceLabels[skill.sourceKind]}
           </Badge>
@@ -74,6 +89,10 @@ export function SkillsInstalledPane({
   isUpdatable
 }: SkillsInstalledPaneProps): React.JSX.Element {
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
+  // Why: a slug that drifted apart shows as two rows, and which root each row
+  // stands for is only knowable from the whole list — so it is summarized here
+  // rather than inside a row that can only see itself.
+  const placementSummaries = useMemo(() => summarizeSkillPlacements(visibleSkills), [visibleSkills])
   // Why: resolving the selection during render keeps one rule for both "nothing
   // picked yet" and "the pick was filtered out" — fall back to the first row —
   // without an effect that writes state back on every list change.
@@ -90,6 +109,7 @@ export function SkillsInstalledPane({
               <SkillRow
                 key={skill.id}
                 skill={skill}
+                placements={placementSummaries.get(skill.id) ?? SINGLE_PLACEMENT}
                 selected={skill.id === selectedSkill?.id}
                 onSelect={(next) => setSelectedSkillId(next.id)}
               />
