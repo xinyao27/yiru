@@ -1,10 +1,10 @@
+import { cn } from 'cnfast'
 import { useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown, CaretRight } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import { MobileGlassGroup } from '../components/glass/group'
@@ -91,7 +91,7 @@ export function QuickCommandEditorForm({
         </Text>
         <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
           <TextInput
-            className="text-foreground px-3 py-3 text-sm"
+            className="text-foreground min-h-11 px-3 py-3 text-sm"
             value={draft.label}
             onChangeText={(label) => onChange({ label })}
             placeholder={translate(

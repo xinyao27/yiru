@@ -1,7 +1,7 @@
+import { cn } from 'cnfast'
 import { Text } from 'react-native'
 
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassPressable } from '../components/glass/pressable'

@@ -1,10 +1,11 @@
+import { cn } from 'cnfast'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { Check, CaretDown as ChevronDown } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { searchBaseRefs } from '~/source-control/base-ref-search'
-import { cn } from '~/style/class-names'
 import type { RpcClient } from '~/transport/rpc-client'
 
 type Props = {
@@ -79,13 +80,13 @@ export function MobilePrBasePicker({
   return (
     <View>
       <MobileGlassSurface
-        className="min-h-10 flex-row items-center gap-1 overflow-hidden rounded-xl px-3 py-1"
+        className="min-h-11 flex-row items-center gap-1 overflow-hidden rounded-xl px-3"
         isFunctional
         isInteractive={editable}
       >
         <TextInput
           className={cn(
-            'text-foreground min-w-0 flex-1 p-0 font-mono text-sm',
+            'text-foreground min-h-11 min-w-0 flex-1 p-0 font-mono text-sm',
             !editable && 'opacity-60'
           )}
           value={value}
@@ -95,7 +96,7 @@ export function MobilePrBasePicker({
           }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="main"
+          placeholder={translate('mobile.pullRequest.base.placeholder', 'main')}
           placeholderTextColorClassName="accent-muted-foreground"
           autoCapitalize="none"
           autoCorrect={false}
@@ -108,7 +109,7 @@ export function MobilePrBasePicker({
           {results.map((ref) => (
             <Pressable
               key={ref}
-              className="border-b-hairline border-b-border active:bg-accent min-h-10 flex-row items-center justify-between gap-2 px-3"
+              className="border-b-hairline border-b-border active:bg-accent min-h-11 flex-row items-center justify-between gap-2 px-3"
               onPress={() => {
                 onChange(ref)
                 setResults([])

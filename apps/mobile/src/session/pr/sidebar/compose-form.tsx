@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
@@ -28,7 +29,6 @@ import {
   shouldPushBeforeMobilePrCreate,
   type MobilePrPrefill
 } from '~/source-control/pr-create'
-import { cn } from '~/style/class-names'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 
@@ -237,9 +237,9 @@ export function MobilePrComposeForm({
       ) : null}
 
       <View className="gap-2">
-        <MobileGlassSurface className="min-h-10 overflow-hidden rounded-xl" isInteractive>
+        <MobileGlassSurface className="min-h-11 overflow-hidden rounded-xl" isInteractive>
           <TextInput
-            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            className="text-foreground min-h-11 px-3 py-2 text-sm"
             value={title}
             onChangeText={setTitle}
             placeholder={translate('mobile.pullRequest.compose.titlePlaceholder', 'Title')}

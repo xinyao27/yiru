@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
@@ -7,7 +8,6 @@ import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { Check } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import type { AskAnswerSelection, AskPrompt } from './ask'
 

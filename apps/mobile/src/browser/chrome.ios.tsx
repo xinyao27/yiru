@@ -73,6 +73,7 @@ function MobileBrowserGlassKeyButton({
       controlSize('small'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable, selected),
       buttonBorderShape('capsule'),
+      frame({ minWidth: 44, minHeight: 44, alignment: 'center' }),
       disabledModifier(disabled),
       accessibilityLabel(label)
     ],

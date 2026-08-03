@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppState, View, Text, Pressable, type AppStateStatus } from 'react-native'
@@ -9,7 +10,6 @@ import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from './accessory-keys'
 import {

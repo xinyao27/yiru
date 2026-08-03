@@ -1,11 +1,11 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Pressable, Text, View } from 'react-native'
 
 import { translate } from '~/i18n/translate'
 import type { MobileDiffReviewQueueItem } from '~/session/diff/review-queue'
 import { mobileReviewCountLabel, type ReviewDiffState } from '~/session/diff/review-screen-model'
 import { MOBILE_GIT_STATUS_LABELS } from '~/source-control/git-status'
-import { cn } from '~/style/class-names'
 
 import { MobileDiffReviewHunkNavigation } from './hunk-navigation'
 import { mobileDiffReviewStyles as styles } from './screen-styles'

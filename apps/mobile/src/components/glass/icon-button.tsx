@@ -1,6 +1,5 @@
+import { cn } from 'cnfast'
 import type { PressableProps } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import {
   ArrowClockwise,

@@ -1,6 +1,5 @@
+import { cn } from 'cnfast'
 import { View } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import type { ConnectionVerdict } from '../transport/connection-health'
 import type { ConnectionState } from '../transport/types'

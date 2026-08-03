@@ -1,5 +1,6 @@
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { useFocusEffect, useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
@@ -33,7 +34,6 @@ import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
 import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
-import { cn } from '~/style/class-names'
 import { useHostClient, useCloseHost, useForceReconnect } from '~/transport/client-context'
 import {
   useLastConnectedAt,

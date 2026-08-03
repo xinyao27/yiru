@@ -1,4 +1,5 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
@@ -8,7 +9,7 @@ import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { MobileSyntaxSegments } from '~/components/syntax-segments'
 import { Chat as MessageSquare, Plus } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import { sessionScreenClassNames as styles } from './screen-class-names'
 import type { RenderableDiffLine } from './screen-state'
@@ -61,7 +62,11 @@ export function DiffLineRow({
         <Text
           selectable
           className="text-foreground flex-1 font-mono text-sm leading-6"
-          accessibilityLabel={`${title} diff line ${index + 1}`}
+          accessibilityLabel={translate(
+            'mobile.session.diff.line.accessibility',
+            '{{title}} diff line {{number}}',
+            { title, number: index + 1 }
+          )}
         >
           <Text
             className={cn(
@@ -77,7 +82,7 @@ export function DiffLineRow({
         {canComment ? (
           <Pressable
             className={cn(
-              'w-7 h-6 items-center justify-center',
+              'h-11 w-11 items-center justify-center',
               'active:bg-accent',
               commentsBusy && styles.diffCommentButtonDisabled
             )}
@@ -87,7 +92,11 @@ export function DiffLineRow({
                 onStartComment(commentLine)
               }
             }}
-            accessibilityLabel={`Add note on line ${commentLine}`}
+            accessibilityLabel={translate(
+              'mobile.review.line.addNoteAccessibility',
+              'Add note on line {{number}}',
+              { number: commentLine }
+            )}
           >
             <Plus size={12} colorClassName="accent-muted-foreground" />
           </Pressable>
@@ -100,10 +109,16 @@ export function DiffLineRow({
               <View className="mb-1 flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
                 <Text className="text-muted-foreground flex-1 text-xs font-semibold">
-                  Line {comment.lineNumber}
+                  {translate('mobile.session.diff.note.line', 'Line {{number}}', {
+                    number: comment.lineNumber
+                  })}
                 </Text>
                 <MobileGlassIconButton
-                  accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
+                  accessibilityLabel={translate(
+                    'mobile.session.diff.note.deleteAccessibility',
+                    'Delete note on line {{number}}',
+                    { number: comment.lineNumber }
+                  )}
                   disabled={commentsBusy}
                   icon="close"
                   onPress={() => onDeleteComment(comment.id)}
@@ -121,7 +136,7 @@ export function DiffLineRow({
             className="text-foreground mr-0 h-20 min-h-20 flex-1 px-3 py-2 font-mono text-sm"
             value={commentDraft}
             onChangeText={onDraftChange}
-            placeholder="Add review note"
+            placeholder={translate('mobile.review.notePlaceholder', 'Review note')}
             placeholderTextColorClassName="accent-muted-foreground"
             editable={!commentsBusy}
             multiline
@@ -131,14 +146,14 @@ export function DiffLineRow({
           <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
             <MobileGlassTextButton
               disabled={commentsBusy}
-              label="Cancel"
+              label={translate('mobile.common.cancel', 'Cancel')}
               onPress={onCancelComment}
               size="small"
             />
             <MobileGlassTextButton
               disabled={!commentDraft.trim() || commentsBusy}
               isProminent
-              label="Save note"
+              label={translate('mobile.session.diff.note.save', 'Save note')}
               onPress={() => {
                 if (commentLine !== undefined) {
                   onSubmitComment(commentLine)

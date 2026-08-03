@@ -2,6 +2,7 @@
 // can't resolve Node's builtin in a React Native bundle.
 import { Buffer } from 'buffer'
 
+import { cn } from 'cnfast'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -16,7 +17,6 @@ import {
 } from 'react-native'
 
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassSurface } from '../components/glass/surface'

@@ -1,6 +1,5 @@
+import { cn } from 'cnfast'
 import { View } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import type { MobileGlassSurfaceProps } from './surface-props'
 

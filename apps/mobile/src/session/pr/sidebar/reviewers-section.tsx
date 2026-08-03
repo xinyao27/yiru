@@ -1,11 +1,11 @@
 import type { GitHubWorkItemDetails } from '@yiru/workbench-model/review'
+import { cn } from 'cnfast'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Text, View } from 'react-native'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { isPrSidebarDetailsPlaceholder } from '~/session/pr/sidebar-state'
 import type { MobilePrActions } from '~/session/pr/use-actions'
-import { cn } from '~/style/class-names'
 import type { RpcClient } from '~/transport/rpc-client'
 
 import { getPRReviewerRows } from './checks-presentation'

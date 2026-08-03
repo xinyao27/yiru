@@ -1,4 +1,4 @@
-import { Button, GlassEffectContainer, HStack } from '@expo/ui/swift-ui'
+import { Button, GlassEffectContainer, Host, HStack } from '@expo/ui/swift-ui'
 import {
   accessibilityLabel,
   buttonBorderShape,
@@ -9,11 +9,12 @@ import {
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
 import { View } from 'react-native'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { ExpoUiHost } from '~/components/expo-ui-host'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
 import { translate } from '~/i18n/translate'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileDiffReviewHunkNavigationProps } from './hunk-navigation-props'
 
@@ -55,16 +56,25 @@ export function MobileDiffReviewHunkNavigation({
   disabled,
   onJumpHunk
 }: MobileDiffReviewHunkNavigationProps): React.JSX.Element {
+  const { theme } = useUniwind()
+  const primaryColor = resolveCssString(useCSSVariable('--color-primary'))
+
   return (
     <View className="mt-2">
-      <ExpoUiHost>
+      <Host
+        colorScheme={theme}
+        ignoreSafeArea="all"
+        matchContents
+        seedColor={primaryColor}
+        style={{ backgroundColor: 'transparent' }}
+      >
         <GlassEffectContainer spacing={8}>
           <HStack spacing={8}>
             <HunkButton direction="previous" disabled={disabled} onJumpHunk={onJumpHunk} />
             <HunkButton direction="next" disabled={disabled} onJumpHunk={onJumpHunk} />
           </HStack>
         </GlassEffectContainer>
-      </ExpoUiHost>
+      </Host>
     </View>
   )
 }

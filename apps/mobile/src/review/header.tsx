@@ -1,10 +1,10 @@
+import { cn } from 'cnfast'
 import { FlatList, Text, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { translate } from '~/i18n/translate'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '~/session/diff/review-screen-model'
-import { cn } from '~/style/class-names'
 
 import { mobileReviewFilterLabel } from './filter-label'
 import type { MobileDiffReviewHeaderProps } from './header-props'

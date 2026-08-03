@@ -1,4 +1,4 @@
-import { cn } from '~/style/class-names'
+import { cn } from 'cnfast'
 
 export const mobilePrComposeFormStyles = {
   branchToken: cn('max-w-28 text-foreground text-xs font-mono'),

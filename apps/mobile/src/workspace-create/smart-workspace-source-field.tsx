@@ -1,8 +1,8 @@
+import { cn } from 'cnfast'
 import { Linking, Text, View } from 'react-native'
 
 import { GitMerge, GitPullRequest } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassIconButton } from '../components/glass/icon-button'

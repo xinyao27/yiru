@@ -1,5 +1,6 @@
 import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Pressable, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
@@ -13,7 +14,6 @@ import {
   GitPullRequest
 } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'

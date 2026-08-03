@@ -1,7 +1,7 @@
+import { cn } from 'cnfast'
 import { View } from 'react-native'
 
 import { LoadingIndicator } from '~/components/loading-indicator'
-import { cn } from '~/style/class-names'
 
 type WorktreeStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 

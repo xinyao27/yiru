@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { Text, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
@@ -13,7 +14,6 @@ import {
   type Icon
 } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import type { MobileDiffReviewFooterProps } from './footer-props'
 

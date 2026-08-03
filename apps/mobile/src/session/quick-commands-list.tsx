@@ -1,10 +1,10 @@
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
+import { cn } from 'cnfast'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { Check, Play, Plus } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import { MobileContentSection } from '../components/content-section'

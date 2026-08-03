@@ -1,8 +1,8 @@
+import { cn } from 'cnfast'
 import type { ReactNode } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 
 import { Check } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'

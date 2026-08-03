@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
@@ -9,7 +10,6 @@ import { MobileGlassPressable } from '~/components/glass/pressable'
 import { Copy, Check } from '~/components/uniwind-icons'
 import { buildConnectionDiagnosticsReport } from '~/diagnostics/connection-diagnostics-report'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 import { useHostClient } from '~/transport/client-context'
 import {
   useLastConnectedAt,

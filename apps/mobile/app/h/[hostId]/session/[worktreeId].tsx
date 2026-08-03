@@ -16,6 +16,7 @@ import {
   type KeyboardEvent,
   type LayoutChangeEvent
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCSSVariable } from 'uniwind'
 
 import { MobileBrowserPane } from '~/browser/pane'
@@ -36,7 +37,6 @@ import {
   Trash as Trash2,
   X
 } from '~/components/uniwind-icons'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { isFileExistsErrorMessage } from '~/files/file-exists-error'
 import { resolveMobileFileTabDoc } from '~/files/file-tab-doc'
 import { translate } from '~/i18n/translate'
@@ -3019,34 +3019,31 @@ export default function SessionScreen(): React.JSX.Element {
                 onPress={requestLeaveSession}
               />
 
-              <View className="min-w-0 flex-1">
+              <Pressable
+                className="min-h-11 min-w-0 flex-1 justify-center"
+                disabled={!showConnectionRetry}
+                onPress={() => {
+                  if (hostId) {
+                    void forceReconnectHost(hostId)
+                  }
+                }}
+                accessibilityRole={showConnectionRetry ? 'button' : undefined}
+                accessibilityLabel={
+                  showConnectionRetry
+                    ? translate('mobile.session.header.reconnectToDesktop', 'Reconnect to desktop')
+                    : undefined
+                }
+              >
                 <Text className="text-foreground text-base font-semibold" numberOfLines={1}>
                   {worktreeName || translate('mobile.session.header.terminalFallback', 'Terminal')}
                 </Text>
-                <Pressable
-                  className="mt-1 flex-row items-center gap-2"
-                  disabled={!showConnectionRetry}
-                  onPress={() => {
-                    if (hostId) {
-                      void forceReconnectHost(hostId)
-                    }
-                  }}
-                  accessibilityRole={showConnectionRetry ? 'button' : undefined}
-                  accessibilityLabel={
-                    showConnectionRetry
-                      ? translate(
-                          'mobile.session.header.reconnectToDesktop',
-                          'Reconnect to desktop'
-                        )
-                      : undefined
-                  }
-                >
+                <View className="mt-1 flex-row items-center gap-2">
                   <StatusDot state={connState} />
                   <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
                     {terminalSummary}
                   </Text>
-                </Pressable>
-              </View>
+                </View>
+              </Pressable>
               <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                 {!isFloatingWorkspaceRoute ? (
                   <MobileGlassIconButton
@@ -3095,7 +3092,7 @@ export default function SessionScreen(): React.JSX.Element {
                   : undefined
               }
               accessibilityRole={showConnectionRetry ? 'button' : undefined}
-              className="active:bg-accent flex-row items-center gap-2 rounded-xl px-3 py-2"
+              className="active:bg-accent min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-2"
               disabled={!showConnectionRetry}
               onPress={() => {
                 if (hostId) {

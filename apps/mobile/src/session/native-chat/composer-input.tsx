@@ -1,8 +1,9 @@
+import { cn } from 'cnfast'
 import { Pressable, TextInput, View } from 'react-native'
 
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { ArrowUp, Square } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileImageSource } from '../image-source-picker'
@@ -39,7 +40,7 @@ export function MobileNativeChatInput({
   onStop
 }: MobileNativeChatInputProps): React.JSX.Element {
   return (
-    <View className="min-h-10 flex-row items-end gap-2">
+    <View className="min-h-11 flex-row items-end gap-2">
       {onAttachImage ? (
         <MobileAttachmentMenu
           disabled={isAttaching || disabled}
@@ -47,11 +48,11 @@ export function MobileNativeChatInput({
           onSelect={onAttachImage}
         />
       ) : null}
-      <MobileGlassSurface className="min-h-10 flex-1 overflow-hidden rounded-full" isInteractive>
-        <View className="min-h-10 flex-row items-end">
+      <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-full" isInteractive>
+        <View className="min-h-11 flex-row items-end">
           <TextInput
             className={cn(
-              'text-foreground max-h-32 min-h-10 flex-1 px-4 py-2 text-base',
+              'text-foreground max-h-32 min-h-11 flex-1 px-4 py-2 text-base',
               (agentWorking && onStop) || hasMessage ? 'pr-2' : 'pr-4'
             )}
             value={value}
@@ -68,27 +69,33 @@ export function MobileNativeChatInput({
             textAlignVertical="center"
           />
           {agentWorking && onStop ? (
-            <View className="m-1 h-8 w-8 shrink-0">
+            <View className="h-11 w-11 shrink-0">
               <Pressable
-                accessibilityLabel="Stop the agent"
-                className="bg-foreground active:bg-accent h-full w-full items-center justify-center rounded-full"
+                accessibilityLabel={translate('mobile.session.chat.stopAgent', 'Stop the agent')}
+                className="h-full w-full items-center justify-center active:opacity-70"
                 onPress={onStop}
               >
-                <Square size={14} colorClassName="accent-background" />
+                <View className="bg-foreground h-8 w-8 items-center justify-center rounded-full">
+                  <Square size={14} colorClassName="accent-background" />
+                </View>
               </Pressable>
             </View>
           ) : hasMessage ? (
-            <View className="m-1 h-8 w-8 shrink-0">
+            <View className="h-11 w-11 shrink-0">
               <Pressable
-                accessibilityLabel="Send message"
-                className={cn(
-                  'bg-foreground h-full w-full items-center justify-center rounded-full',
-                  canSend ? 'active:bg-accent' : 'opacity-40'
-                )}
+                accessibilityLabel={translate('mobile.session.chat.sendMessage', 'Send message')}
+                className="h-full w-full items-center justify-center active:opacity-70"
                 onPress={onSend}
                 disabled={!canSend}
               >
-                <ArrowUp size={16} colorClassName="accent-background" />
+                <View
+                  className={cn(
+                    'bg-foreground h-8 w-8 items-center justify-center rounded-full',
+                    !canSend && 'opacity-40'
+                  )}
+                >
+                  <ArrowUp size={16} colorClassName="accent-background" />
+                </View>
               </Pressable>
             </View>
           ) : null}

@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useState } from 'react'
 import { ActivityIndicator, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
@@ -6,7 +7,6 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { MobileRichMarkdownEditor } from '~/components/rich-markdown-editor'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { resolveMarkdownFloatingActionsBottom } from './markdown-floating-actions-layout'

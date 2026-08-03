@@ -1,7 +1,7 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Text, View } from 'react-native'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
-import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import { MobileSyntaxSegments } from '../components/syntax-segments'

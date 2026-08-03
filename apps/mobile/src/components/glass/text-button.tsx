@@ -1,6 +1,5 @@
+import { cn } from 'cnfast'
 import { Text } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import { MobileGlassPressable } from './pressable'
 

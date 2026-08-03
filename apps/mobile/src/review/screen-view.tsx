@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { RightDrawer } from '~/components/right-drawer'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import type { useMobileDiffReviewController } from '~/session/diff/use-review-controller'

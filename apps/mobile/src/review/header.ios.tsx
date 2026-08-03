@@ -1,4 +1,4 @@
-import { Button, Menu } from '@expo/ui/swift-ui'
+import { Button, Host, Menu } from '@expo/ui/swift-ui'
 import {
   accessibilityAddTraits,
   accessibilityLabel,
@@ -10,12 +10,13 @@ import {
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
 import { Text, View } from 'react-native'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { ExpoUiHost } from '~/components/expo-ui-host'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
 import { translate } from '~/i18n/translate'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '~/session/diff/review-screen-model'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import { mobileReviewFilterLabel } from './filter-label'
 import type { MobileDiffReviewHeaderProps } from './header-props'
@@ -31,6 +32,8 @@ export function MobileDiffReviewHeader({
   onSelectFilter
 }: MobileDiffReviewHeaderProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
+  const { theme } = useUniwind()
+  const primaryColor = resolveCssString(useCSSVariable('--color-primary'))
   const selectedFilterLabel = mobileReviewFilterLabel(filter)
   const menuLabel = translate('mobile.review.filters.button', 'Filter · {{filter}}', {
     filter: selectedFilterLabel
@@ -71,7 +74,13 @@ export function MobileDiffReviewHeader({
         </Text>
       </View>
       <View className="mt-3 min-h-11 justify-center self-start">
-        <ExpoUiHost>
+        <Host
+          colorScheme={theme}
+          ignoreSafeArea="all"
+          matchContents
+          seedColor={primaryColor}
+          style={{ backgroundColor: 'transparent' }}
+        >
           <Menu
             label={menuLabel}
             systemImage="line.3.horizontal.decrease"
@@ -87,7 +96,7 @@ export function MobileDiffReviewHeader({
               />
             ))}
           </Menu>
-        </ExpoUiHost>
+        </Host>
       </View>
     </View>
   )

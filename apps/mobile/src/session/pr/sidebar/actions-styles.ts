@@ -1,4 +1,4 @@
-import { cn } from '~/style/class-names'
+import { cn } from 'cnfast'
 
 // Styles for PRActionsSection (action buttons, auto-merge toggle, transient-error
 // line). Split out of mobile-pr-sidebar-styles to keep that file under the

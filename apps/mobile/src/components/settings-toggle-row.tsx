@@ -1,6 +1,5 @@
+import { cn } from 'cnfast'
 import { Pressable, Switch, Text, View } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import type { SettingsToggleRowProps } from './settings-toggle-row-props'
 

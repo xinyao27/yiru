@@ -1,8 +1,8 @@
+import { cn } from 'cnfast'
 import { useMemo, useState } from 'react'
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import {
   parseInline,
@@ -111,9 +111,10 @@ function DetailsBlock({
   return (
     <View className="border-hairline border-border mb-2 overflow-hidden rounded-xl">
       <Pressable
-        className="bg-secondary flex-row items-center gap-1 px-2 py-1"
-        onPress={() => setOpen((v) => !v)}
         accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        className="bg-secondary min-h-11 flex-row items-center gap-1 px-2 py-1"
+        onPress={() => setOpen((v) => !v)}
       >
         <Chevron size={14} colorClassName="accent-muted-foreground" />
         <Text className={cn('text-foreground shrink font-semibold', bodyTextClassName(variant))}>

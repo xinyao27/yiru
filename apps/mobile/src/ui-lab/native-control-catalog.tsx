@@ -1,4 +1,5 @@
 import { Picker, Switch } from '@expo/ui'
+import { cn } from 'cnfast'
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 
@@ -6,7 +7,6 @@ import { ExpoUiHost } from '~/components/expo-ui-host'
 import { MobileSegmentedControl } from '~/components/segmented-control'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 type CatalogSegment = 'first' | 'second'
 

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { cn } from 'cnfast'
 import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput } from 'react-native'
 
@@ -10,7 +11,6 @@ import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
-import { cn } from '~/style/class-names'
 
 import {
   buildTerminalShortcutKey,
@@ -377,7 +377,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
             <Text className="text-muted-foreground text-xs">{CUSTOM_KEY_COPY.macroLabel}</Text>
             <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
               <TextInput
-                className="text-foreground px-3 py-2 font-mono text-sm"
+                className="text-foreground min-h-11 px-3 py-2 font-mono text-sm"
                 value={macroLabel}
                 onChangeText={setMacroLabel}
                 placeholder={CUSTOM_KEY_COPY.macroLabelExample}
@@ -389,7 +389,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
             <Text className="text-muted-foreground text-xs">{CUSTOM_KEY_COPY.command}</Text>
             <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
               <TextInput
-                className="text-foreground px-3 py-2 font-mono text-sm"
+                className="text-foreground min-h-11 px-3 py-2 font-mono text-sm"
                 value={macroText}
                 onChangeText={setMacroText}
                 placeholder={CUSTOM_KEY_COPY.commandExample}

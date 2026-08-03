@@ -1,7 +1,6 @@
+import { cn } from 'cnfast'
 import type { ReactNode } from 'react'
 import { Pressable, View, type PressableProps } from 'react-native'
-
-import { cn } from '~/style/class-names'
 
 import { useMobileGlassAvailable } from './availability'
 import { MobileGlassSurface } from './surface'

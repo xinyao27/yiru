@@ -1,10 +1,10 @@
+import { cn } from 'cnfast'
 import { Pressable, Text, View } from 'react-native'
 
 import { BottomDrawer } from '~/components/bottom-drawer'
 import { MobileContentSection } from '~/components/content-section'
 import { Check } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 export type SetupTrustPrompt = {
   repoId: string

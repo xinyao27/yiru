@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { Stack, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState, useCallback } from 'react'
 import {
@@ -23,7 +24,6 @@ import {
 import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
 import { MobileContentSection } from '~/components/content-section'
 import { Check, User } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 import { useHostClient } from '~/transport/client-context'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcSuccess } from '~/transport/types'

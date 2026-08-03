@@ -1,9 +1,9 @@
 import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native'
 
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import { MobileContentSection } from '../components/content-section'

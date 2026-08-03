@@ -1,7 +1,7 @@
+import { cn } from 'cnfast'
 import { useCallback } from 'react'
 import { View } from 'react-native'
 
-import { cn } from '~/style/class-names'
 import { TerminalWebView } from '~/terminal/web-view'
 import type {
   MobileTerminalTheme,

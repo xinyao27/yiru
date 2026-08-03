@@ -1,8 +1,9 @@
 # Expo UI refactor plan
 
 Status: code migration complete. Static checks and iOS, Android, and web exports pass. Android
-emulator visual and interaction inspection passes; iOS runtime and manual screen-reader inspection
-remain the release gate for closing this document.
+emulator inspection has recorded the focused UI Lab, BottomDrawer, RTL, and keyboard scenarios
+listed below, but it is not a pass for every migrated control. iOS runtime and manual VoiceOver and
+TalkBack inspection remain release gates for closing this document.
 
 Execution checkpoint (2026-08-03):
 
@@ -30,13 +31,28 @@ Execution checkpoint (2026-08-03):
   across 425 signatures;
 - no newly introduced ordinary layout uses inline `style`; remaining style props are dynamic,
   animated, native-only, or required by a third-party Host API.
+- the one-line `cnfast` re-export and the Uniwind gesture/safe-area passthrough exports are removed;
+  callers import those package APIs directly, while the two real `withUniwind` container adapters
+  remain;
 - Android 17 on the `Pixel_10` emulator now records UI Lab light/dark and 1.3 font-scale evidence,
   semantic checked/disabled states, Picker and segmented selection changes, and 44pt control bounds;
 - Terminal Settings records BottomDrawer semantic paint in light/dark appearance, selected radio
   state, large-font layout, and select, scrim, and pan-down dismissal;
+- forced-RTL inspection records mirrored UI Lab rows, native controls, segmented selection, terminal
+  settings, and BottomDrawer selection state;
+- the session fixture records the New Browser text-input drawer opening with the IME focused, the
+  first Back action hiding the keyboard without losing the sheet, and the second Back action closing
+  the sheet;
+- the chat and working fixtures record 44pt semantic Send and Stop targets while retaining the
+  compact 32pt visual circle;
 - runtime inspection caught and removed a Glass icon-button negative margin that reduced one axis of
   the nominal 44pt target, and moved Expo UI Switch labels to the React Native semantic row because
   the package-owned Android label paints black in dark appearance.
+- completion review moved 44pt minimums onto the actual focusable input and press nodes for PR base,
+  reviewer search, compose title, native-chat reply, suggestions, diff comments, and disclosure
+  controls, shared search, linked-PR entry, quick-command labels, custom terminal keys, workspace
+  notes, PR identity/title actions, source-control failure/PR rows, and session reconnect affordances
+  instead of relying on non-interactive outer surfaces.
 
 ## Problem statement
 
@@ -394,15 +410,15 @@ package scripts, or localization baselines. They format only owned files, do not
 auto-fix while another agent is editing, and do not commit. The primary agent integrates and creates
 small commits after inspecting the combined worktree.
 
-## Commits
+## End-state checklist
 
-Every commit leaves typecheck, repository contracts, and both platform bundles in a working state.
-The intended sequence is deliberately small:
+This list began as the proposed execution sequence. The migration landed in consolidated commits,
+so completion is judged by the final-state requirements below, not by whether each numbered item
+received a separate commit or preserved the original order.
 
 ### Phase 0: make the architecture enforceable
 
-1. Commit the Expo UI-first design and wrapper-deletion policy. Completed by the design-contract
-   commit.
+1. Establish the Expo UI-first design and wrapper-deletion policy.
 2. Replace regex import checks with AST-based import and JSX-host checks; remove the generic Modal
    ban.
 3. Finalize the cross-platform inline/fill `ExpoUiHost` contract with no runtime platform branch.
@@ -415,10 +431,10 @@ The intended sequence is deliberately small:
 6. Add the full settings-toggle-row contract and generic fallback implementation.
 7. Add the iOS native toggle-row implementation.
 8. Add the Android native toggle-row implementation with merged toggle semantics.
-9. Add the web accessible implementation and verify label/input association.
+9. Add the web ARIA switch implementation with accessible name, checked, and disabled state.
 10. Correct typed segmented selection to use intrinsic height and a 44pt outer interaction region.
 11. Remove the obsolete Glass-named segmented modules and update one representative caller.
-12. Introduce the consolidated selection-drawer interface without moving callers.
+12. Establish the consolidated selection-drawer interface and migrate its callers.
 
 ### Phase 2: stabilize shared overlay and Glass seams
 
@@ -428,7 +444,7 @@ The intended sequence is deliberately small:
 15. Require explicit action icons and remove localized-label heuristics.
 16. Localize and tighten confirmation and text-entry drawer defaults without replacing RN input.
 17. Split Glass availability into platform implementations while preserving the public provider.
-18. Correct Glass accessibility ownership and 44pt hit regions before splitting the large iOS
+18. Correct Glass accessibility ownership and 44pt hit regions and split the large iOS
     implementation by capability.
 
 ### Phase 3: migrate the safest product surfaces
@@ -459,7 +475,7 @@ The intended sequence is deliberately small:
 34. Convert the simplest session/header action sheet to Community Menu.
 35. Convert the simplest host action sheet to Community Menu while retaining confirmation flow.
 36. Apply stabilized segmented selection to source control, review comments, browser view mode,
-    history scope, HTML preview, and contribution metrics in separate feature commits.
+    history scope, HTML preview, and contribution metrics.
 37. Apply only proven Picker patterns to remaining static settings; stop when a screen requires
     nested scrolling, custom content, or mixed native/RN state.
 
@@ -474,7 +490,7 @@ The intended sequence is deliberately small:
 
 ## Completion ledger
 
-As of 2026-08-03, items 1–7, 9–21, 25–33, and 35–40 are implemented. The remaining decisions
+As of 2026-08-03, items 1–7, 9–21, 25–33, 35–36, and 38–40 are implemented. The remaining decisions
 are explicit:
 
 - Item 8 is superseded. Expo UI 57.0.8 does not reliably expose an Android/web Switch accessible
@@ -486,10 +502,13 @@ are explicit:
 - Item 34 is satisfied by the native attachment menu and Expo Router native session toolbar menu.
   The hint-bearing non-native header sheet deliberately remains an ActionSheet because Community
   Menu cannot preserve its richer content or web behavior.
+- Item 37 is closed as a no-op. No Universal Picker product pattern passed the runtime and
+  accessibility gates, so no additional static settings were migrated; dynamic and product-rich
+  choices use `SelectionDrawer`.
 - Item 41 is complete for formatting, lint, typecheck, repository contracts, iOS/Android/web
-  exports, and the recorded Android emulator matrix. iOS runtime remains pending because this
-  worktree has no booted iOS Simulator. Automated Android semantics inspection is not recorded as
-  manual TalkBack or VoiceOver proof.
+  exports, and the explicitly recorded Android scenarios. It is still incomplete for the full
+  per-control runtime matrix. iOS runtime remains pending because this worktree has no booted iOS
+  Simulator, and automated Android semantics inspection is not manual TalkBack or VoiceOver proof.
 - Item 42 retains this plan until the runtime matrix below is recorded. The code migration is not a
   reason to weaken that release gate.
 
@@ -553,8 +572,15 @@ Recorded Android evidence (2026-08-03):
 - Terminal Settings BottomDrawer has visible semantic background paint in light and dark
   appearance, preserves radio selection, fits all choices at 1.3 font scale, and closes after
   selection, scrim press, and pan-down gesture;
-- iOS Simulator, VoiceOver, TalkBack speech/focus order, RTL, keyboard-specific sheet flows, and
-  Reduce Transparency remain unrecorded and cannot be inferred from Android hierarchy output.
+- forced RTL mirrors UI Lab content rows, native Switch and Picker placement, segmented selection,
+  terminal settings rows, and BottomDrawer title, selection indicator, and choices without clipping;
+- the UI Lab session's New Browser text-input drawer opens with the Android IME focused, preserves
+  the drawer when Back first hides the keyboard, and closes it on the second Back action;
+- the chat Send and working-state Stop controls expose 115×115 px semantic bounds at 420 dpi while
+  retaining 32dp visual circles;
+- iOS Simulator, VoiceOver, TalkBack speech/focus order, Reduce Transparency, and the runtime matrix
+  for migrated controls outside these focused scenarios remain unrecorded and cannot be inferred
+  from hierarchy output.
 
 A platform control does not graduate from pilot to broad migration until its runtime gate is
 recorded as passed. Bundle success alone is insufficient. The rejected ListItem pilot remains

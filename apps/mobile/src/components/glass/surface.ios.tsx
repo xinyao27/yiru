@@ -1,8 +1,7 @@
+import { cn } from 'cnfast'
 import { GlassView } from 'expo-glass-effect'
 import { View } from 'react-native'
 import { useUniwind, withUniwind } from 'uniwind'
-
-import { cn } from '~/style/class-names'
 
 import { useMobileGlassAvailable } from './availability'
 import type { MobileGlassSurfaceProps } from './surface-props'

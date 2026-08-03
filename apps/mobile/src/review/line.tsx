@@ -1,4 +1,5 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Pressable, Text, View } from 'react-native'
 
 import { MobileSyntaxSegments } from '~/components/syntax-segments'
@@ -7,7 +8,6 @@ import { translate } from '~/i18n/translate'
 import type { MobileDiffLine } from '~/session/diff/lines'
 import type { MobileHighlightedDiffLine } from '~/session/file-syntax'
 import { mobileDiffLineNumber, mobileDiffLinePrefix } from '~/source-control/diff-format'
-import { cn } from '~/style/class-names'
 
 type Props = {
   line: MobileHighlightedDiffLine<MobileDiffLine>

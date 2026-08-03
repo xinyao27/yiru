@@ -2,6 +2,7 @@ import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { View, Text, TextInput, Pressable, ActivityIndicator, Keyboard } from 'react-native'
 
@@ -15,7 +16,6 @@ import { SelectionDrawer, type SelectionDrawerOption } from '~/components/select
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
@@ -947,7 +947,7 @@ function NewWorkspaceModalContent({
                   </Text>
                   <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
                     <TextInput
-                      className="text-foreground px-3 py-3 text-sm"
+                      className="text-foreground min-h-11 px-3 py-3 text-sm"
                       value={note}
                       onChangeText={setNote}
                       placeholder={translate('mobile.newWorkspace.notePlaceholder', 'Write a note')}

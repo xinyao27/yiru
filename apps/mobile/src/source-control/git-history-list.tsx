@@ -1,11 +1,11 @@
 import type { GitBranchChangeEntry } from '@yiru/workbench-model/review'
+import { cn } from 'cnfast'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 
 import { useForceReconnect } from '../transport/client-context'

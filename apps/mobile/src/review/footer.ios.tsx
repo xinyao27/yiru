@@ -1,4 +1,11 @@
-import { Button, GlassEffectContainer, HStack, VStack, type ButtonProps } from '@expo/ui/swift-ui'
+import {
+  Button,
+  GlassEffectContainer,
+  Host,
+  HStack,
+  VStack,
+  type ButtonProps
+} from '@expo/ui/swift-ui'
 import {
   buttonBorderShape,
   controlSize,
@@ -9,9 +16,8 @@ import {
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { useCSSVariable } from 'uniwind'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { ExpoUiHost } from '~/components/expo-ui-host'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
@@ -76,12 +82,20 @@ export function MobileDiffReviewFooter({
   onMarkReviewed,
   onMoveFile
 }: MobileDiffReviewFooterProps): React.JSX.Element {
+  const { theme } = useUniwind()
+  const primaryColor = resolveCssString(useCSSVariable('--color-primary'))
   const fullWidthModifiers = useMemo<ViewModifier[]>(() => [frame({ maxWidth: Infinity })], [])
   const hasGitActions = item.canStage || item.canUnstage || item.canDiscard
 
   return (
     <View className="pb-safe-offset-2 absolute right-0 bottom-0 left-0 px-3 pt-2">
-      <ExpoUiHost layout="fill">
+      <Host
+        colorScheme={theme}
+        ignoreSafeArea="all"
+        matchContents={{ vertical: true }}
+        seedColor={primaryColor}
+        style={{ width: '100%', backgroundColor: 'transparent' }}
+      >
         <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
           <VStack spacing={8} modifiers={fullWidthModifiers}>
             {hasGitActions ? (
@@ -148,7 +162,7 @@ export function MobileDiffReviewFooter({
             </HStack>
           </VStack>
         </GlassEffectContainer>
-      </ExpoUiHost>
+      </Host>
     </View>
   )
 }

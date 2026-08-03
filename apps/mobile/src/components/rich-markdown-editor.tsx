@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Linking, Pressable, ScrollView, View } from 'react-native'
 import type WebView from 'react-native-webview'
@@ -24,7 +25,6 @@ import {
 } from '~/components/uniwind-icons'
 import { UniwindWebView } from '~/components/uniwind-web-view'
 import { translate } from '~/i18n/translate'
-import { cn } from '~/style/class-names'
 import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 
 import { MobileGlassSurface } from './glass/surface'

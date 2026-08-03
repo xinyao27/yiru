@@ -1,8 +1,8 @@
+import { cn } from 'cnfast'
 import { useState, type ReactNode } from 'react'
 import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
 import type { Icon } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
