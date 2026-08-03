@@ -8295,6 +8295,12 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "온보딩을 다시 시작할 수 없습니다.",
+          "restartOnboardingTitle": "온보딩 다시 실행",
+          "restartOnboardingDescription": "온보딩 마법사를 초기화하고 첫 단계부터 다시 엽니다. 체크리스트 진행 상황은 유지됩니다.",
+          "restartOnboardingButton": "온보딩 다시 시작"
         }
       },
       "right": {

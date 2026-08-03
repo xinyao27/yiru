@@ -8295,6 +8295,12 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "オンボーディングを再開できませんでした。",
+          "restartOnboardingTitle": "オンボーディングをもう一度実行",
+          "restartOnboardingDescription": "オンボーディングウィザードをリセットし、最初のステップから開き直します。チェックリストの進捗は保持されます。",
+          "restartOnboardingButton": "オンボーディングを再開"
         }
       },
       "right": {

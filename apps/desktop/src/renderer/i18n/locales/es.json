@@ -8295,6 +8295,12 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "No se pudo reiniciar la introducción.",
+          "restartOnboardingTitle": "Volver a ejecutar la introducción",
+          "restartOnboardingDescription": "Restablece el asistente de introducción y vuelve a abrirlo desde el primer paso. El progreso de tu lista de verificación se conserva.",
+          "restartOnboardingButton": "Reiniciar introducción"
         }
       },
       "right": {
