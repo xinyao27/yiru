@@ -41,6 +41,7 @@ catalog:
   '@tiptap/starter-kit': ^3.28.0
   '@types/node': ^26.1.1
   '@types/qrcode': ^1.5.6
+  '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
   '@types/ssh2': ^1.15.5
   '@types/ws': ^8.18.1
@@ -100,7 +101,9 @@ catalog:
   pngjs: ^7.0.0
   posthog-node: ^5.45.2
   qrcode: ^1.5.4
+  react: ^19.2.7
   react-colorful: ^5.8.0
+  react-dom: ^19.2.7
   react-grab: ^0.1.48
   react-i18next: ^17.0.10
   react-markdown: ^10.1.0

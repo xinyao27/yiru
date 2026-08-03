@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yiru — Run coding agents anywhere your code lives</title>
+    <meta
+      name="description"
+      content="Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or an SSH box. Review and merge from your desk or your phone. Open source, MIT."
+    />
+    <meta property="og:title" content="Yiru — Run coding agents anywhere your code lives" />
+    <meta
+      property="og:description"
+      content="Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or an SSH box. Review and merge from your desk or your phone."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://yiru.ai/og.png" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap"
+    />
+    <script>
+      // Why: follow the system preference unless the visitor picked a theme.
+      // Applied before first paint to avoid a flash.
+      try {
+        var stored = localStorage.getItem('yiru-theme')
+        var light = stored
+          ? stored === 'light'
+          : !window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('light', light)
+      } catch (error) {
+        // Storage may be unavailable; the base dark theme still applies.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
