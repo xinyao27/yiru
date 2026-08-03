@@ -3732,7 +3732,15 @@
           "portUnavailable": "El puerto TCP {{port}} ya está en uso. Cierra el proceso que causa el conflicto; Coworking seguirá comprobándolo.",
           "permissionDenied": "Los permisos del sistema impidieron que Yiru abriera el servicio de escucha de Coworking en Tailnet.",
           "persistenceUnavailable": "Coworking no pudo cargar de forma segura los ajustes de uso compartido, así que este permanece desactivado.",
-          "unavailable": "Coworking no pudo iniciarse en este equipo."
+          "unavailable": "Coworking no pudo iniciarse en este equipo.",
+          "starting": "Coworking se está iniciando…",
+          "readyIdle": "Coworking listo · nadie conectado",
+          "peersConnected": "{{count}} colaborador(es) conectado(s)",
+          "pendingRequests": "{{count}} colaborador(es) esperando tu aprobación",
+          "sharedWorktrees": "{{count}} árbol(es) de trabajo publicado(s) en tu tailnet.",
+          "noSharedWorktrees": "No hay árboles de trabajo publicados. Los colaboradores aún no ven nada.",
+          "hasControl": "Puede editar",
+          "readOnly": "Solo lectura"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Se reparó la regla de Firewall de Windows.",

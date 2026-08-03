@@ -36,6 +36,7 @@ function createInitialCoworkingSharingState(): CoworkingSharingState {
     coworkingRemoteDesktops: [],
     coworkingOwnerWorktrees: [],
     coworkingOwnerControlGrants: [],
+    coworkingOwnerActiveConnections: [],
     coworkingExpandedWorktreeRefsByDesktop: new Map(),
     activeCoworkingWorkspaceRoute: null,
     coworkingControlRequestQueue: [],
@@ -114,6 +115,7 @@ export const createCoworkingSharingSlice: StateCreator<AppState, [], [], Coworki
         coworkingRemoteDesktops,
         coworkingOwnerWorktrees: [...snapshot.ownerWorktrees],
         coworkingOwnerControlGrants: [...snapshot.ownerControlGrants],
+        coworkingOwnerActiveConnections: [...snapshot.ownerActiveConnections],
         coworkingControlRequestQueue: [...snapshot.ownerControlRequests],
         activeCoworkingWorkspaceRoute,
         // Why: requester control is a main-process projection bound to the

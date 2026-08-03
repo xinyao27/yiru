@@ -3732,7 +3732,15 @@
           "portUnavailable": "TCP 포트 {{port}}가 이미 사용 중입니다. 충돌하는 프로세스를 종료하세요. Coworking이 계속 확인합니다.",
           "permissionDenied": "시스템 권한 때문에 Yiru가 Tailnet에서 Coworking 리스너를 열지 못했습니다.",
           "persistenceUnavailable": "Coworking이 공유 설정을 안전하게 불러오지 못해 공유가 꺼진 상태로 유지됩니다.",
-          "unavailable": "이 데스크톱에서 Coworking을 시작하지 못했습니다."
+          "unavailable": "이 데스크톱에서 Coworking을 시작하지 못했습니다.",
+          "starting": "Coworking 시작 중…",
+          "readyIdle": "Coworking 준비됨 · 연결 없음",
+          "peersConnected": "{{count}}명 연결됨",
+          "pendingRequests": "{{count}}명이 승인을 기다리고 있습니다",
+          "sharedWorktrees": "워크트리 {{count}}개를 tailnet에 공개했습니다.",
+          "noSharedWorktrees": "공개된 워크트리가 없습니다. 상대방에게 아무것도 표시되지 않습니다.",
+          "hasControl": "편집 가능",
+          "readOnly": "읽기 전용"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",

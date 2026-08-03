@@ -23,6 +23,7 @@ const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   ownerWorktrees: [],
   ownerControlRequests: [],
   ownerControlGrants: [],
+  ownerActiveConnections: [],
   requesterControlStates: []
 }
 

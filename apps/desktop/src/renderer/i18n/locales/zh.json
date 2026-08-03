@@ -3732,7 +3732,15 @@
           "portUnavailable": "TCP 端口 {{port}} 已被占用。请关闭冲突进程，Coworking 会继续检查。",
           "permissionDenied": "系统权限阻止 Yiru 在 Tailnet 上打开 Coworking 监听端口。",
           "persistenceUnavailable": "Coworking 无法安全加载共享设置，因此共享功能保持关闭。",
-          "unavailable": "Coworking 无法在这台电脑上启动。"
+          "unavailable": "Coworking 无法在这台电脑上启动。",
+          "starting": "Coworking 正在启动…",
+          "readyIdle": "Coworking 就绪 · 暂无连接",
+          "peersConnected": "已连接 {{count}} 位协作者",
+          "pendingRequests": "{{count}} 位协作者等待你的批准",
+          "sharedWorktrees": "已向 tailnet 发布 {{count}} 个工作区。",
+          "noSharedWorktrees": "尚未发布任何工作区，协作者看不到内容。",
+          "hasControl": "可编辑",
+          "readOnly": "只读"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 防火墙规则已修复。",

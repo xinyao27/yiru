@@ -3732,7 +3732,15 @@
           "portUnavailable": "TCP ポート {{port}} はすでに使用中です。競合するプロセスを終了してください。Coworking は確認を続けます。",
           "permissionDenied": "システム権限により、Yiru は Tailnet 上で Coworking のリスナーを開けませんでした。",
           "persistenceUnavailable": "Coworking は共有設定を安全に読み込めなかったため、共有は無効のままです。",
-          "unavailable": "このデスクトップで Coworking を起動できませんでした。"
+          "unavailable": "このデスクトップで Coworking を起動できませんでした。",
+          "starting": "Coworking を起動中…",
+          "readyIdle": "Coworking 準備完了 · 接続なし",
+          "peersConnected": "{{count}} 人が接続中",
+          "pendingRequests": "{{count}} 人が承認を待っています",
+          "sharedWorktrees": "{{count}} 個のワークツリーを tailnet に公開しています。",
+          "noSharedWorktrees": "公開中のワークツリーはありません。相手には何も表示されません。",
+          "hasControl": "編集可能",
+          "readOnly": "読み取り専用"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows ファイアウォール規則を修復しました。",

@@ -4,9 +4,6 @@ import type {
 } from '~shared/coworking/access-contract'
 import type {
   CoworkingDecideControlArgs,
-  CoworkingOwnerControlGrantView,
-  CoworkingOwnerControlRequestView,
-  CoworkingOwnerWorktreeSharing,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
@@ -19,14 +16,19 @@ import type {
   CoworkingWindowsFirewallRepairResult,
   CoworkingWindowsFirewallStatus
 } from '~shared/coworking/windows-firewall-contract'
+import type { AuthenticatedCoworkingPrincipal } from '~shared/coworking/wire-contract'
 
 import type { CoworkingSharingIpcController } from '../sharing'
 import { CoworkingWindowsFirewallRecovery } from '../windows-firewall-recovery'
 import type { CoworkingOwnerCatalogSnapshot, CoworkingRequesterSubscriptionSink } from './catalog'
-import type {
-  CoworkingOwnerServiceOptions,
-  CoworkingOwnerWorktreeDescriptor
-} from './service-options'
+import type { CoworkingOwnerServiceOptions } from './service-options'
+import {
+  projectActiveConnections,
+  projectOwnerGrant,
+  projectOwnerRequest,
+  projectOwnerWorktrees,
+  type CoworkingOwnerProjectionContext
+} from './snapshot-projection'
 import { CoworkingOwnerStartRecovery } from './start-recovery'
 
 export class CoworkingOwnerService implements CoworkingSharingIpcController {
@@ -35,14 +37,21 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
   private remoteSnapshot: CoworkingOwnerCatalogSnapshot = { desktops: [], controlStates: [] }
   private requests: readonly CoworkingControlRequest[] = []
   private grants: readonly CoworkingControlGrant[] = []
+  private activeConnections: readonly AuthenticatedCoworkingPrincipal[] = []
   private status: CoworkingSharingSnapshot['status'] = 'starting'
   private diagnostic: string | null = null
   private stopped = false
   private startAttempt: Promise<void> | null = null
   private readonly startRecovery = new CoworkingOwnerStartRecovery()
   private readonly windowsFirewallRecovery: CoworkingWindowsFirewallRecovery
+  private readonly projectionContext: CoworkingOwnerProjectionContext
 
   constructor(private readonly options: CoworkingOwnerServiceOptions) {
+    this.projectionContext = {
+      visibility: options.visibility,
+      describeOwnerWorktree: options.describeOwnerWorktree,
+      getConnectionPrincipal: (connectionId) => options.access.getConnectionPrincipal(connectionId)
+    }
     this.windowsFirewallRecovery = new CoworkingWindowsFirewallRecovery(
       options.windowsFirewall,
       () => this.diagnostic === 'coworking_windows_firewall_unavailable',
@@ -59,6 +68,10 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
       }),
       options.access.subscribeGrants((grants) => {
         this.grants = grants
+        this.emit()
+      }),
+      options.access.subscribeConnections((connections) => {
+        this.activeConnections = connections
         this.emit()
       }),
       options.visibility.subscribe((change) => {
@@ -140,15 +153,16 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
       status: this.status,
       diagnostic: this.diagnostic,
       remoteDesktops: this.remoteSnapshot.desktops,
-      ownerWorktrees: this.projectOwnerWorktrees(),
+      ownerWorktrees: projectOwnerWorktrees(this.projectionContext),
       ownerControlRequests: this.requests.flatMap((request) => {
-        const projected = this.projectRequest(request)
+        const projected = projectOwnerRequest(this.projectionContext, request)
         return projected ? [projected] : []
       }),
       ownerControlGrants: this.grants.flatMap((grant) => {
-        const projected = this.projectGrant(grant)
+        const projected = projectOwnerGrant(this.projectionContext, grant)
         return projected ? [projected] : []
       }),
+      ownerActiveConnections: projectActiveConnections(this.activeConnections, this.grants),
       requesterControlStates: this.remoteSnapshot.controlStates
     }
   }
@@ -216,64 +230,6 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
 
   async reportIngressUnavailable(error: Error): Promise<void> {
     await this.enterUnavailable(projectDiagnostic(error))
-  }
-
-  private projectOwnerWorktrees(): readonly CoworkingOwnerWorktreeSharing[] {
-    return this.options.visibility.snapshot().worktrees.flatMap((entry) => {
-      const descriptor = this.options.describeOwnerWorktree(entry.worktreeId)
-      return descriptor
-        ? [
-            {
-              worktreeId: entry.worktreeId,
-              projectId: descriptor.projectId,
-              displayName: descriptor.displayName,
-              visibility: entry.visibility,
-              publicationStatus: entry.publicationStatus,
-              shareEpoch: entry.shareEpoch
-            }
-          ]
-        : []
-    })
-  }
-
-  private projectRequest(
-    request: CoworkingControlRequest
-  ): CoworkingOwnerControlRequestView | null {
-    const target = this.findOwnerTarget(request.instanceId)
-    return target
-      ? {
-          requestId: request.requestId,
-          requester: { ...request.requester },
-          worktreeId: target.worktreeId,
-          projectDisplayName: target.projectDisplayName,
-          worktreeDisplayName: target.displayName,
-          requestedAt: request.requestedAt
-        }
-      : null
-  }
-
-  private projectGrant(grant: CoworkingControlGrant): CoworkingOwnerControlGrantView | null {
-    const target = this.findOwnerTarget(grant.instanceId)
-    const principal = this.options.access.getConnectionPrincipal(grant.connectionId)
-    return target && principal
-      ? {
-          grantId: grant.grantId,
-          requester: { ...principal.tailnet },
-          worktreeId: target.worktreeId,
-          worktreeDisplayName: target.displayName,
-          approvedAt: grant.approvedAt
-        }
-      : null
-  }
-
-  private findOwnerTarget(
-    instanceId: string
-  ): (CoworkingOwnerWorktreeDescriptor & { worktreeId: string }) | null {
-    const state = this.options.visibility
-      .snapshot()
-      .worktrees.find((worktree) => worktree.instanceId === instanceId)
-    const descriptor = state ? this.options.describeOwnerWorktree(state.worktreeId) : null
-    return state && descriptor ? { ...descriptor, worktreeId: state.worktreeId } : null
   }
 
   private async recoverWindowsFirewall(): Promise<void> {

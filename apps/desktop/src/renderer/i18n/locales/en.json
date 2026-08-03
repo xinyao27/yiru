@@ -3755,7 +3755,15 @@
           "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Coworking will keep checking.",
           "permissionDenied": "System permissions prevented Yiru from opening the Coworking Tailnet listener.",
           "persistenceUnavailable": "Coworking could not safely load sharing settings, so sharing remains off.",
-          "unavailable": "Coworking could not start on this desktop."
+          "unavailable": "Coworking could not start on this desktop.",
+          "starting": "Coworking is starting…",
+          "readyIdle": "Coworking ready · no one connected",
+          "peersConnected": "{{count}} peer(s) connected",
+          "pendingRequests": "{{count}} peer(s) waiting for your approval",
+          "sharedWorktrees": "{{count}} worktree(s) published to your tailnet.",
+          "noSharedWorktrees": "No worktrees are published. Peers cannot see anything yet.",
+          "hasControl": "Can edit",
+          "readOnly": "Read-only"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",

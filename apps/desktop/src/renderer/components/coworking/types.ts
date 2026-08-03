@@ -1,5 +1,6 @@
 import type { CoworkingRemoteDesktop } from '~shared/coworking/catalog-contract'
 import type {
+  CoworkingActiveConnectionView,
   CoworkingOwnerControlGrantView,
   CoworkingOwnerControlRequestView,
   CoworkingOwnerWorktreeSharing,
@@ -22,6 +23,7 @@ export type CoworkingSharingState = {
   coworkingRemoteDesktops: readonly CoworkingRemoteDesktop[]
   coworkingOwnerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   coworkingOwnerControlGrants: readonly CoworkingOwnerControlGrantView[]
+  coworkingOwnerActiveConnections: readonly CoworkingActiveConnectionView[]
   coworkingExpandedWorktreeRefsByDesktop: CoworkingExpandedRefsByDesktop
   activeCoworkingWorkspaceRoute: CoworkingWorkspaceRoute | null
   coworkingControlRequestQueue: readonly CoworkingOwnerControlRequestView[]

@@ -125,6 +125,15 @@ export type CoworkingOwnerControlGrantView = {
   approvedAt: number
 }
 
+/** A peer currently authenticated against this desktop's ingress. Present for
+ *  the whole connection, including a read-only peer that never asks for
+ *  control — those hold neither a request nor a grant. */
+export type CoworkingActiveConnectionView = {
+  connectionId: string
+  requester: TailnetPrincipal
+  hasControl: boolean
+}
+
 export type CoworkingRequesterControlView = {
   desktopRef: string
   worktreeRef: string
@@ -140,6 +149,7 @@ export type CoworkingSharingSnapshot = {
   ownerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   ownerControlRequests: readonly CoworkingOwnerControlRequestView[]
   ownerControlGrants: readonly CoworkingOwnerControlGrantView[]
+  ownerActiveConnections: readonly CoworkingActiveConnectionView[]
   requesterControlStates: readonly CoworkingRequesterControlView[]
 }
 
