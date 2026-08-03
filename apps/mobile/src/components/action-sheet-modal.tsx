@@ -138,7 +138,6 @@ export function ActionSheetModal({ visible, title, message, actions, onClose }: 
         pendingActionRef.current = null
         pendingAction?.()
       }}
-      dragContentToDismiss
     >
       <ActionSheetContent
         title={title}

@@ -92,7 +92,7 @@ export function ReviewerPickerDrawer({
   }, [load, seededLogins, query])
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
+    <BottomDrawer visible={visible} onClose={onClose}>
       <Text className="text-foreground mb-2 text-sm font-bold">Reviewers</Text>
       <MobileGlassSurface className="mb-2 min-h-10 overflow-hidden rounded-xl" isInteractive>
         <TextInput

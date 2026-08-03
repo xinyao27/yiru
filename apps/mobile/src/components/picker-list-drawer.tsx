@@ -4,7 +4,7 @@ import { FlatList, Pressable, Text, View } from 'react-native'
 import { Check } from '~/components/uniwind-icons'
 import { cn } from '~/style/class-names'
 
-import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
+import { BottomDrawer, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
 
 type Props<T extends { id: string; label: string }> = {
@@ -57,18 +57,13 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
         closeTimerRef.current = null
         onClose()
         onSelect(item)
-      }, BOTTOM_DRAWER_HIDE_DURATION_MS)
+      }, BOTTOM_DRAWER_HIDE_MS)
     },
     [onClose, onSelect]
   )
 
   return (
-    <BottomDrawer
-      visible={drawerVisible}
-      onClose={finishClose}
-      dragContentToDismiss={false}
-      contentScrollable={false}
-    >
+    <BottomDrawer visible={drawerVisible} onClose={finishClose} contentScrollable={false}>
       <View className="px-1 pb-2">
         <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>

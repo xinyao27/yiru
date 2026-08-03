@@ -23,7 +23,6 @@ type Props<T extends string = string> = {
   onSelect: (value: T) => void
   onLongSelect?: (value: T) => void
   onClose: () => void
-  zIndex?: number
 }
 
 type PickerModalContentProps<T extends string = string> = Pick<
@@ -38,11 +37,10 @@ export function PickerModal<T extends string = string>({
   selected,
   onSelect,
   onLongSelect,
-  onClose,
-  zIndex
+  onClose
 }: Props<T>) {
   return (
-    <BottomDrawer visible={visible} onClose={onClose} zIndex={zIndex}>
+    <BottomDrawer visible={visible} onClose={onClose}>
       <View className="px-1 pb-2">
         <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>

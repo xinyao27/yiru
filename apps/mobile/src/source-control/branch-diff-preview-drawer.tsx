@@ -20,12 +20,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
   }
   const entry = branchDiffPreview.entry
   return (
-    <BottomDrawer
-      visible={branchDiffPreview !== null}
-      onClose={onClose}
-      dragContentToDismiss={false}
-      zIndex={1100}
-    >
+    <BottomDrawer visible={branchDiffPreview !== null} onClose={onClose}>
       <View className="border-b-hairline border-b-border flex-row items-center gap-3 pb-3">
         <View className="min-w-0 flex-1">
           <Text className="text-foreground text-sm font-bold" numberOfLines={1}>

@@ -57,8 +57,7 @@ import {
 import { repoColor } from '../workspace/repo-color'
 import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-repo'
 import { MobileAgentIcon } from './agent-icon'
-import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
-import { BottomDrawerModalHost } from './bottom-drawer-modal-host'
+import { BottomDrawer, BottomDrawerModalHost, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
 import { MobileGlassSurface } from './glass/surface'
@@ -101,7 +100,7 @@ type NewWorktreeDrawerView = 'form' | 'transition' | 'source' | 'repo' | 'agent'
 
 // Why: iOS cannot reliably present a second native modal until the first drawer's
 // exit commits; one extra frame keeps transitions sequential on slower devices.
-const NEW_WORKTREE_DRAWER_TRANSITION_MS = BOTTOM_DRAWER_HIDE_DURATION_MS + 16
+const NEW_WORKTREE_DRAWER_TRANSITION_MS = BOTTOM_DRAWER_HIDE_MS + 16
 
 function repoBadgeColor(repo: Repo | null): string {
   return repo?.badgeColor || repoColor(repo?.displayName ?? 'repository')

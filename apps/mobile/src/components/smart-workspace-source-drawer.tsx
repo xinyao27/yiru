@@ -20,7 +20,7 @@ import {
 } from '../workspace-create/smart-source-paste-intent'
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
-import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
+import { BottomDrawer, BOTTOM_DRAWER_HIDE_MS } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
@@ -94,7 +94,7 @@ export function SmartWorkspaceSourceDrawer({
   })
 
   function closeSoon(): void {
-    setTimeout(onClose, BOTTOM_DRAWER_HIDE_DURATION_MS)
+    setTimeout(onClose, BOTTOM_DRAWER_HIDE_MS)
   }
 
   function handleSelectRow(row: SourceRow): void {
@@ -145,12 +145,7 @@ export function SmartWorkspaceSourceDrawer({
     !loading && !error && !needsGitHubRemote && effectiveMode !== 'text' && rows.length === 0
 
   return (
-    <BottomDrawer
-      visible={visible}
-      onClose={onClose}
-      dragContentToDismiss={false}
-      contentScrollable={false}
-    >
+    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
       <View className="flex-row items-center justify-between px-1 pb-2">
         <Text className="text-foreground text-sm font-semibold">Name or 'Create From'</Text>
         <MobileGlassPressable
