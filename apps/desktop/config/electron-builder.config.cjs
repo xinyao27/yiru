@@ -28,9 +28,10 @@ const skillFreshnessResources = {
   from: 'resources/skills',
   to: 'skills'
 }
-// Why: SSH relay deploy resolves bundles from process.resourcesPath in packaged
-// apps. Keeping relay assets as extraResources makes them real directories
-// instead of paths hidden inside app.asar.
+// Why: the WSL agent-hook installer resolves its relay bundle from
+// process.resourcesPath in packaged apps. Keeping relay assets as
+// extraResources makes them real directories instead of paths hidden inside
+// app.asar.
 const relayExtraResource = {
   from: 'out/relay',
   to: 'relay'

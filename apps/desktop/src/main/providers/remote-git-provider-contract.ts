@@ -1,6 +1,6 @@
+import type { RemoteHostPlatform } from '~main/remote-host/platform'
 import type { CommitMessagePlan } from '~shared/commit-message/plan'
 
-import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import type {
   RemoteCommitMessageExecResult,
   TextGenerationOperation

@@ -45,6 +45,7 @@ import type {
   PtyRendererDeliveryStateReport
 } from '~shared/pty-renderer-delivery-health'
 import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
+import { parseAppSshPtyId, toAppSshPtyId, toRelaySshPtyId } from '~shared/ssh-pty-id'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -108,12 +109,6 @@ import {
 } from '../project-groups/folder-workspace-path-status'
 import { LocalPtyProvider } from '../providers/local-pty-provider'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { parseAppSshPtyId, toAppSshPtyId, toRelaySshPtyId } from '../providers/ssh-pty-id'
-import {
-  SSH_SESSION_EXPIRED_ERROR,
-  isSshPtyIdentityMismatchError,
-  isSshPtyNotFoundError
-} from '../providers/ssh-pty-provider'
 import type { IPtyProvider, PtySpawnOptions, PtySpawnResult } from '../providers/types'
 import { isPwshAvailable } from '../pwsh'
 import {
@@ -158,13 +153,31 @@ import { addYiruWslInteropEnv } from './wsl-yiru-env'
 
 // ─── Provider Registry ──────────────────────────────────────────────
 // Routes PTY operations by connectionId. null = local provider.
-// SSH providers will be registered here in Phase 1.
 
 let localProvider: IPtyProvider = new LocalPtyProvider()
 type FreshLocalFallbackProvider = IPtyProvider & {
   routesFreshSpawnsToLocalProvider?: true
 }
+// Why: no transport registers a connection-scoped PTY provider any more, so
+// this stays empty and every connectionId-bearing route fails closed. Kept as
+// the single seam a future remote PTY transport plugs back into, instead of
+// spreading `connectionId ? throw : local` across every call site.
 const sshProviders = new Map<string, IPtyProvider>()
+// Why: the relay reported a vanished remote PTY by message, and both the
+// expired-session marker and the identity-mismatch marker still arrive that
+// way from persisted errors, so the predicates outlive the SSH transport.
+const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
+const SSH_PTY_IDENTITY_MISMATCH_ERROR = 'SSH_PTY_IDENTITY_MISMATCH'
+
+function isSshPtyNotFoundError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  return /PTY ".+" not found/i.test(message)
+}
+
+function isSshPtyIdentityMismatchError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  return message.includes(SSH_PTY_IDENTITY_MISMATCH_ERROR) || /identity mismatch/i.test(message)
+}
 const SYNTHETIC_KILL_EXIT_DUPLICATE_WINDOW_MS = 30_000
 // Why: producer flow control changes terminal physics — a flooding shell now
 // blocks on write instead of buffering in main. Kill switch: flip this one
@@ -1190,21 +1203,6 @@ function beginPtySpawnForWorktree(
     throw error
   }
   return () => finishes.toReversed().forEach((finish) => finish())
-}
-
-/** Register an SSH PTY provider for a connection. */
-export function registerSshPtyProvider(connectionId: string, provider: IPtyProvider): void {
-  sshProviders.set(connectionId, provider)
-}
-
-/** Remove an SSH PTY provider when a connection is closed. */
-export function unregisterSshPtyProvider(connectionId: string): void {
-  sshProviders.delete(connectionId)
-}
-
-/** Get the SSH PTY provider for a connection (for dispose on cleanup). */
-export function getSshPtyProvider(connectionId: string): IPtyProvider | undefined {
-  return sshProviders.get(connectionId)
 }
 
 /** Get the installed PTY provider for runtime services.

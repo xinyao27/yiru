@@ -138,11 +138,10 @@ export class ChannelMultiplexer {
     }
   }
 
-  // Why: the session needs to know when the relay channel dies so it can
-  // auto-reconnect. Without this, a relay channel close (e.g. --connect
-  // bridge exits) leaves the session in 'ready' state with a dead mux
-  // and no recovery path — the underlying connection stays up so
-  // onStateChange never fires the reconnect logic.
+  // Why: the owning session needs to know when the muxed channel dies so it
+  // can auto-reconnect. Without this, a channel close leaves the session in
+  // 'ready' state with a dead mux and no recovery path — the underlying
+  // connection stays up, so onStateChange never fires the reconnect logic.
   onDispose(handler: (reason: 'shutdown' | 'connection_lost') => void): () => void {
     if (this.disposed) {
       return () => {}

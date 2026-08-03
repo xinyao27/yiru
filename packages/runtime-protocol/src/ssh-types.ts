@@ -174,9 +174,9 @@ export type PortForwardEntry = {
   advertisedProtocol?: 'http' | 'https'
 }
 
-/** A listening port detected on the remote host by the relay.
- *  Keep in sync with src/relay/port-scan-handler.ts — DetectedPort.
- *  The relay is deployed as a standalone bundle and cannot import from shared. */
+/** A listening port detected on the remote host by the relay. Its scanner was
+ *  removed with the SSH transport, so nothing produces this shape today; the
+ *  type stays until the SSH contract itself retires. */
 export type DetectedPort = {
   port: number
   host: string

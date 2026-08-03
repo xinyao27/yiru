@@ -1,88 +1,27 @@
 // Self-contained relay wire protocol — no Electron dependencies, so it can be
-// bundled and deployed standalone to a remote host or a WSL distribution. The
-// version string and the ready sentinel live in `~shared/relay-ready-handshake`
-// because the launching host has to agree on them.
+// bundled and deployed standalone into a WSL distribution. The version string
+// and the ready sentinel live in `~shared/relay-ready-handshake` because the
+// launching host has to agree on them.
+//
+// Why: the host end keeps its own copy in
+// `~main/channel-multiplexer/frame-codec`, deliberately forked so this bundle
+// stays Electron-free. Nothing imports across the two, so a type byte or the
+// header length changed on one side compiles cleanly and mismatches at
+// runtime — edit both or neither.
 
 export const HEADER_LENGTH = 13
 export const MAX_MESSAGE_SIZE = 16 * 1024 * 1024
 
 export const MessageType = {
   Regular: 1,
+  // Why: byte 2 carried the retired pre-dispatcher handshake envelope. It stays
+  // listed so a future frame type does not reuse a byte older peers may send.
   Handshake: 2,
   KeepAlive: 9
 } as const
 
-// Why: a pre-dispatcher envelope on a freshly-accepted Unix socket. The daemon
-// reads exactly one Handshake frame before attaching the JSON-RPC dispatcher,
-// to refuse mismatched-version --connect bridges that would otherwise drive a
-// stale daemon.
-export type HandshakeMessage =
-  | { type: 'yiru-relay-handshake'; version: string }
-  | { type: 'yiru-relay-handshake-ok'; version: string }
-  | { type: 'yiru-relay-handshake-mismatch'; expected: string; got: string }
-
-export function encodeHandshakeFrame(msg: HandshakeMessage): Buffer {
-  const payload = Buffer.from(JSON.stringify(msg), 'utf-8')
-  return encodeFrame(MessageType.Handshake, 0, 0, payload)
-}
-
-export function parseHandshakeMessage(payload: Buffer): HandshakeMessage {
-  const msg = JSON.parse(payload.toString('utf-8')) as HandshakeMessage
-  const t = (msg as { type?: string }).type
-  if (
-    t !== 'yiru-relay-handshake' &&
-    t !== 'yiru-relay-handshake-ok' &&
-    t !== 'yiru-relay-handshake-mismatch'
-  ) {
-    throw new Error(`Unknown handshake type: ${t}`)
-  }
-  return msg
-}
-
 export const KEEPALIVE_SEND_MS = 5_000
 export const TIMEOUT_MS = 20_000
-
-// ── Streaming constants (see docs/relay-file-stream-design.md) ─────
-
-export const STREAM_CHUNK_SIZE = 256 * 1024
-export const MAX_CONCURRENT_STREAMS = 16
-
-/** Max unacked fs.streamChunk frames in flight per stream when the client
- * requested `flowControl: 'ack'`. Bounds how many bulk bytes an interactive
- * pty.data frame can queue behind on the shared SSH channel (~1MB raw) while
- * keeping the pipe full across one ack round-trip on fast links. */
-export const STREAM_ACK_WINDOW_CHUNKS = 4
-
-/** Safety-valve poll interval for a pump stalled on acks: re-checks stream
- * abort/staleness so a client that vanished mid-stream cannot park the pump
- * (and its open file handle) forever. */
-export const STREAM_ACK_STALL_RECHECK_MS = 1_000
-
-// ── Git response streaming (see docs/relay-git-response-stream-design.md) ──
-
-/** Serialized-JSON size above which a streamable git response (diff family +
- * exec) is chunked onto the bulk lane instead of one JSON-RPC frame, so a large
- * diff cannot head-of-line-block interactive pty.data echo on the shared SSH
- * channel. Below this, single-frame is cheaper and avoids stream overhead. */
-export const GIT_RESPONSE_STREAM_THRESHOLD = 256 * 1024
-
-/** Per-chunk size (UTF-8 bytes of the serialized result) for git response
- * streaming. Independent from STREAM_CHUNK_SIZE — this offset math is not
- * shared with fs streams, so tuning it here is cross-version safe as long as
- * the client reassembles by concatenation (it does not depend on chunk size). */
-export const GIT_RESPONSE_CHUNK_SIZE = 128 * 1024
-
-/** Sentinel result returned in place of a large git response: the real payload
- * follows as git.responseChunk frames on the bulk lane. Old relays never emit
- * this, so a new client falls back to the plain result they return. */
-export type GitResponseStreamMarker = {
-  __yiruGitResponseStream: { streamId: number; totalBytes: number; chunkCount: number }
-}
-
-export const RelayErrorCode = {
-  TooManyStreams: -33006,
-  StreamProtocolError: -33007
-} as const
 
 export type JsonRpcRequest = {
   jsonrpc: '2.0'
@@ -204,17 +143,6 @@ export class FrameDecoder {
   reset(): void {
     this.chunks = []
     this.bufferedLength = 0
-  }
-
-  // Why: at the handshake → dispatcher transition, the next consumer must
-  // pick up any bytes that arrived in the same TCP chunk as the handshake
-  // frame. This returns and clears the decoder's internal residue so the
-  // caller can hand it to the dispatcher (or stdout pipe) without loss.
-  drain(): Buffer {
-    const out =
-      this.chunks.length === 1 ? this.chunks[0] : Buffer.concat(this.chunks, this.bufferedLength)
-    this.reset()
-    return out
   }
 
   /** View of the first `count` buffered bytes without consuming them. */

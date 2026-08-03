@@ -27,8 +27,7 @@ import {
 import { hasMiniMaxSessionCookie } from '../minimax/cookie-store'
 import {
   fetchCursorUsageForRuntime,
-  type RemoteCursorUsageFetcher,
-  type SshCursorUsageFetcher
+  type RemoteCursorUsageFetcher
 } from '../runtime/cursor-usage/client'
 import type { CursorUsageRuntimeTarget } from '../runtime/cursor-usage/target'
 import { fetchClaudeRateLimits, fetchManagedAccountUsage } from './claude-fetcher'
@@ -234,7 +233,6 @@ export class RateLimitService {
     runtime: 'host'
   })
   private remoteCursorUsageFetcher: RemoteCursorUsageFetcher | undefined
-  private sshCursorUsageFetcher: SshCursorUsageFetcher | undefined
   private inactiveClaudeAccountsResolver: (() => InactiveClaudeAccountInfo[]) | null = null
   private inactiveCodexAccountsResolver: (() => InactiveCodexAccountInfo[]) | null = null
   private networkProxySettingsResolver: (() => NetworkProxySettings) | null = null
@@ -291,10 +289,6 @@ export class RateLimitService {
 
   setRemoteCursorUsageFetcher(fetcher: RemoteCursorUsageFetcher): void {
     this.remoteCursorUsageFetcher = fetcher
-  }
-
-  setSshCursorUsageFetcher(fetcher: SshCursorUsageFetcher): void {
-    this.sshCursorUsageFetcher = fetcher
   }
 
   setNetworkProxySettingsResolver(resolver: () => NetworkProxySettings): void {
@@ -1524,8 +1518,7 @@ export class RateLimitService {
       fetchCursorUsageForRuntime({
         signal,
         target: cursorTarget,
-        remoteFetcher: this.remoteCursorUsageFetcher,
-        sshFetcher: this.sshCursorUsageFetcher
+        remoteFetcher: this.remoteCursorUsageFetcher
       }),
       fetchGeminiRateLimits(geminiCliOAuthEnabled),
       fetchOpenCodeGoRateLimits(cookie, workspaceIdOverride || undefined),

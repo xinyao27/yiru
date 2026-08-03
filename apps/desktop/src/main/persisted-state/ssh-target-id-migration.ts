@@ -4,7 +4,7 @@ import { parseAppSshPtyId, toAppSshPtyId } from '~shared/ssh-pty-id'
 import type { PersistedUIState, WorkspaceSessionState } from '~shared/types'
 
 /**
- * Carrier sweep for SSH target re-adoption (see target-readoption.ts).
+ * Carrier sweep for SSH target re-adoption.
  *
  * reassignSshTargetId re-points repos/worktree metas, but the removed target's
  * id is also embedded in other persisted state: app-scoped SSH pty ids

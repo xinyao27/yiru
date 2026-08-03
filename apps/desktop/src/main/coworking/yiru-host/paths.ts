@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { getSshFilesystemProvider } from '~main/providers/ssh-filesystem-dispatch'
 import type { FileStat, IFilesystemProvider } from '~main/providers/types'
-import type { RemotePathFlavor } from '~main/ssh/remote/platform'
+import type { RemotePathFlavor } from '~main/remote-host/platform'
 
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingCanonicalHostPath } from '../worktree-containment'

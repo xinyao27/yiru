@@ -167,8 +167,6 @@ export type SkillDiscoveryTarget = {
   projectRuntime?: ProjectExecutionRuntimeResolution
 }
 
-export const SSH_SKILL_DISCOVERY_RELAY_CAPABILITY = 'skills.discover.v1' as const
-
 const ResolvedProjectRuntimeSchema = z.object({
   status: z.literal('resolved'),
   runtime: z.discriminatedUnion('kind', [

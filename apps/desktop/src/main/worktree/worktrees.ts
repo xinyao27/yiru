@@ -83,7 +83,7 @@ import { withWorktreeSpan } from '../observability/instrumentation'
 import type { Store } from '../persistence'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider, requireSshGitProvider } from '../providers/ssh-git-dispatch'
-import { clearProviderPtyState, getLocalPtyProvider, getSshPtyProvider } from '../pty/pty'
+import { clearProviderPtyState, getLocalPtyProvider } from '../pty/pty'
 import { listRepoWorktrees } from '../repo-worktrees'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import { killAllProcessesForWorktree } from '../runtime/worktree-teardown'
@@ -128,7 +128,10 @@ async function stopPtysForDestructiveWorktreeRemoval(
   worktreeId: string,
   connectionId?: string
 ): Promise<void> {
-  const provider = connectionId ? getSshPtyProvider(connectionId) : getLocalPtyProvider()
+  // Why: no connection-scoped PTY provider exists any more, so a remote
+  // worktree has nothing to physically stop and must fail rather than report a
+  // clean teardown it never performed.
+  const provider = connectionId ? null : getLocalPtyProvider()
   if (!provider) {
     throw new Error(`PTY provider unavailable for worktree deletion: ${worktreeId}`)
   }

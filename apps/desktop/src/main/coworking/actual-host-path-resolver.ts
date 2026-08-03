@@ -1,11 +1,11 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RemoteHostPlatform } from '~main/remote-host/platform'
 
 import { gitExecFileAsync } from '../git/runner'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import {
   canonicalizeCoworkingLocalHostPath,
   canonicalizeCoworkingSshHostPath

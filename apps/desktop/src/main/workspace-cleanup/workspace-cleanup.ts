@@ -11,7 +11,6 @@ import {
 import { listRegisteredPtys } from '../memory/pty-registry'
 import type { Store } from '../persistence'
 import type { IPtyProvider } from '../providers/types'
-import { getSshPtyProvider } from '../pty/pty'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { scanWorkspaceCleanup } from './scan'
 
@@ -93,7 +92,10 @@ async function hasKillableProcesses(
   }
 
   if (args.connectionId) {
-    return hasKillableSshProcesses(args.connectionId, args.worktreePath ?? '', livenessUnknown)
+    // Why: connection-scoped PTY providers are gone, so remote process liveness
+    // is unknowable rather than false — null keeps the cleanup card from
+    // claiming a remote worktree has nothing running.
+    return null
   }
 
   const registryPtyIds = new Set(
@@ -119,44 +121,4 @@ async function hasKillableProcesses(
   } catch {
     return registryPtyIds.size > 0 ? true : null
   }
-}
-
-async function hasKillableSshProcesses(
-  connectionId: string,
-  worktreePath: string,
-  livenessUnknown: boolean
-): Promise<boolean | null> {
-  const provider = getSshPtyProvider(connectionId)
-  if (!provider) {
-    return null
-  }
-
-  try {
-    const normalizedWorktreePath = normalizeRemotePath(worktreePath)
-    const sessions = await provider.listProcesses()
-    if (
-      sessions.some((session) => {
-        if (session.id.startsWith(`${worktreePath}@@`)) {
-          return true
-        }
-        return (
-          normalizedWorktreePath.length > 0 &&
-          isPathWithin(normalizeRemotePath(session.cwd), normalizedWorktreePath)
-        )
-      })
-    ) {
-      return true
-    }
-    return livenessUnknown ? null : false
-  } catch {
-    return null
-  }
-}
-
-function normalizeRemotePath(path: string): string {
-  return path.replace(/\\/g, '/').replace(/\/+$/, '')
-}
-
-function isPathWithin(candidatePath: string, parentPath: string): boolean {
-  return candidatePath === parentPath || candidatePath.startsWith(`${parentPath}/`)
 }

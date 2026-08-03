@@ -4,30 +4,22 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * Bundle the relay daemon and its crash-isolated watcher child per platform.
+ * Bundle the WSL agent-hook relay: a hooks-only receiver that runs inside a WSL
+ * distribution, launched via wsl.exe.
  *
- * The relay runs on remote hosts via `node relay.js`, so both outputs use
- * self-contained CommonJS bundles with no external dependencies beyond
- * Node.js built-ins. Native addons (node-pty, @parcel/watcher) are
- * marked external and expected to be installed on the remote or
- * gracefully degraded.
+ * The guest runs it as `node wsl-agent-hook-relay.js`, so the output is a
+ * self-contained CommonJS bundle with no dependencies beyond Node built-ins.
+ * Pure built-ins means no native addons and no per-platform variants — one
+ * bundle serves every distro, and it ships inside the Windows app through the
+ * `out/relay` extraResources mapping.
  */
 import { rolldown } from 'rolldown'
 
 const __dirname = import.meta.dirname
-// Why: the script lives under config/scripts, so go two levels up to reach the repo root.
+// Why: the script lives under apps/desktop/scripts, so go one level up to reach
+// the app root.
 const ROOT = join(__dirname, '..')
-const RELAY_ENTRY = join(ROOT, 'src', 'relay', 'relay.ts')
-const WATCHER_ENTRY = join(ROOT, 'src', 'main', 'filesystem', 'parcel-watcher-process-entry.ts')
-
-const PLATFORMS = [
-  'linux-x64',
-  'linux-arm64',
-  'darwin-x64',
-  'darwin-arm64',
-  'win32-x64',
-  'win32-arm64'
-]
+const WSL_ENTRY = join(ROOT, 'src', 'relay', 'wsl-agent-hooks', 'relay.ts')
 
 const RELAY_VERSION = '0.1.0'
 
@@ -37,12 +29,11 @@ async function bundleNodeEntry(input, output, external = []) {
     cwd: ROOT,
     external,
     platform: 'node',
-    // Why: relay and the watcher entry import shared/ and main/ through the
-    // repository aliases, and rolldown has no tsconfig paths reader.
+    // Why: the relay imports shared/ through the repository alias, and rolldown
+    // has no tsconfig paths reader.
     resolve: {
       alias: {
-        '~shared': join(ROOT, 'src', 'shared'),
-        '~main': join(ROOT, 'src', 'main')
+        '~shared': join(ROOT, 'src', 'shared')
       }
     },
     transform: {
@@ -67,48 +58,13 @@ async function bundleNodeEntry(input, output, external = []) {
   }
 }
 
-for (const platform of PLATFORMS) {
-  const outDir = join(ROOT, 'out', 'relay', platform)
-  mkdirSync(outDir, { recursive: true })
+const outDir = join(ROOT, 'out', 'relay', 'wsl')
+mkdirSync(outDir, { recursive: true })
+await bundleNodeEntry(WSL_ENTRY, join(outDir, 'wsl-agent-hook-relay.js'))
 
-  await bundleNodeEntry(RELAY_ENTRY, join(outDir, 'relay.js'), [
-    // Native addons cannot be bundled — they must exist on the remote host.
-    // The relay gracefully degrades when they are absent.
-    'node-pty',
-    '@parcel/watcher',
-    'electron'
-  ])
-
-  await bundleNodeEntry(WATCHER_ENTRY, join(outDir, 'relay-watcher.js'), ['@parcel/watcher'])
-
-  // Why: include a content hash so the deploy check detects code changes
-  // even when RELAY_VERSION hasn't been bumped. Hash both process artifacts
-  // so a watcher-only change always deploys beside the matching relay host.
-  const relayContent = readFileSync(join(outDir, 'relay.js'))
-  const watcherContent = readFileSync(join(outDir, 'relay-watcher.js'))
-  const hash = createHash('sha256')
-    .update(relayContent)
-    .update(watcherContent)
-    .digest('hex')
-    .slice(0, 12)
-  writeFileSync(join(outDir, '.version'), `${RELAY_VERSION}+${hash}`)
-
-  console.log(`Built relay for ${platform} → ${outDir}/relay.js`)
-}
-
-// WSL agent-hook relay: a hooks-only guest receiver launched inside WSL
-// distros via wsl.exe. Pure Node built-ins (no node-pty/@parcel/watcher),
-// so a single platform-independent bundle suffices; it ships inside the
-// Windows app via the same out/relay extraResources mapping.
-{
-  const wslEntry = join(ROOT, 'src', 'relay', 'wsl-agent-hooks', 'relay.ts')
-  const outDir = join(ROOT, 'out', 'relay', 'wsl')
-  mkdirSync(outDir, { recursive: true })
-  await bundleNodeEntry(wslEntry, join(outDir, 'wsl-agent-hook-relay.js'))
-  const content = readFileSync(join(outDir, 'wsl-agent-hook-relay.js'))
-  const hash = createHash('sha256').update(content).digest('hex').slice(0, 12)
-  writeFileSync(join(outDir, '.version'), `${RELAY_VERSION}+${hash}`)
-  console.log(`Built WSL hook relay → ${outDir}/wsl-agent-hook-relay.js`)
-}
-
-console.log('Relay build complete.')
+// Why: include a content hash so the install check detects code changes even
+// when RELAY_VERSION hasn't been bumped.
+const content = readFileSync(join(outDir, 'wsl-agent-hook-relay.js'))
+const hash = createHash('sha256').update(content).digest('hex').slice(0, 12)
+writeFileSync(join(outDir, '.version'), `${RELAY_VERSION}+${hash}`)
+console.log(`Built WSL hook relay → ${outDir}/wsl-agent-hook-relay.js`)

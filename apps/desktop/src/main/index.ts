@@ -139,7 +139,6 @@ import {
   getPtyIdForPaneKey,
   registerPaneKeyTeardownListener,
   getLocalPtyProvider,
-  getSshPtyProvider,
   registerHeadlessPtyRuntime
 } from './pty/pty'
 import { RateLimitResumeService } from './rate-limit-resume/service'
@@ -2097,9 +2096,6 @@ app.whenReady().then(async () => {
     // provider reference eagerly here would freeze the pre-daemon LocalPtyProvider
     // and defeat the teardown helper's prefix sweep (design §4.3 wire-up).
     getLocalProvider: () => getLocalPtyProvider(),
-    // Why: SSH relay providers are registered after runtime construction and
-    // may reconnect; destructive cleanup must resolve the current generation.
-    getSshProvider: (connectionId) => getSshPtyProvider(connectionId),
     onPtyStopped: clearProviderPtyState,
     onTerminalAgentStatus: (event) => {
       agentHookServer.ingestTerminalStatus(event)

@@ -83,6 +83,7 @@ import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
 import { isFolderRepo } from '~shared/repo-kind'
 import { hardenExistingSecureFile } from '~shared/secure-file'
 import { normalizeRepoSourceControlAiOverrides } from '~shared/source-control/ai'
+import { toRelaySshPtyId } from '~shared/ssh-pty-id'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -146,16 +147,15 @@ import {
 } from './persisted-state/persisted-terminal-session-codec'
 import { applyPersistedUiUpdate, readPersistedUi } from './persisted-state/persisted-ui-mutations'
 import {
+  migrateUiHostScopeSshTargetId,
+  migrateWorkspaceSessionSshTargetId
+} from './persisted-state/ssh-target-id-migration'
+import {
   removeRepoFromWorkspaceSessionsForHost,
   removeWorkspaceSessionOwner
 } from './persisted-state/workspace-session-owner-removal'
 import { createNestedProjectGroupResolver } from './project-groups/nested-repo-import'
-import { toRelaySshPtyId } from './providers/ssh-pty-id'
 import { MOBILE_PAIRING_USERDATA_FILES } from './runtime/mobile-pairing-files'
-import {
-  migrateUiHostScopeSshTargetId,
-  migrateWorkspaceSessionSshTargetId
-} from './ssh/target-id-migration'
 import { track } from './telemetry/client'
 import { getCohortAtEmit } from './telemetry/cohort-classifier'
 import {

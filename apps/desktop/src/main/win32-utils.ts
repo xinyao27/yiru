@@ -33,7 +33,7 @@ export function getWhoamiExePath(): string {
 
 /**
  * Full path to cmd.exe, respecting the ComSpec convention used elsewhere in
- * the codebase (hooks.ts, repo.ts, ssh/connection-utils.ts).
+ * the codebase (hooks.ts, repo.ts).
  * Falls back to SystemRoot-based path if ComSpec is unset.
  */
 export function getCmdExePath(): string {

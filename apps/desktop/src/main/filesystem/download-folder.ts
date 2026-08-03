@@ -8,12 +8,20 @@ import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import { promoteLocalDownloadedFolder } from '../local-downloaded-folder-promotion'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import type { FolderDownloader } from '../providers/ssh-filesystem-download'
 import type { IFilesystemProvider } from '../providers/types'
 import { isENOENT } from './auth'
 import { registerDownloadedFolderSessionHandlers } from './downloaded-folder-sessions'
 
 type DownloadFolderResult = { canceled: true } | { canceled: false; destinationPath: string }
+
+// Why: recursive download is an optional remote-provider extension rather than
+// part of IFilesystemProvider, so its shape is declared at the one consumer
+// that probes for it.
+type FolderDownloader = (
+  sourcePath: string,
+  destinationPath: string,
+  options?: { signal?: AbortSignal }
+) => Promise<void>
 
 function getFolderDownloader(provider: IFilesystemProvider): FolderDownloader | null {
   // Why: recursive transfer is an SSH/SFTP extension, not a promise every
