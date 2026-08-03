@@ -1,25 +1,10 @@
-import ExpoBottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView
-} from '@expo/ui/community/bottom-sheet'
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode
-} from 'react'
+import { BottomSheetScrollView, BottomSheetView } from '@expo/ui/community/bottom-sheet'
+import { createContext, useContext, type ReactNode } from 'react'
 import { View } from 'react-native'
-import { useCSSVariable } from 'uniwind'
 
-import { resolveCssString } from '~/style/resolve-css-variable'
-
-import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
+import { BottomDrawerSheet } from './bottom-drawer-sheet'
 
 const BottomDrawerModalHostContext = createContext(false)
-const NATIVE_SHEET_EXIT_GRACE_MS = 400
 
 export type BottomDrawerProps = {
   visible: boolean
@@ -43,9 +28,9 @@ export function BottomDrawer({
   }
 
   return (
-    <NativeBottomSheet visible={visible} onClose={onClose}>
+    <BottomDrawerSheet visible={visible} onClose={onClose}>
       <BottomDrawerContent contentScrollable={contentScrollable}>{children}</BottomDrawerContent>
-    </NativeBottomSheet>
+    </BottomDrawerSheet>
   )
 }
 
@@ -65,83 +50,13 @@ export function BottomDrawerModalHost({
   dismissEnabled = true
 }: BottomDrawerModalHostProps): React.JSX.Element {
   return (
-    <NativeBottomSheet visible={visible} onClose={onRequestClose} dismissEnabled={dismissEnabled}>
+    <BottomDrawerSheet visible={visible} onClose={onRequestClose} dismissEnabled={dismissEnabled}>
       <BottomSheetView>
         <BottomDrawerModalHostContext.Provider value={true}>
           {children}
         </BottomDrawerModalHostContext.Provider>
       </BottomSheetView>
-    </NativeBottomSheet>
-  )
-}
-
-type NativeBottomSheetProps = {
-  visible: boolean
-  onClose: () => void
-  children: ReactNode
-  dismissEnabled?: boolean
-}
-
-function NativeBottomSheet({
-  visible,
-  onClose,
-  children,
-  dismissEnabled = true
-}: NativeBottomSheetProps): React.JSX.Element {
-  const [contentMounted, setContentMounted] = useState(visible)
-  const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const resolvedContentMounted = resolveBottomDrawerMounted(visible, contentMounted)
-  const popoverColor = resolveCssString(useCSSVariable('--color-popover'))
-  const backgroundStyle = useMemo(
-    // Why: the community sheet API has no className path for its native
-    // presentation background, so this adapter supplies the semantic surface.
-    () => ({ backgroundColor: popoverColor }),
-    [popoverColor]
-  )
-
-  useEffect(() => {
-    if (visible && unmountTimerRef.current) {
-      clearTimeout(unmountTimerRef.current)
-      unmountTimerRef.current = null
-    }
-  }, [visible])
-
-  useEffect(
-    () => () => {
-      if (unmountTimerRef.current) {
-        clearTimeout(unmountTimerRef.current)
-      }
-    },
-    []
-  )
-
-  // Why: opening must mount content in the same commit. Closing stays mounted
-  // briefly because Expo's controlled onClose fires before the native exit animation ends.
-  if (resolvedContentMounted !== contentMounted) {
-    setContentMounted(resolvedContentMounted)
-  }
-
-  return (
-    <ExpoBottomSheet
-      backgroundStyle={backgroundStyle}
-      enableDynamicSizing
-      enablePanDownToClose={dismissEnabled}
-      index={visible ? 0 : -1}
-      onClose={() => {
-        if (unmountTimerRef.current) {
-          clearTimeout(unmountTimerRef.current)
-        }
-        unmountTimerRef.current = setTimeout(() => {
-          setContentMounted(false)
-          unmountTimerRef.current = null
-        }, NATIVE_SHEET_EXIT_GRACE_MS)
-        if (visible) {
-          onClose()
-        }
-      }}
-    >
-      {resolvedContentMounted ? children : null}
-    </ExpoBottomSheet>
+    </BottomDrawerSheet>
   )
 }
 

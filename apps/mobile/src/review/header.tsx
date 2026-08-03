@@ -2,9 +2,11 @@ import { FlatList, Text, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
+import { translate } from '~/i18n/translate'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '~/session/diff/review-screen-model'
 import { cn } from '~/style/class-names'
 
+import { mobileReviewFilterLabel } from './filter-label'
 import type { MobileDiffReviewHeaderProps } from './header-props'
 import { mobileDiffReviewStyles as styles } from './screen-styles'
 
@@ -14,15 +16,22 @@ export function MobileDiffReviewHeader({
   reviewedCount,
   unsentCount,
   onSelectFilter
-}: MobileDiffReviewHeaderProps) {
+}: MobileDiffReviewHeaderProps): React.JSX.Element {
   return (
     <View className="px-3 py-2">
       <View className="flex-row justify-between gap-3">
         <Text className={styles.progressText}>
-          {reviewedCount}/{queueLength} reviewed
+          {translate('mobile.review.progress.reviewed', '{{reviewed}}/{{total}} reviewed', {
+            reviewed: reviewedCount,
+            total: queueLength
+          })}
         </Text>
         <Text className={styles.progressText}>
-          {mobileReviewCountLabel(unsentCount, 'unsent note', 'unsent notes')}
+          {mobileReviewCountLabel(
+            unsentCount,
+            translate('mobile.review.progress.unsentNote', 'unsent note'),
+            translate('mobile.review.progress.unsentNotes', 'unsent notes')
+          )}
         </Text>
       </View>
       <MobileGlassGroup className="mt-3" spacing={8}>
@@ -34,13 +43,17 @@ export function MobileDiffReviewHeader({
           contentContainerClassName="gap-2"
           renderItem={({ item }) => (
             <MobileGlassPressable
-              accessibilityLabel={`Show ${item} review files`}
+              accessibilityLabel={translate(
+                'mobile.review.filters.show',
+                'Show {{filter}} review files',
+                { filter: mobileReviewFilterLabel(item) }
+              )}
               accessibilityRole="button"
               accessibilityState={{ selected: filter === item }}
               className="rounded-full"
-              contentClassName="min-h-8 items-center justify-center rounded-full px-3"
-              hitSlop={6}
+              contentClassName="items-center justify-center rounded-full px-3"
               onPress={() => onSelectFilter(item)}
+              size="small"
               tintColorClassName={filter === item ? 'accent-secondary' : undefined}
             >
               <Text
@@ -49,7 +62,7 @@ export function MobileDiffReviewHeader({
                   filter === item ? 'text-foreground' : 'text-muted-foreground'
                 )}
               >
-                {item === 'all' ? 'All' : item[0]?.toUpperCase() + item.slice(1)}
+                {mobileReviewFilterLabel(item)}
               </Text>
             </MobileGlassPressable>
           )}

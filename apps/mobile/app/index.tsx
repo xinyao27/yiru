@@ -22,6 +22,7 @@ import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { MobileHostCard } from '~/components/host-card'
 import { CaretRight as ChevronRight, Terminal } from '~/components/uniwind-icons'
 import { HostActionsDrawer } from '~/home/host-actions-drawer'
+import { HostMenu } from '~/home/host-menu'
 import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
@@ -181,7 +182,7 @@ function fetchAccountsSnapshot(
     .catch(() => {})
 }
 
-export default function HomeScreen() {
+export default function HomeScreen(): React.JSX.Element {
   const router = useRouter()
 
   // Why: cap and center content on wide/tablet canvases so cards don't stretch
@@ -558,7 +559,10 @@ export default function HomeScreen() {
       // Why: keep the confirmation open for retry and surface the failure
       // instead of silently leaving the host listed.
       setConfirmRemove(hostToRemove)
-      Alert.alert('Could not remove host', 'Please try again.')
+      Alert.alert(
+        translate('mobile.home.removeHostError.title', 'Could not remove host'),
+        translate('mobile.common.tryAgain', 'Please try again.')
+      )
     }
   }
 
@@ -614,14 +618,18 @@ export default function HomeScreen() {
           }
         >
           <View className="flex-1 items-center justify-center px-8 pb-10">
-            <Text className="text-foreground mb-3 text-center font-bold">Connect your desktop</Text>
+            <Text className="text-foreground mb-3 text-center font-bold">
+              {translate('mobile.home.onboarding.connectDesktop', 'Connect your desktop')}
+            </Text>
             <Text className="text-muted-foreground mb-8 text-center leading-6">
-              Pair with Yiru on your computer to check on your agents, jump into any terminal, and
-              drive work from your phone.
+              {translate(
+                'mobile.home.onboarding.description',
+                'Pair with Yiru on your computer to check on your agents, jump into any terminal, and drive work from your phone.'
+              )}
             </Text>
             <MobileGlassTextButton
               isProminent
-              label="Pair Desktop"
+              label={translate('mobile.home.pairDesktop', 'Pair Desktop')}
               onPress={() => router.push('/pair-scan')}
               size="large"
             />
@@ -629,7 +637,7 @@ export default function HomeScreen() {
 
           <View className="px-6">
             <Text className="text-muted-foreground mb-2 px-1 font-semibold tracking-wide uppercase">
-              How it works
+              {translate('mobile.home.onboarding.howItWorks', 'How it works')}
             </Text>
             {ONBOARDING_STEPS.map((step, i) => (
               <View
@@ -664,7 +672,7 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View className="pt-2 pb-2">
-              <SectionHeading>Desktops</SectionHeading>
+              <SectionHeading>{translate('mobile.home.desktops', 'Desktops')}</SectionHeading>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -680,22 +688,35 @@ export default function HomeScreen() {
               endpoint: item.endpoint
             })
             return (
-              <MobileContentSection>
-                <MobileHostCard
-                  host={item}
-                  state={state}
-                  verdict={verdict}
-                  path={hostPaths[item.id] ?? 'lan'}
-                  worktreeCounts={
-                    info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
-                  }
-                  onPress={() => router.push(`/h/${item.id}`)}
-                  onLongPress={() => {
-                    triggerMediumImpact()
-                    setActionTarget(item)
-                  }}
-                />
-              </MobileContentSection>
+              <HostMenu
+                connectionState={state}
+                hasEverConnected={lastConnectedAt !== null}
+                host={item}
+                onDisconnect={() => closeHostClient(item.id)}
+                onEdit={() => router.push(`/h/${item.id}/edit`)}
+                onOpenFallback={() => {
+                  triggerMediumImpact()
+                  setActionTarget(item)
+                }}
+                onReconnect={() => void forceReconnectHost(item.id)}
+                onRequestRemove={() => setConfirmRemove(item)}
+              >
+                {(menuTriggerProps) => (
+                  <MobileContentSection>
+                    <MobileHostCard
+                      host={item}
+                      state={state}
+                      verdict={verdict}
+                      path={hostPaths[item.id] ?? 'lan'}
+                      worktreeCounts={
+                        info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
+                      }
+                      onPress={() => router.push(`/h/${item.id}`)}
+                      {...menuTriggerProps}
+                    />
+                  </MobileContentSection>
+                )}
+              </HostMenu>
             )
           }}
           ListFooterComponent={
@@ -703,7 +724,7 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <View className="gap-2">
-                  <SectionHeading>Resume</SectionHeading>
+                  <SectionHeading>{translate('mobile.home.resume', 'Resume')}</SectionHeading>
                   <MobileContentSection>
                     <Pressable
                       accessibilityRole="button"
@@ -743,17 +764,19 @@ export default function HomeScreen() {
 
               {/* ─── Quick actions ─── */}
               <View className="gap-2">
-                <SectionHeading>Quick Actions</SectionHeading>
+                <SectionHeading>
+                  {translate('mobile.home.quickActions', 'Quick Actions')}
+                </SectionHeading>
                 <MobileContentSection className="p-3">
                   <MobileGlassGroup className="flex-row gap-2" spacing={8}>
                     <MobileGlassTextButton
-                      label="Pair Desktop"
+                      label={translate('mobile.home.pairDesktop', 'Pair Desktop')}
                       onPress={() => router.push('/pair-scan')}
                     />
                     <MobileGlassTextButton
                       disabled={!primaryConnectedHost}
                       isProminent
-                      label="New Workspace"
+                      label={translate('mobile.home.newWorkspace', 'New Workspace')}
                       onPress={() => {
                         if (primaryConnectedHost) {
                           router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
@@ -767,7 +790,9 @@ export default function HomeScreen() {
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <View className="gap-2">
-                  <SectionHeading>Account usage</SectionHeading>
+                  <SectionHeading>
+                    {translate('mobile.home.accountUsage', 'Account usage')}
+                  </SectionHeading>
                   <MobileContentSection>
                     {accountsHosts.map(({ host, snapshot }, index) => {
                       const claudeActiveId = snapshot.claude.activeAccountId
@@ -822,17 +847,18 @@ export default function HomeScreen() {
                                 </View>
                                 <View className="min-w-0 flex-1 gap-1">
                                   <Text className="text-foreground" numberOfLines={1}>
-                                    {active?.email ?? 'System default'}
+                                    {active?.email ??
+                                      translate('mobile.home.systemDefault', 'System default')}
                                   </Text>
                                   <View className="gap-1">
                                     <UsageBar
-                                      label="5h"
+                                      label={translate('mobile.home.usage.fiveHours', '5h')}
                                       usedPercent={sessionBar.usedPercent}
                                       unavailable={sessionBar.unavailable}
                                       loading={sessionBar.loading}
                                     />
                                     <UsageBar
-                                      label="7d"
+                                      label={translate('mobile.home.usage.sevenDays', '7d')}
                                       usedPercent={weeklyBar.usedPercent}
                                       unavailable={weeklyBar.unavailable}
                                       loading={weeklyBar.loading}
@@ -881,7 +907,7 @@ export default function HomeScreen() {
   )
 }
 
-function CardGap() {
+function CardGap(): React.JSX.Element {
   return <View className="h-1" />
 }
 
@@ -895,15 +921,24 @@ function SectionHeading({ children }: { children: string }): React.JSX.Element {
 
 const ONBOARDING_STEPS = [
   {
-    title: 'Open Yiru desktop',
-    desc: 'Go to Settings → Mobile and generate a pairing QR code.'
+    title: translate('mobile.home.onboarding.openDesktop.title', 'Open Yiru desktop'),
+    desc: translate(
+      'mobile.home.onboarding.openDesktop.description',
+      'Go to Settings → Mobile and generate a pairing QR code.'
+    )
   },
   {
-    title: 'Scan the code',
-    desc: 'Tap the button above to open the scanner. Point at the QR code on your screen.'
+    title: translate('mobile.home.onboarding.scanCode.title', 'Scan the code'),
+    desc: translate(
+      'mobile.home.onboarding.scanCode.description',
+      'Tap the button above to open the scanner. Point at the QR code on your screen.'
+    )
   },
   {
-    title: "You're connected",
-    desc: 'Your desktop will appear here. Everything is encrypted end-to-end.'
+    title: translate('mobile.home.onboarding.connected.title', "You're connected"),
+    desc: translate(
+      'mobile.home.onboarding.connected.description',
+      'Your desktop will appear here. Everything is encrypted end-to-end.'
+    )
   }
 ]

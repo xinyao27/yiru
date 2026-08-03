@@ -1,7 +1,8 @@
 # Expo UI refactor plan
 
-Status: in progress. The Phase 0 static and bundle gates are complete; device-level accessibility
-inspection remains the release gate for expanding the Universal Picker/ListItem pilots.
+Status: implementation checkpoint complete. Static checks and iOS, Android, and web exports pass.
+Device-level accessibility and visual inspection remain the release gate for graduating the
+Universal ListItem pilot and closing this document.
 
 Execution checkpoint (2026-08-03):
 
@@ -9,10 +10,21 @@ Execution checkpoint (2026-08-03):
 - standard boolean rows now use the reviewed `SettingsToggleRow` seam;
 - typed segmented selection uses intrinsic native height and a 44pt minimum interaction region;
 - the two legacy picker drawers are replaced by one virtualized `SelectionDrawer`;
-- every BottomDrawer now receives the semantic popover background;
-- confirmation and text-entry defaults are localized, and text entry has a 44pt target;
-- settings, workspace creation, terminal, quick-command, and pull-request toggle callers are
-  migrated; action-menu and Glass consolidation remain active work.
+- every BottomDrawer now uses the Expo UI Community Bottom Sheet with semantic popover paint;
+- every ActionSheet action has a stable ID, explicit icon, and explicit dismiss owner;
+- Glass availability, grouping, and surfaces have platform implementations, while leaf Host islands
+  and shallow button wrappers have been removed;
+- the settings navigation group is the bounded Universal ListItem/Icon pilot; external links retain
+  React Native link semantics, and product Pickers remain deferred because Expo UI 57.0.7 cannot
+  expose the required accessible name or a 44pt web target;
+- native attachment, review-filter, and host actions use Expo UI or Expo Router menus, with usable
+  web fallbacks where Community Menu has no implementation;
+- workspace creation owns its Smart Source modules and uses the typed segmented control;
+- touched controls have 44pt interaction regions and localized accessible names; all localization
+  candidates were removed from the touched surface, reducing the legacy baseline to 579 candidates
+  across 537 signatures;
+- no newly introduced ordinary layout uses inline `style`; remaining style props are dynamic,
+  animated, native-only, or required by a third-party Host API.
 
 ## Problem statement
 
@@ -439,6 +451,25 @@ The intended sequence is deliberately small:
 41. Run the complete static, bundle, and runtime verification matrix.
 42. Update this plan with completed/deferred decisions and remove it when no active migration work
     remains.
+
+## Completion ledger
+
+As of 2026-08-03, items 1–7, 9–21, 24, 26–33, and 35–40 are implemented. The remaining decisions
+are explicit:
+
+- Item 8 is superseded. Expo UI 57.0.7 does not reliably expose an Android/web Switch accessible
+  name, so `SettingsToggleRow` keeps the reviewed React Native fallback on those platforms.
+- Items 22, 23, and 25 are deferred. Universal Picker cannot currently meet the accessible-name and
+  44pt web-target contract, while Universal ListItem cannot preserve external-link semantics. The
+  settings navigation group remains the only bounded ListItem pilot until device inspection passes.
+- Item 34 is satisfied by the native attachment menu and Expo Router native session toolbar menu.
+  The hint-bearing non-native header sheet deliberately remains an ActionSheet because Community
+  Menu cannot preserve its richer content or web behavior.
+- Item 41 is complete for formatting, lint, typecheck, repository contracts, and iOS/Android/web
+  exports. Runtime inspection remains pending because this worktree currently has no booted iOS
+  Simulator or attached Android emulator/device. Bundle success is not recorded as runtime proof.
+- Item 42 retains this plan until the runtime matrix below is recorded. The code migration is not a
+  reason to weaken that release gate.
 
 ## Decision document
 

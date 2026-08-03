@@ -42,21 +42,21 @@ export function CreateTabDrawers({
         actions={[
           ...agentActions,
           {
+            id: 'new-terminal',
             label: translate('mobile.session.newTab.terminal', 'Terminal'),
             icon: SquareTerminal,
-            onPress: () => {
-              onActionClose()
-              onCreateTerminal()
-            }
+            dismiss: 'immediate',
+            onPress: onCreateTerminal
           },
           ...(isFloatingWorkspace
             ? []
             : [
                 {
+                  id: 'new-browser',
                   label: translate('mobile.session.newTab.browser', 'Browser'),
                   icon: Globe,
+                  dismiss: 'immediate' as const,
                   onPress: () => {
-                    onActionClose()
                     if (browserSupported) {
                       onOpenBrowserInput()
                     } else {
@@ -65,12 +65,11 @@ export function CreateTabDrawers({
                   }
                 },
                 {
+                  id: 'new-markdown-note',
                   label: translate('mobile.session.newTab.markdownNote', 'Markdown Note'),
                   icon: FileText,
-                  onPress: () => {
-                    onActionClose()
-                    onCreateMarkdown()
-                  }
+                  dismiss: 'immediate' as const,
+                  onPress: onCreateMarkdown
                 }
               ])
         ]}

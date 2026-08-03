@@ -3,6 +3,7 @@ import type { RefObject } from 'react'
 import { ActivityIndicator, FlatList, Text, View } from 'react-native'
 
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { translate } from '~/i18n/translate'
 import type { MobileDiffReviewQueueItem } from '~/session/diff/review-queue'
 import type {
   ReviewDiffLine,
@@ -38,24 +39,41 @@ export function MobileDiffReviewBody({
   onAddNote,
   onEditNote,
   onRetry
-}: Props) {
+}: Props): React.JSX.Element {
   if (screenState.kind === 'loading') {
-    return <CenteredState text="Loading review..." busy />
+    return (
+      <CenteredState text={translate('mobile.review.body.loading', 'Loading review...')} busy />
+    )
   }
   if (screenState.kind === 'error' || screenState.kind === 'unavailable') {
     return (
       <CenteredState
-        title={screenState.kind === 'unavailable' ? 'Review Unavailable' : 'Unable to Load Review'}
+        title={
+          screenState.kind === 'unavailable'
+            ? translate('mobile.review.body.unavailable', 'Review Unavailable')
+            : translate('mobile.review.body.loadFailed', 'Unable to Load Review')
+        }
         text={screenState.message}
         onRetry={onRetry}
       />
     )
   }
   if (filteredCount === 0) {
-    return <CenteredState title="No Reviewable Changes" text="Try a different review filter." />
+    return (
+      <CenteredState
+        title={translate('mobile.review.body.emptyTitle', 'No Reviewable Changes')}
+        text={translate('mobile.review.body.emptyMessage', 'Try a different review filter.')}
+      />
+    )
   }
   if (diffState.kind === 'loading') {
-    return <CenteredState text="Loading diff..." busy muted />
+    return (
+      <CenteredState
+        text={translate('mobile.review.body.loadingDiff', 'Loading diff...')}
+        busy
+        muted
+      />
+    )
   }
   if (diffState.kind !== 'ready') {
     return <DiffUnavailableState diffState={diffState} onRetry={onRetry} />
@@ -92,7 +110,7 @@ export function MobileDiffReviewBody({
       ListFooterComponent={
         diffState.truncated ? (
           <Text className="text-muted-foreground p-3 text-center text-xs">
-            Diff truncated for mobile preview.
+            {translate('mobile.review.body.truncated', 'Diff truncated for mobile preview.')}
           </Text>
         ) : null
       }
@@ -106,25 +124,34 @@ function DiffUnavailableState({
 }: {
   diffState: ReviewDiffState
   onRetry: () => void
-}) {
+}): React.JSX.Element {
   const title =
     diffState.kind === 'binary'
-      ? 'Binary Diff'
+      ? translate('mobile.review.body.binaryTitle', 'Binary Diff')
       : diffState.kind === 'too-large'
-        ? 'Diff Too Large'
+        ? translate('mobile.review.body.tooLargeTitle', 'Diff Too Large')
         : diffState.kind === 'deleted'
-          ? 'Deleted File'
-          : 'Diff Unavailable'
+          ? translate('mobile.review.body.deletedTitle', 'Deleted File')
+          : translate('mobile.review.body.diffUnavailable', 'Diff Unavailable')
   const text =
     diffState.kind === 'binary'
-      ? 'This file cannot be rendered as text on mobile.'
+      ? translate(
+          'mobile.review.body.binaryMessage',
+          'This file cannot be rendered as text on mobile.'
+        )
       : diffState.kind === 'too-large'
-        ? 'This diff is too large for the mobile preview.'
+        ? translate(
+            'mobile.review.body.tooLargeMessage',
+            'This diff is too large for the mobile preview.'
+          )
         : diffState.kind === 'deleted'
-          ? 'This file was deleted. Add a file note or mark it reviewed.'
+          ? translate(
+              'mobile.review.body.deletedMessage',
+              'This file was deleted. Add a file note or mark it reviewed.'
+            )
           : diffState.kind === 'error'
             ? diffState.message
-            : 'Select a file to review.'
+            : translate('mobile.review.body.selectFile', 'Select a file to review.')
   return <CenteredState title={title} text={text} onRetry={onRetry} />
 }
 
@@ -140,7 +167,7 @@ function CenteredState({
   title?: string
   text: string
   onRetry?: () => void
-}) {
+}): React.JSX.Element {
   return (
     <View className="flex-1 items-center justify-center gap-3 p-6">
       {busy ? (
@@ -154,8 +181,11 @@ function CenteredState({
       <Text className="text-muted-foreground text-center text-sm leading-5">{text}</Text>
       {onRetry ? (
         <MobileGlassTextButton
-          accessibilityLabel="Retry loading review"
-          label="Retry"
+          accessibilityLabel={translate(
+            'mobile.review.body.retryAccessibility',
+            'Retry loading review'
+          )}
+          label={translate('mobile.review.body.retry', 'Retry')}
           onPress={onRetry}
           size="large"
         />

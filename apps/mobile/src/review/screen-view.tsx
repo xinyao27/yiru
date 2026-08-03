@@ -6,6 +6,7 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { RightDrawer } from '~/components/right-drawer'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import type { useMobileDiffReviewController } from '~/session/diff/use-review-controller'
 import { MobilePRSidebar } from '~/session/pr/sidebar/panel'
@@ -26,7 +27,7 @@ type Props = {
   controller: ReturnType<typeof useMobileDiffReviewController>
 }
 
-export function MobileDiffReviewScreenView({ controller }: Props) {
+export function MobileDiffReviewScreenView({ controller }: Props): React.JSX.Element {
   const { isWideLayout } = useResponsiveLayout()
   const insets = useSafeAreaInsets()
   const [contentRowWidth, setContentRowWidth] = useState(0)
@@ -65,7 +66,9 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
     <View className="bg-background flex-1">
       <Stack.Screen
         options={{
-          title: `Changes · ${controller.worktreeLabel}`,
+          title: translate('mobile.review.screen.title', 'Changes · {{worktree}}', {
+            worktree: controller.worktreeLabel
+          }),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
@@ -73,13 +76,19 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
                   <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                     {showPRTrigger ? (
                       <MobileGlassIconButton
-                        accessibilityLabel="Open pull request review"
+                        accessibilityLabel={translate(
+                          'mobile.review.screen.openPullRequestAccessibility',
+                          'Open pull request review'
+                        )}
                         icon="checks"
                         onPress={controller.openPRSidebar}
                       />
                     ) : null}
                     <MobileGlassIconButton
-                      accessibilityLabel="More review actions"
+                      accessibilityLabel={translate(
+                        'mobile.review.screen.moreActionsAccessibility',
+                        'More review actions'
+                      )}
                       icon="more"
                       onPress={() => controller.setShowOverflow(true)}
                     />
@@ -90,13 +99,19 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
-            accessibilityLabel="Open pull request sidebar"
+            accessibilityLabel={translate(
+              'mobile.review.screen.openPullRequestSidebarAccessibility',
+              'Open pull request sidebar'
+            )}
             hidden={!showPRTrigger}
             icon="checklist"
             onPress={controller.openPRSidebar}
           />
           <Stack.Toolbar.Button
-            accessibilityLabel="Open review actions"
+            accessibilityLabel={translate(
+              'mobile.review.screen.openActionsAccessibility',
+              'Open review actions'
+            )}
             icon="ellipsis"
             onPress={() => controller.setShowOverflow(true)}
           />

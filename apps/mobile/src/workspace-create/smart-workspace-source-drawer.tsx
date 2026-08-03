@@ -2,10 +2,19 @@ import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native'
 
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
+import { BottomDrawer } from '../components/bottom-drawer'
+import { MobileContentSection } from '../components/content-section'
+import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassPressable } from '../components/glass/pressable'
+import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
+import { MobileSegmentedControl } from '../components/segmented-control'
+import { SmartSourceModeIcon } from '../components/smart-source-mode-icon'
 import type { RpcClient } from '../transport/rpc-client'
-import type { MrStateFilter, SmartNameMode } from '../workspace-create/composer-source-types'
+import type { MrStateFilter, SmartNameMode } from './composer-source-types'
 import {
   MR_STATE_FILTER_OPTIONS,
   resolveAvailableSmartModes,
@@ -13,21 +22,11 @@ import {
   SMART_MODE_OPTIONS,
   type SmartModeAvailabilityInput,
   type SmartModeOption
-} from '../workspace-create/smart-source-modes'
-import {
-  lookupGitHubItemByOwnerRepo,
-  type PasteRepoCandidate
-} from '../workspace-create/smart-source-paste-intent'
-import type { MobileComposerSource } from '../workspace-create/use-composer-source'
-import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
-import { BottomDrawer } from './bottom-drawer'
-import { MobileContentSection } from './content-section'
-import { MobileGlassGroup } from './glass/group'
-import { MobileGlassPressable } from './glass/pressable'
-import { MobileGlassSurface } from './glass/surface'
-import { MobileGlassTextButton } from './glass/text-button'
-import { SmartSourceModeIcon } from './smart-source-mode-icon'
+} from './smart-source-modes'
+import { lookupGitHubItemByOwnerRepo, type PasteRepoCandidate } from './smart-source-paste-intent'
 import { SmartWorkspaceSourceRow } from './smart-workspace-source-row'
+import type { MobileComposerSource } from './use-composer-source'
+import { useSmartWorkspaceSource } from './use-smart-workspace-source'
 
 type SmartWorkspaceSourceDrawerProps = {
   visible: boolean
@@ -73,25 +72,18 @@ export function SmartWorkspaceSourceDrawer({
 
   const searchEnabled = visible && sshReady
 
-  const {
-    rows,
-    loading,
-    error,
-    needsGitHubRemote,
-    emptyHint,
-    crossRepoPrompt,
-    dismissCrossRepoPrompt
-  } = useSmartWorkspaceSource({
-    client,
-    enabled: searchEnabled,
-    mode: effectiveMode,
-    query: composer.name,
-    repoId,
-    githubAvailable: availability.githubAvailable,
-    gitlabAvailable: availability.gitlabAvailable,
-    mrStateFilter,
-    repos
-  })
+  const { rows, loading, error, needsGitHubRemote, crossRepoPrompt, dismissCrossRepoPrompt } =
+    useSmartWorkspaceSource({
+      client,
+      enabled: searchEnabled,
+      mode: effectiveMode,
+      query: composer.name,
+      repoId,
+      githubAvailable: availability.githubAvailable,
+      gitlabAvailable: availability.gitlabAvailable,
+      mrStateFilter,
+      repos
+    })
 
   function handleSelectRow(row: SourceRow): void {
     switch (row.kind) {
@@ -143,23 +135,25 @@ export function SmartWorkspaceSourceDrawer({
   return (
     <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
       <View className="flex-row items-center justify-between px-1 pb-2">
-        <Text className="text-foreground text-sm font-semibold">Name or 'Create From'</Text>
-        <MobileGlassPressable
-          className="rounded-full"
-          contentClassName="min-h-8 items-center justify-center rounded-full px-3"
-          hitSlop={8}
+        <Text className="text-foreground text-sm font-semibold">
+          {translate('mobile.newWorkspace.source.title', "Name or 'Create From'")}
+        </Text>
+        <MobileGlassTextButton
+          label={translate('mobile.common.done', 'Done')}
           onPress={onClose}
-        >
-          <Text className="text-foreground text-sm font-semibold">Done</Text>
-        </MobileGlassPressable>
+          size="small"
+        />
       </View>
 
-      <MobileGlassSurface className="mb-2 min-h-10 overflow-hidden rounded-full" isInteractive>
+      <MobileGlassSurface className="mb-2 min-h-11 overflow-hidden rounded-full" isInteractive>
         <TextInput
-          className="text-foreground min-h-10 rounded-full px-4 text-sm"
+          className="text-foreground min-h-11 rounded-full px-4 text-sm"
           value={composer.name}
           onChangeText={composer.setName}
-          placeholder="Type a name or search a source"
+          placeholder={translate(
+            'mobile.newWorkspace.source.searchPlaceholder',
+            'Type a name or search a source'
+          )}
           placeholderTextColorClassName="accent-muted-foreground"
           autoCapitalize="none"
           autoCorrect={false}
@@ -175,8 +169,11 @@ export function SmartWorkspaceSourceDrawer({
           return (
             <MobileGlassPressable
               key={option.id}
+              accessibilityLabel={option.label}
+              accessibilityState={{ selected }}
               className="rounded-full"
-              contentClassName="flex-row items-center gap-1 rounded-full px-3 py-2"
+              contentClassName="min-h-11 flex-row items-center gap-1 rounded-full px-3"
+              hitSlop={0}
               onPress={() => setMode(option.id)}
               tintColorClassName={selected ? 'accent-primary' : undefined}
             >
@@ -193,38 +190,47 @@ export function SmartWorkspaceSourceDrawer({
       </MobileGlassGroup>
 
       {effectiveMode === 'gitlab' ? (
-        <MobileGlassGroup className="mb-2 flex-row gap-2" spacing={8}>
-          {MR_STATE_FILTER_OPTIONS.map((option) => {
-            const selected = option.id === mrStateFilter
-            return (
-              <MobileGlassPressable
-                key={option.id}
-                className="rounded-full"
-                contentClassName="rounded-full px-3 py-2"
-                onPress={() => setMrStateFilter(option.id)}
-                tintColorClassName={selected ? 'accent-primary' : undefined}
-              >
-                <Text
-                  className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}
-                >
-                  {option.label}
-                </Text>
-              </MobileGlassPressable>
-            )
-          })}
-        </MobileGlassGroup>
+        <View className="mb-2">
+          <MobileSegmentedControl
+            accessibilityLabel={translate(
+              'mobile.newWorkspace.source.state.label',
+              'Merge request state'
+            )}
+            onChange={setMrStateFilter}
+            options={MR_STATE_FILTER_OPTIONS.map((option) => ({
+              value: option.id,
+              label: option.label
+            }))}
+            value={mrStateFilter}
+          />
+        </View>
       ) : null}
 
       {crossRepoPrompt ? (
         <MobileContentSection className="mb-2 gap-2 p-3">
           <Text className="text-muted-foreground text-xs">
-            This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
+            {translate(
+              'mobile.newWorkspace.source.crossRepo.message',
+              'This item lives in {{owner}}/{{repo}}.',
+              {
+                owner: crossRepoPrompt.link.slug.owner,
+                repo: crossRepoPrompt.link.slug.repo
+              }
+            )}
           </Text>
           <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
-            <MobileGlassTextButton label="Cancel" onPress={dismissCrossRepoPrompt} size="small" />
+            <MobileGlassTextButton
+              label={translate('mobile.common.cancel', 'Cancel')}
+              onPress={dismissCrossRepoPrompt}
+              size="small"
+            />
             <MobileGlassTextButton
               isProminent
-              label={`Switch to ${crossRepoPrompt.matchingRepo.displayName}`}
+              label={translate(
+                'mobile.newWorkspace.source.crossRepo.switch',
+                'Switch to {{repo}}',
+                { repo: crossRepoPrompt.matchingRepo.displayName }
+              )}
               onPress={() => void handleAcceptCrossRepo()}
               size="small"
             />
@@ -234,11 +240,17 @@ export function SmartWorkspaceSourceDrawer({
 
       {!sshReady && effectiveMode !== 'text' ? (
         <Text className="text-muted-foreground px-1 pb-2 text-xs">
-          Connect the repository to search sources.
+          {translate(
+            'mobile.newWorkspace.source.connectRepository',
+            'Connect the repository to search sources.'
+          )}
         </Text>
       ) : needsGitHubRemote ? (
         <Text className="text-muted-foreground px-1 pb-2 text-xs">
-          This SSH repo needs a GitHub remote to list pull requests.
+          {translate(
+            'mobile.newWorkspace.source.githubRemoteRequired',
+            'This SSH repo needs a GitHub remote to list pull requests.'
+          )}
         </Text>
       ) : error ? (
         <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>
@@ -258,7 +270,7 @@ export function SmartWorkspaceSourceDrawer({
               </View>
             ) : showEmpty ? (
               <Text className="text-muted-foreground py-4 text-center text-xs">
-                {emptyHint || 'No results found.'}
+                {emptyHintForMode(effectiveMode)}
               </Text>
             ) : null
           }
@@ -269,4 +281,28 @@ export function SmartWorkspaceSourceDrawer({
       </MobileContentSection>
     </BottomDrawer>
   )
+}
+
+function emptyHintForMode(mode: SmartNameMode): string {
+  switch (mode) {
+    case 'smart':
+      return translate(
+        'mobile.newWorkspace.source.empty.smart',
+        'Start typing to create a name or find a source.'
+      )
+    case 'github':
+      return translate(
+        'mobile.newWorkspace.source.empty.github',
+        'Start typing to search GitHub pull requests.'
+      )
+    case 'gitlab':
+      return translate(
+        'mobile.newWorkspace.source.empty.gitlab',
+        'Start typing to search GitLab merge requests.'
+      )
+    case 'branches':
+      return translate('mobile.newWorkspace.source.empty.branches', 'No matching branches.')
+    case 'text':
+      return translate('mobile.common.noResults', 'No results found.')
+  }
 }

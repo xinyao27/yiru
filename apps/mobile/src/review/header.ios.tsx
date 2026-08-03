@@ -1,35 +1,27 @@
-import { ActionSheetIOS, Text, View } from 'react-native'
+import { Button, Menu } from '@expo/ui/swift-ui'
+import {
+  accessibilityAddTraits,
+  accessibilityLabel,
+  accessibilityValue,
+  buttonBorderShape,
+  controlSize,
+  frame,
+  type ViewModifier
+} from '@expo/ui/swift-ui/modifiers'
+import { useMemo } from 'react'
+import { Text, View } from 'react-native'
 
-import { MobileSwiftUiGlassAccessoryButton } from '~/components/glass/swift-ui.ios'
-import type { MobileDiffReviewQueueFilter } from '~/session/diff/review-queue'
+import { ExpoUiHost } from '~/components/expo-ui-host'
+import { useMobileGlassAvailable } from '~/components/glass/availability'
+import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
+import { translate } from '~/i18n/translate'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '~/session/diff/review-screen-model'
 
+import { mobileReviewFilterLabel } from './filter-label'
 import type { MobileDiffReviewHeaderProps } from './header-props'
 import { mobileDiffReviewStyles as styles } from './screen-styles'
 
-function filterLabel(filter: MobileDiffReviewQueueFilter): string {
-  return filter === 'all' ? 'All' : filter[0].toUpperCase() + filter.slice(1)
-}
-
-function showFilterActions(
-  filter: MobileDiffReviewQueueFilter,
-  onSelectFilter: (filter: MobileDiffReviewQueueFilter) => void
-): void {
-  const cancelButtonIndex = REVIEW_FILTERS.length
-  ActionSheetIOS.showActionSheetWithOptions(
-    {
-      cancelButtonIndex,
-      options: [...REVIEW_FILTERS.map(filterLabel), 'Cancel'],
-      title: `Filter review files · ${filterLabel(filter)}`
-    },
-    (selectedIndex) => {
-      const selected = REVIEW_FILTERS[selectedIndex]
-      if (selected) {
-        onSelectFilter(selected)
-      }
-    }
-  )
-}
+const SELECTED_FILTER_MODIFIERS = [accessibilityAddTraits(['isSelected'])]
 
 export function MobileDiffReviewHeader({
   filter,
@@ -38,24 +30,64 @@ export function MobileDiffReviewHeader({
   unsentCount,
   onSelectFilter
 }: MobileDiffReviewHeaderProps): React.JSX.Element {
+  const isGlassAvailable = useMobileGlassAvailable()
+  const selectedFilterLabel = mobileReviewFilterLabel(filter)
+  const menuLabel = translate('mobile.review.filters.button', 'Filter · {{filter}}', {
+    filter: selectedFilterLabel
+  })
+  const menuModifiers = useMemo<ViewModifier[]>(
+    () => [
+      controlSize('regular'),
+      mobileSwiftUiGlassButtonStyle(isGlassAvailable),
+      buttonBorderShape('capsule'),
+      frame({ minWidth: 44, minHeight: 44, alignment: 'center' }),
+      accessibilityLabel(
+        translate('mobile.review.filters.accessibilityLabel', 'Filter review files')
+      ),
+      accessibilityValue(
+        translate('mobile.review.filters.selectedValue', '{{filter}} selected', {
+          filter: selectedFilterLabel
+        })
+      )
+    ],
+    [isGlassAvailable, selectedFilterLabel]
+  )
+
   return (
     <View className="px-3 py-2">
       <View className="flex-row justify-between gap-3">
         <Text className={styles.progressText}>
-          {reviewedCount}/{queueLength} reviewed
+          {translate('mobile.review.progress.reviewed', '{{reviewed}}/{{total}} reviewed', {
+            reviewed: reviewedCount,
+            total: queueLength
+          })}
         </Text>
         <Text className={styles.progressText}>
-          {mobileReviewCountLabel(unsentCount, 'unsent note', 'unsent notes')}
+          {mobileReviewCountLabel(
+            unsentCount,
+            translate('mobile.review.progress.unsentNote', 'unsent note'),
+            translate('mobile.review.progress.unsentNotes', 'unsent notes')
+          )}
         </Text>
       </View>
-      <View className="mt-3 self-start">
-        <MobileSwiftUiGlassAccessoryButton
-          accessibilityLabel={`Filter review files. ${filterLabel(filter)} selected`}
-          label={`Filter · ${filterLabel(filter)}`}
-          onPress={() => showFilterActions(filter, onSelectFilter)}
-          shape="capsule"
-          size="regular"
-        />
+      <View className="mt-3 min-h-11 justify-center self-start">
+        <ExpoUiHost>
+          <Menu
+            label={menuLabel}
+            systemImage="line.3.horizontal.decrease"
+            modifiers={menuModifiers}
+          >
+            {REVIEW_FILTERS.map((option) => (
+              <Button
+                key={option}
+                label={mobileReviewFilterLabel(option)}
+                systemImage={filter === option ? 'checkmark' : undefined}
+                modifiers={filter === option ? SELECTED_FILTER_MODIFIERS : undefined}
+                onPress={() => onSelectFilter(option)}
+              />
+            ))}
+          </Menu>
+        </ExpoUiHost>
       </View>
     </View>
   )

@@ -1,5 +1,6 @@
 import type { ActionSheetAction } from '~/components/action-sheet-modal'
 import { Chat as MessageSquare, TerminalWindow as SquareTerminal } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import { resolveMobileNativeChat, type MobileNativeChatTab } from './eligibility'
 
@@ -14,10 +15,9 @@ export function getMobileNativeChatToggleActions(args: {
   tabs: readonly ToggleTab[]
   isTabChatView: (tabId: string) => boolean
   nativeChatTranscriptIsLocalReadable: boolean
-  onClose: () => void
   onToggle: (tabId: string) => void
 }): ActionSheetAction[] {
-  const { terminalHandle, tabs, isTabChatView, onClose, onToggle } = args
+  const { terminalHandle, tabs, isTabChatView, onToggle } = args
   const tab = terminalHandle
     ? tabs.find((candidate) => candidate.terminal === terminalHandle)
     : null
@@ -27,12 +27,16 @@ export function getMobileNativeChatToggleActions(args: {
   const isChat = isTabChatView(tab.id)
   return [
     {
-      label: isChat ? 'Switch to terminal view' : 'Switch to chat view',
+      id: 'toggle-terminal-chat-view',
+      label: isChat
+        ? translate(
+            'mobile.session.terminalActions.switchToTerminalView',
+            'Switch to terminal view'
+          )
+        : translate('mobile.session.terminalActions.switchToChatView', 'Switch to chat view'),
       icon: isChat ? SquareTerminal : MessageSquare,
-      onPress: () => {
-        onClose()
-        onToggle(tab.id)
-      }
+      dismiss: 'immediate',
+      onPress: () => onToggle(tab.id)
     }
   ]
 }

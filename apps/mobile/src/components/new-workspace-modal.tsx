@@ -43,6 +43,9 @@ import {
   deriveRepoSlug,
   type PasteRepoCandidate
 } from '../workspace-create/smart-source-paste-intent'
+import { SmartWorkspaceAdvancedFields } from '../workspace-create/smart-workspace-advanced-fields'
+import { SmartWorkspaceSourceDrawer } from '../workspace-create/smart-workspace-source-drawer'
+import { SmartWorkspaceSourceField } from '../workspace-create/smart-workspace-source-field'
 import { createWorkspaceFromComposerSource } from '../workspace-create/source-workspace-create'
 import {
   isMobileTuiAgent,
@@ -72,9 +75,6 @@ import {
 } from './new-workspace-agent-selection'
 import { SelectionDrawer, type SelectionDrawerOption } from './selection-drawer'
 import { SetupHookTrustDrawer, type SetupTrustPrompt } from './setup-hook-trust-drawer'
-import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
-import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
-import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { getSuggestedCreatureName } from './workspace-name-suggestion'
 
 type SetupDecision = 'inherit' | 'run' | 'skip'

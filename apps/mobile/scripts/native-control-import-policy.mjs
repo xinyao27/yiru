@@ -26,7 +26,11 @@ export const universalJsxControls = new Set([
 ])
 
 const expoUiHostPath = path.join(mobileRoot, 'src', 'components', 'expo-ui-host.tsx')
-export const bottomDrawerPath = path.join(mobileRoot, 'src', 'components', 'bottom-drawer.tsx')
+export const bottomDrawerPaths = new Set([
+  path.join(mobileRoot, 'src', 'components', 'bottom-drawer.tsx'),
+  path.join(mobileRoot, 'src', 'components', 'bottom-drawer-sheet.tsx'),
+  path.join(mobileRoot, 'src', 'components', 'bottom-drawer-sheet.native.tsx')
+])
 const nativeControlCatalogPath = path.join(
   mobileRoot,
   'src',

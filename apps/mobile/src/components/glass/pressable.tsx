@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Pressable, type PressableProps } from 'react-native'
+import { Pressable, View, type PressableProps } from 'react-native'
 
 import { cn } from '~/style/class-names'
 
@@ -12,27 +12,34 @@ type MobileGlassPressableProps = Omit<
 > & {
   children: ReactNode
   className?: string
+  containerClassName?: string
   contentClassName?: string
   disabled?: boolean
   fallbackClassName?: string
   onPress: NonNullable<PressableProps['onPress']>
+  size?: 'large' | 'regular' | 'small'
   tintColorClassName?: string
 }
 
 export function MobileGlassPressable({
+  accessibilityRole = 'button',
   children,
   className,
+  containerClassName,
   contentClassName,
   disabled = false,
   fallbackClassName,
-  hitSlop = 6,
+  hitSlop,
   onPress,
+  size,
   tintColorClassName,
   ...pressableProps
 }: MobileGlassPressableProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
+  const resolvedHitSlop =
+    hitSlop ?? (size === 'large' ? 0 : size === 'regular' ? 4 : size === 'small' ? 6 : 6)
 
-  return (
+  const surface = (
     <MobileGlassSurface
       className={cn('overflow-hidden', className)}
       fallbackClassName={fallbackClassName}
@@ -42,17 +49,31 @@ export function MobileGlassPressable({
     >
       <Pressable
         {...pressableProps}
+        accessibilityRole={accessibilityRole}
         className={cn(
           !disabled && !isGlassAvailable && 'active:bg-accent',
           disabled && 'opacity-40',
+          size === 'large'
+            ? 'min-h-11'
+            : size === 'regular'
+              ? 'min-h-9'
+              : size === 'small'
+                ? 'min-h-8'
+                : undefined,
           contentClassName
         )}
         disabled={disabled}
-        hitSlop={hitSlop}
+        hitSlop={resolvedHitSlop}
         onPress={onPress}
       >
         {children}
       </Pressable>
     </MobileGlassSurface>
   )
+
+  if (!size) {
+    return surface
+  }
+
+  return <View className={cn('min-h-11 justify-center', containerClassName)}>{surface}</View>
 }

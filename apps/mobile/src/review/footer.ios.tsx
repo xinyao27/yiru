@@ -1,4 +1,4 @@
-import { Button, Host, HStack, VStack, type ButtonProps } from '@expo/ui/swift-ui'
+import { Button, GlassEffectContainer, HStack, VStack, type ButtonProps } from '@expo/ui/swift-ui'
 import {
   buttonBorderShape,
   controlSize,
@@ -9,14 +9,15 @@ import {
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { useCSSVariable, useUniwind } from 'uniwind'
+import { useCSSVariable } from 'uniwind'
 
+import { ExpoUiHost } from '~/components/expo-ui-host'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup
-} from '~/components/glass/swift-ui.ios'
+  MobileSwiftUiGlassCircleButton
+} from '~/components/glass/swift-ui-button.ios'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileDiffReviewFooterProps } from './footer-props'
@@ -47,6 +48,7 @@ function ReviewFooterButton({
       controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable, prominent),
       buttonBorderShape('capsule'),
+      frame({ minHeight: 44, alignment: 'center' }),
       ...(expanded ? [frame({ maxWidth: Infinity })] : []),
       ...(prominent ? [tint(primaryColor)] : []),
       disabledModifier(disabled)
@@ -74,18 +76,13 @@ export function MobileDiffReviewFooter({
   onMarkReviewed,
   onMoveFile
 }: MobileDiffReviewFooterProps): React.JSX.Element {
-  const { theme } = useUniwind()
   const fullWidthModifiers = useMemo<ViewModifier[]>(() => [frame({ maxWidth: Infinity })], [])
   const hasGitActions = item.canStage || item.canUnstage || item.canDiscard
 
   return (
     <View className="pb-safe-offset-2 absolute right-0 bottom-0 left-0 px-3 pt-2">
-      <Host
-        colorScheme={theme}
-        matchContents={{ vertical: true }}
-        style={{ width: '100%', backgroundColor: 'transparent' }}
-      >
-        <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
+      <ExpoUiHost layout="fill">
+        <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
           <VStack spacing={8} modifiers={fullWidthModifiers}>
             {hasGitActions ? (
               <HStack spacing={8} modifiers={fullWidthModifiers}>
@@ -93,7 +90,7 @@ export function MobileDiffReviewFooter({
                   <ReviewFooterButton
                     disabled={busyAction !== null}
                     expanded
-                    label="Stage"
+                    label={translate('mobile.review.footer.stage', 'Stage')}
                     onPress={() => onGitMutation('git.stage', item)}
                     systemImage="plus"
                   />
@@ -102,7 +99,7 @@ export function MobileDiffReviewFooter({
                   <ReviewFooterButton
                     disabled={busyAction !== null}
                     expanded
-                    label="Unstage"
+                    label={translate('mobile.review.footer.unstage', 'Unstage')}
                     onPress={() => onGitMutation('git.unstage', item)}
                     systemImage="arrow.uturn.backward"
                   />
@@ -111,7 +108,7 @@ export function MobileDiffReviewFooter({
                   <ReviewFooterButton
                     disabled={busyAction !== null}
                     expanded
-                    label="Discard"
+                    label={translate('mobile.review.footer.discard', 'Discard')}
                     onPress={() => onDiscard(item)}
                     role="destructive"
                     systemImage="trash"
@@ -121,29 +118,37 @@ export function MobileDiffReviewFooter({
             ) : null}
             <HStack spacing={8} modifiers={fullWidthModifiers}>
               <MobileSwiftUiGlassCircleButton
-                label="Previous file"
+                label={translate('mobile.review.footer.previousFile', 'Previous file')}
                 onPress={() => onMoveFile('previous')}
                 size="regular"
                 systemImage="chevron.left"
               />
-              <ReviewFooterButton label="Note" onPress={onAddFileNote} systemImage="note.text" />
+              <ReviewFooterButton
+                label={translate('mobile.review.footer.note', 'Note')}
+                onPress={onAddFileNote}
+                systemImage="note.text"
+              />
               <ReviewFooterButton
                 expanded
-                label={item.isReviewed ? 'Reviewed' : 'Mark Reviewed'}
+                label={
+                  item.isReviewed
+                    ? translate('mobile.review.footer.reviewed', 'Reviewed')
+                    : translate('mobile.review.footer.markReviewed', 'Mark Reviewed')
+                }
                 onPress={onMarkReviewed}
                 prominent
                 systemImage="checkmark"
               />
               <MobileSwiftUiGlassCircleButton
-                label="Next file"
+                label={translate('mobile.review.footer.nextFile', 'Next file')}
                 onPress={() => onMoveFile('next')}
                 size="regular"
                 systemImage="chevron.right"
               />
             </HStack>
           </VStack>
-        </MobileSwiftUiGlassGroup>
-      </Host>
+        </GlassEffectContainer>
+      </ExpoUiHost>
     </View>
   )
 }

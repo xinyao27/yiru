@@ -4,12 +4,25 @@ import { View } from 'react-native'
 import { MobileGlassSurface } from '../components/glass/surface'
 import { LoadingIndicator } from '../components/loading-indicator'
 import { Plus } from '../components/uniwind-icons'
+import { translate } from '../i18n/translate'
 import type { MobileImageSource } from './image-source-picker'
 
 const ATTACHMENT_ACTIONS = [
-  { id: 'camera', title: 'Camera', image: 'camera' },
-  { id: 'library', title: 'Photos', image: 'photo.on.rectangle' },
-  { id: 'files', title: 'Files', image: 'folder' }
+  {
+    id: 'camera',
+    title: translate('mobile.session.attachments.camera', 'Camera'),
+    image: 'camera'
+  },
+  {
+    id: 'library',
+    title: translate('mobile.session.attachments.photos', 'Photos'),
+    image: 'photo.on.rectangle'
+  },
+  {
+    id: 'files',
+    title: translate('mobile.session.attachments.files', 'Files'),
+    image: 'folder'
+  }
 ] satisfies MenuAction[]
 
 type MobileAttachmentMenuProps = {
@@ -41,7 +54,11 @@ export function MobileAttachmentMenu({
         <View
           accessible
           accessibilityRole="button"
-          accessibilityLabel={pending ? 'Adding attachment' : 'Add attachment'}
+          accessibilityLabel={
+            pending
+              ? translate('mobile.session.attachments.adding', 'Adding attachment')
+              : translate('mobile.session.attachments.add', 'Add attachment')
+          }
           accessibilityState={{ disabled }}
           className={
             disabled

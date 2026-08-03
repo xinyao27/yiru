@@ -164,6 +164,7 @@ catalogs:
     react: '*'
     react-native: '*'
   mobile:
+    '@expo/material-symbols': 0.1.1
     '@expo/ui': 57.0.7
     '@noble/hashes': 2.2.0
     '@react-native-async-storage/async-storage': 2.2.0

@@ -2,9 +2,9 @@ import { Text, TextInput, View } from 'react-native'
 
 import { translate } from '~/i18n/translate'
 
-import type { MobileComposerSource } from '../workspace-create/use-composer-source'
-import { MobileGlassSurface } from './glass/surface'
-import { SettingsToggleRow } from './settings-toggle-row'
+import { MobileGlassSurface } from '../components/glass/surface'
+import { SettingsToggleRow } from '../components/settings-toggle-row'
+import type { MobileComposerSource } from './use-composer-source'
 
 type Props = {
   composer: MobileComposerSource
@@ -27,9 +27,9 @@ export function SmartWorkspaceAdvancedFields({
           <Text className="text-muted-foreground mb-1 text-xs font-medium">
             {translate('mobile.newWorkspace.nameLabel', 'Name')}
           </Text>
-          <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+          <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
             <TextInput
-              className="text-foreground min-h-10 rounded-full px-4 text-sm"
+              className="text-foreground min-h-11 rounded-full px-4 text-sm"
               value={composer.name}
               onChangeText={composer.setName}
               placeholder={translate(
@@ -49,9 +49,9 @@ export function SmartWorkspaceAdvancedFields({
           <Text className="text-muted-foreground mb-1 text-xs font-medium">
             {translate('mobile.newWorkspace.branchNameLabel', 'Branch name')}
           </Text>
-          <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+          <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
             <TextInput
-              className="text-foreground min-h-10 rounded-full px-4 text-sm"
+              className="text-foreground min-h-11 rounded-full px-4 text-sm"
               value={composer.branchNameOverride ?? ''}
               onChangeText={composer.handleBranchNameOverrideChange}
               placeholder={translate(

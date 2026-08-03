@@ -1,4 +1,4 @@
-import { Host, Image, TextField, useNativeState } from '@expo/ui/swift-ui'
+import { GlassEffectContainer, Host, Image, TextField, useNativeState } from '@expo/ui/swift-ui'
 import {
   autocorrectionDisabled,
   frame,
@@ -10,10 +10,8 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import {
-  MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassInputShell
-} from '~/components/glass/swift-ui.ios'
+import { MobileSwiftUiGlassInputShell } from '~/components/glass/swift-ui-input-shell.ios'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileAgentHistorySearchControlProps } from './search-control-props'
@@ -50,7 +48,7 @@ export function MobileAgentHistorySearchControl({
       matchContents={{ vertical: true }}
       style={{ width: '100%', backgroundColor: 'transparent' }}
     >
-      <MobileSwiftUiGlassGroup spacing={8}>
+      <GlassEffectContainer spacing={8}>
         <MobileSwiftUiGlassInputShell hasTrailingAction={false}>
           <Image systemName="magnifyingglass" size={16} color={mutedForegroundColor} />
           <TextField
@@ -59,11 +57,14 @@ export function MobileAgentHistorySearchControl({
               nativeValueRef.current = nextValue
               onChangeText(nextValue)
             }}
-            placeholder="Search sessions, repo:, path:"
+            placeholder={translate(
+              'mobile.agentHistory.search.placeholder',
+              'Search sessions, repo:, path:'
+            )}
             text={nativeText}
           />
         </MobileSwiftUiGlassInputShell>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

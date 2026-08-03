@@ -284,6 +284,8 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
         </Text>
         <MobileContentSection className="mt-2">
           <Pressable
+            accessibilityLabel={translate('mobile.terminalSettings.textSize.label', 'Text size')}
+            accessibilityRole="button"
             className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setTextSizePickerOpen(true)}
           >

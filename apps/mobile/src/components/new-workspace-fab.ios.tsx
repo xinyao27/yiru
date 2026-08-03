@@ -2,7 +2,9 @@ import { Host } from '@expo/ui/swift-ui'
 import { View } from 'react-native'
 import { useUniwind } from 'uniwind'
 
-import { MobileSwiftUiGlassCircleButton } from './glass/swift-ui.ios'
+import { translate } from '~/i18n/translate'
+
+import { MobileSwiftUiGlassCircleButton } from './glass/swift-ui-button.ios'
 
 type NewWorkspaceFabProps = {
   onPress: () => void
@@ -20,7 +22,7 @@ export function NewWorkspaceFab({
       <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
         <MobileSwiftUiGlassCircleButton
           disabled={disabled}
-          label="New workspace"
+          label={translate('mobile.workspace.actions.newWorkspace', 'New workspace')}
           size="large"
           systemImage="plus"
           onPress={onPress}

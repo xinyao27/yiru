@@ -1,9 +1,10 @@
 import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
-import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '~/components/uniwind-icons'
+import { GitMerge, Sparkle as Sparkles } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
-import { SourceProviderLogo } from './source-provider-logo'
+import { SourceProviderLogo } from '../components/source-provider-logo'
 
 type Props = {
   row: SourceRow
@@ -22,14 +23,18 @@ function resolveRowContent(row: SourceRow): RowContent {
     case 'use-name':
       return {
         icon: <Sparkles size={16} colorClassName="accent-muted-foreground" />,
-        title: `Use "${row.name}"`,
-        subtitle: 'Name this workspace'
+        title: translate('mobile.newWorkspace.source.useName', 'Use "{{name}}"', {
+          name: row.name
+        }),
+        subtitle: translate('mobile.newWorkspace.source.nameWorkspace', 'Name this workspace')
       }
     case 'create-branch':
       return {
         icon: <GitMerge size={16} colorClassName="accent-primary" />,
-        title: `Create branch "${row.name}"`,
-        subtitle: 'New branch'
+        title: translate('mobile.newWorkspace.source.createBranch', 'Create branch "{{name}}"', {
+          name: row.name
+        }),
+        subtitle: translate('mobile.newWorkspace.source.newBranch', 'New branch')
       }
     case 'github':
       return {
@@ -41,7 +46,9 @@ function resolveRowContent(row: SourceRow): RowContent {
           />
         ),
         title: row.item.title,
-        subtitle: `PR #${row.item.number}`,
+        subtitle: translate('mobile.newWorkspace.source.pullRequestNumber', 'PR #{{number}}', {
+          number: row.item.number
+        }),
         status: row.item.state
       }
     case 'gitlab':
@@ -54,7 +61,9 @@ function resolveRowContent(row: SourceRow): RowContent {
           />
         ),
         title: row.item.title,
-        subtitle: `MR !${row.item.number}`,
+        subtitle: translate('mobile.newWorkspace.source.mergeRequestNumber', 'MR !{{number}}', {
+          number: row.item.number
+        }),
         status: row.item.state
       }
     case 'branch':
@@ -63,15 +72,10 @@ function resolveRowContent(row: SourceRow): RowContent {
         title: row.localBranchName || row.refName,
         subtitle: row.refName
       }
-    default:
-      return {
-        icon: <CaseSensitive size={16} colorClassName="accent-muted-foreground" />,
-        title: ''
-      }
   }
 }
 
-export function SmartWorkspaceSourceRow({ row, onPress }: Props) {
+export function SmartWorkspaceSourceRow({ row, onPress }: Props): React.JSX.Element {
   const content = resolveRowContent(row)
   return (
     <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3" onPress={onPress}>

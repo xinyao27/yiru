@@ -3,7 +3,18 @@ import { Text } from 'react-native'
 import { cn } from '~/style/class-names'
 
 import { MobileGlassPressable } from './pressable'
-import type { MobileGlassTextButtonProps } from './text-button-props'
+
+type MobileGlassTextButtonProps = {
+  accessibilityLabel?: string
+  className?: string
+  disabled?: boolean
+  isDestructive?: boolean
+  isFullWidth?: boolean
+  isProminent?: boolean
+  label: string
+  onPress: () => void
+  size?: 'large' | 'regular' | 'small'
+}
 
 export function MobileGlassTextButton({
   accessibilityLabel,
@@ -20,7 +31,8 @@ export function MobileGlassTextButton({
     <MobileGlassPressable
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityRole="button"
-      className={cn('rounded-full', isFullWidth && 'self-stretch', className)}
+      className={cn('rounded-full', isFullWidth && 'self-stretch')}
+      containerClassName={cn(isFullWidth && 'self-stretch', className)}
       contentClassName={cn(
         'items-center justify-center rounded-full px-4',
         size === 'large' ? 'min-h-11' : size === 'small' ? 'min-h-8' : 'min-h-9'
@@ -32,7 +44,10 @@ export function MobileGlassTextButton({
         isDestructive && 'bg-destructive'
       )}
       onPress={onPress}
-      tintColorClassName={isDestructive ? 'accent-destructive' : undefined}
+      size={size}
+      tintColorClassName={
+        isDestructive ? 'accent-destructive' : isProminent ? 'accent-primary' : undefined
+      }
     >
       <Text
         className={cn(

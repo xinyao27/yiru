@@ -5,7 +5,7 @@ import path from 'node:path'
 import ts from 'typescript-api'
 
 import {
-  bottomDrawerPath,
+  bottomDrawerPaths,
   forbiddenReactNativeControls,
   isExpoUiHostModule,
   isExpoUiModule,
@@ -509,6 +509,7 @@ function checkExportedLocalName(args, localName, node) {
 }
 
 function checkModuleBoundary(filePath, sourceFile, node, moduleName) {
+  const isBottomSheetModule = moduleName.startsWith('@expo/ui/community/bottom-sheet')
   if (moduleName.startsWith('@expo/ui/swift-ui') && !filePath.endsWith('.ios.tsx')) {
     addViolation(filePath, sourceFile, node, 'SwiftUI imports belong in an .ios.tsx implementation')
   }
@@ -520,7 +521,7 @@ function checkModuleBoundary(filePath, sourceFile, node, moduleName) {
       'Compose imports belong in an .android.tsx implementation'
     )
   }
-  if (moduleName.startsWith('@expo/ui/community/bottom-sheet') && filePath !== bottomDrawerPath) {
+  if (isBottomSheetModule && !bottomDrawerPaths.has(filePath)) {
     addViolation(
       filePath,
       sourceFile,

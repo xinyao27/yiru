@@ -41,6 +41,7 @@
     "start:ui": "node scripts/emulator/start.mjs --ui-lab"
   },
   "dependencies": {
+    "@expo/material-symbols": "catalog:mobile",
     "@expo/ui": "catalog:mobile",
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",

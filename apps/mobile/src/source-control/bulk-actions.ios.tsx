@@ -1,4 +1,4 @@
-import { Button, Host, HStack, Label, ProgressView } from '@expo/ui/swift-ui'
+import { Button, GlassEffectContainer, Host, HStack, Label, ProgressView } from '@expo/ui/swift-ui'
 import {
   buttonBorderShape,
   controlSize,
@@ -14,9 +14,9 @@ import { useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup
-} from '~/components/glass/swift-ui.ios'
+  MobileSwiftUiGlassCircleButton
+} from '~/components/glass/swift-ui-button.ios'
+import { translate } from '~/i18n/translate'
 
 import type { MobileSourceControlBulkActionsProps } from './bulk-actions-props'
 
@@ -80,31 +80,31 @@ export function MobileSourceControlBulkActions({
       matchContents={{ vertical: true }}
       style={{ width: '100%', backgroundColor: 'transparent', marginTop: 12 }}
     >
-      <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
+      <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
         <HStack spacing={8} modifiers={fullWidthModifiers}>
           <MobileSourceControlBulkAction
             disabled={stageDisabled}
-            label="Stage All"
+            label={translate('mobile.sourceControl.stageAll', 'Stage All')}
             loading={stageLoading}
             onPress={onStageAll}
             systemImage="plus"
           />
           <MobileSourceControlBulkAction
             disabled={unstageDisabled}
-            label="Unstage All"
+            label={translate('mobile.sourceControl.unstageAll', 'Unstage All')}
             loading={unstageLoading}
             onPress={onUnstageAll}
             systemImage="minus"
           />
           <MobileSwiftUiGlassCircleButton
             disabled={actionsDisabled}
-            label="More"
+            label={translate('mobile.common.more', 'More')}
             onPress={onMore}
             size="large"
             systemImage="ellipsis"
           />
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

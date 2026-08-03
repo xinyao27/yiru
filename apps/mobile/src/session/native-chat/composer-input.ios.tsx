@@ -1,4 +1,11 @@
-import { Host, HStack, TextField, type TextFieldRef, useNativeState } from '@expo/ui/swift-ui'
+import {
+  GlassEffectContainer,
+  Host,
+  HStack,
+  TextField,
+  type TextFieldRef,
+  useNativeState
+} from '@expo/ui/swift-ui'
 import {
   disabled as disabledModifier,
   fixedSize,
@@ -9,11 +16,9 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { useCSSVariable, useUniwind } from 'uniwind'
 
-import {
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassInputShell
-} from '~/components/glass/swift-ui.ios'
+import { MobileSwiftUiGlassCircleButton } from '~/components/glass/swift-ui-button.ios'
+import { MobileSwiftUiGlassInputShell } from '~/components/glass/swift-ui-input-shell.ios'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import { MobileAttachmentMenu } from '../attachment-menu'
@@ -76,7 +81,7 @@ export function MobileNativeChatInput({
       matchContents={{ vertical: true }}
       style={{ width: '100%' }}
     >
-      <MobileSwiftUiGlassGroup spacing={8}>
+      <GlassEffectContainer spacing={8}>
         <HStack alignment="bottom" spacing={8}>
           {onAttachImage ? (
             <MobileAttachmentMenu
@@ -101,7 +106,7 @@ export function MobileNativeChatInput({
             {agentWorking && onStop ? (
               <MobileSwiftUiGlassCircleButton
                 isProminent
-                label="Stop the agent"
+                label={translate('mobile.session.chat.stopAgent', 'Stop the agent')}
                 size="small"
                 systemImage="stop"
                 tintColor={foregroundColor}
@@ -111,7 +116,7 @@ export function MobileNativeChatInput({
               <MobileSwiftUiGlassCircleButton
                 disabled={!canSend}
                 isProminent
-                label="Send message"
+                label={translate('mobile.session.chat.sendMessage', 'Send message')}
                 size="small"
                 systemImage="arrow.up"
                 tintColor={foregroundColor}
@@ -120,7 +125,7 @@ export function MobileNativeChatInput({
             ) : null}
           </MobileSwiftUiGlassInputShell>
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

@@ -12,6 +12,7 @@ import {
   ArrowCounterClockwise as Undo2,
   type Icon
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
 import type { MobileDiffReviewFooterProps } from './footer-props'
@@ -41,15 +42,16 @@ function ReviewFooterButton({
     <MobileGlassPressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
-      className={cn('rounded-full', grow && 'flex-1')}
+      className={cn('rounded-full', grow && 'w-full')}
+      containerClassName={grow ? 'flex-1' : undefined}
       contentClassName={cn(
-        'min-h-9 flex-row items-center justify-center rounded-full',
-        label ? 'gap-1 px-3' : 'w-9'
+        'flex-row items-center justify-center rounded-full',
+        label ? 'gap-1 px-3' : 'w-11'
       )}
       disabled={disabled}
       fallbackClassName={prominent ? 'border-transparent bg-primary' : 'bg-secondary'}
-      hitSlop={label ? 4 : 8}
       onPress={onPress}
+      size="regular"
       tintColorClassName={prominent ? 'accent-primary' : undefined}
     >
       <Icon
@@ -97,32 +99,32 @@ export function MobileDiffReviewFooter({
           <View className="flex-row gap-2">
             {item.canStage ? (
               <ReviewFooterButton
-                accessibilityLabel="Stage file"
+                accessibilityLabel={translate('mobile.review.footer.stageFile', 'Stage file')}
                 disabled={busyAction !== null}
                 grow
                 icon={Plus}
-                label="Stage"
+                label={translate('mobile.review.footer.stage', 'Stage')}
                 onPress={() => onGitMutation('git.stage', item)}
               />
             ) : null}
             {item.canUnstage ? (
               <ReviewFooterButton
-                accessibilityLabel="Unstage file"
+                accessibilityLabel={translate('mobile.review.footer.unstageFile', 'Unstage file')}
                 disabled={busyAction !== null}
                 grow
                 icon={Undo2}
-                label="Unstage"
+                label={translate('mobile.review.footer.unstage', 'Unstage')}
                 onPress={() => onGitMutation('git.unstage', item)}
               />
             ) : null}
             {item.canDiscard ? (
               <ReviewFooterButton
-                accessibilityLabel="Discard file"
+                accessibilityLabel={translate('mobile.review.footer.discardFile', 'Discard file')}
                 destructive
                 disabled={busyAction !== null}
                 grow
                 icon={Trash2}
-                label="Discard"
+                label={translate('mobile.review.footer.discard', 'Discard')}
                 onPress={() => onDiscard(item)}
               />
             ) : null}
@@ -130,26 +132,34 @@ export function MobileDiffReviewFooter({
         ) : null}
         <View className="flex-row items-center gap-2">
           <ReviewFooterButton
-            accessibilityLabel="Previous file"
+            accessibilityLabel={translate('mobile.review.footer.previousFile', 'Previous file')}
             icon={ChevronLeft}
             onPress={() => onMoveFile('previous')}
           />
           <ReviewFooterButton
-            accessibilityLabel="Add file note"
+            accessibilityLabel={translate('mobile.review.footer.addFileNote', 'Add file note')}
             icon={FileText}
-            label="Note"
+            label={translate('mobile.review.footer.note', 'Note')}
             onPress={onAddFileNote}
           />
           <ReviewFooterButton
-            accessibilityLabel="Mark file reviewed"
+            accessibilityLabel={
+              item.isReviewed
+                ? translate('mobile.review.footer.reviewed', 'Reviewed')
+                : translate('mobile.review.footer.markReviewed', 'Mark Reviewed')
+            }
             grow
             icon={Check}
-            label={item.isReviewed ? 'Reviewed' : 'Mark Reviewed'}
+            label={
+              item.isReviewed
+                ? translate('mobile.review.footer.reviewed', 'Reviewed')
+                : translate('mobile.review.footer.markReviewed', 'Mark Reviewed')
+            }
             onPress={onMarkReviewed}
             prominent
           />
           <ReviewFooterButton
-            accessibilityLabel="Next file"
+            accessibilityLabel={translate('mobile.review.footer.nextFile', 'Next file')}
             icon={ChevronRight}
             onPress={() => onMoveFile('next')}
           />

@@ -1,12 +1,9 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
+import { translate } from '~/i18n/translate'
 import type { MobileDiffReviewQueueItem } from '~/session/diff/review-queue'
-import {
-  mobileReviewCountLabel,
-  mobileReviewScopeLabel,
-  type ReviewDiffState
-} from '~/session/diff/review-screen-model'
+import { mobileReviewCountLabel, type ReviewDiffState } from '~/session/diff/review-screen-model'
 import { MOBILE_GIT_STATUS_LABELS } from '~/source-control/git-status'
 import { cn } from '~/style/class-names'
 
@@ -42,6 +39,15 @@ function statusColorClassName(status: MobileDiffReviewQueueItem['status']): stri
   }
 }
 
+function reviewScopeLabel(item: MobileDiffReviewQueueItem): string {
+  if (item.scope === 'branch') {
+    return translate('mobile.review.file.scope.branch', 'Branch')
+  }
+  return item.scope === 'staged'
+    ? translate('mobile.review.file.scope.staged', 'Staged')
+    : translate('mobile.review.file.scope.unstaged', 'Unstaged')
+}
+
 export function MobileDiffReviewFileSummary({
   currentIndex,
   diffState,
@@ -51,7 +57,7 @@ export function MobileDiffReviewFileSummary({
   staleCommentIds,
   onEditNote,
   onJumpHunk
-}: Props) {
+}: Props): React.JSX.Element {
   const hunkDisabled = diffState.kind !== 'ready' || diffState.hunks.length === 0
   const badgeColorClassName = statusColorClassName(item.status)
   return (
@@ -67,8 +73,12 @@ export function MobileDiffReviewFileSummary({
             {item.filePath}
           </Text>
           <Text className={styles.fileMeta} numberOfLines={1}>
-            {mobileReviewScopeLabel(item)}
-            {item.oldPath ? ` from ${item.oldPath}` : ''}
+            {reviewScopeLabel(item)}
+            {item.oldPath
+              ? translate('mobile.review.file.previousPath', ' from {{path}}', {
+                  path: item.oldPath
+                })
+              : ''}
           </Text>
         </View>
       </View>
@@ -76,15 +86,31 @@ export function MobileDiffReviewFileSummary({
         <Text className={styles.fileMeta}>
           {currentIndex + 1}/{filteredCount}
         </Text>
-        {item.isReviewed ? <Text className="text-xs text-green-500">Reviewed</Text> : null}
-        {item.changedSinceReview ? <Text className="text-xs text-amber-500">Changed</Text> : null}
+        {item.isReviewed ? (
+          <Text className="text-xs text-green-500">
+            {translate('mobile.review.file.reviewed', 'Reviewed')}
+          </Text>
+        ) : null}
+        {item.changedSinceReview ? (
+          <Text className="text-xs text-amber-500">
+            {translate('mobile.review.file.changed', 'Changed')}
+          </Text>
+        ) : null}
         {item.noteCount > 0 ? (
           <Text className={styles.fileMeta}>
-            {mobileReviewCountLabel(item.noteCount, 'note', 'notes')}
+            {mobileReviewCountLabel(
+              item.noteCount,
+              translate('mobile.review.file.note', 'note'),
+              translate('mobile.review.file.notes', 'notes')
+            )}
           </Text>
         ) : null}
         {item.staleNoteCount > 0 ? (
-          <Text className={styles.staleText}>{item.staleNoteCount} stale</Text>
+          <Text className={styles.staleText}>
+            {translate('mobile.review.file.staleCount', '{{count}} stale', {
+              count: item.staleNoteCount
+            })}
+          </Text>
         ) : null}
       </View>
       {fileNotes.length > 0 ? (
@@ -96,7 +122,10 @@ export function MobileDiffReviewFileSummary({
                 'min-h-11 rounded-xl p-2 active:bg-accent',
                 staleCommentIds.has(note.id) && 'border-hairline border-amber-500'
               )}
-              accessibilityLabel="Edit file note"
+              accessibilityLabel={translate(
+                'mobile.review.file.editNoteAccessibility',
+                'Edit file note'
+              )}
               accessibilityRole="button"
               onPress={() => onEditNote(note)}
             >
@@ -104,7 +133,9 @@ export function MobileDiffReviewFileSummary({
                 {note.body}
               </Text>
               {staleCommentIds.has(note.id) ? (
-                <Text className={styles.staleText}>Stale</Text>
+                <Text className={styles.staleText}>
+                  {translate('mobile.review.file.stale', 'Stale')}
+                </Text>
               ) : null}
             </Pressable>
           ))}

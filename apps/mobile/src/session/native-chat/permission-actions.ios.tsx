@@ -1,4 +1,4 @@
-import { Button, Host, HStack } from '@expo/ui/swift-ui'
+import { Button, GlassEffectContainer, Host, HStack } from '@expo/ui/swift-ui'
 import {
   buttonBorderShape,
   controlSize,
@@ -9,10 +9,7 @@ import { useMemo } from 'react'
 import { useUniwind } from 'uniwind'
 
 import { useMobileGlassAvailable } from '~/components/glass/availability'
-import {
-  MobileSwiftUiGlassGroup,
-  mobileSwiftUiGlassButtonStyle
-} from '~/components/glass/swift-ui.ios'
+import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
 
 import type { MobileChatPermission } from './permission'
 
@@ -50,7 +47,7 @@ export function MobileNativeChatPermissionActions({
 
   return (
     <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
-      <MobileSwiftUiGlassGroup spacing={8}>
+      <GlassEffectContainer spacing={8}>
         <HStack spacing={8}>
           {options.map((option, index) => (
             <Button
@@ -61,7 +58,7 @@ export function MobileNativeChatPermissionActions({
             />
           ))}
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

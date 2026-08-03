@@ -22,7 +22,6 @@ import { useCSSVariable } from 'uniwind'
 import { MobileBrowserPane } from '~/browser/pane'
 import { normalizeBrowserUrl } from '~/browser/url'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
-import { MobileAgentIcon } from '~/components/agent-icon'
 import { BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
 import {
@@ -35,19 +34,14 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { StatusDot } from '~/components/status-dot'
 import { TextInputModal } from '~/components/text-input-modal'
 import {
-  Warning as AlertTriangle,
-  Robot as Bot,
-  CaretLeft as ChevronLeft,
   Copy,
-  Folder,
   FileText,
-  GitMerge,
-  DotsThree as MoreHorizontal,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  Trash as Trash2,
+  X
 } from '~/components/uniwind-icons'
 import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { isFileExistsErrorMessage } from '~/files/file-exists-error'
@@ -71,10 +65,13 @@ import {
   dismissMobileSessionCreateWarningState,
   reconcileMobileSessionCreateWarningState
 } from '~/session/create-warning-state'
+import {
+  MobileSessionCreationPlaceholder,
+  MobileSessionCreationWarning
+} from '~/session/creation-status'
 import { SessionDockColumn } from '~/session/dock-column'
 import { FileReader } from '~/session/file-reader'
 import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
-import { MobileSessionHeaderIconButton } from '~/session/header-icon-button'
 import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
 import { MarkdownReader } from '~/session/markdown-reader'
@@ -83,6 +80,10 @@ import { useMobileNativeChatController } from '~/session/native-chat/use-control
 import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
 import { useMobileNativeChatReadability } from '~/session/native-chat/use-readability'
 import { useMobileNativeChatTerminalStream } from '~/session/native-chat/use-terminal-stream'
+import {
+  buildCreateTabAgentActions,
+  buildSendReviewNotesAgentActions
+} from '~/session/new-tab-agent-actions'
 import { loadMobileNewTabAgentOptions } from '~/session/new-tab-agent-loader'
 import type { MobileNewTabAgentOption } from '~/session/new-tab-agent-options'
 import { activateOpenedSourceControlDiffTab } from '~/session/opened-mobile-session-tab'
@@ -194,7 +195,7 @@ const BROWSER_STREAMING_UNAVAILABLE_MESSAGE = translate(
 )
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
-export default function SessionScreen() {
+export default function SessionScreen(): React.JSX.Element {
   const {
     hostId,
     worktreeId,
@@ -1106,7 +1107,13 @@ export default function SessionScreen() {
     void (async () => {
       const reportActivationOutcome = (response: RpcSuccess | null): void => {
         if (!disposed && response && headlessActivationNeedsHostRenderer(response.result)) {
-          showToast('Open Yiru on the host to wake sleeping agents.', 3000)
+          showToast(
+            translate(
+              'mobile.session.wakeAgents.openHost',
+              'Open Yiru on the host to wake sleeping agents.'
+            ),
+            3000
+          )
         }
       }
       if (client && created !== '1' && !isFloatingWorkspaceRoute) {
@@ -1549,7 +1556,10 @@ export default function SessionScreen() {
       }
       if (!isTerminalLiveInputWithinByteLimit(text)) {
         triggerError()
-        showToast('Input too large (max 256 KiB)', 1500)
+        showToast(
+          translate('mobile.session.terminal.inputTooLarge', 'Input too large (max 256 KiB)'),
+          1500
+        )
         return false
       }
       const rpc = clientRef.current
@@ -1964,9 +1974,9 @@ export default function SessionScreen() {
       await client.sendRequest('terminal.clearBuffer', {
         terminal: target.handle
       })
-      showToast('Terminal cleared')
+      showToast(translate('mobile.session.terminal.cleared', 'Terminal cleared'))
     } catch {
-      showToast("Couldn't clear terminal", 1500)
+      showToast(translate('mobile.session.terminal.clearFailed', "Couldn't clear terminal"), 1500)
     }
   }
 
@@ -2060,7 +2070,7 @@ export default function SessionScreen() {
         // nothing on copy (it only banners on paste), so the in-app toast is
         // the only success signal there.
         if (Platform.OS === 'ios') {
-          showToast('Copied')
+          showToast(translate('mobile.common.copied', 'Copied'))
         }
         terminalRefs.current.get(handle)?.cancelSelect()
       } catch (e) {
@@ -2071,7 +2081,7 @@ export default function SessionScreen() {
           name: err.name,
           message: err.message
         })
-        showToast("Couldn't copy", 1500)
+        showToast(translate('mobile.common.copyFailed', "Couldn't copy"), 1500)
       }
     },
     [showToast]
@@ -2084,7 +2094,13 @@ export default function SessionScreen() {
       }
       // eslint-disable-next-line no-console
       console.warn('[mobile-clip] selection evicted')
-      showToast('Selection cleared (scrolled out of buffer)', 1500)
+      showToast(
+        translate(
+          'mobile.session.terminal.selectionEvicted',
+          'Selection cleared (scrolled out of buffer)'
+        ),
+        1500
+      )
       setSelectModeActive(false)
     },
     [showToast]
@@ -2420,7 +2436,13 @@ export default function SessionScreen() {
     const launch = buildMobileQuickCommandLaunch(command)
     if (!launch) {
       triggerError()
-      showToast('Edit this quick command before running it', 1800)
+      showToast(
+        translate(
+          'mobile.session.quickCommands.editBeforeRunning',
+          'Edit this quick command before running it'
+        ),
+        1800
+      )
       return false
     }
     const label = command.label.trim() || 'Quick command'
@@ -2540,7 +2562,10 @@ export default function SessionScreen() {
     method: 'browser.back' | 'browser.forward' | 'browser.reload'
   ) {
     if (!client || !tab.browserPageId) {
-      showToast('Browser page is not available yet.', 1500)
+      showToast(
+        translate('mobile.session.browser.pageUnavailable', 'Browser page is not available yet.'),
+        1500
+      )
       return
     }
     try {
@@ -2811,96 +2836,25 @@ export default function SessionScreen() {
     opacity: toastOpacityRef.current,
     transform: [{ translateY: -keyboardLift }]
   }
-  const createTabAgentActions =
-    createTabAgentLoadState === 'loading'
-      ? [
-          {
-            label: 'Detecting Agents',
-            icon: Bot,
-            disabled: true,
-            loading: true,
-            onPress: () => {}
-          }
-        ]
-      : createTabAgentOptions.length > 0
-        ? createTabAgentOptions.map((option) => ({
-            label: option.label,
-            renderIcon: () => <MobileAgentIcon agentId={option.agent} size={16} />,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              void handleCreateTerminal(option.agent)
-            }
-          }))
-        : createTabAgentLoadState === 'loaded'
-          ? [
-              {
-                label: 'No Enabled Agents',
-                icon: Bot,
-                disabled: true,
-                onPress: () => {}
-              }
-            ]
-          : createTabAgentLoadState === 'error'
-            ? [
-                {
-                  label: 'Agent Presets Unavailable',
-                  hint: 'Check the host connection',
-                  icon: Bot,
-                  disabled: true,
-                  onPress: () => {}
-                }
-              ]
-            : []
-  const sendDiffNotesAgentActions =
-    pendingDiffNotesDelivery === null
-      ? []
-      : createTabAgentLoadState === 'loading'
-        ? [
-            {
-              label: 'Detecting Agents',
-              icon: Bot,
-              disabled: true,
-              loading: true,
-              onPress: () => {}
-            }
-          ]
-        : createTabAgentOptions.length > 0
-          ? createTabAgentOptions.map((option) => ({
-              label: option.label,
-              hint: 'New agent session',
-              icon: Bot,
-              onPress: () => {
-                const delivery = pendingDiffNotesDelivery
-                setPendingDiffNotesDelivery(null)
-                if (!delivery) {
-                  return
-                }
-                void handleCreateTerminal(option.agent, {
-                  initialPrompt: delivery.prompt,
-                  onPromptSent: () => void clearDeliveredDiffComments(delivery.comments)
-                })
-              }
-            }))
-          : createTabAgentLoadState === 'loaded'
-            ? [
-                {
-                  label: 'No Enabled Agents',
-                  icon: Bot,
-                  disabled: true,
-                  onPress: () => {}
-                }
-              ]
-            : createTabAgentLoadState === 'error'
-              ? [
-                  {
-                    label: 'Agent Presets Unavailable',
-                    hint: 'Copy notes instead',
-                    icon: Bot,
-                    disabled: true,
-                    onPress: () => {}
-                  }
-                ]
-              : []
+  const createTabAgentActions = buildCreateTabAgentActions({
+    loadState: createTabAgentLoadState,
+    options: createTabAgentOptions,
+    onCreate: (agent) => void handleCreateTerminal(agent)
+  })
+  const sendDiffNotesAgentActions = buildSendReviewNotesAgentActions({
+    loadState: createTabAgentLoadState,
+    options: pendingDiffNotesDelivery === null ? [] : createTabAgentOptions,
+    onSelect: (agent) => {
+      const delivery = pendingDiffNotesDelivery
+      if (!delivery) {
+        return
+      }
+      void handleCreateTerminal(agent, {
+        initialPrompt: delivery.prompt,
+        onPromptSent: () => void clearDeliveredDiffComments(delivery.comments)
+      })
+    }
+  })
 
   // Routes a header panel-icon tap through the pure dock-vs-push decision (U1):
   // measured dock-capable rows toggle/swap, constrained rows push full-screen.
@@ -2951,7 +2905,7 @@ export default function SessionScreen() {
       headerBackVisible: false,
       headerShadowVisible: false,
       headerStyle: { backgroundColor },
-      title: worktreeName || 'Terminal'
+      title: worktreeName || translate('mobile.session.header.terminalFallback', 'Terminal')
     }),
     [backgroundColor, hasDirtyMarkdownDrafts, worktreeName]
   )
@@ -2963,28 +2917,40 @@ export default function SessionScreen() {
         <>
           <Stack.Toolbar placement="left">
             <Stack.Toolbar.Button
-              accessibilityLabel="Back to workspaces"
+              accessibilityLabel={translate(
+                'mobile.session.header.backToWorkspaces',
+                'Back to workspaces'
+              )}
               icon="chevron.left"
               onPress={requestLeaveSession}
             />
           </Stack.Toolbar>
           <Stack.Toolbar placement="right">
             <Stack.Toolbar.Button
-              accessibilityLabel="Open file explorer"
+              accessibilityLabel={translate(
+                'mobile.session.header.openFileExplorer',
+                'Open file explorer'
+              )}
               hidden={isFloatingWorkspaceRoute}
               icon="folder"
               onPress={() => handlePanelTap('files')}
               selected={activePanel === 'files'}
             />
             <Stack.Toolbar.Button
-              accessibilityLabel="Open source control"
+              accessibilityLabel={translate(
+                'mobile.session.header.openSourceControl',
+                'Open source control'
+              )}
               hidden={isFolderWorkspaceRoute || isFloatingWorkspaceRoute}
               icon="arrow.triangle.branch"
               onPress={() => handlePanelTap('sourceControl')}
               selected={activePanel === 'sourceControl'}
             />
             <Stack.Toolbar.Menu
-              accessibilityLabel="More session actions"
+              accessibilityLabel={translate(
+                'mobile.session.header.moreActions',
+                'More session actions'
+              )}
               hidden={!showHeaderMoreButton}
               icon="ellipsis"
               separateBackground
@@ -2994,14 +2960,14 @@ export default function SessionScreen() {
                 icon="clock.arrow.circlepath"
                 onPress={openAgentSessionHistory}
               >
-                Agent History
+                {translate('mobile.session.header.agentHistory', 'Agent History')}
               </Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction
                 hidden={!showChecksAction}
                 icon="checkmark.circle"
                 onPress={() => handlePanelTap('pr')}
               >
-                Checks
+                {translate('mobile.session.header.checks', 'Checks')}
               </Stack.Toolbar.MenuAction>
             </Stack.Toolbar.Menu>
           </Stack.Toolbar>
@@ -3011,15 +2977,18 @@ export default function SessionScreen() {
         {!useNativeSessionHeader ? (
           <MobileGlassHeader includesTopInset>
             <View className="min-h-15 flex-row items-center gap-2 px-3 py-1">
-              <MobileSessionHeaderIconButton
-                accessibilityLabel="Back to workspaces"
-                icon={ChevronLeft}
+              <MobileGlassIconButton
+                accessibilityLabel={translate(
+                  'mobile.session.header.backToWorkspaces',
+                  'Back to workspaces'
+                )}
+                icon="back"
                 onPress={requestLeaveSession}
               />
 
               <View className="min-w-0 flex-1">
                 <Text className="text-foreground text-base font-semibold" numberOfLines={1}>
-                  {worktreeName || 'Terminal'}
+                  {worktreeName || translate('mobile.session.header.terminalFallback', 'Terminal')}
                 </Text>
                 <Pressable
                   className="mt-1 flex-row items-center gap-2"
@@ -3030,7 +2999,14 @@ export default function SessionScreen() {
                     }
                   }}
                   accessibilityRole={showConnectionRetry ? 'button' : undefined}
-                  accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+                  accessibilityLabel={
+                    showConnectionRetry
+                      ? translate(
+                          'mobile.session.header.reconnectToDesktop',
+                          'Reconnect to desktop'
+                        )
+                      : undefined
+                  }
                 >
                   <StatusDot state={connState} />
                   <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
@@ -3040,26 +3016,35 @@ export default function SessionScreen() {
               </View>
               <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                 {!isFloatingWorkspaceRoute ? (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'files'}
-                    accessibilityLabel="Open file explorer"
-                    icon={Folder}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.openFileExplorer',
+                      'Open file explorer'
+                    )}
+                    icon="folder"
+                    isSelected={activePanel === 'files'}
                     onPress={() => handlePanelTap('files')}
                   />
                 ) : null}
                 {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'sourceControl'}
-                    accessibilityLabel="Open source control"
-                    icon={GitMerge}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.openSourceControl',
+                      'Open source control'
+                    )}
+                    icon="source-control"
+                    isSelected={activePanel === 'sourceControl'}
                     onPress={() => handlePanelTap('sourceControl')}
                   />
                 )}
                 {showHeaderMoreButton ? (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'pr'}
-                    accessibilityLabel="More session actions"
-                    icon={MoreHorizontal}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.moreActions',
+                      'More session actions'
+                    )}
+                    icon="more"
+                    isSelected={activePanel === 'pr'}
                     onPress={() => setShowHeaderMoreActions(true)}
                   />
                 ) : null}
@@ -3071,7 +3056,11 @@ export default function SessionScreen() {
         {useNativeSessionHeader && connState !== 'connected' ? (
           <MobileGlassSurface className="mx-3 mt-2 overflow-hidden rounded-xl" isFunctional>
             <Pressable
-              accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+              accessibilityLabel={
+                showConnectionRetry
+                  ? translate('mobile.session.header.reconnectToDesktop', 'Reconnect to desktop')
+                  : undefined
+              }
               accessibilityRole={showConnectionRetry ? 'button' : undefined}
               className="active:bg-accent flex-row items-center gap-2 rounded-xl px-3 py-2"
               disabled={!showConnectionRetry}
@@ -3109,7 +3098,13 @@ export default function SessionScreen() {
                 setShowQuickCommands(true)
                 return
               }
-              showToast('Checking desktop capabilities - try again in a moment', 1600)
+              showToast(
+                translate(
+                  'mobile.session.capabilities.checking',
+                  'Checking desktop capabilities - try again in a moment'
+                ),
+                1600
+              )
             }}
           />
         ) : null}
@@ -3121,47 +3116,25 @@ export default function SessionScreen() {
         <View className="flex-1 flex-row" onLayout={handleSessionContentRowLayout}>
           <View className="min-w-0 flex-1">
             {createWarning ? (
-              <MobileGlassSurface
-                className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2"
-                isFunctional
-              >
-                <AlertTriangle size={16} colorClassName="accent-amber-500" />
-                <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
-                <MobileGlassIconButton
-                  accessibilityLabel="Dismiss workspace creation warning"
-                  icon="close"
-                  onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
-                  size="small"
-                />
-              </MobileGlassSurface>
+              <MobileSessionCreationWarning
+                message={createWarning}
+                onDismiss={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
+              />
             ) : null}
 
-            {showLoadingState ? (
-              <View className={styles.emptyState}>
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              </View>
-            ) : showEmptyState ? (
-              <View className={styles.emptyState}>
-                <Text className={styles.emptyText}>No tabs in this session</Text>
-                {createError ? (
-                  <Text className="text-destructive mb-2 text-xs">{createError}</Text>
-                ) : null}
-                <View className="flex-row flex-wrap justify-center gap-2">
-                  <MobileGlassTextButton
-                    disabled={
-                      creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
-                    }
-                    label={
-                      creating || creatingBrowser || creatingMarkdown ? 'Creating...' : 'Create Tab'
-                    }
-                    onPress={() => {
-                      setCreateError('')
-                      setShowCreateTabDrawer(true)
-                    }}
-                    size="large"
-                  />
-                </View>
-              </View>
+            {showLoadingState || showEmptyState ? (
+              <MobileSessionCreationPlaceholder
+                createError={createError}
+                disabled={
+                  creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
+                }
+                isCreating={creating || creatingBrowser || creatingMarkdown}
+                loading={showLoadingState}
+                onCreateTab={() => {
+                  setCreateError('')
+                  setShowCreateTabDrawer(true)
+                }}
+              />
             ) : activeMarkdownTab ? (
               <View className={styles.markdownFrame}>
                 <MarkdownReader
@@ -3552,27 +3525,34 @@ export default function SessionScreen() {
 
         <ActionSheetModal
           visible={pendingDiffNotesDelivery !== null}
-          title="Send Review Notes"
-          message="Choose an agent session for the current notes."
+          title={translate('mobile.session.reviewNotes.title', 'Send Review Notes')}
+          message={translate(
+            'mobile.session.reviewNotes.message',
+            'Choose an agent session for the current notes.'
+          )}
           actions={[
             ...sendDiffNotesAgentActions,
             {
-              label: 'Copy Notes',
+              id: 'copy-notes',
+              label: translate('mobile.session.reviewNotes.copy', 'Copy Notes'),
               icon: Copy,
+              dismiss: 'immediate',
               onPress: () => {
                 const delivery = pendingDiffNotesDelivery
-                setPendingDiffNotesDelivery(null)
                 if (!delivery) {
                   return
                 }
                 void Clipboard.setStringAsync(delivery.prompt)
                   .then(() => {
                     triggerSuccess()
-                    showToast('Notes copied')
+                    showToast(translate('mobile.session.reviewNotes.copied', 'Notes copied'))
                   })
                   .catch(() => {
                     triggerError()
-                    showToast("Couldn't copy notes", 1500)
+                    showToast(
+                      translate('mobile.session.reviewNotes.copyFailed', "Couldn't copy notes"),
+                      1500
+                    )
                   })
               }
             }
@@ -3582,13 +3562,14 @@ export default function SessionScreen() {
 
         <ActionSheetModal
           visible={actionTarget != null}
-          title={actionTarget?.title || 'Terminal'}
+          title={
+            actionTarget?.title ?? translate('mobile.session.terminalActions.title', 'Terminal')
+          }
           actions={getMobileTerminalActionSheetActions({
             target: actionTarget,
             tabs: sessionTabs.filter((tab) => tab.type === 'terminal'),
             isTabChatView: nativeChatController.isTabChatView,
             nativeChatTranscriptIsLocalReadable,
-            onDismiss: () => setActionTarget(null),
             onToggleChat: toggleTabChatView,
             isPhoneMode,
             onToggleDisplayMode: (handle) => void toggleDisplayMode(handle),
@@ -3600,37 +3581,43 @@ export default function SessionScreen() {
         />
         <ActionSheetModal
           visible={markdownActionTarget != null}
-          title={markdownActionTarget?.title || 'Markdown'}
+          title={
+            markdownActionTarget?.title ??
+            translate('mobile.session.markdownActions.title', 'Markdown')
+          }
           actions={[
             {
-              label: 'Refresh',
+              id: 'refresh-markdown',
+              label: translate('mobile.session.markdownActions.refresh', 'Refresh'),
               icon: RefreshCw,
+              dismiss: 'immediate',
               onPress: () => {
                 const target = markdownActionTarget
-                setMarkdownActionTarget(null)
                 if (target) {
                   discardMarkdownLocalContent(target)
                 }
               }
             },
             {
-              label: 'Copy Path',
+              id: 'copy-markdown-path',
+              label: translate('mobile.session.markdownActions.copyPath', 'Copy Path'),
               icon: FileText,
+              dismiss: 'immediate',
               onPress: () => {
                 const target = markdownActionTarget
-                setMarkdownActionTarget(null)
                 if (target) {
                   void Clipboard.setStringAsync(target.relativePath || target.filePath)
-                  showToast('Path copied')
+                  showToast(translate('mobile.session.markdownActions.pathCopied', 'Path copied'))
                 }
               }
             },
             {
-              label: 'Close',
-              destructive: true,
+              id: 'close-markdown',
+              label: translate('mobile.session.markdownActions.close', 'Close'),
+              icon: X,
+              dismiss: 'immediate',
               onPress: () => {
                 const target = markdownActionTarget
-                setMarkdownActionTarget(null)
                 if (target) {
                   void handleCloseSessionTab(target)
                 }
@@ -3641,25 +3628,27 @@ export default function SessionScreen() {
         />
         <ActionSheetModal
           visible={fileActionTarget != null}
-          title={fileActionTarget?.title || 'File'}
+          title={fileActionTarget?.title ?? translate('mobile.session.fileActions.title', 'File')}
           actions={[
             {
-              label: 'Refresh',
+              id: 'refresh-file',
+              label: translate('mobile.session.fileActions.refresh', 'Refresh'),
               icon: RefreshCw,
+              dismiss: 'immediate',
               onPress: () => {
                 const target = fileActionTarget
-                setFileActionTarget(null)
                 if (target) {
                   void readFileTab(target)
                 }
               }
             },
             {
-              label: 'Close',
-              destructive: true,
+              id: 'close-file',
+              label: translate('mobile.session.fileActions.close', 'Close'),
+              icon: X,
+              dismiss: 'immediate',
               onPress: () => {
                 const target = fileActionTarget
-                setFileActionTarget(null)
                 if (target) {
                   void handleCloseSessionTab(target)
                 }
@@ -3676,53 +3665,67 @@ export default function SessionScreen() {
         />
         <ActionSheetModal
           visible={leaveDrafts != null}
-          title="Unsaved markdown changes"
-          message="Copy or discard phone drafts before leaving."
+          title={translate('mobile.session.unsavedDrafts.title', 'Unsaved markdown changes')}
+          message={translate(
+            'mobile.session.unsavedDrafts.message',
+            'Copy or discard phone drafts before leaving.'
+          )}
           actions={[
             {
-              label: 'Copy All & Leave',
+              id: 'copy-drafts-and-leave',
+              label: translate('mobile.session.unsavedDrafts.copyAndLeave', 'Copy All & Leave'),
               icon: FileText,
-              onPress: () => {
+              dismiss: 'on-success',
+              onPress: async () => {
                 const drafts = leaveDrafts ?? []
                 const combined = drafts
                   .map((draft) => `# ${draft.title}\n\n${draft.content}`)
                   .join('\n\n---\n\n')
-                void Clipboard.setStringAsync(combined)
-                  .then(() => {
-                    setLeaveDrafts(null)
-                    leaveSession()
-                  })
-                  .catch(() => {
-                    triggerError()
-                    showToast("Couldn't copy drafts", 1500)
-                  })
+                try {
+                  await Clipboard.setStringAsync(combined)
+                  leaveSession()
+                  return true
+                } catch {
+                  triggerError()
+                  showToast(
+                    translate('mobile.session.unsavedDrafts.copyFailed', "Couldn't copy drafts"),
+                    1500
+                  )
+                  return false
+                }
               }
             },
             {
-              label: 'Discard & Leave',
+              id: 'discard-drafts-and-leave',
+              label: translate('mobile.session.unsavedDrafts.discardAndLeave', 'Discard & Leave'),
+              icon: Trash2,
               destructive: true,
-              onPress: () => {
-                setLeaveDrafts(null)
-                leaveSession()
-              }
+              dismiss: 'immediate',
+              onPress: leaveSession
             }
           ]}
           onClose={() => setLeaveDrafts(null)}
         />
         <ConfirmModal
           visible={discardMarkdownTarget != null}
-          title="Discard Changes"
-          message="Replace the phone draft with the latest desktop file?"
-          confirmLabel="Discard"
+          title={translate('mobile.session.markdownDiscard.title', 'Discard Changes')}
+          message={translate(
+            'mobile.session.markdownDiscard.message',
+            'Replace the phone draft with the latest desktop file?'
+          )}
+          confirmLabel={translate('mobile.session.markdownDiscard.confirm', 'Discard')}
           destructive
           onConfirm={confirmDiscardMarkdown}
           onCancel={() => setDiscardMarkdownTarget(null)}
         />
         <TextInputModal
           visible={renameTarget != null}
-          title="Rename Terminal"
-          defaultValue={renameTarget?.title || 'Terminal'}
-          placeholder="Terminal name"
+          title={translate('mobile.session.terminalRename.title', 'Rename Terminal')}
+          defaultValue={
+            renameTarget?.title ??
+            translate('mobile.session.terminalRename.defaultName', 'Terminal')
+          }
+          placeholder={translate('mobile.session.terminalRename.placeholder', 'Terminal name')}
           onSubmit={(value) => void handleRenameTerminal(value)}
           onCancel={() => setRenameTarget(null)}
         />
@@ -3733,23 +3736,24 @@ export default function SessionScreen() {
         onKeysChanged={setCustomKeys}
         onManageShortcuts={handleManageShortcuts}
       />
-      <ActionSheetModal
+      <ConfirmModal
         visible={deleteKeyTarget != null}
-        title={deleteKeyTarget?.label ?? 'Shortcut'}
-        message="Remove this custom shortcut?"
-        actions={[
-          {
-            label: 'Remove',
-            destructive: true,
-            onPress: () => {
-              if (deleteKeyTarget) {
-                void handleDeleteCustomKey(deleteKeyTarget)
-              }
-              setDeleteKeyTarget(null)
-            }
+        title={translate('mobile.session.customShortcut.removeTitle', 'Remove Shortcut')}
+        message={translate(
+          'mobile.session.customShortcut.removeMessage',
+          'Remove "{{label}}" from your custom shortcuts?',
+          { label: deleteKeyTarget?.label ?? '' }
+        )}
+        confirmLabel={translate('mobile.session.customShortcut.removeConfirm', 'Remove')}
+        destructive
+        onConfirm={() => {
+          const target = deleteKeyTarget
+          setDeleteKeyTarget(null)
+          if (target) {
+            void handleDeleteCustomKey(target)
           }
-        ]}
-        onClose={() => setDeleteKeyTarget(null)}
+        }}
+        onCancel={() => setDeleteKeyTarget(null)}
       />
     </View>
   )

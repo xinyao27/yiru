@@ -59,9 +59,10 @@ function MobileTerminalAccessoryIconView({
 }
 
 export function MobileTerminalAccessoryKey({
+  accessibilityState,
   disabled = false,
   icon,
-  isSelected = false,
+  isSelected,
   label,
   onPress,
   ...pressableProps
@@ -70,11 +71,16 @@ export function MobileTerminalAccessoryKey({
     <MobileGlassPressable
       {...pressableProps}
       accessibilityRole="button"
+      accessibilityState={{
+        ...accessibilityState,
+        disabled,
+        ...(isSelected === undefined ? {} : { selected: isSelected })
+      }}
       className="rounded-full"
       contentClassName="min-h-8 min-w-10 items-center justify-center rounded-full px-3 py-1"
       disabled={disabled}
       onPress={onPress}
-      tintColorClassName={isSelected ? 'accent-primary' : 'accent-secondary'}
+      tintColorClassName={isSelected === true ? 'accent-primary' : 'accent-secondary'}
     >
       {icon ? <MobileTerminalAccessoryIconView icon={icon} /> : null}
       {label ? <Text className="text-muted-foreground font-mono text-xs">{label}</Text> : null}

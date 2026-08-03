@@ -1,5 +1,6 @@
 import {
   Button,
+  GlassEffectContainer,
   Host,
   HStack,
   ProgressView,
@@ -28,10 +29,10 @@ import { useCSSVariable, useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassInputShell
-} from '~/components/glass/swift-ui.ios'
+  MobileSwiftUiGlassCircleButton
+} from '~/components/glass/swift-ui-button.ios'
+import { MobileSwiftUiGlassInputShell } from '~/components/glass/swift-ui-input-shell.ios'
+import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileSourceControlCommitBarProps } from './commit-bar-props'
@@ -143,12 +144,15 @@ export function MobileSourceControlCommitBar({
       matchContents={{ vertical: true }}
       style={{ width: '100%', backgroundColor: 'transparent' }}
     >
-      <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
+      <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
         <HStack spacing={8} modifiers={fullWidthModifiers}>
           <MobileSwiftUiGlassInputShell hasTrailingAction={false} minHeight={44}>
             {hasStagedFiles ? (
               <TextField
-                placeholder="Commit message"
+                placeholder={translate(
+                  'mobile.sourceControl.commitMessage.placeholder',
+                  'Commit message'
+                )}
                 modifiers={inputModifiers}
                 text={nativeText}
                 onTextChange={(nextValue) => {
@@ -157,7 +161,9 @@ export function MobileSourceControlCommitBar({
                 }}
               />
             ) : (
-              <Text modifiers={emptyTextModifiers}>No staged files</Text>
+              <Text modifiers={emptyTextModifiers}>
+                {translate('mobile.sourceControl.noStagedFiles', 'No staged files')}
+              </Text>
             )}
           </MobileSwiftUiGlassInputShell>
           <Button modifiers={primaryModifiers} onPress={onPrimaryAction}>
@@ -172,8 +178,14 @@ export function MobileSourceControlCommitBar({
               disabled={generateDisabled}
               label={
                 generatingMessage
-                  ? 'Cancel commit message generation'
-                  : 'Generate commit message with AI'
+                  ? translate(
+                      'mobile.sourceControl.commitMessage.cancelGeneration',
+                      'Cancel commit message generation'
+                    )
+                  : translate(
+                      'mobile.sourceControl.commitMessage.generateWithAi',
+                      'Generate commit message with AI'
+                    )
               }
               onPress={onGenerate}
               size="large"
@@ -181,7 +193,7 @@ export function MobileSourceControlCommitBar({
             />
           ) : null}
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }
