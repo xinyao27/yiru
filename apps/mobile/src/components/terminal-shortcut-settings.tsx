@@ -1,10 +1,11 @@
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AppState, View, Text, Pressable, Switch, type AppStateStatus } from 'react-native'
+import { AppState, View, Text, Pressable, type AppStateStatus } from 'react-native'
 import type Animated from 'react-native-reanimated'
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
 
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
 import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from '../terminal/accessory-keys'
@@ -20,6 +21,7 @@ import { MobileContentSection } from './content-section'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
 import { MobileGlassIconButton } from './glass/icon-button'
+import { SettingsToggleRow } from './settings-toggle-row'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
 // reorderable section must share one fixed height.
@@ -39,19 +41,15 @@ function ShortcutBarRow({
       <View className={styles.keycap}>
         <Text className={styles.keycapText}>{shortcutKey.label}</Text>
       </View>
-      <View className={styles.rowContent}>
-        <Text className={styles.rowLabel}>
-          {shortcutKey.accessibilityLabel ?? shortcutKey.label}
-        </Text>
+      <View className="flex-1">
+        <SettingsToggleRow
+          inset="none"
+          label={shortcutKey.accessibilityLabel ?? shortcutKey.label}
+          labelLines={1}
+          onValueChange={onToggle}
+          value={visible}
+        />
       </View>
-      <Switch
-        value={visible}
-        onValueChange={onToggle}
-        trackColorOffClassName="accent-border"
-        trackColorOnClassName="accent-muted-foreground"
-        thumbColorClassName="accent-foreground"
-        ios_backgroundColorClassName="accent-border"
-      />
     </View>
   )
 }
@@ -219,10 +217,14 @@ export function TerminalShortcutSettings({
 
   return (
     <>
-      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>SHORTCUT BAR</Text>
+      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>
+        {translate('mobile.terminalShortcut.shortcutBarHeading', 'SHORTCUT BAR')}
+      </Text>
       <Text className="text-muted-foreground px-1 text-xs leading-5">
-        Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
-        the terminal shortcut bar.
+        {translate(
+          'mobile.terminalShortcut.shortcutBarDescription',
+          'Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on the terminal shortcut bar.'
+        )}
       </Text>
       <MobileContentSection className={cn(styles.section, styles.sectionTopGap)}>
         <DragReorderList
@@ -244,21 +246,31 @@ export function TerminalShortcutSettings({
         />
         <Pressable className={cn(styles.row, styles.rowPressedActive)} onPress={resetBuiltInKeys}>
           <View className={styles.rowContent}>
-            <Text className={styles.rowLabel}>Reset Defaults</Text>
+            <Text className={styles.rowLabel}>
+              {translate('mobile.terminalShortcut.resetDefaults', 'Reset Defaults')}
+            </Text>
             <Text className={styles.rowSublabel}>
-              Show every built-in shortcut key in the original order
+              {translate(
+                'mobile.terminalShortcut.resetDefaultsDescription',
+                'Show every built-in shortcut key in the original order'
+              )}
             </Text>
           </View>
         </Pressable>
       </MobileContentSection>
 
-      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>CUSTOM SHORTCUTS</Text>
+      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>
+        {translate('mobile.terminalShortcut.customShortcutsHeading', 'CUSTOM SHORTCUTS')}
+      </Text>
       <MobileContentSection className={cn(styles.section, styles.sectionTopGap)}>
         {customKeys.length === 0 ? (
           <>
             <View className="items-center justify-center p-3">
               <Text className="text-muted-foreground p-3 text-sm">
-                No custom shortcuts defined yet.
+                {translate(
+                  'mobile.terminalShortcut.noCustomShortcuts',
+                  'No custom shortcuts defined yet.'
+                )}
               </Text>
             </View>
             <View className="h-hairline bg-border mx-3" />
@@ -285,7 +297,11 @@ export function TerminalShortcutSettings({
                   </Text>
                 </View>
                 <MobileGlassIconButton
-                  accessibilityLabel={`Delete ${key.label}`}
+                  accessibilityLabel={translate(
+                    'mobile.terminalShortcut.deleteCustomShortcut',
+                    'Delete {{label}}',
+                    { label: key.label }
+                  )}
                   icon="delete"
                   isDestructive
                   onPress={() => handleDeleteCustomKey(key)}
@@ -300,8 +316,15 @@ export function TerminalShortcutSettings({
           onPress={() => setShowCustomKeyModal(true)}
         >
           <View className={styles.rowContent}>
-            <Text className={styles.rowLabel}>Add Custom Shortcut…</Text>
-            <Text className={styles.rowSublabel}>Create key combo or text macro</Text>
+            <Text className={styles.rowLabel}>
+              {translate('mobile.terminalShortcut.addCustomShortcut', 'Add Custom Shortcut…')}
+            </Text>
+            <Text className={styles.rowSublabel}>
+              {translate(
+                'mobile.terminalShortcut.addCustomShortcutDescription',
+                'Create key combo or text macro'
+              )}
+            </Text>
           </View>
           <View className="w-5 items-center">
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />

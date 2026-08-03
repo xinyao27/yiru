@@ -555,8 +555,8 @@ export default function HomeScreen() {
       setConfirmRemove(null)
       setHosts(await loadHosts())
     } catch {
-      // Why: ConfirmModal closes on confirm; re-open for retry and surface the
-      // failure instead of silently leaving the host listed.
+      // Why: keep the confirmation open for retry and surface the failure
+      // instead of silently leaving the host listed.
       setConfirmRemove(hostToRemove)
       Alert.alert('Could not remove host', 'Please try again.')
     }

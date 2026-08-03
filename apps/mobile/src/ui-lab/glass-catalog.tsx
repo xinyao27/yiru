@@ -5,6 +5,8 @@ import { useMobileGlassAvailable } from '../components/glass/availability'
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileGlassSurface } from '../components/glass/surface'
+import { translate } from '../i18n/translate'
+import { MobileUiLabNativeControlCatalog } from './native-control-catalog'
 
 export function MobileUiLabGlassCatalog(): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
@@ -12,29 +14,46 @@ export function MobileUiLabGlassCatalog(): React.JSX.Element {
 
   return (
     <View className="mt-5">
-      <Text className="text-foreground text-sm font-semibold">Glass control layer</Text>
+      <Text className="text-foreground text-sm font-semibold">
+        {translate('mobile.uiLab.glass.title', 'Glass control layer')}
+      </Text>
       <Text className="text-muted-foreground mt-1 text-xs leading-5">
-        Native material on iOS 26; the same geometry uses opaque semantic surfaces elsewhere.
+        {translate(
+          'mobile.uiLab.glass.description',
+          'Native material on iOS 26; the same geometry uses opaque semantic surfaces elsewhere.'
+        )}
       </Text>
       <Text className="text-muted-foreground mt-1 text-xs font-semibold">
-        {isGlassAvailable ? 'Native effect active' : 'Opaque fallback active'}
+        {isGlassAvailable
+          ? translate('mobile.uiLab.glass.nativeActive', 'Native effect active')
+          : translate('mobile.uiLab.glass.fallbackActive', 'Opaque fallback active')}
       </Text>
       <View className="border-border bg-secondary relative mt-3 min-h-36 overflow-hidden rounded-3xl border p-4">
         <View className="gap-2">
           <View className="bg-foreground h-5 w-32" />
           <View className="bg-muted h-4 w-48" />
           <View className="bg-muted h-4 w-40" />
-          <Text className="text-muted-foreground text-xs">{previewPresses} preview taps</Text>
+          <Text className="text-muted-foreground text-xs">
+            {translate('mobile.uiLab.glass.previewTaps', '{{count}} preview taps', {
+              count: previewPresses
+            })}
+          </Text>
         </View>
         <MobileGlassGroup className="absolute right-3 bottom-3 flex-row gap-2" spacing={8}>
           <MobileGlassIconButton
-            accessibilityLabel="Preview secondary glass action"
+            accessibilityLabel={translate(
+              'mobile.uiLab.glass.secondaryAction.label',
+              'Preview secondary glass action'
+            )}
             icon="plus"
             onPress={() => setPreviewPresses((count) => count + 1)}
             size="large"
           />
           <MobileGlassIconButton
-            accessibilityLabel="Preview prominent glass action"
+            accessibilityLabel={translate(
+              'mobile.uiLab.glass.prominentAction.label',
+              'Preview prominent glass action'
+            )}
             icon="send"
             isSelected
             onPress={() => setPreviewPresses((count) => count + 1)}
@@ -47,8 +66,11 @@ export function MobileUiLabGlassCatalog(): React.JSX.Element {
         forceFallback
         isFunctional
       >
-        <Text className="text-foreground text-xs font-semibold">Opaque fallback preview</Text>
+        <Text className="text-foreground text-xs font-semibold">
+          {translate('mobile.uiLab.glass.fallbackPreview', 'Opaque fallback preview')}
+        </Text>
       </MobileGlassSurface>
+      <MobileUiLabNativeControlCatalog />
     </View>
   )
 }

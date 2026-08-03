@@ -687,7 +687,7 @@ export function HostScreen({
       leaveHost()
     } catch {
       // Why: metadata commit can fail while the host is still paired; keep the
-      // screen mounted and re-open confirm (ConfirmModal closes on confirm).
+      // screen mounted and confirmation open for retry.
       setConfirmRemoveHost(true)
       Alert.alert('Could not remove host', 'Please try again.')
     }

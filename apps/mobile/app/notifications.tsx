@@ -1,9 +1,11 @@
 import { useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect } from 'react'
-import { AppState, Linking, View, Text, Switch } from 'react-native'
+import { AppState, Linking, View } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
+import { translate } from '~/i18n/translate'
 import {
   ensureNotificationPermissions,
   getNotificationPermissionState,
@@ -64,29 +66,29 @@ export default function NotificationsScreen() {
   const switchEnabled = pushEnabled && permissionState.granted
   const notificationsBlocked = permissionState.status === 'denied'
   const hint = notificationsBlocked
-    ? 'Notifications are disabled in system settings.'
-    : 'Get notified on this device when an agent needs your input or finishes a task.'
+    ? translate(
+        'mobile.notifications.agentNotifications.blockedHint',
+        'Notifications are disabled in system settings.'
+      )
+    : translate(
+        'mobile.notifications.agentNotifications.hint',
+        'Get notified on this device when an agent needs your input or finishes a task.'
+      )
 
   return (
     <View className="bg-background flex-1 p-4">
       <MobileContentSection>
-        <View className="flex-row items-center gap-2 px-3 py-3">
-          <Text className="text-foreground flex-1 text-sm font-medium">Agent notifications</Text>
-          <Switch
-            value={switchEnabled}
-            disabled={notificationsBlocked}
-            onValueChange={(v) => void togglePush(v)}
-            trackColorOffClassName="accent-secondary"
-            trackColorOnClassName="accent-muted-foreground"
-            thumbColorClassName="accent-foreground"
-            ios_backgroundColorClassName="accent-secondary"
-          />
-        </View>
-        <Text className="text-muted-foreground px-3 pb-3 text-xs leading-5">{hint}</Text>
+        <SettingsToggleRow
+          disabled={notificationsBlocked}
+          label={translate('mobile.notifications.agentNotifications.label', 'Agent notifications')}
+          onValueChange={(value) => void togglePush(value)}
+          supportingText={hint}
+          value={switchEnabled}
+        />
         {notificationsBlocked && (
           <MobileGlassTextButton
             className="mx-3 mb-3 self-start"
-            label="Open Settings"
+            label={translate('mobile.notifications.openSettings', 'Open Settings')}
             onPress={() => void Linking.openSettings()}
             size="small"
           />

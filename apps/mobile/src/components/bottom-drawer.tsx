@@ -2,13 +2,24 @@ import ExpoBottomSheet, {
   BottomSheetScrollView,
   BottomSheetView
 } from '@expo/ui/community/bottom-sheet'
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
-import { Platform, View } from 'react-native'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react'
+import { View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
 import { resolveCssString } from '~/style/resolve-css-variable'
 
+import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
+
 const BottomDrawerModalHostContext = createContext(false)
+const NATIVE_SHEET_EXIT_GRACE_MS = 400
 
 export type BottomDrawerProps = {
   visible: boolean
@@ -77,13 +88,38 @@ function NativeBottomSheet({
   children,
   dismissEnabled = true
 }: NativeBottomSheetProps): React.JSX.Element {
+  const [contentMounted, setContentMounted] = useState(visible)
+  const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resolvedContentMounted = resolveBottomDrawerMounted(visible, contentMounted)
   const popoverColor = resolveCssString(useCSSVariable('--color-popover'))
   const backgroundStyle = useMemo(
-    // Why: iOS owns the translucent system sheet material, including Liquid
-    // Glass. Android and web need the app's semantic color for theme parity.
-    () => (Platform.OS === 'ios' ? undefined : { backgroundColor: popoverColor }),
+    // Why: the community sheet API has no className path for its native
+    // presentation background, so this adapter supplies the semantic surface.
+    () => ({ backgroundColor: popoverColor }),
     [popoverColor]
   )
+
+  useEffect(() => {
+    if (visible && unmountTimerRef.current) {
+      clearTimeout(unmountTimerRef.current)
+      unmountTimerRef.current = null
+    }
+  }, [visible])
+
+  useEffect(
+    () => () => {
+      if (unmountTimerRef.current) {
+        clearTimeout(unmountTimerRef.current)
+      }
+    },
+    []
+  )
+
+  // Why: opening must mount content in the same commit. Closing stays mounted
+  // briefly because Expo's controlled onClose fires before the native exit animation ends.
+  if (resolvedContentMounted !== contentMounted) {
+    setContentMounted(resolvedContentMounted)
+  }
 
   return (
     <ExpoBottomSheet
@@ -91,9 +127,20 @@ function NativeBottomSheet({
       enableDynamicSizing
       enablePanDownToClose={dismissEnabled}
       index={visible ? 0 : -1}
-      onClose={onClose}
+      onClose={() => {
+        if (unmountTimerRef.current) {
+          clearTimeout(unmountTimerRef.current)
+        }
+        unmountTimerRef.current = setTimeout(() => {
+          setContentMounted(false)
+          unmountTimerRef.current = null
+        }, NATIVE_SHEET_EXIT_GRACE_MS)
+        if (visible) {
+          onClose()
+        }
+      }}
     >
-      {children}
+      {resolvedContentMounted ? children : null}
     </ExpoBottomSheet>
   )
 }

@@ -7,24 +7,19 @@ import {
   useMobileTheme
 } from '~/appearance/theme-preference'
 import { MobileContentSection } from '~/components/content-section'
-import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
 import { LoadingIndicator } from '~/components/loading-indicator'
-import { PickerModal, type PickerOption } from '~/components/picker-modal'
+import { MobileSegmentedControl, type MobileSegmentOption } from '~/components/segmented-control'
+import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import {
-  getMobileLoaderStyleLabel,
-  MOBILE_LOADER_STYLES,
-  type MobileLoaderStyle
-} from '~/loading/loader-style'
+import { MOBILE_LOADER_STYLES, type MobileLoaderStyle } from '~/loading/loader-style'
 import { useMobileLoaderStyle } from '~/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
   const [loaderPickerOpen, setLoaderPickerOpen] = useState(false)
   const { themeMode, setThemeMode } = useMobileTheme()
   const { loaderStyle, setLoaderStyle } = useMobileLoaderStyle()
-  const themeOptions = useMemo<MobileGlassSegmentOption<MobileThemeMode>[]>(
+  const themeOptions = useMemo<MobileSegmentOption<MobileThemeMode>[]>(
     () =>
       MOBILE_THEME_MODES.map((mode) => ({
         value: mode,
@@ -32,12 +27,13 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
       })),
     []
   )
-  const loaderOptions = useMemo<PickerOption<MobileLoaderStyle>[]>(
+  const loaderOptions = useMemo<SelectionDrawerOption<MobileLoaderStyle, MobileLoaderStyle>[]>(
     () =>
       MOBILE_LOADER_STYLES.map((style) => ({
+        id: style,
         value: style,
-        label: getMobileLoaderStyleLabel(style),
-        renderIcon: () => <LoadingIndicator size={20} loaderStyle={style} />
+        label: getLoaderStyleLabel(style),
+        leading: <LoadingIndicator size={20} loaderStyle={style} />
       })),
     []
   )
@@ -55,7 +51,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
           )}
         </Text>
         <View className="mt-3">
-          <MobileGlassSegmentedControl
+          <MobileSegmentedControl
             accessibilityLabel={translate('mobile.appearance.theme.label', 'Theme')}
             onChange={setThemeMode}
             options={themeOptions}
@@ -87,7 +83,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
                 {translate('mobile.appearance.loader.label', 'Loader')}
               </Text>
               <Text className="text-muted-foreground mt-1 text-xs">
-                {getMobileLoaderStyleLabel(loaderStyle)}
+                {getLoaderStyleLabel(loaderStyle)}
               </Text>
             </View>
             <View className="w-5 items-center">
@@ -97,11 +93,11 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
         </MobileContentSection>
       </ScrollView>
 
-      <PickerModal<MobileLoaderStyle>
+      <SelectionDrawer<MobileLoaderStyle, MobileLoaderStyle>
         visible={loaderPickerOpen}
         title={translate('mobile.appearance.loader.label', 'Loader')}
         options={loaderOptions}
-        selected={loaderStyle}
+        selectedId={loaderStyle}
         onSelect={setLoaderStyle}
         onClose={() => setLoaderPickerOpen(false)}
       />
@@ -117,5 +113,22 @@ function getThemeModeLabel(mode: MobileThemeMode): string {
       return translate('mobile.appearance.theme.light.label', 'Light')
     case 'dark':
       return translate('mobile.appearance.theme.dark.label', 'Dark')
+  }
+}
+
+function getLoaderStyleLabel(style: MobileLoaderStyle): string {
+  switch (style) {
+    case 'working':
+      return translate('mobile.appearance.loader.style.working', 'Working')
+    case 'searching':
+      return translate('mobile.appearance.loader.style.searching', 'Searching')
+    case 'solving':
+      return translate('mobile.appearance.loader.style.solving', 'Solving')
+    case 'listening':
+      return translate('mobile.appearance.loader.style.listening', 'Listening')
+    case 'composing':
+      return translate('mobile.appearance.loader.style.composing', 'Composing')
+    case 'shaping':
+      return translate('mobile.appearance.loader.style.shaping', 'Shaping')
   }
 }

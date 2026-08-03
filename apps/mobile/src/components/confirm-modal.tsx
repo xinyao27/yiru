@@ -1,5 +1,7 @@
 import { View, Text } from 'react-native'
 
+import { translate } from '~/i18n/translate'
+
 import { BottomDrawer } from './bottom-drawer'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassTextButton } from './glass/text-button'
@@ -19,12 +21,12 @@ export function ConfirmModal({
   visible,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = translate('mobile.common.confirm', 'Confirm'),
+  cancelLabel = translate('mobile.common.cancel', 'Cancel'),
   destructive = false,
   onConfirm,
   onCancel
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
       <View className="pb-4">
@@ -46,10 +48,7 @@ export function ConfirmModal({
           isFullWidth
           isProminent={!destructive}
           label={confirmLabel}
-          onPress={() => {
-            onConfirm()
-            onCancel()
-          }}
+          onPress={onConfirm}
         />
       </MobileGlassGroup>
     </BottomDrawer>

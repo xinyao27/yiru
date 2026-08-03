@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Linking, View } from 'react-native'
 
-import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
-import type { MobileGlassSegmentOption } from '~/components/glass/segmented-control-props'
+import { MobileSegmentedControl, type MobileSegmentOption } from '~/components/segmented-control'
 import { UniwindWebView } from '~/components/uniwind-web-view'
+import { translate } from '~/i18n/translate'
 
 type Props = {
   html: string
@@ -13,9 +13,9 @@ type Props = {
 
 type MobileHtmlPreviewMode = 'preview' | 'source'
 
-const HTML_PREVIEW_MODES: MobileGlassSegmentOption<MobileHtmlPreviewMode>[] = [
-  { label: 'Preview', value: 'preview' },
-  { label: 'Source', value: 'source' }
+const HTML_PREVIEW_MODES: MobileSegmentOption<MobileHtmlPreviewMode>[] = [
+  { label: translate('mobile.htmlPreview.preview', 'Preview'), value: 'preview' },
+  { label: translate('mobile.htmlPreview.source', 'Source'), value: 'source' }
 ]
 
 // Renders an agent-produced HTML artifact in a sandboxed WebView, with a
@@ -28,8 +28,8 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
   return (
     <View className="flex-1">
       <View className="mx-3 my-2">
-        <MobileGlassSegmentedControl
-          accessibilityLabel="HTML view"
+        <MobileSegmentedControl
+          accessibilityLabel={translate('mobile.htmlPreview.mode.label', 'HTML view')}
           options={HTML_PREVIEW_MODES}
           value={mode}
           onChange={setMode}

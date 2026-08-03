@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { View, Text, TextInput, type KeyboardTypeOptions } from 'react-native'
 
+import { translate } from '~/i18n/translate'
+
 import { BottomDrawer } from './bottom-drawer'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassSurface } from './glass/surface'
@@ -26,13 +28,13 @@ export function TextInputModal({
   message,
   defaultValue = '',
   placeholder,
-  submitLabel = 'Save',
+  submitLabel = translate('mobile.common.save', 'Save'),
   selectTextOnFocus = false,
   allowEmpty = false,
   keyboardType,
   onSubmit,
   onCancel
-}: Props) {
+}: Props): React.JSX.Element {
   const [value, setValue] = useState(defaultValue)
   const [previousVisible, setPreviousVisible] = useState(visible)
   const [previousDefaultValue, setPreviousDefaultValue] = useState(defaultValue)
@@ -64,9 +66,10 @@ export function TextInputModal({
         {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
       </View>
 
-      <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+      <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
         <TextInput
-          className="text-foreground min-h-10 rounded-full px-4 text-sm"
+          accessibilityLabel={title}
+          className="text-foreground min-h-11 rounded-full px-4 text-sm"
           value={value}
           onChangeText={setValue}
           placeholder={placeholder}
@@ -83,7 +86,10 @@ export function TextInputModal({
       </MobileGlassSurface>
 
       <MobileGlassGroup className="mt-3 flex-row justify-end gap-2" spacing={8}>
-        <MobileGlassTextButton label="Cancel" onPress={onCancel} />
+        <MobileGlassTextButton
+          label={translate('mobile.common.cancel', 'Cancel')}
+          onPress={onCancel}
+        />
         <MobileGlassTextButton
           disabled={!canSubmit}
           isProminent

@@ -1,7 +1,18 @@
 # Expo UI refactor plan
 
-Status: proposed. Do not start broad feature migrations until the foundation and runtime gates in
-Phase 0 are complete.
+Status: in progress. The Phase 0 static and bundle gates are complete; device-level accessibility
+inspection remains the release gate for expanding the Universal Picker/ListItem pilots.
+
+Execution checkpoint (2026-08-03):
+
+- the AST native-control contract, closed `ExpoUiHost`, and UI Lab matrix are implemented;
+- standard boolean rows now use the reviewed `SettingsToggleRow` seam;
+- typed segmented selection uses intrinsic native height and a 44pt minimum interaction region;
+- the two legacy picker drawers are replaced by one virtualized `SelectionDrawer`;
+- every BottomDrawer now receives the semantic popover background;
+- confirmation and text-entry defaults are localized, and text entry has a 44pt target;
+- settings, workspace creation, terminal, quick-command, and pull-request toggle callers are
+  migrated; action-menu and Glass consolidation remain active work.
 
 ## Problem statement
 
@@ -29,7 +40,7 @@ The current mobile tree contains 620 TypeScript/TSX source files. The initial in
 | Files importing Expo UI | 29 |
 | Switch call sites | 10 |
 | Segmented selection call sites | 8 |
-| Picker drawer call sites | 8 across two implementations |
+| Picker drawer call sites | 7 across two legacy implementations |
 | Action sheet call sites | 13 |
 | Confirmation drawer call sites | 7 |
 | Text-entry drawer call sites | 4 |

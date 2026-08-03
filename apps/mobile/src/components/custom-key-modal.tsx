@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useCallback, useMemo, useState } from 'react'
-import { View, Text, Pressable, TextInput, Switch } from 'react-native'
+import { View, Text, Pressable, TextInput } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
@@ -13,11 +13,19 @@ import { cn } from '~/style/class-names'
 import {
   buildTerminalShortcutKey,
   normalizeShortcutKeyInput,
-  TERMINAL_SHORTCUT_SPECIAL_KEYS,
-  type TerminalShortcutModifier,
-  type TerminalShortcutSpecialKey
+  type TerminalShortcutModifier
 } from '../terminal/accessory-keys'
 import { BottomDrawer } from './bottom-drawer'
+import {
+  CUSTOM_KEY_BY_ID,
+  CUSTOM_KEY_COPY,
+  CUSTOM_KEY_GROUPS,
+  CUSTOM_KEY_MODIFIERS,
+  CUSTOM_KEY_STEP_TITLES,
+  translatedCustomKeyAccessibilityLabel,
+  translatedCustomKeyLabel
+} from './custom-key-options'
+import { SettingsToggleRow } from './settings-toggle-row'
 
 const CUSTOM_ACCESSORY_KEYS_STORAGE_KEY = 'yiru:custom-accessory-keys'
 
@@ -29,40 +37,6 @@ export type CustomKey = {
 }
 
 type Step = 'choose-type' | 'shortcut-combo' | 'special-keys' | 'text-macro'
-
-// Why: Alt is rendered with the ⌥ glyph because on macOS hosts the Option key
-// is the only modifier that produces an ESC-prefixed byte sequence terminals
-// can read. Cmd is intentionally absent — macOS swallows it before keystrokes
-// reach the shell, so there's nothing to encode.
-const SHORTCUT_MODIFIERS: { id: TerminalShortcutModifier; label: string; glyph?: string }[] = [
-  { id: 'ctrl', label: 'Ctrl' },
-  { id: 'alt', label: 'Alt', glyph: '⌥' },
-  { id: 'shift', label: 'Shift' }
-]
-
-// Why: special keys are grouped by purpose so the picker reads as three small
-// fixed grids rather than one ragged wrap row that clipped F7-F12.
-const SPECIAL_KEY_GROUPS: { title: string; ids: string[]; columns: number }[] = [
-  {
-    title: 'Editing',
-    ids: ['escape', 'tab', 'enter', 'backspace', 'delete', 'insert', 'space'],
-    columns: 4
-  },
-  {
-    title: 'Navigation',
-    ids: ['arrowUp', 'arrowDown', 'arrowLeft', 'arrowRight', 'home', 'end', 'pageUp', 'pageDown'],
-    columns: 4
-  },
-  {
-    title: 'Function',
-    ids: ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12'],
-    columns: 6
-  }
-]
-
-const SPECIAL_KEY_BY_ID: Record<string, TerminalShortcutSpecialKey> = Object.fromEntries(
-  TERMINAL_SHORTCUT_SPECIAL_KEYS.map((key) => [key.id, key])
-)
 
 type Props = {
   visible: boolean
@@ -84,7 +58,8 @@ export async function saveCustomKeys(keys: CustomKey[]): Promise<void> {
   await AsyncStorage.setItem(CUSTOM_ACCESSORY_KEYS_STORAGE_KEY, JSON.stringify(keys))
 }
 
-export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortcuts }: Props) {
+export function CustomKeyModal(props: Props): React.JSX.Element {
+  const { visible, onClose, onKeysChanged, onManageShortcuts } = props
   const [step, setStep] = useState<Step>('choose-type')
   const [shortcutKey, setShortcutKey] = useState('c')
   const [shortcutModifiers, setShortcutModifiers] = useState<TerminalShortcutModifier[]>(['ctrl'])
@@ -125,15 +100,15 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
   )
 
   const previewKeyLabel = useMemo(() => {
-    const special = SPECIAL_KEY_BY_ID[shortcutKey]
+    const special = CUSTOM_KEY_BY_ID[shortcutKey]
     if (special) {
-      return special.label
+      return translatedCustomKeyLabel(special)
     }
     return shortcutKey.length === 1 ? shortcutKey.toUpperCase() : shortcutKey
   }, [shortcutKey])
 
   const orderedActiveModifiers = useMemo(
-    () => SHORTCUT_MODIFIERS.filter((m) => shortcutModifiers.includes(m.id)),
+    () => CUSTOM_KEY_MODIFIERS.filter((modifier) => shortcutModifiers.includes(modifier.id)),
     [shortcutModifiers]
   )
 
@@ -195,7 +170,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       <View className="flex-row items-center pb-2">
         {showBack ? (
           <MobileGlassIconButton
-            accessibilityLabel="Back"
+            accessibilityLabel={CUSTOM_KEY_COPY.back}
             icon="back"
             onPress={onBack}
             size="small"
@@ -204,10 +179,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           <View className="w-8" />
         )}
         <Text className="text-foreground flex-1 text-center text-sm font-semibold">
-          {step === 'choose-type' && 'Add Shortcut'}
-          {step === 'shortcut-combo' && 'Shortcut Combo'}
-          {step === 'special-keys' && 'Pick a key'}
-          {step === 'text-macro' && 'Text Macro'}
+          {CUSTOM_KEY_STEP_TITLES[step]}
         </Text>
         <View className="w-8" />
       </View>
@@ -218,23 +190,31 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             className="active:bg-accent px-3 py-3"
             onPress={() => setStep('shortcut-combo')}
           >
-            <Text className="text-foreground mb-1 text-sm">Shortcut Combo</Text>
+            <Text className="text-foreground mb-1 text-sm">
+              {CUSTOM_KEY_STEP_TITLES['shortcut-combo']}
+            </Text>
             <Text className="text-muted-foreground text-xs">
-              Build Ctrl, Alt, and Shift key chords
+              {CUSTOM_KEY_COPY.shortcutComboDescription}
             </Text>
           </Pressable>
           <View className="h-hairline bg-border mx-3" />
           <Pressable className="active:bg-accent px-3 py-3" onPress={() => setStep('text-macro')}>
-            <Text className="text-foreground mb-1 text-sm">Text Macro</Text>
-            <Text className="text-muted-foreground text-xs">Send custom text command</Text>
+            <Text className="text-foreground mb-1 text-sm">
+              {CUSTOM_KEY_STEP_TITLES['text-macro']}
+            </Text>
+            <Text className="text-muted-foreground text-xs">
+              {CUSTOM_KEY_COPY.textMacroDescription}
+            </Text>
           </Pressable>
           {onManageShortcuts ? (
             <>
               <View className="h-hairline bg-border mx-3" />
               <Pressable className="active:bg-accent px-3 py-3" onPress={onManageShortcuts}>
-                <Text className="text-foreground mb-1 text-sm">Manage Shortcuts</Text>
+                <Text className="text-foreground mb-1 text-sm">
+                  {CUSTOM_KEY_COPY.manageShortcuts}
+                </Text>
                 <Text className="text-muted-foreground text-xs">
-                  Show, hide, or reorder shortcut keys
+                  {CUSTOM_KEY_COPY.manageShortcutsDescription}
                 </Text>
               </Pressable>
             </>
@@ -277,10 +257,10 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
           <View className="mt-3">
             <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
-              Modifiers
+              {CUSTOM_KEY_COPY.modifiers}
             </Text>
             <MobileGlassGroup className="flex-row gap-2" spacing={8}>
-              {SHORTCUT_MODIFIERS.map((modifier) => {
+              {CUSTOM_KEY_MODIFIERS.map((modifier) => {
                 const selected = shortcutModifiers.includes(modifier.id)
                 return (
                   <MobileGlassPressable
@@ -310,14 +290,18 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
           <View className="mt-3">
             <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
-              Key
+              {CUSTOM_KEY_COPY.key}
             </Text>
             <MobileGlassSurface className="h-14 w-full overflow-hidden rounded-xl" isInteractive>
               <TextInput
                 className="text-foreground h-full w-full text-center font-mono text-sm"
                 value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
                 onChangeText={handleShortcutKeyInput}
-                placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
+                placeholder={
+                  CUSTOM_KEY_BY_ID[shortcutKey]
+                    ? translatedCustomKeyLabel(CUSTOM_KEY_BY_ID[shortcutKey])
+                    : CUSTOM_KEY_COPY.shortcutKeyExample
+                }
                 placeholderTextColorClassName="accent-muted-foreground"
                 autoCapitalize="characters"
                 autoCorrect={false}
@@ -326,7 +310,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             </MobileGlassSurface>
             <MobileGlassTextButton
               className="mt-2 self-center"
-              label="More keys — Tab, arrows, F1–F12…"
+              label={CUSTOM_KEY_COPY.moreKeys}
               onPress={() => setStep('special-keys')}
               size="small"
             />
@@ -337,7 +321,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             disabled={!shortcutPreview}
             isFullWidth
             isProminent
-            label="Add"
+            label={CUSTOM_KEY_COPY.add}
             onPress={handleShortcutSave}
             size="large"
           />
@@ -346,30 +330,34 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
       {step === 'special-keys' && (
         <View className="gap-3 pt-1 pb-3">
-          {SPECIAL_KEY_GROUPS.map((group) => (
+          {CUSTOM_KEY_GROUPS.map((group) => (
             <View key={group.title} className="gap-1">
               <Text className="text-muted-foreground mb-1 pl-1 text-xs tracking-wider uppercase">
                 {group.title}
               </Text>
               <MobileGlassGroup className="-mx-1 flex-row flex-wrap" spacing={8}>
                 {group.ids.map((id) => {
-                  const key = SPECIAL_KEY_BY_ID[id]
+                  const key = CUSTOM_KEY_BY_ID[id]
                   if (!key) {
                     return null
                   }
                   const selected = shortcutKey === id
-                  const flexBasis = `${100 / group.columns}%` as const
                   return (
-                    <View key={id} className="px-1 py-1" style={[{ flexBasis }]}>
+                    <View
+                      key={id}
+                      className={cn('px-1 py-1', group.columns === 4 ? 'basis-1/4' : 'basis-1/6')}
+                    >
                       <MobileGlassPressable
                         className="h-10 rounded-xl"
                         contentClassName="h-full items-center justify-center rounded-xl"
-                        accessibilityLabel={key.accessibilityLabel}
+                        accessibilityLabel={translatedCustomKeyAccessibilityLabel(key)}
                         accessibilityState={{ selected }}
                         onPress={() => handleSpecialKeyPick(id)}
                         tintColorClassName={selected ? 'accent-primary' : undefined}
                       >
-                        <Text className="text-foreground font-mono text-xs">{key.label}</Text>
+                        <Text className="text-foreground font-mono text-xs">
+                          {translatedCustomKeyLabel(key)}
+                        </Text>
                       </MobileGlassPressable>
                     </View>
                   )
@@ -383,47 +371,41 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       {step === 'text-macro' && (
         <MobileContentSection>
           <View className="gap-2 p-3">
-            <Text className="text-muted-foreground text-xs">Label</Text>
+            <Text className="text-muted-foreground text-xs">{CUSTOM_KEY_COPY.macroLabel}</Text>
             <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
               <TextInput
                 className="text-foreground px-3 py-2 font-mono text-sm"
                 value={macroLabel}
                 onChangeText={setMacroLabel}
-                placeholder="e.g. Build"
+                placeholder={CUSTOM_KEY_COPY.macroLabelExample}
                 placeholderTextColorClassName="accent-muted-foreground"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </MobileGlassSurface>
-            <Text className="text-muted-foreground text-xs">Command</Text>
+            <Text className="text-muted-foreground text-xs">{CUSTOM_KEY_COPY.command}</Text>
             <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
               <TextInput
                 className="text-foreground px-3 py-2 font-mono text-sm"
                 value={macroText}
                 onChangeText={setMacroText}
-                placeholder="e.g. pnpm build"
+                placeholder={CUSTOM_KEY_COPY.commandExample}
                 placeholderTextColorClassName="accent-muted-foreground"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </MobileGlassSurface>
-            <View className="flex-row items-center justify-between py-1">
-              <Text className="text-foreground text-sm">Press Enter</Text>
-              <Switch
-                value={macroEnter}
-                onValueChange={setMacroEnter}
-                trackColorOffClassName="accent-secondary"
-                trackColorOnClassName="accent-muted-foreground"
-                thumbColorClassName="accent-foreground"
-                ios_backgroundColorClassName="accent-secondary"
-              />
-            </View>
+            <SettingsToggleRow
+              label={CUSTOM_KEY_COPY.pressEnter}
+              onValueChange={setMacroEnter}
+              value={macroEnter}
+            />
             <MobileGlassTextButton
               className="mt-3"
               disabled={!macroText.trim()}
               isFullWidth
               isProminent
-              label="Add Shortcut"
+              label={CUSTOM_KEY_STEP_TITLES['choose-type']}
               onPress={handleMacroSave}
               size="large"
             />

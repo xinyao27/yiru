@@ -355,6 +355,10 @@ native environment. A Host is a native layout bridge, not a root React provider:
 contiguous native control cluster and never wrap the Expo Router or an arbitrary React Native tree
 with it. Community controls expose a React Native boundary and do not need this outer Host.
 
+Expo UI 57.0.7 Switch is a temporary direct-call exception because Android/web do not reliably
+associate its visible label with the switch semantics. Use Yiru's complete settings-toggle row until
+that package behavior is fixed; do not introduce a generic Switch facade.
+
 This hierarchy follows Apple's guidance to keep custom toolbars consistent with system behavior,
 use tab bars for navigation rather than actions, and give buttons a 44×44pt hit region. Expo UI's
 native Button exposes `small`, `regular`, and `large` control sizes plus `glass` and
@@ -471,6 +475,9 @@ button or switch rather than tab.
   `.android.tsx` files. `verify:native-control-imports` enforces these boundaries.
 - Keep one-off layout utilities directly on the TSX element. Do not create `const styles = { ... }`
   for strings used once.
+- Prefer `className` for feature and React Native layout. `style` is reserved for native modifiers,
+  third-party controls without a class-name bridge, and required numeric native measurements; keep
+  those exceptions inside the owning adapter.
 - Use regular-weight mobile icons. Use SF Symbols through Expo UI on iOS and the shared icon mapping
   elsewhere.
 - Verify every new chrome variant in UI Lab in light and dark appearance, with native glass and the

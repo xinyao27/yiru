@@ -3,8 +3,9 @@ import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { View, Text, TextInput, Pressable, Switch, ActivityIndicator, Keyboard } from 'react-native'
+import { View, Text, TextInput, Pressable, ActivityIndicator, Keyboard } from 'react-native'
 
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
@@ -69,7 +70,7 @@ import {
   resolveNewWorkspaceAgentSelection,
   type NewWorkspaceAgentOption as AgentOption
 } from './new-workspace-agent-selection'
-import { PickerListDrawer } from './picker-list-drawer'
+import { SelectionDrawer, type SelectionDrawerOption } from './selection-drawer'
 import { SetupHookTrustDrawer, type SetupTrustPrompt } from './setup-hook-trust-drawer'
 import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
 import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
@@ -681,17 +682,28 @@ function NewWorkspaceModalContent({
     !creating &&
     !sshGate.requiresConnection &&
     (!needsSetupChoice || setupDecisionChoice != null)
-  const pickerAgentOptions = useMemo<AgentOption[]>(() => {
+  const pickerAgentOptions = useMemo<SelectionDrawerOption<AgentOption>[]>(() => {
     const visible = AGENT_OPTIONS.filter(
       (agent) =>
         agent.id !== '__blank__' &&
         (detectedAgentIds === null || detectedAgentIds.has(agent.id)) &&
         isMobileTuiAgentEnabled(agent.id, runtimeSettings?.disabledTuiAgents)
     )
-    return [...visible, BLANK_TERMINAL]
+    return [...visible, BLANK_TERMINAL].map((agent) => ({
+      id: agent.id,
+      value: agent,
+      label: agent.label,
+      leading: <MobileAgentIcon agentId={agent.id} size={18} />
+    }))
   }, [detectedAgentIds, runtimeSettings?.disabledTuiAgents])
-  const repoPickerItems = useMemo(
-    () => repos.map((repo) => ({ id: repo.id, label: repo.displayName, repo })),
+  const repoPickerOptions = useMemo<SelectionDrawerOption<Repo>[]>(
+    () =>
+      repos.map((repo) => ({
+        id: repo.id,
+        value: repo,
+        label: repo.displayName,
+        leading: <View className="h-2 w-2" style={{ backgroundColor: repoBadgeColor(repo) }} />
+      })),
     [repos]
   )
 
@@ -997,20 +1009,14 @@ function NewWorkspaceModalContent({
                           </MobileGlassPressable>
                         </MobileGlassGroup>
                       ) : (
-                        <View className="mb-2 flex-row items-center justify-between">
-                          <Text className="text-muted-foreground text-xs">
-                            {translate('mobile.newWorkspace.runSetupCommand', 'Run setup command')}
-                          </Text>
-                          <Switch
-                            style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
-                            value={runSetup}
-                            onValueChange={setRunSetup}
-                            trackColorOffClassName="accent-border"
-                            trackColorOnClassName="accent-muted-foreground"
-                            thumbColorClassName="accent-foreground"
-                            ios_backgroundColorClassName="accent-border"
-                          />
-                        </View>
+                        <SettingsToggleRow
+                          label={translate(
+                            'mobile.newWorkspace.runSetupCommand',
+                            'Run setup command'
+                          )}
+                          onValueChange={setRunSetup}
+                          value={runSetup}
+                        />
                       )}
                       <View className="bg-background rounded-xl px-3 py-2">
                         <Text className="text-foreground font-mono text-xs">{setupCommand}</Text>
@@ -1063,29 +1069,25 @@ function NewWorkspaceModalContent({
         onClose={() => transitionDrawer('form')}
       />
 
-      <PickerListDrawer
+      <SelectionDrawer<Repo, string>
         visible={visible && drawerView === 'repo'}
         title={translate('mobile.newWorkspace.repositoryLabel', 'Repository')}
-        items={repoPickerItems}
-        selectedId={selectedRepo?.id ?? ''}
-        onSelect={(item) => handleRepoSelected(item.repo)}
+        options={repoPickerOptions}
+        selectedId={selectedRepo?.id ?? null}
+        onSelect={handleRepoSelected}
         onClose={() => transitionDrawer('form')}
-        renderIcon={(item) => {
-          return <View className="h-2 w-2" style={{ backgroundColor: repoBadgeColor(item.repo) }} />
-        }}
       />
 
-      <PickerListDrawer
+      <SelectionDrawer<AgentOption, string>
         visible={visible && drawerView === 'agent'}
         title={translate('mobile.newWorkspace.agentLabel', 'Agent')}
-        items={pickerAgentOptions}
+        options={pickerAgentOptions}
         selectedId={selectedAgent.id}
         onSelect={(agent) => {
           setAgentOverridden(true)
           setSelectedAgent(agent)
         }}
         onClose={() => transitionDrawer('form')}
-        renderIcon={(agent) => <MobileAgentIcon agentId={agent.id} size={18} />}
       />
 
       <SetupHookTrustDrawer

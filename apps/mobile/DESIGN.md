@@ -53,19 +53,18 @@ Choose the first matching form:
    for which Expo UI has no behaviorally equivalent implementation.
 
 `ExpoUiHost` is the one shared adapter for Universal controls. It maps the current Yiru color
-scheme and semantic primary token into the native environment; the feature still owns the native
-island's layout and `matchContents` choice. It is a rendered native bridge, not a React context
-provider, so it cannot wrap the Expo Router or React Native tree at the app root. Use one host around
-a complete, contiguous native control cluster instead of one host per child control. Do not put
-React Native children directly in a native tree; use `RNHostView` only when a cluster genuinely
-needs embedded React Native content.
+scheme and semantic primary token into the native environment. The feature chooses only the closed
+`inline` or `fill` layout; the adapter owns `matchContents`, safe-area, and transparent paint. It is
+a rendered native bridge, not a React context provider, so it cannot wrap the Expo Router or React
+Native tree at the app root. Use one host around a complete, contiguous native control cluster
+instead of one host per child control. Do not put React Native children directly in a native tree;
+use `RNHostView` only when a cluster genuinely needs embedded React Native content.
 
 ```tsx
-<ExpoUiHost matchContents={{ vertical: true }} style={{ width: '100%' }}>
-  <Switch
-    label={translate('mobile.settings.notifications', 'Agent notifications')}
-    value={enabled}
-    onValueChange={setEnabled}
+<ExpoUiHost layout="fill">
+  <Button
+    label={translate('mobile.actions.save', 'Save')}
+    onPress={save}
   />
 </ExpoUiHost>
 ```
@@ -76,10 +75,18 @@ modules such as the Glass family, `BottomDrawer`, and typed segmented selection.
 one-to-one shadows such as `MobileButton`, `MobileText`, `MobilePicker`, or `MobileSwitch` that only
 rename an Expo control and mirror its props.
 
+Expo UI 57.0.7 does not give its Android/web Universal Switch a reliable accessible name. Until the
+package closes that gap, standard boolean settings use the complete `SettingsToggleRow` product
+interaction; feature code must not create a naked Switch facade or directly repeat the workaround.
+
 Shared interfaces use product semantics and stay closed. They do not expose arbitrary Expo
 `modifiers`, colors, or a generic style escape hatch unless layout is part of the module's job.
 Feature copy and business state stay in the feature. Platform files exist only for two real
 implementations, not in anticipation of a future difference.
+
+Use `className` for feature and React Native layout. Use `style` only where an Expo/native modifier
+or third-party API has no `className` path, or where the API requires a numeric native measurement.
+Keep that exception inside the owning adapter whenever possible.
 
 Universal imports come from `@expo/ui`. Community controls come from their explicit
 `@expo/ui/community/*` entry point. SwiftUI and Compose imports are allowed only in `.ios.tsx` and
@@ -218,8 +225,8 @@ start, and trailing alignment.
 - Use the behaviorally equivalent Expo UI control before React Native or a new wrapper. Use a shared
   module for a picker, sheet, drawer, or confirmation flow only when it owns repeated product
   behavior or platform policy.
-- Immediate booleans use a switch; independent selections use a checkbox; one known choice uses a
-  picker.
+- Immediate booleans use `SettingsToggleRow` while the Expo UI Switch accessibility exception is
+  active; independent selections use a checkbox; one known choice uses a picker.
 - Disable an action immediately. Show a spinner only when work lasts long enough to be perceived,
   and reserve its final footprint before loading begins.
 - Destructive styling is only for irreversible actions. Back, Cancel, Close, and Dismiss stay quiet.
