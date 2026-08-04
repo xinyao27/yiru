@@ -217,11 +217,6 @@ export async function getAzureDevOpsRepoRefForRemote(
     return result
   } catch {
     localGitOptions.signal?.throwIfAborted()
-    if (connectionId) {
-      // Why: SSH provider failures are often transient reconnect/tunnel states;
-      // caching them as "not Azure DevOps" would poison the repo for the session.
-      return null
-    }
     rememberRepoRefCacheEntry(cacheKey, null)
     return null
   }

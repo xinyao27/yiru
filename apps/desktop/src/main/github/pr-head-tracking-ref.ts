@@ -6,7 +6,7 @@ type LocalGitExecOptions = {
 }
 
 export async function fetchPrHeadTrackingRef(
-  repo: { path: string; connectionId?: string | null },
+  repo: { path: string },
   remote: string,
   branch: string,
   options: { localGitExecOptions?: LocalGitExecOptions } = {}

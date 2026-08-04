@@ -1,11 +1,12 @@
 import { execFile } from 'node:child_process'
 import type { Dirent } from 'node:fs'
-/* eslint-disable max-lines -- Why: this module keeps local and SSH directory-walk
-   semantics paired so reclaimable-byte, symlink, and partial-failure behavior cannot drift. */
+/* eslint-disable max-lines -- Why: local workspace sizing keeps traversal, budgeting,
+   symlink, and partial-failure behavior together so reclaimable-byte accounting cannot drift. */
 import { lstat, opendir } from 'node:fs/promises'
 import { posix, win32 } from 'node:path'
 import { platform } from 'node:process'
 
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { GitWorktreeInfo, Repo, Worktree } from '~shared/types'
 import {
@@ -294,7 +295,7 @@ function createBaseWorktreeRow(
     path: worktree.path,
     branch: worktree.branch,
     isMainWorktree: worktree.isMainWorktree,
-    isRemote: Boolean(repo.connectionId),
+    isRemote: false,
     isSparse: worktree.isSparse === true,
     canDelete,
     lastActivityAt: worktree.lastActivityAt,
@@ -670,7 +671,9 @@ export async function analyzeWorkspaceSpace(
 ): Promise<WorkspaceSpaceAnalysis> {
   throwIfAborted(options.signal)
   const scannedAt = Date.now()
-  const reposToScan = store.getRepos()
+  const reposToScan = store
+    .getRepos()
+    .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
   const progress: WorkspaceSpaceProgressState = {
     scanId: options.scanId ?? String(scannedAt),
     state: 'running',

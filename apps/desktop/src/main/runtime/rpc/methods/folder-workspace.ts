@@ -64,8 +64,7 @@ const FolderWorkspacePathStatus = z.discriminatedUnion('scope', [
   }),
   z.object({
     scope: z.literal('path'),
-    path: requiredString('Missing folder path'),
-    connectionId: OptionalString.nullable().optional()
+    path: requiredString('Missing folder path')
   })
 ])
 

@@ -14,8 +14,7 @@ import type {
  * The nine commit-graph write operations (tag, create-branch,
  * checkout-commit, cherry-pick, revert, drop, merge, rebase-onto-commit,
  * reset), plus `abortRevert`. Split out of `IGitProvider` in
- * `providers/types.ts` purely to stay under the 300-line file budget —
- * `SshGitProvider` still implements this as part of `IGitProvider`.
+ * `providers/types.ts` purely to stay under the 300-line file budget.
  */
 export type IGitWriteOpsProvider = {
   abortRevert(worktreePath: string): Promise<void>

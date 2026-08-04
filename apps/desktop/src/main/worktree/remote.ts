@@ -1,11 +1,7 @@
 /* eslint-disable max-lines */
-// Why: extracted from worktrees.ts to keep the main IPC module under the
-// max-lines threshold. Worktree creation helpers (local and remote) live
-// here so the IPC dispatch file stays focused on handler wiring. The
-// sparse-checkout flow plus the post-create setup-runner wiring pushed
-// this file marginally over the per-file limit; matches the
-// eslint-disable pattern other files in src/renderer use when a
-// cohesive flow would split awkwardly.
+// Why: worktree creation and Git-remote setup share base selection, fetch
+// coordination, and post-create metadata. Keeping that flow together prevents
+// the IPC wiring from duplicating lifecycle invariants.
 
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
@@ -1194,8 +1190,8 @@ export async function createLocalWorktree(
     // immediately — prevents scroll-to-reveal racing with a later
     // bumpWorktreeActivity that would re-sort the list.
     lastActivityAt: now,
-    // See createRemoteWorktree above: createdAt protects the newly-created
-    // worktree from ambient PTY bumps in other worktrees for CREATE_GRACE_MS.
+    // Why: createdAt protects the newly-created worktree from ambient PTY bumps
+    // in other worktrees for CREATE_GRACE_MS.
     createdAt: now,
     yiruCreatedAt: now,
     yiruCreationSource: 'desktop',

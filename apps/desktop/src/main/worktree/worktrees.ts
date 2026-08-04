@@ -4,6 +4,7 @@ import { readFile, stat } from 'node:fs/promises'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
@@ -160,6 +161,12 @@ function getRepoForWorktreeRemoval(
     ? legacyMatch
     : undefined
 }
+
+function getLocalRepoById(store: Store, repoId: string): Repo | undefined {
+  return store
+    .getRepos()
+    .find((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
+}
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import {
   FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
@@ -287,7 +294,6 @@ function resolveWorktreeMetaWithDiscoveryBackfill(
 }
 
 async function isAlreadyRemovedWorktreePath(
-  _repo: Repo,
   worktreePath: string,
   localWorktreeGitOptions: { wslDistro?: string } = {}
 ): Promise<boolean> {
@@ -442,6 +448,14 @@ function listLineageForHost(
   if (!parsedHost || parsedHost.kind === 'runtime') {
     return rejected('rejected')
   }
+  const projectGroupHostById = new Map(
+    store
+      .getProjectGroups()
+      .map((group) => [
+        group.id,
+        normalizeExecutionHostId(group.executionHostId) ?? LOCAL_EXECUTION_HOST_ID
+      ])
+  )
   const ownsWorktree = (worktreeId: string): boolean => {
     let repoId: string
     try {
@@ -464,12 +478,14 @@ function listLineageForHost(
         return ownsWorktree(scope.worktreeId)
       }
       if (scope?.type === 'folder') {
-        return store.getFolderWorkspaces().some(
-          (folder) =>
-            // Why: this snapshot is only ever built for the local host now, so a
-            // folder belongs to it exactly when it carries no remote connection.
-            folder.id === scope.folderWorkspaceId && !folder.connectionId
-        )
+        return store
+          .getFolderWorkspaces()
+          .some(
+            (folder) =>
+              folder.id === scope.folderWorkspaceId &&
+              !folder.connectionId &&
+              projectGroupHostById.get(folder.projectGroupId) === LOCAL_EXECUTION_HOST_ID
+          )
       }
       return false
     })
@@ -881,7 +897,9 @@ export function registerWorktreeHandlers(
   ipcMain.removeHandler('hooks:inspectSetupScriptImports')
 
   ipcMain.handle('worktrees:listAll', async () => {
-    const repos = store.getRepos()
+    const repos = store
+      .getRepos()
+      .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
     // Why: each local repo listing can spawn `git worktree list`; cap fan-out
     // so large repo fleets don't start unbounded subprocesses at once.
     const results = await mapWithConcurrency(repos, WORKTREE_LIST_ALL_CONCURRENCY, async (repo) => {
@@ -925,7 +943,7 @@ export function registerWorktreeHandlers(
   })
 
   ipcMain.handle('worktrees:list', async (_event, args: { repoId: string }) => {
-    const repo = store.getRepo(args.repoId)
+    const repo = getLocalRepoById(store, args.repoId)
     if (!repo) {
       return []
     }
@@ -969,7 +987,7 @@ export function registerWorktreeHandlers(
       if ('providerRequestId' in args) {
         return rejectedDetectedWorktreeResult(args, 'rejected')
       }
-      const repo = store.getRepo(args.repoId)
+      const repo = getLocalRepoById(store, args.repoId)
       if (!repo) {
         return {
           repoId: args.repoId,
@@ -1026,7 +1044,7 @@ export function registerWorktreeHandlers(
   ipcMain.handle(
     'worktrees:prefetchCreateBase',
     async (_event, args: { repoId: string; baseBranch?: string }): Promise<void> => {
-      const repo = store.getRepo(args.repoId)
+      const repo = getLocalRepoById(store, args.repoId)
       if (!repo) {
         return
       }
@@ -1051,7 +1069,7 @@ export function registerWorktreeHandlers(
       // title) and the redactor would have to learn yet another rule;
       // the repo ID is the safer correlator for the bundle.
       return withWorktreeSpan({ stage: 'create' }, async () => {
-        const repo = store.getRepo(args.repoId)
+        const repo = getLocalRepoById(store, args.repoId)
         if (!repo) {
           throw new Error(`Repo not found: ${args.repoId}`)
         }
@@ -1129,7 +1147,7 @@ export function registerWorktreeHandlers(
         isCrossRepository?: boolean
       }
     ): Promise<GitHubPrStartPoint | { error: string }> => {
-      const repo = store.getRepo(args.repoId)
+      const repo = getLocalRepoById(store, args.repoId)
       if (!repo) {
         return { error: 'Repo not found' }
       }
@@ -1159,8 +1177,8 @@ export function registerWorktreeHandlers(
     }
   )
 
-  // Why: keep desktop IPC and mobile/runtime RPC on the same MR base
-  // resolution path so SSH repos do not regress differently by surface.
+  // Why: keep desktop IPC and runtime RPC on the same MR base resolution path
+  // so provider behavior does not drift by surface.
   ipcMain.handle(
     'worktrees:resolveMrBase',
     async (
@@ -1176,8 +1194,13 @@ export function registerWorktreeHandlers(
       | { baseBranch: string; compareBaseRef?: string; pushTarget?: GitPushTarget }
       | { error: string }
     > => {
+      const repo = getLocalRepoById(store, args.repoId)
+      if (!repo) {
+        return { error: 'Repo is not owned by the local execution host' }
+      }
       return runtime.resolveManagedMrBase({
         repoSelector: `id:${args.repoId}`,
+        executionHostId: LOCAL_EXECUTION_HOST_ID,
         mrIid: args.mrIid,
         sourceBranch: args.sourceBranch,
         targetBranch: args.targetBranch,
@@ -1195,6 +1218,9 @@ export function registerWorktreeHandlers(
       const repo = getRepoForWorktreeRemoval(store, repoId, args.hostId)
       if (!repo) {
         throw new Error(`Repo not found: ${repoId}`)
+      }
+      if (getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID) {
+        throw new Error(`Repo is not owned by the local execution host: ${repoId}`)
       }
       const inFlightKey = getWorktreeRemovalInFlightKey(
         args.worktreeId,
@@ -1336,7 +1362,7 @@ export function registerWorktreeHandlers(
             notifyWorktreesChanged(mainWindow, repoId)
             return {}
           }
-          if (await isAlreadyRemovedWorktreePath(repo, worktreePath, localWorktreeGitOptions)) {
+          if (await isAlreadyRemovedWorktreePath(worktreePath, localWorktreeGitOptions)) {
             if (!args.force && !removedMeta) {
               // Why: without persisted metadata, require the renderer recovery
               // path before deleting Yiru-only state for an unregistered path.
@@ -1382,7 +1408,7 @@ export function registerWorktreeHandlers(
           (isWindowsAbsolutePathLike(canonicalWorktreePath) ||
             !!localWorktreeGitOptions.wslDistro) &&
           removedMeta &&
-          (await isAlreadyRemovedWorktreePath(repo, canonicalWorktreePath, localWorktreeGitOptions))
+          (await isAlreadyRemovedWorktreePath(canonicalWorktreePath, localWorktreeGitOptions))
         ) {
           const removalResult = await removeStaleLocalWorktreeRegistrationAfterFilesystemRemoval({
             canonicalWorktreePath,
@@ -1649,9 +1675,8 @@ export function registerWorktreeHandlers(
           )
         }
 
-        // Why: best-effort PTY sweep. killAllProcessesForWorktree resolves
-        // synchronously for a dead SSH relay (the provider tombstones the lease
-        // and returns without awaiting the remote), so this never hangs.
+        // Why: teardown is best-effort because stale PTY ownership must not
+        // prevent forgetting metadata for a worktree that is already gone.
         await killAllProcessesForWorktree(args.worktreeId, {
           runtime,
           localProvider: getLocalPtyProvider(),
@@ -1689,7 +1714,7 @@ export function registerWorktreeHandlers(
         args.branchName,
         args.expectedHead
       )
-      const repo = store.getRepo(repoId)
+      const repo = getLocalRepoById(store, repoId)
       if (!repo) {
         throw new Error(`Repo not found: ${repoId}`)
       }
@@ -1820,6 +1845,9 @@ export function registerWorktreeHandlers(
           mayNeedUpdate: false
         }
       }
+      if (getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID) {
+        return { status: 'error', hasHooks: false, hooks: null, mayNeedUpdate: false }
+      }
       if (isFolderRepo(repo)) {
         return { status: 'ok', hasHooks: false, hooks: null, mayNeedUpdate: false }
       }
@@ -1841,7 +1869,7 @@ export function registerWorktreeHandlers(
   )
 
   ipcMain.handle('hooks:inspectSetupScriptImports', async (_event, args: { repoId: string }) => {
-    const repo = store.getRepo(args.repoId)
+    const repo = getLocalRepoById(store, args.repoId)
     if (!repo || isFolderRepo(repo)) {
       return []
     }

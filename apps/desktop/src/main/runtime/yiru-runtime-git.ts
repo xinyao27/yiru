@@ -20,7 +20,7 @@ import {
   type ResolvedSourceControlAiGenerationParams
 } from '~shared/source-control/ai'
 import type { SourceControlAiOperation } from '~shared/source-control/ai-types'
-/* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so local, SSH, and runtime-environment behavior remains comparable. */
+/* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so native, WSL, and paired-runtime behavior remains comparable. */
 import type {
   GitBranchCompareResult,
   GitCommitCompareResult,
@@ -158,7 +158,6 @@ function normalizeRuntimeGitRelativePath(filePath: string): string {
 type RuntimeGitTarget = {
   worktree: ResolvedRuntimeGitWorktree
   repo?: Repo
-  connectionId?: string
   localGitOptions?: GitRuntimeOptions
 }
 

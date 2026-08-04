@@ -1,3 +1,4 @@
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import type { Repo } from '~shared/types'
 
 import { detectGitRemoteIdentity } from './repo-git-remote-identity'
@@ -17,8 +18,8 @@ type EnrichmentOptions = {
 const inFlightProbesByLocation = new Map<string, Promise<boolean>>()
 const noIdentityRetryAfterByLocation = new Map<string, number>()
 
-function getRepoLocationKey(repo: Pick<Repo, 'path' | 'connectionId'>): string {
-  return `${repo.connectionId ?? 'local'}\0${repo.path}`
+function getRepoLocationKey(repo: Repo): string {
+  return `${getRepoExecutionHostId(repo)}\0${repo.path}`
 }
 
 function getCurrentRepo(store: RepoIdentityStore, id: string): Repo | undefined {
@@ -31,7 +32,7 @@ function isSameUnenrichedRepo(snapshot: Repo, current: Repo | undefined): boolea
     current.kind !== 'folder' &&
     !current.gitRemoteIdentity &&
     current.path === snapshot.path &&
-    (current.connectionId ?? null) === (snapshot.connectionId ?? null)
+    getRepoExecutionHostId(current) === getRepoExecutionHostId(snapshot)
   )
 }
 
@@ -46,7 +47,7 @@ async function enrichRepoGitRemoteIdentity(store: RepoIdentityStore, repo: Repo)
     return inFlight
   }
   const probe = (async () => {
-    const identity = await detectGitRemoteIdentity(repo.path, repo.connectionId)
+    const identity = await detectGitRemoteIdentity(repo.path)
     if (!identity) {
       // Why: repos without a parseable remote are common; cache misses briefly so
       // list calls stay cheap while still allowing recent remote changes to land.
@@ -75,7 +76,12 @@ async function enrichMissingRepoGitRemoteIdentitiesInBackground(
 ): Promise<void> {
   const candidates = store
     .getRepos()
-    .filter((repo) => repo.kind !== 'folder' && !repo.gitRemoteIdentity)
+    .filter(
+      (repo) =>
+        repo.kind !== 'folder' &&
+        getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+        !repo.gitRemoteIdentity
+    )
   let changed = false
   for (const repo of candidates) {
     // Why: enrichment runs later; capture the location we probed so a mutable

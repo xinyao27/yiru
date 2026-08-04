@@ -3,7 +3,6 @@ import {
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
 } from '@yiru/runtime-protocol/capabilities'
-import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
@@ -1116,7 +1115,7 @@ function getFolderWorkspacePathStatusScopeKey(request: FolderWorkspacePathStatus
     return `project-group:${request.projectGroupId}`
   }
   if (request.scope === 'path') {
-    return `path:${request.connectionId ?? ''}:${request.path}`
+    return `path:${request.path}`
   }
   return `folder-workspace:${request.folderWorkspaceId}`
 }
@@ -1182,112 +1181,26 @@ async function fetchRuntimeAddProjectPathStatus(args: {
 }
 
 function getFolderWorkspaceStatusRequestSnapshot(
-  state: Pick<AppState, 'projectGroups' | 'folderWorkspaces' | 'repos' | 'sshConnectionStates'>,
+  state: Pick<AppState, 'projectGroups' | 'folderWorkspaces'>,
   request: FolderWorkspacePathStatusRequest
 ): string | null {
   if (request.scope === 'path') {
-    const candidateRepos = state.repos.filter((repo) =>
-      isPathInsideOrEqual(request.path, repo.path)
-    )
-    const relevantConnectionIds = new Set<string>()
-    if (request.connectionId) {
-      relevantConnectionIds.add(request.connectionId)
-    }
-    for (const repo of candidateRepos) {
-      if (repo.connectionId) {
-        relevantConnectionIds.add(repo.connectionId)
-      }
-    }
-    const sshFingerprint = [...relevantConnectionIds]
-      .map(
-        (connectionId) =>
-          `${connectionId}:${state.sshConnectionStates.get(connectionId)?.status ?? 'missing'}`
-      )
-      .sort()
-      .join('|')
-    const repoFingerprint = candidateRepos
-      .map(
-        (repo) => `${repo.id}:${repo.path}:${repo.projectGroupId ?? ''}:${repo.connectionId ?? ''}`
-      )
-      .sort()
-      .join('|')
-    return [request.path, '', request.connectionId ?? '', sshFingerprint, repoFingerprint].join(
-      '\0'
-    )
+    return request.path
   }
 
-  const scope =
-    request.scope === 'project-group'
-      ? state.projectGroups.find((group) => group.id === request.projectGroupId)
-      : state.folderWorkspaces.find((workspace) => workspace.id === request.folderWorkspaceId)
-  const projectGroup =
-    request.scope === 'project-group'
-      ? scope && 'parentPath' in scope
-        ? scope
-        : null
-      : scope && 'projectGroupId' in scope
-        ? state.projectGroups.find((group) => group.id === scope.projectGroupId)
-        : null
-  const folderPath =
-    request.scope === 'project-group'
-      ? scope && 'parentPath' in scope
-        ? scope.parentPath
-        : null
-      : scope && 'folderPath' in scope
-        ? scope.folderPath
-        : null
-  const projectGroupId =
-    request.scope === 'project-group'
-      ? request.projectGroupId
-      : scope && 'projectGroupId' in scope
-        ? scope.projectGroupId
-        : null
-  const scopeConnectionId =
-    request.scope === 'project-group'
-      ? scope && 'parentPath' in scope
-        ? scope.connectionId
-        : null
-      : scope && 'folderPath' in scope
-        ? (scope.connectionId ?? projectGroup?.connectionId)
-        : null
-  if (!folderPath || !projectGroupId) {
+  if (request.scope === 'project-group') {
+    const group = state.projectGroups.find((entry) => entry.id === request.projectGroupId)
+    return group?.parentPath
+      ? [group.parentPath, group.id, group.executionHostId ?? ''].join('\0')
+      : null
+  }
+
+  const workspace = state.folderWorkspaces.find((entry) => entry.id === request.folderWorkspaceId)
+  if (!workspace) {
     return null
   }
-  const groupIds = getProjectGroupSubtreeIds(state.projectGroups, projectGroupId)
-  const candidateRepos = state.repos.filter(
-    (repo) =>
-      (typeof repo.projectGroupId === 'string' && groupIds.has(repo.projectGroupId)) ||
-      isPathInsideOrEqual(folderPath, repo.path)
-  )
-  const relevantConnectionIds = new Set<string>()
-  if (scopeConnectionId) {
-    relevantConnectionIds.add(scopeConnectionId)
-  }
-  for (const repo of candidateRepos) {
-    if (repo.connectionId) {
-      relevantConnectionIds.add(repo.connectionId)
-    }
-  }
-  const sshFingerprint = [...relevantConnectionIds]
-    .map(
-      (connectionId) =>
-        `${connectionId}:${state.sshConnectionStates.get(connectionId)?.status ?? 'missing'}`
-    )
-    .sort()
-    .join('|')
-  const repoFingerprint = candidateRepos
-    .map(
-      (repo) => `${repo.id}:${repo.path}:${repo.projectGroupId ?? ''}:${repo.connectionId ?? ''}`
-    )
-    .sort()
-    .join('|')
-  return [
-    folderPath,
-    projectGroupId,
-    scopeConnectionId ?? '',
-    sshFingerprint,
-    repoFingerprint
-  ].join('\0')
+  const group = state.projectGroups.find((entry) => entry.id === workspace.projectGroupId)
+  return [workspace.folderPath, workspace.projectGroupId, group?.executionHostId ?? ''].join('\0')
 }
 
 function getFreshFolderWorkspacePathStatusFromCache(args: {
@@ -2288,8 +2201,8 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           projectKind: isGitRepoKind(repo) ? 'git' : 'folder',
           displayName: repo.displayName
         })
-        // Why: the design requires the cross-profile advisory for SSH-added
-        // projects too — the presence lookup already keys on connection/host.
+        // Why: the design requires the cross-profile advisory for paired-runtime
+        // projects too because the presence lookup is already host-scoped.
         await warnIfProjectKnownInAnotherProfile(repo, get().activeYiruProfileId)
       }
       return repo
@@ -2547,7 +2460,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
 
   removeProject: async (projectId, options) => {
     try {
-      // Why: pass an explicit hostId (e.g. when removing an SSH host's root repo)
+      // Why: pass an explicit hostId when removing a paired runtime's root repo
       // so a duplicate id across hosts resolves to the intended row instead of
       // falling back to the focused host.
       const ownerRepo = findRepoForHost(get().repos, projectId, {
@@ -2560,12 +2473,12 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       const ownerHostId = getRepoExecutionHostId(ownerRepo)
       // Why: derive the runtime target from the owner's own settings, passing the
       // explicit options.hostId so a duplicate repo id across hosts resolves to the
-      // intended row. settingsForRepoOwner clears the focused runtime for SSH/local
-      // owners (routing local) and pins runtime owners to their environment, so an
-      // SSH host removal never routes repo.rm to the focused runtime.
+      // intended row. settingsForRepoOwner clears the focused runtime for local
+      // owners and pins runtime owners to their environment, so removal cannot
+      // route repo.rm to the wrong host.
       const target = getActiveRuntimeTarget(settingsForRepoOwner(get(), projectId, options?.hostId))
-      // Why: the same repo id can exist on multiple hosts (local + an SSH target,
-      // or a re-added SSH target). Main's repos:remove is repo-id-only and would
+      // Why: the same repo id can exist on local and paired-runtime hosts, including
+      // a re-paired runtime. Main's repos:remove is repo-id-only and would
       // delete every host's row. Scope the local-side removal to the owning host
       // so a cross-host duplicate id keeps its other rows.
       const idExistsOnOtherHost = get().repos.some(
@@ -2668,7 +2581,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           : false
         const nextRepos = s.repos.filter((r) => !repoMatchesHostIdentity(r, projectId, ownerHostId))
         // Why: when no sibling host still owns this repo id, drop every persisted
-        // timestamp for the repo's worktrees — including unhydrated SSH/remote ones
+        // timestamp for the repo's worktrees, including unhydrated paired-runtime ones
         // absent from worktreeIdSet, which pruneLastVisitedTimestamps would otherwise
         // defer forever as "not yet hydrated" after the repo is gone. When a duplicate
         // id remains on another host, stay host-scoped via worktreeIdSet.

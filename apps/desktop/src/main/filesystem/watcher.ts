@@ -7,10 +7,8 @@ import {
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: filesystem-watcher centralizes native
-(@parcel/watcher), WSL-native snapshot, and SSH remote watcher lifecycles in
-one module so subscription/cleanup invariants stay auditable from a single
-file. Splitting by transport would scatter the shared debounce/coalesce
-helpers and the common batch-flush path across three files. */
+(@parcel/watcher) and WSL-native snapshot lifecycles so subscription/cleanup
+invariants stay auditable with the shared debounce and batch-flush paths. */
 import { ipcMain, type WebContents } from 'electron'
 import type { FsChangeEvent, FsChangedPayload } from '~shared/types'
 
@@ -67,7 +65,7 @@ function rememberUnwatchableRoot(rootKey: string): void {
 
 // Why: watcher cleanup is keyed to the renderer WebContents, not to a specific
 // watched root. One listener per sender avoids MaxListeners warnings when a
-// workspace has many local and SSH-backed worktrees open.
+// workspace has many local worktrees open.
 const senderCleanupRegistered = new Set<number>()
 
 // Why: on Windows, tearing down and recreating @parcel/watcher subscriptions

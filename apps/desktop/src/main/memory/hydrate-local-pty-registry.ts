@@ -12,13 +12,16 @@
  *
  * This module fills the gap once at boot: ask the daemon for every live
  * session, reattribute each one to its repo via the minted session-id
- * format, and only register sessions whose repo has no `connectionId`
- * (i.e. truly local). Truly remote (SSH) sessions stay out of the
- * registry, mirroring the spawn-time gate (the `if (!args.connectionId)` block around the `registerPty` call in `src/main/pty/pty.ts`).
+ * format, and only register sessions owned by the local execution host.
+ * Paired-runtime sessions stay out of the local process registry.
  */
 
-import { parsePtySessionId } from '@yiru/workbench-model/workspace'
-import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parsePtySessionId,
+  splitWorktreeId
+} from '@yiru/workbench-model/workspace'
 
 import { DegradedDaemonPtyProvider } from '../daemon/degraded-daemon-pty-provider'
 import { getDaemonProvider } from '../daemon/init'
@@ -75,7 +78,12 @@ export async function hydrateLocalPtyRegistryAtBoot(store: Pick<Store, 'getRepos
     // Why: ask the daemon which repos matter before launching Git worktree
     // enumeration. Most configured repos have no preserved session at boot,
     // so scanning all of them creates pure background subprocess churn.
-    const reposById = new Map(store.getRepos().map((repo) => [repo.id, repo]))
+    const reposById = new Map(
+      store
+        .getRepos()
+        .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
+        .map((repo) => [repo.id, repo])
+    )
     // Why: live git enumeration verifies that a referenced local worktree
     // still exists instead of resurrecting removed worktrees.
     const liveLocalWorktreeIds = new Set<string>()
@@ -104,10 +112,10 @@ export async function hydrateLocalPtyRegistryAtBoot(store: Pick<Store, 'getRepos
           continue
         }
         const repo = reposById.get(parsedWorktreeId.repoId)
-        if (!repo || (repo.connectionId ?? null)) {
-          // Why: unknown repos can't be proven local, and SSH PTYs are never
-          // registered for local process sampling — resolve without git
-          // enumeration so neither can extend the loop.
+        if (!repo || getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID) {
+          // Why: unknown repos cannot be proven local, and paired-runtime PTYs
+          // are never registered for local process sampling. Resolve without
+          // Git enumeration so neither can extend the loop.
           resolvedRepoIds.add(parsedWorktreeId.repoId)
           continue
         }
@@ -140,11 +148,10 @@ export async function hydrateLocalPtyRegistryAtBoot(store: Pick<Store, 'getRepos
       if (!worktreeId) {
         continue
       }
-      // Why: SSH sessions must stay out of the registry — mirrors the
-      // spawn-time `if (!args.connectionId)` gate around `registerPty` in
-      // `src/main/pty/pty.ts`. If the repo isn't in the store, skip the
-      // session: we can't prove it's local, and the renderer-side union
-      // still surfaces the session at the cost of a missing pid sample.
+      // Why: non-local sessions must stay out of the local process registry.
+      // If the repo is absent, skip it because local ownership cannot be
+      // proven; the renderer-side union still surfaces the session without
+      // local process samples.
       if (!liveLocalWorktreeIds.has(worktreeId)) {
         continue
       }

@@ -1,28 +1,15 @@
 import { stat as statLocalPath } from 'node:fs/promises'
 
+import { LOCAL_EXECUTION_HOST_ID, normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
 } from '~shared/folder-workspace-path-status'
-import type { FolderWorkspace, ProjectGroup, Repo } from '~shared/types'
+import type { FolderWorkspace, ProjectGroup } from '~shared/types'
 
 type FolderWorkspacePathStatusStore = {
-  getRepos: () => Repo[]
   getProjectGroups?: () => ProjectGroup[]
   getFolderWorkspaces?: () => FolderWorkspace[]
-}
-
-export type FolderWorkspacePathConnectionResolution = { kind: 'local' }
-
-export function inferFolderWorkspacePathConnection(args: {
-  folderPath: string
-  projectGroupId?: string | null
-  connectionId?: string | null
-  projectGroups: readonly ProjectGroup[]
-  repos: readonly Repo[]
-}): FolderWorkspacePathConnectionResolution {
-  void args
-  return { kind: 'local' }
 }
 
 function pathStatErrorReason(error: unknown): 'missing' | 'unavailable' {
@@ -41,20 +28,16 @@ async function statFolderPath(path: string): Promise<FolderWorkspacePathStatus> 
   }
 }
 
-export async function getFolderWorkspacePathStatusForPath(args: {
+export async function getFolderWorkspacePathStatusForPath(
   folderPath: string
-  projectGroupId?: string | null
-  connectionId?: string | null
-  projectGroups: readonly ProjectGroup[]
-  repos: readonly Repo[]
-}): Promise<FolderWorkspacePathStatus> {
-  return statFolderPath(args.folderPath)
+): Promise<FolderWorkspacePathStatus> {
+  return statFolderPath(folderPath)
 }
 
-export function resolveFolderWorkspaceStatusPath(args: {
+function resolveFolderWorkspaceStatusPath(args: {
   store: FolderWorkspacePathStatusStore
   request: FolderWorkspacePathStatusRequest
-}): { folderPath: string; projectGroupId: string | null; connectionId?: string | null } {
+}): { path: string; executionHostId: string | null } {
   const { request } = args
   if (request.scope === 'project-group') {
     const group = args.store
@@ -64,18 +47,13 @@ export function resolveFolderWorkspaceStatusPath(args: {
       throw new Error('folder_workspace_path_scope_not_found')
     }
     return {
-      folderPath: group.parentPath,
-      projectGroupId: group.id,
-      connectionId: group.connectionId ?? null
+      path: group.parentPath,
+      executionHostId: normalizeExecutionHostId(group.executionHostId)
     }
   }
 
   if (request.scope === 'path') {
-    return {
-      folderPath: request.path,
-      projectGroupId: null,
-      connectionId: request.connectionId ?? null
-    }
+    return { path: request.path, executionHostId: LOCAL_EXECUTION_HOST_ID }
   }
 
   const workspace = args.store
@@ -88,9 +66,8 @@ export function resolveFolderWorkspaceStatusPath(args: {
     .getProjectGroups?.()
     .find((entry) => entry.id === workspace.projectGroupId)
   return {
-    folderPath: workspace.folderPath,
-    projectGroupId: workspace.projectGroupId,
-    connectionId: workspace.connectionId ?? group?.connectionId ?? null
+    path: workspace.folderPath,
+    executionHostId: normalizeExecutionHostId(group?.executionHostId)
   }
 }
 
@@ -99,13 +76,10 @@ export async function getFolderWorkspacePathStatus(
   request: FolderWorkspacePathStatusRequest
 ): Promise<FolderWorkspacePathStatus> {
   const scope = resolveFolderWorkspaceStatusPath({ store, request })
-  return getFolderWorkspacePathStatusForPath({
-    folderPath: scope.folderPath,
-    projectGroupId: scope.projectGroupId,
-    connectionId: scope.connectionId,
-    projectGroups: store.getProjectGroups?.() ?? [],
-    repos: store.getRepos()
-  })
+  if (scope.executionHostId && scope.executionHostId !== LOCAL_EXECUTION_HOST_ID) {
+    return { path: scope.path, exists: false, reason: 'unavailable' }
+  }
+  return getFolderWorkspacePathStatusForPath(scope.path)
 }
 
 export function assertFolderWorkspacePathUsable(status: FolderWorkspacePathStatus): void {
@@ -117,9 +91,6 @@ export function assertFolderWorkspacePathUsable(status: FolderWorkspacePathStatu
   }
   if (status.reason === 'not-directory') {
     throw new Error(`folder_workspace_path_not_directory:${status.path}`)
-  }
-  if (status.reason === 'ambiguous-connection') {
-    throw new Error(`folder_workspace_connection_ambiguous:${status.path}`)
   }
   throw new Error(`folder_workspace_path_unavailable:${status.path}`)
 }

@@ -22,11 +22,8 @@ const PROJECT_REF_CACHE_MAX_ENTRIES = 512
 const GLAB_AUTH_STATUS_TIMEOUT_MS = 10_000
 const projectRefCache = new Map<string, ProjectRef | null>()
 
-// Why: known hosts are cached PER connection. A repo on an SSH connection
-// authenticates against a different glab context than the local one, so a
-// process-global cache would leak one connection's hosts into another (and
-// poison a connection that probes before its tunnel is ready). The local
-// context uses the `'local'` key.
+// Why: keep the cache scoped to the caller's execution context so overlapping
+// runtime requests cannot leak authenticated self-hosted hosts across scopes.
 const LOCAL_CONNECTION_KEY = 'local'
 const knownHostsCacheByConnection = new Map<string, readonly string[]>()
 
@@ -288,10 +285,8 @@ export async function getGlabKnownHosts(
     return merged
   } catch {
     options.signal?.throwIfAborted()
-    // Auth check failed (glab not installed, no auth, tunnel not ready,
-    // etc.) — fall back to the canonical default for THIS call, but do NOT
-    // cache the fallback. A later probe (e.g. after the SSH tunnel comes
-    // up) must be able to discover the real self-hosted host.
+    // Why: auth checks can fail transiently or because glab is unavailable. Fall
+    // back for this call without caching so a later probe can discover hosts.
     return [...DEFAULT_GITLAB_HOSTS]
   }
 }

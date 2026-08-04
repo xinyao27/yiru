@@ -195,7 +195,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
         assertValidBase64Content(contentBase64)
         return await saveClipboardImageBufferAsTempFile(Buffer.from(contentBase64, 'base64'))
       } finally {
-        // Why: failed SSH or filesystem commits must not leave bounded upload
+        // Why: failed runtime or filesystem commits must not leave bounded upload
         // memory pinned until TTL cleanup.
         deleteUpload(params.uploadId)
       }

@@ -161,7 +161,7 @@ export async function createGiteaPullRequest(
 
   const body =
     input.useTemplate && !input.body?.trim()
-      ? await readHostedPullRequestTemplate(repoPath, connectionId)
+      ? await readHostedPullRequestTemplate(repoPath)
       : (input.body ?? '')
   const requestBody = {
     base,

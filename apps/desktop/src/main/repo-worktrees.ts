@@ -1,3 +1,4 @@
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { GitWorktreeInfo, Repo } from '~shared/types'
 
@@ -14,7 +15,11 @@ function hasLocalRepoWorktreeListOptions(options: LocalRepoWorktreeListOptions |
 }
 
 export function isRepoRoot(repos: Repo[], resolvedTarget: string): boolean {
-  return repos.some((repo) => areWorktreePathsEqual(repo.path, resolvedTarget))
+  return repos.some(
+    (repo) =>
+      getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+      areWorktreePathsEqual(repo.path, resolvedTarget)
+  )
 }
 
 export function createFolderWorktree(repo: Repo): GitWorktreeInfo {

@@ -185,7 +185,6 @@ export async function detectRepoIcon({
 }: {
   repoPath: string
   kind: RepoKind
-  connectionId?: string | null
   upstream?: GitHubRepositoryIdentity | null
 }): Promise<RepoIcon | undefined> {
   try {
@@ -212,17 +211,14 @@ export async function detectRepoIcon({
 // repeated best-effort probes.
 export async function detectRepoIconAndUpstream({
   repoPath,
-  kind,
-  connectionId
+  kind
 }: {
   repoPath: string
   kind: RepoKind
-  connectionId?: string | null
 }) {
-  const upstream = kind === 'git' ? await getRepoUpstream(repoPath, connectionId) : null
-  const gitRemoteIdentity =
-    kind === 'git' ? await detectGitRemoteIdentity(repoPath, connectionId) : null
-  const repoIcon = await detectRepoIcon({ repoPath, kind, connectionId, upstream })
+  const upstream = kind === 'git' ? await getRepoUpstream(repoPath) : null
+  const gitRemoteIdentity = kind === 'git' ? await detectGitRemoteIdentity(repoPath) : null
+  const repoIcon = await detectRepoIcon({ repoPath, kind, upstream })
   return {
     ...(repoIcon ? { repoIcon } : {}),
     ...(gitRemoteIdentity ? { gitRemoteIdentity } : {}),

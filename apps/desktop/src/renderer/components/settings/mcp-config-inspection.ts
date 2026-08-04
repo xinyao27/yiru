@@ -1,6 +1,11 @@
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { joinPath } from '~renderer/lib/path'
 import {
+  readRuntimeDirectory,
+  readRuntimeFileContent,
+  type RuntimeFileOperationArgs
+} from '~renderer/runtime/file-client'
+import {
   getMcpConfigCandidateParentDir,
   getMcpConfigParentDirs,
   inspectMcpConfigContent,
@@ -18,10 +23,10 @@ function isMissingFileError(error: unknown): boolean {
 
 export async function loadMcpConfigInspections(
   targetRootPath: string,
-  connectionId: string | undefined
+  runtimeContext: RuntimeFileOperationArgs
 ): Promise<LoadedMcpConfigInspection[]> {
   const entriesByRelativeDir = new Map<string, readonly McpConfigDirectoryEntry[]>()
-  const rootEntries = await window.api.fs.readDir({ dirPath: targetRootPath, connectionId })
+  const rootEntries = await readRuntimeDirectory(runtimeContext, targetRootPath)
   entriesByRelativeDir.set('', rootEntries)
 
   const rootDirectoryNames = new Set(
@@ -34,10 +39,10 @@ export async function loadMcpConfigInspections(
         return
       }
       try {
-        const entries = await window.api.fs.readDir({
-          dirPath: joinPath(targetRootPath, relativeDir),
-          connectionId
-        })
+        const entries = await readRuntimeDirectory(
+          runtimeContext,
+          joinPath(targetRootPath, relativeDir)
+        )
         entriesByRelativeDir.set(relativeDir, entries)
       } catch (error) {
         unreadableParentDirMessages.set(
@@ -75,7 +80,12 @@ export async function loadMcpConfigInspections(
       }
 
       try {
-        const result = await window.api.fs.readFile({ filePath: absolutePath, connectionId })
+        const result = await readRuntimeFileContent({
+          settings: runtimeContext.settings,
+          filePath: absolutePath,
+          relativePath: candidate.relativePath,
+          worktreeId: runtimeContext.worktreeId ?? undefined
+        })
         const inspection = inspectMcpConfigContent(candidate, result.isBinary ? '' : result.content)
         return { ...inspection, absolutePath }
       } catch (error) {

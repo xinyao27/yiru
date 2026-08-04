@@ -16,11 +16,6 @@ export function getFolderWorkspacePathStatusTitle(
         'auto.lib.folderWorkspacePathStatus.title.notDirectory',
         'Path is not a folder'
       )
-    case 'ambiguous-connection':
-      return translate(
-        'auto.lib.folderWorkspacePathStatus.title.ambiguousConnection',
-        'Cannot determine connection'
-      )
     case undefined:
     case 'unavailable':
       return translate(
@@ -49,16 +44,11 @@ export function getFolderWorkspacePathStatusDescription(
         '{{path}} exists, but it is not a folder.',
         { path: status.path }
       )
-    case 'ambiguous-connection':
-      return translate(
-        'auto.lib.folderWorkspacePathStatus.description.ambiguousConnection',
-        'Yiru cannot tell which SSH connection owns this folder scope.'
-      )
     case undefined:
     case 'unavailable':
       return translate(
         'auto.lib.folderWorkspacePathStatus.description.unavailable',
-        'Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again.'
+        'Yiru cannot verify this folder right now. Check the runtime and try again.'
       )
   }
 }
@@ -95,18 +85,6 @@ export function formatFolderWorkspaceCreateError(error: unknown): {
       )
     }
   }
-  if (message.startsWith('folder_workspace_connection_ambiguous:')) {
-    return {
-      title: translate(
-        'auto.lib.folderWorkspacePathStatus.createError.title.ambiguousConnection',
-        'Cannot determine connection'
-      ),
-      description: translate(
-        'auto.lib.folderWorkspacePathStatus.createError.description.ambiguousConnection',
-        'Yiru cannot tell which SSH connection owns this folder scope.'
-      )
-    }
-  }
   if (message.startsWith('folder_workspace_path_unavailable:')) {
     return {
       title: translate(
@@ -115,7 +93,7 @@ export function formatFolderWorkspaceCreateError(error: unknown): {
       ),
       description: translate(
         'auto.lib.folderWorkspacePathStatus.createError.description.unavailable',
-        'Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again.'
+        'Yiru cannot verify this folder right now. Check the runtime and try again.'
       )
     }
   }

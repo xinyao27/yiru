@@ -91,10 +91,7 @@ function hostedReviewExecutionOptionArgs(
   return hasHostedReviewLocalGitOptions(options) ? [options] : []
 }
 
-async function readMergeRequestTemplate(
-  repoPath: string,
-  _connectionId?: string | null
-): Promise<string> {
+async function readMergeRequestTemplate(repoPath: string): Promise<string> {
   const relativeCandidates = [
     '.gitlab/merge_request_templates/Default.md',
     '.gitlab/merge_request_templates/default.md',
@@ -160,7 +157,7 @@ export async function createGitLabMergeRequest(
   try {
     const body =
       input.useTemplate && !input.body?.trim()
-        ? await readMergeRequestTemplate(repoPath, connectionId)
+        ? await readMergeRequestTemplate(repoPath)
         : (input.body ?? '')
     const createArgs = [
       'mr',

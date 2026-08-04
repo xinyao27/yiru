@@ -4045,8 +4045,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
                 : null
             const folderWorkspaceCreateDisabled =
               projectGroupPathStatus?.exists === false &&
-              (isConfirmedStaleFolderPathStatus(projectGroupPathStatus) ||
-                projectGroupPathStatus.reason === 'ambiguous-connection')
+              isConfirmedStaleFolderPathStatus(projectGroupPathStatus)
             const projectGroupDepth = row.projectGroupDepth ?? 0
             const isHeaderCollapsed = collapsedGroups.has(row.key)
             // Why: repo/project and status headers use the same compact
@@ -4933,8 +4932,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
             })
             const folderWorkspaceActivationDisabled =
               folderWorkspacePathStatus?.exists === false &&
-              (isConfirmedStaleFolderPathStatus(folderWorkspacePathStatus) ||
-                folderWorkspacePathStatus.reason === 'ambiguous-connection')
+              isConfirmedStaleFolderPathStatus(folderWorkspacePathStatus)
             const folderPrDisplay = getFolderWorkspaceCardPrDisplay({
               folderWorkspaceId: folderWorkspaceRow.folderWorkspace.id,
               workspaceLineageByChildKey,
@@ -5792,7 +5790,7 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
       const nextOrder: ExecutionHostId[] = [...orderedVisibleHostIds]
       const seen = new Set(nextOrder)
       // Why: dragging only covers rendered host sections. Keep non-rendered
-      // SSH/runtime hosts in the saved preference so they return in the same
+      // paired-runtime hosts in the saved preference so they return in the same
       // place when their workspaces become visible again.
       for (const hostId of [...workspaceHostOrder, ...hostOptionIds]) {
         if (!knownHostIds.has(hostId) || visibleHostIds.has(hostId) || seen.has(hostId)) {

@@ -2,10 +2,7 @@ import { deriveGitRemoteIdentity, type GitRemoteIdentity } from '~shared/git/rem
 
 import { gitExecFileAsync } from './git/runner'
 
-export async function detectGitRemoteIdentity(
-  repoPath: string,
-  _connectionId?: string | null
-): Promise<GitRemoteIdentity | null> {
+export async function detectGitRemoteIdentity(repoPath: string): Promise<GitRemoteIdentity | null> {
   try {
     const result = await gitExecFileAsync(['remote', '-v'], { cwd: repoPath })
     return deriveGitRemoteIdentity(result.stdout)

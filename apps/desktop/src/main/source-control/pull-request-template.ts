@@ -30,16 +30,12 @@ function getTemplateCandidates(provider?: HostedReviewProvider | null): string[]
   return PULL_REQUEST_TEMPLATE_CANDIDATES
 }
 
-export async function readHostedPullRequestTemplate(
-  repoPath: string,
-  connectionId?: string | null
-): Promise<string> {
-  return readHostedReviewTemplate(repoPath, connectionId)
+export async function readHostedPullRequestTemplate(repoPath: string): Promise<string> {
+  return readHostedReviewTemplate(repoPath)
 }
 
 export async function readHostedReviewTemplate(
   repoPath: string,
-  _connectionId?: string | null,
   provider?: HostedReviewProvider | null
 ): Promise<string> {
   for (const relativeCandidate of getTemplateCandidates(provider)) {
@@ -55,7 +51,6 @@ export async function readHostedReviewTemplate(
 export async function resolveHostedReviewBodyForGeneration(args: {
   body: string
   repoPath: string
-  connectionId?: string | null
   provider?: HostedReviewProvider | null
   useTemplate?: boolean
 }): Promise<string> {
@@ -64,5 +59,5 @@ export async function resolveHostedReviewBodyForGeneration(args: {
   }
   // Why: generated non-empty bodies bypass provider-side template fallback, so
   // preload the template into the AI context when the user asked to use it.
-  return readHostedReviewTemplate(args.repoPath, args.connectionId, args.provider)
+  return readHostedReviewTemplate(args.repoPath, args.provider)
 }

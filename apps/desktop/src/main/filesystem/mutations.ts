@@ -15,7 +15,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { pipeline } from 'node:stream/promises'
 
 /* eslint-disable max-lines -- Why: filesystem mutation IPC handlers stay centralized so
-authorization, SSH routing, and external import behavior remain audited together. */
+authorization and external import behavior remain audited together. */
 import { ipcMain } from 'electron'
 import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
@@ -139,8 +139,8 @@ export function registerFilesystemMutationHandlers(store: Store): void {
       args: { sourcePaths: string[]; destDir: string; connectionId?: string; ensureDir?: boolean }
     ): Promise<{ results: ImportItemResult[] }> => {
       if (args.connectionId) {
-        // Why: a connectionId only ever named an SSH host. Fail loudly instead of
-        // authorizing a remote destination path against this machine's roots.
+        // Why: legacy callers can still send a removed host id. Fail closed instead
+        // of authorizing another host's destination against this machine's roots.
         throw new Error('Importing files into a remote host is no longer supported')
       }
 

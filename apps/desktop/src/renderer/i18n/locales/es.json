@@ -545,28 +545,24 @@
         "title": {
           "missing": "Carpeta no encontrada",
           "notDirectory": "La ruta no es una carpeta",
-          "ambiguousConnection": "No se puede determinar la conexión",
           "unavailable": "No se puede verificar la carpeta"
         },
         "description": {
           "missing": "Yiru no puede encontrar {{path}}. Elimina y vuelve a importar este espacio de trabajo de carpeta.",
           "notDirectory": "{{path}} existe, pero no es una carpeta.",
-          "ambiguousConnection": "Yiru no puede determinar a qué conexión SSH pertenece este alcance de carpeta.",
-          "unavailable": "Yiru no puede verificar esta carpeta ahora mismo. Revisa el host o la conexión SSH e inténtalo de nuevo."
+          "unavailable": "Yiru no puede verificar esta carpeta ahora mismo. Revisa el runtime e inténtalo de nuevo."
         },
         "createError": {
           "title": {
             "missing": "Carpeta no encontrada",
             "notDirectory": "La ruta no es una carpeta",
-            "ambiguousConnection": "No se puede determinar la conexión",
             "unavailable": "No se puede verificar la carpeta",
             "generic": "No se pudo crear el espacio de trabajo de carpeta"
           },
           "description": {
             "missing": "Yiru no puede encontrar {{path}}. Elimina y vuelve a importar la carpeta.",
             "notDirectory": "{{path}} existe, pero no es una carpeta.",
-            "ambiguousConnection": "Yiru no puede determinar a qué conexión SSH pertenece este alcance de carpeta.",
-            "unavailable": "Yiru no puede verificar esta carpeta ahora mismo. Revisa el host o la conexión SSH e inténtalo de nuevo."
+            "unavailable": "Yiru no puede verificar esta carpeta ahora mismo. Revisa el runtime e inténtalo de nuevo."
           }
         }
       },
@@ -5046,7 +5042,6 @@
           "3b224167ff": "server",
           "251b96564a": "detectado ·",
           "f34c152dc0": "Actualizar configuraciones de MCP",
-          "6bac9ddfc6": "Los repositorios SSH se leen a través del sistema de archivos remoto. La creación inicial se limita a la configuración raíz del espacio de trabajo.",
           "96f5609b04": "Inspecciona las definiciones de servidores MCP que los agentes pueden usar mientras trabajan en este repositorio.",
           "55eea3ef47": "Configuraciones de MCP",
           "9ee215caf6": ".mcp.json",

@@ -38,7 +38,7 @@ export function WorktreeSymlinksSection({
   // Why: the pane may show a non-focused runtime host; only inspect the local
   // filesystem when the switcher-selected repo is actually local.
   const useLocalDirectorySuggestions = getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID
-  const directorySuggestionKey = `${repo.path}\n${repo.connectionId ?? ''}`
+  const directorySuggestionKey = repo.path
   const [directorySuggestions, setDirectorySuggestions] = useState<DirectorySuggestionState>(
     () => ({
       requestKey: directorySuggestionKey,
@@ -52,7 +52,7 @@ export function WorktreeSymlinksSection({
     }
     let cancelled = false
     void window.api.fs
-      .readDir({ dirPath: repo.path, connectionId: repo.connectionId ?? undefined })
+      .readDir({ dirPath: repo.path })
       .then((list) => {
         if (cancelled) {
           return

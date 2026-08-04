@@ -115,14 +115,11 @@ export function useFolderWorkspaceComposerPathStatus(
   const cachedBlockingPathStatus =
     pathStatus === null &&
     cachedPathStatusEntry?.status.exists === false &&
-    (isConfirmedStaleFolderPathStatus(cachedPathStatusEntry.status) ||
-      cachedPathStatusEntry.status.reason === 'ambiguous-connection')
+    isConfirmedStaleFolderPathStatus(cachedPathStatusEntry.status)
   const pathStatusBlocksCreate =
     pathStatusRefreshPending ||
     cachedBlockingPathStatus ||
-    (pathStatus?.exists === false &&
-      (isConfirmedStaleFolderPathStatus(pathStatus) ||
-        pathStatus.reason === 'ambiguous-connection'))
+    (pathStatus?.exists === false && isConfirmedStaleFolderPathStatus(pathStatus))
   const displayPathStatus =
     pathStatus ?? (cachedBlockingPathStatus ? (cachedPathStatusEntry?.status ?? null) : null)
   const title =

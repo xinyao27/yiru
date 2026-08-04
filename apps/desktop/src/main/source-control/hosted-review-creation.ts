@@ -114,7 +114,6 @@ async function isGitLabAuthenticated(
 async function runGitForHostedReview(
   repoPath: string,
   args: string[],
-  _connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<{ stdout: string; stderr?: string }> {
   return gitExecFileAsync(args, { cwd: repoPath, ...getHostedReviewLocalGitOptions(options) })
@@ -122,12 +121,9 @@ async function runGitForHostedReview(
 
 async function getDefaultBaseRef(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<string | null> {
-  return resolveDefaultBaseRefViaExec((argv) =>
-    runGitForHostedReview(repoPath, argv, connectionId, options)
-  )
+  return resolveDefaultBaseRefViaExec((argv) => runGitForHostedReview(repoPath, argv, options))
 }
 
 /**
@@ -139,14 +135,13 @@ async function getDefaultBaseRef(
  * under *any* configured remote rather than assume `origin` — otherwise fork
  * workflows (`upstream/main`) would be missed. Runs through
  * `runGitForHostedReview` so it evaluates on the same host that will run the
- * provider create (native/WSL/SSH/relay). This reads the local remote-tracking
+ * provider create (native or WSL on the selected runtime). This reads the remote-tracking
  * snapshot, not the live remote; see the design doc's Open Questions for the
  * ls-remote/staleness tradeoff left as a follow-up.
  */
 async function baseRefExistsOnRemote(
   candidate: string,
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<boolean> {
   const base = normalizeHostedReviewBaseRef(candidate).trim()
@@ -154,7 +149,7 @@ async function baseRefExistsOnRemote(
     return false
   }
   const run = (argv: string[]): Promise<{ stdout: string }> =>
-    runGitForHostedReview(repoPath, argv, connectionId, options)
+    runGitForHostedReview(repoPath, argv, options)
 
   const patterns = [`refs/remotes/*/${base}`]
   // Non-origin remote-qualified candidate (e.g. `fork/main`): the wildcard glob
@@ -178,13 +173,11 @@ async function baseRefExistsOnRemote(
 
 async function getCurrentBranch(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<string> {
   const { stdout } = await runGitForHostedReview(
     repoPath,
     ['rev-parse', '--abbrev-ref', 'HEAD'],
-    connectionId,
     options
   )
   return stripRefPrefix(stdout.trim())
@@ -192,7 +185,6 @@ async function getCurrentBranch(
 
 async function hasUncommittedChanges(
   repoPath: string,
-  _connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<boolean> {
   const { stdout } = await gitExecFileAsync(['status', '--porcelain', '-z'], {
@@ -223,7 +215,6 @@ async function anyRecordIsUserDirt(
 
 async function getHostedReviewUpstreamStatus(
   repoPath: string,
-  _connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<GitUpstreamStatus> {
   try {
@@ -394,7 +385,7 @@ async function validateCurrentBranchCanCreateReview(
   options: HostedReviewExecutionOptions = {}
 ): Promise<CreateHostedReviewResult | null> {
   const requestedHead = input.head ? stripRefPrefix(input.head).trim() : ''
-  const currentBranch = await getCurrentBranch(repoPath, connectionId, options)
+  const currentBranch = await getCurrentBranch(repoPath, options)
   const copy = reviewCopy(input.provider)
   if (requestedHead && requestedHead !== currentBranch) {
     return {
@@ -406,8 +397,8 @@ async function validateCurrentBranchCanCreateReview(
 
   try {
     const [dirty, upstreamStatus] = await Promise.all([
-      hasUncommittedChanges(repoPath, connectionId, options),
-      getHostedReviewUpstreamStatus(repoPath, connectionId, options)
+      hasUncommittedChanges(repoPath, options),
+      getHostedReviewUpstreamStatus(repoPath, options)
     ])
     const submittedBase = normalizeHostedReviewBaseRef(input.base)
     const eligibility = await getHostedReviewCreationEligibility({
@@ -453,13 +444,12 @@ export async function getHostedReviewCreationEligibility(
   // keep the candidate if the repo default itself is unavailable.
   const candidateBase = args.base?.trim() || null
   const candidateBaseOnRemote =
-    candidateBase != null &&
-    (await baseRefExistsOnRemote(candidateBase, args.repoPath, args.connectionId, args))
+    candidateBase != null && (await baseRefExistsOnRemote(candidateBase, args.repoPath, args))
   let defaultBaseRef: string | null
   if (candidateBase && candidateBaseOnRemote) {
     defaultBaseRef = candidateBase
   } else {
-    const repoDefaultBaseRef = await getDefaultBaseRef(args.repoPath, args.connectionId, args)
+    const repoDefaultBaseRef = await getDefaultBaseRef(args.repoPath, args)
     defaultBaseRef = repoDefaultBaseRef ?? candidateBase
   }
   const baseBranch = defaultBaseRef ? normalizeHostedReviewBaseRef(defaultBaseRef) : null

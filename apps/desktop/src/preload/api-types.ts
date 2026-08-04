@@ -2011,7 +2011,7 @@ export type PreloadApi = {
     restart: () => Promise<FridaySession>
   }
   fs: {
-    readDir: (args: { dirPath: string; connectionId?: string }) => Promise<DirEntry[]>
+    readDir: (args: { dirPath: string }) => Promise<DirEntry[]>
     readFile: (args: {
       filePath: string
       connectionId?: string

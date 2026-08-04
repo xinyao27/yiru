@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: filesystem, editor-file, and search commands share the same local/SSH path authorization rules. Keeping that IO adapter together prevents separate command paths from drifting on safety checks. */
+/* eslint-disable max-lines -- Why: filesystem, editor-file, and search commands share the same runtime-local path authorization rules. Keeping that IO adapter together prevents separate command paths from drifting on safety checks. */
 import type { ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { watch as watchFs } from 'node:fs'
@@ -337,7 +337,6 @@ export async function awaitRuntimeFileWatcherUnsubscribes(): Promise<void> {
 export type ResolvedRuntimeFileWorktree = Worktree & { git: GitWorktreeInfo }
 export type ResolvedRuntimeFileTarget = {
   worktree: ResolvedRuntimeFileWorktree
-  connectionId?: string
 }
 
 export type RuntimeFileCommandHost = {
@@ -354,9 +353,7 @@ export type RuntimeFileCommandHost = {
     pathText: string,
     absolutePath: string
   ): boolean | Promise<boolean>
-  resolveRuntimeGitTarget(
-    selector: string
-  ): Promise<{ worktree: ResolvedRuntimeFileWorktree; connectionId?: string }>
+  resolveRuntimeGitTarget(selector: string): Promise<{ worktree: ResolvedRuntimeFileWorktree }>
   openFile(
     worktreeId: string,
     filePath: string,
@@ -1648,7 +1645,7 @@ function normalizeTerminalFileUriAuthorityPath(pathText: string, worktreePath?: 
     return normalizeLeadingSlashDrivePath(match[2]!, worktreePath)
   }
   // Why: a file URI authority names a host. Without a verified host match,
-  // stripping it could open a same-path local or SSH artifact on the wrong machine.
+  // stripping it could open a same-path artifact on the wrong runtime host.
   return pathText
 }
 

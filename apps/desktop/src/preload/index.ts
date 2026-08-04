@@ -2424,7 +2424,6 @@ const api = {
   fs: {
     readDir: (args: {
       dirPath: string
-      connectionId?: string
     }): Promise<{ name: string; isDirectory: boolean; isSymlink: boolean }[]> =>
       ipcRenderer.invoke('fs:readDir', args),
     readFile: (args: {

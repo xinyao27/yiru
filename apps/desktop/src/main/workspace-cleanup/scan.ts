@@ -1,4 +1,8 @@
-import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  splitWorktreeId
+} from '@yiru/workbench-model/workspace'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { GitWorktreeInfo, Repo, Worktree } from '~shared/types'
 import type {
@@ -59,9 +63,12 @@ export async function scanWorkspaceCleanup(
   if (args.worktreeId && !parsedTarget) {
     return { scannedAt, candidates: [], errors: [] }
   }
+  const localRepos = store
+    .getRepos()
+    .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
   const repos = parsedTarget
-    ? store.getRepos().filter((repo) => repo.id === parsedTarget.repoId)
-    : store.getRepos()
+    ? localRepos.filter((repo) => repo.id === parsedTarget.repoId)
+    : localRepos
   const progress = createProgressEmitter(args.scanId, scannedAt, options)
   const errors: WorkspaceCleanupScanResult['errors'] = []
   const candidates: WorkspaceCleanupCandidate[] = []
@@ -110,7 +117,7 @@ async function scanRepoWorkspaces(
   try {
     gitWorktrees = await listCleanupGitWorktrees(repo, repoIsFolder)
   } catch (error) {
-    return handleRepoWorktreeListError({ repo, targetWorktreeId, scannedAt, error, onErrors })
+    return handleRepoWorktreeListError({ repo, scannedAt, error, onErrors })
   }
 
   const mergedWorktrees = gitWorktrees.map((gitWorktree) => {
@@ -215,18 +222,12 @@ async function listCleanupGitWorktrees(
 
 function handleRepoWorktreeListError(args: {
   repo: Repo
-  targetWorktreeId?: string
   scannedAt: number
   error: unknown
   onErrors?: (errors: WorkspaceCleanupScanError[]) => void
 }): WorkspaceCleanupScanResult {
-  const { repo, targetWorktreeId, scannedAt, error, onErrors } = args
+  const { repo, scannedAt, error, onErrors } = args
   console.error('Workspace cleanup repo scan failed', error)
-  if (repo.connectionId && !targetWorktreeId) {
-    // Why: broad cleanup only shows remote workspaces Yiru can inspect now.
-    // A connected SSH repo that fails mid-scan is omitted, not bannered.
-    return { scannedAt, candidates: [], errors: [] }
-  }
   const errors = [createWorkspaceCleanupScanError(repo, toSafeWorkspaceCleanupRepoScanError(error))]
   onErrors?.(errors)
   return { scannedAt, candidates: [], errors }

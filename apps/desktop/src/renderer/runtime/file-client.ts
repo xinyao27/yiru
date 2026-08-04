@@ -391,7 +391,7 @@ export async function readRuntimeDirectory(
   const remoteArgs = getRemoteFileArgs(context, dirPath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    return window.api.fs.readDir({ dirPath, connectionId: context.connectionId })
+    return window.api.fs.readDir({ dirPath })
   }
   return callRuntimeRpc<DirEntry[]>(
     remoteArgs.target,

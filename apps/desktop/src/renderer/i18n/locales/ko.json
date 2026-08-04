@@ -545,28 +545,24 @@
         "title": {
           "missing": "폴더를 찾을 수 없습니다",
           "notDirectory": "경로가 폴더가 아닙니다",
-          "ambiguousConnection": "연결을 확인할 수 없습니다",
           "unavailable": "폴더를 확인할 수 없습니다"
         },
         "description": {
           "missing": "Yiru가 {{path}}을(를) 찾을 수 없습니다. 이 폴더 워크스페이스를 제거하고 다시 가져오세요.",
           "notDirectory": "{{path}}이(가) 존재하지만 폴더가 아닙니다.",
-          "ambiguousConnection": "Yiru가 이 폴더 범위를 소유한 SSH 연결을 확인할 수 없습니다.",
-          "unavailable": "Yiru가 지금 이 폴더를 확인할 수 없습니다. 런타임 또는 SSH 연결을 확인한 후 다시 시도하세요."
+          "unavailable": "Yiru가 지금 이 폴더를 확인할 수 없습니다. 런타임을 확인한 후 다시 시도하세요."
         },
         "createError": {
           "title": {
             "missing": "폴더를 찾을 수 없습니다",
             "notDirectory": "경로가 폴더가 아닙니다",
-            "ambiguousConnection": "연결을 확인할 수 없습니다",
             "unavailable": "폴더를 확인할 수 없습니다",
             "generic": "폴더 워크스페이스를 만들지 못했습니다"
           },
           "description": {
             "missing": "Yiru가 {{path}}을(를) 찾을 수 없습니다. 폴더를 제거하고 다시 가져오세요.",
             "notDirectory": "{{path}}이(가) 존재하지만 폴더가 아닙니다.",
-            "ambiguousConnection": "Yiru가 이 폴더 범위를 소유한 SSH 연결을 확인할 수 없습니다.",
-            "unavailable": "Yiru가 지금 이 폴더를 확인할 수 없습니다. 런타임 또는 SSH 연결을 확인한 후 다시 시도하세요."
+            "unavailable": "Yiru가 지금 이 폴더를 확인할 수 없습니다. 런타임을 확인한 후 다시 시도하세요."
           }
         }
       },
@@ -5031,7 +5027,6 @@
           "3b224167ff": "서버",
           "251b96564a": "감지됨 ·",
           "f34c152dc0": "MCP 구성 새로 고침",
-          "6bac9ddfc6": "SSH repos는 원격 파일 시스템을 통해 읽힙니다. 스타터 생성은 워크스페이스 루트 구성으로 제한됩니다.",
           "96f5609b04": "이 repo에서 작업하는 동안 agents가 사용할 수 있는 MCP 서버 정의를 검사하세요.",
           "55eea3ef47": "MCP 구성",
           "9ee215caf6": ".mcp.json",

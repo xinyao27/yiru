@@ -13,7 +13,7 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: repo IPC is intentionally centralized so SSH
+/* eslint-disable max-lines -- Why: repo IPC is intentionally centralized so host
 routing, clone lifecycle, and store persistence stay behind a single audited
 boundary. Splitting by line count would scatter tightly coupled repo behavior. */
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
@@ -100,7 +100,7 @@ import { createNestedRepoImportTargetResolver } from './nested-repo-import-targe
 // Why `isGitRepo`: low-cardinality, non-identifying git-vs-folder signal.
 // Callers pass it because they already have the git-detection result in scope
 // (avoids re-running git I/O here). Pass `undefined` when a call site genuinely
-// can't determine git-ness (e.g. some SSH/remote edges) — never default-guess
+// can't determine git-ness at an external boundary — never default-guess
 // `false`. This replaced the now-removed `onboarding_completed.is_git_repo`,
 // which became meaningless once repo selection left onboarding (1.4.46).
 function emitRepoAdded(method: RepoMethod, alreadyExisted: boolean, isGitRepo?: boolean): void {
@@ -135,24 +135,18 @@ async function listReposForExecutionHost(
     executionHostId: args.executionHostId,
     reason
   })
-  if (!parsedHost || parsedHost.kind === 'runtime') {
+  if (!parsedHost || parsedHost.kind !== 'local') {
     return rejected('rejected')
   }
   const repos = store.getRepos().filter((repo) => getRepoExecutionHostId(repo) === parsedHost.id)
-  if (parsedHost.kind === 'local') {
-    if ('expectedAuthority' in args) {
-      return rejected('rejected')
-    }
-    return {
-      authoritative: true,
-      authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
-      repos: structuredClone(repos)
-    }
+  if ('expectedAuthority' in args) {
+    return rejected('rejected')
   }
-  // Why: a remote catalog was only ever authoritative behind a live SSH provider
-  // whose generation we could re-check after the await. With no way to prove the
-  // snapshot is current, report unavailable rather than claim authority.
-  return rejected('unavailable')
+  return {
+    authoritative: true,
+    authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
+    repos: structuredClone(repos)
+  }
 }
 
 function buildProjectHostSetupResult(store: Store, repo: Repo): ProjectHostSetupResult {
@@ -215,7 +209,11 @@ async function addLocalRepoFromPath(
   const pathKey = normalizeRuntimePathForComparison(path)
   const existing = store
     .getRepos()
-    .find((repo) => !repo.connectionId && normalizeRuntimePathForComparison(repo.path) === pathKey)
+    .find(
+      (repo) =>
+        getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+        normalizeRuntimePathForComparison(repo.path) === pathKey
+    )
   if (existing) {
     return { repo: existing, alreadyExisted: true }
   }
@@ -226,7 +224,8 @@ async function addLocalRepoFromPath(
       .getRepos()
       .find(
         (repo) =>
-          !repo.connectionId && normalizeRuntimePathForComparison(repo.path) === resolvedPathKey
+          getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+          normalizeRuntimePathForComparison(repo.path) === resolvedPathKey
       )
     if (existingAfterRootResolve) {
       return { repo: existingAfterRootResolve, alreadyExisted: true }
@@ -281,7 +280,6 @@ const activeNestedRepoScans = new Map<string, AbortController>()
 type CompletedNestedRepoScan = {
   scan: NestedRepoScanResult
   parentPath: string
-  connectionId: string | null
 }
 const completedNestedRepoScans = new Map<string, CompletedNestedRepoScan>()
 const MAX_COMPLETED_NESTED_SCAN_RESULTS = 50
@@ -302,7 +300,6 @@ function emitCloneProgressFromText(mainWindow: BrowserWindow, text: string): voi
 const ProjectGroupCreateArgs = z.object({
   name: z.string().min(1),
   parentPath: z.string().nullable().optional(),
-  connectionId: z.string().nullable().optional(),
   parentGroupId: z.string().nullable().optional(),
   createdFrom: z.enum(['manual', 'folder-scan', 'migration']).optional()
 })
@@ -406,7 +403,6 @@ const FolderWorkspaceCreateArgs = z.object({
   projectGroupId: z.string().min(1),
   name: z.string().optional(),
   folderPath: z.string().nullable().optional(),
-  connectionId: z.string().nullable().optional(),
   linkedReview: FolderWorkspaceLinkedReviewArgs.optional(),
   createdWithAgent: z.string().refine(isTuiAgent).optional(),
   pendingFirstAgentMessageRename: z.boolean().optional()
@@ -447,14 +443,12 @@ const FolderWorkspacePathStatusArgs = z.discriminatedUnion('scope', [
   }),
   z.object({
     scope: z.literal('path'),
-    path: z.string().min(1),
-    connectionId: z.string().min(1).nullable().optional()
+    path: z.string().min(1)
   })
 ])
 
 const ProjectGroupScanNestedArgs = z.object({
   path: z.string().min(1),
-  connectionId: z.string().min(1).optional(),
   scanId: z.string().min(1).optional(),
   options: z.unknown().optional()
 })
@@ -468,7 +462,6 @@ const ProjectGroupImportNestedArgs = z.discriminatedUnion('mode', [
     parentPath: z.string().min(1),
     groupName: z.string().optional().default(''),
     projectPaths: z.array(z.string()),
-    connectionId: z.string().min(1).optional(),
     scanId: z.string().min(1).optional(),
     mode: z.literal('group')
   }),
@@ -476,7 +469,6 @@ const ProjectGroupImportNestedArgs = z.discriminatedUnion('mode', [
     parentPath: z.string().min(1),
     groupName: z.string().optional().default(''),
     projectPaths: z.array(z.string()),
-    connectionId: z.string().min(1).optional(),
     scanId: z.string().min(1).optional(),
     mode: z.literal('separate')
   })
@@ -490,8 +482,7 @@ function parseProjectGroupIpcArgs<T>(schema: z.ZodType<T>, value: unknown, error
   throw new Error(errorCode)
 }
 
-function validateNestedRepoScanRoot(path: string, connectionId?: string): void {
-  void connectionId
+function validateNestedRepoScanRoot(path: string): void {
   if (!isAbsolute(path)) {
     throw new Error('Repo path must be an absolute path')
   }
@@ -499,7 +490,6 @@ function validateNestedRepoScanRoot(path: string, connectionId?: string): void {
 
 function rememberCompletedNestedRepoScan(
   scanId: string | undefined,
-  context: { parentPath: string; connectionId?: string },
   scan: NestedRepoScanResult
 ): void {
   if (!scanId) {
@@ -507,8 +497,7 @@ function rememberCompletedNestedRepoScan(
   }
   completedNestedRepoScans.set(scanId, {
     scan,
-    parentPath: scan.selectedPath,
-    connectionId: context.connectionId ?? null
+    parentPath: scan.selectedPath
   })
   while (completedNestedRepoScans.size > MAX_COMPLETED_NESTED_SCAN_RESULTS) {
     const oldestScanId = completedNestedRepoScans.keys().next().value
@@ -522,7 +511,6 @@ function rememberCompletedNestedRepoScan(
 function getCompletedNestedRepoScan(args: {
   scanId?: string
   parentPath: string
-  connectionId?: string
 }): NestedRepoScanResult | undefined {
   if (!args.scanId) {
     return undefined
@@ -532,9 +520,8 @@ function getCompletedNestedRepoScan(args: {
     return undefined
   }
   if (
-    completed.connectionId !== (args.connectionId ?? null) ||
     normalizeRuntimePathForComparison(completed.parentPath) !==
-      normalizeRuntimePathForComparison(args.parentPath)
+    normalizeRuntimePathForComparison(args.parentPath)
   ) {
     return undefined
   }
@@ -629,12 +616,11 @@ function sanitizeNestedRepoImportError(context: string, error: unknown): string 
 
 async function scanNestedReposForIpc(args: {
   path: string
-  connectionId?: string
   options?: unknown
   signal?: AbortSignal
   onProgress?: (scan: NestedRepoScanResult) => void
 }): Promise<NestedRepoScanResult> {
-  validateNestedRepoScanRoot(args.path, args.connectionId)
+  validateNestedRepoScanRoot(args.path)
   return scanNestedRepos({
     path: args.path,
     options: args.options,
@@ -666,11 +652,7 @@ async function runNestedRepoScanForIpc(
           }
         : undefined
     })
-    rememberCompletedNestedRepoScan(
-      args.scanId,
-      { parentPath: args.path, connectionId: args.connectionId },
-      scan
-    )
+    rememberCompletedNestedRepoScan(args.scanId, scan)
     return scan
   } finally {
     if (args.scanId && activeNestedRepoScans.get(args.scanId) === controller) {
@@ -905,13 +887,13 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       if (!group || !folderPath) {
         throw new Error('folder_workspace_project_group_not_found')
       }
-      const status = await getFolderWorkspacePathStatusForPath({
-        folderPath,
-        projectGroupId: group.id,
-        connectionId: args.connectionId ?? group.connectionId ?? null,
-        projectGroups,
-        repos: store.getRepos()
-      })
+      if (
+        (normalizeExecutionHostId(group.executionHostId) ?? LOCAL_EXECUTION_HOST_ID) !==
+        LOCAL_EXECUTION_HOST_ID
+      ) {
+        throw new Error('folder_workspace_project_group_not_local')
+      }
+      const status = await getFolderWorkspacePathStatusForPath(folderPath)
       assertFolderWorkspacePathUsable(status)
       const workspace = store.createFolderWorkspace(args)
       notifyReposChanged(mainWindow)
@@ -935,17 +917,16 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         if (!workspace) {
           return null
         }
-        const projectGroups = store.getProjectGroups()
-        const status = await getFolderWorkspacePathStatusForPath({
-          folderPath: args.updates.folderPath,
-          projectGroupId: workspace.projectGroupId,
-          connectionId:
-            workspace.connectionId ??
-            projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
-            null,
-          projectGroups,
-          repos: store.getRepos()
-        })
+        const group = store
+          .getProjectGroups()
+          .find((entry) => entry.id === workspace.projectGroupId)
+        if (
+          (normalizeExecutionHostId(group?.executionHostId) ?? LOCAL_EXECUTION_HOST_ID) !==
+          LOCAL_EXECUTION_HOST_ID
+        ) {
+          throw new Error('folder_workspace_project_group_not_local')
+        }
+        const status = await getFolderWorkspacePathStatusForPath(args.updates.folderPath)
         assertFolderWorkspacePathUsable(status)
       }
       const updated = store.updateFolderWorkspace(args.folderWorkspaceId, args.updates)
@@ -978,7 +959,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
     const group = store.createProjectGroup({
       name: args.name,
       parentPath: args.parentPath ?? null,
-      connectionId: args.connectionId ?? null,
       parentGroupId: args.parentGroupId ?? null,
       createdFrom: args.createdFrom ?? 'manual'
     })
@@ -1065,7 +1045,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         completedScan ??
         (await scanNestedReposForIpc({
           path: args.parentPath,
-          connectionId: args.connectionId,
           options: { timeoutMs: 15_000 }
         }))
       const selection = resolveNestedRepoSelection({ scan, projectPaths: requestedPaths })
@@ -1073,7 +1052,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         parentPath: scan.selectedPath,
         groupName: args.groupName ?? '',
         mode: args.mode,
-        connectionId: args.connectionId ?? null,
         repoPaths: selection.selectedPaths,
         createGroup: (input) => store.createProjectGroup(input)
       })
@@ -1109,7 +1087,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
             .getRepos()
             .find(
               (repo) =>
-                (repo.connectionId ?? null) === (args.connectionId ?? null) &&
+                getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
                 normalizeRuntimePathForComparison(repo.path) === normalizedImportRepoPath
             )
           const group = groupResolver.getGroupForRepo(repoPath)
@@ -1123,8 +1101,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
           }
           const detected = await detectRepoIconAndUpstream({
             repoPath: importRepoPath,
-            kind: 'git',
-            connectionId: args.connectionId
+            kind: 'git'
           })
           const repo: Repo = {
             id: randomUUID(),
@@ -1134,7 +1111,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
             ...detected,
             addedAt: Date.now(),
             kind: 'git',
-            ...(args.connectionId ? { connectionId: args.connectionId } : {}),
             externalWorktreeVisibility: 'hide',
             externalWorktreeVisibilityLegacy: false,
             projectHostSetupMethod: 'imported-existing-folder',
@@ -1242,7 +1218,12 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       // produce two sidebar entries pointing at the same folder. This is the
       // first of three dedup checks; see the pre-addRepo check below for why
       // the race matters even after this one passes.
-      const existing = store.getRepos().find((r) => r.path === targetPath)
+      const existing = store
+        .getRepos()
+        .find(
+          (repo) =>
+            getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID && repo.path === targetPath
+        )
       if (existing) {
         emitRepoAdded('folder_picker', true, repoKind === 'git')
         return { repo: existing }
@@ -1306,7 +1287,13 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
               : undefined
           const isEexist = code === 'EEXIST' || (err instanceof Error && /EEXIST/.test(err.message))
           if (isEexist) {
-            const raceWinner = store.getRepos().find((r) => r.path === targetPath)
+            const raceWinner = store
+              .getRepos()
+              .find(
+                (repo) =>
+                  getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+                  repo.path === targetPath
+              )
             if (raceWinner) {
               return { repo: raceWinner }
             }
@@ -1361,7 +1348,12 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       // dedup lookup here closes the window between the first check and
       // addRepo. A second repos:create for the same path that raced past the
       // initial dedup now returns the entry the first call persisted.
-      const raceWinner = store.getRepos().find((r) => r.path === targetPath)
+      const raceWinner = store
+        .getRepos()
+        .find(
+          (repo) =>
+            getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID && repo.path === targetPath
+        )
       if (raceWinner) {
         // Why: do NOT rm even if this invocation created the directory — the
         // other invocation is using it. Leaking a freshly-made empty folder on
@@ -1443,8 +1435,8 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
   })
 
   // Why: forget a project on a single execution host without disturbing the
-  // same repo id on other hosts (local or a re-added SSH target). Used by the
-  // SSH-workspace forget flow when a host is removed/disconnected.
+  // same repo id on another paired runtime. Used when a host-scoped project is
+  // forgotten without removing an equal repo id elsewhere.
   ipcMain.handle(
     'repos:removeForHost',
     async (_event, args: { repoId: string; hostId: string }) => {
@@ -1735,7 +1727,11 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         await pendingAbortCleanupByPath.get(clonePathKey)
         const existingAfterPendingClone = store
           .getRepos()
-          .find((r) => getClonePathComparisonKey(r.path) === clonePathKey)
+          .find(
+            (repo) =>
+              getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+              getClonePathComparisonKey(repo.path) === clonePathKey
+          )
         if (existingAfterPendingClone && !isFolderRepo(existingAfterPendingClone)) {
           // Why: clone_url always produces a git repo.
           emitRepoAdded('clone_url', true, true)
@@ -1801,8 +1797,8 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
             const text = chunk.toString()
             stderrTail = (stderrTail + text).slice(-4096)
 
-            // Why: git progress lines use \r to overwrite in-place; parse
-            // fragments the same way for local and SSH clone flows.
+            // Why: git progress lines use \r to overwrite in-place, so parse
+            // fragments before emitting local clone progress.
             emitCloneProgressFromText(mainWindow, text)
           })
 
@@ -1865,7 +1861,11 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
           // its kind to 'git' instead of creating a duplicate.
           const existing = store
             .getRepos()
-            .find((r) => getClonePathComparisonKey(r.path) === clonePathKey)
+            .find(
+              (repo) =>
+                getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+                getClonePathComparisonKey(repo.path) === clonePathKey
+            )
           if (existing) {
             if (isFolderRepo(existing)) {
               const updated = store.updateRepo(existing.id, {
@@ -1916,7 +1916,13 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
   )
 
   ipcMain.handle('repos:getGitUsername', async (_event, args: { repoId: string }) => {
-    const repo = store.getRepo(args.repoId)
+    const repo = store
+      .getRepos()
+      .find(
+        (candidate) =>
+          candidate.id === args.repoId &&
+          getRepoExecutionHostId(candidate) === LOCAL_EXECUTION_HOST_ID
+      )
     if (!repo || isFolderRepo(repo)) {
       return ''
     }
@@ -1988,15 +1994,14 @@ function getRepoForExecutionHost(
   repoId: string,
   hostId?: ExecutionHostId
 ): Repo | null {
-  if (!hostId) {
-    return store.getRepo(repoId) ?? null
-  }
-  // Why: repo ids can collide across local and SSH hosts; base-ref reads must
-  // use the same host selected by the Settings pane as the subsequent write.
+  // Why: repo ids can collide across local and paired-runtime hosts; base-ref reads must
+  // use the requested host, while an omitted host means this process's local runtime.
+  const requestedHostId = hostId ?? LOCAL_EXECUTION_HOST_ID
   return (
     store
       .getRepos()
-      .find((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === hostId) ?? null
+      .find((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === requestedHostId) ??
+    null
   )
 }
 

@@ -545,28 +545,24 @@
         "title": {
           "missing": "未找到文件夹",
           "notDirectory": "路径不是文件夹",
-          "ambiguousConnection": "无法确定连接",
           "unavailable": "无法检查文件夹"
         },
         "description": {
           "missing": "Yiru 找不到 {{path}}。请移除并重新导入此文件夹工作区。",
           "notDirectory": "{{path}} 存在，但它不是文件夹。",
-          "ambiguousConnection": "Yiru 无法判断哪个 SSH 连接拥有此文件夹范围。",
-          "unavailable": "Yiru 现在无法验证此文件夹。请检查运行时或 SSH 连接，然后重试。"
+          "unavailable": "Yiru 现在无法验证此文件夹。请检查运行时，然后重试。"
         },
         "createError": {
           "title": {
             "missing": "未找到文件夹",
             "notDirectory": "路径不是文件夹",
-            "ambiguousConnection": "无法确定连接",
             "unavailable": "无法检查文件夹",
             "generic": "创建文件夹工作区失败"
           },
           "description": {
             "missing": "Yiru 找不到 {{path}}。请移除并重新导入该文件夹。",
             "notDirectory": "{{path}} 存在，但它不是文件夹。",
-            "ambiguousConnection": "Yiru 无法判断哪个 SSH 连接拥有此文件夹范围。",
-            "unavailable": "Yiru 现在无法验证此文件夹。请检查运行时或 SSH 连接，然后重试。"
+            "unavailable": "Yiru 现在无法验证此文件夹。请检查运行时，然后重试。"
           }
         }
       },
@@ -5031,7 +5027,6 @@
           "3b224167ff": "服务器",
           "251b96564a": "已检测·",
           "f34c152dc0": "刷新 MCP 配置",
-          "6bac9ddfc6": "SSH 仓库是通过远程文件系统读取的。 Starter 创建仅限于工作区根配置。",
           "96f5609b04": "检查 Agent 在此仓库中工作时可以使用的 MCP 服务器定义。",
           "55eea3ef47": "MCP 配置",
           "9ee215caf6": ".mcp.json",

@@ -568,28 +568,24 @@
         "title": {
           "missing": "Folder not found",
           "notDirectory": "Path is not a folder",
-          "ambiguousConnection": "Cannot determine connection",
           "unavailable": "Cannot check folder"
         },
         "description": {
           "missing": "Yiru cannot find {{path}}. Remove and re-import this folder workspace.",
           "notDirectory": "{{path}} exists, but it is not a folder.",
-          "ambiguousConnection": "Yiru cannot tell which SSH connection owns this folder scope.",
-          "unavailable": "Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again."
+          "unavailable": "Yiru cannot verify this folder right now. Check the runtime and try again."
         },
         "createError": {
           "title": {
             "missing": "Folder not found",
             "notDirectory": "Path is not a folder",
-            "ambiguousConnection": "Cannot determine connection",
             "unavailable": "Cannot check folder",
             "generic": "Failed to create folder workspace"
           },
           "description": {
             "missing": "Yiru cannot find {{path}}. Remove and re-import the folder.",
             "notDirectory": "{{path}} exists, but it is not a folder.",
-            "ambiguousConnection": "Yiru cannot tell which SSH connection owns this folder scope.",
-            "unavailable": "Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again."
+            "unavailable": "Yiru cannot verify this folder right now. Check the runtime and try again."
           }
         }
       },
@@ -5106,7 +5102,6 @@
           "3b224167ff": "server",
           "251b96564a": "detected ·",
           "f34c152dc0": "Refresh MCP configs",
-          "6bac9ddfc6": "SSH repos are read through the remote filesystem. Starter creation is limited to the workspace root config.",
           "96f5609b04": "Inspect MCP server definitions that agents can use while working in this repo.",
           "55eea3ef47": "MCP Configs",
           "9ee215caf6": ".mcp.json",

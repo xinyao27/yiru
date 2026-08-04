@@ -55,6 +55,7 @@ import {
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
@@ -1118,8 +1119,7 @@ type WorktreeStartupFollowup = {
   prompt: string
 }
 
-function getAgentLaunchPlatformForRepo(
-  _repo: Repo,
+function getAgentLaunchPlatform(
   projectRuntime?: ProjectExecutionRuntimeResolution
 ): NodeJS.Platform {
   if (projectRuntime?.status === 'repair-required') {
@@ -1317,7 +1317,6 @@ function omitUndefinedProperties<T extends Record<string, unknown>>(value: T): P
 }
 
 async function isRuntimeWorktreePathMissing(
-  _repo: Repo,
   worktreePath: string,
   localWorktreeGitOptions: { wslDistro?: string } = {}
 ): Promise<boolean> {
@@ -1385,19 +1384,23 @@ function getRuntimeFolderWorkspaceRootId(repo: Repo): string {
   return `${repo.id}::${repo.path}`
 }
 
-// Null executionHostId means host-unaware: path-only callers match any repo, and the first runtime
-// host can adopt a legacy (unstamped) repo.
+// Why: an omitted host means the local execution host. An explicit runtime may
+// still adopt one legacy unstamped repo whose host identity was lost during import.
 function runtimeRepoMatchesExecutionHost(
   repo: Pick<Repo, 'executionHostId'>,
   executionHostId?: ExecutionHostId | null
 ): boolean {
-  if (executionHostId == null) {
-    return true
-  }
+  const requestedHostId = executionHostId ?? LOCAL_EXECUTION_HOST_ID
   if (repo.executionHostId != null) {
-    return repo.executionHostId === executionHostId
+    return getRepoExecutionHostId(repo) === requestedHostId
   }
   return true
+}
+
+function findLocalRepoById(store: Pick<Store, 'getRepos'>, repoId: string): Repo | undefined {
+  return store
+    .getRepos()
+    .find((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
 }
 
 function getRuntimeFolderWorkspaceInstanceId(repo: Repo, instanceId: string): string {
@@ -2736,7 +2739,7 @@ export class YiruRuntimeService {
   }
 
   // Why: scans the transcript-owning host's disk (correct by construction over
-  // RPC — a remote/SSH host scans its own disk). Delegates to the one shared
+  // RPC because the target runtime scans its own disk). Delegates to the shared
   // cache so the desktop panel and the mobile screen never double-scan.
   listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
     return listAiVaultSessions(args)
@@ -5218,34 +5221,27 @@ export class YiruRuntimeService {
   private async resolveRuntimeGitTarget(worktreeSelector: string): Promise<{
     worktree: ResolvedWorktree
     repo?: Repo
-    connectionId?: string
     localGitOptions?: { wslDistro?: string }
   }> {
     const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    const repo = store.getRepo(worktree.repoId)
-    const connectionId = repo?.connectionId ?? undefined
-    const localGitOptions =
-      repo && !connectionId ? getLocalProjectWorktreeGitOptions(store, repo) : {}
-    return { worktree, repo, connectionId, localGitOptions }
+    const repo = findLocalRepoById(store, worktree.repoId)
+    const localGitOptions = repo ? getLocalProjectWorktreeGitOptions(store, repo) : {}
+    return { worktree, repo, localGitOptions }
   }
 
   private async resolveRuntimeFileTarget(worktreeSelector: string): Promise<{
     worktree: ResolvedWorktree
-    connectionId?: string
   }> {
     const folderScope = await this.resolveFolderWorkspaceLaunchScope(worktreeSelector)
     if (folderScope?.folderWorkspace) {
       return {
-        worktree: this.folderWorkspaceToResolvedWorktree(folderScope.folderWorkspace),
-        connectionId: folderScope.connectionId ?? undefined
+        worktree: this.folderWorkspaceToResolvedWorktree(folderScope.folderWorkspace)
       }
     }
 
-    const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    const repo = store.getRepo(worktree.repoId)
-    return { worktree, connectionId: repo?.connectionId ?? undefined }
+    return { worktree }
   }
 
   onMobileSessionTabsChanged(
@@ -7347,7 +7343,7 @@ export class YiruRuntimeService {
   // Lists the speech-model catalog joined with live download/ready state, plus
   // the current enabled flag + selected model, so mobile can present a dictation
   // setup sheet and drive remote enable/download. Always targets this (paired)
-  // desktop — speech never routes to a worktree's SSH host.
+  // desktop — speech never routes to the worktree's execution host.
   async listMobileSpeechModels(): Promise<RuntimeSpeechSetupState> {
     if (!this.store) {
       throw new Error('voice_dictation_unavailable')
@@ -10494,7 +10490,11 @@ export class YiruRuntimeService {
     // Why: worktree.ps backs the mobile sidebar, so it must use the same
     // host-owned imported-worktree visibility gate as worktree.list/desktop.
     await this.refreshPtyWorktreeRecordsFromController(resolvedWorktrees)
-    const repoById = new Map((this.store?.getRepos() ?? []).map((repo) => [repo.id, repo]))
+    const repoById = new Map(
+      (this.store?.getRepos() ?? [])
+        .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
+        .map((repo) => [repo.id, repo])
+    )
     const platformByRepoId = resolvedWorktreeSnapshot.platformByRepoId
     const summaries = new Map<string, RuntimeWorktreePsSummary>()
 
@@ -10750,7 +10750,7 @@ export class YiruRuntimeService {
 
     // Why: surface the desktop's focused worktree so mobile can scroll it into
     // view and highlight it. Resolve through getSummaryForRuntimeWorktreeId so
-    // SSH/remote path-projected ids match the same way tabsByWorktree does.
+    // runtime-projected path ids match the same way tabsByWorktree does.
     if (session?.activeWorktreeId) {
       const activeSummary = this.getSummaryForRuntimeWorktreeId(
         summaries,
@@ -10902,7 +10902,7 @@ export class YiruRuntimeService {
         stateStartedAt: src.stateStartedAt,
         updatedAt: src.updatedAt
       }
-      // Why: SSH/runtime projections can spell an equivalent path differently;
+      // Why: paired-runtime projections can spell an equivalent path differently;
       // bucket by the canonical summary id so mobile keeps the agent activity.
       const rows = rowsByWorktree.get(summary.worktreeId)
       if (rows) {
@@ -10934,7 +10934,9 @@ export class YiruRuntimeService {
   }
 
   listRepos(): Repo[] {
-    return this.store?.getRepos() ?? []
+    return (this.store?.getRepos() ?? []).filter(
+      (repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID
+    )
   }
 
   enrichMissingRepoGitRemoteIdentities(): void {
@@ -11155,13 +11157,13 @@ export class YiruRuntimeService {
     if (!group || !folderPath) {
       throw new Error('folder_workspace_project_group_not_found')
     }
-    const status = await getFolderWorkspacePathStatusForPath({
-      folderPath,
-      projectGroupId: group.id,
-      connectionId: input.connectionId ?? group.connectionId ?? null,
-      projectGroups,
-      repos: this.store.getRepos()
-    })
+    if (
+      (normalizeExecutionHostId(group.executionHostId) ?? LOCAL_EXECUTION_HOST_ID) !==
+      LOCAL_EXECUTION_HOST_ID
+    ) {
+      throw new Error('folder_workspace_project_group_not_local')
+    }
+    const status = await getFolderWorkspacePathStatusForPath(folderPath)
     assertFolderWorkspacePathUsable(status)
     const workspace = this.store.createFolderWorkspace(input)
     this.notifyReposChanged()
@@ -11209,17 +11211,16 @@ export class YiruRuntimeService {
       if (!workspace) {
         return null
       }
-      const projectGroups = this.store.getProjectGroups?.() ?? []
-      const status = await getFolderWorkspacePathStatusForPath({
-        folderPath: updates.folderPath,
-        projectGroupId: workspace.projectGroupId,
-        connectionId:
-          workspace.connectionId ??
-          projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
-          null,
-        projectGroups,
-        repos: this.store.getRepos()
-      })
+      const group = this.store
+        .getProjectGroups?.()
+        .find((entry) => entry.id === workspace.projectGroupId)
+      if (
+        (normalizeExecutionHostId(group?.executionHostId) ?? LOCAL_EXECUTION_HOST_ID) !==
+        LOCAL_EXECUTION_HOST_ID
+      ) {
+        throw new Error('folder_workspace_project_group_not_local')
+      }
+      const status = await getFolderWorkspacePathStatusForPath(updates.folderPath)
       assertFolderWorkspacePathUsable(status)
     }
     const updated = this.store.updateFolderWorkspace(folderWorkspaceId, updates)
@@ -11329,7 +11330,11 @@ export class YiruRuntimeService {
         }
         const existing = this.store
           .getRepos()
-          .find((repo) => normalizeRuntimePathForComparison(repo.path) === normalizedImportRepoPath)
+          .find(
+            (repo) =>
+              getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+              normalizeRuntimePathForComparison(repo.path) === normalizedImportRepoPath
+          )
         const group = groupResolver.getGroupForRepo(repoPath)
         if (existing) {
           if (group) {
@@ -11446,12 +11451,12 @@ export class YiruRuntimeService {
     if (contextWorktree) {
       const worktree = await this.resolveWorktreeSelector(contextWorktree)
       if (!isPathInsideOrEqual(worktree.path, path)) {
-        // Why: SSH `yiru .` is authorized by its managed-worktree context; a
-        // shell that cd'd elsewhere must not reinterpret that remote path locally.
+        // Why: `yiru .` is authorized by its managed-worktree context; a shell
+        // that changed directories must not escape the owning workspace.
         throw new WorkspacePathOpenError(
           'context_path_mismatch',
           path,
-          'The current directory is outside the Yiru-managed SSH workspace. Opening arbitrary SSH directories is not supported yet.'
+          'The current directory is outside the Yiru-managed workspace. Opening arbitrary directories is not supported.'
         )
       }
       return await this.activateWorkspacePathTarget(path, worktree, 'activated')
@@ -11469,7 +11474,12 @@ export class YiruRuntimeService {
     const kind = isGitRepo(targetPath) ? 'git' : 'folder'
     const repoPath = kind === 'git' ? getGitRepoRoot(targetPath) : targetPath
     const store = this.requireStore()
-    const repoIdsBeforeOpen = new Set(store.getRepos().map((repo) => repo.id))
+    const repoIdsBeforeOpen = new Set(
+      store
+        .getRepos()
+        .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
+        .map((repo) => repo.id)
+    )
     const repo = await this.addRepo(repoPath, kind)
     const worktree = await findWorkspaceOpenWorktree(
       (await this.listResolvedWorktrees()).filter((candidate) => candidate.repoId === repo.id),
@@ -11491,7 +11501,7 @@ export class YiruRuntimeService {
     disposition: RuntimeWorkspaceOpenPathResult['disposition']
   ): Promise<RuntimeWorkspaceOpenPathResult> {
     const store = this.requireStore()
-    let repo = store.getRepo(worktree.repoId)
+    let repo = findLocalRepoById(store, worktree.repoId)
     if (!repo) {
       throw new Error('repo_not_found')
     }
@@ -11546,10 +11556,9 @@ export class YiruRuntimeService {
       return runtimeRepoMatchesExecutionHost(repo, executionHostId)
     })
     if (existing) {
-      // Only a runtime host backfills a legacy unstamped repo. An unstamped repo is
-      // indistinguishable from a genuine local repo (both have null executionHostId and
-      // connectionId), so we never stamp local/ssh onto it — that would re-attribute a
-      // real local project to the wrong host. Runtime is the only host that lost its
+      // Why: only a runtime host backfills a legacy unstamped repo. An unstamped repo
+      // is indistinguishable from a genuine local repo because both lack executionHostId,
+      // so a local caller never stamps it. Runtime is the only host that lost its
       // identity to the pre-#7018 path-only import and needs the backfill.
       if (
         existing.executionHostId == null &&
@@ -11614,7 +11623,13 @@ export class YiruRuntimeService {
     }
 
     const targetPath = join(trimmedParentPath, trimmedName)
-    const existing = this.store.getRepos().find((repo) => runtimePathsEqual(repo.path, targetPath))
+    const existing = this.store
+      .getRepos()
+      .find(
+        (repo) =>
+          getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+          runtimePathsEqual(repo.path, targetPath)
+      )
     if (existing) {
       return { repo: existing }
     }
@@ -11681,7 +11696,11 @@ export class YiruRuntimeService {
 
     const raceWinner = this.store
       .getRepos()
-      .find((repo) => runtimePathsEqual(repo.path, targetPath))
+      .find(
+        (repo) =>
+          getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+          runtimePathsEqual(repo.path, targetPath)
+      )
     if (raceWinner) {
       return { repo: raceWinner }
     }
@@ -12065,7 +12084,7 @@ export class YiruRuntimeService {
 
   private getAgentLaunchPlatformForRepo(repo: Repo): NodeJS.Platform {
     const projectRuntime = resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)
-    return getAgentLaunchPlatformForRepo(repo, projectRuntime)
+    return getAgentLaunchPlatform(projectRuntime)
   }
 
   private getAgentLaunchPlatformForWorkspace(scope: TerminalWorkspaceLaunchScope): NodeJS.Platform {
@@ -12108,7 +12127,11 @@ export class YiruRuntimeService {
       const store = this.requireStore()
       let changed = false
       for (const repo of store.getRepos()) {
-        if (repo.upstream !== undefined || repo.kind === 'folder') {
+        if (
+          getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID ||
+          repo.upstream !== undefined ||
+          repo.kind === 'folder'
+        ) {
           continue
         }
         let upstream: { owner: string; repo: string } | null
@@ -13034,8 +13057,9 @@ export class YiruRuntimeService {
   }
 
   private isRuntimeWorktreeVisible(worktree: Worktree): boolean {
-    const repo = this.store?.getRepo(worktree.repoId)
-    if (!repo || !this.store) {
+    const store = this.store
+    const repo = store ? findLocalRepoById(store, worktree.repoId) : undefined
+    if (!repo || !store) {
       return true
     }
     return this.toRuntimeDetectedWorktree(repo, worktree).visible
@@ -13070,7 +13094,7 @@ export class YiruRuntimeService {
   ): Promise<CoworkingPairedRuntimeResolvedWorktree> {
     const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(`id:${selector.worktreeId}`)
-    const repo = store.getRepo(worktree.repoId)
+    const repo = findLocalRepoById(store, worktree.repoId)
     const kind = repo && isFolderRepo(repo) ? 'folder' : 'git'
     if (
       !repo ||
@@ -13125,6 +13149,7 @@ export class YiruRuntimeService {
     const reposById = new Map(
       this.requireStore()
         .getRepos()
+        .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
         .map((repo) => [repo.id, repo])
     )
     return filterWorkspacePortProbes(
@@ -13162,7 +13187,7 @@ export class YiruRuntimeService {
   }> {
     this.assertGraphReady()
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    const repo = this.store?.getRepo(worktree.repoId)
+    const repo = this.store ? findLocalRepoById(this.store, worktree.repoId) : undefined
     if (!repo) {
       throw new Error('repo_not_found')
     }
@@ -13199,8 +13224,8 @@ export class YiruRuntimeService {
           sleepingAgentWake = 'requested'
         } else if (
           // Why: sleeping records are partitioned by execution host; reading
-          // only the local partition would miss slept agents on SSH-host
-          // worktrees and skip the headless warning for them.
+          // only the local partition would miss paired-runtime worktrees and
+          // skip the headless warning for them.
           Object.values(
             this.store?.getWorkspaceSession?.(getRepoExecutionHostId(repo))
               .sleepingAgentSessionsByPaneKey ?? {}
@@ -13331,8 +13356,8 @@ export class YiruRuntimeService {
     if (!isTuiAgentEnabled(agent, settings.disabledTuiAgents)) {
       throw new Error('Selected agent is disabled. Choose an enabled agent before creating.')
     }
-    // Why: CLI clients may target SSH runtimes from macOS/Windows, so quote for
-    // the workspace shell rather than the client shell.
+    // Why: CLI clients may target paired runtimes from macOS or Windows, so
+    // quote for the workspace shell rather than the client shell.
     const agentLaunchPlatform = this.getAgentLaunchPlatformForRepo(repo)
     const isRemote = repoIsRemote(repo)
     const queuedShell = resolveLocalWindowsAgentStartupShell({
@@ -14378,8 +14403,8 @@ export class YiruRuntimeService {
       instanceId: randomUUID(),
       ...getProjectHostSetupWorktreeMeta(this.store.getProjectHostSetups?.() ?? [], repo),
       lastActivityAt: now,
-      // See createRemoteWorktree: createdAt grants the new worktree a grace
-      // window in Recent sort so ambient PTY bumps in OTHER worktrees can't
+      // Why: createdAt grants the new worktree a grace window in Recent sort,
+      // so ambient PTY bumps in other worktrees cannot
       // push it down before the user has had a chance to notice it. Smart-sort
       // uses max(lastActivityAt, createdAt + CREATE_GRACE_MS).
       createdAt: now,
@@ -14917,7 +14942,7 @@ export class YiruRuntimeService {
           cwd: repoPath,
           ...gitOptions,
           // Why: exact remote-base refresh is the network gate for worktree
-          // creation, so honor repo SSH routing and bound custom wrappers.
+          // creation, so honor the configured Git SSH command and bound wrappers.
           useConfiguredSshCommandForNetwork: true,
           timeout: REMOTE_FETCH_TIMEOUT_MS
         }
@@ -15177,7 +15202,7 @@ export class YiruRuntimeService {
     if (!this.store) {
       return null
     }
-    const repo = this.store.getRepos().find((r) => r.id === wt.repoId)
+    const repo = findLocalRepoById(this.store, wt.repoId)
     if (!repo) {
       return null
     }
@@ -15355,6 +15380,7 @@ export class YiruRuntimeService {
 
   async resolveManagedMrBase(args: {
     repoSelector: string
+    executionHostId?: ExecutionHostId
     mrIid: number
     sourceBranch?: string
     targetBranch?: string
@@ -15367,7 +15393,7 @@ export class YiruRuntimeService {
     }
     let repo: Repo
     try {
-      repo = await this.resolveRepoSelector(args.repoSelector)
+      repo = await this.resolveRepoSelector(args.repoSelector, args.executionHostId)
     } catch {
       return { error: 'Repo not found' }
     }
@@ -15684,7 +15710,7 @@ export class YiruRuntimeService {
       throw new Error(`No preserved branch cleanup is pending for "${branchName}".`)
     }
 
-    const repo = this.store.getRepo(removalTarget.repoId)
+    const repo = findLocalRepoById(this.store, removalTarget.repoId)
     if (!repo) {
       throw new Error('repo_not_found')
     }
@@ -15735,7 +15761,7 @@ export class YiruRuntimeService {
     // Why: runtime callers can race the same workspace through CLI/mobile
     // retries. Share one destructive Git/filesystem operation per worktree ID.
     const removal = (async (): Promise<RemoveWorktreeResult & { warning?: string }> => {
-      const repo = store.getRepo(removalTarget.repoId)
+      const repo = findLocalRepoById(store, removalTarget.repoId)
       if (!repo) {
         throw new Error('repo_not_found')
       }
@@ -15865,7 +15891,7 @@ export class YiruRuntimeService {
           this.notifyWorktreesChanged(repo.id)
           return {}
         }
-        if (await isRuntimeWorktreePathMissing(repo, removalTarget.path, localWorktreeGitOptions)) {
+        if (await isRuntimeWorktreePathMissing(removalTarget.path, localWorktreeGitOptions)) {
           if (!force && !removedMeta) {
             // Why: without persisted metadata, require the renderer recovery
             // path before deleting Yiru-only state for an unregistered path.
@@ -15909,7 +15935,7 @@ export class YiruRuntimeService {
         process.platform === 'win32' &&
         (isWindowsAbsolutePathLike(canonicalWorktreePath) || !!localWorktreeGitOptions.wslDistro) &&
         removedMeta &&
-        (await isRuntimeWorktreePathMissing(repo, canonicalWorktreePath, localWorktreeGitOptions))
+        (await isRuntimeWorktreePathMissing(canonicalWorktreePath, localWorktreeGitOptions))
       ) {
         const removalResult = await removeStaleLocalWorktreeRegistrationAfterFilesystemRemoval({
           canonicalWorktreePath,
@@ -16522,7 +16548,7 @@ export class YiruRuntimeService {
     opts: { agent: TuiAgent; prompt: string; title?: string }
   ): Promise<RuntimeTerminalCreate> {
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    const repo = this.store?.getRepo(worktree.repoId)
+    const repo = this.store ? findLocalRepoById(this.store, worktree.repoId) : undefined
     if (!repo) {
       throw new Error('Repository for the selected workspace is no longer available.')
     }
@@ -16860,10 +16886,9 @@ export class YiruRuntimeService {
     if (!isTuiAgentEnabled(opts.agent, settings.disabledTuiAgents)) {
       throw new Error('Selected agent is disabled. Choose an enabled agent before creating.')
     }
-    // Why: mobile may be running on iOS while the actual terminal shell is
-    // Windows/macOS/Linux or an SSH Linux host; quote for the host shell.
+    // Why: mobile may be running on iOS while the target runtime uses a
+    // Windows, macOS, or Linux shell; quote for the host shell.
     const platform = this.getAgentLaunchPlatformForWorkspace(workspace)
-    // Why: an SSH workspace runs the CLI through the relay's public command.
     const isRemote = workspace.repo ? repoIsRemote(workspace.repo) : repoIsRemote(workspace)
     const queuedShell = resolveLocalWindowsAgentStartupShell({
       platform,
@@ -18008,8 +18033,8 @@ export class YiruRuntimeService {
     const fridaySelector =
       selector === FRIDAY_WORKTREE_ID || selector === `id:${FRIDAY_WORKTREE_ID}`
     if (fridaySelector) {
-      // Why: the assistant is local even while the user is browsing an SSH
-      // workspace; its synthetic owner must never inherit a remote connection.
+      // Why: the assistant is local even while the user is browsing another
+      // host; its synthetic owner must never inherit that host's connection.
       return {
         id: FRIDAY_WORKTREE_ID,
         path: homedir(),
@@ -18028,7 +18053,7 @@ export class YiruRuntimeService {
     const parsed = parseWorkspaceKey(workspaceSelector)
     const worktreeSelector = parsed?.type === 'worktree' ? `id:${parsed.worktreeId}` : selector
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    const repo = this.store?.getRepo(worktree.repoId) ?? null
+    const repo = this.store ? (findLocalRepoById(this.store, worktree.repoId) ?? null) : null
     return {
       id: worktree.id,
       path: worktree.path,
@@ -18076,7 +18101,7 @@ export class YiruRuntimeService {
       this.store?.getRepo(worktreeId)
     ) {
       // Why: registered repo ids are known-invalid worktree ids, so reject them
-      // before exact-id fast paths or Git/SSH worktree scans can hide the mistake.
+      // before exact-id fast paths or worktree scans can hide the mistake.
       throw new WorktreeIdRequiresFullPathError()
     }
     return worktreeId
@@ -18094,17 +18119,6 @@ export class YiruRuntimeService {
     if (selector.startsWith('id:')) {
       const worktreeId = explicitWorktreeId ?? selector.slice(3)
       candidates = worktrees.filter((worktree) => worktree.id === worktreeId)
-      if (candidates.length === 0) {
-        const parsed = splitWorktreeIdForFilesystem(worktreeId)
-        const repo = parsed ? this.store?.getRepo(parsed.repoId) : null
-        const fallback =
-          repo?.connectionId && this.store?.getWorktreeMeta(worktreeId)
-            ? this.buildResolvedWorktreeFromId(worktreeId)
-            : null
-        if (fallback !== null) {
-          candidates = [fallback]
-        }
-      }
     } else if (selector.startsWith('path:')) {
       candidates = worktrees.filter((worktree) =>
         runtimePathsEqual(worktree.path, selector.slice(5))
@@ -18549,11 +18563,17 @@ export class YiruRuntimeService {
     return this.store?.getAllWorkspaceLineage?.() ?? {}
   }
 
-  private async resolveRepoSelector(selector: string): Promise<Repo> {
+  private async resolveRepoSelector(
+    selector: string,
+    executionHostId?: ExecutionHostId
+  ): Promise<Repo> {
     if (!this.store) {
       throw new Error('repo_not_found')
     }
-    const repos = this.store.getRepos()
+    const requestedHostId = executionHostId ?? LOCAL_EXECUTION_HOST_ID
+    const repos = this.store
+      .getRepos()
+      .filter((repo) => getRepoExecutionHostId(repo) === requestedHostId)
     let candidates: Repo[]
 
     if (selector.startsWith('id:')) {
@@ -18592,7 +18612,7 @@ export class YiruRuntimeService {
     if (!parsed?.repoId || !parsed.worktreePath) {
       return null
     }
-    const repo = this.store?.getRepos().find((entry) => entry.id === parsed.repoId)
+    const repo = this.store ? findLocalRepoById(this.store, parsed.repoId) : undefined
     const git = {
       path: parsed.worktreePath,
       head: '',
@@ -18685,13 +18705,12 @@ export class YiruRuntimeService {
     }
     const now = Date.now()
     const metaById = this.store.getAllWorktreeMeta() ?? {}
-    const repos = this.store.getRepos()
+    const repos = this.store
+      .getRepos()
+      .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
     const projectRuntimeByRepoId = resolveLocalProjectRuntimesForRepos(this.requireStore(), repos)
     const platformByRepoId = new Map(
-      repos.map((repo) => [
-        repo.id,
-        getAgentLaunchPlatformForRepo(repo, projectRuntimeByRepoId.get(repo.id))
-      ])
+      repos.map((repo) => [repo.id, getAgentLaunchPlatform(projectRuntimeByRepoId.get(repo.id))])
     )
     const perRepoWorktrees = await Promise.all(
       repos.map(async (repo) => {
@@ -18851,6 +18870,11 @@ export class YiruRuntimeService {
     repo: Repo,
     projectRuntimeByRepoId?: ReadonlyMap<string, ProjectExecutionRuntimeResolution>
   ): Promise<RuntimeWorktreeScanResult> {
+    if (getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID) {
+      // Why: paired-runtime worktree metadata contains paths from another machine.
+      // Local selectors must fail closed instead of treating those paths as local IO targets.
+      return { ok: false, worktrees: [] }
+    }
     const projectRuntime = projectRuntimeByRepoId
       ? projectRuntimeByRepoId.get(repo.id)
       : resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)

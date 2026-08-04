@@ -5,7 +5,11 @@ import type { FileHandle } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  splitWorktreeId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { getCommitMessageModelDiscoveryHostKey } from '~shared/commit-message/host-key'
@@ -146,7 +150,7 @@ const FULL_GIT_OBJECT_ID_PATTERN = /^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$/
 // Why: previewable binaries (PDFs, images) are rendered by the viewer as
 // base64 blobs, not parsed as text — 5MB is tight for real-world PDFs, and
 // raising this cap only affects binary preview, not text/search paths.
-// The relay (SSH) uses a smaller 10MB cap because its JSON-RPC frames are
+// The relay runtime uses a smaller 10MB cap because its JSON-RPC frames are
 // bounded by MAX_MESSAGE_SIZE = 16MB; the local IPC path has no such limit,
 // so 50MB covers real-world PDFs (specs, datasheets, image-heavy contracts).
 // See the relay's text-search fs handler for the remote-side reasoning.
@@ -340,12 +344,18 @@ async function localRepoOwnsWorktree(
 
 async function getRepoForSourceControlAi(
   store: Store,
-  args: { repoId?: string; worktreePath: string; connectionId?: string }
+  args: { repoId?: string; worktreePath: string }
 ): Promise<Repo | null> {
   if (!args.repoId) {
     return null
   }
-  const repo = store.getRepo(args.repoId)
+  const repo = store
+    .getRepos()
+    .find(
+      (candidate) =>
+        candidate.id === args.repoId &&
+        getRepoExecutionHostId(candidate) === LOCAL_EXECUTION_HOST_ID
+    )
   if (!repo) {
     return null
   }
@@ -458,48 +468,44 @@ export function registerFilesystemHandlers(
   }
 
   // ─── Filesystem ─────────────────────────────────────────
-  ipcMain.handle(
-    'fs:readDir',
-    async (_event, args: { dirPath: string; connectionId?: string }): Promise<DirEntry[]> => {
-      // Why: a thrown fs:readDir reaches the renderer as the opaque "Error
-      // invoking remote method 'fs:readDir'" (Windows WSL/UNC realpath/readdir
-      // failures, dropped SSH providers). Record which throw site fired plus a
-      // redacted path shape so these are diagnosable without the raw path.
-      let throwSite: ReadDirThrowSite = 'authorize'
-      try {
-        throwSite = 'authorize'
-        const dirPath = await resolveAuthorizedPath(args.dirPath, store)
-        throwSite = 'readdir'
-        const entries = await readdir(dirPath, { withFileTypes: true })
-        const mapped = await Promise.all(
-          entries.map(async (entry) => ({
-            name: entry.name,
-            isDirectory: await isDirectoryEntry(dirPath, entry, (entryPath) =>
-              resolveAuthorizedPath(entryPath, store)
-            ),
-            isSymlink: entry.isSymbolicLink()
-          }))
-        )
-        return mapped.sort((a, b) => {
-          if (a.isDirectory !== b.isDirectory) {
-            return a.isDirectory ? -1 : 1
-          }
-          return a.name.localeCompare(b.name)
+  ipcMain.handle('fs:readDir', async (_event, args: { dirPath: string }): Promise<DirEntry[]> => {
+    // Why: a thrown fs:readDir reaches the renderer as the opaque "Error
+    // invoking remote method 'fs:readDir'" (Windows WSL/UNC realpath/readdir
+    // failures). Record which throw site fired plus a
+    // redacted path shape so these are diagnosable without the raw path.
+    let throwSite: ReadDirThrowSite = 'authorize'
+    try {
+      throwSite = 'authorize'
+      const dirPath = await resolveAuthorizedPath(args.dirPath, store)
+      throwSite = 'readdir'
+      const entries = await readdir(dirPath, { withFileTypes: true })
+      const mapped = await Promise.all(
+        entries.map(async (entry) => ({
+          name: entry.name,
+          isDirectory: await isDirectoryEntry(dirPath, entry, (entryPath) =>
+            resolveAuthorizedPath(entryPath, store)
+          ),
+          isSymlink: entry.isSymbolicLink()
+        }))
+      )
+      return mapped.sort((a, b) => {
+        if (a.isDirectory !== b.isDirectory) {
+          return a.isDirectory ? -1 : 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+    } catch (error: unknown) {
+      recordCrashBreadcrumb(
+        'fs_readdir_error',
+        buildReadDirErrorBreadcrumb({
+          dirPath: args.dirPath,
+          throwSite,
+          error
         })
-      } catch (error: unknown) {
-        recordCrashBreadcrumb(
-          'fs_readdir_error',
-          buildReadDirErrorBreadcrumb({
-            dirPath: args.dirPath,
-            connectionId: args.connectionId,
-            throwSite,
-            error
-          })
-        )
-        throw error
-      }
+      )
+      throw error
     }
-  )
+  })
 
   ipcMain.handle(
     'fs:readFile',
@@ -933,8 +939,8 @@ export function registerFilesystemHandlers(
 
   // ─── List all files (for quick-open) ─────────────────────
   // Why #7721: keyed by renderer-generated token so a workspace switch can
-  // abort the previous workspace's full-tree scan (SSH relays otherwise stack
-  // scans that starve interactive fs.readDir/fs.stat past their 30s timeout).
+  // abort the previous workspace's full-tree scan so superseded scans cannot
+  // starve interactive fs.readDir/fs.stat calls.
   const listFilesCancellations = createSenderScopedRequestCancellations()
   ipcMain.handle(
     'fs:listFiles',
@@ -1047,9 +1053,7 @@ export function registerFilesystemHandlers(
   )
 
   // Why: when status hits the entry limit, the SCM view offers to .gitignore the
-  // folder that's flooding it. These two handlers back that flow. Local-only:
-  // the huge-untracked-folder case is a local-dev pathology, and routing a
-  // .gitignore write through the SSH provider isn't worth the surface here.
+  // folder that's flooding it. These two handlers back that local-only flow.
   ipcMain.handle(
     'git:findHugeFoldersToIgnore',
     async (_event, args: { worktreePath: string }): Promise<string[]> => {

@@ -545,28 +545,24 @@
         "title": {
           "missing": "フォルダーが見つかりません",
           "notDirectory": "パスはフォルダーではありません",
-          "ambiguousConnection": "接続を特定できません",
           "unavailable": "フォルダーを確認できません"
         },
         "description": {
           "missing": "Yiru は {{path}} を見つけられません。このフォルダーワークスペースを削除して再インポートしてください。",
           "notDirectory": "{{path}} は存在しますが、フォルダーではありません。",
-          "ambiguousConnection": "Yiru はこのフォルダースコープをどの SSH 接続が所有しているか判別できません。",
-          "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムまたは SSH 接続を確認して再試行してください。"
+          "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムを確認して再試行してください。"
         },
         "createError": {
           "title": {
             "missing": "フォルダーが見つかりません",
             "notDirectory": "パスはフォルダーではありません",
-            "ambiguousConnection": "接続を特定できません",
             "unavailable": "フォルダーを確認できません",
             "generic": "フォルダーワークスペースの作成に失敗しました"
           },
           "description": {
             "missing": "Yiru は {{path}} を見つけられません。フォルダーを削除して再インポートしてください。",
             "notDirectory": "{{path}} は存在しますが、フォルダーではありません。",
-            "ambiguousConnection": "Yiru はこのフォルダースコープをどの SSH 接続が所有しているか判別できません。",
-            "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムまたは SSH 接続を確認して再試行してください。"
+            "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムを確認して再試行してください。"
           }
         }
       },
@@ -5068,7 +5064,6 @@
           "3b224167ff": "サーバ",
           "251b96564a": "検出された・",
           "f34c152dc0": "MCP 構成を更新する",
-          "6bac9ddfc6": "SSH repos は、リモート ファイル システムを通じて読み取られます。スターターの作成は、ワークスペースのルート構成に限定されます。",
           "96f5609b04": "agents がこの repo での作業中に使用できる MCP サーバー定義を検査します。",
           "55eea3ef47": "MCP 構成",
           "9ee215caf6": ".mcp.json",
