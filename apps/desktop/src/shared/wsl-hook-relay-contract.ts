@@ -23,14 +23,14 @@ export const WSL_HOOK_RELAY_VERSION_ENV = 'YIRU_WSL_HOOK_RELAY_VERSION'
  *  after a Yiru restart — the exact re-coordination this exists to serve. */
 export const WSL_HOOK_RELAY_INSTANCE_ENV = 'YIRU_WSL_HOOK_INSTANCE'
 
-/** Launch-script exit codes. 42 mirrors the SSH relay's handshake-mismatch
+/** Launch-script exit codes. 42 mirrors the relay's handshake-mismatch
  *  convention: the host reinstalls the bundle and relaunches once. */
 export const WSL_HOOK_RELAY_STALE_EXIT_CODE = 42
 export const WSL_HOOK_RELAY_NO_NODE_EXIT_CODE = 43
 
 /** JSON-RPC methods for the relay's home-scoped fs bridge. The host runs the
- *  unchanged SSH remote hook installers against these via an SFTP-shaped
- *  adapter, so hook installation rides the already-open stdio channel instead
+ *  shared remote hook installers against these via a remote-file adapter, so
+ *  hook installation rides the already-open stdio channel instead
  *  of per-file wsl.exe spawns. */
 export const WSL_HOOK_FS_METHODS = {
   home: 'wslfs.home',
@@ -45,8 +45,8 @@ export const WSL_HOOK_FS_METHODS = {
 } as const
 
 /** Result envelope for every fs-bridge method. Errors travel as data (not
- *  JSON-RPC faults) so the host adapter can map POSIX errno onto the ssh2
- *  status codes the shared installer error-classifiers already understand. */
+ *  JSON-RPC faults) so the host adapter can map POSIX errno onto the status
+ *  codes the shared installer error-classifiers already understand. */
 export type WslFsFailure = { ok: false; errno: string; message: string }
 export type WslFsResult<T extends object = object> = ({ ok: true } & T) | WslFsFailure
 

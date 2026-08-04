@@ -1,7 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -29,6 +28,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 // Why: cursor-agent exposes a declarative hooks.json surface at
 // ~/.cursor/hooks.json (https://cursor.com/docs/hooks) with camelCase event
@@ -239,16 +239,19 @@ export class CursorHookService {
   }
 
   // Why: install Yiru's managed Cursor hooks on the remote box. Mirrors
-  // ClaudeHookService.installRemote — POSIX-only, uses the same SFTP-backed
+  // ClaudeHookService.installRemote — POSIX-only, uses the same remote-file
   // primitives, and emits Cursor's documented schema (top-level `command`
   // on each definition + top-level `version: 1`) so cursor-agent on the
   // remote actually invokes the script. See docs/design/agent-status-over-ssh.md
   // §8.
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const remoteConfigPath = `${remoteHome.replace(/\/$/, '')}/.cursor/hooks.json`
     const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.yiru/agent-hooks/cursor-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'cursor',
@@ -284,8 +287,8 @@ export class CursorHookService {
       // ClaudeHookService.installRemote.
       // Why: SSH remotes use POSIX `.sh` hook paths even when Yiru itself is
       // running on Windows; never derive remote script syntax from local OS.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, nextConfig)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, nextConfig)
 
       return {
         agent: 'cursor',

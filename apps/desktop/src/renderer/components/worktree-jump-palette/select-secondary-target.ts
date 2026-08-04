@@ -101,6 +101,10 @@ export function useSelectSecondaryTargetHandlers(input: SelectSecondaryTargetInp
           toast.error(getUnavailableQuickActionMessage(action.title, result.reason))
           return
         }
+        if (result.status === 'error') {
+          toast.error(result.message)
+          return
+        }
         if (action.id === 'create-workspace') {
           recordFeatureInteraction('cmd-j-create-workspace')
           return

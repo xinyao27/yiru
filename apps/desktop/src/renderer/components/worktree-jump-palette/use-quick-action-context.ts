@@ -1,7 +1,8 @@
 import type React from 'react'
-import { useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   buildCmdJQuickActionContext,
+  findCoworkingOwnerWorktree,
   type CmdJActiveGroupSnapshot
 } from '~renderer/components/cmd-j/quick-action-context'
 import {
@@ -9,6 +10,7 @@ import {
   resolveComposerGitRepoId
 } from '~renderer/components/worktree-jump-palette/new-workspace-composer-repo'
 import { useAppStore } from '~renderer/store'
+import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 
 import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import type { PaletteStoreState } from './use-palette-store-state'
@@ -23,6 +25,11 @@ type QuickActionContextInput = Pick<
   | 'openNewTerminalTabInActiveWorkspace'
 > & {
   activeGroupSnapshotRef: React.RefObject<CmdJActiveGroupSnapshot | null>
+}
+
+export type CoworkingPublicationDialogState = {
+  worktreeId: string
+  worktreeName: string
 }
 
 function getComposerPrefetchRepoId(
@@ -51,6 +58,9 @@ export function useQuickActionContext(input: QuickActionContextInput) {
     openNewTerminalTabInActiveWorkspace,
     activeGroupSnapshotRef
   } = input
+  const [coworkingPublicationDialog, setCoworkingPublicationDialog] =
+    useState<CoworkingPublicationDialogState | null>(null)
+  const coworkingVisibilityUpdateInFlightRef = useRef(false)
 
   const prefetchCreateWorkspaceBaseForComposer = useCallback((initialRepoId?: string): void => {
     const state = useAppStore.getState()
@@ -83,6 +93,52 @@ export function useQuickActionContext(input: QuickActionContextInput) {
     openSettingsPage()
   }, [openSettingsPage, openSettingsTarget])
 
+  const openCoworkingSettingsAction = useCallback(() => {
+    openSettingsTarget({ pane: 'coworking', repoId: null })
+    openSettingsPage()
+  }, [openSettingsPage, openSettingsTarget])
+
+  const toggleCoworkingVisibilityAction = useCallback(async (): Promise<void> => {
+    const state = useAppStore.getState()
+    const activeWorktreeId = state.activeWorktreeId
+    const ownerWorktree = findCoworkingOwnerWorktree(
+      state.coworkingOwnerWorktrees,
+      activeWorktreeId
+    )
+    if (!ownerWorktree) {
+      return
+    }
+    if (ownerWorktree.visibility === 'private') {
+      const activeWorktree = activeWorktreeId
+        ? findWorktreeById(state.worktreesByRepo, activeWorktreeId)
+        : null
+      if (!activeWorktree) {
+        return
+      }
+      setCoworkingPublicationDialog({
+        worktreeId: activeWorktree.id,
+        worktreeName: activeWorktree.displayName || activeWorktree.branch || activeWorktree.id
+      })
+      return
+    }
+    if (coworkingVisibilityUpdateInFlightRef.current) {
+      return
+    }
+    coworkingVisibilityUpdateInFlightRef.current = true
+    try {
+      await window.api.coworkingSharing.setWorktreeVisibility({
+        worktreeId: ownerWorktree.worktreeId,
+        visibility: 'private'
+      })
+    } finally {
+      coworkingVisibilityUpdateInFlightRef.current = false
+    }
+  }, [])
+
+  const closeCoworkingPublicationDialog = useCallback(() => {
+    setCoworkingPublicationDialog(null)
+  }, [])
+
   const buildQuickActionContext = useCallback(
     () =>
       buildCmdJQuickActionContext({
@@ -93,20 +149,30 @@ export function useQuickActionContext(input: QuickActionContextInput) {
         openNewTerminalTab: openNewTerminalTabInActiveWorkspace,
         openCreateWorkspace: openCreateWorkspaceAction,
         deleteActiveWorkspace: deleteActiveWorkspaceAction,
-        openAddQuickCommand: openAddQuickCommandAction
+        openAddQuickCommand: openAddQuickCommandAction,
+        openCoworkingSettings: openCoworkingSettingsAction,
+        toggleCoworkingVisibility: toggleCoworkingVisibilityAction
       }),
     [
       activeGroupSnapshotRef,
       deleteActiveWorkspaceAction,
       openAddQuickCommandAction,
+      openCoworkingSettingsAction,
       openCreateWorkspaceAction,
       openNewBrowserTabInActiveWorkspace,
       openNewMarkdownInActiveWorkspace,
-      openNewTerminalTabInActiveWorkspace
+      openNewTerminalTabInActiveWorkspace,
+      toggleCoworkingVisibilityAction
     ]
   )
 
   const quickActionContext = buildQuickActionContext()
 
-  return { prefetchCreateWorkspaceBaseForComposer, buildQuickActionContext, quickActionContext }
+  return {
+    buildQuickActionContext,
+    closeCoworkingPublicationDialog,
+    coworkingPublicationDialog,
+    prefetchCreateWorkspaceBaseForComposer,
+    quickActionContext
+  }
 }

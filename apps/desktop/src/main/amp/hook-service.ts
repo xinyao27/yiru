@@ -7,13 +7,13 @@ import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileS
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
   readTextFileRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 const AMP_PLUGIN_FILE = 'yiru-agent-status.ts'
 const AMP_PLUGIN_MARKER = 'Managed by Yiru. Do not edit; changes may be overwritten.'
@@ -344,14 +344,17 @@ export class AmpHookService {
     return this.getStatus()
   }
 
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const remotePluginPath = getRemotePluginPath(remoteHome)
     try {
-      const existing = await readTextFileRemote(sftp, remotePluginPath)
+      const existing = await readTextFileRemote(remoteFiles, remotePluginPath)
       if (existing !== null && !isManagedPlugin(existing)) {
         return statusFromState(remotePluginPath, { kind: 'unmanaged' })
       }
-      await writeTextFileRemoteAtomic(sftp, remotePluginPath, getAmpPluginSource())
+      await writeTextFileRemoteAtomic(remoteFiles, remotePluginPath, getAmpPluginSource())
       return {
         agent: 'amp',
         state: 'installed',

@@ -1,12 +1,15 @@
+import { translate } from '~renderer/i18n/i18n'
 import type { SshConnectionStatus } from '~renderer/store/slices/ssh'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import type { AppState } from '~renderer/store/types'
+import type { CoworkingOwnerWorktreeSharing } from '~shared/coworking/ipc-contract'
 import type { Worktree } from '~shared/types'
 
 export type CmdJUnavailableReason =
   | 'loading'
   | 'no-active-workspace'
   | 'ssh-disconnected'
+  | 'coworking-unavailable'
   | 'no-active-group'
 
 export type CmdJQuickActionAvailability =
@@ -22,6 +25,7 @@ export type CmdJQuickActionContext = {
   activeView: AppState['activeView']
   activeWorktreeId: string | null
   activeWorktree: Worktree | null
+  coworkingOwnerWorktree: CoworkingOwnerWorktreeSharing | null
   isLoading: boolean
   sshStatus: SshConnectionStatus | null
   runtimeMode: 'local-desktop' | 'paired-web'
@@ -32,6 +36,8 @@ export type CmdJQuickActionContext = {
   openCreateWorkspace: () => void
   deleteActiveWorkspace: () => void
   openAddQuickCommand: () => void
+  openCoworkingSettings: () => void
+  toggleCoworkingVisibility: () => Promise<void>
 }
 
 export function resolveCmdJActiveGroupId(
@@ -95,6 +101,19 @@ export function getWorkspaceScopedActionAvailability(
     'activeGroupId' | 'activeWorktreeId' | 'isLoading' | 'sshStatus'
   >
 ): CmdJQuickActionAvailability {
+  const worktreeAvailability = getActiveWorktreeActionAvailability(ctx)
+  if (!worktreeAvailability.available) {
+    return worktreeAvailability
+  }
+  if (!ctx.activeGroupId) {
+    return { available: false, reason: 'no-active-group' }
+  }
+  return { available: true }
+}
+
+export function getActiveWorktreeActionAvailability(
+  ctx: Pick<CmdJQuickActionContext, 'activeWorktreeId' | 'isLoading' | 'sshStatus'>
+): CmdJQuickActionAvailability {
   if (!ctx.activeWorktreeId) {
     return { available: false, reason: 'no-active-workspace' }
   }
@@ -103,9 +122,6 @@ export function getWorkspaceScopedActionAvailability(
   }
   if (ctx.sshStatus != null && ctx.sshStatus !== 'connected') {
     return { available: false, reason: 'ssh-disconnected' }
-  }
-  if (!ctx.activeGroupId) {
-    return { available: false, reason: 'no-active-group' }
   }
   return { available: true }
 }
@@ -116,13 +132,17 @@ export function getCurrentWorkspaceActionAvailability(
   if (ctx.activeView !== 'terminal' || !ctx.activeWorktreeId) {
     return { available: false, reason: 'no-active-workspace' }
   }
-  if (ctx.isLoading) {
-    return { available: false, reason: 'loading' }
+  return getActiveWorktreeActionAvailability(ctx)
+}
+
+export function findCoworkingOwnerWorktree(
+  ownerWorktrees: AppState['coworkingOwnerWorktrees'],
+  worktreeId: string | null
+): CoworkingOwnerWorktreeSharing | null {
+  if (!worktreeId) {
+    return null
   }
-  if (ctx.sshStatus != null && ctx.sshStatus !== 'connected') {
-    return { available: false, reason: 'ssh-disconnected' }
-  }
-  return { available: true }
+  return ownerWorktrees.find((entry) => entry.worktreeId === worktreeId) ?? null
 }
 
 export function buildCmdJQuickActionContext(args: {
@@ -134,11 +154,17 @@ export function buildCmdJQuickActionContext(args: {
   openCreateWorkspace: () => void
   deleteActiveWorkspace: () => void
   openAddQuickCommand: () => void
+  openCoworkingSettings: () => void
+  toggleCoworkingVisibility: () => Promise<void>
 }): CmdJQuickActionContext {
   const activeWorktreeId = args.state.activeWorktreeId
   const activeWorktree = activeWorktreeId
     ? (findWorktreeById(args.state.worktreesByRepo, activeWorktreeId) ?? null)
     : null
+  const coworkingOwnerWorktree = findCoworkingOwnerWorktree(
+    args.state.coworkingOwnerWorktrees,
+    activeWorktreeId
+  )
   const activeGroupId = resolveCmdJActiveGroupId(
     args.state,
     activeWorktreeId,
@@ -156,6 +182,7 @@ export function buildCmdJQuickActionContext(args: {
     activeView: args.state.activeView,
     activeWorktreeId,
     activeWorktree,
+    coworkingOwnerWorktree,
     isLoading,
     sshStatus: getActiveWorktreeSshStatus(args.state, activeWorktree),
     runtimeMode,
@@ -165,7 +192,9 @@ export function buildCmdJQuickActionContext(args: {
     openNewTerminalTab: args.openNewTerminalTab,
     openCreateWorkspace: args.openCreateWorkspace,
     deleteActiveWorkspace: args.deleteActiveWorkspace,
-    openAddQuickCommand: args.openAddQuickCommand
+    openAddQuickCommand: args.openAddQuickCommand,
+    openCoworkingSettings: args.openCoworkingSettings,
+    toggleCoworkingVisibility: args.toggleCoworkingVisibility
   }
 }
 
@@ -180,6 +209,11 @@ export function getUnavailableQuickActionMessage(
       return `Can't ${actionTitle.toLowerCase()} — no workspace is active.`
     case 'ssh-disconnected':
       return `Can't ${actionTitle.toLowerCase()} — workspace is disconnected.`
+    case 'coworking-unavailable':
+      return `Can't ${actionTitle.toLowerCase()} — ${translate(
+        'auto.components.cmd.j.quick.action.context.coworkingUnavailable',
+        'Coworking is unavailable here.'
+      )}`
     case 'no-active-group':
       return `Can't ${actionTitle.toLowerCase()} — no tab group is available.`
   }

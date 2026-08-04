@@ -13,10 +13,10 @@
 //   already been through `normalizeHookPayload` (which calls
 //   `parseAgentStatusPayload` → `normalizeAgentStatusObject`) on the relay
 //   side. Yiru's `ingestRemote` re-runs the canonical payload normalizer at
-//   the SSH trust boundary before caching or persisting, so relay skew or a
+//   remote trust boundary before caching or persisting, so relay skew or a
 //   buggy remote process cannot poison main-process state.
 // - The wire `connectionId` is **always `null`**: a `connectionId` is Yiru's
-//   local handle on an `ssh2` connection, not a wire identity. Yiru stamps the
+//   local handle on a runtime connection, not a wire identity. Yiru stamps the
 //   real value on receive from `mux` identity inside `ingestRemote`.
 // - The wire `version` and `env` fields are forwarded from the agent CLI's
 //   POST body so Yiru's warn-once protocol diagnostics still fire. The relay

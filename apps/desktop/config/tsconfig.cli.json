@@ -9,6 +9,7 @@
     "../src/main/agent-hooks/installer-utils.ts",
     "../src/main/agent-hooks/installer-utils-remote.ts",
     "../src/main/agent-hooks/managed-agent-hook-controls.ts",
+    "../src/main/agent-hooks/remote-file-operations.ts",
     "../src/main/agent-hooks/posix-agent-hook-post-command.ts",
     "../src/main/amp/hook-service.ts",
     "../src/main/antigravity/hook-service.ts",

@@ -1,7 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -21,6 +20,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import { buildCommandCodeManagedScript } from './managed-script'
 
 const COMMAND_CODE_EVENTS = [
@@ -157,12 +157,15 @@ export class CommandCodeHookService {
     return this.getStatus()
   }
 
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
     const remoteConfigPath = `${home}/.commandcode/settings.json`
     const remoteScriptPath = `${home}/.yiru/agent-hooks/command-code-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'command-code',
@@ -174,8 +177,12 @@ export class CommandCodeHookService {
       }
 
       buildInstalledConfig(config, wrapPosixHookCommand(remoteScriptPath), 'command-code-hook.sh')
-      await writeManagedScriptRemote(sftp, remoteScriptPath, buildCommandCodeManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, config)
+      await writeManagedScriptRemote(
+        remoteFiles,
+        remoteScriptPath,
+        buildCommandCodeManagedScript('posix')
+      )
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
         agent: 'command-code',

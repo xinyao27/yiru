@@ -11036,7 +11036,26 @@
                 "removeWorktree": "quitar worktree",
                 "trashWorktree": "mandar worktree a la papelera",
                 "addQuickCommand": "agregar comando rápido",
-                "newQuickCommand": "nuevo comando rápido"
+                "newQuickCommand": "nuevo comando rápido",
+                "publishWorktree": "publish worktree",
+                "unpublishWorktree": "unpublish worktree",
+                "makePublic": "make worktree public",
+                "makePrivate": "make worktree private",
+                "coworkingWorktree": "coworking worktree",
+                "coworkingSettings": "coworking settings",
+                "openCoworkingSettings": "open coworking settings",
+                "remoteHostAccess": "remote host access",
+                "authorizedDevices": "authorized devices"
+              },
+              "publishOrUnpublishWorktree": "Publish / Unpublish Worktree",
+              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through Coworking.",
+              "coworkingVisibilityFailed": "Could not update Coworking visibility.",
+              "openCoworkingSettings": "Open Coworking Settings",
+              "openCoworkingSettingsDescription": "Manage Coworking-authorized remote host access."
+            },
+            "action": {
+              "context": {
+                "coworkingUnavailable": "Coworking is unavailable here."
               }
             }
           },

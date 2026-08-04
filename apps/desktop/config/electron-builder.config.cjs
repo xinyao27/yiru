@@ -392,7 +392,7 @@ module.exports = {
   // builds (x64 + arm64). With npmRebuild disabled, CI on an arm64 runner
   // packages arm64 binaries into the x64 DMG, causing "posix_spawnp failed"
   // on Intel Macs. The beforeBuild hook performs Yiru's targeted rebuild and
-  // returns false so electron-builder does not rebuild optional cpu-features.
+  // returns false so electron-builder does not rebuild native modules again.
   npmRebuild: true,
   publish: {
     provider: 'github',

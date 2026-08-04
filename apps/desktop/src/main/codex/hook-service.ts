@@ -2,7 +2,6 @@
 import { existsSync, readFileSync, statSync, unlinkSync } from 'node:fs'
 import { join, win32 as pathWin32 } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import { resolveHooksJsonWritePath } from '../agent-hooks/hook-config-write-path'
@@ -35,6 +34,7 @@ import {
   writeManagedScriptRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import { writeFileAtomically } from './accounts/fs-utils'
 import { syncSystemConfigIntoManagedCodexHome } from './config-mirror'
 import {
@@ -1456,7 +1456,7 @@ export class CodexHookService {
   }
 
   async installRemote(
-    sftp: SFTPWrapper,
+    remoteFiles: RemoteFileOperations,
     remoteHome: string,
     options?: {
       /** Explicit CODEX_HOME dir (flat layout: hooks.json/config.toml at its
@@ -1476,7 +1476,7 @@ export class CodexHookService {
     const remoteTomlPath = `${codexHomeBase}/config.toml`
     const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.yiru/agent-hooks/codex-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'codex',
@@ -1527,12 +1527,12 @@ export class CodexHookService {
       // leaves Codex asking for approval rather than executing a missing script.
       // Why: SSH remotes use POSIX `.sh` hook paths even when Yiru itself is
       // running on Windows; never derive remote script syntax from local OS.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
       // Why: SSH installs edit the user's remote ~/.codex/hooks.json directly.
       // Preserve non-Yiru top-level metadata while replacing the hooks tree.
-      await writeHooksJsonRemote(sftp, remoteConfigPath, { ...config, hooks: nextHooks })
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, { ...config, hooks: nextHooks })
       try {
-        const existingTomlRaw = await readTextFileRemote(sftp, remoteTomlPath)
+        const existingTomlRaw = await readTextFileRemote(remoteFiles, remoteTomlPath)
         if (existingTomlRaw === null && options?.deferTrustUntilConfigToml === true) {
           return {
             agent: 'codex',
@@ -1545,7 +1545,7 @@ export class CodexHookService {
         const existingToml = existingTomlRaw ?? ''
         const updatedToml = upsertHookTrustEntriesInContent(existingToml, trustEntries)
         if (updatedToml !== existingToml) {
-          await writeTextFileRemoteAtomic(sftp, remoteTomlPath, updatedToml)
+          await writeTextFileRemoteAtomic(remoteFiles, remoteTomlPath, updatedToml)
         }
       } catch (error) {
         return {

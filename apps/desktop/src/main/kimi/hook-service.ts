@@ -11,7 +11,6 @@ import {
 import { homedir } from 'node:os'
 import { dirname, join, posix as pathPosix } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -30,6 +29,7 @@ import {
   writeManagedScriptRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   applyManagedKimiHooks,
   KIMI_HOOK_EVENTS,
@@ -179,10 +179,14 @@ export class KimiHookService {
     return this.getStatus()
   }
 
-  // Why: install Yiru's managed Kimi hooks on a remote box over SFTP, mirroring
+  // Why: install Yiru's managed Kimi hooks on a remote box through remote-file
+  // operations, mirroring
   // the local install. POSIX-only by design (Kimi's shell is sh/Git Bash); the
   // managed script body is already platform-independent.
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const remoteConfigPath = pathPosix.join(remoteHome, '.kimi-code', 'config.toml')
     const remoteScriptPath = pathPosix.join(
       remoteHome,
@@ -192,11 +196,15 @@ export class KimiHookService {
     )
     try {
       // null (file absent) → start from an empty config; Kimi creates it lazily.
-      const text = (await readTextFileRemote(sftp, remoteConfigPath)) ?? ''
+      const text = (await readTextFileRemote(remoteFiles, remoteConfigPath)) ?? ''
       const command = wrapPosixHookCommand(remoteScriptPath)
       // Write the script first so config.toml never points at a missing script.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript())
-      await writeTextFileRemoteAtomic(sftp, remoteConfigPath, applyManagedKimiHooks(text, command))
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript())
+      await writeTextFileRemoteAtomic(
+        remoteFiles,
+        remoteConfigPath,
+        applyManagedKimiHooks(text, command)
+      )
       return {
         agent: 'kimi',
         state: 'installed',

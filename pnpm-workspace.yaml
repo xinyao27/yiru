@@ -43,7 +43,6 @@ catalog:
   '@types/qrcode': ^1.5.6
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
-  '@types/ssh2': ^1.15.5
   '@types/ws': ^8.18.1
   '@vitejs/plugin-react': ^6.0.3
   '@voidzero-dev/vite-plus-core': 0.2.4
@@ -130,7 +129,6 @@ catalog:
   sherpa-onnx-linux-x64: 1.12.37
   sherpa-onnx-win-x64: 1.12.37
   sonner: ^2.0.7
-  ssh2: ^1.17.0
   tailwindcss: ^4.3.3
   taze: ^19.14.1
   thinking-orbs: 0.1.1
@@ -232,13 +230,11 @@ linkWorkspacePackages: true
 allowBuilds:
   '@parcel/watcher': true
   agent-browser: true
-  cpu-features: true
   electron-winstaller: true
   esbuild: true
   msw: false
   node-pty: true
   sherpa-onnx: true
-  ssh2: false
   workerd: true
 overrides:
   vite: 'catalog:'

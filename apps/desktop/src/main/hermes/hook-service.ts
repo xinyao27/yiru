@@ -13,7 +13,6 @@ import {
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import { parse, stringify } from 'yaml'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
@@ -21,6 +20,7 @@ import {
   readTextFileRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 const HERMES_PLUGIN_NAME = 'yiru-status'
 const HERMES_PLUGIN_MARKER = 'Managed by Yiru. Do not edit; changes may be overwritten.'
@@ -481,12 +481,15 @@ export class HermesHookService {
     return this.getStatus()
   }
 
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const remoteRoot = stripTrailingSlash(remoteHome)
     const remoteConfigPath = `${remoteRoot}/.hermes/config.yaml`
     const remotePluginDir = `${remoteRoot}/.hermes/plugins/${HERMES_PLUGIN_NAME}`
     try {
-      const existing = await readTextFileRemote(sftp, remoteConfigPath)
+      const existing = await readTextFileRemote(remoteFiles, remoteConfigPath)
       const next = updateConfigContent(existing, enablePlugin)
       if (next.content === null) {
         return {
@@ -497,9 +500,17 @@ export class HermesHookService {
           detail: `Could not parse remote Hermes config.yaml: ${next.detail ?? 'unknown error'}`
         }
       }
-      await writeTextFileRemoteAtomic(sftp, `${remotePluginDir}/plugin.yaml`, getPluginManifest())
-      await writeTextFileRemoteAtomic(sftp, `${remotePluginDir}/__init__.py`, getPluginInitSource())
-      await writeTextFileRemoteAtomic(sftp, remoteConfigPath, next.content)
+      await writeTextFileRemoteAtomic(
+        remoteFiles,
+        `${remotePluginDir}/plugin.yaml`,
+        getPluginManifest()
+      )
+      await writeTextFileRemoteAtomic(
+        remoteFiles,
+        `${remotePluginDir}/__init__.py`,
+        getPluginInitSource()
+      )
+      await writeTextFileRemoteAtomic(remoteFiles, remoteConfigPath, next.content)
       return {
         agent: 'hermes',
         state: 'installed',
