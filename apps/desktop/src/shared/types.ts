@@ -2273,7 +2273,6 @@ export type StatusBarItem =
   | 'kimi'
   | 'minimax'
   | 'grok'
-  | 'ssh'
   | 'resource-usage'
   | 'ports'
 export type FloatingTerminalTriggerLocation = 'floating-button' | 'status-bar'

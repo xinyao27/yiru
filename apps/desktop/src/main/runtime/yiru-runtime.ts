@@ -20,7 +20,6 @@ import type {
   RuntimeSpeechSetupState
 } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
-import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
@@ -2814,12 +2813,6 @@ export class YiruRuntimeService {
   private notifyReposChanged(): void {
     this.notifier?.reposChanged()
     this.emitClientEvent({ type: 'reposChanged' })
-  }
-
-  // Why: SSH state changes originate in main's ssh handlers, not in runtime
-  // methods, so they need a public entry point onto the client-event stream.
-  notifySshStateChanged(targetId: string, state: SshConnectionState): void {
-    this.emitClientEvent({ type: 'sshStateChanged', targetId, state })
   }
 
   // Why: renderer-initiated meta updates intentionally skip the renderer

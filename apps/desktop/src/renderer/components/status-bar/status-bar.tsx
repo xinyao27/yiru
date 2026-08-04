@@ -6,7 +6,6 @@ import {
   ActivityIcon as Activity,
   Plug,
   Layout as PanelsTopLeft,
-  HardDrives as Server,
   ArrowCounterClockwise as RotateCcw,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
@@ -119,9 +118,6 @@ const ResourceUsageStatusSegment = lazyWithRetry(() =>
 )
 const PortsStatusSegment = lazyWithRetry(() =>
   import('./ports-status-segment').then((module) => ({ default: module.PortsStatusSegment }))
-)
-const SshStatusSegment = lazyWithRetry(() =>
-  import('./ssh-status-segment').then((module) => ({ default: module.SshStatusSegment }))
 )
 
 export type CodexStatusRuntimeTarget = {
@@ -2046,7 +2042,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // detection-gating doesn't apply.
   const visibleOpencodeGo = getVisibleUsageProvider('opencode-go', opencodeGo, usageSettings)
   const showOpencodeGo = visibleOpencodeGo !== null && statusBarItems.includes('opencode-go')
-  const showSsh = statusBarItems.includes('ssh')
   const showResourceUsage = statusBarItems.includes('resource-usage')
   const showPorts = statusBarItems.includes('ports')
   const showFloatingTerminalToggle =
@@ -2248,7 +2243,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             {petEnabled ? <PetStatusSegment /> : null}
             {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
             {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
-            {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
           </React.Suspense>
           <CoworkingAvailabilityStatusSegment />
           {showFloatingTerminalToggle && (
@@ -2403,16 +2397,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             {translate('auto.components.status.bar.StatusBar.grokUsageMenu', 'Grok Usage')}
           </ContextMenuCheckboxItem>
         )}
-        <ContextMenuCheckboxItem
-          checked={statusBarItems.includes('ssh')}
-          onCheckedChange={() => {
-            recordFeatureInteraction('ssh')
-            toggleStatusBarItem('ssh')
-          }}
-        >
-          <Server className="size-3.5" />
-          {translate('auto.components.status.bar.StatusBar.24ac89df1a', 'Remote Hosts')}
-        </ContextMenuCheckboxItem>
         <ContextMenuCheckboxItem
           checked={statusBarItems.includes('resource-usage')}
           onCheckedChange={() => {

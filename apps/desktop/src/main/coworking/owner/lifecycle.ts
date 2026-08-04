@@ -47,11 +47,7 @@ export class CoworkingOwnerComposition {
       return
     }
     this.unsubscribeRuntime = this.runtime.onClientEvent((event) => {
-      if (
-        event.type === 'reposChanged' ||
-        event.type === 'worktreesChanged' ||
-        event.type === 'sshStateChanged'
-      ) {
+      if (event.type === 'reposChanged' || event.type === 'worktreesChanged') {
         this.scheduleReconcile()
       }
     })
