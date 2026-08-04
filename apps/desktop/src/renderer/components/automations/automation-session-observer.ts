@@ -22,7 +22,7 @@ export async function observeExistingAutomationSession(args: {
   onExit: (code: number) => void
 }): Promise<() => void> {
   const { ptyId, paneKey, runId, onData, onExit } = args
-  // Why: for local/SSH PTYs main already parses OSC 9999 and routes it
+  // Why: for local PTYs main already parses OSC 9999 and routes it
   // through the hook server (agentStatus:set → store); writing here too
   // would race/duplicate that path. Remote-runtime bytes never transit local
   // main, and the kill switch restores the legacy write. The onAgentStatus

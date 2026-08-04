@@ -53,7 +53,7 @@ function settingsForHookRepoOwner(
       ? parsedHost.environmentId
       : null
     : getRuntimeEnvironmentIdForRepo(state, repoId)
-  // Why: hook inspection must follow the repo owner. SSH/local repos execute
+  // Why: hook inspection must follow the repo owner. Local repos execute
   // through desktop IPC, while runtime repos may differ from the focused host.
   return state.settings
     ? { ...state.settings, activeRuntimeEnvironmentId: runtimeEnvironmentId }

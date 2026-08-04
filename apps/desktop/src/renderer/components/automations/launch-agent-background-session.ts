@@ -65,12 +65,8 @@ export async function launchAgentBackgroundSession(
   const agentArgs = resolveTuiAgentLaunchArgs(agent, store.settings?.agentDefaultArgs)
   const agentEnv = resolveTuiAgentLaunchEnv(agent, store.settings?.agentDefaultEnv)
   const launchPlatform = repo
-    ? getAgentLaunchPlatformForRepo(
-        repo,
-        repo.connectionId ? undefined : getLocalProjectExecutionRuntimeContext(store, worktreeId)
-      )
+    ? getAgentLaunchPlatformForRepo(repo, getLocalProjectExecutionRuntimeContext(store, worktreeId))
     : CLIENT_PLATFORM
-  // Why: SSH remotes must use the relay's public CLI command.
   const isRemote = repo ? repoIsRemote(repo) : false
   const startupShell = resolveLocalWindowsAgentStartupShell({
     platform: launchPlatform,
@@ -152,7 +148,7 @@ export async function launchAgentBackgroundSession(
     useAppStore.getState().clearAgentLaunchConfig(paneKey)
     onExit?.(exitPtyId, code)
   }
-  // Why: local/SSH status facts already pass through main's authoritative
+  // Why: local status facts already pass through main's authoritative
   // scanner; remote-runtime bytes still need this renderer-side store write.
   const mainOwnsAgentStatusWrites = isMainTerminalSideEffectAuthorityForPty({
     settings: store.settings,
@@ -288,7 +284,7 @@ export async function launchAgentBackgroundSession(
     }
 
     // Why: mount only after the explicit PTY is bound. Mounting at the earlier
-    // createTab boundary lets a slow SSH/remote spawn race TerminalPane's fresh
+    // createTab boundary lets a slow remote spawn race TerminalPane's fresh
     // spawn path and launch the agent twice.
     requestBackgroundTerminalWorktreeMount({ worktreeId, tabIds: [tab.id] })
 
