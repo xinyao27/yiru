@@ -30,6 +30,10 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
+        // Why: the leading overflow control closes the first tab's outer seam
+        // while tab-strip navigation remains quieter than primary titlebar actions.
+        'tab-strip-scroll':
+          'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 data-[direction=start]:border-r-border dark:hover:bg-accent dark:data-[direction=start]:border-r-input',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
         // Why: actions revealed over an accent row need contrast from the row
@@ -76,6 +80,7 @@ const buttonVariants = cva(
         'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
+        'icon-tab-strip': "h-full w-8 [&_svg:not([class*='size-'])]:size-3.5",
         // Why: titlebar controls share the row height while retaining compact horizontal rhythm.
         'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-4",
