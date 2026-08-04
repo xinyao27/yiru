@@ -34,10 +34,12 @@ const COWORKING_HOST_ACCESS_TTL_MS = 90 * 24 * 60 * 60 * 1_000
 export class CoworkingHostAccessAuthority {
   private readonly requests = new Map<string, PendingHostAccessRequest>()
   private readonly listeners = new Set<(requests: readonly CoworkingHostAccessRequest[]) => void>()
+  private readonly options: CoworkingHostAccessAuthorityOptions
   private readonly now: () => number
   private readonly createId: () => string
 
-  constructor(private readonly options: CoworkingHostAccessAuthorityOptions) {
+  constructor(options: CoworkingHostAccessAuthorityOptions) {
+    this.options = options
     this.now = options.now ?? Date.now
     this.createId = options.createId ?? randomUUID
   }

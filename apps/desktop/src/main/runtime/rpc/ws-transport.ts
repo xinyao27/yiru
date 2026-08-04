@@ -12,7 +12,7 @@ import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 import { createStaticWebClientHandler } from './static-web-client-handler'
 import type { RpcTransport } from './transport'
 
-const MAX_WS_MESSAGE_BYTES = 1024 * 1024
+const MAX_WS_MESSAGE_BYTES = getCoworkingResourceQuota('host', 'read').encryptedFrameMaxBytes
 // Why: desktop remote-host clients can legitimately hold many concurrent
 // streams (session tabs, terminals, file watches, browser streams). Keep the
 // cap high enough that leaked/stale streams do not starve short control RPCs.

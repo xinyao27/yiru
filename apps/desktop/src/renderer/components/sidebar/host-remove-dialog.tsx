@@ -57,7 +57,7 @@ export function HostRemoveDialog({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {translate('auto.components.sidebar.HostRemoveDialog.6f7a8b9c0d', 'Cancel')}
           </Button>
-          <Button type="button" variant="destructive" onClick={handleOpenRuntimeSettings}>
+          <Button type="button" onClick={handleOpenRuntimeSettings}>
             {translate('auto.components.sidebar.HostRemoveDialog.7a8b9c0d1e', 'Open settings')}
           </Button>
         </DialogFooter>

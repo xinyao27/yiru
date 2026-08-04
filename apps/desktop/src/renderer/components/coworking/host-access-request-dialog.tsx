@@ -153,12 +153,7 @@ function CoworkingHostAccessRequestPrompt({
                 'Browse code and git history on this machine.'
               )}
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isDeciding}
-              onClick={() => void approve('read')}
-            >
+            <Button type="button" disabled={isDeciding} onClick={() => void approve('read')}>
               {translate(
                 'auto.components.coworking.CoworkingHostAccessRequestDialog.grantReadOnly',
                 'Grant read only'
@@ -166,7 +161,7 @@ function CoworkingHostAccessRequestPrompt({
             </Button>
           </div>
 
-          <div className="border-destructive/50 bg-destructive/5 flex flex-col gap-3 border p-3">
+          <div className="border-border flex flex-col gap-3 border p-3">
             <div className="flex items-center gap-2 font-medium">
               <TerminalWindow aria-hidden="true" className="size-4" />
               {translate(
@@ -182,7 +177,7 @@ function CoworkingHostAccessRequestPrompt({
             </p>
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               disabled={isDeciding}
               onClick={() => void approve('host')}
             >
@@ -194,7 +189,7 @@ function CoworkingHostAccessRequestPrompt({
           </div>
         </div>
 
-        <div className="border-border bg-muted/50 flex gap-3 border p-3 text-sm">
+        <div className="border-border bg-muted flex gap-3 border p-3 text-sm">
           <AlertTriangle aria-hidden="true" className="text-muted-foreground mt-0.5 size-4" />
           <p>
             {translate(

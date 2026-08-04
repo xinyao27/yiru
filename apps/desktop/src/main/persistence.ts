@@ -396,7 +396,7 @@ function normalizeAutomationPrecheckResult(
   }
 }
 
-function normalizeAutomationSessionReuse(automation: Automation): Automation {
+function normalizeAutomation(automation: Automation): Automation {
   const setupDecision = normalizeAutomationSetupDecisionForWorkspaceMode(
     automation.workspaceMode,
     automation.setupDecision
@@ -405,7 +405,13 @@ function normalizeAutomationSessionReuse(automation: Automation): Automation {
     ...automation,
     precheck: normalizeAutomationPrecheck(automation.precheck),
     setupDecision,
-    reuseSession: automation.workspaceMode === 'existing' && automation.reuseSession === true
+    reuseSession: automation.workspaceMode === 'existing' && automation.reuseSession === true,
+    executionTargetType: 'local',
+    executionTargetId: 'local',
+    schedulerOwner:
+      automation.schedulerOwner === 'remote_host_service'
+        ? 'remote_host_service'
+        : 'local_host_service'
   }
 }
 
@@ -2639,7 +2645,7 @@ export class Store {
 
   listAutomations(): Automation[] {
     return (this.state.automations ?? [])
-      .map((automation) => normalizeAutomationSessionReuse(automation))
+      .map((automation) => normalizeAutomation(automation))
       .sort((left, right) => left.name.localeCompare(right.name))
   }
 
@@ -2656,7 +2662,6 @@ export class Store {
   createAutomation(input: AutomationCreateInput): Automation {
     const repo = this.state.repos.find((entry) => entry.id === input.projectId)
     const now = Date.now()
-    const executionTargetType = repo?.connectionId ? 'ssh' : 'local'
     const schedulerOwner = getAutomationSchedulerOwner(repo)
     const contexts = getAutomationContextsForRepo(repo, this.state.projectHostSetups ?? [])
     const automation: Automation = {
@@ -2668,8 +2673,8 @@ export class Store {
       runContext: input.runContext ?? contexts.runContext,
       sourceContext: input.sourceContext ?? contexts.sourceContext,
       projectId: input.projectId,
-      executionTargetType,
-      executionTargetId: executionTargetType === 'ssh' ? (repo?.connectionId ?? '') : 'local',
+      executionTargetType: 'local',
+      executionTargetId: 'local',
       schedulerOwner,
       workspaceMode: input.workspaceMode,
       workspaceId: input.workspaceMode === 'existing' ? (input.workspaceId ?? null) : null,
@@ -2703,7 +2708,6 @@ export class Store {
     const current = this.state.automations[index]
     const repoId = updates.projectId ?? current.projectId
     const repo = this.state.repos.find((entry) => entry.id === repoId)
-    const executionTargetType = repo?.connectionId ? 'ssh' : 'local'
     const schedulerOwner = getAutomationSchedulerOwner(repo)
     const contexts = getAutomationContextsForRepo(repo, this.state.projectHostSetups ?? [])
     const rrule = updates.rrule ?? current.rrule
@@ -2729,8 +2733,8 @@ export class Store {
         : updates.projectId !== undefined
           ? contexts.sourceContext
           : (current.sourceContext ?? contexts.sourceContext),
-      executionTargetType,
-      executionTargetId: executionTargetType === 'ssh' ? (repo?.connectionId ?? '') : 'local',
+      executionTargetType: 'local',
+      executionTargetId: 'local',
       schedulerOwner,
       workspaceMode,
       workspaceId:

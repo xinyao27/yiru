@@ -36,9 +36,12 @@ const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   requesterControlStates: []
 }
 
-/** Keeps the renderer contract present when Coworking cannot safely compose. */
 export class CoworkingUnavailableOwnerService implements CoworkingSharingIpcController {
-  constructor(private readonly hostDevices?: CoworkingHostDeviceRegistry) {}
+  private readonly hostDevices?: CoworkingHostDeviceRegistry
+
+  constructor(hostDevices?: CoworkingHostDeviceRegistry) {
+    this.hostDevices = hostDevices
+  }
 
   snapshot(): CoworkingSharingSnapshot {
     return UNAVAILABLE_SNAPSHOT

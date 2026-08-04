@@ -67,13 +67,6 @@ export async function collectAutomationRunUsage({
       'Usage is only collected for completed automation runs.'
     )
   }
-  if (automation.executionTargetType === 'ssh') {
-    return unavailable(
-      getAutomationUsageProvider(automation),
-      'remote_usage_unavailable',
-      'Remote automation usage is not available from local usage logs.'
-    )
-  }
   if (automation.agentId === 'claude') {
     if (!claudeUsage) {
       return unavailable('claude', 'scan_failed', 'Claude usage store is unavailable.')

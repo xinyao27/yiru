@@ -4,7 +4,6 @@ import {
 } from '../text-generation/commit-message-agent-environment'
 import type { CommitMessageGenerationTarget } from '../text-generation/commit-message-text-generation'
 
-/** Resolve the local environment used for branch-name generation. */
 export async function resolveGenerationTarget(
   worktreePath: string,
   agentId: string,

@@ -29,8 +29,6 @@ const OPENCLAW_JOBS_FILE = join(homedir(), '.openclaw', 'cron', 'jobs.json')
 const EXTERNAL_JOB_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/
 const LOCAL_COMMAND_LOOKUP_TIMEOUT_MS = 5_000
 const LOCAL_AUTOMATION_COMMAND_TIMEOUT_MS = 30_000
-const REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE =
-  'External automations on remote hosts are no longer supported.'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -250,20 +248,17 @@ export async function listExternalAutomationRuns(
       runs: []
     }
   }
-  if (input.target.type === 'local') {
-    const result = await readHermesCronOutputRunsPage(input.jobId, { page, pageSize })
-    return {
-      managerId: input.managerId,
-      provider: input.provider,
-      target: input.target,
-      jobId: input.jobId,
-      page,
-      pageSize,
-      total: result.total,
-      runs: mapHermesJobs(input.managerId, [{ id: input.jobId, runs: result.runs }])[0]?.runs ?? []
-    }
+  const result = await readHermesCronOutputRunsPage(input.jobId, { page, pageSize })
+  return {
+    managerId: input.managerId,
+    provider: input.provider,
+    target: input.target,
+    jobId: input.jobId,
+    page,
+    pageSize,
+    total: result.total,
+    runs: mapHermesJobs(input.managerId, [{ id: input.jobId, runs: result.runs }])[0]?.runs ?? []
   }
-  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }
 
 function hermesCommandForAction(action: ExternalAutomationAction): string {
@@ -371,12 +366,8 @@ export async function createExternalAutomation(
   input: ExternalAutomationCreateInput
 ): Promise<void> {
   const normalized = normalizeHermesCronMutationInput(input)
-  if (input.target.type === 'local') {
-    await runLocalAutomationCommand('hermes', hermesCronCreateArgs(normalized))
-    clearHermesCronOutputRunCountCache()
-    return
-  }
-  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
+  await runLocalAutomationCommand('hermes', hermesCronCreateArgs(normalized))
+  clearHermesCronOutputRunCountCache()
 }
 
 export async function updateExternalAutomation(
@@ -386,12 +377,8 @@ export async function updateExternalAutomation(
     throw new Error('Invalid external automation job ID.')
   }
   const normalized = normalizeHermesCronMutationInput(input)
-  if (input.target.type === 'local') {
-    await runLocalAutomationCommand('hermes', hermesCronEditArgs(input.jobId, normalized))
-    clearHermesCronOutputRunCountCache(input.jobId)
-    return
-  }
-  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
+  await runLocalAutomationCommand('hermes', hermesCronEditArgs(input.jobId, normalized))
+  clearHermesCronOutputRunCountCache(input.jobId)
 }
 
 export async function runExternalAutomationAction(
@@ -404,12 +391,8 @@ export async function runExternalAutomationAction(
     input.provider === 'hermes'
       ? hermesCommandForAction(input.action)
       : openClawCommandForAction(input.action)
-  if (input.target.type === 'local') {
-    await runLocalAutomationCommand(input.provider, ['cron', command, input.jobId])
-    if (input.provider === 'hermes') {
-      clearHermesCronOutputRunCountCache(input.jobId)
-    }
-    return
+  await runLocalAutomationCommand(input.provider, ['cron', command, input.jobId])
+  if (input.provider === 'hermes') {
+    clearHermesCronOutputRunCountCache(input.jobId)
   }
-  throw new Error(REMOTE_EXTERNAL_AUTOMATION_UNSUPPORTED_MESSAGE)
 }

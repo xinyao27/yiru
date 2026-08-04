@@ -1,3 +1,5 @@
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+import { coworkingLocalActualHostScopeKey } from '~main/coworking/canonical-host-path'
 import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 
 import type { YiruRuntimeService } from '../yiru-runtime'
@@ -12,14 +14,7 @@ import {
 import type { RpcAnyMethod, RpcEnvelopeMeta, RpcResponse } from './core'
 import { errorResponse } from './errors'
 
-/**
- * Whether this caller class is bounded by an explicit grant.
- *
- * Why only `coworking-host`: `local` is the owner's own process, and `mobile` /
- * `runtime` are devices the owner paired with a full-power token. Narrowing
- * those is a separate product decision (see the §6.8 mobile note) — pretending
- * to enforce them here while their tokens stay all-powerful would be theatre.
- */
+// Why: paired owner devices retain full-power behavior; only Coworking hosts are grant-bound.
 function requiresGrant(caller: RpcCallerClass): boolean {
   switch (caller) {
     case 'local':
@@ -31,10 +26,6 @@ function requiresGrant(caller: RpcCallerClass): boolean {
   }
 }
 
-/**
- * Returns an error response when this caller may not invoke this method, or
- * null to let the call through.
- */
 export function denyAccess(
   method: RpcAnyMethod,
   meta: RpcEnvelopeMeta,
@@ -56,9 +47,7 @@ export function denyAccess(
     return null
   }
 
-  // Why: fail closed. A grant-bound caller with no resolvable grant is denied
-  // rather than defaulted, so a transport that forgets to pass grantedAccess
-  // loses access instead of silently gaining unrestricted access.
+  // Why: a missing grant must lose access instead of silently becoming unrestricted.
   if (!context.grantedAccess) {
     return errorResponse(
       requestId,
@@ -103,6 +92,11 @@ const GITLAB_PROJECT_REF_METHODS = new Set([
   'gitlab.workItemDetails'
 ])
 
+const COWORKING_RUNTIME_HOST_SCOPE_KEY = coworkingLocalActualHostScopeKey(
+  LOCAL_EXECUTION_HOST_ID,
+  null
+)
+
 function normalizedProjectPart(value: string): string {
   return value
     .trim()
@@ -144,14 +138,7 @@ function redirectedProjectDenied(
   )
 }
 
-/**
- * Reject project-scoped parameters that redirect credential use to another repository.
- *
- * Why this runs only for grant-bound callers: the owner's existing local/mobile
- * workflows intentionally support pasting links from other repositories. A
- * Coworking host grant must make the declared project scope enforceable instead
- * of letting an arbitrary owner/path consume whichever token the repo selector chose.
- */
+// Why: a Coworking host grant must not redirect owner credentials outside its selected project.
 export async function denyRedirectedProjectAccess(
   method: RpcAnyMethod,
   params: unknown,
@@ -162,8 +149,7 @@ export async function denyRedirectedProjectAccess(
   if (!requiresGrant(callerClassOf(context.principal))) {
     return null
   }
-  // Why: method-specific Zod parsing has already validated these fields before
-  // the dispatcher reaches this cross-method authorization boundary.
+  // Why: method-specific Zod parsing validates these fields before this authorization boundary.
   const request = params as ProjectRedirectParams
   if (method.name === 'github.workItemByOwnerRepo') {
     const project = await context.runtime.getRepoSlug(request.repo).catch(() => null)
@@ -192,18 +178,16 @@ export async function denyRedirectedProjectAccess(
     : redirectedProjectDenied(method, meta, requestId)
 }
 
-/**
- * Project a persisted device entry onto the access it was granted.
- *
- * Why a host-wide scope: a Coworking host grant is bounded by which *machine*
- * it covers (`hostScopeKey`), not by a worktree inside it — the tier is what
- * limits what the peer may do there. Returns null for the owner's own paired
- * devices, which carry no grant and are handled by requiresGrant above.
- */
+// Why: a host grant is valid only in the exact machine namespace it was issued for.
 export function grantedAccessForDevice(
-  device: { scope: string; tier?: RpcAccessTier } | null
+  device: { scope: string; tier?: RpcAccessTier; hostScopeKey?: string } | null
 ): RpcAccess | null {
-  if (!device || device.scope !== 'coworking-host' || !device.tier) {
+  if (
+    !device ||
+    device.scope !== 'coworking-host' ||
+    !device.tier ||
+    device.hostScopeKey !== COWORKING_RUNTIME_HOST_SCOPE_KEY
+  ) {
     return null
   }
   return { scope: 'host', tier: device.tier }

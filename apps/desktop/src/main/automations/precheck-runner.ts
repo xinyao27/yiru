@@ -3,16 +3,10 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '~shared/automation/precheck'
 import type { AutomationPrecheck, AutomationPrecheckResult } from '~shared/automations-types'
 
-type AutomationPrecheckExecutionTarget =
-  | {
-      type: 'local'
-      cwd: string
-    }
-  | {
-      type: 'ssh'
-      cwd: string
-      connectionId: string
-    }
+type AutomationPrecheckExecutionTarget = {
+  type: 'local'
+  cwd: string
+}
 
 type TailBuffer = {
   content: string
@@ -53,22 +47,6 @@ function createPrecheckResult(args: {
     startedAt: args.startedAt,
     completedAt
   }
-}
-
-function failedPrecheckResult(
-  precheck: AutomationPrecheck,
-  startedAt: number,
-  error: string
-): AutomationPrecheckResult {
-  return createPrecheckResult({
-    precheck,
-    startedAt,
-    stdout: { content: '', truncated: false },
-    stderr: { content: '', truncated: false },
-    exitCode: null,
-    timedOut: false,
-    error
-  })
 }
 
 function killLocalPrecheckProcessTree(child: ChildProcess): ReturnType<typeof setTimeout> | null {
@@ -180,14 +158,5 @@ export async function runAutomationPrecheck(args: {
   precheck: AutomationPrecheck
   target: AutomationPrecheckExecutionTarget
 }): Promise<AutomationPrecheckResult> {
-  if (args.target.type === 'ssh') {
-    // Why: the only transport that could reach a remote cwd is gone. Report a
-    // failed precheck rather than silently passing an unrun automation gate.
-    return failedPrecheckResult(
-      args.precheck,
-      Date.now(),
-      'Prechecks are no longer supported on remote hosts.'
-    )
-  }
   return await runLocalPrecheck(args.precheck, args.target)
 }
