@@ -30,10 +30,10 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
-        // Why: the leading overflow control closes the first tab's outer seam
-        // while tab-strip navigation remains quieter than primary titlebar actions.
+        // Why: tab-strip arrows use accent-only focus so their transparent
+        // chrome never reads as a bordered control beside the tab viewport.
         'tab-strip-scroll':
-          'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 data-[direction=start]:border-r-border dark:hover:bg-accent dark:data-[direction=start]:border-r-input',
+          'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-transparent focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 dark:hover:bg-accent',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
         // Why: actions revealed over an accent row need contrast from the row

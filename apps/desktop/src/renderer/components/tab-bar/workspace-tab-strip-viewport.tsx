@@ -54,9 +54,13 @@ export function WorkspaceTabStripViewport({
         />
       ) : null}
       {/* Why: only the actual tab viewport is no-drag; unused titlebar space
-          remains available for moving the window on every workspace surface. */}
+          remains movable. The overflow viewport owns its leading seam so the
+          neighboring navigation control stays borderless. */}
       <div
-        className="relative flex min-h-0 max-w-full min-w-0 flex-[0_1_auto]"
+        className={cn(
+          'relative flex min-h-0 max-w-full min-w-0 flex-[0_1_auto]',
+          tabStripOverflowState.hasOverflow && 'border-l border-border'
+        )}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <div
@@ -112,7 +116,6 @@ function TabStripScrollButton({
           <Button
             variant="tab-strip-scroll"
             size="icon-tab-strip"
-            data-direction={direction}
             className={isStart ? 'mr-[-1px]' : '-ml-px'}
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             aria-label={label}
