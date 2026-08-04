@@ -1,10 +1,8 @@
-import { isWslUncPath } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
@@ -15,7 +13,7 @@ import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 import { getFolderWorkspaceCandidateRepos } from '../components/editor/folder-workspace-connection'
 
-export type AiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'
+export type AiVaultResumeTargetStatus = 'local' | 'runtime' | 'unknown'
 
 type AiVaultResumeRepoOwner = Pick<Repo, 'connectionId' | 'executionHostId'>
 
@@ -25,8 +23,8 @@ export function getAiVaultResumeRepoTargetStatus(
   if (!repo) {
     return 'unknown'
   }
-  // Why: SSH and WSL targets use the normal PTY startup path. Runtime-owned
-  // repos intentionally keep connectionId null, so check the execution host.
+  // Why: runtime-owned repos intentionally keep connectionId null, so check
+  // the execution host.
   return getAiVaultResumeExecutionHostTargetStatus(getRepoExecutionHostId(repo))
 }
 
@@ -37,15 +35,10 @@ export function isSupportedAiVaultResumeRepo(
 }
 
 export function isSupportedAiVaultResumeTargetStatus(status: AiVaultResumeTargetStatus): boolean {
-  return status === 'local' || status === 'ssh' || status === 'runtime'
-}
-
-export function isWslStoredAiVaultSessionFile(sessionFilePath: string | null | undefined): boolean {
-  return Boolean(sessionFilePath && isWslUncPath(sessionFilePath))
+  return status === 'local' || status === 'runtime'
 }
 
 export function canResumeAiVaultSessionOnTarget(args: {
-  sessionFilePath: string | null | undefined
   sessionExecutionHostId?: ExecutionHostId | null
   targetStatus: AiVaultResumeTargetStatus
   targetExecutionHostId?: ExecutionHostId | null
@@ -69,25 +62,11 @@ export function canResumeAiVaultSessionOnTarget(args: {
       if (sessionExecutionHostId === targetExecutionHostId) {
         return true
       }
-      // Why: SSH-to-local-WSL setups (#6270) tag the session 'local' but the
-      // file lives under a WSL UNC path reachable from any SSH shell into this
-      // machine, so we bypass the exact host-id match for that case.
-      return (
-        sessionExecutionHostId === LOCAL_EXECUTION_HOST_ID &&
-        args.targetStatus === 'ssh' &&
-        isWslStoredAiVaultSessionFile(args.sessionFilePath)
-      )
+      return false
     }
     if (sessionExecutionHostId !== LOCAL_EXECUTION_HOST_ID) {
       return false
     }
-  }
-  // Why: vault sessions are scanned from this machine's disk (host home dirs
-  // plus local WSL homes). An SSH shell can only reach the WSL-stored ones
-  // (SSH-to-local-WSL setups, #6270); host-stored session files do not exist
-  // on a remote filesystem, so queuing a resume there is guaranteed to fail.
-  if (args.targetStatus === 'ssh') {
-    return isWslStoredAiVaultSessionFile(args.sessionFilePath)
   }
   return true
 }
@@ -185,7 +164,7 @@ function getAiVaultResumeFolderTargetStatus(
   }
   const explicitConnectionId = (workspace.connectionId ?? group?.connectionId ?? '').trim()
   if (explicitConnectionId) {
-    return getAiVaultResumeExecutionHostTargetStatus(toSshExecutionHostId(explicitConnectionId))
+    return 'local'
   }
 
   return mergeAiVaultResumeExecutionHostTargetStatuses(
@@ -209,7 +188,7 @@ function getAiVaultResumeFolderExecutionHostId(
   }
   const explicitConnectionId = (workspace.connectionId ?? group?.connectionId ?? '').trim()
   if (explicitConnectionId) {
-    return toSshExecutionHostId(explicitConnectionId)
+    return LOCAL_EXECUTION_HOST_ID
   }
   return mergeAiVaultResumeExecutionHostIds(
     getFolderWorkspaceCandidateRepos(state, folderWorkspaceId).map(getRepoExecutionHostId)

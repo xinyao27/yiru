@@ -1,8 +1,7 @@
 import {
   getRepoExecutionHostId,
   getRepoIdFromWorktreeId,
-  parseExecutionHostId,
-  toSshExecutionHostId
+  parseExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { resolveLocalProjectRuntimeForRepo } from '~main/local-project-runtime-resolution'
@@ -18,7 +17,6 @@ export type CursorHostRuntimeTarget =
 
 export type CursorUsageRuntimeTarget =
   | CursorHostRuntimeTarget
-  | { runtime: 'ssh'; connectionId: string }
   | { runtime: 'environment'; environmentId: string }
 
 function getWorktreeId(workspaceId: string | null): string | null {
@@ -50,11 +48,7 @@ function getFolderWorkspaceHost(store: Store, workspaceId: string): ExecutionHos
     ? store.getProjectGroups().find((entry) => entry.id === workspace.projectGroupId)
     : null
   const explicitHost = parseExecutionHostId(group?.executionHostId)
-  if (explicitHost) {
-    return explicitHost.id
-  }
-  const connectionId = workspace?.connectionId?.trim() || group?.connectionId?.trim()
-  return connectionId ? toSshExecutionHostId(connectionId) : null
+  return explicitHost ? explicitHost.id : null
 }
 
 function getWorkspaceExecutionHost(
@@ -126,9 +120,6 @@ export function resolveCursorUsageRuntimeTarget(
 ): CursorUsageRuntimeTarget {
   const resolvedContext = context ?? getFallbackContext(store)
   const executionHost = parseExecutionHostId(resolvedContext.executionHostId)
-  if (executionHost?.kind === 'ssh') {
-    return { runtime: 'ssh', connectionId: executionHost.targetId }
-  }
   if (executionHost?.kind === 'runtime') {
     return { runtime: 'environment', environmentId: executionHost.environmentId }
   }

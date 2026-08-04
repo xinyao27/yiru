@@ -10,7 +10,6 @@ export type AttachMobileImageDeps = {
   readonly client: Pick<RpcClient, 'sendRequest'>
   readonly terminal: string
   readonly deviceToken: string | null
-  readonly getConnectionId: () => Promise<string | null>
   // Supplied by the view so this transport module stays free of Expo/native imports.
   readonly pickImage: (source: MobileImageSource) => Promise<PickedMobileImage | null>
   // Fired once the user has picked an image and the host upload is about to
@@ -30,7 +29,6 @@ export async function attachMobileImageToTerminal(
     client,
     terminal,
     deviceToken,
-    getConnectionId,
     pickImage,
     onUploadStart,
     beforeTerminalSend
@@ -41,10 +39,7 @@ export async function attachMobileImageToTerminal(
     return 'cancelled'
   }
   onUploadStart?.()
-  const connectionId = await getConnectionId()
-  const imagePath = await saveMobileClipboardImageAsTempFile(client, picked.base64, {
-    connectionId
-  })
+  const imagePath = await saveMobileClipboardImageAsTempFile(client, picked.base64)
   // Why: a generated image path is terminal image injection, so it's always
   // bracketed (matching desktop paste) regardless of terminal mode.
   const payload = buildMobileImagePastePayload(imagePath)

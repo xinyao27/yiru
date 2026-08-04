@@ -4,14 +4,12 @@ import {
   RUNTIME_PROTOCOL_VERSION,
   type RuntimeCompatVerdict
 } from '@yiru/runtime-protocol/capabilities'
-import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import {
   LOCAL_EXECUTION_HOST_ID,
   getLocalExecutionHostLabel,
   getSettingsFocusedExecutionHostId,
   parseExecutionHostId,
   toRuntimeExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId,
   type ExecutionHostKind
 } from '@yiru/workbench-model/workspace'
@@ -33,7 +31,6 @@ export type ExecutionHostRegistryEntry = {
   label: string
   detail: string
   health: ExecutionHostHealth
-  connectionStatus?: SshConnectionStatus
   compatibility?: RuntimeCompatVerdict
   capabilities?: readonly string[]
   appVersion?: string | null
@@ -108,24 +105,6 @@ function runtimeControlHealth(
   }
 }
 
-function sshHealth(state: SshConnectionState | undefined): ExecutionHostHealth {
-  switch (state?.status) {
-    case 'connected':
-      return 'available'
-    case 'connecting':
-    case 'deploying-relay':
-    case 'reconnecting':
-      return 'connecting'
-    case 'auth-failed':
-    case 'error':
-    case 'reconnection-failed':
-      return 'error'
-    case 'disconnected':
-    case undefined:
-      return 'disconnected'
-  }
-}
-
 function setHost(
   hosts: Map<ExecutionHostId, ExecutionHostRegistryEntry>,
   entry: ExecutionHostRegistryEntry
@@ -176,8 +155,6 @@ function addRuntimeHost(
 export function buildExecutionHostRegistry(args: {
   repos: readonly Pick<Repo, 'connectionId' | 'executionHostId'>[]
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
-  sshTargetLabels?: ReadonlyMap<string, string>
-  sshConnectionStates?: ReadonlyMap<string, SshConnectionState>
   runtimeEnvironments?: readonly RuntimeEnvironmentSummary[]
   runtimeStatusByEnvironmentId?: RuntimeStatusByEnvironmentId
   // Why: user-chosen per-host display labels override the derived label so a
@@ -220,7 +197,6 @@ export function buildExecutionHostRegistry(args: {
     )
   }
 
-  const sshTargetIds = new Set<string>()
   for (const repo of args.repos) {
     const parsedHost = parseExecutionHostId(repo.executionHostId)
     if (parsedHost?.kind === 'runtime') {
@@ -231,33 +207,6 @@ export function buildExecutionHostRegistry(args: {
         args.runtimeStatusByEnvironmentId
       )
     }
-    if (parsedHost?.kind === 'ssh') {
-      sshTargetIds.add(parsedHost.targetId)
-    }
-  }
-  for (const targetId of args.sshTargetLabels?.keys() ?? []) {
-    const normalized = normalizeHostPart(targetId)
-    if (normalized) {
-      sshTargetIds.add(normalized)
-    }
-  }
-  for (const repo of args.repos) {
-    const targetId = normalizeHostPart(repo.connectionId)
-    if (targetId) {
-      sshTargetIds.add(targetId)
-    }
-  }
-
-  for (const targetId of sshTargetIds) {
-    const state = args.sshConnectionStates?.get(targetId)
-    setHost(hosts, {
-      id: toSshExecutionHostId(targetId),
-      kind: 'ssh',
-      label: args.sshTargetLabels?.get(targetId) || targetId,
-      detail: 'SSH',
-      health: sshHealth(state),
-      connectionStatus: state?.status
-    })
   }
 
   const overrides = args.hostLabelOverrides

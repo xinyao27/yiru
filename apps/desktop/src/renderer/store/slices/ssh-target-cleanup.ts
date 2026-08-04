@@ -1,7 +1,7 @@
-import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
 import type { AppState } from '../types'
+import type { SshConnectionState, SshTargetMetadata } from './ssh'
 
 export function sshConnectionStatesEqual(
   a: SshConnectionState | undefined,
@@ -19,7 +19,7 @@ export function sshConnectionStatesEqual(
 
 export function sshTargetLabelsEqual(
   labels: Map<string, string>,
-  targets: Pick<SshTarget, 'id' | 'label'>[]
+  targets: SshTargetMetadata[]
 ): boolean {
   if (labels.size !== targets.length) {
     return false

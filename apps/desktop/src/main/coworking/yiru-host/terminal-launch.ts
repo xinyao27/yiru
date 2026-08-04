@@ -1,9 +1,6 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { Store } from '~main/persistence'
-import {
-  detectInstalledAgentsWithShellPathHydration,
-  detectRemoteAgents
-} from '~main/preflight/preflight'
+import { detectInstalledAgentsWithShellPathHydration } from '~main/preflight/preflight'
 import { getLocalProjectWorktreeGitOptions } from '~main/project-runtime-git-options'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import { isCoworkingAgentLaunchId } from '~shared/coworking/agent-launch-contract'
@@ -176,10 +173,7 @@ export class YiruCoworkingHostTerminalLaunch {
     if (!host || host.kind === 'runtime') {
       throw new CoworkingExecutionError('resource_unavailable')
     }
-    const detected =
-      host.kind === 'ssh'
-        ? await detectRemoteAgents({ connectionId: host.targetId })
-        : await this.detectLocalAgents(target)
+    const detected = await this.detectLocalAgents(target)
     return detected.filter(isTuiAgent)
   }
 

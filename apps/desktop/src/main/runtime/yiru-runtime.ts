@@ -13328,7 +13328,7 @@ export class YiruRuntimeService {
       projectId: worktree.projectId ?? null,
       repoId: worktree.repoId,
       executionHostId,
-      connectionId: host.kind === 'ssh' ? host.targetId : null,
+      connectionId: null,
       ...(worktree.projectHostSetupId ? { projectHostSetupId: worktree.projectHostSetupId } : {}),
       worktreePath: worktree.path,
       localWslDistro:

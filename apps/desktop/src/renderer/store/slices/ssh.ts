@@ -1,9 +1,3 @@
-import type {
-  SshConnectionState,
-  PortForwardEntry,
-  EnrichedDetectedPort,
-  SshTarget
-} from '@yiru/runtime-protocol/ssh-connection'
 import type { StateCreator } from 'zustand'
 
 import type { AppState } from '../types'
@@ -12,6 +6,50 @@ import {
   sshConnectionStatesEqual,
   sshTargetLabelsEqual
 } from './ssh-target-cleanup'
+
+export type SshConnectionStatus =
+  | 'disconnected'
+  | 'connecting'
+  | 'auth-failed'
+  | 'deploying-relay'
+  | 'connected'
+  | 'reconnecting'
+  | 'reconnection-failed'
+  | 'error'
+
+export type SshConnectionState = {
+  targetId: string
+  status: SshConnectionStatus
+  error: string | null
+  reconnectAttempt: number
+  supportsFolderDownload?: boolean
+  remotePlatform?: 'linux' | 'darwin' | 'win32'
+}
+
+export type SshTargetMetadata = {
+  id: string
+  label: string
+}
+
+export type PortForwardEntry = {
+  id: string
+  connectionId: string
+  localPort: number
+  remoteHost: string
+  remotePort: number
+  label?: string
+  advertisedUrl?: string
+  advertisedProtocol?: 'http' | 'https'
+}
+
+export type EnrichedDetectedPort = {
+  port: number
+  host: string
+  pid?: number
+  processName?: string
+  advertisedUrl?: string
+  advertisedProtocol?: 'http' | 'https'
+}
 
 export type RemoteWorkspaceSyncStatus = {
   phase: 'idle' | 'pulling' | 'pushing' | 'synced' | 'conflict' | 'error' | 'offline'
@@ -61,7 +99,7 @@ export type SshSlice = {
   setSshConnectionState: (targetId: string, state: SshConnectionState) => void
   setSshTargetLabels: (labels: Map<string, string>) => void
   setRemovedSshTargetLabels: (labels: Record<string, string>) => void
-  setSshTargetsMetadata: (targets: Pick<SshTarget, 'id' | 'label'>[]) => void
+  setSshTargetsMetadata: (targets: SshTargetMetadata[]) => void
   clearRemovedSshTargetState: (targetId: string) => void
   markRemoteWorkspaceHydrated: (targetId: string) => void
   clearRemoteWorkspaceHydrated: (targetId: string) => void

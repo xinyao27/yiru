@@ -754,17 +754,6 @@ function getHostHeaderDetail(row: HostHeaderRow): { text: string; isWarning: boo
       isWarning: true
     }
   }
-  // Why: auth-expired SSH hosts must say so in words — the plan requires a clear
-  // auth-needed status, and the health icon alone doesn't explain the fix.
-  if (row.connectionStatus === 'auth-failed') {
-    return {
-      text: translate(
-        'auto.components.sidebar.WorktreeList.hostAuthNeeded',
-        'Authentication needed'
-      ),
-      isWarning: true
-    }
-  }
   if (row.health === 'disconnected') {
     return {
       text: translate('auto.components.sidebar.WorktreeList.hostDisconnected', 'Disconnected'),
@@ -5248,8 +5237,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
   )
   const settings = useAppStore((s) => s.settings)
   const pinnedDisplayPolicy = getPinnedWorktreeDisplayPolicy(settings)
-  const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
-  const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
 
@@ -5729,22 +5716,12 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     () =>
       buildSidebarHostOptions({
         repos,
-        sshTargetLabels,
-        sshConnectionStates,
         settings,
         runtimeEnvironments,
         runtimeStatusByEnvironmentId,
         hostLabelOverrides
       }),
-    [
-      repos,
-      sshTargetLabels,
-      sshConnectionStates,
-      settings,
-      runtimeEnvironments,
-      runtimeStatusByEnvironmentId,
-      hostLabelOverrides
-    ]
+    [repos, settings, runtimeEnvironments, runtimeStatusByEnvironmentId, hostLabelOverrides]
   )
   const hostLabelById = useMemo(
     () => new Map(hostOptions.map((host) => [host.id, host.label])),

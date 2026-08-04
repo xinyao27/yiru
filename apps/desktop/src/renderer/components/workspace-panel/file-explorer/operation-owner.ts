@@ -127,10 +127,6 @@ function operationOwnerFromHostId(hostId: ExecutionHostId): FileExplorerOperatio
   switch (parsed?.kind) {
     case 'local':
       return { kind: 'local' }
-    case 'ssh':
-      // Why: SSH hosts no longer exist as a workspace target; treat a legacy
-      // persisted ssh: hostId the same as an unresolved owner.
-      return { kind: 'unresolved' }
     case 'runtime':
       return { kind: 'runtime', environmentId: parsed.environmentId }
     case undefined:

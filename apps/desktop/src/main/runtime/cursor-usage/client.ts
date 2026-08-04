@@ -113,8 +113,8 @@ export async function fetchCursorUsageForRuntime(options: {
     return fetchCursorRateLimits({ signal: options.signal, target: options.target })
   }
   // Why: a paired runtime environment is the only remaining target that can
-  // answer a remote usage probe. An ssh-scoped target has no transport left, so
-  // it reports unavailable instead of falling through to local usage.
+  // answer a remote usage probe; without a remote fetcher it reports
+  // unavailable instead of falling through to local usage.
   if (options.target.runtime === 'environment' && options.remoteFetcher) {
     return options.remoteFetcher(options.target.environmentId, options.signal)
   }

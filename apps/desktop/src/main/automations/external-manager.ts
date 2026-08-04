@@ -6,19 +6,16 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import type {
   ExternalAutomationAction,
   ExternalAutomationActionInput,
   ExternalAutomationCreateInput,
   ExternalAutomationManager,
-  ExternalAutomationProvider,
   ExternalAutomationRunsInput,
   ExternalAutomationRunsPage,
   ExternalAutomationUpdateInput
 } from '~shared/automations-types'
 
-import type { Store } from '../persistence'
 import { mapHermesJobs, mapOpenClawJobs } from './external-job-mappers'
 import {
   clearHermesCronOutputRunCountCache,
@@ -223,45 +220,12 @@ async function listLocalOpenClawManager(): Promise<ExternalAutomationManager | n
   }
 }
 
-// Why: SSH hosts stay in the manager list so their jobs do not vanish without
-// explanation, but the transport that read them is gone — every entry reports
-// unavailable rather than an empty job list that reads as "nothing scheduled".
-function unreachableRemoteManager(
-  target: SshTarget,
-  provider: ExternalAutomationProvider
-): ExternalAutomationManager {
-  const providerLabel = provider === 'hermes' ? 'Hermes' : 'OpenClaw'
-  return {
-    id: `${provider}:ssh:${target.id}`,
-    provider,
-    label: `${providerLabel} on ${target.label}`,
-    targetLabel: target.label,
-    target: { type: 'ssh', connectionId: target.id },
-    status: 'unavailable',
-    error: 'External automations are no longer readable on remote hosts.',
-    canManage: false,
-    jobs: []
-  }
-}
-
-export async function listExternalAutomationManagers(
-  store: Store
-): Promise<ExternalAutomationManager[]> {
+export async function listExternalAutomationManagers(): Promise<ExternalAutomationManager[]> {
   const [localHermes, localOpenClaw] = await Promise.all([
     listLocalHermesManager(),
     listLocalOpenClawManager()
   ])
-  const remote = store
-    .getSshTargets()
-    .flatMap((target) => [
-      unreachableRemoteManager(target, 'hermes'),
-      unreachableRemoteManager(target, 'openclaw')
-    ])
-  return [
-    ...(localHermes ? [localHermes] : []),
-    ...(localOpenClaw ? [localOpenClaw] : []),
-    ...remote
-  ]
+  return [...(localHermes ? [localHermes] : []), ...(localOpenClaw ? [localOpenClaw] : [])]
 }
 
 export async function listExternalAutomationRuns(

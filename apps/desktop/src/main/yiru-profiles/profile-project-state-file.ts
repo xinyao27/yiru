@@ -67,8 +67,6 @@ export function readProfileState(profileId: string, userDataPath: string): Trans
           Record<ExecutionHostId, WorkspaceSessionState>
         >)
       : {},
-    sshTargets: arrayOrEmpty(parsed.sshTargets),
-    sshRemotePtyLeases: arrayOrEmpty(parsed.sshRemotePtyLeases),
     migrationUnsupportedPtyEntries: arrayOrEmpty(parsed.migrationUnsupportedPtyEntries),
     legacyPaneKeyAliasEntries: arrayOrEmpty(parsed.legacyPaneKeyAliasEntries),
     automations: arrayOrEmpty(parsed.automations),

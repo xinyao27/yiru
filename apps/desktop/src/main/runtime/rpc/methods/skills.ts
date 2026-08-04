@@ -1,4 +1,3 @@
-import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import {
   discoverSkillsOnTarget,
   resolveSkillDiscoveryTarget
@@ -15,7 +14,7 @@ export const SKILL_METHODS: RpcMethod[] = [
     handler: async (params, { runtime }) => {
       // Why: fail closed instead of scanning this host for a remote host's
       // skills — an empty result would read as "that host has no skills".
-      if (parseExecutionHostId(params.executionHostId)?.kind === 'ssh') {
+      if (params.executionHostId?.startsWith('ssh:')) {
         throw new Error('Skill discovery is no longer supported on remote hosts.')
       }
       // Why: the executing runtime owns WSL project preferences. Remote callers

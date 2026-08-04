@@ -461,23 +461,7 @@ function readPersistedPtyWorktreeInstanceId(
     tab && (tab.ptyId === binding.ptyId || layoutPtyId === binding.ptyId)
       ? normalizePtyWorktreeInstanceId(tab.worktreeInstanceId)
       : null
-  const relayPtyId = getRelayPtyId(binding.connectionId, binding.ptyId)
-  const lease = binding.connectionId
-    ? store
-        .getSshRemotePtyLeases(binding.connectionId)
-        .find(
-          (candidate) =>
-            candidate.ptyId === relayPtyId &&
-            candidate.worktreeId === binding.worktreeId &&
-            (binding.tabId === undefined || candidate.tabId === binding.tabId) &&
-            (binding.leafId == null || candidate.leafId === binding.leafId)
-        )
-    : undefined
-  const leaseInstanceId = normalizePtyWorktreeInstanceId(lease?.worktreeInstanceId)
-  if (tabInstanceId && leaseInstanceId && tabInstanceId !== leaseInstanceId) {
-    return null
-  }
-  return tabInstanceId ?? leaseInstanceId
+  return tabInstanceId
 }
 
 function resolveSpawnPtyWorktreeInstanceId(
@@ -605,15 +589,8 @@ async function verifyPtyStopped(
   return true
 }
 
-function finishPtyShutdown(
-  id: string,
-  connectionId: string | null | undefined,
-  store: Store | undefined
-): void {
+function finishPtyShutdown(id: string): void {
   clearProviderPtyState(id)
-  if (connectionId) {
-    store?.markSshRemotePtyLease(connectionId, getRelayPtyId(connectionId, id), 'terminated')
-  }
   ptyOwnership.delete(id)
   markClaudePtyExited(id)
 }
@@ -3322,9 +3299,6 @@ export function registerPtyHandlers(
               clearProviderPtyState(effectiveSessionAppId)
               deletePtyOwnership(effectiveSessionAppId)
             }
-            if (!isIdentityMismatch) {
-              store?.markSshRemotePtyLease(args.connectionId, effectiveSessionRelayId, 'expired')
-            }
           }
           if (isMintedSessionId && sessionId !== undefined) {
             clearProviderPtyState(sessionId)
@@ -3356,29 +3330,6 @@ export function registerPtyHandlers(
         ) {
           markNativeWindowsConptyPty(result.id)
         }
-        const relayResultId = getRelayPtyId(args.connectionId, result.id)
-        const persistSshLease = (): void => {
-          if (!store || !args.connectionId) {
-            return
-          }
-          // Why: workspace-session bindings keep app-facing PTY ids for hydration,
-          // while SSH leases keep relay ids for remote lease reconciliation.
-          store.upsertSshRemotePtyLease({
-            targetId: args.connectionId,
-            ptyId: relayResultId,
-            ...(typeof args.worktreeId === 'string' ? { worktreeId: args.worktreeId } : {}),
-            worktreeInstanceId,
-            ...(typeof args.tabId === 'string' ? { tabId: args.tabId } : {}),
-            ...(typeof args.leafId === 'string' && isTerminalLeafId(args.leafId)
-              ? { leafId: args.leafId }
-              : {}),
-            state: 'attached',
-            lastAttachedAt: Date.now()
-          })
-        }
-        if (!hostSessionBinding) {
-          persistSshLease()
-        }
         ptySizes.set(result.id, { cols: args.cols, rows: args.rows })
         if (effectiveSessionAppId !== undefined && effectiveSessionAppId !== result.id) {
           ptySizes.delete(effectiveSessionAppId)
@@ -3406,7 +3357,6 @@ export function registerPtyHandlers(
             }
             throw new Error(createTerminalSessionStateSaveFailureMessage())
           }
-          persistSshLease()
         }
         if (args.preAllocatedHandle) {
           runtime?.registerPreAllocatedHandleForPty(result.id, args.preAllocatedHandle)
@@ -3510,9 +3460,7 @@ export function registerPtyHandlers(
       } catch {
         if (connectionId) {
           // Why: runtime/CLI close can target a detached SSH PTY after its
-          // provider was unregistered. Tombstone the lease so reconnect does
-          // not revive a terminal the user explicitly closed.
-          finishPtyShutdown(ptyId, connectionId, store)
+          finishPtyShutdown(ptyId)
           runtime?.onPtyExit(ptyId, -1)
           rememberSyntheticKillExit(ptyId)
           sendPtyExitToRenderer({ id: ptyId, code: -1 })
@@ -3529,7 +3477,7 @@ export function registerPtyHandlers(
       // delivered runtime + renderer exits — synthesizing again would double-fire.
       void shutdownProviderAndDetectExit(provider, ptyId, { immediate: false })
         .then((providerExitObserved) => {
-          finishPtyShutdown(ptyId, connectionId, store)
+          finishPtyShutdown(ptyId)
           if (!providerExitObserved) {
             runtime?.onPtyExit(ptyId, -1)
             rememberSyntheticKillExit(ptyId)
@@ -3538,7 +3486,7 @@ export function registerPtyHandlers(
         })
         .catch((err) => {
           if (isPtyAlreadyGoneError(err)) {
-            finishPtyShutdown(ptyId, connectionId, store)
+            finishPtyShutdown(ptyId)
             runtime?.onPtyExit(ptyId, -1)
             rememberSyntheticKillExit(ptyId)
             sendPtyExitToRenderer({ id: ptyId, code: -1 })
@@ -3564,9 +3512,7 @@ export function registerPtyHandlers(
         provider = connectionId ? getProvider(connectionId) : getProviderForPty(ptyId)
       } catch {
         if (connectionId) {
-          // Why: an absent SSH provider means there is no live target left to
-          // await, but the relay lease must still be tombstoned.
-          finishPtyShutdown(ptyId, connectionId, store)
+          finishPtyShutdown(ptyId)
           runtime?.onPtyExit(ptyId, -1)
           rememberSyntheticKillExit(ptyId)
           sendPtyExitToRenderer({ id: ptyId, code: -1 })
@@ -3600,7 +3546,7 @@ export function registerPtyHandlers(
         )
         return false
       }
-      finishPtyShutdown(ptyId, connectionId, store)
+      finishPtyShutdown(ptyId)
       if (!providerExitObserved) {
         runtime?.onPtyExit(ptyId, -1)
         rememberSyntheticKillExit(ptyId)
@@ -4320,9 +4266,6 @@ export function registerPtyHandlers(
               clearProviderPtyState(effectiveSessionAppId)
               deletePtyOwnership(effectiveSessionAppId)
             }
-            if (!isIdentityMismatch) {
-              store?.markSshRemotePtyLease(args.connectionId, effectiveSessionRelayId, 'expired')
-            }
           }
           // Why: if buildPtyHostEnv materialized provider state for this minted
           // id but provider.spawn failed, that state would otherwise leak.
@@ -4415,22 +4358,6 @@ export function registerPtyHandlers(
             )
           }
         }
-        const relayResultId = getRelayPtyId(args.connectionId, result.id)
-        if (store && args.connectionId) {
-          // Why: remote PTYs live in the SSH relay grace window after Yiru
-          // detaches. Persist their IDs immediately so reconnect can reattach
-          // instead of treating the tab as a fresh shell.
-          store.upsertSshRemotePtyLease({
-            targetId: args.connectionId,
-            ptyId: relayResultId,
-            ...(typeof args.worktreeId === 'string' ? { worktreeId: args.worktreeId } : {}),
-            worktreeInstanceId,
-            ...(typeof args.tabId === 'string' ? { tabId: args.tabId } : {}),
-            ...(validatedLeafId ? { leafId: validatedLeafId } : {}),
-            state: 'attached',
-            lastAttachedAt: Date.now()
-          })
-        }
         if (preAllocatedHandle) {
           runtime?.registerPreAllocatedHandleForPty(result.id, preAllocatedHandle)
         }
@@ -4467,9 +4394,6 @@ export function registerPtyHandlers(
               }
               clearProviderPtyState(result.id)
               deletePtyOwnership(result.id)
-            }
-            if (!result.isReattach && args.connectionId && store) {
-              store.removeSshRemotePtyLease(args.connectionId, relayResultId)
             }
             throw new Error(createTerminalSessionStateSaveFailureMessage())
           }
@@ -5234,8 +5158,8 @@ export function registerPtyHandlers(
     if (!provider && connectionId) {
       // Why: detached SSH PTYs intentionally keep ownership after their
       // provider is unregistered; hydrated app-scoped ids can also arrive
-      // before ownership is rebuilt. Tombstone instead of falling back local.
-      finishPtyShutdown(args.id, connectionId, store)
+      // before ownership is rebuilt.
+      finishPtyShutdown(args.id)
       runtime?.onPtyExit(args.id, -1)
       rememberSyntheticKillExit(args.id)
       sendPtyExitToRenderer({ id: args.id, code: -1 })
@@ -5259,7 +5183,7 @@ export function registerPtyHandlers(
     }
     // Why: some shutdown paths do not emit onExit through the provider listener.
     // Explicit cleanup is idempotent and covers already-dead PTYs.
-    finishPtyShutdown(args.id, connectionId, store)
+    finishPtyShutdown(args.id)
     if (!providerExitObserved) {
       runtime?.onPtyExit(args.id, -1)
       rememberSyntheticKillExit(args.id)

@@ -1,7 +1,6 @@
 import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { WorktreeRuntimeOwnerState } from '~renderer/lib/worktree-runtime-owner'
@@ -26,9 +25,8 @@ function getResolvedFolderHost(
   if (explicitHost) {
     return explicitHost.id
   }
-  const connectionId = folder?.connectionId?.trim() || group?.connectionId?.trim()
-  if (connectionId) {
-    return toSshExecutionHostId(connectionId)
+  if (folder?.connectionId?.trim() || group?.connectionId?.trim()) {
+    return LOCAL_EXECUTION_HOST_ID
   }
   const restoredHost = parseExecutionHostId(
     state.restoredRuntimeHostIdByWorkspaceSessionKey?.[folderWorkspaceKey(folderWorkspaceId)]
@@ -40,8 +38,7 @@ function getResolvedFolderHost(
 }
 
 /**
- * Resolves a host only when hydrated ownership proves it. Why: a restored SSH
- * worktree can temporarily collide with a local repo row during catalog load.
+ * Resolves a host only when hydrated ownership proves it.
  */
 export function getResolvedExecutionHostIdForWorktree(
   state: WorktreeRuntimeOwnerState,
@@ -73,7 +70,5 @@ export function getResolvedExecutionHostIdForWorktree(
   if (explicitRepoHost) {
     return explicitRepoHost.id
   }
-  return repo.connectionId?.trim()
-    ? toSshExecutionHostId(repo.connectionId)
-    : LOCAL_EXECUTION_HOST_ID
+  return LOCAL_EXECUTION_HOST_ID
 }

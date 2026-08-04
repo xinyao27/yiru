@@ -42,15 +42,6 @@
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
     },
-    "./ssh-connection": {
-      "types": "./src/ssh-types.ts",
-      "react-native": "./src/ssh-types.ts",
-      "browser": "./src/ssh-types.ts",
-      "development": "./src/ssh-types.ts",
-      "import": "./dist/esm/ssh-connection.mjs",
-      "require": "./dist/ssh-types.js",
-      "default": "./dist/ssh-types.js"
-    },
     "./subscription-replay": {
       "types": "./src/runtime-subscription-replay.ts",
       "react-native": "./src/runtime-subscription-replay.ts",

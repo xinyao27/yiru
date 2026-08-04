@@ -36,19 +36,12 @@ export function clearHostRename(
   return clearHostSettingOverride(settings, hostId, 'displayLabel')
 }
 
-export type HostRemovalTarget =
-  | { kind: 'ssh'; targetId: string }
-  | { kind: 'runtime'; environmentId: string }
-  | null
+export type HostRemovalTarget = { kind: 'runtime'; environmentId: string } | null
 
-/** Resolves how a host should be removed. SSH targets are removed inline via the
- *  ssh API; runtime environments deep-link into the Yiru servers pane because
+/** Why: runtime environments deep-link into the Yiru servers pane because
  *  their removal needs active-environment/error context that lives there. */
 export function resolveHostRemoval(hostId: ExecutionHostId): HostRemovalTarget {
   const parsed = parseExecutionHostId(hostId)
-  if (parsed?.kind === 'ssh') {
-    return { kind: 'ssh', targetId: parsed.targetId }
-  }
   if (parsed?.kind === 'runtime') {
     return { kind: 'runtime', environmentId: parsed.environmentId }
   }

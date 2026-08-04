@@ -186,7 +186,6 @@ export default function AiVaultSessionDropLayer({
       }
       if (
         !canResumeAiVaultSessionOnTarget({
-          sessionFilePath: payload.sessionFilePath ?? null,
           sessionExecutionHostId: payload.sessionExecutionHostId ?? null,
           targetStatus,
           targetExecutionHostId

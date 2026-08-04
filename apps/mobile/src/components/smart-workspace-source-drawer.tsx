@@ -2,6 +2,7 @@ import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native'
 
+import { translate } from '~/i18n/translate'
 import { cn } from '~/style/class-names'
 
 import type { RpcClient } from '../transport/rpc-client'
@@ -36,7 +37,6 @@ type Props = {
   availability: SmartModeAvailabilityInput
   repoId: string | null
   repos: readonly PasteRepoCandidate[]
-  sshReady: boolean
   onRepoChange: (repoId: string) => void
   onClose: () => void
 }
@@ -48,7 +48,6 @@ export function SmartWorkspaceSourceDrawer({
   availability,
   repoId,
   repos,
-  sshReady,
   onRepoChange,
   onClose
 }: Props) {
@@ -71,7 +70,7 @@ export function SmartWorkspaceSourceDrawer({
   // Snap the chosen mode back into the available set if availability changes.
   const effectiveMode = availableModes.includes(mode) ? mode : (availableModes[0] ?? 'text')
 
-  const searchEnabled = visible && sshReady
+  const searchEnabled = visible
 
   const {
     rows,
@@ -241,13 +240,12 @@ export function SmartWorkspaceSourceDrawer({
         </MobileContentSection>
       ) : null}
 
-      {!sshReady && effectiveMode !== 'text' ? (
+      {needsGitHubRemote ? (
         <Text className="text-muted-foreground px-1 pb-2 text-xs">
-          Connect the repository to search sources.
-        </Text>
-      ) : needsGitHubRemote ? (
-        <Text className="text-muted-foreground px-1 pb-2 text-xs">
-          This SSH repo needs a GitHub remote to list pull requests.
+          {translate(
+            'mobile.smartWorkspaceSource.githubRemoteRequired',
+            'This repository needs a GitHub remote to list pull requests.'
+          )}
         </Text>
       ) : error ? (
         <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>

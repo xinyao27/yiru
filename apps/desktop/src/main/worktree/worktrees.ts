@@ -526,15 +526,6 @@ function listLineageForHost(
   if (!parsedHost || parsedHost.kind === 'runtime') {
     return rejected('rejected')
   }
-  // Why: vouching for a remote lineage snapshot needed a live provider generation
-  // to re-check against. Report stale rather than claim authority we cannot prove.
-  if (parsedHost.kind === 'ssh') {
-    return rejected('stale')
-  }
-  if ('expectedAuthority' in args) {
-    return rejected('rejected')
-  }
-
   const ownsWorktree = (worktreeId: string): boolean => {
     let repoId: string
     try {

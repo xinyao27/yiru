@@ -49,8 +49,6 @@ export function RepositoryHostSetupsSection({
   const createProjectHostSetup = useAppStore((state) => state.createProjectHostSetup)
   const deleteProjectHostSetup = useAppStore((state) => state.deleteProjectHostSetup)
   const repos = useAppStore((state) => state.repos)
-  const sshTargetLabels = useAppStore((state) => state.sshTargetLabels)
-  const sshConnectionStates = useAppStore((state) => state.sshConnectionStates)
   const settings = useAppStore((state) => state.settings)
   const runtimeEnvironments = useAppStore((state) => state.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((state) => state.runtimeStatusByEnvironmentId)
@@ -60,21 +58,11 @@ export function RepositoryHostSetupsSection({
       buildExecutionHostRegistry({
         repos,
         settings,
-        sshTargetLabels,
-        sshConnectionStates,
         runtimeEnvironments,
         runtimeStatusByEnvironmentId,
         hostLabelOverrides
       }),
-    [
-      repos,
-      settings,
-      sshTargetLabels,
-      sshConnectionStates,
-      runtimeEnvironments,
-      runtimeStatusByEnvironmentId,
-      hostLabelOverrides
-    ]
+    [repos, settings, runtimeEnvironments, runtimeStatusByEnvironmentId, hostLabelOverrides]
   )
   const projectHostSetupProjection = useAppStore((state) =>
     getProjectHostSetupProjectionFromState(state)

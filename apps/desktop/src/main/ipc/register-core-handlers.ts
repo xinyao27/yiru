@@ -1,4 +1,3 @@
-import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
 import { app } from 'electron'
 
 import type { AgentAwakeService } from '../agent-awake-service'
@@ -196,8 +195,6 @@ export function registerCoreHandlers(
   registerAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
     resolveClaudeProjectsDirs: lifecycleOptions.resolveAiVaultClaudeProjectsDirs,
-    getUnscannableAiVaultHostIds: () =>
-      store.getSshTargets().map((target) => toSshExecutionHostId(target.id)),
     getActiveRuntimeAiVaultHostInfos: () =>
       getSavedRuntimeAiVaultHostInfos(app.getPath('userData')),
     scanRuntimeAiVaultSessions: async (environmentId, args, options) =>

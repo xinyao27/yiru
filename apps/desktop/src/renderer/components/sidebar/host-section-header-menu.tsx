@@ -48,8 +48,6 @@ function blockedTitle(reason: 'client-too-old' | 'server-too-old'): string {
       )
 }
 
-// Why: SSH and paired runtime hosts share the sidebar model, but Settings keeps
-// their management pages separate so each connection type can explain itself.
 function openManageHost(row: HostHeaderRow): void {
   const state = useAppStore.getState()
   if (row.kind === 'runtime') {
@@ -71,18 +69,9 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
   const [renameOpen, setRenameOpen] = useState(false)
   const [removeOpen, setRemoveOpen] = useState(false)
   const mountedRef = useMountedRef()
-  const sshConnected = useAppStore((s) => {
-    const parsed = parseExecutionHostId(row.hostId)
-    if (parsed?.kind !== 'ssh') {
-      return false
-    }
-    return s.sshConnectionStates.get(parsed.targetId)?.status === 'connected'
-  })
-
   const model = buildHostHeaderMenuModel({
     kind: row.kind,
     health: row.health,
-    sshConnected,
     compatibility: row.compatibility
   })
   const removalTarget = resolveHostRemoval(row.hostId)

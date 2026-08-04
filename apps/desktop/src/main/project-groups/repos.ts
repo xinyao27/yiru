@@ -337,12 +337,6 @@ async function addRemoteRepoFromPath(
 
   const folderName = getRemoteRepoFolderName(resolvedPath)
   let displayName = args.displayName || folderName
-  if (!args.displayName && (args.remotePath === '~' || args.remotePath === '~/')) {
-    const sshTarget = store.getSshTarget(args.connectionId)
-    if (sshTarget) {
-      displayName = sshTarget.label
-    }
-  }
 
   const detected = await detectRepoIconAndUpstream({
     repoPath: resolvedPath,
@@ -1291,17 +1285,10 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       const result =
         parsedHost.kind === 'local'
           ? await addLocalRepoFromPath(store, args.path, args.kind)
-          : parsedHost.kind === 'ssh'
-            ? await addRemoteRepoFromPath(store, {
-                connectionId: parsedHost.targetId,
-                remotePath: args.path,
-                displayName: args.displayName,
-                kind: args.kind
-              })
-            : {
-                error:
-                  'Runtime hosts must be set up through the runtime projectHostSetup.setupExistingFolder RPC.'
-              }
+          : {
+              error:
+                'Runtime hosts must be set up through the runtime projectHostSetup.setupExistingFolder RPC.'
+            }
       if ('error' in result) {
         throw new Error(result.error)
       }

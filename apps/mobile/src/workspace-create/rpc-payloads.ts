@@ -1,4 +1,3 @@
-import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type {
   PersistedTrustedYiruHookEntry,
@@ -175,41 +174,6 @@ export function readGlabInstalled(result: unknown): boolean {
     return false
   }
   return result.glab.installed === true
-}
-
-const SSH_CONNECTION_STATUSES: readonly SshConnectionStatus[] = [
-  'disconnected',
-  'connecting',
-  'auth-failed',
-  'deploying-relay',
-  'connected',
-  'reconnecting',
-  'reconnection-failed',
-  'error'
-]
-
-function readSshConnectionStatus(value: unknown): SshConnectionStatus | undefined {
-  return SSH_CONNECTION_STATUSES.find((status) => status === value)
-}
-
-// Only the fields the mobile SSH gate renders; desktop-only provenance tokens are
-// deliberately dropped because mobile never sends them back.
-export function readSshConnectionState(result: unknown): SshConnectionState | null {
-  const state = isRecord(result) && isRecord(result.state) ? result.state : null
-  if (!state) {
-    return null
-  }
-  const targetId = readString(state.targetId)
-  const status = readSshConnectionStatus(state.status)
-  if (targetId === undefined || status === undefined) {
-    return null
-  }
-  return {
-    targetId,
-    status,
-    error: readString(state.error) ?? null,
-    reconnectAttempt: readNumber(state.reconnectAttempt) ?? 0
-  }
 }
 
 export function readDetectedAgentIds(result: unknown): string[] {

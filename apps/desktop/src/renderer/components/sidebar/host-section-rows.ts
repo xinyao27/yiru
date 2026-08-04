@@ -1,5 +1,4 @@
 import type { RuntimeCompatVerdict } from '@yiru/runtime-protocol/capabilities'
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   LOCAL_EXECUTION_HOST_ID,
@@ -11,7 +10,7 @@ import {
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostHealth } from '~shared/execution-host-registry'
-import type { FolderWorkspace, ProjectGroup, Repo } from '~shared/types'
+import type { Repo } from '~shared/types'
 
 import type { Row } from './worktree-list-groups'
 
@@ -26,7 +25,6 @@ export type HostHeaderRow = {
   // Why: blocked-host guidance in the header menu needs the verdict reason so
   // it can deep-link an "Update server/client required" row per skew direction.
   compatibility?: RuntimeCompatVerdict
-  connectionStatus?: SshConnectionStatus
   collapsed: boolean
   count: number
 }
@@ -40,7 +38,6 @@ export type HostSectionOption = {
   detail: string
   health: ExecutionHostHealth
   compatibility?: RuntimeCompatVerdict
-  connectionStatus?: SshConnectionStatus
 }
 
 function getRepoHostId(
@@ -55,19 +52,6 @@ function getRepoHostId(
   return defaultHostId
 }
 
-function getSshHostId(connectionId: string): ExecutionHostId {
-  return `ssh:${encodeURIComponent(connectionId)}` as ExecutionHostId
-}
-
-function getFolderWorkspaceHostId(
-  folderWorkspace: Pick<FolderWorkspace, 'connectionId'>,
-  projectGroup: Pick<ProjectGroup, 'connectionId'>,
-  defaultHostId: ExecutionHostId
-): ExecutionHostId {
-  const connectionId = folderWorkspace.connectionId ?? projectGroup.connectionId
-  return connectionId ? getSshHostId(connectionId) : defaultHostId
-}
-
 function getRowHostId(row: Row, defaultHostId: ExecutionHostId): ExecutionHostId | null {
   switch (row.type) {
     case 'item':
@@ -77,7 +61,7 @@ function getRowHostId(row: Row, defaultHostId: ExecutionHostId): ExecutionHostId
     case 'new-external-worktrees-inbox':
       return getRepoHostId(row.repo, defaultHostId)
     case 'folder-workspace':
-      return getFolderWorkspaceHostId(row.folderWorkspace, row.projectGroup, defaultHostId)
+      return defaultHostId
     case 'header':
       return row.repo ? getRepoHostId(row.repo, defaultHostId) : null
   }
@@ -87,7 +71,7 @@ function getFallbackHost(hostId: ExecutionHostId): HostSectionOption {
   const isLocal = hostId === LOCAL_EXECUTION_HOST_ID
   return {
     id: hostId,
-    kind: isLocal ? 'local' : hostId.startsWith('ssh:') ? 'ssh' : 'runtime',
+    kind: isLocal ? 'local' : 'runtime',
     label: isLocal ? getLocalExecutionHostLabel() : hostId,
     detail: isLocal ? 'This computer' : 'Host',
     health: isLocal ? 'local' : 'available'
@@ -293,7 +277,6 @@ export function addHostSectionRows(args: {
       detail: host.detail,
       health: host.health,
       compatibility: host.compatibility,
-      connectionStatus: host.connectionStatus,
       collapsed,
       count: countWorktreeRows(hostRows)
     })

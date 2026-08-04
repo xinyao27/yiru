@@ -4,7 +4,6 @@ import {
   getRepoExecutionHostId,
   normalizeExecutionHostId,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
@@ -14,7 +13,7 @@ import {
   resolveMobileAgentHistorySessionWorktree
 } from './session-worktree'
 
-export type MobileAiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'
+export type MobileAiVaultResumeTargetStatus = 'local' | 'runtime' | 'unknown'
 
 export type MobileAiVaultResumeRepo = {
   id: string
@@ -109,9 +108,6 @@ export function mobileAiVaultResumeTargetBlockMessage(
   if (status === 'runtime') {
     return 'Resume from history is not available in runtime-hosted workspaces.'
   }
-  if (status === 'ssh') {
-    return 'This session is stored on the host machine, so it cannot be resumed in an SSH workspace. Open a local workspace for this project.'
-  }
   return 'Open a local workspace before resuming a session.'
 }
 
@@ -197,17 +193,6 @@ function getMobileAiVaultResumeFolderTargetStatus(args: {
   const groupHostId = normalizeExecutionHostId(projectGroup?.executionHostId)
   if (groupHostId) {
     return getMobileAiVaultResumeExecutionHostTargetStatus(groupHostId)
-  }
-
-  const explicitConnectionId = (
-    folderWorkspace?.connectionId ??
-    projectGroup?.connectionId ??
-    ''
-  ).trim()
-  if (explicitConnectionId) {
-    return getMobileAiVaultResumeExecutionHostTargetStatus(
-      toSshExecutionHostId(explicitConnectionId)
-    )
   }
 
   return mergeMobileAiVaultResumeExecutionHostTargetStatuses(

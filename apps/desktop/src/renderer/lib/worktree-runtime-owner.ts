@@ -1,8 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  toSshExecutionHostId
-} from '@yiru/workbench-model/workspace'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostId, ParsedExecutionHost } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
@@ -57,7 +53,6 @@ function getRuntimeEnvironmentIdForFolderWorkspace(
   }
   if (
     parsed?.kind === 'local' ||
-    parsed?.kind === 'ssh' ||
     folderWorkspace?.connectionId?.trim() ||
     projectGroup?.connectionId?.trim()
   ) {
@@ -133,7 +128,7 @@ function getExecutionHostIdForFolderWorkspace(
   }
   const connectionId = folderWorkspace?.connectionId?.trim() || projectGroup?.connectionId?.trim()
   if (connectionId) {
-    return toSshExecutionHostId(connectionId)
+    return 'local'
   }
   const restoredRuntimeHost = getRestoredRuntimeHostForFolderWorkspace(state, folderWorkspaceId)
   if (restoredRuntimeHost) {

@@ -1,4 +1,4 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import type { SshConnectionStatus } from '~renderer/store/slices/ssh'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import type { AppState } from '~renderer/store/types'
 import type { Worktree } from '~shared/types'

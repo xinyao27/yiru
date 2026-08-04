@@ -1827,9 +1827,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   )
   const agentDetectionTarget = useMemo<AgentDetectionTarget>(() => {
     const target = parseExecutionHostId(usageExecutionHostId)
-    if (target?.kind === 'ssh') {
-      return { kind: 'ssh', connectionId: target.targetId }
-    }
     if (target?.kind === 'runtime') {
       return { kind: 'runtime', environmentId: target.environmentId }
     }
@@ -1898,8 +1895,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const refreshDetectedAgents = useAppStore((s) => s.refreshDetectedAgents)
   const clearRuntimeDetectedAgents = useAppStore((s) => s.clearRuntimeDetectedAgents)
   const ensureRuntimeDetectedAgents = useAppStore((s) => s.ensureRuntimeDetectedAgents)
-  const clearRemoteDetectedAgents = useAppStore((s) => s.clearRemoteDetectedAgents)
-  const ensureRemoteDetectedAgents = useAppStore((s) => s.ensureRemoteDetectedAgents)
   const handleRefresh = useCallback(async () => {
     if (isRefreshing) {
       return
@@ -1910,15 +1905,11 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       // appears (and a removed CLI's bar hides) without restarting Yiru.
       if (agentDetectionTarget.kind === 'runtime') {
         clearRuntimeDetectedAgents(agentDetectionTarget.environmentId)
-      } else if (agentDetectionTarget.kind === 'ssh') {
-        clearRemoteDetectedAgents(agentDetectionTarget.connectionId)
       }
       const detectedAgentsRefresh =
         agentDetectionTarget.kind === 'runtime'
           ? ensureRuntimeDetectedAgents(agentDetectionTarget.environmentId)
-          : agentDetectionTarget.kind === 'ssh'
-            ? ensureRemoteDetectedAgents(agentDetectionTarget.connectionId)
-            : refreshDetectedAgents()
+          : refreshDetectedAgents()
       await Promise.all([refreshRateLimits(cursorRefreshContext), detectedAgentsRefresh])
     } finally {
       if (mountedRef.current) {
@@ -1927,10 +1918,8 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     }
   }, [
     agentDetectionTarget,
-    clearRemoteDetectedAgents,
     clearRuntimeDetectedAgents,
     cursorRefreshContext,
-    ensureRemoteDetectedAgents,
     ensureRuntimeDetectedAgents,
     isRefreshing,
     refreshRateLimits,

@@ -3,11 +3,6 @@ import { mkdirSync, existsSync, copyFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, isAbsolute, resolve } from 'node:path'
 
-import type {
-  RemovedSshTargetTombstone,
-  SshRemotePtyLease,
-  SshTarget
-} from '@yiru/runtime-protocol/ssh-connection'
 import type { MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
 import { isPathInsideOrEqual, isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
@@ -20,7 +15,6 @@ import {
 import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
 import {
   FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
-  getRepoIdFromWorktreeId,
   getWorktreePathBasenameFromId
 } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: Store remains the single mutation authority
@@ -82,7 +76,6 @@ import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
 import { isFolderRepo } from '~shared/repo-kind'
 import { hardenExistingSecureFile } from '~shared/secure-file'
 import { normalizeRepoSourceControlAiOverrides } from '~shared/source-control/ai'
-import { toRelaySshPtyId } from '~shared/ssh-pty-id'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -138,7 +131,6 @@ import { DurableStateFile } from './persisted-state/durable-state-file'
 import { GitHubCacheFile } from './persisted-state/github-cache-file'
 import { PersistedStateNotifications } from './persisted-state/notifications'
 import { applyPersistedSettingsUpdate } from './persisted-state/persisted-settings-mutations'
-import { normalizePersistedSshTarget as normalizeSshTarget } from './persisted-state/persisted-ssh-codec'
 import {
   MAX_CLAUDE_LIVE_PTY_SESSION_IDS,
   normalizePersistedLegacyPaneKeyAliasEntries as normalizeLegacyPaneKeyAliasEntries,
@@ -471,9 +463,6 @@ function getAutomationSchedulerOwner(repo: Repo | undefined): AutomationSchedule
     return 'local_host_service'
   }
   const host = parseExecutionHostId(getRepoExecutionHostId(repo))
-  if (host?.kind === 'ssh') {
-    return 'ssh_bridge'
-  }
   if (host?.kind === 'runtime') {
     return 'remote_host_service'
   }
@@ -1120,36 +1109,6 @@ function normalizeWorkspaceSessionPaneIdentities(
   }
 }
 
-function remapSshRemotePtyLeaseLeafIds(
-  leases: SshRemotePtyLease[],
-  leafIdByInputLeafIdByTabId: Map<string, Map<string, string>>,
-  leafIdByPtyIdByTabId: Map<string, Map<string, string>>
-): { leases: SshRemotePtyLease[]; changed: boolean } {
-  let changed = false
-  const nextLeases = leases.map((lease) => {
-    if (lease.leafId === undefined || isTerminalLeafId(lease.leafId)) {
-      return lease
-    }
-    const remappedLeafId = lease.tabId
-      ? leafIdByInputLeafIdByTabId.get(lease.tabId)?.get(lease.leafId)
-      : undefined
-    const leafIdForPty = lease.tabId
-      ? leafIdByPtyIdByTabId.get(lease.tabId)?.get(lease.ptyId)
-      : undefined
-    changed = true
-    const nextLeafId = remappedLeafId ?? leafIdForPty
-    if (nextLeafId) {
-      return { ...lease, leafId: nextLeafId }
-    }
-    const next = { ...lease }
-    // Why: unmatched legacy leaf ids are ambiguous after migration; do not
-    // re-persist them as durable pane identity.
-    delete next.leafId
-    return next
-  })
-  return { leases: nextLeases, changed }
-}
-
 function normalizePersistedPaneIdentityState(state: PersistedState): {
   state: PersistedState
   changed: boolean
@@ -1157,11 +1116,6 @@ function normalizePersistedPaneIdentityState(state: PersistedState): {
   legacyPaneKeyAliasEntries: LegacyPaneKeyAliasEntry[]
 } {
   const normalizedSession = normalizeWorkspaceSessionPaneIdentities(state.workspaceSession, {})
-  const remappedLeases = remapSshRemotePtyLeaseLeafIds(
-    state.sshRemotePtyLeases ?? [],
-    normalizedSession.leafIdByInputLeafIdByTabId,
-    normalizedSession.leafIdByPtyIdByTabId
-  )
   const mergedMigrationUnsupportedEntries: MigrationUnsupportedPtyEntry[] = []
   const mergedLegacyPaneKeyAliasEntries = mergeLegacyPaneKeyAliasEntries([
     ...normalizeLegacyPaneKeyAliasEntries(state.legacyPaneKeyAliasEntries),
@@ -1182,7 +1136,6 @@ function normalizePersistedPaneIdentityState(state: PersistedState): {
   )
   if (
     !normalizedSession.changed &&
-    !remappedLeases.changed &&
     !migrationUnsupportedChanged &&
     !legacyAliasesChanged &&
     !remappedAcknowledgements.changed
@@ -1198,7 +1151,6 @@ function normalizePersistedPaneIdentityState(state: PersistedState): {
     state: {
       ...state,
       workspaceSession: normalizedSession.session,
-      sshRemotePtyLeases: remappedLeases.leases,
       migrationUnsupportedPtyEntries: mergedMigrationUnsupportedEntries,
       legacyPaneKeyAliasEntries: mergedLegacyPaneKeyAliasEntries,
       ...(remappedAcknowledgements.changed
@@ -1264,10 +1216,6 @@ function remapAcknowledgedAgentPaneKeys(
 
   return { acknowledgements: next, changed }
 }
-
-// Why: bound the removed-SSH-target history so remove/re-add churn can't grow
-// the state file without limit. Re-adoption only needs recent removals.
-const MAX_REMOVED_SSH_TARGET_TOMBSTONES = 50
 
 function registerPersistedPaneKeyAlias(entry: LegacyPaneKeyAliasEntry): void {
   if (parseLegacyNumericPaneKey(entry.legacyPaneKey)) {
@@ -3559,23 +3507,9 @@ export class Store {
       registerPersistedPaneKeyAlias(entry)
     }
     session = normalized.session
-    const remappedLeases = remapSshRemotePtyLeaseLeafIds(
-      this.state.sshRemotePtyLeases ?? [],
-      normalized.leafIdByInputLeafIdByTabId,
-      normalized.leafIdByPtyIdByTabId
-    )
-    if (remappedLeases.changed) {
-      this.state.sshRemotePtyLeases = remappedLeases.leases
-    }
     if (session && prior) {
       const priorTabs = prior.tabsByWorktree ?? {}
       const nextTabs = session.tabsByWorktree ?? {}
-      const worktreeIdByTabId = new Map<string, string>()
-      for (const [worktreeId, tabs] of Object.entries({ ...priorTabs, ...nextTabs })) {
-        for (const tab of tabs) {
-          worktreeIdByTabId.set(tab.id, worktreeId)
-        }
-      }
       for (const [worktreeId, tabs] of Object.entries(nextTabs)) {
         const priorList = priorTabs[worktreeId]
         if (!priorList) {
@@ -3583,29 +3517,14 @@ export class Store {
         }
         for (const tab of tabs) {
           const priorTab = priorList.find((t) => t.id === tab.id)
-          if (
-            !tab.ptyId &&
-            priorTab?.ptyId &&
-            this.isRestorablePtyBinding({
-              ptyId: priorTab.ptyId,
-              worktreeId,
-              targetId: this.getConnectionIdForWorktree(worktreeId),
-              tabId: tab.id
-            })
-          ) {
+          if (!tab.ptyId && priorTab?.ptyId) {
             tab.ptyId = priorTab.ptyId
           }
           if (
             !tab.worktreeInstanceId &&
             priorTab?.worktreeInstanceId &&
             priorTab.ptyId &&
-            tab.ptyId === priorTab.ptyId &&
-            this.isRestorablePtyBinding({
-              ptyId: priorTab.ptyId,
-              worktreeId,
-              targetId: this.getConnectionIdForWorktree(worktreeId),
-              tabId: tab.id
-            })
+            tab.ptyId === priorTab.ptyId
           ) {
             // Why: a stale renderer snapshot must not erase the spawn-time safety binding.
             tab.worktreeInstanceId = priorTab.worktreeInstanceId
@@ -3622,24 +3541,14 @@ export class Store {
         const incoming = layout.ptyIdsByLeafId ?? {}
         const incomingHasAnyBinding = Object.keys(incoming).length > 0
         const liveLeafIds = this.getTerminalLayoutLeafIds(layout.root)
-        const worktreeId = worktreeIdByTabId.get(tabId)
-        const targetId = worktreeId ? this.getConnectionIdForWorktree(worktreeId) : null
         const restorableBindings = Object.fromEntries(
           Object.entries(priorLayout.ptyIdsByLeafId).filter(
-            ([leafId, ptyId]) =>
+            ([leafId]) =>
               liveLeafIds.has(leafId) &&
               incoming[leafId] === undefined &&
               // Why: an empty layout map can be a stale pre-spawn snapshot; a
-              // partial map is intentional unless a durable SSH lease proves it.
-              (incomingHasAnyBinding
-                ? this.hasRestorableSshRemotePtyLease({
-                    ptyId,
-                    targetId,
-                    worktreeId,
-                    tabId,
-                    leafId
-                  })
-                : this.isRestorablePtyBinding({ ptyId, targetId, worktreeId, tabId, leafId }))
+              // partial map is intentional.
+              !incomingHasAnyBinding
           )
         )
         if (Object.keys(restorableBindings).length > 0) {
@@ -3728,109 +3637,6 @@ export class Store {
     }
     visit(root)
     return leafIds
-  }
-
-  private isRestorablePtyBinding(binding: {
-    ptyId: string
-    targetId?: string | null
-    worktreeId?: string
-    tabId?: string
-    leafId?: string
-  }): boolean {
-    const leases = this.state.sshRemotePtyLeases?.filter((entry) =>
-      this.sshRemotePtyLeaseMatchesBinding(entry, binding)
-    )
-    return !leases?.some((lease) => lease.state === 'terminated' || lease.state === 'expired')
-  }
-
-  private getRelayPtyIdForSshLeaseComparison(targetId: string, ptyId: string): string {
-    try {
-      return toRelaySshPtyId(targetId, ptyId)
-    } catch {
-      return ptyId
-    }
-  }
-
-  private getRelayPtyIdForSshLeaseStorage(targetId: string, ptyId: string): string {
-    return toRelaySshPtyId(targetId, ptyId)
-  }
-
-  private sshRemotePtyLeaseMatchesBinding(
-    lease: SshRemotePtyLease,
-    binding: {
-      ptyId: string
-      targetId?: string | null
-      worktreeId?: string
-      tabId?: string
-      leafId?: string
-    }
-  ): boolean {
-    const bindingPtyId = this.getRelayPtyIdForSshLeaseComparison(lease.targetId, binding.ptyId)
-    if (lease.ptyId !== bindingPtyId) {
-      return false
-    }
-    // Why: remote PTY ids are scoped to a relay target. Workspace PTY bindings
-    // only store the id, so derive target/context when possible and require
-    // stored lease context to match instead of treating missing fields as
-    // wildcards that can tombstone unrelated panes.
-    return (
-      (binding.targetId === undefined ||
-        binding.targetId === null ||
-        lease.targetId === binding.targetId) &&
-      (binding.worktreeId === undefined || lease.worktreeId === binding.worktreeId) &&
-      (binding.tabId === undefined || lease.tabId === binding.tabId) &&
-      (binding.leafId === undefined || lease.leafId === binding.leafId)
-    )
-  }
-
-  private hasRestorableSshRemotePtyLease(binding: {
-    ptyId: string
-    targetId?: string | null
-    worktreeId?: string
-    tabId?: string
-    leafId?: string
-  }): boolean {
-    return (
-      this.state.sshRemotePtyLeases?.some(
-        (lease) =>
-          this.sshRemotePtyLeaseMatchesBinding(lease, binding) &&
-          lease.state !== 'terminated' &&
-          lease.state !== 'expired'
-      ) ?? false
-    )
-  }
-
-  private sshRemotePtyLeaseMayReferenceBinding(
-    lease: SshRemotePtyLease,
-    binding: {
-      ptyId: string
-      targetId: string
-      worktreeId?: string
-      tabId?: string
-      leafId?: string
-    }
-  ): boolean {
-    const bindingPtyId = this.getRelayPtyIdForSshLeaseComparison(binding.targetId, binding.ptyId)
-    if (lease.targetId !== binding.targetId || lease.ptyId !== bindingPtyId) {
-      return false
-    }
-    // Why: target removal is destructive. Legacy/contextless leases should
-    // scrub matching workspace bindings before the lease record is deleted,
-    // otherwise removing the tombstone can let stale PTY ids revive later.
-    return (
-      (binding.worktreeId === undefined ||
-        lease.worktreeId === undefined ||
-        lease.worktreeId === binding.worktreeId) &&
-      (binding.tabId === undefined || lease.tabId === undefined || lease.tabId === binding.tabId) &&
-      (binding.leafId === undefined ||
-        lease.leafId === undefined ||
-        lease.leafId === binding.leafId)
-    )
-  }
-
-  private getConnectionIdForWorktree(worktreeId: string): string | null {
-    const repoId = getRepoIdFromWorktreeId(worktreeId)
-    return this.state.repos.find((repo) => repo.id === repoId)?.connectionId ?? null
   }
 
   // Why: closes the SIGKILL-between-spawn-and-persist race (Issue #217). The
@@ -3948,48 +3754,6 @@ export class Store {
     }
   }
 
-  // ── SSH Targets ────────────────────────────────────────────────────
-
-  getSshTargets(): SshTarget[] {
-    return (this.state.sshTargets ?? []).map(normalizeSshTarget)
-  }
-
-  getSshTarget(id: string): SshTarget | undefined {
-    const target = this.state.sshTargets?.find((t) => t.id === id)
-    return target ? normalizeSshTarget(target) : undefined
-  }
-
-  addSshTarget(target: SshTarget): void {
-    this.state.sshTargets ??= []
-    this.state.sshTargets.push(normalizeSshTarget(target))
-    this.scheduleSave()
-  }
-
-  updateSshTarget(id: string, updates: Partial<Omit<SshTarget, 'id'>>): SshTarget | null {
-    const target = this.state.sshTargets?.find((t) => t.id === id)
-    if (!target) {
-      return null
-    }
-    const normalized = normalizeSshTarget({ ...target, ...updates })
-    Object.assign(target, updates, normalized)
-    if (!Object.hasOwn(normalized, 'relayGracePeriodSeconds')) {
-      delete target.relayGracePeriodSeconds
-    }
-    if (!Object.hasOwn(normalized, 'systemSshConnectionReuse')) {
-      delete target.systemSshConnectionReuse
-    }
-    this.scheduleSave()
-    return { ...target }
-  }
-
-  removeSshTarget(id: string): void {
-    if (!this.state.sshTargets) {
-      return
-    }
-    this.state.sshTargets = this.state.sshTargets.filter((t) => t.id !== id)
-    this.scheduleSave()
-  }
-
   // ── Live Claude PTY sessions ───────────────────────────────────────
 
   getClaudeLivePtySessionIds(): string[] {
@@ -4019,264 +3783,6 @@ export class Store {
     }
     this.state.claudeLivePtySessionIds = ids.filter((id) => id !== sessionId)
     this.scheduleSave()
-  }
-
-  getDeletedSshConfigAliases(): string[] {
-    return [...(this.state.deletedSshConfigAliases ?? [])]
-  }
-
-  addDeletedSshConfigAlias(alias: string): void {
-    this.state.deletedSshConfigAliases ??= []
-    if (!this.state.deletedSshConfigAliases.includes(alias)) {
-      this.state.deletedSshConfigAliases.push(alias)
-      this.scheduleSave()
-    }
-  }
-
-  removeDeletedSshConfigAlias(alias: string): void {
-    const current = this.state.deletedSshConfigAliases
-    if (!current || !current.includes(alias)) {
-      return
-    }
-    this.state.deletedSshConfigAliases = current.filter((entry) => entry !== alias)
-    this.scheduleSave()
-  }
-
-  clearDeletedSshConfigAliases(): void {
-    if (this.state.deletedSshConfigAliases && this.state.deletedSshConfigAliases.length > 0) {
-      this.state.deletedSshConfigAliases = []
-      this.scheduleSave()
-    }
-  }
-
-  getRemovedSshTargetTombstones(): RemovedSshTargetTombstone[] {
-    return [...(this.state.removedSshTargetTombstones ?? [])]
-  }
-
-  addRemovedSshTargetTombstone(tombstone: RemovedSshTargetTombstone): void {
-    const existing = this.state.removedSshTargetTombstones ?? []
-    // Why: dedupe by oldTargetId so a remove/re-remove of the same id can't
-    // stack duplicate tombstones. Newest wins.
-    const filtered = existing.filter((t) => t.oldTargetId !== tombstone.oldTargetId)
-    // Cap the history so pathological churn can't grow the state file unbounded.
-    this.state.removedSshTargetTombstones = [...filtered, tombstone].slice(
-      -MAX_REMOVED_SSH_TARGET_TOMBSTONES
-    )
-    this.scheduleSave()
-  }
-
-  removeRemovedSshTargetTombstone(oldTargetId: string): void {
-    const existing = this.state.removedSshTargetTombstones
-    if (!existing?.some((t) => t.oldTargetId === oldTargetId)) {
-      return
-    }
-    this.state.removedSshTargetTombstones = existing.filter((t) => t.oldTargetId !== oldTargetId)
-    this.scheduleSave()
-  }
-
-  // ── SSH Remote PTY Leases ──────────────────────────────────────────
-
-  getSshRemotePtyLeases(targetId?: string): SshRemotePtyLease[] {
-    const leases = this.state.sshRemotePtyLeases ?? []
-    return leases.filter((lease) => targetId === undefined || lease.targetId === targetId)
-  }
-
-  upsertSshRemotePtyLease(
-    lease: Omit<SshRemotePtyLease, 'createdAt' | 'updatedAt' | 'worktreeInstanceId'> & {
-      worktreeInstanceId?: string | null
-    } & Partial<Pick<SshRemotePtyLease, 'createdAt' | 'updatedAt'>>
-  ): void {
-    this.state.sshRemotePtyLeases ??= []
-    const { worktreeInstanceId, ...normalizedLease } = lease
-    const clearWorktreeInstanceId = worktreeInstanceId === null
-    if (normalizedLease.leafId !== undefined && !isTerminalLeafId(normalizedLease.leafId)) {
-      delete normalizedLease.leafId
-    }
-    // Why: app-facing SSH PTY ids are globally scoped; durable relay leases
-    // stay target-local so reconnect can call relay pty.attach with raw ids.
-    normalizedLease.ptyId = this.getRelayPtyIdForSshLeaseStorage(
-      normalizedLease.targetId,
-      normalizedLease.ptyId
-    )
-    const now = Date.now()
-    const existingIndex = this.state.sshRemotePtyLeases.findIndex(
-      (entry) =>
-        entry.targetId === normalizedLease.targetId && entry.ptyId === normalizedLease.ptyId
-    )
-    const existing = existingIndex >= 0 ? this.state.sshRemotePtyLeases[existingIndex] : undefined
-    const next: SshRemotePtyLease = {
-      ...existing,
-      ...normalizedLease,
-      ...(worktreeInstanceId ? { worktreeInstanceId } : {}),
-      createdAt: existing?.createdAt ?? normalizedLease.createdAt ?? now,
-      updatedAt: normalizedLease.updatedAt ?? now
-    }
-    if (clearWorktreeInstanceId) {
-      // Why: unknown or conflicting reattach evidence must not revive a prior trusted binding.
-      delete next.worktreeInstanceId
-    }
-    if (existingIndex >= 0) {
-      this.state.sshRemotePtyLeases[existingIndex] = next
-    } else {
-      this.state.sshRemotePtyLeases.push(next)
-    }
-    this.flush()
-  }
-
-  markSshRemotePtyLeases(targetId: string, state: SshRemotePtyLease['state']): void {
-    const now = Date.now()
-    let changed = false
-    const shouldClearBindings = state === 'terminated' || state === 'expired'
-    const leasesToClear: SshRemotePtyLease[] = []
-    this.state.sshRemotePtyLeases ??= []
-    for (const lease of this.state.sshRemotePtyLeases) {
-      if (lease.targetId !== targetId) {
-        continue
-      }
-      if (state === 'detached' && lease.state !== 'attached') {
-        continue
-      }
-      if (lease.state !== state) {
-        lease.state = state
-        lease.updatedAt = now
-        if (state === 'attached') {
-          lease.lastAttachedAt = now
-        } else if (state === 'detached') {
-          lease.lastDetachedAt = now
-        }
-        changed = true
-      }
-      if (shouldClearBindings) {
-        leasesToClear.push(lease)
-      }
-    }
-    const bindingsChanged = shouldClearBindings
-      ? this.clearSshRemotePtyBindingsForLeases(targetId, leasesToClear)
-      : false
-    if (changed || bindingsChanged) {
-      this.flush()
-    }
-  }
-
-  markSshRemotePtyLease(targetId: string, ptyId: string, state: SshRemotePtyLease['state']): void {
-    const relayPtyId = this.getRelayPtyIdForSshLeaseStorage(targetId, ptyId)
-    const lease = this.state.sshRemotePtyLeases?.find(
-      (entry) => entry.targetId === targetId && entry.ptyId === relayPtyId
-    )
-    if (!lease) {
-      return
-    }
-    const shouldClearBindings = state === 'terminated' || state === 'expired'
-    if (lease.state === state) {
-      if (shouldClearBindings && this.clearSshRemotePtyBindingsForLeases(targetId, [lease])) {
-        this.flush()
-      }
-      return
-    }
-    const now = Date.now()
-    lease.state = state
-    lease.updatedAt = now
-    if (state === 'attached') {
-      lease.lastAttachedAt = now
-    } else if (state === 'detached') {
-      lease.lastDetachedAt = now
-    }
-    if (shouldClearBindings) {
-      this.clearSshRemotePtyBindingsForLeases(targetId, [lease])
-    }
-    this.flush()
-  }
-
-  removeSshRemotePtyLease(targetId: string, ptyId: string): void {
-    const relayPtyId = this.getRelayPtyIdForSshLeaseStorage(targetId, ptyId)
-    const leases = (this.state.sshRemotePtyLeases ?? []).filter(
-      (lease) => lease.targetId === targetId && lease.ptyId === relayPtyId
-    )
-    const before = this.state.sshRemotePtyLeases?.length ?? 0
-    this.clearSshRemotePtyBindingsForLeases(targetId, leases)
-    this.state.sshRemotePtyLeases = (this.state.sshRemotePtyLeases ?? []).filter(
-      (lease) => lease.targetId !== targetId || lease.ptyId !== relayPtyId
-    )
-    if (this.state.sshRemotePtyLeases.length !== before) {
-      this.flush()
-    }
-  }
-
-  removeSshRemotePtyLeases(targetId: string): void {
-    this.state.sshRemotePtyLeases ??= []
-    this.clearSshRemotePtyBindingsForTarget(targetId)
-    const before = this.state.sshRemotePtyLeases.length
-    this.state.sshRemotePtyLeases = this.state.sshRemotePtyLeases.filter(
-      (lease) => lease.targetId !== targetId
-    )
-    if (this.state.sshRemotePtyLeases.length !== before) {
-      this.flush()
-    }
-  }
-
-  private clearSshRemotePtyBindingsForTarget(targetId: string): void {
-    const leases = this.state.sshRemotePtyLeases?.filter((lease) => lease.targetId === targetId)
-    this.clearSshRemotePtyBindingsForLeases(targetId, leases ?? [])
-  }
-
-  private clearSshRemotePtyBindingsForLeases(
-    targetId: string,
-    leases: SshRemotePtyLease[]
-  ): boolean {
-    const session = this.state.workspaceSession
-    if (!leases?.length || !session) {
-      return false
-    }
-    let changed = false
-    for (const [worktreeId, tabs] of Object.entries(session.tabsByWorktree ?? {})) {
-      for (const tab of tabs) {
-        if (
-          tab.ptyId &&
-          leases.some((lease) =>
-            this.sshRemotePtyLeaseMayReferenceBinding(lease, {
-              ptyId: tab.ptyId!,
-              worktreeId,
-              targetId,
-              tabId: tab.id
-            })
-          )
-        ) {
-          tab.ptyId = null
-          changed = true
-        }
-      }
-    }
-    for (const [tabId, layout] of Object.entries(session.terminalLayoutsByTabId ?? {})) {
-      const bindings = layout.ptyIdsByLeafId
-      if (!bindings) {
-        continue
-      }
-      const worktreeId = Object.entries(session.tabsByWorktree ?? {}).find(([, tabs]) =>
-        tabs.some((tab) => tab.id === tabId)
-      )?.[0]
-      const nextBindings = Object.fromEntries(
-        Object.entries(bindings).filter(
-          ([leafId, ptyId]) =>
-            !leases.some((lease) =>
-              this.sshRemotePtyLeaseMayReferenceBinding(lease, {
-                ptyId,
-                targetId,
-                worktreeId,
-                tabId,
-                leafId
-              })
-            )
-        )
-      )
-      if (Object.keys(nextBindings).length !== Object.keys(bindings).length) {
-        layout.ptyIdsByLeafId = nextBindings
-        changed = true
-      }
-    }
-    if (changed) {
-      this.scheduleSave()
-    }
-    return changed
   }
 
   // ── Flush (for shutdown) ───────────────────────────────────────────

@@ -244,11 +244,6 @@ export function resolveMobileAiVaultResumePlatform(
   workspacePath?: string | null,
   terminalPlatform?: NodeJS.Platform | null
 ): NodeJS.Platform | null {
-  if (targetStatus === 'ssh') {
-    // Why: desktop builds SSH resume commands for the remote POSIX execution
-    // host instead of the phone or local desktop platform.
-    return 'linux'
-  }
   if (targetStatus === 'local') {
     if (terminalPlatform === 'linux' && hostPlatform === 'win32') {
       // Why: Windows-hosted WSL project terminals run a POSIX shell even when

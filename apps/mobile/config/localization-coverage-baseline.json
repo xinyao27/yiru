@@ -2471,20 +2471,6 @@
     "count": 1
   },
   {
-    "filePath": "src/components/smart-workspace-source-drawer.tsx",
-    "kind": "jsx-text",
-    "text": "Connect the repository to search sources.",
-    "dynamic": false,
-    "count": 1
-  },
-  {
-    "filePath": "src/components/smart-workspace-source-drawer.tsx",
-    "kind": "jsx-text",
-    "text": "This SSH repo needs a GitHub remote to list pull requests.",
-    "dynamic": false,
-    "count": 1
-  },
-  {
     "filePath": "src/components/smart-workspace-source-field.tsx",
     "kind": "jsx-text",
     "text": "[Optional]",

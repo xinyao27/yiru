@@ -3,8 +3,7 @@ import {
   type ExecutionHostId,
   normalizeExecutionHostId,
   parseExecutionHostId,
-  toRuntimeExecutionHostId,
-  toSshExecutionHostId
+  toRuntimeExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
 import type { GlobalSettings, ProjectProviderIdentity, Repo } from './types'
@@ -157,8 +156,7 @@ function getRepoHostId(repo: Pick<Repo, 'connectionId' | 'executionHostId'>): Ex
   if (explicit) {
     return explicit
   }
-  const connectionId = normalizeNonEmptyString(repo.connectionId)
-  return connectionId ? toSshExecutionHostId(connectionId) : LOCAL_EXECUTION_HOST_ID
+  return LOCAL_EXECUTION_HOST_ID
 }
 
 function normalizeProjectSourceProvider(value: string): ProjectSourceProvider | null {

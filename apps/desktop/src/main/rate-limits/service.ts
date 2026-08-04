@@ -134,9 +134,6 @@ function getCursorTargetKey(target: CursorUsageRuntimeTarget): string {
   if (target.runtime === 'wsl') {
     return `wsl:${target.wslDistro ?? ''}`
   }
-  if (target.runtime === 'ssh') {
-    return `ssh:${target.connectionId}`
-  }
   return `environment:${target.environmentId}`
 }
 

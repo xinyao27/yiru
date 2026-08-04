@@ -1,7 +1,6 @@
 import {
   getSettingsFocusedExecutionHostId,
-  normalizeExecutionHostId,
-  toSshExecutionHostId
+  normalizeExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { GlobalSettings } from '~shared/types'
 
@@ -37,11 +36,10 @@ function getHostedReviewCacheHostScope(
   if (hostId) {
     return hostId
   }
-  const sshConnectionId = connectionId?.trim()
-  if (sshConnectionId) {
-    return toSshExecutionHostId(sshConnectionId)
+  if (connectionId?.trim()) {
+    return 'local'
   }
-  // Why: a known repo owner with no SSH/runtime marker is local; absent owner
+  // Why: a known repo owner with no runtime marker is local; absent owner
   // context keeps the focused-runtime fallback for active-host operations.
   if (hasRepoOwner) {
     return 'local'

@@ -1,4 +1,4 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import type { SshConnectionStatus } from '~renderer/store/slices/ssh'
 
 export type SelectedRepoSshGate = {
   selectedRepoConnectionId: string | null

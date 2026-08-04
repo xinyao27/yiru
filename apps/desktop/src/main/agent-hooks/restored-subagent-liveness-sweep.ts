@@ -1,7 +1,6 @@
 import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId,
   getRepoIdFromWorktreeId
 } from '@yiru/workbench-model/workspace'
@@ -86,8 +85,7 @@ function resolveDeclaredExecutionHost(owner: ExecutionHostOwner): ExecutionHostI
   if (owner.executionHostId?.trim()) {
     return parseExecutionHostId(owner.executionHostId)?.id ?? null
   }
-  const connectionId = owner.connectionId?.trim()
-  return connectionId ? toSshExecutionHostId(connectionId) : LOCAL_EXECUTION_HOST_ID
+  return LOCAL_EXECUTION_HOST_ID
 }
 
 export function resolveAgentWorkspaceExecutionHostId(

@@ -1,10 +1,5 @@
 import type * as RuntimeMobileTypes from '@yiru/runtime-protocol/mobile-runtime-types'
 import type {
-  RemovedSshTargetTombstone,
-  SshRemotePtyLease,
-  SshTarget
-} from '@yiru/runtime-protocol/ssh-connection'
-import type {
   SleepingAgentLaunchConfig,
   SleepingAgentSessionRecord
 } from '@yiru/workbench-model/agent'
@@ -242,13 +237,15 @@ export type Repo = {
   /** Optional repo-scoped workspace root override. Relative paths resolve from `path`. */
   worktreeBasePath?: string
   hookSettings?: RepoHookSettings
-  /** SSH target ID for remote repos. null/undefined = local. */
+  /** Why: preserve the legacy remote-host id so persisted repos decode without loss;
+   *  nothing sets it since remote hosts were removed.
+   */
   connectionId?: string | null
   /**
    * Explicit execution owner for this repo. Runtime-host repos need this
    * because they otherwise look identical to local repos (`connectionId: null`).
    */
-  executionHostId?: 'local' | `ssh:${string}` | `runtime:${string}` | null
+  executionHostId?: 'local' | `runtime:${string}` | null
   /** Per-repo override for issue-source resolution. `undefined` is treated
    *  identically to `'auto'`; writers leave it undefined on creation so
    *  existing persisted records stay forward-compatible. */
@@ -2284,7 +2281,7 @@ export type WorkspaceTitlebarActionId = ActiveRightSidebarTab | 'open-in' | 'com
 export type RightSidebarExplorerView = 'files' | 'search'
 
 export type ProjectOrderBy = 'manual' | 'recent'
-export type WorkspaceHostScope = 'all' | 'local' | `ssh:${string}` | `runtime:${string}`
+export type WorkspaceHostScope = 'all' | 'local' | `runtime:${string}`
 export type VisibleWorkspaceHostIds = Exclude<WorkspaceHostScope, 'all'>[] | null
 export type WorkspaceHostOrder = Exclude<WorkspaceHostScope, 'all'>[]
 export type ManualRepoOrderEntry = {
@@ -2637,15 +2634,6 @@ export type PersistedState = {
    *  Mixed-host writes stay isolated here; 'local' stays in workspaceSession so
    *  pre-partition builds keep working. Optional/absent on legacy files. */
   workspaceSessionsByHostId?: Partial<Record<ExecutionHostId, WorkspaceSessionState>>
-  sshTargets: SshTarget[]
-  /** SSH config aliases the user explicitly deleted. Suppresses re-import of the
-   *  matching ~/.ssh/config host on the next sync so a deleted host does not
-   *  reappear. Cleared for an alias when the user re-adds it or re-adopts config. */
-  deletedSshConfigAliases: string[]
-  /** Identity records for removed SSH targets. Lets a re-added host re-adopt
-   *  workspaces that were orphaned on the old target id. Pruned by age/count. */
-  removedSshTargetTombstones?: RemovedSshTargetTombstone[]
-  sshRemotePtyLeases: SshRemotePtyLease[]
   /** Daemon session ids of live local Claude launches. Seeds the Claude
    *  live-PTY gate on startup so an early OAuth refresh cannot rotate the
    *  single-use refresh token out from under a still-running daemon CLI. */

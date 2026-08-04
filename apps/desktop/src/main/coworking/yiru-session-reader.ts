@@ -58,7 +58,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
     if (host.kind === 'runtime') {
       return await this.requirePairedRuntime().listMobileSessionTabs(request, signal)
     }
-    // Why: SSH PTYs are already represented by the owner runtime's session graph.
     const tabs = await this.runtime.listMobileSessionTabs(`id:${request.worktreeId}`)
     signal?.throwIfAborted()
     this.rememberLocalReadRequest(request)
@@ -73,10 +72,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
     const host = requireExecutionHost(request)
     if (host.kind === 'runtime') {
       return await this.requirePairedRuntime().listAiVaultSessionPage(request, cursor, signal)
-    }
-    if (host.kind === 'ssh') {
-      // Why: owner-local AI Vault data must never be projected as an SSH host's history.
-      throw new CoworkingExecutionError('resource_unavailable')
     }
     try {
       return await listLocalCoworkingSessionInventoryPage({
@@ -109,10 +104,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
     const host = requireExecutionHost(request)
     if (host.kind === 'runtime') {
       await this.requirePairedRuntime().releaseAiVaultSessionPage(request, cursor)
-      return
-    }
-    if (host.kind === 'ssh') {
-      // Why: nothing was ever opened for an SSH host, so there is no page to release.
       return
     }
     releaseLocalCoworkingSessionInventoryPage({

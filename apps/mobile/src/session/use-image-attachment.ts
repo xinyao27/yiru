@@ -27,7 +27,6 @@ type UseMobileImageAttachmentArgs = {
   readonly canSend: boolean
   readonly connState: ConnectionState
   readonly deviceTokenRef: CurrentRef<string | null>
-  readonly getActiveWorktreeConnectionId: () => Promise<string | null>
   readonly showToast: ShowToast
   readonly onSuccess: () => void
   readonly onError: () => void
@@ -51,7 +50,6 @@ export function useMobileImageAttachment({
   canSend,
   connState,
   deviceTokenRef,
-  getActiveWorktreeConnectionId,
   showToast,
   onSuccess,
   onError,
@@ -69,7 +67,6 @@ export function useMobileImageAttachment({
           client,
           terminal: activeHandle,
           deviceToken: deviceTokenRef.current,
-          getConnectionId: getActiveWorktreeConnectionId,
           pickImage: pickMobileImage,
           onUploadStart: () => setIsAttaching(true),
           beforeTerminalSend: async (terminal) => {
@@ -131,7 +128,6 @@ export function useMobileImageAttachment({
       client,
       connState,
       deviceTokenRef,
-      getActiveWorktreeConnectionId,
       onError,
       onSuccess,
       showToast

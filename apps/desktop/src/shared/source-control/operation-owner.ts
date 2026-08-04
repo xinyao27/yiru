@@ -3,7 +3,6 @@ import {
   getRepoExecutionHostId,
   normalizeExecutionHostId,
   toRuntimeExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
@@ -69,6 +68,5 @@ function resolveSourceControlOperationExecutionHostId(
   if (runtimeEnvironmentId) {
     return toRuntimeExecutionHostId(runtimeEnvironmentId)
   }
-  const connectionId = target.connectionId?.trim()
-  return connectionId ? toSshExecutionHostId(connectionId) : LOCAL_EXECUTION_HOST_ID
+  return LOCAL_EXECUTION_HOST_ID
 }
