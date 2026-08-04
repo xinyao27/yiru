@@ -3,6 +3,7 @@ import { isIP, type Socket } from 'node:net'
 import type { Duplex } from 'node:stream'
 
 import { WebSocketServer, type WebSocket } from 'ws'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 import {
   COWORKING_CONNECT_PATH,
   COWORKING_INGRESS_PORT,
@@ -24,8 +25,9 @@ import { normalizeTailnetIp } from './tailscale-json-projection'
 import type { CoworkingTicketAuthority } from './ticket-authority'
 
 const RECONCILE_INTERVAL_MS = 5_000
-const MAX_COWORKING_CONNECTIONS = 128
-const MAX_COWORKING_CONNECTIONS_PER_NODE = 8
+const PRE_GRANT_RESOURCE_QUOTA = getCoworkingResourceQuota('worktree', 'read')
+const MAX_COWORKING_CONNECTIONS = PRE_GRANT_RESOURCE_QUOTA.maxConnections
+const MAX_COWORKING_CONNECTIONS_PER_NODE = PRE_GRANT_RESOURCE_QUOTA.maxConnectionsPerSubject
 const MAX_COWORKING_TRANSPORT_SOCKETS = MAX_COWORKING_CONNECTIONS + 32
 const MAX_COWORKING_TRANSPORT_SOCKETS_PER_SOURCE = 16
 

@@ -6,7 +6,10 @@ export const COWORKING_INGRESS_PORT = 52_777
 export const COWORKING_PROBE_PATH = '/coworking/v1/probe'
 export const COWORKING_CONNECT_PATH = '/coworking/v1/connect'
 export const COWORKING_TICKET_TTL_MS = 30_000
-export const COWORKING_MAX_ENCRYPTED_FRAME_BYTES = 8 * 1024 * 1024
+export const COWORKING_MAX_ENCRYPTED_FRAME_BYTES = getCoworkingResourceQuota(
+  'worktree',
+  'read'
+).encryptedFrameMaxBytes
 // Leaves room for the NaCl nonce/MAC before base64 expands the encrypted frame to 8 MiB.
 export const COWORKING_MAX_RPC_PLAINTEXT_BYTES = 6 * 1024 * 1024 - 64
 
@@ -84,3 +87,4 @@ export type {
   AuthenticatedCoworkingPrincipal,
   TailnetPrincipal
 } from '../rpc-principal'
+import { getCoworkingResourceQuota } from './resource-limits'

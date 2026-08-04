@@ -1,8 +1,15 @@
 /* oxlint-disable max-lines -- Why: file RPC routing coverage stays together so the dispatcher contract for read, write, mutation, and watch methods is easy to audit. */
 import { z } from 'zod'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 
 import { callerClassOf } from '../access'
-import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
+import {
+  InvalidArgumentError,
+  defineMethod,
+  defineStreamingMethod,
+  type RpcAnyMethod,
+  type RpcContext
+} from '../core'
 import { runFileWatchStream } from './file-watch-stream-lifecycle'
 import { assertOutOfTreeFileAccess } from './files-out-of-tree-guard'
 
@@ -285,20 +292,24 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     mobile: true,
     params: FileOpen,
     access: { scope: 'worktree', tier: 'read' },
-    handler: async (params, { fileCommands }) =>
-      fileCommands.readFileExplorerPreview(params.worktree, params.relativePath)
+    handler: async (params, context) =>
+      context.fileCommands.readFileExplorerPreview(
+        params.worktree,
+        params.relativePath,
+        grantFileReadMaxBytes(context)
+      )
   }),
   defineMethod({
     name: 'files.readChunk',
     mobile: true,
     params: FileReadChunk,
     access: { scope: 'worktree', tier: 'read' },
-    handler: async (params, { fileCommands }) =>
-      fileCommands.readFileExplorerChunk(
+    handler: async (params, context) =>
+      context.fileCommands.readFileExplorerChunk(
         params.worktree,
         params.relativePath,
         params.offset,
-        params.length
+        grantBoundedReadLength(context, params.offset, params.length)
       )
   }),
   defineMethod({
@@ -475,3 +486,29 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     }
   })
 ]
+
+function grantFileReadMaxBytes(context: RpcContext): number | undefined {
+  if (callerClassOf(context.principal) !== 'coworking-host') {
+    return undefined
+  }
+  const grant = context.grantedAccess
+  if (!grant) {
+    throw new Error('unauthorized')
+  }
+  return getCoworkingResourceQuota(grant.scope, grant.tier).fileReadMaxBytes
+}
+
+function grantBoundedReadLength(
+  context: RpcContext,
+  offset: number,
+  requestedLength: number
+): number {
+  const maxBytes = grantFileReadMaxBytes(context)
+  if (maxBytes === undefined) {
+    return requestedLength
+  }
+  if (offset >= maxBytes) {
+    throw new InvalidArgumentError('File read exceeds the grant quota')
+  }
+  return Math.min(requestedLength, maxBytes - offset)
+}

@@ -10,6 +10,7 @@ import {
   COWORKING_FILE_READ_DEFAULT_BYTES,
   COWORKING_FILE_READ_MAX_BYTES
 } from '~shared/coworking/operation-contract'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 
 import { asCoworkingExecutionError, CoworkingExecutionError } from './execution-error'
 import type { ExecutionAdmissionGuard } from './execution-gateway'
@@ -120,12 +121,17 @@ export class CoworkingFileOperationExecutor {
     const path = await this.containment.bindExisting(target.ownerWorktree, normalized)
     await requireRevalidation(path)
     const offset = boundedInteger(requestedOffset, 0, 0, Number.MAX_SAFE_INTEGER)
-    const maxBytes = boundedInteger(
+    const requestedMaxBytes = boundedInteger(
       requestedBytes,
       COWORKING_FILE_READ_DEFAULT_BYTES,
       1,
       COWORKING_FILE_READ_MAX_BYTES
     )
+    const readQuota = getCoworkingResourceQuota('worktree', 'read').fileReadMaxBytes
+    if (offset >= readQuota) {
+      throw new CoworkingExecutionError('invalid_argument')
+    }
+    const maxBytes = Math.min(requestedMaxBytes, readQuota - offset)
     const result = await this.host.readVerified(path, offset, maxBytes, signal)
     if (
       result.bytes.byteLength > maxBytes ||

@@ -993,14 +993,15 @@ export class RuntimeFileCommands {
 
   async readFileExplorerPreview(
     worktreeSelector: string,
-    relativePath: string
+    relativePath: string,
+    grantedMaxBytes: number = RUNTIME_PREVIEWABLE_BINARY_MAX_BYTES
   ): Promise<RuntimeFilePreviewResult> {
     const target = await this.resolveFileExplorerPath(worktreeSelector, relativePath)
     const filePath = await resolveAuthorizedPath(target.path, this.host.requireStore())
     const fileStats = await stat(filePath)
     const mimeType = RUNTIME_PREVIEWABLE_BINARY_MIME_TYPES[extname(filePath).toLowerCase()]
     if (mimeType) {
-      if (fileStats.size > RUNTIME_PREVIEWABLE_BINARY_MAX_BYTES) {
+      if (fileStats.size > Math.min(RUNTIME_PREVIEWABLE_BINARY_MAX_BYTES, grantedMaxBytes)) {
         throw new Error('file_too_large')
       }
       const buffer = await readFile(filePath)
@@ -1012,7 +1013,7 @@ export class RuntimeFileCommands {
       }
     }
 
-    if (fileStats.size > MOBILE_FILE_READ_MAX_BYTES) {
+    if (fileStats.size > Math.min(MOBILE_FILE_READ_MAX_BYTES, grantedMaxBytes)) {
       throw new Error('file_too_large')
     }
     const buffer = await readFile(filePath)

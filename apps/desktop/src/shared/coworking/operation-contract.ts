@@ -1,4 +1,5 @@
 import type { CoworkingAgentLaunchId } from './agent-launch-contract'
+import { getCoworkingResourceQuota } from './resource-limits'
 
 export const COWORKING_FILE_LIST_DEFAULT_LIMIT = 1_000
 export const COWORKING_FILE_LIST_MAX_LIMIT = 5_000
@@ -6,7 +7,10 @@ export const COWORKING_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT = 256
 // Why: owner-only entries are filtered across bounded internal host pages.
 export const COWORKING_FILE_LIST_VERIFIED_HOST_MAX_LIMIT = COWORKING_FILE_LIST_MAX_LIMIT + 256
 export const COWORKING_FILE_READ_DEFAULT_BYTES = 512 * 1_024
-export const COWORKING_FILE_READ_MAX_BYTES = 2 * 1_024 * 1_024
+export const COWORKING_FILE_READ_MAX_BYTES = getCoworkingResourceQuota(
+  'worktree',
+  'read'
+).fileReadMaxBytes
 export const COWORKING_FILE_WRITE_MAX_BYTES = 4 * 1_024 * 1_024
 export const COWORKING_GIT_DIFF_MAX_BYTES = 4 * 1_024 * 1_024
 export const COWORKING_GIT_HISTORY_DEFAULT_LIMIT = 50

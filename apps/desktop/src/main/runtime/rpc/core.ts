@@ -96,6 +96,9 @@ export type RpcContext = {
   // clients. Carries the paired device's scope so handlers can gate the diet to
   // phones only. Undefined for in-process callers → treat as full-class (no clip).
   clientKind?: 'mobile' | 'runtime'
+  /** Resolved on every grant-bound request so quota and authorization changes
+   *  take effect without reconnecting the encrypted channel. */
+  grantedAccess?: RpcAccess
   // Why: mobile terminal traffic is byte-oriented and bypasses JSON streaming
   // responses after the binary terminal cutover. Undefined on Unix/socket
   // transports and non-E2EE WebSocket paths.
