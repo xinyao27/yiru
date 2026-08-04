@@ -42,7 +42,6 @@ import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '~renderer
 import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
-import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import {
   createFloatingWorkspaceBrowserTab,
@@ -71,7 +70,6 @@ import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runti
 import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
 import { destroyPersistentWebview } from '~renderer/runtime/browser-webview-registry'
 import { subscribeRuntimeClientEvents } from '~renderer/runtime/client-events'
-import { hydrateRuntimeEnvironmentSshState } from '~renderer/runtime/environment-ssh-state'
 import { attachMobileMarkdownBridge } from '~renderer/runtime/mobile-markdown-bridge'
 import { closeMobileSessionTabInStore } from '~renderer/runtime/mobile-session-tab-close'
 import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
@@ -487,15 +485,6 @@ function getNewlyConnectedRuntimeEnvironmentIds(
   return [...new Set(next)].filter((environmentId) => !known.has(environmentId))
 }
 
-/** Ids in `previous` not in `next` — runtime environments whose transport was
- *  just observed down. Their mirrored SSH buckets get downgraded to unknown. */
-function getNewlyDisconnectedRuntimeEnvironmentIds(
-  previous: readonly string[],
-  next: readonly string[]
-): string[] {
-  return getNewlyConnectedRuntimeEnvironmentIds(next, previous)
-}
-
 export function getRuntimeProjectRefreshEnvironmentIds(args: {
   previousDesired: readonly string[]
   nextDesired: readonly string[]
@@ -684,13 +673,6 @@ export function useIpcEvents(): void {
 
     const runtimeProjectRefreshScheduler = createRuntimeProjectRefreshScheduler({
       refresh: async (environmentId) => {
-        if (!isPairedWebClientWindow()) {
-          // Why: mirrored SSH-backed workspaces read the owning environment's
-          // SSH bucket; refresh it whenever the environment (re)connects so a
-          // pre-drop snapshot can't keep a reconnect overlay stale. The web
-          // client mirrors host SSH state through the global store instead.
-          void hydrateRuntimeEnvironmentSshState(environmentId, { force: true }).catch(() => {})
-        }
         const repos = await useAppStore.getState().fetchRuntimeEnvironmentRepos(environmentId)
         await refreshRuntimeProjectWorktrees(repos)
         await useAppStore.getState().fetchWorktreeLineage()
@@ -728,14 +710,6 @@ export function useIpcEvents(): void {
           // and a server-created worktree stays invisible until relaunch
           // (#7970). The scheduler debounces, so this stays cheap.
           runtimeProjectRefreshScheduler.request(environmentId)
-          if (isPairedWebClientWindow()) {
-            return
-          }
-          // Why: sshStateChanged events during the transport gap are lost, so
-          // the pre-drop bucket may hold a stale "connected". Downgrade to
-          // unknown, then refetch the authoritative state.
-          useAppStore.getState().markEnvironmentSshStateStale(environmentId)
-          void hydrateRuntimeEnvironmentSshState(environmentId, { force: true }).catch(() => {})
         }),
       onEvent: handleRuntimeClientEvent
     })
@@ -776,13 +750,6 @@ export function useIpcEvents(): void {
           nextReachable: nextReachableEnvironmentIds
         })) {
           runtimeProjectRefreshScheduler.request(environmentId)
-        }
-        for (const environmentId of getNewlyDisconnectedRuntimeEnvironmentIds(
-          reachableRuntimeEnvironmentIds,
-          nextReachableEnvironmentIds
-        )) {
-          // No-op when the environment has no SSH bucket (e.g. web client).
-          useAppStore.getState().markEnvironmentSshStateStale(environmentId)
         }
         runtimeClientEventEnvironmentIds = nextEnvironmentIds
         runtimeClientEventEnvironmentKey = nextKey

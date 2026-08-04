@@ -1,4 +1,3 @@
-import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import type {
   AgentProviderSessionMetadata,
   SleepingAgentLaunchConfig
@@ -62,7 +61,6 @@ import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import { DEFAULT_REPO_BADGE_COLOR, FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { resolveLocalWindowsTerminalShellOverrideForTab } from '~shared/local-windows-terminal-runtime'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
-import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 import { makePaneKey, parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
 import type { CodexRestartNotice } from '~shared/terminal/codex-restart-notice'
 import { isValidHostTerminalTabId, isValidTerminalTabId } from '~shared/terminal/tab-id'
@@ -132,15 +130,6 @@ function getNextTerminalOrdinal(tabs: TerminalTab[]): number {
 
 function isRemoteRuntimePtyId(ptyId: string | null | undefined): boolean {
   return typeof ptyId === 'string' && parseRemoteRuntimePtyId(ptyId) !== null
-}
-
-function isCurrentDirectSshAuthority(state: AppState, authority: DirectSshAuthority): boolean {
-  const current = state.sshConnectionStates.get(authority.targetId)
-  return Boolean(
-    current?.status === 'connected' &&
-    current.providerEpoch === authority.providerEpoch &&
-    current.connectionGeneration === authority.connectionGeneration
-  )
 }
 
 function getPendingActivationSpawnCount(value: boolean | number | undefined): number {
@@ -766,21 +755,12 @@ export type TerminalSlice = {
     session: WorkspaceSessionState,
     options?: HydrateWorkspaceSessionOptions
   ) => void
-  reconnectPersistedTerminals: (
-    signal?: AbortSignal,
-    options?: ReconnectPersistedTerminalsOptions
-  ) => Promise<void>
+  reconnectPersistedTerminals: (signal?: AbortSignal) => Promise<void>
 }
 
 export type HydrateWorkspaceSessionOptions = {
-  directSshAuthority?: DirectSshAuthority
   runtimeHostIdByWorkspaceSessionKey?: Record<string, ExecutionHostId>
 } & WorkspaceSessionHydrationOptions
-
-export type ReconnectPersistedTerminalsOptions = {
-  directSshAuthority: DirectSshAuthority
-  workspaceKeys: readonly string[]
-}
 
 export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> = (set, get) => ({
   tabsByWorktree: {},
@@ -3475,7 +3455,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     })
   },
 
-  reconnectPersistedTerminals: async (signal, options) => {
+  reconnectPersistedTerminals: async (signal) => {
     const {
       pendingReconnectWorktreeIds,
       pendingReconnectTabByWorktree,
@@ -3484,19 +3464,13 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       tabsByWorktree,
       ptyIdsByTabId
     } = get()
-    if (
-      signal?.aborted ||
-      (options && !isCurrentDirectSshAuthority(get(), options.directSshAuthority))
-    ) {
+    if (signal?.aborted) {
       return
     }
-    const scopedWorkspaceKeys = options ? new Set(options.workspaceKeys) : null
-    const ids = (pendingReconnectWorktreeIds ?? []).filter(
-      (workspaceKey) => !scopedWorkspaceKeys || scopedWorkspaceKeys.has(workspaceKey)
-    )
+    const ids = pendingReconnectWorktreeIds ?? []
 
     if (ids.length === 0) {
-      if (!options) {
+      {
         set({
           workspaceSessionReady: true,
           pendingReconnectWorktreeIds: [],
@@ -3533,10 +3507,10 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       // SSH connection is active. Without the active-connection check, we'd try
       // to reattach to a relay that isn't connected yet (the deferred/passphrase
       // targets), which would fail.
-      const sshTargetId = options?.directSshAuthority.targetId ?? repo?.connectionId ?? null
+      const sshTargetId = repo?.connectionId ?? null
       const sshState = sshTargetId ? get().sshConnectionStates.get(sshTargetId) : null
       const sshConnected = sshTargetId != null && sshState?.status === 'connected'
-      const supportsDeferredReattach = options ? sshConnected : !repo?.connectionId || sshConnected
+      const supportsDeferredReattach = !repo?.connectionId || sshConnected
       console.debug(
         `[reconnect-terminals] worktree=${worktreeId} connectionId=${repo?.connectionId} sshStatus=${sshState?.status} supportsDeferredReattach=${supportsDeferredReattach}`
       )
@@ -3556,11 +3530,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         const layout = terminalLayoutsByTabId[tabId]
         const leafPtyMap = layout?.ptyIdsByLeafId ?? {}
         const pendingPtyId = pendingReconnectPtyIdByTabId[tabId]
-        const tabLevelPtyId =
-          options &&
-          parseAppSshPtyId(pendingPtyId ?? '')?.connectionId !== options.directSshAuthority.targetId
-            ? undefined
-            : pendingPtyId
+        const tabLevelPtyId = pendingPtyId
         const hasLeafMappings = Object.keys(leafPtyMap).length > 0
 
         // Why: populate the wake-hint and the live-pty map so the worktree
@@ -3604,20 +3574,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
 
     // Why: deferred SSH targets (passphrase-protected) haven't connected
     // yet, so their tabs' ptyIds were never restored above. Stash the
-    // session IDs in a separate map that survives this cleanup so the
-    // deferred reconnect code in pty-connection.ts can find them.
-    const scopedTabIds = new Set(
-      [...(scopedWorkspaceKeys ?? ids)].flatMap((workspaceKey) =>
-        (tabsByWorktree[workspaceKey] ?? []).map((tab) => tab.id)
-      )
-    )
-    const deferredSshSessionIdsByTabId: Record<string, string> = options
-      ? Object.fromEntries(
-          Object.entries(get().deferredSshSessionIdsByTabId).filter(
-            ([tabId]) => !scopedTabIds.has(tabId)
-          )
-        )
-      : {}
+    const deferredSshSessionIdsByTabId: Record<string, string> = {}
     for (const worktreeId of ids) {
       const worktree = worktreeById.get(worktreeId)
       // Why: SSH worktrees aren't in worktreesByRepo at cold start (relay
@@ -3626,7 +3583,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       // map — otherwise panes fresh-spawn into a missing PTY provider.
       const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(worktreeId)
       const repo = repoId ? (repoById.get(repoId) ?? null) : null
-      const connectionId = options?.directSshAuthority.targetId ?? repo?.connectionId
+      const connectionId = repo?.connectionId
       if (!connectionId) {
         continue
       }
@@ -3637,38 +3594,23 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       const tabs = tabsByWorktree[worktreeId] ?? []
       for (const tab of tabs) {
         const sessionId = pendingReconnectPtyIdByTabId[tab.id]
-        if (sessionId && (!options || parseAppSshPtyId(sessionId)?.connectionId === connectionId)) {
+        if (sessionId) {
           deferredSshSessionIdsByTabId[tab.id] = sessionId
         }
       }
     }
 
-    if (
-      signal?.aborted ||
-      (options && !isCurrentDirectSshAuthority(get(), options.directSshAuthority))
-    ) {
+    if (signal?.aborted) {
       return
     }
-    const remainingReconnectWorktreeIds = options
-      ? pendingReconnectWorktreeIds.filter((id) => !scopedWorkspaceKeys?.has(id))
-      : []
-    const remainingReconnectTabByWorktree = options
-      ? Object.fromEntries(
-          Object.entries(pendingReconnectTabByWorktree).filter(
-            ([workspaceKey]) => !scopedWorkspaceKeys?.has(workspaceKey)
-          )
-        )
-      : {}
-    const remainingReconnectPtyIdByTabId = options
-      ? Object.fromEntries(
-          Object.entries(pendingReconnectPtyIdByTabId).filter(([tabId]) => !scopedTabIds.has(tabId))
-        )
-      : {}
+    const remainingReconnectWorktreeIds: string[] = []
+    const remainingReconnectTabByWorktree = {}
+    const remainingReconnectPtyIdByTabId = {}
 
     set({
       ...(reconnectedTabsByWorktree ? { tabsByWorktree: reconnectedTabsByWorktree } : {}),
       ...(reconnectedPtyIdsByTabId ? { ptyIdsByTabId: reconnectedPtyIdsByTabId } : {}),
-      ...(options ? {} : { workspaceSessionReady: true }),
+      workspaceSessionReady: true,
       pendingReconnectWorktreeIds: remainingReconnectWorktreeIds,
       pendingReconnectTabByWorktree: remainingReconnectTabByWorktree,
       pendingReconnectPtyIdByTabId: remainingReconnectPtyIdByTabId,
