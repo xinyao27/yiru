@@ -1,7 +1,5 @@
-import { PlugCharging as PlugZap, FolderPlus } from '@phosphor-icons/react'
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import { FolderPlus } from '@phosphor-icons/react'
 import React from 'react'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import type { NewWorkspaceProjectOption } from '~renderer/components/new-workspace-composer-card/new-workspace-project-options'
 import type { ProjectHostSetupOption } from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
 import ProjectCombobox from '~renderer/components/new-workspace/project-combobox'
@@ -10,9 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 
-import type { RepoOption } from './card-types'
 import { WorkspaceRunTargetCombobox } from './run-target-combobox'
-import { getSshStatusLabel } from './ssh-status'
 
 type ProjectSectionProps = {
   projectLabel?: string
@@ -27,13 +23,6 @@ type ProjectSectionProps = {
   projectHostSetupOptions: ProjectHostSetupOption[]
   selectedProjectHostSetupId: string | null
   onProjectHostSetupChange?: (setupId: string) => void
-  eligibleRepos: RepoOption[]
-  repoId: string
-  selectedRepoRequiresConnection: boolean
-  selectedRepoConnectionId: string | null
-  selectedRepoSshStatus: SshConnectionStatus | null
-  selectedRepoConnectInProgress: boolean
-  onConnectSelectedRepo: () => Promise<void>
 }
 
 export function ProjectSection({
@@ -48,14 +37,7 @@ export function ProjectSection({
   projectError,
   projectHostSetupOptions,
   selectedProjectHostSetupId,
-  onProjectHostSetupChange,
-  eligibleRepos,
-  repoId,
-  selectedRepoRequiresConnection,
-  selectedRepoConnectionId,
-  selectedRepoSshStatus,
-  selectedRepoConnectInProgress,
-  onConnectSelectedRepo
+  onProjectHostSetupChange
 }: ProjectSectionProps): React.JSX.Element {
   const openModal = useAppStore((s) => s.openModal)
   const projectDescriptionId = React.useId()
@@ -68,23 +50,6 @@ export function ProjectSection({
     () => projectHostSetupOptions.filter((option) => option.kind === 'ready'),
     [projectHostSetupOptions]
   )
-
-  const selectedRepoName = React.useMemo(() => {
-    const repo = eligibleRepos.find((candidate) => candidate.id === repoId)
-    return repo?.displayName ?? repo?.path ?? 'This project'
-  }, [eligibleRepos, repoId])
-  const selectedProjectName = React.useMemo(() => {
-    const option = projectOptions.find((candidate) => candidate.id === selectedProjectId)
-    return option?.displayName ?? selectedRepoName
-  }, [projectOptions, selectedProjectId, selectedRepoName])
-
-  const sshStatusLabel = selectedRepoSshStatus
-    ? getSshStatusLabel(selectedRepoSshStatus)
-    : translate('auto.components.NewWorkspaceComposerCard.notConnected', 'Not connected')
-  const connectButtonLabel =
-    selectedRepoSshStatus === 'disconnected' || selectedRepoSshStatus === null
-      ? 'Connect'
-      : 'Reconnect'
 
   return (
     <div className="space-y-1" data-contextual-tour-target="workspace-creation-project">
@@ -158,38 +123,6 @@ export function ProjectSection({
             hostValue={selectedProjectHostSetupId ?? null}
             onHostChange={onProjectHostSetupChange}
           />
-        </div>
-      ) : null}
-      {selectedRepoRequiresConnection && selectedRepoConnectionId ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="border-border/70 bg-muted/35 flex items-center justify-between gap-3 border px-3 py-2"
-        >
-          <div className="min-w-0">
-            <div className="text-foreground truncate text-xs font-medium">
-              {translate('auto.components.NewWorkspaceComposerCard.b5a0796911', 'Connect')}{' '}
-              {selectedProjectName}
-            </div>
-            <div className="text-muted-foreground mt-0.5 text-[11px]">{sshStatusLabel}</div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            onClick={() => void onConnectSelectedRepo()}
-            disabled={selectedRepoConnectInProgress}
-            className="shrink-0"
-          >
-            {selectedRepoConnectInProgress ? (
-              <LoadingIndicator className="size-3.5" />
-            ) : (
-              <PlugZap className="size-3.5" />
-            )}
-            {selectedRepoConnectInProgress
-              ? translate('auto.components.NewWorkspaceComposerCard.f660aa1454', 'Connecting')
-              : connectButtonLabel}
-          </Button>
         </div>
       ) : null}
     </div>

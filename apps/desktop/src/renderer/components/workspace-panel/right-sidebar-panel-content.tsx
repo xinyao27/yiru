@@ -54,9 +54,6 @@ export function RightSidebarPanelContent({
             onViewChange={onSourceControlViewChange}
           />
         )}
-        {/* Why: SSH port forwarding still depends on the raw ports.detect data,
-            which the workspace-scoped status bar popover intentionally does not
-            expose. Keep this panel reachable only for SSH worktrees. */}
         {effectiveTab === 'ports' && (
           <PortsPanel isVisible={panelVisible && effectiveTab === 'ports'} />
         )}

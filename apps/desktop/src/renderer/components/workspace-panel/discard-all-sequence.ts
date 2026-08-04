@@ -133,8 +133,9 @@ export async function runDiscardAllForArea(
       await deps.discardMany([...paths])
       return { discarded: [...paths], failed: [], aborted: false }
     } catch {
-      // Why: older SSH relays may not support the bulk discard RPC yet. Fall
-      // back to the long-standing per-file path so the action still completes.
+      // Why: an older paired-runtime relay may not support the bulk discard
+      // RPC yet. Fall back to the long-standing per-file path so the action
+      // still completes.
     }
   }
 

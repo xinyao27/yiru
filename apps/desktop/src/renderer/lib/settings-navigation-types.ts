@@ -28,7 +28,6 @@ export type SettingsNavTarget =
   | 'dev'
   | 'voice'
   | 'shortcuts'
-  | 'ssh'
   | 'experimental'
   | 'agents'
   | 'orchestration'

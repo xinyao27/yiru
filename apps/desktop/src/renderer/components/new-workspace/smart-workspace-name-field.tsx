@@ -147,7 +147,7 @@ export function canUseGitLabSmartSource({
     return false
   }
   const parsedHost = parseExecutionHostId(sourceHostId)
-  return parsedHost?.kind === 'ssh' || parsedHost?.kind === 'runtime' || localGitlabAvailable
+  return parsedHost?.kind === 'runtime' || localGitlabAvailable
 }
 
 type RowEntry = SmartWorkspaceSourceRow

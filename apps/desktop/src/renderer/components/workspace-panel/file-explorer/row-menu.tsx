@@ -57,7 +57,6 @@ export type FileExplorerRowMenuProps = {
   deleteShortcutLabel: string
   connectionId?: string | null
   runtimeDownloadContext?: RuntimeFileOperationArgs | null
-  supportsFolderDownload?: boolean
   canCollapseFolderSubtree: boolean
   canAddAsProject: boolean
   targetDir: string
@@ -92,7 +91,6 @@ export function FileExplorerRowMenu({
   deleteShortcutLabel,
   connectionId,
   runtimeDownloadContext,
-  supportsFolderDownload = false,
   canCollapseFolderSubtree,
   canAddAsProject,
   targetDir,
@@ -115,12 +113,7 @@ export function FileExplorerRowMenu({
   const copyPathShortcutLabel = useShortcutLabel('fileExplorer.copyPath')
   const copyRelativePathShortcutLabel = useShortcutLabel('fileExplorer.copyRelativePath')
   const findInFolderShortcutLabel = useShortcutLabel('sidebar.search.toggle')
-  const showDownload = shouldShowRemoteDownloadAction(
-    node,
-    connectionId,
-    runtimeDownloadContext,
-    supportsFolderDownload
-  )
+  const showDownload = shouldShowRemoteDownloadAction(node, connectionId, runtimeDownloadContext)
 
   const handleReveal = (): void => {
     const state = useAppStore.getState()

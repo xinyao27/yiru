@@ -1,4 +1,3 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import {
   normalizeExecutionHostId,
@@ -54,11 +53,6 @@ import {
   getLinkedWorkItemPromptContext,
   resolveQuickCreateLinkedWorkItemPrompt
 } from '~renderer/components/sidebar/linked-work-item-context'
-import {
-  canUseRepoBackedComposerSources,
-  getSelectedRepoSshGate,
-  isSshConnectInProgress
-} from '~renderer/components/sidebar/new-workspace-ssh-gate'
 import { isWorkItemLookupText } from '~renderer/components/sidebar/work-item-lookup-text'
 import { getSuggestedCreatureName } from '~renderer/components/sidebar/worktree-name-suggestions'
 import { runBackgroundWorktreeCreation } from '~renderer/components/worktree-creation/flow'
@@ -102,7 +96,6 @@ import { checkRuntimeHooks, type HookCheckResult } from '~renderer/runtime/hooks
 import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { resolveWorktreeCreateBaseBranch } from '~renderer/runtime/worktree-create-base'
 import { useAppStore } from '~renderer/store'
-import { repoIsRemote } from '~shared/agent/launch-remote'
 import { getDefaultRepoHookSettings } from '~shared/constants'
 import { buildExecutionHostRegistry } from '~shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
@@ -311,13 +304,6 @@ export type ComposerCardProps = {
   baseBranchLinkedPrNumber: number | null
   /** Absolute path of the selected repo, used by Start-from picker for SWR. */
   selectedRepoPath: string | null
-  /** True when the selected repo is a remote SSH repo. */
-  selectedRepoIsRemote: boolean
-  selectedRepoConnectionId: string | null
-  selectedRepoSshStatus: SshConnectionStatus | null
-  selectedRepoRequiresConnection: boolean
-  selectedRepoConnectInProgress: boolean
-  onConnectSelectedRepo: () => Promise<void>
   branchesEnabled?: boolean
   /** Transient inline hint shown next to the Start-from trigger after a repo
    *  switch resets a prior selection (e.g. "was PR #8778"). Null when none. */
@@ -598,7 +584,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const workspaceStatuses = useAppStore((s) => s.workspaceStatuses)
   const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
-  const sshConnectedGeneration = useAppStore((s) => s.sshConnectedGeneration)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
   const workspaceHostScope = useAppStore((s) => s.workspaceHostScope)
@@ -690,28 +675,12 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const parsedFolderTargetHost = parseExecutionHostId(selectedProjectGroup?.executionHostId)
   const folderTargetRuntimeEnvironmentId =
     parsedFolderTargetHost?.kind === 'runtime' ? parsedFolderTargetHost.environmentId : null
-  const folderTargetConnectionId =
-    parsedFolderTargetHost?.kind === 'runtime' ? null : (selectedProjectGroup?.connectionId ?? null)
-  const folderTargetIsRemote =
-    folderTargetConnectionId !== null || folderTargetRuntimeEnvironmentId !== null
+  const folderTargetIsRemote = folderTargetRuntimeEnvironmentId !== null
   const folderTargetAgentDetectionTarget = folderTargetRuntimeEnvironmentId
     ? { kind: 'runtime' as const, environmentId: folderTargetRuntimeEnvironmentId }
-    : folderTargetConnectionId
-      ? { kind: 'ssh' as const, connectionId: folderTargetConnectionId }
-      : selectedProjectGroup
-        ? { kind: 'local' as const }
-        : undefined
-  const folderTargetSshState = folderTargetConnectionId
-    ? (sshConnectionStates.get(folderTargetConnectionId) ?? null)
-    : null
-  const {
-    selectedRepoSshStatus: folderTargetSshStatus,
-    selectedRepoRequiresConnection: folderTargetRequiresConnection,
-    selectedRepoConnectInProgress: folderTargetConnectInProgress
-  } = getSelectedRepoSshGate({
-    connectionId: folderTargetConnectionId,
-    status: folderTargetSshState?.status ?? null
-  })
+    : selectedProjectGroup
+      ? { kind: 'local' as const }
+      : undefined
   const { pathStatusBlocksCreate: folderPathStatusBlocksCreate, pathStatusProjectError } =
     useFolderWorkspaceComposerPathStatus(
       selectedProjectGroup,
@@ -740,28 +709,23 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     if (!selectedRepo) {
       return CLIENT_PLATFORM
     }
-    const projectRuntime = selectedRepo.connectionId
-      ? undefined
-      : getLocalRepoProjectExecutionRuntimeContext(
-          {
-            activeRepoId,
-            activeWorktreeId: null,
-            projects,
-            repos,
-            settings,
-            worktreesByRepo
-          },
-          selectedRepo.id,
-          CLIENT_PLATFORM
-        )
+    const projectRuntime = getLocalRepoProjectExecutionRuntimeContext(
+      {
+        activeRepoId,
+        activeWorktreeId: null,
+        projects,
+        repos,
+        settings,
+        worktreesByRepo
+      },
+      selectedRepo.id,
+      CLIENT_PLATFORM
+    )
     return getAgentLaunchPlatformForRepo(selectedRepo, projectRuntime)
   }, [activeRepoId, projects, repos, selectedRepo, settings, worktreesByRepo])
-  // Why: SSH remotes deploy the CLI shim as plain `yiru`, so the Linux-only
-  // SSH remotes must use the relay's public CLI command.
-  const selectedRepoIsRemote = selectedRepo ? repoIsRemote(selectedRepo) : false
   const selectedRepoStartupShell = resolveLocalWindowsAgentStartupShell({
     platform: selectedRepoAgentLaunchPlatform,
-    isRemote: selectedRepoIsRemote,
+    isRemote: false,
     terminalWindowsShell: settings?.terminalWindowsShell
   })
   const selectedRepoProjectId =
@@ -825,15 +789,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       selectedRepo?.id ?? null
     )
   }, [selectedRepo, settings])
-  const selectedRepoConnectionId = selectedRepo?.connectionId ?? null
-  const selectedRepoSshState = selectedRepoConnectionId
-    ? (sshConnectionStates.get(selectedRepoConnectionId) ?? null)
-    : null
-  const { selectedRepoSshStatus, selectedRepoRequiresConnection, selectedRepoConnectInProgress } =
-    getSelectedRepoSshGate({
-      connectionId: selectedRepoConnectionId,
-      status: selectedRepoSshState?.status ?? null
-    })
   const repoIdRef = useRef(repoId)
   repoIdRef.current = repoId
   const setRepoId = useCallback(
@@ -1011,24 +966,18 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const [tuiAgent, setTuiAgent] = useState<TuiAgent>(
     persistDraft ? (newWorkspaceDraft?.agent ?? fallbackDefaultAgent) : fallbackDefaultAgent
   )
-  // Why: when the selected repo has a connectionId or runtime environment, read
-  // the per-host agent list instead of the local one. This ensures the Create
-  // Workspace dialog shows agents installed on the SSH host or paired runtime,
-  // not the local machine.
-  const connectionId = selectedRepoConnectionId
-  const isRemote = typeof connectionId === 'string'
+  // Why: when the selected repo has a paired runtime environment, read the
+  // per-host agent list instead of the local one. This ensures the Create
+  // Workspace dialog shows agents installed on the paired runtime, not the
+  // local machine.
   const runtimeEnvironmentId = selectedRepoSettings?.activeRuntimeEnvironmentId?.trim() || null
   const detectedAgentList = useAppStore((s) => {
-    if (isRemote) {
-      return s.remoteDetectedAgentIds[connectionId] ?? null
-    }
     if (runtimeEnvironmentId) {
       return s.runtimeDetectedAgentIds[runtimeEnvironmentId] ?? null
     }
     return s.detectedAgentIds
   })
   const ensureDetectedAgents = useAppStore((s) => s.ensureDetectedAgents)
-  const ensureRemoteDetectedAgents = useAppStore((s) => s.ensureRemoteDetectedAgents)
   const ensureRuntimeDetectedAgents = useAppStore((s) => s.ensureRuntimeDetectedAgents)
   const detectedAgentIds = useMemo<Set<TuiAgent> | null>(
     () => (detectedAgentList ? new Set(detectedAgentList) : null),
@@ -1124,10 +1073,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   // multi-instance routing).
   const agentPromptRef = useRef(agentPrompt)
   agentPromptRef.current = agentPrompt
-  const connectionIdRef = useRef(connectionId)
-  connectionIdRef.current = connectionId
-  const selectedRepoConnectionIdRef = useRef(selectedRepoConnectionId)
-  selectedRepoConnectionIdRef.current = selectedRepoConnectionId
 
   // Why: resolves the selected repo's owner/repo slug so a PR URL pasted
   // into the workspace name field can be matched against the current repo.
@@ -1339,9 +1284,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     if (!selectedRepoIsGit) {
       return null
     }
-    if (selectedRepo?.connectionId) {
-      return 'Sparse checkout is only supported for local repos right now.'
-    }
     if (normalizedSparseDirectories.length === 0) {
       return 'Enter at least one repo-relative directory.'
     }
@@ -1351,7 +1293,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       return 'Use repo-relative directories, not root or parent paths.'
     }
     return null
-  }, [normalizedSparseDirectories, selectedRepo?.connectionId, selectedRepoIsGit, sparseEnabled])
+  }, [normalizedSparseDirectories, selectedRepoIsGit, sparseEnabled])
   // Why: when the user pastes a PR URL straight into the workspace name field
   // (without picking from the source picker), `linkedPR` stays null and the
   // worktree card has no PR strip. Recover the PR number from the name on
@@ -1532,34 +1474,23 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   // Why: the compact sparse dropdown is always visible under Advanced, so
   // presets must load before sparse mode is enabled.
   useEffect(() => {
-    if (!repoId || !selectedRepoIsGit || selectedRepo?.connectionId) {
+    if (!repoId || !selectedRepoIsGit) {
       return
     }
     if (sparsePresetsByRepo[repoId] !== undefined) {
       return
     }
     void fetchSparsePresets(repoId)
-  }, [
-    fetchSparsePresets,
-    repoId,
-    selectedRepo?.connectionId,
-    selectedRepoIsGit,
-    sparsePresetsByRepo
-  ])
+  }, [fetchSparsePresets, repoId, selectedRepoIsGit, sparsePresetsByRepo])
 
   // Why: detect agents for the selected repo. For local repos this runs once
-  // on mount (deduped by the store). For remote/runtime repos it re-runs when
-  // the selected repo changes so the agent list matches the correct host.
+  // on mount (deduped by the store). For runtime repos it re-runs when the
+  // selected repo changes so the agent list matches the correct host.
   useEffect(() => {
-    if (isRemote && selectedRepoSshStatus !== 'connected') {
-      return
-    }
     let cancelled = false
-    const detect = isRemote
-      ? ensureRemoteDetectedAgents(connectionId)
-      : runtimeEnvironmentId
-        ? ensureRuntimeDetectedAgents(runtimeEnvironmentId)
-        : ensureDetectedAgents()
+    const detect = runtimeEnvironmentId
+      ? ensureRuntimeDetectedAgents(runtimeEnvironmentId)
+      : ensureDetectedAgents()
     void detect.then((ids) => {
       if (cancelled) {
         return
@@ -1578,11 +1509,11 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     return () => {
       cancelled = true
     }
-    // Why: re-run when connectionId/runtimeEnvironmentId changes (user picks a
-    // different repo) so detection targets the correct host. Draft/settings deps
-    // are intentionally excluded — detection is a best-effort PATH snapshot.
+    // Why: re-run when runtimeEnvironmentId changes (user picks a different
+    // repo) so detection targets the correct host. Draft/settings deps are
+    // intentionally excluded — detection is a best-effort PATH snapshot.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectionId, runtimeEnvironmentId, isRemote, selectedRepoSshStatus, disabledTuiAgents])
+  }, [runtimeEnvironmentId, disabledTuiAgents])
 
   // Per-repo hook inspection determines setup availability and policy.
   useEffect(() => {
@@ -1612,88 +1543,21 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     }
   }, [commitHookCheckIfCurrent, loadHookCheckForRepo, repoId, selectedRepoIsGit])
 
-  const onConnectSelectedRepo = useCallback(async (): Promise<void> => {
-    const targetId = selectedRepoConnectionIdRef.current
-    if (!targetId) {
-      return
-    }
-    const liveState = useAppStore.getState()
-    const liveRepo = liveState.repos.find((repo) => repo.id === repoIdRef.current)
-    if (liveRepo?.connectionId !== targetId) {
-      return
-    }
-    const liveStatus = liveState.sshConnectionStates.get(targetId)?.status ?? null
-    if (liveStatus === 'connected' || isSshConnectInProgress(liveStatus)) {
-      return
-    }
-
-    try {
-      await window.api.ssh.connect({ targetId })
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate('auto.hooks.useComposerState.ba6cb77082', 'Failed to connect to project.')
-      )
-    }
-  }, [])
-
-  const onConnectSelectedProjectGroup = useCallback(async (): Promise<void> => {
-    if (!folderTargetConnectionId) {
-      return
-    }
-    const liveStatus = useAppStore
-      .getState()
-      .sshConnectionStates.get(folderTargetConnectionId)?.status
-    if (liveStatus === 'connected' || isSshConnectInProgress(liveStatus ?? null)) {
-      return
-    }
-    try {
-      await window.api.ssh.connect({ targetId: folderTargetConnectionId })
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate('auto.hooks.useComposerState.ba6cb77082', 'Failed to connect to project.')
-      )
-    }
-  }, [folderTargetConnectionId])
-
   // Why: warm the Start-from picker's PR cache on composer mount and whenever
   // the selected repo changes so opening the picker paints instantly from
   // cache.
-  const canPrefetchSelectedRepoWorkItems = canUseRepoBackedComposerSources({
-    connectionId: selectedRepoConnectionId,
-    status: selectedRepoSshStatus
-  })
-  const prefetchSshConnectedGeneration =
-    selectedRepoConnectionId && selectedRepoSshStatus === 'connected' ? sshConnectedGeneration : 0
   useEffect(() => {
-    if (!repoId || !selectedRepoIsGit || !canPrefetchSelectedRepoWorkItems) {
+    if (!repoId || !selectedRepoIsGit) {
       return
     }
     void prefetchWorktreeCreateBase(repoId, baseBranch)
-  }, [
-    baseBranch,
-    canPrefetchSelectedRepoWorkItems,
-    prefetchSshConnectedGeneration,
-    prefetchWorktreeCreateBase,
-    repoId,
-    selectedRepoIsGit
-  ])
+  }, [baseBranch, prefetchWorktreeCreateBase, repoId, selectedRepoIsGit])
   useEffect(() => {
-    if (!selectedRepoIsGit || !selectedRepo?.path || !canPrefetchSelectedRepoWorkItems) {
+    if (!selectedRepoIsGit || !selectedRepo?.path) {
       return
     }
     prefetchWorkItems(selectedRepo.id, selectedRepo.path, PER_REPO_FETCH_LIMIT, 'is:pr is:open')
-  }, [
-    canPrefetchSelectedRepoWorkItems,
-    prefetchSshConnectedGeneration,
-    prefetchWorkItems,
-    selectedRepo?.id,
-    selectedRepo?.path,
-    selectedRepoIsGit
-  ])
+  }, [prefetchWorkItems, selectedRepo?.id, selectedRepo?.path, selectedRepoIsGit])
 
   // Reset setup decision when config / policy changes.
   useEffect(() => {
@@ -2221,11 +2085,10 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     async (
       sourcePaths: string[],
       targetSettings = selectedRepoSettings,
-      targetConnectionId = connectionId,
       targetRepoPath = selectedRepoPath,
       canReportFailure: () => boolean = () => true
     ): Promise<{ filePaths: string[]; folderPaths: string[] } | null> => {
-      if (!targetSettings?.activeRuntimeEnvironmentId?.trim() && !targetConnectionId) {
+      if (!targetSettings?.activeRuntimeEnvironmentId?.trim()) {
         return null
       }
       if (!targetRepoPath) {
@@ -2244,8 +2107,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         {
           settings: targetSettings,
           worktreeId: targetRepoPath,
-          worktreePath: targetRepoPath,
-          connectionId: targetConnectionId ?? undefined
+          worktreePath: targetRepoPath
         },
         sourcePaths,
         destinationDir,
@@ -2262,7 +2124,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       }
       return { filePaths: uploadResult.filePaths, folderPaths: uploadResult.folderPaths }
     },
-    [connectionId, selectedRepoPath, selectedRepoSettings]
+    [selectedRepoPath, selectedRepoSettings]
   )
 
   const handleAddAttachment = useCallback(async (): Promise<void> => {
@@ -2346,7 +2208,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         const uploaded = await uploadComposerPathsRef.current(
           data.paths,
           selectedRepoSettingsRef.current,
-          connectionIdRef.current,
           selectedRepoPathRef.current,
           isStillDropOwner
         )
@@ -2959,10 +2820,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   )
 
   const folderCreateDisabled =
-    creating ||
-    !selectedProjectGroup?.parentPath ||
-    folderPathStatusBlocksCreate ||
-    folderTargetRequiresConnection
+    creating || !selectedProjectGroup?.parentPath || folderPathStatusBlocksCreate
 
   const submitFolderTarget = useCallback(
     async (requestedAgent: TuiAgent | null): Promise<void> => {
@@ -3086,7 +2944,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     }
     if (
       !workspaceSeedName ||
-      selectedRepoRequiresConnection ||
       shouldWaitForSetupCheck ||
       (requiresExplicitSetupChoice && !setupDecision) ||
       sparseError !== null
@@ -3233,7 +3090,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         ),
         platform: selectedRepoAgentLaunchPlatform,
         shell: selectedRepoStartupShell,
-        isRemote: selectedRepoIsRemote
+        isRemote: false
       })
       const shouldSeedInitialAgentStatus =
         tuiAgent === 'command-code' && submitStartupPrompt.trim().length > 0
@@ -3399,10 +3256,8 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     resolvedInitialWorkspaceStatus,
     selectedRepo,
     selectedRepoAgentLaunchPlatform,
-    selectedRepoIsRemote,
     selectedRepoStartupShell,
     selectedRepoIsGit,
-    selectedRepoRequiresConnection,
     showProjectRequiredError,
     settings?.agentCmdOverrides,
     settings?.agentDefaultArgs,
@@ -3475,7 +3330,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       }
       if (
         !workspaceNameSeed ||
-        selectedRepoRequiresConnection ||
         (requiresExplicitSetupChoice && !setupDecision) ||
         sparseError !== null
       ) {
@@ -3649,7 +3503,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
                 ),
                 platform: selectedRepoAgentLaunchPlatform,
                 shell: selectedRepoStartupShell,
-                isRemote: selectedRepoIsRemote
+                isRemote: false
               })
 
         let startupPlan: ReturnType<typeof buildAgentStartupPlan> = null
@@ -3681,7 +3535,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
             ),
             platform: selectedRepoAgentLaunchPlatform,
             shell: selectedRepoStartupShell,
-            isRemote: selectedRepoIsRemote,
+            isRemote: false,
             allowEmptyPromptLaunch: true
           })
           if (startupPlan && quickDraftPrompt) {
@@ -3837,11 +3691,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       resolvedInitialWorkspaceStatus,
       selectedRepo,
       selectedRepoAgentLaunchPlatform,
-      selectedRepoIsRemote,
       selectedRepoStartupShell,
       selectedRepoIsGit,
       selectedRepoSettings,
-      selectedRepoRequiresConnection,
       selectedWorkspaceTarget,
       showProjectRequiredError,
       settings?.agentCmdOverrides,
@@ -3878,7 +3730,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     shouldWaitForSetupCheck,
     requiresExplicitSetupChoice,
     hasSetupDecision: Boolean(setupDecision),
-    selectedRepoRequiresConnection,
     sparseError
   }
   const repoCreateDisabled =
@@ -3958,22 +3809,6 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     baseBranchLinkedPrNumber:
       linkedWorkItem?.type === 'pr' && baseBranch ? linkedWorkItem.number : null,
     selectedRepoPath: isProjectGroupTarget ? null : (selectedRepo?.path ?? null),
-    selectedRepoIsRemote: isProjectGroupTarget
-      ? folderTargetIsRemote
-      : Boolean(selectedRepo?.connectionId),
-    selectedRepoConnectionId: isProjectGroupTarget
-      ? folderTargetConnectionId
-      : selectedRepoConnectionId,
-    selectedRepoSshStatus: isProjectGroupTarget ? folderTargetSshStatus : selectedRepoSshStatus,
-    selectedRepoRequiresConnection: isProjectGroupTarget
-      ? folderTargetRequiresConnection
-      : selectedRepoRequiresConnection,
-    selectedRepoConnectInProgress: isProjectGroupTarget
-      ? folderTargetConnectInProgress
-      : selectedRepoConnectInProgress,
-    onConnectSelectedRepo: isProjectGroupTarget
-      ? onConnectSelectedProjectGroup
-      : onConnectSelectedRepo,
     startFromResetHint: isProjectGroupTarget ? null : startFromResetHint,
     forkPushWarning: isProjectGroupTarget ? null : forkPushWarning,
     note,
@@ -3989,9 +3824,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     shouldWaitForSetupCheck: isProjectGroupTarget ? false : shouldWaitForSetupCheck,
     resolvedSetupDecision: isProjectGroupTarget ? null : resolvedSetupDecision,
     createError,
-    canUseSparseCheckout: isProjectGroupTarget
-      ? false
-      : selectedRepoIsGit && !selectedRepo?.connectionId,
+    canUseSparseCheckout: isProjectGroupTarget ? false : selectedRepoIsGit,
     sparsePresets: isProjectGroupTarget ? [] : sparsePresets,
     sparseSelectedPresetId: isProjectGroupTarget ? null : sparseSelectedPresetId,
     onSparseSelectPreset: isProjectGroupTarget ? () => {} : handleSparseSelectPreset,

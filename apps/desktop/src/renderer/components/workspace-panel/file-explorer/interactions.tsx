@@ -24,7 +24,6 @@ export function useFileExplorerInteractions(
   workspacePanelTabId?: string
 ) {
   const { view, owner, tree, actions } = model
-  const sshConnectedGeneration = useAppStore((state) => state.sshConnectedGeneration)
   const toggleDir = useAppStore((state) => state.toggleDir)
   const pendingExplorerReveal = useAppStore((state) => state.pendingExplorerReveal)
   const clearPendingExplorerReveal = useAppStore((state) => state.clearPendingExplorerReveal)
@@ -84,16 +83,6 @@ export function useFileExplorerInteractions(
     tree.resetAndLoad()
     clearFileExplorerUndoHistory()
   }, [owner.visibleFilesWorktreePath, selection.resetSelection]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const sshGenRef = useRef(sshConnectedGeneration)
-  useEffect(() => {
-    if (sshConnectedGeneration > sshGenRef.current) {
-      sshGenRef.current = sshConnectedGeneration
-      if (owner.visibleFilesWorktreePath && tree.rootError) {
-        tree.resetAndLoad()
-      }
-    }
-  }, [sshConnectedGeneration, owner.visibleFilesWorktreePath]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!owner.visibleFilesWorktreePath) {

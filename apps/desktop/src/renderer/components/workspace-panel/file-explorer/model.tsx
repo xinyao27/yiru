@@ -53,12 +53,6 @@ export function useFileExplorerModel({
   const activeRuntimeEnvironmentId = useAppStore((state) =>
     getRuntimeEnvironmentIdForWorktree(state, activeWorktreeId)
   )
-  const supportsFolderDownload = useAppStore((state) => {
-    if (activeRuntimeEnvironmentId || !activeRepo?.connectionId) {
-      return false
-    }
-    return state.sshConnectionStates.get(activeRepo.connectionId)?.supportsFolderDownload === true
-  })
   const expandedDirs = useAppStore((state) => state.expandedDirs)
   const showDotfiles = useAppStore((state) =>
     activeWorktreeId ? (state.showDotfilesByWorktree[activeWorktreeId] ?? true) : true
@@ -227,8 +221,7 @@ export function useFileExplorerModel({
       activeRuntimeEnvironmentId,
       worktreePath,
       visibleFilesWorktreePath,
-      runtimeDownloadContext,
-      supportsFolderDownload
+      runtimeDownloadContext
     }),
     [
       activeWorktreeId,
@@ -236,8 +229,7 @@ export function useFileExplorerModel({
       activeRuntimeEnvironmentId,
       worktreePath,
       visibleFilesWorktreePath,
-      runtimeDownloadContext,
-      supportsFolderDownload
+      runtimeDownloadContext
     ]
   )
   // Why: useFileExplorerTree returns a fresh wrapper object every render even

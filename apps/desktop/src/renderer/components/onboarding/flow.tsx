@@ -110,15 +110,13 @@ const stepTooltipLabels = {
 type OnboardingFlowProps = {
   onboarding: OnboardingState
   onOnboardingChange: (state: OnboardingState) => void
-  onSettingsDetourStart?: () => void
 }
 
 export default function OnboardingFlow({
   onboarding,
-  onOnboardingChange,
-  onSettingsDetourStart
+  onOnboardingChange
 }: OnboardingFlowProps): React.JSX.Element {
-  const flow = useOnboardingFlow(onboarding, onOnboardingChange, { onSettingsDetourStart })
+  const flow = useOnboardingFlow(onboarding, onOnboardingChange)
   const continueShortcutModifierLabel = getScreenSubmitModifierLabel()
   const { currentStep, stepIndex, busyLabel } = flow
   const copy = stepCopy[currentStep.id]

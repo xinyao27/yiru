@@ -5,7 +5,6 @@ export type ComposerCreateGateInput = {
   shouldWaitForSetupCheck: boolean
   requiresExplicitSetupChoice: boolean
   hasSetupDecision: boolean
-  selectedRepoRequiresConnection: boolean
   sparseError: string | null
 }
 
@@ -13,7 +12,6 @@ function hasBlockingCreateState(input: ComposerCreateGateInput): boolean {
   return (
     !input.workspaceSeedName ||
     input.creating ||
-    input.selectedRepoRequiresConnection ||
     (input.requiresExplicitSetupChoice && !input.hasSetupDecision) ||
     input.sparseError !== null
   )

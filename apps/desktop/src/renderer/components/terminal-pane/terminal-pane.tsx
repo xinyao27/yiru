@@ -37,7 +37,6 @@ import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context
 import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '~renderer/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '~renderer/lib/connection-context'
-import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
 import { requestFriday } from '~renderer/lib/friday'
 import { useEffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
@@ -77,11 +76,7 @@ import {
   WORKSPACE_FILE_PATH_MIME,
   WORKSPACE_FILE_PATHS_MIME
 } from '~renderer/lib/workspace-file-drag'
-import {
-  getExplicitRuntimeEnvironmentIdForWorktree,
-  getRuntimeEnvironmentIdForWorktree
-} from '~renderer/lib/worktree-runtime-owner'
-import { hydrateRuntimeEnvironmentSshState } from '~renderer/runtime/environment-ssh-state'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import {
   inspectRuntimeTerminalProcess,
   isRemoteRuntimePtyId
@@ -93,11 +88,6 @@ import {
 } from '~renderer/runtime/web-runtime-session'
 import { useAppStore } from '~renderer/store'
 import { isUnifiedTabPinned } from '~renderer/store/pinned-tab-close-guard'
-import {
-  selectRuntimeAwareSshStatus,
-  selectRuntimeAwareSshTargetLabel,
-  selectRuntimeAwareSshTargetRemoved
-} from '~renderer/store/slices/runtime-environment-ssh'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { keybindingMatchesAction } from '~shared/keybindings'
 import { makePaneKey } from '~shared/stable-pane-id'
@@ -173,7 +163,6 @@ import {
 import { TerminalSessionStateSaveFailureDialog } from './terminal-session-state-save-failure-dialog'
 import type { MacOptionAsAlt } from './terminal-shortcut-policy'
 import { captureTerminalShutdownLayout } from './terminal-shutdown-layout-capture'
-import { TerminalSshReconnectOverlay } from './terminal-ssh-reconnect-overlay'
 import { selectTerminalTabAgentTypesByLeaf } from './terminal-tab-agent-type-index'
 import { scheduleImagePasteWebglAtlasRecovery } from './terminal-webgl-atlas-recovery'
 import { useNotificationDispatch } from './use-notification-dispatch'
@@ -213,7 +202,6 @@ import {
 } from './paste/coordinator'
 import { formatTerminalPasteExecutionError } from './paste/errors'
 import { resolveTerminalPasteRuntime } from './paste/runtime'
-import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
 import {
   isTerminalPanePasteFocusCurrent,
   isTerminalPanePasteTargetCurrent
@@ -342,50 +330,9 @@ export default function TerminalPane({
   const isRendererVisible = isVisible && isWorktreeActive
   const isVisibleRef = useRef(isRendererVisible)
   isVisibleRef.current = isRendererVisible
-  const sshReconnectTargetId = useAppStore(
-    (store) => getConnectionIdFromState(store, worktreeId) || null
-  )
   const nativeChatTranscriptIsLocalReadable = useAppStore((store) =>
     isNativeChatTranscriptLocalReadable(getConnectionIdFromState(store, worktreeId))
   )
-  // Which machine's SSH store this target belongs to: a remote Yiru server's
-  // per-environment bucket, or null for this machine's local SSH maps. The
-  // explicit-owner resolver never lets a merely focused runtime make a
-  // local-owned workspace look remote. The paired web client mirrors its one
-  // host through the local maps instead.
-  const sshReconnectEnvironmentId = useAppStore((store) =>
-    sshReconnectTargetId && !isPairedWebClientWindow()
-      ? getExplicitRuntimeEnvironmentIdForWorktree(store, worktreeId)
-      : null
-  )
-  const sshReconnectStatus = useAppStore((store) =>
-    sshReconnectTargetId
-      ? selectRuntimeAwareSshStatus(store, sshReconnectEnvironmentId, sshReconnectTargetId)
-      : null
-  )
-  const sshReconnectTargetLabel = useAppStore((store) =>
-    sshReconnectTargetId
-      ? selectRuntimeAwareSshTargetLabel(store, sshReconnectEnvironmentId, sshReconnectTargetId)
-      : ''
-  )
-  // Why: the target was removed entirely (a ghost) when it's no longer a known
-  // SSH target on its owning host. Reconnecting to it can only fail ("SSH
-  // target not found"), so the overlay must offer to remove the workspace
-  // instead of Connect. The selector requires positive removal evidence.
-  const sshReconnectTargetRemoved = useAppStore((store) =>
-    sshReconnectTargetId
-      ? selectRuntimeAwareSshTargetRemoved(store, sshReconnectEnvironmentId, sshReconnectTargetId)
-      : false
-  )
-  useEffect(() => {
-    if (!sshReconnectEnvironmentId) {
-      return
-    }
-    // Why: an SSH-backed workspace can be mirrored before its owning
-    // environment's bucket ever hydrated (no-op once hydrated), and overlay
-    // state must come from fetched evidence, never from an empty default.
-    void hydrateRuntimeEnvironmentSshState(sshReconnectEnvironmentId).catch(() => {})
-  }, [sshReconnectEnvironmentId])
 
   useVisibleTerminalTabClaim({ isVisible, tabId })
 
@@ -2052,7 +1999,6 @@ export default function TerminalPane({
             platform: shortcutPlatform,
             ptyId,
             connectionId,
-            remotePlatform: getTerminalPasteSshRemotePlatform(connectionId),
             transport,
             isWindowsConpty: forceBracketedMultilineTextPaste
           })
@@ -2828,7 +2774,6 @@ export default function TerminalPane({
               platform: shortcutPlatform,
               ptyId,
               connectionId,
-              remotePlatform: getTerminalPasteSshRemotePlatform(connectionId),
               transport
             })
           },
@@ -2939,13 +2884,6 @@ export default function TerminalPane({
 
   const activePane = managerRef.current?.getActivePane()
   const managedPanes = managerRef.current?.getPanes() ?? []
-  const showSshReconnectOverlay = Boolean(
-    isActive &&
-    isVisible &&
-    sshReconnectTargetId &&
-    sshReconnectStatus &&
-    sshReconnectStatus !== 'connected'
-  )
   const menuPaneHasCustomTitle =
     contextMenu.menuPaneId !== null && Boolean(paneTitles[contextMenu.menuPaneId])
   const chatLeafStillMounted = chatLeafId
@@ -3073,16 +3011,6 @@ export default function TerminalPane({
           onRestartDaemon={() => daemonActions.setPending('restart')}
         />
       )}
-      {showSshReconnectOverlay && sshReconnectTargetId && sshReconnectStatus ? (
-        <TerminalSshReconnectOverlay
-          targetId={sshReconnectTargetId}
-          targetLabel={sshReconnectTargetLabel}
-          status={sshReconnectStatus}
-          targetRemoved={sshReconnectTargetRemoved}
-          worktreeId={worktreeId}
-          sshOwnerEnvironmentId={sshReconnectEnvironmentId}
-        />
-      ) : null}
       <DaemonActionDialog api={daemonActions} />
       {isActive && (
         <TerminalSessionStateSaveFailureDialog

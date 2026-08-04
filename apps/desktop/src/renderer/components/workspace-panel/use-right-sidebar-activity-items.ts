@@ -23,7 +23,6 @@ export function useRightSidebarActivityItems(worktreeId: string | null): {
   const workspaceScope = parseWorkspaceKey(worktreeId ?? '')
   const isFolderWorkspace = workspaceScope?.type === 'folder'
   const isFolder = isFolderWorkspace || (repo ? isFolderRepo(repo) : false)
-  const isSshRepo = Boolean(repo?.connectionId)
   const items = useMemo(() => {
     if (worktreeId && !worktree) {
       return []
@@ -36,13 +35,12 @@ export function useRightSidebarActivityItems(worktreeId: string | null): {
         sourceControl: sourceControlShortcut,
         ports: portsShortcut
       }),
-      { isFolder, isFolderWorkspace, isSshRepo }
+      { isFolder, isFolderWorkspace }
     )
   }, [
     explorerShortcut,
     isFolder,
     isFolderWorkspace,
-    isSshRepo,
     portsShortcut,
     sourceControlShortcut,
     worktree,

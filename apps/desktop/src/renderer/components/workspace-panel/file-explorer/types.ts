@@ -1,6 +1,5 @@
 export type FileExplorerOperationOwner =
   | { kind: 'local' }
-  | { kind: 'ssh'; connectionId: string }
   | { kind: 'runtime'; environmentId: string }
   | { kind: 'unresolved' }
 

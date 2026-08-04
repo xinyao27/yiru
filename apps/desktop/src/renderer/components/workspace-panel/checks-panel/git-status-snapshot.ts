@@ -71,16 +71,6 @@ export function buildChecksPanelGitStatusContextKey(
   })
 }
 
-export function shouldPollChecksPanelRuntimeSshStatus(input: {
-  isPanelVisible: boolean
-  runtimeEnvironmentId: string | null
-  repoConnectionId: string | null
-}): boolean {
-  return (
-    input.isPanelVisible && input.runtimeEnvironmentId !== null && input.repoConnectionId !== null
-  )
-}
-
 export function shouldCommitChecksPanelGitStatusSnapshot(
   currentContextKey: string,
   requestContextKey: string

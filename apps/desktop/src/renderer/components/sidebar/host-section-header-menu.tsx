@@ -61,8 +61,6 @@ function openManageHost(row: HostHeaderRow): void {
       repoId: null,
       sectionId: parsed?.kind === 'runtime' ? parsed.environmentId : undefined
     })
-  } else if (row.kind === 'ssh') {
-    state.openSettingsTarget({ pane: 'ssh', repoId: null, sectionId: 'ssh' })
   } else {
     state.openSettingsTarget({ pane: 'general', repoId: null })
   }

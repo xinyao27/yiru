@@ -13,8 +13,6 @@ import {
   type AgentType
 } from '@yiru/workbench-model/agent'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-import { directSshAuthoritiesEqual } from '~renderer/components/direct-ssh/terminal-recovery/authority-ledger'
-import type { DirectSshPaneRetryAttempt } from '~renderer/components/direct-ssh/terminal-recovery/binding-state'
 import { dispatchTerminalCommandFinishedEvent } from '~renderer/hooks/terminal-command-finished-event'
 import {
   detectAgentStatusFromTitle,
@@ -99,7 +97,6 @@ import {
 import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
 import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
 import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
-import { isTerminalTabParked } from '~renderer/runtime/terminal-parked-watcher-registry'
 import { getRemoteRuntimePtyEnvironmentId } from '~renderer/runtime/terminal-stream'
 import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
 import { useAppStore } from '~renderer/store'
@@ -122,7 +119,6 @@ import { createDraftPasteReadyScanner } from '~shared/draft-paste-ready-scanner'
 import { resolvePaneAgentOwner } from '~shared/pane-agent-owner'
 import { redactPtyIdForDiagnostics } from '~shared/pty-delivery-diagnostics'
 import { resolveSetupAgentSequenceLaunchCommand } from '~shared/setup/agent-sequencing'
-import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 import { makePaneKey, parseLegacyNumericPaneKey } from '~shared/stable-pane-id'
 import {
   mode2031SequenceFor,
@@ -205,7 +201,6 @@ import {
 } from '../layout-serialization'
 import { createPaneForegroundAgentTracker } from '../pane-foreground-agent-tracker'
 import { resolveTerminalPasteRuntime } from '../paste/runtime'
-import { getTerminalPasteSshRemotePlatform } from '../paste/ssh-platform'
 import {
   captureTerminalPaneRecoveryGeneration,
   registerTerminalPaneRecoveryInstance,
@@ -227,11 +222,6 @@ import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence
 } from '../sleeping-agent-pane-ownership'
-import { resolveSshPaneConnectGate } from '../ssh-pane-connect-gate'
-import {
-  createSshReattachModelReplayProbe,
-  type SshReattachModelReplay
-} from '../ssh-reattach-model-restore'
 import {
   isDocumentVisibilityProvenStale,
   registerStaleDocumentVisibilityRecovery
@@ -290,7 +280,6 @@ import { createIpcPtyTransport } from './transport'
 
 const pendingSpawnByPaneKey = new Map<string, Promise<string | null>>()
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
-const DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS = 31_000
 const REMOTE_PTY_ID_PREFIX = 'remote:'
 const SSH_SHELL_READY_STARTUP_FALLBACK_MS = 1500
 const MANUAL_AGENT_COMMAND_MAX_CHARS = 4096
@@ -560,15 +549,6 @@ function subscribeAgentTaskCompleteTrackingEnabled(listener: () => void): () => 
   }
 }
 
-// Why: when multiple panes/tabs need the same deferred SSH connection,
-// the first one calls ssh.connect() and subsequent ones must wait for it
-// rather than returning early (which would leave them disconnected). This
-// helper either connects or waits for an in-flight connect to finish.
-type SshConnectResult = { connected: true } | { connected: false; error: string }
-type UserInitiatedSshConnectOutcome = 'connected' | 'cancelled' | 'failed'
-
-const sshConnectPromises = new Map<string, Promise<SshConnectResult>>()
-
 function isSshSessionExpiredError(err: unknown): boolean {
   return (err instanceof Error ? err.message : String(err)).includes(SSH_SESSION_EXPIRED_ERROR)
 }
@@ -601,54 +581,6 @@ function hasCodexRestartNotices(
     codexRestartNoticePresence = Object.keys(noticesByPtyId).length > 0
   }
   return codexRestartNoticePresence
-}
-
-function sshPromptConnectOutcomeForStatus(
-  status: string | undefined,
-  sawNonDisconnected: boolean
-): UserInitiatedSshConnectOutcome | null {
-  if (status === 'connected') {
-    return 'connected'
-  }
-  if (status === 'auth-failed' || status === 'error' || status === 'reconnection-failed') {
-    return 'failed'
-  }
-  // Why: this only counts after a real connect attempt; the entry-time
-  // disconnected state just means the user still needs to initiate auth.
-  if (sawNonDisconnected && status === 'disconnected') {
-    return 'cancelled'
-  }
-  return null
-}
-
-async function waitForSshConnection(connectionId: string): Promise<SshConnectResult> {
-  const state = useAppStore.getState().sshConnectionStates.get(connectionId)
-  if (state?.status === 'connected') {
-    return { connected: true }
-  }
-
-  const existing = sshConnectPromises.get(connectionId)
-  if (existing) {
-    return existing
-  }
-
-  const promise: Promise<SshConnectResult> = (async (): Promise<SshConnectResult> => {
-    try {
-      await window.api.ssh.connect({ targetId: connectionId })
-      return { connected: true }
-    } catch (err) {
-      console.warn(`Deferred SSH reconnect failed for ${connectionId}:`, err)
-      return {
-        connected: false,
-        error: err instanceof Error ? err.message : String(err)
-      }
-    } finally {
-      sshConnectPromises.delete(connectionId)
-    }
-  })()
-
-  sshConnectPromises.set(connectionId, promise)
-  return promise
 }
 
 function isCodexPaneStale(args: {
@@ -832,7 +764,6 @@ export function connectPanePty(
   // settles after remount must not remount its already-replaced successor.
   const terminalRecoveryGeneration = captureTerminalPaneRecoveryGeneration(deps.tabId)
   const terminalRecoveryInstance = registerTerminalPaneRecoveryInstance(deps.tabId)
-  let mountFollowsTerminalPark = isTerminalTabParked(deps.tabId)
   let disposed = false
   const structuralReplayCoordinator = createTerminalStructuralReplayCoordinator(pane.terminal)
   let connectFrame: number | null = null
@@ -1797,7 +1728,7 @@ export function connectPanePty(
     dropStatus?.()
   }
   const isForegroundTrackingAllowed = (id: string): boolean => {
-    if (isRemoteRuntimePtyId(id) || parseAppSshPtyId(id) !== null) {
+    if (isRemoteRuntimePtyId(id)) {
       return false
     }
     if (!navigator.userAgent.includes('Windows')) {
@@ -2126,14 +2057,14 @@ export function connectPanePty(
       isAgentTaskCompleteTrackingEnabled() && deps.isVisibleRef.current,
     isProcessInspectionCostly: () => {
       // Why: local Windows inspection forks a powershell.exe whole-process-table
-      // CIM scan per poll (~10-40x heavier than POSIX `ps`); SSH/remote PTYs run
+      // CIM scan per poll (~10-40x heavier than POSIX `ps`); remote PTYs run
       // their scans on the remote host, so only local Windows panes relax the
       // no-evidence cadence.
       if (!navigator.userAgent.includes('Windows')) {
         return false
       }
       const ptyId = transport.getPtyId()
-      return ptyId !== null && !isRemoteRuntimePtyId(ptyId) && parseAppSshPtyId(ptyId) === null
+      return ptyId !== null && !isRemoteRuntimePtyId(ptyId)
     },
     isLive: () => {
       if (disposed) {
@@ -2568,9 +2499,6 @@ export function connectPanePty(
       sampleVisibleForegroundAgent?: boolean
     } = {}
   ): void => {
-    if (!claimCapturedDirectSshRetryPty(ptyId)) {
-      return
-    }
     if (activePanePtyBinding && activePanePtyBinding !== ptyId) {
       reportPanePtyVisibility(activePanePtyBinding, false)
     }
@@ -2584,12 +2512,8 @@ export function connectPanePty(
     syncHiddenRendererPtyDelivery()
     deps.syncPanePtyLayoutBinding(pane.id, ptyId)
     const tabPtyIds = useAppStore.getState().ptyIdsByTabId?.[deps.tabId] ?? []
-    const retryAttemptId =
-      capturedDirectSshRetryPtyAccepted && directSshRetryAttempt
-        ? directSshRetryAttempt.attemptId
-        : undefined
-    if (retryAttemptId || options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
-      deps.updateTabPtyId(deps.tabId, ptyId, options.replacePtyId, retryAttemptId)
+    if (options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
+      deps.updateTabPtyId(deps.tabId, ptyId, options.replacePtyId)
     }
     if (options.seedInitialAgentStatus) {
       applyInitialAgentStatus()
@@ -2963,85 +2887,7 @@ export function connectPanePty(
   const worktree = getWorktreeMapFromState(state).get(deps.worktreeId)
   const connectionId = getConnectionId(deps.worktreeId) ?? null
   const tab = (state.tabsByWorktree[deps.worktreeId] ?? []).find((t) => t.id === deps.tabId)
-  type DirectSshRetryLease = Pick<
-    DirectSshPaneRetryAttempt,
-    'attemptId' | 'authority' | 'tabGeneration'
-  >
-  const directSshRetryAttempt: DirectSshRetryLease | undefined = (() => {
-    const pendingAttempt = state.directSshPaneRetryByTabId[deps.tabId]
-    const liveBinding = state.directSshLivePtyBindingByTabId[deps.tabId]
-    if (
-      pendingAttempt?.authority.targetId === connectionId &&
-      pendingAttempt.tabGeneration === (tab?.generation ?? 0)
-    ) {
-      return pendingAttempt
-    }
-    if (
-      liveBinding?.authority.targetId === connectionId &&
-      liveBinding.tabGeneration === (tab?.generation ?? 0)
-    ) {
-      return liveBinding
-    }
-    return undefined
-  })()
-  const pendingSpawnKey = directSshRetryAttempt
-    ? JSON.stringify([cacheKey, directSshRetryAttempt.attemptId])
-    : cacheKey
-  let capturedDirectSshRetryPtyAccepted = false
-  const capturedDirectSshRetryLeaseMatches = (): boolean => {
-    if (!directSshRetryAttempt) {
-      return true
-    }
-    const currentState = useAppStore.getState()
-    const currentConnection = currentState.sshConnectionStates.get(
-      directSshRetryAttempt.authority.targetId
-    )
-    const currentTab = (currentState.tabsByWorktree[deps.worktreeId] ?? []).find(
-      (candidate) => candidate.id === deps.tabId
-    )
-    if (
-      currentConnection?.status !== 'connected' ||
-      currentConnection.providerEpoch !== directSshRetryAttempt.authority.providerEpoch ||
-      currentConnection.connectionGeneration !==
-        directSshRetryAttempt.authority.connectionGeneration ||
-      (currentTab?.generation ?? 0) !== directSshRetryAttempt.tabGeneration
-    ) {
-      return false
-    }
-    const pendingAttempt = currentState.directSshPaneRetryByTabId[deps.tabId]
-    const liveBinding = currentState.directSshLivePtyBindingByTabId[deps.tabId]
-    return Boolean(
-      (pendingAttempt?.attemptId === directSshRetryAttempt.attemptId &&
-        directSshAuthoritiesEqual(pendingAttempt.authority, directSshRetryAttempt.authority)) ||
-      (liveBinding?.attemptId === directSshRetryAttempt.attemptId &&
-        directSshAuthoritiesEqual(liveBinding.authority, directSshRetryAttempt.authority))
-    )
-  }
-  const claimCapturedDirectSshRetryPty = (ptyId: string): boolean => {
-    if (!directSshRetryAttempt) {
-      return true
-    }
-    if (
-      parseAppSshPtyId(ptyId)?.connectionId !== directSshRetryAttempt.authority.targetId ||
-      !capturedDirectSshRetryLeaseMatches()
-    ) {
-      return false
-    }
-    capturedDirectSshRetryPtyAccepted = true
-    return true
-  }
-  if (directSshRetryAttempt) {
-    const retryAttempt = directSshRetryAttempt
-    setTimeout(() => {
-      useAppStore.getState().settleDirectSshPaneRetry({
-        status: 'timed-out',
-        tabId: deps.tabId,
-        attemptId: retryAttempt.attemptId,
-        authority: retryAttempt.authority,
-        tabGeneration: retryAttempt.tabGeneration
-      })
-    }, DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS)
-  }
+  const pendingSpawnKey = cacheKey
   const shellOverride = tab?.shellOverride
   // Why: a serve/remote-runtime pane has no SSH connectionId and a Linux cwd, so
   // the native-Windows ConPTY heuristic misfires on a Windows client and wrongly
@@ -4399,7 +4245,6 @@ export function connectPanePty(
           platform: CLIENT_PLATFORM,
           ptyId,
           connectionId,
-          remotePlatform: getTerminalPasteSshRemotePlatform(connectionId),
           transport,
           isWindowsConpty: isNativeWindowsConpty
         }),
@@ -7158,25 +7003,7 @@ export function connectPanePty(
       const hasStructuralReplay = Boolean(
         connectResult?.snapshot || connectResult?.replay || connectResult?.coldRestore
       )
-      const fetchSshMainModelReattachReplay = createSshReattachModelReplayProbe({
-        ptyId,
-        isParkingEnabled: () => useAppStore.getState().settings?.terminalSshViewParking !== false,
-        readSnapshot: () =>
-          window.api.pty.getMainBufferSnapshot(ptyId, {
-            scrollbackRows: resolveHiddenRestoreScrollbackRows(pane.terminal.options.scrollback)
-          })
-      })
-      const revealFollowsTerminalPark =
-        mountFollowsTerminalPark && connectResult?.isReattach === true
-      mountFollowsTerminalPark = false
-      let prefetchedSshModelReplay: SshReattachModelReplay | null = null
-      if (revealFollowsTerminalPark && !hasStructuralReplay) {
-        prefetchedSshModelReplay = await fetchSshMainModelReattachReplay()
-        if (!isCurrentReattachPayload()) {
-          return false
-        }
-      }
-      let reattachPayloadApplied = !hasStructuralReplay && prefetchedSshModelReplay === null
+      let reattachPayloadApplied = !hasStructuralReplay
       const applyReattachPayload = async (): Promise<void> => {
         if (!isCurrentReattachPayload()) {
           return
@@ -7234,52 +7061,15 @@ export function connectPanePty(
               window.api.pty.ackColdRestore(ptyId)
             }
           }
-        } else if (connectResult?.replay || prefetchedSshModelReplay) {
-          const modelReplay = revealFollowsTerminalPark
-            ? (prefetchedSshModelReplay ?? (await fetchSshMainModelReattachReplay()))
-            : null
-          if (!isCurrentReattachPayload()) {
-            return
-          }
-          if (modelReplay) {
-            rememberReattachPayloadAgentSignal(modelReplay.modelData, { fullScreenReplay: true })
-            if (
-              modelReplay.dimensions &&
-              (pane.terminal.cols !== modelReplay.dimensions.cols ||
-                pane.terminal.rows !== modelReplay.dimensions.rows)
-            ) {
-              suppressSnapshotReplayPtyResize = true
-              try {
-                pane.terminal.resize(modelReplay.dimensions.cols, modelReplay.dimensions.rows)
-              } finally {
-                suppressSnapshotReplayPtyResize = false
-              }
-            }
-            kittyKeyboardModes.scanReplay(modelReplay.modelData)
-            for (const replayChunk of modelReplay.replayWrites) {
-              writeReplayData(replayChunk)
-            }
-            writeReplayData(reattachReplayResetSequence(modelReplay.modelData))
-            if (modelReplay.snapshot.pendingEscapeTailAnsi) {
-              writeReplayData(modelReplay.snapshot.pendingEscapeTailAnsi)
-            }
-            setRestoredSnapshotBaseline(ptyId, modelReplay.snapshot)
-            recordRendererOrderedSeq(modelReplay.snapshot)
-            sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
-            if (connectResult?.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
-              window.api.pty.ackColdRestore(ptyId)
-            }
-          } else if (connectResult?.replay) {
-            rememberReattachPayloadAgentSignal(connectResult.replay, { fullScreenReplay: true })
-            // Why: relay replay is only the fallback for a missing/stalled model.
-            writeReplayData('\x1b[2J\x1b[3J\x1b[H')
-            kittyKeyboardModes.scanReplay(connectResult.replay)
-            writeReplayData(connectResult.replay)
-            writeReplayData(reattachReplayResetSequence(connectResult.replay))
-            sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
-            if (connectResult.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
-              window.api.pty.ackColdRestore(ptyId)
-            }
+        } else if (connectResult?.replay) {
+          rememberReattachPayloadAgentSignal(connectResult.replay, { fullScreenReplay: true })
+          writeReplayData('\x1b[2J\x1b[3J\x1b[H')
+          kittyKeyboardModes.scanReplay(connectResult.replay)
+          writeReplayData(connectResult.replay)
+          writeReplayData(reattachReplayResetSequence(connectResult.replay))
+          sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
+          if (connectResult.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
+            window.api.pty.ackColdRestore(ptyId)
           }
         } else if (connectResult?.coldRestore) {
           // replayIntoTerminal: the recorded scrollback is raw PTY output that
@@ -7312,7 +7102,7 @@ export function connectPanePty(
             schedulePendingStartupCommandDelivery()
           }
         }
-        if (hasStructuralReplay || prefetchedSshModelReplay) {
+        if (hasStructuralReplay) {
           await waitForTerminalReplayWritesParsed(pane.terminal)
           if (!isCurrentReattachPayload()) {
             return
@@ -7363,7 +7153,7 @@ export function connectPanePty(
           window.api.pty.signal(reattachPtyId, 'SIGWINCH')
         }
       }
-      if (hasStructuralReplay || prefetchedSshModelReplay) {
+      if (hasStructuralReplay) {
         await structuralReplayCoordinator.run(applyReattachPayload, {
           shouldRestore: isCurrentReattachPayload,
           afterRestore: fitAfterReattachRestore
@@ -7379,319 +7169,6 @@ export function connectPanePty(
 
       scheduleRuntimeGraphSync()
       return true
-    }
-
-    // Why: if this tab has a deferred SSH session ID, trigger the SSH
-    // connection now that the user has focused the tab. We check per-tab
-    // (not per-target) because multiple tabs for the same target each need
-    // to reattach independently. This must run before session ID resolution
-    // because the SSH provider isn't registered until after connect succeeds.
-    if (connectionId) {
-      const storeState = useAppStore.getState()
-      // Why: the SSH target was removed entirely (a ghost workspace). Reattaching
-      // can only fail with "SSH target not found", which surfaces a red "file an
-      // issue" banner for what is an expected user action. Skip reattach — the
-      // terminal overlay already shows a "host removed" state with a remove
-      // action.
-      // A target map that exists but omits this id means the target was removed.
-      // (Guard the map's presence for minimal test stubs that omit it; an absent
-      // map is "not hydrated", not "target gone".)
-      if (
-        storeState.sshTargetLabels instanceof Map &&
-        !storeState.sshTargetLabels.has(connectionId)
-      ) {
-        return
-      }
-      const restoredLeafSessionId =
-        deps.restoredLeafId && deps.restoredPtyIdByLeafId
-          ? (deps.restoredPtyIdByLeafId[deps.restoredLeafId] ?? null)
-          : null
-      const gate = resolveSshPaneConnectGate({
-        connectionId,
-        sshStatus: storeState.sshConnectionStates.get(connectionId)?.status,
-        isDeferredTarget: storeState.deferredSshReconnectTargets.includes(connectionId),
-        restoredLeafSessionId,
-        deferredTabSessionId: storeState.deferredSshSessionIdsByTabId[deps.tabId],
-        tabPtyId: storeState.tabsByWorktree[deps.worktreeId]?.find((t) => t.id === deps.tabId)
-          ?.ptyId,
-        hasLeafSessionMap: Boolean(
-          deps.restoredPtyIdByLeafId && Object.keys(deps.restoredPtyIdByLeafId).length > 0
-        )
-      })
-      const pendingSessionId = gate.pendingSessionId
-      console.warn(
-        `[pty-connection] SSH tab=${deps.tabId} connectionId=${connectionId} pendingSessionId=${pendingSessionId} sshConnected=${gate.sshConnected}`
-      )
-      if (gate.enterDeferredFlow) {
-        void (async () => {
-          // Why: if the target requires a passphrase/password and no credential
-          // is cached yet, auto-firing ssh.connect would surprise the user —
-          // a prompt pops unprompted just because they focused a tab / jumped
-          // via Cmd+J. Wait for the user to initiate the connect (via
-          // SshDisconnectedDialog → passphrase dialog) before proceeding with
-          // the PTY reattach. No-passphrase targets (ssh-agent, unencrypted
-          // key, cached creds) return false here and continue auto-connecting
-          // as before.
-          let needsPrompt = false
-          try {
-            needsPrompt = await window.api.ssh.needsPassphrasePrompt({
-              targetId: connectionId
-            })
-          } catch (err) {
-            console.warn('[pty-connection] needsPassphrasePrompt probe failed:', err)
-            // Why: if the probe fails, fall through to the existing auto-connect
-            // behavior rather than stranding the tab — a stuck tab is worse
-            // than a surprising prompt.
-          }
-          if (disposed) {
-            return
-          }
-          if (needsPrompt) {
-            const alreadyConnected =
-              useAppStore.getState().sshConnectionStates.get(connectionId)?.status === 'connected'
-            if (!alreadyConnected) {
-              // Wait for the user-driven connect (SshDisconnectedDialog →
-              // passphrase dialog → ssh.connect) to complete, then continue.
-              // Why: resolve on terminal-failure statuses too ('auth-failed',
-              // 'error', 'reconnection-failed') so this promise can't hang
-              // forever if the user cancels or the connect fails —
-              // waitForSshConnection below has its own error path that will
-              // surface the failure via reportError.
-              const outcome = await new Promise<UserInitiatedSshConnectOutcome>((resolve) => {
-                // Why: 'disconnected' counts as terminal only after we've
-                // observed a non-disconnected status — i.e. the user actually
-                // initiated a connect attempt that returned to 'disconnected'
-                // (cancel/dismiss). Treating the entry-time 'disconnected'
-                // as terminal would skip the gate entirely, defeating the
-                // passphrase-prompt deferral.
-                let sawNonDisconnected =
-                  useAppStore.getState().sshConnectionStates.get(connectionId)?.status !==
-                    'disconnected' &&
-                  useAppStore.getState().sshConnectionStates.get(connectionId)?.status !== undefined
-                let resolvedOutcome: UserInitiatedSshConnectOutcome = 'cancelled'
-                let settled = false
-                const finish = (nextOutcome: UserInitiatedSshConnectOutcome): void => {
-                  if (settled) {
-                    return
-                  }
-                  resolvedOutcome = nextOutcome
-                  settled = true
-                  unsub()
-                  const idx = waitTeardowns.indexOf(teardown)
-                  if (idx !== -1) {
-                    waitTeardowns.splice(idx, 1)
-                  }
-                  resolve(resolvedOutcome)
-                }
-                const teardown = (): void => finish('cancelled')
-                // Why: registering a teardown lets dispose() actively
-                // unsubscribe + resolve if the pane is torn down while the
-                // wait is in flight. Without this the zustand subscriber and
-                // the surrounding async IIFE leak for the rest of the app
-                // session because the callback only checks `disposed` when
-                // it next fires — and it may never fire again.
-                waitTeardowns.push(teardown)
-                const unsub = useAppStore.subscribe((state) => {
-                  if (disposed) {
-                    finish('cancelled')
-                    return
-                  }
-                  const status = state.sshConnectionStates.get(connectionId)?.status
-                  if (status && status !== 'disconnected') {
-                    sawNonDisconnected = true
-                  }
-                  const nextOutcome = sshPromptConnectOutcomeForStatus(status, sawNonDisconnected)
-                  if (nextOutcome) {
-                    finish(nextOutcome)
-                  }
-                })
-                // Why: re-read state immediately after subscribing to close the
-                // race where status transitioned between the alreadyConnected
-                // check above and the subscribe registration — otherwise we'd
-                // wait forever for a state change that already happened.
-                if (disposed) {
-                  finish('cancelled')
-                  return
-                }
-                const currentStatus = useAppStore
-                  .getState()
-                  .sshConnectionStates.get(connectionId)?.status
-                const currentOutcome = sshPromptConnectOutcomeForStatus(
-                  currentStatus,
-                  sawNonDisconnected
-                )
-                if (currentOutcome) {
-                  finish(currentOutcome)
-                }
-              })
-              if (disposed) {
-                return
-              }
-              if (outcome === 'cancelled') {
-                return
-              }
-              if (outcome === 'failed') {
-                reportError('SSH connection failed')
-                return
-              }
-            }
-          }
-
-          // Why: ensure the SSH connection is established before attempting
-          // PTY reattach. Multiple panes/tabs may need the same connection,
-          // so we wait for it rather than returning early when in-flight.
-          const connectResult = await waitForSshConnection(connectionId)
-          if (!connectResult.connected) {
-            reportError(`SSH connection failed: ${connectResult.error}`)
-            return
-          }
-          if (disposed) {
-            return
-          }
-          useAppStore.getState().removeDeferredSshReconnectTarget(connectionId)
-          if (disposed) {
-            return
-          }
-          if (pendingSessionId) {
-            console.warn(
-              `[pty-connection] Attempting reattach for tab=${deps.tabId} sessionId=${pendingSessionId}`
-            )
-            // Why: the saved remote PTY ID is single-use restore metadata.
-            // Clear it before attach/fallback so remounts don't keep retrying
-            // an expired session after a fresh shell has been created.
-            useAppStore.getState().removeDeferredSshSessionId(deps.tabId)
-            // Why: pre-signal also for SSH-deferred reattach so the
-            // cooperation gate uniformly applies to remote sessions. Issue
-            // declare and connect back-to-back; Electron preserves order. See
-            // docs/mobile-prefer-renderer-scrollback.md.
-            const preSignalPromise =
-              runtimeEnvironmentId || isRemoteRuntimePtyId(pendingSessionId)
-                ? Promise.resolve(null)
-                : window.api.pty.declarePendingPaneSerializer(cacheKey).catch(() => null)
-            let expiredReattachError = false
-            const coldRestoreStartup = buildColdRestoreAgentResumeStartup()
-            clearPaneMode2031State()
-            clearHiddenOutputRestoreState()
-            const outputCallbacks = captureTransportOutputCallbacks((message) => {
-              if (isSshSessionExpiredError(message)) {
-                expiredReattachError = true
-                return
-              }
-              reportError(message)
-            })
-            beginReattachLiveDataDeferral(outputCallbacks.generation)
-            transportConnectInFlightSince = Date.now()
-            const reattachPromise = transport.connect({
-              url: '',
-              cols,
-              rows,
-              sessionId: pendingSessionId,
-              ...(coldRestoreStartup?.command ? { command: coldRestoreStartup.command } : {}),
-              ...(coldRestoreStartup?.env
-                ? { env: mergeStartupEnvWithPaneIdentity(coldRestoreStartup.env) }
-                : {}),
-              ...(coldRestoreStartup?.launchConfig
-                ? { launchConfig: coldRestoreStartup.launchConfig }
-                : {}),
-              ...(coldRestoreStartup?.launchToken
-                ? { launchToken: coldRestoreStartup.launchToken }
-                : {}),
-              ...(coldRestoreStartup?.agent ? { launchAgent: coldRestoreStartup.agent } : {}),
-              ...(shouldDeclareHiddenAtSpawn() ? { initiallyHidden: true } : {}),
-              callbacks: outputCallbacks.callbacks
-            })
-            void Promise.resolve(reattachPromise)
-              .catch(() => null)
-              .finally(() => {
-                transportConnectInFlightSince = null
-              })
-            void Promise.resolve(reattachPromise)
-              .then(async (result) => {
-                if (outputCallbacks.generation !== transportStreamGeneration) {
-                  finishReattachLiveDataDeferral(false, outputCallbacks.generation)
-                  const gen = await preSignalPromise
-                  if (typeof gen === 'number') {
-                    void window.api.pty.clearPendingPaneSerializer(cacheKey, gen).catch(() => {})
-                  }
-                  return
-                }
-                console.warn(
-                  `[pty-connection] Reattach result for tab=${deps.tabId}:`,
-                  result
-                    ? {
-                        sessionExpired: (result as Record<string, unknown>).sessionExpired,
-                        replay: !!(result as Record<string, unknown>).replay
-                      }
-                    : 'undefined'
-                )
-                if (!result && expiredReattachError) {
-                  finishReattachLiveDataDeferral(false, outputCallbacks.generation)
-                  const gen = await preSignalPromise
-                  if (typeof gen === 'number') {
-                    void window.api.pty.clearPendingPaneSerializer(cacheKey, gen).catch(() => {})
-                  }
-                  if (disposed) {
-                    return
-                  }
-                  deps.clearExitedPanePtyLayoutBinding(pane.id, pendingSessionId)
-                  deps.clearTabPtyId(deps.tabId, pendingSessionId)
-                  startFreshColdRestoreAgentResume(coldRestoreStartup, {
-                    forceBlankRestoredViewport: true
-                  })
-                  return
-                }
-                const accepted = await handleReattachResult(
-                  result,
-                  pendingSessionId,
-                  coldRestoreStartup,
-                  outputCallbacks.generation
-                )
-                finishReattachLiveDataDeferral(accepted, outputCallbacks.generation)
-                const gen = await preSignalPromise
-                if (typeof gen === 'number') {
-                  if (!isRemoteRuntimePtyId(pendingSessionId)) {
-                    const settledPtyId =
-                      result && typeof result === 'object' && 'id' in result
-                        ? result.id
-                        : (transport.getPtyId() ?? pendingSessionId)
-                    const hasRestorePayload =
-                      result &&
-                      typeof result === 'object' &&
-                      ('snapshot' in result || 'replay' in result || 'coldRestore' in result)
-                    await (hasRestorePayload
-                      ? settlePaneSerializerAfterReplay(settledPtyId, gen)
-                      : window.api.pty.settlePaneSerializer(cacheKey, gen))
-                  }
-                }
-              })
-              .catch(async (err) => {
-                finishReattachLiveDataDeferral(false, outputCallbacks.generation)
-                const gen = await preSignalPromise
-                if (typeof gen === 'number') {
-                  void window.api.pty.clearPendingPaneSerializer(cacheKey, gen).catch(() => {})
-                }
-                console.warn(`[pty-connection] Reattach FAILED for tab=${deps.tabId}:`, err)
-                if (disposed || outputCallbacks.generation !== transportStreamGeneration) {
-                  return
-                }
-                if (isSshSessionExpiredError(err)) {
-                  deps.clearExitedPanePtyLayoutBinding(pane.id, pendingSessionId)
-                  deps.clearTabPtyId(deps.tabId, pendingSessionId)
-                  startFreshColdRestoreAgentResume(coldRestoreStartup, {
-                    forceBlankRestoredViewport: true
-                  })
-                  return
-                }
-                startFreshColdRestoreAgentResume(coldRestoreStartup, {
-                  forceBlankRestoredViewport: true
-                })
-              })
-          } else {
-            startFreshColdRestoreAgentResume()
-          }
-        })()
-        return
-      }
     }
 
     // Why: re-read session IDs inside the rAF instead of capturing before.

@@ -187,10 +187,8 @@ export async function prepareSkippedOnboardingPreferences({
 
 export function useOnboardingFlow(
   onboarding: OnboardingState,
-  onOnboardingChange: (state: OnboardingState) => void,
-  options: { onSettingsDetourStart?: () => void } = {}
+  onOnboardingChange: (state: OnboardingState) => void
 ) {
-  const { onSettingsDetourStart } = options
   const settings = useAppStore((s) => s.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const refreshDetectedAgents = useAppStore((s) => s.refreshDetectedAgents)
@@ -206,8 +204,6 @@ export function useOnboardingFlow(
   const cancelNestedRepoScan = useAppStore((s) => s.cancelNestedRepoScan)
   const importNestedRepos = useAppStore((s) => s.importNestedRepos)
   const openModal = useAppStore((s) => s.openModal)
-  const openSettingsPage = useAppStore((s) => s.openSettingsPage)
-  const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
   const preflightStatus = useAppStore((s) => s.preflightStatus)
   const preflightStatusChecked = useAppStore((s) => s.preflightStatusChecked)
   const refreshPreflightStatus = useAppStore((s) => s.refreshPreflightStatus)
@@ -1164,42 +1160,6 @@ export function useOnboardingFlow(
     ]
   )
 
-  const openSshSettings = useCallback(async () => {
-    if (busyLabel) {
-      return
-    }
-    setError(null)
-    try {
-      onOnboardingChange(await persistStep(currentStep.stepNumber - 1))
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(message)
-      toast.error(
-        translate(
-          'auto.components.onboarding.use.onboarding.flow.dce4bdce5b',
-          'Could not open SSH settings'
-        ),
-        { description: message }
-      )
-      return
-    }
-    // Why: Settings renders behind the fullscreen onboarding layer; SSH users
-    // need a temporary detour without marking required repo setup dismissed.
-    onSettingsDetourStart?.()
-    // Why: keep the target in the store before the Settings view mounts. A
-    // timer here can run before the lazy view subscribes and strand users on
-    // the default General pane.
-    openSettingsTarget({ pane: 'ssh', repoId: null, sectionId: 'ssh' })
-    openSettingsPage()
-  }, [
-    busyLabel,
-    currentStep.stepNumber,
-    onOnboardingChange,
-    onSettingsDetourStart,
-    openSettingsPage,
-    openSettingsTarget
-  ])
-
   const back = useCallback(() => {
     if (nestedScan) {
       trackNestedBackAndClear()
@@ -1258,7 +1218,6 @@ export function useOnboardingFlow(
     setLifecycleRootRef,
     openFolder,
     continueWithExistingProject,
-    openSshSettings,
     clone
   }
 }

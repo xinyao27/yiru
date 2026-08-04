@@ -1,4 +1,3 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
@@ -97,11 +96,6 @@ type NewWorkspaceComposerCardProps = {
   shouldWaitForSetupCheck: boolean
   resolvedSetupDecision: 'run' | 'skip' | null
   createError: WorkspaceCreateErrorDisplay | null
-  selectedRepoConnectionId: string | null
-  selectedRepoSshStatus: SshConnectionStatus | null
-  selectedRepoRequiresConnection: boolean
-  selectedRepoConnectInProgress: boolean
-  onConnectSelectedRepo: () => Promise<void>
   branchesEnabled?: boolean
   setupControlsEnabled?: boolean
   canUseSparseCheckout: boolean
@@ -179,11 +173,6 @@ export function NewWorkspaceComposerCard({
   shouldWaitForSetupCheck,
   resolvedSetupDecision,
   createError,
-  selectedRepoConnectionId,
-  selectedRepoSshStatus,
-  selectedRepoRequiresConnection,
-  selectedRepoConnectInProgress,
-  onConnectSelectedRepo,
   branchesEnabled = true,
   setupControlsEnabled = true,
   canUseSparseCheckout,
@@ -284,13 +273,6 @@ export function NewWorkspaceComposerCard({
           projectHostSetupOptions={projectHostSetupOptions}
           selectedProjectHostSetupId={selectedProjectHostSetupId}
           onProjectHostSetupChange={onProjectHostSetupChange}
-          eligibleRepos={eligibleRepos}
-          repoId={repoId}
-          selectedRepoRequiresConnection={selectedRepoRequiresConnection}
-          selectedRepoConnectionId={selectedRepoConnectionId}
-          selectedRepoSshStatus={selectedRepoSshStatus}
-          selectedRepoConnectInProgress={selectedRepoConnectInProgress}
-          onConnectSelectedRepo={onConnectSelectedRepo}
         />
 
         <NameSection
@@ -308,7 +290,6 @@ export function NewWorkspaceComposerCard({
           smartNameSelection={smartNameSelection}
           onClearSmartNameSelection={onClearSmartNameSelection}
           smartNameGitHubSourceContext={smartNameGitHubSourceContext}
-          selectedRepoRequiresConnection={selectedRepoRequiresConnection}
           branchesEnabled={branchesEnabled}
           repoBackedSourcesDisabled={repoBackedSourcesDisabled}
           repoBackedSearchRepos={repoBackedSearchRepos}

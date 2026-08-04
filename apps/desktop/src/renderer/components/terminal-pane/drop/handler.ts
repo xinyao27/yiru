@@ -5,7 +5,6 @@ import { readWorkspaceFileDragPaths } from '~renderer/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { useAppStore } from '~renderer/store'
 
-import { getTerminalPasteSshRemotePlatform } from '../paste/ssh-platform'
 import { recordTerminalUserInputForLeaf } from '../terminal-input-activity'
 import {
   handleNativeTerminalFileDrop as handleTerminalFileDrop,
@@ -90,8 +89,7 @@ export async function handleInternalTerminalFileDrop({
     worktreePath,
     // Why: internal Explorer drags paste worktree-owned paths directly, so SSH
     // shell semantics must come from the remote session, not the client OS.
-    connectionId,
-    remotePlatform: getTerminalPasteSshRemotePlatform(connectionId)
+    connectionId
   })
 
   const writeResult = await writeTerminalDropPathsToCapturedTarget({
