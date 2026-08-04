@@ -54,12 +54,14 @@ export function WorkspaceTabStripViewport({
         />
       ) : null}
       {/* Why: only the actual tab viewport is no-drag; unused titlebar space
-          remains movable. The overflow viewport owns both outer seams so the
-          neighboring navigation controls stay borderless. */}
+          remains movable. The viewport owns the leading seam; its trailing
+          seam appears only while the edge mask hides a tab divider. */}
       <div
         className={cn(
           'relative flex min-h-0 max-w-full min-w-0 flex-[0_1_auto]',
-          tabStripOverflowState.hasOverflow && 'border-x border-border'
+          tabStripOverflowState.hasOverflow && 'border-l border-border',
+          tabStripOverflowState.canScrollEnd &&
+            "after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:z-10 after:w-px after:bg-border after:content-['']"
         )}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
