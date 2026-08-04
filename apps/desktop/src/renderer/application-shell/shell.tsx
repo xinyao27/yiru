@@ -156,7 +156,6 @@ import {
   timeRendererStartupStep,
   timeRendererStartupSyncStep
 } from '../startup/diagnostics'
-import { reconnectSshTargetForRendererStartup } from '../startup/ssh-startup-reconnect'
 import { useAppStore } from '../store'
 import { selectActiveTerminalChromeState } from '../store/active-terminal-chrome-selector'
 import { selectFloatingVisibleTabCount } from '../store/selectors'
@@ -371,11 +370,6 @@ const DeleteWorktreeDialog = lazy(() => import('../components/sidebar/delete-wor
 const DictationController = lazy(() =>
   import('../components/dictation/controller').then((module) => ({
     default: module.DictationController
-  }))
-)
-const SshPassphraseDialog = lazy(() =>
-  import('../components/direct-ssh/passphrase-dialog').then((module) => ({
-    default: module.SshPassphraseDialog
   }))
 )
 const UpdateCard = lazy(() =>
@@ -718,7 +712,6 @@ function App(): React.JSX.Element {
   )
   const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const dictationState = useAppStore((s) => s.dictationState)
-  const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
     settings?.voice?.enabled === true || dictationState !== 'idle'
   usePrimarySelectionPaste()
@@ -1043,95 +1036,6 @@ function App(): React.JSX.Element {
           if (!cancelled) {
             setOnboarding(onboardingState)
             setOnboardingLoaded(true)
-          }
-
-          // Why: SSH connections must be re-established BEFORE terminal
-          // reconnect so that reconnectPersistedTerminals can route SSH-backed
-          // tabs through pty.attach on the relay. Passphrase-protected targets
-          // are deferred to tab focus to avoid stacking credential dialogs at
-          // startup before the user has context.
-          const connectionIds = sessionRead.session.activeConnectionIdsAtShutdown ?? []
-          if (connectionIds.length > 0) {
-            try {
-              const SSH_RECONNECT_TIMEOUT_MS = 15_000
-              const allTargets = await timeRendererStartupStep('ssh-list-targets', () =>
-                window.api.ssh.listTargets()
-              )
-              const targetMap = new Map(allTargets.map((t) => [t.id, t]))
-              const targets = connectionIds.map((targetId) => ({
-                targetId,
-                needsPassphrase: targetMap.get(targetId)?.lastRequiredPassphrase ?? false
-              }))
-
-              const eagerTargets = targets.filter((t) => !t.needsPassphrase)
-              const deferredTargets = targets.filter((t) => t.needsPassphrase)
-
-              if (deferredTargets.length > 0) {
-                actions.setDeferredSshReconnectTargets(deferredTargets.map((t) => t.targetId))
-              }
-
-              // Why: track which eager targets timed out so we can treat them
-              // as deferred — the underlying ssh.connect() keeps running in the
-              // main process, but reconnectPersistedTerminals won't see them as
-              // connected. Adding them to the deferred list ensures PTYs get
-              // reattached when the user focuses the tab (by which time the
-              // slow connect will likely have succeeded).
-              const timedOutTargets: string[] = []
-              await timeRendererStartupStep(
-                'ssh-reconnect',
-                () =>
-                  Promise.all(
-                    eagerTargets.map(async ({ targetId }) => {
-                      const result = await reconnectSshTargetForRendererStartup({
-                        targetId,
-                        timeoutMs: SSH_RECONNECT_TIMEOUT_MS,
-                        connect: (id) => window.api.ssh.connect({ targetId: id }),
-                        publishState: actions.setSshConnectionState,
-                        onFailure: (id, error) => {
-                          console.warn(`SSH auto-reconnect failed for ${id}:`, error)
-                        }
-                      })
-                      if (result.timedOut) {
-                        timedOutTargets.push(targetId)
-                      }
-                    })
-                  ),
-                {
-                  eagerTargets: eagerTargets.length,
-                  deferredTargets: deferredTargets.length
-                }
-              )
-              if (timedOutTargets.length > 0) {
-                actions.setDeferredSshReconnectTargets([
-                  ...deferredTargets.map((t) => t.targetId),
-                  ...timedOutTargets
-                ])
-              }
-
-              // Why: connect's returned state is published above, but older or
-              // wrapped providers may return no state. Poll main once as a
-              // compatibility fallback before terminal restoration.
-              for (const { targetId } of eagerTargets) {
-                if (timedOutTargets.includes(targetId)) {
-                  continue
-                }
-                try {
-                  const state = await window.api.ssh.getState({ targetId })
-                  console.warn(
-                    `[ssh-restore] Polled state for ${targetId}: status=${state?.status}`
-                  )
-                  if (state?.status === 'connected') {
-                    actions.setSshConnectionState(targetId, state)
-                  }
-                } catch {
-                  /* best-effort */
-                }
-              }
-            } catch (err) {
-              console.warn('SSH startup reconnect failed:', err)
-            }
-          } else {
-            logRendererStartupDiagnostic('ssh-reconnect-skipped', { connectionIds: 0 })
           }
 
           // Why: main overlaps daemon/hook startup with renderer hydration for
@@ -2806,18 +2710,6 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               ) : null}
             </Suspense>
-            {hasSshCredentialRequest ? (
-              <Suspense fallback={null}>
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.ssh-passphrase"
-                  surface="modal"
-                  resetKey={activeModal}
-                  compact
-                >
-                  <SshPassphraseDialog />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
             <RecoverableRenderErrorBoundary
               boundaryId="modal.markdown-template-picker"
               surface="modal"

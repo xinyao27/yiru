@@ -1,5 +1,4 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
 import { buildNativeChatUnsubscribe } from '@yiru/workbench-model/agent'
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
@@ -631,7 +630,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     shell: createShellApi(),
     skills: createSkillsApi(),
     pty: createPtyApi(),
-    ssh: createSshApi(),
     wsl: {
       isAvailable: () => callRuntimeResult<boolean>('host.wsl.isAvailable').catch(() => false),
       listDistros: () => callRuntimeResult<string[]>('host.wsl.listDistros').catch(() => [])
@@ -2875,65 +2873,6 @@ function createPtyApi(): NonNullable<Partial<PreloadApi>['pty']> {
       killOne: () => Promise.resolve({ success: false }),
       restart: () => Promise.resolve({ success: false })
     }
-  }
-}
-
-function createSshApi(): NonNullable<Partial<PreloadApi>['ssh']> {
-  return {
-    // Why: SSH connections are owned by the paired host. Read/connect route to
-    // its runtime RPC so remote worktrees can show real connection state and
-    // reconnect (STA-1468); target management stays desktop-only.
-    listTargets: async () => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return []
-      }
-      const { targets } = await callRuntimeResult<{ targets: SshTarget[] }>('ssh.listTargets')
-      return targets
-    },
-    listRemovedTargetLabels: async () => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return {}
-      }
-      const { labels } = await callRuntimeResult<{ labels: Record<string, string> }>(
-        'ssh.listRemovedTargetLabels'
-      )
-      return labels
-    },
-    removeTarget: () => Promise.resolve(),
-    connect: async (args) => {
-      const { state } = await callRuntimeResult<{ state: SshConnectionState | null }>(
-        'ssh.connect',
-        { targetId: args.targetId }
-      )
-      return state
-    },
-    disconnect: () => Promise.resolve(),
-    terminateSessions: () => Promise.resolve(),
-    getState: async (args) => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return null
-      }
-      const { state } = await callRuntimeResult<{ state: SshConnectionState | null }>(
-        'ssh.getState',
-        { targetId: args.targetId }
-      )
-      return state
-    },
-    needsPassphrasePrompt: () => Promise.resolve(false),
-    onStateChanged: () => noopUnsubscribe,
-    addPortForward: () =>
-      Promise.reject(new Error('SSH port forwarding is unavailable in the web client.')),
-    updatePortForward: () =>
-      Promise.reject(new Error('SSH port forwarding is unavailable in the web client.')),
-    removePortForward: () => Promise.resolve(null),
-    listPortForwards: () => Promise.resolve([]),
-    listDetectedPorts: () => Promise.resolve([]),
-    onPortForwardsChanged: () => noopUnsubscribe,
-    onDetectedPortsChanged: () => noopUnsubscribe,
-    browseDir: () => Promise.resolve({ entries: [], resolvedPath: '' }),
-    onCredentialRequest: () => noopUnsubscribe,
-    onCredentialResolved: () => noopUnsubscribe,
-    submitCredential: () => Promise.resolve()
   }
 }
 

@@ -1,5 +1,4 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
@@ -19,8 +18,6 @@ import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 import { getAllWorktreesFromState } from '~renderer/store/selectors'
 
-import { removeSshTargetWithBestEffortCleanup } from '../direct-ssh/target-remove'
-import { clearHostRename } from './host-rename-remove'
 import type { HostRemovalTarget } from './host-rename-remove'
 import { resolveSshHostRemoval } from './ssh-host-remove-resolution'
 import { clearSshHostWorkspaces } from './ssh-host-remove-workspaces'
@@ -28,7 +25,6 @@ import { clearSshHostWorkspaces } from './ssh-host-remove-workspaces'
 type HostRemoveDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  hostId: ExecutionHostId
   label: string
   target: NonNullable<HostRemovalTarget>
 }
@@ -36,7 +32,6 @@ type HostRemoveDialogProps = {
 export function HostRemoveDialog({
   open,
   onOpenChange,
-  hostId,
   label,
   target
 }: HostRemoveDialogProps): React.JSX.Element {
@@ -69,23 +64,6 @@ export function HostRemoveDialog({
   const workspaceCount = sshResolution?.workspaceCount ?? 0
   const hasWorkspaces = workspaceCount > 0
   const isConnected = sshResolution?.isConnected ?? false
-
-  // Why: dropping a host should also drop its now-orphaned label override so a
-  // future host reusing the same id doesn't inherit a stale rename.
-  const dropOverridesForHost = (): void => {
-    const state = useAppStore.getState()
-    void state.updateSettings({
-      hostSettingOverrides: clearHostRename(state.settings, hostId)
-    })
-  }
-
-  const removeSshTarget = async (targetId: string): Promise<void> => {
-    await removeSshTargetWithBestEffortCleanup(window.api.ssh, targetId)
-    // Why: clear deferred reconnect metadata so focused SSH tabs stop retrying
-    // the deleted target — mirrors the SSH settings pane removal flow.
-    useAppStore.getState().clearRemovedSshTargetState(targetId)
-    dropOverridesForHost()
-  }
 
   // Why: runtime-environment removal needs active-environment switching and
   // error context owned by the Yiru servers settings pane, so we deep-link
@@ -127,7 +105,6 @@ export function HostRemoveDialog({
           return
         }
       }
-      await removeSshTarget(target.targetId)
       if (mountedRef.current) {
         onOpenChange(false)
       }

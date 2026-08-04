@@ -306,12 +306,6 @@ type RuntimeEnvironmentSubscriptionHandle = {
   sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => void
 }
 import type {
-  SshConnectionState,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '@yiru/runtime-protocol/ssh-connection'
-import type {
   AiVaultListArgs,
   AiVaultListResult,
   AiVaultSubagentListArgs,
@@ -2765,59 +2759,6 @@ export type PreloadApi = {
   }
   grokAccounts: {
     getStatus: () => Promise<GrokAccountStatus>
-  }
-  ssh: {
-    listTargets: () => Promise<SshTarget[]>
-    // Removed-target id → last known label, for showing a friendly host name on
-    // workspaces still pinned to a target that no longer exists.
-    listRemovedTargetLabels: () => Promise<Record<string, string>>
-    removeTarget: (args: { id: string }) => Promise<void>
-    connect: (args: { targetId: string }) => Promise<SshConnectionState | null>
-    disconnect: (args: { targetId: string }) => Promise<void>
-    terminateSessions: (args: { targetId: string }) => Promise<void>
-    getState: (args: { targetId: string }) => Promise<SshConnectionState | null>
-    needsPassphrasePrompt: (args: { targetId: string }) => Promise<boolean>
-    onStateChanged: (
-      callback: (data: { targetId: string; state: SshConnectionState }) => void
-    ) => () => void
-    addPortForward: (args: {
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }) => Promise<PortForwardEntry>
-    updatePortForward: (args: {
-      id: string
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }) => Promise<PortForwardEntry>
-    removePortForward: (args: { id: string }) => Promise<PortForwardEntry | null>
-    listPortForwards: (args?: { targetId?: string }) => Promise<PortForwardEntry[]>
-    listDetectedPorts: (args: { targetId: string }) => Promise<EnrichedDetectedPort[]>
-    onPortForwardsChanged: (
-      callback: (data: { targetId: string; forwards: PortForwardEntry[] }) => void
-    ) => () => void
-    onDetectedPortsChanged: (
-      callback: (data: { targetId: string; ports: EnrichedDetectedPort[] }) => void
-    ) => () => void
-    browseDir: (args: { targetId: string; dirPath: string }) => Promise<{
-      entries: { name: string; isDirectory: boolean }[]
-      resolvedPath: string
-    }>
-    onCredentialRequest: (
-      callback: (data: {
-        requestId: string
-        targetId: string
-        kind: 'passphrase' | 'password'
-        detail: string
-      }) => void
-    ) => () => void
-    onCredentialResolved: (callback: (data: { requestId: string }) => void) => () => void
-    submitCredential: (args: { requestId: string; value: string | null }) => Promise<void>
   }
   automations: {
     list: () => Promise<Automation[]>

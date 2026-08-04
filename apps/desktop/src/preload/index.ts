@@ -1,11 +1,5 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type {
-  SshConnectionState,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '@yiru/runtime-protocol/ssh-connection'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type {
   AgentStatusIpcPayload,
@@ -165,10 +159,6 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '~shared/speech-types'
-import {
-  admitSshConnectionStateForAuthorityReconciliation,
-  admitSshDetectedPorts
-} from '~shared/ssh-retained-payload-admission'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
 import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
@@ -3894,140 +3884,6 @@ const api = {
 
   grokAccounts: {
     getStatus: (): Promise<GrokAccountStatus> => ipcRenderer.invoke('grokAccounts:getStatus')
-  },
-
-  ssh: {
-    listTargets: (): Promise<SshTarget[]> => ipcRenderer.invoke('ssh:listTargets'),
-
-    listRemovedTargetLabels: (): Promise<Record<string, string>> =>
-      ipcRenderer.invoke('ssh:listRemovedTargetLabels'),
-
-    removeTarget: (args: { id: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:removeTarget', args),
-
-    connect: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      admitSshConnectionStateForAuthorityReconciliation(
-        await ipcRenderer.invoke('ssh:connect', args),
-        args.targetId
-      ),
-
-    disconnect: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:disconnect', args),
-
-    terminateSessions: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:terminateSessions', args),
-
-    getState: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      admitSshConnectionStateForAuthorityReconciliation(
-        await ipcRenderer.invoke('ssh:getState', args),
-        args.targetId
-      ),
-
-    needsPassphrasePrompt: (args: { targetId: string }): Promise<boolean> =>
-      ipcRenderer.invoke('ssh:needsPassphrasePrompt', args),
-
-    onStateChanged: (
-      callback: (data: { targetId: string; state: SshConnectionState }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; state: unknown }
-      ) => {
-        const state = admitSshConnectionStateForAuthorityReconciliation(data.state, data.targetId)
-        if (state) {
-          callback({ targetId: data.targetId, state })
-        }
-      }
-      ipcRenderer.on('ssh:state-changed', listener)
-      return () => ipcRenderer.removeListener('ssh:state-changed', listener)
-    },
-
-    addPortForward: (args: {
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }): Promise<PortForwardEntry> => ipcRenderer.invoke('ssh:addPortForward', args),
-
-    updatePortForward: (args: {
-      id: string
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }): Promise<PortForwardEntry> => ipcRenderer.invoke('ssh:updatePortForward', args),
-
-    removePortForward: (args: { id: string }): Promise<PortForwardEntry | null> =>
-      ipcRenderer.invoke('ssh:removePortForward', args),
-
-    listPortForwards: (args?: { targetId?: string }): Promise<PortForwardEntry[]> =>
-      ipcRenderer.invoke('ssh:listPortForwards', args),
-
-    listDetectedPorts: async (args: { targetId: string }): Promise<EnrichedDetectedPort[]> =>
-      admitSshDetectedPorts(await ipcRenderer.invoke('ssh:listDetectedPorts', args)),
-
-    onPortForwardsChanged: (
-      callback: (data: { targetId: string; forwards: PortForwardEntry[] }) => void
-    ): (() => void) => {
-      const handler = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; forwards: PortForwardEntry[] }
-      ) => callback(data)
-      ipcRenderer.on('ssh:port-forwards-changed', handler)
-      return () => ipcRenderer.removeListener('ssh:port-forwards-changed', handler)
-    },
-
-    onDetectedPortsChanged: (
-      callback: (data: { targetId: string; ports: EnrichedDetectedPort[] }) => void
-    ): (() => void) => {
-      const handler = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; ports: unknown }
-      ) => callback({ targetId: data.targetId, ports: admitSshDetectedPorts(data.ports) })
-      ipcRenderer.on('ssh:detected-ports-changed', handler)
-      return () => ipcRenderer.removeListener('ssh:detected-ports-changed', handler)
-    },
-
-    browseDir: (args: {
-      targetId: string
-      dirPath: string
-    }): Promise<{
-      entries: { name: string; isDirectory: boolean }[]
-      resolvedPath: string
-    }> => ipcRenderer.invoke('ssh:browseDir', args),
-
-    onCredentialRequest: (
-      callback: (data: {
-        requestId: string
-        targetId: string
-        kind: 'passphrase' | 'password'
-        detail: string
-      }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: {
-          requestId: string
-          targetId: string
-          kind: 'passphrase' | 'password'
-          detail: string
-        }
-      ) => callback(data)
-      ipcRenderer.on('ssh:credential-request', listener)
-      return () => ipcRenderer.removeListener('ssh:credential-request', listener)
-    },
-
-    onCredentialResolved: (callback: (data: { requestId: string }) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: { requestId: string }) =>
-        callback(data)
-      ipcRenderer.on('ssh:credential-resolved', listener)
-      return () => ipcRenderer.removeListener('ssh:credential-resolved', listener)
-    },
-
-    submitCredential: (args: { requestId: string; value: string | null }): Promise<void> =>
-      ipcRenderer.invoke('ssh:submitCredential', args)
   },
 
   automations: {
