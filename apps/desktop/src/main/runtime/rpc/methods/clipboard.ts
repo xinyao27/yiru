@@ -136,9 +136,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     params: SaveImageAsTempFile,
     access: { scope: 'host', tier: 'host' },
     handler: async (params) =>
-      saveClipboardImageBufferAsTempFile(Buffer.from(params.contentBase64, 'base64'), {
-        connectionId: params.connectionId
-      })
+      saveClipboardImageBufferAsTempFile(Buffer.from(params.contentBase64, 'base64'))
   }),
   defineMethod({
     name: 'clipboard.startImageUpload',
@@ -195,9 +193,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
         }
         const contentBase64 = upload.chunks.join('')
         assertValidBase64Content(contentBase64)
-        return await saveClipboardImageBufferAsTempFile(Buffer.from(contentBase64, 'base64'), {
-          connectionId: upload.connectionId
-        })
+        return await saveClipboardImageBufferAsTempFile(Buffer.from(contentBase64, 'base64'))
       } finally {
         // Why: failed SSH or filesystem commits must not leave bounded upload
         // memory pinned until TTL cleanup.

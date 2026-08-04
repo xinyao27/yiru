@@ -2,7 +2,6 @@ import { realpath } from 'node:fs/promises'
 
 import { resolveAuthorizedPath } from '~main/filesystem/auth'
 import type { Store } from '~main/persistence'
-import { getSshGitProvider } from '~main/providers/ssh-git-dispatch'
 
 import { CoworkingExecutionError } from '../execution-error'
 import { readCoworkingGitAdministrativePaths } from '../git-administrative-path-reader'
@@ -22,11 +21,7 @@ import {
   localCoworkingHostScope,
   localCoworkingPathIdentity,
   lstatCoworkingHostPath,
-  remoteCoworkingPathIdentity,
-  requireCoworkingSshFilesystem,
-  coworkingFilesystemProvider,
-  coworkingHostPath,
-  coworkingSshHostScope
+  coworkingHostPath
 } from './paths'
 
 /** Implements containment and verified IO on the worktree's already-authorized host route. */
@@ -39,18 +34,6 @@ export class YiruCoworkingHostFiles
   }
 
   async resolveRoot(target: CoworkingOwnerWorktree): Promise<CoworkingCanonicalHostPath> {
-    if (target.connectionId) {
-      const provider = requireCoworkingSshFilesystem(target.connectionId)
-      const platform = getSshGitProvider(target.connectionId)?.getHostPlatform()
-      if (!platform) {
-        throw new CoworkingExecutionError('resource_unavailable')
-      }
-      return canonicalCoworkingHostPath(
-        coworkingSshHostScope(target.connectionId, platform.pathFlavor),
-        await provider.realpath(target.worktreePath),
-        await remoteCoworkingPathIdentity(provider, target.worktreePath)
-      )
-    }
     const authorized = await resolveAuthorizedPath(target.worktreePath, this.store)
     const absolutePath = await realpath(authorized)
     return canonicalCoworkingHostPath(
@@ -171,14 +154,6 @@ export class YiruCoworkingHostFiles
     root: CoworkingCanonicalHostPath,
     absolutePath: string
   ): Promise<CoworkingCanonicalHostPath> {
-    const provider = coworkingFilesystemProvider(root)
-    if (provider) {
-      return canonicalCoworkingHostPath(
-        root.scopeKey,
-        await provider.realpath(absolutePath),
-        await remoteCoworkingPathIdentity(provider, absolutePath)
-      )
-    }
     const authorized = await resolveAuthorizedPath(absolutePath, this.store)
     const canonical = await realpath(authorized)
     return canonicalCoworkingHostPath(
@@ -207,10 +182,7 @@ export class YiruCoworkingHostFiles
     absolutePath: string
   ): Promise<CoworkingCanonicalHostPath | null> {
     try {
-      const provider = coworkingFilesystemProvider(root)
-      const canonical = provider
-        ? await provider.realpath(absolutePath)
-        : await realpath(await resolveAuthorizedPath(absolutePath, this.store))
+      const canonical = await realpath(await resolveAuthorizedPath(absolutePath, this.store))
       return canonicalCoworkingHostPath(root.scopeKey, canonical, null)
     } catch (error) {
       if (isMissingCoworkingPath(error)) {
@@ -224,15 +196,6 @@ export class YiruCoworkingHostFiles
     root: CoworkingCanonicalHostPath,
     absolutePath: string
   ): Promise<CoworkingCanonicalHostPath> {
-    const provider = coworkingFilesystemProvider(root)
-    if (provider) {
-      const canonical = await provider.realpath(absolutePath)
-      return canonicalCoworkingHostPath(
-        root.scopeKey,
-        canonical,
-        await remoteCoworkingPathIdentity(provider, canonical)
-      )
-    }
     const canonical = await realpath(absolutePath)
     return canonicalCoworkingHostPath(
       root.scopeKey,

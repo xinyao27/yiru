@@ -2,13 +2,9 @@ import type { ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { access, mkdir, readdir, rm } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { isAbsolute, join, posix } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 
-import {
-  isRuntimePathAbsolute,
-  normalizeRuntimePathForComparison,
-  relativePathInsideRoot
-} from '@yiru/workbench-model/platform'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
@@ -23,7 +19,6 @@ boundary. Splitting by line count would scatter tightly coupled repo behavior. *
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import { dialog, ipcMain } from 'electron'
 import { z } from 'zod'
-import { joinRemotePath } from '~main/remote-host/platform'
 import { DEFAULT_REPO_BADGE_COLOR } from '~shared/constants'
 import type { FolderWorkspacePathStatusRequest } from '~shared/folder-workspace-path-status'
 import { getGitCloneFailureMessage } from '~shared/git/clone-failure-message'
@@ -59,36 +54,25 @@ import type {
 } from '~shared/types'
 
 import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
-import { getSshGitCapabilityCache } from '../git/capability-state'
 import {
   isGitRepo,
   getGitRepoRoot,
   getRepoName,
   getBaseRefDefault,
   getRemoteCount,
-  normalizeRefSearchQuery,
-  parseAndFilterSearchRefDetails,
-  parseRemoteCount,
-  resolveDefaultBaseRefViaExec,
-  buildSearchBaseRefsArgv,
-  isForEachRefExcludeUnsupportedError,
-  mergeBaseRefSearchResultGroups,
   searchBaseRefDetails
 } from '../git/repo'
 import {
   cleanupClaimedCloneTarget,
   claimCloneTarget,
-  deriveCloneRepoNameFromUrl,
   deriveValidatedClonePath,
   getClonePathComparisonKey
 } from '../git/repo-clone-path'
 import type { ClaimedCloneTarget } from '../git/repo-clone-path'
 import { gitExecFileAsync, gitSpawn, nonInteractiveGitEnv } from '../git/runner'
 import { runWithGitReadCacheInvalidation } from '../git/status'
-import { getSshGitUsername, resolveLocalGitUsername } from '../git/username'
+import { resolveLocalGitUsername } from '../git/username'
 import type { Store } from '../persistence'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identity-enrichment'
 import { enrichRepoGitUsernames } from '../repo-git-username-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
@@ -274,363 +258,6 @@ async function addLocalRepoFromPath(
   return { repo, alreadyExisted: false }
 }
 
-async function addRemoteRepoFromPath(
-  store: Store,
-  args: {
-    connectionId: string
-    remotePath: string
-    displayName?: string
-    kind?: 'git' | 'folder'
-    setupMethod?: Repo['projectHostSetupMethod']
-  }
-): Promise<{ repo: Repo; alreadyExisted: boolean } | { error: string }> {
-  const gitProvider = getSshGitProvider(args.connectionId)
-  if (!gitProvider) {
-    return { error: `SSH connection "${args.connectionId}" not found or not connected` }
-  }
-
-  let repoKind: 'git' | 'folder' = args.kind ?? 'git'
-  let resolvedPath = await resolveRemoteHomePath(args.connectionId, args.remotePath)
-
-  const existing = store
-    .getRepos()
-    .find(
-      (repo) =>
-        repo.connectionId === args.connectionId &&
-        normalizeRuntimePathForComparison(repo.path) ===
-          normalizeRuntimePathForComparison(resolvedPath)
-    )
-  if (existing) {
-    return { repo: existing, alreadyExisted: true }
-  }
-
-  if (args.kind !== 'folder') {
-    try {
-      const check = await gitProvider.isGitRepoAsync(resolvedPath)
-      if (check.isRepo) {
-        repoKind = 'git'
-        if (check.rootPath) {
-          resolvedPath = check.rootPath
-        }
-      } else {
-        return { error: `Not a valid git repository: ${args.remotePath}` }
-      }
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('Not a valid git repository')) {
-        return { error: err.message }
-      }
-      return { error: `Not a valid git repository: ${args.remotePath}` }
-    }
-  }
-
-  const existingAfterRootResolve = store
-    .getRepos()
-    .find(
-      (repo) =>
-        repo.connectionId === args.connectionId &&
-        normalizeRuntimePathForComparison(repo.path) ===
-          normalizeRuntimePathForComparison(resolvedPath)
-    )
-  if (existingAfterRootResolve) {
-    return { repo: existingAfterRootResolve, alreadyExisted: true }
-  }
-
-  const folderName = getRemoteRepoFolderName(resolvedPath)
-  let displayName = args.displayName || folderName
-
-  const detected = await detectRepoIconAndUpstream({
-    repoPath: resolvedPath,
-    kind: repoKind,
-    connectionId: args.connectionId
-  })
-  const repo: Repo = {
-    id: randomUUID(),
-    path: resolvedPath,
-    displayName,
-    badgeColor: DEFAULT_REPO_BADGE_COLOR,
-    ...detected,
-    addedAt: Date.now(),
-    kind: repoKind,
-    connectionId: args.connectionId,
-    ...(repoKind === 'git'
-      ? {
-          externalWorktreeVisibility: 'hide' as const,
-          externalWorktreeVisibilityLegacy: false,
-          projectHostSetupMethod: args.setupMethod ?? ('imported-existing-folder' as const)
-        }
-      : {})
-  }
-
-  store.addRepo(repo)
-  return { repo, alreadyExisted: false }
-}
-
-function getRemoteRepoFolderName(remotePath: string): string {
-  const trimmed = remotePath.replace(/[\\/]+$/, '')
-  if (!trimmed) {
-    return remotePath
-  }
-  return trimmed.split(/[\\/]/).at(-1) || remotePath
-}
-
-async function cloneRemoteRepo(
-  store: Store,
-  mainWindow: BrowserWindow,
-  args: {
-    connectionId: string
-    url: string
-    destination: string
-  }
-): Promise<Repo> {
-  const gitProvider = getSshGitProvider(args.connectionId)
-  if (!gitProvider) {
-    throw new Error(`SSH connection "${args.connectionId}" not found or not connected`)
-  }
-  const fsProvider = getSshFilesystemProvider(args.connectionId)
-  if (!fsProvider) {
-    throw new Error(`SSH connection "${args.connectionId}" not found or not connected`)
-  }
-  const host = gitProvider.getHostPlatform?.()
-  if (!host) {
-    throw new Error('SSH host platform is unavailable. Reconnect the SSH target before cloning.')
-  }
-  const trimmedDestination = await resolveRemoteHomePath(args.connectionId, args.destination.trim())
-  if (!isRuntimePathAbsolute(trimmedDestination, host.pathFlavor)) {
-    throw new Error('Clone destination must be an absolute path on the SSH host')
-  }
-  const repoName = deriveCloneRepoNameFromUrl(args.url.trim())
-  const clonePath = joinRemotePath(host, trimmedDestination, repoName)
-  if (relativePathInsideRoot(trimmedDestination, clonePath) === null) {
-    throw new Error('Clone path must be inside the destination directory')
-  }
-  const clonePathKey = normalizeRuntimePathForComparison(clonePath)
-  const existing = store.getRepos().find((repo) => {
-    return (
-      repo.connectionId === args.connectionId &&
-      normalizeRuntimePathForComparison(repo.path) === clonePathKey
-    )
-  })
-  if (existing && !isFolderRepo(existing)) {
-    emitRepoAdded('clone_url', true)
-    return existing
-  }
-
-  const remoteCloneKey = `${args.connectionId}:${clonePathKey}`
-  if (remoteCloneInFlightByPath.has(remoteCloneKey)) {
-    throw new Error('A clone is already in progress for this SSH destination')
-  }
-  const controller = new AbortController()
-  const metadata: ActiveRemoteCloneMetadata = {
-    connectionId: args.connectionId,
-    clonePath,
-    controller
-  }
-  activeRemoteClone = metadata
-  remoteCloneInFlightByPath.add(remoteCloneKey)
-  try {
-    // Why: local clone creates the typed parent before spawning git. SSH clone
-    // must match that behavior or a fresh remote parent surfaces as spawn ENOENT.
-    await fsProvider.createDir(trimmedDestination)
-    // Why: the SSH relay exposes argv-based git execution, not a shell. Use
-    // the repo folder name as the target so git creates it inside the chosen
-    // parent, and keep the same flag separator safety as local clone.
-    await gitProvider.clone(
-      ['clone', '--progress', '--', args.url.trim(), repoName],
-      trimmedDestination,
-      {
-        signal: controller.signal,
-        timeoutMs: 10 * 60_000,
-        onProgress: (progress) => {
-          if (!mainWindow.isDestroyed()) {
-            mainWindow.webContents.send('repos:clone-progress', progress)
-          }
-        }
-      }
-    )
-  } catch (err) {
-    if (controller.signal.aborted) {
-      throw new Error('Clone aborted')
-    }
-    const message = err instanceof Error ? err.message : String(err)
-    if (message.startsWith('Clone failed:')) {
-      throw new Error(`Clone failed: ${getGitCloneFailureMessage(message, { clonePath })}`)
-    }
-    throw err
-  } finally {
-    if (activeRemoteClone === metadata) {
-      activeRemoteClone = null
-    }
-    remoteCloneInFlightByPath.delete(remoteCloneKey)
-  }
-  if (existing && isFolderRepo(existing)) {
-    const updated = store.updateRepo(existing.id, {
-      kind: 'git',
-      projectHostSetupMethod: 'cloned'
-    })
-    if (updated) {
-      emitRepoAdded('clone_url', false)
-      return updated
-    }
-  }
-  const result = await addRemoteRepoFromPath(store, {
-    connectionId: args.connectionId,
-    remotePath: clonePath,
-    kind: 'git',
-    setupMethod: 'cloned'
-  })
-  if ('error' in result) {
-    throw new Error(result.error)
-  }
-  emitRepoAdded('clone_url', result.alreadyExisted)
-  return result.repo
-}
-
-async function createRemoteRepo(
-  store: Store,
-  args: {
-    connectionId: string
-    parentPath: string
-    name: string
-    kind: 'git' | 'folder'
-  }
-): Promise<{ repo: Repo } | { error: string }> {
-  const name = args.name?.trim() ?? ''
-  const parentPath = await resolveRemoteHomePath(args.connectionId, args.parentPath?.trim() ?? '')
-  const repoKind: 'git' | 'folder' = args.kind === 'folder' ? 'folder' : 'git'
-  if (!name) {
-    return { error: 'Name cannot be empty' }
-  }
-  if (/[\\/]/.test(name) || name === '.' || name === '..') {
-    return { error: 'Name cannot contain slashes or be "." / ".."' }
-  }
-  if (!parentPath) {
-    return { error: 'Parent directory is required' }
-  }
-  const gitProvider = getSshGitProvider(args.connectionId)
-  const fsProvider = getSshFilesystemProvider(args.connectionId)
-  if (!gitProvider || !fsProvider) {
-    return { error: `SSH connection "${args.connectionId}" not found or not connected` }
-  }
-  const host = gitProvider.getHostPlatform?.()
-  if (!host) {
-    return { error: 'SSH host platform is unavailable. Reconnect the SSH target before creating.' }
-  }
-  if (!isRuntimePathAbsolute(parentPath, host.pathFlavor)) {
-    return { error: 'Parent directory must be an absolute path on the SSH host' }
-  }
-
-  const targetPath = joinRemotePath(host, parentPath, name)
-  if (relativePathInsideRoot(parentPath, targetPath) === null) {
-    return { error: 'Project path must be inside the parent directory' }
-  }
-  const targetPathKey = normalizeRuntimePathForComparison(targetPath)
-  const existing = store.getRepos().find((repo) => {
-    return (
-      repo.connectionId === args.connectionId &&
-      normalizeRuntimePathForComparison(repo.path) === targetPathKey
-    )
-  })
-  if (existing) {
-    emitRepoAdded('folder_picker', true)
-    return { repo: existing }
-  }
-
-  let createdDir = false
-  let targetExists = false
-  try {
-    await fsProvider.stat(targetPath)
-    targetExists = true
-  } catch {
-    targetExists = false
-  }
-
-  if (targetExists) {
-    try {
-      const entries = await fsProvider.readDir(targetPath)
-      if (entries.length > 0) {
-        return { error: `"${name}" already exists at this location and is not empty.` }
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      return { error: `Failed to read directory: ${message}` }
-    }
-  } else {
-    try {
-      await fsProvider.createDirNoClobber(targetPath)
-      createdDir = true
-    } catch (err) {
-      const raceWinner = store.getRepos().find((repo) => {
-        return (
-          repo.connectionId === args.connectionId &&
-          normalizeRuntimePathForComparison(repo.path) === targetPathKey
-        )
-      })
-      if (raceWinner) {
-        return { repo: raceWinner }
-      }
-      const message = err instanceof Error ? err.message : String(err)
-      return { error: `Failed to create directory: ${message}` }
-    }
-  }
-
-  if (repoKind === 'git') {
-    let step: 'init' | 'commit' = 'init'
-    try {
-      await gitProvider.exec(['init'], targetPath)
-      step = 'commit'
-      await gitProvider.exec(['commit', '--allow-empty', '-m', 'Initial commit'], targetPath)
-    } catch (err) {
-      if (createdDir) {
-        await fsProvider.deletePath(targetPath, true).catch(() => undefined)
-      } else if (step === 'commit') {
-        await fsProvider
-          .deletePath(joinRemotePath(host, targetPath, '.git'), true)
-          .catch(() => undefined)
-      }
-      const message = err instanceof Error ? err.message : String(err)
-      if (step === 'commit' && /Please tell me who you are|user\.name|user\.email/i.test(message)) {
-        return {
-          error:
-            'Git author identity is not configured on the SSH host. Run `git config --global user.name "Your Name"` and `git config --global user.email "you@example.com"` on that host, then try again.'
-        }
-      }
-      const stepLabel =
-        step === 'init' ? 'Failed to initialize git repository' : 'Failed to create initial commit'
-      return { error: `${stepLabel}: ${message}` }
-    }
-  }
-
-  const raceWinner = store.getRepos().find((repo) => {
-    return (
-      repo.connectionId === args.connectionId &&
-      normalizeRuntimePathForComparison(repo.path) === targetPathKey
-    )
-  })
-  if (raceWinner) {
-    emitRepoAdded('folder_picker', true)
-    return { repo: raceWinner }
-  }
-
-  const result = await addRemoteRepoFromPath(store, {
-    connectionId: args.connectionId,
-    remotePath: targetPath,
-    kind: repoKind,
-    displayName: name
-  })
-  if ('error' in result) {
-    return result
-  }
-  emitRepoAdded('folder_picker', result.alreadyExisted)
-  return { repo: result.repo }
-}
-
-// Why: no transport can expand `~` on a remote host any more. Returning the
-// tilde unchanged lets the caller's absolute-path validation reject it with a
-// message about the path, instead of silently resolving it against this machine.
-async function resolveRemoteHomePath(_connectionId: string, path: string): Promise<string> {
-  return path
-}
-
 type ActiveCloneMetadata = {
   path: string
   pathKey: string
@@ -642,22 +269,14 @@ type ActiveCloneMetadata = {
   resolvePendingAbortCleanup: (() => void) | null
 }
 
-type ActiveRemoteCloneMetadata = {
-  connectionId: string
-  clonePath: string
-  controller: AbortController
-}
-
 // Why: module-scoped so the abort handle survives window re-creation on macOS.
 // registerRepoHandlers is called again when a new BrowserWindow is created,
 // and a function-scoped variable would lose the reference to an in-flight clone.
 let activeClone: ActiveCloneMetadata | null = null
-let activeRemoteClone: ActiveRemoteCloneMetadata | null = null
 let nextCloneGeneration = 1
 const latestCloneGenerationByPath = new Map<string, number>()
 const pendingAbortCleanupByPath = new Map<string, Promise<void>>()
 const cloneInFlightByPath = new Map<string, Promise<void>>()
-const remoteCloneInFlightByPath = new Set<string>()
 const activeNestedRepoScans = new Map<string, AbortController>()
 type CompletedNestedRepoScan = {
   scan: NestedRepoScanResult
@@ -872,9 +491,7 @@ function parseProjectGroupIpcArgs<T>(schema: z.ZodType<T>, value: unknown, error
 }
 
 function validateNestedRepoScanRoot(path: string, connectionId?: string): void {
-  if (connectionId) {
-    return
-  }
+  void connectionId
   if (!isAbsolute(path)) {
     throw new Error('Repo path must be an absolute path')
   }
@@ -1010,11 +627,6 @@ function sanitizeNestedRepoImportError(context: string, error: unknown): string 
   return 'Repository could not be imported'
 }
 
-// Why: see resolveRemoteHomePath — remote `~` expansion has no transport left.
-async function resolveSshProjectGroupPath(_connectionId: string, path: string): Promise<string> {
-  return path
-}
-
 async function scanNestedReposForIpc(args: {
   path: string
   connectionId?: string
@@ -1023,59 +635,11 @@ async function scanNestedReposForIpc(args: {
   onProgress?: (scan: NestedRepoScanResult) => void
 }): Promise<NestedRepoScanResult> {
   validateNestedRepoScanRoot(args.path, args.connectionId)
-  if (!args.connectionId) {
-    return scanNestedRepos({
-      path: args.path,
-      options: args.options,
-      signal: args.signal,
-      onProgress: args.onProgress
-    })
-  }
-  const gitProvider = getSshGitProvider(args.connectionId)
-  const fsProvider = getSshFilesystemProvider(args.connectionId)
-  if (!gitProvider || !fsProvider) {
-    throw new Error('ssh_connection_unavailable')
-  }
-  const resolvedPath = await resolveSshProjectGroupPath(args.connectionId, args.path)
   return scanNestedRepos({
-    path: resolvedPath,
+    path: args.path,
     options: args.options,
     signal: args.signal,
-    onProgress: args.onProgress,
-    filesystem: {
-      readDirectory: async (dirPath) =>
-        (await fsProvider.readDir(dirPath)).map((entry) => ({
-          name: entry.name,
-          isDirectory: entry.isDirectory,
-          isSymlink: entry.isSymlink
-        })),
-      readTextFile: async (filePath) => (await fsProvider.readFile(filePath)).content,
-      joinPath: (parentPath, childName) => posix.join(parentPath, childName),
-      basename: (path) => posix.basename(path),
-      hasGitMarker: async (path) => {
-        try {
-          const marker = await fsProvider.stat(posix.join(path, '.git'))
-          if (marker.type === 'directory' || marker.type === 'file') {
-            return true
-          }
-        } catch {
-          // Continue to cheap bare-repository marker checks below.
-        }
-        const [head, objects, refs] = await Promise.all([
-          fsProvider.stat(posix.join(path, 'HEAD')).catch(() => null),
-          fsProvider.stat(posix.join(path, 'objects')).catch(() => null),
-          fsProvider.stat(posix.join(path, 'refs')).catch(() => null)
-        ])
-        return head?.type === 'file' && objects?.type === 'directory' && refs?.type === 'directory'
-      },
-      isSelectedPathGitRepo: async (path) => {
-        try {
-          return (await gitProvider.isGitRepoAsync(path)).isRepo
-        } catch {
-          return false
-        }
-      }
-    }
+    onProgress: args.onProgress
   })
 }
 
@@ -1321,7 +885,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       rawArgs,
       'invalid_folder_workspace_path_status_args'
     ) as FolderWorkspacePathStatusRequest
-    return getFolderWorkspacePathStatus(store, args, { getSshFilesystemProvider })
+    return getFolderWorkspacePathStatus(store, args)
   })
 
   ipcMain.handle(
@@ -1341,16 +905,13 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       if (!group || !folderPath) {
         throw new Error('folder_workspace_project_group_not_found')
       }
-      const status = await getFolderWorkspacePathStatusForPath(
-        {
-          folderPath,
-          projectGroupId: group.id,
-          connectionId: args.connectionId ?? group.connectionId ?? null,
-          projectGroups,
-          repos: store.getRepos()
-        },
-        { getSshFilesystemProvider }
-      )
+      const status = await getFolderWorkspacePathStatusForPath({
+        folderPath,
+        projectGroupId: group.id,
+        connectionId: args.connectionId ?? group.connectionId ?? null,
+        projectGroups,
+        repos: store.getRepos()
+      })
       assertFolderWorkspacePathUsable(status)
       const workspace = store.createFolderWorkspace(args)
       notifyReposChanged(mainWindow)
@@ -1375,19 +936,16 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
           return null
         }
         const projectGroups = store.getProjectGroups()
-        const status = await getFolderWorkspacePathStatusForPath(
-          {
-            folderPath: args.updates.folderPath,
-            projectGroupId: workspace.projectGroupId,
-            connectionId:
-              workspace.connectionId ??
-              projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
-              null,
-            projectGroups,
-            repos: store.getRepos()
-          },
-          { getSshFilesystemProvider }
-        )
+        const status = await getFolderWorkspacePathStatusForPath({
+          folderPath: args.updates.folderPath,
+          projectGroupId: workspace.projectGroupId,
+          connectionId:
+            workspace.connectionId ??
+            projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
+            null,
+          projectGroups,
+          repos: store.getRepos()
+        })
         assertFolderWorkspacePathUsable(status)
       }
       const updated = store.updateFolderWorkspace(args.folderWorkspaceId, args.updates)
@@ -1531,25 +1089,11 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
 
       for (const [projectGroupOrder, repoPath] of selection.selectedPaths.entries()) {
         try {
-          let importRepoPath = repoPath
-          if (args.connectionId) {
-            const gitProvider = getSshGitProvider(args.connectionId)
-            const check = gitProvider ? await gitProvider.isGitRepoAsync(repoPath) : null
-            if (!gitProvider || !check?.isRepo) {
-              results.push({
-                path: repoPath,
-                status: 'failed',
-                error: 'Not a valid git repository'
-              })
-              continue
-            }
-            importRepoPath = await importTargetResolver.resolveSsh(repoPath, gitProvider)
-          } else if (!isGitRepo(repoPath)) {
+          if (!isGitRepo(repoPath)) {
             results.push({ path: repoPath, status: 'failed', error: 'Not a valid git repository' })
             continue
-          } else {
-            importRepoPath = await importTargetResolver.resolveLocal(repoPath)
           }
+          const importRepoPath = await importTargetResolver.resolveLocal(repoPath)
           const normalizedImportRepoPath = normalizeRuntimePathForComparison(importRepoPath)
           const alreadyImportedProjectId =
             importedProjectIdsByRepoPath.get(normalizedImportRepoPath)
@@ -1655,47 +1199,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       notifyReposChanged(mainWindow)
       emitRepoAdded('folder_picker', result.alreadyExisted, result.repo.kind === 'git')
       return { repo: result.repo }
-    }
-  )
-
-  ipcMain.handle(
-    'repos:addRemote',
-    async (
-      _event,
-      args: {
-        connectionId: string
-        remotePath: string
-        displayName?: string
-        kind?: 'git' | 'folder'
-      }
-    ): Promise<{ repo: Repo } | { error: string }> => {
-      const result = await addRemoteRepoFromPath(store, args)
-      if ('error' in result) {
-        return result
-      }
-      notifyReposChanged(mainWindow)
-      emitRepoAdded('folder_picker', result.alreadyExisted, result.repo.kind === 'git')
-      return { repo: result.repo }
-    }
-  )
-
-  ipcMain.handle(
-    'repos:createRemote',
-    async (
-      _event,
-      args: {
-        connectionId: string
-        parentPath: string
-        name: string
-        kind: 'git' | 'folder'
-      }
-    ): Promise<{ repo: Repo } | { error: string }> => {
-      const result = await createRemoteRepo(store, args)
-      if ('error' in result) {
-        return result
-      }
-      notifyReposChanged(mainWindow)
-      return result
     }
   )
 
@@ -2217,10 +1720,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       clone.process.kill()
       activeClone = null
     }
-    if (activeRemoteClone) {
-      activeRemoteClone.controller.abort()
-      activeRemoteClone = null
-    }
   })
 
   ipcMain.handle(
@@ -2416,31 +1915,10 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
     }
   )
 
-  ipcMain.handle(
-    'repos:cloneRemote',
-    async (
-      _event,
-      args: { connectionId: string; url: string; destination: string }
-    ): Promise<Repo> => {
-      const repo = await cloneRemoteRepo(store, mainWindow, args)
-      notifyReposChanged(mainWindow)
-      return repo
-    }
-  )
-
   ipcMain.handle('repos:getGitUsername', async (_event, args: { repoId: string }) => {
     const repo = store.getRepo(args.repoId)
     if (!repo || isFolderRepo(repo)) {
       return ''
-    }
-    // Why: remote repos have their git config on the remote host. Keep this
-    // to explicit username config; user.email/name are author identity.
-    if (repo.connectionId) {
-      const provider = getSshGitProvider(repo.connectionId)
-      if (!provider) {
-        return ''
-      }
-      return getSshGitUsername(provider, repo.path)
     }
     return resolveLocalGitUsername(repo.path)
   })
@@ -2457,62 +1935,6 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         // Return null + 0 so the renderer can decline to use a fabricated default
         // and suppress the multi-remote hint.
         return { defaultBaseRef: null, remoteCount: 0 }
-      }
-      // Why: remote repos need the relay to resolve symbolic-ref on the
-      // remote host where the git data lives.
-      if (repo.connectionId) {
-        const provider = getSshGitProvider(repo.connectionId)
-        if (!provider) {
-          return { defaultBaseRef: null, remoteCount: 0 }
-        }
-        // Why: run default-ref resolution and remote-count concurrently to
-        // match the local path's latency characteristics (see Promise.all
-        // below). The two lookups are independent — neither depends on the
-        // other's result — so serializing them only adds SSH round-trip
-        // latency on slow relays.
-        //
-        // Why: delegate to the shared resolveDefaultBaseRefViaExec so SSH and
-        // local repos return identical defaults for equivalent states. We
-        // log in the exec callback for the symbolic-ref call to preserve the
-        // SSH-specific transport-failure diagnostic (connection drops,
-        // permission issues) that the shared helper otherwise swallows
-        // together with the expected "origin/HEAD unset" non-zero exit.
-        const resolveDefault = async (): Promise<string | null> => {
-          return resolveDefaultBaseRefViaExec(async (argv) => {
-            try {
-              return await provider.exec(argv, repo.path)
-            } catch (err) {
-              if (argv[0] === 'symbolic-ref') {
-                console.warn('[repos:getBaseRefDefault] SSH symbolic-ref failed', {
-                  path: repo.path,
-                  err
-                })
-              }
-              throw err
-            }
-          })
-        }
-
-        const resolveRemoteCount = async (): Promise<number> => {
-          try {
-            const remotesResult = await provider.exec(['remote'], repo.path)
-            return parseRemoteCount(remotesResult.stdout)
-          } catch (err) {
-            // Why: fall back to 0 (the "unknown / do not render the multi-remote
-            // hint" sentinel). Log so diagnostic signal isn't lost.
-            console.warn('[repos:getBaseRefDefault] SSH git remote count failed', {
-              path: repo.path,
-              err
-            })
-            return 0
-          }
-        }
-
-        const [defaultBaseRef, remoteCount] = await Promise.all([
-          resolveDefault(),
-          resolveRemoteCount()
-        ])
-        return { defaultBaseRef, remoteCount }
       }
       // Why: compute default and remote count independently. A failure
       // counting remotes must not break default detection. Run in parallel
@@ -2557,73 +1979,6 @@ async function searchBaseRefDetailsForRepo(
   const limit = args.limit ?? 25
   if (!Number.isInteger(limit) || limit <= 0) {
     return []
-  }
-  // Why: remote repos need the relay to list branches on the remote host.
-  if (repo.connectionId) {
-    const provider = getSshGitProvider(repo.connectionId)
-    if (!provider) {
-      return []
-    }
-    // Why: mirror the local path's sanitization (normalizeRefSearchQuery
-    // in ../git/repo.ts) — strip glob metacharacters to prevent glob
-    // injection via the SSH branch while preserving empty-query branch lists.
-    const normalizedQuery = normalizeRefSearchQuery(args.query)
-    try {
-      // Why: argv (including the two-remote-glob rationale) lives in
-      // buildSearchBaseRefsArgv so the SSH and local paths cannot drift.
-      const remotesResult = await provider.exec(['remote'], repo.path).catch(() => ({ stdout: '' }))
-      const remotes = remotesResult.stdout
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-      const capabilities = getSshGitCapabilityCache(provider)
-      const runSearch = async (patternGroup?: 'segmented' | 'branchRoot'): Promise<string> => {
-        return capabilities.runWithFallback(
-          'for-each-ref-exclude',
-          async () =>
-            (
-              await provider.exec(
-                buildSearchBaseRefsArgv(normalizedQuery, limit, {
-                  remoteNames: remotes,
-                  patternGroup
-                }),
-                repo.path
-              )
-            ).stdout,
-          async () =>
-            (
-              await provider.exec(
-                buildSearchBaseRefsArgv(normalizedQuery, limit, {
-                  excludeRemoteHead: false,
-                  remoteNames: remotes,
-                  patternGroup
-                }),
-                repo.path
-              )
-            ).stdout,
-          isForEachRefExcludeUnsupportedError
-        )
-      }
-      // Why: delegate the NUL-parse + HEAD filter + dedup + limit pipeline
-      // to the shared helper so the SSH and local paths cannot diverge.
-      // See parseAndFilterSearchRefs in ../git/repo.ts for the dedup +
-      // HEAD-filter rationale.
-      const searchTokens = normalizedQuery.split('/').filter((token) => token.length > 0)
-      if (searchTokens.length > 1) {
-        const results = await Promise.all([runSearch('segmented'), runSearch('branchRoot')])
-        return mergeBaseRefSearchResultGroups(
-          results.map((stdout) => parseAndFilterSearchRefDetails(stdout, limit, remotes)),
-          limit
-        )
-      }
-      return parseAndFilterSearchRefDetails(await runSearch(), limit, remotes)
-    } catch (err) {
-      console.warn('[repos:searchBaseRefs] SSH for-each-ref failed', {
-        path: repo.path,
-        err
-      })
-      return []
-    }
   }
   return searchBaseRefDetails(repo.path, args.query, limit)
 }

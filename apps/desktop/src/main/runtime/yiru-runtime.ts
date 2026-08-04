@@ -243,7 +243,6 @@ import { isTuiAgentEnabled, pickTuiAgent } from '~shared/tui-agent/selection'
 import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '~shared/tui-agent/startup'
 import type {
   AutomationWorkspaceProvenance,
-  BaseRefSearchResult,
   CreateWorktreeResult,
   DetectedWorktree,
   DetectedWorktreeListResult,
@@ -350,14 +349,10 @@ import { isENOENT } from '../filesystem/auth'
 import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
 import {
   closeLocalWatcherForWorktreePath,
-  closeRemoteWatcherForWorktreePath,
   forgetLocalWatcherRemovalSnapshot,
-  forgetRemoteWatcherRemovalSnapshot,
-  restoreLocalWatcherAfterFailedRemoval,
-  restoreRemoteWatcherAfterFailedRemoval
+  restoreLocalWatcherAfterFailedRemoval
 } from '../filesystem/watcher'
 import { acquireWatcherRemovalGate } from '../filesystem/watcher-removal-gate'
-import { getSshGitCapabilityCache } from '../git/capability-state'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
 import {
   getBaseRefDefault,
@@ -368,14 +363,7 @@ import {
   getRepoName,
   searchBaseRefDetails,
   getRemoteCount,
-  normalizeRefSearchQuery,
-  parseAndFilterSearchRefDetails,
-  parseRemoteCount,
-  resolveDefaultBaseRefViaExec,
   resolveDefaultBaseRefWithLocalGit,
-  buildSearchBaseRefsArgv,
-  isForEachRefExcludeUnsupportedError,
-  mergeBaseRefSearchResultGroups,
   getRemoteDrift,
   getRecentDriftSubjects
 } from '../git/repo'
@@ -461,7 +449,6 @@ import {
   hasUnrecognizedYiruYamlKeys,
   hasHooksFile,
   loadHooks,
-  parseYiruYaml,
   runHook,
   shouldRunSetupForCreate
 } from '../hooks'
@@ -483,15 +470,11 @@ import {
   killWorkspacePort,
   scanWorkspacePortProbes
 } from '../ports/workspace-port-ownership'
-import {
-  detectInstalledAgentsWithShellPathHydration,
-  detectRemoteAgents
-} from '../preflight/preflight'
+import { detectInstalledAgentsWithShellPathHydration } from '../preflight/preflight'
 import {
   assertFolderWorkspacePathUsable,
   getFolderWorkspacePathStatus,
-  getFolderWorkspacePathStatusForPath,
-  inferFolderWorkspacePathConnection
+  getFolderWorkspacePathStatusForPath
 } from '../project-groups/folder-workspace-path-status'
 import { scanNestedRepos } from '../project-groups/nested-repo-discovery'
 import {
@@ -506,8 +489,6 @@ import {
   resolveLocalProjectRuntimeForRepo,
   resolveLocalProjectRuntimesForRepos
 } from '../project-runtime-git-options'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { getSshGitProvider, requireSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { PtyProviderBufferSnapshot } from '../providers/types'
 import type { IPtyProvider, PtyProcessInfo, PtyTransientFact } from '../providers/types'
 import type { RateLimitService } from '../rate-limits/service'
@@ -575,8 +556,6 @@ import {
 import { worktreePathComparisonKey } from '../worktree/path-comparison'
 import {
   cleanupUnusedWorktreePushTargetRemote,
-  cleanupUnusedWorktreePushTargetRemoteSsh,
-  createRemoteWorktree,
   configureCreatedWorktreePushTarget,
   prepareWorktreePushTarget
 } from '../worktree/remote'
@@ -1140,19 +1119,16 @@ type WorktreeStartupFollowup = {
 }
 
 function getAgentLaunchPlatformForRepo(
-  repo: Pick<Repo, 'connectionId' | 'path'>,
+  _repo: Repo,
   projectRuntime?: ProjectExecutionRuntimeResolution
 ): NodeJS.Platform {
-  if (!repo.connectionId) {
-    if (projectRuntime?.status === 'repair-required') {
-      return projectRuntime.repair.preferredRuntime.kind === 'wsl' ? 'linux' : process.platform
-    }
-    if (projectRuntime?.status === 'resolved' && projectRuntime.runtime.kind === 'wsl') {
-      return 'linux'
-    }
-    return process.platform
+  if (projectRuntime?.status === 'repair-required') {
+    return projectRuntime.repair.preferredRuntime.kind === 'wsl' ? 'linux' : process.platform
   }
-  return isWindowsAbsolutePathLike(repo.path) ? 'win32' : 'linux'
+  if (projectRuntime?.status === 'resolved' && projectRuntime.runtime.kind === 'wsl') {
+    return 'linux'
+  }
+  return process.platform
 }
 
 // Why: long enough for a phone to reconnect and retry a create whose response
@@ -1341,23 +1317,15 @@ function omitUndefinedProperties<T extends Record<string, unknown>>(value: T): P
 }
 
 async function isRuntimeWorktreePathMissing(
-  repo: Repo,
+  _repo: Repo,
   worktreePath: string,
   localWorktreeGitOptions: { wslDistro?: string } = {}
 ): Promise<boolean> {
-  if (!repo.connectionId) {
-    const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-    return isWorktreePathMissing(
-      toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
-      access.statPath
-    )
-  }
-
-  const fsProvider = getSshFilesystemProvider(repo.connectionId)
-  if (!fsProvider) {
-    return false
-  }
-  return isWorktreePathMissing(worktreePath, (path) => fsProvider.stat(path))
+  const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+  return isWorktreePathMissing(
+    toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
+    access.statPath
+  )
 }
 
 async function isLocalRuntimeGitRepository(
@@ -1418,10 +1386,9 @@ function getRuntimeFolderWorkspaceRootId(repo: Repo): string {
 }
 
 // Null executionHostId means host-unaware: path-only callers match any repo, and the first runtime
-// host can adopt a legacy (unstamped) repo. But an unstamped repo with a connectionId is an SSH repo
-// (resolves to ssh:<id>), so it must not be adopted/matched by a runtime host at the same path.
+// host can adopt a legacy (unstamped) repo.
 function runtimeRepoMatchesExecutionHost(
-  repo: Pick<Repo, 'connectionId' | 'executionHostId'>,
+  repo: Pick<Repo, 'executionHostId'>,
   executionHostId?: ExecutionHostId | null
 ): boolean {
   if (executionHostId == null) {
@@ -1430,7 +1397,7 @@ function runtimeRepoMatchesExecutionHost(
   if (repo.executionHostId != null) {
     return repo.executionHostId === executionHostId
   }
-  return repo.connectionId == null
+  return true
 }
 
 function getRuntimeFolderWorkspaceInstanceId(repo: Repo, instanceId: string): string {
@@ -1715,7 +1682,7 @@ function getSelectedReviewLookupHints(args: SelectedReviewBranchInput): {
 }
 
 async function getSelectedHostedReviewForBranch(
-  repo: Pick<Repo, 'path' | 'connectionId'>,
+  repo: Pick<Repo, 'path'>,
   branchName: string,
   args: SelectedReviewBranchInput,
   executionOptions: { localGitExecOptions?: { wslDistro?: string } } = {}
@@ -1726,7 +1693,7 @@ async function getSelectedHostedReviewForBranch(
   }
   const review = await getHostedReviewForBranchFromRepo({
     repoPath: repo.path,
-    connectionId: repo.connectionId ?? null,
+    connectionId: null,
     branch: branchName,
     ...executionOptions,
     ...getSelectedReviewLookupHints(args)
@@ -5155,8 +5122,6 @@ export class YiruRuntimeService {
     resolveRuntimeFileTarget: (selector) => this.resolveRuntimeFileTarget(selector),
     resolveTerminalCwd: (terminalHandle) => this.resolveTerminalCwd(terminalHandle),
     resolveTerminalContext: (terminalHandle) => this.resolveTerminalContext(terminalHandle),
-    resolveTerminalFileUriHostname: (terminalHandle) =>
-      this.resolveTerminalFileUriHostname(terminalHandle),
     hasRecentTerminalOutputPath: (terminalHandle, pathText, absolutePath) =>
       this.hasRecentTerminalOutputPath(terminalHandle, pathText, absolutePath),
     resolveRuntimeGitTarget: (selector) => this.resolveRuntimeGitTarget(selector),
@@ -5174,15 +5139,10 @@ export class YiruRuntimeService {
     }
   })
 
-  closeFileWatchersForRemoval = async (
-    worktreePath: string,
-    connectionId?: string
-  ): Promise<void> => {
+  closeFileWatchersForRemoval = async (worktreePath: string): Promise<void> => {
     const results = await Promise.allSettled([
-      connectionId
-        ? closeRemoteWatcherForWorktreePath(connectionId, worktreePath)
-        : closeLocalWatcherForWorktreePath(worktreePath),
-      this.fileCommands.closeFileExplorerWatchersForPath(worktreePath, connectionId)
+      closeLocalWatcherForWorktreePath(worktreePath),
+      this.fileCommands.closeFileExplorerWatchersForPath(worktreePath)
     ])
     const failure = results.find((result): result is PromiseRejectedResult => {
       return result.status === 'rejected'
@@ -5193,36 +5153,26 @@ export class YiruRuntimeService {
       throw failure.reason
     }
   }
-  restoreFileWatchersAfterFailedRemoval = async (
-    worktreePath: string,
-    connectionId?: string
-  ): Promise<void> => {
+  restoreFileWatchersAfterFailedRemoval = async (worktreePath: string): Promise<void> => {
     await Promise.all([
-      connectionId
-        ? restoreRemoteWatcherAfterFailedRemoval(connectionId, worktreePath)
-        : restoreLocalWatcherAfterFailedRemoval(worktreePath),
-      this.fileCommands.restoreFileExplorerWatchersAfterFailedRemoval(worktreePath, connectionId)
+      restoreLocalWatcherAfterFailedRemoval(worktreePath),
+      this.fileCommands.restoreFileExplorerWatchersAfterFailedRemoval(worktreePath)
     ])
   }
-  forgetFileWatchersAfterRemoval = (worktreePath: string, connectionId?: string): void => {
-    if (connectionId) {
-      forgetRemoteWatcherRemovalSnapshot(connectionId, worktreePath)
-    } else {
-      forgetLocalWatcherRemovalSnapshot(worktreePath)
-    }
-    this.fileCommands.forgetFileExplorerWatchersAfterRemoval(worktreePath, connectionId)
+  forgetFileWatchersAfterRemoval = (worktreePath: string): void => {
+    forgetLocalWatcherRemovalSnapshot(worktreePath)
+    this.fileCommands.forgetFileExplorerWatchersAfterRemoval(worktreePath)
   }
   acquireFileWatcherRemoval = async (
-    worktreePath: string,
-    connectionId?: string
+    worktreePath: string
   ): Promise<{ finish(removed: boolean): Promise<void> }> => {
-    const gate = acquireWatcherRemovalGate(worktreePath, connectionId)
+    const gate = acquireWatcherRemovalGate(worktreePath)
     try {
       // Why: the first pass aborts desktop setup immediately; the second catches
       // any pre-gate runtime install that published after the first snapshot.
-      await this.closeFileWatchersForRemoval(worktreePath, connectionId)
+      await this.closeFileWatchersForRemoval(worktreePath)
       await gate.ready
-      await this.closeFileWatchersForRemoval(worktreePath, connectionId)
+      await this.closeFileWatchersForRemoval(worktreePath)
       let finished = false
       return {
         finish: async (removed) => {
@@ -5231,11 +5181,11 @@ export class YiruRuntimeService {
           }
           finished = true
           if (removed) {
-            this.forgetFileWatchersAfterRemoval(worktreePath, connectionId)
+            this.forgetFileWatchersAfterRemoval(worktreePath)
           }
           gate.release()
           if (!removed) {
-            await this.restoreFileWatchersAfterFailedRemoval(worktreePath, connectionId).catch(
+            await this.restoreFileWatchersAfterFailedRemoval(worktreePath).catch(
               (restoreError: unknown) => {
                 console.error('[worktrees] failed to restore watchers after removal failed', {
                   worktreePath,
@@ -5248,7 +5198,7 @@ export class YiruRuntimeService {
       }
     } catch (error) {
       gate.release()
-      await this.restoreFileWatchersAfterFailedRemoval(worktreePath, connectionId).catch(
+      await this.restoreFileWatchersAfterFailedRemoval(worktreePath).catch(
         (restoreError: unknown) => {
           console.error('[worktrees] failed to restore watchers after removal setup failed', {
             worktreePath,
@@ -11205,16 +11155,13 @@ export class YiruRuntimeService {
     if (!group || !folderPath) {
       throw new Error('folder_workspace_project_group_not_found')
     }
-    const status = await getFolderWorkspacePathStatusForPath(
-      {
-        folderPath,
-        projectGroupId: group.id,
-        connectionId: input.connectionId ?? group.connectionId ?? null,
-        projectGroups,
-        repos: this.store.getRepos()
-      },
-      { getSshFilesystemProvider }
-    )
+    const status = await getFolderWorkspacePathStatusForPath({
+      folderPath,
+      projectGroupId: group.id,
+      connectionId: input.connectionId ?? group.connectionId ?? null,
+      projectGroups,
+      repos: this.store.getRepos()
+    })
     assertFolderWorkspacePathUsable(status)
     const workspace = this.store.createFolderWorkspace(input)
     this.notifyReposChanged()
@@ -11227,7 +11174,7 @@ export class YiruRuntimeService {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
-    return getFolderWorkspacePathStatus(this.store, request, { getSshFilesystemProvider })
+    return getFolderWorkspacePathStatus(this.store, request)
   }
 
   async updateFolderWorkspace(
@@ -11263,19 +11210,16 @@ export class YiruRuntimeService {
         return null
       }
       const projectGroups = this.store.getProjectGroups?.() ?? []
-      const status = await getFolderWorkspacePathStatusForPath(
-        {
-          folderPath: updates.folderPath,
-          projectGroupId: workspace.projectGroupId,
-          connectionId:
-            workspace.connectionId ??
-            projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
-            null,
-          projectGroups,
-          repos: this.store.getRepos()
-        },
-        { getSshFilesystemProvider }
-      )
+      const status = await getFolderWorkspacePathStatusForPath({
+        folderPath: updates.folderPath,
+        projectGroupId: workspace.projectGroupId,
+        connectionId:
+          workspace.connectionId ??
+          projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
+          null,
+        projectGroups,
+        repos: this.store.getRepos()
+      })
       assertFolderWorkspacePathUsable(status)
     }
     const updated = this.store.updateFolderWorkspace(folderWorkspaceId, updates)
@@ -12067,9 +12011,7 @@ export class YiruRuntimeService {
         truncated: false
       }
     }
-    const refDetails = repo.connectionId
-      ? await this.searchRemoteRepoRefs(repo, query, limit + 1)
-      : await searchBaseRefDetails(repo.path, query, limit + 1)
+    const refDetails = await searchBaseRefDetails(repo.path, query, limit + 1)
     return {
       refs: refDetails.slice(0, limit).map((entry) => entry.refName),
       refDetails: refDetails.slice(0, limit),
@@ -12084,111 +12026,11 @@ export class YiruRuntimeService {
     if (isFolderRepo(repo)) {
       return { defaultBaseRef: null, remoteCount: 0 }
     }
-    if (repo.connectionId) {
-      return this.getRemoteRepoBaseRefDefault(repo)
-    }
     const [defaultBaseRef, remoteCount] = await Promise.all([
       getBaseRefDefault(repo.path),
       getRemoteCount(repo.path)
     ])
     return { defaultBaseRef, remoteCount }
-  }
-
-  private async getRemoteRepoBaseRefDefault(
-    repo: Repo
-  ): Promise<{ defaultBaseRef: string | null; remoteCount: number }> {
-    const provider = repo.connectionId ? getSshGitProvider(repo.connectionId) : null
-    if (!provider) {
-      return { defaultBaseRef: null, remoteCount: 0 }
-    }
-    const [defaultBaseRef, remoteCount] = await Promise.all([
-      resolveDefaultBaseRefViaExec(async (argv) => {
-        try {
-          return await provider.exec(argv, repo.path)
-        } catch (err) {
-          if (argv[0] === 'symbolic-ref') {
-            console.warn('[runtime:repo.baseRefDefault] SSH symbolic-ref failed', {
-              path: repo.path,
-              err
-            })
-          }
-          throw err
-        }
-      }),
-      provider
-        .exec(['remote'], repo.path)
-        .then((result) => parseRemoteCount(result.stdout))
-        .catch((err) => {
-          console.warn('[runtime:repo.baseRefDefault] SSH git remote count failed', {
-            path: repo.path,
-            err
-          })
-          return 0
-        })
-    ])
-    return { defaultBaseRef, remoteCount }
-  }
-
-  private async searchRemoteRepoRefs(
-    repo: Repo,
-    query: string,
-    limit: number
-  ): Promise<BaseRefSearchResult[]> {
-    const provider = repo.connectionId ? getSshGitProvider(repo.connectionId) : null
-    if (!provider) {
-      return []
-    }
-    const normalizedQuery = normalizeRefSearchQuery(query)
-    try {
-      const remotesResult = await provider.exec(['remote'], repo.path).catch(() => ({ stdout: '' }))
-      const remotes = remotesResult.stdout
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-      const capabilities = getSshGitCapabilityCache(provider)
-      const runSearch = async (patternGroup?: 'segmented' | 'branchRoot'): Promise<string> => {
-        return capabilities.runWithFallback(
-          'for-each-ref-exclude',
-          async () =>
-            (
-              await provider.exec(
-                buildSearchBaseRefsArgv(normalizedQuery, limit, {
-                  remoteNames: remotes,
-                  patternGroup
-                }),
-                repo.path
-              )
-            ).stdout,
-          async () =>
-            (
-              await provider.exec(
-                buildSearchBaseRefsArgv(normalizedQuery, limit, {
-                  excludeRemoteHead: false,
-                  remoteNames: remotes,
-                  patternGroup
-                }),
-                repo.path
-              )
-            ).stdout,
-          isForEachRefExcludeUnsupportedError
-        )
-      }
-      const searchTokens = normalizedQuery.split('/').filter((token) => token.length > 0)
-      if (searchTokens.length > 1) {
-        const results = await Promise.all([runSearch('segmented'), runSearch('branchRoot')])
-        return mergeBaseRefSearchResultGroups(
-          results.map((stdout) => parseAndFilterSearchRefDetails(stdout, limit, remotes)),
-          limit
-        )
-      }
-      return parseAndFilterSearchRefDetails(await runSearch(), limit, remotes)
-    } catch (err) {
-      console.warn('[runtime:repo.searchRefs] SSH for-each-ref failed', {
-        path: repo.path,
-        err
-      })
-      return []
-    }
   }
 
   private async resolveHostedReviewTarget(args: {
@@ -12222,9 +12064,7 @@ export class YiruRuntimeService {
   }
 
   private getAgentLaunchPlatformForRepo(repo: Repo): NodeJS.Platform {
-    const projectRuntime = repo.connectionId
-      ? undefined
-      : resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)
+    const projectRuntime = resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)
     return getAgentLaunchPlatformForRepo(repo, projectRuntime)
   }
 
@@ -12232,39 +12072,31 @@ export class YiruRuntimeService {
     if (scope.repo) {
       return this.getAgentLaunchPlatformForRepo(scope.repo)
     }
-    if (scope.connectionId) {
-      return isWindowsAbsolutePathLike(scope.path) ? 'win32' : 'linux'
-    }
     return isWslUncPath(scope.path) ? 'linux' : process.platform
   }
 
   async getRepoSlug(repoSelector: string): Promise<{ owner: string; repo: string } | null> {
     const repo = await this.resolveRepoSelector(repoSelector)
     const options = this.getHostedReviewExecutionOptions(repo)
-    return options
-      ? getRepoSlug(repo.path, repo.connectionId ?? null, options)
-      : getRepoSlug(repo.path, repo.connectionId ?? null)
+    return options ? getRepoSlug(repo.path, null, options) : getRepoSlug(repo.path, null)
   }
 
   async getRepoUpstream(repoSelector: string): Promise<{ owner: string; repo: string } | null> {
     const repo = await this.resolveRepoSelector(repoSelector)
     const options = this.getHostedReviewExecutionOptions(repo)
-    return options
-      ? getRepoUpstream(repo.path, repo.connectionId ?? null, options)
-      : getRepoUpstream(repo.path, repo.connectionId ?? null)
+    return options ? getRepoUpstream(repo.path, null, options) : getRepoUpstream(repo.path, null)
   }
 
   // Why: repos added before fork detection existed have no stored `upstream`, so
   // their avatar/badge would never self-correct. Resolve it once at startup for
-  // local git repos; SSH repos resolve lazily when their settings open (their
-  // connection may not be up yet). Sequential to respect the gh rate limit;
-  // failures leave `upstream` unset so the next launch retries.
+  // local git repos. Sequential to respect the gh rate limit; failures leave
+  // `upstream` unset so the next launch retries.
   private async backfillForkUpstreams(): Promise<void> {
     try {
       const store = this.requireStore()
       let changed = false
       for (const repo of store.getRepos()) {
-        if (repo.upstream !== undefined || repo.kind === 'folder' || repo.connectionId) {
+        if (repo.upstream !== undefined || repo.kind === 'folder') {
           continue
         }
         let upstream: { owner: string; repo: string } | null
@@ -12303,7 +12135,7 @@ export class YiruRuntimeService {
       query,
       page,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       noCache,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12315,13 +12147,7 @@ export class YiruRuntimeService {
     type?: 'pr'
   ): Promise<Awaited<ReturnType<typeof getWorkItem>>> {
     const repo = await this.resolveRepoSelector(repoSelector)
-    return getWorkItem(
-      repo.path,
-      number,
-      type,
-      repo.connectionId ?? null,
-      ...this.getLocalGitExecutionOptionArgs(repo)
-    )
+    return getWorkItem(repo.path, number, type, null, ...this.getLocalGitExecutionOptionArgs(repo))
   }
 
   async getRepoWorkItemByOwnerRepo(
@@ -12336,7 +12162,7 @@ export class YiruRuntimeService {
       ownerRepo,
       number,
       type,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12351,7 +12177,7 @@ export class YiruRuntimeService {
       repo.path,
       number,
       type,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12360,11 +12186,7 @@ export class YiruRuntimeService {
     repoSelector: string
   ): Promise<Awaited<ReturnType<typeof listPullRequestLabels>>> {
     const repo = await this.resolveRepoSelector(repoSelector)
-    return listPullRequestLabels(
-      repo.path,
-      repo.connectionId ?? null,
-      ...this.getLocalGitExecutionOptionArgs(repo)
-    )
+    return listPullRequestLabels(repo.path, null, ...this.getLocalGitExecutionOptionArgs(repo))
   }
 
   async listRepoAssignableUsers(
@@ -12373,7 +12195,7 @@ export class YiruRuntimeService {
     const repo = await this.resolveRepoSelector(repoSelector)
     return listPullRequestAssignableUsers(
       repo.path,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12407,7 +12229,7 @@ export class YiruRuntimeService {
       repo.path,
       branch,
       linkedPRNumber ?? null,
-      repo.connectionId ?? null,
+      null,
       linkedPRNumber == null ? (fallbackPRNumber ?? null) : null,
       ...lookupOptionArgs
     )
@@ -12433,7 +12255,7 @@ export class YiruRuntimeService {
     const executionOptions = this.getHostedReviewExecutionOptions(repo)
     const review = await getHostedReviewForBranchFromRepo({
       repoPath: repo.path,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       branch: args.branch,
       currentHeadOid: args.currentHeadOid ?? null,
       linkedGitHubPR: args.linkedGitHubPR ?? null,
@@ -12473,7 +12295,7 @@ export class YiruRuntimeService {
     const executionOptions = this.getHostedReviewExecutionOptions(repo)
     return getHostedReviewCreationEligibilityFromRepo({
       repoPath,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       branch: args.branch,
       base: args.base ?? null,
       hasUncommittedChanges: args.hasUncommittedChanges,
@@ -12505,13 +12327,8 @@ export class YiruRuntimeService {
       ...(args.useTemplate !== undefined ? { useTemplate: args.useTemplate } : {})
     }
     const result = executionOptions
-      ? await createHostedReviewFromRepo(
-          repoPath,
-          input,
-          repo.connectionId ?? null,
-          executionOptions
-        )
-      : await createHostedReviewFromRepo(repoPath, input, repo.connectionId ?? null)
+      ? await createHostedReviewFromRepo(repoPath, input, null, executionOptions)
+      : await createHostedReviewFromRepo(repoPath, input, null)
     if (result.ok && this.stats && !this.stats.hasCountedPR(result.url)) {
       this.stats.record({
         type: 'pr_created',
@@ -12538,7 +12355,7 @@ export class YiruRuntimeService {
       normalizeGitLabPositiveInteger(perPage, 20, 100),
       repo.forgeRemotePreference,
       query,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12561,7 +12378,7 @@ export class YiruRuntimeService {
     return listGitLabLabels(
       repo.path,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12578,7 +12395,7 @@ export class YiruRuntimeService {
       iid,
       body,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12596,7 +12413,7 @@ export class YiruRuntimeService {
       iid,
       input,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12616,7 +12433,7 @@ export class YiruRuntimeService {
       discussionId,
       resolved,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12632,7 +12449,7 @@ export class YiruRuntimeService {
       repo.path,
       jobId,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12648,7 +12465,7 @@ export class YiruRuntimeService {
       repo.path,
       jobId,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12666,7 +12483,7 @@ export class YiruRuntimeService {
       iid,
       method ?? 'merge',
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12684,7 +12501,7 @@ export class YiruRuntimeService {
           repo.path,
           iid,
           repo.forgeRemotePreference,
-          repo.connectionId ?? null,
+          null,
           projectRef,
           ...this.getLocalGitExecutionOptionArgs(repo)
         )
@@ -12692,7 +12509,7 @@ export class YiruRuntimeService {
           repo.path,
           iid,
           repo.forgeRemotePreference,
-          repo.connectionId ?? null,
+          null,
           projectRef,
           ...this.getLocalGitExecutionOptionArgs(repo)
         )
@@ -12710,7 +12527,7 @@ export class YiruRuntimeService {
       iid,
       updates,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12728,7 +12545,7 @@ export class YiruRuntimeService {
       iid,
       reviewerIds,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12746,7 +12563,7 @@ export class YiruRuntimeService {
       iid,
       type,
       repo.forgeRemotePreference,
-      repo.connectionId ?? null,
+      null,
       projectRef,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12764,7 +12581,7 @@ export class YiruRuntimeService {
       projectRef,
       iid,
       type,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12785,7 +12602,7 @@ export class YiruRuntimeService {
       headSha,
       prRepo ?? null,
       options,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12800,7 +12617,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       options,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12819,7 +12636,7 @@ export class YiruRuntimeService {
     return getPRCheckDetails(
       repo.path,
       { ...args, prRepo: args.prRepo ?? null },
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12835,7 +12652,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       { ...options, prRepo: prRepo ?? null },
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12854,7 +12671,7 @@ export class YiruRuntimeService {
     const repo = await this.resolveRepoSelector(repoSelector)
     return getPRFileContents({
       repoPath: repo.path,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       localGitOptions: this.getLocalGitExecutionOptionArgs(repo)[0],
       ...args
     })
@@ -12870,7 +12687,7 @@ export class YiruRuntimeService {
       repo.path,
       threadId,
       resolve,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12886,7 +12703,7 @@ export class YiruRuntimeService {
     const repo = await this.resolveRepoSelector(repoSelector)
     return setPRFileViewed({
       repoPath: repo.path,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       localGitOptions: this.getLocalGitExecutionOptionArgs(repo)[0],
       ...args
     })
@@ -12903,7 +12720,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       title,
-      repo.connectionId ?? null,
+      null,
       prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12920,7 +12737,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       updates,
-      repo.connectionId ?? null,
+      null,
       prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12937,7 +12754,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       method,
-      repo.connectionId ?? null,
+      null,
       prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12956,7 +12773,7 @@ export class YiruRuntimeService {
       prNumber,
       enabled,
       method,
-      repo.connectionId ?? null,
+      null,
       prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -12972,7 +12789,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       updates,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -12987,7 +12804,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       reviewers,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -13002,7 +12819,7 @@ export class YiruRuntimeService {
       repo.path,
       prNumber,
       reviewers,
-      repo.connectionId ?? null,
+      null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
   }
@@ -13018,7 +12835,7 @@ export class YiruRuntimeService {
       repo.path,
       number,
       body,
-      repo.connectionId ?? null,
+      null,
       prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -13031,7 +12848,7 @@ export class YiruRuntimeService {
     const repo = await this.resolveRepoSelector(repoSelector)
     return addPRReviewComment({
       repoPath: repo.path,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       localGitOptions: this.getLocalGitExecutionOptionArgs(repo)[0],
       ...args
     })
@@ -13058,7 +12875,7 @@ export class YiruRuntimeService {
       args.threadId,
       args.path,
       args.line,
-      repo.connectionId ?? null,
+      null,
       args.prRepo ?? null,
       ...this.getLocalGitExecutionOptionArgs(repo)
     )
@@ -13090,38 +12907,6 @@ export class YiruRuntimeService {
 
   async getRepoHooks(repoSelector: string) {
     const repo = await this.resolveRepoSelector(repoSelector)
-    if (repo.connectionId) {
-      const fsProvider = getSshFilesystemProvider(repo.connectionId)
-      if (!fsProvider) {
-        return {
-          hasHooksFile: false,
-          hooks: null,
-          setupRunPolicy: getEffectiveSetupRunPolicy(repo),
-          source: null
-        }
-      }
-      try {
-        const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
-        const hooks = result.isBinary ? null : parseYiruYaml(result.content)
-        return {
-          hasHooksFile: Boolean(hooks),
-          hooks,
-          setupRunPolicy: getEffectiveSetupRunPolicy(repo),
-          source: hooks ? 'yiru.yaml' : null,
-          setupTrust: this.getSharedSetupHookTrustPayload(
-            repo,
-            getDefaultTabCommandTrustContent(hooks)
-          )
-        }
-      } catch {
-        return {
-          hasHooksFile: false,
-          hooks: null,
-          setupRunPolicy: getEffectiveSetupRunPolicy(repo),
-          source: null
-        }
-      }
-    }
     const hasFile = hasHooksFile(repo.path)
     const hooks = getEffectiveHooks(repo)
     const sharedHooks = hasFile ? loadHooks(repo.path) : null
@@ -13144,22 +12929,6 @@ export class YiruRuntimeService {
       return { hasHooks: false, hooks: null, mayNeedUpdate: false }
     }
 
-    if (repo.connectionId) {
-      const fsProvider = getSshFilesystemProvider(repo.connectionId)
-      if (!fsProvider) {
-        return { hasHooks: false, hooks: null, mayNeedUpdate: false }
-      }
-      try {
-        const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
-        if (result.isBinary) {
-          return { hasHooks: false, hooks: null, mayNeedUpdate: false }
-        }
-        return { hasHooks: true, hooks: parseYiruYaml(result.content), mayNeedUpdate: false }
-      } catch {
-        return { hasHooks: false, hooks: null, mayNeedUpdate: false }
-      }
-    }
-
     const has = hasHooksFile(repo.path)
     const hooks = has ? loadHooks(repo.path) : null
     return {
@@ -13177,19 +12946,6 @@ export class YiruRuntimeService {
 
     return inspectSetupScriptImportCandidates(async (relativePath) => {
       const filePath = joinWorktreeRelativePath(repo.path, relativePath)
-      if (repo.connectionId) {
-        const fsProvider = getSshFilesystemProvider(repo.connectionId)
-        if (!fsProvider) {
-          return null
-        }
-        try {
-          const result = await fsProvider.readFile(filePath)
-          return result.isBinary ? null : result.content
-        } catch {
-          return null
-        }
-      }
-
       try {
         return await readFile(filePath, 'utf-8')
       } catch (error) {
@@ -13479,9 +13235,7 @@ export class YiruRuntimeService {
       let detected: string[] = []
       try {
         // Why: startup-draft fallback can run from sparse runtime launch envs too.
-        detected = repo.connectionId
-          ? await detectRemoteAgents({ connectionId: repo.connectionId })
-          : await detectInstalledAgentsWithShellPathHydration()
+        detected = await detectInstalledAgentsWithShellPathHydration()
       } catch {
         detected = []
       }
@@ -13492,10 +13246,10 @@ export class YiruRuntimeService {
       return null
     }
 
-    // Why: a mobile client can run on Windows while the workspace shell is
-    // Linux over SSH. Startup command quoting must target the shell that runs it.
+    // Why: a mobile client can run on another platform. Startup command quoting
+    // must target the shell that runs on this host.
     const agentLaunchPlatform = this.getAgentLaunchPlatformForRepo(repo)
-    const isRemote = repoIsRemote(repo)
+    const isRemote = false
     const queuedShell = resolveLocalWindowsAgentStartupShell({
       platform: agentLaunchPlatform,
       isRemote,
@@ -14191,34 +13945,6 @@ export class YiruRuntimeService {
     const lineageInput =
       args.lineage || args.comment ? { ...args.lineage, comment: args.comment } : undefined
     const lineageResolution = await this.resolveLineageForWorktreeCreate(lineageInput)
-    if (repo.connectionId) {
-      const result = await this.createManagedRemoteWorktree(repo, {
-        ...args,
-        activate: args.activate,
-        ...(effectiveStartup ? { startup: effectiveStartup } : {}),
-        ...(effectiveStartupFollowup ? { startupFollowup: effectiveStartupFollowup } : {}),
-        ...(effectiveCreatedWithAgent ? { createdWithAgent: effectiveCreatedWithAgent } : {}),
-        ...(effectiveDraftPaste ? { startupDraftPaste: effectiveDraftPaste } : {})
-      })
-      const recordedLineage = this.recordCreatedWorktreeLineage(result.worktree, lineageResolution)
-      return {
-        ...result,
-        worktree: {
-          ...result.worktree,
-          parentWorktreeId: recordedLineage.lineage?.parentWorktreeId ?? null,
-          childWorktreeIds: result.worktree.childWorktreeIds ?? [],
-          lineage: recordedLineage.lineage,
-          workspaceLineage: recordedLineage.workspaceLineage
-        },
-        ...(lineageInput
-          ? {
-              lineage: recordedLineage.lineage,
-              workspaceLineage: recordedLineage.workspaceLineage,
-              warnings: recordedLineage.warnings
-            }
-          : {})
-      }
-    }
     const settings = createSettings
     const worktreePathSettings = getWorktreePathSettings(repo, settings)
     const localGitExecOptions = getLocalProjectGitExecOptions(this.requireStore(), repo)
@@ -15015,314 +14741,6 @@ export class YiruRuntimeService {
     }
   }
 
-  private async createManagedRemoteWorktree(
-    repo: Repo,
-    args: {
-      name: string
-      baseBranch?: string
-      compareBaseRef?: string
-      branchNameOverride?: string
-      linkedPR?: number | null
-      linkedGitLabMR?: number | null
-      linkedBitbucketPR?: number | null
-      linkedAzureDevOpsPR?: number | null
-      linkedGiteaPR?: number | null
-      comment?: string
-      displayName?: string
-      workspaceStatus?: string
-      manualOrder?: number
-      sparseCheckout?: { directories: string[]; presetId?: string }
-      pushTarget?: GitPushTarget
-      runHooks?: boolean
-      activate?: boolean
-      setupDecision?: 'run' | 'skip' | 'inherit'
-      awaitTerminalProvisioning?: boolean
-      observeSetupCompletion?: boolean
-      createdWithAgent?: TuiAgent
-      pendingFirstAgentMessageRename?: boolean
-      automationProvenance?: AutomationWorkspaceProvenance
-      startup?: WorktreeStartupLaunch
-      startupFollowup?: WorktreeStartupFollowup
-      startupDraftPaste?: WorktreeStartupDraftPaste
-    }
-  ): Promise<CreateWorktreeResult> {
-    if (!this.store) {
-      throw new Error('runtime_unavailable')
-    }
-
-    // Why: runtime/mobile callers do not own a renderer BrowserWindow, but the
-    // SSH create helper only uses it for progress and change notifications.
-    // Runtime emits those through RuntimeNotifier after the create succeeds.
-    const headlessWindow = {
-      isDestroyed: () => false,
-      webContents: { send: () => undefined }
-    } as unknown as BrowserWindow
-
-    const result = await createRemoteWorktree(
-      {
-        repoId: repo.id,
-        name: args.name,
-        ...(args.displayName ? { displayName: args.displayName } : {}),
-        ...(args.baseBranch ? { baseBranch: args.baseBranch } : {}),
-        ...(args.compareBaseRef ? { compareBaseRef: args.compareBaseRef } : {}),
-        ...(args.branchNameOverride ? { branchNameOverride: args.branchNameOverride } : {}),
-        ...(args.runHooks ? { setupDecision: 'run' as const } : {}),
-        ...(!args.runHooks && args.setupDecision ? { setupDecision: args.setupDecision } : {}),
-        ...(args.sparseCheckout ? { sparseCheckout: args.sparseCheckout } : {}),
-        ...(args.linkedPR != null ? { linkedPR: args.linkedPR } : {}),
-        ...(args.linkedGitLabMR != null ? { linkedGitLabMR: args.linkedGitLabMR } : {}),
-        ...(args.linkedBitbucketPR != null ? { linkedBitbucketPR: args.linkedBitbucketPR } : {}),
-        ...(args.linkedAzureDevOpsPR != null
-          ? { linkedAzureDevOpsPR: args.linkedAzureDevOpsPR }
-          : {}),
-        ...(args.linkedGiteaPR != null ? { linkedGiteaPR: args.linkedGiteaPR } : {}),
-        ...(args.pushTarget ? { pushTarget: args.pushTarget } : {}),
-        ...(args.workspaceStatus ? { workspaceStatus: args.workspaceStatus as never } : {}),
-        ...(args.manualOrder !== undefined ? { manualOrder: args.manualOrder } : {}),
-        ...(args.createdWithAgent ? { createdWithAgent: args.createdWithAgent } : {}),
-        ...(args.pendingFirstAgentMessageRename === true
-          ? { pendingFirstAgentMessageRename: true }
-          : {}),
-        ...(args.automationProvenance ? { automationProvenance: args.automationProvenance } : {})
-      },
-      repo,
-      this.store as unknown as Store,
-      headlessWindow
-    )
-
-    if (args.comment !== undefined) {
-      this.store.setWorktreeMeta(result.worktree.id, { comment: args.comment })
-      result.worktree.comment = args.comment
-    }
-
-    this.invalidateResolvedWorktreeCache()
-    this.notifyWorktreesChanged(repo.id)
-
-    let warning = result.warning
-    let didSpawnStartup = false
-    // Why: same no-double-spawn contract as the local path — once runtime
-    // provisions setup, omit it from activation and the RPC result.
-    let didSpawnSetup = false
-    let setupTerminalHandle: string | null = null
-    let startupTerminalHandle: string | null = null
-    let startupTerminalTabId: string | null = null
-    let startupTerminalPaneKey: string | null = null
-    let startupTerminalPtyId: string | null = null
-
-    let sequencedStartup = args.startup
-    let wrappedSetupCommandStr: string | undefined
-    if (args.startup && result.setup?.waitForAgentStartup === true) {
-      const platform = getSetupRunnerCommandPlatformForPath(result.setup.runnerScriptPath, 'posix')
-      const sequenced = createSequencedSetupAgentCommands({
-        runnerScriptPath: result.setup.runnerScriptPath,
-        startupCommand: args.startup.command,
-        platform
-      })
-      sequencedStartup = {
-        ...args.startup,
-        command: sequenced.startupCommand,
-        ...(sequenced.startupEnv ? { env: { ...args.startup.env, ...sequenced.startupEnv } } : {})
-      }
-      wrappedSetupCommandStr = sequenced.setupCommand
-    }
-
-    if (sequencedStartup && this.ptyController?.spawn) {
-      try {
-        const terminal = await this.createTerminal(`path:${result.worktree.path}`, {
-          command: sequencedStartup.command,
-          ...(result.setup && args.startup
-            ? { claudeAgentTeamsSourceCommand: args.startup.command }
-            : {}),
-          env: sequencedStartup.env,
-          ...(sequencedStartup.launchConfig ? { launchConfig: sequencedStartup.launchConfig } : {}),
-          ...(args.createdWithAgent ? { launchAgent: args.createdWithAgent } : {}),
-          startupCommandDelivery: sequencedStartup.startupCommandDelivery,
-          telemetry: sequencedStartup.telemetry
-        })
-        if (args.startupDraftPaste) {
-          this.pasteStartupDraftWhenReady(terminal.handle, args.startupDraftPaste)
-        }
-        if (args.startupFollowup) {
-          this.sendStartupFollowupWhenReady(terminal.handle, args.startupFollowup)
-        }
-        didSpawnStartup = true
-        startupTerminalHandle = terminal.handle
-        startupTerminalTabId = terminal.tabId ?? null
-        startupTerminalPaneKey = terminal.paneKey ?? null
-        startupTerminalPtyId = terminal.ptyId ?? null
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err)
-        warning = warning
-          ? `${warning} Also failed to create the startup terminal for ${result.worktree.path}: ${message}`
-          : `Failed to create the startup terminal for ${result.worktree.path}: ${message}`
-      }
-    }
-
-    const shouldActivate = args.activate === true || args.runHooks === true
-    if (shouldActivate) {
-      const runtimeWillProvisionTerminals =
-        didSpawnStartup && Boolean(result.setup || result.defaultTabs)
-      if (runtimeWillProvisionTerminals) {
-        // Why: remote/mobile task creates spawn the agent terminal in runtime,
-        // so renderer activation may not materialize setup/default tabs. Await so
-        // a failed setup spawn falls back to renderer activation for retry.
-        const provisioned = await this.provisionManagedWorktreeTerminals({
-          worktreeSelector: `path:${result.worktree.path}`,
-          worktreeId: result.worktree.id,
-          worktreePath: result.worktree.path,
-          ...(result.setup ? { setup: result.setup } : {}),
-          ...(result.defaultTabs ? { defaultTabs: result.defaultTabs } : {}),
-          primaryTerminalHandle: startupTerminalHandle,
-          hasStartupTerminal: didSpawnStartup,
-          setupCommandPlatform: result.setup
-            ? isWindowsAbsolutePathLike(result.setup.runnerScriptPath)
-              ? 'windows'
-              : 'posix'
-            : 'posix',
-          observeSetupCompletion: args.observeSetupCompletion,
-          // Why: carry the wait-for-agent wrapped setup command (#6298) so the
-          // remote Setup tab runs the same script the sequenced agent waits on.
-          ...(wrappedSetupCommandStr ? { wrappedSetupCommand: wrappedSetupCommandStr } : {})
-        })
-        didSpawnSetup = provisioned.setupSpawned
-        setupTerminalHandle = provisioned.setupTerminalHandle
-      }
-      // Why: omit setup from activation when runtime spawned it; on spawn
-      // failure fall through with the wrapped command so renderer retries.
-      const activationSetup = didSpawnSetup
-        ? undefined
-        : result.setup
-          ? {
-              ...result.setup,
-              ...(didSpawnStartup && wrappedSetupCommandStr
-                ? { command: wrappedSetupCommandStr }
-                : {})
-            }
-          : undefined
-      const activationDefaultTabs = runtimeWillProvisionTerminals ? undefined : result.defaultTabs
-      if (args.startup && !didSpawnStartup) {
-        this.notifyActivateWorktree(
-          repo.id,
-          result.worktree.id,
-          activationSetup,
-          args.startup,
-          activationDefaultTabs
-        )
-      } else {
-        this.notifyActivateWorktree(
-          repo.id,
-          result.worktree.id,
-          activationSetup,
-          undefined,
-          activationDefaultTabs
-        )
-      }
-    }
-
-    if (
-      !shouldActivate &&
-      this.ptyController?.spawn &&
-      (result.setup || result.defaultTabs || didSpawnStartup)
-    ) {
-      // Why: inactive terminal materialization matches normal worktree creation,
-      // but setup/default tab failures must not gate automation dispatch.
-      const provisioning = this.provisionManagedWorktreeTerminals({
-        worktreeSelector: `path:${result.worktree.path}`,
-        worktreeId: result.worktree.id,
-        worktreePath: result.worktree.path,
-        ...(result.setup ? { setup: result.setup } : {}),
-        ...(result.defaultTabs ? { defaultTabs: result.defaultTabs } : {}),
-        primaryTerminalHandle: startupTerminalHandle,
-        hasStartupTerminal: didSpawnStartup,
-        setupCommandPlatform: result.setup
-          ? isWindowsAbsolutePathLike(result.setup.runnerScriptPath)
-            ? 'windows'
-            : 'posix'
-          : 'posix',
-        observeSetupCompletion: args.observeSetupCompletion,
-        ...(wrappedSetupCommandStr ? { wrappedSetupCommand: wrappedSetupCommandStr } : {})
-      })
-      // Why: runtime owns setup spawning here, so omit setup from the RPC result
-      // to keep the headless/mobile caller from launching it a second time.
-      if (args.awaitTerminalProvisioning) {
-        const provisioned = await provisioning
-        didSpawnSetup = provisioned.setupSpawned
-        setupTerminalHandle = provisioned.setupTerminalHandle
-      } else {
-        void provisioning
-        if (result.setup) {
-          didSpawnSetup = true
-        }
-      }
-    } else if (!shouldActivate && this.ptyController?.spawn) {
-      try {
-        await this.createTerminal(`path:${result.worktree.path}`)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err)
-        warning = warning
-          ? `${warning} Also failed to create the initial terminal for ${result.worktree.path}: ${message}`
-          : `Failed to create the initial terminal for ${result.worktree.path}: ${message}`
-      }
-    }
-
-    const returnedSetup = didSpawnSetup
-      ? undefined
-      : result.setup
-        ? {
-            ...result.setup,
-            ...(didSpawnStartup && wrappedSetupCommandStr
-              ? { command: wrappedSetupCommandStr }
-              : {})
-          }
-        : undefined
-    const resultForRenderer = returnedSetup
-      ? { ...result, setup: returnedSetup }
-      : (() => {
-          const { setup: _setup, ...resultWithoutSetup } = result
-          return resultWithoutSetup
-        })()
-
-    const resultWithStartupTerminal =
-      didSpawnStartup && startupTerminalHandle
-        ? {
-            ...resultForRenderer,
-            startupTerminal: {
-              spawned: true,
-              handle: startupTerminalHandle,
-              ...(startupTerminalTabId ? { tabId: startupTerminalTabId } : {}),
-              ...(startupTerminalPaneKey ? { paneKey: startupTerminalPaneKey } : {}),
-              ...(startupTerminalPtyId ? { ptyId: startupTerminalPtyId } : {}),
-              surface: 'background' as const
-            }
-          }
-        : resultForRenderer
-
-    const requestedSetupDecision = args.runHooks ? 'run' : (args.setupDecision ?? 'inherit')
-    const resultWithSetupReceipt = args.awaitTerminalProvisioning
-      ? {
-          ...resultWithStartupTerminal,
-          setupReceipt: {
-            requested: requestedSetupDecision,
-            hookFound: Boolean(result.setup),
-            startupPolicy: result.setup?.waitForAgentStartup
-              ? ('wait-for-setup' as const)
-              : ('start-immediately' as const),
-            state:
-              requestedSetupDecision === 'skip'
-                ? ('skipped' as const)
-                : !result.setup
-                  ? ('not_configured' as const)
-                  : didSpawnSetup
-                    ? ('running' as const)
-                    : ('spawn_failed' as const),
-            ...(setupTerminalHandle ? { terminalHandle: setupTerminalHandle } : {})
-          }
-        }
-      : resultWithStartupTerminal
-
-    return warning ? { ...resultWithSetupReceipt, warning } : resultWithSetupReceipt
-  }
-
   /**
    * Fetch `remote` in `repoPath`, sharing the 30s freshness window + in-flight
    * serialization with all other callers. Never rejects — callers
@@ -15751,12 +15169,6 @@ export class YiruRuntimeService {
     if (!repo) {
       return null
     }
-    if (repo.connectionId) {
-      // Why: the drift probe uses local git helpers. Until the SSH provider
-      // exposes equivalent remote refs/log plumbing, fail closed to "unknown"
-      // instead of probing a server path on the desktop filesystem.
-      return null
-    }
     const localGitExecOptions = getLocalProjectGitExecOptions(this.requireStore(), repo)
     const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
     const meta = this.store.getWorktreeMeta(wt.id)
@@ -15908,48 +15320,12 @@ export class YiruRuntimeService {
     if (isFolderRepo(repo)) {
       return { error: 'Folder mode does not support creating worktrees.' }
     }
-    const sshGitProvider = repo.connectionId ? requireSshGitProvider(repo.connectionId) : null
-    const localGitExecOptions = sshGitProvider
-      ? undefined
-      : getLocalProjectGitExecOptions(this.requireStore(), repo)
-    const localWorktreeGitOptions = sshGitProvider
-      ? {}
-      : getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
-    const gitExec = sshGitProvider
-      ? (gitArgs: string[]) => sshGitProvider.exec(gitArgs, repo.path)
-      : (gitArgs: string[]) => gitExecFileAsync(gitArgs, localGitExecOptions ?? { cwd: repo.path })
-    const resolveRemote = sshGitProvider
-      ? async () => {
-          const { stdout } = await sshGitProvider.exec(['remote'], repo.path)
-          const remotes = stdout
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean)
-          if (remotes.includes('origin')) {
-            return 'origin'
-          }
-          if (remotes.length === 1) {
-            return remotes[0]!
-          }
-          if (remotes.length === 0) {
-            throw new Error('Repo has no configured git remotes.')
-          }
-          throw new Error(
-            `Repo has multiple remotes (${remotes.join(', ')}) and no default is configured.`
-          )
-        }
-      : () => getDefaultRemote(repo.path, localWorktreeGitOptions)
-
-    // Why: SSH repos can't fetch over the relay's read-only git.exec channel, so
-    // route the PR head fetch through the write-capable helper instead of gitExec.
+    const localGitExecOptions = getLocalProjectGitExecOptions(this.requireStore(), repo)
+    const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
+    const gitExec = (gitArgs: string[]) => gitExecFileAsync(gitArgs, localGitExecOptions)
+    const resolveRemote = () => getDefaultRemote(repo.path, localWorktreeGitOptions)
     const fetchRemoteTrackingRef = (remote: string, branch: string): Promise<void> =>
-      fetchPrHeadTrackingRef(
-        repo,
-        sshGitProvider,
-        remote,
-        branch,
-        localGitExecOptions ? { localGitExecOptions } : {}
-      )
+      fetchPrHeadTrackingRef(repo, remote, branch, { localGitExecOptions })
 
     return resolveGitHubPrStartPoint({
       repoPath: repo.path,
@@ -15957,7 +15333,7 @@ export class YiruRuntimeService {
       headRefName: args.headRefName,
       baseRefName: args.baseRefName,
       isCrossRepository: args.isCrossRepository,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       localGitOptions: localWorktreeGitOptions,
       gitExec,
       fetchRemoteTrackingRef,
@@ -15986,16 +15362,9 @@ export class YiruRuntimeService {
     if (isFolderRepo(repo)) {
       return { error: 'Folder mode does not support creating worktrees.' }
     }
-    const sshGitProvider = repo.connectionId ? requireSshGitProvider(repo.connectionId) : null
-    const localGitExecOptions = sshGitProvider
-      ? undefined
-      : getLocalProjectGitExecOptions(this.requireStore(), repo)
-    const localWorktreeGitOptions = sshGitProvider
-      ? {}
-      : getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
-    const gitExec = sshGitProvider
-      ? (gitArgs: string[]) => sshGitProvider.exec(gitArgs, repo.path)
-      : (gitArgs: string[]) => gitExecFileAsync(gitArgs, localGitExecOptions ?? { cwd: repo.path })
+    const localGitExecOptions = getLocalProjectGitExecOptions(this.requireStore(), repo)
+    const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
+    const gitExec = (gitArgs: string[]) => gitExecFileAsync(gitArgs, localGitExecOptions)
 
     let sourceBranch = args.sourceBranch?.trim() ?? ''
     let targetBranch = args.targetBranch?.trim() ?? ''
@@ -16007,18 +15376,17 @@ export class YiruRuntimeService {
         remote = await this.resolveGitLabProjectRemote(
           repo.path,
           repo.forgeRemotePreference,
-          repo.connectionId ?? null,
           localWorktreeGitOptions
         )
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Could not resolve git remote.' }
       }
-      const knownHosts = await getGlabKnownHosts(repo.connectionId ?? null)
+      const knownHosts = await getGlabKnownHosts(null)
       const projectRef = await getGitLabProjectRefForRemote(
         repo.path,
         remote,
         knownHosts,
-        repo.connectionId ?? null,
+        null,
         localWorktreeGitOptions
       )
       if (!projectRef) {
@@ -16029,7 +15397,7 @@ export class YiruRuntimeService {
         projectRef,
         args.mrIid,
         'mr',
-        repo.connectionId ?? null,
+        null,
         localWorktreeGitOptions
       )
       if (!item || item.type !== 'mr') {
@@ -16050,7 +15418,6 @@ export class YiruRuntimeService {
       remote = await this.resolveGitLabProjectRemote(
         repo.path,
         repo.forgeRemotePreference,
-        repo.connectionId ?? null,
         localWorktreeGitOptions
       )
     } catch (error) {
@@ -16058,9 +15425,7 @@ export class YiruRuntimeService {
     }
     const compareBaseRef = targetBranch ? `refs/remotes/${remote}/${targetBranch}` : undefined
     const fetchRemoteTrackingRef = async (branch: string, ref: string): Promise<void> => {
-      await (sshGitProvider
-        ? sshGitProvider.fetchRemoteTrackingRef(repo.path, remote, branch, ref)
-        : gitExec(['fetch', remote, `+refs/heads/${branch}:${ref}`]))
+      await gitExec(['fetch', remote, `+refs/heads/${branch}:${ref}`])
     }
     // Why: the target/compare branch is optional (it only powers the diff
     // base). A merged MR may have had its target ref deleted, so a fetch
@@ -16087,12 +15452,10 @@ export class YiruRuntimeService {
 
     if (isCrossRepository) {
       const mrRef = `refs/merge-requests/${args.mrIid}/head`
-      // Why: GitLab exposes fork MR heads on the target project, so mobile/SSH
+      // Why: GitLab exposes fork MR heads on the target project, so mobile
       // can match desktop without adding the contributor fork as a remote.
       try {
-        await (sshGitProvider
-          ? sshGitProvider.fetchGitLabMergeRequestHead(repo.path, remote, args.mrIid)
-          : gitExec(['fetch', remote, mrRef]))
+        await gitExec(['fetch', remote, mrRef])
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
         return { error: `Failed to fetch ${mrRef}: ${message.split('\n')[0]}` }
@@ -16135,10 +15498,9 @@ export class YiruRuntimeService {
   private async resolveGitLabProjectRemote(
     repoPath: string,
     preference?: Repo['forgeRemotePreference'],
-    connectionId?: string | null,
     localGitOptions: { wslDistro?: string } = {}
   ): Promise<string> {
-    const knownHosts = await getGlabKnownHosts(connectionId)
+    const knownHosts = await getGlabKnownHosts(null)
     const localGitOptionArgs =
       Object.keys(localGitOptions).length > 0 ? ([localGitOptions] as const) : []
     if (preference === 'origin') {
@@ -16146,7 +15508,7 @@ export class YiruRuntimeService {
         repoPath,
         'origin',
         knownHosts,
-        connectionId,
+        null,
         ...localGitOptionArgs
       )
       if (origin) {
@@ -16159,7 +15521,7 @@ export class YiruRuntimeService {
         repoPath,
         'upstream',
         knownHosts,
-        connectionId,
+        null,
         ...localGitOptionArgs
       )
       if (upstream) {
@@ -16169,7 +15531,7 @@ export class YiruRuntimeService {
         repoPath,
         'origin',
         knownHosts,
-        connectionId,
+        null,
         ...localGitOptionArgs
       )
       if (origin) {
@@ -16181,7 +15543,7 @@ export class YiruRuntimeService {
       repoPath,
       'upstream',
       knownHosts,
-      connectionId,
+      null,
       ...localGitOptionArgs
     )
     if (upstream) {
@@ -16191,31 +15553,11 @@ export class YiruRuntimeService {
       repoPath,
       'origin',
       knownHosts,
-      connectionId,
+      null,
       ...localGitOptionArgs
     )
     if (origin) {
       return 'origin'
-    }
-    if (connectionId) {
-      const provider = requireSshGitProvider(connectionId)
-      const { stdout } = await provider.exec(['remote'], repoPath)
-      const remotes = stdout
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-      if (remotes.includes('origin')) {
-        return 'origin'
-      }
-      if (remotes.length === 1) {
-        return remotes[0]!
-      }
-      if (remotes.length === 0) {
-        throw new Error('Repo has no configured git remotes.')
-      }
-      throw new Error(
-        `Repo has multiple remotes (${remotes.join(', ')}) and no default is configured.`
-      )
     }
     return getDefaultRemote(repoPath, localGitOptions)
   }
@@ -16338,41 +15680,22 @@ export class YiruRuntimeService {
       throw new Error('Folder workspaces do not have local Git branches.')
     }
 
-    if (repo.connectionId) {
-      const provider = requireSshGitProvider(repo.connectionId)
-      // Why: SSH must use the write-capable relay RPC; the shared exec-based
-      // helper routes through the read-only git.exec allowlist, which rejects
-      // the worktree/update-ref/config writes this delete needs.
-      await provider.forceDeletePreservedBranch(
-        repo.path,
-        cleanupTarget.branchName,
-        cleanupTarget.head
-      )
-      await cleanupUnusedWorktreePushTargetRemoteSsh(
-        provider,
-        repo.path,
-        removalTarget.id,
-        cleanupTarget.pushTarget,
-        this.store
-      )
-    } else {
-      const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
-      await (Object.keys(localWorktreeGitOptions).length > 0
-        ? forceDeleteLocalBranch(
-            repo.path,
-            cleanupTarget.branchName,
-            cleanupTarget.head,
-            (argv, cwd) => gitExecFileAsync(argv, { cwd, ...localWorktreeGitOptions })
-          )
-        : forceDeleteLocalBranch(repo.path, cleanupTarget.branchName, cleanupTarget.head))
-      await cleanupUnusedWorktreePushTargetRemote(
-        repo.path,
-        removalTarget.id,
-        cleanupTarget.pushTarget,
-        this.store,
-        localWorktreeGitOptions
-      )
-    }
+    const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
+    await (Object.keys(localWorktreeGitOptions).length > 0
+      ? forceDeleteLocalBranch(
+          repo.path,
+          cleanupTarget.branchName,
+          cleanupTarget.head,
+          (argv, cwd) => gitExecFileAsync(argv, { cwd, ...localWorktreeGitOptions })
+        )
+      : forceDeleteLocalBranch(repo.path, cleanupTarget.branchName, cleanupTarget.head))
+    await cleanupUnusedWorktreePushTargetRemote(
+      repo.path,
+      removalTarget.id,
+      cleanupTarget.pushTarget,
+      this.store,
+      localWorktreeGitOptions
+    )
 
     this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
     return { deleted: true }
@@ -16428,17 +15751,11 @@ export class YiruRuntimeService {
         this.notifyWorktreesChanged(repo.id)
         return {}
       }
-      const provider = repo.connectionId ? requireSshGitProvider(repo.connectionId) : null
-      const fsProvider = repo.connectionId ? getSshFilesystemProvider(repo.connectionId) : null
-      const localWorktreeGitOptions = repo.connectionId
-        ? {}
-        : getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
+      const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
       const hasLocalWorktreeGitOptions = Object.keys(localWorktreeGitOptions).length > 0
-      const registeredWorktrees = repo.connectionId
-        ? await provider!.listWorktrees(repo.path)
-        : hasLocalWorktreeGitOptions
-          ? await listWorktreesStrict(repo.path, localWorktreeGitOptions)
-          : await listWorktreesStrict(repo.path)
+      const registeredWorktrees = hasLocalWorktreeGitOptions
+        ? await listWorktreesStrict(repo.path, localWorktreeGitOptions)
+        : await listWorktreesStrict(repo.path)
       const removedMeta = store.getWorktreeMeta(removalTarget.id)
       const removedPushTarget = removedMeta?.pushTarget ?? removalTarget.pushTarget
       const registeredWorktree = findRegisteredDeletableWorktree(
@@ -16453,74 +15770,37 @@ export class YiruRuntimeService {
             meta: removedMeta
           })
         ) {
-          if (repo.connectionId) {
-            if (!fsProvider) {
-              throw new Error('SSH filesystem provider unavailable')
-            }
-            if (!fsProvider.lstat) {
-              throw new Error('SSH filesystem provider lstat unavailable')
-            }
-            canCleanOrphanedDirectory = await canSafelyRemoveOrphanedWorktreeDirectory(
-              removalTarget.path,
-              repo.path,
-              (path) => fsProvider.lstat!(path),
-              (path) => fsProvider.readFile(path)
-            )
-          } else {
-            const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-            canCleanOrphanedDirectory =
-              !isDangerousWorktreeRemovalPath(removalTarget.path, repo.path) &&
-              (await canSafelyRemoveOrphanedWorktreeDirectory(
-                toLocalWorktreeRuntimePath(removalTarget.path, localWorktreeGitOptions),
-                toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
-                access.statPath,
-                access.readPath
-              ))
-          }
+          const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+          canCleanOrphanedDirectory =
+            !isDangerousWorktreeRemovalPath(removalTarget.path, repo.path) &&
+            (await canSafelyRemoveOrphanedWorktreeDirectory(
+              toLocalWorktreeRuntimePath(removalTarget.path, localWorktreeGitOptions),
+              toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
+              access.statPath,
+              access.readPath
+            ))
         }
         if (canCleanOrphanedDirectory) {
           assertWorktreeDoesNotContainRegisteredWorktree(removalTarget.path, registeredWorktrees)
           if (!force) {
             throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
           }
-          if (repo.connectionId) {
-            const removalGate = await this.acquireFileWatcherRemoval(
-              removalTarget.path,
-              repo.connectionId
-            )
-            let removalCompleted = false
-            try {
-              await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id, repo.connectionId)
-              await fsProvider!.deletePath(removalTarget.path, true)
-              removalCompleted = true
-            } finally {
-              await removalGate.finish(removalCompleted)
-            }
-            await cleanupUnusedWorktreePushTargetRemoteSsh(
-              provider!,
-              repo.path,
-              removalTarget.id,
-              removedPushTarget,
-              store
-            )
-          } else {
-            const removalGate = await this.acquireFileWatcherRemoval(removalTarget.path)
-            let removalCompleted = false
-            try {
-              await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id)
-              await removeLocalWorktreePath(removalTarget.path, localWorktreeGitOptions)
-              removalCompleted = true
-            } finally {
-              await removalGate.finish(removalCompleted)
-            }
-            await cleanupUnusedWorktreePushTargetRemote(
-              repo.path,
-              removalTarget.id,
-              removedPushTarget,
-              store,
-              localWorktreeGitOptions
-            )
+          const removalGate = await this.acquireFileWatcherRemoval(removalTarget.path)
+          let removalCompleted = false
+          try {
+            await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id)
+            await removeLocalWorktreePath(removalTarget.path, localWorktreeGitOptions)
+            removalCompleted = true
+          } finally {
+            await removalGate.finish(removalCompleted)
           }
+          await cleanupUnusedWorktreePushTargetRemote(
+            repo.path,
+            removalTarget.id,
+            removedPushTarget,
+            store,
+            localWorktreeGitOptions
+          )
           this.clearOptimisticReconcileToken(removalTarget.id)
           this.removeWorktreeMetadataAndHistory(store, removalTarget.id)
           this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
@@ -16529,51 +15809,49 @@ export class YiruRuntimeService {
           this.notifyWorktreesChanged(repo.id)
           return {}
         }
-        if (!repo.connectionId) {
-          const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-          const runtimeWorktreePath = toLocalWorktreeRuntimePath(
-            removalTarget.path,
+        const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+        const runtimeWorktreePath = toLocalWorktreeRuntimePath(
+          removalTarget.path,
+          localWorktreeGitOptions
+        )
+        if (
+          await canCleanupUnregisteredYiruLeftoverDirectory({
+            meta: removedMeta,
+            worktreePath: removalTarget.path,
+            runtimeWorktreePath,
+            repo,
+            runtimeRepoPath: toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
+            registeredWorktrees,
+            statPath: access.statPath,
+            isGitRepository: (path) => isLocalRuntimeGitRepository(path, localWorktreeGitOptions)
+          })
+        ) {
+          if (!force) {
+            throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
+          }
+          const removalGate = await this.acquireFileWatcherRemoval(removalTarget.path)
+          let removalCompleted = false
+          try {
+            await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id)
+            await removeLocalWorktreePath(removalTarget.path, localWorktreeGitOptions)
+            removalCompleted = true
+          } finally {
+            await removalGate.finish(removalCompleted)
+          }
+          await cleanupUnusedWorktreePushTargetRemote(
+            repo.path,
+            removalTarget.id,
+            removedPushTarget,
+            store,
             localWorktreeGitOptions
           )
-          if (
-            await canCleanupUnregisteredYiruLeftoverDirectory({
-              meta: removedMeta,
-              worktreePath: removalTarget.path,
-              runtimeWorktreePath,
-              repo,
-              runtimeRepoPath: toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
-              registeredWorktrees,
-              statPath: access.statPath,
-              isGitRepository: (path) => isLocalRuntimeGitRepository(path, localWorktreeGitOptions)
-            })
-          ) {
-            if (!force) {
-              throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
-            }
-            const removalGate = await this.acquireFileWatcherRemoval(removalTarget.path)
-            let removalCompleted = false
-            try {
-              await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id)
-              await removeLocalWorktreePath(removalTarget.path, localWorktreeGitOptions)
-              removalCompleted = true
-            } finally {
-              await removalGate.finish(removalCompleted)
-            }
-            await cleanupUnusedWorktreePushTargetRemote(
-              repo.path,
-              removalTarget.id,
-              removedPushTarget,
-              store,
-              localWorktreeGitOptions
-            )
-            this.clearOptimisticReconcileToken(removalTarget.id)
-            this.removeWorktreeMetadataAndHistory(store, removalTarget.id)
-            this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
-            this.invalidateResolvedWorktreeCache()
-            invalidateAuthorizedRootsCache()
-            this.notifyWorktreesChanged(repo.id)
-            return {}
-          }
+          this.clearOptimisticReconcileToken(removalTarget.id)
+          this.removeWorktreeMetadataAndHistory(store, removalTarget.id)
+          this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
+          this.invalidateResolvedWorktreeCache()
+          invalidateAuthorizedRootsCache()
+          this.notifyWorktreesChanged(repo.id)
+          return {}
         }
         if (await isRuntimeWorktreePathMissing(repo, removalTarget.path, localWorktreeGitOptions)) {
           if (!force && !removedMeta) {
@@ -16584,21 +15862,13 @@ export class YiruRuntimeService {
           // Why: a manually deleted worktree is already gone from Git and disk.
           // Finish runtime metadata cleanup without requiring force or touching
           // any unregistered path that still exists.
-          await (repo.connectionId
-            ? cleanupUnusedWorktreePushTargetRemoteSsh(
-                provider!,
-                repo.path,
-                removalTarget.id,
-                removedPushTarget,
-                store
-              )
-            : cleanupUnusedWorktreePushTargetRemote(
-                repo.path,
-                removalTarget.id,
-                removedPushTarget,
-                store,
-                localWorktreeGitOptions
-              ))
+          await cleanupUnusedWorktreePushTargetRemote(
+            repo.path,
+            removalTarget.id,
+            removedPushTarget,
+            store,
+            localWorktreeGitOptions
+          )
           this.clearOptimisticReconcileToken(removalTarget.id)
           this.removeWorktreeMetadataAndHistory(store, removalTarget.id)
           this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
@@ -16623,7 +15893,6 @@ export class YiruRuntimeService {
       // Why: a prior forced Windows recovery can delete the directory but leave
       // Git's stale registration; recover and verify it before clearing metadata.
       if (
-        !repo.connectionId &&
         force === true &&
         process.platform === 'win32' &&
         (isWindowsAbsolutePathLike(canonicalWorktreePath) || !!localWorktreeGitOptions.wslDistro) &&
@@ -16657,48 +15926,6 @@ export class YiruRuntimeService {
         this.notifyWorktreesChanged(repo.id)
         return removalResult ?? {}
       }
-      if (repo.connectionId) {
-        const remoteRemoveOptions = !deleteBranch ? { deleteBranch } : {}
-        const removalGate = await this.acquireFileWatcherRemoval(
-          canonicalWorktreePath,
-          repo.connectionId
-        )
-        let rawRemovalResult: RemoveWorktreeResult | undefined
-        let removalCompleted = false
-        try {
-          await this.stopPtysForDestructiveWorktreeRemoval(removalTarget.id, repo.connectionId)
-          rawRemovalResult = await (Object.keys(remoteRemoveOptions).length > 0
-            ? provider!.removeWorktree(canonicalWorktreePath, force, remoteRemoveOptions)
-            : provider!.removeWorktree(canonicalWorktreePath, force))
-          removalCompleted = true
-        } finally {
-          await removalGate.finish(removalCompleted)
-        }
-        const removalResult = this.preserveBranchHeadFallback(
-          rawRemovalResult,
-          registeredWorktree.head
-        )
-        await cleanupUnusedWorktreePushTargetRemoteSsh(
-          provider!,
-          repo.path,
-          removalTarget.id,
-          removedPushTarget,
-          store
-        )
-        this.rememberPreservedBranchCleanupTarget(
-          removalTarget.id,
-          removalResult,
-          registeredWorktree.head,
-          removedPushTarget
-        )
-        this.clearOptimisticReconcileToken(removalTarget.id)
-        this.removeWorktreeMetadataAndHistory(store, removalTarget.id)
-        this.invalidateResolvedWorktreeCache()
-        invalidateAuthorizedRootsCache()
-        this.notifyWorktreesChanged(repo.id)
-        return removalResult ?? {}
-      }
-
       const hooks = getEffectiveHooks(repo)
       let warning: string | undefined
       if (hooks?.scripts.archive && runHooks) {
@@ -17288,9 +16515,7 @@ export class YiruRuntimeService {
       throw new Error('Repository for the selected workspace is no longer available.')
     }
     const startup = this.buildStartupForAgent(repo, opts.agent, opts.prompt)
-    if (!repo.connectionId) {
-      this.markLocalWorkspaceTrustedForAgent(opts.agent, worktree.path)
-    }
+    this.markLocalWorkspaceTrustedForAgent(opts.agent, worktree.path)
     return await this.createTerminal(`id:${worktree.id}`, {
       command: startup.startup.command,
       env: startup.startup.env,
@@ -18695,24 +17920,6 @@ export class YiruRuntimeService {
     this.terminalSessions.assertGraphReady(expectedGraphEpoch)
   }
 
-  private resolveFolderWorkspaceConnectionId(workspace: FolderWorkspace): string | null {
-    const repos = this.store?.getRepos() ?? []
-    const projectGroups = this.store?.getProjectGroups?.() ?? []
-    const connection = inferFolderWorkspacePathConnection({
-      folderPath: workspace.folderPath,
-      projectGroupId: workspace.projectGroupId,
-      connectionId: workspace.connectionId ?? null,
-      projectGroups,
-      repos
-    })
-    if (connection.kind === 'ambiguous') {
-      // Why: a single PTY can only be spawned on one runtime target; mixed
-      // child repo connections need an explicit V2 routing decision.
-      throw new Error('folder_workspace_connection_ambiguous')
-    }
-    return connection.kind === 'ssh' ? connection.connectionId : null
-  }
-
   private async resolveFolderWorkspaceLaunchScope(
     selector: string
   ): Promise<TerminalWorkspaceLaunchScope | null> {
@@ -18730,16 +17937,15 @@ export class YiruRuntimeService {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
-    const status = await getFolderWorkspacePathStatus(
-      this.store,
-      { scope: 'folder-workspace', folderWorkspaceId: workspace.id },
-      { getSshFilesystemProvider }
-    )
+    const status = await getFolderWorkspacePathStatus(this.store, {
+      scope: 'folder-workspace',
+      folderWorkspaceId: workspace.id
+    })
     assertFolderWorkspacePathUsable(status)
     return {
       id: folderWorkspaceKey(workspace.id),
       path: workspace.folderPath,
-      connectionId: this.resolveFolderWorkspaceConnectionId(workspace),
+      connectionId: null,
       repo: null,
       folderWorkspace: workspace
     }
@@ -19633,57 +18839,16 @@ export class YiruRuntimeService {
     repo: Repo,
     projectRuntimeByRepoId?: ReadonlyMap<string, ProjectExecutionRuntimeResolution>
   ): Promise<RuntimeWorktreeScanResult> {
-    if (!repo.connectionId) {
-      const projectRuntime = projectRuntimeByRepoId
-        ? projectRuntimeByRepoId.get(repo.id)
-        : resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)
-      return {
-        ok: true,
-        worktrees: await listRepoWorktrees(
-          repo,
-          getLocalProjectWorktreeGitOptionsForRuntime(repo, projectRuntime)
-        )
-      }
+    const projectRuntime = projectRuntimeByRepoId
+      ? projectRuntimeByRepoId.get(repo.id)
+      : resolveLocalProjectRuntimeForRepo(this.requireStore(), repo)
+    return {
+      ok: true,
+      worktrees: await listRepoWorktrees(
+        repo,
+        getLocalProjectWorktreeGitOptionsForRuntime(repo, projectRuntime)
+      )
     }
-    const provider = getSshGitProvider(repo.connectionId)
-    if (!provider) {
-      return { ok: false, worktrees: this.listStoredSshWorktreesForResolution(repo) }
-    }
-    try {
-      return { ok: true, worktrees: await provider.listWorktrees(repo.path) }
-    } catch {
-      return { ok: false, worktrees: this.listStoredSshWorktreesForResolution(repo) }
-    }
-  }
-
-  private listStoredSshWorktreesForResolution(repo: Repo): GitWorktreeInfo[] {
-    const store = this.store
-    if (!store) {
-      return []
-    }
-    const byWorktreeId = new Map<string, GitWorktreeInfo>()
-    for (const [worktreeId, meta] of Object.entries(store.getAllWorktreeMeta())) {
-      const parsed = splitWorktreeId(worktreeId)
-      if (!parsed || parsed.repoId !== repo.id) {
-        continue
-      }
-      // Why: this mirrors desktop worktrees:list's disconnected-SSH fallback.
-      // Web clients should keep showing persisted SSH worktrees while the
-      // provider is reconnecting instead of dropping the repo to zero rows.
-      byWorktreeId.set(worktreeId, {
-        path: parsed.worktreePath,
-        head: '',
-        branch: '',
-        isBare: false,
-        isMainWorktree: areWorktreePathsEqual(parsed.worktreePath, repo.path),
-        ...(meta.sparseDirectories !== undefined ||
-        meta.sparseBaseRef !== undefined ||
-        meta.sparsePresetId !== undefined
-          ? { isSparse: true }
-          : {})
-      })
-    }
-    return [...byWorktreeId.values()]
   }
 
   private async getResolvedWorktreeMap(): Promise<Map<string, ResolvedWorktree>> {

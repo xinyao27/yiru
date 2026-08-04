@@ -108,7 +108,6 @@ import {
   getFolderWorkspacePathStatus
 } from '../project-groups/folder-workspace-path-status'
 import { LocalPtyProvider } from '../providers/local-pty-provider'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { IPtyProvider, PtySpawnOptions, PtySpawnResult } from '../providers/types'
 import { isPwshAvailable } from '../pwsh'
 import {
@@ -3000,11 +2999,10 @@ export function registerPtyHandlers(
     if (!store || workspaceScope?.type !== 'folder') {
       return
     }
-    const status = await getFolderWorkspacePathStatus(
-      store,
-      { scope: 'folder-workspace', folderWorkspaceId: workspaceScope.folderWorkspaceId },
-      { getSshFilesystemProvider }
-    )
+    const status = await getFolderWorkspacePathStatus(store, {
+      scope: 'folder-workspace',
+      folderWorkspaceId: workspaceScope.folderWorkspaceId
+    })
     assertFolderWorkspacePathUsable(status)
   }
 

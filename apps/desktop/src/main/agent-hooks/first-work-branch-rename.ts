@@ -24,8 +24,7 @@ import {
   type GitExec
 } from '../git/branch-rename'
 import { gitExecFileAsync } from '../git/runner'
-import { getSshGitUsername, resolveLocalGitUsername } from '../git/username'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
+import { resolveLocalGitUsername } from '../git/username'
 import type { AgentGenerationFailureOutput } from '../text-generation/agent-failure-output'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -195,13 +194,7 @@ async function runAutoRename(
   }
   const worktreePath = parsed.worktreePath
 
-  const provider = repo.connectionId ? (getSshGitProvider(repo.connectionId) ?? null) : null
-  if (repo.connectionId && !provider) {
-    return retry('ssh provider unavailable')
-  }
-  const exec: GitExec = provider
-    ? (args) => provider.exec(args, worktreePath)
-    : (args) => gitExecFileAsync(args, { cwd: worktreePath })
+  const exec: GitExec = (args) => gitExecFileAsync(args, { cwd: worktreePath })
 
   const currentBranch = (await exec(['rev-parse', '--abbrev-ref', 'HEAD'])).stdout.trim()
   if (!currentBranch || currentBranch === 'HEAD') {
@@ -242,7 +235,7 @@ async function runAutoRename(
   }
   const params = resolvedParams.params
 
-  const target = await resolveGenerationTarget(worktreePath, params.agentId, provider, deps)
+  const target = await resolveGenerationTarget(worktreePath, params.agentId, deps)
   if (!target) {
     deps.setRenameError(worktreeId, 'Could not prepare the branch-name generation environment.')
     return retry('could not prepare generation environment')
@@ -278,9 +271,7 @@ async function runAutoRename(
     )
   }
 
-  const username = provider
-    ? (await getSshGitUsername(provider, repo.path)) || null
-    : (await resolveLocalGitUsername(repo.path)) || null
+  const username = (await resolveLocalGitUsername(repo.path)) || null
   // The model sometimes echoes the configured prefix (e.g. `tmchow/...`); strip
   // it so it doesn't double-prefix the branch or leak into the display name.
   const slug = stripConfiguredBranchPrefix(
@@ -304,9 +295,7 @@ async function runAutoRename(
     return stop(`no distinct unique branch name for slug "${slug}"`, true)
   }
 
-  await (provider
-    ? provider.renameCurrentBranch(worktreePath, newBranch)
-    : renameCurrentBranch(exec, newBranch))
+  await renameCurrentBranch(exec, newBranch)
 
   // resolveUniqueBranchName may have appended a collision suffix (`-2`, …), so
   // derive the sidebar name and on-disk folder from the *resolved* branch leaf,

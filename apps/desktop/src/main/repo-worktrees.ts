@@ -2,7 +2,6 @@ import { isFolderRepo } from '~shared/repo-kind'
 import type { GitWorktreeInfo, Repo } from '~shared/types'
 
 import { listWorktrees } from './git/worktree'
-import { getSshGitProvider } from './providers/ssh-git-dispatch'
 import { areWorktreePathsEqual } from './worktree/logic'
 
 type LocalRepoWorktreeListOptions = {
@@ -15,9 +14,7 @@ function hasLocalRepoWorktreeListOptions(options: LocalRepoWorktreeListOptions |
 }
 
 export function isRepoRoot(repos: Repo[], resolvedTarget: string): boolean {
-  return repos.some(
-    (repo) => !repo.connectionId && areWorktreePathsEqual(repo.path, resolvedTarget)
-  )
+  return repos.some((repo) => areWorktreePathsEqual(repo.path, resolvedTarget))
 }
 
 export function createFolderWorktree(repo: Repo): GitWorktreeInfo {
@@ -39,13 +36,6 @@ export async function listRepoWorktrees(
 ): Promise<GitWorktreeInfo[]> {
   if (isFolderRepo(repo)) {
     return [createFolderWorktree(repo)]
-  }
-  if (repo.connectionId) {
-    const provider = getSshGitProvider(repo.connectionId)
-    // Why: runtime worktree resolution can run before SSH providers have
-    // reattached during startup. Return empty instead of falling back to
-    // local git against a server path.
-    return provider ? await provider.listWorktrees(repo.path) : []
   }
   return hasLocalRepoWorktreeListOptions(options)
     ? await listWorktrees(repo.path, options)

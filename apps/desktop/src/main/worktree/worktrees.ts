@@ -71,18 +71,13 @@ import { pruneWorktreePRRefreshAliases } from '../github/pr-refresh-coordinator'
 import { resolveGitHubPrStartPoint } from '../github/pr-start-point'
 import {
   getEffectiveHooks,
-  getEffectiveHooksFromConfig,
-  getSetupRunnerEnvVars,
   loadHooks,
-  parseYiruYaml,
   runHook,
   hasHooksFile,
   hasUnrecognizedYiruYamlKeys
 } from '../hooks'
 import { withWorktreeSpan } from '../observability/instrumentation'
 import type { Store } from '../persistence'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { getSshGitProvider, requireSshGitProvider } from '../providers/ssh-git-dispatch'
 import { clearProviderPtyState, getLocalPtyProvider } from '../pty/pty'
 import { listRepoWorktrees } from '../repo-worktrees'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'
@@ -104,9 +99,7 @@ import {
 import { dedupeWorktreesByPath } from './path-comparison'
 import {
   createLocalWorktree,
-  createRemoteWorktree,
   cleanupUnusedWorktreePushTargetRemote,
-  cleanupUnusedWorktreePushTargetRemoteSsh,
   notifyWorktreesChanged
 } from './remote'
 import { getWorktreeSharedLinkPaths } from './shared-directories'
@@ -125,13 +118,9 @@ type RemoveWorktreeArgs = {
 
 async function stopPtysForDestructiveWorktreeRemoval(
   runtime: YiruRuntimeService,
-  worktreeId: string,
-  connectionId?: string
+  worktreeId: string
 ): Promise<void> {
-  // Why: no connection-scoped PTY provider exists any more, so a remote
-  // worktree has nothing to physically stop and must fail rather than report a
-  // clean teardown it never performed.
-  const provider = connectionId ? null : getLocalPtyProvider()
+  const provider = getLocalPtyProvider()
   if (!provider) {
     throw new Error(`PTY provider unavailable for worktree deletion: ${worktreeId}`)
   }
@@ -139,8 +128,7 @@ async function stopPtysForDestructiveWorktreeRemoval(
     runtime,
     localProvider: provider,
     onPtyStopped: clearProviderPtyState,
-    requirePhysicalStop: true,
-    ...(connectionId ? { includeLocalRegistry: false } : {})
+    requirePhysicalStop: true
   })
   const total =
     teardownResult.runtimeStopped + teardownResult.providerStopped + teardownResult.registryStopped
@@ -209,7 +197,6 @@ import {
 } from '../worktree-removal-safety'
 import { classifyWorkspaceCreateError } from './workspace-create-error-classifier'
 
-const WORKTREE_ARCHIVE_HOOK_TIMEOUT_MS = 120_000
 const WORKTREE_LIST_ALL_CONCURRENCY = 8
 
 async function mapWithConcurrency<T, R>(
@@ -300,23 +287,15 @@ function resolveWorktreeMetaWithDiscoveryBackfill(
 }
 
 async function isAlreadyRemovedWorktreePath(
-  repo: Repo,
+  _repo: Repo,
   worktreePath: string,
   localWorktreeGitOptions: { wslDistro?: string } = {}
 ): Promise<boolean> {
-  if (!repo.connectionId) {
-    const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-    return isWorktreePathMissing(
-      toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
-      access.statPath
-    )
-  }
-
-  const fsProvider = getSshFilesystemProvider(repo.connectionId)
-  if (!fsProvider) {
-    return false
-  }
-  return isWorktreePathMissing(worktreePath, (path) => fsProvider.stat(path))
+  const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+  return isWorktreePathMissing(
+    toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
+    access.statPath
+  )
 }
 
 async function isLocalGitRepository(
@@ -361,69 +340,7 @@ function getWorktreeRemovalInFlightKey(worktreeId: string, hostId?: ExecutionHos
 }
 
 async function getArchiveHooksForRemoval(repo: Repo): Promise<YiruHooks | null> {
-  if (!repo.connectionId) {
-    return getEffectiveHooks(repo)
-  }
-
-  const fsProvider = getSshFilesystemProvider(repo.connectionId)
-  if (!fsProvider) {
-    return getEffectiveHooksFromConfig(repo, null)
-  }
-
-  try {
-    const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
-    const yamlHooks = result.isBinary ? null : parseYiruYaml(result.content)
-    return getEffectiveHooksFromConfig(repo, yamlHooks)
-  } catch {
-    return getEffectiveHooksFromConfig(repo, null)
-  }
-}
-
-async function runRemoteArchiveHook(
-  repo: Repo,
-  worktreePath: string,
-  script: string
-): Promise<{ success: boolean; output: string }> {
-  if (!repo.connectionId) {
-    return { success: true, output: '' }
-  }
-
-  const provider = requireSshGitProvider(repo.connectionId)
-  const env = getSetupRunnerEnvVars(repo, worktreePath)
-  const isWindowsRemote = isWindowsAbsolutePathLike(worktreePath)
-  const result = await provider
-    .execNonInteractive(
-      isWindowsRemote ? 'cmd.exe' : '/bin/bash',
-      isWindowsRemote ? ['/d', '/s', '/c', script] : ['-lc', script],
-      worktreePath,
-      WORKTREE_ARCHIVE_HOOK_TIMEOUT_MS,
-      undefined,
-      env
-    )
-    .catch((error) => ({
-      stdout: '',
-      stderr: '',
-      exitCode: null,
-      timedOut: false,
-      spawnError: error instanceof Error ? error.message : String(error)
-    }))
-  const output = [
-    result.stdout,
-    result.stderr,
-    result.spawnError,
-    result.timedOut ? 'archive hook timed out' : null,
-    typeof result.exitCode === 'number' && result.exitCode !== 0
-      ? `archive hook exited ${result.exitCode}`
-      : null
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join('\n')
-    .trim()
-
-  return {
-    success: !result.spawnError && !result.timedOut && result.exitCode === 0,
-    output
-  }
+  return getEffectiveHooks(repo)
 }
 
 type WorktreeRemovalInFlight = {
@@ -490,7 +407,6 @@ function getPreservedBranchCleanupTarget(
   return target
 }
 
-const loggedUnavailableSshGitProviders = new Set<string>()
 const loggedWorktreeListFailures = new Set<string>()
 const detectedWorktreeProviderAborts = new Map<ProviderRequestId, AbortController>()
 // Why: absorb renderer polling bursts while keeping external worktree-change
@@ -611,7 +527,7 @@ async function listDetectedGitWorktrees(
   repo: Repo
 ): Promise<DetectedWorktreeScanResult> {
   const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
-  if (repo.connectionId || isFolderRepo(repo)) {
+  if (isFolderRepo(repo)) {
     return {
       gitWorktrees: await listRepoWorktrees(repo, localWorktreeGitOptions),
       fresh: true
@@ -675,9 +591,6 @@ function rememberLocalWorktreeRoots(
   repo: Repo,
   gitWorktrees: GitWorktreeInfo[]
 ): void {
-  if (repo.connectionId) {
-    return
-  }
   // Why: worktrees:list already paid the `git worktree list` cost. Reusing
   // that result keeps later git/file IPC validation from doing a second
   // background scan that can trigger macOS folder-permission prompts.
@@ -977,28 +890,6 @@ export function registerWorktreeHandlers(
         let freshScan = true
         if (isFolderRepo(repo)) {
           return listVisibleFolderWorkspaces(store, repo)
-        } else if (repo.connectionId) {
-          const provider = getSshGitProvider(repo.connectionId)
-          if (!provider) {
-            warnOnce(
-              loggedUnavailableSshGitProviders,
-              `${repo.connectionId}:${repo.id}`,
-              `[worktrees] SSH git provider unavailable; skipping worktree list for repo "${repo.displayName}" (${repo.id}) at ${repo.path} on connection ${repo.connectionId}`
-            )
-            return []
-          }
-          loggedUnavailableSshGitProviders.delete(`${repo.connectionId}:${repo.id}`)
-          try {
-            gitWorktrees = await provider.listWorktrees(repo.path)
-          } catch (err) {
-            warnOnce(
-              loggedWorktreeListFailures,
-              `${repo.id}:${repo.path}`,
-              `[worktrees] failed to list worktrees for repo "${repo.displayName}" (${repo.id}) at ${repo.path}`,
-              err
-            )
-            return []
-          }
         } else {
           const scan = await listDetectedGitWorktrees(store, repo)
           gitWorktrees = scan.gitWorktrees
@@ -1043,28 +934,6 @@ export function registerWorktreeHandlers(
       let freshScan = true
       if (isFolderRepo(repo)) {
         return listVisibleFolderWorkspaces(store, repo)
-      } else if (repo.connectionId) {
-        const provider = getSshGitProvider(repo.connectionId)
-        if (!provider) {
-          warnOnce(
-            loggedUnavailableSshGitProviders,
-            `${repo.connectionId}:${repo.id}`,
-            `[worktrees] SSH git provider unavailable; skipping worktree list for repo "${repo.displayName}" (${repo.id}) at ${repo.path} on connection ${repo.connectionId}`
-          )
-          return []
-        }
-        loggedUnavailableSshGitProviders.delete(`${repo.connectionId}:${repo.id}`)
-        try {
-          gitWorktrees = await provider.listWorktrees(repo.path)
-        } catch (err) {
-          warnOnce(
-            loggedWorktreeListFailures,
-            `${repo.id}:${repo.path}`,
-            `[worktrees] failed to list worktrees for repo "${repo.displayName}" (${repo.id}) at ${repo.path}`,
-            err
-          )
-          return []
-        }
       } else {
         const scan = await listDetectedGitWorktrees(store, repo)
         gitWorktrees = scan.gitWorktrees
@@ -1119,17 +988,6 @@ export function registerWorktreeHandlers(
             source: 'git',
             worktrees: buildFolderDetectedWorktrees(store, repo)
           }
-        } else if (repo.connectionId) {
-          const provider = getSshGitProvider(repo.connectionId)
-          if (!provider) {
-            return {
-              repoId: repo.id,
-              authoritative: false,
-              source: 'metadata-fallback',
-              worktrees: []
-            }
-          }
-          gitWorktrees = await provider.listWorktrees(repo.path)
         } else {
           const scan = await listDetectedGitWorktrees(store, repo)
           gitWorktrees = scan.gitWorktrees
@@ -1153,14 +1011,6 @@ export function registerWorktreeHandlers(
           `[worktrees] failed to list detected worktrees for repo "${repo.displayName}" (${repo.id}) at ${repo.path}`,
           err
         )
-        if (repo.connectionId) {
-          return {
-            repoId: repo.id,
-            authoritative: false,
-            source: 'metadata-fallback',
-            worktrees: []
-          }
-        }
         return { repoId: repo.id, authoritative: false, source: 'metadata-fallback', worktrees: [] }
       }
     }
@@ -1229,9 +1079,7 @@ export function registerWorktreeHandlers(
           // into `unknown` would pollute the failure taxonomy.
           result = isFolderRepo(repo)
             ? createFolderWorkspace(createArgs, repo, store)
-            : repo.connectionId
-              ? await createRemoteWorktree(createArgs, repo, store, mainWindow)
-              : await createLocalWorktree(createArgs, repo, store, mainWindow, runtime)
+            : await createLocalWorktree(createArgs, repo, store, mainWindow, runtime)
         } catch (error) {
           releaseAutomationWorkspaceProvenanceRequest(args.automationProvenanceRequest)
           track('workspace_create_failed', {
@@ -1288,28 +1136,12 @@ export function registerWorktreeHandlers(
       if (isFolderRepo(repo)) {
         return { error: 'Folder mode does not support creating worktrees.' }
       }
-      const gitExec = async (args: string[]): Promise<{ stdout: string; stderr: string }> => {
-        if (!repo.connectionId) {
-          return gitExecFileAsync(args, getLocalProjectGitExecOptions(store, repo))
-        }
-        const provider = getSshGitProvider(repo.connectionId)
-        if (!provider) {
-          throw new Error(
-            'SSH Git provider is not available. Reconnect to this target and try again.'
-          )
-        }
-        return provider.exec(args, repo.path)
-      }
-      // Why: SSH repos can't fetch over the relay's read-only git.exec channel, so
-      // route the PR head fetch through the write-capable helper instead of gitExec.
+      const gitExec = (gitArgs: string[]): Promise<{ stdout: string; stderr: string }> =>
+        gitExecFileAsync(gitArgs, getLocalProjectGitExecOptions(store, repo))
       const fetchRemoteTrackingRef = (remote: string, branch: string): Promise<void> =>
-        fetchPrHeadTrackingRef(
-          repo,
-          repo.connectionId ? getSshGitProvider(repo.connectionId) : undefined,
-          remote,
-          branch,
-          { localGitExecOptions: getLocalProjectGitExecOptions(store, repo) }
-        )
+        fetchPrHeadTrackingRef(repo, remote, branch, {
+          localGitExecOptions: getLocalProjectGitExecOptions(store, repo)
+        })
 
       return resolveGitHubPrStartPoint({
         repoPath: repo.path,
@@ -1317,22 +1149,12 @@ export function registerWorktreeHandlers(
         headRefName: args.headRefName,
         baseRefName: args.baseRefName,
         isCrossRepository: args.isCrossRepository,
-        connectionId: repo.connectionId ?? null,
+        connectionId: null,
         localGitOptions: getLocalProjectWorktreeGitOptions(store, repo),
         gitExec,
         fetchRemoteTrackingRef,
-        resolveRemote: async () => {
-          if (repo.connectionId) {
-            const { stdout } = await gitExec(['remote'])
-            return (
-              stdout
-                .split('\n')
-                .map((line) => line.trim())
-                .find(Boolean) ?? 'origin'
-            )
-          }
-          return getDefaultRemote(repo.path, getLocalProjectWorktreeGitOptions(store, repo))
-        }
+        resolveRemote: () =>
+          getDefaultRemote(repo.path, getLocalProjectWorktreeGitOptions(store, repo))
       })
     }
   )
@@ -1414,16 +1236,11 @@ export function registerWorktreeHandlers(
 
         // Why: the renderer-supplied worktreeId contains a filesystem path.
         // Re-derive the canonical path from git before any destructive action.
-        const provider = repo.connectionId ? requireSshGitProvider(repo.connectionId) : null
-        const localWorktreeGitOptions = repo.connectionId
-          ? {}
-          : getLocalProjectWorktreeGitOptions(store, repo)
+        const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
         const hasLocalWorktreeGitOptions = Object.keys(localWorktreeGitOptions).length > 0
-        const registeredWorktrees = repo.connectionId
-          ? await provider!.listWorktrees(repo.path)
-          : hasLocalWorktreeGitOptions
-            ? await listGitWorktreesStrict(repo.path, localWorktreeGitOptions)
-            : await listGitWorktreesStrict(repo.path)
+        const registeredWorktrees = hasLocalWorktreeGitOptions
+          ? await listGitWorktreesStrict(repo.path, localWorktreeGitOptions)
+          : await listGitWorktreesStrict(repo.path)
         const removedMeta = store.getWorktreeMeta(args.worktreeId)
         const removedPushTarget = removedMeta?.pushTarget
         const registeredWorktree = findRegisteredDeletableWorktree(
@@ -1432,136 +1249,92 @@ export function registerWorktreeHandlers(
           registeredWorktrees
         )
         if (!registeredWorktree) {
-          const fsProvider = repo.connectionId ? getSshFilesystemProvider(repo.connectionId) : null
           let canCleanOrphanedDirectory = false
           if (
             canCleanupUnregisteredYiruWorktreeDirectory({
               meta: removedMeta
             })
           ) {
-            if (repo.connectionId) {
-              if (!fsProvider) {
-                throw new Error('SSH filesystem provider unavailable')
-              }
-              if (!fsProvider.lstat) {
-                throw new Error('SSH filesystem provider lstat unavailable')
-              }
-              canCleanOrphanedDirectory = await canSafelyRemoveOrphanedWorktreeDirectory(
-                worktreePath,
-                repo.path,
-                (path) => fsProvider.lstat!(path),
-                (path) => fsProvider.readFile(path)
-              )
-            } else {
-              const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-              canCleanOrphanedDirectory =
-                !isDangerousWorktreeRemovalPath(worktreePath, repo.path) &&
-                (await canSafelyRemoveOrphanedWorktreeDirectory(
-                  toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
-                  toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
-                  access.statPath,
-                  access.readPath
-                ))
-            }
+            const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+            canCleanOrphanedDirectory =
+              !isDangerousWorktreeRemovalPath(worktreePath, repo.path) &&
+              (await canSafelyRemoveOrphanedWorktreeDirectory(
+                toLocalWorktreeRuntimePath(worktreePath, localWorktreeGitOptions),
+                toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
+                access.statPath,
+                access.readPath
+              ))
           }
           if (canCleanOrphanedDirectory) {
             assertWorktreeDoesNotContainRegisteredWorktree(worktreePath, registeredWorktrees)
             if (!args.force) {
               throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
             }
-            if (repo.connectionId) {
-              const removalGate = await runtime.acquireFileWatcherRemoval(
-                worktreePath,
-                repo.connectionId
-              )
-              let removalCompleted = false
-              try {
-                await stopPtysForDestructiveWorktreeRemoval(
-                  runtime,
-                  args.worktreeId,
-                  repo.connectionId
-                )
-                await fsProvider!.deletePath(worktreePath, true)
-                removalCompleted = true
-              } finally {
-                await removalGate.finish(removalCompleted)
-              }
-              await cleanupUnusedWorktreePushTargetRemoteSsh(
-                provider!,
-                repo.path,
-                args.worktreeId,
-                removedPushTarget,
-                store
-              )
-            } else {
-              const removalGate = await runtime.acquireFileWatcherRemoval(worktreePath)
-              let removalCompleted = false
-              try {
-                await stopPtysForDestructiveWorktreeRemoval(runtime, args.worktreeId)
-                await removeLocalWorktreePath(worktreePath, localWorktreeGitOptions)
-                removalCompleted = true
-              } finally {
-                await removalGate.finish(removalCompleted)
-              }
-              await cleanupUnusedWorktreePushTargetRemote(
-                repo.path,
-                args.worktreeId,
-                removedPushTarget,
-                store,
-                localWorktreeGitOptions
-              )
-              invalidateAuthorizedRootsCache()
+            const removalGate = await runtime.acquireFileWatcherRemoval(worktreePath)
+            let removalCompleted = false
+            try {
+              await stopPtysForDestructiveWorktreeRemoval(runtime, args.worktreeId)
+              await removeLocalWorktreePath(worktreePath, localWorktreeGitOptions)
+              removalCompleted = true
+            } finally {
+              await removalGate.finish(removalCompleted)
             }
+            await cleanupUnusedWorktreePushTargetRemote(
+              repo.path,
+              args.worktreeId,
+              removedPushTarget,
+              store,
+              localWorktreeGitOptions
+            )
+            invalidateAuthorizedRootsCache()
             runtime.clearOptimisticReconcileToken(args.worktreeId)
             removeWorktreeMetadataAndTransientState(store, args.worktreeId)
             preservedBranchCleanupByWorktreeId.delete(args.worktreeId)
             notifyWorktreesChanged(mainWindow, repoId)
             return {}
           }
-          if (!repo.connectionId) {
-            const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
-            const runtimeWorktreePath = toLocalWorktreeRuntimePath(
+          const access = getLocalWorktreePathAccess(localWorktreeGitOptions)
+          const runtimeWorktreePath = toLocalWorktreeRuntimePath(
+            worktreePath,
+            localWorktreeGitOptions
+          )
+          if (
+            await canCleanupUnregisteredYiruLeftoverDirectory({
+              meta: removedMeta,
               worktreePath,
+              runtimeWorktreePath,
+              repo,
+              runtimeRepoPath: toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
+              registeredWorktrees,
+              statPath: access.statPath,
+              isGitRepository: (path) => isLocalGitRepository(path, localWorktreeGitOptions)
+            })
+          ) {
+            if (!args.force) {
+              throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
+            }
+            const removalGate = await runtime.acquireFileWatcherRemoval(worktreePath)
+            let removalCompleted = false
+            try {
+              await stopPtysForDestructiveWorktreeRemoval(runtime, args.worktreeId)
+              await removeLocalWorktreePath(worktreePath, localWorktreeGitOptions)
+              removalCompleted = true
+            } finally {
+              await removalGate.finish(removalCompleted)
+            }
+            await cleanupUnusedWorktreePushTargetRemote(
+              repo.path,
+              args.worktreeId,
+              removedPushTarget,
+              store,
               localWorktreeGitOptions
             )
-            if (
-              await canCleanupUnregisteredYiruLeftoverDirectory({
-                meta: removedMeta,
-                worktreePath,
-                runtimeWorktreePath,
-                repo,
-                runtimeRepoPath: toLocalWorktreeRuntimePath(repo.path, localWorktreeGitOptions),
-                registeredWorktrees,
-                statPath: access.statPath,
-                isGitRepository: (path) => isLocalGitRepository(path, localWorktreeGitOptions)
-              })
-            ) {
-              if (!args.force) {
-                throw new Error(ORPHANED_WORKTREE_DIRECTORY_MESSAGE)
-              }
-              const removalGate = await runtime.acquireFileWatcherRemoval(worktreePath)
-              let removalCompleted = false
-              try {
-                await stopPtysForDestructiveWorktreeRemoval(runtime, args.worktreeId)
-                await removeLocalWorktreePath(worktreePath, localWorktreeGitOptions)
-                removalCompleted = true
-              } finally {
-                await removalGate.finish(removalCompleted)
-              }
-              await cleanupUnusedWorktreePushTargetRemote(
-                repo.path,
-                args.worktreeId,
-                removedPushTarget,
-                store,
-                localWorktreeGitOptions
-              )
-              runtime.clearOptimisticReconcileToken(args.worktreeId)
-              removeWorktreeMetadataAndTransientState(store, args.worktreeId)
-              preservedBranchCleanupByWorktreeId.delete(args.worktreeId)
-              invalidateAuthorizedRootsCache()
-              notifyWorktreesChanged(mainWindow, repoId)
-              return {}
-            }
+            runtime.clearOptimisticReconcileToken(args.worktreeId)
+            removeWorktreeMetadataAndTransientState(store, args.worktreeId)
+            preservedBranchCleanupByWorktreeId.delete(args.worktreeId)
+            invalidateAuthorizedRootsCache()
+            notifyWorktreesChanged(mainWindow, repoId)
+            return {}
           }
           if (await isAlreadyRemovedWorktreePath(repo, worktreePath, localWorktreeGitOptions)) {
             if (!args.force && !removedMeta) {
@@ -1572,24 +1345,14 @@ export function registerWorktreeHandlers(
             // Why: a manually deleted worktree is already gone from Git and disk.
             // The sidebar delete action has persisted metadata proving this was
             // a Yiru-known row, so no force confirmation is needed.
-            if (repo.connectionId) {
-              await cleanupUnusedWorktreePushTargetRemoteSsh(
-                provider!,
-                repo.path,
-                args.worktreeId,
-                removedPushTarget,
-                store
-              )
-            } else {
-              await cleanupUnusedWorktreePushTargetRemote(
-                repo.path,
-                args.worktreeId,
-                removedPushTarget,
-                store,
-                localWorktreeGitOptions
-              )
-              invalidateAuthorizedRootsCache()
-            }
+            await cleanupUnusedWorktreePushTargetRemote(
+              repo.path,
+              args.worktreeId,
+              removedPushTarget,
+              store,
+              localWorktreeGitOptions
+            )
+            invalidateAuthorizedRootsCache()
             runtime.clearOptimisticReconcileToken(args.worktreeId)
             removeWorktreeMetadataAndTransientState(store, args.worktreeId)
             preservedBranchCleanupByWorktreeId.delete(args.worktreeId)
@@ -1614,7 +1377,6 @@ export function registerWorktreeHandlers(
         // Why: a prior forced Windows recovery can delete the directory but leave
         // Git's stale registration; recover and verify it before clearing metadata.
         if (
-          !repo.connectionId &&
           args.force === true &&
           process.platform === 'win32' &&
           (isWindowsAbsolutePathLike(canonicalWorktreePath) ||
@@ -1652,72 +1414,19 @@ export function registerWorktreeHandlers(
         // Run archive hook before removal so teardown scripts still see the worktree directory.
         const hooks = await getArchiveHooksForRemoval(repo)
         if (hooks?.scripts.archive && !args.skipArchive) {
-          const result = repo.connectionId
-            ? await runRemoteArchiveHook(repo, canonicalWorktreePath, hooks.scripts.archive)
-            : await runHook(
-                'archive',
-                canonicalWorktreePath,
-                repo,
-                undefined,
-                localWorktreeGitOptions
-              )
+          const result = await runHook(
+            'archive',
+            canonicalWorktreePath,
+            repo,
+            undefined,
+            localWorktreeGitOptions
+          )
           if (!result.success) {
             console.error(
               `[hooks] archive hook failed for ${canonicalWorktreePath}:`,
               result.output
             )
           }
-        }
-
-        if (repo.connectionId) {
-          // Why: SSH deletion mirrors the local flow: hooks run while the
-          // directory is intact, then the clean check guards destructive removal.
-          if (!args.force) {
-            const { clean, stdout } = await provider!.worktreeIsClean(canonicalWorktreePath)
-            if (!clean) {
-              const error = new Error('Worktree has uncommitted or untracked changes.')
-              ;(error as Error & { stdout?: string }).stdout = stdout
-              throw error
-            }
-          }
-
-          const remoteRemoveOptions = !deleteBranch ? { deleteBranch } : {}
-          const removalGate = await runtime.acquireFileWatcherRemoval(
-            canonicalWorktreePath,
-            repo.connectionId
-          )
-          let rawRemovalResult: RemoveWorktreeResult | undefined
-          let removalCompleted = false
-          try {
-            await stopPtysForDestructiveWorktreeRemoval(runtime, args.worktreeId, repo.connectionId)
-            rawRemovalResult = await (Object.keys(remoteRemoveOptions).length > 0
-              ? provider!.removeWorktree(canonicalWorktreePath, args.force, remoteRemoveOptions)
-              : provider!.removeWorktree(canonicalWorktreePath, args.force))
-            removalCompleted = true
-          } finally {
-            await removalGate.finish(removalCompleted)
-          }
-          const removalResult = preserveBranchHeadFallback(
-            rawRemovalResult,
-            registeredWorktree.head
-          )
-          await cleanupUnusedWorktreePushTargetRemoteSsh(
-            provider!,
-            repo.path,
-            args.worktreeId,
-            removedPushTarget,
-            store
-          )
-          rememberPreservedBranchCleanupTarget(
-            args.worktreeId,
-            removalResult,
-            registeredWorktree.head,
-            removedPushTarget
-          )
-          runtime.clearOptimisticReconcileToken(args.worktreeId)
-          removeWorktreeMetadataAndTransientState(store, args.worktreeId)
-          notifyWorktreesChanged(mainWindow, repoId)
-          return removalResult ?? {}
         }
 
         const refreshedWorktrees = hasLocalWorktreeGitOptions
@@ -1904,12 +1613,8 @@ export function registerWorktreeHandlers(
     }
   )
 
-  // Why: forget-locally drops a workspace from Yiru without any remote Git or
-  // filesystem work. It exists so a workspace pinned to a removed/disconnected
-  // SSH target — whose provider is gone and whose `worktrees:remove` therefore
-  // throws at requireSshGitProvider before any cleanup runs — can still be
-  // cleared from the app. It never touches the remote: no worktree registration,
-  // no branches, no files are deleted there.
+  // Why: forget-locally drops a workspace from Yiru without Git or filesystem
+  // work, so stale metadata can be cleared without deleting branches or files.
   ipcMain.handle(
     'worktrees:forgetLocal',
     async (
@@ -1992,42 +1697,23 @@ export function registerWorktreeHandlers(
         throw new Error('Folder workspaces do not have local Git branches.')
       }
 
-      if (repo.connectionId) {
-        const provider = requireSshGitProvider(repo.connectionId)
-        // Why: SSH must use the write-capable relay RPC; the shared exec-based
-        // helper routes through the read-only git.exec allowlist, which rejects
-        // the worktree/update-ref/config writes this delete needs.
-        await provider.forceDeletePreservedBranch(
-          repo.path,
-          cleanupTarget.branchName,
-          cleanupTarget.head
-        )
-        await cleanupUnusedWorktreePushTargetRemoteSsh(
-          provider,
-          repo.path,
-          args.worktreeId,
-          cleanupTarget.pushTarget,
-          store
-        )
-      } else {
-        const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
-        const hasLocalWorktreeGitOptions = Object.keys(localWorktreeGitOptions).length > 0
-        await (hasLocalWorktreeGitOptions
-          ? forceDeleteLocalBranch(
-              repo.path,
-              cleanupTarget.branchName,
-              cleanupTarget.head,
-              (argv, cwd) => gitExecFileAsync(argv, { cwd, ...localWorktreeGitOptions })
-            )
-          : forceDeleteLocalBranch(repo.path, cleanupTarget.branchName, cleanupTarget.head))
-        await cleanupUnusedWorktreePushTargetRemote(
-          repo.path,
-          args.worktreeId,
-          cleanupTarget.pushTarget,
-          store,
-          localWorktreeGitOptions
-        )
-      }
+      const localWorktreeGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
+      const hasLocalWorktreeGitOptions = Object.keys(localWorktreeGitOptions).length > 0
+      await (hasLocalWorktreeGitOptions
+        ? forceDeleteLocalBranch(
+            repo.path,
+            cleanupTarget.branchName,
+            cleanupTarget.head,
+            (argv, cwd) => gitExecFileAsync(argv, { cwd, ...localWorktreeGitOptions })
+          )
+        : forceDeleteLocalBranch(repo.path, cleanupTarget.branchName, cleanupTarget.head))
+      await cleanupUnusedWorktreePushTargetRemote(
+        repo.path,
+        args.worktreeId,
+        cleanupTarget.pushTarget,
+        store,
+        localWorktreeGitOptions
+      )
 
       preservedBranchCleanupByWorktreeId.delete(args.worktreeId)
       return { deleted: true }
@@ -2138,29 +1824,6 @@ export function registerWorktreeHandlers(
         return { status: 'ok', hasHooks: false, hooks: null, mayNeedUpdate: false }
       }
 
-      if (repo.connectionId) {
-        const fsProvider = getSshFilesystemProvider(repo.connectionId)
-        if (!fsProvider) {
-          return { status: 'error', hasHooks: false, hooks: null, mayNeedUpdate: false }
-        }
-        try {
-          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
-          return {
-            status: 'ok',
-            hasHooks: !result.isBinary,
-            hooks: result.isBinary ? null : parseYiruYaml(result.content),
-            mayNeedUpdate: false
-          }
-        } catch (error) {
-          return {
-            status: isENOENT(error) ? 'ok' : 'error',
-            hasHooks: false,
-            hooks: null,
-            mayNeedUpdate: false
-          }
-        }
-      }
-
       const has = hasHooksFile(repo.path)
       const hooks = has ? loadHooks(repo.path) : null
       // Why: when a newer Yiru version adds a top-level key to `yiru.yaml`, older
@@ -2186,19 +1849,6 @@ export function registerWorktreeHandlers(
     return inspectSetupScriptImportCandidates(
       async (relativePath) => {
         const filePath = joinWorktreeRelativePath(repo.path, relativePath)
-        if (repo.connectionId) {
-          const fsProvider = getSshFilesystemProvider(repo.connectionId)
-          if (!fsProvider) {
-            return null
-          }
-          try {
-            const result = await fsProvider.readFile(filePath)
-            return result.isBinary ? null : result.content
-          } catch {
-            return null
-          }
-        }
-
         try {
           return await readFile(filePath, 'utf-8')
         } catch (error) {
@@ -2211,19 +1861,6 @@ export function registerWorktreeHandlers(
       {
         fileExists: async (relativePath) => {
           const filePath = joinWorktreeRelativePath(repo.path, relativePath)
-          if (repo.connectionId) {
-            const fsProvider = getSshFilesystemProvider(repo.connectionId)
-            if (!fsProvider) {
-              return false
-            }
-            try {
-              const fileStat = await fsProvider.stat(filePath)
-              return fileStat.type !== 'directory'
-            } catch {
-              return false
-            }
-          }
-
           try {
             const fileStat = await stat(filePath)
             return !fileStat.isDirectory()

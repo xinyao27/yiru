@@ -20,7 +20,6 @@ import { ipcMain } from 'electron'
 import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
 import type { Store } from '../persistence'
-import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { authorizeExternalPath, resolveAuthorizedPath, isENOENT } from './auth'
 import { resolveLocalDroppedPathsForAgent } from './dropped-path-resolution'
 
@@ -72,10 +71,6 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   ipcMain.handle(
     'fs:createFile',
     async (_event, args: { filePath: string; connectionId?: string }): Promise<void> => {
-      if (args.connectionId) {
-        const provider = requireSshFilesystemProvider(args.connectionId)
-        return provider.createFile(args.filePath)
-      }
       const filePath = await resolveAuthorizedPath(args.filePath, store)
       await mkdir(dirname(filePath), { recursive: true })
       try {
@@ -90,10 +85,6 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   ipcMain.handle(
     'fs:createDir',
     async (_event, args: { dirPath: string; connectionId?: string }): Promise<void> => {
-      if (args.connectionId) {
-        const provider = requireSshFilesystemProvider(args.connectionId)
-        return provider.createDir(args.dirPath)
-      }
       const dirPath = await resolveAuthorizedPath(args.dirPath, store)
       await assertNotExists(dirPath)
       await mkdir(dirPath, { recursive: true })
@@ -109,10 +100,6 @@ export function registerFilesystemMutationHandlers(store: Store): void {
       _event,
       args: { oldPath: string; newPath: string; connectionId?: string }
     ): Promise<void> => {
-      if (args.connectionId) {
-        const provider = requireSshFilesystemProvider(args.connectionId)
-        return provider.renameNoClobber(args.oldPath, args.newPath)
-      }
       // Why: rename() operates on directory entries, not file contents. If
       // oldPath is a symlink, we must rename the link itself rather than
       // resolving it to its target — following the link would rename the
@@ -132,10 +119,6 @@ export function registerFilesystemMutationHandlers(store: Store): void {
       _event,
       args: { sourcePath: string; destinationPath: string; connectionId?: string }
     ): Promise<void> => {
-      if (args.connectionId) {
-        const provider = requireSshFilesystemProvider(args.connectionId)
-        return provider.copy(args.sourcePath, args.destinationPath)
-      }
       const sourcePath = await resolveAuthorizedPath(args.sourcePath, store, {
         preserveSymlink: true
       })

@@ -1,7 +1,6 @@
 import type { ForgeRemotePreference } from '~shared/types'
 
 import { gitExecFileAsync, glabExecFileAsync } from '../git/runner'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { runProjectRefProbeOnce } from './project-ref-inflight'
 import {
   DEFAULT_GITLAB_HOSTS,
@@ -96,21 +95,11 @@ async function resolveProjectRefForRemote(
   localGitOptions: LocalGitExecOptions
 ): Promise<ProjectRef | null> {
   try {
-    const sshGitProvider = connectionId ? getSshGitProvider(connectionId) : null
-    if (connectionId && !sshGitProvider) {
-      return null
-    }
-    const { stdout } = sshGitProvider
-      ? await sshGitProvider.exec(
-          ['remote', 'get-url', remoteName],
-          repoPath,
-          localGitOptions.signal ? { signal: localGitOptions.signal } : undefined
-        )
-      : await gitExecFileAsync(['remote', 'get-url', remoteName], {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
-          ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
-        })
+    const { stdout } = await gitExecFileAsync(['remote', 'get-url', remoteName], {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+      ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
+    })
     const result = parseGitLabProjectRef(stdout, knownHosts)
     if (result) {
       rememberProjectRefCacheEntry(cacheKey, result)

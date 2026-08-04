@@ -1,22 +1,15 @@
-import type { Stats } from 'node:fs'
 import { realpath, stat } from 'node:fs/promises'
 import { normalize } from 'node:path'
 
 import {
-  isRuntimePathAbsolute,
-  isWindowsAbsolutePathLike,
   getRuntimePathBasename,
-  normalizeRuntimePathForComparison,
-  resolveRuntimePath
+  normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { GlobalSettings, Repo } from '~shared/types'
 
 import type { Store } from '../persistence'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import type { FileStat, IFilesystemProvider } from '../providers/types'
 import type {
   WorktreeBaseRepoWatchConfig,
   WorktreeBaseWatchKind,
@@ -24,7 +17,7 @@ import type {
 } from './base-directory-event-filter'
 import { shouldEmitBoundedWarning } from './bounded-warning-dedupe'
 import { resolveWorktreeCommonGitDirectory } from './common-git-directory'
-import { computeWorkspaceRoot, getWorktreePathSettings, hasRepoWorktreeBasePath } from './logic'
+import { computeWorkspaceRoot, getWorktreePathSettings } from './logic'
 
 const missingRootWarnings = new Set<string>()
 const skippedWslWarnings = new Set<string>()
@@ -33,21 +26,7 @@ function normalizeWatchKey(pathValue: string): string {
   return normalizeRuntimePathForComparison(normalize(pathValue))
 }
 
-async function canonicalizeExistingPath(
-  pathValue: string,
-  connectionId: string | undefined
-): Promise<string> {
-  if (connectionId) {
-    const provider = getSshFilesystemProvider(connectionId)
-    if (!provider) {
-      return normalize(pathValue)
-    }
-    try {
-      return await provider.realpath(pathValue)
-    } catch {
-      return normalize(pathValue)
-    }
-  }
+async function canonicalizeExistingPath(pathValue: string): Promise<string> {
   try {
     return await realpath(pathValue)
   } catch {
@@ -55,22 +34,14 @@ async function canonicalizeExistingPath(
   }
 }
 
-function isDirectoryStat(value: Stats | FileStat | undefined): boolean {
-  if (!value) {
-    return false
-  }
-  return 'type' in value ? value.type === 'directory' : value.isDirectory()
-}
-
 async function addTarget(
   targets: Map<string, WorktreeBaseWatchTarget>,
   kind: WorktreeBaseWatchKind,
   pathValue: string,
-  config: WorktreeBaseRepoWatchConfig,
-  connectionId?: string
+  config: WorktreeBaseRepoWatchConfig
 ): Promise<void> {
-  const watchedPath = await canonicalizeExistingPath(pathValue, connectionId)
-  const key = `${kind}:${connectionId ?? 'local'}:${normalizeWatchKey(watchedPath)}`
+  const watchedPath = await canonicalizeExistingPath(pathValue)
+  const key = `${kind}:local:${normalizeWatchKey(watchedPath)}`
   const existing = targets.get(key)
   if (existing) {
     existing.repos.set(config.repoId, config)
@@ -80,38 +51,14 @@ async function addTarget(
     key,
     kind,
     path: watchedPath,
-    ...(connectionId ? { connectionId } : {}),
     repos: new Map([[config.repoId, config]])
   })
 }
 
-function getRemoteProvider(connectionId: string | undefined): IFilesystemProvider | undefined {
-  return connectionId ? getSshFilesystemProvider(connectionId) : undefined
-}
-
-function isRuntimePathAbsoluteForRepo(repoPath: string, pathValue: string): boolean {
-  const pathFlavor =
-    isWindowsAbsolutePathLike(repoPath) || isWindowsAbsolutePathLike(pathValue)
-      ? 'windows'
-      : 'posix'
-  return isRuntimePathAbsolute(pathValue, pathFlavor)
-}
-
 function getBaseWatchLayout(
   repo: Repo,
-  pathSettings: Pick<GlobalSettings, 'workspaceDir' | 'nestWorkspaces'>,
-  connectionId: string | undefined
+  pathSettings: Pick<GlobalSettings, 'workspaceDir' | 'nestWorkspaces'>
 ): { workspaceRoot: string; nestWorkspaces: boolean } {
-  if (
-    connectionId &&
-    !hasRepoWorktreeBasePath(repo) &&
-    isRuntimePathAbsoluteForRepo(repo.path, pathSettings.workspaceDir)
-  ) {
-    // Why: SSH creates default worktrees beside the remote repo when the
-    // global workspace dir is a desktop-local absolute path.
-    return { workspaceRoot: resolveRuntimePath(repo.path, '..'), nestWorkspaces: false }
-  }
-
   return {
     workspaceRoot: computeWorkspaceRoot(repo.path, pathSettings),
     nestWorkspaces: pathSettings.nestWorkspaces
@@ -121,11 +68,10 @@ function getBaseWatchLayout(
 async function maybeAddBaseTarget(
   targets: Map<string, WorktreeBaseWatchTarget>,
   repo: Repo,
-  settings: GlobalSettings,
-  connectionId?: string
+  settings: GlobalSettings
 ): Promise<void> {
   const pathSettings = getWorktreePathSettings(repo, settings)
-  const { workspaceRoot, nestWorkspaces } = getBaseWatchLayout(repo, pathSettings, connectionId)
+  const { workspaceRoot, nestWorkspaces } = getBaseWatchLayout(repo, pathSettings)
   // Why: WSL UNC roots are unreliable for native watching; avoid project-level polling.
   if (isWslUncPath(workspaceRoot) || isWslUncPath(repo.path)) {
     const key = `${repo.id}:${workspaceRoot}`
@@ -142,16 +88,10 @@ async function maybeAddBaseTarget(
     repoName: getRuntimePathBasename(repo.path).replace(/\.git$/, ''),
     nestWorkspaces
   }
-  const remoteProvider = getRemoteProvider(connectionId)
-  if (connectionId && !remoteProvider) {
-    return
-  }
   try {
-    const rootStat = remoteProvider
-      ? await remoteProvider.stat(workspaceRoot)
-      : await stat(workspaceRoot)
-    if (isDirectoryStat(rootStat)) {
-      await addTarget(targets, 'base', workspaceRoot, config, connectionId)
+    const rootStat = await stat(workspaceRoot)
+    if (rootStat.isDirectory()) {
+      await addTarget(targets, 'base', workspaceRoot, config)
     }
   } catch {
     const key = normalizeWatchKey(workspaceRoot)
@@ -160,17 +100,9 @@ async function maybeAddBaseTarget(
     }
   }
 
-  const commonDir = await resolveWorktreeCommonGitDirectory(
-    repo,
-    remoteProvider
-      ? {
-          stat: (path) => remoteProvider.stat(path),
-          readFile: async (path) => (await remoteProvider.readFile(path)).content
-        }
-      : undefined
-  )
+  const commonDir = await resolveWorktreeCommonGitDirectory(repo)
   if (commonDir) {
-    await addTarget(targets, 'git-common', commonDir, config, connectionId)
+    await addTarget(targets, 'git-common', commonDir, config)
   }
 }
 
@@ -183,12 +115,7 @@ export async function buildWorktreeBaseDirectoryWatchTargets(
     if (isFolderRepo(repo)) {
       continue
     }
-    const executionHostId = getRepoExecutionHostId(repo)
-    if (executionHostId === LOCAL_EXECUTION_HOST_ID) {
-      await maybeAddBaseTarget(targets, repo, settings)
-    } else if (repo.connectionId) {
-      await maybeAddBaseTarget(targets, repo, settings, repo.connectionId)
-    }
+    await maybeAddBaseTarget(targets, repo, settings)
   }
   return targets
 }

@@ -7,7 +7,7 @@ import { posix, win32 } from 'node:path'
 import { platform } from 'node:process'
 
 import { isFolderRepo } from '~shared/repo-kind'
-import type { DirEntry, GitWorktreeInfo, Repo, Worktree } from '~shared/types'
+import type { GitWorktreeInfo, Repo, Worktree } from '~shared/types'
 import {
   scanWorkspaceSpaceEntryTree,
   type WorkspaceSpaceEntryScan
@@ -20,7 +20,6 @@ import {
 import { compactWorkspaceSpaceItems } from '~shared/workspace/space-compaction'
 import type {
   WorkspaceSpaceAnalysis,
-  WorkspaceSpaceDirectoryScanResult,
   WorkspaceSpaceItem,
   WorkspaceSpaceRepoSummary,
   WorkspaceSpaceScanProgress,
@@ -29,19 +28,12 @@ import type {
 } from '~shared/workspace/space-types'
 
 import type { Store } from './persistence'
-import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
-import { getSshGitProvider } from './providers/ssh-git-dispatch'
-import type { IFilesystemProvider } from './providers/types'
 import { createFolderWorktree, listRepoWorktrees } from './repo-worktrees'
 import { mergeWorktree } from './worktree/logic'
 
 const WORKTREE_SCAN_CONCURRENCY = 3
 const LOCAL_WORKTREE_SCAN_CONCURRENCY = 1
-// Why: each compatibility traversal owns a 64 MiB admission budget; cap their
-// aggregate main-process exposure independently of repo and worktree fan-out.
-const REMOTE_FALLBACK_SCAN_CONCURRENCY = 2
 const LOCAL_FS_CONCURRENCY = 48
-const REMOTE_FS_CONCURRENCY = 10
 const DU_TIMEOUT_MS = 120_000
 const DU_MAX_BUFFER_BYTES = 16 * 1024 * 1024
 
@@ -49,7 +41,6 @@ type AsyncLimiter = <T>(task: () => Promise<T>) => Promise<T>
 
 type WorkspaceSpaceScanLimiters = {
   localWorktree: AsyncLimiter
-  remoteFallbackTraversal: AsyncLimiter
 }
 
 type ScanStats = WorkspaceSpaceEntryScan
@@ -82,20 +73,6 @@ function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) {
     throw new WorkspaceSpaceScanCancelledError()
   }
-}
-
-function isAbortError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') {
-    return false
-  }
-  return (error as { name?: unknown }).name === 'AbortError'
-}
-
-function isRelayMethodNotFoundError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') {
-    return false
-  }
-  return (error as { code?: unknown }).code === -32601
 }
 
 function createAsyncLimiter(maxConcurrent: number, signal?: AbortSignal): AsyncLimiter {
@@ -345,25 +322,6 @@ function createUnavailableWorktreeRow(
   }
 }
 
-function createScannedWorktreeRow(
-  repo: Repo,
-  worktree: Worktree,
-  scannedAt: number,
-  scan: WorkspaceSpaceDirectoryScanResult
-): WorkspaceSpaceWorktree {
-  return {
-    ...createBaseWorktreeRow(repo, worktree, scannedAt),
-    status: 'ok',
-    error: null,
-    sizeBytes: scan.sizeBytes,
-    reclaimableBytes: worktree.isMainWorktree ? 0 : scan.sizeBytes,
-    skippedEntryCount: scan.skippedEntryCount,
-    topLevelItems: scan.topLevelItems,
-    omittedTopLevelItemCount: scan.omittedTopLevelItemCount,
-    omittedTopLevelSizeBytes: scan.omittedTopLevelSizeBytes
-  }
-}
-
 async function scanLocalEntry(
   entryPath: string,
   name: string,
@@ -387,39 +345,6 @@ async function scanLocalEntry(
         : { kind: 'file', sizeBytes: stats.size }
     },
     readDirectory: (path) => opendir(path),
-    checkCancelled: () => throwIfAborted(signal),
-    createCancellationError: () => new WorkspaceSpaceScanCancelledError(),
-    isCancellationError: (error) => error instanceof WorkspaceSpaceScanCancelledError
-  })
-}
-
-async function scanRemoteEntry(
-  entryPath: string,
-  name: string,
-  provider: IFilesystemProvider,
-  signal?: AbortSignal
-): Promise<ScanStats> {
-  return scanWorkspaceSpaceEntryTree<DirEntry>({
-    rootPath: entryPath,
-    rootName: name,
-    concurrency: REMOTE_FS_CONCURRENCY,
-    signal,
-    entryName: (entry) => entry.name,
-    joinPath: joinFilesystemPath,
-    classifyEntry: async (path, sourceEntry) => {
-      if (sourceEntry?.isSymlink) {
-        return { kind: 'symlink', sizeBytes: 0 }
-      }
-      const stats = await provider.stat(path)
-      throwIfAborted(signal)
-      if (stats.type === 'symlink') {
-        return { kind: 'symlink', sizeBytes: stats.size }
-      }
-      return stats.type === 'directory'
-        ? { kind: 'directory', sizeBytes: stats.size }
-        : { kind: 'file', sizeBytes: stats.size }
-    },
-    readDirectory: (path) => provider.readDir(path),
     checkCancelled: () => throwIfAborted(signal),
     createCancellationError: () => new WorkspaceSpaceScanCancelledError(),
     isCancellationError: (error) => error instanceof WorkspaceSpaceScanCancelledError
@@ -605,56 +530,6 @@ async function scanLocalWorktree(
   return scanLocalWorktreeWithNode(repo, worktree, scannedAt, signal)
 }
 
-async function scanRemoteWorktree(
-  repo: Repo,
-  worktree: Worktree,
-  scannedAt: number,
-  provider: IFilesystemProvider,
-  fallbackTraversalLimit: AsyncLimiter,
-  signal?: AbortSignal
-): Promise<WorkspaceSpaceWorktree> {
-  try {
-    if (provider.scanWorkspaceSpace) {
-      try {
-        const scan = await provider.scanWorkspaceSpace(worktree.path, { signal })
-        return createScannedWorktreeRow(repo, worktree, scannedAt, scan)
-      } catch (error) {
-        if (isAbortError(error)) {
-          throw new WorkspaceSpaceScanCancelledError()
-        }
-        if (!isRelayMethodNotFoundError(error)) {
-          throw error
-        }
-        // Why: old SSH relays do not know the bulk Space scan method. Fall
-        // back to the request-by-request walker instead of marking SSH rows
-        // unavailable after an app upgrade.
-      }
-    }
-
-    const root = await fallbackTraversalLimit(() =>
-      scanRemoteEntry(worktree.path, basenameFilesystemPath(worktree.path), provider, signal)
-    )
-    const compact = compactWorkspaceSpaceItems((root.children ?? []).map(toWorkspaceSpaceItem))
-    return createScannedWorktreeRow(repo, worktree, scannedAt, {
-      sizeBytes: root.sizeBytes,
-      skippedEntryCount: root.skippedEntryCount,
-      ...compact
-    })
-  } catch (error) {
-    if (error instanceof WorkspaceSpaceScanCancelledError) {
-      throw error
-    }
-    const classified = classifyError(error)
-    return createUnavailableWorktreeRow(
-      repo,
-      worktree,
-      scannedAt,
-      classified.status,
-      classified.message
-    )
-  }
-}
-
 async function listWorktreesForSpaceScan(
   repo: Repo,
   signal?: AbortSignal
@@ -663,19 +538,6 @@ async function listWorktreesForSpaceScan(
     throwIfAborted(signal)
     if (isFolderRepo(repo)) {
       return { ok: true, worktrees: [createFolderWorktree(repo)] }
-    }
-    if (repo.connectionId) {
-      const provider = getSshGitProvider(repo.connectionId)
-      if (!provider) {
-        return {
-          ok: false,
-          status: 'unavailable',
-          error: `SSH connection "${repo.connectionId}" is not connected.`
-        }
-      }
-      const worktrees = await provider.listWorktrees(repo.path, { signal })
-      throwIfAborted(signal)
-      return { ok: true, worktrees }
     }
     const worktrees = await listRepoWorktrees(repo)
     throwIfAborted(signal)
@@ -733,7 +595,7 @@ async function scanRepo(
         repoId: repo.id,
         displayName: repo.displayName,
         path: repo.path,
-        isRemote: Boolean(repo.connectionId),
+        isRemote: false,
         worktreeCount: 0,
         scannedWorktreeCount: 0,
         unavailableWorktreeCount: 1,
@@ -755,7 +617,6 @@ async function scanRepo(
     { totalWorktreeCount: progress.totalWorktreeCount + worktrees.length },
     options.onProgress
   )
-  const remoteProvider = repo.connectionId ? getSshFilesystemProvider(repo.connectionId) : undefined
   const rows = await mapLimit(worktrees, WORKTREE_SCAN_CONCURRENCY, async (worktree) => {
     throwIfAborted(options.signal)
     reportProgress(
@@ -766,26 +627,9 @@ async function scanRepo(
       },
       options.onProgress
     )
-    const row: WorkspaceSpaceWorktree = repo.connectionId
-      ? remoteProvider
-        ? await scanRemoteWorktree(
-            repo,
-            worktree,
-            scannedAt,
-            remoteProvider,
-            limiters.remoteFallbackTraversal,
-            options.signal
-          )
-        : createUnavailableWorktreeRow(
-            repo,
-            worktree,
-            scannedAt,
-            'unavailable',
-            `SSH filesystem for "${repo.connectionId}" is not connected.`
-          )
-      : await limiters.localWorktree(() =>
-          scanLocalWorktree(repo, worktree, scannedAt, options.signal)
-        )
+    const row = await limiters.localWorktree(() =>
+      scanLocalWorktree(repo, worktree, scannedAt, options.signal)
+    )
     reportProgress(
       progress,
       { scannedWorktreeCount: progress.scannedWorktreeCount + 1 },
@@ -809,7 +653,7 @@ async function scanRepo(
       repoId: repo.id,
       displayName: repo.displayName,
       path: repo.path,
-      isRemote: Boolean(repo.connectionId),
+      isRemote: false,
       worktreeCount: rows.length,
       scannedWorktreeCount: rows.filter((row) => row.status === 'ok').length,
       unavailableWorktreeCount: rows.filter((row) => row.status !== 'ok').length,
@@ -841,8 +685,7 @@ export async function analyzeWorkspaceSpace(
   }
   options.onProgress?.({ ...progress })
   const limiters: WorkspaceSpaceScanLimiters = {
-    localWorktree: createAsyncLimiter(LOCAL_WORKTREE_SCAN_CONCURRENCY, options.signal),
-    remoteFallbackTraversal: createAsyncLimiter(REMOTE_FALLBACK_SCAN_CONCURRENCY, options.signal)
+    localWorktree: createAsyncLimiter(LOCAL_WORKTREE_SCAN_CONCURRENCY, options.signal)
   }
   const repoResults = await mapLimit(reposToScan, 2, (repo) =>
     scanRepo(repo, scannedAt, store, limiters, progress, options)

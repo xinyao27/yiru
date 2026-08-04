@@ -1,10 +1,8 @@
 import type { BrowserWindow } from 'electron'
 
 import type { Store } from '../persistence'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import {
   collectLocalWorktreeBaseChanges,
-  collectRemoteWorktreeBaseChanges,
   type WorktreeBaseCollectedChanges
 } from './base-directory-change-collector'
 import type { WorktreeBaseWatchTarget } from './base-directory-event-filter'
@@ -95,10 +93,8 @@ function scheduleNotification(watch: ActiveWatch, changes: PendingNotificationIn
   }, WATCH_DEBOUNCE_MS)
 }
 
-// Why: SSH common dirs would need per-signal network reads to diff heads;
-// remote background freshness stays on the structural path for now.
 function supportsHeadIdentityRefresh(watch: ActiveWatch): boolean {
-  return watch.kind === 'git-common' && !watch.connectionId
+  return watch.kind === 'git-common'
 }
 
 function hasCollectedChanges(changes: WorktreeBaseCollectedChanges): boolean {
@@ -121,23 +117,6 @@ function handleLocalWatchEvents(
     return
   }
   const changes = collectLocalWorktreeBaseChanges(watch, events)
-  if (hasCollectedChanges(changes)) {
-    scheduleNotification(watch, changes)
-  }
-}
-
-function handleRemoteWatchEvents(
-  watch: ActiveWatch,
-  events: Parameters<typeof collectRemoteWorktreeBaseChanges>[1]
-): void {
-  if (watch.disposed || watch.mainWindow.isDestroyed()) {
-    return
-  }
-  const changes = collectRemoteWorktreeBaseChanges(watch, events)
-  if (changes.overflow) {
-    scheduleNotification(watch, { structureRepoIds: [...watch.repos.keys()] })
-    return
-  }
   if (hasCollectedChanges(changes)) {
     scheduleNotification(watch, changes)
   }
@@ -166,24 +145,6 @@ async function subscribeTarget(
   mainWindow: BrowserWindow
 ): Promise<ActiveWatch> {
   let activeWatch: ActiveWatch | null = null
-  if (target.connectionId) {
-    const provider = getSshFilesystemProvider(target.connectionId)
-    if (!provider) {
-      throw new Error(`SSH filesystem provider unavailable for ${target.connectionId}`)
-    }
-    const unwatch = await provider.watch(target.path, (events) => {
-      const currentWatch = activeWatches.get(target.key) ?? activeWatch
-      if (!currentWatch || currentWatch.disposed) {
-        return
-      }
-      handleRemoteWatchEvents(currentWatch, events)
-    })
-    activeWatch = createActiveWatch(target, mainWindow, {
-      unsubscribe: async () => unwatch()
-    })
-    return activeWatch
-  }
-
   // Why: a recursive native watcher here forced fseventsd to deliver every
   // event under the whole workspace root (all worktrees) / whole common .git
   // (objects included) just to observe a few shallow paths. The poller reads

@@ -37,9 +37,6 @@ import type {
   GitHubPRMergeMethodSettings
 } from '~shared/types'
 
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   hasHostedReviewLocalGitOptions,
   getHostedReviewLocalGitOptions,
@@ -1118,7 +1115,7 @@ async function findOpenPRByHeadBase(args: {
 
 async function readPullRequestTemplate(
   repoPath: string,
-  connectionId?: string | null
+  _connectionId?: string | null
 ): Promise<string> {
   const relativeCandidates = [
     '.github/pull_request_template.md',
@@ -1128,21 +1125,8 @@ async function readPullRequestTemplate(
     'docs/pull_request_template.md',
     'docs/PULL_REQUEST_TEMPLATE.md'
   ]
-  const remoteProvider = connectionId ? getSshFilesystemProvider(connectionId) : undefined
-  if (connectionId && !remoteProvider) {
-    return ''
-  }
   for (const relativeCandidate of relativeCandidates) {
     try {
-      if (remoteProvider) {
-        const result = await remoteProvider.readFile(
-          joinWorktreeRelativePath(repoPath, relativeCandidate)
-        )
-        if (result.isBinary) {
-          continue
-        }
-        return result.content
-      }
       return await readFile(join(repoPath, relativeCandidate), 'utf8')
     } catch {
       // Try the next conventional PR template path.
@@ -1440,17 +1424,14 @@ function isMergedImplicitPR(data: PullRequestLookupData, linkedPRNumber?: number
 
 async function getCurrentHeadOid(
   repoPath: string,
-  connectionId?: string | null,
+  _connectionId?: string | null,
   localGitOptions: { wslDistro?: string } = {}
 ): Promise<string | null> {
   try {
-    const provider = connectionId ? getSshGitProvider(connectionId) : null
-    const result = provider
-      ? await provider.exec(['rev-parse', 'HEAD'], repoPath)
-      : await gitExecFileAsync(['rev-parse', 'HEAD'], {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
-        })
+    const result = await gitExecFileAsync(['rev-parse', 'HEAD'], {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+    })
     return result.stdout.trim() || null
   } catch {
     return null
@@ -1911,7 +1892,7 @@ function getTrackedUpstreamBranchCacheKey(
 
 async function probeTrackedUpstreamBranches(
   repoPath: string,
-  connectionId?: string | null,
+  _connectionId?: string | null,
   localGitOptions: { wslDistro?: string } = {}
 ): Promise<{
   probeFailed: boolean
@@ -1919,13 +1900,10 @@ async function probeTrackedUpstreamBranches(
 }> {
   const args = ['for-each-ref', '--format=%(refname)%00%(upstream)', 'refs/heads']
   try {
-    const provider = connectionId ? getSshGitProvider(connectionId) : null
-    const result = provider
-      ? await provider.exec(args, repoPath)
-      : await gitExecFileAsync(args, {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
-        })
+    const result = await gitExecFileAsync(args, {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+    })
     return {
       probeFailed: false,
       upstreamsByBranchName: parseTrackedUpstreamBranches(result.stdout)
