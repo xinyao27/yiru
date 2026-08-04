@@ -17,6 +17,7 @@ import {
   Palette,
   Layout as PanelsTopLeft,
   Play,
+  ShareNetwork,
   HardDrives as Server,
   ShieldCheck,
   SlidersHorizontal,
@@ -34,6 +35,7 @@ import { getAdvancedPaneSearchEntries } from '~renderer/components/settings/adva
 import { getAgentsPaneSearchEntries } from '~renderer/components/settings/agents-search'
 import { getCommitMessageAiPaneSearchEntries } from '~renderer/components/settings/commit-message-ai-search'
 import { getComputerUsePaneSearchEntries } from '~renderer/components/settings/computer-use-search'
+import { getCoworkingSettingsSearchEntries } from '~renderer/components/settings/coworking/search'
 import { getDeveloperPermissionsPaneSearchEntries } from '~renderer/components/settings/developer-permissions-search'
 import { getExperimentalPaneSearchEntries } from '~renderer/components/settings/experimental-search'
 import { getFloatingWorkspaceSearchEntries } from '~renderer/components/settings/floating-workspace-search'
@@ -398,6 +400,24 @@ export function buildSettingsNavigationMetadata({
       searchEntries: getFloatingWorkspaceSearchEntries(),
       group: 'workflows'
     },
+    ...(showDesktopOnlySettings
+      ? [
+          {
+            id: 'coworking',
+            title: translate(
+              'auto.hooks.useSettingsNavigationMetadata.coworkingTitle',
+              'Coworking'
+            ),
+            description: translate(
+              'auto.hooks.useSettingsNavigationMetadata.coworkingDescription',
+              'Review and revoke persistent remote host authorizations.'
+            ),
+            icon: ShareNetwork,
+            searchEntries: getCoworkingSettingsSearchEntries(),
+            group: 'remote'
+          }
+        ]
+      : []),
     {
       id: 'servers',
       title: translate(

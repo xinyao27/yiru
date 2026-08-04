@@ -1,5 +1,6 @@
 import type { CoworkingRemoteDesktop } from '~shared/coworking/catalog-contract'
 import type {
+  CoworkingRequestHostAccessResult,
   CoworkingRequesterControlView,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs
@@ -15,6 +16,7 @@ import { CoworkingPeerConnection } from '../peer/connection'
 import type { CoworkingSubscription } from '../peer/connection-contract'
 import type { CoworkingProbeClient } from '../probe-client'
 import type { DiscoveredCoworkingDesktop, TailnetPeerDirectory } from '../tailnet-peer-directory'
+import { requestCoworkingHostAccess } from './host-access'
 import {
   createCoworkingOwnerRecord,
   projectCoworkingRemoteDesktop,
@@ -45,7 +47,8 @@ export class CoworkingOwnerCatalog {
 
   constructor(
     private readonly directory: TailnetPeerDirectory,
-    private readonly probeClient: CoworkingProbeClient
+    private readonly probeClient: CoworkingProbeClient,
+    private readonly userDataPath: string
   ) {}
 
   snapshot(): CoworkingOwnerCatalogSnapshot {
@@ -96,6 +99,10 @@ export class CoworkingOwnerCatalog {
     }
     ensureCoworkingControlSubscription(record, worktreeRef, () => this.emit())
     await record.connection.request('control.request', { worktreeRef }, { mutation: true })
+  }
+
+  async requestHostAccess(desktopRef: string): Promise<CoworkingRequestHostAccessResult> {
+    return await requestCoworkingHostAccess(this.records.get(desktopRef), this.userDataPath)
   }
 
   async invokeRequester(args: CoworkingRequesterInvokeArgs): Promise<unknown> {

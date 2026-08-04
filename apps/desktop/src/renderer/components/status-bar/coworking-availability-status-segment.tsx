@@ -52,7 +52,10 @@ function CoworkingPresenceStatusSegment({
   // always-mounted trigger reads counts only. The peer arrays are read by the
   // popover body, which exists solely while it is open.
   const connectionCount = useAppStore((state) => state.coworkingOwnerActiveConnections.length)
-  const pendingCount = useAppStore((state) => state.coworkingControlRequestQueue.length)
+  const pendingCount = useAppStore(
+    (state) =>
+      state.coworkingControlRequestQueue.length + state.coworkingHostAccessRequestQueue.length
+  )
   const sharedCount = useAppStore(
     (state) =>
       state.coworkingOwnerWorktrees.filter((worktree) => worktree.visibility === 'public').length

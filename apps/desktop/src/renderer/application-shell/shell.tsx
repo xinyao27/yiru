@@ -79,6 +79,7 @@ import logo from '../../../resources/yiru-wordmark.png?url'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
+import { CoworkingHostAccessRequestDialog } from '../components/coworking/host-access-request-dialog'
 import { useCoworkingSharingBridge } from '../components/coworking/use-sharing-bridge'
 import { CrashReportDialog } from '../components/crash-report/dialog'
 import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
@@ -2216,6 +2217,7 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <CoworkingControlRequestDialog />
+            <CoworkingHostAccessRequestDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />

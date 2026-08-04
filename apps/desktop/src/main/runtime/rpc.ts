@@ -9,7 +9,12 @@ import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 import type { WebSocket } from 'ws'
+import type {
+  CoworkingHostAccessTier,
+  CoworkingHostDeviceView
+} from '~shared/coworking/host-access-contract'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '~shared/pairing'
+import type { PairingOffer } from '~shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
@@ -233,6 +238,60 @@ export class YiruRuntimeRpcServer {
       return false
     }
     this.mobileSocketWiring?.terminateDeviceConnections(device.token)
+    return true
+  }
+
+  createCoworkingHostPairingOffer(args: {
+    name: string
+    subject: { nodeId: string; userDisplayName: string }
+    hostScopeKey: string
+    tier: CoworkingHostAccessTier
+    expiresAt: number
+  }): PairingOffer {
+    const endpoint = this.getWebSocketEndpoint()
+    const publicKeyB64 = this.getE2EEPublicKey()
+    if (!endpoint || !publicKeyB64 || !this.deviceRegistry) {
+      throw new Error('coworking_host_pairing_unavailable')
+    }
+    const device = this.deviceRegistry.addCoworkingHostDevice(args)
+    return {
+      v: PAIRING_OFFER_VERSION,
+      endpoint,
+      deviceToken: device.token,
+      publicKeyB64,
+      scope: 'runtime'
+    }
+  }
+
+  listCoworkingHostDevices(): readonly CoworkingHostDeviceView[] {
+    return (this.deviceRegistry?.listDevices() ?? [])
+      .filter((device): device is CoworkingHostDeviceEntry => device.scope === 'coworking-host')
+      .sort((a, b) => b.pairedAt - a.pairedAt)
+      .map((device) => ({
+        deviceId: device.deviceId,
+        name: device.name,
+        pairedAt: device.pairedAt,
+        lastSeenAt: device.lastSeenAt > 0 ? device.lastSeenAt : null,
+        subject: device.subject,
+        tier: device.tier,
+        expiresAt: device.expiresAt,
+        revokedAt: device.revokedAt
+      }))
+  }
+
+  revokeCoworkingHostDevice(deviceId: string): boolean {
+    const device = this.deviceRegistry?.getDevice(deviceId)
+    if (device?.scope !== 'coworking-host' || !this.deviceRegistry?.revokeDevice(deviceId)) {
+      return false
+    }
+    for (const subjectDevice of this.deviceRegistry.listDevices()) {
+      if (
+        subjectDevice.scope === 'coworking-host' &&
+        subjectDevice.subject.nodeId === device.subject.nodeId
+      ) {
+        this.mobileSocketWiring?.terminateDeviceConnections(subjectDevice.token)
+      }
+    }
     return true
   }
 

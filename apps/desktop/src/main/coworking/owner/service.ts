@@ -2,12 +2,19 @@ import type {
   CoworkingControlGrant,
   CoworkingControlRequest
 } from '~shared/coworking/access-contract'
+import type { CoworkingHostAccessRequest } from '~shared/coworking/host-access-contract'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSelfIdentity,
@@ -21,6 +28,7 @@ import type { AuthenticatedCoworkingPrincipal } from '~shared/coworking/wire-con
 
 import type { CoworkingSharingIpcController } from '../sharing'
 import { CoworkingWindowsFirewallRecovery } from '../windows-firewall-recovery'
+import { projectCoworkingAvailabilityDiagnostic } from './availability-diagnostic'
 import type { CoworkingOwnerCatalogSnapshot, CoworkingRequesterSubscriptionSink } from './catalog'
 import type { CoworkingOwnerServiceOptions } from './service-options'
 import {
@@ -37,6 +45,7 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
   private readonly unsubscribes: (() => void)[] = []
   private remoteSnapshot: CoworkingOwnerCatalogSnapshot = { desktops: [], controlStates: [] }
   private requests: readonly CoworkingControlRequest[] = []
+  private hostAccessRequests: readonly CoworkingHostAccessRequest[] = []
   private grants: readonly CoworkingControlGrant[] = []
   private activeConnections: readonly AuthenticatedCoworkingPrincipal[] = []
   private self: CoworkingSelfIdentity | null = null
@@ -66,6 +75,10 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
       }),
       options.access.subscribeOwnerRequests((requests) => {
         this.requests = requests
+        this.emit()
+      }),
+      options.hostAccess.subscribe((requests) => {
+        this.hostAccessRequests = requests
         this.emit()
       }),
       options.access.subscribeGrants((grants) => {
@@ -131,7 +144,7 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
       this.diagnostic = null
       this.emit()
     } catch (error) {
-      await this.enterUnavailable(projectDiagnostic(error))
+      await this.enterUnavailable(projectCoworkingAvailabilityDiagnostic(error))
     }
   }
 
@@ -161,6 +174,9 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
         const projected = projectOwnerRequest(this.projectionContext, request)
         return projected ? [projected] : []
       }),
+      ownerHostAccessRequests: this.hostAccessRequests.map(
+        ({ connectionId: _connectionId, ...request }) => request
+      ),
       ownerControlGrants: this.grants.flatMap((grant) => {
         const projected = projectOwnerGrant(this.projectionContext, grant)
         return projected ? [projected] : []
@@ -192,6 +208,26 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
 
   async decideControl(args: CoworkingDecideControlArgs): Promise<void> {
     this.options.access.decide({ requestId: args.requestId, decision: args.decision })
+  }
+
+  requestHostAccess(
+    args: CoworkingRequestHostAccessArgs
+  ): Promise<CoworkingRequestHostAccessResult> {
+    return this.options.ownerCatalog.requestHostAccess(args.desktopRef)
+  }
+
+  async decideHostAccess(args: CoworkingDecideHostAccessArgs): Promise<void> {
+    this.options.hostAccess.decide(args)
+  }
+
+  async listHostDevices(): Promise<CoworkingListHostDevicesResult> {
+    return { devices: this.options.hostDevices.listCoworkingHostDevices() }
+  }
+
+  async revokeHostDevice(
+    args: CoworkingRevokeHostDeviceArgs
+  ): Promise<CoworkingRevokeHostDeviceResult> {
+    return { revoked: this.options.hostDevices.revokeCoworkingHostDevice(args.deviceId) }
   }
 
   async revokeControl(args: CoworkingRevokeControlArgs): Promise<void> {
@@ -243,7 +279,7 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
   }
 
   async reportIngressUnavailable(error: Error): Promise<void> {
-    await this.enterUnavailable(projectDiagnostic(error))
+    await this.enterUnavailable(projectCoworkingAvailabilityDiagnostic(error))
   }
 
   private async recoverWindowsFirewall(): Promise<void> {
@@ -277,28 +313,4 @@ export class CoworkingOwnerService implements CoworkingSharingIpcController {
       listener(snapshot)
     }
   }
-}
-
-function projectDiagnostic(error: unknown): string {
-  const code = errorCode(error)
-  if (code === 'EADDRINUSE') {
-    return 'coworking_port_unavailable'
-  }
-  if (code === 'EACCES' || code === 'EPERM') {
-    return 'coworking_permission_denied'
-  }
-  if (error instanceof Error && /^tailscale_[a-z-]+$/.test(error.message)) {
-    return error.message
-  }
-  if (error instanceof Error && error.message === 'coworking_windows_firewall_unavailable') {
-    return error.message
-  }
-  return 'coworking_unavailable'
-}
-
-function errorCode(error: unknown): string | null {
-  if (!error || typeof error !== 'object' || !('code' in error)) {
-    return null
-  }
-  return typeof error.code === 'string' ? error.code : null
 }

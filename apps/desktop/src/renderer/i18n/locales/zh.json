@@ -694,7 +694,9 @@
         "devSearchKeywordError": "error",
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} 个主机",
-        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
+        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
+        "coworkingTitle": "Coworking",
+        "coworkingDescription": "Review and revoke persistent remote host authorizations."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "粘贴内容过大。"
@@ -3670,7 +3672,13 @@
         },
         "CoworkingDesktopRow": {
           "connecting": "Connecting…",
-          "disconnected": "Disconnected"
+          "disconnected": "Disconnected",
+          "hostAccessDenied": "Remote host access was denied.",
+          "hostAccessCancelled": "Remote host access request was cancelled.",
+          "hostAdded": "{{value0}} is ready as a remote host.",
+          "hostAccessFailed": "Could not request remote host access.",
+          "requestingHostAccess": "Waiting…",
+          "useAsHost": "Use as host"
         },
         "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
@@ -4001,6 +4009,22 @@
           "controlPending": "Waiting for the owner to approve control.",
           "controlRequired": "Request control to create terminals.",
           "creating": "Creating terminal…"
+        },
+        "CoworkingHostAccessRequestDialog": {
+          "decisionFailed": "Could not send the host access decision.",
+          "nameRequired": "Name this authorized device before continuing.",
+          "title": "Authorize {{value0}} as a remote host client?",
+          "description": "This authorization lasts 90 days and is limited to this machine.",
+          "deviceName": "Authorized device name",
+          "readOnly": "Read only",
+          "readOnlyDescription": "Browse code and git history on this machine.",
+          "grantReadOnly": "Grant read only",
+          "fullAccess": "Full access",
+          "fullAccessDescription": "They will receive continuous shell access on this machine.",
+          "grantFullAccess": "Grant full access",
+          "revokeHelp": "You can revoke this authorization at any time in Settings → Coworking.",
+          "queued": "Queued host access requests: {{value0}}.",
+          "deny": "Deny"
         }
       },
       "shared": {
@@ -5713,7 +5737,9 @@
           "65358016ea": "放弃",
           "dev": "开发工具",
           "devDescription": "仅用于调试 UI 状态的开发工具。",
-          "b07041697f": "Connect GitHub, GitLab, and source-hosting services."
+          "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
+          "coworkingTitle": "Coworking",
+          "coworkingDescription": "Review and revoke persistent remote host authorizations."
         },
         "SettingsFormControls": {
           "42a4d15a30": "没有匹配的字体。",
@@ -8110,6 +8136,28 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "CoworkingSettingsPane": {
+          "loadFailed": "Could not load authorized remote host clients.",
+          "alreadyRevoked": "This authorization was already revoked.",
+          "revoked": "Authorization revoked and active connections disconnected.",
+          "revokeFailed": "Could not revoke this authorization.",
+          "title": "Authorized remote host clients",
+          "description": "Like authorized_keys, these devices retain access until revoked or expired.",
+          "refresh": "Refresh",
+          "loading": "Loading…",
+          "empty": "No remote host clients have been authorized through Coworking.",
+          "fullAccess": "Full access",
+          "readOnly": "Read only",
+          "revokedState": "Revoked",
+          "expiredState": "Expired",
+          "identity": "{{value0}} · node {{value1}}",
+          "dates": "Paired {{value0}} · Last used {{value1}} · Expires {{value2}}",
+          "never": "Never",
+          "noExpiry": "Never",
+          "revoking": "Revoking…",
+          "revoke": "Revoke",
+          "searchTitle": "Authorized remote host clients"
         }
       },
       "right": {

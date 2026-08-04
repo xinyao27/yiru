@@ -2489,6 +2489,7 @@ app.whenReady().then(async () => {
     coworkingOwner = createCoworkingOwnerComposition({
       store,
       runtime: runtimeService,
+      runtimeRpc,
       rateLimits,
       userDataPath: getCanonicalUserDataPath(),
       profileId: activeYiruProfile.profile.id,
@@ -2505,7 +2506,7 @@ app.whenReady().then(async () => {
     // Why: corrupt sharing state or a missing platform dependency disables only Coworking.
     console.error('[coworking] Failed to compose Desktop sharing:', error)
     unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(
-      new CoworkingUnavailableOwnerService()
+      new CoworkingUnavailableOwnerService(runtimeRpc)
     )
   }
 

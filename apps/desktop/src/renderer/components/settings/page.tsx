@@ -76,6 +76,7 @@ import {
   getFallbackTerminalFonts,
   mergeFontSuggestions
 } from './constants'
+import { CoworkingSettingsPane } from './coworking/pane'
 import { DeveloperPermissionsPane } from './developer-permissions-pane'
 import { ExperimentalPane } from './experimental-pane'
 import { FloatingWorkspacePane } from './floating-workspace-pane'
@@ -1579,6 +1580,23 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                 >
                   {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
                 </SettingsSection>
+
+                {showDesktopOnlySettings ? (
+                  <SettingsSection
+                    id="coworking"
+                    title={translate(
+                      'auto.components.settings.Settings.coworkingTitle',
+                      'Coworking'
+                    )}
+                    description={translate(
+                      'auto.components.settings.Settings.coworkingDescription',
+                      'Review and revoke persistent remote host authorizations.'
+                    )}
+                    searchEntries={getSectionSearchEntries('coworking')}
+                  >
+                    {isSectionMounted('coworking') ? <CoworkingSettingsPane /> : null}
+                  </SettingsSection>
+                ) : null}
 
                 <SettingsSection
                   id="servers"

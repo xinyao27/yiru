@@ -18,6 +18,7 @@ import { useAppStore } from '~renderer/store'
 export function CoworkingControlRequestDialog(): React.JSX.Element | null {
   const request = useAppStore((state) => state.coworkingControlRequestQueue[0] ?? null)
   const requestCount = useAppStore((state) => state.coworkingControlRequestQueue.length)
+  const hostRequestCount = useAppStore((state) => state.coworkingHostAccessRequestQueue.length)
   const removeRequest = useAppStore((state) => state.removeCoworkingControlRequest)
   const denyButtonRef = useRef<HTMLButtonElement>(null)
   const [decidingRequestId, setDecidingRequestId] = useState<string | null>(null)
@@ -50,7 +51,7 @@ export function CoworkingControlRequestDialog(): React.JSX.Element | null {
     [decidingRequestId, removeRequest, request]
   )
 
-  if (!request) {
+  if (!request || hostRequestCount > 0) {
     return null
   }
 

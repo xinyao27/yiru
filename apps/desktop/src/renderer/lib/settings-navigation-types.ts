@@ -32,6 +32,7 @@ export type SettingsNavTarget =
   | 'agents'
   | 'orchestration'
   | 'servers'
+  | 'coworking'
   | 'mobile'
   | 'mobile-emulator'
   | 'repo'

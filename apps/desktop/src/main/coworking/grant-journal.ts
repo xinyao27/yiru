@@ -1,6 +1,7 @@
 import { appendFileSync, existsSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
+import type { CoworkingHostAccessRequest } from '~shared/coworking/host-access-contract'
 import { hardenExistingSecureFile, writeSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 const COWORKING_VISIBILITY_DENY_JOURNAL_VERSION = 1
@@ -39,6 +40,14 @@ export class CoworkingGrantJournal {
 
   recordHostOperation(operation: CoworkingHostOperation): void {
     this.appendAuditEvent({ kind: 'host-operation', ...operation })
+  }
+
+  recordHostAccessDenial(request: CoworkingHostAccessRequest): void {
+    this.appendAuditEvent({
+      kind: 'host-access-denied',
+      requestId: request.requestId,
+      requester: request.requester
+    })
   }
 
   private appendAuditEvent(event: { kind: string } & Record<string, unknown>): void {

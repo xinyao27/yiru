@@ -1,5 +1,11 @@
 import type { TailnetPrincipal } from '../rpc-principal'
+import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
 import type { CoworkingRemoteDesktop } from './catalog-contract'
+import type {
+  CoworkingHostAccessDecision,
+  CoworkingHostDeviceView,
+  CoworkingOwnerHostAccessRequestView
+} from './host-access-contract'
 import { isCoworkingMutationKind } from './operation-contract'
 import type { CoworkingPublicationSuspensionReason } from './publication-suspension'
 import { COWORKING_RPC_ERROR_CODES, type CoworkingRpcErrorCode } from './wire-contract'
@@ -161,6 +167,7 @@ export type CoworkingSharingSnapshot = {
   remoteDesktops: readonly CoworkingRemoteDesktop[]
   ownerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   ownerControlRequests: readonly CoworkingOwnerControlRequestView[]
+  ownerHostAccessRequests: readonly CoworkingOwnerHostAccessRequestView[]
   ownerControlGrants: readonly CoworkingOwnerControlGrantView[]
   ownerActiveConnections: readonly CoworkingActiveConnectionView[]
   requesterControlStates: readonly CoworkingRequesterControlView[]
@@ -188,4 +195,26 @@ export type CoworkingDecideControlArgs = {
 
 export type CoworkingRevokeControlArgs = {
   grantId: string
+}
+
+export type CoworkingRequestHostAccessArgs = {
+  desktopRef: string
+}
+
+export type CoworkingRequestHostAccessResult =
+  | { status: 'denied' | 'cancelled' }
+  | { status: 'granted'; environment: PublicKnownRuntimeEnvironment }
+
+export type CoworkingDecideHostAccessArgs = CoworkingHostAccessDecision
+
+export type CoworkingListHostDevicesResult = {
+  devices: readonly CoworkingHostDeviceView[]
+}
+
+export type CoworkingRevokeHostDeviceArgs = {
+  deviceId: string
+}
+
+export type CoworkingRevokeHostDeviceResult = {
+  revoked: boolean
 }

@@ -48,7 +48,11 @@ import type {
   CommitMessageModelCapability
 } from '~shared/commit-message/agent-spec'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
@@ -57,6 +61,8 @@ import type {
   CoworkingRequesterSubscriptionStopArgs,
   CoworkingRequesterSubscriptionStopResult,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -2737,6 +2743,14 @@ export type PreloadApi = {
     requestControl: (args: CoworkingRequestControlArgs) => Promise<void>
     decideControl: (args: CoworkingDecideControlArgs) => Promise<void>
     revokeControl: (args: CoworkingRevokeControlArgs) => Promise<void>
+    requestHostAccess: (
+      args: CoworkingRequestHostAccessArgs
+    ) => Promise<CoworkingRequestHostAccessResult>
+    decideHostAccess: (args: CoworkingDecideHostAccessArgs) => Promise<void>
+    listHostDevices: () => Promise<CoworkingListHostDevicesResult>
+    revokeHostDevice: (
+      args: CoworkingRevokeHostDeviceArgs
+    ) => Promise<CoworkingRevokeHostDeviceResult>
     getWindowsFirewallStatus: () => Promise<CoworkingWindowsFirewallStatus>
     repairWindowsFirewall: () => Promise<CoworkingWindowsFirewallRepairResult>
     retryAvailability: () => Promise<void>

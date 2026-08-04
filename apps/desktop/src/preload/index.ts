@@ -35,7 +35,11 @@ import type {
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
@@ -44,6 +48,8 @@ import type {
   CoworkingRequesterSubscriptionStopArgs,
   CoworkingRequesterSubscriptionStopResult,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -3837,6 +3843,18 @@ const api = {
       ipcRenderer.invoke('coworkingSharing:decideControl', args),
     revokeControl: (args: CoworkingRevokeControlArgs): Promise<void> =>
       ipcRenderer.invoke('coworkingSharing:revokeControl', args),
+    requestHostAccess: (
+      args: CoworkingRequestHostAccessArgs
+    ): Promise<CoworkingRequestHostAccessResult> =>
+      ipcRenderer.invoke('coworkingSharing:requestHostAccess', args),
+    decideHostAccess: (args: CoworkingDecideHostAccessArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:decideHostAccess', args),
+    listHostDevices: (): Promise<CoworkingListHostDevicesResult> =>
+      ipcRenderer.invoke('coworkingSharing:listHostDevices'),
+    revokeHostDevice: (
+      args: CoworkingRevokeHostDeviceArgs
+    ): Promise<CoworkingRevokeHostDeviceResult> =>
+      ipcRenderer.invoke('coworkingSharing:revokeHostDevice', args),
     getWindowsFirewallStatus: (): Promise<CoworkingWindowsFirewallStatus> =>
       ipcRenderer.invoke('coworkingSharing:getWindowsFirewallStatus'),
     repairWindowsFirewall: (): Promise<CoworkingWindowsFirewallRepairResult> =>

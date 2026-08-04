@@ -73,6 +73,37 @@ export function addEnvironmentFromPairingCode(
   return environment
 }
 
+export function upsertEnvironmentFromPairingOffer(
+  userDataPath: string,
+  args: { id: string; name: string; offer: PairingOffer; now?: number }
+): KnownRuntimeEnvironment {
+  const store = readEnvironmentStore(userDataPath)
+  const now = args.now ?? Date.now()
+  const existing = store.environments.find((entry) => entry.id === args.id)
+  const environment = createEnvironmentFromPairingOffer({
+    id: args.id,
+    name: args.name,
+    now: existing?.createdAt ?? now,
+    offer: args.offer,
+    runtimeId: existing?.runtimeId ?? null
+  })
+  const next = existing
+    ? {
+        ...environment,
+        createdAt: existing.createdAt,
+        updatedAt: now,
+        lastUsedAt: existing.lastUsedAt
+      }
+    : environment
+  writeEnvironmentStore(userDataPath, {
+    version: 1,
+    environments: [...store.environments.filter((entry) => entry.id !== args.id), next].sort(
+      (a, b) => a.name.localeCompare(b.name)
+    )
+  })
+  return next
+}
+
 export function removeEnvironment(userDataPath: string, selector: string): KnownRuntimeEnvironment {
   const store = readEnvironmentStore(userDataPath)
   const environment = resolveEnvironmentFromStore(store, selector)
