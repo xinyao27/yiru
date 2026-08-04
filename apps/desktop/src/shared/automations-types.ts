@@ -2,8 +2,8 @@ import type { ProjectSourceContext, WorkspaceRunContext } from './project-source
 import type { SetupDecision, TuiAgent } from './types'
 
 export type AutomationWorkspaceMode = 'existing' | 'new_per_run'
-export type AutomationExecutionTargetType = 'local' | 'ssh'
-export type AutomationSchedulerOwner = 'local_host_service' | 'ssh_bridge' | 'remote_host_service'
+export type AutomationExecutionTargetType = 'local'
+export type AutomationSchedulerOwner = 'local_host_service' | 'remote_host_service'
 export type AutomationMissedRunPolicy = 'run_once_within_grace'
 export type AutomationRunStatus =
   | 'pending'
@@ -36,7 +36,6 @@ export type AutomationRunUsageAttribution = 'provider_session_time_window'
 export type AutomationRunUsageUnavailableReason =
   | 'run_not_finished'
   | 'provider_unsupported'
-  | 'remote_usage_unavailable'
   | 'usage_not_enabled'
   | 'scan_failed'
   | 'no_matching_session'
@@ -227,14 +226,9 @@ export type ExternalAutomationManagerStatus = 'available' | 'unavailable'
 export type ExternalAutomationAction = 'pause' | 'resume' | 'run' | 'delete'
 export type ExternalAutomationRunStatus = 'completed' | 'failed' | 'unknown'
 
-export type ExternalAutomationTarget =
-  | {
-      type: 'local'
-    }
-  | {
-      type: 'ssh'
-      connectionId: string
-    }
+export type ExternalAutomationTarget = {
+  type: 'local'
+}
 
 export type ExternalAutomationJob = {
   id: string

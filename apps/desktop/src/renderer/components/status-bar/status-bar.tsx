@@ -6,7 +6,6 @@ import {
   ActivityIcon as Activity,
   Plug,
   Layout as PanelsTopLeft,
-  HardDrives as Server,
   ArrowCounterClockwise as RotateCcw,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
@@ -119,9 +118,6 @@ const ResourceUsageStatusSegment = lazyWithRetry(() =>
 )
 const PortsStatusSegment = lazyWithRetry(() =>
   import('./ports-status-segment').then((module) => ({ default: module.PortsStatusSegment }))
-)
-const SshStatusSegment = lazyWithRetry(() =>
-  import('./ssh-status-segment').then((module) => ({ default: module.SshStatusSegment }))
 )
 
 export type CodexStatusRuntimeTarget = {
@@ -1831,9 +1827,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   )
   const agentDetectionTarget = useMemo<AgentDetectionTarget>(() => {
     const target = parseExecutionHostId(usageExecutionHostId)
-    if (target?.kind === 'ssh') {
-      return { kind: 'ssh', connectionId: target.targetId }
-    }
     if (target?.kind === 'runtime') {
       return { kind: 'runtime', environmentId: target.environmentId }
     }
@@ -1902,8 +1895,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const refreshDetectedAgents = useAppStore((s) => s.refreshDetectedAgents)
   const clearRuntimeDetectedAgents = useAppStore((s) => s.clearRuntimeDetectedAgents)
   const ensureRuntimeDetectedAgents = useAppStore((s) => s.ensureRuntimeDetectedAgents)
-  const clearRemoteDetectedAgents = useAppStore((s) => s.clearRemoteDetectedAgents)
-  const ensureRemoteDetectedAgents = useAppStore((s) => s.ensureRemoteDetectedAgents)
   const handleRefresh = useCallback(async () => {
     if (isRefreshing) {
       return
@@ -1914,15 +1905,11 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       // appears (and a removed CLI's bar hides) without restarting Yiru.
       if (agentDetectionTarget.kind === 'runtime') {
         clearRuntimeDetectedAgents(agentDetectionTarget.environmentId)
-      } else if (agentDetectionTarget.kind === 'ssh') {
-        clearRemoteDetectedAgents(agentDetectionTarget.connectionId)
       }
       const detectedAgentsRefresh =
         agentDetectionTarget.kind === 'runtime'
           ? ensureRuntimeDetectedAgents(agentDetectionTarget.environmentId)
-          : agentDetectionTarget.kind === 'ssh'
-            ? ensureRemoteDetectedAgents(agentDetectionTarget.connectionId)
-            : refreshDetectedAgents()
+          : refreshDetectedAgents()
       await Promise.all([refreshRateLimits(cursorRefreshContext), detectedAgentsRefresh])
     } finally {
       if (mountedRef.current) {
@@ -1931,10 +1918,8 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     }
   }, [
     agentDetectionTarget,
-    clearRemoteDetectedAgents,
     clearRuntimeDetectedAgents,
     cursorRefreshContext,
-    ensureRemoteDetectedAgents,
     ensureRuntimeDetectedAgents,
     isRefreshing,
     refreshRateLimits,
@@ -2046,7 +2031,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // detection-gating doesn't apply.
   const visibleOpencodeGo = getVisibleUsageProvider('opencode-go', opencodeGo, usageSettings)
   const showOpencodeGo = visibleOpencodeGo !== null && statusBarItems.includes('opencode-go')
-  const showSsh = statusBarItems.includes('ssh')
   const showResourceUsage = statusBarItems.includes('resource-usage')
   const showPorts = statusBarItems.includes('ports')
   const showFloatingTerminalToggle =
@@ -2248,7 +2232,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             {petEnabled ? <PetStatusSegment /> : null}
             {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
             {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
-            {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
           </React.Suspense>
           <CoworkingAvailabilityStatusSegment />
           {showFloatingTerminalToggle && (
@@ -2403,16 +2386,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             {translate('auto.components.status.bar.StatusBar.grokUsageMenu', 'Grok Usage')}
           </ContextMenuCheckboxItem>
         )}
-        <ContextMenuCheckboxItem
-          checked={statusBarItems.includes('ssh')}
-          onCheckedChange={() => {
-            recordFeatureInteraction('ssh')
-            toggleStatusBarItem('ssh')
-          }}
-        >
-          <Server className="size-3.5" />
-          {translate('auto.components.status.bar.StatusBar.24ac89df1a', 'Remote Hosts')}
-        </ContextMenuCheckboxItem>
         <ContextMenuCheckboxItem
           checked={statusBarItems.includes('resource-usage')}
           onCheckedChange={() => {

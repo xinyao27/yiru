@@ -1,8 +1,17 @@
 /* oxlint-disable max-lines -- Why: file RPC routing coverage stays together so the dispatcher contract for read, write, mutation, and watch methods is easy to audit. */
 import { z } from 'zod'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 
-import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
+import { callerClassOf } from '../access'
+import {
+  InvalidArgumentError,
+  defineMethod,
+  defineStreamingMethod,
+  type RpcAnyMethod,
+  type RpcContext
+} from '../core'
 import { runFileWatchStream } from './file-watch-stream-lifecycle'
+import { assertOutOfTreeFileAccess } from './files-out-of-tree-guard'
 
 let filesWatchSubscriptionSeq = 0
 const RUNTIME_FILE_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/
@@ -181,12 +190,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.list',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) => fileCommands.listMobileFiles(params.worktree)
   }),
   defineMethod({
     name: 'files.searchPaths',
     mobile: true,
     params: FilePathSearch,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.searchMobileFilePaths(params.worktree, params.query, params.limit)
   }),
@@ -194,6 +205,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.open',
     mobile: true,
     params: FileOpen,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.openMobileFile(params.worktree, params.relativePath)
   }),
@@ -201,6 +213,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.openDiff',
     mobile: true,
     params: FileOpenDiff,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.openMobileDiff(params.worktree, params.relativePath, params.staged === true)
   }),
@@ -208,6 +221,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.read',
     mobile: true,
     params: FileOpen,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.readMobileFile(params.worktree, params.relativePath)
   }),
@@ -215,75 +229,94 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.resolveTerminalPath',
     mobile: true,
     params: ResolveTerminalPath,
-    handler: async (params, { fileCommands, clientId }) =>
-      fileCommands.resolveTerminalPath(
+    access: { scope: 'host', tier: 'host' },
+    handler: async (params, { fileCommands, clientId, principal }) => {
+      assertOutOfTreeFileAccess(callerClassOf(principal), 'files.resolveTerminalPath')
+      return fileCommands.resolveTerminalPath(
         params.worktree,
         params.pathText,
         params.cwd ?? null,
         clientId,
         params.terminal ?? null
       )
+    }
   }),
   defineMethod({
     name: 'files.readTerminalArtifact',
     mobile: true,
     params: TerminalArtifactFile,
-    handler: async (params, { fileCommands, clientId }) =>
-      fileCommands.readTerminalArtifactFile(
+    access: { scope: 'host', tier: 'host' },
+    handler: async (params, { fileCommands, clientId, principal }) => {
+      assertOutOfTreeFileAccess(callerClassOf(principal), 'files.readTerminalArtifact')
+      return fileCommands.readTerminalArtifactFile(
         params.worktree,
         params.grantId,
         params.absolutePath,
         clientId
       )
+    }
   }),
   defineMethod({
     name: 'files.readTerminalArtifactPreview',
     mobile: true,
     params: TerminalArtifactFile,
-    handler: async (params, { fileCommands, clientId }) =>
-      fileCommands.readTerminalArtifactPreview(
+    access: { scope: 'host', tier: 'host' },
+    handler: async (params, { fileCommands, clientId, principal }) => {
+      assertOutOfTreeFileAccess(callerClassOf(principal), 'files.readTerminalArtifactPreview')
+      return fileCommands.readTerminalArtifactPreview(
         params.worktree,
         params.grantId,
         params.absolutePath,
         clientId
       )
+    }
   }),
   defineMethod({
     name: 'files.writeTerminalArtifact',
     mobile: true,
     params: TerminalArtifactFileWrite,
-    handler: async (params, { fileCommands, clientId }) =>
-      fileCommands.writeTerminalArtifactFile(
+    access: { scope: 'host', tier: 'host' },
+    handler: async (params, { fileCommands, clientId, principal }) => {
+      assertOutOfTreeFileAccess(callerClassOf(principal), 'files.writeTerminalArtifact')
+      return fileCommands.writeTerminalArtifactFile(
         params.worktree,
         params.grantId,
         params.absolutePath,
         params.content,
         clientId
       )
+    }
   }),
   defineMethod({
     name: 'files.readPreview',
     mobile: true,
     params: FileOpen,
-    handler: async (params, { fileCommands }) =>
-      fileCommands.readFileExplorerPreview(params.worktree, params.relativePath)
+    access: { scope: 'worktree', tier: 'read' },
+    handler: async (params, context) =>
+      context.fileCommands.readFileExplorerPreview(
+        params.worktree,
+        params.relativePath,
+        grantFileReadMaxBytes(context)
+      )
   }),
   defineMethod({
     name: 'files.readChunk',
     mobile: true,
     params: FileReadChunk,
-    handler: async (params, { fileCommands }) =>
-      fileCommands.readFileExplorerChunk(
+    access: { scope: 'worktree', tier: 'read' },
+    handler: async (params, context) =>
+      context.fileCommands.readFileExplorerChunk(
         params.worktree,
         params.relativePath,
         params.offset,
-        params.length
+        grantBoundedReadLength(context, params.offset, params.length)
       )
   }),
   defineMethod({
     name: 'files.readDir',
     mobile: true,
     params: FileTreePath,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.readFileExplorerDir(params.worktree, params.relativePath)
   }),
@@ -291,17 +324,23 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.browseServerDir',
     mobile: true,
     params: ServerDirectoryBrowse,
-    handler: async (params, { runtime }) => runtime.browseServerDir(params.path)
+    access: { scope: 'host', tier: 'host' },
+    handler: async (params, { runtime, principal }) => {
+      assertOutOfTreeFileAccess(callerClassOf(principal), 'files.browseServerDir')
+      return runtime.browseServerDir(params.path)
+    }
   }),
   defineMethod({
     name: 'files.write',
     params: FileWrite,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.writeFileExplorerFile(params.worktree, params.relativePath, params.content)
   }),
   defineMethod({
     name: 'files.writeBase64',
     params: FileWriteBase64,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.writeFileExplorerFileBase64(
         params.worktree,
@@ -312,6 +351,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.writeBase64Chunk',
     params: FileWriteBase64Chunk,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.writeFileExplorerFileBase64Chunk(
         params.worktree,
@@ -324,24 +364,28 @@ export const FILE_METHODS: RpcAnyMethod[] = [
     name: 'files.createFile',
     mobile: true,
     params: FileOpen,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.createFileExplorerFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.createDir',
     params: FileOpen,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.createFileExplorerDir(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.createDirNoClobber',
     params: FileOpen,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.createFileExplorerDirNoClobber(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.commitUpload',
     params: FileCommitUpload,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.commitFileExplorerUpload(
         params.worktree,
@@ -352,6 +396,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.rename',
     params: FileRename,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.renameFileExplorerPath(
         params.worktree,
@@ -362,6 +407,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.copy',
     params: FileCopy,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.copyFileExplorerPath(
         params.worktree,
@@ -372,12 +418,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.delete',
     params: FileDelete,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { fileCommands }) =>
       fileCommands.deleteFileExplorerPath(params.worktree, params.relativePath, params.recursive)
   }),
   defineMethod({
     name: 'files.search',
     params: FileSearch,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.searchRuntimeFiles(params.worktree, {
         query: params.query,
@@ -392,24 +440,28 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.listAll',
     params: FileListAll,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.listRuntimeFiles(params.worktree, { excludePaths: params.excludePaths })
   }),
   defineMethod({
     name: 'files.listMarkdownDocuments',
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.listRuntimeMarkdownDocuments(params.worktree)
   }),
   defineMethod({
     name: 'files.stat',
     params: FileTreePath,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { fileCommands }) =>
       fileCommands.statRuntimeFile(params.worktree, params.relativePath)
   }),
   defineStreamingMethod({
     name: 'files.watch',
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime, fileCommands, connectionId, signal }, emit) => {
       const seq = ++filesWatchSubscriptionSeq
       const subscriptionId = `files-watch-${connectionId ?? 'inproc'}-${seq}`
@@ -427,9 +479,36 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.unwatch',
     params: FileUnwatch,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { runtime }) => {
       await runtime.cleanupSubscriptionAndWait(params.subscriptionId)
       return { unsubscribed: true }
     }
   })
 ]
+
+function grantFileReadMaxBytes(context: RpcContext): number | undefined {
+  if (callerClassOf(context.principal) !== 'coworking-host') {
+    return undefined
+  }
+  const grant = context.grantedAccess
+  if (!grant) {
+    throw new Error('unauthorized')
+  }
+  return getCoworkingResourceQuota(grant.scope, grant.tier).fileReadMaxBytes
+}
+
+function grantBoundedReadLength(
+  context: RpcContext,
+  offset: number,
+  requestedLength: number
+): number {
+  const maxBytes = grantFileReadMaxBytes(context)
+  if (maxBytes === undefined) {
+    return requestedLength
+  }
+  if (offset >= maxBytes) {
+    throw new InvalidArgumentError('File read exceeds the grant quota')
+  }
+  return Math.min(requestedLength, maxBytes - offset)
+}

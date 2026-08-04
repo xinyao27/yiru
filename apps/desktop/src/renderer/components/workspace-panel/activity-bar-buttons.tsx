@@ -31,8 +31,6 @@ export type ActivityBarItem = {
   gitOnly?: boolean
   /** When true, shown only for folder workspaces. */
   folderOnly?: boolean
-  /** When true, shown only for worktrees that belong to an SSH repo. */
-  sshOnly?: boolean
 }
 
 const STATUS_DOT_COLOR: Record<CheckStatus, string> = {

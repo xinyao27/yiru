@@ -1,5 +1,6 @@
 import type React from 'react'
 import { useCallback, useDeferredValue, useState } from 'react'
+import { CoworkingWorktreeVisibilityDialog } from '~renderer/components/coworking/worktree-visibility-dialog'
 import { CommandDialog, CommandInput, CommandList } from '~renderer/components/ui/command'
 import { getNextWorktreePaletteSelection } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
 import { translate } from '~renderer/i18n/i18n'
@@ -207,95 +208,107 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
   })()
 
   return (
-    // Why: modal backdrops intentionally use alpha to preserve page context
-    // while separating the command palette from the workspace beneath it.
-    <CommandDialog
-      open={storeState.visible}
-      onOpenChange={lifecycle.handleOpenChange}
-      shouldFilter={false}
-      density="compact"
-      onOpenAutoFocus={handleOpenAutoFocus}
-      onCloseAutoFocus={handleCloseAutoFocus}
-      title={translate('auto.components.WorktreeJumpPalette.4ee378034d', 'Jump to...')}
-      description={translate(
-        'auto.components.WorktreeJumpPalette.4e4ff044d5',
-        'Search worktrees, settings, tabs, and actions'
-      )}
-      overlayClassName="bg-black/55 backdrop-blur-[2px]"
-      contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden border border-border/70 bg-background"
-      commandProps={{
-        loop: true,
-        value: commandSelectedItemId,
-        onValueChange: setSelectedItemId,
-        className: 'bg-transparent'
-      }}
-    >
-      <CommandInput
-        size="sm"
-        variant="inset"
-        placeholder={translate(
-          'auto.components.WorktreeJumpPalette.1ebe225fee',
-          'Search worktrees, settings, tabs, and actions...'
+    <>
+      {/* Why: modal backdrops intentionally use alpha to preserve page context
+      while separating the command palette from the workspace beneath it. */}
+      <CommandDialog
+        open={storeState.visible}
+        onOpenChange={lifecycle.handleOpenChange}
+        shouldFilter={false}
+        density="compact"
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        title={translate('auto.components.WorktreeJumpPalette.4ee378034d', 'Jump to...')}
+        description={translate(
+          'auto.components.WorktreeJumpPalette.4e4ff044d5',
+          'Search worktrees, settings, tabs, and actions'
         )}
-        value={query}
-        onValueChange={handleQueryChange}
-        wrapperClassName="mx-2 mt-2"
-      />
-      <CommandList ref={lifecycle.listRef} className="max-h-[min(460px,62vh)] px-1.5 pt-2 pb-2.5">
-        <PaletteResultsList
-          isLoading={worktreeSearch.isLoading}
-          resultCount={resultCount}
-          showCreateAction={paletteList.showCreateAction}
-          listEntries={paletteList.listEntries}
-          createWorktreeName={paletteList.createWorktreeName}
-          emptyState={emptyState}
-          repoMap={hostOptions.repoMap}
-          hostOptions={hostOptions.hostOptions}
-          worktreeMap={worktreeSearch.worktreeMap}
-          tabsByWorktree={storeState.tabsByWorktree}
-          browserTabsByWorktree={storeState.browserTabsByWorktree}
-          ptyIdsByTabId={storeState.ptyIdsByTabId}
-          runtimePaneTitlesByTabId={storeState.runtimePaneTitlesByTabId}
-          liveAgentStatusByWorktreeId={worktreeSearch.liveAgentStatusByWorktreeId}
-          activeWorktreeId={storeState.activeWorktreeId}
-          sshConnectionStates={storeState.sshConnectionStates}
-          onSelectItem={handleSelectItem}
-          onCreateWorktree={handleCreateWorktree}
+        overlayClassName="bg-black/55 backdrop-blur-[2px]"
+        contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden border border-border/70 bg-background"
+        commandProps={{
+          loop: true,
+          value: commandSelectedItemId,
+          onValueChange: setSelectedItemId,
+          className: 'bg-transparent'
+        }}
+      >
+        <CommandInput
+          size="sm"
+          variant="inset"
+          placeholder={translate(
+            'auto.components.WorktreeJumpPalette.1ebe225fee',
+            'Search worktrees, settings, tabs, and actions...'
+          )}
+          value={query}
+          onValueChange={handleQueryChange}
+          wrapperClassName="mx-2 mt-2"
         />
-      </CommandList>
-      <div className="border-border/60 text-muted-foreground/82 flex items-center justify-end border-t px-3.5 py-2.5 text-[11px]">
-        <div className="flex items-center gap-2">
-          <FooterKey>
-            {translate('auto.components.WorktreeJumpPalette.f65d992a11', 'Enter')}
-          </FooterKey>
-          <span>{translate('auto.components.WorktreeJumpPalette.45def60329', 'Open')}</span>
-          <FooterKey>
-            {translate('auto.components.WorktreeJumpPalette.66b5a67bee', 'Esc')}
-          </FooterKey>
-          <span>{translate('auto.components.WorktreeJumpPalette.75499e01d9', 'Close')}</span>
-          <FooterKey>↑↓</FooterKey>
-          <span>{translate('auto.components.WorktreeJumpPalette.ac037cfac2', 'Move')}</span>
+        <CommandList ref={lifecycle.listRef} className="max-h-[min(460px,62vh)] px-1.5 pt-2 pb-2.5">
+          <PaletteResultsList
+            isLoading={worktreeSearch.isLoading}
+            resultCount={resultCount}
+            showCreateAction={paletteList.showCreateAction}
+            listEntries={paletteList.listEntries}
+            createWorktreeName={paletteList.createWorktreeName}
+            emptyState={emptyState}
+            repoMap={hostOptions.repoMap}
+            hostOptions={hostOptions.hostOptions}
+            worktreeMap={worktreeSearch.worktreeMap}
+            tabsByWorktree={storeState.tabsByWorktree}
+            browserTabsByWorktree={storeState.browserTabsByWorktree}
+            ptyIdsByTabId={storeState.ptyIdsByTabId}
+            runtimePaneTitlesByTabId={storeState.runtimePaneTitlesByTabId}
+            liveAgentStatusByWorktreeId={worktreeSearch.liveAgentStatusByWorktreeId}
+            activeWorktreeId={storeState.activeWorktreeId}
+            sshConnectionStates={storeState.sshConnectionStates}
+            onSelectItem={handleSelectItem}
+            onCreateWorktree={handleCreateWorktree}
+          />
+        </CommandList>
+        <div className="border-border/60 text-muted-foreground/82 flex items-center justify-end border-t px-3.5 py-2.5 text-[11px]">
+          <div className="flex items-center gap-2">
+            <FooterKey>
+              {translate('auto.components.WorktreeJumpPalette.f65d992a11', 'Enter')}
+            </FooterKey>
+            <span>{translate('auto.components.WorktreeJumpPalette.45def60329', 'Open')}</span>
+            <FooterKey>
+              {translate('auto.components.WorktreeJumpPalette.66b5a67bee', 'Esc')}
+            </FooterKey>
+            <span>{translate('auto.components.WorktreeJumpPalette.75499e01d9', 'Close')}</span>
+            <FooterKey>↑↓</FooterKey>
+            <span>{translate('auto.components.WorktreeJumpPalette.ac037cfac2', 'Move')}</span>
+          </div>
         </div>
-      </div>
-      <div aria-live="polite" className="sr-only">
-        {deferredQuery.trim()
-          ? translate(
-              'auto.components.WorktreeJumpPalette.bb72c08e63',
-              '{{value0}} results found{{value1}}',
-              {
-                value0: resultCount,
-                value1: paletteList.showCreateAction ? ', create worktree action available' : ''
-              }
-            )
-          : translate(
-              'auto.components.WorktreeJumpPalette.20af998bff',
-              '{{value0}} items available{{value1}}',
-              {
-                value0: resultCount,
-                value1: paletteList.showCreateAction ? ', create worktree action available' : ''
-              }
-            )}
-      </div>
-    </CommandDialog>
+        <div aria-live="polite" className="sr-only">
+          {deferredQuery.trim()
+            ? translate(
+                'auto.components.WorktreeJumpPalette.bb72c08e63',
+                '{{value0}} results found{{value1}}',
+                {
+                  value0: resultCount,
+                  value1: paletteList.showCreateAction ? ', create worktree action available' : ''
+                }
+              )
+            : translate(
+                'auto.components.WorktreeJumpPalette.20af998bff',
+                '{{value0}} items available{{value1}}',
+                {
+                  value0: resultCount,
+                  value1: paletteList.showCreateAction ? ', create worktree action available' : ''
+                }
+              )}
+        </div>
+      </CommandDialog>
+      <CoworkingWorktreeVisibilityDialog
+        open={quickActionCtx.coworkingPublicationDialog !== null}
+        worktreeId={quickActionCtx.coworkingPublicationDialog?.worktreeId ?? ''}
+        worktreeName={quickActionCtx.coworkingPublicationDialog?.worktreeName ?? ''}
+        onOpenChange={(open) => {
+          if (!open) {
+            quickActionCtx.closeCoworkingPublicationDialog()
+          }
+        }}
+      />
+    </>
   )
 }

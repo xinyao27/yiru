@@ -85,7 +85,7 @@ export function PullPolicyRemoteActionNotice({
             <p className="text-muted-foreground text-[11px] leading-4">
               {translate(
                 'auto.components.right.sidebar.pull.policy.notice.body',
-                'This branch has local and remote commits. Run one command in this worktree or on the SSH host, then try Pull or Sync again.'
+                'This branch has local and remote commits. Run one command in this worktree, then try Pull or Sync again.'
               )}
             </p>
           </div>

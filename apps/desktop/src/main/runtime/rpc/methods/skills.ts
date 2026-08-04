@@ -1,12 +1,8 @@
-import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import {
   discoverSkillsOnTarget,
   resolveSkillDiscoveryTarget
 } from '~main/skills/skill-discovery-target'
-import { getActiveMultiplexer } from '~main/ssh/ssh'
 import { SkillDiscoveryTargetSchema } from '~shared/skills'
-import { SSH_SKILL_DISCOVERY_RELAY_CAPABILITY } from '~shared/skills'
-import type { SkillDiscoveryResult } from '~shared/skills'
 
 import { defineMethod, type RpcMethod } from '../core'
 
@@ -14,35 +10,12 @@ export const SKILL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'skills.discover',
     params: SkillDiscoveryTargetSchema.default({}),
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
-      const executionHost = parseExecutionHostId(params.executionHostId)
-      if (executionHost?.kind === 'ssh') {
-        const mux = getActiveMultiplexer(executionHost.targetId)
-        if (!mux || mux.isDisposed()) {
-          throw new Error('SSH skill discovery requires a connected relay.')
-        }
-        let advertisement: { capabilities?: unknown }
-        try {
-          advertisement = (await mux.request('session.capabilities')) as {
-            capabilities?: unknown
-          }
-        } catch (error) {
-          if (error instanceof Error && (error as Error & { code?: number }).code === -32601) {
-            throw new Error('The connected SSH relay does not support skill discovery.')
-          }
-          throw error
-        }
-        if (
-          !Array.isArray(advertisement.capabilities) ||
-          !advertisement.capabilities.includes(SSH_SKILL_DISCOVERY_RELAY_CAPABILITY)
-        ) {
-          // Why: an older relay may accept the connection but scan no skills;
-          // gate before calling the additive method so mixed versions fail closed.
-          throw new Error('The connected SSH relay does not support skill discovery.')
-        }
-        return (await mux.request('skills.discover', {
-          cwd: params.cwd ?? undefined
-        })) as SkillDiscoveryResult
+      // Why: fail closed instead of scanning this host for a remote host's
+      // skills — an empty result would read as "that host has no skills".
+      if (params.executionHostId?.startsWith('ssh:')) {
+        throw new Error('Skill discovery is no longer supported on remote hosts.')
       }
       // Why: the executing runtime owns WSL project preferences. Remote callers
       // send worktree identity only; trusting their projectRuntime absence

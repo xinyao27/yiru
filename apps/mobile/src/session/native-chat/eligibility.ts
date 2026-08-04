@@ -1,14 +1,13 @@
 import { isNativeChatSupportedAgent } from '@yiru/workbench-model/agent'
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 // Why: native chat renders an agent's own JSONL transcript, and the host
-// resolver knows these transcript layouts. Grok is additionally gated on host
-// readability because Model-A SSH stores its transcript on the remote target.
+// resolver knows these transcript layouts. Deliberately mirrors desktop's
+// isNativeChatTranscriptLocalReadable — keep the two in step.
 export function isMobileNativeChatTranscriptReadable(
   connectionId: string | null | undefined
 ): boolean {
-  return connectionId === null || isRuntimeOwnedSshTargetId(connectionId)
+  return connectionId === null
 }
 
 export type MobileNativeChatResolution = {

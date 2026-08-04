@@ -7,6 +7,7 @@ export const COWORKING_AVAILABILITY_DIAGNOSTICS = [
   'coworking_port_unavailable',
   'coworking_permission_denied',
   'persistence_unavailable',
+  'coworking_windows_firewall_unavailable',
   'coworking_unavailable'
 ] as const
 
@@ -20,7 +21,11 @@ export function projectCoworkingAvailabilityDiagnostic(
   status: 'starting' | 'ready' | 'unavailable',
   diagnostic: string | null
 ): CoworkingAvailabilityDiagnostic | null {
-  if (status !== 'unavailable' || diagnostic === 'coworking_windows_firewall_unavailable') {
+  // Why: a firewall-blocked listener used to be filtered out here because the
+  // pull-based notice inside the Coworking panel owned it. That notice is
+  // unreachable for anyone who never opens the panel, so the status bar now
+  // carries it too — with a repair action instead of a re-probe.
+  if (status !== 'unavailable') {
     return null
   }
   // Why: diagnostics cross the main/renderer trust boundary; unknown values

@@ -42,7 +42,6 @@ import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '~renderer
 import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
-import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import {
   createFloatingWorkspaceBrowserTab,
@@ -71,10 +70,6 @@ import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runti
 import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
 import { destroyPersistentWebview } from '~renderer/runtime/browser-webview-registry'
 import { subscribeRuntimeClientEvents } from '~renderer/runtime/client-events'
-import {
-  applyRuntimeEnvironmentSshStateChanged,
-  hydrateRuntimeEnvironmentSshState
-} from '~renderer/runtime/environment-ssh-state'
 import { attachMobileMarkdownBridge } from '~renderer/runtime/mobile-markdown-bridge'
 import { closeMobileSessionTabInStore } from '~renderer/runtime/mobile-session-tab-close'
 import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
@@ -105,8 +100,6 @@ import { makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode, UpdateStatus } from '~shared/types'
 import { isWslHookRelayConnectionId } from '~shared/wsl-hook-relay-contract'
 
-import { isDirectSshRemoteWorkspaceApplyInProgress } from '../components/direct-ssh/remote-workspace/target-sync'
-import { createDirectSshRuntimeController } from '../components/direct-ssh/runtime-controller'
 import { runWorktreeDelete } from '../components/sidebar/delete-worktree/flow'
 import { resolveAgentStatusTerminalTitle } from '../components/terminal-pane/agent/status-terminal-title'
 import { useAppStore } from '../store'
@@ -405,10 +398,6 @@ function activateExistingLeafInLayout(
   }
 }
 
-export function isRemoteWorkspaceSnapshotApplyInProgress(): boolean {
-  return isDirectSshRemoteWorkspaceApplyInProgress()
-}
-
 type BrowserSessionTabTarget =
   | { kind: 'unified-browser'; unifiedTabId: string; workspaceId: string; groupId: string }
   | { kind: 'fallback-browser'; workspaceId: string }
@@ -496,15 +485,6 @@ function getNewlyConnectedRuntimeEnvironmentIds(
   return [...new Set(next)].filter((environmentId) => !known.has(environmentId))
 }
 
-/** Ids in `previous` not in `next` — runtime environments whose transport was
- *  just observed down. Their mirrored SSH buckets get downgraded to unknown. */
-function getNewlyDisconnectedRuntimeEnvironmentIds(
-  previous: readonly string[],
-  next: readonly string[]
-): string[] {
-  return getNewlyConnectedRuntimeEnvironmentIds(next, previous)
-}
-
 export function getRuntimeProjectRefreshEnvironmentIds(args: {
   previousDesired: readonly string[]
   nextDesired: readonly string[]
@@ -557,7 +537,6 @@ function getWorktreeRuntimeEnvironmentId(worktreeId: string | null | undefined):
 export function useIpcEvents(): void {
   useEffect(() => {
     const unsubs: (() => void)[] = []
-    const directSshRuntimeController = createDirectSshRuntimeController()
     const backgroundSleepingAgentWakeDispatcher = createBackgroundSleepingAgentWakeDispatcher()
     unsubs.push(backgroundSleepingAgentWakeDispatcher.dispose)
     type AgentStatusApplyResult = 'applied' | 'pending' | 'dropped'
@@ -694,13 +673,6 @@ export function useIpcEvents(): void {
 
     const runtimeProjectRefreshScheduler = createRuntimeProjectRefreshScheduler({
       refresh: async (environmentId) => {
-        if (!isPairedWebClientWindow()) {
-          // Why: mirrored SSH-backed workspaces read the owning environment's
-          // SSH bucket; refresh it whenever the environment (re)connects so a
-          // pre-drop snapshot can't keep a reconnect overlay stale. The web
-          // client mirrors host SSH state through the global store instead.
-          void hydrateRuntimeEnvironmentSshState(environmentId, { force: true }).catch(() => {})
-        }
         const repos = await useAppStore.getState().fetchRuntimeEnvironmentRepos(environmentId)
         await refreshRuntimeProjectWorktrees(repos)
         await useAppStore.getState().fetchWorktreeLineage()
@@ -713,21 +685,6 @@ export function useIpcEvents(): void {
     const handleRuntimeClientEvent = (environmentId: string, event: RuntimeClientEvent): void => {
       if (event.type === 'reposChanged') {
         runtimeProjectRefreshScheduler.request(environmentId)
-        return
-      }
-      if (event.type === 'sshStateChanged') {
-        // Why: a paired web client mirrors host SSH state in the global store —
-        // its whole ssh.* API routes to that one host (STA-1468). A desktop
-        // client owns a local SSH surface those maps must keep describing, so a
-        // remote host's state goes into that environment's own bucket instead.
-        if (isPairedWebClientWindow()) {
-          directSshRuntimeController.handleStateChangedEvent({
-            targetId: event.targetId,
-            state: event.state
-          })
-        } else {
-          applyRuntimeEnvironmentSshStateChanged(environmentId, event.targetId, event.state)
-        }
         return
       }
       if (event.type === 'worktreesChanged') {
@@ -753,14 +710,6 @@ export function useIpcEvents(): void {
           // and a server-created worktree stays invisible until relaunch
           // (#7970). The scheduler debounces, so this stays cheap.
           runtimeProjectRefreshScheduler.request(environmentId)
-          if (isPairedWebClientWindow()) {
-            return
-          }
-          // Why: sshStateChanged events during the transport gap are lost, so
-          // the pre-drop bucket may hold a stale "connected". Downgrade to
-          // unknown, then refetch the authoritative state.
-          useAppStore.getState().markEnvironmentSshStateStale(environmentId)
-          void hydrateRuntimeEnvironmentSshState(environmentId, { force: true }).catch(() => {})
         }),
       onEvent: handleRuntimeClientEvent
     })
@@ -801,13 +750,6 @@ export function useIpcEvents(): void {
           nextReachable: nextReachableEnvironmentIds
         })) {
           runtimeProjectRefreshScheduler.request(environmentId)
-        }
-        for (const environmentId of getNewlyDisconnectedRuntimeEnvironmentIds(
-          reachableRuntimeEnvironmentIds,
-          nextReachableEnvironmentIds
-        )) {
-          // No-op when the environment has no SSH bucket (e.g. web client).
-          useAppStore.getState().markEnvironmentSshStateStale(environmentId)
         }
         runtimeClientEventEnvironmentIds = nextEnvironmentIds
         runtimeClientEventEnvironmentKey = nextKey
@@ -2404,8 +2346,6 @@ export function useIpcEvents(): void {
       unsubs.push(unsubscribeWorkspaceSpaceProgress)
     }
 
-    directSshRuntimeController.start()
-
     // Zoom handling for menu accelerators and keyboard fallback paths.
     unsubs.push(
       window.api.ui.onTerminalZoom((direction) => {
@@ -2980,7 +2920,6 @@ export function useIpcEvents(): void {
       pendingAgentStatusEvents.length = 0
       mobileStateHydrationDisposed = true
       pendingMobileStateEvents.length = 0
-      directSshRuntimeController.stop()
       unsubs.forEach((fn) => fn())
       resetAgentHookCompletionNotificationCoordinators()
     }

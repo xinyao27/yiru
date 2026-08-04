@@ -17,6 +17,7 @@ import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'
 import type { RuntimeEmulatorCommands } from '../yiru-runtime-emulator'
 import type { RuntimeFileCommands } from '../yiru-runtime-files'
 import type { RuntimeGitCommands } from '../yiru-runtime-git'
+import type { RpcAccess } from './access'
 
 export type RpcEnvelopeMeta = {
   runtimeId: string
@@ -95,6 +96,9 @@ export type RpcContext = {
   // clients. Carries the paired device's scope so handlers can gate the diet to
   // phones only. Undefined for in-process callers → treat as full-class (no clip).
   clientKind?: 'mobile' | 'runtime'
+  /** Resolved on every grant-bound request so quota and authorization changes
+   *  take effect without reconnecting the encrypted channel. */
+  grantedAccess?: RpcAccess
   // Why: mobile terminal traffic is byte-oriented and bypasses JSON streaming
   // responses after the binary terminal cutover. Undefined on Unix/socket
   // transports and non-E2EE WebSocket paths.
@@ -122,6 +126,10 @@ export type RpcMethod = {
   readonly name: string
   readonly params: ZodType | null
   readonly mobile: boolean
+  // Why: required, with no default. A new method that forgets to declare its
+  // authority must fail to compile rather than inherit a permissive fallback —
+  // that silent inheritance is how authorization holes ship.
+  readonly access: RpcAccess
   readonly handler: (params: unknown, ctx: RpcContext) => Promise<unknown> | unknown
 }
 
@@ -129,11 +137,13 @@ type DefineMethodSpec<TSchema extends ZodType | null> = {
   name: string
   params: TSchema
   mobile?: boolean
+  access: RpcAccess
   handler: RpcHandler<TSchema extends ZodType ? TSchema['_output'] : void>
 }
 
 type DefineContractMethodSpec<TContract extends RuntimeMethodContract> = {
   contract: TContract
+  access: RpcAccess
   handler: RpcHandler<RuntimeMethodParams<TContract>, RuntimeMethodResult<TContract>>
 }
 
@@ -151,6 +161,7 @@ export function defineMethod(
       name: spec.contract.name,
       params: spec.contract.params,
       mobile: spec.contract.mobile,
+      access: spec.access,
       handler: spec.handler as RpcMethod['handler']
     }
   }
@@ -158,6 +169,7 @@ export function defineMethod(
     name: spec.name,
     params: spec.params,
     mobile: spec.mobile ?? false,
+    access: spec.access,
     handler: spec.handler as RpcMethod['handler']
   }
 }
@@ -175,6 +187,7 @@ export type RpcStreamingMethod = {
   readonly name: string
   readonly params: ZodType | null
   readonly mobile: boolean
+  readonly access: RpcAccess
   readonly stream: true
   readonly handler: (
     params: unknown,
@@ -187,6 +200,7 @@ type DefineStreamingMethodSpec<TSchema extends ZodType | null> = {
   name: string
   params: TSchema
   mobile?: boolean
+  access: RpcAccess
   handler: RpcStreamingHandler<TSchema extends ZodType ? TSchema['_output'] : void>
 }
 
@@ -197,6 +211,7 @@ export function defineStreamingMethod<TSchema extends ZodType | null>(
     name: spec.name,
     params: spec.params,
     mobile: spec.mobile ?? false,
+    access: spec.access,
     stream: true,
     handler: spec.handler as RpcStreamingMethod['handler']
   }

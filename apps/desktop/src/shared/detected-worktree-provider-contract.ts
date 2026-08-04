@@ -1,11 +1,9 @@
-import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import type { ExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 
 import type { DetectedWorktreeListResult } from './types'
 
 export const PROVIDER_REQUEST_ID_MAX_UTF8_BYTES = 128
 export type ProviderRequestId = string & { readonly __providerRequestId: unique symbol }
-export type SshExecutionHostId = Extract<ExecutionHostId, `ssh:${string}`>
 
 export type LocalDetectedWorktreeRequest = {
   providerRequestId: ProviderRequestId
@@ -13,26 +11,12 @@ export type LocalDetectedWorktreeRequest = {
   executionHostId: typeof LOCAL_EXECUTION_HOST_ID
 }
 
-export type DirectSshDetectedWorktreeRequest = {
-  providerRequestId: ProviderRequestId
-  repoId: string
-  executionHostId: SshExecutionHostId
-  expectedAuthority: DirectSshAuthority
+export type ListDetectedWorktreesArgs = LocalDetectedWorktreeRequest
+
+export type AuthoritativeDetectedWorktreeHost = {
+  kind: 'local'
+  executionHostId: typeof LOCAL_EXECUTION_HOST_ID
 }
-
-export type ListDetectedWorktreesArgs =
-  | LocalDetectedWorktreeRequest
-  | DirectSshDetectedWorktreeRequest
-
-export type AuthoritativeDetectedWorktreeHost =
-  | {
-      kind: 'local'
-      executionHostId: typeof LOCAL_EXECUTION_HOST_ID
-    }
-  | ({
-      kind: 'direct-ssh'
-      executionHostId: SshExecutionHostId
-    } & DirectSshAuthority)
 
 export type HostQualifiedDetectedWorktreeResult =
   | {

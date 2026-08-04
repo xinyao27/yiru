@@ -161,96 +161,115 @@ export const EMULATOR_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'emulator.list',
     params: ListParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorList(params)
   }),
   defineMethod({
     name: 'emulator.attach',
     params: AttachParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAttach(params)
   }),
   defineMethod({
     name: 'emulator.tap',
     params: TapParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorTap(params)
   }),
   defineMethod({
     name: 'emulator.gesture',
     params: GestureParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorGesture(params)
   }),
   defineMethod({
     name: 'emulator.type',
     params: TypeParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorType(params)
   }),
   defineMethod({
     name: 'emulator.button',
     params: ButtonParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorButton(params)
   }),
   defineMethod({
     name: 'emulator.rotate',
     params: RotateParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorRotate(params)
   }),
   defineMethod({
     name: 'emulator.exec',
     params: ExecParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorExec(params)
   }),
   defineMethod({
     name: 'emulator.kill',
     params: KillParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorKill(params)
   }),
   defineMethod({
     name: 'emulator.shutdown',
     params: ShutdownParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorShutdown(params)
   }),
   defineMethod({
     name: 'emulator.listSimulators',
     params: z.object({ worktree: z.string().optional() }).partial(),
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListSimulators(params)
   }),
   defineMethod({
     name: 'emulator.availability',
     params: z.object({ worktree: z.string().optional() }).partial(),
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAvailability(params)
   }),
   defineMethod({
     name: 'emulator.listDevices',
     params: z.object({ worktree: z.string().optional() }).partial(),
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListDevices(params)
   }),
   defineMethod({
     name: 'emulator.install',
     params: InstallParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorInstall(params)
   }),
   defineMethod({
     name: 'emulator.launch',
     params: LaunchParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLaunch(params)
   }),
   defineMethod({
     name: 'emulator.permissions',
     params: PermissionsParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorPermissions(params)
   }),
   defineMethod({
     name: 'emulator.ax',
     params: AxParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAx(params)
   }),
   defineMethod({
     name: 'emulator.logcat',
     params: LogcatParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLogcat(params)
   }),
   defineMethod({
     name: 'emulator.unregisterActive',
     params: z.object({ worktree: z.string().optional() }).partial(),
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { emulatorCommands }) =>
       emulatorCommands.emulatorUnregisterActive(params)
   })

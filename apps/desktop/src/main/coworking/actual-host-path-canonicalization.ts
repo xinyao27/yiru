@@ -3,9 +3,9 @@ import { realpath } from 'node:fs/promises'
 import { isRuntimePathAbsolute } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RemoteHostPlatform } from '~main/remote-host/platform'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import {
   isAbsoluteForCurrentPlatform,
   isDefinitiveCoworkingFilesystemFailure,

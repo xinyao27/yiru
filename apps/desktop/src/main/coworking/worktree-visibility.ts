@@ -138,7 +138,7 @@ export class CoworkingWorktreeVisibility {
     const meta = published ? this.store.getWorktreeMeta(published.worktreeId) : undefined
     try {
       return (
-        !this.denyJournal.snapshot().has(instanceId) &&
+        !this.denyJournal.snapshotVisibilityDenies().has(instanceId) &&
         meta?.instanceId === instanceId &&
         meta.coworkingVisibility === 'public'
       )

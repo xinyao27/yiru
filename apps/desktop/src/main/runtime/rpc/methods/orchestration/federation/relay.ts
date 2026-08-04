@@ -37,6 +37,7 @@ export const ORCHESTRATION_FEDERATION_RELAY_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationPull',
     params: FederationPullParams,
+    access: { scope: 'host', tier: 'control' },
     handler: (params, { runtime, authenticatedCallerFingerprint }) => {
       requireHomeAttachment(runtime, params.dispatchId, authenticatedCallerFingerprint)
       return {
@@ -54,6 +55,7 @@ export const ORCHESTRATION_FEDERATION_RELAY_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationAck',
     params: FederationAckParams,
+    access: { scope: 'host', tier: 'control' },
     handler: (params, { runtime, authenticatedCallerFingerprint }) => {
       requireHomeAttachment(runtime, params.dispatchId, authenticatedCallerFingerprint)
       runtime.getOrchestrationDb().acknowledgeFederationRelay({
@@ -67,6 +69,7 @@ export const ORCHESTRATION_FEDERATION_RELAY_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationImport',
     params: FederationImportParams,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime, authenticatedCallerFingerprint }) => {
       const db = runtime.getOrchestrationDb()
       const attachment = requireHomeAttachment(

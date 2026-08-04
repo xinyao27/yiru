@@ -34,7 +34,6 @@ import {
   glabRepoExecOptions,
   release as releaseGlab
 } from '../gitlab/gl-utils'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { findExistingWorktreeSymlinkPaths } from '../worktree/symlink-detection'
 import { detectHostedReviewProvider, getForgeProviderForRepository } from './forge-provider'
 import { getHostedReviewForBranch } from './hosted-review'
@@ -77,10 +76,10 @@ async function isGitHubAuthenticated(
   }
   await acquire()
   try {
-    await ghExecFileAsync(
-      ['auth', 'status', '--hostname', 'github.com'],
-      connectionId ? {} : { cwd: repoPath, ...getHostedReviewLocalGitOptions(options) }
-    )
+    await ghExecFileAsync(['auth', 'status', '--hostname', 'github.com'], {
+      cwd: repoPath,
+      ...getHostedReviewLocalGitOptions(options)
+    })
     return true
   } catch {
     return false
@@ -102,7 +101,7 @@ async function isGitLabAuthenticated(
   try {
     await glabExecFileAsync(['auth', 'status', '--hostname', projectRef.host], {
       ...glabRepoExecOptions(repoPath, connectionId),
-      ...(connectionId ? {} : getHostedReviewLocalGitOptions(options))
+      ...getHostedReviewLocalGitOptions(options)
     })
     return true
   } catch {
@@ -115,29 +114,16 @@ async function isGitLabAuthenticated(
 async function runGitForHostedReview(
   repoPath: string,
   args: string[],
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<{ stdout: string; stderr?: string }> {
-  if (connectionId) {
-    const provider = getSshGitProvider(connectionId)
-    if (!provider) {
-      throw new Error(
-        'Remote connection dropped. Click Reconnect on the SSH target before retrying.'
-      )
-    }
-    return provider.exec(args, repoPath)
-  }
   return gitExecFileAsync(args, { cwd: repoPath, ...getHostedReviewLocalGitOptions(options) })
 }
 
 async function getDefaultBaseRef(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<string | null> {
-  return resolveDefaultBaseRefViaExec((argv) =>
-    runGitForHostedReview(repoPath, argv, connectionId, options)
-  )
+  return resolveDefaultBaseRefViaExec((argv) => runGitForHostedReview(repoPath, argv, options))
 }
 
 /**
@@ -149,14 +135,13 @@ async function getDefaultBaseRef(
  * under *any* configured remote rather than assume `origin` — otherwise fork
  * workflows (`upstream/main`) would be missed. Runs through
  * `runGitForHostedReview` so it evaluates on the same host that will run the
- * provider create (native/WSL/SSH/relay). This reads the local remote-tracking
+ * provider create (native or WSL on the selected runtime). This reads the remote-tracking
  * snapshot, not the live remote; see the design doc's Open Questions for the
  * ls-remote/staleness tradeoff left as a follow-up.
  */
 async function baseRefExistsOnRemote(
   candidate: string,
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<boolean> {
   const base = normalizeHostedReviewBaseRef(candidate).trim()
@@ -164,7 +149,7 @@ async function baseRefExistsOnRemote(
     return false
   }
   const run = (argv: string[]): Promise<{ stdout: string }> =>
-    runGitForHostedReview(repoPath, argv, connectionId, options)
+    runGitForHostedReview(repoPath, argv, options)
 
   const patterns = [`refs/remotes/*/${base}`]
   // Non-origin remote-qualified candidate (e.g. `fork/main`): the wildcard glob
@@ -188,13 +173,11 @@ async function baseRefExistsOnRemote(
 
 async function getCurrentBranch(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<string> {
   const { stdout } = await runGitForHostedReview(
     repoPath,
     ['rev-parse', '--abbrev-ref', 'HEAD'],
-    connectionId,
     options
   )
   return stripRefPrefix(stdout.trim())
@@ -202,20 +185,8 @@ async function getCurrentBranch(
 
 async function hasUncommittedChanges(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<boolean> {
-  if (connectionId) {
-    const provider = getSshGitProvider(connectionId)
-    if (!provider) {
-      throw new Error(
-        'Remote connection dropped. Click Reconnect on the SSH target before retrying.'
-      )
-    }
-    // Why: the relay intentionally restricts generic git.exec. Use the
-    // structured status RPC for SSH dirty checks instead of raw `git status`.
-    return (await provider.getStatus(repoPath)).entries.length > 0
-  }
   const { stdout } = await gitExecFileAsync(['status', '--porcelain', '-z'], {
     cwd: repoPath,
     ...getHostedReviewLocalGitOptions(options),
@@ -244,20 +215,10 @@ async function anyRecordIsUserDirt(
 
 async function getHostedReviewUpstreamStatus(
   repoPath: string,
-  connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<GitUpstreamStatus> {
-  if (!connectionId) {
-    return getUpstreamStatus(repoPath, undefined, getHostedReviewLocalGitOptions(options))
-  }
-  const provider = getSshGitProvider(connectionId)
-  if (!provider) {
-    throw new Error('Remote connection dropped. Click Reconnect on the SSH target before retrying.')
-  }
   try {
-    // Why: SSH exposes upstream divergence through a dedicated relay RPC;
-    // generic git.exec intentionally does not allow rev-list/status plumbing.
-    return await provider.getUpstreamStatus(repoPath)
+    return await getUpstreamStatus(repoPath, undefined, getHostedReviewLocalGitOptions(options))
   } catch (error) {
     if (isNoUpstreamError(error)) {
       return { hasUpstream: false, ahead: 0, behind: 0 }
@@ -424,7 +385,7 @@ async function validateCurrentBranchCanCreateReview(
   options: HostedReviewExecutionOptions = {}
 ): Promise<CreateHostedReviewResult | null> {
   const requestedHead = input.head ? stripRefPrefix(input.head).trim() : ''
-  const currentBranch = await getCurrentBranch(repoPath, connectionId, options)
+  const currentBranch = await getCurrentBranch(repoPath, options)
   const copy = reviewCopy(input.provider)
   if (requestedHead && requestedHead !== currentBranch) {
     return {
@@ -436,8 +397,8 @@ async function validateCurrentBranchCanCreateReview(
 
   try {
     const [dirty, upstreamStatus] = await Promise.all([
-      hasUncommittedChanges(repoPath, connectionId, options),
-      getHostedReviewUpstreamStatus(repoPath, connectionId, options)
+      hasUncommittedChanges(repoPath, options),
+      getHostedReviewUpstreamStatus(repoPath, options)
     ])
     const submittedBase = normalizeHostedReviewBaseRef(input.base)
     const eligibility = await getHostedReviewCreationEligibility({
@@ -483,13 +444,12 @@ export async function getHostedReviewCreationEligibility(
   // keep the candidate if the repo default itself is unavailable.
   const candidateBase = args.base?.trim() || null
   const candidateBaseOnRemote =
-    candidateBase != null &&
-    (await baseRefExistsOnRemote(candidateBase, args.repoPath, args.connectionId, args))
+    candidateBase != null && (await baseRefExistsOnRemote(candidateBase, args.repoPath, args))
   let defaultBaseRef: string | null
   if (candidateBase && candidateBaseOnRemote) {
     defaultBaseRef = candidateBase
   } else {
-    const repoDefaultBaseRef = await getDefaultBaseRef(args.repoPath, args.connectionId, args)
+    const repoDefaultBaseRef = await getDefaultBaseRef(args.repoPath, args)
     defaultBaseRef = repoDefaultBaseRef ?? candidateBase
   }
   const baseBranch = defaultBaseRef ? normalizeHostedReviewBaseRef(defaultBaseRef) : null

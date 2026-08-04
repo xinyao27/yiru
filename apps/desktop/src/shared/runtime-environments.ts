@@ -20,9 +20,6 @@ export const PublicRuntimeAccessEndpointSchema = RuntimeAccessEndpointSchema.omi
 
 export type PublicRuntimeAccessEndpoint = z.infer<typeof PublicRuntimeAccessEndpointSchema>
 
-export const RuntimeEnvironmentSourceSchema = z.enum(['manual', 'ephemeral-vm'])
-export type RuntimeEnvironmentSource = z.infer<typeof RuntimeEnvironmentSourceSchema>
-
 export const KnownRuntimeEnvironmentSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -30,7 +27,6 @@ export const KnownRuntimeEnvironmentSchema = z.object({
   updatedAt: z.number().finite(),
   lastUsedAt: z.number().finite().nullable(),
   runtimeId: z.string().min(1).nullable(),
-  source: RuntimeEnvironmentSourceSchema.optional(),
   endpoints: z.array(RuntimeAccessEndpointSchema).min(1),
   preferredEndpointId: z.string().min(1)
 })
@@ -65,7 +61,6 @@ export function createEnvironmentFromPairingOffer(args: {
   now: number
   offer: PairingOffer
   runtimeId?: string | null
-  source?: RuntimeEnvironmentSource
 }): KnownRuntimeEnvironment {
   const endpointId = `ws-${args.id}`
   return KnownRuntimeEnvironmentSchema.parse({
@@ -75,7 +70,6 @@ export function createEnvironmentFromPairingOffer(args: {
     updatedAt: args.now,
     lastUsedAt: null,
     runtimeId: args.runtimeId ?? null,
-    ...(args.source ? { source: args.source } : {}),
     endpoints: [
       {
         id: endpointId,
@@ -88,18 +82,6 @@ export function createEnvironmentFromPairingOffer(args: {
     ],
     preferredEndpointId: endpointId
   })
-}
-
-export function isEphemeralVmRuntimeEnvironment(
-  environment: Pick<PublicKnownRuntimeEnvironment, 'source'>
-): boolean {
-  return environment.source === 'ephemeral-vm'
-}
-
-export function isUserManagedRuntimeEnvironment(
-  environment: Pick<PublicKnownRuntimeEnvironment, 'source'>
-): boolean {
-  return !isEphemeralVmRuntimeEnvironment(environment)
 }
 
 export function getPreferredPairingOffer(environment: KnownRuntimeEnvironment): PairingOffer {

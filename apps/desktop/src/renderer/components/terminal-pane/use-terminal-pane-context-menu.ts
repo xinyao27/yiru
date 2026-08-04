@@ -27,7 +27,6 @@ import {
 } from './paste/coordinator'
 import { formatTerminalPasteExecutionError } from './paste/errors'
 import { resolveTerminalPasteRuntime } from './paste/runtime'
-import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
 import { isTerminalPanePasteTargetCurrent } from './paste/target-state'
 import type { PtyTransport } from './pty/transport'
 import type { PaneCwdMap } from './resolve-split-cwd'
@@ -233,7 +232,6 @@ export function useTerminalPaneContextMenu({
           platform: shortcutPlatform,
           ptyId,
           connectionId,
-          remotePlatform: getTerminalPasteSshRemotePlatform(connectionId),
           transport,
           isWindowsConpty: forceBracketedMultilineTextPaste
         })

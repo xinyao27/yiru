@@ -1372,7 +1372,7 @@ export class AgentHookServer {
   }
 
   /** Ingest a payload that arrived over the relay JSON-RPC channel rather
-   *  than the local HTTP server. `connectionId` is the SshChannelMultiplexer
+   *  than the local HTTP server. `connectionId` is the ChannelMultiplexer
    *  identity Yiru holds (the wire envelope carries connectionId: null and
    *  Yiru stamps the real value here). The relay has already normalized the
    *  payload via the shared listener module, but main is still the SSH trust

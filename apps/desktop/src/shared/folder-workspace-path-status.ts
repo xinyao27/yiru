@@ -1,15 +1,11 @@
-export type FolderWorkspacePathStatusReason =
-  | 'missing'
-  | 'not-directory'
-  | 'unavailable'
-  | 'ambiguous-connection'
+export type FolderWorkspacePathStatusReason = 'missing' | 'not-directory' | 'unavailable'
 
 export const FOLDER_WORKSPACE_PATH_STATUS_TTL_MS = 10_000
 
 export type FolderWorkspacePathStatusRequest =
   | { scope: 'folder-workspace'; folderWorkspaceId: string }
   | { scope: 'project-group'; projectGroupId: string }
-  | { scope: 'path'; path: string; connectionId?: string | null }
+  | { scope: 'path'; path: string }
 
 export type FolderWorkspacePathStatus = {
   path: string
@@ -28,8 +24,5 @@ export function isConfirmedStaleFolderPathStatus(
 export function blocksFolderWorkspaceActivation(
   status: FolderWorkspacePathStatus | null | undefined
 ): boolean {
-  return (
-    isConfirmedStaleFolderPathStatus(status) ||
-    (status?.exists === false && status.reason === 'ambiguous-connection')
-  )
+  return isConfirmedStaleFolderPathStatus(status)
 }

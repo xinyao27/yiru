@@ -54,9 +54,15 @@ export function WorkspaceTabStripViewport({
         />
       ) : null}
       {/* Why: only the actual tab viewport is no-drag; unused titlebar space
-          remains available for moving the window on every workspace surface. */}
+          remains movable. The viewport owns the leading seam; its trailing
+          seam appears only while the edge mask hides a tab divider. */}
       <div
-        className="relative flex min-h-0 max-w-full min-w-0 flex-[0_1_auto]"
+        className={cn(
+          'relative flex min-h-0 max-w-full min-w-0 flex-[0_1_auto]',
+          tabStripOverflowState.hasOverflow && 'border-l border-border',
+          tabStripOverflowState.canScrollEnd &&
+            "after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:z-10 after:w-px after:bg-border after:content-['']"
+        )}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <div
@@ -110,12 +116,8 @@ function TabStripScrollButton({
       <TooltipTrigger
         render={
           <Button
-            variant="quiet"
-            size="icon-xs"
-            className={cn(
-              ' h-full w-8 border-b-0 disabled:opacity-35',
-              isStart ? 'mr-[-1px]' : '-ml-px'
-            )}
+            variant="tab-strip-scroll"
+            size="icon-tab-strip"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             aria-label={label}
             aria-disabled={!canScroll}

@@ -32,7 +32,7 @@ export function registerAutomationHandlers(store: Store, service: AutomationServ
       store.listAutomationRuns(args?.automationId)
   )
   ipcMain.handle('automations:listExternalManagers', (): Promise<ExternalAutomationManager[]> => {
-    return listExternalAutomationManagers(store)
+    return listExternalAutomationManagers()
   })
   ipcMain.handle(
     'automations:listExternalRuns',

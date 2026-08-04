@@ -38,6 +38,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.listWorktrees',
     params: CoworkingPairedRuntimeWorktreeCatalogParamsSchema,
+    access: { scope: 'project', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       const actualHostScope = resolvePairedRuntimeRepoActualHostScope(
@@ -51,6 +52,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.inspectWorktree',
     params: CoworkingPairedRuntimeInspectParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {
@@ -73,6 +75,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.canonicalizePath',
     params: CoworkingPairedRuntimeCanonicalizeParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {
@@ -92,6 +95,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.invoke',
     params: CoworkingPairedRuntimeInvokeParamsSchema,
+    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       const operation = parseCoworkingPairedRuntimeOperation(params.operation)
@@ -120,6 +124,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'coworking.host.subscribeTerminal',
     params: CoworkingPairedRuntimeSubscribeParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context, emit) => {
       requirePairedRuntimePrincipal(context)
       const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
@@ -150,6 +155,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.releaseChannel',
     params: CoworkingPairedRuntimeReleaseChannelParamsSchema,
+    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
     handler: (params, context) => {
       requirePairedRuntimePrincipal(context)
       getCoworkingHostChannelLifetimes(context.runtime).release(
@@ -163,6 +169,7 @@ export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.revokeWorktree',
     params: CoworkingPairedRuntimeRevokeWorktreeParamsSchema,
+    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
     handler: (params, context) => {
       requirePairedRuntimePrincipal(context)
       getHostBundle(context.runtime).adapter.revokeWorktree(params.channelRef, params.instanceId)

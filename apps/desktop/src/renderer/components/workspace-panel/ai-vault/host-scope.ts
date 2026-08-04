@@ -34,9 +34,7 @@ export function useAiVaultExecutionHostScope(args: {
   )
   const activeExecutionHost = parseExecutionHostId(activeExecutionHostId)
   const activeExecutionHostScope: ExecutionHostId | null =
-    activeExecutionHost?.kind === 'ssh' || activeExecutionHost?.kind === 'runtime'
-      ? activeExecutionHost.id
-      : null
+    activeExecutionHost?.kind === 'runtime' ? activeExecutionHost.id : null
   const defaultExecutionHostScope: ExecutionHostScope =
     activeExecutionHostScope ?? LOCAL_EXECUTION_HOST_ID
   const [executionHostScope, setExecutionHostScope] =
@@ -110,9 +108,6 @@ export function buildAiVaultHostScopeOptions(args: {
     : null
 
   add({ id: LOCAL_EXECUTION_HOST_ID, label: getExecutionHostLabel(LOCAL_EXECUTION_HOST_ID) })
-  if (activeHost?.kind === 'ssh') {
-    add({ id: activeHost.id, label: getExecutionHostLabel(activeHost.id) })
-  }
   for (const option of args.runtimeHostOptions) {
     add(option)
   }

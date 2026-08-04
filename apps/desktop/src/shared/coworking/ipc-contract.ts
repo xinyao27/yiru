@@ -1,6 +1,13 @@
 import type { TailnetPrincipal } from '../rpc-principal'
+import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
 import type { CoworkingRemoteDesktop } from './catalog-contract'
+import type {
+  CoworkingHostAccessDecision,
+  CoworkingHostDeviceView,
+  CoworkingOwnerHostAccessRequestView
+} from './host-access-contract'
 import { isCoworkingMutationKind } from './operation-contract'
+import type { CoworkingPublicationSuspensionReason } from './publication-suspension'
 import { COWORKING_RPC_ERROR_CODES, type CoworkingRpcErrorCode } from './wire-contract'
 
 export const COWORKING_REQUESTER_INVOKE_METHODS = [
@@ -106,6 +113,10 @@ export type CoworkingOwnerWorktreeSharing = {
   visibility: 'public' | 'private'
   publicationStatus: 'pending-validation' | 'private' | 'published' | 'suspended'
   shareEpoch: string | null
+  /** Why: 'suspended' alone cannot be acted on — the owner needs to know
+   *  whether the host went away, the worktree was re-created, or two shares
+   *  overlap on one root. */
+  suspensionReason?: CoworkingPublicationSuspensionReason
 }
 
 export type CoworkingOwnerControlRequestView = {
@@ -125,6 +136,15 @@ export type CoworkingOwnerControlGrantView = {
   approvedAt: number
 }
 
+/** A peer currently authenticated against this desktop's ingress. Present for
+ *  the whole connection, including a read-only peer that never asks for
+ *  control — those hold neither a request nor a grant. */
+export type CoworkingActiveConnectionView = {
+  connectionId: string
+  requester: TailnetPrincipal
+  hasControl: boolean
+}
+
 export type CoworkingRequesterControlView = {
   desktopRef: string
   worktreeRef: string
@@ -133,13 +153,23 @@ export type CoworkingRequesterControlView = {
   approvedAt?: number
 }
 
+/** This desktop's own tailnet identity, so the owner UI can name the device it
+ *  is sharing as. Null until the first successful tailnet read. */
+export type CoworkingSelfIdentity = {
+  nodeDisplayName: string
+  userDisplayName: string
+}
+
 export type CoworkingSharingSnapshot = {
   status: 'starting' | 'ready' | 'unavailable'
   diagnostic: string | null
+  self: CoworkingSelfIdentity | null
   remoteDesktops: readonly CoworkingRemoteDesktop[]
   ownerWorktrees: readonly CoworkingOwnerWorktreeSharing[]
   ownerControlRequests: readonly CoworkingOwnerControlRequestView[]
+  ownerHostAccessRequests: readonly CoworkingOwnerHostAccessRequestView[]
   ownerControlGrants: readonly CoworkingOwnerControlGrantView[]
+  ownerActiveConnections: readonly CoworkingActiveConnectionView[]
   requesterControlStates: readonly CoworkingRequesterControlView[]
 }
 
@@ -165,4 +195,26 @@ export type CoworkingDecideControlArgs = {
 
 export type CoworkingRevokeControlArgs = {
   grantId: string
+}
+
+export type CoworkingRequestHostAccessArgs = {
+  desktopRef: string
+}
+
+export type CoworkingRequestHostAccessResult =
+  | { status: 'denied' | 'cancelled' }
+  | { status: 'granted'; environment: PublicKnownRuntimeEnvironment }
+
+export type CoworkingDecideHostAccessArgs = CoworkingHostAccessDecision
+
+export type CoworkingListHostDevicesResult = {
+  devices: readonly CoworkingHostDeviceView[]
+}
+
+export type CoworkingRevokeHostDeviceArgs = {
+  deviceId: string
+}
+
+export type CoworkingRevokeHostDeviceResult = {
+  revoked: boolean
 }

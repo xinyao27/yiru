@@ -1,7 +1,7 @@
 import {
+  LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { FolderWorkspacePathStatusRequest } from '~shared/folder-workspace-path-status'
@@ -15,7 +15,7 @@ export function getProjectGroupExecutionHostIdForRows(
   if (executionHostId) {
     return executionHostId
   }
-  return group.connectionId ? toSshExecutionHostId(group.connectionId) : defaultHostId
+  return group.connectionId ? LOCAL_EXECUTION_HOST_ID : defaultHostId
 }
 
 export function getFolderWorkspaceExecutionHostIdForRows({
@@ -37,9 +37,7 @@ export function getFolderWorkspaceExecutionHostIdForRows({
       return projectGroupHostId
     }
   }
-  return folderWorkspace.connectionId
-    ? toSshExecutionHostId(folderWorkspace.connectionId)
-    : defaultHostId
+  return folderWorkspace.connectionId ? LOCAL_EXECUTION_HOST_ID : defaultHostId
 }
 
 export function getRuntimeEnvironmentIdForFolderPathStatusHost(
@@ -56,7 +54,7 @@ function getProjectGroupExecutionHostIdForFolderPathStatus(
   if (executionHostId) {
     return executionHostId
   }
-  return group.connectionId ? toSshExecutionHostId(group.connectionId) : 'local'
+  return LOCAL_EXECUTION_HOST_ID
 }
 
 export function getFolderPathStatusRouteOptionsForRows({

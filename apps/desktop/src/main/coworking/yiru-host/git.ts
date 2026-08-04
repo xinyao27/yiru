@@ -2,7 +2,6 @@ import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { gitExecFileAsync } from '~main/git/runner'
 import type { Store } from '~main/persistence'
 import { getLocalProjectWorktreeGitOptions } from '~main/project-runtime-git-options'
-import { getSshGitProvider } from '~main/providers/ssh-git-dispatch'
 import type { RuntimeGitCommands } from '~main/runtime/yiru-runtime-git'
 
 import { CoworkingExecutionError } from '../execution-error'
@@ -34,23 +33,8 @@ export class YiruCoworkingHostGit implements CoworkingGitReadCommandHost, Cowork
     command: CoworkingGitReadCommand
   ): Promise<CoworkingGitReadCommandResult> {
     requireSupportedRoute(target)
-    if (target.ownerWorktree.connectionId) {
-      const provider = getSshGitProvider(target.ownerWorktree.connectionId)
-      if (!provider) {
-        throw new CoworkingExecutionError('resource_unavailable')
-      }
-      const result = await provider.exec([...command.args], target.ownerWorktree.worktreePath, {
-        signal: command.signal,
-        timeoutMs: command.timeoutMs,
-        disableOptionalLocks: true,
-        nonInteractive: true,
-        maxBuffer: command.maxOutputBytes
-      })
-      requireOutputBound(result.stdout, command.maxOutputBytes)
-      return { stdout: result.stdout }
-    }
     const repo = this.store.getRepo(target.ownerWorktree.repoId)
-    if (!repo || repo.connectionId) {
+    if (!repo) {
       throw new CoworkingExecutionError('resource_not_found')
     }
     try {

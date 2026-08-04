@@ -1,4 +1,3 @@
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 import type { WorkspaceSessionState } from '~shared/types'
 
@@ -13,13 +12,9 @@ export function buildActiveConnectionIdsAtShutdown(
 ): WorkspaceSessionState['activeConnectionIdsAtShutdown'] {
   // Why: sshConnectionStates is a Map<string, SshConnectionState>, not a plain
   // object. Object.entries() on a Map returns [] — must use Array.from().
-  // Runtime-owned states are normally never broadcast to the renderer, but a
-  // pane-level optimistic write could stamp one; exclude them here too.
   const targetIds = new Set(
     Array.from(snapshot.sshConnectionStates.entries())
-      .filter(
-        ([targetId, state]) => state.status === 'connected' && !isRuntimeOwnedSshTargetId(targetId)
-      )
+      .filter(([, state]) => state.status === 'connected')
       .map(([targetId]) => targetId)
   )
 
@@ -31,11 +26,9 @@ export function buildActiveConnectionIdsAtShutdown(
   // disconnect or a failed/cancelled connect — startup must not auto-dial a
   // host the user left offline or stack credential dialogs (sessions still
   // restore on tab focus via the deferred flow, so only eagerness is lost).
-  // Runtime-owned (ephemeral-VM) targets belong to the runtime layer; a
-  // renderer-driven ssh.connect would dispose the runtime's live relay session.
   for (const sessionId of Object.values(remoteSessionIdsByTabId ?? {})) {
     const connectionId = parseAppSshPtyId(sessionId)?.connectionId
-    if (!connectionId || isRuntimeOwnedSshTargetId(connectionId)) {
+    if (!connectionId) {
       continue
     }
     const status = snapshot.sshConnectionStates.get(connectionId)?.status

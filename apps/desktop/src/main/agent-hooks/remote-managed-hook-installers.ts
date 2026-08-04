@@ -1,4 +1,3 @@
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import { ampHookService } from '../amp/hook-service'
@@ -15,6 +14,7 @@ import { grokHookService } from '../grok/hook-service'
 import { hermesHookService } from '../hermes/hook-service'
 import { kimiHookService } from '../kimi/hook-service'
 import { openClaudeHookService } from '../openclaude/hook-service'
+import type { RemoteFileOperations } from './remote-file-operations'
 
 export type RemoteManagedHookInstallOptions = {
   /** Explicit CODEX_HOME dir for redirected runtimes (WSL managed runtime
@@ -29,52 +29,64 @@ export type RemoteManagedHookInstallOptions = {
 type RemoteManagedHookInstaller = readonly [
   AgentHookInstallStatus['agent'],
   (
-    sftp: SFTPWrapper,
+    remoteFiles: RemoteFileOperations,
     remoteHome: string,
     options?: RemoteManagedHookInstallOptions
   ) => Promise<AgentHookInstallStatus>
 ]
 
 const REMOTE_MANAGED_HOOK_INSTALLERS: readonly RemoteManagedHookInstaller[] = [
-  ['claude', (sftp, remoteHome) => claudeHookService.installRemote(sftp, remoteHome)],
-  ['openclaude', (sftp, remoteHome) => openClaudeHookService.installRemote(sftp, remoteHome)],
+  ['claude', (remoteFiles, remoteHome) => claudeHookService.installRemote(remoteFiles, remoteHome)],
+  [
+    'openclaude',
+    (remoteFiles, remoteHome) => openClaudeHookService.installRemote(remoteFiles, remoteHome)
+  ],
   [
     'codex',
-    (sftp, remoteHome, options) =>
+    (remoteFiles, remoteHome, options) =>
       codexHookService.installRemote(
-        sftp,
+        remoteFiles,
         remoteHome,
         options?.codexHomeDir
           ? { codexHomeDir: options.codexHomeDir, deferTrustUntilConfigToml: true }
           : undefined
       )
   ],
-  ['gemini', (sftp, remoteHome) => geminiHookService.installRemote(sftp, remoteHome)],
-  ['antigravity', (sftp, remoteHome) => antigravityHookService.installRemote(sftp, remoteHome)],
-  ['amp', (sftp, remoteHome) => ampHookService.installRemote(sftp, remoteHome)],
-  ['cursor', (sftp, remoteHome) => cursorHookService.installRemote(sftp, remoteHome)],
-  ['command-code', (sftp, remoteHome) => commandCodeHookService.installRemote(sftp, remoteHome)],
-  ['copilot', (sftp, remoteHome) => copilotHookService.installRemote(sftp, remoteHome)],
+  ['gemini', (remoteFiles, remoteHome) => geminiHookService.installRemote(remoteFiles, remoteHome)],
+  [
+    'antigravity',
+    (remoteFiles, remoteHome) => antigravityHookService.installRemote(remoteFiles, remoteHome)
+  ],
+  ['amp', (remoteFiles, remoteHome) => ampHookService.installRemote(remoteFiles, remoteHome)],
+  ['cursor', (remoteFiles, remoteHome) => cursorHookService.installRemote(remoteFiles, remoteHome)],
+  [
+    'command-code',
+    (remoteFiles, remoteHome) => commandCodeHookService.installRemote(remoteFiles, remoteHome)
+  ],
+  [
+    'copilot',
+    (remoteFiles, remoteHome) => copilotHookService.installRemote(remoteFiles, remoteHome)
+  ],
   [
     'grok',
-    (sftp, remoteHome, options) =>
-      grokHookService.installRemote(sftp, remoteHome, options?.grokHomeDir)
+    (remoteFiles, remoteHome, options) =>
+      grokHookService.installRemote(remoteFiles, remoteHome, options?.grokHomeDir)
   ],
-  ['droid', (sftp, remoteHome) => droidHookService.installRemote(sftp, remoteHome)],
-  ['hermes', (sftp, remoteHome) => hermesHookService.installRemote(sftp, remoteHome)],
-  ['devin', (sftp, remoteHome) => devinHookService.installRemote(sftp, remoteHome)],
-  ['kimi', (sftp, remoteHome) => kimiHookService.installRemote(sftp, remoteHome)]
+  ['droid', (remoteFiles, remoteHome) => droidHookService.installRemote(remoteFiles, remoteHome)],
+  ['hermes', (remoteFiles, remoteHome) => hermesHookService.installRemote(remoteFiles, remoteHome)],
+  ['devin', (remoteFiles, remoteHome) => devinHookService.installRemote(remoteFiles, remoteHome)],
+  ['kimi', (remoteFiles, remoteHome) => kimiHookService.installRemote(remoteFiles, remoteHome)]
 ]
 
 export async function installRemoteManagedAgentHooks(
-  sftp: SFTPWrapper,
+  remoteFiles: RemoteFileOperations,
   remoteHome: string,
   options?: RemoteManagedHookInstallOptions
 ): Promise<AgentHookInstallStatus[]> {
   const results: AgentHookInstallStatus[] = []
   for (const [agent, install] of REMOTE_MANAGED_HOOK_INSTALLERS) {
     try {
-      const result = await install(sftp, remoteHome, options)
+      const result = await install(remoteFiles, remoteHome, options)
       results.push(result)
       if (result.state === 'error') {
         console.warn(
@@ -84,8 +96,8 @@ export async function installRemoteManagedAgentHooks(
         )
       }
     } catch (error) {
-      // Why: remote hook installation must not block SSH workspace startup.
-      // A broken agent config or transient SFTP failure should degrade status
+      // Why: remote hook installation must not block workspace startup. A
+      // broken agent config or transient file failure should degrade status
       // reporting only, while terminals/filesystem/git still come online.
       const detail = error instanceof Error ? error.message : String(error)
       console.warn(`[agent-hooks] Remote ${agent} managed hook install threw: ${detail}`)

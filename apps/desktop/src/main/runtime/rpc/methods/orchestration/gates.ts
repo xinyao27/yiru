@@ -47,6 +47,7 @@ export const ORCHESTRATION_GATE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.run',
     params: RunParams,
+    access: { scope: 'project', tier: 'host' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
 
@@ -88,6 +89,7 @@ export const ORCHESTRATION_GATE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.runStop',
     params: RunStopParams,
+    access: { scope: 'project', tier: 'host' },
     handler: (_params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const run = db.getActiveCoordinatorRun()
@@ -107,6 +109,7 @@ export const ORCHESTRATION_GATE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.gateCreate',
     params: GateCreateParams,
+    access: { scope: 'project', tier: 'control' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       let options: string[] | undefined
@@ -133,6 +136,7 @@ export const ORCHESTRATION_GATE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.gateResolve',
     params: GateResolveParams,
+    access: { scope: 'project', tier: 'host' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const gate = db.resolveGate(params.id, params.resolution)
@@ -146,6 +150,7 @@ export const ORCHESTRATION_GATE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.gateList',
     params: GateListParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const gates = db.listGates({

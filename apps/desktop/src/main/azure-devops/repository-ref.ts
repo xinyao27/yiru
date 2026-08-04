@@ -1,5 +1,4 @@
 import { gitExecFileAsync } from '../git/runner'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 
 export type AzureDevOpsRepoRef = {
   host: string
@@ -208,31 +207,16 @@ export async function getAzureDevOpsRepoRefForRemote(
     return repoRefCache.get(cacheKey)!
   }
   try {
-    const sshGitProvider = connectionId ? getSshGitProvider(connectionId) : null
-    if (connectionId && !sshGitProvider) {
-      return null
-    }
-    const { stdout } = sshGitProvider
-      ? await sshGitProvider.exec(
-          ['remote', 'get-url', remoteName],
-          repoPath,
-          localGitOptions.signal ? { signal: localGitOptions.signal } : undefined
-        )
-      : await gitExecFileAsync(['remote', 'get-url', remoteName], {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
-          ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
-        })
+    const { stdout } = await gitExecFileAsync(['remote', 'get-url', remoteName], {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+      ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
+    })
     const result = parseAzureDevOpsRepoRef(stdout)
     rememberRepoRefCacheEntry(cacheKey, result)
     return result
   } catch {
     localGitOptions.signal?.throwIfAborted()
-    if (connectionId) {
-      // Why: SSH provider failures are often transient reconnect/tunnel states;
-      // caching them as "not Azure DevOps" would poison the repo for the session.
-      return null
-    }
     rememberRepoRefCacheEntry(cacheKey, null)
     return null
   }

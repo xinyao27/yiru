@@ -96,7 +96,6 @@ import type {
   MobileDisplayMode,
   MobileNewTabAgentLoadState,
   MobileSessionTab,
-  RuntimeRepoSummary,
   SessionTabsResult,
   Terminal,
   TerminalCreateResult,
@@ -2140,21 +2139,6 @@ export default function SessionScreen(): React.JSX.Element {
     }
   }, [])
 
-  const getActiveWorktreeConnectionId = useCallback(async (): Promise<string | null> => {
-    // Why: floating terminals always belong to the paired runtime, never an SSH repo target.
-    if (!client || isFloatingWorkspaceRoute) {
-      return null
-    }
-    const repoId = getRepoIdFromMobileWorktreeId(worktreeId)
-    const repoResponse = await client.sendRequest('repo.list')
-    if (!repoResponse.ok) {
-      throw new Error((repoResponse as RpcFailure).error.message)
-    }
-    const repos =
-      ((repoResponse as RpcSuccess).result as { repos?: RuntimeRepoSummary[] }).repos ?? []
-    return repos.find((repo) => repo.id === repoId)?.connectionId?.trim() || null
-  }, [client, isFloatingWorkspaceRoute, worktreeId])
-
   const refreshCanPaste = useCallback(() => {
     void Promise.all([
       Clipboard.hasStringAsync().catch(() => false),
@@ -2175,7 +2159,6 @@ export default function SessionScreen(): React.JSX.Element {
     clientRef,
     deviceTokenRef,
     flushPendingLiveInputBeforeExternalSend,
-    getActiveWorktreeConnectionId,
     onError: triggerError,
     onSuccess: triggerSelection,
     ptyModesRef,
@@ -2199,7 +2182,6 @@ export default function SessionScreen(): React.JSX.Element {
     connState,
     deviceTokenRef,
     beforeTerminalSend: flushPendingLiveInputBeforeAttachmentSend,
-    getActiveWorktreeConnectionId,
     showToast,
     onSuccess: triggerSelection,
     onError: triggerError

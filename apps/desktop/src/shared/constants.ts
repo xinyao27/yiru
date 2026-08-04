@@ -371,7 +371,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     experimentalTerminalAttention: false,
     experimentalAgentHibernation: false,
     agentHibernationIdleMs: 30 * 60 * 1000,
-    experimentalEphemeralVms: false,
     // Why: local desktop remains the default server until the user explicitly
     // selects a saved runtime environment.
     activeRuntimeEnvironmentId: null,
@@ -437,9 +436,6 @@ export function getDefaultPersistedState(homedir: string): PersistedState {
     githubCache: { pr: {} },
     workspaceSession: getDefaultWorkspaceSession(),
     workspaceSessionsByHostId: {},
-    sshTargets: [],
-    deletedSshConfigAliases: [],
-    sshRemotePtyLeases: [],
     claudeLivePtySessionIds: [],
     migrationUnsupportedPtyEntries: [],
     legacyPaneKeyAliasEntries: [],

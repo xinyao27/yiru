@@ -9,7 +9,6 @@ import {
   KnownRuntimeEnvironmentSchema,
   RuntimeEnvironmentStoreSchema,
   type KnownRuntimeEnvironment,
-  type RuntimeEnvironmentSource,
   type RuntimeEnvironmentStore
 } from './runtime-environments'
 import { hardenExistingSecureFile, writeSecureJsonFile } from './secure-file'
@@ -38,7 +37,7 @@ export function listEnvironments(userDataPath: string): KnownRuntimeEnvironment[
 
 export function addEnvironmentFromPairingCode(
   userDataPath: string,
-  args: { name: string; pairingCode: string; now?: number; source?: RuntimeEnvironmentSource }
+  args: { name: string; pairingCode: string; now?: number }
 ): KnownRuntimeEnvironment {
   const offer = parsePairingCode(args.pairingCode)
   if (!offer) {
@@ -61,8 +60,7 @@ export function addEnvironmentFromPairingCode(
     name: args.name,
     now,
     offer,
-    runtimeId: null,
-    ...(args.source ? { source: args.source } : {})
+    runtimeId: null
   })
   const next = {
     version: 1 as const,
@@ -73,6 +71,37 @@ export function addEnvironmentFromPairingCode(
   }
   writeEnvironmentStore(userDataPath, next)
   return environment
+}
+
+export function upsertEnvironmentFromPairingOffer(
+  userDataPath: string,
+  args: { id: string; name: string; offer: PairingOffer; now?: number }
+): KnownRuntimeEnvironment {
+  const store = readEnvironmentStore(userDataPath)
+  const now = args.now ?? Date.now()
+  const existing = store.environments.find((entry) => entry.id === args.id)
+  const environment = createEnvironmentFromPairingOffer({
+    id: args.id,
+    name: args.name,
+    now: existing?.createdAt ?? now,
+    offer: args.offer,
+    runtimeId: existing?.runtimeId ?? null
+  })
+  const next = existing
+    ? {
+        ...environment,
+        createdAt: existing.createdAt,
+        updatedAt: now,
+        lastUsedAt: existing.lastUsedAt
+      }
+    : environment
+  writeEnvironmentStore(userDataPath, {
+    version: 1,
+    environments: [...store.environments.filter((entry) => entry.id !== args.id), next].sort(
+      (a, b) => a.name.localeCompare(b.name)
+    )
+  })
+  return next
 }
 
 export function removeEnvironment(userDataPath: string, selector: string): KnownRuntimeEnvironment {
@@ -105,8 +134,7 @@ export function updateEnvironmentFromPairingCode(
     name: existing.name,
     now: existing.createdAt,
     offer,
-    runtimeId: existing.runtimeId,
-    ...(existing.source ? { source: existing.source } : {})
+    runtimeId: existing.runtimeId
   })
   const next = {
     ...environment,

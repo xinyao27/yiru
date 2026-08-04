@@ -568,28 +568,24 @@
         "title": {
           "missing": "Folder not found",
           "notDirectory": "Path is not a folder",
-          "ambiguousConnection": "Cannot determine connection",
           "unavailable": "Cannot check folder"
         },
         "description": {
           "missing": "Yiru cannot find {{path}}. Remove and re-import this folder workspace.",
           "notDirectory": "{{path}} exists, but it is not a folder.",
-          "ambiguousConnection": "Yiru cannot tell which SSH connection owns this folder scope.",
-          "unavailable": "Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again."
+          "unavailable": "Yiru cannot verify this folder right now. Check the runtime and try again."
         },
         "createError": {
           "title": {
             "missing": "Folder not found",
             "notDirectory": "Path is not a folder",
-            "ambiguousConnection": "Cannot determine connection",
             "unavailable": "Cannot check folder",
             "generic": "Failed to create folder workspace"
           },
           "description": {
             "missing": "Yiru cannot find {{path}}. Remove and re-import the folder.",
             "notDirectory": "{{path}} exists, but it is not a folder.",
-            "ambiguousConnection": "Yiru cannot tell which SSH connection owns this folder scope.",
-            "unavailable": "Yiru cannot verify this folder right now. Check the runtime or SSH connection and try again."
+            "unavailable": "Yiru cannot verify this folder right now. Check the runtime and try again."
           }
         }
       },
@@ -598,12 +594,6 @@
         "distroRequired": "Select a WSL distro for this project before installing this skill.",
         "distroMissing": "The selected WSL distro is unavailable. Choose an available distro or switch this project to Windows.",
         "wslDefault": "WSL default"
-      },
-      "sidebarWorktreeActivation": {
-        "wakeEphemeralVmFailed": "Failed to wake ephemeral VM workspace"
-      },
-      "ephemeralVmWorkspaceTarget": {
-        "projectRootRegistrationFailed": "Failed to register the recipe-created project root on the runtime."
       },
       "blocked": {
         "notification": {
@@ -670,8 +660,6 @@
         "d91ae31fbd": "macOS Permissions",
         "95a1886d94": "Control terminals and agents from your phone.",
         "1cd25673df": "Mobile",
-        "31e57d1c70": "Use existing machines over SSH for files, terminals, Git, and workspaces.",
-        "94a5afe910": "SSH Hosts",
         "40d80bad8a": "Beta",
         "de0c2907a1": "Remote Yiru Servers",
         "b351014180": "Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.",
@@ -725,7 +713,9 @@
         "devSearchKeywordError": "error",
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} hosts",
-        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
+        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
+        "coworkingTitle": "Coworking",
+        "coworkingDescription": "Review and revoke persistent remote host authorizations."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "Paste is too large."
@@ -903,13 +893,8 @@
         "notePasteTooLarge": "Paste is too large for the note field.",
         "waitForSetupBeforeAgent": "Wait for setup to complete before starting agent",
         "waitForSetupBeforeAgentHelp": "Turn this on when setup installs dependencies, MCP servers, or config files the agent needs during startup.",
-        "destroyDisabled": "destroy disabled",
-        "destroyConfigured": "destroy configured",
-        "noDestroyConfigured": "no destroy",
-        "ephemeralVm": "Per-Workspace Environment",
         "chooseRunTarget": "Choose target",
         "noRunTargets": "No run targets are ready for this project.",
-        "perWorkspaceEnvHint": "Provision an on-demand environment from a recipe",
         "branchName": "Branch name",
         "branchNamePlaceholder": "feature/my-branch"
       },
@@ -1206,10 +1191,7 @@
             "ed2a664f8b": "Couldn’t create worktree",
             "a3346fc6ed": "Cancel worktree creation",
             "532aea14ce": "Cancel",
-            "767951265d": "Something went wrong while creating the worktree.",
-            "vmProvisioningTitle": "Provisioning VM",
-            "cancelProvisioning": "Cancel",
-            "vmProvisioningLogEmpty": "Waiting for recipe output…"
+            "767951265d": "Something went wrong while creating the worktree."
           }
         }
       },
@@ -2825,14 +2807,7 @@
           "runtime": "Server",
           "ssh": "SSH",
           "connecting": "Connecting",
-          "connect": "Connect",
-          "addSshHost": "Add SSH host",
-          "addRemoteServer": "Add remote server",
-          "addRemoteHost": "Add remote host",
-          "addRemoteHostTooltip": "Choose SSH for a machine you can log into, or remote server for a Yiru server.",
-          "addSshHostDetail": "Use an existing machine over SSH.",
-          "addRemoteServerDetail": "Pair with Yiru running on another computer.",
-          "addRemoteHostDetail": "SSH host or Yiru server"
+          "connect": "Connect"
         },
         "AddRepoNestedImportStep": {
           "496f68cf8c": "Scanning repositories. Click to stop.",
@@ -3684,45 +3659,6 @@
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH connection failed."
         },
-        "AddRemoteHostDialog": {
-          "sshHostRequired": "Host or SSH config alias is required.",
-          "sshPortInvalid": "Port must be between 1 and 65535.",
-          "sshRelayGraceInvalid": "Terminal timeout must be between 60 and {{value0}} seconds.",
-          "sshSaved": "SSH host added.",
-          "sshSaveFailed": "Failed to add SSH host.",
-          "serverFieldsRequired": "Server name and pairing code are required.",
-          "serverSaved": "Remote server added.",
-          "serverSaveFailed": "Failed to add remote server.",
-          "serverTitle": "Add remote server",
-          "sshTitle": "Add SSH host",
-          "serverDescription": "Pair with Yiru running on another computer.",
-          "sshDescription": "Add a persistent machine you can log into over SSH.",
-          "cancel": "Cancel",
-          "saving": "Saving...",
-          "save": "Save",
-          "label": "Label",
-          "sshLabelPlaceholder": "Dev box",
-          "sshHost": "Host or alias",
-          "sshHostPlaceholder": "deploy@server:22",
-          "username": "Username",
-          "usernamePlaceholder": "deploy",
-          "port": "Port",
-          "identityFile": "Identity file",
-          "identityFilePlaceholder": "~/.ssh/id_ed25519 (optional)",
-          "sshPersistenceDefault": "Remote terminals on this host stay alive until you end them or reset the relay.",
-          "serverName": "Server name",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "Pairing code",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "Run",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "on the server and paste the printed pairing URL.",
-          "sshImportAlreadySynced": "~/.ssh/config already in sync.",
-          "sshImportSynced": "Synced {{value0}} host{{value1}}.",
-          "sshImportFailed": "Failed to import SSH config.",
-          "importing": "Importing...",
-          "importSshConfig": "Import ~/.ssh/config"
-        },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "Reconnection failed",
           "forgetBody": "Removes this workspace from Yiru only. Files, the Git worktree, and branches on {{host}} are left untouched.",
@@ -3735,7 +3671,13 @@
         },
         "CoworkingDesktopRow": {
           "connecting": "Connecting…",
-          "disconnected": "Disconnected"
+          "disconnected": "Disconnected",
+          "hostAccessDenied": "Remote host access was denied.",
+          "hostAccessCancelled": "Remote host access request was cancelled.",
+          "hostAdded": "{{value0}} is ready as a remote host.",
+          "hostAccessFailed": "Could not request remote host access.",
+          "requestingHostAccess": "Waiting…",
+          "useAsHost": "Use as host"
         },
         "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
@@ -3797,7 +3739,22 @@
           "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Coworking will keep checking.",
           "permissionDenied": "System permissions prevented Yiru from opening the Coworking Tailnet listener.",
           "persistenceUnavailable": "Coworking could not safely load sharing settings, so sharing remains off.",
-          "unavailable": "Coworking could not start on this desktop."
+          "unavailable": "Coworking could not start on this desktop.",
+          "starting": "Coworking is starting…",
+          "readyIdle": "Coworking ready · no one connected",
+          "peersConnected": "{{count}} peer(s) connected",
+          "pendingRequests": "{{count}} peer(s) waiting for your approval",
+          "sharedWorktrees": "{{count}} worktree(s) published to your tailnet.",
+          "noSharedWorktrees": "No worktrees are published. Peers cannot see anything yet.",
+          "hasControl": "Can edit",
+          "readOnly": "Read-only",
+          "windowsFirewallUnavailable": "Windows Firewall is blocking the Coworking listener on TCP port {{port}}.",
+          "repairFirewall": "Repair firewall rule",
+          "suspendedHostUnavailable": "Host offline",
+          "suspendedIncarnation": "Worktree replaced",
+          "suspendedOverlapping": "Overlapping share",
+          "suspendedUnknown": "Not served",
+          "sharingAs": "Sharing as {{node}}"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",
@@ -4051,6 +4008,22 @@
           "controlPending": "Waiting for the owner to approve control.",
           "controlRequired": "Request control to create terminals.",
           "creating": "Creating terminal…"
+        },
+        "CoworkingHostAccessRequestDialog": {
+          "decisionFailed": "Could not send the host access decision.",
+          "nameRequired": "Name this authorized device before continuing.",
+          "title": "Authorize {{value0}} as a remote host client?",
+          "description": "This authorization lasts 90 days and is limited to this machine.",
+          "deviceName": "Authorized device name",
+          "readOnly": "Read only",
+          "readOnlyDescription": "Browse code and git history on this machine.",
+          "grantReadOnly": "Grant read only",
+          "fullAccess": "Full access",
+          "fullAccessDescription": "They will receive continuous shell access on this machine.",
+          "grantFullAccess": "Grant full access",
+          "revokeHelp": "You can revoke this authorization at any time in Settings → Coworking.",
+          "queued": "Queued host access requests: {{value0}}.",
+          "deny": "Deny"
         }
       },
       "shared": {
@@ -5129,7 +5102,6 @@
           "3b224167ff": "server",
           "251b96564a": "detected ·",
           "f34c152dc0": "Refresh MCP configs",
-          "6bac9ddfc6": "SSH repos are read through the remote filesystem. Starter creation is limited to the workspace root config.",
           "96f5609b04": "Inspect MCP server definitions that agents can use while working in this repo.",
           "55eea3ef47": "MCP Configs",
           "9ee215caf6": ".mcp.json",
@@ -5650,14 +5622,6 @@
           "84b9b2be05": "Create a revocable access grant so a browser or another Yiru client can connect.",
           "6e1280ca55": "Share this Yiru server",
           "9a3758d983": "No saved servers.",
-          "9bee6bbeeb": "Add Server",
-          "55fcc964cd": "on the server and paste the printed pairing URL.",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "Run",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "Pairing code",
-          "e038625857": "Dev box",
-          "54ebacc600": "Server name",
           "1826bd0608": "Saved Servers",
           "6ce4664003": "Refresh servers",
           "b07070ed3c": "No server connected",
@@ -5665,11 +5629,6 @@
           "64b6bea541": "Active Server",
           "99ac81fb43": "Switched to {{value0}}.",
           "b5b5114cb0": "Removed {{value0}}.",
-          "6cb6eae14f": "Failed to save runtime environment.",
-          "7b5986c8df": "Saved {{value0}}. Use Active Server to switch when ready.",
-          "a5b58465b6": "Connected to {{value0}}.",
-          "5ef712f407": "A server named \"{{value0}}\" already exists.",
-          "0c55a47480": "Name and pairing code are required.",
           "e6410d72c3": "Failed to load runtime environments.",
           "6ef71985da": "No endpoint",
           "ed3e3f069d": "This removes the saved server from Yiru. It does not change the active server.",
@@ -5693,7 +5652,7 @@
           "serverDisconnected": "Disconnected",
           "disconnectedServer": "Disconnected from {{value0}}.",
           "connectToRemoteServers": "Connect to remote servers",
-          "connectToRemoteServersHelp": "Pair another Yiru runtime, then connect or disconnect it here. Use Advanced > Active Server only when you want to change the default host.",
+          "connectToRemoteServersHelp": "Connect, disconnect, or inspect hosts authorized through Coworking.",
           "activeServerRowHelp": "Active server for server-routed projects, terminals, and provider checks.",
           "disconnect": "Disconnect",
           "connect": "Connect",
@@ -5760,8 +5719,6 @@
           "65660d4548": "macOS Permissions",
           "c6c01ac209": "Control terminals and agents from your phone.",
           "c40dadaac8": "Mobile",
-          "c2ee313198": "Use existing machines over SSH for files, terminals, Git, and workspaces.",
-          "9b02492d1f": "SSH Hosts",
           "b5ee17826b": "Pair remote Yiru runtimes for persistent sessions, richer remote state, and web or mobile handoff.",
           "7686cb5c36": "Connect this browser to a saved Yiru server.",
           "bd0181eeca": "Remote Yiru Servers",
@@ -5817,7 +5774,9 @@
           "65358016ea": "Discard",
           "dev": "Dev Tools",
           "devDescription": "Dev-only tools for exercising UI states.",
-          "b07041697f": "Connect GitHub, GitLab, and source-hosting services."
+          "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
+          "coworkingTitle": "Coworking",
+          "coworkingDescription": "Review and revoke persistent remote host authorizations."
         },
         "SettingsFormControls": {
           "42a4d15a30": "No matching fonts.",
@@ -5939,36 +5898,6 @@
           "68bbcd864a": "new",
           "2ef2b2674b": "Delete {{value0}}"
         },
-        "SshDestructiveActionDialog": {
-          "895b216267": "Cancel"
-        },
-        "SshPane": {
-          "c0f1c80166": "No SSH targets configured.",
-          "639ceb3698": "Add Target",
-          "51d7dba44d": "Import",
-          "a7d28dff81": "Add a remote host to connect to it in Yiru.",
-          "94c5284560": "Targets",
-          "f495689b82": "Import failed",
-          "f8050f6307": "Synced {{value0}} server{{value1}}",
-          "68c13b4589": "Test failed",
-          "81d08bcddf": "Connection successful",
-          "2c4ee7332b": "Failed to reset remote relay",
-          "db2e48975e": "Remote relay reset",
-          "025e107643": "Failed to end remote terminals",
-          "90e308c98b": "Remote terminals ended",
-          "a43de1d3ee": "Disconnect failed",
-          "e95d5ae10e": "Connection failed",
-          "c2a69510e3": "Failed to remove target",
-          "a0237eb1ca": "Target removed",
-          "2227ce47b6": "Failed to save target",
-          "f602009125": "Target added",
-          "b4ba0ce33d": "Target updated",
-          "3879cbaa52": "Terminal timeout must be between 60 and {{value0}} seconds, or keep terminals alive until reset.",
-          "4db9afce1c": "Port must be between 1 and 65535",
-          "0e5aa04161": "Host or SSH config alias is required",
-          "f1fc50dad2": "Failed to load SSH targets",
-          "0cda732f43": "Connection test failed"
-        },
         "SshPassphraseDialog": {
           "d5a234456f": "Cancel",
           "c3ce71aad6": "Enter passphrase",
@@ -5985,64 +5914,16 @@
           "106bd57f4a": "SSH Password"
         },
         "SshTargetCard": {
-          "a883f5a00f": "terminal timeout: {{value0}}",
-          "8ce71262f4": "terminals until reset",
-          "ec6543cee9": "Connect",
-          "0e53e9f8e8": "Test",
-          "1810b51482": "Connecting",
-          "4c86f30877": "Disconnect",
-          "7f7b3d7ab4": "Remove target",
-          "3d21a22d0e": "Removing target",
-          "3d8af2949f": "Edit target",
-          "762a48c662": "Reset remote relay",
-          "97dea4e8cf": "Resetting remote relay",
-          "da16e108e6": "End remote terminals",
-          "c77f1abfe3": "Ending remote terminals",
+          "0d4da494f9": "Connecting…",
           "18968ede9e": "Error",
+          "47e94bd6ba": "connected",
+          "8df62d1912": "Connected",
+          "8f14a926e0": "Deploying relay…",
+          "a6d5b7a30b": "Auth failed",
+          "d4986d71b0": "Reconnecting…",
+          "ec37738139": "Reconnection failed",
           "f0871e6bfb": "connect",
-          "47e94bd6ba": "connected"
-        },
-        "SshTargetDestructiveActions": {
-          "7e66942808": "This will stop active terminal sessions on this SSH target. Reconnecting will not restore them.",
-          "accf177a03": "End Remote Terminals?",
-          "26be00392d": "This force-stops the remote relay for this SSH target. Active remote terminals and port forwards for this target will end.",
-          "570a7a0574": "Reset Remote Relay?",
-          "3bb0cf0ee4": "This will remove the target and end any active remote terminals.",
-          "4808966c41": "Remove SSH Target"
-        },
-        "SshTargetForm": {
-          "fea9cb402e": "Cancel",
-          "1b19b00e93": "Bounded timeouts must be between 60 seconds and 7 days.",
-          "7c13f58c91": "Until reset",
-          "55c56cf2c7": "Timeout after disconnect (seconds)",
-          "137e88ce8d": "Remote terminals keep running after Yiru disconnects from this host.",
-          "b574994adc": "Use End Remote Terminals or Reset Relay when you want to stop them.",
-          "71fc546097": "Keep terminals alive until reset",
-          "92f80edbfd": "Remote Terminal Persistence",
-          "feae1d1e69": "Optional. Equivalent to ProxyJump / ssh -J.",
-          "11bcb4507a": "bastion.example.com",
-          "b2ab248ded": "Jump Host",
-          "3b01ca44a0": "Optional. Used for tunneling (e.g. Cloudflare Access, ProxyCommand).",
-          "f42d844544": "e.g. cloudflared access ssh --hostname %h",
-          "c7d0e18ecb": "Proxy Command",
-          "cb91f6375c": "Optional. SSH agent is used by default.",
-          "d6a5f2ee5c": "~/.ssh/id_ed25519 (leave empty for SSH agent)",
-          "63c0c145c1": "Identity File",
-          "c94cfa634c": "Port",
-          "47e082bc17": "deploy",
-          "dc1dc52aaa": "Username",
-          "2ee9bcd2e8": "server, deploy@server:2222, ssh://server",
-          "ce370ce674": "Host or alias *",
-          "b8dab0aa7b": "My Server",
-          "298de87a88": "Label",
-          "9518545cb6": "Add Target",
-          "a62b4cb39a": "Save Changes",
-          "29af933cd5": "New SSH Target",
-          "f2331ce599": "Edit SSH Target",
-          "4a342f44c1": "Advanced Connection",
-          "e9609ddca6": "Proxy, jump host, and connection reuse",
-          "8c922dffba": "Reuse SSH connection for faster setup",
-          "53e9aabfc0": "Uses OpenSSH multiplexing when available. Turn off for hosts with custom SSH restrictions."
+          "fc028bdfa9": "Disconnected"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "Thickness of the pane divider line.",
@@ -7520,7 +7401,7 @@
               "f1575f1e09": "web client",
               "81444c4102": "pairing url",
               "104f4d7dbd": "pairing",
-              "4575341c77": "Choose local desktop, add a saved remote Yiru server, or generate a pairing URL."
+              "4575341c77": "Manage Coworking-authorized hosts, generate a client pairing URL, or adjust the advanced default runtime."
             }
           }
         },
@@ -7537,31 +7418,6 @@
             "0ecba9aa5f": "keyboard",
             "ebd7d81e1d": "Choose whether Yiru or the focused terminal wins when shortcuts overlap.",
             "f052906167": "Shortcuts in Terminal"
-          }
-        },
-        "ssh": {
-          "search": {
-            "d41f296f64": "ping",
-            "237b391f7c": "connection",
-            "8cb870b109": "test",
-            "7efd17e816": "ssh",
-            "96ca5d9a0b": "Test connectivity to an SSH target.",
-            "a3058f3605": "Test Connection",
-            "2cd40ba0d0": "hosts",
-            "5220501141": "config",
-            "3b12e064a4": "import",
-            "7f251a45a8": "Import hosts from ~/.ssh/config.",
-            "41a3127094": "Import from SSH Config",
-            "f9493b80c0": "server",
-            "8fb1cc87cc": "host",
-            "09395490af": "target",
-            "00d1fda01a": "new",
-            "f7b6383aec": "add",
-            "62826efbe9": "Add a new remote SSH target.",
-            "f5a691bb6c": "Add SSH Target",
-            "d4bcd497c7": "remote",
-            "74c6d90d78": "Manage remote SSH targets.",
-            "380a788da7": "SSH Connections"
           }
         },
         "terminal": {
@@ -8161,59 +8017,6 @@
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
           "devOnly": "Dev only"
         },
-        "EphemeralVmRecipeRow": {
-          "useInWorkspace": "Use in workspace"
-        },
-        "EphemeralVmRuntimesSection": {
-          "cleanupFailed": "Cleanup failed",
-          "cleanupRunning": "Cleanup running",
-          "cleanupDisabled": "Cleanup disabled",
-          "running": "Running",
-          "failed": "Failed",
-          "loadFailed": "Couldn’t load temporary VM runtimes.",
-          "cleanupFailedToast": "Couldn’t clean up temporary VM runtime.",
-          "markedCleaned": "Marked temporary VM runtime as cleaned.",
-          "cleaned": "Cleaned up temporary VM runtime.",
-          "copiedCleanupCommand": "Copied cleanup command.",
-          "copiedCleanupPayload": "Copied cleanup payload.",
-          "copyCleanupFailed": "Couldn’t copy cleanup command.",
-          "title": "Temporary VM runtimes",
-          "description": "Recipe-created runtimes are workspace-owned. Clean up stale entries after crashes, failed creates, or manual recovery.",
-          "refresh": "Refresh temporary VM runtimes",
-          "loading": "Checking temporary VM runtimes…",
-          "empty": "No temporary VM runtimes need cleanup.",
-          "copyCleanup": "Copy command",
-          "retry": "Retry cleanup",
-          "cleanup": "Cleanup"
-        },
-        "ephemeralVms": {
-          "search": {
-            "title": "Per-Workspace Environments",
-            "description": "Learn how repo-owned recipes give each workspace its own on-demand, disposable environment."
-          }
-        },
-        "EphemeralVmsPane": {
-          "loadError": "Could not load recipes.",
-          "copyError": "Could not copy the prompt.",
-          "skillTitle": "Per-Workspace Environments skill",
-          "skillDescription": "Sets up, builds, authenticates, and validates repo-owned environment recipes.",
-          "whatTitle": "What the skill does, with you",
-          "whatScaffold": "Writes the recipe & scripts for your provider — connected over a Yiru server or SSH.",
-          "whatBuild": "Builds a reusable base image and signs your agent in.",
-          "whatValidate": "Validates it so you can create a workspace on it.",
-          "promptHint": "In any workspace, ask your agent:",
-          "copy": "Copy",
-          "copied": "Copied",
-          "recipes": "Recipes",
-          "recipesHelp": "Recipes your agent adds to yiru.yaml show up here, ready to launch a workspace on.",
-          "refresh": "Refresh ephemeral VM recipes",
-          "checking": "Checking recipes...",
-          "none": "No recipes found yet."
-        },
-        "ephemeralVmsExperimentalSetting": {
-          "description": "Shows setup controls and workspace run targets for repo-owned, on-demand environments.",
-          "toggleLabel": "Toggle per-workspace environments"
-        },
         "SourceControlActionRepoOverrideNote": {
           "agent": "Agent",
           "agentArgs": "CLI arguments",
@@ -8318,6 +8121,28 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "CoworkingSettingsPane": {
+          "loadFailed": "Could not load authorized remote host clients.",
+          "alreadyRevoked": "This authorization was already revoked.",
+          "revoked": "Authorization revoked and active connections disconnected.",
+          "revokeFailed": "Could not revoke this authorization.",
+          "title": "Authorized remote host clients",
+          "description": "Like authorized_keys, these devices retain access until revoked or expired.",
+          "refresh": "Refresh",
+          "loading": "Loading…",
+          "empty": "No remote host clients have been authorized through Coworking.",
+          "fullAccess": "Full access",
+          "readOnly": "Read only",
+          "revokedState": "Revoked",
+          "expiredState": "Expired",
+          "identity": "{{value0}} · node {{value1}}",
+          "dates": "Paired {{value0}} · Last used {{value1}} · Expires {{value2}}",
+          "never": "Never",
+          "noExpiry": "Never",
+          "revoking": "Revoking…",
+          "revoke": "Revoke",
+          "searchTitle": "Authorized remote host clients"
         },
         "SettingsSetupGuidePane": {
           "restartOnboardingError": "Couldn't restart onboarding.",
@@ -11240,7 +11065,26 @@
                 "removeWorktree": "remove worktree",
                 "trashWorktree": "trash worktree",
                 "addQuickCommand": "add quick command",
-                "newQuickCommand": "new quick command"
+                "newQuickCommand": "new quick command",
+                "publishWorktree": "publish worktree",
+                "unpublishWorktree": "unpublish worktree",
+                "makePublic": "make worktree public",
+                "makePrivate": "make worktree private",
+                "coworkingWorktree": "coworking worktree",
+                "coworkingSettings": "coworking settings",
+                "openCoworkingSettings": "open coworking settings",
+                "remoteHostAccess": "remote host access",
+                "authorizedDevices": "authorized devices"
+              },
+              "publishOrUnpublishWorktree": "Publish / Unpublish Worktree",
+              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through Coworking.",
+              "coworkingVisibilityFailed": "Could not update Coworking visibility.",
+              "openCoworkingSettings": "Open Coworking Settings",
+              "openCoworkingSettingsDescription": "Manage Coworking-authorized remote host access."
+            },
+            "action": {
+              "context": {
+                "coworkingUnavailable": "Coworking is unavailable here."
               }
             }
           },
@@ -12471,6 +12315,7 @@
       "schedule": "Continue in about {{countdown}}",
       "reveal": "Show me"
     },
-    "workspace": "Workspace"
+    "workspace": "Workspace",
+    "workspaceIndicator": "{{agent}} will automatically continue at {{time}}"
   }
 }

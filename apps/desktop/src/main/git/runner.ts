@@ -276,7 +276,7 @@ function resolveCommand(
 // cap entirely, so a command that prints more than V8's ~512MB max string
 // length crashes the main process uncatchably inside execFile's exit handler
 // (Array.join over the buffered chunks). Apply this floor so no git call can
-// ever buffer without a bound. Matches the relay's MAX_GIT_BUFFER.
+// ever buffer without a bound.
 export const DEFAULT_GIT_MAX_BUFFER = 10 * 1024 * 1024
 
 type GitExecOptions = {

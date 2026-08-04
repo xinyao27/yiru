@@ -33,6 +33,7 @@ export const ORCHESTRATION_DISPATCH_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.dispatch',
     params: DispatchParams,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const task = db.getTask(params.task)
@@ -140,6 +141,7 @@ export const ORCHESTRATION_DISPATCH_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.dispatchShow',
     params: DispatchShowParams,
+    access: { scope: 'project', tier: 'read' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       if (!params.task) {

@@ -2,6 +2,7 @@ import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import type { Store } from '~main/persistence'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
+import type { CoworkingGrantJournal } from '../grant-journal'
 import type { CoworkingSessionCatalog } from '../session/catalog'
 import type { CoworkingWorktreeVisibility } from '../worktree-visibility'
 import type { CoworkingOwnerService } from './service'
@@ -22,6 +23,7 @@ export class CoworkingOwnerComposition {
 
   constructor(
     service: CoworkingOwnerService,
+    readonly grantJournal: CoworkingGrantJournal,
     store: Store,
     private readonly catalog: DefaultCoworkingOwnerWorktreeCatalog,
     private readonly visibility: CoworkingWorktreeVisibility,
@@ -47,11 +49,7 @@ export class CoworkingOwnerComposition {
       return
     }
     this.unsubscribeRuntime = this.runtime.onClientEvent((event) => {
-      if (
-        event.type === 'reposChanged' ||
-        event.type === 'worktreesChanged' ||
-        event.type === 'sshStateChanged'
-      ) {
+      if (event.type === 'reposChanged' || event.type === 'worktreesChanged') {
         this.scheduleReconcile()
       }
     })

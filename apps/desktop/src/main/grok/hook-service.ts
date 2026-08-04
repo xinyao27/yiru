@@ -1,6 +1,5 @@
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 import { resolveGrokHomeDir } from '~shared/grok-session-paths'
 
@@ -29,6 +28,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 // Why: Grok's tool-event matcher is a real regex (see Grok hooks docs). Bare
 // `*` is not a valid "match all" pattern and can fail to load/match, so tool
@@ -71,7 +71,7 @@ function getConfigPath(): string {
 
 /** Validated guest Grok home with a login-home fallback. */
 function getRemoteGrokHome(remoteHome: string, remoteGrokHome?: string): string {
-  // Why: SFTP paths are always POSIX — never use host path.join here.
+  // Why: remote paths are always POSIX — never use host path.join here.
   const home = remoteHome.replace(/\/+$/, '') || remoteHome
   const candidate = remoteGrokHome?.trim()
   if (
@@ -253,17 +253,17 @@ export class GrokHookService {
   }
 
   async installRemote(
-    sftp: SFTPWrapper,
+    remoteFiles: RemoteFileOperations,
     remoteHome: string,
     remoteGrokHome?: string
   ): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
     // Why: only a guest-resolved path can describe remote Grok; never apply the
-    // host process's GROK_HOME to SFTP paths.
+    // host process's GROK_HOME to remote paths.
     const remoteConfigPath = `${getRemoteGrokHome(home, remoteGrokHome)}/hooks/yiru-status.json`
     const remoteScriptPath = `${home}/.yiru/agent-hooks/grok-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'grok',
@@ -275,8 +275,8 @@ export class GrokHookService {
       }
 
       buildInstalledConfig(config, wrapPosixHookCommand(remoteScriptPath), 'grok-hook.sh')
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, config)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
         agent: 'grok',

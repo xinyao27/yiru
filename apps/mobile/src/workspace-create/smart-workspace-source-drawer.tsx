@@ -35,7 +35,6 @@ type SmartWorkspaceSourceDrawerProps = {
   availability: SmartModeAvailabilityInput
   repoId: string | null
   repos: readonly PasteRepoCandidate[]
-  sshReady: boolean
   onRepoChange: (repoId: string) => void
   onClose: () => void
 }
@@ -47,7 +46,6 @@ export function SmartWorkspaceSourceDrawer({
   availability,
   repoId,
   repos,
-  sshReady,
   onRepoChange,
   onClose
 }: SmartWorkspaceSourceDrawerProps): React.JSX.Element {
@@ -70,7 +68,7 @@ export function SmartWorkspaceSourceDrawer({
   // Snap the chosen mode back into the available set if availability changes.
   const effectiveMode = availableModes.includes(mode) ? mode : (availableModes[0] ?? 'text')
 
-  const searchEnabled = visible && sshReady
+  const searchEnabled = visible
 
   const { rows, loading, error, needsGitHubRemote, crossRepoPrompt, dismissCrossRepoPrompt } =
     useSmartWorkspaceSource({
@@ -238,18 +236,11 @@ export function SmartWorkspaceSourceDrawer({
         </MobileContentSection>
       ) : null}
 
-      {!sshReady && effectiveMode !== 'text' ? (
-        <Text className="text-muted-foreground px-1 pb-2 text-xs">
-          {translate(
-            'mobile.newWorkspace.source.connectRepository',
-            'Connect the repository to search sources.'
-          )}
-        </Text>
-      ) : needsGitHubRemote ? (
+      {needsGitHubRemote ? (
         <Text className="text-muted-foreground px-1 pb-2 text-xs">
           {translate(
             'mobile.newWorkspace.source.githubRemoteRequired',
-            'This SSH repo needs a GitHub remote to list pull requests.'
+            'This repository needs a GitHub remote to list pull requests.'
           )}
         </Text>
       ) : error ? (

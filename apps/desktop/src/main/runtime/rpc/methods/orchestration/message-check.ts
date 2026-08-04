@@ -12,6 +12,7 @@ export const ORCHESTRATION_MESSAGE_CHECK_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.check',
     params: MessageReadParams,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime, signal }) => {
       const db = runtime.getOrchestrationDb()
       const handle = params.terminal ?? 'unknown'

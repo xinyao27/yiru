@@ -36,6 +36,7 @@ export const ORCHESTRATION_WORKER_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.workerShow',
     params: WorkerDispatchParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const dispatch = db.getDispatchContextById(params.dispatch)
@@ -134,6 +135,7 @@ export const ORCHESTRATION_WORKER_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.workerRead',
     params: WorkerReadParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       const federated = db.getFederatedDispatch(params.dispatch)
@@ -210,6 +212,7 @@ export const ORCHESTRATION_WORKER_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.workerAbandon',
     params: WorkerDispatchParams,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => {
       const abandoned = runtime.getOrchestrationDb().abandonWorkerDispatch(params.dispatch)
       const worker = abandoned.worker

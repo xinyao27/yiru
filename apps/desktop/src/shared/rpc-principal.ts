@@ -13,5 +13,5 @@ export type AuthenticatedCoworkingPrincipal = {
 }
 
 export type AuthenticatedRpcPrincipal =
-  | { kind: 'paired-device'; deviceId: string; scope: 'mobile' | 'runtime' }
+  | { kind: 'paired-device'; deviceId: string; scope: 'mobile' | 'runtime' | 'coworking-host' }
   | AuthenticatedCoworkingPrincipal

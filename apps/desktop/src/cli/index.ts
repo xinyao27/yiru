@@ -26,7 +26,6 @@ function shouldIgnoreRemoteSelection(commandPath: string[]): boolean {
     (commandPath[0] === 'mobile' && commandPath[1] === 'development-pairing') ||
     commandPath[0] === 'serve' ||
     commandPath[0] === 'agent' ||
-    commandPath[0] === 'vm' ||
     commandPath[0] === 'agent-context'
   )
 }

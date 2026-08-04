@@ -4,7 +4,6 @@ import type { SourceControlLaunchActionId } from '~shared/source-control/ai-acti
 
 import type { ChecksPanelReview } from './review'
 
-export const RUNTIME_SSH_STATUS_REFRESH_MS = 3000
 export const GIT_STATUS_FAILURE_RETRY_MS = 3000
 
 export type HostedReviewCreationSnapshot = {

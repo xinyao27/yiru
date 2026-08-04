@@ -9,12 +9,17 @@ import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 import type { WebSocket } from 'ws'
+import type {
+  CoworkingHostAccessTier,
+  CoworkingHostDeviceView
+} from '~shared/coworking/host-access-contract'
 import {
   MOBILE_DEVELOPMENT_PAIRING_METHOD,
   MobileDevelopmentPairingParamsSchema,
   type MobileDevelopmentPairingResult
 } from '~shared/mobile-development-pairing/contract'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '~shared/pairing'
+import type { PairingOffer } from '~shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
@@ -26,10 +31,12 @@ import {
   type TerminalStreamFrame
 } from '~shared/terminal/stream-protocol'
 
-import { DeviceRegistry, type DeviceScope } from './device-registry'
+import type { CoworkingGrantJournal } from '../coworking/grant-journal'
+import { DeviceRegistry, type CoworkingHostDeviceEntry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
+import { grantedAccessForDevice } from './rpc/access-adjudication'
 import type { RpcRequest, RpcResponse } from './rpc/core'
 import { RpcDispatcher } from './rpc/dispatcher'
 import { errorResponse, successResponse } from './rpc/errors'
@@ -175,6 +182,7 @@ export class YiruRuntimeRpcServer {
   // only long-running dispatches, not every in-flight short RPC. See §3.1 +
   // §7 risk #2.
   private activeLongPolls = 0
+  private grantJournal: Pick<CoworkingGrantJournal, 'recordHostOperation'> | null = null
 
   constructor({
     runtime,
@@ -201,6 +209,10 @@ export class YiruRuntimeRpcServer {
 
   getDeviceRegistry(): DeviceRegistry | null {
     return this.deviceRegistry
+  }
+
+  setGrantJournal(journal: Pick<CoworkingGrantJournal, 'recordHostOperation'>): void {
+    this.grantJournal = journal
   }
 
   getTlsFingerprint(): string | null {
@@ -240,6 +252,60 @@ export class YiruRuntimeRpcServer {
     return true
   }
 
+  createCoworkingHostPairingOffer(args: {
+    name: string
+    subject: { nodeId: string; userDisplayName: string }
+    hostScopeKey: string
+    tier: CoworkingHostAccessTier
+    expiresAt: number
+  }): PairingOffer {
+    const endpoint = this.getWebSocketEndpoint()
+    const publicKeyB64 = this.getE2EEPublicKey()
+    if (!endpoint || !publicKeyB64 || !this.deviceRegistry) {
+      throw new Error('coworking_host_pairing_unavailable')
+    }
+    const device = this.deviceRegistry.addCoworkingHostDevice(args)
+    return {
+      v: PAIRING_OFFER_VERSION,
+      endpoint,
+      deviceToken: device.token,
+      publicKeyB64,
+      scope: 'runtime'
+    }
+  }
+
+  listCoworkingHostDevices(): readonly CoworkingHostDeviceView[] {
+    return (this.deviceRegistry?.listDevices() ?? [])
+      .filter((device): device is CoworkingHostDeviceEntry => device.scope === 'coworking-host')
+      .sort((a, b) => b.pairedAt - a.pairedAt)
+      .map((device) => ({
+        deviceId: device.deviceId,
+        name: device.name,
+        pairedAt: device.pairedAt,
+        lastSeenAt: device.lastSeenAt > 0 ? device.lastSeenAt : null,
+        subject: device.subject,
+        tier: device.tier,
+        expiresAt: device.expiresAt,
+        revokedAt: device.revokedAt
+      }))
+  }
+
+  revokeCoworkingHostDevice(deviceId: string): boolean {
+    const device = this.deviceRegistry?.getDevice(deviceId)
+    if (device?.scope !== 'coworking-host' || !this.deviceRegistry?.revokeDevice(deviceId)) {
+      return false
+    }
+    for (const subjectDevice of this.deviceRegistry.listDevices()) {
+      if (
+        subjectDevice.scope === 'coworking-host' &&
+        subjectDevice.subject.nodeId === device.subject.nodeId
+      ) {
+        this.mobileSocketWiring?.terminateDeviceConnections(subjectDevice.token)
+      }
+    }
+    return true
+  }
+
   getWebSocketEndpoint(): string | null {
     const ws = this.transports.find((t) => t.kind === 'websocket')
     return ws?.endpoint ?? null
@@ -267,7 +333,7 @@ export class YiruRuntimeRpcServer {
 
     const endpoint = resolvePairingEndpoint(rawEndpoint, args.address)
     const deviceName = args.name ?? `CLI ${new Date().toLocaleDateString()}`
-    const scope = args.scope ?? 'runtime'
+    const scope = args.scope === 'mobile' ? 'mobile' : 'runtime'
     const credentialPolicy = args.credentialPolicy ?? 'reuse-pending'
     const device =
       credentialPolicy === 'reuse-named'
@@ -413,6 +479,28 @@ export class YiruRuntimeRpcServer {
 
   private cancelWebSocketDispatch(ws: WebSocket, requestId: string): void {
     this.wsDispatchAbortStates.get(ws)?.requests.get(requestId)?.abort()
+  }
+
+  private recordCoworkingHostOperation(
+    request: RpcRequest,
+    device: CoworkingHostDeviceEntry
+  ): boolean {
+    if (device.tier !== 'host' || !this.grantJournal) {
+      return device.tier !== 'host'
+    }
+    try {
+      this.grantJournal.recordHostOperation({
+        requestId: request.id,
+        method: request.method,
+        deviceId: device.deviceId,
+        deviceName: device.name,
+        subject: device.subject,
+        hostScopeKey: device.hostScopeKey
+      })
+      return true
+    } catch {
+      return false
+    }
   }
 
   async start(): Promise<void> {
@@ -754,6 +842,14 @@ export class YiruRuntimeRpcServer {
       )
       return
     }
+    if (device.scope === 'coworking-host' && !this.recordCoworkingHostOperation(request, device)) {
+      reply(
+        JSON.stringify(
+          this.buildError(request.id, 'internal_error', 'Privileged operation audit unavailable')
+        )
+      )
+      return
+    }
 
     if (request.method === REMOTE_RUNTIME_CANCEL_REQUEST_METHOD) {
       const targetRequestId = readRemoteRuntimeCancellationRequestId(request.params)
@@ -817,6 +913,12 @@ export class YiruRuntimeRpcServer {
         : reply
 
     const connectionId = ws ? this.mobileSocketWiring?.getConnectionId(ws) : undefined
+    // Why: resolved per request rather than cached at connect time, so a revoked
+    // or downgraded grant takes effect on the next call instead of surviving for
+    // the life of the socket.
+    const grantedAccess = grantedAccessForDevice(
+      this.deviceRegistry?.getDevice(device.deviceId) ?? null
+    )
     try {
       await this.dispatcher.dispatchStreaming(request, replyForRequest, {
         connectionId,
@@ -828,7 +930,8 @@ export class YiruRuntimeRpcServer {
         },
         // Why: gates the mobile-only payload diet (native-chat char clipping) so
         // full-screen web/desktop runtime clients aren't truncated.
-        clientKind: device.scope,
+        clientKind: device.scope === 'mobile' ? 'mobile' : 'runtime',
+        ...(grantedAccess ? { grantedAccess } : {}),
         signal: abortRegistration?.signal,
         sendBinary,
         registerBinaryStreamHandler: (streamId, handler) =>

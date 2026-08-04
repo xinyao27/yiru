@@ -100,7 +100,6 @@ export type PersistedTrustedYiruHookRepo = {
   }
   setup?: PersistedTrustedYiruHookEntry
   archive?: PersistedTrustedYiruHookEntry
-  vmRecipe?: PersistedTrustedYiruHookEntry
 }
 
 export type PersistedTrustedYiruHooks = Record<string, PersistedTrustedYiruHookRepo>

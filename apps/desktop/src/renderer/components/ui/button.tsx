@@ -30,6 +30,10 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
+        // Why: tab-strip arrows use accent-only focus so their transparent
+        // chrome never reads as a bordered control beside the tab viewport.
+        'tab-strip-scroll':
+          'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-transparent focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 dark:hover:bg-accent',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
         // Why: actions revealed over an accent row need contrast from the row
@@ -76,6 +80,7 @@ const buttonVariants = cva(
         'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
+        'icon-tab-strip': "h-full w-8 [&_svg:not([class*='size-'])]:size-3.5",
         // Why: titlebar controls share the row height while retaining compact horizontal rhythm.
         'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-4",

@@ -1,10 +1,11 @@
-import { posix, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
 import type {
   CreateHostedReviewArgs,
   HostedReviewCreationEligibilityArgs,
   HostedReviewForBranchArgs
 } from '@yiru/workbench-model/review'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { ipcMain } from 'electron'
 import type { Repo } from '~shared/types'
 
@@ -18,17 +19,34 @@ import { getHostedReviewForBranch } from './hosted-review'
 import { createHostedReview, getHostedReviewCreationEligibility } from './hosted-review-creation'
 
 function assertRegisteredRepo(repoPath: string, store: Store, repoId?: string): Repo {
+  let repo: Repo | undefined
   if (repoId) {
-    const repo = store.getRepo(repoId)
-    if (!repo || repo.path !== repoPath) {
+    repo = store
+      .getRepos()
+      .find(
+        (candidate) =>
+          candidate.id === repoId &&
+          candidate.path === repoPath &&
+          getRepoExecutionHostId(candidate) === LOCAL_EXECUTION_HOST_ID
+      )
+    if (!repo) {
       throw new Error('Access denied: unknown repository')
     }
-    return repo
+  } else {
+    const resolvedRepoPath = resolve(repoPath)
+    repo = store
+      .getRepos()
+      .find(
+        (candidate) =>
+          getRepoExecutionHostId(candidate) === LOCAL_EXECUTION_HOST_ID &&
+          resolve(candidate.path) === resolvedRepoPath
+      )
   }
-  const resolvedRepoPath = resolve(repoPath)
-  const repo = store.getRepos().find((r) => resolve(r.path) === resolvedRepoPath)
   if (!repo) {
     throw new Error('Access denied: unknown repository path')
+  }
+  if (getRepoExecutionHostId(repo) !== LOCAL_EXECUTION_HOST_ID) {
+    throw new Error('Access denied: repository is owned by a paired runtime')
   }
   return repo
 }
@@ -40,18 +58,6 @@ async function resolveHostedReviewWorktreePath(
 ): Promise<string> {
   if (!worktreePath) {
     return repo.path
-  }
-  if (repo.connectionId) {
-    const remoteWorktreePath = normalizeRemoteHostedReviewPath(worktreePath)
-    const repoWorktrees = await listRepoWorktrees(repo)
-    if (
-      !repoWorktrees.some(
-        (worktree) => normalizeRemoteHostedReviewPath(worktree.path) === remoteWorktreePath
-      )
-    ) {
-      throw new Error('Access denied: worktree does not belong to repository')
-    }
-    return remoteWorktreePath
   }
   const resolvedWorktreePath = await resolveRegisteredWorktreePath(worktreePath, store)
   const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
@@ -65,23 +71,13 @@ async function resolveHostedReviewWorktreePath(
   return resolvedWorktreePath
 }
 
-function normalizeRemoteHostedReviewPath(remotePath: string): string {
-  if (!remotePath || remotePath.includes('\0')) {
-    throw new Error('Access denied: invalid worktree path')
-  }
-  // Why: SSH worktree paths belong to the remote POSIX host. Local path.resolve
-  // rewrites them on Windows and cannot authorize remote-only paths.
-  const normalized = posix.normalize(remotePath)
-  return normalized.length > 1 ? normalized.replace(/\/+$/, '') : normalized
-}
-
 export function registerHostedReviewHandlers(store: Store, stats: StatsCollector): void {
   ipcMain.handle('hostedReview:forBranch', async (_event, args: HostedReviewForBranchArgs) => {
     const repo = assertRegisteredRepo(args.repoPath, store, args.repoId)
     const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
     const review = await getHostedReviewForBranch({
       repoPath: repo.path,
-      connectionId: repo.connectionId,
+      connectionId: null,
       branch: args.branch,
       linkedGitHubPR: args.linkedGitHubPR ?? null,
       fallbackGitHubPR: args.linkedGitHubPR == null ? (args.fallbackGitHubPR ?? null) : null,
@@ -109,11 +105,11 @@ export function registerHostedReviewHandlers(store: Store, stats: StatsCollector
       const repo = assertRegisteredRepo(args.repoPath, store, args.repoId)
       const worktreePath = await resolveHostedReviewWorktreePath(repo, store, args.worktreePath)
       const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
-      const sharedLinkPaths = repo.connectionId ? [] : getWorktreeSharedLinkPaths(repo)
+      const sharedLinkPaths = getWorktreeSharedLinkPaths(repo)
       return getHostedReviewCreationEligibility({
         ...args,
         repoPath: worktreePath,
-        connectionId: repo.connectionId ?? null,
+        connectionId: null,
         ...(Object.keys(localGitOptions).length > 0
           ? { localGitExecOptions: localGitOptions }
           : {}),
@@ -126,7 +122,7 @@ export function registerHostedReviewHandlers(store: Store, stats: StatsCollector
     const repo = assertRegisteredRepo(args.repoPath, store, args.repoId)
     const worktreePath = await resolveHostedReviewWorktreePath(repo, store, args.worktreePath)
     const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
-    const sharedLinkPaths = repo.connectionId ? [] : getWorktreeSharedLinkPaths(repo)
+    const sharedLinkPaths = getWorktreeSharedLinkPaths(repo)
     const executionOptions =
       Object.keys(localGitOptions).length > 0 || sharedLinkPaths.length > 0
         ? {
@@ -146,8 +142,8 @@ export function registerHostedReviewHandlers(store: Store, stats: StatsCollector
       ...(args.useTemplate !== undefined ? { useTemplate: args.useTemplate } : {})
     }
     const result = executionOptions
-      ? await createHostedReview(worktreePath, input, repo.connectionId ?? null, executionOptions)
-      : await createHostedReview(worktreePath, input, repo.connectionId ?? null)
+      ? await createHostedReview(worktreePath, input, null, executionOptions)
+      : await createHostedReview(worktreePath, input, null)
     if (result.ok && !stats.hasCountedPR(result.url)) {
       stats.record({
         type: 'pr_created',

@@ -101,15 +101,15 @@ export function projectCoworkingSidebarRows(
       connectionStatus: desktop.connectionStatus,
       quota: catalog?.quota ?? []
     }
+    // Why: the desktop row is the Coworking-only remote-host admission point;
+    // it must remain reachable whether or not this peer publishes worktrees.
+    rows.push({
+      type: 'coworking-desktop-status',
+      key: createCoworkingSidebarRowKey('coworking-desktop-status', desktop.desktopRef),
+      desktopRef: desktop.desktopRef,
+      desktop: sidebarDesktop
+    })
     if (!catalog) {
-      // Why: flattening removes the Desktop hierarchy row, but connection
-      // failures still need a visible, non-hierarchical status surface.
-      rows.push({
-        type: 'coworking-desktop-status',
-        key: createCoworkingSidebarRowKey('coworking-desktop-status', desktop.desktopRef),
-        desktopRef: desktop.desktopRef,
-        desktop: sidebarDesktop
-      })
       continue
     }
     for (const project of catalog.projects) {

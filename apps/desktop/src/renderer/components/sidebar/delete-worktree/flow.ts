@@ -4,16 +4,13 @@ import {
 } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
-import { isPairedWebClientWindow } from '~renderer/lib/desktop-window-chrome'
 import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { useAppStore } from '~renderer/store'
 import { getWorktreeMapFromState } from '~renderer/store/selectors'
-import { findRepoForHost } from '~renderer/store/slices/repo-host-identity'
 import type { Worktree } from '~shared/types'
 
 import { prepareActiveWorktreeFocusAfterDelete } from '../active-worktree-focus-after-delete'
-import { resolveSshWorkspaceForget } from '../ssh-workspace-forget-resolution'
 import { getWorkspaceDeleteLineage } from '../workspace-delete-lineage'
 import { showDeleteWorktreeFailureToast } from './failure-toast'
 
@@ -260,39 +257,6 @@ export function runWorktreeDelete(worktreeId: string): void {
   // Why: a workspace on a removed/disconnected SSH host cannot go through the
   // normal remote removal — its provider is gone, so worktrees:remove throws
   // before any cleanup. Route to a dialog that offers reconnect-and-delete
-  // (when the target still exists) or a local-only forget.
-  //
-  // Skip this on paired web/mobile clients: SSH targets/labels/connection state
-  // are desktop-only, so those clients have empty sshTargetLabels and would
-  // misclassify every SSH repo as a ghost, routing to a forget dialog whose
-  // local-only backend is unavailable there. Their normal worktree.rm RPC path
-  // already handles the delete against the desktop runtime.
-  const matchingRepos = state.repos.filter((entry) => entry.id === target.repoId)
-  const repo = target.hostId
-    ? findRepoForHost(matchingRepos, target.repoId, { hostId: target.hostId })
-    : matchingRepos.length === 1
-      ? matchingRepos[0]
-      : null
-  const sshResolution = isPairedWebClientWindow()
-    ? { kind: 'not-ssh' as const }
-    : resolveSshWorkspaceForget({
-        repo,
-        sshConnectionStates: state.sshConnectionStates,
-        sshTargetLabels: state.sshTargetLabels
-      })
-  if (sshResolution.kind === 'ghost' || sshResolution.kind === 'disconnected') {
-    // Why no lineage-children warning here (unlike the normal path below):
-    // forget-local is metadata-only and per-worktree, so it can't fail on a
-    // still-registered child the way a remote git removal would. Any descendants
-    // live on the same ghost host and remain independently visible/forgettable —
-    // they are not orphaned unrecoverably.
-    state.openModal('forget-ssh-workspace', {
-      worktreeId,
-      displayName: target.displayName,
-      resolution: sshResolution
-    })
-    return
-  }
 
   const hasLineageChildren =
     getWorkspaceDeleteLineage(target, state.allWorktrees(), state.worktreeLineageById).descendants

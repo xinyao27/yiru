@@ -36,7 +36,8 @@ export function createCoworkingPeerConnectivity(options: CoworkingPeerConnectivi
   const probeClient = new HttpCoworkingProbeClient()
   const ownerCatalog = new CoworkingOwnerCatalog(
     new DefaultTailnetPeerDirectory(tailnet, probeClient),
-    probeClient
+    probeClient,
+    options.userDataPath
   )
   const firewallEnvironment: CoworkingWindowsFirewallEnvironment = {
     platform: process.platform,

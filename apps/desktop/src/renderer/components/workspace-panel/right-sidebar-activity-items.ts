@@ -1,4 +1,4 @@
-import { Files, FlowArrow as Workflow, GitMerge, ListChecks, Plug } from '@phosphor-icons/react'
+import { Files, FlowArrow as Workflow, GitMerge, ListChecks } from '@phosphor-icons/react'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
@@ -43,13 +43,6 @@ export function createRightSidebarActivityItems(
       title: translate('auto.components.workspace.panel.sourceControl.title', 'Changes & Review'),
       shortcut: assignedShortcut(shortcuts.sourceControl),
       gitOnly: true
-    },
-    {
-      id: 'ports',
-      icon: Plug,
-      title: translate('auto.components.right.sidebar.index.441733b630', 'Ports'),
-      shortcut: assignedShortcut(shortcuts.ports),
-      sshOnly: true
     },
     {
       // Why: keeping Agent last here preserves its trailing position after visibility filtering.

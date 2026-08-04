@@ -25,13 +25,12 @@ export function shouldShowViewFileAction(node: TreeNode): boolean {
 export function shouldShowRemoteDownloadAction(
   node: TreeNode,
   connectionId?: string | null,
-  runtimeDownloadContext?: RuntimeFileOperationArgs | null,
-  supportsFolderDownload = false
+  runtimeDownloadContext?: RuntimeFileOperationArgs | null
 ): boolean {
   // Why: download depends on Electron's native save dialog.
   return (
     Boolean(connectionId || runtimeDownloadContext) &&
-    (!node.isDirectory || Boolean(runtimeDownloadContext) || supportsFolderDownload) &&
+    (!node.isDirectory || Boolean(runtimeDownloadContext)) &&
     (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }

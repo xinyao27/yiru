@@ -1931,9 +1931,6 @@
   "auto.components.settings.McpConfigSection.3b224167ff": {
     "ko": "서버"
   },
-  "auto.components.settings.McpConfigSection.6bac9ddfc6": {
-    "ko": "SSH repos는 원격 파일 시스템을 통해 읽힙니다. 스타터 생성은 워크스페이스 루트 구성으로 제한됩니다."
-  },
   "auto.components.settings.MobileEmulatorExamples.4daa95f25a": {
     "ko": "Yiru CLI 스킬이 설치된 프로젝트의 Claude Code, Codex 또는 다른 agent에 이들 중 하나를 붙여넣으세요."
   },

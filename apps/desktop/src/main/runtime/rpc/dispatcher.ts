@@ -4,6 +4,8 @@ import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { YiruRuntimeService } from '../yiru-runtime'
+import type { RpcAccess } from './access'
+import { denyAccess, denyRedirectedProjectAccess } from './access-adjudication'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport
 // makes it unit-testable without spinning up a socket, and keeps
@@ -43,13 +45,11 @@ export type DispatcherOptions = {
 }
 
 export class RpcDispatcher {
-  private readonly runtime: YiruRuntimeService
   private readonly registry: RpcRegistry
   private readonly moduleContext: RpcContext
   private readonly orchestrationMutations: OrchestrationMutationExecutor
 
   constructor({ runtime, methods }: DispatcherOptions) {
-    this.runtime = runtime
     this.registry = buildRegistry(methods)
     this.orchestrationMutations = new OrchestrationMutationExecutor(runtime)
     this.moduleContext = {
@@ -138,6 +138,12 @@ export class RpcDispatcher {
       clientId?: string
       clientKind?: 'mobile' | 'runtime'
       principal?: AuthenticatedRpcPrincipal
+      /**
+       * The authority this caller was granted, for callers whose admission
+       * carries one. Absent for `local` / `mobile` / `runtime`, which are the
+       * owner's own clients and are not scope-limited today.
+       */
+      grantedAccess?: RpcAccess
       sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
       registerBinaryStreamHandler?: (
         streamId: number,
@@ -162,10 +168,34 @@ export class RpcDispatcher {
       return
     }
 
+    // Why: the single adjudication point for `access`. Handlers must not repeat
+    // this — a check that lives in 450 handlers is a check that will be missed
+    // in the 451st. Denials are computed before params are even parsed so an
+    // unauthorized caller learns nothing about the method's shape.
+    const denial = denyAccess(method, meta, request.id, {
+      principal: options?.principal,
+      grantedAccess: options?.grantedAccess
+    })
+    if (denial) {
+      reply(JSON.stringify(denial))
+      return
+    }
+
     const parsedParams = this.parseParams(request, method, meta)
     if (parsedParams.error) {
       reply(JSON.stringify(parsedParams.error))
       return
+    }
+
+    const redirectDenial = await denyRedirectedProjectAccess(
+      method,
+      parsedParams.value,
+      meta,
+      request.id,
+      { principal: options?.principal, runtime: this.moduleContext.runtime }
+    )
+    if (redirectDenial) {
+      return reply(JSON.stringify(redirectDenial))
     }
 
     if (!isStreamingMethod(method)) {
@@ -179,6 +209,7 @@ export class RpcDispatcher {
             clientId: options?.clientId,
             clientKind: options?.clientKind,
             principal: options?.principal,
+            grantedAccess: options?.grantedAccess,
             orchestrationCapability: request.orchestrationCapability,
             authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
             recordMutationReceipt: mutation?.recordReceipt,
@@ -291,7 +322,7 @@ export class RpcDispatcher {
   }
 
   private meta(): RpcEnvelopeMeta {
-    return { runtimeId: this.runtime.getRuntimeId() }
+    return { runtimeId: this.moduleContext.runtime.getRuntimeId() }
   }
 
   private recordRuntimeFeatureInteraction(
@@ -308,7 +339,7 @@ export class RpcDispatcher {
       return
     }
     try {
-      this.runtime.recordFeatureInteraction(id)
+      this.moduleContext.runtime.recordFeatureInteraction(id)
       alreadyRecorded?.add(id)
     } catch {
       // Best-effort education state must not break runtime tools.

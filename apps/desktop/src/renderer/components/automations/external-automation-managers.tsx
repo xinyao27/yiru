@@ -62,8 +62,8 @@ function getProviderLabel(manager: ExternalAutomationManager): string {
   return manager.provider === 'hermes' ? 'Hermes' : 'OpenClaw'
 }
 
-function getTargetKindLabel(manager: ExternalAutomationManager): string {
-  return manager.target.type === 'ssh' ? 'SSH host' : 'Local'
+function getTargetKindLabel(_manager: ExternalAutomationManager): string {
+  return 'Local'
 }
 
 function ExternalActionButton({

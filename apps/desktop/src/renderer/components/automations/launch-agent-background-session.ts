@@ -18,7 +18,6 @@ import { useAppStore } from '~renderer/store'
 import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
 import { repoIsRemote } from '~shared/agent/launch-remote'
 import { createAgentStatusOscProcessor } from '~shared/agent/status-osc'
-import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
 import type { RuntimeTerminalCreate } from '~shared/runtime-types'
 import { makePaneKey } from '~shared/stable-pane-id'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -40,7 +39,6 @@ import type {
   LaunchAgentBackgroundSessionResult
 } from './agent-background-session-contract'
 import { retireProvider, retireUnownedTerminal } from './retire-unowned-background-terminal'
-import { createSshBackgroundStartupDelivery } from './ssh-background-startup-delivery'
 
 export async function launchAgentBackgroundSession(
   args: LaunchAgentBackgroundSessionArgs
@@ -67,12 +65,8 @@ export async function launchAgentBackgroundSession(
   const agentArgs = resolveTuiAgentLaunchArgs(agent, store.settings?.agentDefaultArgs)
   const agentEnv = resolveTuiAgentLaunchEnv(agent, store.settings?.agentDefaultEnv)
   const launchPlatform = repo
-    ? getAgentLaunchPlatformForRepo(
-        repo,
-        repo.connectionId ? undefined : getLocalProjectExecutionRuntimeContext(store, worktreeId)
-      )
+    ? getAgentLaunchPlatformForRepo(repo, getLocalProjectExecutionRuntimeContext(store, worktreeId))
     : CLIENT_PLATFORM
-  // Why: SSH remotes must use the relay's public CLI command.
   const isRemote = repo ? repoIsRemote(repo) : false
   const startupShell = resolveLocalWindowsAgentStartupShell({
     platform: launchPlatform,
@@ -132,17 +126,6 @@ export async function launchAgentBackgroundSession(
     YIRU_WORKTREE_ID: worktreeId,
     YIRU_AGENT_LAUNCH_TOKEN: launchToken
   }
-  const sshConnectionId = repo?.connectionId ?? null
-  const sshStartupDelivery = createSshBackgroundStartupDelivery({
-    command: sshConnectionId ? startupPlan.launchCommand : null,
-    waitForShellReady:
-      Boolean(sshConnectionId) &&
-      shouldUseShellReadyStartupDelivery({
-        command: startupPlan.launchCommand,
-        startupCommandDelivery: startupPlan.startupCommandDelivery
-      }),
-    write: (ptyId, data) => window.api.pty.write(ptyId, data)
-  })
   // Route by the worktree's owner host, not the focused runtime.
   const runtimeTarget = getActiveRuntimeTarget(
     getSettingsForWorktreeRuntimeOwner(store, worktreeId)
@@ -161,12 +144,11 @@ export async function launchAgentBackgroundSession(
     exitHandled = true
     unsubscribeExit()
     unsubscribeData()
-    sshStartupDelivery.clear()
     useAppStore.getState().clearTabPtyId(tab.id, exitPtyId)
     useAppStore.getState().clearAgentLaunchConfig(paneKey)
     onExit?.(exitPtyId, code)
   }
-  // Why: local/SSH status facts already pass through main's authoritative
+  // Why: local status facts already pass through main's authoritative
   // scanner; remote-runtime bytes still need this renderer-side store write.
   const mainOwnsAgentStatusWrites = isMainTerminalSideEffectAuthorityForPty({
     settings: store.settings,
@@ -174,9 +156,7 @@ export async function launchAgentBackgroundSession(
   })
   const processAgentStatus = createAgentStatusOscProcessor()
   const handleData = (data: string): void => {
-    data = sshStartupDelivery.handleData(data)
     onData?.(data)
-    sshStartupDelivery.schedule(ptyId)
     const processed = processAgentStatus(data)
     for (const payload of processed.payloads) {
       if (!mainOwnsAgentStatusWrites) {
@@ -227,7 +207,7 @@ export async function launchAgentBackgroundSession(
         launchConfig: startupPlan.launchConfig,
         launchToken,
         launchAgent: agent,
-        connectionId: sshConnectionId,
+        connectionId: repo?.connectionId ?? null,
         worktreeId,
         tabId: tab.id,
         leafId,
@@ -248,7 +228,6 @@ export async function launchAgentBackgroundSession(
         runtimeTerminalHandle,
         onRetire: () => {
           exitHandled = true
-          sshStartupDelivery.clear()
           store.clearAgentLaunchConfig(paneKey)
         }
       })
@@ -305,7 +284,7 @@ export async function launchAgentBackgroundSession(
     }
 
     // Why: mount only after the explicit PTY is bound. Mounting at the earlier
-    // createTab boundary lets a slow SSH/remote spawn race TerminalPane's fresh
+    // createTab boundary lets a slow remote spawn race TerminalPane's fresh
     // spawn path and launch the agent twice.
     requestBackgroundTerminalWorktreeMount({ worktreeId, tabIds: [tab.id] })
 
@@ -320,7 +299,6 @@ export async function launchAgentBackgroundSession(
     exitHandled = true
     runBestEffortAgentBackgroundCleanups(unsubscribeExit, unsubscribeData)
     runBestEffortAgentBackgroundCleanups(() => eagerPtyBuffer?.dispose())
-    runBestEffortAgentBackgroundCleanups(() => sshStartupDelivery.clear())
     runBestEffortAgentBackgroundCleanups(() => store.clearTabPtyId(tab.id, ptyId))
     runBestEffortAgentBackgroundCleanups(() => store.clearAgentLaunchConfig(paneKey))
     if (ptyId) {

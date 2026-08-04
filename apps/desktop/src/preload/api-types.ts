@@ -48,7 +48,11 @@ import type {
   CommitMessageModelCapability
 } from '~shared/commit-message/agent-spec'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
@@ -57,6 +61,8 @@ import type {
   CoworkingRequesterSubscriptionStopArgs,
   CoworkingRequesterSubscriptionStopResult,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -79,11 +85,6 @@ import type {
   ListDetectedWorktreesArgs,
   ProviderRequestId
 } from '~shared/detected-worktree-provider-contract'
-import type {
-  EphemeralVmRecipeDoctorResult,
-  EphemeralVmRecipeResultWarning
-} from '~shared/ephemeral-vm/recipes'
-import type { EphemeralVmRuntimeRecord } from '~shared/ephemeral-vm/runtimes'
 import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '~shared/feature-interactions'
 import type {
@@ -311,14 +312,6 @@ type RuntimeEnvironmentSubscriptionHandle = {
   sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => void
 }
 import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '@yiru/runtime-protocol/ssh-connection'
-import type {
   AiVaultListArgs,
   AiVaultListResult,
   AiVaultSubagentListArgs,
@@ -403,12 +396,6 @@ import type {
   RateLimitRuntimeTarget,
   RateLimitState
 } from '~shared/rate-limit-types'
-import type {
-  RemoteWorkspaceChangedEvent,
-  RemoteWorkspaceConnectedClient,
-  RemoteWorkspacePatchResult,
-  RemoteWorkspaceSnapshot
-} from '~shared/remote-workspace-types'
 import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
@@ -628,13 +615,6 @@ export type PreflightApi = {
   detectAgents: (args?: PreflightRuntimeContext) => Promise<string[]>
   refreshAgents: (args?: PreflightRuntimeContext) => Promise<RefreshAgentsResult>
   detectRemoteAgents: (args: { connectionId: string }) => Promise<string[]>
-  detectRemoteWindowsTerminalCapabilities: (args: { connectionId: string }) => Promise<{
-    wslAvailable: boolean
-    wslDistros: string[]
-    pwshAvailable: boolean
-    gitBashAvailable: boolean
-    hostPlatform: NodeJS.Platform | null
-  }>
 }
 
 // Why: renderer-facing mirror of the daemon's `SessionInfo` + protocolVersion
@@ -1981,70 +1961,6 @@ export type PreloadApi = {
     }>
     inspectSetupScriptImports: (args: { repoId: string }) => Promise<SetupScriptImportCandidate[]>
   }
-  ephemeralVm: {
-    listRecipes: (args: { repoId: string }) => Promise<{
-      status: 'ok' | 'error'
-      repoPath: string | null
-      recipes: YiruHooks['environmentRecipes']
-      diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
-      message?: string
-    }>
-    listRecipeCatalog: () => Promise<
-      {
-        repoId: string
-        repoName: string
-        repoPath: string
-        recipes: NonNullable<YiruHooks['environmentRecipes']>
-        diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
-      }[]
-    >
-    doctor: (args: { repoId: string; recipeId: string }) => Promise<EphemeralVmRecipeDoctorResult>
-    provision: (args: {
-      repoId: string
-      recipeId: string
-      workspaceName?: string
-      projectId?: string
-      workspaceId?: string
-      provisionId?: string
-    }) => Promise<
-      | {
-          ok: true
-          connectionType: 'yiru-server'
-          runtime: EphemeralVmRuntimeRecord
-          environment: PublicKnownRuntimeEnvironment
-          stderr: string
-          warnings: EphemeralVmRecipeResultWarning[]
-        }
-      | {
-          ok: true
-          connectionType: 'ssh'
-          runtime: EphemeralVmRuntimeRecord
-          sshTargetId: string
-          stderr: string
-          warnings: EphemeralVmRecipeResultWarning[]
-        }
-      | { ok: false; error: string; stderr: string; stdout: string }
-    >
-    cancelProvision: (args: { provisionId: string }) => Promise<{ cancelled: boolean }>
-    onProvisionEvent: (
-      callback: (event: { provisionId: string; stream: 'stdout' | 'stderr'; chunk: string }) => void
-    ) => () => void
-    listRuntimes: () => Promise<EphemeralVmRuntimeRecord[]>
-    attachWorkspace: (args: {
-      runtimeId: string
-      workspaceId: string
-    }) => Promise<EphemeralVmRuntimeRecord>
-    suspendWorkspace: (args: { workspaceId: string }) => Promise<EphemeralVmRuntimeRecord | null>
-    resumeWorkspace: (args: { workspaceId: string }) => Promise<EphemeralVmRuntimeRecord | null>
-    cleanup: (args: { runtimeId: string }) => Promise<EphemeralVmRuntimeRecord>
-    getCleanupCommand: (args: { runtimeId: string }) => Promise<{
-      runtimeId: string
-      command: string | null
-      payloadJson: string
-      cleanupDisabled: boolean
-      message?: string
-    }>
-  }
   cache: {
     getGitHub: () => Promise<{
       pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
@@ -2064,19 +1980,6 @@ export type PreloadApi = {
     flush: () => Promise<void>
     readTerminalScrollback: (args: { ref: string }) => string | null
     setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
-  }
-  remoteWorkspace: {
-    get: (args: { targetId: string }) => Promise<RemoteWorkspaceSnapshot | null>
-    setForConnectedTargets: (args: {
-      session?: WorkspaceSessionState
-      hydratedTargetIds?: string[]
-    }) => Promise<{ targetId: string; result: RemoteWorkspacePatchResult }[]>
-    listEnabledConnectedTargets: () => Promise<string[]>
-    listConnectedClients: (args?: {
-      targetIds?: string[]
-    }) => Promise<{ targetId: string; clients: RemoteWorkspaceConnectedClient[] }[]>
-    clientId: () => Promise<string>
-    onChanged: (callback: (event: RemoteWorkspaceChangedEvent) => void) => () => void
   }
   updater: {
     getVersion: () => Promise<string>
@@ -2108,7 +2011,7 @@ export type PreloadApi = {
     restart: () => Promise<FridaySession>
   }
   fs: {
-    readDir: (args: { dirPath: string; connectionId?: string }) => Promise<DirEntry[]>
+    readDir: (args: { dirPath: string }) => Promise<DirEntry[]>
     readFile: (args: {
       filePath: string
       connectionId?: string
@@ -2840,6 +2743,14 @@ export type PreloadApi = {
     requestControl: (args: CoworkingRequestControlArgs) => Promise<void>
     decideControl: (args: CoworkingDecideControlArgs) => Promise<void>
     revokeControl: (args: CoworkingRevokeControlArgs) => Promise<void>
+    requestHostAccess: (
+      args: CoworkingRequestHostAccessArgs
+    ) => Promise<CoworkingRequestHostAccessResult>
+    decideHostAccess: (args: CoworkingDecideHostAccessArgs) => Promise<void>
+    listHostDevices: () => Promise<CoworkingListHostDevicesResult>
+    revokeHostDevice: (
+      args: CoworkingRevokeHostDeviceArgs
+    ) => Promise<CoworkingRevokeHostDeviceResult>
     getWindowsFirewallStatus: () => Promise<CoworkingWindowsFirewallStatus>
     repairWindowsFirewall: () => Promise<CoworkingWindowsFirewallRepairResult>
     retryAvailability: () => Promise<void>
@@ -2862,69 +2773,6 @@ export type PreloadApi = {
   }
   grokAccounts: {
     getStatus: () => Promise<GrokAccountStatus>
-  }
-  ssh: {
-    listTargets: () => Promise<SshTarget[]>
-    // Removed-target id → last known label, for showing a friendly host name on
-    // workspaces still pinned to a target that no longer exists.
-    listRemovedTargetLabels: () => Promise<Record<string, string>>
-    addTarget: (args: { target: Omit<SshTarget, 'id'> }) => Promise<SshTargetAddResult>
-    updateTarget: (args: {
-      id: string
-      updates: Partial<Omit<SshTarget, 'id'>>
-    }) => Promise<SshTarget>
-    removeTarget: (args: { id: string }) => Promise<void>
-    importConfig: (args?: { reAdopt?: boolean }) => Promise<SshConfigImportResult>
-    connect: (args: { targetId: string }) => Promise<SshConnectionState | null>
-    disconnect: (args: { targetId: string }) => Promise<void>
-    terminateSessions: (args: { targetId: string }) => Promise<void>
-    resetRelay: (args: { targetId: string }) => Promise<void>
-    getState: (args: { targetId: string }) => Promise<SshConnectionState | null>
-    needsPassphrasePrompt: (args: { targetId: string }) => Promise<boolean>
-    testConnection: (args: {
-      targetId: string
-    }) => Promise<{ success: boolean; error?: string; state?: SshConnectionState }>
-    onStateChanged: (
-      callback: (data: { targetId: string; state: SshConnectionState }) => void
-    ) => () => void
-    addPortForward: (args: {
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }) => Promise<PortForwardEntry>
-    updatePortForward: (args: {
-      id: string
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }) => Promise<PortForwardEntry>
-    removePortForward: (args: { id: string }) => Promise<PortForwardEntry | null>
-    listPortForwards: (args?: { targetId?: string }) => Promise<PortForwardEntry[]>
-    listDetectedPorts: (args: { targetId: string }) => Promise<EnrichedDetectedPort[]>
-    onPortForwardsChanged: (
-      callback: (data: { targetId: string; forwards: PortForwardEntry[] }) => void
-    ) => () => void
-    onDetectedPortsChanged: (
-      callback: (data: { targetId: string; ports: EnrichedDetectedPort[] }) => void
-    ) => () => void
-    browseDir: (args: { targetId: string; dirPath: string }) => Promise<{
-      entries: { name: string; isDirectory: boolean }[]
-      resolvedPath: string
-    }>
-    onCredentialRequest: (
-      callback: (data: {
-        requestId: string
-        targetId: string
-        kind: 'passphrase' | 'password'
-        detail: string
-      }) => void
-    ) => () => void
-    onCredentialResolved: (callback: (data: { requestId: string }) => void) => () => void
-    submitCredential: (args: { requestId: string; value: string | null }) => Promise<void>
   }
   automations: {
     list: () => Promise<Automation[]>

@@ -22,7 +22,6 @@ import { captureTerminalDropTarget, getCurrentTerminalDropTransport } from './dr
 import { reportTerminalDropUploadSkipsAndFailures } from './drop/upload-report'
 import { joinRuntimeTerminalDropDir, resolveTerminalDropWorktreePath } from './drop/worktree-path'
 import { showTerminalDropWriteFailure } from './drop/write-failure'
-import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
 import type { PtyTransport } from './pty/transport'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 
@@ -106,8 +105,7 @@ export async function handleNativeTerminalFileDrop(
   const targetShell = resolveTerminalDropTargetShell({
     activeRuntimeEnvironmentId: null,
     worktreePath,
-    connectionId,
-    remotePlatform: getTerminalPasteSshRemotePlatform(connectionId)
+    connectionId
   })
   const isRemote = connectionId !== null
   const localWslDrop = !isRemote && isWorktreeUsingLocalWslRuntime(state, worktreeId)

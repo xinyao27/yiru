@@ -1,5 +1,4 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-import type { DirectSshPaneRetryAttemptId } from '~renderer/components/direct-ssh/terminal-recovery/binding-state'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type { EventProps } from '~shared/telemetry-events'
 import type { TerminalColorSchemeMode } from '~shared/terminal/color-scheme-protocol'
@@ -57,12 +56,7 @@ export type PtyConnectionDeps = {
   updateTabTitle: (tabId: string, title: string) => void
   setRuntimePaneTitle: (tabId: string, paneId: number, title: string) => void
   clearRuntimePaneTitle: (tabId: string, paneId: number) => void
-  updateTabPtyId: (
-    tabId: string,
-    ptyId: string,
-    replacedPtyId?: string,
-    directSshRetryAttemptId?: DirectSshPaneRetryAttemptId
-  ) => void
+  updateTabPtyId: (tabId: string, ptyId: string, replacedPtyId?: string) => void
   markWorktreeUnread: (worktreeId: string) => void
   markTerminalTabUnread: (tabId: string) => void
   markTerminalPaneUnread: (paneKey: string) => void

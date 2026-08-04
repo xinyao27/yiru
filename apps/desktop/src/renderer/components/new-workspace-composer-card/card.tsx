@@ -1,4 +1,3 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
@@ -21,7 +20,7 @@ import type {
 
 import { AdvancedSection } from './advanced-section'
 import { AgentSection } from './agent-section'
-import type { EphemeralVmRecipeOption, RepoOption } from './card-types'
+import type { RepoOption } from './card-types'
 import { useComposerFileDragOver } from './file-drag'
 import { NameSection } from './name-section'
 import { ProjectSection } from './project-section'
@@ -29,7 +28,6 @@ import { SubmitFooter } from './submit-footer'
 
 const EMPTY_PROJECT_OPTIONS: NewWorkspaceProjectOption[] = []
 const EMPTY_PROJECT_HOST_SETUP_OPTIONS: ProjectHostSetupOption[] = []
-const EMPTY_EPHEMERAL_VM_RECIPES: EphemeralVmRecipeOption[] = []
 
 type NewWorkspaceComposerCardProps = {
   contextualTourSource?: string
@@ -49,10 +47,6 @@ type NewWorkspaceComposerCardProps = {
   projectHostSetupOptions?: ProjectHostSetupOption[]
   selectedProjectHostSetupId?: string | null
   onProjectHostSetupChange?: (setupId: string) => void
-  ephemeralVmRecipes?: EphemeralVmRecipeOption[]
-  selectedEphemeralVmRecipeId?: string | null
-  onEphemeralVmRecipeChange?: (recipeId: string | null) => void
-  ephemeralVmRecipeError?: string | null
   repoBackedSearchRepos?: RepoOption[]
   repoBackedSourcesDisabled?: boolean
   allowSmartNameAddProject?: boolean
@@ -102,11 +96,6 @@ type NewWorkspaceComposerCardProps = {
   shouldWaitForSetupCheck: boolean
   resolvedSetupDecision: 'run' | 'skip' | null
   createError: WorkspaceCreateErrorDisplay | null
-  selectedRepoConnectionId: string | null
-  selectedRepoSshStatus: SshConnectionStatus | null
-  selectedRepoRequiresConnection: boolean
-  selectedRepoConnectInProgress: boolean
-  onConnectSelectedRepo: () => Promise<void>
   branchesEnabled?: boolean
   setupControlsEnabled?: boolean
   canUseSparseCheckout: boolean
@@ -138,10 +127,6 @@ export function NewWorkspaceComposerCard({
   projectHostSetupOptions = EMPTY_PROJECT_HOST_SETUP_OPTIONS,
   selectedProjectHostSetupId = null,
   onProjectHostSetupChange,
-  ephemeralVmRecipes = EMPTY_EPHEMERAL_VM_RECIPES,
-  selectedEphemeralVmRecipeId = null,
-  onEphemeralVmRecipeChange,
-  ephemeralVmRecipeError = null,
   repoBackedSearchRepos,
   repoBackedSourcesDisabled = false,
   allowSmartNameAddProject = true,
@@ -188,11 +173,6 @@ export function NewWorkspaceComposerCard({
   shouldWaitForSetupCheck,
   resolvedSetupDecision,
   createError,
-  selectedRepoConnectionId,
-  selectedRepoSshStatus,
-  selectedRepoRequiresConnection,
-  selectedRepoConnectInProgress,
-  onConnectSelectedRepo,
   branchesEnabled = true,
   setupControlsEnabled = true,
   canUseSparseCheckout,
@@ -293,17 +273,6 @@ export function NewWorkspaceComposerCard({
           projectHostSetupOptions={projectHostSetupOptions}
           selectedProjectHostSetupId={selectedProjectHostSetupId}
           onProjectHostSetupChange={onProjectHostSetupChange}
-          ephemeralVmRecipes={ephemeralVmRecipes}
-          selectedEphemeralVmRecipeId={selectedEphemeralVmRecipeId}
-          onEphemeralVmRecipeChange={onEphemeralVmRecipeChange}
-          ephemeralVmRecipeError={ephemeralVmRecipeError}
-          eligibleRepos={eligibleRepos}
-          repoId={repoId}
-          selectedRepoRequiresConnection={selectedRepoRequiresConnection}
-          selectedRepoConnectionId={selectedRepoConnectionId}
-          selectedRepoSshStatus={selectedRepoSshStatus}
-          selectedRepoConnectInProgress={selectedRepoConnectInProgress}
-          onConnectSelectedRepo={onConnectSelectedRepo}
         />
 
         <NameSection
@@ -321,7 +290,6 @@ export function NewWorkspaceComposerCard({
           smartNameSelection={smartNameSelection}
           onClearSmartNameSelection={onClearSmartNameSelection}
           smartNameGitHubSourceContext={smartNameGitHubSourceContext}
-          selectedRepoRequiresConnection={selectedRepoRequiresConnection}
           branchesEnabled={branchesEnabled}
           repoBackedSourcesDisabled={repoBackedSourcesDisabled}
           repoBackedSearchRepos={repoBackedSearchRepos}

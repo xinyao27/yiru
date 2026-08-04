@@ -4,7 +4,6 @@ import {
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   RUNTIME_PROTOCOL_VERSION
 } from '@yiru/runtime-protocol/capabilities'
-import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { Automation } from '~shared/automations-types'
 import type { ProjectSourceContext } from '~shared/project-source-context'
@@ -32,9 +31,6 @@ export type AutomationTargetAvailability =
         | 'runtime-checking'
         | 'runtime-unavailable'
         | 'runtime-update-required'
-        | 'ssh-auth-needed'
-        | 'ssh-unavailable'
-        | 'ssh-connecting'
         | 'source-auth-needed'
         | 'source-tool-unavailable'
         | 'source-provider-unsupported'
@@ -47,7 +43,6 @@ type AutomationTargetAvailabilityArgs = {
   repo: Repo | null | undefined
   workspace: Worktree | null | undefined
   projectHostSetups: readonly ProjectHostSetup[]
-  sshConnectionStates: ReadonlyMap<string, Pick<SshConnectionState, 'status'>>
   runtimeStatusByEnvironmentId?: ReadonlyMap<
     string,
     { status: RuntimeStatus | null; checkedAt: number }
@@ -61,7 +56,6 @@ export function getAutomationTargetAvailability({
   repo,
   workspace,
   projectHostSetups,
-  sshConnectionStates,
   runtimeStatusByEnvironmentId,
   automationHostTarget,
   sourceHostAvailability
@@ -125,26 +119,7 @@ export function getAutomationTargetAvailability({
     return sourceAvailability
   }
 
-  const sshTargetId = getAutomationSshTargetId(automation, repo)
-  if (!sshTargetId) {
-    return { canRunNow: true, reason: 'available', message: null }
-  }
-
-  const status = sshConnectionStates.get(sshTargetId)?.status ?? 'disconnected'
-  switch (status) {
-    case 'connected':
-      return { canRunNow: true, reason: 'available', message: null }
-    case 'auth-failed':
-    case 'reconnection-failed':
-      return unavailable('ssh-auth-needed', 'Connect this SSH host before running manually.')
-    case 'connecting':
-    case 'deploying-relay':
-    case 'reconnecting':
-      return unavailable('ssh-connecting', 'This SSH host is still connecting.')
-    case 'disconnected':
-    case 'error':
-      return unavailable('ssh-unavailable', 'Connect this SSH host before running manually.')
-  }
+  return { canRunNow: true, reason: 'available', message: null }
 }
 
 function getRuntimeTargetHostId(target: AutomationHostTarget | null | undefined): string | null {
@@ -293,17 +268,6 @@ function getRuntimeAutomationAvailability(
     return unavailable('runtime-update-required', describeRuntimeCompatBlock(compat))
   }
   return { canRunNow: true, reason: 'available', message: null }
-}
-
-function getAutomationSshTargetId(automation: Automation, repo: Repo): string | null {
-  const parsedHost = parseExecutionHostId(automation.runContext?.hostId)
-  if (parsedHost?.kind === 'ssh') {
-    return parsedHost.targetId
-  }
-  if (automation.executionTargetType === 'ssh' && automation.executionTargetId.trim()) {
-    return automation.executionTargetId
-  }
-  return repo.connectionId?.trim() || null
 }
 
 function unavailable(

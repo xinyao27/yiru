@@ -118,6 +118,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.listMRs',
     mobile: true,
     params: WorkItemsList,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.listGitLabRepoMRs(
         params.repo,
@@ -130,28 +131,33 @@ export const GITLAB_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'gitlab.diagnoseAuth',
     params: EmptyParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime }) => runtime.diagnoseGitLabAuth()
   }),
   defineMethod({
     name: 'gitlab.rateLimit',
     params: GitLabRateLimit,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime }) => runtime.getGitLabRateLimit(params)
   }),
   defineMethod({
     name: 'gitlab.listLabels',
     params: RepoSelector,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) => runtime.listGitLabRepoLabels(params.repo)
   }),
   defineMethod({
     name: 'gitlab.addMRComment',
     mobile: true,
     params: AddMRComment,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.addGitLabRepoMRComment(params.repo, params.iid, params.body, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.addMRInlineComment',
     params: AddMRInlineComment,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.addGitLabRepoMRInlineComment(params.repo, params.iid, params.input, params.projectRef)
   }),
@@ -159,6 +165,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.resolveMRDiscussion',
     mobile: true,
     params: ResolveMRDiscussion,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.resolveGitLabRepoMRDiscussion(
         params.repo,
@@ -171,12 +178,14 @@ export const GITLAB_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'gitlab.jobTrace',
     params: JobTrace,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoJobTrace(params.repo, params.jobId, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.retryJob',
     params: RetryJob,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.retryGitLabRepoJob(params.repo, params.jobId, params.projectRef)
   }),
@@ -184,6 +193,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.mergeMR',
     mobile: true,
     params: MergeMr,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.mergeGitLabRepoMR(params.repo, params.iid, params.method, params.projectRef)
   }),
@@ -191,6 +201,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.updateMRState',
     mobile: true,
     params: UpdateMrState,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.updateGitLabRepoMRState(params.repo, params.iid, params.state, params.projectRef)
   }),
@@ -198,12 +209,14 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.updateMR',
     mobile: true,
     params: UpdateMr,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.updateGitLabRepoMR(params.repo, params.iid, params.updates, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.updateMRReviewers',
     params: UpdateMrReviewers,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.updateGitLabRepoMRReviewers(
         params.repo,
@@ -216,6 +229,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.workItemDetails',
     mobile: true,
     params: WorkItemDetails,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoWorkItemDetails(params.repo, params.iid, params.type, params.projectRef)
   }),
@@ -223,6 +237,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.workItemByPath',
     mobile: true,
     params: WorkItemByPath,
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoWorkItemByPath(
         params.repo,

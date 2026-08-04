@@ -3,6 +3,7 @@ import { isIP, type Socket } from 'node:net'
 import type { Duplex } from 'node:stream'
 
 import { WebSocketServer, type WebSocket } from 'ws'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 import {
   COWORKING_CONNECT_PATH,
   COWORKING_INGRESS_PORT,
@@ -14,13 +15,19 @@ import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import { openCoworkingEncryptedConnection } from './ingress-encrypted-connection'
 import type { CoworkingProbeService } from './ingress-probe'
 import type { CoworkingRpcGateway } from './rpc/gateway'
-import type { TailnetControl, TailnetPrincipal, TailnetSnapshot } from './tailnet-control'
+import type {
+  TailnetControl,
+  TailnetNode,
+  TailnetPrincipal,
+  TailnetSnapshot
+} from './tailnet-control'
 import { normalizeTailnetIp } from './tailscale-json-projection'
 import type { CoworkingTicketAuthority } from './ticket-authority'
 
 const RECONCILE_INTERVAL_MS = 5_000
-const MAX_COWORKING_CONNECTIONS = 128
-const MAX_COWORKING_CONNECTIONS_PER_NODE = 8
+const PRE_GRANT_RESOURCE_QUOTA = getCoworkingResourceQuota('worktree', 'read')
+const MAX_COWORKING_CONNECTIONS = PRE_GRANT_RESOURCE_QUOTA.maxConnections
+const MAX_COWORKING_CONNECTIONS_PER_NODE = PRE_GRANT_RESOURCE_QUOTA.maxConnectionsPerSubject
 const MAX_COWORKING_TRANSPORT_SOCKETS = MAX_COWORKING_CONNECTIONS + 32
 const MAX_COWORKING_TRANSPORT_SOCKETS_PER_SOURCE = 16
 
@@ -38,6 +45,9 @@ export type CoworkingIngressOptions = {
   ownerRuntimeId: string
   ownerKeyFingerprint: string
   onUnavailable?: (error: Error) => void
+  /** Why: `self` is read on every reconcile anyway, and the owner UI needs to
+   *  name the device it is sharing as. Reported here so nothing probes twice. */
+  onSelfIdentity?: (self: TailnetNode) => void
 }
 
 export class CoworkingIngress {
@@ -62,6 +72,7 @@ export class CoworkingIngress {
       return
     }
     const snapshot = await this.options.tailnet.readSnapshot()
+    this.options.onSelfIdentity?.(snapshot.self)
     this.started = true
     try {
       await this.reconcile(snapshot.self.addresses)
@@ -114,6 +125,7 @@ export class CoworkingIngress {
       // physical socket; the next interval retries address reconciliation.
       return
     }
+    this.options.onSelfIdentity?.(snapshot.self)
     try {
       await this.reconcile(snapshot.self.addresses)
     } catch (error) {

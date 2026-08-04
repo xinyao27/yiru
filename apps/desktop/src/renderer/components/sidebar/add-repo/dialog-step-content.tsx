@@ -1,4 +1,3 @@
-import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import type { NestedRepoScanResult } from '~shared/types'
 
@@ -7,7 +6,6 @@ import { CloneStep } from './clone-step'
 import { CreateStep } from './create-step'
 import type { AddRepoDialogStep } from './dialog-types'
 import { AddRepoNestedImportStep } from './nested-import-step'
-import { RemoteStep } from './remote-step'
 import { AddRepoServerPathStartStep } from './server-start-step'
 import { AddRepoLocalStartStep } from './start-steps'
 
@@ -15,7 +13,6 @@ type AddRepoDialogStepContentProps = {
   step: AddRepoDialogStep
   isRuntimeEnvironmentActive: boolean
   activeRuntimeEnvironmentId: string | null | undefined
-  isSshLikely: boolean
   repoCount: number
   isAdding: boolean
   addProjectBusyLabel: string | null
@@ -28,15 +25,8 @@ type AddRepoDialogStepContentProps = {
   cloneError: string | null
   cloneProgress: { phase: string; percent: number } | null
   isCloning: boolean
-  sshTargets: (SshTarget & { state?: SshConnectionState })[]
-  selectedTargetId: string | null
   selectedSshTargetId?: string | null
   selectedHostLabel?: string | null
-  lockSshTargetSelection?: boolean
-  remotePath: string
-  remoteError: string | null
-  isAddingRemote: boolean
-  isScanningRemoteNested: boolean
   nestedScan: NestedRepoScanResult | null
   nestedSelectedPaths: Set<string>
   nestedGroupName: string
@@ -45,10 +35,9 @@ type AddRepoDialogStepContentProps = {
   createError: string | null
   isCreating: boolean
   hostSelector?: ReactNode
-  showRemoteAction?: boolean
   canCreateProject?: boolean
   manualCreateParentEntry?: boolean
-  browseHostKind?: 'local' | 'ssh' | 'runtime'
+  browseHostKind?: 'local' | 'runtime'
   createDefaultParent: string
   createGitAvailability: GitAvailability
   createRuntimeParentStatus: 'idle' | 'checking' | 'failed'
@@ -56,16 +45,9 @@ type AddRepoDialogStepContentProps = {
   onBrowse: () => void
   onOpenCloneStep: () => void
   onOpenCreateStep: () => void
-  onOpenRemoteStep: (targetId?: string | null) => void
   onStopNestedScan: () => void
   onServerPathChange: (path: string) => void
   onAddServerPath: (kind: 'git' | 'folder') => void
-  onSelectTarget: (id: string) => void
-  onRemotePathChange: (path: string) => void
-  onAddRemoteRepo: () => void
-  onOpenSshSettings: () => void
-  onConnectTarget: (id: string) => Promise<void>
-  onStopRemoteNestedScan: () => void
   onCloneUrlChange: (url: string) => void
   onCloneDestinationChange: (destination: string) => void
   onPickCloneDestination: () => void
@@ -84,7 +66,6 @@ export function AddRepoDialogStepContent({
   step,
   isRuntimeEnvironmentActive,
   activeRuntimeEnvironmentId,
-  isSshLikely,
   repoCount,
   isAdding,
   addProjectBusyLabel,
@@ -97,15 +78,8 @@ export function AddRepoDialogStepContent({
   cloneError,
   cloneProgress,
   isCloning,
-  sshTargets,
-  selectedTargetId,
   selectedSshTargetId,
   selectedHostLabel,
-  lockSshTargetSelection = false,
-  remotePath,
-  remoteError,
-  isAddingRemote,
-  isScanningRemoteNested,
   nestedScan,
   nestedSelectedPaths,
   nestedGroupName,
@@ -114,7 +88,6 @@ export function AddRepoDialogStepContent({
   createError,
   isCreating,
   hostSelector,
-  showRemoteAction = true,
   canCreateProject = true,
   manualCreateParentEntry = isRuntimeEnvironmentActive,
   browseHostKind = 'local',
@@ -125,16 +98,9 @@ export function AddRepoDialogStepContent({
   onBrowse,
   onOpenCloneStep,
   onOpenCreateStep,
-  onOpenRemoteStep,
   onStopNestedScan,
   onServerPathChange,
   onAddServerPath,
-  onSelectTarget,
-  onRemotePathChange,
-  onAddRemoteRepo,
-  onOpenSshSettings,
-  onConnectTarget,
-  onStopRemoteNestedScan,
   onCloneUrlChange,
   onCloneDestinationChange,
   onPickCloneDestination,
@@ -152,18 +118,15 @@ export function AddRepoDialogStepContent({
     return (
       <AddRepoLocalStartStep
         repoCount={repoCount}
-        isSshLikely={isSshLikely}
         isAdding={isAdding}
         addProjectBusyLabel={addProjectBusyLabel}
         nestedScanInProgress={nestedScanInProgress}
         nestedScanId={nestedScanId}
         hostSelector={hostSelector}
-        showRemoteAction={showRemoteAction}
         canCreateProject={canCreateProject}
         browseHostKind={browseHostKind}
         onBrowse={onBrowse}
         onOpenCloneStep={onOpenCloneStep}
-        onOpenRemoteStep={onOpenRemoteStep}
         onOpenCreateStep={onOpenCreateStep}
         onStopNestedScan={onStopNestedScan}
       />
@@ -183,26 +146,6 @@ export function AddRepoDialogStepContent({
         onAddServerPath={onAddServerPath}
         onOpenCloneStep={onOpenCloneStep}
         onOpenCreateStep={onOpenCreateStep}
-      />
-    )
-  }
-
-  if (step === 'remote') {
-    return (
-      <RemoteStep
-        sshTargets={sshTargets}
-        selectedTargetId={selectedTargetId}
-        lockSshTargetSelection={lockSshTargetSelection}
-        remotePath={remotePath}
-        remoteError={remoteError}
-        isAddingRemote={isAddingRemote}
-        isScanningNested={isScanningRemoteNested}
-        onSelectTarget={onSelectTarget}
-        onRemotePathChange={onRemotePathChange}
-        onAdd={onAddRemoteRepo}
-        onOpenSshSettings={onOpenSshSettings}
-        onConnectTarget={onConnectTarget}
-        onStopNestedScan={onStopRemoteNestedScan}
       />
     )
   }

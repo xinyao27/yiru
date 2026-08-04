@@ -57,24 +57,28 @@ export const SPEECH_METHODS: RpcMethod[] = [
     name: 'speech.models.list',
     mobile: true,
     params: null,
+    access: { scope: 'host', tier: 'read' },
     handler: async (_params, { runtime }) => runtime.listMobileSpeechModels()
   }),
   defineMethod({
     name: 'speech.models.download',
     mobile: true,
     params: SpeechModelAction,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.downloadMobileSpeechModel(params.modelId)
   }),
   defineMethod({
     name: 'speech.models.delete',
     mobile: true,
     params: SpeechModelAction,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => runtime.deleteMobileSpeechModel(params.modelId)
   }),
   defineMethod({
     name: 'speech.dictation.setup',
     mobile: true,
     params: DictationSetup,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) =>
       runtime.configureMobileDictation({
         ...(params.enabled !== undefined ? { enabled: params.enabled } : {}),
@@ -86,6 +90,7 @@ export const SPEECH_METHODS: RpcMethod[] = [
     name: 'speech.dictation.start',
     mobile: true,
     params: DictationStart,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.startMobileDictation({ ...params, clientId, connectionId })
   }),
@@ -93,6 +98,7 @@ export const SPEECH_METHODS: RpcMethod[] = [
     name: 'speech.dictation.chunk',
     mobile: true,
     params: DictationChunk,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime, clientId, connectionId }) =>
       runtime.feedMobileDictation({ ...params, clientId, connectionId })
   }),
@@ -100,6 +106,7 @@ export const SPEECH_METHODS: RpcMethod[] = [
     name: 'speech.dictation.finish',
     mobile: true,
     params: DictationHandle,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.finishMobileDictation({ ...params, clientId, connectionId })
   }),
@@ -107,6 +114,7 @@ export const SPEECH_METHODS: RpcMethod[] = [
     name: 'speech.dictation.cancel',
     mobile: true,
     params: DictationHandle,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.cancelMobileDictation({ ...params, clientId, connectionId })
   })

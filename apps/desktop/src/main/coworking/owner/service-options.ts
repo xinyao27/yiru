@@ -1,4 +1,7 @@
+import type { CoworkingHostDeviceView } from '~shared/coworking/host-access-contract'
+
 import type { CoworkingAccessAuthority } from '../access-authority'
+import type { CoworkingHostAccessAuthority } from '../host-access-authority'
 import type { CoworkingIngress } from '../ingress'
 import type { CoworkingShareCatalog } from '../share-catalog'
 import type { CoworkingWindowsFirewallOperations } from '../windows-firewall-recovery'
@@ -11,9 +14,16 @@ export type CoworkingOwnerWorktreeDescriptor = {
   projectDisplayName: string
 }
 
+export type CoworkingHostDeviceRegistry = {
+  listCoworkingHostDevices(): readonly CoworkingHostDeviceView[]
+  revokeCoworkingHostDevice(deviceId: string): boolean
+}
+
 export type CoworkingOwnerServiceOptions = {
   visibility: CoworkingWorktreeVisibility
   access: CoworkingAccessAuthority
+  hostAccess: CoworkingHostAccessAuthority
+  hostDevices: CoworkingHostDeviceRegistry
   shareCatalog: CoworkingShareCatalog
   ownerCatalog: CoworkingOwnerCatalog
   ingress: CoworkingIngress

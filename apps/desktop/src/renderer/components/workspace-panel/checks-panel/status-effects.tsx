@@ -1,14 +1,12 @@
 import { useEffect } from 'react'
-import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
 import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '~renderer/runtime/git-client'
 
-import { RUNTIME_SSH_STATUS_REFRESH_MS, GIT_STATUS_FAILURE_RETRY_MS } from './controller-types'
+import { GIT_STATUS_FAILURE_RETRY_MS } from './controller-types'
 import type { useChecksPanelGenerationFieldsState } from './generation-fields'
 import {
   shouldClearChecksPanelGitStatusSnapshot,
   shouldCoalesceChecksPanelGitStatusSnapshotRefresh,
-  shouldCommitChecksPanelGitStatusSnapshot,
-  shouldPollChecksPanelRuntimeSshStatus
+  shouldCommitChecksPanelGitStatusSnapshot
 } from './git-status-snapshot'
 import { resolveChecksPanelPRRefreshRequest } from './pr-refresh-request'
 
@@ -45,12 +43,9 @@ export function useChecksPanelStatusEffects(context: useChecksPanelGenerationFie
     prFetchedAt,
     remoteStatusInvalidation,
     repo,
-    repoConnectionId,
-    runtimeEnvironmentId,
     setAgentComposerState,
     setGitStatusRefreshNonce,
     setGitStatusSnapshot,
-    sshConnectionStatus,
     stateRequestKey,
     updateWorktreeGitIdentity
   } = context
@@ -109,61 +104,19 @@ export function useChecksPanelStatusEffects(context: useChecksPanelGenerationFie
 
   useEffect(() => {
     if (
-      !shouldPollChecksPanelRuntimeSshStatus({
-        isPanelVisible,
-        runtimeEnvironmentId,
-        repoConnectionId
-      })
-    ) {
-      return undefined
-    }
-    let skippedInitialRun = false
-    return installWindowVisibilityInterval({
-      run: () => {
-        if (!skippedInitialRun) {
-          skippedInitialRun = true
-          return
-        }
-        const currentContextKey = panelContextKeyRef.current
-        if (
-          shouldCoalesceChecksPanelGitStatusSnapshotRefresh(
-            gitStatusSnapshotInFlightContextRef.current,
-            currentContextKey
-          )
-        ) {
-          gitStatusSnapshotRerunContextRef.current = currentContextKey
-          return
-        }
-        setGitStatusRefreshNonce((value) => value + 1)
-      },
-      intervalMs: RUNTIME_SSH_STATUS_REFRESH_MS
-    })
-  }, [
-    isPanelVisible,
-    repoConnectionId,
-    runtimeEnvironmentId,
-    gitStatusSnapshotInFlightContextRef,
-    gitStatusSnapshotRerunContextRef,
-    setGitStatusRefreshNonce,
-    panelContextKeyRef
-  ])
-
-  useEffect(() => {
-    if (
       !repo ||
       isFolder ||
       !branch ||
       !isPanelVisible ||
       !activeWorktreeId ||
-      !activeWorktreePath ||
-      (!runtimeEnvironmentId && repoConnectionId && sshConnectionStatus !== 'connected')
+      !activeWorktreePath
     ) {
       if (gitStatusSnapshotRetryTimerRef.current) {
         clearTimeout(gitStatusSnapshotRetryTimerRef.current)
         gitStatusSnapshotRetryTimerRef.current = null
       }
-      // Why: hiding the panel or temporarily losing SSH should stop new work,
-      // not erase same-context Create PR eligibility that can still be retried.
+      // Why: hiding the panel stops new work, not erase same-context Create PR
+      // eligibility that can still be retried.
       return
     }
     let stale = false
@@ -292,10 +245,7 @@ export function useChecksPanelStatusEffects(context: useChecksPanelGenerationFie
     ownerSettings,
     panelContextKey,
     repo,
-    repoConnectionId,
     remoteStatusInvalidation,
-    runtimeEnvironmentId,
-    sshConnectionStatus,
     updateWorktreeGitIdentity,
     setGitStatusSnapshot,
     setGitStatusRefreshNonce,

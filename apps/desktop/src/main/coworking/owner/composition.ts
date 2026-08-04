@@ -1,14 +1,19 @@
 import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import type { Store } from '~main/persistence'
 import type { RateLimitService } from '~main/rate-limits/service'
+import type { YiruRuntimeRpcServer } from '~main/runtime/rpc'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import { COWORKING_INGRESS_PORT, type CoworkingOsFamily } from '~shared/coworking/wire-contract'
 
 import { CoworkingAccessAuthority } from '../access-authority'
+import { coworkingLocalActualHostScopeKey } from '../canonical-host-path'
 import { CoworkingExecutionGateway } from '../execution-gateway'
+import { CoworkingGrantJournal } from '../grant-journal'
 import { CoworkingCanonicalHistoricalSessionConsistency } from '../historical-session-consistency'
+import { CoworkingHostAccessAuthority } from '../host-access-authority'
 import { CoworkingIngress } from '../ingress'
 import { CoworkingLegacySessionAttestor } from '../legacy-session-attestor'
 import { resolveCoworkingLocalWslDistro } from '../local-wsl-route'
@@ -26,7 +31,6 @@ import { CoworkingSessionProvenanceIndex } from '../session/provenance-index'
 import { CoworkingActualHostSessionRootMatcher } from '../session/root-matcher'
 import { CoworkingShareCatalog } from '../share-catalog'
 import { CoworkingTerminalAttachmentRegistry } from '../terminal-attachment-registry'
-import { CoworkingVisibilityDenyJournal } from '../visibility-deny-journal'
 import {
   assertWindowsCoworkingFirewallReady,
   inspectWindowsCoworkingFirewall,
@@ -47,6 +51,10 @@ export { CoworkingOwnerComposition } from './lifecycle'
 export type CoworkingOwnerCompositionOptions = {
   store: Store
   runtime: YiruRuntimeService
+  runtimeRpc: Pick<
+    YiruRuntimeRpcServer,
+    'createCoworkingHostPairingOffer' | 'listCoworkingHostDevices' | 'revokeCoworkingHostDevice'
+  >
   rateLimits: Pick<RateLimitService, 'getState' | 'onStateChange'>
   userDataPath: string
   profileId: string
@@ -103,12 +111,13 @@ export function createCoworkingOwnerComposition(
     new CoworkingCanonicalHistoricalSessionConsistency(catalog, incarnation, roots)
   )
   const attestor = new CoworkingLegacySessionAttestor(provenance, sessionSource, roots)
+  const grantJournal = new CoworkingGrantJournal(
+    join(options.userDataPath, 'coworking-visibility-deny.json'),
+    options.profileId
+  )
   const visibility = new CoworkingWorktreeVisibility({
     store: options.store,
-    denyJournal: new CoworkingVisibilityDenyJournal(
-      join(options.userDataPath, 'coworking-visibility-deny.json'),
-      options.profileId
-    ),
+    denyJournal: grantJournal,
     catalog,
     incarnation,
     prepareFirstPublication: async (entries, registeredRoots, refreshInstanceIds) => {
@@ -139,6 +148,17 @@ export function createCoworkingOwnerComposition(
     ownerRuntimeId: options.ownerRuntimeId,
     isPublic: (instanceId, shareEpoch) => visibility.isPublic(instanceId, shareEpoch)
   })
+  const hostAccess = new CoworkingHostAccessAuthority({
+    issue: ({ name, requester, tier, expiresAt }) =>
+      options.runtimeRpc.createCoworkingHostPairingOffer({
+        name,
+        subject: { nodeId: requester.nodeId, userDisplayName: requester.userDisplayName },
+        hostScopeKey: coworkingLocalActualHostScopeKey(LOCAL_EXECUTION_HOST_ID, null),
+        tier,
+        expiresAt
+      }),
+    recordDenied: (request) => grantJournal.recordHostAccessDenial(request)
+  })
   const terminalAttachments = new CoworkingTerminalAttachmentRegistry()
   const execution = new CoworkingExecutionGateway({
     resolveAdapter: host.resolveAdapter,
@@ -160,6 +180,7 @@ export function createCoworkingOwnerComposition(
     catalog: shareCatalog,
     visibility,
     access,
+    hostAccess,
     execution,
     sessions,
     attachments: terminalAttachments
@@ -177,6 +198,7 @@ export function createCoworkingOwnerComposition(
       // Why: revoke authority first; downstream cleanup errors must never leave
       // a grant alive after its physical connection has closed.
       try {
+        hostAccess.connectionClosed(connectionId)
         access.connectionClosed(connectionId)
       } finally {
         try {
@@ -217,11 +239,18 @@ export function createCoworkingOwnerComposition(
     gateway,
     ownerRuntimeId: options.ownerRuntimeId,
     ownerKeyFingerprint: keypair.fingerprint,
-    onUnavailable: (error) => void service?.reportIngressUnavailable(error)
+    onUnavailable: (error) => void service?.reportIngressUnavailable(error),
+    onSelfIdentity: (self) =>
+      service?.reportSelfIdentity({
+        nodeDisplayName: self.nodeDisplayName,
+        userDisplayName: self.userDisplayName
+      })
   })
   service = new CoworkingOwnerService({
     visibility,
     access,
+    hostAccess,
+    hostDevices: options.runtimeRpc,
     shareCatalog,
     ownerCatalog,
     ingress,
@@ -260,6 +289,7 @@ export function createCoworkingOwnerComposition(
   })
   composition = new CoworkingOwnerComposition(
     service,
+    grantJournal,
     options.store,
     catalog,
     visibility,

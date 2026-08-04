@@ -147,8 +147,7 @@ import type { FetchExternalAutomationRuns } from './external-automation-run-tabl
 import { getExternalAutomationScheduleDisplay } from './external-automation-schedule-display'
 import {
   getExternalAutomationActionDisabledMessage,
-  getExternalAutomationSourceAvailability,
-  isSshConnectionBusy
+  getExternalAutomationSourceAvailability
 } from './external-automation-source-availability'
 import { HermesCronOutputView } from './hermes-cron-output-view'
 
@@ -302,8 +301,8 @@ function getExternalProviderLabel(manager: ExternalAutomationManager): string {
   return manager.provider === 'hermes' ? 'Hermes' : 'OpenClaw'
 }
 
-function getExternalTargetKindLabel(manager: ExternalAutomationManager): string {
-  return manager.target.type === 'ssh' ? 'SSH host' : 'Local'
+function getExternalTargetKindLabel(_manager: ExternalAutomationManager): string {
+  return 'Local'
 }
 
 function getExternalRunStatusLabel(run: ExternalAutomationRun): string {
@@ -379,8 +378,6 @@ export default function AutomationsPage(): React.JSX.Element {
   const closeAutomationsPage = useAppStore((s) => s.closeAutomationsPage)
   const agentStatusByPaneKey = useAppStore((s) => s.agentStatusByPaneKey)
   const retainedAgentsByPaneKey = useAppStore((s) => s.retainedAgentsByPaneKey)
-  const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
-  const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
   const settings = useAppStore((s) => s.settings)
@@ -446,9 +443,6 @@ export default function AutomationsPage(): React.JSX.Element {
     setSelectedExternalRunPage(null)
     setSelectedExternalKey(externalKey)
   }, [])
-  const [connectingExternalSourceKey, setConnectingExternalSourceKey] = useState<string | null>(
-    null
-  )
   const [draftAtOpen, setDraftAtOpen] = useState<AutomationDraft | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Automation | null>(null)
   const [externalDeleteTarget, setExternalDeleteTarget] = useState<{
@@ -907,7 +901,6 @@ export default function AutomationsPage(): React.JSX.Element {
         repo: selectedRepo,
         workspace: selectedWorktree,
         projectHostSetups,
-        sshConnectionStates,
         runtimeStatusByEnvironmentId,
         automationHostTarget,
         sourceHostAvailability: automationSourceHostAvailabilityById.get(selected.id)
@@ -917,30 +910,12 @@ export default function AutomationsPage(): React.JSX.Element {
     editingAutomationId === null ||
     !draftAtOpen ||
     JSON.stringify(draft) !== JSON.stringify(draftAtOpen)
-  const selectedExternalSshSource =
-    selectedExternal?.kind === 'source' && selectedExternal.manager.target.type === 'ssh'
-      ? {
-          manager: selectedExternal.manager,
-          connectionId: selectedExternal.manager.target.connectionId,
-          sourceKey: getExternalAutomationSourceKey(selectedExternal.manager)
-        }
-      : null
-  const selectedExternalSshStatus = selectedExternalSshSource
-    ? sshConnectionStates.get(selectedExternalSshSource.connectionId)?.status
-    : undefined
-  const selectedExternalSshConnected = selectedExternalSshStatus === 'connected'
-  const isSelectedExternalSshConnecting =
-    selectedExternalSshSource !== null &&
-    (connectingExternalSourceKey === selectedExternalSshSource.sourceKey ||
-      isSshConnectionBusy(selectedExternalSshStatus))
   const selectedExternalSourceAvailability =
     selectedExternal?.kind === 'source'
       ? getExternalAutomationSourceAvailability({
           manager: selectedExternal.manager,
           providerLabel: getExternalProviderLabel(selectedExternal.manager),
-          targetKindLabel: getExternalTargetKindLabel(selectedExternal.manager),
-          sshStatus: selectedExternalSshStatus,
-          isConnectingOverride: isSelectedExternalSshConnecting
+          targetKindLabel: getExternalTargetKindLabel(selectedExternal.manager)
         })
       : null
 
@@ -948,9 +923,6 @@ export default function AutomationsPage(): React.JSX.Element {
     (repo: Repo): string => {
       const hostId = getRepoExecutionHostId(repo)
       const parsed = parseExecutionHostId(hostId)
-      if (parsed?.kind === 'ssh') {
-        return sshTargetLabels.get(parsed.targetId) ?? parsed.targetId
-      }
       if (parsed?.kind === 'runtime') {
         return (
           runtimeEnvironments.find((environment) => environment.id === parsed.environmentId)
@@ -959,14 +931,11 @@ export default function AutomationsPage(): React.JSX.Element {
       }
       return getLocalExecutionHostLabel()
     },
-    [runtimeEnvironments, sshTargetLabels]
+    [runtimeEnvironments]
   )
   const hostLabelOverrides = useMemo(() => getHostDisplayLabelOverrides(settings), [settings])
   const hostLabelById = useMemo(() => {
     const labels = new Map<string, string>([['local', getLocalExecutionHostLabel()]])
-    for (const [targetId, label] of sshTargetLabels) {
-      labels.set(`ssh:${encodeURIComponent(targetId)}`, label)
-    }
     for (const environment of runtimeEnvironments) {
       labels.set(`runtime:${encodeURIComponent(environment.id)}`, environment.name)
     }
@@ -974,7 +943,7 @@ export default function AutomationsPage(): React.JSX.Element {
       labels.set(hostId, label)
     }
     return labels
-  }, [hostLabelOverrides, runtimeEnvironments, sshTargetLabels])
+  }, [hostLabelOverrides, runtimeEnvironments])
 
   useEffect(() => {
     if ((!selected || selectedExternal) && activePaneTab === 'runs') {
@@ -1374,10 +1343,7 @@ export default function AutomationsPage(): React.JSX.Element {
         .flat()
         .find((worktree) => {
           const repo = repoMap.get(worktree.repoId)
-          const repoTargetMatches =
-            manager.target.type === 'local'
-              ? !repo?.connectionId
-              : repo?.connectionId === manager.target.connectionId
+          const repoTargetMatches = !repo?.connectionId
           return repoTargetMatches && job.workdir !== null && worktree.path === job.workdir
         }) ?? null
     const fallbackTarget = getDefaultTarget()
@@ -1518,13 +1484,8 @@ export default function AutomationsPage(): React.JSX.Element {
           )
           return
         }
-        const target =
-          editingExternalTarget?.manager.target ??
-          (repo.connectionId
-            ? { type: 'ssh' as const, connectionId: repo.connectionId }
-            : { type: 'local' as const })
-        const repoTargetMatches =
-          target.type === 'local' ? !repo.connectionId : repo.connectionId === target.connectionId
+        const target = editingExternalTarget?.manager.target ?? { type: 'local' as const }
+        const repoTargetMatches = !repo.connectionId
         if (!repoTargetMatches) {
           toast.error(
             translate(
@@ -1535,9 +1496,7 @@ export default function AutomationsPage(): React.JSX.Element {
           return
         }
         const schedule = buildHermesCronSchedule(draft)
-        const managerId =
-          editingExternalTarget?.manager.id ??
-          (target.type === 'ssh' ? `hermes:ssh:${target.connectionId}` : 'hermes:local')
+        const managerId = editingExternalTarget?.manager.id ?? 'hermes:local'
         const input = {
           managerId,
           provider: 'hermes' as const,
@@ -1805,7 +1764,6 @@ export default function AutomationsPage(): React.JSX.Element {
       repo,
       workspace,
       projectHostSetups,
-      sshConnectionStates,
       runtimeStatusByEnvironmentId,
       automationHostTarget,
       sourceHostAvailability: automationSourceHostAvailabilityById.get(automation.id)
@@ -1980,54 +1938,6 @@ export default function AutomationsPage(): React.JSX.Element {
     const target = externalDeleteTarget
     setExternalDeleteTarget(null)
     await runExternalAction(target.manager, target.job, 'delete')
-  }
-
-  const connectExternalAutomationSource = async (
-    manager: ExternalAutomationManager
-  ): Promise<void> => {
-    if (manager.target.type !== 'ssh') {
-      return
-    }
-    const sourceKey = getExternalAutomationSourceKey(manager)
-    setConnectingExternalSourceKey(sourceKey)
-    try {
-      if (sshConnectionStates.get(manager.target.connectionId)?.status === 'connected') {
-        await refresh()
-        toast.success(
-          translate(
-            'auto.components.automations.AutomationsPage.a21f6c33ad',
-            'Automation source refreshed.'
-          )
-        )
-        return
-      }
-      const state = await window.api.ssh.connect({ targetId: manager.target.connectionId })
-      if (!state || state.status !== 'connected') {
-        toast.error(
-          state?.error ??
-            translate(
-              'auto.components.automations.AutomationsPage.7b2e285552',
-              'SSH connections are unavailable in this client.'
-            )
-        )
-        return
-      }
-      await refresh()
-      toast.success(
-        translate('auto.components.automations.AutomationsPage.9f2855677c', 'SSH connected.')
-      )
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate(
-              'auto.components.automations.AutomationsPage.3e42a5cc1b',
-              'SSH connection failed.'
-            )
-      )
-    } finally {
-      setConnectingExternalSourceKey(null)
-    }
   }
 
   const openRunWorkspace = (run: AutomationRun): void => {
@@ -2409,7 +2319,6 @@ export default function AutomationsPage(): React.JSX.Element {
                 repo: automationRepo,
                 workspace: automationWorktree,
                 projectHostSetups,
-                sshConnectionStates,
                 runtimeStatusByEnvironmentId,
                 automationHostTarget,
                 sourceHostAvailability: automationSourceHostAvailabilityById.get(automation.id)
@@ -2561,15 +2470,10 @@ export default function AutomationsPage(): React.JSX.Element {
               const providerLabel = getExternalProviderLabel(entry.manager)
               const targetKindLabel = getExternalTargetKindLabel(entry.manager)
               if (entry.kind === 'source') {
-                const sshStatus =
-                  entry.manager.target.type === 'ssh'
-                    ? sshConnectionStates.get(entry.manager.target.connectionId)?.status
-                    : undefined
                 const sourceAvailability = getExternalAutomationSourceAvailability({
                   manager: entry.manager,
                   providerLabel,
-                  targetKindLabel,
-                  sshStatus
+                  targetKindLabel
                 })
                 return (
                   <Button
@@ -2618,15 +2522,10 @@ export default function AutomationsPage(): React.JSX.Element {
               const nextRunLabel = entry.job.enabled
                 ? formatExternalDate(entry.job.nextRunAt, relativeNow)
                 : 'Paused'
-              const entrySshStatus =
-                entry.manager.target.type === 'ssh'
-                  ? sshConnectionStates.get(entry.manager.target.connectionId)?.status
-                  : undefined
               const disabledMessage = getExternalAutomationActionDisabledMessage({
                 manager: entry.manager,
                 providerLabel,
                 targetKindLabel,
-                sshStatus: entrySshStatus,
                 actionInProgress: externalActionKey !== null
               })
               const actionDisabled = disabledMessage !== null
@@ -2843,35 +2742,6 @@ export default function AutomationsPage(): React.JSX.Element {
                         {selectedExternalSourceAvailability?.summary}
                       </div>
                     </div>
-                    {selectedExternalSshSource ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={selectedExternalSourceAvailability?.isConnecting ?? false}
-                        onClick={() =>
-                          void connectExternalAutomationSource(selectedExternalSshSource.manager)
-                        }
-                      >
-                        {selectedExternalSourceAvailability?.isConnecting ? (
-                          <LoadingIndicator className="size-3.5" />
-                        ) : null}
-                        {selectedExternalSourceAvailability?.isConnecting
-                          ? translate(
-                              'auto.components.automations.AutomationsPage.f93ed7a6f8',
-                              'Connecting...'
-                            )
-                          : selectedExternalSshConnected
-                            ? translate(
-                                'auto.components.automations.AutomationsPage.53f06f0ad5',
-                                'Retry source'
-                              )
-                            : translate(
-                                'auto.components.automations.AutomationsPage.7934ee0d81',
-                                'Connect SSH'
-                              )}
-                      </Button>
-                    ) : null}
                   </div>
                   <div className="text-muted-foreground px-4 py-4 text-sm">
                     {selectedExternalSourceAvailability?.detail}

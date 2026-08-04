@@ -104,33 +104,27 @@ export type RemoteCursorUsageFetcher = (
   signal?: AbortSignal
 ) => Promise<ProviderRateLimits>
 
-export type SshCursorUsageFetcher = (
-  connectionId: string,
-  signal?: AbortSignal
-) => Promise<ProviderRateLimits>
-
 export async function fetchCursorUsageForRuntime(options: {
   target: CursorUsageRuntimeTarget
   remoteFetcher?: RemoteCursorUsageFetcher
-  sshFetcher?: SshCursorUsageFetcher
   signal?: AbortSignal
 }): Promise<ProviderRateLimits> {
   if (options.target.runtime === 'host' || options.target.runtime === 'wsl') {
     return fetchCursorRateLimits({ signal: options.signal, target: options.target })
   }
-  const fetcher = options.target.runtime === 'ssh' ? options.sshFetcher : options.remoteFetcher
-  const targetId =
-    options.target.runtime === 'ssh' ? options.target.connectionId : options.target.environmentId
-  if (!fetcher) {
-    return {
-      provider: 'cursor',
-      session: null,
-      weekly: null,
-      updatedAt: Date.now(),
-      error: 'Cursor usage is unavailable for this runtime environment.',
-      status: 'unavailable',
-      usageMetadata: { failureKind: 'usage-unavailable', source: 'cli' }
-    }
+  // Why: a paired runtime environment is the only remaining target that can
+  // answer a remote usage probe; without a remote fetcher it reports
+  // unavailable instead of falling through to local usage.
+  if (options.target.runtime === 'environment' && options.remoteFetcher) {
+    return options.remoteFetcher(options.target.environmentId, options.signal)
   }
-  return fetcher(targetId, options.signal)
+  return {
+    provider: 'cursor',
+    session: null,
+    weekly: null,
+    updatedAt: Date.now(),
+    error: 'Cursor usage is unavailable for this runtime environment.',
+    status: 'unavailable',
+    usageMetadata: { failureKind: 'usage-unavailable', source: 'cli' }
+  }
 }

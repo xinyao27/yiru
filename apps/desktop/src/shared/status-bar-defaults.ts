@@ -10,7 +10,6 @@ export const DEFAULT_STATUS_BAR_ITEMS: StatusBarItem[] = [
   'kimi',
   'minimax',
   'grok',
-  'ssh',
   'resource-usage',
   'ports'
 ]
@@ -24,7 +23,6 @@ const LEGACY_DEFAULT_STATUS_BAR_ITEMS: readonly StatusBarItem[] = [
   'kimi',
   'minimax',
   'grok',
-  'ssh',
   'resource-usage',
   'ports'
 ]
@@ -32,7 +30,6 @@ const LEGACY_DEFAULT_STATUS_BAR_ITEMS: readonly StatusBarItem[] = [
 const PRE_CURSOR_DEFAULT_STATUS_BAR_ITEMS: readonly StatusBarItem[] = [
   'claude',
   'codex',
-  'ssh',
   'resource-usage',
   'ports'
 ]
@@ -43,6 +40,13 @@ export function normalizeStatusBarItems(items: readonly string[] | undefined): S
   const source = items ?? DEFAULT_STATUS_BAR_ITEMS
   const normalized: string[] = []
   for (const id of source) {
+    // Why: 'ssh' was a shipped default before remote hosts were removed. It has
+    // to be dropped here rather than just deleted from the arrays below — the
+    // legacy-upgrade checks compare by exact length, so a persisted 'ssh' would
+    // make an otherwise-default config miss every upgrade and keep a dead entry.
+    if (id === 'ssh') {
+      continue
+    }
     const mapped = id === 'memory' || id === 'sessions' ? 'resource-usage' : id
     if (!normalized.includes(mapped)) {
       normalized.push(mapped)

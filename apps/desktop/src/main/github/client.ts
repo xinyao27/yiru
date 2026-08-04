@@ -37,9 +37,6 @@ import type {
   GitHubPRMergeMethodSettings
 } from '~shared/types'
 
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   hasHostedReviewLocalGitOptions,
   getHostedReviewLocalGitOptions,
@@ -1070,8 +1067,8 @@ function parseCreatePRPayload(stdout: string): { number: number; url: string } |
 // Why: `gh --repo OWNER/REPO` resolves the shorthand against gh's default host
 // (usually github.com), not the repo's remote — so a GHES repo would target a
 // same-named github.com repo, or fail. Qualify with the host for GHES so gh hits
-// the Enterprise server; this is the only host signal for SSH repos, which run
-// gh with no cwd context (#8312). github.com keeps the bare shorthand.
+// the Enterprise server; this also preserves the host when gh has no cwd
+// context (#8312). github.com keeps the bare shorthand.
 function ghRepoArg(slug: { owner: string; repo: string; host?: string }): string {
   return slug.host && slug.host.toLowerCase() !== 'github.com'
     ? `${slug.host}/${slug.owner}/${slug.repo}`
@@ -1116,10 +1113,7 @@ async function findOpenPRByHeadBase(args: {
   return { number: list[0].number, url: list[0].url }
 }
 
-async function readPullRequestTemplate(
-  repoPath: string,
-  connectionId?: string | null
-): Promise<string> {
+async function readPullRequestTemplate(repoPath: string): Promise<string> {
   const relativeCandidates = [
     '.github/pull_request_template.md',
     '.github/PULL_REQUEST_TEMPLATE.md',
@@ -1128,21 +1122,8 @@ async function readPullRequestTemplate(
     'docs/pull_request_template.md',
     'docs/PULL_REQUEST_TEMPLATE.md'
   ]
-  const remoteProvider = connectionId ? getSshFilesystemProvider(connectionId) : undefined
-  if (connectionId && !remoteProvider) {
-    return ''
-  }
   for (const relativeCandidate of relativeCandidates) {
     try {
-      if (remoteProvider) {
-        const result = await remoteProvider.readFile(
-          joinWorktreeRelativePath(repoPath, relativeCandidate)
-        )
-        if (result.isBinary) {
-          continue
-        }
-        return result.content
-      }
       return await readFile(join(repoPath, relativeCandidate), 'utf8')
     } catch {
       // Try the next conventional PR template path.
@@ -1204,7 +1185,7 @@ export async function createGitHubPullRequest(
   try {
     const body =
       input.useTemplate && !input.body?.trim()
-        ? await readPullRequestTemplate(repoPath, connectionId)
+        ? await readPullRequestTemplate(repoPath)
         : (input.body ?? '')
     await writeFile(bodyPath, body, 'utf8')
     const createArgs = [
@@ -1440,17 +1421,13 @@ function isMergedImplicitPR(data: PullRequestLookupData, linkedPRNumber?: number
 
 async function getCurrentHeadOid(
   repoPath: string,
-  connectionId?: string | null,
   localGitOptions: { wslDistro?: string } = {}
 ): Promise<string | null> {
   try {
-    const provider = connectionId ? getSshGitProvider(connectionId) : null
-    const result = provider
-      ? await provider.exec(['rev-parse', 'HEAD'], repoPath)
-      : await gitExecFileAsync(['rev-parse', 'HEAD'], {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
-        })
+    const result = await gitExecFileAsync(['rev-parse', 'HEAD'], {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+    })
     return result.stdout.trim() || null
   } catch {
     return null
@@ -1843,7 +1820,6 @@ async function probeTrackedUpstreamSnapshot(
   })
   const { probeFailed, upstreamsByBranchName } = await probeTrackedUpstreamBranches(
     repoPath,
-    connectionId,
     localGitOptions
   )
   const endingGitConfigSignature = await readLocalGitConfigSignature({
@@ -1869,8 +1845,8 @@ async function probeTrackedUpstreamSnapshot(
 function getCacheableTrackedUpstreamSnapshot(
   upstreamsByBranchName: Map<string, TrackedUpstreamBranch | null>
 ): Map<string, TrackedUpstreamBranch | null> {
-  // Why: SSH/WSL cannot cheaply inspect remote .git/config here. The short TTL
-  // still bounds stale positives, while repeated PR refreshes share one scan.
+  // Why: repeated PR refreshes should share one branch scan; the short TTL
+  // bounds stale positives after upstream configuration changes.
   return upstreamsByBranchName
 }
 
@@ -1904,14 +1880,13 @@ function getTrackedUpstreamBranchCacheKey(
   localGitOptions: { wslDistro?: string } = {}
 ): string {
   const runtimeKey = connectionId
-    ? `ssh:${connectionId}`
+    ? `connection:${connectionId}`
     : `local:${localGitOptions.wslDistro ?? 'host'}`
   return [runtimeKey, repoPath].join('\0')
 }
 
 async function probeTrackedUpstreamBranches(
   repoPath: string,
-  connectionId?: string | null,
   localGitOptions: { wslDistro?: string } = {}
 ): Promise<{
   probeFailed: boolean
@@ -1919,13 +1894,10 @@ async function probeTrackedUpstreamBranches(
 }> {
   const args = ['for-each-ref', '--format=%(refname)%00%(upstream)', 'refs/heads']
   try {
-    const provider = connectionId ? getSshGitProvider(connectionId) : null
-    const result = provider
-      ? await provider.exec(args, repoPath)
-      : await gitExecFileAsync(args, {
-          cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
-        })
+    const result = await gitExecFileAsync(args, {
+      cwd: repoPath,
+      ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+    })
     return {
       probeFailed: false,
       upstreamsByBranchName: parseTrackedUpstreamBranches(result.stdout)
@@ -2293,7 +2265,7 @@ export async function getPRForBranchOutcome(
       currentHeadOidForMergedImplicit ??=
         explicitCurrentHeadOid !== null
           ? explicitCurrentHeadOid
-          : await getCurrentHeadOid(repoPath, connectionId, localGitOptions)
+          : await getCurrentHeadOid(repoPath, localGitOptions)
       if (!shouldHideMergedImplicitPR(candidate, linkedPRNumber, currentHeadOidForMergedImplicit)) {
         return false
       }
@@ -4025,8 +3997,8 @@ async function getPRMergeBlocker(
     if (pr.mergeQueueRequired === true) {
       return 'This pull request must be merged through GitHub merge queue. Use Merge when ready instead.'
     }
-    // Why: conflict summaries shell out to local git; SSH repo paths are remote-only
-    // until that helper is routed through the SSH git provider.
+    // Why: a legacy connection-scoped request has no verified local path for
+    // the conflict-summary git commands, so fail closed before spawning them.
     if (
       connectionId ||
       pr.mergeable !== 'CONFLICTING' ||

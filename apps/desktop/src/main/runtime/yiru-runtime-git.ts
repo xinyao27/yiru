@@ -20,7 +20,7 @@ import {
   type ResolvedSourceControlAiGenerationParams
 } from '~shared/source-control/ai'
 import type { SourceControlAiOperation } from '~shared/source-control/ai-types'
-/* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so local, SSH, and runtime-environment behavior remains comparable. */
+/* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so native, WSL, and paired-runtime behavior remains comparable. */
 import type {
   GitBranchCompareResult,
   GitCommitCompareResult,
@@ -79,10 +79,6 @@ import {
 import { addTag } from '../git/tag'
 import { getUpstreamStatus } from '../git/upstream'
 import type { GitProviderStatusOptions } from '../providers/git-provider-status-options'
-import {
-  getSshGitProvider,
-  SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE
-} from '../providers/ssh-git-dispatch'
 import { resolveHostedReviewBodyForGeneration } from '../source-control/pull-request-template'
 import type {
   CommitMessageAgentEnvironmentResolvers,
@@ -93,7 +89,6 @@ import {
   cancelGenerateCommitMessageLocal,
   cancelGeneratePullRequestFieldsLocal,
   discoverCommitMessageModelsLocal,
-  discoverCommitMessageModelsRemote,
   generateCommitMessageFromContext,
   generatePullRequestFieldsFromContext,
   resolveCommitMessageSettings,
@@ -163,12 +158,11 @@ function normalizeRuntimeGitRelativePath(filePath: string): string {
 type RuntimeGitTarget = {
   worktree: ResolvedRuntimeGitWorktree
   repo?: Repo
-  connectionId?: string
   localGitOptions?: GitRuntimeOptions
 }
 
 function localGitOptionsForTarget(target: RuntimeGitTarget): GitRuntimeOptions {
-  return target.connectionId ? {} : (target.localGitOptions ?? {})
+  return target.localGitOptions ?? {}
 }
 
 function localAgentRuntimeTargetForTarget(
@@ -205,15 +199,6 @@ export class RuntimeGitCommands {
     options?: GitProviderStatusOptions
   ): Promise<GitStatusResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return options
-        ? provider.getStatus(target.worktree.path, options)
-        : provider.getStatus(target.worktree.path)
-    }
     const gitOptions = localGitOptionsForTarget(target)
     const sharedLinkPaths = target.repo ? getWorktreeSharedLinkPaths(target.repo) : []
     const sharedOptions = sharedLinkPaths.length > 0 ? { sharedLinkPaths } : {}
@@ -228,13 +213,6 @@ export class RuntimeGitCommands {
     area: GitStagingArea = 'unstaged'
   ): Promise<GitStatusResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getSubmoduleStatus(target.worktree.path, submodulePath, area)
-    }
     return getGitSubmoduleStatus(target.worktree.path, submodulePath, {
       ...localGitOptionsForTarget(target),
       ...(area === 'staged' ? { staged: true } : {})
@@ -246,13 +224,6 @@ export class RuntimeGitCommands {
     relativePaths: string[]
   ): Promise<string[]> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.checkIgnoredPaths(target.worktree.path, relativePaths)
-    }
     return checkIgnoredPaths(target.worktree.path, relativePaths, localGitOptionsForTarget(target))
   }
 
@@ -261,13 +232,6 @@ export class RuntimeGitCommands {
     options: GitHistoryOptions = {}
   ): Promise<GitHistoryResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getHistory(target.worktree.path, options)
-    }
     return getGitHistory(target.worktree.path, {
       ...options,
       ...localGitOptionsForTarget(target)
@@ -276,40 +240,17 @@ export class RuntimeGitCommands {
 
   async getRuntimeGitConflictOperation(worktreeSelector: string): Promise<GitConflictOperation> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.detectConflictOperation(target.worktree.path)
-    }
     return detectConflictOperation(target.worktree.path)
   }
 
   async abortRuntimeGitMerge(worktreeSelector: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.abortMerge(target.worktree.path)
-      return { ok: true }
-    }
     await abortMerge(target.worktree.path, localGitOptionsForTarget(target))
     return { ok: true }
   }
 
   async abortRuntimeGitRebase(worktreeSelector: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.abortRebase(target.worktree.path)
-      return { ok: true }
-    }
     await abortRebase(target.worktree.path, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -319,28 +260,12 @@ export class RuntimeGitCommands {
     branch: string
   ): Promise<RuntimeGitCheckoutResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.checkoutBranch(target.worktree.path, branch)
-      return { ok: true, branch }
-    }
     await checkoutBranch(target.worktree.path, branch, localGitOptionsForTarget(target))
     return { ok: true, branch }
   }
 
   async abortRuntimeGitRevert(worktreeSelector: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.abortRevert(target.worktree.path)
-      return { ok: true }
-    }
     await abortRevert(target.worktree.path, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -350,13 +275,6 @@ export class RuntimeGitCommands {
     params: { name: string; commit: string; message?: string; force?: boolean }
   ): Promise<GitAddTagResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.addTag(target.worktree.path, params)
-    }
     return addTag(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -365,13 +283,6 @@ export class RuntimeGitCommands {
     params: { name: string; commit: string; checkout?: boolean }
   ): Promise<GitCreateBranchResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.createBranchFromCommit(target.worktree.path, params)
-    }
     return createBranchFromCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -380,13 +291,6 @@ export class RuntimeGitCommands {
     commit: string
   ): Promise<GitCheckoutCommitResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.checkoutCommit(target.worktree.path, commit)
-    }
     return checkoutCommit(target.worktree.path, commit, localGitOptionsForTarget(target))
   }
 
@@ -395,13 +299,6 @@ export class RuntimeGitCommands {
     params: { commit: string; mainline?: number }
   ): Promise<GitCherryPickResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.cherryPickCommit(target.worktree.path, params)
-    }
     return cherryPickCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -410,13 +307,6 @@ export class RuntimeGitCommands {
     params: { commit: string; mainline?: number }
   ): Promise<GitRevertResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.revertCommit(target.worktree.path, params)
-    }
     return revertCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -425,13 +315,6 @@ export class RuntimeGitCommands {
     params: { commit: string }
   ): Promise<GitDropCommitResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.dropCommit(target.worktree.path, params)
-    }
     return dropCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -440,13 +323,6 @@ export class RuntimeGitCommands {
     params: { commit: string; noFf?: boolean; squash?: boolean; message?: string }
   ): Promise<GitMergeCommitResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.mergeCommit(target.worktree.path, params)
-    }
     return mergeCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -455,13 +331,6 @@ export class RuntimeGitCommands {
     params: { commit: string }
   ): Promise<GitRebaseOntoCommitResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.rebaseOntoCommit(target.worktree.path, params)
-    }
     return rebaseOntoCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
@@ -470,25 +339,11 @@ export class RuntimeGitCommands {
     params: { commit: string; mode: 'soft' | 'mixed' | 'hard' }
   ): Promise<GitResetToCommitResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.resetToCommit(target.worktree.path, params)
-    }
     return resetToCommit(target.worktree.path, params, localGitOptionsForTarget(target))
   }
 
   async listRuntimeGitLocalBranches(worktreeSelector: string): Promise<RuntimeGitLocalBranches> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.listLocalBranches(target.worktree.path)
-    }
     return listLocalBranches(target.worktree.path, localGitOptionsForTarget(target))
   }
 
@@ -500,13 +355,6 @@ export class RuntimeGitCommands {
   ): Promise<GitDiffResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeGitRelativePath(filePath)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getDiff(target.worktree.path, relativePath, staged, compareAgainstHead)
-    }
     return getDiff(
       target.worktree.path,
       relativePath,
@@ -521,13 +369,6 @@ export class RuntimeGitCommands {
     baseRef: string
   ): Promise<GitBranchCompareResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getBranchCompare(target.worktree.path, baseRef)
-    }
     return getBranchCompare(target.worktree.path, baseRef, localGitOptionsForTarget(target))
   }
 
@@ -536,13 +377,6 @@ export class RuntimeGitCommands {
     commitId: string
   ): Promise<GitCommitCompareResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getCommitCompare(target.worktree.path, commitId)
-    }
     return getCommitCompare(target.worktree.path, commitId, localGitOptionsForTarget(target))
   }
 
@@ -551,13 +385,6 @@ export class RuntimeGitCommands {
     pushTarget?: GitPushTarget
   ): Promise<GitUpstreamStatus> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getUpstreamStatus(target.worktree.path, pushTarget)
-    }
     return getUpstreamStatus(target.worktree.path, pushTarget, localGitOptionsForTarget(target))
   }
 
@@ -566,14 +393,6 @@ export class RuntimeGitCommands {
     pushTarget?: GitPushTarget
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.fetchRemote(target.worktree.path, pushTarget)
-      return { ok: true }
-    }
     await gitFetch(target.worktree.path, pushTarget, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -583,13 +402,6 @@ export class RuntimeGitCommands {
     expectedUpstream: GitForkSyncExpectedUpstream
   ): Promise<GitForkSyncResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.syncForkDefaultBranch(target.worktree.path, expectedUpstream)
-    }
     return gitSyncForkDefaultBranch(
       target.worktree.path,
       expectedUpstream,
@@ -602,14 +414,6 @@ export class RuntimeGitCommands {
     pushTarget?: GitPushTarget
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.pullBranch(target.worktree.path, pushTarget)
-      return { ok: true }
-    }
     await gitPull(target.worktree.path, pushTarget, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -619,28 +423,12 @@ export class RuntimeGitCommands {
     pushTarget?: GitPushTarget
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.fastForwardBranch(target.worktree.path, pushTarget)
-      return { ok: true }
-    }
     await gitFastForward(target.worktree.path, pushTarget, localGitOptionsForTarget(target))
     return { ok: true }
   }
 
   async rebaseRuntimeGitFromBase(worktreeSelector: string, baseRef: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.rebaseFromBase(target.worktree.path, baseRef)
-      return { ok: true }
-    }
     await gitPullRebaseFromBase(target.worktree.path, baseRef, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -652,16 +440,6 @@ export class RuntimeGitCommands {
     forceWithLease?: boolean
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.pushBranch(target.worktree.path, publish === true, pushTarget, {
-        forceWithLease: forceWithLease === true
-      })
-      return { ok: true }
-    }
     await gitPush(target.worktree.path, publish === true, pushTarget, {
       forceWithLease: forceWithLease === true,
       ...localGitOptionsForTarget(target)
@@ -678,26 +456,6 @@ export class RuntimeGitCommands {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeGitRelativePath(filePath)
     const oldRelativePath = oldPath ? normalizeRuntimeGitRelativePath(oldPath) : undefined
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      const results = await provider.getBranchDiff(target.worktree.path, compare.mergeBase, {
-        includePatch: true,
-        filePath: relativePath,
-        oldPath: oldRelativePath
-      })
-      return (
-        results[0] ?? {
-          kind: 'text',
-          originalContent: '',
-          modifiedContent: '',
-          originalIsBinary: false,
-          modifiedIsBinary: false
-        }
-      )
-    }
     return getBranchDiff(
       target.worktree.path,
       {
@@ -717,18 +475,6 @@ export class RuntimeGitCommands {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeRelativePath(args.filePath)
     const oldRelativePath = args.oldPath ? normalizeRuntimeRelativePath(args.oldPath) : undefined
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getCommitDiff(target.worktree.path, {
-        commitOid: args.commitOid,
-        parentOid: args.parentOid,
-        filePath: relativePath,
-        oldPath: oldRelativePath
-      })
-    }
     return getCommitDiff(
       target.worktree.path,
       {
@@ -750,14 +496,6 @@ export class RuntimeGitCommands {
       throw new Error('Commit message is required')
     }
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await admitRuntimeGitMutation(admission)
-      return provider.commit(target.worktree.path, message, { signal: admission?.signal })
-    }
     await admitRuntimeGitMutation(admission)
     return commitChanges(target.worktree.path, message, {
       ...localGitOptionsForTarget(target),
@@ -771,8 +509,7 @@ export class RuntimeGitCommands {
   ): Promise<GenerateCommitMessageResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const discoveryHostKey =
-      settingsOverride?.commitMessageDiscoveryHostKey ??
-      getCommitMessageModelDiscoveryHostKey(target.connectionId ?? null)
+      settingsOverride?.commitMessageDiscoveryHostKey ?? getCommitMessageModelDiscoveryHostKey(null)
     const resolvedSettings = settingsOverride?.sourceControlAiResolvedParams
       ? { ok: true as const, params: settingsOverride.sourceControlAiResolvedParams }
       : resolveCommitMessageSettings(
@@ -787,33 +524,6 @@ export class RuntimeGitCommands {
         )
     if (!resolvedSettings.ok) {
       return { success: false, error: resolvedSettings.error }
-    }
-
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        return {
-          success: false,
-          error: SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE
-        }
-      }
-      let context: CommitMessageDraftContext | null
-      try {
-        context = await provider.getStagedCommitContext(target.worktree.path)
-      } catch (error) {
-        console.error('[runtime-git] Failed to read remote staged commit context:', error)
-        return { success: false, error: 'Failed to read staged changes.' }
-      }
-      if (!context) {
-        return { success: false, error: 'No staged changes to summarize.' }
-      }
-      return generateCommitMessageFromContext(context, resolvedSettings.params, {
-        kind: 'remote',
-        cwd: target.worktree.path,
-        execute: (plan, cwd, timeoutMs, operation) =>
-          provider.executeCommitMessagePlan(plan, cwd, timeoutMs, operation),
-        missingBinaryLocation: 'remote PATH'
-      })
     }
 
     let context: CommitMessageDraftContext | null
@@ -843,11 +553,6 @@ export class RuntimeGitCommands {
 
   async cancelRuntimeGenerateCommitMessage(worktreeSelector: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      await provider?.cancelGenerateCommitMessage(target.worktree.path, 'commit-message')
-      return { ok: true }
-    }
     cancelGenerateCommitMessageLocal(target.worktree.path)
     return { ok: true }
   }
@@ -866,8 +571,7 @@ export class RuntimeGitCommands {
   ): Promise<GeneratePullRequestFieldsResult> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const discoveryHostKey =
-      settingsOverride?.commitMessageDiscoveryHostKey ??
-      getCommitMessageModelDiscoveryHostKey(target.connectionId ?? null)
+      settingsOverride?.commitMessageDiscoveryHostKey ?? getCommitMessageModelDiscoveryHostKey(null)
     const resolvedSettings = settingsOverride?.sourceControlAiResolvedParams
       ? { ok: true as const, params: settingsOverride.sourceControlAiResolvedParams }
       : resolveCommitMessageSettings(
@@ -884,43 +588,28 @@ export class RuntimeGitCommands {
       return { success: false, error: resolvedSettings.error }
     }
 
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId && !provider) {
-      return {
-        success: false,
-        error: SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE
-      }
-    }
     let context: Awaited<ReturnType<typeof getPullRequestDraftContext>>
     try {
       const currentBody = await resolveHostedReviewBodyForGeneration({
         body: input.body,
         repoPath: target.worktree.path,
-        connectionId: target.connectionId,
         provider: input.provider,
         useTemplate: input.useTemplate
       })
-      context = target.connectionId
-        ? await getPullRequestDraftContext((argv) => provider!.exec(argv, target.worktree.path), {
-            base: input.base,
-            currentTitle: input.title,
-            currentBody,
-            currentDraft: input.draft
-          })
-        : await getPullRequestDraftContext(
-            (argv, options) =>
-              gitExecFileAsync(argv, {
-                cwd: target.worktree.path,
-                ...localGitOptionsForTarget(target),
-                ...options
-              }),
-            {
-              base: input.base,
-              currentTitle: input.title,
-              currentBody,
-              currentDraft: input.draft
-            }
-          )
+      context = await getPullRequestDraftContext(
+        (argv, options) =>
+          gitExecFileAsync(argv, {
+            cwd: target.worktree.path,
+            ...localGitOptionsForTarget(target),
+            ...options
+          }),
+        {
+          base: input.base,
+          currentTitle: input.title,
+          currentBody,
+          currentDraft: input.draft
+        }
+      )
     } catch (error) {
       return {
         success: false,
@@ -929,16 +618,6 @@ export class RuntimeGitCommands {
     }
     if (!context) {
       return { success: false, error: 'No branch changes to summarize.' }
-    }
-
-    if (target.connectionId) {
-      return generatePullRequestFieldsFromContext(context, resolvedSettings.params, {
-        kind: 'remote',
-        cwd: target.worktree.path,
-        execute: (plan, cwd, timeoutMs, operation) =>
-          provider!.executeCommitMessagePlan(plan, cwd, timeoutMs, operation),
-        missingBinaryLocation: 'remote PATH'
-      })
     }
 
     const localEnv = await prepareLocalCommitMessageAgentEnv(
@@ -958,11 +637,6 @@ export class RuntimeGitCommands {
 
   async cancelRuntimeGeneratePullRequestFields(worktreeSelector: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      await provider?.cancelGenerateCommitMessage(target.worktree.path, 'pull-request-fields')
-      return { ok: true }
-    }
     cancelGeneratePullRequestFieldsLocal(target.worktree.path)
     return { ok: true }
   }
@@ -977,21 +651,6 @@ export class RuntimeGitCommands {
     const agentCommandOverride =
       settingsOverride?.agentCmdOverrides?.[typedAgentId] ??
       this.host.getRuntimeSettings().agentCmdOverrides?.[typedAgentId]
-    if (target.connectionId) {
-      const provider = getSshGitProvider(target.connectionId)
-      if (!provider) {
-        return {
-          success: false,
-          error: `No git provider for connection "${target.connectionId}"`
-        }
-      }
-      return discoverCommitMessageModelsRemote(
-        typedAgentId,
-        target.worktree.path,
-        (plan, cwd, timeoutMs) => provider.executeCommitMessagePlan(plan, cwd, timeoutMs),
-        agentCommandOverride
-      )
-    }
     const localEnv = await prepareLocalCommitMessageAgentEnv(
       typedAgentId,
       this.host.getCommitMessageAgentEnvironment?.(),
@@ -1012,14 +671,6 @@ export class RuntimeGitCommands {
   async stageRuntimeGitPath(worktreeSelector: string, filePath: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeGitRelativePath(filePath)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.stageFile(target.worktree.path, relativePath)
-      return { ok: true }
-    }
     await stageFile(target.worktree.path, relativePath, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -1027,14 +678,6 @@ export class RuntimeGitCommands {
   async unstageRuntimeGitPath(worktreeSelector: string, filePath: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeGitRelativePath(filePath)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.unstageFile(target.worktree.path, relativePath)
-      return { ok: true }
-    }
     await unstageFile(target.worktree.path, relativePath, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -1046,17 +689,6 @@ export class RuntimeGitCommands {
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePaths = filePaths.map((path) => normalizeRuntimeGitRelativePath(path))
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await admitRuntimeGitMutation(admission)
-      await provider.bulkStageFiles(target.worktree.path, relativePaths, {
-        signal: admission?.signal
-      })
-      return { ok: true }
-    }
     await admitRuntimeGitMutation(admission)
     await bulkStageFiles(target.worktree.path, relativePaths, {
       ...localGitOptionsForTarget(target),
@@ -1072,17 +704,6 @@ export class RuntimeGitCommands {
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePaths = filePaths.map((path) => normalizeRuntimeGitRelativePath(path))
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await admitRuntimeGitMutation(admission)
-      await provider.bulkUnstageFiles(target.worktree.path, relativePaths, {
-        signal: admission?.signal
-      })
-      return { ok: true }
-    }
     await admitRuntimeGitMutation(admission)
     await bulkUnstageFiles(target.worktree.path, relativePaths, {
       ...localGitOptionsForTarget(target),
@@ -1097,14 +718,6 @@ export class RuntimeGitCommands {
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePaths = filePaths.map((path) => normalizeRuntimeGitRelativePath(path))
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.bulkDiscardChanges(target.worktree.path, relativePaths)
-      return { ok: true }
-    }
     await bulkDiscardChanges(target.worktree.path, relativePaths, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -1112,14 +725,6 @@ export class RuntimeGitCommands {
   async discardRuntimeGitPath(worktreeSelector: string, filePath: string): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePath = normalizeRuntimeGitRelativePath(filePath)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      await provider.discardChanges(target.worktree.path, relativePath)
-      return { ok: true }
-    }
     await discardChanges(target.worktree.path, relativePath, localGitOptionsForTarget(target))
     return { ok: true }
   }
@@ -1131,13 +736,6 @@ export class RuntimeGitCommands {
   ): Promise<string | null> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const normalizedRelativePath = normalizeRuntimeGitRelativePath(relativePath)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getRemoteFileUrl(target.worktree.path, normalizedRelativePath, line)
-    }
     return getRemoteFileUrl(target.worktree.path, normalizedRelativePath, line)
   }
 
@@ -1146,13 +744,6 @@ export class RuntimeGitCommands {
     sha: string
   ): Promise<string | null> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
-    const provider = target.connectionId ? getSshGitProvider(target.connectionId) : null
-    if (target.connectionId) {
-      if (!provider) {
-        throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
-      }
-      return provider.getRemoteCommitUrl(target.worktree.path, sha)
-    }
     return getRemoteCommitUrl(target.worktree.path, sha)
   }
 }

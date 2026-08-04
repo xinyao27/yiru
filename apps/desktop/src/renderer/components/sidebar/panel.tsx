@@ -18,7 +18,6 @@ const WorktreeMetaDialog = lazyWithRetry(() => import('./worktree-meta-dialog'))
 const RemoveFolderDialog = lazyWithRetry(() => import('./remove-folder-dialog'))
 const WorktreeVisibilityDialog = lazyWithRetry(() => import('./worktree-visibility-dialog'))
 const YiruYamlTrustDialog = lazyWithRetry(() => import('./yiru-yaml-trust-dialog'))
-const ForgetSshWorkspaceDialog = lazyWithRetry(() => import('./forget-ssh-workspace-dialog'))
 
 const MIN_WIDTH = 240
 const MAX_WIDTH = 500
@@ -170,7 +169,6 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
         {activeModal === 'confirm-remove-folder' ? <RemoveFolderDialog /> : null}
         {activeModal === 'worktree-visibility' ? <WorktreeVisibilityDialog /> : null}
         {activeModal === 'confirm-yiru-yaml-hooks' ? <YiruYamlTrustDialog /> : null}
-        {activeModal === 'forget-ssh-workspace' ? <ForgetSshWorkspaceDialog /> : null}
       </React.Suspense>
     </TooltipProvider>
   )

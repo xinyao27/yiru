@@ -58,25 +58,20 @@ export function getFileExplorerOperationOwnerFromState(
 
   const connectionId = getConnectionIdFromState(state, worktreeId ?? null)
   const explicitRuntimeEnvironmentId = getExplicitRuntimeEnvironmentIdForWorktree(state, worktreeId)
-  // Why: global runtime focus is not ownership evidence while SSH/local
-  // metadata is unresolved; destructive actions must wait for explicit provenance.
+  // Why: global runtime focus is not ownership evidence while local metadata
+  // is unresolved; destructive actions must wait for explicit provenance.
   if (connectionId === undefined && explicitRuntimeEnvironmentId === null) {
     return { kind: 'unresolved' }
   }
   const settings = getSettingsForWorktreeRuntimeOwner(state, worktreeId)
-  // Why: inferred SSH ownership outranks global runtime focus, but an explicit
-  // workspace runtime still owns its files.
-  const runtimeEnvironmentId =
-    connectionId && explicitRuntimeEnvironmentId === null
-      ? null
-      : settings.activeRuntimeEnvironmentId?.trim()
+  const runtimeEnvironmentId = settings.activeRuntimeEnvironmentId?.trim()
   if (runtimeEnvironmentId) {
     return { kind: 'runtime', environmentId: runtimeEnvironmentId }
   }
   if (connectionId === undefined) {
     return { kind: 'unresolved' }
   }
-  return connectionId ? { kind: 'ssh', connectionId } : { kind: 'local' }
+  return { kind: 'local' }
 }
 
 export function getFileExplorerOperationOwner(
@@ -91,11 +86,6 @@ export function getFileExplorerOperationRoute(
   switch (owner.kind) {
     case 'local':
       return { settings: { activeRuntimeEnvironmentId: null } }
-    case 'ssh':
-      return {
-        settings: { activeRuntimeEnvironmentId: null },
-        connectionId: owner.connectionId
-      }
     case 'runtime':
       return { settings: { activeRuntimeEnvironmentId: owner.environmentId } }
     case 'unresolved':
@@ -137,8 +127,6 @@ function operationOwnerFromHostId(hostId: ExecutionHostId): FileExplorerOperatio
   switch (parsed?.kind) {
     case 'local':
       return { kind: 'local' }
-    case 'ssh':
-      return { kind: 'ssh', connectionId: parsed.targetId }
     case 'runtime':
       return { kind: 'runtime', environmentId: parsed.environmentId }
     case undefined:

@@ -6,8 +6,13 @@ the security boundary is auditable end to end. */
 import { resolve, relative, dirname, basename, isAbsolute, sep } from 'node:path'
 
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostId
+} from '@yiru/workbench-model/workspace'
 import { getProjectGroupSubtreeIds } from '~shared/project-groups'
-import type { FolderWorkspace, ProjectGroup, Repo } from '~shared/types'
+import type { ProjectGroup, Repo } from '~shared/types'
 
 import type { Store } from '../persistence'
 import { isRepoRoot, listRepoWorktrees } from '../repo-worktrees'
@@ -66,10 +71,10 @@ export function invalidateAuthorizedRootsCache(): void {
 }
 
 function getLocalRepos(store: Store) {
-  // Why: SSH repo paths are meaningful on the remote host. Treating them as
-  // local roots can both authorize unrelated local folders and probe paths
-  // that Yiru should only touch through the SSH provider.
-  return store.getRepos().filter((repo) => !repo.connectionId)
+  // Why: paired-runtime paths are meaningful on their owning host. Treating
+  // them as local roots can authorize unrelated local folders and trigger
+  // filesystem probes against paths this process does not own.
+  return store.getRepos().filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
 }
 
 function getFolderScopeCandidateRepos(
@@ -86,28 +91,22 @@ function getFolderScopeCandidateRepos(
   )
 }
 
-function isRemoteOnlyFolderScope(
+function isLocalFolderScope(
   folderPath: string,
   projectGroupId: string,
-  connectionId: string | null | undefined,
   projectGroups: readonly ProjectGroup[],
   repos: readonly Repo[]
 ): boolean {
-  if (connectionId) {
-    return true
+  const groupHostId = normalizeExecutionHostId(
+    projectGroups.find((group) => group.id === projectGroupId)?.executionHostId
+  )
+  if (groupHostId) {
+    return groupHostId === LOCAL_EXECUTION_HOST_ID
   }
   const candidates = getFolderScopeCandidateRepos(folderPath, projectGroupId, projectGroups, repos)
-  return candidates.length > 0 && candidates.every((repo) => Boolean(repo.connectionId))
-}
-
-function getFolderWorkspaceConnectionId(
-  workspace: FolderWorkspace,
-  projectGroups: readonly ProjectGroup[]
-): string | null {
   return (
-    workspace.connectionId ??
-    projectGroups.find((group) => group.id === workspace.projectGroupId)?.connectionId ??
-    null
+    candidates.length === 0 ||
+    candidates.some((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
   )
 }
 
@@ -118,23 +117,12 @@ function getLocalFolderScopeRoots(store: Store): string[] {
   const projectGroups = scopeStore.getProjectGroups?.() ?? []
   const roots: string[] = []
   for (const group of projectGroups) {
-    if (
-      group.parentPath &&
-      !isRemoteOnlyFolderScope(group.parentPath, group.id, group.connectionId, projectGroups, repos)
-    ) {
+    if (group.parentPath && isLocalFolderScope(group.parentPath, group.id, projectGroups, repos)) {
       roots.push(resolve(group.parentPath))
     }
   }
   for (const workspace of scopeStore.getFolderWorkspaces?.() ?? []) {
-    if (
-      !isRemoteOnlyFolderScope(
-        workspace.folderPath,
-        workspace.projectGroupId,
-        getFolderWorkspaceConnectionId(workspace, projectGroups),
-        projectGroups,
-        repos
-      )
-    ) {
+    if (isLocalFolderScope(workspace.folderPath, workspace.projectGroupId, projectGroups, repos)) {
       roots.push(resolve(workspace.folderPath))
     }
   }

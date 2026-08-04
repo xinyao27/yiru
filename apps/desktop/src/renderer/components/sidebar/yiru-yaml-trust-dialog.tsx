@@ -18,14 +18,12 @@ type ScriptKind = YiruHookScriptKind
 
 const SCRIPT_KIND_LABEL: Record<ScriptKind, string> = {
   setup: 'setup script',
-  archive: 'archive script',
-  vmRecipe: 'VM recipe'
+  archive: 'archive script'
 }
 
 const SCRIPT_KIND_TRIGGER: Record<ScriptKind, string> = {
   setup: 'when this workspace is created',
-  archive: 'when this workspace is removed',
-  vmRecipe: 'before provisioning a VM'
+  archive: 'when this workspace is removed'
 }
 
 const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
@@ -53,12 +51,7 @@ const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
 
   const repoId = typeof modalData.repoId === 'string' ? modalData.repoId : ''
   const repoName = typeof modalData.repoName === 'string' ? modalData.repoName : 'this repository'
-  const scriptKind: ScriptKind =
-    modalData.scriptKind === 'archive'
-      ? 'archive'
-      : modalData.scriptKind === 'vmRecipe'
-        ? 'vmRecipe'
-        : 'setup'
+  const scriptKind: ScriptKind = modalData.scriptKind === 'archive' ? 'archive' : 'setup'
   const scriptContent = typeof modalData.scriptContent === 'string' ? modalData.scriptContent : ''
   const contentHash = typeof modalData.contentHash === 'string' ? modalData.contentHash : ''
   const previouslyApproved = modalData.previouslyApproved === true

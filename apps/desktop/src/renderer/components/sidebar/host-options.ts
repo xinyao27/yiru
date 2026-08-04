@@ -1,9 +1,9 @@
 import type { RuntimeCompatVerdict } from '@yiru/runtime-protocol/capabilities'
-import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
+  type ExecutionHostId,
+  type ExecutionHostKind
 } from '@yiru/workbench-model/workspace'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -18,13 +18,11 @@ export type SidebarHostOption = {
   id: ExecutionHostId
   label: string
   detail: string
-  kind: 'local' | 'ssh' | 'runtime'
+  kind: ExecutionHostKind
   health: ExecutionHostHealth
   presence: 'local' | 'configured' | 'project' | 'active'
   // Why: surfaced to the sidebar host-header menu so it can warn on version skew.
   compatibility?: RuntimeCompatVerdict
-  // Why: lets host headers spell out auth-needed SSH states, not just an icon.
-  connectionStatus?: SshConnectionStatus
 }
 
 export type SidebarHostScopeOption = {
@@ -36,8 +34,6 @@ export type SidebarHostScopeOption = {
 
 export function buildSidebarHostOptions(args: {
   repos: readonly Pick<Repo, 'connectionId' | 'executionHostId'>[]
-  sshTargetLabels: ReadonlyMap<string, string>
-  sshConnectionStates?: ReadonlyMap<string, SshConnectionState>
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
   // Why: live per-environment runtime status lets the registry surface compat
   // verdicts and blocked health in the sidebar without re-probing servers.
@@ -50,43 +46,18 @@ export function buildSidebarHostOptions(args: {
   // options feed (host headers, scope picker, focus menu).
   hostLabelOverrides?: ReadonlyMap<ExecutionHostId, string>
 }): SidebarHostOption[] {
-  const configuredSshTargetIds = new Set(args.sshTargetLabels.keys())
-  const projectSshTargetIds = new Set<string>()
-  for (const repo of args.repos) {
-    if (repo.connectionId?.trim()) {
-      projectSshTargetIds.add(repo.connectionId.trim())
-    }
-    if (repo.executionHostId?.startsWith('ssh:')) {
-      projectSshTargetIds.add(decodeURIComponent(repo.executionHostId.slice('ssh:'.length)))
-    }
-  }
   const activeRuntimeHostId = args.settings?.activeRuntimeEnvironmentId?.trim()
     ? (`runtime:${encodeURIComponent(args.settings.activeRuntimeEnvironmentId.trim())}` as const)
     : null
   return buildExecutionHostRegistry({
     repos: args.repos,
     settings: args.settings,
-    sshTargetLabels: args.sshTargetLabels,
-    sshConnectionStates: args.sshConnectionStates,
     runtimeEnvironments: args.runtimeEnvironments,
     runtimeStatusByEnvironmentId: args.runtimeStatusByEnvironmentId,
     hostLabelOverrides: args.hostLabelOverrides
   }).map((host) => {
     if (host.kind === 'local') {
       return { ...host, presence: 'local' }
-    }
-    if (host.kind === 'ssh') {
-      const targetId = decodeURIComponent(host.id.slice('ssh:'.length))
-      // Why: configured hosts explain why a disconnected target remains
-      // visible; project-only hosts remain because workspaces still point at it.
-      return {
-        ...host,
-        presence: configuredSshTargetIds.has(targetId)
-          ? 'configured'
-          : projectSshTargetIds.has(targetId)
-            ? 'project'
-            : 'active'
-      }
     }
     return {
       ...host,

@@ -5,7 +5,6 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { CoworkingActualHostPathResolver } from './actual-host-path-resolver'
 import {
   isDefinitiveCoworkingFilesystemFailure,
@@ -102,9 +101,6 @@ export class CoworkingFolderWorkspaceIncarnation {
     if (!parsed || parsed.kind === 'runtime') {
       throw new CoworkingWorktreeIncarnationHostError('invalid-host-response')
     }
-    if (parsed.kind === 'ssh') {
-      return await this.inspectSshDirectory(target, root, parsed.targetId)
-    }
     return await this.inspectLocalDirectory(target, root)
   }
 
@@ -163,36 +159,6 @@ export class CoworkingFolderWorkspaceIncarnation {
     return {
       identity: { deviceId: result.deviceId, inodeId: result.inodeId },
       markerLocation: { kind: 'local', directory: result.path }
-    }
-  }
-
-  private async inspectSshDirectory(
-    target: CoworkingOwnerWorktree,
-    root: CoworkingWorktreeRootComparison,
-    targetId: string
-  ): Promise<FolderDirectoryEvidence | null> {
-    if (target.connectionId?.trim() && target.connectionId !== targetId) {
-      throw new CoworkingWorktreeIncarnationHostError('invalid-host-response')
-    }
-    const filesystem = getSshFilesystemProvider(targetId)
-    if (!filesystem) {
-      throw new CoworkingWorktreeIncarnationHostError('host-unavailable')
-    }
-    try {
-      const canonicalPath = await filesystem.realpath(target.worktreePath)
-      requireMatchingCanonicalRoot(canonicalPath, root)
-      const verified = filesystem.coworkingVerifiedFiles
-      if (!verified) {
-        throw new CoworkingWorktreeIncarnationHostError('host-unavailable')
-      }
-      const identity = await verified.inspectDirectoryIdentity(canonicalPath)
-      requireMatchingCanonicalRoot(identity.canonicalPath, root)
-      return {
-        identity: { deviceId: identity.deviceId, inodeId: identity.inodeId },
-        markerLocation: { kind: 'ssh', filesystem, directory: identity.canonicalPath }
-      }
-    } catch (error) {
-      throw classifyDirectoryInspectionError(error)
     }
   }
 }

@@ -25,14 +25,14 @@ export function createRateLimitBannerScanner(agent: AgentType): RateLimitBannerS
   let pending = ''
   let recentLines: string[] = []
   let lastEmittedAt = 0
-  let lastEmittedBanner = ''
+  let activeBannerHeadline = ''
 
   const emitIfNew = (banner: string[]): string[] | null => {
-    const signature = banner.join('\n')
-    // Why: a limit banner stays on screen for the whole outage and is redrawn
-    // on every frame. Suppress the identical banner outright — only a
-    // genuinely different one, after the cooldown, counts as a new hit.
-    if (signature === lastEmittedBanner) {
+    const headline = banner[0] ?? ''
+    // Why: trailing context grows whenever the user sends another message, but
+    // it is still the same visible outage. Keep the stable headline active
+    // until it leaves the scanner window instead of treating context as identity.
+    if (headline === activeBannerHeadline) {
       return null
     }
     const now = Date.now()
@@ -40,7 +40,7 @@ export function createRateLimitBannerScanner(agent: AgentType): RateLimitBannerS
       return null
     }
     lastEmittedAt = now
-    lastEmittedBanner = signature
+    activeBannerHeadline = headline
     return banner
   }
 
@@ -55,12 +55,16 @@ export function createRateLimitBannerScanner(agent: AgentType): RateLimitBannerS
       }
       recentLines = [...recentLines, ...parts].slice(-SCANNER_WINDOW_LINES)
       const banner = detectRateLimitBanner(recentLines, agent)
-      return banner ? emitIfNew(banner) : null
+      if (!banner) {
+        activeBannerHeadline = ''
+        return null
+      }
+      return emitIfNew(banner)
     },
     reset: () => {
       pending = ''
       recentLines = []
-      lastEmittedBanner = ''
+      activeBannerHeadline = ''
     }
   }
 }

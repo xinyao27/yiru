@@ -44,6 +44,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.listLiveSessions',
     params: CoworkingPairedRuntimeListLiveSessionsParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {
@@ -64,6 +65,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.listHistoricalSessionPage',
     params: CoworkingPairedRuntimeListHistoricalSessionPageParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {
@@ -146,6 +148,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.releaseHistoricalSessionPage',
     params: CoworkingPairedRuntimeReleaseHistoricalSessionPageParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       const binding = coworkingHostSessionPageReleaseBinding(context, params)
@@ -163,6 +166,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'coworking.host.subscribeSessionChanges',
     params: CoworkingPairedRuntimeSubscribeSessionChangesParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: async (params, context, emit) => {
       requirePairedRuntimePrincipal(context)
       const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
@@ -177,6 +181,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.unsubscribeSessionChanges',
     params: CoworkingPairedRuntimeUnsubscribeSessionChangesParamsSchema,
+    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
     handler: (params, context) => {
       requirePairedRuntimePrincipal(context)
       context.runtime.cleanupSubscription(
@@ -188,6 +193,7 @@ export const COWORKING_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'coworking.host.invokeSession',
     params: CoworkingPairedRuntimeSessionInvokeParamsSchema,
+    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {

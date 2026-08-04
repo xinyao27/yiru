@@ -33,7 +33,7 @@ type NativeChatSkillWorktreeState = {
 export type NativeChatSkillDiscoveryContext = {
   key: string
   cwd: string
-  executionHostKind: 'local' | 'runtime' | 'ssh'
+  executionHostKind: 'local' | 'runtime'
   runtimeTarget: RuntimeClientTarget
   discoveryTarget: SkillDiscoveryTarget
 }
@@ -98,18 +98,6 @@ export function resolveNativeChatSkillDiscoveryContext(
 
   const hostId = getExecutionHostIdForWorktree(state, worktreeId)
   const parsedHost = parseExecutionHostId(hostId)
-  if (parsedHost?.kind === 'ssh') {
-    return {
-      key: JSON.stringify(['ssh', hostId, cwd]),
-      cwd,
-      executionHostKind: 'ssh',
-      runtimeTarget: { kind: 'local' },
-      // Why: the desktop runtime needs the concrete SSH owner to delegate the
-      // scan to that relay; cwd alone is ambiguous with a local path.
-      discoveryTarget: { cwd, worktreeId, executionHostId: hostId }
-    }
-  }
-
   const runtimeEnvironmentId = getExplicitRuntimeEnvironmentIdForWorktree(state, worktreeId)
   // Why: a selected global runtime is not proof that it owns this pane. Modern
   // panes carry an owner stamp; ambiguous legacy panes stay not-ready.

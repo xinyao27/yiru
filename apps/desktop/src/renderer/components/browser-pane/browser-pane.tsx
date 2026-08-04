@@ -247,6 +247,8 @@ const BROWSER_ANNOTATION_INTENT_OPTIONS = [
 // compatibility, but the annotation UI no longer exposes urgency choices.
 const DEFAULT_BROWSER_ANNOTATION_PRIORITY: BrowserAnnotationPriority = 'important'
 const BROWSER_PAGE_ZOOM_FEEDBACK_MS = 1400
+const BROWSER_GUEST_REGISTRATION_RETRY_DELAY_MS = 100
+const BROWSER_GUEST_REGISTRATION_RETRY_LIMIT = 5
 
 type BrowserOverlayViewport = {
   scrollX: number
@@ -3759,11 +3761,16 @@ function BrowserPagePane({
     container = ensuredWebview.container
     const webview = ensuredWebview.webview
     const needsInitialNavigation = ensuredWebview.created
-    if (needsInitialNavigation) {
-      initialNavigationPendingWebviewRef.current = webview
-    } else if (initialNavigationPendingWebviewRef.current !== webview) {
-      initialNavigationPendingWebviewRef.current = null
+    const hasRegisteredWebContents = (): boolean => {
+      try {
+        return registeredWebContentsIds.get(browserTab.id) === webview.getWebContentsId()
+      } catch {
+        return false
+      }
     }
+    const needsGuestRegistration = !needsInitialNavigation && !hasRegisteredWebContents()
+    initialNavigationPendingWebviewRef.current =
+      needsInitialNavigation || needsGuestRegistration ? webview : null
     let needsInitialDefaultZoom = ensuredWebview.created
 
     if (!ensuredWebview.created) {
@@ -3802,8 +3809,16 @@ function BrowserPagePane({
     }
 
     let registrationInFlight: { webContentsId: number; promise: Promise<boolean> } | null = null
+    let registrationRetryTimer: ReturnType<typeof setTimeout> | null = null
+    let registrationRetryCount = 0
+    let lifecycleDisposed = false
     const registerGuest = (): Promise<boolean> => {
-      const webContentsId = webview.getWebContentsId()
+      let webContentsId: number
+      try {
+        webContentsId = webview.getWebContentsId()
+      } catch {
+        return Promise.resolve(false)
+      }
       if (registeredWebContentsIds.get(browserTab.id) === webContentsId) {
         return Promise.resolve(true)
       }
@@ -3836,9 +3851,16 @@ function BrowserPagePane({
       return promise
     }
 
+    let initialUrl =
+      normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
+    // Why: a webview without src may never create its guest, so bootstrap with
+    // Yiru's inert blank document before navigating to the requested URL. Keep
+    // its events out of the page model until the requested navigation commits.
+    let initialTargetCommitted = initialUrl === YIRU_BROWSER_BLANK_URL
     let hasStartedInitialNavigation = !needsInitialNavigation
     const startInitialNavigation = (): void => {
       if (
+        lifecycleDisposed ||
         hasStartedInitialNavigation ||
         initialNavigationPendingWebviewRef.current !== webview ||
         !webview.isConnected
@@ -3847,18 +3869,79 @@ function BrowserPagePane({
       }
       hasStartedInitialNavigation = true
       initialNavigationPendingWebviewRef.current = null
+      initialUrl =
+        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
+      initialTargetCommitted = initialUrl === YIRU_BROWSER_BLANK_URL
       // Why: listeners and the pre-document session restore must both be ready
       // before the first real URL can execute any site JavaScript.
-      const initialUrl =
-        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
       trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
       lastKnownWebviewUrlRef.current = initialUrl
       webview.src = initialUrl
     }
 
-    const finishGuestRegistration = (registered: boolean): void => {
+    let finishGuestRegistration: (registered: boolean) => void = () => {}
+    const scheduleGuestRegistrationRetry = (): void => {
+      if (
+        registrationRetryTimer ||
+        registrationRetryCount >= BROWSER_GUEST_REGISTRATION_RETRY_LIMIT ||
+        !webview.isConnected
+      ) {
+        return
+      }
+      registrationRetryCount += 1
+      registrationRetryTimer = setTimeout(() => {
+        registrationRetryTimer = null
+        void registerGuest().then(finishGuestRegistration)
+      }, BROWSER_GUEST_REGISTRATION_RETRY_DELAY_MS)
+    }
+    const syncRegisteredWebviewToStoreUrl = (): void => {
+      const normalizedUrl = normalizeBrowserNavigationUrl(browserTabUrlRef.current)
+      if (!normalizedUrl) {
+        return
+      }
+      let liveUrl: string | null = null
+      try {
+        liveUrl = webview.getURL() || null
+      } catch {
+        return
+      }
+      const normalizedLiveUrl = liveUrl ? (normalizeBrowserNavigationUrl(liveUrl) ?? liveUrl) : null
+      const declaredSrc = webview.getAttribute('src')
+      if (
+        normalizedLiveUrl === normalizedUrl ||
+        webview.src === normalizedUrl ||
+        declaredSrc === normalizedUrl
+      ) {
+        return
+      }
+      trackNextLoadingEventRef.current = normalizedUrl !== YIRU_BROWSER_BLANK_URL
+      lastKnownWebviewUrlRef.current = normalizedUrl
+      webview.src = normalizedUrl
+      if (normalizedUrl !== YIRU_BROWSER_BLANK_URL) {
+        keepAddressBarFocusRef.current = false
+        if (document.activeElement === addressBarInputRef.current) {
+          focusWebviewNow()
+        }
+      }
+    }
+    finishGuestRegistration = (registered: boolean): void => {
+      if (lifecycleDisposed) {
+        return
+      }
       if (registered) {
-        void waitForPendingWebviewDestruction().then(startInitialNavigation)
+        registrationRetryCount = 0
+        if (registrationRetryTimer) {
+          clearTimeout(registrationRetryTimer)
+          registrationRetryTimer = null
+        }
+        if (needsInitialNavigation) {
+          void waitForPendingWebviewDestruction().then(startInitialNavigation)
+        } else {
+          initialNavigationPendingWebviewRef.current = null
+          syncRegisteredWebviewToStoreUrl()
+        }
+      } else {
+        scheduleGuestRegistrationRetry()
       }
       syncBrowserAnnotationViewportBridge()
     }
@@ -3871,8 +3954,7 @@ function BrowserPagePane({
     }
 
     const handleDomReady = (): void => {
-      const queuedAnnotationViewportBridgeSync =
-        registeredWebContentsIds.get(browserTab.id) !== webview.getWebContentsId()
+      const queuedAnnotationViewportBridgeSync = !hasRegisteredWebContents()
       if (queuedAnnotationViewportBridgeSync) {
         void registerGuest().then(finishGuestRegistration)
       }
@@ -3925,6 +4007,17 @@ function BrowserPagePane({
 
     const handleDidStopLoading = (): void => {
       const currentUrl = webview.getURL() || webview.src || 'about:blank'
+      if (
+        needsInitialNavigation &&
+        initialUrl !== YIRU_BROWSER_BLANK_URL &&
+        !initialTargetCommitted &&
+        normalizeBrowserNavigationUrl(currentUrl) === YIRU_BROWSER_BLANK_URL
+      ) {
+        return
+      }
+      if (needsInitialNavigation && initialUrl !== YIRU_BROWSER_BLANK_URL) {
+        initialTargetCommitted = true
+      }
       const browserModelUrl = redactKagiSessionToken(currentUrl)
       const activeLoadFailure = activeLoadFailureRef.current
       if (isChromiumErrorPage(currentUrl)) {
@@ -4002,6 +4095,17 @@ function BrowserPagePane({
       const currentUrl = event.url ?? webview.getURL() ?? webview.src ?? 'about:blank'
       if (isChromiumErrorPage(currentUrl)) {
         return
+      }
+      if (
+        needsInitialNavigation &&
+        initialUrl !== YIRU_BROWSER_BLANK_URL &&
+        !initialTargetCommitted &&
+        normalizeBrowserNavigationUrl(currentUrl) === YIRU_BROWSER_BLANK_URL
+      ) {
+        return
+      }
+      if (needsInitialNavigation && initialUrl !== YIRU_BROWSER_BLANK_URL) {
+        initialTargetCommitted = true
       }
       const browserModelUrl = redactKagiSessionToken(currentUrl)
       lastKnownWebviewUrlRef.current =
@@ -4114,7 +4218,22 @@ function BrowserPagePane({
     webview.addEventListener('did-fail-load', handleFailLoad)
     webview.addEventListener('console-message', handleAnnotationViewportMessage)
 
+    if (needsGuestRegistration) {
+      void registerGuest().then(finishGuestRegistration)
+    }
+    if (needsInitialNavigation) {
+      // Why: assigning the requested URL before registerGuest completes lets
+      // site JavaScript run before session restoration and guest policies are
+      // installed. The inert bootstrap creates the guest without exposing the
+      // requested page, then startInitialNavigation replaces it safely.
+      webview.src = YIRU_BROWSER_BLANK_URL
+    }
+
     return () => {
+      lifecycleDisposed = true
+      if (registrationRetryTimer) {
+        clearTimeout(registrationRetryTimer)
+      }
       webview.removeEventListener('did-attach', handleDidAttach)
       webview.removeEventListener('dom-ready', handleDomReady)
       webview.removeEventListener('focus', dismissAddressBarSuggestions)

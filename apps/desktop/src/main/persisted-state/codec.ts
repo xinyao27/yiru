@@ -7,7 +7,6 @@ import type { PersistedState } from '~shared/types'
 
 import { decodePersistedOnboarding } from './persisted-onboarding-codec'
 import { decodePersistedSettings } from './persisted-settings-codec'
-import { decodePersistedSshState } from './persisted-ssh-codec'
 import { decodePersistedTelemetry } from './persisted-telemetry-codec'
 import { decodePersistedTerminalSessionState } from './persisted-terminal-session-codec'
 import { decodePersistedUi } from './persisted-ui-codec'
@@ -78,7 +77,6 @@ function decodePersistedStateV1(
     context.createInstallId
   )
   const projectGroups = normalizeProjectGroups(persisted?.projectGroups)
-  const ssh = decodePersistedSshState(persisted, now)
   const terminalSessions = decodePersistedTerminalSessionState(persisted)
   const rawAutomationRuns = Array.isArray(persisted?.automationRuns) ? persisted.automationRuns : []
   const automationRuns = pruneAutomationRuns(backfillAutomationRunNumbers(rawAutomationRuns))
@@ -87,7 +85,6 @@ function decodePersistedStateV1(
     state: {
       ...defaults,
       ...persisted,
-      ...ssh,
       ...terminalSessions,
       featureInteractionTelemetryBuckets: normalizeFeatureInteractionTelemetryBuckets(
         persisted?.featureInteractionTelemetryBuckets

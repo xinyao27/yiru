@@ -2,9 +2,9 @@
    it owns app lifecycle, service wiring, window creation, and hook/daemon
    startup. Splitting by line count would fragment tightly coupled startup
    logic across files without a cleaner ownership seam. */
-import { existsSync, statSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import os from 'node:os'
-import { isAbsolute, join } from 'node:path'
+import { join } from 'node:path'
 
 import { electronApp, is } from '@electron-toolkit/utils'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
@@ -138,7 +138,6 @@ import {
   getPtyIdForPaneKey,
   registerPaneKeyTeardownListener,
   getLocalPtyProvider,
-  getSshPtyProvider,
   registerHeadlessPtyRuntime
 } from './pty/pty'
 import { RateLimitResumeService } from './rate-limit-resume/service'
@@ -146,7 +145,6 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
-import { parseCursorRateLimitsResponse } from './runtime/cursor-usage/client'
 import { resolveCursorUsageRuntimeTarget } from './runtime/cursor-usage/target'
 import { callRuntimeEnvironment } from './runtime/environment-transport-routing'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
@@ -163,7 +161,6 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
-import { getActiveMultiplexer } from './ssh/ssh'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -1532,8 +1529,6 @@ type ServeOptions = {
   pairingAddress: string | null
   noPairing: boolean
   mobilePairing: boolean
-  recipeJson: boolean
-  projectRoot: string | null
 }
 
 function getServeOptions(argv = process.argv): ServeOptions {
@@ -1559,9 +1554,7 @@ function getServeOptions(argv = process.argv): ServeOptions {
     ...(wsPort !== undefined ? { wsPort } : {}),
     pairingAddress: valueAfter('--serve-pairing-address'),
     noPairing: argv.includes('--serve-no-pairing'),
-    mobilePairing: argv.includes('--serve-mobile-pairing'),
-    recipeJson: argv.includes('--serve-recipe-json'),
-    projectRoot: valueAfter('--serve-project-root')
+    mobilePairing: argv.includes('--serve-mobile-pairing')
   }
 }
 
@@ -1588,18 +1581,6 @@ async function printServeReady(options: ServeOptions): Promise<void> {
   if (!runtime || !runtimeRpc) {
     throw new Error('Runtime server must be initialized before printing serve readiness')
   }
-  if (options.recipeJson) {
-    if (!options.projectRoot) {
-      throw new Error('--serve-recipe-json requires --serve-project-root')
-    }
-    if (!isAbsolute(options.projectRoot)) {
-      throw new Error(`--serve-project-root must be absolute: ${options.projectRoot}`)
-    }
-    const projectRootStats = statSync(options.projectRoot)
-    if (!projectRootStats.isDirectory()) {
-      throw new Error(`--serve-project-root must be a directory: ${options.projectRoot}`)
-    }
-  }
   const endpoint = runtimeRpc.getWebSocketEndpoint()
   const pairing = options.noPairing
     ? ({ available: false } as const)
@@ -1612,19 +1593,6 @@ async function printServeReady(options: ServeOptions): Promise<void> {
     pairing.available && options.mobilePairing
       ? await renderTerminalPairingQr(pairing.pairingUrl)
       : null
-  if (options.recipeJson) {
-    if (!pairing.available) {
-      throw new Error('Recipe JSON output requires runtime pairing to be available')
-    }
-    console.log(
-      JSON.stringify({
-        schemaVersion: 1,
-        pairingCode: pairing.pairingUrl,
-        projectRoot: options.projectRoot
-      })
-    )
-    return
-  }
   if (options.json) {
     console.log(
       JSON.stringify({
@@ -2049,27 +2017,6 @@ app.whenReady().then(async () => {
     }
     return response.result
   })
-  rateLimits.setSshCursorUsageFetcher(async (connectionId, signal) => {
-    if (signal?.aborted) {
-      throw new Error('Rate-limit fetch aborted')
-    }
-    const multiplexer = getActiveMultiplexer(connectionId)
-    if (!multiplexer || multiplexer.isDisposed()) {
-      throw new Error('SSH runtime is unavailable')
-    }
-    const result: unknown = await multiplexer.request('usage.cursor', undefined, {
-      signal,
-      timeoutMs: 40_000
-    })
-    if (signal?.aborted) {
-      throw new Error('Rate-limit fetch aborted')
-    }
-    const cursorRateLimits = parseCursorRateLimitsResponse(result)
-    if (!cursorRateLimits) {
-      throw new Error('SSH runtime returned invalid Cursor usage data')
-    }
-    return cursorRateLimits
-  })
   rateLimits.setClaudeAuthPreparationResolver((target) =>
     claudeRuntimeAuth!.prepareForRateLimitFetch(target)
   )
@@ -2147,9 +2094,6 @@ app.whenReady().then(async () => {
     // provider reference eagerly here would freeze the pre-daemon LocalPtyProvider
     // and defeat the teardown helper's prefix sweep (design §4.3 wire-up).
     getLocalProvider: () => getLocalPtyProvider(),
-    // Why: SSH relay providers are registered after runtime construction and
-    // may reconnect; destructive cleanup must resolve the current generation.
-    getSshProvider: (connectionId) => getSshPtyProvider(connectionId),
     onPtyStopped: clearProviderPtyState,
     onTerminalAgentStatus: (event) => {
       agentHookServer.ingestTerminalStatus(event)
@@ -2546,6 +2490,7 @@ app.whenReady().then(async () => {
     coworkingOwner = createCoworkingOwnerComposition({
       store,
       runtime: runtimeService,
+      runtimeRpc,
       rateLimits,
       userDataPath: getCanonicalUserDataPath(),
       profileId: activeYiruProfile.profile.id,
@@ -2556,12 +2501,13 @@ app.whenReady().then(async () => {
       osFamily:
         process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
     })
+    runtimeRpc.setGrantJournal(coworkingOwner.grantJournal)
     unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(coworkingOwner.service)
   } catch (error) {
     // Why: corrupt sharing state or a missing platform dependency disables only Coworking.
     console.error('[coworking] Failed to compose Desktop sharing:', error)
     unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(
-      new CoworkingUnavailableOwnerService()
+      new CoworkingUnavailableOwnerService(runtimeRpc)
     )
   }
 

@@ -1,13 +1,5 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '@yiru/runtime-protocol/ssh-connection'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type {
   AgentStatusIpcPayload,
@@ -43,7 +35,11 @@ import type {
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
@@ -52,6 +48,8 @@ import type {
   CoworkingRequesterSubscriptionStopArgs,
   CoworkingRequesterSubscriptionStopResult,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -122,7 +120,6 @@ import type {
   RateLimitRuntimeTarget,
   RateLimitState
 } from '~shared/rate-limit-types'
-import type { RemoteWorkspaceChangedEvent } from '~shared/remote-workspace-types'
 import {
   richMarkdownContextMenuCommandChannel,
   type RichMarkdownContextMenuCommandPayload
@@ -168,11 +165,6 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '~shared/speech-types'
-import {
-  admitSshConnectionState,
-  admitSshConnectionStateForAuthorityReconciliation,
-  admitSshDetectedPorts
-} from '~shared/ssh-retained-payload-admission'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
 import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
@@ -1734,16 +1726,7 @@ const api = {
     refreshAgents: (args?: PreflightRuntimeContext): Promise<RefreshAgentsResult> =>
       ipcRenderer.invoke('preflight:refreshAgents', args),
     detectRemoteAgents: (args: { connectionId: string }): Promise<string[]> =>
-      ipcRenderer.invoke('preflight:detectRemoteAgents', args),
-    detectRemoteWindowsTerminalCapabilities: (args: {
-      connectionId: string
-    }): Promise<{
-      wslAvailable: boolean
-      wslDistros: string[]
-      pwshAvailable: boolean
-      gitBashAvailable: boolean
-      hostPlatform: NodeJS.Platform | null
-    }> => ipcRenderer.invoke('preflight:detectRemoteWindowsTerminalCapabilities', args)
+      ipcRenderer.invoke('preflight:detectRemoteAgents', args)
   },
 
   notifications: {
@@ -2378,28 +2361,6 @@ const api = {
       ipcRenderer.invoke('hooks:inspectSetupScriptImports', args)
   },
 
-  ephemeralVm: {
-    listRecipes: (args) => ipcRenderer.invoke('ephemeralVm:listRecipes', args),
-    listRecipeCatalog: () => ipcRenderer.invoke('ephemeralVm:listRecipeCatalog'),
-    doctor: (args) => ipcRenderer.invoke('ephemeralVm:doctor', args),
-    provision: (args) => ipcRenderer.invoke('ephemeralVm:provision', args),
-    cancelProvision: (args) => ipcRenderer.invoke('ephemeralVm:cancelProvision', args),
-    onProvisionEvent: (callback) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        event: { provisionId: string; stream: 'stdout' | 'stderr'; chunk: string }
-      ): void => callback(event)
-      ipcRenderer.on('ephemeralVm:provisionEvent', listener)
-      return () => ipcRenderer.removeListener('ephemeralVm:provisionEvent', listener)
-    },
-    listRuntimes: () => ipcRenderer.invoke('ephemeralVm:listRuntimes'),
-    attachWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:attachWorkspace', args),
-    suspendWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:suspendWorkspace', args),
-    resumeWorkspace: (args) => ipcRenderer.invoke('ephemeralVm:resumeWorkspace', args),
-    cleanup: (args) => ipcRenderer.invoke('ephemeralVm:cleanup', args),
-    getCleanupCommand: (args) => ipcRenderer.invoke('ephemeralVm:getCleanupCommand', args)
-  } satisfies PreloadApi['ephemeralVm'],
-
   cache: {
     getGitHub: () => ipcRenderer.invoke('cache:getGitHub'),
     setGitHub: (args) => ipcRenderer.invoke('cache:setGitHub', args)
@@ -2419,23 +2380,6 @@ const api = {
       ipcRenderer.sendSync('session:set-sync', args, hostId)
     }
   } satisfies PreloadApi['session'],
-
-  remoteWorkspace: {
-    get: (args) => ipcRenderer.invoke('remoteWorkspace:get', args),
-    setForConnectedTargets: (args) =>
-      ipcRenderer.invoke('remoteWorkspace:setForConnectedTargets', args),
-    listEnabledConnectedTargets: () =>
-      ipcRenderer.invoke('remoteWorkspace:listEnabledConnectedTargets'),
-    listConnectedClients: (args) =>
-      ipcRenderer.invoke('remoteWorkspace:listConnectedClients', args),
-    clientId: () => ipcRenderer.invoke('remoteWorkspace:clientId'),
-    onChanged: (callback) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: RemoteWorkspaceChangedEvent) =>
-        callback(data)
-      ipcRenderer.on('remoteWorkspace:changed', listener)
-      return () => ipcRenderer.removeListener('remoteWorkspace:changed', listener)
-    }
-  } satisfies PreloadApi['remoteWorkspace'],
 
   updater: {
     getStatus: () => ipcRenderer.invoke('updater:getStatus'),
@@ -2480,7 +2424,6 @@ const api = {
   fs: {
     readDir: (args: {
       dirPath: string
-      connectionId?: string
     }): Promise<{ name: string; isDirectory: boolean; isSymlink: boolean }[]> =>
       ipcRenderer.invoke('fs:readDir', args),
     readFile: (args: {
@@ -3899,6 +3842,18 @@ const api = {
       ipcRenderer.invoke('coworkingSharing:decideControl', args),
     revokeControl: (args: CoworkingRevokeControlArgs): Promise<void> =>
       ipcRenderer.invoke('coworkingSharing:revokeControl', args),
+    requestHostAccess: (
+      args: CoworkingRequestHostAccessArgs
+    ): Promise<CoworkingRequestHostAccessResult> =>
+      ipcRenderer.invoke('coworkingSharing:requestHostAccess', args),
+    decideHostAccess: (args: CoworkingDecideHostAccessArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:decideHostAccess', args),
+    listHostDevices: (): Promise<CoworkingListHostDevicesResult> =>
+      ipcRenderer.invoke('coworkingSharing:listHostDevices'),
+    revokeHostDevice: (
+      args: CoworkingRevokeHostDeviceArgs
+    ): Promise<CoworkingRevokeHostDeviceResult> =>
+      ipcRenderer.invoke('coworkingSharing:revokeHostDevice', args),
     getWindowsFirewallStatus: (): Promise<CoworkingWindowsFirewallStatus> =>
       ipcRenderer.invoke('coworkingSharing:getWindowsFirewallStatus'),
     repairWindowsFirewall: (): Promise<CoworkingWindowsFirewallRepairResult> =>
@@ -3946,170 +3901,6 @@ const api = {
 
   grokAccounts: {
     getStatus: (): Promise<GrokAccountStatus> => ipcRenderer.invoke('grokAccounts:getStatus')
-  },
-
-  ssh: {
-    listTargets: (): Promise<SshTarget[]> => ipcRenderer.invoke('ssh:listTargets'),
-
-    listRemovedTargetLabels: (): Promise<Record<string, string>> =>
-      ipcRenderer.invoke('ssh:listRemovedTargetLabels'),
-
-    addTarget: (args: { target: Omit<SshTarget, 'id'> }): Promise<SshTargetAddResult> =>
-      ipcRenderer.invoke('ssh:addTarget', args),
-
-    updateTarget: (args: {
-      id: string
-      updates: Partial<Omit<SshTarget, 'id'>>
-    }): Promise<SshTarget> => ipcRenderer.invoke('ssh:updateTarget', args),
-
-    removeTarget: (args: { id: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:removeTarget', args),
-
-    importConfig: (args?: { reAdopt?: boolean }): Promise<SshConfigImportResult> =>
-      ipcRenderer.invoke('ssh:importConfig', args),
-
-    connect: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      admitSshConnectionStateForAuthorityReconciliation(
-        await ipcRenderer.invoke('ssh:connect', args),
-        args.targetId
-      ),
-
-    disconnect: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:disconnect', args),
-
-    terminateSessions: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:terminateSessions', args),
-
-    resetRelay: (args: { targetId: string }): Promise<void> =>
-      ipcRenderer.invoke('ssh:resetRelay', args),
-
-    getState: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      admitSshConnectionStateForAuthorityReconciliation(
-        await ipcRenderer.invoke('ssh:getState', args),
-        args.targetId
-      ),
-
-    needsPassphrasePrompt: (args: { targetId: string }): Promise<boolean> =>
-      ipcRenderer.invoke('ssh:needsPassphrasePrompt', args),
-
-    testConnection: (args: {
-      targetId: string
-    }): Promise<{ success: boolean; error?: string; state?: SshConnectionState }> =>
-      ipcRenderer.invoke('ssh:testConnection', args).then((result: unknown) => {
-        if (!result || typeof result !== 'object') {
-          return { success: false }
-        }
-        const retained = result as Record<string, unknown>
-        const state = admitSshConnectionState(retained.state, args.targetId)
-        return {
-          success: retained.success === true,
-          ...(typeof retained.error === 'string' ? { error: retained.error } : {}),
-          ...(state ? { state } : {})
-        }
-      }),
-
-    onStateChanged: (
-      callback: (data: { targetId: string; state: SshConnectionState }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; state: unknown }
-      ) => {
-        const state = admitSshConnectionStateForAuthorityReconciliation(data.state, data.targetId)
-        if (state) {
-          callback({ targetId: data.targetId, state })
-        }
-      }
-      ipcRenderer.on('ssh:state-changed', listener)
-      return () => ipcRenderer.removeListener('ssh:state-changed', listener)
-    },
-
-    addPortForward: (args: {
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }): Promise<PortForwardEntry> => ipcRenderer.invoke('ssh:addPortForward', args),
-
-    updatePortForward: (args: {
-      id: string
-      targetId: string
-      localPort: number
-      remoteHost: string
-      remotePort: number
-      label?: string
-    }): Promise<PortForwardEntry> => ipcRenderer.invoke('ssh:updatePortForward', args),
-
-    removePortForward: (args: { id: string }): Promise<PortForwardEntry | null> =>
-      ipcRenderer.invoke('ssh:removePortForward', args),
-
-    listPortForwards: (args?: { targetId?: string }): Promise<PortForwardEntry[]> =>
-      ipcRenderer.invoke('ssh:listPortForwards', args),
-
-    listDetectedPorts: async (args: { targetId: string }): Promise<EnrichedDetectedPort[]> =>
-      admitSshDetectedPorts(await ipcRenderer.invoke('ssh:listDetectedPorts', args)),
-
-    onPortForwardsChanged: (
-      callback: (data: { targetId: string; forwards: PortForwardEntry[] }) => void
-    ): (() => void) => {
-      const handler = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; forwards: PortForwardEntry[] }
-      ) => callback(data)
-      ipcRenderer.on('ssh:port-forwards-changed', handler)
-      return () => ipcRenderer.removeListener('ssh:port-forwards-changed', handler)
-    },
-
-    onDetectedPortsChanged: (
-      callback: (data: { targetId: string; ports: EnrichedDetectedPort[] }) => void
-    ): (() => void) => {
-      const handler = (
-        _event: Electron.IpcRendererEvent,
-        data: { targetId: string; ports: unknown }
-      ) => callback({ targetId: data.targetId, ports: admitSshDetectedPorts(data.ports) })
-      ipcRenderer.on('ssh:detected-ports-changed', handler)
-      return () => ipcRenderer.removeListener('ssh:detected-ports-changed', handler)
-    },
-
-    browseDir: (args: {
-      targetId: string
-      dirPath: string
-    }): Promise<{
-      entries: { name: string; isDirectory: boolean }[]
-      resolvedPath: string
-    }> => ipcRenderer.invoke('ssh:browseDir', args),
-
-    onCredentialRequest: (
-      callback: (data: {
-        requestId: string
-        targetId: string
-        kind: 'passphrase' | 'password'
-        detail: string
-      }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: {
-          requestId: string
-          targetId: string
-          kind: 'passphrase' | 'password'
-          detail: string
-        }
-      ) => callback(data)
-      ipcRenderer.on('ssh:credential-request', listener)
-      return () => ipcRenderer.removeListener('ssh:credential-request', listener)
-    },
-
-    onCredentialResolved: (callback: (data: { requestId: string }) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: { requestId: string }) =>
-        callback(data)
-      ipcRenderer.on('ssh:credential-resolved', listener)
-      return () => ipcRenderer.removeListener('ssh:credential-resolved', listener)
-    },
-
-    submitCredential: (args: { requestId: string; value: string | null }): Promise<void> =>
-      ipcRenderer.invoke('ssh:submitCredential', args)
   },
 
   automations: {

@@ -1,8 +1,5 @@
 import { listEnvironments } from '~shared/runtime-environment-store'
-import {
-  isUserManagedRuntimeEnvironment,
-  type KnownRuntimeEnvironment
-} from '~shared/runtime-environments'
+import type { KnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type { GlobalSettings } from '~shared/types'
 
 type RuntimeEnvironmentFocusStore = {
@@ -62,7 +59,7 @@ export function selfHealRuntimeEnvironmentFocus({
   }
 
   const focusedEnvironment = environments.find((entry) => entry.id === activeRuntimeEnvironmentId)
-  if (focusedEnvironment && isUserManagedRuntimeEnvironment(focusedEnvironment)) {
+  if (focusedEnvironment) {
     return
   }
 

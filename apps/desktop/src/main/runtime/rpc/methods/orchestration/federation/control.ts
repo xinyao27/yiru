@@ -28,6 +28,7 @@ export const ORCHESTRATION_FEDERATION_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationShow',
     params: FederationDispatchParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime, authenticatedCallerFingerprint }) => {
       const attachment = requireHomeAttachment(
         runtime,
@@ -47,6 +48,7 @@ export const ORCHESTRATION_FEDERATION_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationRead',
     params: FederationReadParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime, authenticatedCallerFingerprint }) => {
       requireHomeAttachment(runtime, params.dispatchId, authenticatedCallerFingerprint)
       const observation = await inspectRemoteAttachment(runtime, params.dispatchId)
@@ -69,6 +71,7 @@ export const ORCHESTRATION_FEDERATION_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationReadOutput',
     params: FederationOutputReadParams,
+    access: { scope: 'host', tier: 'read' },
     handler: async (params, { runtime, authenticatedCallerFingerprint }) => {
       const attachment = requireHomeAttachment(
         runtime,
@@ -110,6 +113,7 @@ export const ORCHESTRATION_FEDERATION_CONTROL_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.federationStop',
     params: FederationDispatchParams,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime, authenticatedCallerFingerprint }) => {
       requireHomeAttachment(runtime, params.dispatchId, authenticatedCallerFingerprint)
       const db = runtime.getOrchestrationDb()

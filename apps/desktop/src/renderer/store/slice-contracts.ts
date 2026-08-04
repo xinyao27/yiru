@@ -29,7 +29,6 @@ import type { RateLimitSlice } from './slices/rate-limits'
 import type { RecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import type { RemoteServerUpdatesSlice } from './slices/remote-server-updates'
 import type { RepoSlice } from './slices/repos'
-import type { RuntimeEnvironmentSshSlice } from './slices/runtime-environment-ssh'
 import type { RuntimeStatusSlice } from './slices/runtime-status'
 import type { SparsePresetsSlice } from './slices/sparse-presets'
 import type { SshSlice } from './slices/ssh'
@@ -66,7 +65,6 @@ declare module './types' {
       RateLimitResumeSlice,
       RemoteServerUpdatesSlice,
       SshSlice,
-      RuntimeEnvironmentSshSlice,
       AgentStatusSlice,
       PaneForegroundAgentSlice,
       DiffCommentsSlice,

@@ -16,7 +16,6 @@ await build({
         'client-invalidations': resolve(import.meta.dirname, 'src/runtime-client-invalidations.ts'),
         'mobile-runtime-types': resolve(import.meta.dirname, 'src/mobile-runtime-types.ts'),
         'rpc-envelope': resolve(import.meta.dirname, 'src/runtime-rpc-envelope.ts'),
-        'ssh-connection': resolve(import.meta.dirname, 'src/ssh-types.ts'),
         'subscription-replay': resolve(import.meta.dirname, 'src/runtime-subscription-replay.ts'),
         'tailscale-endpoint': resolve(import.meta.dirname, 'src/remote-runtime-tailscale-hint.ts'),
         'terminal-osc-links': resolve(import.meta.dirname, 'src/terminal-osc-link-ranges.ts'),

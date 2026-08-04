@@ -4,10 +4,6 @@ import { join } from 'node:path'
 
 import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
-import type {
-  CoworkingVerifiedRemoteExistingPath,
-  CoworkingVerifiedRemoteFilesystem
-} from '../providers/coworking-verified-filesystem-types'
 import { CoworkingExecutionError } from './execution-error'
 import type {
   CoworkingFileHostEntry,
@@ -19,10 +15,7 @@ import type { CoworkingCanonicalHostPath, CoworkingContainedPath } from './workt
 import {
   localCoworkingPathIdentity,
   localStatsIdentity,
-  requireCoworkingPathIdentity,
-  COWORKING_LOCAL_SCOPE_PREFIX,
-  COWORKING_SSH_SCOPE_PREFIX,
-  coworkingFilesystemProvider
+  requireCoworkingPathIdentity
 } from './yiru-host/paths'
 
 const OPEN_NOFOLLOW = typeof constants.O_NOFOLLOW === 'number' ? constants.O_NOFOLLOW : 0
@@ -36,10 +29,6 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<CoworkingFileHostPage> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(contained.root)
-    if (remote) {
-      return await remote.list(remotePathProof(contained.target), offset, limit, signal)
-    }
     const handle = await open(
       contained.target.absolutePath,
       constants.O_RDONLY | OPEN_DIRECTORY | OPEN_NOFOLLOW
@@ -105,10 +94,6 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<CoworkingVerifiedFileRead> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(contained.root)
-    if (remote) {
-      return remote.read(remotePathProof(contained.target), offset, maxBytes, signal)
-    }
     const handle = await open(contained.target.absolutePath, constants.O_RDONLY | OPEN_NOFOLLOW)
     try {
       const stats = await handle.stat()
@@ -128,25 +113,6 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<void> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(contained.root)
-    if (remote) {
-      const request =
-        mode === 'create'
-          ? {
-              mode,
-              targetPath: contained.target.absolutePath,
-              parent: remotePathProof(contained.parent),
-              bytes
-            }
-          : {
-              mode,
-              target: remotePathProof(contained.target),
-              parent: remotePathProof(contained.parent),
-              bytes
-            }
-      await remote.write(request, signal)
-      return
-    }
     if (mode === 'create') {
       await requireLocalIdentity(contained.parent)
     }
@@ -176,15 +142,6 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<void> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(contained.root)
-    if (remote) {
-      await remote.createDirectory(
-        contained.target.absolutePath,
-        remotePathProof(contained.parent),
-        signal
-      )
-      return
-    }
     await requireLocalIdentity(contained.parent)
     await mkdir(contained.target.absolutePath, { recursive: false })
   }
@@ -195,17 +152,6 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<void> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(source.root)
-    if (remote) {
-      await remote.rename(
-        remotePathProof(source.target),
-        remotePathProof(source.parent),
-        destination.target.absolutePath,
-        remotePathProof(destination.parent),
-        signal
-      )
-      return
-    }
     await Promise.all([
       requireLocalIdentity(source.target),
       requireLocalIdentity(source.parent),
@@ -224,51 +170,11 @@ export class YiruCoworkingVerifiedFileOperations implements CoworkingFileOperati
     signal: AbortSignal
   ): Promise<void> {
     signal.throwIfAborted()
-    const remote = verifiedRemoteFilesystem(contained.root)
-    if (remote) {
-      await remote.delete(
-        remotePathProof(contained.target),
-        remotePathProof(contained.parent),
-        recursive,
-        signal
-      )
-      return
-    }
     await Promise.all([
       requireLocalIdentity(contained.target),
       requireLocalIdentity(contained.parent)
     ])
     await rm(contained.target.absolutePath, { recursive, force: false })
-  }
-}
-
-function verifiedRemoteFilesystem(
-  root: CoworkingCanonicalHostPath
-): CoworkingVerifiedRemoteFilesystem | null {
-  if (root.scopeKey.startsWith(COWORKING_LOCAL_SCOPE_PREFIX)) {
-    return null
-  }
-  if (!root.scopeKey.startsWith(COWORKING_SSH_SCOPE_PREFIX)) {
-    throw new CoworkingExecutionError('resource_unavailable')
-  }
-  const verified = coworkingFilesystemProvider(root)?.coworkingVerifiedFiles
-  if (!verified) {
-    // Why: an old or disconnected relay cannot safely emulate handle-bound operations.
-    throw new CoworkingExecutionError('resource_unavailable')
-  }
-  return verified
-}
-
-function remotePathProof(
-  pathValue: CoworkingCanonicalHostPath
-): CoworkingVerifiedRemoteExistingPath {
-  if (!pathValue.identity) {
-    throw new CoworkingExecutionError('resource_unavailable')
-  }
-  return {
-    path: pathValue.absolutePath,
-    expectedRealPath: pathValue.absolutePath,
-    expectedStatIdentity: pathValue.identity
   }
 }
 

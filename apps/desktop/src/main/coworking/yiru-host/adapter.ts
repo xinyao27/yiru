@@ -14,7 +14,6 @@ import { CoworkingTerminalSessionBindings } from '../terminal-session-bindings'
 import { CoworkingWorktreeContainment } from '../worktree-containment'
 import type { CoworkingPublicWorktreeInstance } from '../worktree-publication-state'
 import { YiruCoworkingExecutionHostSessionReader } from '../yiru-session-reader'
-import { YiruCoworkingSshSessionReader } from '../yiru-ssh-session-reader'
 import { YiruCoworkingHostChecks } from './checks'
 import { YiruCoworkingHostFiles } from './files'
 import { YiruCoworkingHostGit } from './git'
@@ -27,7 +26,6 @@ export type YiruCoworkingHostAdapterOptions = {
   runtime: YiruRuntimeService
   pairedRuntimeAdapter?: CoworkingHostAdapter
   pairedRuntimeSessionReader?: CoworkingExecutionHostSessionReader
-  sshSessionReader?: CoworkingExecutionHostSessionReader
 }
 
 export type YiruCoworkingHostAdapterBundle = {
@@ -39,7 +37,7 @@ export type YiruCoworkingHostAdapterBundle = {
   resolveAdapter(target: CoworkingPublicWorktreeInstance): CoworkingHostAdapter | null
 }
 
-/** Builds the owner adapter without opening SSH or paired-runtime connections. */
+/** Builds the owner adapter without opening a paired-runtime connection. */
 export function createYiruCoworkingHostAdapter(
   options: YiruCoworkingHostAdapterOptions
 ): YiruCoworkingHostAdapterBundle {
@@ -68,8 +66,7 @@ export function createYiruCoworkingHostAdapter(
   )
   const sessionReader = new YiruCoworkingExecutionHostSessionReader(
     options.runtime,
-    options.pairedRuntimeSessionReader,
-    options.sshSessionReader ?? new YiruCoworkingSshSessionReader()
+    options.pairedRuntimeSessionReader
   )
   return {
     adapter,

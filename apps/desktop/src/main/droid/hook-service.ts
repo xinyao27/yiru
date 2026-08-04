@@ -1,7 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -30,6 +29,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 // Why: SessionStart is installed (not just listened for) so that resuming a
 // droid session via `droid --resume` resets the per-pane prompt/tool caches
@@ -229,15 +229,19 @@ export class DroidHookService {
 
   // Why: SSH remotes run the Droid CLI on the remote host, so its hook config
   // and managed script must be written into the remote ~/.factory + ~/.yiru via
-  // SFTP. Without this, Droid never fires the managed hook over SSH and its
+  // remote file operations. Without this, Droid never fires the managed hook
+  // remotely and its
   // status row is absent from the task tree (issue #7253). Mirrors the local
   // install() but always emits POSIX script/paths — even from a Windows host.
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
     const remoteConfigPath = `${home}/.factory/settings.json`
     const remoteScriptPath = `${home}/.yiru/agent-hooks/droid-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'droid',
@@ -251,8 +255,8 @@ export class DroidHookService {
       buildInstalledDroidConfig(config, wrapPosixHookCommand(remoteScriptPath), 'droid-hook.sh')
       // Why: script first, config last — a partial config write must never
       // point Droid at a script that isn't on disk yet.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, config)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
         agent: 'droid',

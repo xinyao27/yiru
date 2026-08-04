@@ -1,4 +1,8 @@
-import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  splitWorktreeId
+} from '@yiru/workbench-model/workspace'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { GitWorktreeInfo, Repo, Worktree } from '~shared/types'
 import type {
@@ -10,8 +14,6 @@ import type {
 } from '~shared/workspace/cleanup'
 
 import type { Store } from '../persistence'
-import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import type { IGitProvider } from '../providers/types'
 import { listRepoWorktrees, createFolderWorktree } from '../repo-worktrees'
 import { mergeWorktree } from '../worktree/logic'
 import {
@@ -24,7 +26,6 @@ import {
   buildWorkspaceCleanupCandidateFromError,
   isWorkspaceInactiveForCleanup
 } from './candidate'
-import { synthesizeDisconnectedSshCleanupCandidates } from './disconnected-ssh'
 import {
   WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
   appendWorkspaceCleanupItems,
@@ -62,9 +63,12 @@ export async function scanWorkspaceCleanup(
   if (args.worktreeId && !parsedTarget) {
     return { scannedAt, candidates: [], errors: [] }
   }
+  const localRepos = store
+    .getRepos()
+    .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
   const repos = parsedTarget
-    ? store.getRepos().filter((repo) => repo.id === parsedTarget.repoId)
-    : store.getRepos()
+    ? localRepos.filter((repo) => repo.id === parsedTarget.repoId)
+    : localRepos
   const progress = createProgressEmitter(args.scanId, scannedAt, options)
   const errors: WorkspaceCleanupScanResult['errors'] = []
   const candidates: WorkspaceCleanupCandidate[] = []
@@ -108,26 +112,12 @@ async function scanRepoWorkspaces(
   } = args
   const errors: WorkspaceCleanupScanResult['errors'] = []
   const repoIsFolder = isFolderRepo(repo)
-  let provider: IGitProvider | null = null
   let gitWorktrees: GitWorktreeInfo[] = []
 
   try {
-    const discovered = await listCleanupGitWorktrees(repo, repoIsFolder)
-    provider = discovered.provider
-    gitWorktrees = discovered.gitWorktrees
+    gitWorktrees = await listCleanupGitWorktrees(repo, repoIsFolder)
   } catch (error) {
-    return handleRepoWorktreeListError({ repo, targetWorktreeId, scannedAt, error, onErrors })
-  }
-
-  if (repo.connectionId && !provider) {
-    const candidates = targetWorktreeId
-      ? synthesizeDisconnectedSshCleanupCandidates(store, repo, scannedAt, targetWorktreeId)
-      : []
-    onWorktreesDiscovered?.(candidates.length)
-    for (const candidate of candidates) {
-      onCandidateScanned?.(candidate)
-    }
-    return { scannedAt, candidates, errors: [] }
+    return handleRepoWorktreeListError({ repo, scannedAt, error, onErrors })
   }
 
   const mergedWorktrees = gitWorktrees.map((gitWorktree) => {
@@ -163,7 +153,7 @@ async function scanRepoWorkspaces(
         repo,
         worktree: worktreeWithActivity,
         scannedAt,
-        provider,
+        provider: null,
         skipGit: skipGitWorktreeIds.has(worktreeWithActivity.id),
         forceGitCheck: Boolean(targetWorktreeId)
       }).catch((error) => {
@@ -219,49 +209,25 @@ function shouldResolveBroadWorkspaceCleanupActivity(
 async function listCleanupGitWorktrees(
   repo: Repo,
   repoIsFolder: boolean
-): Promise<{ provider: IGitProvider | null; gitWorktrees: GitWorktreeInfo[] }> {
+): Promise<GitWorktreeInfo[]> {
   if (repoIsFolder) {
-    return { provider: null, gitWorktrees: [createFolderWorktree(repo)] }
+    return [createFolderWorktree(repo)]
   }
-  if (repo.connectionId) {
-    const provider = getSshGitProvider(repo.connectionId) ?? null
-    if (!provider) {
-      // Why: cleanup should reflect only workspaces Yiru can currently inspect.
-      return { provider: null, gitWorktrees: [] }
-    }
-    return {
-      provider,
-      gitWorktrees: await withWorkspaceCleanupTimeout(
-        (signal) => provider.listWorktrees(repo.path, { signal }),
-        WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
-        'Timed out listing SSH worktrees.'
-      )
-    }
-  }
-  return {
-    provider: null,
-    gitWorktrees: await withWorkspaceCleanupTimeout(
-      (signal) => listRepoWorktrees(repo, { signal }),
-      WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
-      'Timed out listing worktrees.'
-    )
-  }
+  return await withWorkspaceCleanupTimeout(
+    (signal) => listRepoWorktrees(repo, { signal }),
+    WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
+    'Timed out listing worktrees.'
+  )
 }
 
 function handleRepoWorktreeListError(args: {
   repo: Repo
-  targetWorktreeId?: string
   scannedAt: number
   error: unknown
   onErrors?: (errors: WorkspaceCleanupScanError[]) => void
 }): WorkspaceCleanupScanResult {
-  const { repo, targetWorktreeId, scannedAt, error, onErrors } = args
+  const { repo, scannedAt, error, onErrors } = args
   console.error('Workspace cleanup repo scan failed', error)
-  if (repo.connectionId && !targetWorktreeId) {
-    // Why: broad cleanup only shows remote workspaces Yiru can inspect now.
-    // A connected SSH repo that fails mid-scan is omitted, not bannered.
-    return { scannedAt, candidates: [], errors: [] }
-  }
   const errors = [createWorkspaceCleanupScanError(repo, toSafeWorkspaceCleanupRepoScanError(error))]
   onErrors?.(errors)
   return { scannedAt, candidates: [], errors }

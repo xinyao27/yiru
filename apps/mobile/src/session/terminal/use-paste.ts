@@ -82,7 +82,6 @@ type UseMobileTerminalPasteOptions = {
   readonly connStateRef: RefObject<ConnectionState>
   readonly deviceTokenRef: RefObject<string | null>
   readonly flushPendingLiveInputBeforeExternalSend: (handle: string) => Promise<boolean>
-  readonly getActiveWorktreeConnectionId: () => Promise<string | null>
   readonly onError: () => void
   readonly onSuccess: () => void
   readonly ptyModesRef: RefObject<Map<string, TerminalModes>>
@@ -101,7 +100,6 @@ export function useMobileTerminalPaste({
   connStateRef,
   deviceTokenRef,
   flushPendingLiveInputBeforeExternalSend,
-  getActiveWorktreeConnectionId,
   onError,
   onSuccess,
   ptyModesRef,
@@ -127,11 +125,8 @@ export function useMobileTerminalPaste({
           refreshCanPaste()
           return
         }
-        const connectionId = await getActiveWorktreeConnectionId()
         const base64 = await prepareMobileClipboardImageBase64(image, resizeMobileClipboardImage)
-        const imagePath = await saveMobileClipboardImageAsTempFile(client, base64, {
-          connectionId
-        })
+        const imagePath = await saveMobileClipboardImageAsTempFile(client, base64)
         payload = buildMobileImagePastePayload(imagePath)
       }
 
@@ -192,7 +187,6 @@ export function useMobileTerminalPaste({
     connStateRef,
     deviceTokenRef,
     flushPendingLiveInputBeforeExternalSend,
-    getActiveWorktreeConnectionId,
     onError,
     onSuccess,
     ptyModesRef,

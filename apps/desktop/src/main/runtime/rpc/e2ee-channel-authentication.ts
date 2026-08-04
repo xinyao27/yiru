@@ -1,4 +1,5 @@
 import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
+import type { DeviceScope } from '~shared/runtime-types'
 
 import type { E2EEChannel } from './e2ee-channel'
 import { isValidMobileE2EEAuthVersion, type MobileE2EEAuth } from './mobile-e2ee-auth-validation'
@@ -7,7 +8,10 @@ import type { DesktopMobileE2EEV2Session } from './mobile-e2ee-v2-desktop-sessio
 export type E2EEAuthenticatedDevice = {
   deviceId: string
   deviceToken: string
-  scope: 'mobile' | 'runtime'
+  // Why: carries the true grant class end-to-end. Collapsing 'coworking-host'
+  // to 'runtime' here would erase the distinction the dispatcher needs to
+  // adjudicate `access.principals`.
+  scope: DeviceScope
 }
 
 export type E2EEAuthenticationResult = {

@@ -1,8 +1,4 @@
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  normalizeExecutionHostId,
-  toSshExecutionHostId
-} from '@yiru/workbench-model/workspace'
+import { LOCAL_EXECUTION_HOST_ID, normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { GlobalSettings } from '~shared/types'
 
 type RuntimeFocusSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
@@ -18,7 +14,7 @@ export function getGitHubRepoCacheKey(
 ): string {
   const owner = repoId ?? repoPath
   const scope = getGitHubCacheHostScope(settings, connectionId, executionHostId, hasRepoOwner)
-  // Why: runtime/SSH lookups can observe different remotes than the local repo
+  // Why: runtime lookups can observe different remotes than the local repo
   // path, so cache keys include the repo's owning execution boundary.
   if (scope) {
     return `${scope}::${owner}::${suffix}`
@@ -36,11 +32,10 @@ function getGitHubCacheHostScope(
   if (hostId) {
     return hostId === LOCAL_EXECUTION_HOST_ID ? null : hostId
   }
-  const sshConnectionId = connectionId?.trim()
-  if (sshConnectionId) {
-    return toSshExecutionHostId(sshConnectionId)
+  if (connectionId?.trim()) {
+    return null
   }
-  // Why: an existing repo with no remote/runtime owner is local; only missing
+  // Why: an existing repo with no runtime owner is local; only missing
   // owner context should inherit the focused runtime fallback.
   if (hasRepoOwner) {
     return null

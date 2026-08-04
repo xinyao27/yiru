@@ -1,4 +1,3 @@
-import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
@@ -40,7 +39,6 @@ import {
   readDetectedAgentIds,
   readGlabInstalled,
   readRepoHooks,
-  readSshConnectionState,
   readTrustedYiruHooks,
   readWorkspaceRepoList,
   readWorkspaceRepos,
@@ -69,7 +67,6 @@ import {
 } from './tui-agents'
 import { useMobileComposerSource } from './use-composer-source'
 import { normalizeWorkspaceAgent } from './workspace-agent-selection'
-import { deriveWorkspaceSshGate, workspaceSshStatusLabel } from './workspace-ssh-gate'
 
 type SetupDecision = 'inherit' | 'run' | 'skip'
 
@@ -179,8 +176,6 @@ function NewWorkspaceModalContent({
     null
   )
   const [agentOverriddenState, setAgentOverridden] = useState(false)
-  const [sshState, setSshState] = useState<SshConnectionState | null>(null)
-  const [sshConnectingTargetId, setSshConnectingTargetId] = useState<string | null>(null)
   const [note, setNote] = useState('')
   const [gitlabAvailable, setGitLabAvailable] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -216,17 +211,8 @@ function NewWorkspaceModalContent({
     onError: setError
   })
 
-  const selectedRepoConnectionId = selectedRepo?.connectionId ?? null
-  const sshGate = deriveWorkspaceSshGate({
-    connectionId: selectedRepoConnectionId,
-    state: sshState,
-    connecting: sshConnectingTargetId === selectedRepoConnectionId
-  })
   const detectedAgentIds =
-    detectedAgentIdsState?.connectionId === selectedRepoConnectionId &&
-    (selectedRepoConnectionId === null || sshGate.status === 'connected')
-      ? detectedAgentIdsState.ids
-      : null
+    detectedAgentIdsState?.connectionId === null ? detectedAgentIdsState.ids : null
   const activeSetupHookDetails =
     selectedRepo && setupHookDetails?.repoId === selectedRepo.id ? setupHookDetails : null
   const setupCommand = activeSetupHookDetails?.command ?? null
@@ -355,81 +341,30 @@ function NewWorkspaceModalContent({
   }, [visible, client, hostId])
 
   useEffect(() => {
-    if (!visible || !client || !selectedRepoConnectionId) {
-      return
-    }
-    let stale = false
-    void client
-      .sendRequest('ssh.getState', { targetId: selectedRepoConnectionId })
-      .then((response) => {
-        if (stale) {
-          return
-        }
-        if (!response.ok) {
-          throw new Error(response.error.message)
-        }
-        setSshState(
-          readSshConnectionState(response.result) ?? {
-            targetId: selectedRepoConnectionId,
-            status: 'disconnected',
-            error: null,
-            reconnectAttempt: 0
-          }
-        )
-      })
-      .catch((err) => {
-        if (!stale) {
-          setSshState({
-            targetId: selectedRepoConnectionId,
-            status: 'error',
-            error:
-              err instanceof Error
-                ? err.message
-                : translate(
-                    'mobile.newWorkspace.sshStateReadFailed',
-                    'Failed to read SSH connection state.'
-                  ),
-            reconnectAttempt: 0
-          })
-        }
-      })
-    return () => {
-      stale = true
-    }
-  }, [client, selectedRepoConnectionId, visible])
-
-  useEffect(() => {
     if (!visible || !client) {
-      return
-    }
-    if (selectedRepoConnectionId && sshGate.status !== 'connected') {
       return
     }
     let stale = false
     void (async () => {
       try {
-        const response = selectedRepoConnectionId
-          ? await client.sendRequest('preflight.detectRemoteAgents', {
-              connectionId: selectedRepoConnectionId
-            })
-          : await client.sendRequest('preflight.detectAgents')
+        const response = await client.sendRequest('preflight.detectAgents')
         if (stale) {
           return
         }
         setDetectedAgentIdsState({
-          connectionId: selectedRepoConnectionId,
+          connectionId: null,
           ids: new Set(response.ok ? readDetectedAgentIds(response.result) : [])
         })
       } catch {
         if (!stale) {
-          setDetectedAgentIdsState({ connectionId: selectedRepoConnectionId, ids: new Set() })
+          setDetectedAgentIdsState({ connectionId: null, ids: new Set() })
         }
       }
     })()
     return () => {
       stale = true
     }
-  }, [client, selectedRepoConnectionId, sshGate.status, visible])
+  }, [client, visible])
 
   useEffect(() => {
     if (!client || !selectedRepo) {
@@ -477,52 +412,6 @@ function NewWorkspaceModalContent({
     }
   }, [client, selectedRepo])
 
-  async function connectSelectedSshRepo(): Promise<void> {
-    if (!client || !selectedRepoConnectionId) {
-      return
-    }
-    setSshConnectingTargetId(selectedRepoConnectionId)
-    setSshState({
-      targetId: selectedRepoConnectionId,
-      status: 'connecting',
-      error: null,
-      reconnectAttempt: 0
-    })
-    try {
-      const response = await client.sendRequest(
-        'ssh.connect',
-        { targetId: selectedRepoConnectionId },
-        { timeoutMs: 120_000 }
-      )
-      if (!response.ok) {
-        throw new Error(response.error.message)
-      }
-      setSshState(
-        readSshConnectionState(response.result) ?? {
-          targetId: selectedRepoConnectionId,
-          status: 'connected',
-          error: null,
-          reconnectAttempt: 0
-        }
-      )
-    } catch (err) {
-      setSshState({
-        targetId: selectedRepoConnectionId,
-        status: 'error',
-        error:
-          err instanceof Error
-            ? err.message
-            : translate(
-                'mobile.newWorkspace.sshConnectFailed',
-                'Failed to connect to SSH repository.'
-              ),
-        reconnectAttempt: 0
-      })
-    } finally {
-      setSshConnectingTargetId((current) => (current === selectedRepoConnectionId ? null : current))
-    }
-  }
-
   async function handleCreate(options: CreateOptions = {}) {
     if (!client || !selectedRepo || createInFlightRef.current) {
       return
@@ -532,16 +421,6 @@ function NewWorkspaceModalContent({
     setError('')
 
     try {
-      if (sshGate.requiresConnection) {
-        setError(
-          translate(
-            'mobile.newWorkspace.connectRepoBeforeCreate',
-            'Connect {{repo}} before creating a workspace.',
-            { repo: selectedRepo.displayName }
-          )
-        )
-        return
-      }
       let latestRuntimeSettings = runtimeSettings
       try {
         const settingsResponse = await client.sendRequest('settings.get')
@@ -672,10 +551,7 @@ function NewWorkspaceModalContent({
 
   const needsSetupChoice = Boolean(setupCommand) && setupRunPolicy === 'ask'
   const canCreate =
-    selectedRepo != null &&
-    !creating &&
-    !sshGate.requiresConnection &&
-    (!needsSetupChoice || setupDecisionChoice != null)
+    selectedRepo != null && !creating && (!needsSetupChoice || setupDecisionChoice != null)
   const pickerAgentOptions = useMemo<SelectionDrawerOption<AgentOption>[]>(() => {
     const visible = AGENT_OPTIONS.filter(
       (agent) =>
@@ -842,59 +718,12 @@ function NewWorkspaceModalContent({
                   ? translate('mobile.newWorkspace.nameOrCreateFromLabel', "Name or 'Create From'")
                   : translate('mobile.newWorkspace.workspaceNameLabel', 'Workspace name')
               }
-              disabled={sshGate.requiresConnection}
               onBeforeOpen={() => setError('')}
               onOpenDrawer={() => transitionDrawer('source')}
             />
 
             {composer.forkPushWarning ? (
               <Text className="-mt-2 mb-3 text-xs text-amber-500">{composer.forkPushWarning}</Text>
-            ) : null}
-
-            {selectedRepoConnectionId ? (
-              <View className="mb-3">
-                <Text className="text-muted-foreground mb-1 text-xs font-medium">
-                  {translate('mobile.newWorkspace.sshConnectionLabel', 'SSH Connection')}
-                </Text>
-                <View className="border-border bg-secondary gap-1 rounded-2xl border px-3 py-2">
-                  <View className="flex-row items-center gap-2">
-                    <View
-                      className={cn(
-                        'w-2 h-2',
-                        sshGate.status === 'connected'
-                          ? 'bg-green-500'
-                          : sshGate.connectInProgress
-                            ? 'bg-amber-500'
-                            : 'bg-destructive'
-                      )}
-                    />
-                    <View className="min-w-0 flex-1">
-                      <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
-                        {selectedRepo?.displayName ??
-                          translate('mobile.newWorkspace.remoteRepository', 'Remote repository')}
-                      </Text>
-                      <Text className="text-muted-foreground mt-1 text-xs">
-                        {workspaceSshStatusLabel(sshGate.status)}
-                      </Text>
-                    </View>
-                    {sshGate.status === 'connected' ? null : (
-                      <MobileGlassTextButton
-                        disabled={sshGate.connectInProgress}
-                        label={
-                          sshGate.connectInProgress
-                            ? translate('mobile.newWorkspace.connecting', 'Connecting...')
-                            : translate('mobile.newWorkspace.connect', 'Connect')
-                        }
-                        onPress={() => void connectSelectedSshRepo()}
-                        size="small"
-                      />
-                    )}
-                  </View>
-                  {sshGate.error ? (
-                    <Text className="text-destructive text-xs">{sshGate.error}</Text>
-                  ) : null}
-                </View>
-              </View>
             ) : null}
 
             <View className="mb-3">
@@ -904,7 +733,6 @@ function NewWorkspaceModalContent({
               <MobileGlassPressable
                 className="rounded-xl"
                 contentClassName="flex-row items-center gap-2 px-3 py-3"
-                disabled={sshGate.requiresConnection}
                 onPress={() => {
                   prepareSelectionPickerOpen()
                   transitionDrawer('agent')
@@ -912,9 +740,7 @@ function NewWorkspaceModalContent({
               >
                 <MobileAgentIcon agentId={selectedAgent.id} size={16} />
                 <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
-                  {sshGate.requiresConnection
-                    ? translate('mobile.newWorkspace.connectRepoFirst', 'Connect repository first')
-                    : selectedAgent.label}
+                  {selectedAgent.label}
                 </Text>
                 <ChevronDown size={14} colorClassName="accent-muted-foreground" />
               </MobileGlassPressable>
@@ -1028,11 +854,7 @@ function NewWorkspaceModalContent({
                 <MobileGlassTextButton
                   disabled={!canCreate}
                   isProminent
-                  label={
-                    sshGate.requiresConnection
-                      ? translate('mobile.newWorkspace.connectRepository', 'Connect Repository')
-                      : translate('mobile.newWorkspace.title', 'Create Workspace')
-                  }
+                  label={translate('mobile.newWorkspace.title', 'Create Workspace')}
                   onPress={() => void handleCreate()}
                   size="regular"
                 />
@@ -1051,7 +873,6 @@ function NewWorkspaceModalContent({
         availability={sourceAvailability}
         repoId={selectedRepo?.id ?? null}
         repos={pasteRepos}
-        sshReady={!sshGate.requiresConnection}
         onRepoChange={(repoId) => {
           const nextRepo = repos.find((repo) => repo.id === repoId)
           if (nextRepo) {

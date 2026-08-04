@@ -21,7 +21,6 @@ import { REPO_HANDLERS } from './handlers/repo'
 import { SESSION_HANDLERS } from './handlers/sessions'
 import { SKILL_HANDLERS } from './handlers/skills'
 import { TERMINAL_HANDLERS } from './handlers/terminal'
-import { VM_HANDLERS } from './handlers/vm'
 import { WORKTREE_HANDLERS } from './handlers/worktree'
 import { MOBILE_HANDLERS } from './mobile/development-pairing'
 import type { RuntimeClient } from './runtime-client'
@@ -64,7 +63,6 @@ function buildHandlers(): Map<string, CommandHandler> {
     INTROSPECTION_HANDLERS,
     MOBILE_HANDLERS,
     ENVIRONMENT_HANDLERS,
-    VM_HANDLERS,
     SKILL_HANDLERS
   ]
   for (const group of groups) {

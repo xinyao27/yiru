@@ -1,3 +1,4 @@
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import type { Repo } from '~shared/types'
 
 import { resolveLocalGitUsernameDetailed } from './git/username'
@@ -18,22 +19,22 @@ const attemptedLocations = new Set<string>()
 let enrichmentInFlight: Promise<void> | null = null
 let rerunRequested = false
 
-function getRepoLocationKey(repo: Pick<Repo, 'path' | 'connectionId'>): string {
-  return `${repo.connectionId ?? 'local'}\0${repo.path}`
+function getRepoLocationKey(repo: Repo): string {
+  return `${getRepoExecutionHostId(repo)}\0${repo.path}`
 }
 
 async function enrichRepoGitUsernamesInBackground(
   store: RepoUsernameStore,
   options: EnrichmentOptions
 ): Promise<void> {
-  const candidates = store.getRepos().filter(
-    (repo) =>
-      repo.kind !== 'folder' &&
-      // Why: SSH repo paths are remote; local git cannot inspect them. The
-      // SSH username path (getSshGitUsername) stays caller-driven.
-      !repo.connectionId &&
-      !attemptedLocations.has(getRepoLocationKey(repo))
-  )
+  const candidates = store
+    .getRepos()
+    .filter(
+      (repo) =>
+        repo.kind !== 'folder' &&
+        getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+        !attemptedLocations.has(getRepoLocationKey(repo))
+    )
   let changed = false
   for (const repo of candidates) {
     attemptedLocations.add(getRepoLocationKey(repo))

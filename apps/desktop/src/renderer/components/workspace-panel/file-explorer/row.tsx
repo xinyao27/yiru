@@ -51,7 +51,6 @@ type FileExplorerRowProps = {
   deleteShortcutLabel: string
   connectionId?: string | null
   runtimeDownloadContext?: RuntimeFileOperationArgs | null
-  supportsFolderDownload?: boolean
   canCollapseFolderSubtree: boolean
   targetDir: string
   targetDepth: number
@@ -94,7 +93,6 @@ export function FileExplorerRow({
   deleteShortcutLabel,
   connectionId,
   runtimeDownloadContext,
-  supportsFolderDownload = false,
   canCollapseFolderSubtree,
   targetDir,
   targetDepth,
@@ -243,7 +241,6 @@ export function FileExplorerRow({
         deleteShortcutLabel={deleteShortcutLabel}
         connectionId={connectionId}
         runtimeDownloadContext={runtimeDownloadContext}
-        supportsFolderDownload={supportsFolderDownload}
         canCollapseFolderSubtree={canCollapseFolderSubtree}
         canAddAsProject={canAddAsProject}
         targetDir={targetDir}

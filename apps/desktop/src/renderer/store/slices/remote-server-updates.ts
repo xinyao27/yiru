@@ -9,7 +9,6 @@ import {
 } from '~renderer/runtime/remote-server-update-coordinator'
 import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '~renderer/runtime/rpc-client'
 import { isValidAppVersion } from '~shared/app-version'
-import { isUserManagedRuntimeEnvironment } from '~shared/runtime-environments'
 import {
   UPDATER_CHECK_CONTRACT,
   UPDATER_DOWNLOAD_CONTRACT,
@@ -90,9 +89,7 @@ export const createRemoteServerUpdatesSlice: StateCreator<
     })
     try {
       const listed = await window.api.runtimeEnvironments.list()
-      // Why: plain SSH/WSL hosts do not own a Yiru app lifecycle; only explicit
-      // paired runtimes carry the authenticated updater RPC and restart contract.
-      const environments = listed.filter(isUserManagedRuntimeEnvironment)
+      const environments = listed
       get().setRuntimeEnvironments(listed)
       const previous = get().remoteServerUpdates
       set({

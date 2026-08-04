@@ -97,6 +97,7 @@ function buildCommitMessageGenerationOverride(params: {
 export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     contract: GIT_STATUS_CONTRACT,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands, signal }) => {
       const options =
         params.includeIgnored === undefined &&
@@ -122,12 +123,14 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.checkIgnored',
     params: GitCheckIgnored,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.checkRuntimeGitIgnoredPaths(params.worktree, params.paths)
   }),
   defineMethod({
     name: 'git.submoduleStatus',
     params: GitSubmoduleStatus,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitSubmoduleStatus(params.worktree, params.submodulePath, params.area)
   }),
@@ -135,6 +138,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.history',
     mobile: true,
     params: GitHistory,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitHistory(params.worktree, {
         limit: params.limit,
@@ -147,6 +151,7 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.conflictOperation',
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitConflictOperation(params.worktree)
   }),
@@ -154,23 +159,27 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.abortMerge',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitMerge(params.worktree)
   }),
   defineMethod({
     name: 'git.abortRebase',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitRebase(params.worktree)
   }),
   defineMethod({
     name: 'git.abortRevert',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitRevert(params.worktree)
   }),
   defineMethod({
     name: 'git.addTag',
     params: GitAddTag,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { gitCommands }) =>
       gitCommands.addRuntimeGitTag(params.worktree, {
         name: params.name,
@@ -182,6 +191,7 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.createBranch',
     params: GitCreateBranch,
+    access: { scope: 'project', tier: 'host' },
     handler: async (params, { gitCommands }) =>
       gitCommands.createRuntimeGitBranchFromCommit(params.worktree, {
         name: params.name,
@@ -192,12 +202,14 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.checkoutCommit',
     params: GitCheckoutCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.checkoutRuntimeGitCommit(params.worktree, params.commit)
   }),
   defineMethod({
     name: 'git.cherryPick',
     params: GitCherryPick,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.cherryPickRuntimeGitCommit(params.worktree, {
         commit: params.commit,
@@ -207,6 +219,7 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.revertCommit',
     params: GitRevertCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.revertRuntimeGitCommit(params.worktree, {
         commit: params.commit,
@@ -216,12 +229,14 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.dropCommit',
     params: GitDropCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.dropRuntimeGitCommit(params.worktree, { commit: params.commit })
   }),
   defineMethod({
     name: 'git.mergeCommit',
     params: GitMergeCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.mergeRuntimeGitCommit(params.worktree, {
         commit: params.commit,
@@ -233,12 +248,14 @@ export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'git.rebaseOntoCommit',
     params: GitRebaseOntoCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.rebaseRuntimeGitOntoCommit(params.worktree, { commit: params.commit })
   }),
   defineMethod({
     name: 'git.resetToCommit',
     params: GitResetToCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.resetRuntimeGitToCommit(params.worktree, {
         commit: params.commit,
@@ -249,6 +266,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.checkout',
     mobile: true,
     params: GitCheckout,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.checkoutRuntimeGitBranch(params.worktree, params.branch)
   }),
@@ -256,6 +274,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.localBranches',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.listRuntimeGitLocalBranches(params.worktree)
   }),
@@ -263,6 +282,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.diff',
     mobile: true,
     params: GitDiff,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitDiff(
         params.worktree,
@@ -275,6 +295,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.branchCompare',
     mobile: true,
     params: GitBranchCompare,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitBranchCompare(params.worktree, params.baseRef)
   }),
@@ -282,6 +303,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.commitCompare',
     mobile: true,
     params: GitCommitCompare,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitCommitCompare(params.worktree, params.commitId)
   }),
@@ -289,6 +311,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.upstreamStatus',
     mobile: true,
     params: GitTargetedRemote,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
         ? gitCommands.getRuntimeGitUpstreamStatus(params.worktree)
@@ -298,6 +321,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.fetch',
     mobile: true,
     params: GitTargetedRemote,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
         ? gitCommands.fetchRuntimeGit(params.worktree)
@@ -307,6 +331,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.forkSync',
     mobile: true,
     params: GitForkSync,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.syncRuntimeGitForkDefaultBranch(params.worktree, params.expectedUpstream)
   }),
@@ -314,6 +339,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.pull',
     mobile: true,
     params: GitTargetedRemote,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
         ? gitCommands.pullRuntimeGit(params.worktree)
@@ -323,6 +349,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.fastForward',
     mobile: true,
     params: GitTargetedRemote,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
         ? gitCommands.fastForwardRuntimeGit(params.worktree)
@@ -332,6 +359,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.rebaseFromBase',
     mobile: true,
     params: GitRebaseFromBase,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.rebaseRuntimeGitFromBase(params.worktree, params.baseRef)
   }),
@@ -339,6 +367,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.push',
     mobile: true,
     params: GitPush,
+    access: { scope: 'project', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.pushRuntimeGit(
         params.worktree,
@@ -351,6 +380,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.branchDiff',
     mobile: true,
     params: GitBranchDiff,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitBranchDiff(
         params.worktree,
@@ -363,6 +393,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.commitDiff',
     mobile: true,
     params: GitCommitDiff,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitCommitDiff(params.worktree, {
         commitOid: params.commitOid,
@@ -375,6 +406,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.commit',
     mobile: true,
     params: GitCommit,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.commitRuntimeGit(params.worktree, params.message)
   }),
@@ -382,6 +414,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.generateCommitMessage',
     mobile: true,
     params: GitGenerateCommitMessage,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { gitCommands }) => {
       const override = buildCommitMessageGenerationOverride(params)
       if (override === undefined) {
@@ -394,6 +427,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.discoverCommitMessageModels',
     mobile: true,
     params: GitDiscoverCommitMessageModels,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { gitCommands }) =>
       gitCommands.discoverRuntimeCommitMessageModels(
         params.worktree,
@@ -409,6 +443,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.cancelGenerateCommitMessage',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.cancelRuntimeGenerateCommitMessage(params.worktree)
   }),
@@ -416,6 +451,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.generatePullRequestFields',
     mobile: true,
     params: GitGeneratePullRequestFields,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { gitCommands }) => {
       const input = {
         base: params.base,
@@ -436,6 +472,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.cancelGeneratePullRequestFields',
     mobile: true,
     params: WorktreeSelector,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.cancelRuntimeGeneratePullRequestFields(params.worktree)
   }),
@@ -443,6 +480,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.stage',
     mobile: true,
     params: GitFilePath,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.stageRuntimeGitPath(params.worktree, params.filePath)
   }),
@@ -450,6 +488,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.bulkStage',
     mobile: true,
     params: GitBulkPaths,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.bulkStageRuntimeGitPaths(params.worktree, params.filePaths)
   }),
@@ -457,6 +496,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.unstage',
     mobile: true,
     params: GitFilePath,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.unstageRuntimeGitPath(params.worktree, params.filePath)
   }),
@@ -464,6 +504,7 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.bulkUnstage',
     mobile: true,
     params: GitBulkPaths,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.bulkUnstageRuntimeGitPaths(params.worktree, params.filePaths)
   }),
@@ -471,24 +512,28 @@ export const GIT_METHODS: RpcMethod[] = [
     name: 'git.discard',
     mobile: true,
     params: GitFilePath,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.discardRuntimeGitPath(params.worktree, params.filePath)
   }),
   defineMethod({
     name: 'git.bulkDiscard',
     params: GitBulkPaths,
+    access: { scope: 'worktree', tier: 'control' },
     handler: async (params, { gitCommands }) =>
       gitCommands.bulkDiscardRuntimeGitPaths(params.worktree, params.filePaths)
   }),
   defineMethod({
     name: 'git.remoteFileUrl',
     params: GitRemoteFileUrl,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitRemoteFileUrl(params.worktree, params.relativePath, params.line)
   }),
   defineMethod({
     name: 'git.remoteCommitUrl',
     params: GitRemoteCommitUrl,
+    access: { scope: 'worktree', tier: 'read' },
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitRemoteCommitUrl(params.worktree, params.sha)
   })

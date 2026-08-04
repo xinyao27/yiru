@@ -217,15 +217,6 @@ export function AutomationDetail({
         </div>
       </div>
 
-      {automation.executionTargetType === 'ssh' ? (
-        <div className="border-border/50 bg-muted/50 text-muted-foreground border p-3 text-sm">
-          {translate(
-            'auto.components.automations.AutomationDetail.dbef8dc110',
-            'This SSH automation runs only while Yiru can reach the SSH host. If reconnect needs interactive credentials or the host is unavailable, the run is recorded as skipped.'
-          )}
-        </div>
-      ) : null}
-
       {runNowAvailability?.canRunNow === false ? (
         <div className="border-border/50 bg-muted/40 text-muted-foreground border p-3 text-sm">
           {runNowAvailability.message}

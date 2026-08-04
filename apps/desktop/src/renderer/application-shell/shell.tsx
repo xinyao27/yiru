@@ -5,11 +5,7 @@ import {
   ArrowRight,
   ArrowsIn as Minimize2
 } from '@phosphor-icons/react'
-import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '@yiru/workbench-model/workspace'
+import { toRuntimeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
   Suspense,
@@ -77,13 +73,13 @@ import {
   toModifierDoubleTapEvent
 } from '~shared/modifier-double-tap-detector'
 import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
-import type { RemoteWorkspacePatchResult } from '~shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '~shared/types'
 
 import logo from '../../../resources/yiru-wordmark.png?url'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
+import { CoworkingHostAccessRequestDialog } from '../components/coworking/host-access-request-dialog'
 import { useCoworkingSharingBridge } from '../components/coworking/use-sharing-bridge'
 import { CrashReportDialog } from '../components/crash-report/dialog'
 import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
@@ -122,6 +118,7 @@ import { SkillFreshnessNudge } from '../components/skills/skill-freshness-nudge'
 import { StarNagCard } from '../components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
 import { StarNagToastHost } from '../components/star-nag/toast-host'
+import { CoworkingPresenceFooter } from '../components/status-bar/coworking-presence-footer'
 import RecentTabSwitcher from '../components/tab-bar/recent-tab-switcher'
 import PinnedTabCloseDialog from '../components/terminal-pane/pinned-tab-close-dialog'
 import { publishTerminalViewAttributesAtAppStart } from '../components/terminal-pane/terminal-appearance'
@@ -160,7 +157,6 @@ import {
   timeRendererStartupStep,
   timeRendererStartupSyncStep
 } from '../startup/diagnostics'
-import { reconnectSshTargetForRendererStartup } from '../startup/ssh-startup-reconnect'
 import { useAppStore } from '../store'
 import { selectActiveTerminalChromeState } from '../store/active-terminal-chrome-selector'
 import { selectFloatingVisibleTabCount } from '../store/selectors'
@@ -181,7 +177,7 @@ import { shouldShowWorktreeHistoryControls } from './titlebar-worktree-history-c
 import { useAppMenuPaste } from './use-app-menu-paste'
 import { useAutoAckViewedAgent } from './use-auto-ack-viewed-agent'
 import { useGlobalFileDrop } from './use-global-file-drop'
-import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './use-ipc-events'
+import { useIpcEvents } from './use-ipc-events'
 import { useLargeTextControlPaste } from './use-large-text-control-paste'
 import { usePrimarySelectionPaste } from './use-primary-selection-paste'
 import { useRadixBodyPointerEventsRecovery } from './use-radix-body-pointer-events-recovery'
@@ -377,11 +373,6 @@ const DictationController = lazy(() =>
     default: module.DictationController
   }))
 )
-const SshPassphraseDialog = lazy(() =>
-  import('../components/settings/ssh/passphrase-dialog').then((module) => ({
-    default: module.SshPassphraseDialog
-  }))
-)
 const UpdateCard = lazy(() =>
   import('./update-card').then((module) => ({ default: module.UpdateCard }))
 )
@@ -418,36 +409,6 @@ const PetOverlay = lazy(() => import('../components/pet/overlay'))
 // past first-launch. The gate `shouldShowOnboarding` lives in its own tiny
 // module so no eager import path pulls OnboardingFlow into the main chunk.
 const OnboardingFlow = lazy(() => import('../components/onboarding/flow'))
-
-function applyRemoteWorkspacePatchStatus(
-  targetId: string,
-  result: RemoteWorkspacePatchResult
-): void {
-  const store = useAppStore.getState()
-  if (result.ok) {
-    store.setRemoteWorkspaceSyncStatus(targetId, {
-      phase: 'synced',
-      direction: 'push',
-      revision: result.snapshot.revision,
-      updatedAt: result.snapshot.updatedAt,
-      lastSyncedAt: Date.now(),
-      message: translate('auto.App.332dbfa497', 'Workspace uploaded')
-    })
-    return
-  }
-  store.setRemoteWorkspaceSyncStatus(targetId, {
-    phase: result.reason === 'stale-revision' ? 'conflict' : 'offline',
-    direction: 'push',
-    revision: result.snapshot?.revision,
-    updatedAt: result.snapshot?.updatedAt,
-    lastSyncedAt: Date.now(),
-    message:
-      result.message ??
-      (result.reason === 'stale-revision'
-        ? 'Workspace changed on another device'
-        : 'Remote workspace sync unavailable')
-  })
-}
 
 function shouldMountUpdateCardForStatus(status: UpdateStatus): boolean {
   if (status.state === 'idle') {
@@ -752,7 +713,6 @@ function App(): React.JSX.Element {
   )
   const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const dictationState = useAppStore((s) => s.dictationState)
-  const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
     settings?.voice?.enabled === true || dictationState !== 'idle'
   usePrimarySelectionPaste()
@@ -777,15 +737,7 @@ function App(): React.JSX.Element {
   const featureTipsSuppressedByOnboardingThisSessionRef = useRef(false)
   const unmountAddRepoDialogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [featureTipCliInstalled, setFeatureTipCliInstalled] = useState<boolean | null>(null)
-  const [onboardingSettingsDetour, setOnboardingSettingsDetour] = useState(false)
   const shouldRenderOnboarding = onboarding !== null && shouldShowOnboarding(onboarding)
-  const onboardingSettingsDetourActive =
-    onboardingSettingsDetour && activeView === 'settings' && shouldRenderOnboarding
-  if (onboardingSettingsDetour && !onboardingSettingsDetourActive) {
-    // Why: the settings detour is valid only while Settings is onscreen; clear
-    // it during render so onboarding can resume without a follow-up Effect pass.
-    setOnboardingSettingsDetour(false)
-  }
 
   useEffect(() => {
     if (activeModal === 'add-repo') {
@@ -938,10 +890,6 @@ function App(): React.JSX.Element {
     settings
   ])
 
-  const beginOnboardingSettingsDetour = useCallback(() => {
-    setOnboardingSettingsDetour(true)
-  }, [])
-
   // Why: sidebar open/close flips width instantaneously. useLayoutEffect
   // runs synchronously after React commits the DOM but before paint, so
   // dispatching SYNC_FIT_PANES_EVENT here lets the terminal reflow in the
@@ -1089,101 +1037,6 @@ function App(): React.JSX.Element {
           if (!cancelled) {
             setOnboarding(onboardingState)
             setOnboardingLoaded(true)
-          }
-
-          // Why: SSH connections must be re-established BEFORE terminal
-          // reconnect so that reconnectPersistedTerminals can route SSH-backed
-          // tabs through pty.attach on the relay. Passphrase-protected targets
-          // are deferred to tab focus to avoid stacking credential dialogs at
-          // startup before the user has context.
-          // Why: runtime-owned (ephemeral-VM) targets must never be dialed from
-          // the renderer — ssh.connect would dispose the runtime layer's live
-          // relay session. Main's windowless-promotion path can persist such
-          // ids into this list, so filter at the consumption boundary too.
-          const connectionIds = (sessionRead.session.activeConnectionIdsAtShutdown ?? []).filter(
-            (targetId) => !isRuntimeOwnedSshTargetId(targetId)
-          )
-          if (connectionIds.length > 0) {
-            try {
-              const SSH_RECONNECT_TIMEOUT_MS = 15_000
-              const allTargets = await timeRendererStartupStep('ssh-list-targets', () =>
-                window.api.ssh.listTargets()
-              )
-              const targetMap = new Map(allTargets.map((t) => [t.id, t]))
-              const targets = connectionIds.map((targetId) => ({
-                targetId,
-                needsPassphrase: targetMap.get(targetId)?.lastRequiredPassphrase ?? false
-              }))
-
-              const eagerTargets = targets.filter((t) => !t.needsPassphrase)
-              const deferredTargets = targets.filter((t) => t.needsPassphrase)
-
-              if (deferredTargets.length > 0) {
-                actions.setDeferredSshReconnectTargets(deferredTargets.map((t) => t.targetId))
-              }
-
-              // Why: track which eager targets timed out so we can treat them
-              // as deferred — the underlying ssh.connect() keeps running in the
-              // main process, but reconnectPersistedTerminals won't see them as
-              // connected. Adding them to the deferred list ensures PTYs get
-              // reattached when the user focuses the tab (by which time the
-              // slow connect will likely have succeeded).
-              const timedOutTargets: string[] = []
-              await timeRendererStartupStep(
-                'ssh-reconnect',
-                () =>
-                  Promise.all(
-                    eagerTargets.map(async ({ targetId }) => {
-                      const result = await reconnectSshTargetForRendererStartup({
-                        targetId,
-                        timeoutMs: SSH_RECONNECT_TIMEOUT_MS,
-                        connect: (id) => window.api.ssh.connect({ targetId: id }),
-                        publishState: actions.setSshConnectionState,
-                        onFailure: (id, error) => {
-                          console.warn(`SSH auto-reconnect failed for ${id}:`, error)
-                        }
-                      })
-                      if (result.timedOut) {
-                        timedOutTargets.push(targetId)
-                      }
-                    })
-                  ),
-                {
-                  eagerTargets: eagerTargets.length,
-                  deferredTargets: deferredTargets.length
-                }
-              )
-              if (timedOutTargets.length > 0) {
-                actions.setDeferredSshReconnectTargets([
-                  ...deferredTargets.map((t) => t.targetId),
-                  ...timedOutTargets
-                ])
-              }
-
-              // Why: connect's returned state is published above, but older or
-              // wrapped providers may return no state. Poll main once as a
-              // compatibility fallback before terminal restoration.
-              for (const { targetId } of eagerTargets) {
-                if (timedOutTargets.includes(targetId)) {
-                  continue
-                }
-                try {
-                  const state = await window.api.ssh.getState({ targetId })
-                  console.warn(
-                    `[ssh-restore] Polled state for ${targetId}: status=${state?.status}`
-                  )
-                  if (state?.status === 'connected') {
-                    actions.setSshConnectionState(targetId, state)
-                  }
-                } catch {
-                  /* best-effort */
-                }
-              }
-            } catch (err) {
-              console.warn('SSH startup reconnect failed:', err)
-            }
-          } else {
-            logRendererStartupDiagnostic('ssh-reconnect-skipped', { connectionIds: 0 })
           }
 
           // Why: main overlaps daemon/hook startup with renderer hydration for
@@ -1398,35 +1251,12 @@ function App(): React.JSX.Element {
   useEffect(() => {
     return createSessionWriteSubscriber({
       store: useAppStore,
-      shouldSchedulePersist: () => !isRemoteWorkspaceSnapshotApplyInProgress(),
       persist: ({ patch }) => {
         const state = useAppStore.getState()
         // Why: route each runtime host's worktree-scoped slice to its own
         // partition; the returned promise is the local write so the
         // remote-workspace upload chain below keeps its ordering.
-        const localWrite = patchWorkspaceSessionByHost(window.api.session, patch, state)
-        void localWrite
-        const hydratedTargetIds = Array.from(state.remoteWorkspaceHydratedTargetIds).filter(
-          (targetId) => state.remoteWorkspaceSyncStatusByTargetId[targetId]?.phase !== 'conflict'
-        )
-        if (hydratedTargetIds.length > 0) {
-          void localWrite
-            .then(() => window.api.remoteWorkspace?.setForConnectedTargets({ hydratedTargetIds }))
-            .then((results) => {
-              for (const { targetId, result } of results ?? []) {
-                applyRemoteWorkspacePatchStatus(targetId, result)
-              }
-            })
-            .catch((err) => {
-              for (const targetId of hydratedTargetIds) {
-                useAppStore.getState().setRemoteWorkspaceSyncStatus(targetId, {
-                  phase: 'error',
-                  direction: 'push',
-                  message: err instanceof Error ? err.message : 'Workspace upload failed'
-                })
-              }
-            })
-        }
+        void patchWorkspaceSessionByHost(window.api.session, patch, state)
       }
     })
   }, [])
@@ -2387,6 +2217,7 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <CoworkingControlRequestDialog />
+            <CoworkingHostAccessRequestDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />
@@ -2646,6 +2477,7 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}
+            {statusBarVisible && hasActiveCoworkingWorkspace ? <CoworkingPresenceFooter /> : null}
             {statusBarVisible && !hasActiveCoworkingWorkspace ? (
               <Suspense
                 fallback={
@@ -2880,18 +2712,6 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               ) : null}
             </Suspense>
-            {hasSshCredentialRequest ? (
-              <Suspense fallback={null}>
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.ssh-passphrase"
-                  surface="modal"
-                  resetKey={activeModal}
-                  compact
-                >
-                  <SshPassphraseDialog />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
             <RecoverableRenderErrorBoundary
               boundaryId="modal.markdown-template-picker"
               surface="modal"
@@ -2914,23 +2734,18 @@ function App(): React.JSX.Element {
             >
               <CrashReportDialog />
             </RecoverableRenderErrorBoundary>
-            {onboarding && shouldRenderOnboarding && !onboardingSettingsDetourActive ? (
+            {onboarding && shouldRenderOnboarding ? (
               <Suspense fallback={null}>
                 <RecoverableRenderErrorBoundary
                   boundaryId="modal.onboarding"
                   surface="modal"
-                  resetKey={onboardingSettingsDetourActive}
                   title={translate('auto.App.f02d37278a', 'Onboarding hit an error.')}
                   description={translate(
                     'auto.App.221a95ba38',
                     'Retry onboarding or close it and continue in the app.'
                   )}
                 >
-                  <OnboardingFlow
-                    onboarding={onboarding}
-                    onOnboardingChange={setOnboarding}
-                    onSettingsDetourStart={beginOnboardingSettingsDetour}
-                  />
+                  <OnboardingFlow onboarding={onboarding} onOnboardingChange={setOnboarding} />
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}

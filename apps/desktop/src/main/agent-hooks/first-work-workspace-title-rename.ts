@@ -34,12 +34,7 @@ export async function runFolderWorkspaceTitleAutoRename(
     deps.setRenameError(worktreeId, resolvedParams.error)
     return stop(`no generation agent: ${resolvedParams.error}`)
   }
-  const target = await resolveGenerationTarget(
-    folderPath,
-    resolvedParams.params.agentId,
-    null,
-    deps
-  )
+  const target = await resolveGenerationTarget(folderPath, resolvedParams.params.agentId, deps)
   if (!target) {
     deps.setRenameError(worktreeId, 'Could not prepare the workspace-name generation environment.')
     return retry('could not prepare generation environment')

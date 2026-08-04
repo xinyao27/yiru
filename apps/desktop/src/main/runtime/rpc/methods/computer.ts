@@ -28,6 +28,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.capabilities',
     params: z.object({}),
+    access: { scope: 'host', tier: 'host' },
     handler: async () => {
       return await callComputerSidecarCapabilities()
     }
@@ -35,6 +36,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.listApps',
     params: ListApps,
+    access: { scope: 'host', tier: 'host' },
     handler: async () => {
       return await callComputerSidecarListApps()
     }
@@ -42,6 +44,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.permissions',
     params: ComputerPermissions,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       const { openComputerUsePermissions } =
         await import('~main/computer/macos-computer-use-permissions')
@@ -51,6 +54,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.permissionsStatus',
     params: z.object({}),
+    access: { scope: 'host', tier: 'host' },
     handler: async () => {
       const { getComputerUsePermissionStatus } =
         await import('~main/computer/macos-computer-use-permissions')
@@ -60,6 +64,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.listWindows',
     params: ListWindows,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarListWindows(params)
     }
@@ -67,6 +72,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.getAppState',
     params: ComputerObserveTarget,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarSnapshot(params)
     }
@@ -74,6 +80,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.click',
     params: Click,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('click', params)
     }
@@ -81,6 +88,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.performSecondaryAction',
     params: PerformSecondaryAction,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('performSecondaryAction', params)
     }
@@ -88,6 +96,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.scroll',
     params: Scroll,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('scroll', params)
     }
@@ -95,6 +104,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.drag',
     params: Drag,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('drag', params)
     }
@@ -102,6 +112,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.typeText',
     params: TypeText,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('typeText', params)
     }
@@ -109,6 +120,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.pressKey',
     params: PressKey,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('pressKey', params)
     }
@@ -116,6 +128,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.hotkey',
     params: Hotkey,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('hotkey', params)
     }
@@ -123,6 +136,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.pasteText',
     params: PasteText,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('pasteText', params)
     }
@@ -130,6 +144,7 @@ export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'computer.setValue',
     params: SetValue,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params) => {
       return await callComputerSidecarAction('setValue', params)
     }

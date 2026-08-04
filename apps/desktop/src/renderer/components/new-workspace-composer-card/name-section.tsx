@@ -27,7 +27,6 @@ type NameSectionProps = {
   smartNameSelection: SmartWorkspaceNameSelection | null
   onClearSmartNameSelection: () => void
   smartNameGitHubSourceContext?: ProjectSourceContext | null
-  selectedRepoRequiresConnection: boolean
   branchesEnabled: boolean
   repoBackedSourcesDisabled?: boolean
   repoBackedSearchRepos?: RepoOption[]
@@ -57,7 +56,6 @@ export function NameSection({
   smartNameSelection,
   onClearSmartNameSelection,
   smartNameGitHubSourceContext,
-  selectedRepoRequiresConnection,
   branchesEnabled,
   repoBackedSourcesDisabled = false,
   repoBackedSearchRepos,
@@ -95,11 +93,6 @@ export function NameSection({
         selectedSource={smartNameSelection}
         onClearSelectedSource={onClearSmartNameSelection}
         githubSourceContext={smartNameGitHubSourceContext}
-        disabled={selectedRepoRequiresConnection}
-        disabledPlaceholder={translate(
-          'auto.components.NewWorkspaceComposerCard.connectProjectFirst',
-          'Connect this project first'
-        )}
         textOnly={!selectedRepoIsGit}
         branchesEnabled={branchesEnabled}
         repoBackedSourcesDisabled={repoBackedSourcesDisabled}

@@ -27,7 +27,6 @@ import { getWorkspaceComposerInitialFocusTarget } from './workspace-composer-ini
 type ComposerModalData = {
   prefilledName?: string
   initialRepoId?: string
-  initialEphemeralVmRecipeId?: string
   initialProjectGroupId?: string
   linkedWorkItem?: LinkedWorkItemSummary | null
   projectSourceContext?: ProjectSourceContext | null
@@ -128,7 +127,6 @@ function QuickTabBody({
     initialLinkedWorkItem: modalData.linkedWorkItem ?? null,
     initialProjectSourceContext: modalData.projectSourceContext ?? null,
     initialRepoId: modalData.initialRepoId,
-    initialEphemeralVmRecipeId: modalData.initialEphemeralVmRecipeId,
     initialProjectGroupId: modalData.initialProjectGroupId,
     initialWorkspaceStatus: modalData.initialWorkspaceStatus,
     ...(modalData.initialBaseBranch ? { initialBaseBranch: modalData.initialBaseBranch } : {}),

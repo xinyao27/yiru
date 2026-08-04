@@ -37,7 +37,6 @@ import { createRateLimitSlice } from './slices/rate-limits'
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import { createRemoteServerUpdatesSlice } from './slices/remote-server-updates'
 import { createRepoSlice } from './slices/repos'
-import { createRuntimeEnvironmentSshSlice } from './slices/runtime-environment-ssh'
 import { createRuntimeStatusSlice } from './slices/runtime-status'
 import { createSparsePresetsSlice } from './slices/sparse-presets'
 import { createSshSlice } from './slices/ssh'
@@ -72,7 +71,6 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createRateLimitResumeSlice(...a),
   ...createRemoteServerUpdatesSlice(...a),
   ...createSshSlice(...a),
-  ...createRuntimeEnvironmentSshSlice(...a),
   ...createAgentStatusSlice(...a),
   ...createPaneForegroundAgentSlice(...a),
   ...createDiffCommentsSlice(...a),

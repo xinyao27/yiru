@@ -2,6 +2,7 @@ import {
   FileText,
   Globe,
   Play,
+  ShareNetwork,
   TerminalWindow as SquareTerminal,
   Trash as Trash2,
   type Icon as PhosphorIcon,
@@ -13,11 +14,13 @@ import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import type { CmdJQuickActionAvailability, CmdJQuickActionContext } from './quick-action-context'
 import {
   getCurrentWorkspaceActionAvailability,
+  getActiveWorktreeActionAvailability,
   getWorkspaceScopedActionAvailability
 } from './quick-action-context'
 
 export type CmdJQuickActionRunResult =
   | { status: 'ok' }
+  | { status: 'error'; message: string }
   | {
       status: 'unavailable'
       reason: Exclude<CmdJQuickActionAvailability, { available: true }>['reason']
@@ -44,6 +47,27 @@ function currentWorkspaceActionAvailability(
   ctx: CmdJQuickActionContext
 ): CmdJQuickActionAvailability {
   return getCurrentWorkspaceActionAvailability(ctx)
+}
+
+function coworkingWorktreeActionAvailability(
+  ctx: CmdJQuickActionContext
+): CmdJQuickActionAvailability {
+  const workspaceAvailability = getActiveWorktreeActionAvailability(ctx)
+  if (!workspaceAvailability.available) {
+    return workspaceAvailability
+  }
+  if (ctx.runtimeMode !== 'local-desktop' || !ctx.coworkingOwnerWorktree) {
+    return { available: false, reason: 'coworking-unavailable' }
+  }
+  return { available: true }
+}
+
+function coworkingSettingsActionAvailability(
+  ctx: CmdJQuickActionContext
+): CmdJQuickActionAvailability {
+  return ctx.runtimeMode === 'local-desktop'
+    ? { available: true }
+    : { available: false, reason: 'coworking-unavailable' }
 }
 
 async function runWorkspaceAction(
@@ -184,6 +208,82 @@ export const getCmdJQuickActions = createLocalizedCatalog((): CmdJQuickAction[] 
     isAvailable: () => ({ available: true }),
     run: async (ctx) => {
       ctx.openAddQuickCommand()
+      return { status: 'ok' }
+    }
+  },
+  {
+    id: 'toggle-coworking-worktree',
+    kind: 'action',
+    title: translate(
+      'auto.components.cmd.j.quick.actions.publishOrUnpublishWorktree',
+      'Publish / Unpublish Worktree'
+    ),
+    description: translate(
+      'auto.components.cmd.j.quick.actions.publishOrUnpublishWorktreeDescription',
+      'Publish or unpublish the current worktree through Coworking.'
+    ),
+    icon: ShareNetwork,
+    verbKeywords: [
+      translate('auto.components.cmd.j.quick.actions.verbs.publishWorktree', 'publish worktree'),
+      translate(
+        'auto.components.cmd.j.quick.actions.verbs.unpublishWorktree',
+        'unpublish worktree'
+      ),
+      translate('auto.components.cmd.j.quick.actions.verbs.makePublic', 'make worktree public'),
+      translate('auto.components.cmd.j.quick.actions.verbs.makePrivate', 'make worktree private'),
+      translate('auto.components.cmd.j.quick.actions.verbs.coworkingWorktree', 'coworking worktree')
+    ],
+    isAvailable: coworkingWorktreeActionAvailability,
+    run: async (ctx) => {
+      const availability = coworkingWorktreeActionAvailability(ctx)
+      if (!availability.available) {
+        return { status: 'unavailable', reason: availability.reason }
+      }
+      try {
+        await ctx.toggleCoworkingVisibility()
+        return { status: 'ok' }
+      } catch {
+        return {
+          status: 'error',
+          message: translate(
+            'auto.components.cmd.j.quick.actions.coworkingVisibilityFailed',
+            'Could not update Coworking visibility.'
+          )
+        }
+      }
+    }
+  },
+  {
+    id: 'open-coworking-settings',
+    kind: 'action',
+    title: translate(
+      'auto.components.cmd.j.quick.actions.openCoworkingSettings',
+      'Open Coworking Settings'
+    ),
+    description: translate(
+      'auto.components.cmd.j.quick.actions.openCoworkingSettingsDescription',
+      'Manage Coworking-authorized remote host access.'
+    ),
+    icon: ShareNetwork,
+    verbKeywords: [
+      translate(
+        'auto.components.cmd.j.quick.actions.verbs.coworkingSettings',
+        'coworking settings'
+      ),
+      translate(
+        'auto.components.cmd.j.quick.actions.verbs.openCoworkingSettings',
+        'open coworking settings'
+      ),
+      translate('auto.components.cmd.j.quick.actions.verbs.remoteHostAccess', 'remote host access'),
+      translate('auto.components.cmd.j.quick.actions.verbs.authorizedDevices', 'authorized devices')
+    ],
+    isAvailable: coworkingSettingsActionAvailability,
+    run: async (ctx) => {
+      const availability = coworkingSettingsActionAvailability(ctx)
+      if (!availability.available) {
+        return { status: 'unavailable', reason: availability.reason }
+      }
+      ctx.openCoworkingSettings()
       return { status: 'ok' }
     }
   }

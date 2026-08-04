@@ -1,5 +1,3 @@
-import type { FsChangeEvent } from '~shared/types'
-
 import {
   classifyWorktreeBaseChange,
   type WorktreeBaseWatchTarget
@@ -28,15 +26,6 @@ function emptyBuckets(): ChangeBuckets {
     structureRepoIds: new Set<string>(),
     gitStatusRepoIds: new Set<string>(),
     headIdentityRepoIds: new Set<string>()
-  }
-}
-
-function emptyChanges(): WorktreeBaseCollectedChanges {
-  return {
-    overflow: false,
-    structureRepoIds: [],
-    gitStatusRepoIds: [],
-    headIdentityRepoIds: []
   }
 }
 
@@ -73,27 +62,6 @@ export function collectLocalWorktreeBaseChanges(
   const buckets = emptyBuckets()
   for (const event of events) {
     addMatchingChange(target, event, buckets)
-  }
-  return toCollectedChanges(buckets)
-}
-
-export function collectRemoteWorktreeBaseChanges(
-  target: WorktreeBaseWatchTarget,
-  events: FsChangeEvent[]
-): WorktreeBaseCollectedChanges {
-  const buckets = emptyBuckets()
-  for (const event of events) {
-    if (event.kind === 'overflow') {
-      return { ...emptyChanges(), overflow: true }
-    }
-    if (event.kind === 'rename') {
-      if (event.oldAbsolutePath) {
-        addMatchingChange(target, { type: 'delete', path: event.oldAbsolutePath }, buckets)
-      }
-      addMatchingChange(target, { type: 'create', path: event.absolutePath }, buckets)
-      continue
-    }
-    addMatchingChange(target, { type: event.kind, path: event.absolutePath }, buckets)
   }
   return toCollectedChanges(buckets)
 }

@@ -1,7 +1,6 @@
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   getRepoExecutionHostId,
-  isRuntimeOwnedSshTargetId,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
 
@@ -13,14 +12,10 @@ type NewWorkspaceDialogRepo = Pick<
   'id' | 'path' | 'kind' | 'connectionId' | 'executionHostId'
 >
 
-export function getNewWorkspaceDialogEligibleRepos<T extends Pick<Repo, 'path' | 'connectionId'>>(
+export function getNewWorkspaceDialogEligibleRepos<T extends Pick<Repo, 'path'>>(
   repos: readonly T[]
 ): T[] {
-  // Why: a runtime-owned (per-workspace-env) SSH repo is hidden plumbing, not a real project. If it
-  // were selectable here, creating an ephemeral VM would seed the composer to that repo — which has
-  // no recipes — hiding the "Run on" picker entirely on the next create. Exclude it like every other
-  // user-facing surface does.
-  return repos.filter((repo) => Boolean(repo.path) && !isRuntimeOwnedSshTargetId(repo.connectionId))
+  return repos.filter((repo) => Boolean(repo.path))
 }
 
 export function resolveNewWorkspaceDialogRepoId({

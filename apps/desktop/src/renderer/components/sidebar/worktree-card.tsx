@@ -9,11 +9,12 @@ import {
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
 import React, { useEffect, useCallback, useState } from 'react'
 import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { RateLimitResumeWorkspaceIndicator } from '~renderer/components/rate-limit-resume/workspace-indicator'
 import { RepoIconGlyph } from '~renderer/components/repo/icon'
 import { activateWorktreeFromSidebar } from '~renderer/components/sidebar/worktree-activation'
 import { Badge } from '~renderer/components/ui/badge'
@@ -41,7 +42,6 @@ import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
 import { runWorktreeDelete } from './delete-worktree/flow'
 import { resolveRepoHeaderColor } from './project-header-color'
-import { SshDisconnectedDialog } from './ssh-disconnected-dialog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import { useWorktreeAgentRows } from './use-worktree-agent-rows'
 import {
@@ -311,24 +311,13 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
   // SSH disconnected state
   const sshStatus = useAppStore((s) => {
-    // Why: runtime-owned (per-workspace-env) SSH targets are hidden and their relay health is
-    // owned by the runtime layer — Yiru suppresses their ssh:state-changed broadcasts, so their
-    // state is absent here. Don't show a false "disconnected" SSH chip for them.
-    if (!repo?.connectionId || isRuntimeOwnedSshTargetId(repo.connectionId)) {
+    if (!repo?.connectionId) {
       return null
     }
     const state = s.sshConnectionStates.get(repo.connectionId)
     return state?.status ?? 'disconnected'
   })
   const isSshDisconnected = sshStatus != null && sshStatus !== 'connected'
-  // Why: a terminal view already carries its own in-pane reconnect overlay, so
-  // the blocking dialog would just duplicate it there; reserve the dialog for
-  // views without an in-context prompt. Default to terminal (suppress) for the
-  // ambiguous case so we err toward non-blocking.
-  const activeViewIsTerminal = useAppStore(
-    (s) => (s.activeTabTypeByWorktree?.[worktree.id] ?? 'terminal') === 'terminal'
-  )
-
   // Why: runtime ("Yiru server") hosts get the same disconnected treatment as
   // SSH — when the host's runtime environment has no live status, its worktrees
   // are dimmed and marked disconnected instead of looking fully available.
@@ -339,19 +328,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
     }
     return !s.runtimeStatusByEnvironmentId.get(parsed.environmentId)?.status
   })
-  // Why: the reconnect dialog is blocking, so it is never auto-shown for a
-  // disconnected worktree just because it is the active/restored card — that
-  // would steal focus app-wide while the user works elsewhere. The card chip,
-  // status bar, and terminal overlay carry the non-blocking disconnected state;
-  // the dialog only opens on deliberate focus (see handleClick).
-  const [showDisconnectedDialog, setShowDisconnectedDialog] = useState(false)
   const [titleRenaming, setTitleRenaming] = useState(false)
   const [showRenameErrorDialog, setShowRenameErrorDialog] = useState(false)
-  // Why: read the target label from the store (populated during hydration in
-  // use-ipc-events.ts) instead of calling listTargets IPC per card instance.
-  const sshTargetLabel = useAppStore((s) =>
-    repo?.connectionId ? (s.sshTargetLabels.get(repo.connectionId) ?? '') : ''
-  )
 
   const gitIdentityDisplay = getWorktreeGitIdentityDisplay(worktree)
   const detachedHeadDisplay = gitIdentityDisplay?.kind === 'detached' ? gitIdentityDisplay : null
@@ -643,14 +621,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         sshDisconnected: isSshDisconnected
       })
       onImmediateActivate?.(worktree.id, activationRowKey)
-      void activateWorktreeFromSidebar(worktree.id)
-      // Why: clicking the card is a deliberate focus of this project, so the
-      // blocking reconnect prompt is appropriate here (unlike auto-restore) —
-      // but skip it when a terminal is active, since that pane already shows the
-      // in-context reconnect overlay and a second prompt would just duplicate it.
-      if (isSshDisconnected && !activeViewIsTerminal) {
-        setShowDisconnectedDialog(true)
-      }
+      activateWorktreeFromSidebar(worktree.id)
       onActivate?.()
     },
     [
@@ -661,7 +632,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       isDeleting,
       activationRowKey,
       isSshDisconnected,
-      activeViewIsTerminal,
       onActivate,
       onImmediateActivate,
       onSelectionGesture
@@ -1145,6 +1115,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
               }
             />
 
+            <RateLimitResumeWorkspaceIndicator worktreeId={worktree.id} />
+
             {typeof worktree.firstAgentMessageRenameError === 'string' &&
             worktree.firstAgentMessageRenameError.length > 0 &&
             !titleRenaming ? (
@@ -1507,16 +1479,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
         >
           {cardBody}
         </WorktreeContextMenu>
-      )}
-
-      {repo?.connectionId && (
-        <SshDisconnectedDialog
-          open={showDisconnectedDialog && isSshDisconnected}
-          onOpenChange={setShowDisconnectedDialog}
-          targetId={repo.connectionId}
-          targetLabel={sshTargetLabel || repo.displayName}
-          status={sshStatus ?? 'disconnected'}
-        />
       )}
 
       {typeof worktree.firstAgentMessageRenameError === 'string' &&

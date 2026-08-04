@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto'
 
 import type { WebSocket } from 'ws'
+import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 
 import type { DeviceEntry, DeviceRegistry } from '../device-registry'
 import type { E2EEKeypair } from '../e2ee-keypair'
@@ -116,6 +117,9 @@ export class MobileSocketWiring {
           return toAuthenticatedDevice(device)
         },
         onReady: (_channel, device) => {
+          if (!this.canAdmitDeviceConnection(device)) {
+            throw new Error('coworking_grant_connection_quota_exceeded')
+          }
           const socket = { ws, connectionId, device }
           this.authenticatedSockets.set(ws, socket)
           transport.setClientId(ws, device.deviceToken)
@@ -156,5 +160,20 @@ export class MobileSocketWiring {
         (candidate) => candidate.device.deviceToken === socket.device.deviceToken
       )
     this.onClose(socket, hasOtherConnections)
+  }
+
+  private canAdmitDeviceConnection(device: E2EEAuthenticatedDevice): boolean {
+    if (device.scope !== 'coworking-host') {
+      return true
+    }
+    const grant = this.deviceRegistry.getDevice(device.deviceId)
+    if (grant?.scope !== 'coworking-host') {
+      return false
+    }
+    const quota = getCoworkingResourceQuota('host', grant.tier)
+    const activeForGrant = Array.from(this.authenticatedSockets.values()).filter(
+      (socket) => socket.device.deviceId === device.deviceId
+    ).length
+    return activeForGrant < quota.maxConnectionsPerSubject
   }
 }

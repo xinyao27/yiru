@@ -2,8 +2,6 @@ import {
   Warning as AlertTriangle,
   DotsThree as Ellipsis,
   Pencil,
-  Plug,
-  PlugCharging as PlugZap,
   GearSix as Settings2,
   Trash as Trash2,
   ArrowClockwise as RefreshCw
@@ -50,8 +48,6 @@ function blockedTitle(reason: 'client-too-old' | 'server-too-old'): string {
       )
 }
 
-// Why: SSH and paired runtime hosts share the sidebar model, but Settings keeps
-// their management pages separate so each connection type can explain itself.
 function openManageHost(row: HostHeaderRow): void {
   const state = useAppStore.getState()
   if (row.kind === 'runtime') {
@@ -61,8 +57,6 @@ function openManageHost(row: HostHeaderRow): void {
       repoId: null,
       sectionId: parsed?.kind === 'runtime' ? parsed.environmentId : undefined
     })
-  } else if (row.kind === 'ssh') {
-    state.openSettingsTarget({ pane: 'ssh', repoId: null, sectionId: 'ssh' })
   } else {
     state.openSettingsTarget({ pane: 'general', repoId: null })
   }
@@ -75,18 +69,9 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
   const [renameOpen, setRenameOpen] = useState(false)
   const [removeOpen, setRemoveOpen] = useState(false)
   const mountedRef = useMountedRef()
-  const sshConnected = useAppStore((s) => {
-    const parsed = parseExecutionHostId(row.hostId)
-    if (parsed?.kind !== 'ssh') {
-      return false
-    }
-    return s.sshConnectionStates.get(parsed.targetId)?.status === 'connected'
-  })
-
   const model = buildHostHeaderMenuModel({
     kind: row.kind,
     health: row.health,
-    sshConnected,
     compatibility: row.compatibility
   })
   const removalTarget = resolveHostRemoval(row.hostId)
@@ -94,38 +79,6 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
   const handleManage = useCallback(() => {
     openManageHost(row)
   }, [row])
-
-  const runSshAction = useCallback(
-    async (action: 'connect' | 'disconnect') => {
-      const parsed = parseExecutionHostId(row.hostId)
-      if (parsed?.kind !== 'ssh') {
-        return
-      }
-      setBusy(true)
-      try {
-        await window.api.ssh[action]({ targetId: parsed.targetId })
-      } catch (err) {
-        toast.error(
-          err instanceof Error
-            ? err.message
-            : action === 'connect'
-              ? translate(
-                  'auto.components.sidebar.HostSectionHeaderMenu.2c29e2de68',
-                  'Connection failed'
-                )
-              : translate(
-                  'auto.components.sidebar.HostSectionHeaderMenu.bf07aee59e',
-                  'Disconnect failed'
-                )
-        )
-      } finally {
-        if (mountedRef.current) {
-          setBusy(false)
-        }
-      }
-    },
-    [mountedRef, row.hostId]
-  )
 
   const handleCheckConnection = useCallback(async () => {
     const parsed = parseExecutionHostId(row.hostId)
@@ -246,18 +199,6 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
             {translate('auto.components.sidebar.HostSectionHeaderMenu.8d1e2f3a4b', 'Rename…')}
           </DropdownMenuItem>
         )}
-        {model.actions.includes('ssh-reconnect') && (
-          <DropdownMenuItem onClick={() => void runSshAction('connect')}>
-            <Plug className="size-3.5" />
-            {translate('auto.components.sidebar.HostSectionHeaderMenu.63f36455cc', 'Reconnect')}
-          </DropdownMenuItem>
-        )}
-        {model.actions.includes('ssh-disconnect') && (
-          <DropdownMenuItem onClick={() => void runSshAction('disconnect')}>
-            <PlugZap className="size-3.5" />
-            {translate('auto.components.sidebar.HostSectionHeaderMenu.59b553e2aa', 'Disconnect')}
-          </DropdownMenuItem>
-        )}
         {model.actions.includes('runtime-check-connection') && (
           <DropdownMenuItem onClick={() => void handleCheckConnection()}>
             <RefreshCw className="size-3.5" />
@@ -298,7 +239,6 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
         <HostRemoveDialog
           open={removeOpen}
           onOpenChange={setRemoveOpen}
-          hostId={row.hostId}
           label={row.label}
           target={removalTarget}
         />

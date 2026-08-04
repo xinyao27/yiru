@@ -10,8 +10,6 @@ import {
   normalizeHostedReviewHeadRef
 } from '~shared/hosted-review-refs'
 
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   getHostedReviewLocalGitOptions,
   hasHostedReviewLocalGitOptions,
@@ -93,31 +91,15 @@ function hostedReviewExecutionOptionArgs(
   return hasHostedReviewLocalGitOptions(options) ? [options] : []
 }
 
-async function readMergeRequestTemplate(
-  repoPath: string,
-  connectionId?: string | null
-): Promise<string> {
+async function readMergeRequestTemplate(repoPath: string): Promise<string> {
   const relativeCandidates = [
     '.gitlab/merge_request_templates/Default.md',
     '.gitlab/merge_request_templates/default.md',
     '.gitlab/merge_request_template.md',
     '.gitlab/MERGE_REQUEST_TEMPLATE.md'
   ]
-  const remoteProvider = connectionId ? getSshFilesystemProvider(connectionId) : undefined
-  if (connectionId && !remoteProvider) {
-    return ''
-  }
   for (const relativeCandidate of relativeCandidates) {
     try {
-      if (remoteProvider) {
-        const result = await remoteProvider.readFile(
-          joinWorktreeRelativePath(repoPath, relativeCandidate)
-        )
-        if (result.isBinary) {
-          continue
-        }
-        return result.content
-      }
       return await readFile(join(repoPath, relativeCandidate), 'utf8')
     } catch {
       // Try the next conventional GitLab merge-request template path.
@@ -175,7 +157,7 @@ export async function createGitLabMergeRequest(
   try {
     const body =
       input.useTemplate && !input.body?.trim()
-        ? await readMergeRequestTemplate(repoPath, connectionId)
+        ? await readMergeRequestTemplate(repoPath)
         : (input.body ?? '')
     const createArgs = [
       'mr',

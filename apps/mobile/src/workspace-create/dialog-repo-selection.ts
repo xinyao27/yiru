@@ -1,10 +1,9 @@
-type ExecutionHostScope = 'all' | 'local' | `ssh:${string}` | `runtime:${string}`
+type ExecutionHostScope = 'all' | 'local' | `runtime:${string}`
 
 type MobileNewWorkspaceDialogRepo = {
   id: string
   path: string
-  connectionId?: string | null
-  executionHostId?: 'local' | `ssh:${string}` | `runtime:${string}` | null
+  executionHostId?: 'local' | `runtime:${string}` | null
 }
 
 export function getMobileNewWorkspaceDialogEligibleRepos<T extends { path: string }>(
@@ -19,7 +18,7 @@ function getMobileRepoExecutionHostId(
   if (repo.executionHostId) {
     return repo.executionHostId
   }
-  return repo.connectionId ? `ssh:${encodeURIComponent(repo.connectionId)}` : 'local'
+  return 'local'
 }
 
 export function resolveMobileNewWorkspaceDialogRepoId({

@@ -1,22 +1,12 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 
-import type { ClientChannel } from 'ssh2'
 import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '~shared/automation/precheck'
 import type { AutomationPrecheck, AutomationPrecheckResult } from '~shared/automations-types'
 
-import { shellEscape } from '../ssh/connection-utils'
-import { getSshConnectionManager } from '../ssh/ssh'
-
-type AutomationPrecheckExecutionTarget =
-  | {
-      type: 'local'
-      cwd: string
-    }
-  | {
-      type: 'ssh'
-      cwd: string
-      connectionId: string
-    }
+type AutomationPrecheckExecutionTarget = {
+  type: 'local'
+  cwd: string
+}
 
 type TailBuffer = {
   content: string
@@ -57,22 +47,6 @@ function createPrecheckResult(args: {
     startedAt: args.startedAt,
     completedAt
   }
-}
-
-function failedPrecheckResult(
-  precheck: AutomationPrecheck,
-  startedAt: number,
-  error: string
-): AutomationPrecheckResult {
-  return createPrecheckResult({
-    precheck,
-    startedAt,
-    stdout: { content: '', truncated: false },
-    stderr: { content: '', truncated: false },
-    exitCode: null,
-    timedOut: false,
-    error
-  })
 }
 
 function killLocalPrecheckProcessTree(child: ChildProcess): ReturnType<typeof setTimeout> | null {
@@ -180,92 +154,9 @@ function runLocalPrecheck(
   })
 }
 
-function runSshChannelPrecheck(args: {
-  precheck: AutomationPrecheck
-  channel: ClientChannel
-  startedAt: number
-}): Promise<AutomationPrecheckResult> {
-  const { precheck, channel, startedAt } = args
-  const timeoutMs = precheck.timeoutSeconds * 1000
-  return new Promise((resolve) => {
-    let stdout: TailBuffer = { content: '', truncated: false }
-    let stderr: TailBuffer = { content: '', truncated: false }
-    let exitCode: number | null = null
-    let timedOut = false
-    let settled = false
-    let timeout: ReturnType<typeof setTimeout> | null = null
-
-    const settle = (exitCode: number | null, error: string | null): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      if (timeout) {
-        clearTimeout(timeout)
-        timeout = null
-      }
-      resolve(
-        createPrecheckResult({ precheck, startedAt, stdout, stderr, exitCode, timedOut, error })
-      )
-    }
-
-    timeout = setTimeout(() => {
-      timedOut = true
-      channel.close()
-    }, timeoutMs)
-
-    const fail = (error: Error): void => {
-      settle(null, error.message)
-    }
-    channel.on('error', fail)
-    channel.stderr.on('error', fail)
-    channel.on('data', (data: Buffer | string) => {
-      stdout = appendTail(stdout, data.toString())
-    })
-    channel.stderr.on('data', (data: Buffer | string) => {
-      stderr = appendTail(stderr, data.toString())
-    })
-    channel.on('exit', (code: number | null) => {
-      exitCode = typeof code === 'number' ? code : null
-    })
-    channel.on('close', (code?: number | null) => {
-      if (typeof code === 'number') {
-        exitCode = code
-      }
-      settle(exitCode, timedOut ? `Precheck timed out after ${precheck.timeoutSeconds}s.` : null)
-    })
-  })
-}
-
-async function runSshPrecheck(
-  precheck: AutomationPrecheck,
-  target: Extract<AutomationPrecheckExecutionTarget, { type: 'ssh' }>
-): Promise<AutomationPrecheckResult> {
-  const startedAt = Date.now()
-  const manager = getSshConnectionManager()
-  const connection = manager?.getConnection(target.connectionId)
-  if (!connection || connection.getState().status !== 'connected') {
-    return failedPrecheckResult(precheck, startedAt, 'SSH target is not connected.')
-  }
-  try {
-    const remoteCommand = `cd ${shellEscape(target.cwd)} && ${precheck.command}`
-    const channel = await connection.exec(remoteCommand)
-    return await runSshChannelPrecheck({ precheck, channel, startedAt })
-  } catch (error) {
-    return failedPrecheckResult(
-      precheck,
-      startedAt,
-      error instanceof Error ? error.message : String(error)
-    )
-  }
-}
-
 export async function runAutomationPrecheck(args: {
   precheck: AutomationPrecheck
   target: AutomationPrecheckExecutionTarget
 }): Promise<AutomationPrecheckResult> {
-  if (args.target.type === 'ssh') {
-    return await runSshPrecheck(args.precheck, args.target)
-  }
   return await runLocalPrecheck(args.precheck, args.target)
 }

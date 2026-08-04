@@ -1,4 +1,3 @@
-import type { DirectSshAuthority } from '@yiru/runtime-protocol/ssh-connection'
 import { isPositiveHostedReviewNumber } from '@yiru/workbench-model/review'
 import {
   CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
@@ -10,12 +9,11 @@ import {
   getSettingsFocusedExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
-import type { StateCreator, StoreApi } from 'zustand'
+import type { StateCreator } from 'zustand'
 import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
 import { forgetAgentHibernationTabOutput } from '~renderer/components/terminal-pane/agent/hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '~renderer/components/terminal-pane/agent/startup-delivery-guards'
@@ -24,7 +22,6 @@ import {
   forgetHugeRepoWarningDismissalsForWorktrees,
   migrateHugeRepoWarningDismissal
 } from '~renderer/components/workspace-panel/source-control/huge-repo-warning-dismissals'
-import { cleanupEphemeralVmRuntimesForDeleted } from '~renderer/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '~renderer/lib/foreground-terminal-tabs'
 import { branchName } from '~renderer/lib/git-utils'
 import {
@@ -42,11 +39,6 @@ import {
 import { disposeRemovedWorktreeParkedTerminalWatchers } from '~renderer/runtime/terminal-parked-watcher-registry'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
-import type {
-  HostQualifiedDetectedWorktreeResult,
-  ProviderRequestId,
-  SshExecutionHostId
-} from '~shared/detected-worktree-provider-contract'
 import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
 import {
   WORKTREE_CREATE_CONTRACT,
@@ -85,10 +77,6 @@ import {
 
 import type { AppState } from '../types'
 import { moveFocusToRendererBeforeFocusedWebviewHidden } from './browser-webview-cleanup'
-import {
-  createDetectedWorktreeRefreshLeaseRegistry,
-  type DetectedWorktreeRefreshLease
-} from './detected-worktree-refresh-leases'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'
 import { getHostedReviewCacheKey, refreshHostedReviewCard } from './hosted-review'
 import {
@@ -363,17 +351,6 @@ function repoHasExecutionHost(
   return (
     (repoOwners.length === 0 && ownerWasMissingAtStart) ||
     repoOwners.some((repo) => getRepoExecutionHostId(repo) === hostId)
-  )
-}
-
-function repoHasExactlyOneExecutionHostOwner(
-  state: Pick<AppState, 'repos'>,
-  repoId: string,
-  hostId: ExecutionHostId
-): boolean {
-  return (
-    state.repos.filter((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === hostId)
-      .length === 1
   )
 }
 
@@ -811,14 +788,7 @@ function settingsForKnownRepoOwner(
   if (parsed?.kind === 'local' && settings?.activeRuntimeEnvironmentId) {
     return { ...settings, activeRuntimeEnvironmentId: null }
   }
-  if (parsed?.kind !== 'ssh') {
-    return settings
-  }
-  // Why: SSH repos are owned by the desktop client/SSH provider, not the
-  // currently focused runtime server.
   return settings
-    ? { ...settings, activeRuntimeEnvironmentId: null }
-    : ({ activeRuntimeEnvironmentId: null } as AppState['settings'])
 }
 
 function settingsForExecutionHostOwner(
@@ -831,7 +801,7 @@ function settingsForExecutionHostOwner(
       ? { ...settings, activeRuntimeEnvironmentId: parsed.environmentId }
       : ({ activeRuntimeEnvironmentId: parsed.environmentId } as AppState['settings'])
   }
-  if (parsed?.kind === 'local' || parsed?.kind === 'ssh') {
+  if (parsed?.kind === 'local') {
     return settings
       ? { ...settings, activeRuntimeEnvironmentId: null }
       : ({ activeRuntimeEnvironmentId: null } as AppState['settings'])
@@ -954,57 +924,6 @@ async function listDetectedWorktreesForRepoCoalesced(
       detectedWorktreeRefreshesInFlight.delete(key)
     }
   }
-}
-
-const directSshDetectedWorktreeRefreshRegistry = createDetectedWorktreeRefreshLeaseRegistry({
-  startProviderRequest: (request) => window.api.worktrees.listDetectedForHost(request),
-  cancelProviderRequest: (request) =>
-    window.api.worktrees.cancelListDetected({ providerRequestId: request.providerRequestId })
-})
-
-function isCurrentDirectSshAuthority(
-  state: Pick<AppState, 'sshConnectionStates'>,
-  authority: DirectSshAuthority
-): boolean {
-  const connection = state.sshConnectionStates.get(authority.targetId)
-  return (
-    connection?.status === 'connected' &&
-    connection.providerEpoch === authority.providerEpoch &&
-    connection.connectionGeneration === authority.connectionGeneration
-  )
-}
-
-function admitDirectSshDetectedWorktreeResult(
-  result: HostQualifiedDetectedWorktreeResult,
-  request: {
-    repoId: string
-    executionHostId: SshExecutionHostId
-    authority: DirectSshAuthority
-    providerRequestId: ProviderRequestId
-  }
-): result is Extract<
-  HostQualifiedDetectedWorktreeResult,
-  { status: 'complete' | 'non-authoritative' }
-> {
-  return (
-    result.providerRequestId === request.providerRequestId &&
-    (result.status === 'complete' || result.status === 'non-authoritative') &&
-    result.repoId === request.repoId &&
-    result.result.repoId === request.repoId &&
-    result.result.authoritative === (result.status === 'complete') &&
-    result.authority.kind === 'direct-ssh' &&
-    result.authority.executionHostId === request.executionHostId &&
-    result.authority.targetId === request.authority.targetId &&
-    result.authority.providerEpoch === request.authority.providerEpoch &&
-    result.authority.connectionGeneration === request.authority.connectionGeneration
-  )
-}
-
-function staleDirectSshDetectedWorktreeResult(
-  providerRequestId: ProviderRequestId,
-  executionHostId: SshExecutionHostId
-): HostQualifiedDetectedWorktreeResult {
-  return { providerRequestId, executionHostId, status: 'stale' }
 }
 
 async function listWorktreeLineageForRuntime(
@@ -1303,50 +1222,6 @@ async function persistWorktreeMeta(
     },
     { timeoutMs: 15_000 }
   )
-}
-
-// Why: an SSH-mode per-workspace-env registers a project whose host is the runtime-owned SSH
-// target. Once that runtime is destroyed the project points at a host that no longer exists, so it
-// must be removed — otherwise it lingers as a dead, never-connectable project in the composer.
-async function purgeOrphanedRuntimeSshProjects(
-  get: () => AppState,
-  destroyedSshTargetIds: string[]
-): Promise<void> {
-  if (destroyedSshTargetIds.length === 0) {
-    return
-  }
-  const destroyedTargetIds = new Set(destroyedSshTargetIds)
-  const destroyedHostIds = new Set<ExecutionHostId>(
-    destroyedSshTargetIds.map((id) => toSshExecutionHostId(id))
-  )
-  const orphanedSetupIds = get()
-    .projectHostSetups.filter((setup) => destroyedHostIds.has(setup.hostId))
-    .map((setup) => setup.id)
-  const purgedRepoIds = new Set<string>()
-  for (const setupId of orphanedSetupIds) {
-    try {
-      const result = await get().deleteProjectHostSetup({ setupId })
-      if (result?.repo) {
-        purgedRepoIds.add(result.repo.id)
-      }
-    } catch (error) {
-      console.error('Failed to purge orphaned per-workspace-env project:', error)
-    }
-  }
-  // A repo whose only host was the destroyed runtime can outlive its setup (the setup may be pruned
-  // by a projection refresh first). Remove it directly so no dead, never-connectable project lingers.
-  const orphanedRepoIds = get()
-    .repos.filter(
-      (repo) => destroyedTargetIds.has(repo.connectionId ?? '') && !purgedRepoIds.has(repo.id)
-    )
-    .map((repo) => repo.id)
-  for (const repoId of orphanedRepoIds) {
-    try {
-      await get().removeProject(repoId)
-    } catch (error) {
-      console.error('Failed to purge orphaned per-workspace-env repo:', error)
-    }
-  }
 }
 
 async function resolveGitHubReviewPushTarget(
@@ -2292,161 +2167,6 @@ function buildWorktreePurgeState(s: AppState, worktreeIds: string[]): Partial<Ap
   }
 }
 
-export type DirectSshDetectedWorktreeRefresh = {
-  waiterLeaseId: DetectedWorktreeRefreshLease['waiterLeaseId']
-  providerRequestId: ProviderRequestId
-  result: Promise<HostQualifiedDetectedWorktreeResult>
-  release: DetectedWorktreeRefreshLease['release']
-  merge(result: HostQualifiedDetectedWorktreeResult): HostQualifiedDetectedWorktreeResult
-}
-
-export function acquireDirectSshDetectedWorktreeRefresh(
-  store: Pick<StoreApi<AppState>, 'getState' | 'setState'>,
-  request: {
-    repoId: string
-    executionHostId: SshExecutionHostId
-    authority: DirectSshAuthority
-    requireAuthoritative?: boolean
-  }
-): DirectSshDetectedWorktreeRefresh {
-  const requestStartedState = store.getState()
-  const requestStartedWorktrees = requestStartedState.worktreesByRepo[request.repoId]
-  const setup = getProjectHostSetupForRepoHost(
-    requestStartedState,
-    request.repoId,
-    request.executionHostId
-  )
-  const lease = directSshDetectedWorktreeRefreshRegistry.acquire(
-    [
-      request.repoId,
-      request.executionHostId,
-      request.authority.providerEpoch,
-      request.authority.connectionGeneration,
-      request.requireAuthoritative === true ? 'authoritative' : 'best-effort'
-    ].join('\n'),
-    {
-      repoId: request.repoId,
-      executionHostId: request.executionHostId,
-      expectedAuthority: request.authority
-    }
-  )
-  let mergedResult: HostQualifiedDetectedWorktreeResult | undefined
-
-  return {
-    waiterLeaseId: lease.waiterLeaseId,
-    providerRequestId: lease.providerRequestId,
-    result: lease.result,
-    release: lease.release,
-    merge: (providerResult) => {
-      if (mergedResult) {
-        return mergedResult
-      }
-      const admissionRequest = {
-        repoId: request.repoId,
-        executionHostId: request.executionHostId,
-        authority: request.authority,
-        providerRequestId: lease.providerRequestId
-      }
-      if (!admitDirectSshDetectedWorktreeResult(providerResult, admissionRequest)) {
-        mergedResult = staleDirectSshDetectedWorktreeResult(
-          lease.providerRequestId,
-          request.executionHostId
-        )
-        return mergedResult
-      }
-      if (request.requireAuthoritative && providerResult.status !== 'complete') {
-        mergedResult = providerResult
-        return mergedResult
-      }
-
-      let admitted = false
-      store.setState((state) => {
-        if (
-          !isCurrentDirectSshAuthority(state, request.authority) ||
-          !repoHasExactlyOneExecutionHostOwner(state, request.repoId, request.executionHostId)
-        ) {
-          return state
-        }
-        admitted = true
-        const matchOptions = worktreeHostMatchOptions(
-          state,
-          request.repoId,
-          request.executionHostId
-        )
-        let incoming = toVisibleWorktrees(providerResult.result, request.executionHostId, setup)
-        incoming = routeListingBranchSwitchesThroughGitIdentity({
-          requestStarted: requestStartedWorktrees,
-          current: state.worktreesByRepo[request.repoId],
-          incoming,
-          matchesRefreshHost: (worktree) =>
-            worktreeMatchesHost(worktree, request.executionHostId, matchOptions),
-          hasBranchScopedReviewContext: hasBranchScopedHostedReviewContext,
-          updateWorktreeGitIdentity: state.updateWorktreeGitIdentity
-        })
-        const worktrees = sanitizeHostedReviewLinksForBranchClears(
-          incoming,
-          state.worktreesByRepo[request.repoId]
-        )
-        const mergedWorktrees = mergeWorktreesForHost(
-          state.worktreesByRepo[request.repoId],
-          worktrees,
-          request.executionHostId,
-          matchOptions
-        )
-        const mergedDetected = mergeDetectedWorktreesForHost(
-          state.detectedWorktreesByRepo[request.repoId],
-          providerResult.result,
-          request.executionHostId,
-          setup,
-          matchOptions
-        )
-        const removedIds = getRemovedWorktreeIdsAfterAuthoritativeScan(
-          state,
-          request.repoId,
-          providerResult.result,
-          request.executionHostId
-        )
-        const worktreesChanged = !areWorktreesEqual(
-          state.worktreesByRepo[request.repoId],
-          mergedWorktrees
-        )
-        const detectedChanged = !areDetectedWorktreeResultsEqual(
-          state.detectedWorktreesByRepo[request.repoId],
-          mergedDetected
-        )
-        if (!worktreesChanged && !detectedChanged && removedIds.length === 0) {
-          return state
-        }
-        return {
-          ...state,
-          ...(worktreesChanged
-            ? {
-                worktreesByRepo: {
-                  ...state.worktreesByRepo,
-                  [request.repoId]: mergedWorktrees
-                },
-                sortEpoch: state.sortEpoch + 1
-              }
-            : {}),
-          ...(detectedChanged
-            ? {
-                detectedWorktreesByRepo: {
-                  ...state.detectedWorktreesByRepo,
-                  [request.repoId]: mergedDetected
-                }
-              }
-            : {}),
-          ...(removedIds.length > 0 ? buildWorktreePurgeState(state, removedIds) : {})
-        }
-      })
-      mergedResult = admitted
-        ? providerResult
-        : staleDirectSshDetectedWorktreeResult(lease.providerRequestId, request.executionHostId)
-      return mergedResult
-    }
-  }
-}
-
 export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> = (set, get) => ({
   worktreesByRepo: {},
   detectedWorktreesByRepo: {},
@@ -3366,36 +3086,10 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     })
   },
 
-  removePendingWorktreeCreation: (creationId, options) => {
+  removePendingWorktreeCreation: (creationId) => {
     set((s) => {
-      const entry = s.pendingWorktreeCreations[creationId]
-      if (!entry) {
+      if (!s.pendingWorktreeCreations[creationId]) {
         return {}
-      }
-      const cleanupVm = options?.cleanupVm ?? true
-      if (
-        cleanupVm &&
-        entry.phase === 'provisioning-vm' &&
-        typeof window !== 'undefined' &&
-        window.api?.ephemeralVm?.cancelProvision
-      ) {
-        void window.api.ephemeralVm.cancelProvision({ provisionId: creationId }).catch(() => {
-          // Best effort: dismissing the pending surface should not be blocked by
-          // an already-finished or unreachable provisioning process.
-        })
-      }
-      if (
-        cleanupVm &&
-        entry.request.ephemeralVmRuntimeId &&
-        typeof window !== 'undefined' &&
-        window.api?.ephemeralVm?.cleanup
-      ) {
-        void window.api.ephemeralVm
-          .cleanup({ runtimeId: entry.request.ephemeralVmRuntimeId })
-          .catch(() => {
-            // Best effort: cancellation should not block on provider cleanup,
-            // and the Settings runtime list still exposes retry/manual cleanup.
-          })
       }
       const { [creationId]: _removed, ...rest } = s.pendingWorktreeCreations
       return {
@@ -3516,15 +3210,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       // can intercept them.
       await get().shutdownWorktreeBrowsers(worktreeId)
       await get().shutdownWorktreeTerminals(worktreeId)
-      // Why: dispose the runtime-owned SSH relay AFTER tearing down this workspace's terminals,
-      // so a still-mounted SSH terminal pane can't connect to an already-gone relay and surface a
-      // spurious "SSH connection is not active" toast during delete.
-      const destroyedRuntimeSshTargetIds = await cleanupEphemeralVmRuntimesForDeleted({
-        workspaceIds: [worktreeId]
-      })
-      // Remove the now-orphaned project that pointed at the destroyed runtime-owned SSH target so it
-      // can't surface as a dead, never-connectable project in the composer.
-      await purgeOrphanedRuntimeSshProjects(get, destroyedRuntimeSshTargetIds)
       const tabs = get().tabsByWorktree[worktreeId] ?? []
       const tabIds = new Set(tabs.map((t) => t.id))
 

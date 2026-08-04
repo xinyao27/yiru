@@ -1,14 +1,13 @@
 export const LOCAL_EXECUTION_HOST_ID = 'local'
 export const ALL_EXECUTION_HOSTS_SCOPE = 'all'
 
-export type ExecutionHostKind = 'local' | 'ssh' | 'runtime'
-export type ExecutionHostId = typeof LOCAL_EXECUTION_HOST_ID | `ssh:${string}` | `runtime:${string}`
+export type ExecutionHostKind = 'local' | 'runtime'
+export type ExecutionHostId = typeof LOCAL_EXECUTION_HOST_ID | `runtime:${string}`
 
 export type ExecutionHostScope = typeof ALL_EXECUTION_HOSTS_SCOPE | ExecutionHostId
 
 export type ParsedExecutionHost =
   | { kind: 'local'; id: typeof LOCAL_EXECUTION_HOST_ID }
-  | { kind: 'ssh'; id: `ssh:${string}`; targetId: string }
   | { kind: 'runtime'; id: `runtime:${string}`; environmentId: string }
 
 type RepoExecutionHost = {
@@ -59,22 +58,8 @@ function normalizeHostPart(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null
 }
 
-export function toSshExecutionHostId(targetId: string): `ssh:${string}` {
-  return `ssh:${encodeURIComponent(targetId)}`
-}
-
 export function toRuntimeExecutionHostId(environmentId: string): `runtime:${string}` {
   return `runtime:${encodeURIComponent(environmentId)}`
-}
-
-// Why: runtime-owned (ephemeral-VM) SSH targets are hidden from user-facing
-// SSH/run-target surfaces. The renderer can't read the target.owner field, so it
-// recognizes them by their deterministic id prefix. getRuntimeOwnedSshTargetId
-// (main) builds on this same prefix to keep the two in sync.
-export const RUNTIME_OWNED_SSH_TARGET_ID_PREFIX = 'runtime-ssh-'
-
-export function isRuntimeOwnedSshTargetId(targetId: string | null | undefined): boolean {
-  return typeof targetId === 'string' && targetId.startsWith(RUNTIME_OWNED_SSH_TARGET_ID_PREFIX)
 }
 
 export function parseExecutionHostId(value: string | null | undefined): ParsedExecutionHost | null {
@@ -84,18 +69,6 @@ export function parseExecutionHostId(value: string | null | undefined): ParsedEx
   }
   if (normalized === LOCAL_EXECUTION_HOST_ID) {
     return { kind: 'local', id: LOCAL_EXECUTION_HOST_ID }
-  }
-  if (normalized.startsWith('ssh:')) {
-    const encoded = normalized.slice('ssh:'.length)
-    if (!encoded) {
-      return null
-    }
-    try {
-      const targetId = decodeURIComponent(encoded)
-      return targetId ? { kind: 'ssh', id: `ssh:${encoded}`, targetId } : null
-    } catch {
-      return null
-    }
   }
   if (normalized.startsWith('runtime:')) {
     const encoded = normalized.slice('runtime:'.length)
@@ -151,12 +124,10 @@ export function normalizeExecutionHostOrder(
 }
 
 export function getRepoExecutionHostId(repo: RepoExecutionHost): ExecutionHostId {
-  const executionHostId = normalizeExecutionHostId(repo.executionHostId)
-  if (executionHostId) {
-    return executionHostId
-  }
-  const connectionId = normalizeHostPart(repo.connectionId)
-  return connectionId ? toSshExecutionHostId(connectionId) : LOCAL_EXECUTION_HOST_ID
+  // Why: repo.connectionId was the SSH target id and used to select the host
+  // here. With SSH removed nothing can set it, so an unset executionHostId
+  // always means the local host.
+  return normalizeExecutionHostId(repo.executionHostId) ?? LOCAL_EXECUTION_HOST_ID
 }
 
 export function getWorktreeExecutionHostId(
@@ -164,8 +135,9 @@ export function getWorktreeExecutionHostId(
   repo: RepoExecutionHost | undefined,
   defaultHostId: ExecutionHostId = LOCAL_EXECUTION_HOST_ID
 ): ExecutionHostId {
-  // Why: runtime and SSH snapshots can identify a more precise workspace owner
-  // than the repo fallback; every host-scoped sidebar path uses this precedence.
+  // Why: a runtime snapshot can identify a more precise workspace owner than
+  // the repo fallback; legacy SSH ownership must still select the narrowed repo
+  // resolver so it degrades to local instead of inheriting the focused host.
   return (
     worktree.hostId ??
     (repo?.connectionId || repo?.executionHostId ? getRepoExecutionHostId(repo) : defaultHostId)
@@ -192,8 +164,6 @@ export function getExecutionHostLabel(id: ExecutionHostScope): string {
   switch (parsed.kind) {
     case 'local':
       return getLocalExecutionHostLabel()
-    case 'ssh':
-      return parsed.targetId
     case 'runtime':
       return parsed.environmentId
   }

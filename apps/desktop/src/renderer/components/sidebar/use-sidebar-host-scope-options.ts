@@ -17,8 +17,6 @@ export function useSidebarHostScopeOptions(): {
   hostScopeOptions: SidebarHostScopeOption[]
 } {
   const repos = useAppStore((s) => s.repos)
-  const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
-  const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const settings = useAppStore((s) => s.settings)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
@@ -28,22 +26,12 @@ export function useSidebarHostScopeOptions(): {
     () =>
       buildSidebarHostOptions({
         repos,
-        sshTargetLabels,
-        sshConnectionStates,
         settings,
         runtimeEnvironments,
         runtimeStatusByEnvironmentId,
         hostLabelOverrides
       }),
-    [
-      repos,
-      sshTargetLabels,
-      sshConnectionStates,
-      settings,
-      runtimeEnvironments,
-      runtimeStatusByEnvironmentId,
-      hostLabelOverrides
-    ]
+    [repos, settings, runtimeEnvironments, runtimeStatusByEnvironmentId, hostLabelOverrides]
   )
   const hostScopeOptions = useMemo(() => buildSidebarHostScopeOptions(hostOptions), [hostOptions])
 

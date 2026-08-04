@@ -545,28 +545,24 @@
         "title": {
           "missing": "フォルダーが見つかりません",
           "notDirectory": "パスはフォルダーではありません",
-          "ambiguousConnection": "接続を特定できません",
           "unavailable": "フォルダーを確認できません"
         },
         "description": {
           "missing": "Yiru は {{path}} を見つけられません。このフォルダーワークスペースを削除して再インポートしてください。",
           "notDirectory": "{{path}} は存在しますが、フォルダーではありません。",
-          "ambiguousConnection": "Yiru はこのフォルダースコープをどの SSH 接続が所有しているか判別できません。",
-          "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムまたは SSH 接続を確認して再試行してください。"
+          "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムを確認して再試行してください。"
         },
         "createError": {
           "title": {
             "missing": "フォルダーが見つかりません",
             "notDirectory": "パスはフォルダーではありません",
-            "ambiguousConnection": "接続を特定できません",
             "unavailable": "フォルダーを確認できません",
             "generic": "フォルダーワークスペースの作成に失敗しました"
           },
           "description": {
             "missing": "Yiru は {{path}} を見つけられません。フォルダーを削除して再インポートしてください。",
             "notDirectory": "{{path}} は存在しますが、フォルダーではありません。",
-            "ambiguousConnection": "Yiru はこのフォルダースコープをどの SSH 接続が所有しているか判別できません。",
-            "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムまたは SSH 接続を確認して再試行してください。"
+            "unavailable": "Yiru は現在このフォルダーを確認できません。ランタイムを確認して再試行してください。"
           }
         }
       },
@@ -575,12 +571,6 @@
         "distroRequired": "このスキルをインストールする前に、このプロジェクトの WSL ディストリビューションを選択してください。",
         "distroMissing": "選択した WSL ディストリビューションは利用できません。利用可能なものを選ぶか、このプロジェクトを Windows に切り替えてください。",
         "wslDefault": "WSL 既定"
-      },
-      "sidebarWorktreeActivation": {
-        "wakeEphemeralVmFailed": "一時的なVMワークスペースの起動に失敗しました"
-      },
-      "ephemeralVmWorkspaceTarget": {
-        "projectRootRegistrationFailed": "ランタイム上でのレシピ作成プロジェクトルートの登録に失敗しました"
       },
       "blocked": {
         "notification": {
@@ -647,8 +637,6 @@
         "d91ae31fbd": "macOS のアクセス許可",
         "95a1886d94": "スマートフォンから terminals と agents を操作",
         "1cd25673df": "モバイル",
-        "31e57d1c70": "ファイル、ターミナル、Git、ワークスペースに既存のマシンを SSH 経由で使用します。",
-        "94a5afe910": "SSH ホスト",
         "40d80bad8a": "ベータ",
         "de0c2907a1": "リモート Yiru サーバー",
         "b351014180": "Yiru の統計に加え、Claude、Codex、OpenCode のトークン分析と Grok サブスクリプション使用状況。",
@@ -702,7 +690,9 @@
         "devSearchKeywordError": "error",
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} 台のホスト",
-        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
+        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
+        "coworkingTitle": "Coworking",
+        "coworkingDescription": "Review and revoke persistent remote host authorizations."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "貼り付け内容が大きすぎます。"
@@ -880,13 +870,8 @@
         "createMultiple": "さらに作成",
         "waitForSetupBeforeAgent": "セットアップが完了するまで待ってから agent を開始してください",
         "waitForSetupBeforeAgentHelp": "セットアップによって、起動時に agent に必要な依存関係、MCP サーバー、または構成ファイルがインストールされるときに、これをオンにします。",
-        "destroyDisabled": "破壊は無効です",
-        "destroyConfigured": "設定されたものを破棄する",
-        "noDestroyConfigured": "破壊しない",
-        "ephemeralVm": "ワークスペースごとの環境",
         "chooseRunTarget": "ターゲットを選択",
         "noRunTargets": "このプロジェクトには実行ターゲットが準備されていません。",
-        "perWorkspaceEnvHint": "レシピからオンデマンド環境をプロビジョニングする",
         "branchName": "ブランチ名",
         "branchNamePlaceholder": "feature/my-branch"
       },
@@ -1183,10 +1168,7 @@
             "ed2a664f8b": "ワークツリーを作成できませんでした",
             "a3346fc6ed": "ワークツリーの作成をキャンセルする",
             "532aea14ce": "キャンセル",
-            "767951265d": "ワークツリーの作成中に問題が発生しました。",
-            "vmProvisioningTitle": "VMのプロビジョニング",
-            "cancelProvisioning": "キャンセル",
-            "vmProvisioningLogEmpty": "レシピの出力を待っています…"
+            "767951265d": "ワークツリーの作成中に問題が発生しました。"
           }
         }
       },
@@ -3565,14 +3547,7 @@
           "runtime": "Server",
           "ssh": "SSH",
           "connecting": "接続中",
-          "connect": "接続",
-          "addSshHost": "SSH ホストの追加",
-          "addRemoteServer": "リモートサーバーを追加する",
-          "addRemoteHost": "リモートホストの追加",
-          "addRemoteHostTooltip": "ログインできるマシンには SSH を選択し、Yiru サーバーにはリモート サーバーを選択します。",
-          "addSshHostDetail": "SSH 経由で既存のマシンを使用します。",
-          "addRemoteServerDetail": "別のコンピューターで実行されている Yiru とペアリングします。",
-          "addRemoteHostDetail": "SSH ホストまたは Yiru サーバー"
+          "connect": "接続"
         },
         "sidebarHostOptions": {
           "3e102f111c": "All hosts",
@@ -3661,45 +3636,6 @@
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH 接続に失敗しました。"
         },
-        "AddRemoteHostDialog": {
-          "sshHostRequired": "ホストまたは SSH 構成エイリアスが必要です。",
-          "sshPortInvalid": "ポートは 1 ～ 65535 でなければなりません。",
-          "sshRelayGraceInvalid": "Terminal のタイムアウトは 60 秒から {{value0}} 秒の間である必要があります。",
-          "sshSaved": "SSH ホストが追加されました。",
-          "sshSaveFailed": "SSH ホストの追加に失敗しました。",
-          "serverFieldsRequired": "サーバー名とペアリングコードは必須です。",
-          "serverSaved": "リモートサーバーが追加されました。",
-          "serverSaveFailed": "リモートサーバーの追加に失敗しました。",
-          "serverTitle": "リモートサーバーを追加する",
-          "sshTitle": "SSH ホストの追加",
-          "serverDescription": "別のコンピューターで実行されている Yiru とペアリングします。",
-          "sshDescription": "SSH 経由でログインできる永続マシンを追加します。",
-          "cancel": "キャンセル",
-          "saving": "保存中...",
-          "save": "保存",
-          "label": "ラベル",
-          "sshLabelPlaceholder": "Dev box",
-          "sshHost": "ホストまたはエイリアス",
-          "sshHostPlaceholder": "deploy@server:22",
-          "username": "ユーザー名",
-          "usernamePlaceholder": "deploy",
-          "port": "ポート",
-          "identityFile": "アイデンティティファイル",
-          "identityFilePlaceholder": "~/.ssh/id_ed25519 (オプション)",
-          "serverName": "サーバー名",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "ペアリングコード",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "サーバーで実行",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "し、表示されたペアリング URL を貼り付けます。",
-          "sshImportAlreadySynced": "~/.ssh/config はすでに同期されています。",
-          "sshImportSynced": "{{value0}} ホスト{{value1}} を同期しました。",
-          "sshImportFailed": "SSH 構成のインポートに失敗しました。",
-          "importing": "インポート中...",
-          "importSshConfig": "~/.ssh/config をインポートします",
-          "sshPersistenceDefault": "このホスト上のリモートターミナルは、終了するかリレーをリセットするまで動作し続けます。"
-        },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "再接続に失敗しました",
           "forgetBody": "このワークスペースをYiruからのみ削除します。ファイル、Gitワークツリー、{{host}}のブランチはそのまま残ります。",
@@ -3712,7 +3648,13 @@
         },
         "CoworkingDesktopRow": {
           "connecting": "Connecting…",
-          "disconnected": "Disconnected"
+          "disconnected": "Disconnected",
+          "hostAccessDenied": "Remote host access was denied.",
+          "hostAccessCancelled": "Remote host access request was cancelled.",
+          "hostAdded": "{{value0}} is ready as a remote host.",
+          "hostAccessFailed": "Could not request remote host access.",
+          "requestingHostAccess": "Waiting…",
+          "useAsHost": "Use as host"
         },
         "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
@@ -3774,7 +3716,22 @@
           "portUnavailable": "TCP ポート {{port}} はすでに使用中です。競合するプロセスを終了してください。Coworking は確認を続けます。",
           "permissionDenied": "システム権限により、Yiru は Tailnet 上で Coworking のリスナーを開けませんでした。",
           "persistenceUnavailable": "Coworking は共有設定を安全に読み込めなかったため、共有は無効のままです。",
-          "unavailable": "このデスクトップで Coworking を起動できませんでした。"
+          "unavailable": "このデスクトップで Coworking を起動できませんでした。",
+          "starting": "Coworking を起動中…",
+          "readyIdle": "Coworking 準備完了 · 接続なし",
+          "peersConnected": "{{count}} 人が接続中",
+          "pendingRequests": "{{count}} 人が承認を待っています",
+          "sharedWorktrees": "{{count}} 個のワークツリーを tailnet に公開しています。",
+          "noSharedWorktrees": "公開中のワークツリーはありません。相手には何も表示されません。",
+          "hasControl": "編集可能",
+          "readOnly": "読み取り専用",
+          "windowsFirewallUnavailable": "Windows ファイアウォールが TCP ポート {{port}} の Coworking リスナーをブロックしています。",
+          "repairFirewall": "ファイアウォール規則を修復",
+          "suspendedHostUnavailable": "ホストがオフライン",
+          "suspendedIncarnation": "ワークツリーが置き換えられました",
+          "suspendedOverlapping": "共有が重複",
+          "suspendedUnknown": "配信されていません",
+          "sharingAs": "{{node}} として共有中"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows ファイアウォール規則を修復しました。",
@@ -4028,6 +3985,22 @@
           "controlPending": "Waiting for the owner to approve control.",
           "controlRequired": "Request control to create terminals.",
           "creating": "Creating terminal…"
+        },
+        "CoworkingHostAccessRequestDialog": {
+          "decisionFailed": "Could not send the host access decision.",
+          "nameRequired": "Name this authorized device before continuing.",
+          "title": "Authorize {{value0}} as a remote host client?",
+          "description": "This authorization lasts 90 days and is limited to this machine.",
+          "deviceName": "Authorized device name",
+          "readOnly": "Read only",
+          "readOnlyDescription": "Browse code and git history on this machine.",
+          "grantReadOnly": "Grant read only",
+          "fullAccess": "Full access",
+          "fullAccessDescription": "They will receive continuous shell access on this machine.",
+          "grantFullAccess": "Grant full access",
+          "revokeHelp": "You can revoke this authorization at any time in Settings → Coworking.",
+          "queued": "Queued host access requests: {{value0}}.",
+          "deny": "Deny"
         }
       },
       "shared": {
@@ -5091,7 +5064,6 @@
           "3b224167ff": "サーバ",
           "251b96564a": "検出された・",
           "f34c152dc0": "MCP 構成を更新する",
-          "6bac9ddfc6": "SSH repos は、リモート ファイル システムを通じて読み取られます。スターターの作成は、ワークスペースのルート構成に限定されます。",
           "96f5609b04": "agents がこの repo での作業中に使用できる MCP サーバー定義を検査します。",
           "55eea3ef47": "MCP 構成",
           "9ee215caf6": ".mcp.json",
@@ -5605,14 +5577,6 @@
           "84b9b2be05": "ブラウザまたは別の Yiru クライアントが接続できるように、取り消し可能なアクセス許可を作成します。",
           "6e1280ca55": "この Yiru サーバーを共有する",
           "9a3758d983": "保存されたサーバーはありません。",
-          "9bee6bbeeb": "サーバーの追加",
-          "55fcc964cd": "をサーバーで実行し、出力されたペアリング URL を貼り付けます。",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "実行",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "ペアリングコード",
-          "e038625857": "開発環境",
-          "54ebacc600": "サーバー名",
           "1826bd0608": "保存されたサーバー",
           "6ce4664003": "サーバーを更新する",
           "b07070ed3c": "サーバーが接続されていません",
@@ -5620,11 +5584,6 @@
           "64b6bea541": "アクティブサーバー",
           "99ac81fb43": "{{value0}} に切り替えました。",
           "b5b5114cb0": "{{value0}} を削除しました。",
-          "6cb6eae14f": "実行環境の保存に失敗しました。",
-          "7b5986c8df": "{{value0}} を保存しました。準備ができたら、アクティブサーバーで切り替えてください。",
-          "a5b58465b6": "{{value0}} に接続されています。",
-          "5ef712f407": "「{{value0}}」という名前のサーバーはすでに存在します。",
-          "0c55a47480": "名前とペアリングコードは必須です。",
           "e6410d72c3": "ランタイム環境の読み込みに失敗しました。",
           "6ef71985da": "エンドポイントなし",
           "ed3e3f069d": "これにより、保存されたサーバーが Yiru から削除されます。アクティブなサーバーは変更されません。",
@@ -5655,7 +5614,7 @@
           "serverDisconnected": "切断済み",
           "disconnectedServer": "{{value0}} から切断しました。",
           "connectToRemoteServers": "リモートサーバーに接続",
-          "connectToRemoteServersHelp": "別の Yiru ランタイムをペアリングし、ここで接続または切断します。既定のホストを変更したい場合にのみ、詳細 > アクティブサーバーを使用してください。",
+          "connectToRemoteServersHelp": "Coworking を通じて承認されたホストに接続、切断、または詳細を確認します。",
           "activeServerRowHelp": "サーバー経由のプロジェクト、terminals、プロバイダーチェックに使うアクティブサーバーです。",
           "disconnect": "切断",
           "connect": "接続",
@@ -5722,8 +5681,6 @@
           "65660d4548": "macOS のアクセス許可",
           "c6c01ac209": "スマートフォンから terminals と agents を操作",
           "c40dadaac8": "モバイル",
-          "c2ee313198": "ファイル、ターミナル、Git、ワークスペースに既存のマシンを SSH 経由で使用します。",
-          "9b02492d1f": "SSH ホスト",
           "b5ee17826b": "Pair remote Yiru runtimes for persistent sessions, richer remote state, and web or mobile handoff.",
           "7686cb5c36": "このブラウザを保存された Yiru サーバーに接続します。",
           "bd0181eeca": "リモート Yiru サーバー",
@@ -5779,7 +5736,9 @@
           "65358016ea": "破棄",
           "dev": "Dev Tools",
           "devDescription": "Dev-only tools for exercising UI states.",
-          "b07041697f": "Connect GitHub, GitLab, and source-hosting services."
+          "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
+          "coworkingTitle": "Coworking",
+          "coworkingDescription": "Review and revoke persistent remote host authorizations."
         },
         "SettingsFormControls": {
           "42a4d15a30": "一致するフォントがありません。",
@@ -5901,36 +5860,6 @@
           "68bbcd864a": "新規",
           "2ef2b2674b": "{{value0}} を削除"
         },
-        "SshDestructiveActionDialog": {
-          "895b216267": "キャンセル"
-        },
-        "SshPane": {
-          "c0f1c80166": "SSH ターゲットが構成されていません。",
-          "639ceb3698": "ターゲットの追加",
-          "51d7dba44d": "インポート",
-          "a7d28dff81": "Yiru で接続するリモート ホストを追加します。",
-          "94c5284560": "ターゲット",
-          "f495689b82": "インポートに失敗しました",
-          "f8050f6307": "{{value0}} サーバー{{value1}} を同期しました",
-          "68c13b4589": "テストが失敗しました",
-          "81d08bcddf": "接続成功",
-          "2c4ee7332b": "リモートリレーのリセットに失敗しました",
-          "db2e48975e": "リモートリレーリセット",
-          "025e107643": "リモート terminals の終了に失敗しました",
-          "90e308c98b": "リモート terminals が終了しました",
-          "a43de1d3ee": "切断に失敗しました",
-          "e95d5ae10e": "接続に失敗しました",
-          "c2a69510e3": "ターゲットの削除に失敗しました",
-          "a0237eb1ca": "ターゲットが削除されました",
-          "2227ce47b6": "ターゲットの保存に失敗しました",
-          "f602009125": "ターゲットが追加されました",
-          "b4ba0ce33d": "ターゲットが更新されました",
-          "3879cbaa52": "terminals のタイムアウトは 60 ～ {{value0}} 秒にする必要があります。そうでない場合は、リセットされるまで terminals をアクティブにしておく必要があります。",
-          "4db9afce1c": "ポートは 1 ～ 65535 でなければなりません",
-          "0e5aa04161": "ホストまたは SSH 構成エイリアスが必要です",
-          "f1fc50dad2": "SSH ターゲットのロードに失敗しました",
-          "0cda732f43": "接続テストに失敗しました"
-        },
         "SshPassphraseDialog": {
           "d5a234456f": "キャンセル",
           "c3ce71aad6": "パスフレーズを入力",
@@ -5947,64 +5876,16 @@
           "106bd57f4a": "SSH パスワード"
         },
         "SshTargetCard": {
-          "ec6543cee9": "接続",
-          "0e53e9f8e8": "テスト",
-          "1810b51482": "接続中",
-          "4c86f30877": "切断",
-          "7f7b3d7ab4": "ターゲットの削除",
-          "3d21a22d0e": "ターゲットの削除",
-          "3d8af2949f": "ターゲットの編集",
-          "762a48c662": "リモートリレーをリセットする",
-          "97dea4e8cf": "リモートリレーのリセット",
-          "da16e108e6": "リモート terminals を終了する",
-          "c77f1abfe3": "リモート terminals の終了",
+          "0d4da494f9": "接続中…",
           "18968ede9e": "エラー",
-          "f0871e6bfb": "接続",
           "47e94bd6ba": "接続されています",
-          "a883f5a00f": "terminal タイムアウト: {{value0}}",
-          "8ce71262f4": "リセットまでの terminals"
-        },
-        "SshTargetDestructiveActions": {
-          "7e66942808": "これにより、この SSH ターゲット上のアクティブな terminal セッションが停止されます。再接続しても復元されません。",
-          "accf177a03": "リモート Terminals を終了しますか?",
-          "26be00392d": "これにより、この SSH ターゲットのリモート リレーが強制的に停止されます。このターゲットに対するアクティブなリモート terminals とポート転送が終了します。",
-          "570a7a0574": "リモートリレーをリセットしますか?",
-          "3bb0cf0ee4": "これによりターゲットが削除され、アクティブなリモート terminals がすべて終了します。",
-          "4808966c41": "SSH ターゲットの削除"
-        },
-        "SshTargetForm": {
-          "fea9cb402e": "キャンセル",
-          "1b19b00e93": "制限付きタイムアウトは 60 秒から 7 日間にする必要があります。",
-          "137e88ce8d": "Yiru がこのホストから切断された後も、リモートターミナルは実行を続けます。",
-          "b574994adc": "停止したい場合は「リモートターミナルを終了」または「リレーをリセット」を使用してください。",
-          "71fc546097": "リセットするまでターミナルを維持",
-          "92f80edbfd": "リモートターミナルの永続化",
-          "feae1d1e69": "オプション。 ProxyJump / ssh -J と同等。",
-          "11bcb4507a": "バスティオン.example.com",
-          "b2ab248ded": "ジャンプホスト",
-          "3b01ca44a0": "オプション。トンネリングに使用されます (Cloudflare Access、ProxyCommand など)。",
-          "f42d844544": "例えばCloudflared アクセス ssh --ホスト名 %h",
-          "c7d0e18ecb": "プロキシコマンド",
-          "cb91f6375c": "オプション。 SSH agent がデフォルトで使用されます。",
-          "d6a5f2ee5c": "~/.ssh/id_ed25519 (SSH agent の場合は空のままにします)",
-          "63c0c145c1": "アイデンティティファイル",
-          "c94cfa634c": "ポート",
-          "47e082bc17": "展開する",
-          "dc1dc52aaa": "ユーザー名",
-          "2ee9bcd2e8": "サーバー、deploy@server:2222、ssh://server",
-          "ce370ce674": "ホストまたはエイリアス *",
-          "b8dab0aa7b": "私のサーバー",
-          "298de87a88": "ラベル",
-          "9518545cb6": "ターゲットの追加",
-          "a62b4cb39a": "変更を保存",
-          "29af933cd5": "新規 SSH ターゲット",
-          "f2331ce599": "SSH ターゲットの編集",
-          "7c13f58c91": "リセットまで",
-          "55c56cf2c7": "切断後のタイムアウト（秒）",
-          "4a342f44c1": "詳細接続",
-          "e9609ddca6": "プロキシ、ジャンプホスト、接続の再利用",
-          "8c922dffba": "より速いセットアップのため SSH 接続を再利用",
-          "53e9aabfc0": "利用可能な場合は OpenSSH の多重化を使用します。独自の SSH 制限があるホストではオフにしてください。"
+          "8df62d1912": "接続済み",
+          "8f14a926e0": "リレーをデプロイ中…",
+          "a6d5b7a30b": "認証に失敗しました",
+          "d4986d71b0": "再接続中…",
+          "ec37738139": "再接続に失敗しました",
+          "f0871e6bfb": "接続",
+          "fc028bdfa9": "切断済み"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "ペイン分割線の太さ。",
@@ -7482,7 +7363,7 @@
               "f1575f1e09": "ウェブクライアント",
               "81444c4102": "ペアリングURL",
               "104f4d7dbd": "ペアリング",
-              "4575341c77": "ローカル デスクトップを選択するか、保存されたリモート Yiru サーバーを追加するか、ペアリング URL を生成します。"
+              "4575341c77": "Coworking で承認されたホストを管理し、クライアント用ペアリング URL の生成や高度な既定ランタイムの調整を行います。"
             }
           }
         },
@@ -7499,31 +7380,6 @@
             "0ecba9aa5f": "キーボード",
             "ebd7d81e1d": "ショートカットが重なった場合に、Yiru とフォーカスされた terminal のどちらが優先されるかを選択します。",
             "f052906167": "Terminal のショートカット"
-          }
-        },
-        "ssh": {
-          "search": {
-            "d41f296f64": "ピング",
-            "237b391f7c": "接続",
-            "8cb870b109": "テスト",
-            "7efd17e816": "ssh",
-            "96ca5d9a0b": "SSH ターゲットへの接続をテストします。",
-            "a3058f3605": "テスト接続",
-            "2cd40ba0d0": "ホスト",
-            "5220501141": "構成",
-            "3b12e064a4": "インポート",
-            "7f251a45a8": "~/.ssh/config からホストをインポートします。",
-            "41a3127094": "SSH 構成からインポート",
-            "f9493b80c0": "サーバ",
-            "8fb1cc87cc": "ホスト",
-            "09395490af": "ターゲット",
-            "00d1fda01a": "新規",
-            "f7b6383aec": "追加",
-            "62826efbe9": "新規リモート SSH ターゲットを追加します。",
-            "f5a691bb6c": "SSH ターゲットの追加",
-            "d4bcd497c7": "リモート",
-            "74c6d90d78": "リモート SSH ターゲットを管理します。",
-            "380a788da7": "SSH 接続"
           }
         },
         "terminal": {
@@ -8138,59 +7994,6 @@
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
           "devOnly": "Dev only"
         },
-        "EphemeralVmRecipeRow": {
-          "useInWorkspace": "ワークスペースでの使用"
-        },
-        "EphemeralVmRuntimesSection": {
-          "cleanupFailed": "クリーンアップに失敗しました",
-          "cleanupRunning": "クリーンアップ実行中",
-          "cleanupDisabled": "クリーンアップが無効になっています",
-          "running": "ランニング",
-          "failed": "失敗した",
-          "loadFailed": "一時的な VM ランタイムを読み込めませんでした。",
-          "cleanupFailedToast": "一時的な VM ランタイムをクリーンアップできませんでした。",
-          "markedCleaned": "一時的な VM ランタイムをクリーン済みとしてマークしました。",
-          "cleaned": "一時的な VM ランタイムをクリーンアップしました。",
-          "copiedCleanupCommand": "クリーンアップコマンドをコピーしました。",
-          "copiedCleanupPayload": "コピーされたクリーンアップ ペイロード。",
-          "copyCleanupFailed": "クリーンアップ コマンドをコピーできませんでした。",
-          "title": "一時的な VM ランタイム",
-          "description": "レシピで作成されたランタイムはワークスペースに所有されます。クラッシュ、作成の失敗、または手動リカバリの後に、古いエントリをクリーンアップします。",
-          "refresh": "一時的な VM ランタイムを更新する",
-          "loading": "一時的な VM ランタイムを確認しています…",
-          "empty": "一時的な VM ランタイムにはクリーンアップが必要ありません。",
-          "copyCleanup": "コピーコマンド",
-          "retry": "クリーンアップを再試行します",
-          "cleanup": "掃除"
-        },
-        "ephemeralVms": {
-          "search": {
-            "title": "ワークスペースごとの環境",
-            "description": "repo 所有のレシピが各ワークスペースに独自のオンデマンドの使い捨て環境を与える方法を学びましょう。"
-          }
-        },
-        "EphemeralVmsPane": {
-          "loadError": "レシピを読み込めませんでした。",
-          "copyError": "プロンプトをコピーできませんでした。",
-          "skillTitle": "ワークスペースごとの環境スキル",
-          "skillDescription": "repo が所有する環境レシピをセットアップ、構築、認証、および検証します。",
-          "whatTitle": "スキルが何をするのか、あなたと一緒に",
-          "whatScaffold": "Yiru サーバーまたは SSH 経由で接続されているプロバイダーのレシピとスクリプトを作成します。",
-          "whatBuild": "再利用可能な基本イメージを構築し、agent をサインインします。",
-          "whatValidate": "ワークスペースを作成できるようにそれを検証します。",
-          "promptHint": "どのワークスペースでも、agent に次のように尋ねます。",
-          "copy": "コピー",
-          "copied": "コピーされました",
-          "recipes": "レシピ",
-          "recipesHelp": "agent が yiru.yaml に追加したレシピがここに表示され、ワー​​クスペースを起動できるようになります。",
-          "refresh": "一時的な VM レシピを更新する",
-          "checking": "レシピを確認中...",
-          "none": "レシピはまだ見つかりません。"
-        },
-        "ephemeralVmsExperimentalSetting": {
-          "description": "repo が所有するオンデマンド環境のセットアップ コントロールとワークスペース実行ターゲットを示します。",
-          "toggleLabel": "ワークスペースごとの環境を切り替える"
-        },
         "SourceControlActionRepoOverrideNote": {
           "agent": "エージェント",
           "agentArgs": "CLI引数",
@@ -8295,6 +8098,28 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
+        },
+        "CoworkingSettingsPane": {
+          "loadFailed": "Could not load authorized remote host clients.",
+          "alreadyRevoked": "This authorization was already revoked.",
+          "revoked": "Authorization revoked and active connections disconnected.",
+          "revokeFailed": "Could not revoke this authorization.",
+          "title": "Authorized remote host clients",
+          "description": "Like authorized_keys, these devices retain access until revoked or expired.",
+          "refresh": "Refresh",
+          "loading": "Loading…",
+          "empty": "No remote host clients have been authorized through Coworking.",
+          "fullAccess": "Full access",
+          "readOnly": "Read only",
+          "revokedState": "Revoked",
+          "expiredState": "Expired",
+          "identity": "{{value0}} · node {{value1}}",
+          "dates": "Paired {{value0}} · Last used {{value1}} · Expires {{value2}}",
+          "never": "Never",
+          "noExpiry": "Never",
+          "revoking": "Revoking…",
+          "revoke": "Revoke",
+          "searchTitle": "Authorized remote host clients"
         },
         "SettingsSetupGuidePane": {
           "restartOnboardingError": "オンボーディングを再開できませんでした。",
@@ -11217,7 +11042,26 @@
                 "removeWorktree": "ワークツリーを削除する",
                 "trashWorktree": "ゴミ箱ワークツリー",
                 "addQuickCommand": "クイックコマンドを追加",
-                "newQuickCommand": "新規クイックコマンド"
+                "newQuickCommand": "新規クイックコマンド",
+                "publishWorktree": "publish worktree",
+                "unpublishWorktree": "unpublish worktree",
+                "makePublic": "make worktree public",
+                "makePrivate": "make worktree private",
+                "coworkingWorktree": "coworking worktree",
+                "coworkingSettings": "coworking settings",
+                "openCoworkingSettings": "open coworking settings",
+                "remoteHostAccess": "remote host access",
+                "authorizedDevices": "authorized devices"
+              },
+              "publishOrUnpublishWorktree": "Publish / Unpublish Worktree",
+              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through Coworking.",
+              "coworkingVisibilityFailed": "Could not update Coworking visibility.",
+              "openCoworkingSettings": "Open Coworking Settings",
+              "openCoworkingSettingsDescription": "Manage Coworking-authorized remote host access."
+            },
+            "action": {
+              "context": {
+                "coworkingUnavailable": "Coworking is unavailable here."
               }
             }
           },
@@ -12471,6 +12315,7 @@
       "schedule": "約 {{countdown}} 後に再開",
       "reveal": "表示する"
     },
-    "workspace": "ワークスペース"
+    "workspace": "ワークスペース",
+    "workspaceIndicator": "{{agent}} は {{time}} に自動的に再開します"
   }
 }

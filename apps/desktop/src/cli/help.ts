@@ -28,9 +28,6 @@ Environments:
   environment show          Show one saved remote Yiru runtime
   environment rm            Remove a saved remote Yiru runtime
 
-Environment Recipes:
-  vm recipe doctor          Validate a per-workspace environment recipe
-
 Automations:
   automations list          List scheduled Yiru automations
   automations show          Show one Yiru automation
@@ -206,7 +203,7 @@ Browser Automation:
 Common Commands:
   yiru open [directory] [--json]
   yiru .
-  yiru serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--project-root <path>] [--recipe-json] [--json]
+  yiru serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--json]
   yiru status [--json]
   yiru diagnostics memory [--json]
   yiru agent-context [--json]

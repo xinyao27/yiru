@@ -6,7 +6,6 @@ import {
   markCopilotFolderTrusted,
   markCursorWorkspaceTrusted
 } from './agent-trust-presets'
-import { markRemoteAgentWorkspaceTrusted } from './remote-agent-trust-presets'
 
 /**
  * Why: cursor-agent, GitHub Copilot CLI, and Codex gate first-launch in an
@@ -29,16 +28,14 @@ export function registerAgentTrustHandlers(): void {
         return
       }
       try {
+        // Why: a connectionId means the agent reads its trust artifacts from a
+        // remote user's home. Writing this machine's artifacts for a remote path
+        // would trust the wrong folder, so skip rather than mislabel.
         const connectionId = typeof args.connectionId === 'string' ? args.connectionId.trim() : ''
         if (connectionId) {
-          // Why: SSH-launched agents read trust artifacts from the remote
-          // user's home, not from this desktop process.
-          await markRemoteAgentWorkspaceTrusted({
-            preset: args.preset,
-            connectionId,
-            workspacePath: args.workspacePath
-          })
-        } else if (args.preset === 'cursor') {
+          return
+        }
+        if (args.preset === 'cursor') {
           markCursorWorkspaceTrusted(args.workspacePath)
         } else if (args.preset === 'copilot') {
           markCopilotFolderTrusted(args.workspacePath)

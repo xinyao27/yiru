@@ -1,4 +1,3 @@
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -18,6 +17,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   mergeHookInstallDetail,
   parseDevinHooksConfigText,
@@ -149,9 +149,12 @@ export class DevinHookService {
   }
 
   // Why: install Yiru's Devin hook settings on the remote box rather than the
-  // local machine. Caller passes the user's SFTP handle plus the resolved
+  // local machine. Caller passes the user's remote file operations plus the resolved
   // remote `$HOME`; POSIX-only by design (Windows-remote deferred).
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     // Why: remote-Windows is out of scope for v1 — we ship POSIX-shaped paths
     // and a `.sh` managed script body. The remote platform is gated by the
     // relay's capability RPC at a higher layer; we cannot detect it from
@@ -159,7 +162,7 @@ export class DevinHookService {
     const remoteConfigPath = getDevinRemoteConfigPath(remoteHome)
     const remoteScriptFileName = getDevinPosixManagedScriptFileName()
     const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.yiru/agent-hooks/${remoteScriptFileName}`
-    // Why: SFTP reads/writes fail far more often than local fs (network drops,
+    // Why: remote file reads/writes fail far more often than local fs (network drops,
     // EACCES on remote dirs, disk full, channel closed). Wrap the entire
     // install flow in try/catch so a transient I/O failure surfaces as a
     // structured `state: 'error'` result for the UI, not an unstructured
@@ -168,9 +171,10 @@ export class DevinHookService {
     // distinct so the user sees an actionable message.
     try {
       // Why: Devin config.json is JSONC (comments); stock
-      // JSON.parse rejects them. Read the raw text via SFTP and parse with
+      // JSON.parse rejects them. Read the raw text through remote file operations
+      // and parse with
       // jsonc-parser, mirroring the local readDevinHooksConfig path.
-      const body = await readTextFileRemote(sftp, remoteConfigPath)
+      const body = await readTextFileRemote(remoteFiles, remoteConfigPath)
       const config =
         body === null ? {} : parseDevinHooksConfigText(body, 'remote Devin config.json')
       if (!config) {
@@ -196,8 +200,8 @@ export class DevinHookService {
       // of broken settings.json.
       // Why: SSH remotes use POSIX `.sh` hook paths even when Yiru itself is
       // running on Windows; never derive remote script syntax from local OS.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, nextConfig)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, nextConfig)
 
       return {
         agent: 'devin',

@@ -234,7 +234,6 @@ export function resolveAiVaultSessionLaunchTarget(args: {
   )
   if (
     !canResumeAiVaultSessionOnTarget({
-      sessionFilePath: args.sessionFilePath,
       sessionExecutionHostId: args.sessionExecutionHostId,
       targetStatus,
       targetExecutionHostId
@@ -269,9 +268,9 @@ function resolveAiVaultSessionLaunchTargetOrNotify(
 function aiVaultResumeUnsupportedMessage(
   targetStatus: ReturnType<typeof getAiVaultResumeWorkspaceTargetStatus>
 ): string {
-  // Why: local and SSH targets can both be valid generally; this branch means
-  // the session's recorded host does not match the selected workspace.
-  if (targetStatus === 'ssh' || targetStatus === 'local' || targetStatus === 'runtime') {
+  // Why: local and runtime targets can both be valid generally; this branch
+  // means the session's recorded host does not match the selected workspace.
+  if (targetStatus === 'local' || targetStatus === 'runtime') {
     return translate(
       'auto.components.right.sidebar.AiVaultPanel.sessionHostMismatchUnsupported',
       'This session belongs to a different host. Open a workspace on the same host to resume it.'

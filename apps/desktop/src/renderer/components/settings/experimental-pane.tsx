@@ -9,7 +9,6 @@ import {
   MIN_AGENT_HIBERNATION_IDLE_MS,
   getEffectiveAgentHibernationIdleMs
 } from './agent/hibernation-planner'
-import { EphemeralVmsExperimentalSetting } from './ephemeral-vms-experimental-setting'
 import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './experimental-search'
 import { NumberField, SettingsSwitch } from './form-controls'
 import { HiddenExperimentalGroup } from './hidden-experimental-group'
@@ -197,8 +196,6 @@ export function ExperimentalPane({
           ) : null}
         </SearchableSetting>
       ) : null}
-
-      <EphemeralVmsExperimentalSetting settings={settings} updateSettings={updateSettings} />
 
       {hiddenExperimentalUnlocked ? <HiddenExperimentalGroup /> : null}
     </div>

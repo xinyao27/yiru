@@ -1,7 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -30,6 +29,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 // Why: Gemini CLI fires `BeforeAgent` when a turn starts and `AfterAgent` when
 // it completes. `AfterTool` marks the resumption of model work after a tool
@@ -208,15 +208,18 @@ export class GeminiHookService {
   }
 
   // Why: install Yiru's managed Gemini hooks on the remote box. Mirrors
-  // ClaudeHookService.installRemote — POSIX-only, uses the same SFTP-backed
+  // ClaudeHookService.installRemote — POSIX-only, uses the same remote-file
   // primitives, and lays down the same script body the local install
   // generates so a remote-side Gemini CLI behaves identically. See
   // docs/design/agent-status-over-ssh.md §8.
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const remoteConfigPath = `${remoteHome.replace(/\/$/, '')}/.gemini/settings.json`
     const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.yiru/agent-hooks/gemini-hook.sh`
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'gemini',
@@ -264,8 +267,8 @@ export class GeminiHookService {
       // settings.json pointing at a missing script. See ClaudeHookService.
       // Why: SSH remotes use POSIX `.sh` hook paths even when Yiru itself is
       // running on Windows; never derive remote script syntax from local OS.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, config)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
         agent: 'gemini',

@@ -13,10 +13,7 @@ import type { WorkspaceSessionState } from '~shared/types'
  * Field classification lives in FIELD_OWNERSHIP below and is checked for
  * exhaustiveness at compile time, mirroring SESSION_RELEVANT_FIELDS in
  * workspace-session.ts. The remote-workspace SSH projection
- * (src/shared/remote-workspace-session-projection.ts) enumerates the same
- * worktree/tab-scoped fields by worktree-path; the two surfaces are kept
- * deliberately aligned — when a new worktree-scoped field is added there it
- * must be classified here too.
+ * worktree/tab-scoped fields are classified here.
  */
 
 export type HostSessionSlices = Partial<Record<ExecutionHostId, WorkspaceSessionState>>

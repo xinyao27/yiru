@@ -27,8 +27,7 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
 
   constructor(
     private readonly runtime: CoworkingSessionRuntime,
-    private readonly pairedRuntime?: CoworkingExecutionHostSessionReader,
-    private readonly ssh?: CoworkingExecutionHostSessionReader
+    private readonly pairedRuntime?: CoworkingExecutionHostSessionReader
   ) {}
 
   registerPublicWorktree(request: CoworkingExecutionHostSessionReadRequest): void {
@@ -59,7 +58,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
     if (host.kind === 'runtime') {
       return await this.requirePairedRuntime().listMobileSessionTabs(request, signal)
     }
-    // Why: SSH PTYs are already represented by the owner runtime's session graph.
     const tabs = await this.runtime.listMobileSessionTabs(`id:${request.worktreeId}`)
     signal?.throwIfAborted()
     this.rememberLocalReadRequest(request)
@@ -74,13 +72,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
     const host = requireExecutionHost(request)
     if (host.kind === 'runtime') {
       return await this.requirePairedRuntime().listAiVaultSessionPage(request, cursor, signal)
-    }
-    if (host.kind === 'ssh') {
-      if (this.ssh) {
-        return await this.ssh.listAiVaultSessionPage(request, cursor, signal)
-      }
-      // Why: owner-local AI Vault data must never be projected as an SSH host's history.
-      throw new CoworkingExecutionError('resource_unavailable')
     }
     try {
       return await listLocalCoworkingSessionInventoryPage({
@@ -115,10 +106,6 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
       await this.requirePairedRuntime().releaseAiVaultSessionPage(request, cursor)
       return
     }
-    if (host.kind === 'ssh') {
-      await this.ssh?.releaseAiVaultSessionPage(request, cursor)
-      return
-    }
     releaseLocalCoworkingSessionInventoryPage({
       bindingKey: inventoryBindingKey(request),
       cursor,
@@ -140,11 +127,9 @@ export class YiruCoworkingExecutionHostSessionReader implements CoworkingExecuti
       listener(snapshot, this.resolveLocalReadRequest(snapshot))
     )
     const unsubscribeRuntime = this.pairedRuntime?.subscribe?.(listener) ?? (() => {})
-    const unsubscribeSsh = this.ssh?.subscribe?.(listener) ?? (() => {})
     return () => {
       unsubscribeLocal()
       unsubscribeRuntime()
-      unsubscribeSsh()
     }
   }
 

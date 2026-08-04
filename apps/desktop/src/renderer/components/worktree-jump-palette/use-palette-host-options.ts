@@ -7,26 +7,14 @@ import type { PaletteStoreState } from './use-palette-store-state'
 
 type PaletteHostOptionsInput = Pick<
   PaletteStoreState,
-  | 'repos'
-  | 'settings'
-  | 'sshTargetLabels'
-  | 'sshConnectionStates'
-  | 'runtimeEnvironments'
-  | 'runtimeStatusByEnvironmentId'
+  'repos' | 'settings' | 'runtimeEnvironments' | 'runtimeStatusByEnvironmentId'
 >
 
 // Why: the repo lookup map and the host-badge registry are shared by the
 // worktree pipeline, the row renderers, and the create-worktree flow — kept
 // in one small hook so none of those recompute them independently.
 export function usePaletteHostOptions(input: PaletteHostOptionsInput) {
-  const {
-    repos,
-    settings,
-    sshTargetLabels,
-    sshConnectionStates,
-    runtimeEnvironments,
-    runtimeStatusByEnvironmentId
-  } = input
+  const { repos, settings, runtimeEnvironments, runtimeStatusByEnvironmentId } = input
 
   const repoMap = useMemo(() => new Map(repos.map((r) => [r.id, r])), [repos])
   const repoByHostIdentity = useMemo(
@@ -40,22 +28,12 @@ export function usePaletteHostOptions(input: PaletteHostOptionsInput) {
     () =>
       buildSidebarHostOptions({
         repos,
-        sshTargetLabels,
-        sshConnectionStates,
         settings,
         runtimeEnvironments,
         runtimeStatusByEnvironmentId,
         hostLabelOverrides
       }),
-    [
-      repos,
-      sshTargetLabels,
-      sshConnectionStates,
-      settings,
-      runtimeEnvironments,
-      runtimeStatusByEnvironmentId,
-      hostLabelOverrides
-    ]
+    [repos, settings, runtimeEnvironments, runtimeStatusByEnvironmentId, hostLabelOverrides]
   )
   const canCreateWorktree = repos.length > 0
 

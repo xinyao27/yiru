@@ -1,4 +1,3 @@
-import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
 import {
@@ -903,14 +902,9 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
         // throws a raw IPC error. Replace with a friendly message since this
         // is an expected state, not an application crash.
         if (connectionId && msg.includes('No PTY provider for connection')) {
-          // Why: a runtime-owned (per-workspace-env) SSH target disappearing is an expected
-          // teardown state (e.g. the workspace was deleted) with no user-facing reconnect dialog —
-          // don't surface a "reconnect" toast for it.
-          if (!isRuntimeOwnedSshTargetId(connectionId)) {
-            storedCallbacks.onError?.(
-              'SSH connection is not active. Use the reconnect dialog or Settings to connect.'
-            )
-          }
+          storedCallbacks.onError?.(
+            'SSH connection is not active. Use the reconnect dialog or Settings to connect.'
+          )
         } else {
           storedCallbacks.onError?.(msg)
         }

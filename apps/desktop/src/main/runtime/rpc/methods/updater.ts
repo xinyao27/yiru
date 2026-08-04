@@ -16,18 +16,22 @@ import { defineMethod, type RpcMethod } from '../core'
 export const UPDATER_METHODS: RpcMethod[] = [
   defineMethod({
     contract: UPDATER_GET_STATUS_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: (_params, { runtime }) => getRemoteServerUpdaterSnapshot(runtime.getRuntimeId())
   }),
   defineMethod({
     contract: UPDATER_CHECK_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => checkRemoteServerUpdater(runtime.getRuntimeId(), params)
   }),
   defineMethod({
     contract: UPDATER_DOWNLOAD_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: (_params, { runtime }) => downloadRemoteServerUpdater(runtime.getRuntimeId())
   }),
   defineMethod({
     contract: UPDATER_INSTALL_CONTRACT,
+    access: { scope: 'host', tier: 'host' },
     handler: (_params, { runtime }) => installRemoteServerUpdater(runtime.getRuntimeId())
   })
 ]

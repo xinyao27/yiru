@@ -1,5 +1,5 @@
-import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { translate } from '~renderer/i18n/i18n'
+import type { SshConnectionStatus } from '~renderer/store/slices/ssh'
 import { isGitRepoKind } from '~shared/repo-kind'
 import type { Repo } from '~shared/types'
 

@@ -1,11 +1,17 @@
 import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
   CoworkingRequesterSubscriptionStopArgs,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -38,6 +44,10 @@ export type CoworkingSharingIpcController = {
   requestControl(args: CoworkingRequestControlArgs): Promise<void>
   decideControl(args: CoworkingDecideControlArgs): Promise<void>
   revokeControl(args: CoworkingRevokeControlArgs): Promise<void>
+  requestHostAccess(args: CoworkingRequestHostAccessArgs): Promise<CoworkingRequestHostAccessResult>
+  decideHostAccess(args: CoworkingDecideHostAccessArgs): Promise<void>
+  listHostDevices(): Promise<CoworkingListHostDevicesResult>
+  revokeHostDevice(args: CoworkingRevokeHostDeviceArgs): Promise<CoworkingRevokeHostDeviceResult>
   getWindowsFirewallStatus(): Promise<CoworkingWindowsFirewallStatus>
   repairWindowsFirewall(): Promise<CoworkingWindowsFirewallRepairResult>
   retryAvailability(): Promise<void>
@@ -76,6 +86,23 @@ export function registerCoworkingSharingHandlers(
   ipcMain.handle('coworkingSharing:revokeControl', (event, value: unknown) => {
     requireWindowRenderer(event)
     return controller.revokeControl({ grantId: readIdentifier(value, 'grantId') })
+  })
+  ipcMain.handle('coworkingSharing:requestHostAccess', (event, value: unknown) => {
+    requireWindowRenderer(event)
+    return controller.requestHostAccess({ desktopRef: readIdentifier(value, 'desktopRef') })
+  })
+  ipcMain.handle('coworkingSharing:decideHostAccess', (event, value: unknown) => {
+    requireWindowRenderer(event)
+    return controller.decideHostAccess(readHostAccessDecision(value))
+  })
+  ipcMain.handle('coworkingSharing:listHostDevices', (event, ...values: unknown[]) => {
+    requireWindowRenderer(event)
+    requireNoArguments(values)
+    return controller.listHostDevices()
+  })
+  ipcMain.handle('coworkingSharing:revokeHostDevice', (event, value: unknown) => {
+    requireWindowRenderer(event)
+    return controller.revokeHostDevice({ deviceId: readIdentifier(value, 'deviceId') })
   })
   ipcMain.handle('coworkingSharing:getWindowsFirewallStatus', (event, ...values: unknown[]) => {
     requireWindowRenderer(event)
@@ -142,6 +169,10 @@ const COWORKING_HANDLER_CHANNELS = [
   'coworkingSharing:requestControl',
   'coworkingSharing:decideControl',
   'coworkingSharing:revokeControl',
+  'coworkingSharing:requestHostAccess',
+  'coworkingSharing:decideHostAccess',
+  'coworkingSharing:listHostDevices',
+  'coworkingSharing:revokeHostDevice',
   'coworkingSharing:getWindowsFirewallStatus',
   'coworkingSharing:repairWindowsFirewall',
   'coworkingSharing:retryAvailability',
@@ -182,6 +213,24 @@ function readDecisionArgs(value: unknown): CoworkingDecideControlArgs {
     throw new Error('invalid_coworking_decision')
   }
   return { requestId: readIdentifier(value, 'requestId'), decision: record.decision }
+}
+
+function readHostAccessDecision(value: unknown): CoworkingDecideHostAccessArgs {
+  const record = asRecord(value)
+  const requestId = readIdentifier(value, 'requestId')
+  if (record.decision === 'deny') {
+    requireExactKeys(record, ['requestId', 'decision'])
+    return { requestId, decision: 'deny' }
+  }
+  if (record.decision !== 'allow' || (record.tier !== 'read' && record.tier !== 'host')) {
+    throw new Error('invalid_coworking_host_access_decision')
+  }
+  requireExactKeys(record, ['requestId', 'decision', 'name', 'tier'])
+  const name = readIdentifier(value, 'name').trim()
+  if (!name || name.length > 128) {
+    throw new Error('invalid_coworking_host_access_name')
+  }
+  return { requestId, decision: 'allow', name, tier: record.tier }
 }
 
 function readRequesterInvokeArgs(value: unknown): CoworkingRequesterInvokeArgs {

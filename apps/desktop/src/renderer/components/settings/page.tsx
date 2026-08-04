@@ -76,6 +76,7 @@ import {
   getFallbackTerminalFonts,
   mergeFontSuggestions
 } from './constants'
+import { CoworkingSettingsPane } from './coworking/pane'
 import { DeveloperPermissionsPane } from './developer-permissions-pane'
 import { ExperimentalPane } from './experimental-pane'
 import { FloatingWorkspacePane } from './floating-workspace-pane'
@@ -105,7 +106,6 @@ import { ActiveSettingsSectionProvider, SettingsSection } from './section'
 import { SettingsSetupGuidePane } from './setup-guide-pane'
 import { ShortcutsPane } from './shortcuts-pane'
 import { SettingsSidebar } from './sidebar'
-import { SshPane } from './ssh/pane'
 import { TerminalPane } from './terminal/pane'
 import { useGhosttyImport } from './use-ghostty-import'
 import { isWebClientLocation, useSettingsNavigationMetadata } from './use-navigation-metadata'
@@ -1581,6 +1581,23 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                   {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
                 </SettingsSection>
 
+                {showDesktopOnlySettings ? (
+                  <SettingsSection
+                    id="coworking"
+                    title={translate(
+                      'auto.components.settings.Settings.coworkingTitle',
+                      'Coworking'
+                    )}
+                    description={translate(
+                      'auto.components.settings.Settings.coworkingDescription',
+                      'Review and revoke persistent remote host authorizations.'
+                    )}
+                    searchEntries={getSectionSearchEntries('coworking')}
+                  >
+                    {isSectionMounted('coworking') ? <CoworkingSettingsPane /> : null}
+                  </SettingsSection>
+                ) : null}
+
                 <SettingsSection
                   id="servers"
                   title={translate(
@@ -1610,20 +1627,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                     />
                   ) : null}
                 </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="ssh"
-                    title={translate('auto.components.settings.Settings.9b02492d1f', 'SSH Hosts')}
-                    description={translate(
-                      'auto.components.settings.Settings.c2ee313198',
-                      'Use existing machines over SSH for files, terminals, Git, and workspaces.'
-                    )}
-                    searchEntries={getSectionSearchEntries('ssh')}
-                  >
-                    {isSectionMounted('ssh') ? <SshPane /> : null}
-                  </SettingsSection>
-                ) : null}
 
                 {showDesktopOnlySettings && isMac ? (
                   <SettingsSection

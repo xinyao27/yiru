@@ -1,3 +1,6 @@
+import type { CoworkingPublicationSuspensionReason } from '~shared/coworking/publication-suspension'
+
+export type { CoworkingPublicationSuspensionReason }
 import type { WorktreeMeta } from '~shared/types'
 
 import type {
@@ -7,11 +10,6 @@ import type {
 import type { CoworkingPublicationValidation } from './worktree-publication-validation'
 
 export type CoworkingVisibility = 'public' | 'private'
-
-export type CoworkingPublicationSuspensionReason =
-  | 'host-unavailable'
-  | 'incarnation-unavailable'
-  | 'overlapping-root'
 
 export type CoworkingVisibilityInvalidationReason =
   | 'deleted'

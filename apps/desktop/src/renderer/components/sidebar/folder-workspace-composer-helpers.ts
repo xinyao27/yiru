@@ -3,7 +3,6 @@ import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
-  toSshExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import {
@@ -33,9 +32,7 @@ function getProjectGroupExecutionHostId(projectGroup: ProjectGroup): ExecutionHo
   if (executionHostId) {
     return executionHostId
   }
-  return projectGroup.connectionId
-    ? toSshExecutionHostId(projectGroup.connectionId)
-    : LOCAL_EXECUTION_HOST_ID
+  return LOCAL_EXECUTION_HOST_ID
 }
 
 export function getFolderSourceRepos(

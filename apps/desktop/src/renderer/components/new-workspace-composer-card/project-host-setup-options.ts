@@ -4,13 +4,10 @@ import {
 } from '@yiru/runtime-protocol/capabilities'
 import {
   getExecutionHostLabel,
-  isRuntimeOwnedSshTargetId,
   LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type { ExecutionHostRegistryEntry } from '~shared/execution-host-registry'
-import { isEphemeralVmRuntimeEnvironment } from '~shared/runtime-environments'
 import type { ProjectHostSetup, Repo } from '~shared/types'
 
 export type ProjectHostSetupOption =
@@ -112,16 +109,12 @@ function buildReadySetupOptions({
   const eligibleRepoIds = new Set(eligibleRepos.map((repo) => repo.id))
   const hostById = new Map(hosts.map((host) => [host.id, host]))
   return projectHostSetups
-    .filter((setup) => {
-      const host = hostById.get(setup.hostId)
-      return (
+    .filter(
+      (setup) =>
         setup.projectId === projectId &&
         setup.setupState === 'ready' &&
-        eligibleRepoIds.has(setup.repoId) &&
-        !isEphemeralVmProjectHost(host) &&
-        !isRuntimeOwnedSshSetupHost(setup.hostId)
-      )
-    })
+        eligibleRepoIds.has(setup.repoId)
+    )
     .map((setup) => ({
       id: setup.id,
       kind: 'ready' as const,
@@ -141,12 +134,7 @@ function buildNeedsSetupOptions({
   pendingSetupByHost
 }: BuildNeedsSetupOptionsInput): NeedsSetupProjectHostOption[] {
   return hosts
-    .filter(
-      (host) =>
-        !readySetupByHost.has(host.id) &&
-        !isEphemeralVmProjectHost(host) &&
-        !isRuntimeOwnedSshSetupHost(host.id)
-    )
+    .filter((host) => !readySetupByHost.has(host.id))
     .map((host) => {
       const pendingSetup = pendingSetupByHost.get(host.id)
       const availability = getHostSetupAvailability(host)
@@ -164,18 +152,6 @@ function buildNeedsSetupOptions({
         isAvailable: availability.isAvailable
       }
     })
-}
-
-function isEphemeralVmProjectHost(host: ExecutionHostRegistryEntry | undefined): boolean {
-  return host?.kind === 'runtime' && isEphemeralVmRuntimeEnvironment(host)
-}
-
-// Why: a per-workspace-env SSH repo projects a setup with hostId `ssh:runtime-ssh-<id>`. The
-// execution-host registry filters runtime-owned targets, so its host is absent here — guard on the
-// hostId directly so the hidden target never becomes a selectable run-target option.
-function isRuntimeOwnedSshSetupHost(hostId: ExecutionHostId): boolean {
-  const parsed = parseExecutionHostId(hostId)
-  return parsed?.kind === 'ssh' && isRuntimeOwnedSshTargetId(parsed.targetId)
 }
 
 function getHostSetupAvailability(host: ExecutionHostRegistryEntry): {

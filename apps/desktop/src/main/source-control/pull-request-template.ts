@@ -3,9 +3,6 @@ import { join } from 'node:path'
 
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/relative-paths'
-
 const PULL_REQUEST_TEMPLATE_CANDIDATES = [
   '.github/pull_request_template.md',
   '.github/PULL_REQUEST_TEMPLATE.md',
@@ -33,33 +30,16 @@ function getTemplateCandidates(provider?: HostedReviewProvider | null): string[]
   return PULL_REQUEST_TEMPLATE_CANDIDATES
 }
 
-export async function readHostedPullRequestTemplate(
-  repoPath: string,
-  connectionId?: string | null
-): Promise<string> {
-  return readHostedReviewTemplate(repoPath, connectionId)
+export async function readHostedPullRequestTemplate(repoPath: string): Promise<string> {
+  return readHostedReviewTemplate(repoPath)
 }
 
 export async function readHostedReviewTemplate(
   repoPath: string,
-  connectionId?: string | null,
   provider?: HostedReviewProvider | null
 ): Promise<string> {
-  const remoteProvider = connectionId ? getSshFilesystemProvider(connectionId) : undefined
-  if (connectionId && !remoteProvider) {
-    return ''
-  }
   for (const relativeCandidate of getTemplateCandidates(provider)) {
     try {
-      if (remoteProvider) {
-        const result = await remoteProvider.readFile(
-          joinWorktreeRelativePath(repoPath, relativeCandidate)
-        )
-        if (result.isBinary) {
-          continue
-        }
-        return result.content
-      }
       return await readFile(join(repoPath, relativeCandidate), 'utf8')
     } catch {
       // Try the next conventional hosted-review template path.
@@ -71,7 +51,6 @@ export async function readHostedReviewTemplate(
 export async function resolveHostedReviewBodyForGeneration(args: {
   body: string
   repoPath: string
-  connectionId?: string | null
   provider?: HostedReviewProvider | null
   useTemplate?: boolean
 }): Promise<string> {
@@ -80,5 +59,5 @@ export async function resolveHostedReviewBodyForGeneration(args: {
   }
   // Why: generated non-empty bodies bypass provider-side template fallback, so
   // preload the template into the AI context when the user asked to use it.
-  return readHostedReviewTemplate(args.repoPath, args.connectionId, args.provider)
+  return readHostedReviewTemplate(args.repoPath, args.provider)
 }

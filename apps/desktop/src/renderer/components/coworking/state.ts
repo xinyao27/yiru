@@ -33,12 +33,15 @@ function createInitialCoworkingSharingState(): CoworkingSharingState {
   return {
     coworkingSharingStatus: 'starting',
     coworkingSharingDiagnostic: null,
+    coworkingSelfIdentity: null,
     coworkingRemoteDesktops: [],
     coworkingOwnerWorktrees: [],
     coworkingOwnerControlGrants: [],
+    coworkingOwnerActiveConnections: [],
     coworkingExpandedWorktreeRefsByDesktop: new Map(),
     activeCoworkingWorkspaceRoute: null,
     coworkingControlRequestQueue: [],
+    coworkingHostAccessRequestQueue: [],
     coworkingRequesterControlByWorktree: new Map()
   }
 }
@@ -111,10 +114,13 @@ export const createCoworkingSharingSlice: StateCreator<AppState, [], [], Coworki
       return {
         coworkingSharingStatus: snapshot.status,
         coworkingSharingDiagnostic: snapshot.diagnostic,
+        coworkingSelfIdentity: snapshot.self,
         coworkingRemoteDesktops,
         coworkingOwnerWorktrees: [...snapshot.ownerWorktrees],
         coworkingOwnerControlGrants: [...snapshot.ownerControlGrants],
+        coworkingOwnerActiveConnections: [...snapshot.ownerActiveConnections],
         coworkingControlRequestQueue: [...snapshot.ownerControlRequests],
+        coworkingHostAccessRequestQueue: [...snapshot.ownerHostAccessRequests],
         activeCoworkingWorkspaceRoute,
         // Why: requester control is a main-process projection bound to the
         // physical connection; replacing it wholesale prevents stale grants.

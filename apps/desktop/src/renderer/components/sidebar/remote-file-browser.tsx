@@ -53,7 +53,6 @@ type PreviewState = {
 }
 
 export function RemoteFileBrowser({
-  targetId,
   runtimeEnvironmentId,
   initialPath = '~',
   onSelect,
@@ -132,12 +131,10 @@ export function RemoteFileBrowser({
       if (cached) {
         return cached
       }
-      const result = targetId
-        ? await window.api.ssh.browseDir({ targetId, dirPath })
-        : await browseRuntimeServerDirectory(
-            requireRuntimeEnvironmentId(runtimeEnvironmentId),
-            dirPath
-          )
+      const result = await browseRuntimeServerDirectory(
+        requireRuntimeEnvironmentId(runtimeEnvironmentId),
+        dirPath
+      )
       listingCacheRef.current.set(result.resolvedPath, result)
       // Also cache under the requested dirPath when it differs from the
       // server-resolved canonical path (e.g. `~`, `~/foo`, or a relative
@@ -148,7 +145,7 @@ export function RemoteFileBrowser({
       }
       return result
     },
-    [runtimeEnvironmentId, targetId]
+    [runtimeEnvironmentId]
   )
 
   const loadDir = useCallback(

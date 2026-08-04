@@ -5,7 +5,6 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
@@ -29,6 +28,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 
 // Why: Copilot's user-level hook files can use VS Code-compatible PascalCase
 // names, which match the event vocabulary already normalized by Yiru's hook
@@ -286,13 +286,16 @@ export class CopilotHookService {
     return this.getStatus()
   }
 
-  async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
+  async installRemote(
+    remoteFiles: RemoteFileOperations,
+    remoteHome: string
+  ): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
     const remoteConfigPath = `${home}/.copilot/hooks/yiru.json`
     const remoteScriptPath = `${home}/.yiru/agent-hooks/copilot-hook.sh`
 
     try {
-      const config = await readHooksJsonRemote(sftp, remoteConfigPath)
+      const config = await readHooksJsonRemote(remoteFiles, remoteConfigPath)
       if (!config) {
         return {
           agent: 'copilot',
@@ -336,8 +339,8 @@ export class CopilotHookService {
       // Why: SSH remotes use POSIX scripts regardless of Yiru's local OS. Write
       // the script before hooks/yiru.json so a partial install cannot point
       // Copilot at a missing managed command.
-      await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
-      await writeHooksJsonRemote(sftp, remoteConfigPath, config)
+      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
         agent: 'copilot',

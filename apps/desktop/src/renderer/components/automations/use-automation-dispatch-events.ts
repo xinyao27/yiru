@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: automation dispatch is a single renderer lifecycle
- * coordinator spanning workspace creation, SSH readiness, terminal launch/reuse,
+ * coordinator spanning workspace creation, terminal launch/reuse,
  * completion bookkeeping, and focus restoration. */
 import { useEffect } from 'react'
 import {
@@ -83,43 +83,6 @@ export function useAutomationDispatchEvents(): void {
         }
 
         try {
-          if (repo.connectionId) {
-            const needsPrompt = await window.api.ssh.needsPassphrasePrompt({
-              targetId: repo.connectionId
-            })
-            if (needsPrompt) {
-              await markDispatchResult({
-                runId: run.id,
-                status: 'skipped_needs_interactive_auth',
-                workspaceId: dispatchWorkspaceId,
-                workspaceDisplayName: dispatchWorkspaceDisplayName,
-                error: translate(
-                  'auto.hooks.useAutomationDispatchEvents.16a21d6413',
-                  'SSH reconnect requires interactive credentials.'
-                )
-              })
-              return
-            }
-            const sshState = await window.api.ssh.getState({ targetId: repo.connectionId })
-            if (sshState?.status !== 'connected') {
-              try {
-                const connected = await window.api.ssh.connect({ targetId: repo.connectionId })
-                if (connected?.status !== 'connected') {
-                  throw new Error('SSH target is unavailable.')
-                }
-              } catch (error) {
-                await markDispatchResult({
-                  runId: run.id,
-                  status: 'skipped_unavailable',
-                  workspaceId: dispatchWorkspaceId,
-                  workspaceDisplayName: dispatchWorkspaceDisplayName,
-                  error: error instanceof Error ? error.message : String(error)
-                })
-                return
-              }
-            }
-          }
-
           if (
             automation.workspaceMode === 'existing' &&
             automationWorktree &&

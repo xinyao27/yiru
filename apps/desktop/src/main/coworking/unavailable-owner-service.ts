@@ -1,9 +1,15 @@
 import type {
+  CoworkingDecideHostAccessArgs,
   CoworkingDecideControlArgs,
+  CoworkingListHostDevicesResult,
+  CoworkingRequestHostAccessArgs,
+  CoworkingRequestHostAccessResult,
   CoworkingRequestControlArgs,
   CoworkingRequesterInvokeArgs,
   CoworkingRequesterSubscriptionArgs,
   CoworkingRevokeControlArgs,
+  CoworkingRevokeHostDeviceArgs,
+  CoworkingRevokeHostDeviceResult,
   CoworkingSetProjectVisibilityArgs,
   CoworkingSetWorktreeVisibilityArgs,
   CoworkingSharingSnapshot
@@ -13,21 +19,30 @@ import type {
   CoworkingWindowsFirewallStatus
 } from '~shared/coworking/windows-firewall-contract'
 
+import type { CoworkingHostDeviceRegistry } from './owner/service-options'
 import type { CoworkingSharingIpcSubscriptionSink } from './requester-subscriptions'
 import type { CoworkingSharingIpcController } from './sharing'
 
 const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   status: 'unavailable',
   diagnostic: 'coworking_unavailable',
+  self: null,
   remoteDesktops: [],
   ownerWorktrees: [],
   ownerControlRequests: [],
+  ownerHostAccessRequests: [],
   ownerControlGrants: [],
+  ownerActiveConnections: [],
   requesterControlStates: []
 }
 
-/** Keeps the renderer contract present when Coworking cannot safely compose. */
 export class CoworkingUnavailableOwnerService implements CoworkingSharingIpcController {
+  private readonly hostDevices?: CoworkingHostDeviceRegistry
+
+  constructor(hostDevices?: CoworkingHostDeviceRegistry) {
+    this.hostDevices = hostDevices
+  }
+
   snapshot(): CoworkingSharingSnapshot {
     return UNAVAILABLE_SNAPSHOT
   }
@@ -55,6 +70,28 @@ export class CoworkingUnavailableOwnerService implements CoworkingSharingIpcCont
 
   revokeControl(_args: CoworkingRevokeControlArgs): Promise<void> {
     return unavailable()
+  }
+
+  requestHostAccess(
+    _args: CoworkingRequestHostAccessArgs
+  ): Promise<CoworkingRequestHostAccessResult> {
+    return unavailable()
+  }
+
+  decideHostAccess(_args: CoworkingDecideHostAccessArgs): Promise<void> {
+    return unavailable()
+  }
+
+  listHostDevices(): Promise<CoworkingListHostDevicesResult> {
+    return this.hostDevices
+      ? Promise.resolve({ devices: this.hostDevices.listCoworkingHostDevices() })
+      : unavailable()
+  }
+
+  revokeHostDevice(args: CoworkingRevokeHostDeviceArgs): Promise<CoworkingRevokeHostDeviceResult> {
+    return this.hostDevices
+      ? Promise.resolve({ revoked: this.hostDevices.revokeCoworkingHostDevice(args.deviceId) })
+      : unavailable()
   }
 
   getWindowsFirewallStatus(): Promise<CoworkingWindowsFirewallStatus> {

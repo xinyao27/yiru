@@ -24,6 +24,9 @@ export const ORCHESTRATION_RESET_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'orchestration.reset',
     params: ResetParams,
+    // Why: `--all` calls db.resetAll(), truncating every run, task, message and
+    // gate across all projects on the host — not just the caller's run.
+    access: { scope: 'host', tier: 'host' },
     handler: (params, { runtime }) => {
       const db = runtime.getOrchestrationDb()
       if (params.all) {

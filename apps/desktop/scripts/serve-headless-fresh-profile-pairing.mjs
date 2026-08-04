@@ -22,12 +22,6 @@ if (hasForwardedServeFlag(parsed.serveArgs, 'no-pairing')) {
   console.error('serve-headless-fresh-profile-pairing: --no-pairing cannot print a pairing code.')
   process.exit(2)
 }
-if (hasForwardedServeFlag(parsed.serveArgs, 'recipe-json')) {
-  console.error(
-    'serve-headless-fresh-profile-pairing: --recipe-json detaches the server and cannot use an ephemeral profile safely.'
-  )
-  process.exit(2)
-}
 
 const serveArgs = withDefaultPairingAddress(parsed.serveArgs)
 

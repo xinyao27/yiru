@@ -101,14 +101,11 @@ function assertSuccess<T>(response: RpcSuccess | RpcFailure): T {
 
 export async function saveMobileClipboardImageAsTempFile(
   client: Pick<RpcClient, 'sendRequest'>,
-  imageData: string,
-  args?: { connectionId?: string | null }
+  imageData: string
 ): Promise<string> {
   const contentBase64 = normalizeMobileClipboardImageBase64(imageData)
-  const connectionId = args?.connectionId ?? null
   const startResponse = await client.sendRequest('clipboard.startImageUpload', {
-    expectedBase64Length: contentBase64.length,
-    connectionId
+    expectedBase64Length: contentBase64.length
   })
 
   if (!startResponse.ok) {
@@ -117,7 +114,7 @@ export async function saveMobileClipboardImageAsTempFile(
       contentBase64.length <= MOBILE_CLIPBOARD_IMAGE_SINGLE_FRAME_FALLBACK_BASE64_CHARS
     ) {
       return assertSuccess<string>(
-        await client.sendRequest('clipboard.saveImageAsTempFile', { contentBase64, connectionId })
+        await client.sendRequest('clipboard.saveImageAsTempFile', { contentBase64 })
       )
     }
     throw new Error(startResponse.error.message)

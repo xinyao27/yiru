@@ -168,7 +168,6 @@ function resolveSupportedResumeWorktreeId(args: {
   )
   if (
     !canResumeAiVaultSessionOnTarget({
-      sessionFilePath: args.sessionFilePath,
       sessionExecutionHostId: args.sessionExecutionHostId,
       targetStatus,
       targetExecutionHostId

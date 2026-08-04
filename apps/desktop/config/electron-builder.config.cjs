@@ -28,9 +28,10 @@ const skillFreshnessResources = {
   from: 'resources/skills',
   to: 'skills'
 }
-// Why: SSH relay deploy resolves bundles from process.resourcesPath in packaged
-// apps. Keeping relay assets as extraResources makes them real directories
-// instead of paths hidden inside app.asar.
+// Why: the WSL agent-hook installer resolves its relay bundle from
+// process.resourcesPath in packaged apps. Keeping relay assets as
+// extraResources makes them real directories instead of paths hidden inside
+// app.asar.
 const relayExtraResource = {
   from: 'out/relay',
   to: 'relay'
@@ -391,7 +392,7 @@ module.exports = {
   // builds (x64 + arm64). With npmRebuild disabled, CI on an arm64 runner
   // packages arm64 binaries into the x64 DMG, causing "posix_spawnp failed"
   // on Intel Macs. The beforeBuild hook performs Yiru's targeted rebuild and
-  // returns false so electron-builder does not rebuild optional cpu-features.
+  // returns false so electron-builder does not rebuild native modules again.
   npmRebuild: true,
   publish: {
     provider: 'github',

@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 
-import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
 import type { PersistedState, Repo, SparsePreset, WorkspaceKey } from '~shared/types'
@@ -27,7 +26,6 @@ export type TransferPayload = {
   workspaceLineageByChildKey: PersistedState['workspaceLineageByChildKey']
   workspaceSession?: PersistedState['workspaceSession']
   workspaceSessionsByHostId?: Partial<Record<ExecutionHostId, PersistedState['workspaceSession']>>
-  sshTargets: SshTarget[]
   targetProjectId: string | null
 }
 
@@ -249,9 +247,6 @@ export function createTransferPayload(args: {
           )
         }
       : {}),
-    sshTargets: sourceRepo.connectionId
-      ? sourceState.sshTargets.filter((target) => target.id === sourceRepo.connectionId)
-      : [],
     targetProjectId
   }
 }
@@ -272,8 +267,7 @@ export function applyPayloadToTarget(
     workspaceLineageByChildKey: {
       ...targetState.workspaceLineageByChildKey,
       ...payload.workspaceLineageByChildKey
-    },
-    sshTargets: mergeSshTargets(targetState.sshTargets, payload.sshTargets)
+    }
   }
   if (payload.workspaceSession) {
     next.workspaceSession = mergeWorkspaceSessions(
@@ -288,9 +282,4 @@ export function applyPayloadToTarget(
     )
   }
   return rebuildRepoBackedProjectState(next)
-}
-
-function mergeSshTargets(existing: SshTarget[], incoming: SshTarget[]): SshTarget[] {
-  const existingIds = new Set(existing.map((target) => target.id))
-  return [...existing, ...incoming.filter((target) => !existingIds.has(target.id))]
 }

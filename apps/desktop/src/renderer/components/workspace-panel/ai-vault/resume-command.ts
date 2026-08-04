@@ -173,7 +173,7 @@ export function getAiVaultResumePlatform(
 ): NodeJS.Platform {
   const targetWorktreeId = worktreeId ?? state.activeWorktreeId
   const executionHost = parseExecutionHostId(getExecutionHostIdForWorktree(state, targetWorktreeId))
-  if (executionHost?.kind === 'ssh' || executionHost?.kind === 'runtime') {
+  if (executionHost?.kind === 'runtime') {
     return 'linux'
   }
 

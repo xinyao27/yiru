@@ -7,6 +7,7 @@ import {
 
 import type { CoworkingAccessAuthority } from '../access-authority'
 import type { CoworkingExecutionGateway } from '../execution-gateway'
+import type { CoworkingHostAccessAuthority } from '../host-access-authority'
 import type { CoworkingSessionCatalog } from '../session/catalog'
 import type { CoworkingShareCatalog } from '../share-catalog'
 import type { CoworkingTerminalAttachmentRegistry } from '../terminal-attachment-registry'
@@ -27,6 +28,7 @@ import {
   type CoworkingRpcInvocationContext,
   type CoworkingRpcRegistry
 } from './gateway'
+import { createCoworkingHostAccessMethod } from './host-access-method'
 import { asCoworkingSessionInvocation } from './session-binding'
 import { createCoworkingSessionRpcMethods } from './session-methods'
 import { createCoworkingTerminalCreationRpcMethods } from './terminal-creation-methods'
@@ -97,6 +99,7 @@ export type CoworkingRpcRegistryDependencies = {
   catalog: CoworkingShareCatalog
   visibility: CoworkingWorktreeVisibility
   access: CoworkingAccessAuthority
+  hostAccess: CoworkingHostAccessAuthority
   execution: CoworkingExecutionGateway
   sessions: CoworkingSessionCatalog
   attachments: CoworkingTerminalAttachmentRegistry
@@ -107,6 +110,7 @@ export function createDefaultCoworkingRpcRegistry(
 ): CoworkingRpcRegistry {
   return createCoworkingRpcRegistry([
     ...createCoworkingCatalogRpcMethods(dependencies.catalog),
+    createCoworkingHostAccessMethod(dependencies.hostAccess),
     {
       name: 'control.request',
       schema: WorktreeParams,

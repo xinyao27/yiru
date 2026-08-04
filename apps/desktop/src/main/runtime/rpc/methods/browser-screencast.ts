@@ -12,6 +12,7 @@ export const BROWSER_SCREENCAST_METHODS: RpcAnyMethod[] = [
     name: 'browser.screencast',
     mobile: true,
     params: Screencast,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { browserCommands, connectionId, sendBinary, signal }, emit) =>
       browserCommands.browserScreencast(params, { connectionId, sendBinary, signal, emit })
   }),
@@ -19,6 +20,7 @@ export const BROWSER_SCREENCAST_METHODS: RpcAnyMethod[] = [
     name: 'browser.screencast.unsubscribe',
     mobile: true,
     params: ScreencastUnsubscribe,
+    access: { scope: 'host', tier: 'host' },
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)
       return { unsubscribed: true }

@@ -1,7 +1,6 @@
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 
-import { getEphemeralVmsSearchEntry } from './ephemeral-vms-search'
 import { getNativeChatExperimentalSearchEntry } from './native-chat-experimental-search-entry'
 import type { SettingsSearchEntry } from './search'
 import { translateSearchKeyword } from './search-keywords'
@@ -134,8 +133,7 @@ export const getExperimentalPaneSearchEntries = createLocalizedCatalog(
           'terminal'
         )
       ]
-    },
-    getEphemeralVmsSearchEntry()
+    }
   ]
 )
 
@@ -164,9 +162,6 @@ export function getExperimentalSearchEntry() {
         'auto.components.settings.experimental.search.agentHibernation.title',
         'Agent sleep'
       )
-    ),
-    ephemeralVms: findEntry(
-      translate('auto.components.settings.ephemeralVms.search.title', 'Per-Workspace Environments')
     )
   } as const
 }

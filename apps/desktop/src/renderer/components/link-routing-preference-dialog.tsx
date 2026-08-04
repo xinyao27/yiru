@@ -262,14 +262,22 @@ export function LinkRoutingPreferenceDialogProvider({
           </div>
 
           <DialogFooter className="border-border bg-muted/20 border-t px-6 py-4 sm:justify-between">
-            <Button variant="outline" onClick={() => settleActiveRequest(false)}>
+            <Button
+              autoFocus={!openLinksInAppDefault}
+              variant={openLinksInAppDefault ? 'outline' : undefined}
+              onClick={() => settleActiveRequest(false)}
+            >
               <ExternalLink className="size-4" />
               {translate(
                 'auto.components.link.routing.preference.dialog.system.button',
                 'Use system browser'
               )}
             </Button>
-            <Button autoFocus onClick={() => settleActiveRequest(true)}>
+            <Button
+              autoFocus={openLinksInAppDefault}
+              variant={openLinksInAppDefault ? undefined : 'outline'}
+              onClick={() => settleActiveRequest(true)}
+            >
               {openLinksInAppDefault
                 ? translate(
                     'auto.components.link.routing.preference.dialog.keep.yiru.button',

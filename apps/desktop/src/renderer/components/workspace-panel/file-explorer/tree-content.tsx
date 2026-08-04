@@ -139,7 +139,6 @@ function FileExplorerTreeContent({
                   deleteShortcutLabel={deletion.deleteShortcutLabel}
                   connectionId={owner.activeRepo?.connectionId ?? null}
                   runtimeDownloadContext={owner.runtimeDownloadContext}
-                  supportsFolderDownload={owner.supportsFolderDownload}
                   canCollapseFolderSubtree={!view.hasNameFilter}
                   targetDir={node.isDirectory ? node.path : rowParentDir}
                   targetDepth={node.isDirectory ? node.depth + 1 : node.depth}

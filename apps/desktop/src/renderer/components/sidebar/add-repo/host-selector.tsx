@@ -1,13 +1,6 @@
-import {
-  Check,
-  CaretRight as ChevronRight,
-  CaretUpDown as ChevronsUpDown,
-  Plus
-} from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import { useState } from 'react'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Command, CommandItem, CommandList } from '~renderer/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
@@ -16,7 +9,7 @@ import { cn } from '~renderer/lib/class-names'
 
 import type { SidebarHostOption } from '../host-options'
 import { getSidebarHostHealthLabel, shouldShowHostScopeControls } from '../host-options'
-import { canConnectAddRepoHost, canSelectAddRepoHost } from './host-availability'
+import { canSelectAddRepoHost } from './host-availability'
 
 type AddRepoHostSelectorProps = {
   hosts: SidebarHostOption[]
@@ -24,9 +17,6 @@ type AddRepoHostSelectorProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelectHost: (hostId: ExecutionHostId) => void
-  onConnectHost?: (hostId: ExecutionHostId) => void
-  onAddSshHost?: () => void
-  onAddRemoteServer?: () => void
 }
 
 function getHostStatusDetail(host: SidebarHostOption): string {
@@ -41,14 +31,9 @@ export function AddRepoHostSelector({
   selectedHostId,
   open,
   onOpenChange,
-  onSelectHost,
-  onConnectHost,
-  onAddSshHost,
-  onAddRemoteServer
+  onSelectHost
 }: AddRepoHostSelectorProps): React.JSX.Element | null {
-  const [addHostOpen, setAddHostOpen] = useState(false)
-  const showHostSetupActions = Boolean(onAddSshHost || onAddRemoteServer)
-  if (!shouldShowHostScopeControls(hosts) && !showHostSetupActions) {
+  if (!shouldShowHostScopeControls(hosts)) {
     return null
   }
 
@@ -90,102 +75,14 @@ export function AddRepoHostSelector({
         >
           <Command>
             <CommandList>
-              {showHostSetupActions ? (
-                <Popover open={addHostOpen} onOpenChange={setAddHostOpen}>
-                  <PopoverTrigger
-                    render={
-                      <CommandItem
-                        value="Add remote host SSH host Yiru server"
-                        onSelect={() => setAddHostOpen(true)}
-                        className="text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground items-start gap-2 px-3 py-2 text-xs"
-                      >
-                        <Plus className="mt-0.5 size-3 shrink-0" />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex min-w-0 items-center gap-2">
-                            <span className="truncate font-medium">
-                              {translate(
-                                'auto.components.sidebar.AddRepoHostSelector.addRemoteHost',
-                                'Add remote host'
-                              )}
-                            </span>
-                          </span>
-                          <span className="text-muted-foreground mt-0.5 block truncate text-[11px]">
-                            {translate(
-                              'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
-                              'SSH host or Yiru server'
-                            )}
-                          </span>
-                        </span>
-                        <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
-                      </CommandItem>
-                    }
-                  />
-                  <PopoverContent align="start" side="right" className="w-72 p-1" sideOffset={8}>
-                    {onAddSshHost ? (
-                      <Button
-                        variant="ghost"
-                        size="default"
-                        type="button"
-                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
-                        onClick={() => {
-                          setAddHostOpen(false)
-                          onOpenChange(false)
-                          onAddSshHost()
-                        }}
-                      >
-                        <span className="text-xs font-medium">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addSshHost',
-                            'Add SSH host'
-                          )}
-                        </span>
-                        <span className="text-muted-foreground mt-0.5 text-[11px]">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addSshHostDetail',
-                            'Use an existing machine over SSH.'
-                          )}
-                        </span>
-                      </Button>
-                    ) : null}
-                    {onAddRemoteServer ? (
-                      <Button
-                        variant="ghost"
-                        size="default"
-                        type="button"
-                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
-                        onClick={() => {
-                          setAddHostOpen(false)
-                          onOpenChange(false)
-                          onAddRemoteServer()
-                        }}
-                      >
-                        <span className="text-xs font-medium">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addRemoteServer',
-                            'Add remote server'
-                          )}
-                        </span>
-                        <span className="text-muted-foreground mt-0.5 text-[11px]">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
-                            'Pair with Yiru running on another computer.'
-                          )}
-                        </span>
-                      </Button>
-                    ) : null}
-                  </PopoverContent>
-                </Popover>
-              ) : null}
               {hosts.map((host) => {
                 const selected = host.id === selectedHostId
                 const disabled = !canSelectAddRepoHost(host)
-                const canConnect = canConnectAddRepoHost(host)
-                const isConnecting = host.health === 'connecting'
                 return (
                   <CommandItem
                     key={host.id}
                     value={`${host.label} ${host.detail}`}
-                    disabled={disabled && !canConnect}
+                    disabled={disabled}
                     aria-disabled={disabled}
                     onSelect={() => {
                       if (disabled) {
@@ -196,7 +93,7 @@ export function AddRepoHostSelector({
                     }}
                     className={cn(
                       'items-start gap-2 px-3 py-2 text-xs',
-                      disabled && !canConnect && 'cursor-not-allowed opacity-55'
+                      disabled && 'cursor-not-allowed opacity-55'
                     )}
                   >
                     <Check
@@ -213,31 +110,6 @@ export function AddRepoHostSelector({
                         <span className="min-w-0 flex-1 truncate">{getHostStatusDetail(host)}</span>
                       </span>
                     </span>
-                    {canConnect ? (
-                      <Button
-                        type="button"
-                        variant="link"
-                        size="xs"
-                        className="text-muted-foreground hover:text-foreground ml-2 h-auto w-[5.75rem] shrink-0 justify-end gap-1 self-center px-0 py-0 text-[11px] font-normal hover:no-underline"
-                        disabled={isConnecting}
-                        onClick={(event) => {
-                          event.preventDefault()
-                          event.stopPropagation()
-                          onConnectHost?.(host.id)
-                        }}
-                      >
-                        {isConnecting ? <LoadingIndicator className="size-3" /> : null}
-                        {isConnecting
-                          ? translate(
-                              'auto.components.sidebar.AddRepoHostSelector.connecting',
-                              'Connecting'
-                            )
-                          : translate(
-                              'auto.components.sidebar.AddRepoHostSelector.connect',
-                              'Connect'
-                            )}
-                      </Button>
-                    ) : null}
                   </CommandItem>
                 )
               })}

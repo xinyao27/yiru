@@ -34,6 +34,9 @@ export class CoworkingAccessAuthority {
     (requests: readonly CoworkingControlRequest[]) => void
   >()
   private readonly grantListeners = new Set<(grants: readonly CoworkingControlGrant[]) => void>()
+  private readonly connectionListeners = new Set<
+    (connections: readonly AuthenticatedCoworkingPrincipal[]) => void
+  >()
   private readonly ownerRuntimeId: string
   private readonly isPublic: (instanceId: string, shareEpoch: string) => boolean
   private readonly now: () => number
@@ -48,6 +51,7 @@ export class CoworkingAccessAuthority {
 
   connectionOpened(principal: AuthenticatedCoworkingPrincipal): void {
     this.connections.set(principal.connectionId, principal)
+    this.emitConnections()
   }
 
   getConnectionPrincipal(connectionId: string): AuthenticatedCoworkingPrincipal | null {
@@ -169,7 +173,7 @@ export class CoworkingAccessAuthority {
   }
 
   connectionClosed(connectionId: string): void {
-    this.connections.delete(connectionId)
+    const connectionsChanged = this.connections.delete(connectionId)
     const requestsChanged = deleteMatching(
       this.requests,
       (value) => value.connectionId === connectionId
@@ -182,6 +186,9 @@ export class CoworkingAccessAuthority {
       if (key.startsWith(`${connectionId}\0`)) {
         this.deniedUntil.delete(key)
       }
+    }
+    if (connectionsChanged) {
+      this.emitConnections()
     }
     if (requestsChanged) {
       this.emitRequests()
@@ -219,6 +226,16 @@ export class CoworkingAccessAuthority {
     return () => this.grantListeners.delete(listener)
   }
 
+  // Why: a peer reading a published worktree holds no request and no grant, so
+  // without this the owner has no signal that anyone is connected at all.
+  subscribeConnections(
+    listener: (connections: readonly AuthenticatedCoworkingPrincipal[]) => void
+  ): () => void {
+    this.connectionListeners.add(listener)
+    listener(this.connectionSnapshot())
+    return () => this.connectionListeners.delete(listener)
+  }
+
   private findRequest(
     connectionId: string,
     instanceId: string,
@@ -243,6 +260,13 @@ export class CoworkingAccessAuthority {
     return [...this.grants.values()].map((grant) => ({ ...grant }))
   }
 
+  private connectionSnapshot(): readonly AuthenticatedCoworkingPrincipal[] {
+    return [...this.connections.values()].map((principal) => ({
+      ...principal,
+      tailnet: { ...principal.tailnet }
+    }))
+  }
+
   private emitRequests(): void {
     const snapshot = this.requestSnapshot()
     for (const listener of this.requestListeners) {
@@ -253,6 +277,13 @@ export class CoworkingAccessAuthority {
   private emitGrants(): void {
     const snapshot = this.grantSnapshot()
     for (const listener of this.grantListeners) {
+      listener(snapshot)
+    }
+  }
+
+  private emitConnections(): void {
+    const snapshot = this.connectionSnapshot()
+    for (const listener of this.connectionListeners) {
       listener(snapshot)
     }
   }
