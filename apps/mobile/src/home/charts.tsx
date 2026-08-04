@@ -1,10 +1,9 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import Svg, { Defs, LinearGradient, Line, Path, Stop } from 'react-native-svg'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileGlassGroup } from '../components/glass/group'
 import { translate } from '../i18n/translate'
 import { resolveCssString } from '../style/resolve-css-variable'
 import {
@@ -15,7 +14,6 @@ import {
   nextTokenValueMetric,
   type TokenValueMetric
 } from './chart-data'
-import { HomeGlassChartPressable } from './glass-chart-pressable'
 
 const CHART_WIDTH = 320
 const CHART_HEIGHT = 132
@@ -38,14 +36,14 @@ export function ContributionCharts({
   const nextMetric = nextTokenValueMetric(metric)
 
   return (
-    <MobileGlassGroup className="mb-4 gap-3" spacing={12}>
-      <HomeGlassChartPressable
+    <View className="mb-4 gap-2">
+      <Pressable
         accessibilityLabel={chartActivationLabel(
           translate('mobile.home.trend.title', '30-day momentum'),
           nextMetric
         )}
-        className="rounded-2xl"
-        contentClassName="p-4"
+        accessibilityRole="button"
+        className="active:bg-accent rounded-2xl p-4"
         onPress={() => onMetricChange(nextMetric)}
       >
         <Text className="text-foreground text-sm font-semibold">
@@ -60,15 +58,15 @@ export function ContributionCharts({
         <View className="mt-4">
           <AreaPlot points={trend.map((point) => point.value)} />
         </View>
-      </HomeGlassChartPressable>
+      </Pressable>
 
-      <HomeGlassChartPressable
+      <Pressable
         accessibilityLabel={chartActivationLabel(
           translate('mobile.home.rhythm.title', 'Weekly rhythm'),
           nextMetric
         )}
-        className="rounded-2xl"
-        contentClassName="p-4"
+        accessibilityRole="button"
+        className="active:bg-accent rounded-2xl p-4"
         onPress={() => onMetricChange(nextMetric)}
       >
         <Text className="text-foreground text-sm font-semibold">
@@ -99,8 +97,8 @@ export function ContributionCharts({
             </View>
           ))}
         </View>
-      </HomeGlassChartPressable>
-    </MobileGlassGroup>
+      </Pressable>
+    </View>
   )
 }
 

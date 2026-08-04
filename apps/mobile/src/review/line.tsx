@@ -1,12 +1,13 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Pressable, Text, View } from 'react-native'
 
 import { MobileSyntaxSegments } from '~/components/syntax-segments'
 import { Chat as MessageSquare } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import type { MobileDiffLine } from '~/session/diff/lines'
 import type { MobileHighlightedDiffLine } from '~/session/file-syntax'
 import { mobileDiffLineNumber, mobileDiffLinePrefix } from '~/source-control/diff-format'
-import { cn } from '~/style/class-names'
 
 type Props = {
   line: MobileHighlightedDiffLine<MobileDiffLine>
@@ -19,8 +20,18 @@ type Props = {
 
 function accessibilityLabelForLine(line: MobileDiffLine): string {
   const number = mobileDiffLineNumber(line)
-  const label = line.kind === 'add' ? 'Added' : line.kind === 'delete' ? 'Deleted' : 'Context'
-  return number ? `${label} line ${number}` : `${label} line`
+  const label =
+    line.kind === 'add'
+      ? translate('mobile.review.line.added', 'Added')
+      : line.kind === 'delete'
+        ? translate('mobile.review.line.deleted', 'Deleted')
+        : translate('mobile.review.line.context', 'Context')
+  return number
+    ? translate('mobile.review.line.numberAccessibility', '{{kind}} line {{number}}', {
+        kind: label,
+        number
+      })
+    : translate('mobile.review.line.accessibility', '{{kind}} line', { kind: label })
 }
 
 function canCommentOnLine(line: MobileDiffLine): boolean {
@@ -34,7 +45,7 @@ export function MobileDiffReviewLine({
   active,
   onAddNote,
   onEditNote
-}: Props) {
+}: Props): React.JSX.Element {
   const lineNumber = mobileDiffLineNumber(line)
   const canComment = canCommentOnLine(line)
 
@@ -56,7 +67,10 @@ export function MobileDiffReviewLine({
         {lineNumber ? String(lineNumber) : ''}
       </Text>
       <Pressable
-        className={cn('flex-1 min-w-0 px-2', canComment && 'active:bg-accent')}
+        className={cn(
+          'min-h-11 min-w-0 flex-1 justify-center px-2',
+          canComment && 'active:bg-accent'
+        )}
         disabled={!canComment}
         onPress={() => {
           if (canComment && line.newLineNumber !== undefined) {
@@ -66,7 +80,9 @@ export function MobileDiffReviewLine({
         accessibilityRole={canComment ? 'button' : 'text'}
         accessibilityLabel={
           canComment && line.newLineNumber !== undefined
-            ? `Add note on line ${line.newLineNumber}`
+            ? translate('mobile.review.line.addNoteAccessibility', 'Add note on line {{number}}', {
+                number: line.newLineNumber
+              })
             : accessibilityLabelForLine(line)
         }
       >
@@ -75,14 +91,18 @@ export function MobileDiffReviewLine({
         </Text>
       </Pressable>
       {comments.length > 0 ? (
-        <View className="w-10 items-center justify-center gap-1">
+        <View className="w-11 items-center justify-center gap-1">
           {comments.map((comment) => (
             <Pressable
               key={comment.id}
-              className="active:bg-accent min-h-7 min-w-8 items-center justify-center"
+              className="active:bg-accent min-h-11 min-w-11 items-center justify-center"
               onPress={() => onEditNote(comment)}
               accessibilityRole="button"
-              accessibilityLabel={`Edit note on line ${comment.lineNumber}`}
+              accessibilityLabel={translate(
+                'mobile.review.line.editNoteAccessibility',
+                'Edit note on line {{number}}',
+                { number: comment.lineNumber }
+              )}
             >
               <MessageSquare
                 size={13}

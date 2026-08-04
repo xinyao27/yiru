@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { useMemo, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
@@ -7,7 +8,7 @@ import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { Check, Question as CircleHelp } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import { formatQuestionAnswer, type MobileChatQuestion } from './question'
 
@@ -129,11 +130,20 @@ export function MobileNativeChatQuestion({
 
       {question.multiSelect && hasOptions ? (
         <MobileGlassTextButton
-          accessibilityLabel="Submit selected options"
+          accessibilityLabel={translate(
+            'mobile.session.chat.question.submitSelectedAccessibility',
+            'Submit selected options'
+          )}
           disabled={!canSubmitMulti}
           isFullWidth
           isProminent
-          label={`Submit${selected.length > 0 ? ` (${selected.length})` : ''}`}
+          label={
+            selected.length > 0
+              ? translate('mobile.session.chat.question.submitCount', 'Submit ({{count}})', {
+                  count: selected.length
+                })
+              : translate('mobile.session.chat.question.submit', 'Submit')
+          }
           onPress={() => void submitMulti()}
           size="large"
         />
@@ -141,14 +151,21 @@ export function MobileNativeChatQuestion({
 
       <MobileGlassGroup className="flex-row items-end gap-2" spacing={8}>
         <MobileGlassSurface
-          className="max-h-30 min-h-10 flex-1 overflow-hidden rounded-xl"
+          className="max-h-30 min-h-11 flex-1 overflow-hidden rounded-xl"
           isInteractive
         >
           <TextInput
-            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            className="text-foreground min-h-11 px-3 py-2 text-sm"
             value={freeText}
             onChangeText={setFreeText}
-            placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}
+            placeholder={
+              hasOptions
+                ? translate(
+                    'mobile.session.chat.question.otherReplyPlaceholder',
+                    'Or type a reply…'
+                  )
+                : translate('mobile.session.chat.question.replyPlaceholder', 'Type your reply…')
+            }
             placeholderTextColorClassName="accent-muted-foreground"
             selectionColorClassName="accent-primary"
             onSubmitEditing={submitFreeText}
@@ -157,7 +174,7 @@ export function MobileNativeChatQuestion({
           />
         </MobileGlassSurface>
         <MobileGlassIconButton
-          accessibilityLabel="Send reply"
+          accessibilityLabel={translate('mobile.session.chat.question.sendReply', 'Send reply')}
           disabled={!canSendFreeText}
           icon="send"
           onPress={() => void submitFreeText()}

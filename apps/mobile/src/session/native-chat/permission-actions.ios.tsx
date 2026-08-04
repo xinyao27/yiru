@@ -1,18 +1,18 @@
-import { Button, Host, HStack } from '@expo/ui/swift-ui'
+import { Button, GlassEffectContainer, Host, HStack } from '@expo/ui/swift-ui'
 import {
   buttonBorderShape,
   controlSize,
   disabled as disabledModifier,
+  frame,
+  tint,
   type ViewModifier
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
-import { useUniwind } from 'uniwind'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
 import { useMobileGlassAvailable } from '~/components/glass/availability'
-import {
-  MobileSwiftUiGlassGroup,
-  mobileSwiftUiGlassButtonStyle
-} from '~/components/glass/swift-ui.ios'
+import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
+import { resolveCssString } from '~/style/resolve-css-variable'
 
 import type { MobileChatPermission } from './permission'
 
@@ -29,20 +29,24 @@ export function MobileNativeChatPermissionActions({
 }: MobileNativeChatPermissionActionsProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
   const { theme } = useUniwind()
+  const primaryColor = resolveCssString(useCSSVariable('--color-primary'))
   const primaryModifiers = useMemo<ViewModifier[]>(
     () => [
       controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable, true),
       buttonBorderShape('capsule'),
+      frame({ minWidth: 44, minHeight: 44, alignment: 'center' }),
+      tint(primaryColor),
       disabledModifier(disabled)
     ],
-    [disabled, isGlassAvailable]
+    [disabled, isGlassAvailable, primaryColor]
   )
   const secondaryModifiers = useMemo<ViewModifier[]>(
     () => [
       controlSize('regular'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable),
       buttonBorderShape('capsule'),
+      frame({ minWidth: 44, minHeight: 44, alignment: 'center' }),
       disabledModifier(disabled)
     ],
     [disabled, isGlassAvailable]
@@ -50,7 +54,7 @@ export function MobileNativeChatPermissionActions({
 
   return (
     <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
-      <MobileSwiftUiGlassGroup spacing={8}>
+      <GlassEffectContainer spacing={8}>
         <HStack spacing={8}>
           {options.map((option, index) => (
             <Button
@@ -61,7 +65,7 @@ export function MobileNativeChatPermissionActions({
             />
           ))}
         </HStack>
-      </MobileSwiftUiGlassGroup>
+      </GlassEffectContainer>
     </Host>
   )
 }

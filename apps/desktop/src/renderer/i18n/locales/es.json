@@ -8120,6 +8120,12 @@
           "revoking": "Revoking…",
           "revoke": "Revoke",
           "searchTitle": "Authorized remote host clients"
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "No se pudo reiniciar la introducción.",
+          "restartOnboardingTitle": "Volver a ejecutar la introducción",
+          "restartOnboardingDescription": "Restablece el asistente de introducción y vuelve a abrirlo desde el primer paso. El progreso de tu lista de verificación se conserva.",
+          "restartOnboardingButton": "Reiniciar introducción"
         }
       },
       "right": {

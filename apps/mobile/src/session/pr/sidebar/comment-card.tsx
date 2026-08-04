@@ -1,4 +1,5 @@
 import type { GitHubReaction, GitHubReactionContent, PRComment } from '@yiru/workbench-model/review'
+import { cn } from 'cnfast'
 import { memo, useState } from 'react'
 import { Image, Linking, Text, View } from 'react-native'
 
@@ -7,7 +8,6 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { isResolvableComment } from '~/session/pr/comment-actions'
-import { cn } from '~/style/class-names'
 
 import { PRCommentComposer } from './comment-composer'
 import { CommentMarkdown } from './comment-markdown'

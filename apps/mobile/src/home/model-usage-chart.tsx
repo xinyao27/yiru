@@ -1,6 +1,6 @@
 import type { RuntimeStatsModelUsage } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { useMemo } from 'react'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
 import { useCSSVariable } from 'uniwind'
 
@@ -8,7 +8,6 @@ import { MobileContentSection } from '../components/content-section'
 import { translate } from '../i18n/translate'
 import { resolveCssString } from '../style/resolve-css-variable'
 import { formatMetricValue, nextTokenValueMetric, type TokenValueMetric } from './chart-data'
-import { HomeGlassChartPressable } from './glass-chart-pressable'
 
 const VISIBLE_MODEL_COUNT = 4
 const DONUT_SIZE = 168
@@ -60,10 +59,10 @@ export function ModelUsageChart({
 
       {data.length > 0 ? (
         <>
-          <HomeGlassChartPressable
+          <Pressable
             accessibilityLabel={activationLabel(nextMetric)}
-            className="mt-3 rounded-2xl"
-            contentClassName="items-center"
+            accessibilityRole="button"
+            className="active:bg-accent mt-3 items-center rounded-2xl"
             onPress={() => onMetricChange(nextMetric)}
           >
             <View className="items-center justify-center">
@@ -108,7 +107,7 @@ export function ModelUsageChart({
                 </Text>
               </View>
             </View>
-          </HomeGlassChartPressable>
+          </Pressable>
 
           <View className="border-border mt-2 border-t pt-2">
             {data.map((point, index) => (
@@ -131,10 +130,10 @@ export function ModelUsageChart({
           </View>
         </>
       ) : (
-        <HomeGlassChartPressable
+        <Pressable
           accessibilityLabel={activationLabel(nextMetric)}
-          className="mt-4 rounded-2xl"
-          contentClassName="px-4 py-8"
+          accessibilityRole="button"
+          className="active:bg-accent mt-4 rounded-2xl px-4 py-8"
           onPress={() => onMetricChange(nextMetric)}
         >
           <Text className="text-muted-foreground text-center text-xs">
@@ -148,7 +147,7 @@ export function ModelUsageChart({
                   'No known model pricing is available for comparison yet.'
                 )}
           </Text>
-        </HomeGlassChartPressable>
+        </Pressable>
       )}
     </MobileContentSection>
   )

@@ -19,7 +19,7 @@
   "funding": "https://github.com/sponsors/xinyao27",
   "type": "module",
   "scripts": {
-    "dev": "vp run build && vp run --parallel --filter './apps/*' dev",
+    "dev": "vp run build && node scripts/start-development.mjs",
     "dev:desktop": "vp run yiru#dev",
     "dev:landing": "vp run yiru-landing#dev",
     "dev:mobile": "vp run yiru-mobile#dev",

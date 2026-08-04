@@ -1,10 +1,12 @@
 import type { GitHubPRMergeMethod, PRInfo } from '@yiru/workbench-model/review'
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Switch, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
 import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
+import { translate } from '~/i18n/translate'
 import type { MobilePrActions } from '~/session/pr/use-actions'
 import { unlinkMobilePr } from '~/source-control/pr-link'
 import type { RpcClient } from '~/transport/rpc-client'
@@ -27,7 +29,13 @@ type Confirm =
 
 // Merge primary; Close/Reopen + Unlink share one secondary row. No section title —
 // button labels are self-explanatory and a header wasted a full row on mobile.
-export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }: Props) {
+export function PRActionsSection({
+  pr,
+  actions,
+  client,
+  worktreeId,
+  onUnlinked
+}: Props): React.JSX.Element {
   const [confirm, setConfirm] = useState<Confirm | null>(null)
   const [unlinking, setUnlinking] = useState(false)
   // Local unlink errors — unlink is not routed through the actions engine.
@@ -51,6 +59,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
     })
   const showSecondary = avail.canClose || avail.canReopen || avail.canUnlink
   const actionError = unlinkError ?? actions.error
+  const autoMergeLabel = translate('mobile.pullRequest.autoMerge.label', 'Auto-merge when ready')
 
   const unlink = useCallback(async (): Promise<void> => {
     if (!client || unlinking) {
@@ -66,7 +75,11 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
         setUnlinkError(outcome.error)
       }
     } catch (err) {
-      setUnlinkError(err instanceof Error ? err.message : 'Failed to unlink pull request.')
+      setUnlinkError(
+        err instanceof Error
+          ? err.message
+          : translate('mobile.pullRequest.actions.unlink.error', 'Failed to unlink pull request.')
+      )
     } finally {
       setUnlinking(false)
     }
@@ -75,22 +88,34 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
   const confirmCopy = (): { title: string; message: string; confirmLabel: string } => {
     if (confirm?.kind === 'merge') {
       return {
-        title: 'Merge pull request?',
-        message: `This will merge #${pr.number} into its base branch.`,
-        confirmLabel: 'Merge'
+        title: translate('mobile.pullRequest.actions.merge.confirmTitle', 'Merge pull request?'),
+        message: translate(
+          'mobile.pullRequest.actions.merge.confirmMessage',
+          'This will merge #{{number}} into its base branch.',
+          { number: pr.number }
+        ),
+        confirmLabel: translate('mobile.pullRequest.actions.merge.confirmLabel', 'Merge')
       }
     }
     if (confirm?.kind === 'state' && confirm.state === 'closed') {
       return {
-        title: 'Close pull request?',
-        message: `#${pr.number} will be closed without merging.`,
-        confirmLabel: 'Close'
+        title: translate('mobile.pullRequest.actions.close.confirmTitle', 'Close pull request?'),
+        message: translate(
+          'mobile.pullRequest.actions.close.confirmMessage',
+          '#{{number}} will be closed without merging.',
+          { number: pr.number }
+        ),
+        confirmLabel: translate('mobile.pullRequest.actions.close.confirmLabel', 'Close')
       }
     }
     return {
-      title: 'Reopen pull request?',
-      message: `#${pr.number} will be reopened.`,
-      confirmLabel: 'Reopen'
+      title: translate('mobile.pullRequest.actions.reopen.confirmTitle', 'Reopen pull request?'),
+      message: translate(
+        'mobile.pullRequest.actions.reopen.confirmMessage',
+        '#{{number}} will be reopened.',
+        { number: pr.number }
+      ),
+      confirmLabel: translate('mobile.pullRequest.actions.reopen.confirmLabel', 'Reopen')
     }
   }
 
@@ -98,12 +123,14 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
     if (!confirm) {
       return
     }
+    const pending = confirm
+    setConfirm(null)
     // Engine errors take over the shared error line after this; drop unlink text.
     setUnlinkError(null)
-    if (confirm.kind === 'merge') {
-      actions.merge(confirm.method)
+    if (pending.kind === 'merge') {
+      actions.merge(pending.method)
     } else {
-      actions.updateState(confirm.state)
+      actions.updateState(pending.state)
     }
   }
 
@@ -120,35 +147,35 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
           <MobileGlassTextButton
             isFullWidth
             isProminent
-            label="Merge pull request"
+            label={translate('mobile.pullRequest.actions.merge.label', 'Merge pull request')}
             onPress={() => {
               setUnlinkError(null)
               setConfirm({ kind: 'merge', method: effectiveMethod })
             }}
-            accessibilityLabel="Merge pull request"
+            accessibilityLabel={translate(
+              'mobile.pullRequest.actions.merge.accessibilityLabel',
+              'Merge pull request'
+            )}
             size="large"
           />
         )
       ) : null}
 
       {showAutoMerge ? (
-        <View className="min-h-11 flex-row items-center justify-between gap-2">
-          <Text className="text-foreground shrink text-sm">Auto-merge when ready</Text>
+        <View className="min-h-11">
           {autoMergeBusy ? (
-            <ActivityIndicator colorClassName="accent-muted-foreground" />
+            <View className="min-h-11 flex-row items-center justify-between gap-2 px-5">
+              <Text className="text-foreground shrink text-sm">{autoMergeLabel}</Text>
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
+            </View>
           ) : (
-            <Switch
-              value={autoMerge}
+            <SettingsToggleRow
+              label={autoMergeLabel}
               onValueChange={(enabled) => {
                 setUnlinkError(null)
                 actions.setAutoMerge(enabled, effectiveMethod)
               }}
-              disabled={autoMergeBusy}
-              accessibilityLabel="Toggle auto-merge"
-              trackColorOffClassName="accent-secondary"
-              trackColorOnClassName="accent-muted-foreground"
-              thumbColorClassName="accent-foreground"
-              ios_backgroundColorClassName="accent-secondary"
+              value={autoMerge}
             />
           )}
         </View>
@@ -164,12 +191,26 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
                 className="flex-1"
                 isDestructive={avail.canClose}
                 isFullWidth
-                label={avail.canClose ? 'Close' : 'Reopen'}
+                label={
+                  avail.canClose
+                    ? translate('mobile.pullRequest.actions.close.label', 'Close')
+                    : translate('mobile.pullRequest.actions.reopen.label', 'Reopen')
+                }
                 onPress={() => {
                   setUnlinkError(null)
                   setConfirm({ kind: 'state', state: avail.canClose ? 'closed' : 'open' })
                 }}
-                accessibilityLabel={avail.canClose ? 'Close pull request' : 'Reopen pull request'}
+                accessibilityLabel={
+                  avail.canClose
+                    ? translate(
+                        'mobile.pullRequest.actions.close.accessibilityLabel',
+                        'Close pull request'
+                      )
+                    : translate(
+                        'mobile.pullRequest.actions.reopen.accessibilityLabel',
+                        'Reopen pull request'
+                      )
+                }
                 size="regular"
               />
             )
@@ -179,11 +220,14 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
               <ActivityIndicator colorClassName="accent-muted-foreground" />
             ) : (
               <MobileGlassTextButton
-                accessibilityLabel="Unlink pull request"
+                accessibilityLabel={translate(
+                  'mobile.pullRequest.actions.unlink.accessibilityLabel',
+                  'Unlink pull request'
+                )}
                 className="flex-1"
                 disabled={unlinkBusy}
                 isFullWidth
-                label="Unlink"
+                label={translate('mobile.pullRequest.actions.unlink.label', 'Unlink')}
                 onPress={() => void unlink()}
                 size="regular"
               />

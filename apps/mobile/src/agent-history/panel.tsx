@@ -5,8 +5,9 @@ import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
-import { MobileGlassSegmentedControl } from '~/components/glass/segmented-control'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { MobileSegmentedControl } from '~/components/segmented-control'
+import { translate } from '~/i18n/translate'
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import {
   buildMobileAiVaultResumeLaunch,
@@ -38,16 +39,16 @@ export type MobileAgentSessionHistoryPanelProps = {
 }
 
 const SCOPE_TABS: { value: AiVaultScope; label: string }[] = [
-  { value: 'workspace', label: 'Workspace' },
-  { value: 'project', label: 'Project' },
-  { value: 'all', label: 'All' }
+  { value: 'workspace', label: translate('mobile.agentHistory.scope.workspace', 'Workspace') },
+  { value: 'project', label: translate('mobile.agentHistory.scope.project', 'Project') },
+  { value: 'all', label: translate('mobile.agentHistory.scope.all', 'All') }
 ]
 
 export function MobileAgentSessionHistoryPanel({
   hostId,
   worktreeId,
   name = ''
-}: MobileAgentSessionHistoryPanelProps) {
+}: MobileAgentSessionHistoryPanelProps): React.JSX.Element {
   const router = useRouter()
   const { client, state: connState } = useHostClient(hostId)
   const [worktrees, setWorktrees] = useState<Worktree[]>([])
@@ -144,12 +145,16 @@ export function MobileAgentSessionHistoryPanel({
         return
       }
       if (!client || connState !== 'connected') {
-        setResumeMessage('Waiting for host...')
+        setResumeMessage(
+          translate('mobile.agentHistory.resume.waitingForHost', 'Waiting for host…')
+        )
         triggerError()
         return
       }
       if (!session.sessionId) {
-        setResumeMessage('This session is missing a resume id.')
+        setResumeMessage(
+          translate('mobile.agentHistory.resume.missingId', 'This session is missing a resume id.')
+        )
         triggerError()
         return
       }
@@ -189,7 +194,12 @@ export function MobileAgentSessionHistoryPanel({
           target.terminalPlatform
         )
         if (!platform) {
-          setResumeMessage('Unable to determine host platform.')
+          setResumeMessage(
+            translate(
+              'mobile.agentHistory.resume.unknownPlatform',
+              'Unable to determine host platform.'
+            )
+          )
           triggerError()
           return
         }
@@ -206,7 +216,7 @@ export function MobileAgentSessionHistoryPanel({
         })
         resumeMutationRegistryRef.current.releaseOnSuccess(session.id)
         triggerSuccess()
-        setResumeMessage('Agent session queued.')
+        setResumeMessage(translate('mobile.agentHistory.resume.queued', 'Agent session queued.'))
         router.push(
           `/h/${encodeURIComponent(hostId)}/session/${encodeURIComponent(target.worktreeId)}` as Parameters<
             typeof router.push
@@ -214,7 +224,11 @@ export function MobileAgentSessionHistoryPanel({
         )
       } catch (err) {
         triggerError()
-        setResumeMessage(err instanceof Error ? err.message : 'Failed to resume session.')
+        setResumeMessage(
+          err instanceof Error
+            ? err.message
+            : translate('mobile.agentHistory.resume.failed', 'Failed to resume session.')
+        )
       } finally {
         resumeLaunchInFlightRef.current = false
         setResumingSessionId(null)
@@ -236,13 +250,18 @@ export function MobileAgentSessionHistoryPanel({
     <View className="bg-background flex-1">
       <Stack.Screen
         options={{
-          title: `History · ${worktreeLabel}`,
+          title: translate('mobile.agentHistory.title', 'History · {{worktree}}', {
+            worktree: worktreeLabel
+          }),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
               : () => (
                   <MobileGlassIconButton
-                    accessibilityLabel="Refresh agent history"
+                    accessibilityLabel={translate(
+                      'mobile.agentHistory.refresh.label',
+                      'Refresh agent history'
+                    )}
                     icon="refresh"
                     onPress={() => void onRefresh()}
                   />
@@ -252,7 +271,10 @@ export function MobileAgentSessionHistoryPanel({
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
-            accessibilityLabel="Refresh agent sessions"
+            accessibilityLabel={translate(
+              'mobile.agentHistory.refreshSessions.label',
+              'Refresh agent sessions'
+            )}
             icon="arrow.clockwise"
             onPress={() => void onRefresh()}
           />
@@ -265,22 +287,39 @@ export function MobileAgentSessionHistoryPanel({
         </View>
       ) : screenState.kind === 'unsupported' ? (
         <View className={styles.state}>
-          <Text className={styles.stateTitle}>Agent Session History Unavailable</Text>
+          <Text className={styles.stateTitle}>
+            {translate(
+              'mobile.agentHistory.unsupported.title',
+              'Agent Session History Unavailable'
+            )}
+          </Text>
           <Text className={styles.stateText}>
-            Update Yiru on this host to browse agent session history.
+            {translate(
+              'mobile.agentHistory.unsupported.description',
+              'Update Yiru on this host to browse agent session history.'
+            )}
           </Text>
         </View>
       ) : screenState.kind === 'error' ? (
         <View className={styles.state}>
-          <Text className={styles.stateTitle}>Unable to Load</Text>
+          <Text className={styles.stateTitle}>
+            {translate('mobile.agentHistory.error.title', 'Unable to Load')}
+          </Text>
           <Text className={styles.stateText}>{screenState.message}</Text>
-          <MobileGlassTextButton className="mt-2" label="Retry" onPress={retry} />
+          <MobileGlassTextButton
+            className="mt-2"
+            label={translate('mobile.common.retry', 'Retry')}
+            onPress={retry}
+          />
         </View>
       ) : (
         <>
           <View className="px-3 pt-2">
-            <MobileGlassSegmentedControl
-              accessibilityLabel="Agent session scope"
+            <MobileSegmentedControl
+              accessibilityLabel={translate(
+                'mobile.agentHistory.scope.label',
+                'Agent session scope'
+              )}
               onChange={onSelectScope}
               options={SCOPE_TABS}
               value={scope}
@@ -292,7 +331,15 @@ export function MobileAgentSessionHistoryPanel({
           {issues.length > 0 ? (
             <MobileContentSection className="mx-3 mt-2 rounded-xl p-2">
               <Text className="text-xs text-amber-500">
-                {issues.length} {issues.length === 1 ? 'transcript' : 'transcripts'} skipped
+                {issues.length === 1
+                  ? translate('mobile.agentHistory.issues.single', '{{count}} transcript skipped', {
+                      count: issues.length
+                    })
+                  : translate(
+                      'mobile.agentHistory.issues.multiple',
+                      '{{count}} transcripts skipped',
+                      { count: issues.length }
+                    )}
               </Text>
             </MobileContentSection>
           ) : null}
@@ -303,9 +350,16 @@ export function MobileAgentSessionHistoryPanel({
           ) : null}
           {sections.length === 0 ? (
             <View className={styles.state}>
-              <Text className={styles.stateTitle}>No agent sessions</Text>
+              <Text className={styles.stateTitle}>
+                {translate('mobile.agentHistory.empty.title', 'No agent sessions')}
+              </Text>
               <Text className={styles.stateText}>
-                {query ? 'No sessions match your search.' : 'No past agent sessions in this scope.'}
+                {query
+                  ? translate('mobile.agentHistory.empty.search', 'No sessions match your search.')
+                  : translate(
+                      'mobile.agentHistory.empty.scope',
+                      'No past agent sessions in this scope.'
+                    )}
               </Text>
             </View>
           ) : (

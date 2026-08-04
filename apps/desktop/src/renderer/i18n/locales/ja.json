@@ -8120,6 +8120,12 @@
           "revoking": "Revoking…",
           "revoke": "Revoke",
           "searchTitle": "Authorized remote host clients"
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "オンボーディングを再開できませんでした。",
+          "restartOnboardingTitle": "オンボーディングをもう一度実行",
+          "restartOnboardingDescription": "オンボーディングウィザードをリセットし、最初のステップから開き直します。チェックリストの進捗は保持されます。",
+          "restartOnboardingButton": "オンボーディングを再開"
         }
       },
       "right": {

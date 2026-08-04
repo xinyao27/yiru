@@ -139,6 +139,15 @@ export class DeviceRegistry {
     return this.addDevice(name, scope)
   }
 
+  // Why: local development reopens the same simulator on every `pnpm dev`.
+  // Reusing its named credential prevents one paired-device row per restart.
+  getOrCreateNamedDevice(name: string, scope: 'mobile' | 'runtime' = 'mobile'): DeviceEntry {
+    return (
+      this.devices.find((device) => device.name === name && device.scope === scope) ??
+      this.addDevice(name, scope)
+    )
+  }
+
   // Why: explicit rotation path for "Regenerate QR" — invalidates any
   // existing never-scanned token (e.g. one that was screenshotted, copied
   // to clipboard, or shown on a screen-share) and mints a fresh one. Without

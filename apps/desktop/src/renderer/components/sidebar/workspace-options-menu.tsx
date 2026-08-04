@@ -85,6 +85,7 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                   variant="ghost"
                   size="icon-xs"
                   type="button"
+                  className="relative"
                   aria-label={
                     hasAnyFilter
                       ? translate(

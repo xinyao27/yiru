@@ -8143,6 +8143,12 @@
           "revoking": "Revoking…",
           "revoke": "Revoke",
           "searchTitle": "Authorized remote host clients"
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "Couldn't restart onboarding.",
+          "restartOnboardingTitle": "Run onboarding again",
+          "restartOnboardingDescription": "Reset the onboarding wizard and reopen it from the first step. Your checklist progress stays intact.",
+          "restartOnboardingButton": "Restart onboarding"
         }
       },
       "right": {

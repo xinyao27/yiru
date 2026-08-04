@@ -1,9 +1,10 @@
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
+import { cn } from 'cnfast'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { Check, Play, Plus } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
+import { translate } from '~/i18n/translate'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import { MobileContentSection } from '../components/content-section'
@@ -65,7 +66,10 @@ export function QuickCommandsList(props: ListProps) {
           onChangeText={(value) =>
             onQueryChange(value.slice(0, QUICK_COMMAND_SEARCH_QUERY_MAX_LENGTH))
           }
-          placeholder="Search quick commands..."
+          placeholder={translate(
+            'mobile.quickCommand.searchPlaceholder',
+            'Search quick commands...'
+          )}
           editable={!disabled}
         />
       ) : null}
@@ -74,14 +78,18 @@ export function QuickCommandsList(props: ListProps) {
         <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       ) : null}
       {!loading && totalCount === 0 ? (
-        <Text className={styles.empty}>No quick commands yet.</Text>
+        <Text className={styles.empty}>
+          {translate('mobile.quickCommand.empty', 'No quick commands yet.')}
+        </Text>
       ) : null}
       {!loading && totalCount > 0 && !hasVisible ? (
-        <Text className={styles.empty}>No matching quick commands.</Text>
+        <Text className={styles.empty}>
+          {translate('mobile.quickCommand.noMatches', 'No matching quick commands.')}
+        </Text>
       ) : null}
       {repoCommands.length > 0 ? (
         <QuickCommandGroup
-          label="This project"
+          label={translate('mobile.quickCommand.projectGroup', 'This project')}
           commands={repoCommands}
           disabled={disabled}
           onLaunch={onLaunch}
@@ -91,7 +99,7 @@ export function QuickCommandsList(props: ListProps) {
       ) : null}
       {globalCommands.length > 0 ? (
         <QuickCommandGroup
-          label="Global"
+          label={translate('mobile.quickCommand.globalGroup', 'Global')}
           commands={globalCommands}
           disabled={disabled}
           onLaunch={onLaunch}
@@ -101,14 +109,17 @@ export function QuickCommandsList(props: ListProps) {
       ) : null}
       <MobileGlassPressable
         accessibilityRole="button"
-        className="mt-1 rounded-xl"
+        className="rounded-xl"
+        containerClassName="mt-1"
         contentClassName="min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-3"
         disabled={disabled || !canAdd}
         onPress={onAdd}
       >
         <Plus size={18} colorClassName="accent-muted-foreground" />
         <Text className="text-foreground text-sm">
-          {canAdd ? 'New quick command' : 'Quick command limit reached'}
+          {canAdd
+            ? translate('mobile.quickCommand.new', 'New quick command')
+            : translate('mobile.quickCommand.limitReached', 'Quick command limit reached')}
         </Text>
       </MobileGlassPressable>
     </View>
@@ -181,7 +192,13 @@ function QuickCommandRow({
         disabled={disabled}
         onPress={() => onLaunch(command)}
         accessibilityRole="button"
-        accessibilityLabel={`Run ${command.label}`}
+        accessibilityLabel={translate(
+          'mobile.quickCommand.runAccessibilityLabel',
+          'Run {{label}}',
+          {
+            label: command.label
+          }
+        )}
       >
         <View className={styles.rowIcon}>
           {isAgent ? (
@@ -204,14 +221,22 @@ function QuickCommandRow({
       </Pressable>
       <MobileGlassGroup className="mr-2 flex-row gap-2" spacing={8}>
         <MobileGlassIconButton
-          accessibilityLabel={`Edit ${command.label}`}
+          accessibilityLabel={translate(
+            'mobile.quickCommand.editAccessibilityLabel',
+            'Edit {{label}}',
+            { label: command.label }
+          )}
           disabled={disabled}
           icon="edit"
           onPress={() => onEdit(command)}
           size="small"
         />
         <MobileGlassIconButton
-          accessibilityLabel={`Delete ${command.label}`}
+          accessibilityLabel={translate(
+            'mobile.quickCommand.deleteAccessibilityLabel',
+            'Delete {{label}}',
+            { label: command.label }
+          )}
           disabled={disabled}
           icon="delete"
           isDestructive

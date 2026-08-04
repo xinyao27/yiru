@@ -1,4 +1,4 @@
-import { cn } from '~/style/class-names'
+import { cn } from 'cnfast'
 
 // Empty-state, retry, and committed-diff-preview drawer styles. Split from the
 // main source-control stylesheet to stay under the line limit.

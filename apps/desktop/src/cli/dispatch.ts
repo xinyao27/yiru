@@ -22,6 +22,7 @@ import { SESSION_HANDLERS } from './handlers/sessions'
 import { SKILL_HANDLERS } from './handlers/skills'
 import { TERMINAL_HANDLERS } from './handlers/terminal'
 import { WORKTREE_HANDLERS } from './handlers/worktree'
+import { MOBILE_HANDLERS } from './mobile/development-pairing'
 import type { RuntimeClient } from './runtime-client'
 import { RuntimeClientError } from './runtime-client'
 
@@ -60,6 +61,7 @@ function buildHandlers(): Map<string, CommandHandler> {
     AGENT_HOOK_HANDLERS,
     DIAGNOSTICS_HANDLERS,
     INTROSPECTION_HANDLERS,
+    MOBILE_HANDLERS,
     ENVIRONMENT_HANDLERS,
     SKILL_HANDLERS
   ]

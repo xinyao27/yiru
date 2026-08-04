@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import {
@@ -9,8 +10,8 @@ import {
   Chat as MessageSquare,
   X
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { statusColorClasses } from '~/session/pr/sidebar/status-color'
-import { cn } from '~/style/class-names'
 
 import { hubStyles } from './hub-styles'
 import type { MobilePrChipRollup, MobilePrChipSummary } from './pr-chip-summary'
@@ -28,7 +29,7 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
   return (
     <Pressable
       className={cn(
-        'flex-row items-center gap-2 mt-3 pt-3 border-t-hairline border-t-border',
+        'mt-3 min-h-11 flex-row items-center gap-2 border-t-hairline border-t-border pt-3',
         'active:bg-accent'
       )}
       onPress={onPress}
@@ -42,12 +43,14 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
         <>
           <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           <Text className={hubStyles.chipMutedText} numberOfLines={1}>
-            Loading pull request…
+            {translate('mobile.sourceControl.prChip.loading', 'Loading pull request…')}
           </Text>
         </>
       ) : summary.kind === 'none' ? (
         <>
-          <Text className="text-primary text-sm font-semibold">Create pull request</Text>
+          <Text className="text-primary text-sm font-semibold">
+            {translate('mobile.sourceControl.prChip.create', 'Create pull request')}
+          </Text>
           <View className={hubStyles.chipSpacer} />
           <View className="w-5 items-center">
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
@@ -123,17 +126,34 @@ function RollupIcon({
 function chipAccessibilityLabel(summary: MobilePrChipSummary): string {
   switch (summary.kind) {
     case 'loading':
-      return 'Loading pull request'
+      return translate('mobile.sourceControl.prChip.loadingAccessibility', 'Loading pull request')
     case 'none':
-      return 'Create pull request'
+      return translate('mobile.sourceControl.prChip.create', 'Create pull request')
     case 'unavailable':
-      return `Pull request unavailable: ${summary.message}`
+      return translate(
+        'mobile.sourceControl.prChip.unavailableAccessibility',
+        'Pull request unavailable: {{message}}',
+        { message: summary.message }
+      )
     case 'ready': {
       const comments =
         summary.commentCount != null && summary.commentCount > 0
-          ? `, ${summary.commentCount} unresolved comments`
+          ? translate(
+              'mobile.sourceControl.prChip.unresolvedCommentsAccessibility',
+              ', {{count}} unresolved comments',
+              { count: summary.commentCount }
+            )
           : ''
-      return `Pull request #${summary.number}, ${summary.stateLabel}, ${summary.rollup.text}${comments}. Open pull request.`
+      return translate(
+        'mobile.sourceControl.prChip.readyAccessibility',
+        'Pull request #{{number}}, {{state}}, {{rollup}}{{comments}}. Open pull request.',
+        {
+          number: summary.number,
+          state: summary.stateLabel,
+          rollup: summary.rollup.text,
+          comments
+        }
+      )
     }
   }
 }

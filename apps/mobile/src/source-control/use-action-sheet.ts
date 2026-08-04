@@ -62,7 +62,10 @@ export function useMobileSourceControlActionSheet(
           checkout: () => void openBranchPicker(),
           history: () => void openHistory()
         }
-      }).map((action) => ({ ...action, icon: SOURCE_CONTROL_ACTION_ICONS[action.iconKey] })),
+      }).map(({ iconKey, ...action }) => ({
+        ...action,
+        icon: SOURCE_CONTROL_ACTION_ICONS[iconKey]
+      })),
     [
       busyAction,
       commitMessage,

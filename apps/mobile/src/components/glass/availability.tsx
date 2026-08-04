@@ -1,11 +1,8 @@
-import { isGlassEffectAPIAvailable, isLiquidGlassAvailable } from 'expo-glass-effect'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { AccessibilityInfo, Platform } from 'react-native'
+import type { ReactNode } from 'react'
 
-const PLATFORM_SUPPORTS_GLASS =
-  Platform.OS === 'ios' && isGlassEffectAPIAvailable() && isLiquidGlassAvailable()
+import { MobileGlassAvailabilityContext } from './availability-context'
 
-const MobileGlassAvailabilityContext = createContext(false)
+export { useMobileGlassAvailable } from './availability-context'
 
 type MobileGlassScopeProps = {
   children: ReactNode
@@ -14,36 +11,5 @@ type MobileGlassScopeProps = {
 export function MobileGlassAvailabilityProvider({
   children
 }: MobileGlassScopeProps): React.JSX.Element {
-  const [allowsTransparency, setAllowsTransparency] = useState(false)
-
-  useEffect(() => {
-    if (!PLATFORM_SUPPORTS_GLASS) {
-      return
-    }
-
-    let active = true
-    void AccessibilityInfo.isReduceTransparencyEnabled().then((enabled) => {
-      if (active) {
-        setAllowsTransparency(!enabled)
-      }
-    })
-    const subscription = AccessibilityInfo.addEventListener(
-      'reduceTransparencyChanged',
-      (enabled) => setAllowsTransparency(!enabled)
-    )
-    return () => {
-      active = false
-      subscription.remove()
-    }
-  }, [])
-
-  return (
-    <MobileGlassAvailabilityContext value={PLATFORM_SUPPORTS_GLASS && allowsTransparency}>
-      {children}
-    </MobileGlassAvailabilityContext>
-  )
-}
-
-export function useMobileGlassAvailable(): boolean {
-  return useContext(MobileGlassAvailabilityContext)
+  return <MobileGlassAvailabilityContext value={false}>{children}</MobileGlassAvailabilityContext>
 }

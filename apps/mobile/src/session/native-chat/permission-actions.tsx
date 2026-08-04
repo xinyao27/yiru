@@ -22,13 +22,23 @@ export function MobileNativeChatPermissionActions({
         <MobileGlassPressable
           key={`${option.send}:${option.label}`}
           className="rounded-full"
-          contentClassName="min-h-10 justify-center rounded-full px-4"
+          contentClassName="justify-center rounded-full px-4"
           disabled={disabled}
           hitSlop={6}
+          isProminent={index === 0}
           onPress={() => onRespond(option.send)}
-          tintColorClassName={index === 0 ? 'accent-primary' : 'accent-secondary'}
+          size="regular"
+          tintColorClassName="accent-secondary"
         >
-          <Text className="text-foreground text-sm font-semibold">{option.label}</Text>
+          <Text
+            className={
+              index === 0
+                ? 'text-primary-foreground text-sm font-semibold'
+                : 'text-foreground text-sm font-semibold'
+            }
+          >
+            {option.label}
+          </Text>
         </MobileGlassPressable>
       ))}
     </MobileGlassGroup>

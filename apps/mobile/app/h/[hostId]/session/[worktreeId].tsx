@@ -8,7 +8,6 @@ import {
   BackHandler,
   View,
   Text,
-  ScrollView,
   TextInput,
   Pressable,
   Keyboard,
@@ -17,42 +16,30 @@ import {
   type KeyboardEvent,
   type LayoutChangeEvent
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCSSVariable } from 'uniwind'
 
 import { MobileBrowserPane } from '~/browser/pane'
 import { normalizeBrowserUrl } from '~/browser/url'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
-import { MobileAgentIcon } from '~/components/agent-icon'
+import { BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
-import {
-  CustomKeyModal,
-  loadCustomKeys,
-  saveCustomKeys,
-  type CustomKey
-} from '~/components/custom-key-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { StatusDot } from '~/components/status-dot'
 import { TextInputModal } from '~/components/text-input-modal'
 import {
-  Warning as AlertTriangle,
-  Robot as Bot,
-  CaretLeft as ChevronLeft,
   Copy,
-  Folder,
   FileText,
-  GitMerge,
-  Globe,
-  DotsThree as MoreHorizontal,
   ArrowClockwise as RefreshCw,
-  TerminalWindow as SquareTerminal
+  Trash as Trash2,
+  X
 } from '~/components/uniwind-icons'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
 import { isFileExistsErrorMessage } from '~/files/file-exists-error'
 import { resolveMobileFileTabDoc } from '~/files/file-tab-doc'
+import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import {
   triggerMediumImpact,
@@ -65,15 +52,19 @@ import { headlessActivationNeedsHostRenderer } from '~/session/activation-result
 import { MobileBrowserTabActionSheet } from '~/session/browser-tab-action-sheet'
 import { sendMobileBufferedTerminalInput } from '~/session/buffered-terminal-send'
 import { resolveMobileSessionConnectionHealth } from '~/session/connection-health'
+import { CreateTabDrawers } from '~/session/create-tab-drawers'
 import {
   createMobileSessionCreateWarningState,
   dismissMobileSessionCreateWarningState,
   reconcileMobileSessionCreateWarningState
 } from '~/session/create-warning-state'
+import {
+  MobileSessionCreationPlaceholder,
+  MobileSessionCreationWarning
+} from '~/session/creation-status'
 import { SessionDockColumn } from '~/session/dock-column'
 import { FileReader } from '~/session/file-reader'
 import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
-import { MobileSessionHeaderIconButton } from '~/session/header-icon-button'
 import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
 import { MarkdownReader } from '~/session/markdown-reader'
@@ -82,6 +73,10 @@ import { useMobileNativeChatController } from '~/session/native-chat/use-control
 import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
 import { useMobileNativeChatReadability } from '~/session/native-chat/use-readability'
 import { useMobileNativeChatTerminalStream } from '~/session/native-chat/use-terminal-stream'
+import {
+  buildCreateTabAgentActions,
+  buildSendReviewNotesAgentActions
+} from '~/session/new-tab-agent-actions'
 import { loadMobileNewTabAgentOptions } from '~/session/new-tab-agent-loader'
 import type { MobileNewTabAgentOption } from '~/session/new-tab-agent-options'
 import { activateOpenedSourceControlDiffTab } from '~/session/opened-mobile-session-tab'
@@ -109,7 +104,7 @@ import type {
 } from '~/session/screen-state'
 import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
 import { MobileSessionTabStrip } from '~/session/tab-strip'
-import { MobileTerminalAccessoryKey } from '~/session/terminal/accessory-key'
+import { MobileTerminalAccessoryBar } from '~/session/terminal/accessory-bar'
 import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
 import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
 import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
@@ -141,6 +136,12 @@ import {
   getVisibleTerminalAccessoryKeys,
   loadTerminalAccessoryLayout
 } from '~/terminal/accessory-layout'
+import {
+  CustomKeyModal,
+  loadCustomKeys,
+  saveCustomKeys,
+  type CustomKey
+} from '~/terminal/custom-key-modal'
 import {
   countTerminalGestureInputSequences,
   isGestureMouseTrackingMode,
@@ -186,9 +187,13 @@ import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '~/transport/types'
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
+const BROWSER_STREAMING_UNAVAILABLE_MESSAGE = translate(
+  'mobile.session.browserStreamingUnavailable',
+  'Desktop update required for mobile browser streaming'
+)
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
-export default function SessionScreen() {
+export default function SessionScreen(): React.JSX.Element {
   const {
     hostId,
     worktreeId,
@@ -785,12 +790,12 @@ export default function SessionScreen() {
         const message = err instanceof Error ? err.message : ''
         const previewMessage =
           message === 'binary_file'
-            ? 'Binary preview unavailable'
+            ? translate('mobile.files.binaryPreviewUnavailable', 'Binary preview unavailable')
             : message === 'file_too_large'
-              ? 'File too large for mobile preview'
+              ? translate('mobile.files.previewTooLarge', 'File too large for mobile preview')
               : tab.diffSource === 'staged' || tab.diffSource === 'unstaged'
-                ? "Couldn't load diff preview"
-                : "Couldn't load file preview"
+                ? translate('mobile.files.diffPreviewFailed', "Couldn't load diff preview")
+                : translate('mobile.files.previewFailed', "Couldn't load file preview")
         setFileDocs((prev) =>
           new Map(prev).set(tab.id, {
             status: 'error',
@@ -1100,7 +1105,13 @@ export default function SessionScreen() {
     void (async () => {
       const reportActivationOutcome = (response: RpcSuccess | null): void => {
         if (!disposed && response && headlessActivationNeedsHostRenderer(response.result)) {
-          showToast('Open Yiru on the host to wake sleeping agents.', 3000)
+          showToast(
+            translate(
+              'mobile.session.wakeAgents.openHost',
+              'Open Yiru on the host to wake sleeping agents.'
+            ),
+            3000
+          )
         }
       }
       if (client && created !== '1' && !isFloatingWorkspaceRoute) {
@@ -1543,7 +1554,10 @@ export default function SessionScreen() {
       }
       if (!isTerminalLiveInputWithinByteLimit(text)) {
         triggerError()
-        showToast('Input too large (max 256 KiB)', 1500)
+        showToast(
+          translate('mobile.session.terminal.inputTooLarge', 'Input too large (max 256 KiB)'),
+          1500
+        )
         return false
       }
       const rpc = clientRef.current
@@ -1958,9 +1972,9 @@ export default function SessionScreen() {
       await client.sendRequest('terminal.clearBuffer', {
         terminal: target.handle
       })
-      showToast('Terminal cleared')
+      showToast(translate('mobile.session.terminal.cleared', 'Terminal cleared'))
     } catch {
-      showToast("Couldn't clear terminal", 1500)
+      showToast(translate('mobile.session.terminal.clearFailed', "Couldn't clear terminal"), 1500)
     }
   }
 
@@ -2054,7 +2068,7 @@ export default function SessionScreen() {
         // nothing on copy (it only banners on paste), so the in-app toast is
         // the only success signal there.
         if (Platform.OS === 'ios') {
-          showToast('Copied')
+          showToast(translate('mobile.common.copied', 'Copied'))
         }
         terminalRefs.current.get(handle)?.cancelSelect()
       } catch (e) {
@@ -2065,7 +2079,7 @@ export default function SessionScreen() {
           name: err.name,
           message: err.message
         })
-        showToast("Couldn't copy", 1500)
+        showToast(translate('mobile.common.copyFailed', "Couldn't copy"), 1500)
       }
     },
     [showToast]
@@ -2078,7 +2092,13 @@ export default function SessionScreen() {
       }
       // eslint-disable-next-line no-console
       console.warn('[mobile-clip] selection evicted')
-      showToast('Selection cleared (scrolled out of buffer)', 1500)
+      showToast(
+        translate(
+          'mobile.session.terminal.selectionEvicted',
+          'Selection cleared (scrolled out of buffer)'
+        ),
+        1500
+      )
       setSelectModeActive(false)
     },
     [showToast]
@@ -2299,7 +2319,10 @@ export default function SessionScreen() {
             const existing = prev.find((terminal) => terminal.handle === createdHandle)
             const createdTerminal: Terminal = {
               handle: createdHandle,
-              title: created.title || existing?.title || 'Terminal',
+              title:
+                created.title ||
+                existing?.title ||
+                translate('mobile.terminal.defaultTitle', 'Terminal'),
               terminalTheme: created.terminalTheme ?? existing?.terminalTheme,
               isActive: true
             }
@@ -2328,24 +2351,34 @@ export default function SessionScreen() {
               .then((sendResponse) => {
                 if (!sendResponse.ok) {
                   throw new Error(
-                    (sendResponse as RpcFailure).error.message || 'Failed to send notes'
+                    (sendResponse as RpcFailure).error.message ||
+                      translate('mobile.terminal.sendNotesFailed', 'Failed to send notes')
                   )
                 }
                 const result = (sendResponse as RpcSuccess).result as {
                   send?: { accepted?: boolean }
                 }
                 if (result.send?.accepted === false) {
-                  throw new Error('Terminal input is locked by another client.')
+                  throw new Error(
+                    translate(
+                      'mobile.terminal.inputLocked',
+                      'Terminal input is locked by another client.'
+                    )
+                  )
                 }
                 triggerSuccess()
-                showToast(options.successToast ?? 'Notes sent')
+                showToast(
+                  options.successToast ?? translate('mobile.terminal.notesSent', 'Notes sent')
+                )
                 options.onPromptSent?.()
               })
               .catch((err) => {
                 triggerError()
                 showToast(
                   options.errorToast ??
-                    (err instanceof Error ? err.message : "Couldn't send notes"),
+                    (err instanceof Error
+                      ? err.message
+                      : translate('mobile.terminal.sendNotesError', "Couldn't send notes")),
                   1800
                 )
               })
@@ -2362,7 +2395,9 @@ export default function SessionScreen() {
         }
         scheduleDelayedAction(() => void fetchSessionTabs(), 500)
       } else {
-        const message = options?.errorToast ?? 'Failed to create terminal'
+        const message =
+          options?.errorToast ??
+          translate('mobile.terminal.createFailed', 'Failed to create terminal')
         setCreateError(message)
         if (options?.errorToast) {
           triggerError()
@@ -2370,7 +2405,9 @@ export default function SessionScreen() {
         }
       }
     } catch {
-      const message = options?.errorToast ?? 'Failed to create terminal'
+      const message =
+        options?.errorToast ??
+        translate('mobile.terminal.createFailed', 'Failed to create terminal')
       setCreateError(message)
       if (options?.errorToast) {
         triggerError()
@@ -2397,13 +2434,20 @@ export default function SessionScreen() {
     const launch = buildMobileQuickCommandLaunch(command)
     if (!launch) {
       triggerError()
-      showToast('Edit this quick command before running it', 1800)
+      showToast(
+        translate(
+          'mobile.session.quickCommands.editBeforeRunning',
+          'Edit this quick command before running it'
+        ),
+        1800
+      )
       return false
     }
-    const label = command.label.trim() || 'Quick command'
+    const label =
+      command.label.trim() || translate('mobile.quickCommand.defaultLabel', 'Quick command')
     void handleCreateTerminal(launch.agent, {
       ...launch.options,
-      errorToast: `Couldn't run ${label}`
+      errorToast: translate('mobile.quickCommand.runFailed', "Couldn't run {{label}}", { label })
     })
     return true
   }
@@ -2430,7 +2474,9 @@ export default function SessionScreen() {
           if (isFileExistsErrorMessage(message) && attempt < 100) {
             continue
           }
-          throw new Error(message || 'Failed to create markdown note')
+          throw new Error(
+            message || translate('mobile.markdown.createFailed', 'Failed to create markdown note')
+          )
         }
 
         const openResponse = await client.sendRequest(
@@ -2444,9 +2490,14 @@ export default function SessionScreen() {
         scheduleDelayedAction(() => void fetchSessionTabs(), 300)
         return
       }
-      throw new Error('Unable to create untitled markdown note')
+      throw new Error(
+        translate('mobile.markdown.createUntitledFailed', 'Unable to create untitled markdown note')
+      )
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create markdown note'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.markdown.createFailed', 'Failed to create markdown note')
       setCreateError(message)
       showToast(message, 1800)
     } finally {
@@ -2461,12 +2512,12 @@ export default function SessionScreen() {
     // Why: read via ref so a tap that fires before the capability probe resolves
     // (or from a stale callback) still sees the live support value.
     if (browserScreencastSupportedRef.current !== true) {
-      showToast('Desktop update required for mobile browser streaming', 1600)
+      showToast(BROWSER_STREAMING_UNAVAILABLE_MESSAGE, 1600)
       return false
     }
     const url = normalizeBrowserUrl(rawUrl)
     if (!url) {
-      const message = 'Enter a valid URL'
+      const message = translate('mobile.browser.enterValidUrl', 'Enter a valid URL')
       setCreateError(message)
       showToast(message, 1400)
       return false
@@ -2500,7 +2551,10 @@ export default function SessionScreen() {
       scheduleDelayedAction(() => void fetchSessionTabs(), 1200)
       return true
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create browser'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.browser.createFailed', 'Failed to create browser')
       setCreateError(message)
       showToast(message, 1800)
       return false
@@ -2517,7 +2571,10 @@ export default function SessionScreen() {
     method: 'browser.back' | 'browser.forward' | 'browser.reload'
   ) {
     if (!client || !tab.browserPageId) {
-      showToast('Browser page is not available yet.', 1500)
+      showToast(
+        translate('mobile.session.browser.pageUnavailable', 'Browser page is not available yet.'),
+        1500
+      )
       return
     }
     try {
@@ -2534,7 +2591,10 @@ export default function SessionScreen() {
       }
       scheduleDelayedAction(() => void fetchSessionTabs(), 250)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Browser command failed'
+      const message =
+        err instanceof Error
+          ? err.message
+          : translate('mobile.browser.commandFailed', 'Browser command failed')
       showToast(message, 1600)
     }
   }
@@ -2556,7 +2616,10 @@ export default function SessionScreen() {
         setTerminals((prev) => {
           const next = prev.map((terminal) =>
             terminal.handle === target.handle
-              ? { ...terminal, title: title || 'Terminal' }
+              ? {
+                  ...terminal,
+                  title: title || translate('mobile.terminal.defaultTitle', 'Terminal')
+                }
               : terminal
           )
           terminalsRef.current = next
@@ -2788,96 +2851,25 @@ export default function SessionScreen() {
     opacity: toastOpacityRef.current,
     transform: [{ translateY: -keyboardLift }]
   }
-  const createTabAgentActions =
-    createTabAgentLoadState === 'loading'
-      ? [
-          {
-            label: 'Detecting Agents',
-            icon: Bot,
-            disabled: true,
-            loading: true,
-            onPress: () => {}
-          }
-        ]
-      : createTabAgentOptions.length > 0
-        ? createTabAgentOptions.map((option) => ({
-            label: option.label,
-            renderIcon: () => <MobileAgentIcon agentId={option.agent} size={16} />,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              void handleCreateTerminal(option.agent)
-            }
-          }))
-        : createTabAgentLoadState === 'loaded'
-          ? [
-              {
-                label: 'No Enabled Agents',
-                icon: Bot,
-                disabled: true,
-                onPress: () => {}
-              }
-            ]
-          : createTabAgentLoadState === 'error'
-            ? [
-                {
-                  label: 'Agent Presets Unavailable',
-                  hint: 'Check the host connection',
-                  icon: Bot,
-                  disabled: true,
-                  onPress: () => {}
-                }
-              ]
-            : []
-  const sendDiffNotesAgentActions =
-    pendingDiffNotesDelivery === null
-      ? []
-      : createTabAgentLoadState === 'loading'
-        ? [
-            {
-              label: 'Detecting Agents',
-              icon: Bot,
-              disabled: true,
-              loading: true,
-              onPress: () => {}
-            }
-          ]
-        : createTabAgentOptions.length > 0
-          ? createTabAgentOptions.map((option) => ({
-              label: option.label,
-              hint: 'New agent session',
-              icon: Bot,
-              onPress: () => {
-                const delivery = pendingDiffNotesDelivery
-                setPendingDiffNotesDelivery(null)
-                if (!delivery) {
-                  return
-                }
-                void handleCreateTerminal(option.agent, {
-                  initialPrompt: delivery.prompt,
-                  onPromptSent: () => void clearDeliveredDiffComments(delivery.comments)
-                })
-              }
-            }))
-          : createTabAgentLoadState === 'loaded'
-            ? [
-                {
-                  label: 'No Enabled Agents',
-                  icon: Bot,
-                  disabled: true,
-                  onPress: () => {}
-                }
-              ]
-            : createTabAgentLoadState === 'error'
-              ? [
-                  {
-                    label: 'Agent Presets Unavailable',
-                    hint: 'Copy notes instead',
-                    icon: Bot,
-                    disabled: true,
-                    onPress: () => {}
-                  }
-                ]
-              : []
+  const createTabAgentActions = buildCreateTabAgentActions({
+    loadState: createTabAgentLoadState,
+    options: createTabAgentOptions,
+    onCreate: (agent) => void handleCreateTerminal(agent)
+  })
+  const sendDiffNotesAgentActions = buildSendReviewNotesAgentActions({
+    loadState: createTabAgentLoadState,
+    options: pendingDiffNotesDelivery === null ? [] : createTabAgentOptions,
+    onSelect: (agent) => {
+      const delivery = pendingDiffNotesDelivery
+      if (!delivery) {
+        return
+      }
+      void handleCreateTerminal(agent, {
+        initialPrompt: delivery.prompt,
+        onPromptSent: () => void clearDeliveredDiffComments(delivery.comments)
+      })
+    }
+  })
 
   // Routes a header panel-icon tap through the pure dock-vs-push decision (U1):
   // measured dock-capable rows toggle/swap, constrained rows push full-screen.
@@ -2928,7 +2920,7 @@ export default function SessionScreen() {
       headerBackVisible: false,
       headerShadowVisible: false,
       headerStyle: { backgroundColor },
-      title: worktreeName || 'Terminal'
+      title: worktreeName || translate('mobile.session.header.terminalFallback', 'Terminal')
     }),
     [backgroundColor, hasDirtyMarkdownDrafts, worktreeName]
   )
@@ -2940,28 +2932,40 @@ export default function SessionScreen() {
         <>
           <Stack.Toolbar placement="left">
             <Stack.Toolbar.Button
-              accessibilityLabel="Back to workspaces"
+              accessibilityLabel={translate(
+                'mobile.session.header.backToWorkspaces',
+                'Back to workspaces'
+              )}
               icon="chevron.left"
               onPress={requestLeaveSession}
             />
           </Stack.Toolbar>
           <Stack.Toolbar placement="right">
             <Stack.Toolbar.Button
-              accessibilityLabel="Open file explorer"
+              accessibilityLabel={translate(
+                'mobile.session.header.openFileExplorer',
+                'Open file explorer'
+              )}
               hidden={isFloatingWorkspaceRoute}
               icon="folder"
               onPress={() => handlePanelTap('files')}
               selected={activePanel === 'files'}
             />
             <Stack.Toolbar.Button
-              accessibilityLabel="Open source control"
+              accessibilityLabel={translate(
+                'mobile.session.header.openSourceControl',
+                'Open source control'
+              )}
               hidden={isFolderWorkspaceRoute || isFloatingWorkspaceRoute}
               icon="arrow.triangle.branch"
               onPress={() => handlePanelTap('sourceControl')}
               selected={activePanel === 'sourceControl'}
             />
             <Stack.Toolbar.Menu
-              accessibilityLabel="More session actions"
+              accessibilityLabel={translate(
+                'mobile.session.header.moreActions',
+                'More session actions'
+              )}
               hidden={!showHeaderMoreButton}
               icon="ellipsis"
               separateBackground
@@ -2971,14 +2975,14 @@ export default function SessionScreen() {
                 icon="clock.arrow.circlepath"
                 onPress={openAgentSessionHistory}
               >
-                Agent History
+                {translate('mobile.session.header.agentHistory', 'Agent History')}
               </Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction
                 hidden={!showChecksAction}
                 icon="checkmark.circle"
                 onPress={() => handlePanelTap('pr')}
               >
-                Checks
+                {translate('mobile.session.header.checks', 'Checks')}
               </Stack.Toolbar.MenuAction>
             </Stack.Toolbar.Menu>
           </Stack.Toolbar>
@@ -2988,55 +2992,71 @@ export default function SessionScreen() {
         {!useNativeSessionHeader ? (
           <MobileGlassHeader includesTopInset>
             <View className="min-h-15 flex-row items-center gap-2 px-3 py-1">
-              <MobileSessionHeaderIconButton
-                accessibilityLabel="Back to workspaces"
-                icon={ChevronLeft}
+              <MobileGlassIconButton
+                accessibilityLabel={translate(
+                  'mobile.session.header.backToWorkspaces',
+                  'Back to workspaces'
+                )}
+                icon="back"
                 onPress={requestLeaveSession}
               />
 
-              <View className="min-w-0 flex-1">
+              <Pressable
+                className="min-h-11 min-w-0 flex-1 justify-center"
+                disabled={!showConnectionRetry}
+                onPress={() => {
+                  if (hostId) {
+                    void forceReconnectHost(hostId)
+                  }
+                }}
+                accessibilityRole={showConnectionRetry ? 'button' : undefined}
+                accessibilityLabel={
+                  showConnectionRetry
+                    ? translate('mobile.session.header.reconnectToDesktop', 'Reconnect to desktop')
+                    : undefined
+                }
+              >
                 <Text className="text-foreground text-base font-semibold" numberOfLines={1}>
-                  {worktreeName || 'Terminal'}
+                  {worktreeName || translate('mobile.session.header.terminalFallback', 'Terminal')}
                 </Text>
-                <Pressable
-                  className="mt-1 flex-row items-center gap-2"
-                  disabled={!showConnectionRetry}
-                  onPress={() => {
-                    if (hostId) {
-                      void forceReconnectHost(hostId)
-                    }
-                  }}
-                  accessibilityRole={showConnectionRetry ? 'button' : undefined}
-                  accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
-                >
+                <View className="mt-1 flex-row items-center gap-2">
                   <StatusDot state={connState} />
                   <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
                     {terminalSummary}
                   </Text>
-                </Pressable>
-              </View>
+                </View>
+              </Pressable>
               <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                 {!isFloatingWorkspaceRoute ? (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'files'}
-                    accessibilityLabel="Open file explorer"
-                    icon={Folder}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.openFileExplorer',
+                      'Open file explorer'
+                    )}
+                    icon="folder"
+                    isSelected={activePanel === 'files'}
                     onPress={() => handlePanelTap('files')}
                   />
                 ) : null}
                 {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'sourceControl'}
-                    accessibilityLabel="Open source control"
-                    icon={GitMerge}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.openSourceControl',
+                      'Open source control'
+                    )}
+                    icon="source-control"
+                    isSelected={activePanel === 'sourceControl'}
                     onPress={() => handlePanelTap('sourceControl')}
                   />
                 )}
                 {showHeaderMoreButton ? (
-                  <MobileSessionHeaderIconButton
-                    active={activePanel === 'pr'}
-                    accessibilityLabel="More session actions"
-                    icon={MoreHorizontal}
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.session.header.moreActions',
+                      'More session actions'
+                    )}
+                    icon="more"
+                    isSelected={activePanel === 'pr'}
                     onPress={() => setShowHeaderMoreActions(true)}
                   />
                 ) : null}
@@ -3048,9 +3068,13 @@ export default function SessionScreen() {
         {useNativeSessionHeader && connState !== 'connected' ? (
           <MobileGlassSurface className="mx-3 mt-2 overflow-hidden rounded-xl" isFunctional>
             <Pressable
-              accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+              accessibilityLabel={
+                showConnectionRetry
+                  ? translate('mobile.session.header.reconnectToDesktop', 'Reconnect to desktop')
+                  : undefined
+              }
               accessibilityRole={showConnectionRetry ? 'button' : undefined}
-              className="active:bg-accent flex-row items-center gap-2 rounded-xl px-3 py-2"
+              className="active:bg-accent min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-2"
               disabled={!showConnectionRetry}
               onPress={() => {
                 if (hostId) {
@@ -3086,7 +3110,13 @@ export default function SessionScreen() {
                 setShowQuickCommands(true)
                 return
               }
-              showToast('Checking desktop capabilities - try again in a moment', 1600)
+              showToast(
+                translate(
+                  'mobile.session.capabilities.checking',
+                  'Checking desktop capabilities - try again in a moment'
+                ),
+                1600
+              )
             }}
           />
         ) : null}
@@ -3098,47 +3128,25 @@ export default function SessionScreen() {
         <View className="flex-1 flex-row" onLayout={handleSessionContentRowLayout}>
           <View className="min-w-0 flex-1">
             {createWarning ? (
-              <MobileGlassSurface
-                className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2"
-                isFunctional
-              >
-                <AlertTriangle size={16} colorClassName="accent-amber-500" />
-                <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
-                <MobileGlassIconButton
-                  accessibilityLabel="Dismiss workspace creation warning"
-                  icon="close"
-                  onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
-                  size="small"
-                />
-              </MobileGlassSurface>
+              <MobileSessionCreationWarning
+                message={createWarning}
+                onDismiss={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
+              />
             ) : null}
 
-            {showLoadingState ? (
-              <View className={styles.emptyState}>
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              </View>
-            ) : showEmptyState ? (
-              <View className={styles.emptyState}>
-                <Text className={styles.emptyText}>No tabs in this session</Text>
-                {createError ? (
-                  <Text className="text-destructive mb-2 text-xs">{createError}</Text>
-                ) : null}
-                <View className="flex-row flex-wrap justify-center gap-2">
-                  <MobileGlassTextButton
-                    disabled={
-                      creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
-                    }
-                    label={
-                      creating || creatingBrowser || creatingMarkdown ? 'Creating...' : 'Create Tab'
-                    }
-                    onPress={() => {
-                      setCreateError('')
-                      setShowCreateTabDrawer(true)
-                    }}
-                    size="large"
-                  />
-                </View>
-              </View>
+            {showLoadingState || showEmptyState ? (
+              <MobileSessionCreationPlaceholder
+                createError={createError}
+                disabled={
+                  creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
+                }
+                isCreating={creating || creatingBrowser || creatingMarkdown}
+                loading={showLoadingState}
+                onCreateTab={() => {
+                  setCreateError('')
+                  setShowCreateTabDrawer(true)
+                }}
+              />
             ) : activeMarkdownTab ? (
               <View className={styles.markdownFrame}>
                 <MarkdownReader
@@ -3165,7 +3173,7 @@ export default function SessionScreen() {
               <View className={styles.markdownFrame}>
                 <FileReader
                   doc={fileDocs.get(activeFileTab.id)}
-                  title={activeFileTab.title || 'File'}
+                  title={activeFileTab.title || translate('mobile.files.defaultTitle', 'File')}
                   relativePath={activeFileTab.relativePath}
                   language={activeFileTab.language}
                   diffCommentActions={
@@ -3219,7 +3227,8 @@ export default function SessionScreen() {
               <View className={styles.emptyState}>
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 <Text className={styles.emptyText}>
-                  {activePendingTerminalTab.title || 'Loading terminal'}
+                  {activePendingTerminalTab.title ||
+                    translate('mobile.terminal.loading', 'Loading terminal')}
                 </Text>
               </View>
             ) : (
@@ -3296,112 +3305,31 @@ export default function SessionScreen() {
                   }
                 ]}
               >
-                {/* Accessory keys */}
-                <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-                  {/* Why: a fixed, always-visible escape hatch from the open
-                  keyboard. Kept outside the horizontal ScrollView so it does
-                  not scroll away, and out of the terminal-byte shortcut path so
-                  it cannot be hidden by user shortcut customization (#5106). */}
-                  {keyboardLift > 0 && (
-                    <MobileTerminalAccessoryKey
-                      icon="dismiss-keyboard"
-                      onPress={dismissSoftwareKeyboard}
-                      hitSlop={8}
-                      accessibilityLabel="Dismiss keyboard"
-                      accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
-                    />
-                  )}
-                  {/* Why: with default tap handling the first tap on any accessory
-                  key dismisses the open keyboard and is swallowed, so live
-                  input lost its keyboard on every Esc/Tab press (#5106). */}
-                  <ScrollView
-                    className="min-w-0 flex-1 overflow-visible"
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerClassName="gap-2 py-2"
-                    keyboardShouldPersistTaps="always"
-                  >
-                    <MobileTerminalAccessoryKey
-                      disabled={!canSend}
-                      icon={isPhoneMode(activeHandle) ? 'desktop' : 'phone'}
-                      onPress={() => {
-                        if (activeHandle) {
-                          void toggleDisplayMode(activeHandle)
-                        }
-                      }}
-                      accessibilityLabel={
-                        isPhoneMode(activeHandle)
-                          ? 'Switch to desktop mode'
-                          : 'Switch to phone mode'
-                      }
-                    />
-                    <MobileTerminalAccessoryKey
-                      disabled={!canSend}
-                      icon="live-input"
-                      isSelected={liveInputEnabled}
-                      onPress={toggleLiveInput}
-                      accessibilityLabel={
-                        liveInputEnabled
-                          ? 'Switch to buffered command input'
-                          : 'Switch to live terminal input'
-                      }
-                    />
-                    {canPaste && (
-                      <MobileTerminalAccessoryKey
-                        disabled={!canSend}
-                        label="Paste"
-                        onPress={() => void handlePaste()}
-                        accessibilityLabel="Paste from clipboard"
-                      />
-                    )}
-                    {visibleBuiltInAccessoryKeys.map((key) => (
-                      <MobileTerminalAccessoryKey
-                        key={key.id}
-                        disabled={!canSend}
-                        label={key.label}
-                        onPressIn={() => {
-                          if (!key.repeatable) {
-                            return
-                          }
-                          const input = createTerminalLiveAccessoryInput(key)
-                          void handleAccessoryKey(input)
-                          startAccessoryRepeat(input)
-                        }}
-                        onPressOut={() => {
-                          if (key.repeatable) {
-                            stopAccessoryRepeat()
-                          }
-                        }}
-                        onPress={() => {
-                          if (key.repeatable) {
-                            return
-                          }
-                          void handleAccessoryKey(createTerminalLiveAccessoryInput(key))
-                        }}
-                        accessibilityLabel={key.accessibilityLabel ?? `Send ${key.label}`}
-                      />
-                    ))}
-                    {customKeys.map((key) => (
-                      <MobileTerminalAccessoryKey
-                        key={key.id}
-                        disabled={!canSend}
-                        label={key.label}
-                        onPress={() => void handleAccessoryKey({ bytes: key.bytes })}
-                        onLongPress={() => {
-                          triggerMediumImpact()
-                          setDeleteKeyTarget(key)
-                        }}
-                        delayLongPress={400}
-                        accessibilityLabel={`Send ${key.label}`}
-                      />
-                    ))}
-                    <MobileTerminalAccessoryKey
-                      icon="add"
-                      onPress={() => setShowCustomKeyModal(true)}
-                      accessibilityLabel="Add custom shortcut"
-                    />
-                  </ScrollView>
-                </MobileGlassGroup>
+                <MobileTerminalAccessoryBar
+                  builtInKeys={visibleBuiltInAccessoryKeys}
+                  canPaste={canPaste}
+                  canSend={canSend}
+                  customKeys={customKeys}
+                  isKeyboardVisible={keyboardLift > 0}
+                  isPhoneDisplayMode={isPhoneMode(activeHandle)}
+                  liveInputEnabled={liveInputEnabled}
+                  onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
+                  onAddCustomKey={() => setShowCustomKeyModal(true)}
+                  onCustomKeyLongPress={(key) => {
+                    triggerMediumImpact()
+                    setDeleteKeyTarget(key)
+                  }}
+                  onDismissKeyboard={dismissSoftwareKeyboard}
+                  onPaste={() => void handlePaste()}
+                  onRepeatStart={startAccessoryRepeat}
+                  onRepeatStop={stopAccessoryRepeat}
+                  onToggleDisplayMode={() => {
+                    if (activeHandle) {
+                      void toggleDisplayMode(activeHandle)
+                    }
+                  }}
+                  onToggleLiveInput={toggleLiveInput}
+                />
 
                 {/* Input bar */}
                 <MobileTerminalInputBar
@@ -3480,266 +3408,284 @@ export default function SessionScreen() {
         onLaunch={launchQuickCommand}
       />
 
-      <ActionSheetModal
-        visible={showCreateTabDrawer}
-        title="New Tab"
-        actions={[
-          ...createTabAgentActions,
-          {
-            label: 'Terminal',
-            icon: SquareTerminal,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              void handleCreateTerminal()
-            }
-          },
-          // Why: these RPCs resolve a real worktree; the floating sentinel is terminal-only.
-          ...(isFloatingWorkspaceRoute
-            ? []
-            : [
-                {
-                  label: 'Browser',
-                  icon: Globe,
-                  onPress: () => {
-                    setShowCreateTabDrawer(false)
-                    if (browserScreencastSupported !== true) {
-                      showToast('Desktop update required for mobile browser streaming', 1600)
-                      return
-                    }
-                    setShowCreateBrowserModal(true)
-                  }
-                },
-                {
-                  label: 'Markdown Note',
-                  icon: FileText,
-                  onPress: () => {
-                    setShowCreateTabDrawer(false)
-                    void handleCreateMarkdownNote()
-                  }
-                }
-              ])
-        ]}
-        onClose={() => setShowCreateTabDrawer(false)}
-      />
-
-      <ActionSheetModal
-        visible={pendingDiffNotesDelivery !== null}
-        title="Send Review Notes"
-        message="Choose an agent session for the current notes."
-        actions={[
-          ...sendDiffNotesAgentActions,
-          {
-            label: 'Copy Notes',
-            icon: Copy,
-            onPress: () => {
-              const delivery = pendingDiffNotesDelivery
-              setPendingDiffNotesDelivery(null)
-              if (!delivery) {
-                return
-              }
-              void Clipboard.setStringAsync(delivery.prompt)
-                .then(() => {
-                  triggerSuccess()
-                  showToast('Notes copied')
-                })
-                .catch(() => {
-                  triggerError()
-                  showToast("Couldn't copy notes", 1500)
-                })
-            }
-          }
-        ]}
-        onClose={() => setPendingDiffNotesDelivery(null)}
-      />
-
-      <ActionSheetModal
-        visible={actionTarget != null}
-        title={actionTarget?.title || 'Terminal'}
-        actions={getMobileTerminalActionSheetActions({
-          target: actionTarget,
-          tabs: sessionTabs.filter((tab) => tab.type === 'terminal'),
-          isTabChatView: nativeChatController.isTabChatView,
-          nativeChatTranscriptIsLocalReadable,
-          onDismiss: () => setActionTarget(null),
-          onToggleChat: toggleTabChatView,
-          isPhoneMode,
-          onToggleDisplayMode: (handle) => void toggleDisplayMode(handle),
-          onRename: setRenameTarget,
-          onClear: (target) => void handleClearTerminal(target),
-          onClose: (target) => void handleCloseTerminal(target)
-        })}
-        onClose={() => setActionTarget(null)}
-      />
-      <ActionSheetModal
-        visible={markdownActionTarget != null}
-        title={markdownActionTarget?.title || 'Markdown'}
-        actions={[
-          {
-            label: 'Refresh',
-            icon: RefreshCw,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                discardMarkdownLocalContent(target)
-              }
-            }
-          },
-          {
-            label: 'Copy Path',
-            icon: FileText,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                void Clipboard.setStringAsync(target.relativePath || target.filePath)
-                showToast('Path copied')
-              }
-            }
-          },
-          {
-            label: 'Close',
-            destructive: true,
-            onPress: () => {
-              const target = markdownActionTarget
-              setMarkdownActionTarget(null)
-              if (target) {
-                void handleCloseSessionTab(target)
-              }
-            }
-          }
-        ]}
-        onClose={() => setMarkdownActionTarget(null)}
-      />
-      <ActionSheetModal
-        visible={fileActionTarget != null}
-        title={fileActionTarget?.title || 'File'}
-        actions={[
-          {
-            label: 'Refresh',
-            icon: RefreshCw,
-            onPress: () => {
-              const target = fileActionTarget
-              setFileActionTarget(null)
-              if (target) {
-                void readFileTab(target)
-              }
-            }
-          },
-          {
-            label: 'Close',
-            destructive: true,
-            onPress: () => {
-              const target = fileActionTarget
-              setFileActionTarget(null)
-              if (target) {
-                void handleCloseSessionTab(target)
-              }
-            }
-          }
-        ]}
-        onClose={() => setFileActionTarget(null)}
-      />
-      <MobileBrowserTabActionSheet
-        target={browserActionTarget}
-        onClose={() => setBrowserActionTarget(null)}
-        onNavigate={handleBrowserNavigationCommand}
-        onCloseTab={handleCloseSessionTab}
-      />
-      <ActionSheetModal
-        visible={leaveDrafts != null}
-        title="Unsaved markdown changes"
-        message="Copy or discard phone drafts before leaving."
-        actions={[
-          {
-            label: 'Copy All & Leave',
-            icon: FileText,
-            onPress: () => {
-              const drafts = leaveDrafts ?? []
-              const combined = drafts
-                .map((draft) => `# ${draft.title}\n\n${draft.content}`)
-                .join('\n\n---\n\n')
-              void Clipboard.setStringAsync(combined)
-                .then(() => {
-                  setLeaveDrafts(null)
-                  leaveSession()
-                })
-                .catch(() => {
-                  triggerError()
-                  showToast("Couldn't copy drafts", 1500)
-                })
-            }
-          },
-          {
-            label: 'Discard & Leave',
-            destructive: true,
-            onPress: () => {
-              setLeaveDrafts(null)
-              leaveSession()
-            }
-          }
-        ]}
-        onClose={() => setLeaveDrafts(null)}
-      />
-      <ConfirmModal
-        visible={discardMarkdownTarget != null}
-        title="Discard Changes"
-        message="Replace the phone draft with the latest desktop file?"
-        confirmLabel="Discard"
-        destructive
-        onConfirm={confirmDiscardMarkdown}
-        onCancel={() => setDiscardMarkdownTarget(null)}
-      />
-      <TextInputModal
-        visible={renameTarget != null}
-        title="Rename Terminal"
-        defaultValue={renameTarget?.title || 'Terminal'}
-        placeholder="Terminal name"
-        onSubmit={(value) => void handleRenameTerminal(value)}
-        onCancel={() => setRenameTarget(null)}
-      />
-      <TextInputModal
-        visible={showCreateBrowserModal}
-        title="New Browser"
-        message="Enter a URL, or leave blank for a new tab."
-        defaultValue=""
-        placeholder="https://example.com"
-        submitLabel="Open"
-        allowEmpty
-        selectTextOnFocus
-        keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
-        onSubmit={(value) => {
-          void handleCreateBrowser(value).then((created) => {
-            if (created) {
-              setShowCreateBrowserModal(false)
-            }
-          })
+      <BottomDrawerModalHost
+        visible={
+          showCreateTabDrawer ||
+          showCreateBrowserModal ||
+          pendingDiffNotesDelivery !== null ||
+          actionTarget !== null ||
+          renameTarget !== null ||
+          markdownActionTarget !== null ||
+          discardMarkdownTarget !== null ||
+          fileActionTarget !== null ||
+          browserActionTarget !== null ||
+          leaveDrafts !== null
+        }
+        onRequestClose={() => {
+          setShowCreateTabDrawer(false)
+          setShowCreateBrowserModal(false)
+          setPendingDiffNotesDelivery(null)
+          setActionTarget(null)
+          setRenameTarget(null)
+          setMarkdownActionTarget(null)
+          setDiscardMarkdownTarget(null)
+          setFileActionTarget(null)
+          setBrowserActionTarget(null)
+          setLeaveDrafts(null)
         }}
-        onCancel={() => setShowCreateBrowserModal(false)}
-      />
+      >
+        <CreateTabDrawers
+          actionVisible={showCreateTabDrawer}
+          browserInputVisible={showCreateBrowserModal}
+          agentActions={createTabAgentActions}
+          browserSupported={browserScreencastSupported === true}
+          isFloatingWorkspace={isFloatingWorkspaceRoute}
+          onActionClose={() => setShowCreateTabDrawer(false)}
+          onBrowserInputClose={() => setShowCreateBrowserModal(false)}
+          onBrowserSubmit={(value) => {
+            void handleCreateBrowser(value).then((created) => {
+              if (created) {
+                setShowCreateBrowserModal(false)
+              }
+            })
+          }}
+          onBrowserUnavailable={() => showToast(BROWSER_STREAMING_UNAVAILABLE_MESSAGE, 1600)}
+          onCreateMarkdown={() => void handleCreateMarkdownNote()}
+          onCreateTerminal={() => void handleCreateTerminal()}
+          onOpenBrowserInput={() => setShowCreateBrowserModal(true)}
+        />
+
+        <ActionSheetModal
+          visible={pendingDiffNotesDelivery !== null}
+          title={translate('mobile.session.reviewNotes.title', 'Send Review Notes')}
+          message={translate(
+            'mobile.session.reviewNotes.message',
+            'Choose an agent session for the current notes.'
+          )}
+          actions={[
+            ...sendDiffNotesAgentActions,
+            {
+              id: 'copy-notes',
+              label: translate('mobile.session.reviewNotes.copy', 'Copy Notes'),
+              icon: Copy,
+              dismiss: 'immediate',
+              onPress: () => {
+                const delivery = pendingDiffNotesDelivery
+                if (!delivery) {
+                  return
+                }
+                void Clipboard.setStringAsync(delivery.prompt)
+                  .then(() => {
+                    triggerSuccess()
+                    showToast(translate('mobile.session.reviewNotes.copied', 'Notes copied'))
+                  })
+                  .catch(() => {
+                    triggerError()
+                    showToast(
+                      translate('mobile.session.reviewNotes.copyFailed', "Couldn't copy notes"),
+                      1500
+                    )
+                  })
+              }
+            }
+          ]}
+          onClose={() => setPendingDiffNotesDelivery(null)}
+        />
+
+        <ActionSheetModal
+          visible={actionTarget != null}
+          title={
+            actionTarget?.title ?? translate('mobile.session.terminalActions.title', 'Terminal')
+          }
+          actions={getMobileTerminalActionSheetActions({
+            target: actionTarget,
+            tabs: sessionTabs.filter((tab) => tab.type === 'terminal'),
+            isTabChatView: nativeChatController.isTabChatView,
+            nativeChatTranscriptIsLocalReadable,
+            onToggleChat: toggleTabChatView,
+            isPhoneMode,
+            onToggleDisplayMode: (handle) => void toggleDisplayMode(handle),
+            onRename: setRenameTarget,
+            onClear: (target) => void handleClearTerminal(target),
+            onClose: (target) => void handleCloseTerminal(target)
+          })}
+          onClose={() => setActionTarget(null)}
+        />
+        <ActionSheetModal
+          visible={markdownActionTarget != null}
+          title={
+            markdownActionTarget?.title ??
+            translate('mobile.session.markdownActions.title', 'Markdown')
+          }
+          actions={[
+            {
+              id: 'refresh-markdown',
+              label: translate('mobile.session.markdownActions.refresh', 'Refresh'),
+              icon: RefreshCw,
+              dismiss: 'immediate',
+              onPress: () => {
+                const target = markdownActionTarget
+                if (target) {
+                  discardMarkdownLocalContent(target)
+                }
+              }
+            },
+            {
+              id: 'copy-markdown-path',
+              label: translate('mobile.session.markdownActions.copyPath', 'Copy Path'),
+              icon: FileText,
+              dismiss: 'immediate',
+              onPress: () => {
+                const target = markdownActionTarget
+                if (target) {
+                  void Clipboard.setStringAsync(target.relativePath || target.filePath)
+                  showToast(translate('mobile.session.markdownActions.pathCopied', 'Path copied'))
+                }
+              }
+            },
+            {
+              id: 'close-markdown',
+              label: translate('mobile.session.markdownActions.close', 'Close'),
+              icon: X,
+              dismiss: 'immediate',
+              onPress: () => {
+                const target = markdownActionTarget
+                if (target) {
+                  void handleCloseSessionTab(target)
+                }
+              }
+            }
+          ]}
+          onClose={() => setMarkdownActionTarget(null)}
+        />
+        <ActionSheetModal
+          visible={fileActionTarget != null}
+          title={fileActionTarget?.title ?? translate('mobile.session.fileActions.title', 'File')}
+          actions={[
+            {
+              id: 'refresh-file',
+              label: translate('mobile.session.fileActions.refresh', 'Refresh'),
+              icon: RefreshCw,
+              dismiss: 'immediate',
+              onPress: () => {
+                const target = fileActionTarget
+                if (target) {
+                  void readFileTab(target)
+                }
+              }
+            },
+            {
+              id: 'close-file',
+              label: translate('mobile.session.fileActions.close', 'Close'),
+              icon: X,
+              dismiss: 'immediate',
+              onPress: () => {
+                const target = fileActionTarget
+                if (target) {
+                  void handleCloseSessionTab(target)
+                }
+              }
+            }
+          ]}
+          onClose={() => setFileActionTarget(null)}
+        />
+        <MobileBrowserTabActionSheet
+          target={browserActionTarget}
+          onClose={() => setBrowserActionTarget(null)}
+          onNavigate={handleBrowserNavigationCommand}
+          onCloseTab={handleCloseSessionTab}
+        />
+        <ActionSheetModal
+          visible={leaveDrafts != null}
+          title={translate('mobile.session.unsavedDrafts.title', 'Unsaved markdown changes')}
+          message={translate(
+            'mobile.session.unsavedDrafts.message',
+            'Copy or discard phone drafts before leaving.'
+          )}
+          actions={[
+            {
+              id: 'copy-drafts-and-leave',
+              label: translate('mobile.session.unsavedDrafts.copyAndLeave', 'Copy All & Leave'),
+              icon: FileText,
+              dismiss: 'on-success',
+              onPress: async () => {
+                const drafts = leaveDrafts ?? []
+                const combined = drafts
+                  .map((draft) => `# ${draft.title}\n\n${draft.content}`)
+                  .join('\n\n---\n\n')
+                try {
+                  await Clipboard.setStringAsync(combined)
+                  leaveSession()
+                  return true
+                } catch {
+                  triggerError()
+                  showToast(
+                    translate('mobile.session.unsavedDrafts.copyFailed', "Couldn't copy drafts"),
+                    1500
+                  )
+                  return false
+                }
+              }
+            },
+            {
+              id: 'discard-drafts-and-leave',
+              label: translate('mobile.session.unsavedDrafts.discardAndLeave', 'Discard & Leave'),
+              icon: Trash2,
+              destructive: true,
+              dismiss: 'immediate',
+              onPress: leaveSession
+            }
+          ]}
+          onClose={() => setLeaveDrafts(null)}
+        />
+        <ConfirmModal
+          visible={discardMarkdownTarget != null}
+          title={translate('mobile.session.markdownDiscard.title', 'Discard Changes')}
+          message={translate(
+            'mobile.session.markdownDiscard.message',
+            'Replace the phone draft with the latest desktop file?'
+          )}
+          confirmLabel={translate('mobile.session.markdownDiscard.confirm', 'Discard')}
+          destructive
+          onConfirm={confirmDiscardMarkdown}
+          onCancel={() => setDiscardMarkdownTarget(null)}
+        />
+        <TextInputModal
+          visible={renameTarget != null}
+          title={translate('mobile.session.terminalRename.title', 'Rename Terminal')}
+          defaultValue={
+            renameTarget?.title ??
+            translate('mobile.session.terminalRename.defaultName', 'Terminal')
+          }
+          placeholder={translate('mobile.session.terminalRename.placeholder', 'Terminal name')}
+          onSubmit={(value) => void handleRenameTerminal(value)}
+          onCancel={() => setRenameTarget(null)}
+        />
+      </BottomDrawerModalHost>
       <CustomKeyModal
         visible={showCustomKeyModal}
         onClose={() => setShowCustomKeyModal(false)}
         onKeysChanged={setCustomKeys}
         onManageShortcuts={handleManageShortcuts}
       />
-      <ActionSheetModal
+      <ConfirmModal
         visible={deleteKeyTarget != null}
-        title={deleteKeyTarget?.label ?? 'Shortcut'}
-        message="Remove this custom shortcut?"
-        actions={[
-          {
-            label: 'Remove',
-            destructive: true,
-            onPress: () => {
-              if (deleteKeyTarget) {
-                void handleDeleteCustomKey(deleteKeyTarget)
-              }
-              setDeleteKeyTarget(null)
-            }
+        title={translate('mobile.session.customShortcut.removeTitle', 'Remove Shortcut')}
+        message={translate(
+          'mobile.session.customShortcut.removeMessage',
+          'Remove "{{label}}" from your custom shortcuts?',
+          { label: deleteKeyTarget?.label ?? '' }
+        )}
+        confirmLabel={translate('mobile.session.customShortcut.removeConfirm', 'Remove')}
+        destructive
+        onConfirm={() => {
+          const target = deleteKeyTarget
+          setDeleteKeyTarget(null)
+          if (target) {
+            void handleDeleteCustomKey(target)
           }
-        ]}
-        onClose={() => setDeleteKeyTarget(null)}
+        }}
+        onCancel={() => setDeleteKeyTarget(null)}
       />
     </View>
   )

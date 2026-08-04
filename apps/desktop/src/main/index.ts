@@ -2387,6 +2387,7 @@ app.whenReady().then(async () => {
     // across restarts/updates. See persistence.ts:getCanonicalUserDataPath.
     userDataPath: getCanonicalUserDataPath(),
     enableWebSocket: true,
+    enableDevelopmentMobilePairing: is.dev,
     ...(hasIsolatedUserData ? { wsPort: 0 } : {}),
     ...(devWsPort !== undefined ? { wsPort: devWsPort } : {}),
     ...(serveOptions?.wsPort !== undefined

@@ -2,24 +2,39 @@ import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
-import { PickerModal, type PickerOption } from '~/components/picker-modal'
+import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { CaretRight as ChevronRight, Globe } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import {
   loadTerminalLinkOpenMode,
   saveTerminalLinkOpenMode,
   type MobileTerminalLinkOpenMode
 } from '~/storage/preferences'
 
-const LINK_MODE_OPTIONS: PickerOption<MobileTerminalLinkOpenMode>[] = [
+const LINK_MODE_OPTIONS: SelectionDrawerOption<
+  MobileTerminalLinkOpenMode,
+  MobileTerminalLinkOpenMode
+>[] = [
   {
+    id: 'yiru-browser',
     value: 'yiru-browser',
-    label: 'Yiru browser on desktop',
-    subtitle: 'Open in the streamed browser from your paired desktop.'
+    label: translate(
+      'mobile.browserSettings.linkMode.yiruBrowser.label',
+      'Yiru browser on desktop'
+    ),
+    supportingText: translate(
+      'mobile.browserSettings.linkMode.yiruBrowser.description',
+      'Open in the streamed browser from your paired desktop.'
+    )
   },
   {
+    id: 'phone-browser',
     value: 'phone-browser',
-    label: 'Phone browser',
-    subtitle: 'Open in Safari, Chrome, or another browser on this phone.'
+    label: translate('mobile.browserSettings.linkMode.phoneBrowser.label', 'Phone browser'),
+    supportingText: translate(
+      'mobile.browserSettings.linkMode.phoneBrowser.description',
+      'Open in Safari, Chrome, or another browser on this phone.'
+    )
   }
 ]
 
@@ -46,13 +61,21 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
     <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
         <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
-          LINKS
+          {translate('mobile.browserSettings.links.heading', 'LINKS')}
         </Text>
         <Text className="text-muted-foreground px-1 text-xs leading-5">
-          Choose where HTTP(S) links tapped in terminal output open.
+          {translate(
+            'mobile.browserSettings.links.description',
+            'Choose where HTTP(S) links tapped in terminal output open.'
+          )}
         </Text>
         <MobileContentSection className="mt-2">
           <Pressable
+            accessibilityLabel={translate(
+              'mobile.browserSettings.openTerminalLinks.label',
+              'Open terminal links'
+            )}
+            accessibilityRole="button"
             className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setPickerOpen(true)}
           >
@@ -60,7 +83,9 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
               <Globe size={16} colorClassName="accent-muted-foreground" />
             </View>
             <View className="flex-1">
-              <Text className="text-foreground text-sm font-medium">Open terminal links</Text>
+              <Text className="text-foreground text-sm font-medium">
+                {translate('mobile.browserSettings.openTerminalLinks.label', 'Open terminal links')}
+              </Text>
               <Text className="text-muted-foreground mt-1 text-xs">{linkModeLabel(linkMode)}</Text>
             </View>
             <View className="w-5 items-center">
@@ -70,11 +95,11 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
         </MobileContentSection>
       </ScrollView>
 
-      <PickerModal<MobileTerminalLinkOpenMode>
+      <SelectionDrawer<MobileTerminalLinkOpenMode, MobileTerminalLinkOpenMode>
         visible={pickerOpen}
-        title="Open terminal links"
+        title={translate('mobile.browserSettings.openTerminalLinks.label', 'Open terminal links')}
         options={LINK_MODE_OPTIONS}
-        selected={linkMode}
+        selectedId={linkMode}
         onSelect={selectLinkMode}
         onClose={() => setPickerOpen(false)}
       />

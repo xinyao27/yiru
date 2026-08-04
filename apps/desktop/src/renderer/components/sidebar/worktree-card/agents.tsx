@@ -18,6 +18,8 @@ import { deriveRunningAgentSendTargets } from '../running-agent-targets'
 import { useWorktreeAgentRows } from '../use-worktree-agent-rows'
 import { useWorktreeAgentExpansionState } from './agents-expansion-state'
 import { CompactAgentRow } from './compact-agent-row'
+import { buildCompactAgentBranches, type CompactAgentBranch } from './compact-agent-tree'
+import { InlineAgentRail, type InlineAgentRailRootRow } from './inline-agent-rail'
 import { selectSendTargetControlInputs, selectSendTargetInputs } from './send-target-inputs'
 
 export const SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT =
@@ -31,6 +33,7 @@ type WorktreeCardAgentsProps = {
   worktreeId: string
   agents?: DashboardAgentRowData[]
   hasLeadingStatusIcon?: boolean
+  inlineRailCardPaddingLeft?: string
   /** Controls spacing from the card body above. Passed in so the parent can
    *  decide whether a divider is appropriate — e.g. suppressed when the card
    *  chrome already provides visual separation. */
@@ -46,7 +49,13 @@ type WorktreeCardAgentsProps = {
  * derivation stay consistent with the inline agent activity on each card.
  */
 const WorktreeCardAgents = React.memo(function WorktreeCardAgents(props: WorktreeCardAgentsProps) {
-  const { worktreeId, agents: precomputedAgents, hasLeadingStatusIcon = false, className } = props
+  const {
+    worktreeId,
+    agents: precomputedAgents,
+    hasLeadingStatusIcon = false,
+    inlineRailCardPaddingLeft,
+    className
+  } = props
   const selectedAgents = useWorktreeAgentRows(worktreeId, precomputedAgents === undefined)
   const agents = precomputedAgents ?? selectedAgents
   if (agents.length === 0) {
@@ -60,6 +69,7 @@ const WorktreeCardAgents = React.memo(function WorktreeCardAgents(props: Worktre
       worktreeId={worktreeId}
       agents={agents}
       hasLeadingStatusIcon={hasLeadingStatusIcon}
+      inlineRailCardPaddingLeft={inlineRailCardPaddingLeft}
       className={className}
     />
   )
@@ -69,13 +79,14 @@ type WorktreeCardAgentsBodyProps = {
   worktreeId: string
   agents: DashboardAgentRowData[]
   hasLeadingStatusIcon: boolean
+  inlineRailCardPaddingLeft?: string
   className?: string
 }
 
 const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   props: WorktreeCardAgentsBodyProps
 ) {
-  const { worktreeId, agents, hasLeadingStatusIcon, className } = props
+  const { worktreeId, agents, hasLeadingStatusIcon, inlineRailCardPaddingLeft, className } = props
   const agentActivityDisplayMode =
     useAppStore((s) => s.agentActivityDisplayMode) ?? DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE
   const dropAgentStatus = useAppStore((s) => s.dropAgentStatus)
@@ -225,6 +236,18 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   // toggle no longer resets it (which read as one section expanding the other).
   const { collapsedLineageParents, toggleLineageParent: toggleLineageParentState } =
     useWorktreeAgentExpansionState(worktreeId)
+  const compactRootBranches = useMemo(
+    () => buildCompactAgentBranches(agents, collapsedLineageParents),
+    [agents, collapsedLineageParents]
+  )
+  const compactRootRailRows = useMemo<InlineAgentRailRootRow[]>(
+    () =>
+      compactRootBranches.map((branch) => ({
+        paneKey: branch.agent.paneKey,
+        visibleRowCount: branch.visibleRowCount
+      })),
+    [compactRootBranches]
+  )
 
   const toggleLineageParent = useCallback(
     (paneKey: string) => {
@@ -329,25 +352,35 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
   }
 
   const renderCompactAgentBranch = (
-    agent: DashboardAgentRowData,
-    ancestorPaneKeys: ReadonlySet<string> = new Set()
+    branch: CompactAgentBranch,
+    siblingPosition?: 'middle' | 'last'
   ): React.ReactNode => {
-    if (ancestorPaneKeys.has(agent.paneKey)) {
-      return null
-    }
-    const childAgents = childrenByParentPaneKey.get(agent.paneKey) ?? []
+    const { agent, children: childBranches, isExpanded } = branch
     const sendTarget = isAgentSendTargetModeActive
       ? (sendTargetsByPaneKey.get(agent.paneKey) ?? {
           status: 'disabled' as const,
           disabledReason: 'Agent is not available'
         })
       : undefined
-    const descendantAncestorPaneKeys = new Set(ancestorPaneKeys)
-    descendantAncestorPaneKeys.add(agent.paneKey)
     return (
-      <React.Fragment key={agent.paneKey}>
-        {/* Why: compact rows carry no disclosure — every agent under a workspace
-            stays laid out, so there is no collapsed state to toggle. */}
+      <div className="relative" key={agent.paneKey}>
+        {siblingPosition ? (
+          <>
+            <span
+              aria-hidden="true"
+              className={cn(
+                'bg-sidebar-border pointer-events-none absolute -left-1 top-0 z-10 w-px',
+                siblingPosition === 'middle' ? 'bottom-0' : 'h-3'
+              )}
+            />
+            <span
+              aria-hidden="true"
+              className="bg-sidebar-border pointer-events-none absolute top-3 -left-1 z-10 h-px w-1"
+            />
+          </>
+        ) : null}
+        {/* Why: disclosure is passed as stable data/callbacks so streamed status
+            updates do not rebuild per-row closures. */}
         <CompactAgentRow
           agent={agent}
           now={now}
@@ -358,41 +391,70 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           sendTargetDisabledReason={sendTarget?.disabledReason}
           onSendTargetClick={isAgentSendTargetModeActive ? handleSendTargetClick : undefined}
           isFocusedPane={agent.paneKey === focusedAgentPaneKey}
+          childAgentCount={childBranches.length > 0 ? childBranches.length : undefined}
+          childAgentsExpanded={isExpanded}
+          onToggleChildAgents={childBranches.length > 0 ? toggleLineageParent : undefined}
+          // Why: retained completion rows outlive the tab they came from, so
+          // the compact list is the only surface left that can clear them.
+          // Without an X here a stale row has no user-reachable exit.
+          onDismiss={agent.rowSource === 'subagent' ? undefined : handleDismissAgent}
         />
-        {childAgents.length > 0 ? (
-          <div className="ml-3 flex flex-col border-l border-l-[color:color-mix(in_srgb,var(--sidebar-foreground)_16%,transparent)] pl-1 dark:border-l-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
-            {childAgents.map((childAgent) =>
-              renderCompactAgentBranch(childAgent, descendantAncestorPaneKeys)
+        {childBranches.length > 0 ? (
+          <div
+            className={cn(
+              'ml-3 grid transition-[grid-template-rows] duration-150 ease-out motion-reduce:transition-none',
+              isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             )}
+            aria-hidden={!isExpanded}
+            inert={!isExpanded}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="flex flex-col pl-1">
+                {childBranches.map((childBranch, index) =>
+                  renderCompactAgentBranch(
+                    childBranch,
+                    index === childBranches.length - 1 ? 'last' : 'middle'
+                  )
+                )}
+              </div>
+            </div>
           </div>
         ) : null}
-      </React.Fragment>
+      </div>
     )
   }
 
   if (agentActivityDisplayMode === 'compact') {
     return (
-      <div
-        className={cn(
-          // Why: compact rows read as one continuous tree column, so they stack
-          // flush — a gap between them breaks the rail that runs alongside.
-          'mt-1 flex flex-col',
-          // Why: rows pull back by their own `px-1` so each agent glyph's left
-          // edge lands on the workspace title's text edge above it, leaving the
-          // status column free for the rail that joins them.
-          hasLeadingStatusIcon ? '-ms-1 w-[calc(100%+0.25rem)]' : '-ms-2 w-[calc(100%+0.5rem)]',
-          className
-        )}
-        onClick={stopBubble}
-        onDoubleClick={stopBubble}
-        onMouseDown={stopBubble}
-        onPointerDown={stopBubble}
-        role={hasLineage ? 'tree' : 'group'}
-        aria-label={translate('auto.components.sidebar.WorktreeCardAgents.1b0a156717', 'Agents')}
-        data-compact-agent-list="true"
-      >
-        {rootAgents.map((rootAgent) => renderCompactAgentBranch(rootAgent))}
-      </div>
+      <>
+        {inlineRailCardPaddingLeft ? (
+          <InlineAgentRail
+            cardPaddingLeft={inlineRailCardPaddingLeft}
+            rootRows={compactRootRailRows}
+          />
+        ) : null}
+        <div
+          className={cn(
+            // Why: compact rows read as one continuous tree column, so they stack
+            // flush — a gap between them breaks the rail that runs alongside.
+            'mt-1 flex flex-col',
+            // Why: rows pull back by their own `px-1` so each agent glyph's left
+            // edge lands on the workspace title's text edge above it, leaving the
+            // status column free for the rail that joins them.
+            hasLeadingStatusIcon ? '-ms-1 w-[calc(100%+0.25rem)]' : '-ms-2 w-[calc(100%+0.5rem)]',
+            className
+          )}
+          onClick={stopBubble}
+          onDoubleClick={stopBubble}
+          onMouseDown={stopBubble}
+          onPointerDown={stopBubble}
+          role={hasLineage ? 'tree' : 'group'}
+          aria-label={translate('auto.components.sidebar.WorktreeCardAgents.1b0a156717', 'Agents')}
+          data-compact-agent-list="true"
+        >
+          {compactRootBranches.map((rootBranch) => renderCompactAgentBranch(rootBranch))}
+        </div>
+      </>
     )
   }
 

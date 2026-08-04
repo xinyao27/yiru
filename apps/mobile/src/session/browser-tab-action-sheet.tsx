@@ -1,8 +1,10 @@
 import {
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  X
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import { ActionSheetModal } from '../components/action-sheet-modal'
 import type { MobileSessionTab } from './screen-state'
@@ -23,16 +25,21 @@ export function MobileBrowserTabActionSheet(props: {
   return (
     <ActionSheetModal
       visible={target != null}
-      title={target ? getMobileSessionTabTitle(target) : 'Browser'}
+      title={
+        target
+          ? getMobileSessionTabTitle(target)
+          : translate('mobile.session.browserActions.fallbackTitle', 'Browser')
+      }
       actions={[
         ...(target?.canGoBack
           ? [
               {
-                label: 'Back',
+                id: 'browser-back',
+                label: translate('mobile.session.browserActions.back', 'Back'),
                 icon: ChevronLeft,
+                dismiss: 'immediate' as const,
                 onPress: () => {
                   const current = target
-                  onClose()
                   if (current) {
                     onNavigate(current, 'browser.back')
                   }
@@ -43,11 +50,12 @@ export function MobileBrowserTabActionSheet(props: {
         ...(target?.canGoForward
           ? [
               {
-                label: 'Forward',
+                id: 'browser-forward',
+                label: translate('mobile.session.browserActions.forward', 'Forward'),
                 icon: ChevronRight,
+                dismiss: 'immediate' as const,
                 onPress: () => {
                   const current = target
-                  onClose()
                   if (current) {
                     onNavigate(current, 'browser.forward')
                   }
@@ -56,22 +64,24 @@ export function MobileBrowserTabActionSheet(props: {
             ]
           : []),
         {
-          label: 'Reload',
+          id: 'browser-reload',
+          label: translate('mobile.session.browserActions.reload', 'Reload'),
           icon: RefreshCw,
+          dismiss: 'immediate',
           onPress: () => {
             const current = target
-            onClose()
             if (current) {
               onNavigate(current, 'browser.reload')
             }
           }
         },
         {
-          label: 'Close',
-          destructive: true,
+          id: 'browser-close',
+          label: translate('mobile.session.browserActions.close', 'Close'),
+          icon: X,
+          dismiss: 'immediate',
           onPress: () => {
             const current = target
-            onClose()
             if (current) {
               onCloseTab(current)
             }

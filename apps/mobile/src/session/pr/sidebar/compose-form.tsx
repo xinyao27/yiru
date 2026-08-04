@@ -1,11 +1,13 @@
+import { cn } from 'cnfast'
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Switch, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import {
   ArrowRight,
   GitMerge,
@@ -13,6 +15,7 @@ import {
   Sparkle as Sparkles,
   Warning as TriangleAlert
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import { MobilePrBasePicker } from '~/session/pr/base-picker'
 import { hostedReviewCopy } from '~/source-control/hosted-review-copy'
@@ -26,7 +29,6 @@ import {
   shouldPushBeforeMobilePrCreate,
   type MobilePrPrefill
 } from '~/source-control/pr-create'
-import { cn } from '~/style/class-names'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 
@@ -56,7 +58,7 @@ export function MobilePrComposeForm({
   head,
   onCancel,
   onCreated
-}: Props) {
+}: Props): React.JSX.Element {
   const copy = hostedReviewCopy(prefill.provider)
   const ReviewIcon = prefill.provider === 'gitlab' ? GitMerge : GitPullRequestArrow
   const [title, setTitle] = useState(prefill.title)
@@ -83,7 +85,10 @@ export function MobilePrComposeForm({
         draft
       })
       if (!response.ok) {
-        setError(response.error?.message || 'Failed to generate PR fields')
+        setError(
+          response.error?.message ||
+            translate('mobile.pullRequest.compose.generate.error', 'Failed to generate PR fields')
+        )
         return
       }
       const result = (response as RpcSuccess).result as {
@@ -101,7 +106,11 @@ export function MobilePrComposeForm({
       }
     } catch (err) {
       triggerError()
-      setError(err instanceof Error ? err.message : 'Failed to generate PR fields')
+      setError(
+        err instanceof Error
+          ? err.message
+          : translate('mobile.pullRequest.compose.generate.error', 'Failed to generate PR fields')
+      )
     } finally {
       setGenerating(false)
     }
@@ -172,11 +181,19 @@ export function MobilePrComposeForm({
       <View className="mb-1 flex-row items-center justify-between gap-2">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <ReviewIcon size={14} colorClassName="accent-muted-foreground" />
-          <Text className="text-foreground text-sm font-bold">New {copy.reviewLabel}</Text>
+          <Text className="text-foreground text-sm font-bold">
+            {translate('mobile.pullRequest.compose.title', 'New {{review}}', {
+              review: copy.reviewLabel
+            })}
+          </Text>
         </View>
         <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
           <MobileGlassPressable
-            accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
+            accessibilityLabel={translate(
+              'mobile.pullRequest.compose.generate.accessibilityLabel',
+              'Generate {{review}} details with AI',
+              { review: copy.reviewLabel }
+            )}
             accessibilityRole="button"
             className="min-h-8 rounded-full"
             contentClassName="min-h-8 flex-row items-center justify-center gap-1 rounded-full px-3"
@@ -189,11 +206,13 @@ export function MobilePrComposeForm({
               <Sparkles size={13} colorClassName="accent-muted-foreground" />
             )}
             <Text className="text-muted-foreground text-xs">
-              {generating ? 'Generating…' : 'Generate'}
+              {generating
+                ? translate('mobile.pullRequest.compose.generate.generatingLabel', 'Generating…')
+                : translate('mobile.pullRequest.compose.generate.label', 'Generate')}
             </Text>
           </MobileGlassPressable>
           <MobileGlassIconButton
-            accessibilityLabel="Cancel"
+            accessibilityLabel={translate('mobile.pullRequest.compose.cancel', 'Cancel')}
             disabled={submitting}
             icon="close"
             onPress={onCancel}
@@ -212,34 +231,45 @@ export function MobilePrComposeForm({
             className={cn(styles.branchToken, baseConflict && 'text-destructive')}
             numberOfLines={1}
           >
-            {base || 'base'}
+            {base || translate('mobile.pullRequest.compose.baseFallback', 'base')}
           </Text>
         </View>
       ) : null}
 
       <View className="gap-2">
-        <MobileGlassSurface className="min-h-10 overflow-hidden rounded-xl" isInteractive>
+        <MobileGlassSurface className="min-h-11 overflow-hidden rounded-xl" isInteractive>
           <TextInput
-            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            className="text-foreground min-h-11 px-3 py-2 text-sm"
             value={title}
             onChangeText={setTitle}
-            placeholder="Title"
+            placeholder={translate('mobile.pullRequest.compose.titlePlaceholder', 'Title')}
             placeholderTextColorClassName="accent-muted-foreground"
             editable={!fieldsLocked}
-            accessibilityLabel={`${copy.titleLabel} title`}
+            accessibilityLabel={translate(
+              'mobile.pullRequest.compose.titleAccessibilityLabel',
+              '{{review}} title',
+              { review: copy.titleLabel }
+            )}
           />
         </MobileGlassSurface>
         <MobileGlassSurface className="min-h-30 overflow-hidden rounded-xl" isInteractive>
           <TextInput
             className="text-foreground min-h-30 px-3 py-2 text-sm"
-            style={{ textAlignVertical: 'top' }}
+            textAlignVertical="top"
             value={body}
             onChangeText={setBody}
-            placeholder="Description (optional)"
+            placeholder={translate(
+              'mobile.pullRequest.compose.descriptionPlaceholder',
+              'Description (optional)'
+            )}
             placeholderTextColorClassName="accent-muted-foreground"
             multiline
             editable={!fieldsLocked}
-            accessibilityLabel={`${copy.titleLabel} description`}
+            accessibilityLabel={translate(
+              'mobile.pullRequest.compose.descriptionAccessibilityLabel',
+              '{{review}} description',
+              { review: copy.titleLabel }
+            )}
           />
         </MobileGlassSurface>
       </View>
@@ -247,12 +277,19 @@ export function MobilePrComposeForm({
       {generating ? (
         <View className={styles.notice}>
           <Sparkles size={13} colorClassName="accent-muted-foreground" />
-          <Text className={styles.noticeText}>Generating title and description…</Text>
+          <Text className={styles.noticeText}>
+            {translate(
+              'mobile.pullRequest.compose.generate.notice',
+              'Generating title and description…'
+            )}
+          </Text>
         </View>
       ) : null}
 
       <View className="min-h-10 flex-row items-center gap-2">
-        <Text className="text-muted-foreground w-9 text-xs">Base</Text>
+        <Text className="text-muted-foreground w-9 text-xs">
+          {translate('mobile.pullRequest.compose.baseLabel', 'Base')}
+        </Text>
         <View className="min-w-0 flex-1">
           <MobilePrBasePicker
             client={client}
@@ -264,19 +301,12 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <MobileGlassSurface
-        className="min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2"
-        isFunctional
-      >
-        <Text className="text-foreground text-xs">Create as draft</Text>
-        <Switch
-          value={draft}
-          onValueChange={setDraft}
+      <MobileGlassSurface className="min-h-11 overflow-hidden rounded-xl" isFunctional>
+        <SettingsToggleRow
           disabled={fieldsLocked}
-          trackColorOffClassName="accent-secondary disabled:accent-muted"
-          trackColorOnClassName="accent-muted-foreground disabled:accent-muted"
-          thumbColorClassName="accent-foreground disabled:accent-muted-foreground"
-          ios_backgroundColorClassName="accent-secondary"
+          label={translate('mobile.pullRequest.createAsDraft.label', 'Create as draft')}
+          onValueChange={setDraft}
+          value={draft}
         />
       </MobileGlassSurface>
       {error || submitDisabledReason ? (
@@ -300,11 +330,23 @@ export function MobilePrComposeForm({
           label={
             pushBeforeCreate
               ? draft
-                ? `Push & create draft ${copy.shortLabel}`
-                : `Push & create ${copy.shortLabel}`
+                ? translate(
+                    'mobile.pullRequest.compose.submit.pushDraft',
+                    'Push & create draft {{review}}',
+                    { review: copy.shortLabel }
+                  )
+                : translate('mobile.pullRequest.compose.submit.push', 'Push & create {{review}}', {
+                    review: copy.shortLabel
+                  })
               : draft
-                ? `Create draft ${copy.shortLabel}`
-                : `Create ${copy.shortLabel}`
+                ? translate(
+                    'mobile.pullRequest.compose.submit.createDraft',
+                    'Create draft {{review}}',
+                    { review: copy.shortLabel }
+                  )
+                : translate('mobile.pullRequest.compose.submit.create', 'Create {{review}}', {
+                    review: copy.shortLabel
+                  })
           }
           onPress={() => void submit()}
           size="large"

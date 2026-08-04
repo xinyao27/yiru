@@ -54,7 +54,6 @@ import { WorktreeCardControlGrants } from './worktree-card/control-grants'
 import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
 import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
 import { CONFLICT_OPERATION_LABELS } from './worktree-card/helpers'
-import { InlineAgentRail } from './worktree-card/inline-agent-rail'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
@@ -1326,6 +1325,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
             worktreeId={worktree.id}
             agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
             hasLeadingStatusIcon={hasLeadingStatusIcon}
+            inlineRailCardPaddingLeft={showInlineAgentRail ? (cardPaddingLeft ?? '0px') : undefined}
             className={
               hasMetaRow || remoteBranchConflict || coworkingControlGrants.length > 0
                 ? 'mt-0'
@@ -1453,12 +1453,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         </div>
       )}
-      {showInlineAgentRail ? (
-        <InlineAgentRail
-          cardPaddingLeft={cardPaddingLeft ?? '0px'}
-          agents={compactInlineAgentRows}
-        />
-      ) : null}
       {parentCardBodyWithHoverDetails}
 
       {lineageChildren ? (

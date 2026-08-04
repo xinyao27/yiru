@@ -8120,6 +8120,12 @@
           "revoking": "Revoking…",
           "revoke": "Revoke",
           "searchTitle": "Authorized remote host clients"
+        },
+        "SettingsSetupGuidePane": {
+          "restartOnboardingError": "无法重新启动新手引导。",
+          "restartOnboardingTitle": "重新运行新手引导",
+          "restartOnboardingDescription": "重置新手引导，并从第一步重新打开。已完成的入门清单进度会保留。",
+          "restartOnboardingButton": "重新启动新手引导"
         }
       },
       "right": {

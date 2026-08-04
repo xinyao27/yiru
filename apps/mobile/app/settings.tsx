@@ -1,33 +1,106 @@
 import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
-import { useFocusEffect, useRouter } from 'expo-router'
+import { Link, useFocusEffect, type Href } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
-import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
+import { View, Text, Pressable, ActivityIndicator, ScrollView } from 'react-native'
 
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import {
-  CaretRight as ChevronRight,
-  Info,
   Bell,
-  Wrench,
-  Shield,
-  Lifebuoy as LifeBuoy,
+  CaretRight as ChevronRight,
+  Chat,
   Globe,
+  Info,
+  Key as KeyRound,
+  Lifebuoy as LifeBuoy,
   Palette,
   Shapes,
-  Chat as MessageSquare,
-  Terminal as TerminalIcon,
-  Key as KeyRound
+  Shield,
+  Terminal,
+  Wrench,
+  type Icon
 } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 import {
   loadPendingHostCredentialCleanup,
   subscribePendingHostCredentialCleanup
 } from '~/transport/host-credential-cleanup'
 import { retryPendingHostCredentialCleanup } from '~/transport/host-store'
 
-export default function SettingsScreen() {
-  const router = useRouter()
+type SettingsNavigationItem = {
+  href: Href
+  icon: Icon
+  label: string
+}
 
+const SETTINGS_NAVIGATION_ITEMS = [
+  {
+    href: '/appearance-settings',
+    icon: Palette,
+    label: translate('mobile.settings.appearance', 'Appearance')
+  },
+  {
+    href: '/native-chat-settings',
+    icon: Chat,
+    label: translate('mobile.settings.chatUi', 'Chat UI')
+  },
+  {
+    href: '/terminal-settings',
+    icon: Terminal,
+    label: translate('mobile.settings.terminal', 'Terminal')
+  },
+  {
+    href: '/browser-settings',
+    icon: Globe,
+    label: translate('mobile.settings.browser', 'Browser')
+  },
+  {
+    href: '/notifications',
+    icon: Bell,
+    label: translate('mobile.settings.notifications', 'Notifications')
+  },
+  {
+    href: '/troubleshoot',
+    icon: Wrench,
+    label: translate('mobile.settings.troubleshooting', 'Troubleshooting')
+  },
+  {
+    href: '/about',
+    icon: Info,
+    label: translate('mobile.settings.about', 'About')
+  }
+] satisfies readonly SettingsNavigationItem[]
+
+function credentialCleanupMessage(
+  pendingCredentialCount: number,
+  credentialRetryFailed: boolean
+): string {
+  if (credentialRetryFailed) {
+    return translate(
+      'mobile.settings.credentialCleanup.retryFailed',
+      "Cleanup still couldn't be confirmed. Try again later."
+    )
+  }
+  if (pendingCredentialCount === 1) {
+    return translate(
+      'mobile.settings.credentialCleanup.pendingOne',
+      "Couldn't confirm cleanup for 1 credential on this device."
+    )
+  }
+  if (pendingCredentialCount > 1) {
+    return translate(
+      'mobile.settings.credentialCleanup.pendingMany',
+      "Couldn't confirm cleanup for {{count}} credentials on this device.",
+      { count: pendingCredentialCount }
+    )
+  }
+  return translate(
+    'mobile.settings.credentialCleanup.statusUnavailable',
+    "Couldn't check cleanup status on this device. Retry to be safe."
+  )
+}
+
+export default function SettingsScreen(): React.JSX.Element {
   const [pendingCredentialIds, setPendingCredentialIds] = useState<string[]>([])
   const [credentialStorageUnreadable, setCredentialStorageUnreadable] = useState(false)
   const [retryingCredentialCleanup, setRetryingCredentialCleanup] = useState(false)
@@ -90,110 +163,25 @@ export default function SettingsScreen() {
     <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
         <MobileContentSection>
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/appearance-settings')}
-            accessibilityLabel="Appearance"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <Palette size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Appearance</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/native-chat-settings')}
-            accessibilityLabel="Chat UI"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <MessageSquare size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Chat UI</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/terminal-settings')}
-            accessibilityLabel="Terminal"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <TerminalIcon size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Terminal</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/browser-settings')}
-            accessibilityLabel="Browser"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <Globe size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Browser</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/notifications')}
-            accessibilityLabel="Notifications"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <Bell size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Notifications</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/troubleshoot')}
-            accessibilityLabel="Troubleshooting"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <Wrench size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Troubleshooting</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => router.push('/about')}
-            accessibilityLabel="About"
-            accessibilityRole="button"
-          >
-            <View className="w-5 items-center">
-              <Info size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">About</Text>
-            <View className="w-5 items-center">
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-            </View>
-          </Pressable>
+          {SETTINGS_NAVIGATION_ITEMS.map((item, index) => {
+            const ItemIcon = item.icon
+            return (
+              <View key={item.href.toString()}>
+                {index > 0 ? <View className="bg-border h-hairline mx-3" /> : null}
+                <Link href={item.href} asChild>
+                  <Pressable className="active:bg-accent min-h-11 flex-row items-center gap-2 px-3 py-3">
+                    <View className="w-5 items-center">
+                      <ItemIcon size={16} colorClassName="accent-muted-foreground" />
+                    </View>
+                    <Text className="text-foreground flex-1 text-sm">{item.label}</Text>
+                    <View className="w-5 items-center">
+                      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                    </View>
+                  </Pressable>
+                </Link>
+              </View>
+            )
+          })}
         </MobileContentSection>
 
         {showCredentialCleanup ? (
@@ -204,17 +192,16 @@ export default function SettingsScreen() {
               </View>
               <View className="flex-1 gap-1">
                 <Text className="text-foreground text-sm font-medium">
-                  Pairing credential cleanup
+                  {translate(
+                    'mobile.settings.credentialCleanup.title',
+                    'Pairing credential cleanup'
+                  )}
                 </Text>
                 <Text
                   accessibilityLiveRegion="polite"
                   className="text-muted-foreground text-xs leading-5"
                 >
-                  {credentialRetryFailed
-                    ? "Cleanup still couldn't be confirmed. Try again later."
-                    : pendingCredentialCount > 0
-                      ? `Couldn't confirm cleanup for ${pendingCredentialCount} credential${pendingCredentialCount === 1 ? '' : 's'} on this device.`
-                      : "Couldn't check cleanup status on this device. Retry to be safe."}
+                  {credentialCleanupMessage(pendingCredentialCount, credentialRetryFailed)}
                 </Text>
               </View>
               {retryingCredentialCleanup ? (
@@ -223,8 +210,11 @@ export default function SettingsScreen() {
                 </View>
               ) : (
                 <MobileGlassTextButton
-                  accessibilityLabel="Retry clearing pairing credentials"
-                  label="Retry"
+                  accessibilityLabel={translate(
+                    'mobile.settings.credentialCleanup.retryAccessibilityLabel',
+                    'Retry clearing pairing credentials'
+                  )}
+                  label={translate('mobile.common.retry', 'Retry')}
                   onPress={() => void retryCredentialCleanup()}
                   size="small"
                 />
@@ -235,48 +225,56 @@ export default function SettingsScreen() {
 
         {__DEV__ ? (
           <MobileContentSection className="mt-3">
-            <Pressable
-              accessibilityLabel="Open UI Lab"
-              accessibilityRole="button"
-              className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-              onPress={() => router.push('/ui-lab')}
-            >
-              <View className="w-5 items-center">
-                <Shapes size={16} colorClassName="accent-muted-foreground" />
-              </View>
-              <Text className="text-foreground flex-1 text-sm">UI Lab</Text>
-              <Text className="text-muted-foreground text-xs">DEV ONLY</Text>
-              <View className="w-5 items-center">
-                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-              </View>
-            </Pressable>
+            <Link href="/ui-lab" asChild>
+              <Pressable
+                accessibilityLabel={translate('mobile.settings.uiLab.open', 'Open UI Lab')}
+                className="active:bg-accent min-h-11 flex-row items-center gap-2 px-3 py-3"
+              >
+                <View className="w-5 items-center">
+                  <Shapes size={16} colorClassName="accent-muted-foreground" />
+                </View>
+                <Text className="text-foreground flex-1 text-sm">
+                  {translate('mobile.settings.uiLab.title', 'UI Lab')}
+                </Text>
+                <Text className="text-muted-foreground text-xs">
+                  {translate('mobile.settings.uiLab.devOnly', 'DEV ONLY')}
+                </Text>
+                <View className="w-5 items-center">
+                  <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                </View>
+              </Pressable>
+            </Link>
           </MobileContentSection>
         ) : null}
 
         <MobileContentSection className="mt-3">
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => void Linking.openURL('https://yiru.ai/privacy')}
-            accessibilityLabel="Privacy Policy"
-            accessibilityRole="link"
-          >
-            <View className="w-5 items-center">
-              <Shield size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Privacy Policy</Text>
-          </Pressable>
+          <Link href="https://yiru.ai/privacy" asChild>
+            <Pressable
+              accessibilityLabel={translate('mobile.settings.privacyPolicy', 'Privacy Policy')}
+              className="active:bg-accent min-h-11 flex-row items-center gap-2 px-3 py-3"
+            >
+              <View className="w-5 items-center">
+                <Shield size={16} colorClassName="accent-muted-foreground" />
+              </View>
+              <Text className="text-foreground flex-1 text-sm">
+                {translate('mobile.settings.privacyPolicy', 'Privacy Policy')}
+              </Text>
+            </Pressable>
+          </Link>
           <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => void Linking.openURL(YIRU_GITHUB_ISSUES_URL)}
-            accessibilityLabel="Support"
-            accessibilityRole="link"
-          >
-            <View className="w-5 items-center">
-              <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
-            </View>
-            <Text className="text-foreground flex-1 text-sm">Support</Text>
-          </Pressable>
+          <Link href={YIRU_GITHUB_ISSUES_URL} asChild>
+            <Pressable
+              accessibilityLabel={translate('mobile.settings.support', 'Support')}
+              className="active:bg-accent min-h-11 flex-row items-center gap-2 px-3 py-3"
+            >
+              <View className="w-5 items-center">
+                <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
+              </View>
+              <Text className="text-foreground flex-1 text-sm">
+                {translate('mobile.settings.support', 'Support')}
+              </Text>
+            </Pressable>
+          </Link>
         </MobileContentSection>
       </ScrollView>
     </View>

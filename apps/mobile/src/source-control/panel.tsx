@@ -1,3 +1,4 @@
+import { cn } from 'cnfast'
 import { Stack } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Platform, Text, View } from 'react-native'
@@ -9,7 +10,6 @@ import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { translate } from '~/i18n/translate'
 import { openMobilePrUrl } from '~/session/pr/compose-sheet'
 import { MobilePrViewPanelBody } from '~/session/pr/sidebar/view-panel'
-import { cn } from '~/style/class-names'
 
 import { prSidebarDetailsNeedFetch } from '../session/pr/sidebar-state'
 import { useMobilePrSidebarController } from '../session/pr/use-sidebar-controller'

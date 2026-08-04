@@ -24,6 +24,34 @@ type OrphanTerminalCleanupState = Pick<
   | 'activeTabId'
 >
 
+type OrphanTerminalAgentStatusSweepState = Pick<AppState, 'dropAgentStatusByTabPrefix'>
+
+/**
+ * Sweep live + retained agent status for tabs that orphan reconciliation is
+ * about to remove.
+ *
+ * Why: buildOrphanTerminalCleanupPatch drops the tab from `tabsByWorktree`,
+ * and the retention sync reads a pane leaving the live×tab join as "this agent
+ * disappeared" — snapshotting every `done` row under it into
+ * `retainedAgentsByPaneKey`. That snapshot is then unreachable: no future tab
+ * close can match a tab id that no longer exists, so the row shows a completed
+ * agent forever. closeTab already plants the same suppressors; orphan
+ * reconciliation is the same teardown and must plant them too.
+ *
+ * Slept and hibernated tabs keep their wake-hint `tab.ptyId`, so
+ * getOrphanTerminalIds never classifies them as orphans and their retained
+ * completion evidence survives.
+ */
+export function dropOrphanTerminalAgentStatus(
+  state: OrphanTerminalAgentStatusSweepState,
+  worktreeId: string,
+  orphanTerminalIds: ReadonlySet<string>
+): void {
+  for (const tabId of orphanTerminalIds) {
+    state.dropAgentStatusByTabPrefix(tabId, { worktreeId })
+  }
+}
+
 export function getOrphanTerminalIds(
   state: OrphanTerminalDetectionState,
   worktreeId: string

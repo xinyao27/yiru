@@ -246,7 +246,7 @@ export function MobileNativeChatComposer({
             {suggestions.map((s) => (
               <Pressable
                 key={s}
-                className="border-b-hairline border-b-border active:bg-accent px-3 py-2"
+                className="border-b-hairline border-b-border active:bg-accent min-h-11 justify-center px-3 py-2"
                 onPress={() => pickSuggestion(s)}
               >
                 <Text className="text-foreground font-mono text-xs" numberOfLines={1}>

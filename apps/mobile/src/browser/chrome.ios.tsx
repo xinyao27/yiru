@@ -1,5 +1,6 @@
 import {
   Button,
+  GlassEffectContainer,
   Host,
   HStack,
   Picker,
@@ -40,11 +41,13 @@ import { useCSSVariable, useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '../components/glass/availability'
 import {
   mobileSwiftUiGlassButtonStyle,
+  MobileSwiftUiGlassCircleButton
+} from '../components/glass/swift-ui-button.ios'
+import {
   mobileSwiftUiGlassEffect,
-  MobileSwiftUiGlassCircleButton,
-  MobileSwiftUiGlassGroup,
   MobileSwiftUiGlassInputShell
-} from '../components/glass/swift-ui.ios'
+} from '../components/glass/swift-ui-input-shell.ios'
+import { translate } from '../i18n/translate'
 import { resolveCssNumber, resolveCssString } from '../style/resolve-css-variable'
 import type { MobileBrowserKeyboardChromeProps, MobileBrowserTopChromeProps } from './chrome'
 import { BROWSER_KEYS } from './key-row'
@@ -70,6 +73,7 @@ function MobileBrowserGlassKeyButton({
       controlSize('small'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable, selected),
       buttonBorderShape('capsule'),
+      frame({ minWidth: 44, minHeight: 44, alignment: 'center' }),
       disabledModifier(disabled),
       accessibilityLabel(label)
     ],
@@ -144,27 +148,27 @@ export function MobileBrowserTopChrome({
   return (
     <View className="px-2 pt-2">
       <Host colorScheme={theme} matchContents={{ vertical: true }} style={{ width: '100%' }}>
-        <MobileSwiftUiGlassGroup spacing={8}>
+        <GlassEffectContainer spacing={8}>
           <HStack spacing={8} modifiers={chromeModifiers}>
             {!addressFocused ? (
               <HStack spacing={8}>
                 <MobileSwiftUiGlassCircleButton
                   disabled={disabled || !canGoBack}
-                  label="Back"
+                  label={translate('mobile.browser.back', 'Back')}
                   onPress={onBackPress}
                   size="small"
                   systemImage="chevron.left"
                 />
                 <MobileSwiftUiGlassCircleButton
                   disabled={disabled || !canGoForward}
-                  label="Forward"
+                  label={translate('mobile.browser.forward', 'Forward')}
                   onPress={onForwardPress}
                   size="small"
                   systemImage="chevron.right"
                 />
                 <MobileSwiftUiGlassCircleButton
                   disabled={disabled}
-                  label="Reload"
+                  label={translate('mobile.browser.reload', 'Reload')}
                   onPress={onReloadPress}
                   size="small"
                   systemImage="arrow.clockwise"
@@ -174,7 +178,7 @@ export function MobileBrowserTopChrome({
             <TextField
               key="browser-address"
               ref={addressRef}
-              placeholder="URL"
+              placeholder={translate('mobile.browser.address.placeholder', 'URL')}
               text={nativeAddress}
               modifiers={addressModifiers}
               onTextChange={(value) => {
@@ -202,7 +206,7 @@ export function MobileBrowserTopChrome({
               </Picker>
             ) : null}
           </HStack>
-        </MobileSwiftUiGlassGroup>
+        </GlassEffectContainer>
       </Host>
     </View>
   )
@@ -264,7 +268,7 @@ export function MobileBrowserKeyboardChrome({
         matchContents={{ vertical: true }}
         style={{ width: '100%' }}
       >
-        <MobileSwiftUiGlassGroup spacing={8}>
+        <GlassEffectContainer spacing={8}>
           <VStack spacing={8}>
             <ScrollView axes="horizontal" showsIndicators={false} modifiers={keyScrollModifiers}>
               <HStack spacing={8} modifiers={keyRowModifiers}>
@@ -281,7 +285,13 @@ export function MobileBrowserKeyboardChrome({
                   <MobileBrowserGlassKeyButton
                     key={key}
                     disabled={disabled}
-                    label={key === 'Backspace' ? '⌫' : key === 'Escape' ? 'Esc' : key}
+                    label={
+                      key === 'Backspace'
+                        ? '⌫'
+                        : key === 'Escape'
+                          ? translate('mobile.browser.keys.escape', 'Esc')
+                          : key
+                    }
                     selected={false}
                     onPress={() => onKeyPress(key)}
                   />
@@ -290,7 +300,7 @@ export function MobileBrowserKeyboardChrome({
             </ScrollView>
             <MobileSwiftUiGlassInputShell alignment="bottom" hasTrailingAction>
               <TextField
-                placeholder="Type on page…"
+                placeholder={translate('mobile.browser.keyboard.placeholder', 'Type on page…')}
                 text={nativeKeyboardText}
                 modifiers={inputModifiers}
                 onTextChange={(value) => {
@@ -301,7 +311,7 @@ export function MobileBrowserKeyboardChrome({
               <MobileSwiftUiGlassCircleButton
                 disabled={disabled || !keyboardValue}
                 isProminent
-                label="Send text to browser"
+                label={translate('mobile.browser.keyboard.send', 'Send text to browser')}
                 size="small"
                 systemImage="arrow.up"
                 tintColor={foregroundColor}
@@ -309,7 +319,7 @@ export function MobileBrowserKeyboardChrome({
               />
             </MobileSwiftUiGlassInputShell>
           </VStack>
-        </MobileSwiftUiGlassGroup>
+        </GlassEffectContainer>
       </Host>
     </View>
   )

@@ -1,4 +1,5 @@
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import { cn } from 'cnfast'
 import { Image, Text, View } from 'react-native'
 
 import {
@@ -24,7 +25,6 @@ import {
   TerminalWindow as SquareTerminal,
   Wrench
 } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 // The desktop payload keeps historical icon names; map them to Phosphor so
 // mobile and desktop still render the same project concept.

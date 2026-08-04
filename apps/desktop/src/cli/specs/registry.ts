@@ -1,4 +1,5 @@
 import type { CommandSpec } from '../args'
+import { MOBILE_COMMAND_SPECS } from '../mobile/development-pairing'
 import { AGENT_HOOK_COMMAND_SPECS } from './agent-hooks'
 import { AUTOMATION_COMMAND_SPECS } from './automations'
 import { BROWSER_ADVANCED_COMMAND_SPECS } from './browser-advanced'
@@ -28,6 +29,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
   ...AGENT_HOOK_COMMAND_SPECS,
   ...DIAGNOSTICS_COMMAND_SPECS,
   ...INTROSPECTION_COMMAND_SPECS,
+  ...MOBILE_COMMAND_SPECS,
   ...ENVIRONMENT_COMMAND_SPECS,
   ...EMULATOR_COMMAND_SPECS,
   ...SKILL_COMMAND_SPECS

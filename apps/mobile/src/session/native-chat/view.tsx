@@ -9,12 +9,13 @@ import {
   Text,
   View
 } from 'react-native'
+import { GestureDetector } from 'react-native-gesture-handler'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCSSVariable } from 'uniwind'
 
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { GestureDetector, GestureHandlerRootView } from '~/components/uniwind-native-components'
-import { useSafeAreaInsets } from '~/components/uniwind-native-components'
+import { GestureHandlerRootView } from '~/components/uniwind-native-components'
 import { translate } from '~/i18n/translate'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
 

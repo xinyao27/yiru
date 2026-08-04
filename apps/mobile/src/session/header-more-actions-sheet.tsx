@@ -1,5 +1,6 @@
 import { MobileAgentSessionHistoryIcon } from '~/agent-history/icon'
 import { ListChecks } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import { ActionSheetModal } from '../components/action-sheet-modal'
 
@@ -19,7 +20,7 @@ export function MobileSessionHeaderMoreActionsSheet({
   onOpenAgentSessionHistory,
   onOpenChecks,
   onClose
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <ActionSheetModal
       visible={visible}
@@ -27,14 +28,19 @@ export function MobileSessionHeaderMoreActionsSheet({
         ...(showAgentSessionHistory
           ? [
               {
-                label: 'Agent History',
-                hint: 'Browse and resume agent sessions',
+                id: 'agent-history',
+                label: translate('mobile.session.headerActions.agentHistory', 'Agent History'),
+                hint: translate(
+                  'mobile.session.headerActions.agentHistoryHint',
+                  'Browse and resume agent sessions'
+                ),
                 renderIcon: () => (
                   <MobileAgentSessionHistoryIcon
                     size={16}
                     colorClassName="accent-muted-foreground"
                   />
                 ),
+                dismiss: 'immediate' as const,
                 onPress: onOpenAgentSessionHistory
               }
             ]
@@ -42,9 +48,14 @@ export function MobileSessionHeaderMoreActionsSheet({
         ...(showChecks
           ? [
               {
-                label: 'Checks',
-                hint: 'Open pull request checks',
+                id: 'checks',
+                label: translate('mobile.session.headerActions.checks', 'Checks'),
+                hint: translate(
+                  'mobile.session.headerActions.checksHint',
+                  'Open pull request checks'
+                ),
                 icon: ListChecks,
+                dismiss: 'immediate' as const,
                 onPress: onOpenChecks
               }
             ]

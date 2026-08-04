@@ -28,14 +28,84 @@ Use these layers in order:
 
 1. This document defines the mobile visual and interaction rules.
 2. `global.css` defines semantic colors, type sizes, spacing, and radii.
-3. Expo Router, Expo UI SwiftUI, and `src/components/glass/` own native chrome behavior.
-4. Shared components in `src/components/` own repeated content patterns.
+3. Expo Router and Expo UI own standard native control behavior.
+4. Deep shared modules in `src/components/` own repeated product interactions and platform policy.
 5. Feature code arranges those pieces and supplies product behavior and copy.
 
 Features may control placement, flex behavior, safe-area layout, and the standard spacing scale.
 They may not invent a parallel palette, control size, Glass treatment, back button, or row grammar.
 
-## 3. Foundations
+## 3. Component architecture
+
+Use Expo UI first, and call it directly by default. Yiru does not maintain a parallel copy of the
+Expo UI component catalog.
+
+Choose the first matching form:
+
+1. Expo Router owns navigation chrome, headers, toolbars, and native menus.
+2. A feature directly calls `@expo/ui` Universal controls inside `ExpoUiHost`.
+3. A feature directly calls `@expo/ui/community/*`; community controls already expose a React
+   Native boundary and must not be wrapped in `ExpoUiHost`.
+4. A platform implementation (`.ios.tsx` or `.android.tsx`) directly calls SwiftUI or Compose when
+   that platform has a real, different interaction.
+5. A shared Yiru module owns a repeated product interaction or a real platform adapter.
+6. React Native owns content, layout, virtualized lists, gestures, WebViews, editors, and controls
+   for which Expo UI has no behaviorally equivalent implementation.
+
+`ExpoUiHost` is the one shared adapter for Universal controls. It maps the current Yiru color
+scheme and semantic primary token into the native environment. The feature chooses only the closed
+`inline` or `fill` layout; the adapter owns `matchContents`, safe-area, and transparent paint. It is
+a rendered native bridge, not a React context provider, so it cannot wrap the Expo Router or React
+Native tree at the app root. `inline` matches native content on both axes; `fill` owns the available
+width while matching native content height. Use one host around a complete, contiguous native control cluster
+instead of one host per child control. Do not put React Native children directly in a native tree;
+use `RNHostView` only when a cluster genuinely needs embedded React Native content.
+
+```tsx
+<ExpoUiHost layout="fill">
+  <Button
+    label={translate('mobile.actions.save', 'Save')}
+    onPress={save}
+  />
+</ExpoUiHost>
+```
+
+A shared module must pass the deletion test: deleting it would spread platform behavior, theme
+mapping, accessibility, lifecycle, or a product invariant back across multiple callers. Keep deep
+modules such as the Glass family, `BottomDrawer`, and typed segmented selection. Do not create
+one-to-one shadows such as `MobileButton`, `MobileText`, `MobilePicker`, or `MobileSwitch` that only
+rename an Expo control and mirror its props.
+
+Expo UI 57.0.8 does not give its Android/web Universal Switch a reliable accessible name, and its
+Android-owned label paints black in dark appearance. Until the package closes both gaps, standard
+boolean settings use the complete `SettingsToggleRow` product interaction; feature code must not
+create a naked Switch facade or directly repeat the workaround.
+The same behavior-equivalence gate keeps closed product choices and navigation links in React
+Native until Universal Picker exposes an accessible name and a 44pt web target, and Universal
+ListItem exposes a 44pt iOS target plus link semantics. These are reviewed platform exceptions, not
+reasons to add Expo UI facades. The native-control repository contract limits Universal Picker to
+UI Lab and rejects product ListItem imports until those package gates are removed here.
+
+Shared interfaces use product semantics and stay closed. They do not expose arbitrary Expo
+`modifiers`, colors, or a generic style escape hatch unless layout is part of the module's job.
+Feature copy and business state stay in the feature. Platform files exist only for two real
+implementations, not in anticipation of a future difference.
+
+Use `className` for feature and React Native layout. Use `style` only for animated/runtime-computed
+values, or where an Expo/native or third-party API has no `className` path and requires a numeric
+native measurement. Keep that exception inside the owning adapter whenever possible.
+
+Universal imports come from `@expo/ui`. Community controls come from their explicit
+`@expo/ui/community/*` entry point. SwiftUI and Compose imports are allowed only in `.ios.tsx` and
+`.android.tsx` implementations respectively; a cross-platform file must not choose a platform at
+runtime.
+
+Expo UI adoption is behavioral, not numerical. Do not replace `FlatList`, complex controlled
+`TextInput`, terminal input, or searchable/custom pickers merely to increase Expo UI usage. Migrate
+them only when the Expo control supports the required selection, keyboard, virtualization,
+accessibility, and layout behavior on every supported platform.
+
+## 4. Foundations
 
 ### Color and surfaces
 
@@ -78,7 +148,7 @@ uses a 12pt horizontal inset. Do not add arbitrary spacing to optically repair o
 Every action keeps at least a 44pt hit region. Shared controls own visible size, glyph size, shape,
 and hit slop; feature call sites do not override them.
 
-## 4. Navigation and chrome
+## 5. Navigation and chrome
 
 - Prefer Expo Router native headers and `Stack.Toolbar`. They own safe areas, title placement,
   system material, and back behavior.
@@ -94,7 +164,7 @@ and hit slop; feature call sites do not override them.
   pressable control; reserve bare pressables for transparent content rows, high-density inline
   affordances intrinsic to those rows, and interactions nested inside an existing Glass surface.
 
-## 5. Liquid Glass
+## 6. Liquid Glass
 
 Liquid Glass is the default functional layer above content. Comprehensive adoption means every
 eligible header, tab rail, toolbar, grouped control, floating action, sheet, drawer, input shell,
@@ -141,7 +211,7 @@ almost always a bug.
 Native Glass supplies its own edge and interaction state. Never add a border, nested background,
 opacity wash, or shadow to the active Glass path.
 
-## 6. Lists and alignment
+## 7. Lists and alignment
 
 Lists use a shared visual grid. A section header and its rows must agree on content start, metadata
 start, and trailing alignment.
@@ -157,19 +227,20 @@ start, and trailing alignment.
 - Rows are transparent at rest and use `accent` for press/selection. Do not wrap each row in Glass
   or a card.
 
-## 7. Forms, feedback, and motion
+## 8. Forms, feedback, and motion
 
-- Use the shared field, switch, picker, sheet, drawer, and confirmation components before composing
-  a new control.
-- Immediate booleans use a switch; independent selections use a checkbox; one known choice uses a
-  picker.
+- Use the behaviorally equivalent Expo UI control before React Native or a new wrapper. Use a shared
+  module for a picker, sheet, drawer, or confirmation flow only when it owns repeated product
+  behavior or platform policy.
+- Immediate booleans use `SettingsToggleRow` while the Expo UI Switch accessibility exception is
+  active; independent selections use a checkbox; one known choice uses a picker.
 - Disable an action immediately. Show a spinner only when work lasts long enough to be perceived,
   and reserve its final footprint before loading begins.
 - Destructive styling is only for irreversible actions. Back, Cancel, Close, and Dismiss stay quiet.
 - Motion explains expansion, navigation, and continuity. Respect Reduce Motion and never animate a
   working surface merely for decoration.
 
-## 8. Verification checklist
+## 9. Verification checklist
 
 Before finishing a mobile visual change, check:
 
@@ -185,3 +256,5 @@ Before finishing a mobile visual change, check:
    area, and content must update together.
 8. Do overlays stay in the current iOS window so Glass can sample the screen behind them?
 9. Has the result been inspected in UI Lab or the iOS Simulator rather than inferred from TSX?
+10. Was a standard control imported directly from Expo UI, with any wrapper justified by a real
+    product or platform invariant?

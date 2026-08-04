@@ -9,7 +9,8 @@ import {
 import { useMemo } from 'react'
 
 import { useMobileGlassAvailable } from '../components/glass/availability'
-import { mobileSwiftUiGlassButtonStyle } from '../components/glass/swift-ui.ios'
+import { mobileSwiftUiGlassButtonStyle } from '../components/glass/swift-ui-button.ios'
+import { translate } from '../i18n/translate'
 import type { MobileImageSource } from './image-source-picker'
 
 type MobileAttachmentMenuProps = {
@@ -37,13 +38,29 @@ export function MobileAttachmentMenu({
 
   return (
     <Menu
-      label={pending ? 'Adding attachment' : 'Add attachment'}
+      label={
+        pending
+          ? translate('mobile.session.attachments.adding', 'Adding attachment')
+          : translate('mobile.session.attachments.add', 'Add attachment')
+      }
       systemImage={pending ? 'ellipsis' : 'plus'}
       modifiers={modifiers}
     >
-      <Button label="Camera" systemImage="camera" onPress={() => onSelect('camera')} />
-      <Button label="Photos" systemImage="photo.on.rectangle" onPress={() => onSelect('library')} />
-      <Button label="Files" systemImage="folder" onPress={() => onSelect('files')} />
+      <Button
+        label={translate('mobile.session.attachments.camera', 'Camera')}
+        systemImage="camera"
+        onPress={() => onSelect('camera')}
+      />
+      <Button
+        label={translate('mobile.session.attachments.photos', 'Photos')}
+        systemImage="photo.on.rectangle"
+        onPress={() => onSelect('library')}
+      />
+      <Button
+        label={translate('mobile.session.attachments.files', 'Files')}
+        systemImage="folder"
+        onPress={() => onSelect('files')}
+      />
     </Menu>
   )
 }

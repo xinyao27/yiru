@@ -3,6 +3,7 @@ import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { translate } from '~/i18n/translate'
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import { parseGitHubPrReference } from '~/source-control/github-pr-link-parse'
 import { linkMobilePr } from '~/source-control/pr-link'
@@ -48,21 +49,28 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
   return (
     <View>
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-foreground text-sm font-bold">Link existing pull request</Text>
+        <Text className="text-foreground text-sm font-bold">
+          {translate('mobile.pullRequest.link.title', 'Link existing pull request')}
+        </Text>
         <MobileGlassTextButton
           disabled={submitting}
-          label="Cancel"
+          label={translate('mobile.common.cancel', 'Cancel')}
           onPress={onCancel}
           size="small"
         />
       </View>
-      <Text className="text-muted-foreground mt-2 mb-1 text-xs">PR number or GitHub URL</Text>
-      <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+      <Text className="text-muted-foreground mt-2 mb-1 text-xs">
+        {translate('mobile.pullRequest.link.inputLabel', 'PR number or GitHub URL')}
+      </Text>
+      <MobileGlassSurface className="min-h-11 overflow-hidden rounded-xl" isInteractive>
         <TextInput
-          className="text-foreground px-3 py-2 text-sm"
+          className="text-foreground min-h-11 px-3 py-2 text-sm"
           value={input}
           onChangeText={setInput}
-          placeholder="#123 or https://github.com/owner/repo/pull/123"
+          placeholder={translate(
+            'mobile.pullRequest.link.placeholder',
+            '#123 or https://github.com/owner/repo/pull/123'
+          )}
           placeholderTextColorClassName="accent-muted-foreground"
           autoCapitalize="none"
           autoCorrect={false}
@@ -80,7 +88,11 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
           disabled={parsed === null}
           isFullWidth
           isProminent
-          label={parsed ? `Link #${parsed}` : 'Link pull request'}
+          label={
+            parsed
+              ? translate('mobile.pullRequest.link.number', 'Link #{{number}}', { number: parsed })
+              : translate('mobile.pullRequest.link.submit', 'Link pull request')
+          }
           onPress={() => void submit()}
           size="large"
         />

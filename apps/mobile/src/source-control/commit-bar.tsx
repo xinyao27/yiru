@@ -1,10 +1,10 @@
+import { cn } from 'cnfast'
 import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { Sparkle as Sparkles } from '~/components/uniwind-icons'
-import { cn } from '~/style/class-names'
 
 import type { MobileSourceControlCommitBarProps } from './commit-bar-props'
 

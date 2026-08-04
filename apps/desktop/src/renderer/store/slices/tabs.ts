@@ -42,7 +42,11 @@ import {
   updateGroup
 } from './tab-group-state'
 import { buildHydratedTabState, pruneTabGroupLayoutForGroups } from './tabs-hydration'
-import { buildOrphanTerminalCleanupPatch, getOrphanTerminalIds } from './terminal-orphan-helpers'
+import {
+  buildOrphanTerminalCleanupPatch,
+  dropOrphanTerminalAgentStatus,
+  getOrphanTerminalIds
+} from './terminal-orphan-helpers'
 
 export type { TabSplitDirection } from '~renderer/lib/tab-split-direction'
 
@@ -2084,6 +2088,9 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
             : {})
         }
       })
+      // Why: the patch above removed the orphan tabs, so their agent rows must
+      // be torn down the same way closeTab tears down a closed tab's rows.
+      dropOrphanTerminalAgentStatus(get(), worktreeId, orphanTerminalIds)
     }
 
     const activeRenderableTabId =

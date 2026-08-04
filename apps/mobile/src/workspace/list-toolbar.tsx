@@ -1,17 +1,10 @@
 import { View } from 'react-native'
 
-import {
-  Plus,
-  SidebarSimple as Sidebar,
-  TerminalWindow,
-  UserCircle,
-  type Icon
-} from '~/components/uniwind-icons'
-
 import { MobileGlassGroup } from '../components/glass/group'
-import { MobileGlassPressable } from '../components/glass/pressable'
+import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import { MobileSearchField } from '../components/search-field'
+import { translate } from '../i18n/translate'
 
 type MobileWorkspaceListToolbarProps = {
   canUseHost: boolean
@@ -22,36 +15,6 @@ type MobileWorkspaceListToolbarProps = {
   onFloatingWorkspace: () => void
   onNewWorkspace: () => void
   onSearchChange: (value: string) => void
-}
-
-type ToolbarIconButtonProps = {
-  accessibilityLabel: string
-  disabled?: boolean
-  icon: Icon
-  onPress: () => void
-  size?: 'large' | 'regular'
-}
-
-function ToolbarIconButton({
-  accessibilityLabel,
-  disabled = false,
-  icon: Icon,
-  onPress,
-  size = 'regular'
-}: ToolbarIconButtonProps): React.JSX.Element {
-  return (
-    <MobileGlassPressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      className={size === 'large' ? 'h-11 w-11 rounded-full' : 'h-9 w-9 rounded-full'}
-      contentClassName="h-full w-full items-center justify-center rounded-full"
-      disabled={disabled}
-      hitSlop={4}
-      onPress={onPress}
-    >
-      <Icon size={size === 'large' ? 20 : 18} colorClassName="accent-muted-foreground" />
-    </MobileGlassPressable>
-  )
 }
 
 type MobileWorkspaceListHeaderActionsProps = {
@@ -73,19 +36,24 @@ export function MobileWorkspaceListHeaderActions({
 }: MobileWorkspaceListHeaderActionsProps): React.JSX.Element {
   return (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-      {showReconnect ? <MobileGlassTextButton label="Reconnect" onPress={onReconnect} /> : null}
+      {showReconnect ? (
+        <MobileGlassTextButton
+          label={translate('mobile.workspace.actions.reconnect', 'Reconnect')}
+          onPress={onReconnect}
+        />
+      ) : null}
       {!embedded && !showReconnect ? (
-        <ToolbarIconButton
-          accessibilityLabel="Accounts"
+        <MobileGlassIconButton
+          accessibilityLabel={translate('mobile.workspace.actions.accounts', 'Accounts')}
           disabled={!canUseHost}
-          icon={UserCircle}
+          icon="account"
           onPress={onAccounts}
         />
       ) : null}
       {embedded && onHideSidebar ? (
-        <ToolbarIconButton
-          accessibilityLabel="Hide sidebar"
-          icon={Sidebar}
+        <MobileGlassIconButton
+          accessibilityLabel={translate('mobile.workspace.actions.hideSidebar', 'Hide sidebar')}
+          icon="sidebar"
           onPress={onHideSidebar}
         />
       ) : null}
@@ -106,29 +74,35 @@ export function MobileWorkspaceListToolbar({
   const primaryControls = (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
       {embedded && floatingWorkspaceEnabled ? (
-        <ToolbarIconButton
-          accessibilityLabel="Floating Workspace"
+        <MobileGlassIconButton
+          accessibilityLabel={translate(
+            'mobile.workspace.actions.floatingWorkspace',
+            'Floating Workspace'
+          )}
           disabled={!canUseHost}
-          icon={TerminalWindow}
+          icon="terminal"
           onPress={onFloatingWorkspace}
-          size="large"
+          size="regular"
         />
       ) : null}
       <View className="flex-1">
         <MobileSearchField
           value={search}
           onChangeText={onSearchChange}
-          placeholder="Search workspaces…"
-          accessibilityLabel="Search workspaces"
+          placeholder={translate('mobile.workspace.search.placeholder', 'Search workspaces…')}
+          accessibilityLabel={translate('mobile.workspace.search.label', 'Search workspaces')}
         />
       </View>
       {!embedded && floatingWorkspaceEnabled ? (
-        <ToolbarIconButton
-          accessibilityLabel="Floating Workspace"
+        <MobileGlassIconButton
+          accessibilityLabel={translate(
+            'mobile.workspace.actions.floatingWorkspace',
+            'Floating Workspace'
+          )}
           disabled={!canUseHost}
-          icon={TerminalWindow}
+          icon="terminal"
           onPress={onFloatingWorkspace}
-          size="large"
+          size="regular"
         />
       ) : null}
     </MobileGlassGroup>
@@ -142,16 +116,16 @@ export function MobileWorkspaceListToolbar({
     <View className="gap-2">
       {primaryControls}
       <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-        <ToolbarIconButton
-          accessibilityLabel="Accounts"
+        <MobileGlassIconButton
+          accessibilityLabel={translate('mobile.workspace.actions.accounts', 'Accounts')}
           disabled={!canUseHost}
-          icon={UserCircle}
+          icon="account"
           onPress={onAccounts}
         />
-        <ToolbarIconButton
-          accessibilityLabel="New workspace"
+        <MobileGlassIconButton
+          accessibilityLabel={translate('mobile.workspace.actions.newWorkspace', 'New workspace')}
           disabled={!canUseHost}
-          icon={Plus}
+          icon="plus"
           onPress={onNewWorkspace}
         />
       </MobileGlassGroup>
