@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import {
+  openHttpLink,
+  type HttpLinkSourceOwner
+} from '~renderer/components/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
 import { resolveDefaultAgentForNewTab } from '~renderer/lib/agent-tab-shortcuts'
 import { getConnectionId } from '~renderer/lib/connection-context'
@@ -50,7 +54,6 @@ export function useGitHistoryCommitActions({
 }): GitHistoryCommitActions {
   const openCommitAllDiffs = useAppStore((s) => s.openCommitAllDiffs)
   const openCommitDiff = useAppStore((s) => s.openCommitDiff)
-  const createBrowserTab = useAppStore((s) => s.createBrowserTab)
 
   // Caches each commit's compare result so expanding a commit fetches its files
   // once, and opening a single file (or the combined diff) reuses that same
@@ -212,7 +215,16 @@ export function useGitHistoryCommitActions({
         )
           .then((url) => {
             if (url) {
-              createBrowserTab(activeWorktreeId, url, { activate: true })
+              const connectionId = getConnectionId(activeWorktreeId)
+              const runtimeEnvironmentId = activeRepoSettings?.activeRuntimeEnvironmentId?.trim()
+              const sourceOwner: HttpLinkSourceOwner | undefined = runtimeEnvironmentId
+                ? { kind: 'runtime', runtimeEnvironmentId }
+                : connectionId === null
+                  ? { kind: 'local' }
+                  : connectionId === undefined
+                    ? undefined
+                    : { kind: 'ssh', connectionId }
+              openHttpLink(url, { worktreeId: activeWorktreeId, sourceOwner })
             } else {
               toast.error(
                 translate(
@@ -288,7 +300,7 @@ export function useGitHistoryCommitActions({
         promptDelivery: 'submit-after-ready'
       })
     },
-    [activeRepoSettings, activeWorktreeId, copyCommitText, createBrowserTab, worktreePath]
+    [activeRepoSettings, activeWorktreeId, copyCommitText, worktreePath]
   )
 
   return { loadCommitFiles, openHistoryCommitDiff, openCommitFile, handleCommitAction }

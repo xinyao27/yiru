@@ -789,6 +789,7 @@ export class BrowserManager {
     if (clickedLinkFrameName) {
       guest.on('frame-created', handleFrameCreated)
     }
+    let allowInitialFileNavigation = true
     const handleDidCreateWindow = (window: Electron.BrowserWindow): void => {
       // Why: popup descendants inherit the opener's owner context for routing,
       // but must not replace its primary guest registration.
@@ -859,6 +860,7 @@ export class BrowserManager {
     })
 
     const navigationGuard = (event: Electron.Event, url: string): void => {
+      const normalizedUrl = normalizeBrowserNavigationUrl(url)
       // Why: blob: URLs are same-origin (inherit the creator's origin) and are
       // used by Cloudflare Turnstile to load challenge resources inside iframes.
       // Blocking them triggers error 600010 ("bot behavior detected"). Only
@@ -867,16 +869,33 @@ export class BrowserManager {
       if (url.startsWith('blob:https://') || url.startsWith('blob:http://')) {
         return
       }
-      // Why: file:// is permitted at `will-attach-webview` so the preview pane
-      // can render local HTML the user explicitly opened. After that initial
-      // load, a page must not be able to redirect the guest to file:// — that
-      // would let a remote page probe the local filesystem. Keep the in-guest
-      // navigation guard strict even though initial attach is permissive.
+      // Why: a new guest bootstraps through Yiru's inert blank document before
+      // loading an explicitly opened local preview. Permit that one transition
+      // only while the guest is still blank; after any real navigation, a page
+      // must not be able to redirect the guest to file:// and probe the local
+      // filesystem.
       if (url.startsWith('file:')) {
+        let currentUrl = ''
+        try {
+          currentUrl = guest.getURL()
+        } catch {
+          // Why: a destroyed guest must fail closed instead of receiving the
+          // one-time file preview exception.
+        }
+        if (
+          allowInitialFileNavigation &&
+          normalizeBrowserNavigationUrl(currentUrl) === YIRU_BROWSER_BLANK_URL
+        ) {
+          allowInitialFileNavigation = false
+          return
+        }
         event.preventDefault()
         return
       }
-      if (!normalizeBrowserNavigationUrl(url)) {
+      if (normalizedUrl !== YIRU_BROWSER_BLANK_URL) {
+        allowInitialFileNavigation = false
+      }
+      if (!normalizedUrl) {
         // Why: `will-attach-webview` only validates the initial src. Main must
         // keep enforcing the same allowlist for later guest navigations too.
         event.preventDefault()
@@ -939,6 +958,9 @@ export class BrowserManager {
       if (!isMainFrame || isChromiumInternalErrorUrl(url)) {
         return
       }
+      if (normalizeBrowserNavigationUrl(url) !== YIRU_BROWSER_BLANK_URL) {
+        allowInitialFileNavigation = false
+      }
       this.certificateTrustController?.onMainFrameNavigationStarted(guest.id)
       // Why: a failure queued before renderer registration belongs only to the
       // navigation that produced it. A replacement navigation must not replay
@@ -957,6 +979,9 @@ export class BrowserManager {
     }
 
     const didNavigateHandler = (_event: Electron.Event, url: string): void => {
+      if (normalizeBrowserNavigationUrl(url) !== YIRU_BROWSER_BLANK_URL) {
+        allowInitialFileNavigation = false
+      }
       // Why: a committed navigation means the optimistic stash from
       // did-start-navigation is obsolete — drop it so a later ERR_ABORTED
       // cannot restore a failure over the already-committed page.
