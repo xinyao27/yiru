@@ -3551,10 +3551,7 @@
           "runtime": "서버",
           "ssh": "SSH",
           "connecting": "연결 중",
-          "connect": "연결",
-          "addRemoteServer": "원격 서버 추가",
-          "addRemoteHostTooltip": "로그인할 수 있는 시스템의 경우 SSH를 선택하고 Yiru 서버의 경우 원격 서버를 선택합니다.",
-          "addRemoteServerDetail": "다른 컴퓨터에서 실행 중인 Yiru와 페어링합니다."
+          "connect": "연결"
         },
         "sidebarHostOptions": {
           "3e102f111c": "모든 호스트",
@@ -3642,23 +3639,6 @@
         },
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH 연결에 실패했습니다."
-        },
-        "AddRemoteHostDialog": {
-          "serverFieldsRequired": "서버 이름과 페어링 코드가 필요합니다.",
-          "serverSaved": "원격 서버가 추가되었습니다.",
-          "serverSaveFailed": "원격 서버를 추가하지 못했습니다.",
-          "serverTitle": "원격 서버 추가",
-          "serverDescription": "다른 컴퓨터에서 실행 중인 Yiru와 페어링합니다.",
-          "cancel": "취소",
-          "saving": "저장 중...",
-          "save": "저장",
-          "serverName": "서버 이름",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "페어링 코드",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "서버에서 실행",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "한 다음 출력된 페어링 URL을 붙여넣으세요."
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "재연결 실패",
@@ -5565,14 +5545,6 @@
           "84b9b2be05": "브라우저나 다른 Yiru 클라이언트가 연결할 수 있도록 취소 가능한 액세스 권한을 생성합니다.",
           "6e1280ca55": "이 Yiru 서버 공유",
           "9a3758d983": "저장된 서버가 없습니다.",
-          "9bee6bbeeb": "서버 추가",
-          "55fcc964cd": "을(를) 서버에서 실행하고 출력된 페어링 URL을 붙여넣으세요.",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "실행",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "페어링 코드",
-          "e038625857": "개발 환경",
-          "54ebacc600": "서버 이름",
           "1826bd0608": "저장된 서버",
           "6ce4664003": "서버 새로 고침",
           "b07070ed3c": "연결된 서버가 없습니다",
@@ -5580,11 +5552,6 @@
           "64b6bea541": "활성 서버",
           "99ac81fb43": "{{value0}}(으)로 전환되었습니다.",
           "b5b5114cb0": "{{value0}}을(를) 삭제했습니다.",
-          "6cb6eae14f": "런타임 환경을 저장하지 못했습니다.",
-          "7b5986c8df": "{{value0}}이(가) 저장되었습니다. 준비되면 활성 서버에서 전환하세요.",
-          "a5b58465b6": "{{value0}}에 연결되었습니다.",
-          "5ef712f407": "\"{{value0}}\"이라는 서버가 이미 존재합니다.",
-          "0c55a47480": "이름과 페어링 코드가 필요합니다.",
           "e6410d72c3": "런타임 환경을 로드하지 못했습니다.",
           "6ef71985da": "엔드포인트 없음",
           "ed3e3f069d": "그러면 Yiru에서 저장된 서버가 제거됩니다. 활성 서버는 변경되지 않습니다.",
@@ -5615,7 +5582,7 @@
           "serverDisconnected": "연결 해제됨",
           "disconnectedServer": "{{value0}}에서 연결이 해제되었습니다.",
           "connectToRemoteServers": "원격 서버에 연결",
-          "connectToRemoteServersHelp": "다른 Yiru 런타임을 페어링한 다음 여기에서 연결하거나 연결 해제하세요. 기본 호스트를 변경하려는 경우에만 고급 > 활성 서버를 사용하세요.",
+          "connectToRemoteServersHelp": "Coworking을 통해 승인된 호스트를 연결하거나 연결 해제하고 살펴봅니다.",
           "activeServerRowHelp": "서버를 통해 라우팅되는 프로젝트, terminals, 공급자 확인에 사용할 활성 서버입니다.",
           "disconnect": "연결 해제",
           "connect": "연결",
@@ -7364,7 +7331,7 @@
               "f1575f1e09": "웹 클라이언트",
               "81444c4102": "페어링 URL",
               "104f4d7dbd": "페어링",
-              "4575341c77": "로컬 데스크톱을 선택하고, 저장된 원격 Yiru 서버를 추가하거나, 페어링 URL을 생성하세요."
+              "4575341c77": "Coworking에서 승인된 호스트를 관리하고 클라이언트 페어링 URL을 생성하거나 고급 기본 런타임을 조정합니다."
             }
           }
         },

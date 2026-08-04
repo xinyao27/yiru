@@ -8,7 +8,6 @@ import {
   ShareNetwork as Share2,
   Trash as Trash2,
   CaretDown as ChevronDown,
-  Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import {
@@ -46,7 +45,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '../ui/dialog'
-import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import {
@@ -254,7 +252,6 @@ export function RuntimeEnvironmentsPane({
 }: RuntimeEnvironmentsPaneProps): React.JSX.Element {
   const [environments, setEnvironments] = useState<PublicKnownRuntimeEnvironment[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [detailsByEnvironmentId, setDetailsByEnvironmentId] = useState<
     Record<string, RuntimeHostDetails>
   >({})
@@ -264,13 +261,10 @@ export function RuntimeEnvironmentsPane({
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null)
   const [pendingSwitchValue, setPendingSwitchValue] = useState<string | null>(null)
   const [pendingRemove, setPendingRemove] = useState<PublicKnownRuntimeEnvironment | null>(null)
-  const [addServerFormOpen, setAddServerFormOpen] = useState(false)
   const [shareServerFormOpen, setShareServerFormOpen] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [switchError, setSwitchError] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [pairingCode, setPairingCode] = useState('')
   const remoteServerUpdates = useAppStore((state) => state.remoteServerUpdates)
   const remoteServerUpdatesChecking = useAppStore((state) => state.remoteServerUpdatesChecking)
   const remoteServerUpdatesRunning = useAppStore((state) => state.remoteServerUpdatesRunning)
@@ -284,7 +278,6 @@ export function RuntimeEnvironmentsPane({
     settings.activeRuntimeEnvironmentId ??
     (allowLocalRuntime ? LOCAL_RUNTIME_VALUE : NO_RUNTIME_VALUE)
   const isBusy =
-    isSaving ||
     connectingId !== null ||
     switchingValue !== null ||
     removingId !== null ||
@@ -392,105 +385,6 @@ export function RuntimeEnvironmentsPane({
   useEffect(() => {
     void refreshRemoteServerUpdates()
   }, [environmentIdsKey, refreshRemoteServerUpdates])
-
-  const closeAddServerForm = (): void => {
-    if (isSaving) {
-      return
-    }
-    setAddServerFormOpen(false)
-    setName('')
-    setPairingCode('')
-  }
-
-  const addEnvironment = async (): Promise<void> => {
-    const trimmedName = name.trim()
-    const trimmedPairingCode = pairingCode.trim()
-    if (!trimmedName || !trimmedPairingCode) {
-      toast.error(
-        translate(
-          'auto.components.settings.RuntimeEnvironmentsPane.0c55a47480',
-          'Name and pairing code are required.'
-        )
-      )
-      return
-    }
-    const duplicate = environments.find(
-      (environment) => environment.name.trim().toLowerCase() === trimmedName.toLowerCase()
-    )
-    if (duplicate) {
-      toast.error(
-        translate(
-          'auto.components.settings.RuntimeEnvironmentsPane.5ef712f407',
-          'A server named "{{value0}}" already exists.',
-          { value0: duplicate.name }
-        )
-      )
-      return
-    }
-    setIsSaving(true)
-    try {
-      if (!allowLocalRuntime && settings.activeRuntimeEnvironmentId) {
-        const disconnected = await switchRuntimeEnvironment(null)
-        if (!disconnected) {
-          return
-        }
-      }
-      const result = await window.api.runtimeEnvironments.addFromPairingCode({
-        name: trimmedName,
-        pairingCode: trimmedPairingCode
-      })
-      if (mountedRef.current) {
-        setName('')
-        setPairingCode('')
-      }
-      await loadEnvironments()
-      if (!allowLocalRuntime) {
-        const switched = await switchRuntimeEnvironment(result.environment.id)
-        if (!switched) {
-          await window.api.runtimeEnvironments.remove({ selector: result.environment.id })
-          await loadEnvironments()
-          return
-        }
-        if (mountedRef.current) {
-          toast.success(
-            translate(
-              'auto.components.settings.RuntimeEnvironmentsPane.a5b58465b6',
-              'Connected to {{value0}}.',
-              { value0: result.environment.name }
-            )
-          )
-        }
-      } else {
-        if (mountedRef.current) {
-          toast.success(
-            translate(
-              'auto.components.settings.RuntimeEnvironmentsPane.7b5986c8df',
-              'Saved {{value0}}. Use Advanced > Default runtime to make it the default.',
-              { value0: result.environment.name }
-            )
-          )
-        }
-      }
-      if (mountedRef.current) {
-        setAddServerFormOpen(false)
-      }
-    } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.6cb6eae14f',
-                'Failed to save runtime environment.'
-              )
-        )
-      }
-    } finally {
-      if (mountedRef.current) {
-        setIsSaving(false)
-      }
-    }
-  }
 
   const removeEnvironment = async (
     environment: PublicKnownRuntimeEnvironment
@@ -762,7 +656,7 @@ export function RuntimeEnvironmentsPane({
             <p className="text-muted-foreground text-xs">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServersHelp',
-                'Pair another Yiru runtime, then connect or disconnect it here.'
+                'Connect, disconnect, or inspect hosts authorized through Coworking.'
               )}
             </p>
           </div>
@@ -796,110 +690,8 @@ export function RuntimeEnvironmentsPane({
                     )}
               </Button>
             ) : null}
-            {addServerFormOpen ? null : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => setAddServerFormOpen(true)}
-                disabled={isBusy}
-              >
-                <Plus />
-                {translate(
-                  'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
-                  'Add Server'
-                )}
-              </Button>
-            )}
           </div>
         </div>
-
-        {addServerFormOpen ? (
-          <form
-            className="border-border/50 bg-muted/20 space-y-3 border p-3"
-            onSubmit={(event) => {
-              event.preventDefault()
-              void addEnvironment()
-            }}
-          >
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,180px)_minmax(0,1fr)]">
-              <div className="space-y-1">
-                <Label htmlFor="runtime-server-name">
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.54ebacc600',
-                    'Server name'
-                  )}
-                </Label>
-                <Input
-                  id="runtime-server-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder={translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.e038625857',
-                    'Dev box'
-                  )}
-                  className="h-8 text-xs"
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="runtime-server-pairing-code">
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.9bc9b83474',
-                    'Pairing code'
-                  )}
-                </Label>
-                <Input
-                  id="runtime-server-pairing-code"
-                  aria-describedby="runtime-server-pairing-code-help"
-                  value={pairingCode}
-                  onChange={(event) => setPairingCode(event.target.value)}
-                  placeholder={translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.c3d772c514',
-                    'yiru://pair?code=...'
-                  )}
-                  className="h-8 min-w-0 font-mono text-xs"
-                />
-                <p id="runtime-server-pairing-code-help" className="text-muted-foreground text-xs">
-                  {translate('auto.components.settings.RuntimeEnvironmentsPane.163671f7b5', 'Run')}
-                  <span className="font-mono">
-                    {translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.960e901ae4',
-                      'yiru serve --pairing-address <host>'
-                    )}
-                  </span>{' '}
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.55fcc964cd',
-                    'on the server and paste the printed pairing URL.'
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={closeAddServerForm}
-                disabled={isSaving}
-              >
-                {translate('auto.components.settings.RuntimeEnvironmentsPane.af53761f31', 'Cancel')}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={isBusy || !name.trim() || !pairingCode.trim()}
-              >
-                {isSaving ? <LoadingIndicator /> : <Plus />}
-                {translate(
-                  'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
-                  'Add Server'
-                )}
-              </Button>
-            </div>
-          </form>
-        ) : null}
 
         <div className="border-border/50 bg-card/30 border">
           {environments.length === 0 ? (

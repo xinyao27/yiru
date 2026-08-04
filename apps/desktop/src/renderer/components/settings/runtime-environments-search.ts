@@ -12,7 +12,7 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
     ),
     description: translate(
       'auto.components.settings.runtime.environments.search.4575341c77',
-      'Add a saved remote Yiru server, generate a pairing URL, or adjust the advanced default runtime.'
+      'Manage Coworking-authorized hosts, generate a client pairing URL, or adjust the advanced default runtime.'
     ),
     keywords: [
       ...translateSearchKeyword(

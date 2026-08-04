@@ -3551,10 +3551,7 @@
           "runtime": "Servidor",
           "ssh": "SSH",
           "connecting": "Conectando",
-          "connect": "Conectar",
-          "addRemoteServer": "Agregar servidor remoto",
-          "addRemoteHostTooltip": "Elige SSH para una máquina donde puedas iniciar sesión, o servidor remoto para un servidor de Yiru.",
-          "addRemoteServerDetail": "Empareja con Yiru ejecutándose en otro equipo."
+          "connect": "Conectar"
         },
         "sidebarHostOptions": {
           "3e102f111c": "Todos los hosts",
@@ -3642,23 +3639,6 @@
         },
         "useAddRepoHostSelection": {
           "connectionFailed": "La conexión SSH falló."
-        },
-        "AddRemoteHostDialog": {
-          "serverFieldsRequired": "Se requieren el nombre del servidor y el código de emparejamiento.",
-          "serverSaved": "Se agregó servidor remoto.",
-          "serverSaveFailed": "No se pudo agregar el servidor remoto.",
-          "serverTitle": "Agregar servidor remoto",
-          "serverDescription": "Empareja con Yiru ejecutándose en otro equipo.",
-          "cancel": "Cancelar",
-          "saving": "Guardando...",
-          "save": "Guardar",
-          "serverName": "Nombre del servidor",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "Código de emparejamiento",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "Ejecuta",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "en el servidor y pega la URL de emparejamiento impresa."
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "Error de reconexión",
@@ -5580,14 +5560,6 @@
           "84b9b2be05": "Crea una concesión de acceso revocable para que un navegador u otro cliente de Yiru pueda conectarse.",
           "6e1280ca55": "Compartir este servidor Yiru",
           "9a3758d983": "No hay servidores guardados.",
-          "9bee6bbeeb": "Agregar servidor",
-          "55fcc964cd": "en el servidor y pega la URL de emparejamiento impresa.",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "Ejecutar",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "Código de emparejamiento",
-          "e038625857": "Equipo de desarrollo",
-          "54ebacc600": "Nombre del servidor",
           "1826bd0608": "Servidores guardados",
           "6ce4664003": "Actualizar servidores",
           "b07070ed3c": "Ningún servidor conectado",
@@ -5595,11 +5567,6 @@
           "64b6bea541": "Servidor activo",
           "99ac81fb43": "Cambiado a {{value0}}.",
           "b5b5114cb0": "Se eliminó {{value0}}.",
-          "6cb6eae14f": "No se pudo guardar el runtime.",
-          "7b5986c8df": "Se guardó {{value0}}. Usa Servidor activo para cambiar cuando esté listo.",
-          "a5b58465b6": "Conectado a {{value0}}.",
-          "5ef712f407": "Ya existe un servidor llamado \"{{value0}}\".",
-          "0c55a47480": "Se requieren nombre y código de emparejamiento.",
           "e6410d72c3": "No se pudieron cargar los runtimes.",
           "6ef71985da": "Sin punto final",
           "ed3e3f069d": "Esto elimina el servidor guardado de Yiru. No cambia el servidor activo.",
@@ -5630,7 +5597,7 @@
           "serverDisconnected": "Desconectado",
           "disconnectedServer": "Desconectado de {{value0}}.",
           "connectToRemoteServers": "Conectarse a servidores remotos",
-          "connectToRemoteServersHelp": "Empareja otro runtime de Yiru y luego conéctalo o desconéctalo aquí. Usa Avanzado > Servidor activo solo cuando quieras cambiar el host predeterminado.",
+          "connectToRemoteServersHelp": "Conecta, desconecta o inspecciona hosts autorizados mediante Coworking.",
           "activeServerRowHelp": "Servidor activo para proyectos, terminales y checks de proveedores enrutados por servidor.",
           "disconnect": "Desconectar",
           "connect": "Conectar",
@@ -7379,7 +7346,7 @@
               "f1575f1e09": "cliente web",
               "81444c4102": "URL de emparejamiento",
               "104f4d7dbd": "emparejamiento",
-              "4575341c77": "Agrega un servidor Yiru remoto guardado, genera una URL de emparejamiento o ajusta el runtime predeterminado avanzado."
+              "4575341c77": "Administra hosts autorizados por Coworking, genera una URL de emparejamiento de clientes o ajusta el runtime predeterminado avanzado."
             }
           }
         },

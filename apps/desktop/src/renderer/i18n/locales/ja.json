@@ -3551,10 +3551,7 @@
           "runtime": "Server",
           "ssh": "SSH",
           "connecting": "接続中",
-          "connect": "接続",
-          "addRemoteServer": "リモートサーバーを追加する",
-          "addRemoteHostTooltip": "ログインできるマシンには SSH を選択し、Yiru サーバーにはリモート サーバーを選択します。",
-          "addRemoteServerDetail": "別のコンピューターで実行されている Yiru とペアリングします。"
+          "connect": "接続"
         },
         "sidebarHostOptions": {
           "3e102f111c": "All hosts",
@@ -3642,23 +3639,6 @@
         },
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH 接続に失敗しました。"
-        },
-        "AddRemoteHostDialog": {
-          "serverFieldsRequired": "サーバー名とペアリングコードは必須です。",
-          "serverSaved": "リモートサーバーが追加されました。",
-          "serverSaveFailed": "リモートサーバーの追加に失敗しました。",
-          "serverTitle": "リモートサーバーを追加する",
-          "serverDescription": "別のコンピューターで実行されている Yiru とペアリングします。",
-          "cancel": "キャンセル",
-          "saving": "保存中...",
-          "save": "保存",
-          "serverName": "サーバー名",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "ペアリングコード",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "サーバーで実行",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "し、表示されたペアリング URL を貼り付けます。"
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "再接続に失敗しました",
@@ -5602,14 +5582,6 @@
           "84b9b2be05": "ブラウザまたは別の Yiru クライアントが接続できるように、取り消し可能なアクセス許可を作成します。",
           "6e1280ca55": "この Yiru サーバーを共有する",
           "9a3758d983": "保存されたサーバーはありません。",
-          "9bee6bbeeb": "サーバーの追加",
-          "55fcc964cd": "をサーバーで実行し、出力されたペアリング URL を貼り付けます。",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "実行",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "ペアリングコード",
-          "e038625857": "開発環境",
-          "54ebacc600": "サーバー名",
           "1826bd0608": "保存されたサーバー",
           "6ce4664003": "サーバーを更新する",
           "b07070ed3c": "サーバーが接続されていません",
@@ -5617,11 +5589,6 @@
           "64b6bea541": "アクティブサーバー",
           "99ac81fb43": "{{value0}} に切り替えました。",
           "b5b5114cb0": "{{value0}} を削除しました。",
-          "6cb6eae14f": "実行環境の保存に失敗しました。",
-          "7b5986c8df": "{{value0}} を保存しました。準備ができたら、アクティブサーバーで切り替えてください。",
-          "a5b58465b6": "{{value0}} に接続されています。",
-          "5ef712f407": "「{{value0}}」という名前のサーバーはすでに存在します。",
-          "0c55a47480": "名前とペアリングコードは必須です。",
           "e6410d72c3": "ランタイム環境の読み込みに失敗しました。",
           "6ef71985da": "エンドポイントなし",
           "ed3e3f069d": "これにより、保存されたサーバーが Yiru から削除されます。アクティブなサーバーは変更されません。",
@@ -5652,7 +5619,7 @@
           "serverDisconnected": "切断済み",
           "disconnectedServer": "{{value0}} から切断しました。",
           "connectToRemoteServers": "リモートサーバーに接続",
-          "connectToRemoteServersHelp": "別の Yiru ランタイムをペアリングし、ここで接続または切断します。既定のホストを変更したい場合にのみ、詳細 > アクティブサーバーを使用してください。",
+          "connectToRemoteServersHelp": "Coworking を通じて承認されたホストに接続、切断、または詳細を確認します。",
           "activeServerRowHelp": "サーバー経由のプロジェクト、terminals、プロバイダーチェックに使うアクティブサーバーです。",
           "disconnect": "切断",
           "connect": "接続",
@@ -7401,7 +7368,7 @@
               "f1575f1e09": "ウェブクライアント",
               "81444c4102": "ペアリングURL",
               "104f4d7dbd": "ペアリング",
-              "4575341c77": "ローカル デスクトップを選択するか、保存されたリモート Yiru サーバーを追加するか、ペアリング URL を生成します。"
+              "4575341c77": "Coworking で承認されたホストを管理し、クライアント用ペアリング URL の生成や高度な既定ランタイムの調整を行います。"
             }
           }
         },

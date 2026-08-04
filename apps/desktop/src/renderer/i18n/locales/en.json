@@ -2811,10 +2811,7 @@
           "runtime": "Server",
           "ssh": "SSH",
           "connecting": "Connecting",
-          "connect": "Connect",
-          "addRemoteServer": "Add remote server",
-          "addRemoteHostTooltip": "Choose SSH for a machine you can log into, or remote server for a Yiru server.",
-          "addRemoteServerDetail": "Pair with Yiru running on another computer."
+          "connect": "Connect"
         },
         "AddRepoNestedImportStep": {
           "496f68cf8c": "Scanning repositories. Click to stop.",
@@ -3665,23 +3662,6 @@
         },
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH connection failed."
-        },
-        "AddRemoteHostDialog": {
-          "serverFieldsRequired": "Server name and pairing code are required.",
-          "serverSaved": "Remote server added.",
-          "serverSaveFailed": "Failed to add remote server.",
-          "serverTitle": "Add remote server",
-          "serverDescription": "Pair with Yiru running on another computer.",
-          "cancel": "Cancel",
-          "saving": "Saving...",
-          "save": "Save",
-          "serverName": "Server name",
-          "serverNamePlaceholder": "Dev box",
-          "pairingCode": "Pairing code",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "Run",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "on the server and paste the printed pairing URL."
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "Reconnection failed",
@@ -5647,14 +5627,6 @@
           "84b9b2be05": "Create a revocable access grant so a browser or another Yiru client can connect.",
           "6e1280ca55": "Share this Yiru server",
           "9a3758d983": "No saved servers.",
-          "9bee6bbeeb": "Add Server",
-          "55fcc964cd": "on the server and paste the printed pairing URL.",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "Run",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "Pairing code",
-          "e038625857": "Dev box",
-          "54ebacc600": "Server name",
           "1826bd0608": "Saved Servers",
           "6ce4664003": "Refresh servers",
           "b07070ed3c": "No server connected",
@@ -5662,11 +5634,6 @@
           "64b6bea541": "Active Server",
           "99ac81fb43": "Switched to {{value0}}.",
           "b5b5114cb0": "Removed {{value0}}.",
-          "6cb6eae14f": "Failed to save runtime environment.",
-          "7b5986c8df": "Saved {{value0}}. Use Active Server to switch when ready.",
-          "a5b58465b6": "Connected to {{value0}}.",
-          "5ef712f407": "A server named \"{{value0}}\" already exists.",
-          "0c55a47480": "Name and pairing code are required.",
           "e6410d72c3": "Failed to load runtime environments.",
           "6ef71985da": "No endpoint",
           "ed3e3f069d": "This removes the saved server from Yiru. It does not change the active server.",
@@ -5690,7 +5657,7 @@
           "serverDisconnected": "Disconnected",
           "disconnectedServer": "Disconnected from {{value0}}.",
           "connectToRemoteServers": "Connect to remote servers",
-          "connectToRemoteServersHelp": "Pair another Yiru runtime, then connect or disconnect it here. Use Advanced > Active Server only when you want to change the default host.",
+          "connectToRemoteServersHelp": "Connect, disconnect, or inspect hosts authorized through Coworking.",
           "activeServerRowHelp": "Active server for server-routed projects, terminals, and provider checks.",
           "disconnect": "Disconnect",
           "connect": "Connect",
@@ -7439,7 +7406,7 @@
               "f1575f1e09": "web client",
               "81444c4102": "pairing url",
               "104f4d7dbd": "pairing",
-              "4575341c77": "Choose local desktop, add a saved remote Yiru server, or generate a pairing URL."
+              "4575341c77": "Manage Coworking-authorized hosts, generate a client pairing URL, or adjust the advanced default runtime."
             }
           }
         },

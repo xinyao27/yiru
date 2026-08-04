@@ -1,4 +1,4 @@
-import { Check, CaretUpDown as ChevronsUpDown, Plus } from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { Button } from '~renderer/components/ui/button'
@@ -17,7 +17,6 @@ type AddRepoHostSelectorProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelectHost: (hostId: ExecutionHostId) => void
-  onAddRemoteServer?: () => void
 }
 
 function getHostStatusDetail(host: SidebarHostOption): string {
@@ -32,11 +31,9 @@ export function AddRepoHostSelector({
   selectedHostId,
   open,
   onOpenChange,
-  onSelectHost,
-  onAddRemoteServer
+  onSelectHost
 }: AddRepoHostSelectorProps): React.JSX.Element | null {
-  const showHostSetupActions = Boolean(onAddRemoteServer)
-  if (!shouldShowHostScopeControls(hosts) && !showHostSetupActions) {
+  if (!shouldShowHostScopeControls(hosts)) {
     return null
   }
 
@@ -78,34 +75,6 @@ export function AddRepoHostSelector({
         >
           <Command>
             <CommandList>
-              {onAddRemoteServer ? (
-                <CommandItem
-                  value="Add remote server Yiru pairing code"
-                  onSelect={() => {
-                    onOpenChange(false)
-                    onAddRemoteServer()
-                  }}
-                  className="text-muted-foreground items-start gap-2 px-3 py-2 text-xs"
-                >
-                  <Plus className="mt-0.5 size-3 shrink-0" />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate font-medium">
-                        {translate(
-                          'auto.components.sidebar.AddRepoHostSelector.addRemoteServer',
-                          'Add remote server'
-                        )}
-                      </span>
-                    </span>
-                    <span className="text-muted-foreground mt-0.5 block truncate text-[11px]">
-                      {translate(
-                        'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
-                        'Pair with Yiru running on another computer.'
-                      )}
-                    </span>
-                  </span>
-                </CommandItem>
-              ) : null}
               {hosts.map((host) => {
                 const selected = host.id === selectedHostId
                 const disabled = !canSelectAddRepoHost(host)

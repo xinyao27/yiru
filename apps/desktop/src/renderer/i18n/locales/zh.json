@@ -3551,10 +3551,7 @@
           "runtime": "服务器",
           "ssh": "SSH",
           "connecting": "正在连接",
-          "connect": "连接",
-          "addRemoteServer": "添加远程服务器",
-          "addRemoteHostTooltip": "可选择能通过 SSH 登录的机器，也可选择运行 Yiru 的远程服务器。",
-          "addRemoteServerDetail": "与另一台电脑上运行的 Yiru 配对。"
+          "connect": "连接"
         },
         "sidebarHostOptions": {
           "3e102f111c": "所有主机",
@@ -3642,23 +3639,6 @@
         },
         "useAddRepoHostSelection": {
           "connectionFailed": "SSH 连接失败。"
-        },
-        "AddRemoteHostDialog": {
-          "serverFieldsRequired": "必须填写服务器名称和配对码。",
-          "serverSaved": "已添加远程服务器。",
-          "serverSaveFailed": "添加远程服务器失败。",
-          "serverTitle": "添加远程服务器",
-          "serverDescription": "与另一台电脑上运行的 Yiru 配对。",
-          "cancel": "取消",
-          "saving": "正在保存...",
-          "save": "保存",
-          "serverName": "服务器名称",
-          "serverNamePlaceholder": "开发机",
-          "pairingCode": "配对码",
-          "pairingCodePlaceholder": "yiru://pair?code=...",
-          "pairingHelpPrefix": "在服务器上运行",
-          "pairingCommand": "yiru serve --pairing-address <host>",
-          "pairingHelpSuffix": "，然后粘贴打印出的配对 URL。"
         },
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "重新连接失败",
@@ -5565,14 +5545,6 @@
           "84b9b2be05": "创建可撤销的访问授权，以便浏览器或其他 Yiru 客户端可以连接。",
           "6e1280ca55": "分享此 Yiru 服务器",
           "9a3758d983": "没有保存的服务器。",
-          "9bee6bbeeb": "添加服务器",
-          "55fcc964cd": "在服务器上运行，并粘贴输出的配对 URL。",
-          "960e901ae4": "yiru serve --pairing-address <host>",
-          "163671f7b5": "运行",
-          "c3d772c514": "yiru://pair?code=...",
-          "9bc9b83474": "配对码",
-          "e038625857": "开发环境",
-          "54ebacc600": "服务器名称",
           "1826bd0608": "已保存的服务器",
           "6ce4664003": "刷新服务器",
           "b07070ed3c": "没有连接服务器",
@@ -5580,11 +5552,6 @@
           "64b6bea541": "活动服务器",
           "99ac81fb43": "切换到 {{value0}}。",
           "b5b5114cb0": "删除了 {{value0}}。",
-          "6cb6eae14f": "无法保存运行时环境。",
-          "7b5986c8df": "已保存 {{value0}}。准备好后可通过活动服务器进行切换。",
-          "a5b58465b6": "连接到 {{value0}}。",
-          "5ef712f407": "名为“{{value0}}”的服务器已存在。",
-          "0c55a47480": "需要名称和配对代码。",
           "e6410d72c3": "无法加载运行时环境。",
           "6ef71985da": "无终点",
           "ed3e3f069d": "这将从 Yiru 中删除保存的服务器。它不会更改活动服务器。",
@@ -5615,7 +5582,7 @@
           "serverDisconnected": "已断开连接",
           "disconnectedServer": "已断开与 {{value0}} 的连接。",
           "connectToRemoteServers": "连接到远程服务器",
-          "connectToRemoteServersHelp": "配对另一个 Yiru 运行时，然后在此处连接或断开连接。仅当你想更改默认主机时，才使用高级 > 活动服务器。",
+          "connectToRemoteServersHelp": "连接、断开或检查通过 Coworking 授权的主机。",
           "activeServerRowHelp": "用于通过服务器路由的项目、终端和提供商检查的活动服务器。",
           "disconnect": "断开连接",
           "connect": "连接",
@@ -7364,7 +7331,7 @@
               "f1575f1e09": "网络客户端",
               "81444c4102": "配对网址",
               "104f4d7dbd": "配对",
-              "4575341c77": "选择本地桌面、添加已保存的远程 Yiru 服务器或生成配对 URL。"
+              "4575341c77": "管理通过 Coworking 授权的主机、生成客户端配对 URL，或调整高级默认运行时。"
             }
           }
         },
