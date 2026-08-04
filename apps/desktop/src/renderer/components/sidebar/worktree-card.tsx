@@ -319,14 +319,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
     return state?.status ?? 'disconnected'
   })
   const isSshDisconnected = sshStatus != null && sshStatus !== 'connected'
-  // Why: a terminal view already carries its own in-pane reconnect overlay, so
-  // the blocking dialog would just duplicate it there; reserve the dialog for
-  // views without an in-context prompt. Default to terminal (suppress) for the
-  // ambiguous case so we err toward non-blocking.
-  const activeViewIsTerminal = useAppStore(
-    (s) => (s.activeTabTypeByWorktree?.[worktree.id] ?? 'terminal') === 'terminal'
-  )
-
   // Why: runtime ("Yiru server") hosts get the same disconnected treatment as
   // SSH — when the host's runtime environment has no live status, its worktrees
   // are dimmed and marked disconnected instead of looking fully available.
@@ -641,7 +633,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       isDeleting,
       activationRowKey,
       isSshDisconnected,
-      activeViewIsTerminal,
       onActivate,
       onImmediateActivate,
       onSelectionGesture

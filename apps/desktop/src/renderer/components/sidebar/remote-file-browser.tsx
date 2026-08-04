@@ -53,7 +53,6 @@ type PreviewState = {
 }
 
 export function RemoteFileBrowser({
-  targetId,
   runtimeEnvironmentId,
   initialPath = '~',
   onSelect,
@@ -146,7 +145,7 @@ export function RemoteFileBrowser({
       }
       return result
     },
-    [runtimeEnvironmentId, targetId]
+    [runtimeEnvironmentId]
   )
 
   const loadDir = useCallback(
