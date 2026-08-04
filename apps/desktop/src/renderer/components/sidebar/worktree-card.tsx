@@ -42,7 +42,6 @@ import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
 import { runWorktreeDelete } from './delete-worktree/flow'
 import { resolveRepoHeaderColor } from './project-header-color'
-import { SshDisconnectedDialog } from './ssh-disconnected-dialog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import { useWorktreeAgentRows } from './use-worktree-agent-rows'
 import {
@@ -338,19 +337,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
     }
     return !s.runtimeStatusByEnvironmentId.get(parsed.environmentId)?.status
   })
-  // Why: the reconnect dialog is blocking, so it is never auto-shown for a
-  // disconnected worktree just because it is the active/restored card — that
-  // would steal focus app-wide while the user works elsewhere. The card chip,
-  // status bar, and terminal overlay carry the non-blocking disconnected state;
-  // the dialog only opens on deliberate focus (see handleClick).
-  const [showDisconnectedDialog, setShowDisconnectedDialog] = useState(false)
   const [titleRenaming, setTitleRenaming] = useState(false)
   const [showRenameErrorDialog, setShowRenameErrorDialog] = useState(false)
-  // Why: read the target label from the store (populated during hydration in
-  // use-ipc-events.ts) instead of calling listTargets IPC per card instance.
-  const sshTargetLabel = useAppStore((s) =>
-    repo?.connectionId ? (s.sshTargetLabels.get(repo.connectionId) ?? '') : ''
-  )
 
   const gitIdentityDisplay = getWorktreeGitIdentityDisplay(worktree)
   const detachedHeadDisplay = gitIdentityDisplay?.kind === 'detached' ? gitIdentityDisplay : null
@@ -643,13 +631,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       })
       onImmediateActivate?.(worktree.id, activationRowKey)
       activateWorktreeFromSidebar(worktree.id)
-      // Why: clicking the card is a deliberate focus of this project, so the
-      // blocking reconnect prompt is appropriate here (unlike auto-restore) —
-      // but skip it when a terminal is active, since that pane already shows the
-      // in-context reconnect overlay and a second prompt would just duplicate it.
-      if (isSshDisconnected && !activeViewIsTerminal) {
-        setShowDisconnectedDialog(true)
-      }
       onActivate?.()
     },
     [
@@ -1513,16 +1494,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
         >
           {cardBody}
         </WorktreeContextMenu>
-      )}
-
-      {repo?.connectionId && (
-        <SshDisconnectedDialog
-          open={showDisconnectedDialog && isSshDisconnected}
-          onOpenChange={setShowDisconnectedDialog}
-          targetId={repo.connectionId}
-          targetLabel={sshTargetLabel || repo.displayName}
-          status={sshStatus ?? 'disconnected'}
-        />
       )}
 
       {typeof worktree.firstAgentMessageRenameError === 'string' &&
