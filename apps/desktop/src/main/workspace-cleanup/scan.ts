@@ -24,7 +24,6 @@ import {
   buildWorkspaceCleanupCandidateFromError,
   isWorkspaceInactiveForCleanup
 } from './candidate'
-import { synthesizeDisconnectedSshCleanupCandidates } from './disconnected-ssh'
 import {
   WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
   appendWorkspaceCleanupItems,
@@ -117,17 +116,6 @@ async function scanRepoWorkspaces(
     gitWorktrees = discovered.gitWorktrees
   } catch (error) {
     return handleRepoWorktreeListError({ repo, targetWorktreeId, scannedAt, error, onErrors })
-  }
-
-  if (repo.connectionId && !provider) {
-    const candidates = targetWorktreeId
-      ? synthesizeDisconnectedSshCleanupCandidates(store, repo, scannedAt, targetWorktreeId)
-      : []
-    onWorktreesDiscovered?.(candidates.length)
-    for (const candidate of candidates) {
-      onCandidateScanned?.(candidate)
-    }
-    return { scannedAt, candidates, errors: [] }
   }
 
   const mergedWorktrees = gitWorktrees.map((gitWorktree) => {

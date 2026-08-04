@@ -125,7 +125,6 @@ import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
 import { initObservability, shutdownObservability } from './observability/service'
 import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode/usage/store'
-import { removeOrphanedRuntimeOwnedSshTargets } from './orphaned-runtime-ssh-target-cleanup'
 import {
   Store,
   initDataPath,
@@ -1906,7 +1905,6 @@ app.whenReady().then(async () => {
     )
   }
   selfHealRuntimeEnvironmentFocus({ store, userDataPath: app.getPath('userData') })
-  removeOrphanedRuntimeOwnedSshTargets({ store })
   applyAppIcon(store.getSettings().appIcon)
   if (shouldSuppressDevEducation({ isDev: is.dev })) {
     suppressDevEducationForStore(store)
