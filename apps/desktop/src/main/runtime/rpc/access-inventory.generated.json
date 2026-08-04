@@ -1637,7 +1637,7 @@
     {
       "method": "github.workItemByOwnerRepo",
       "file": "src/main/runtime/rpc/methods/github.ts",
-      "scope": "host",
+      "scope": "project",
       "tier": "read"
     },
     {
@@ -1727,7 +1727,7 @@
     {
       "method": "gitlab.workItemByPath",
       "file": "src/main/runtime/rpc/methods/gitlab.ts",
-      "scope": "host",
+      "scope": "project",
       "tier": "read"
     },
     {

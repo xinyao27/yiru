@@ -437,7 +437,7 @@ import {
   updateMR as updateGitLabMR,
   updateMRReviewers as updateGitLabMRReviewers
 } from '../gitlab/client'
-import { getGlabKnownHosts } from '../gitlab/gl-utils'
+import { getGlabKnownHosts, resolveProjectRemote } from '../gitlab/gl-utils'
 import { normalizeGitLabMRListState, normalizeGitLabPositiveInteger } from '../gitlab/preload-args'
 import { getWorkItemDetails as getGitLabWorkItemDetails } from '../gitlab/work-item-details'
 import {
@@ -12085,6 +12085,18 @@ export class YiruRuntimeService {
     const repo = await this.resolveRepoSelector(repoSelector)
     const options = this.getHostedReviewExecutionOptions(repo)
     return options ? getRepoUpstream(repo.path, null, options) : getRepoUpstream(repo.path, null)
+  }
+
+  async getGitLabRepoProjectRef(repoSelector: string): Promise<GitLabProjectRef | null> {
+    const repo = await this.resolveRepoSelector(repoSelector)
+    const resolution = await resolveProjectRemote(
+      repo.path,
+      repo.forgeRemotePreference,
+      await getGlabKnownHosts(null),
+      null,
+      getLocalProjectWorktreeGitOptions(this.requireStore(), repo)
+    )
+    return resolution.source
   }
 
   // Why: repos added before fork detection existed have no stored `upstream`, so

@@ -6,6 +6,7 @@ import {
   OptionalString,
   requiredString
 } from '~shared/runtime-method-contracts/runtime-method-params'
+import { parsePaneKey } from '~shared/stable-pane-id'
 
 const RunCreateParams = z.object({
   objective: requiredString('Missing --objective'),
@@ -30,6 +31,15 @@ function requireCallerPane(runtime: YiruRuntimeService, handle: string): string 
     )
   }
   return paneKey
+}
+
+function paneKeysMatch(a: string, b: string): boolean {
+  if (a === b) {
+    return true
+  }
+  const aLeaf = parsePaneKey(a)?.leafId
+  const bLeaf = parsePaneKey(b)?.leafId
+  return Boolean(aLeaf && bLeaf && aLeaf === bLeaf)
 }
 
 export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
@@ -60,6 +70,16 @@ export const ORCHESTRATION_RUN_METHODS: RpcMethod[] = [
       const paneKey = requireCallerPane(runtime, params.from)
       const db = runtime.getOrchestrationDb()
       const priorRun = db.getCurrentRunForPane(paneKey)
+      const targetRun = db.getRun(params.id)
+      const liveTargetPane = targetRun?.coordinator_handle
+        ? runtime.getTerminalPaneKey(targetRun.coordinator_handle)
+        : null
+      if (liveTargetPane && !paneKeysMatch(liveTargetPane, paneKey)) {
+        throw new OrchestrationError(
+          'run_in_use',
+          `Run ${params.id} is already bound to another live coordinator.`
+        )
+      }
       const run = db.bindRun({
         runId: params.id,
         coordinatorHandle: params.from,

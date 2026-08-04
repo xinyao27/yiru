@@ -5,7 +5,7 @@ import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { YiruRuntimeService } from '../yiru-runtime'
 import type { RpcAccess } from './access'
-import { denyAccess } from './access-adjudication'
+import { denyAccess, denyRedirectedProjectAccess } from './access-adjudication'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport
 // makes it unit-testable without spinning up a socket, and keeps
@@ -45,13 +45,11 @@ export type DispatcherOptions = {
 }
 
 export class RpcDispatcher {
-  private readonly runtime: YiruRuntimeService
   private readonly registry: RpcRegistry
   private readonly moduleContext: RpcContext
   private readonly orchestrationMutations: OrchestrationMutationExecutor
 
   constructor({ runtime, methods }: DispatcherOptions) {
-    this.runtime = runtime
     this.registry = buildRegistry(methods)
     this.orchestrationMutations = new OrchestrationMutationExecutor(runtime)
     this.moduleContext = {
@@ -189,6 +187,17 @@ export class RpcDispatcher {
       return
     }
 
+    const redirectDenial = await denyRedirectedProjectAccess(
+      method,
+      parsedParams.value,
+      meta,
+      request.id,
+      { principal: options?.principal, runtime: this.moduleContext.runtime }
+    )
+    if (redirectDenial) {
+      return reply(JSON.stringify(redirectDenial))
+    }
+
     if (!isStreamingMethod(method)) {
       try {
         const invoke = (mutation?: DurableMutationInvocation): Promise<unknown> | unknown =>
@@ -312,7 +321,7 @@ export class RpcDispatcher {
   }
 
   private meta(): RpcEnvelopeMeta {
-    return { runtimeId: this.runtime.getRuntimeId() }
+    return { runtimeId: this.moduleContext.runtime.getRuntimeId() }
   }
 
   private recordRuntimeFeatureInteraction(
@@ -329,7 +338,7 @@ export class RpcDispatcher {
       return
     }
     try {
-      this.runtime.recordFeatureInteraction(id)
+      this.moduleContext.runtime.recordFeatureInteraction(id)
       alreadyRecorded?.add(id)
     } catch {
       // Best-effort education state must not break runtime tools.

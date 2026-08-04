@@ -74,7 +74,7 @@ export const GITHUB_METHODS: RpcMethod[] = [
     name: 'github.workItemByOwnerRepo',
     mobile: true,
     params: WorkItemByOwnerRepo,
-    access: { scope: 'host', tier: 'read' },
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.getRepoWorkItemByOwnerRepo(
         params.repo,

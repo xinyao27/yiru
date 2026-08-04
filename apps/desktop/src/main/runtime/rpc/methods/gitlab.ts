@@ -237,7 +237,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
     name: 'gitlab.workItemByPath',
     mobile: true,
     params: WorkItemByPath,
-    access: { scope: 'host', tier: 'read' },
+    access: { scope: 'project', tier: 'read' },
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoWorkItemByPath(
         params.repo,
