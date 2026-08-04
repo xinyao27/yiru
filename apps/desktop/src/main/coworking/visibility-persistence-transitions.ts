@@ -1,5 +1,5 @@
 import type { Store, CoworkingVisibilityCommitChange } from '../persistence'
-import type { CoworkingVisibilityDenyJournal } from './visibility-deny-journal'
+import type { CoworkingGrantJournal } from './grant-journal'
 import { CoworkingVisibilityError } from './visibility-errors'
 import type {
   CoworkingVisibilityInvalidationReason,
@@ -33,15 +33,15 @@ export class CoworkingVisibilityPersistenceTransitions {
   constructor(
     private readonly store: CoworkingVisibilityStore,
     private readonly denyJournal: Pick<
-      CoworkingVisibilityDenyJournal,
-      'add' | 'remove' | 'snapshot'
+      CoworkingGrantJournal,
+      'addVisibilityDenies' | 'removeVisibilityDenies' | 'snapshotVisibilityDenies'
     >,
     private readonly publicationState: CoworkingWorktreePublicationState,
     private readonly createId: () => string
   ) {}
 
   recoverDenyJournal(): void {
-    const denied = [...this.denyJournal.snapshot()]
+    const denied = [...this.denyJournal.snapshotVisibilityDenies()]
     if (denied.length === 0) {
       return
     }
@@ -61,7 +61,7 @@ export class CoworkingVisibilityPersistenceTransitions {
       if (changes.length > 0) {
         this.store.commitCoworkingVisibility(changes)
       }
-      this.denyJournal.remove(denied)
+      this.denyJournal.removeVisibilityDenies(denied)
     })
   }
 
@@ -82,7 +82,7 @@ export class CoworkingVisibilityPersistenceTransitions {
           coworkingIncarnationId: entry.markerId
         }))
       )
-      this.denyJournal.remove(instanceIds)
+      this.denyJournal.removeVisibilityDenies(instanceIds)
       preparedPersistence.completeAttestation()
     } catch (error) {
       this.publicationState.suspend(instanceIds, 'incarnation-unavailable')
@@ -131,7 +131,7 @@ export class CoworkingVisibilityPersistenceTransitions {
     commit: () => void
   ): void {
     try {
-      this.denyJournal.add(instanceIds)
+      this.denyJournal.addVisibilityDenies(instanceIds)
     } catch (error) {
       this.publicationState.invalidate(instanceIds, reason, replacements ?? new Map())
       throw new CoworkingVisibilityError('persistence-failed', { cause: error })
@@ -141,7 +141,7 @@ export class CoworkingVisibilityPersistenceTransitions {
     this.publicationState.invalidate(instanceIds, reason, replacements ?? new Map())
     this.persist(() => {
       commit()
-      this.denyJournal.remove(instanceIds)
+      this.denyJournal.removeVisibilityDenies(instanceIds)
     })
   }
 

@@ -21,7 +21,8 @@ import {
   type TerminalStreamFrame
 } from '~shared/terminal/stream-protocol'
 
-import { DeviceRegistry, type DeviceScope } from './device-registry'
+import type { CoworkingGrantJournal } from '../coworking/grant-journal'
+import { DeviceRegistry, type CoworkingHostDeviceEntry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
@@ -167,6 +168,7 @@ export class YiruRuntimeRpcServer {
   // only long-running dispatches, not every in-flight short RPC. See §3.1 +
   // §7 risk #2.
   private activeLongPolls = 0
+  private grantJournal: Pick<CoworkingGrantJournal, 'recordHostOperation'> | null = null
 
   constructor({
     runtime,
@@ -191,6 +193,10 @@ export class YiruRuntimeRpcServer {
 
   getDeviceRegistry(): DeviceRegistry | null {
     return this.deviceRegistry
+  }
+
+  setGrantJournal(journal: Pick<CoworkingGrantJournal, 'recordHostOperation'>): void {
+    this.grantJournal = journal
   }
 
   getTlsFingerprint(): string | null {
@@ -399,6 +405,28 @@ export class YiruRuntimeRpcServer {
 
   private cancelWebSocketDispatch(ws: WebSocket, requestId: string): void {
     this.wsDispatchAbortStates.get(ws)?.requests.get(requestId)?.abort()
+  }
+
+  private recordCoworkingHostOperation(
+    request: RpcRequest,
+    device: CoworkingHostDeviceEntry
+  ): boolean {
+    if (device.tier !== 'host' || !this.grantJournal) {
+      return device.tier !== 'host'
+    }
+    try {
+      this.grantJournal.recordHostOperation({
+        requestId: request.id,
+        method: request.method,
+        deviceId: device.deviceId,
+        deviceName: device.name,
+        subject: device.subject,
+        hostScopeKey: device.hostScopeKey
+      })
+      return true
+    } catch {
+      return false
+    }
   }
 
   async start(): Promise<void> {
@@ -700,6 +728,14 @@ export class YiruRuntimeRpcServer {
             'forbidden',
             `Method '${request.method}' is not available to mobile clients`
           )
+        )
+      )
+      return
+    }
+    if (device.scope === 'coworking-host' && !this.recordCoworkingHostOperation(request, device)) {
+      reply(
+        JSON.stringify(
+          this.buildError(request.id, 'internal_error', 'Privileged operation audit unavailable')
         )
       )
       return

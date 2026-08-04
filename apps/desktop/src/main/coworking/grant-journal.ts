@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { appendFileSync, existsSync, readFileSync, rmSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 
-import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
+import { hardenExistingSecureFile, writeSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 const COWORKING_VISIBILITY_DENY_JOURNAL_VERSION = 1
 
@@ -9,36 +10,73 @@ type PersistedCoworkingVisibilityDenyJournal = {
   deniedByProfile: Record<string, string[]>
 }
 
-export class CoworkingVisibilityDenyJournal {
+export type CoworkingHostOperation = {
+  requestId: string
+  method: string
+  deviceId: string
+  deviceName: string
+  subject: { nodeId: string; userDisplayName: string }
+  hostScopeKey: string
+}
+
+export class CoworkingGrantJournal {
   private deniedInstanceIds: Set<string>
   private deniedByProfile: Record<string, string[]>
+  private readonly operationFilePath: string
 
   constructor(
     private readonly filePath: string,
     private readonly profileId: string
   ) {
     if (!profileId) {
-      throw new Error('Missing Coworking visibility profile identity')
+      throw new Error('Missing Coworking grant journal profile identity')
     }
+    this.operationFilePath = join(dirname(filePath), 'coworking-grant-journal.jsonl')
+    hardenExistingSecureFile(this.operationFilePath)
     this.deniedByProfile = this.load()
     this.deniedInstanceIds = new Set(this.deniedByProfile[profileId] ?? [])
   }
 
-  snapshot(): ReadonlySet<string> {
+  recordHostOperation(operation: CoworkingHostOperation): void {
+    this.appendAuditEvent({ kind: 'host-operation', ...operation })
+  }
+
+  private appendAuditEvent(event: { kind: string } & Record<string, unknown>): void {
+    const line = `${JSON.stringify({
+      version: 1,
+      profileId: this.profileId,
+      occurredAt: Date.now(),
+      ...event
+    })}\n`
+    if (!existsSync(this.operationFilePath)) {
+      writeSecureFile(this.operationFilePath, line)
+      return
+    }
+    // Why: the first secure write fixes the file ACL; append-only records keep
+    // each privileged invocation durable without rewriting the full history.
+    appendFileSync(this.operationFilePath, line, { encoding: 'utf-8', mode: 0o600 })
+  }
+
+  snapshotVisibilityDenies(): ReadonlySet<string> {
     return new Set(this.deniedInstanceIds)
   }
 
-  add(instanceIds: readonly string[]): void {
+  addVisibilityDenies(instanceIds: readonly string[]): void {
     const next = new Set(this.deniedInstanceIds)
+    const added: string[] = []
     for (const instanceId of instanceIds) {
-      if (instanceId) {
+      if (instanceId && !next.has(instanceId)) {
         next.add(instanceId)
+        added.push(instanceId)
       }
+    }
+    if (added.length > 0) {
+      this.appendAuditEvent({ kind: 'visibility-deny', instanceIds: added.sort() })
     }
     this.replace(next)
   }
 
-  remove(instanceIds: readonly string[]): void {
+  removeVisibilityDenies(instanceIds: readonly string[]): void {
     const next = new Set(this.deniedInstanceIds)
     for (const instanceId of instanceIds) {
       next.delete(instanceId)

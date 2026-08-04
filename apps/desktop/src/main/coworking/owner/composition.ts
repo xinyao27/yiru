@@ -8,6 +8,7 @@ import { COWORKING_INGRESS_PORT, type CoworkingOsFamily } from '~shared/coworkin
 
 import { CoworkingAccessAuthority } from '../access-authority'
 import { CoworkingExecutionGateway } from '../execution-gateway'
+import { CoworkingGrantJournal } from '../grant-journal'
 import { CoworkingCanonicalHistoricalSessionConsistency } from '../historical-session-consistency'
 import { CoworkingIngress } from '../ingress'
 import { CoworkingLegacySessionAttestor } from '../legacy-session-attestor'
@@ -26,7 +27,6 @@ import { CoworkingSessionProvenanceIndex } from '../session/provenance-index'
 import { CoworkingActualHostSessionRootMatcher } from '../session/root-matcher'
 import { CoworkingShareCatalog } from '../share-catalog'
 import { CoworkingTerminalAttachmentRegistry } from '../terminal-attachment-registry'
-import { CoworkingVisibilityDenyJournal } from '../visibility-deny-journal'
 import {
   assertWindowsCoworkingFirewallReady,
   inspectWindowsCoworkingFirewall,
@@ -103,12 +103,13 @@ export function createCoworkingOwnerComposition(
     new CoworkingCanonicalHistoricalSessionConsistency(catalog, incarnation, roots)
   )
   const attestor = new CoworkingLegacySessionAttestor(provenance, sessionSource, roots)
+  const grantJournal = new CoworkingGrantJournal(
+    join(options.userDataPath, 'coworking-visibility-deny.json'),
+    options.profileId
+  )
   const visibility = new CoworkingWorktreeVisibility({
     store: options.store,
-    denyJournal: new CoworkingVisibilityDenyJournal(
-      join(options.userDataPath, 'coworking-visibility-deny.json'),
-      options.profileId
-    ),
+    denyJournal: grantJournal,
     catalog,
     incarnation,
     prepareFirstPublication: async (entries, registeredRoots, refreshInstanceIds) => {
@@ -265,6 +266,7 @@ export function createCoworkingOwnerComposition(
   })
   composition = new CoworkingOwnerComposition(
     service,
+    grantJournal,
     options.store,
     catalog,
     visibility,

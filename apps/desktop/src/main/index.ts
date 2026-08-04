@@ -2499,6 +2499,7 @@ app.whenReady().then(async () => {
       osFamily:
         process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
     })
+    runtimeRpc.setGrantJournal(coworkingOwner.grantJournal)
     unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(coworkingOwner.service)
   } catch (error) {
     // Why: corrupt sharing state or a missing platform dependency disables only Coworking.

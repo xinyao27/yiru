@@ -1,4 +1,4 @@
-import type { CoworkingVisibilityDenyJournal } from './visibility-deny-journal'
+import type { CoworkingGrantJournal } from './grant-journal'
 import type {
   CoworkingPreparedPublicationPersistence,
   CoworkingVisibilityStore
@@ -12,7 +12,10 @@ import type { PreparedCoworkingPublication } from './worktree-publication-valida
 
 export type CoworkingWorktreeVisibilityOptions = {
   store: CoworkingVisibilityStore
-  denyJournal: Pick<CoworkingVisibilityDenyJournal, 'add' | 'remove' | 'snapshot'>
+  denyJournal: Pick<
+    CoworkingGrantJournal,
+    'addVisibilityDenies' | 'removeVisibilityDenies' | 'snapshotVisibilityDenies'
+  >
   catalog: CoworkingOwnerWorktreeCatalog
   incarnation: CoworkingWorktreeIncarnation
   createShareEpoch?: () => string
