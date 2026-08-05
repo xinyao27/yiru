@@ -232,12 +232,12 @@ function HomeMetricTile({
         accessibilityLabel={`${label}: ${value}`}
         accessibilityRole="button"
         accessibilityState={{ disabled: !onPress }}
-        className="active:bg-accent min-h-32 flex-row items-center gap-2 rounded-2xl p-3"
+        className="active:bg-accent min-h-32 flex-col items-start justify-end gap-3 rounded-2xl p-4"
         disabled={!onPress}
         onPress={onPress}
       >
-        <Icon size={22} colorClassName={iconColorClassName} />
-        <Text className="text-foreground flex-1 text-base" numberOfLines={2}>
+        <Icon size={24} colorClassName={iconColorClassName} />
+        <Text className="text-foreground text-base">
           {label} <Text className="text-muted-foreground/70 text-sm tabular-nums">{value}</Text>
         </Text>
       </Pressable>
