@@ -2941,12 +2941,33 @@ export default function SessionScreen(): React.JSX.Element {
   }
   const showAgentSessionHistoryAction =
     !isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && agentSessionHistorySupported === true
+  const showQuickCommandsAction = shouldShowMobileQuickCommandsAction(quickCommandsSupported)
+  const showFileExplorerAction = !isFloatingWorkspaceRoute
+  const showSourceControlAction = !isFolderWorkspaceRoute && !isFloatingWorkspaceRoute
   const showChecksAction = shouldShowSessionHeaderChecksAction({
     isFolderWorkspaceRoute: isFolderWorkspaceRoute || isFloatingWorkspaceRoute,
     repoContextLoaded: prRepoContextLoaded,
     hostedChecksSupported: prIsGithubRepo
   })
-  const showHeaderMoreButton = showAgentSessionHistoryAction || showChecksAction
+  const showHeaderMoreButton =
+    showQuickCommandsAction ||
+    showFileExplorerAction ||
+    showSourceControlAction ||
+    showAgentSessionHistoryAction ||
+    showChecksAction
+  const openQuickCommands = (): void => {
+    if (quickCommandsSupported === true) {
+      setShowQuickCommands(true)
+      return
+    }
+    showToast(
+      translate(
+        'mobile.session.capabilities.checking',
+        'Checking desktop capabilities - try again in a moment'
+      ),
+      1600
+    )
+  }
   const useNativeSessionHeader = shouldUseNativeSessionHeader(isWideLayout)
   const hasDirtyMarkdownDrafts = getDirtyMarkdownDrafts().length > 0
   const nativeHeaderOptions = useMemo(
@@ -2976,26 +2997,6 @@ export default function SessionScreen(): React.JSX.Element {
             />
           </Stack.Toolbar>
           <Stack.Toolbar placement="right">
-            <Stack.Toolbar.Button
-              accessibilityLabel={translate(
-                'mobile.session.header.openFileExplorer',
-                'Open file explorer'
-              )}
-              hidden={isFloatingWorkspaceRoute}
-              icon="folder"
-              onPress={() => handlePanelTap('files')}
-              selected={activePanel === 'files'}
-            />
-            <Stack.Toolbar.Button
-              accessibilityLabel={translate(
-                'mobile.session.header.openSourceControl',
-                'Open source control'
-              )}
-              hidden={isFolderWorkspaceRoute || isFloatingWorkspaceRoute}
-              icon="arrow.triangle.branch"
-              onPress={() => handlePanelTap('sourceControl')}
-              selected={activePanel === 'sourceControl'}
-            />
             <Stack.Toolbar.Menu
               accessibilityLabel={translate(
                 'mobile.session.header.moreActions',
@@ -3005,6 +3006,27 @@ export default function SessionScreen(): React.JSX.Element {
               icon="ellipsis"
               separateBackground
             >
+              <Stack.Toolbar.MenuAction
+                hidden={!showQuickCommandsAction}
+                icon="arrow.right.square"
+                onPress={openQuickCommands}
+              >
+                {translate('mobile.session.quickCommands', 'Quick commands')}
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showFileExplorerAction}
+                icon="folder"
+                onPress={() => handlePanelTap('files')}
+              >
+                {translate('mobile.session.header.openFileExplorer', 'Open file explorer')}
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showSourceControlAction}
+                icon="arrow.triangle.branch"
+                onPress={() => handlePanelTap('sourceControl')}
+              >
+                {translate('mobile.session.header.openSourceControl', 'Open source control')}
+              </Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction
                 hidden={!showAgentSessionHistoryAction}
                 icon="clock.arrow.circlepath"
@@ -3062,28 +3084,6 @@ export default function SessionScreen(): React.JSX.Element {
                 </View>
               </Pressable>
               <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-                {!isFloatingWorkspaceRoute ? (
-                  <MobileGlassIconButton
-                    accessibilityLabel={translate(
-                      'mobile.session.header.openFileExplorer',
-                      'Open file explorer'
-                    )}
-                    icon="folder"
-                    isSelected={activePanel === 'files'}
-                    onPress={() => handlePanelTap('files')}
-                  />
-                ) : null}
-                {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-                  <MobileGlassIconButton
-                    accessibilityLabel={translate(
-                      'mobile.session.header.openSourceControl',
-                      'Open source control'
-                    )}
-                    icon="source-control"
-                    isSelected={activePanel === 'sourceControl'}
-                    onPress={() => handlePanelTap('sourceControl')}
-                  />
-                )}
                 {showHeaderMoreButton ? (
                   <MobileGlassIconButton
                     accessibilityLabel={translate(
@@ -3091,7 +3091,7 @@ export default function SessionScreen(): React.JSX.Element {
                       'More session actions'
                     )}
                     icon="more"
-                    isSelected={activePanel === 'pr'}
+                    isSelected={activePanel !== null}
                     onPress={() => setShowHeaderMoreActions(true)}
                   />
                 ) : null}
@@ -3130,7 +3130,6 @@ export default function SessionScreen(): React.JSX.Element {
             activeTabId={activeSessionTabId}
             disabled={creating || creatingBrowser || creatingMarkdown || connState !== 'connected'}
             tabs={visibleTabs}
-            showQuickCommands={shouldShowMobileQuickCommandsAction(quickCommandsSupported)}
             onTabPress={switchSessionTab}
             onTabLongPress={(tab) => {
               triggerMediumImpact()
@@ -3139,19 +3138,6 @@ export default function SessionScreen(): React.JSX.Element {
             onNewTabPress={() => {
               setCreateError('')
               setShowCreateTabDrawer(true)
-            }}
-            onQuickCommandsPress={() => {
-              if (quickCommandsSupported === true) {
-                setShowQuickCommands(true)
-                return
-              }
-              showToast(
-                translate(
-                  'mobile.session.capabilities.checking',
-                  'Checking desktop capabilities - try again in a moment'
-                ),
-                1600
-              )
             }}
           />
         ) : null}
@@ -3397,8 +3383,14 @@ export default function SessionScreen(): React.JSX.Element {
 
       <MobileSessionHeaderMoreActionsSheet
         visible={!useNativeSessionHeader && showHeaderMoreActions}
+        showQuickCommands={showQuickCommandsAction}
+        showFileExplorer={showFileExplorerAction}
+        showSourceControl={showSourceControlAction}
         showAgentSessionHistory={showAgentSessionHistoryAction}
         showChecks={showChecksAction}
+        onOpenQuickCommands={openQuickCommands}
+        onOpenFileExplorer={() => handlePanelTap('files')}
+        onOpenSourceControl={() => handlePanelTap('sourceControl')}
         onOpenAgentSessionHistory={openAgentSessionHistory}
         onOpenChecks={() => handlePanelTap('pr')}
         onClose={() => setShowHeaderMoreActions(false)}

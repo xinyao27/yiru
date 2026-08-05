@@ -10,10 +10,8 @@ export type MobileSessionTabStripProps = {
   activeTabId: string | null
   disabled: boolean
   onNewTabPress: () => void
-  onQuickCommandsPress: () => void
   onTabLongPress: (tab: MobileSessionTab) => void
   onTabPress: (tab: MobileSessionTab) => void
-  showQuickCommands: boolean
   tabs: MobileSessionTab[]
 }
 
@@ -21,10 +19,8 @@ export function MobileSessionTabStrip({
   activeTabId,
   disabled,
   onNewTabPress,
-  onQuickCommandsPress,
   onTabLongPress,
   onTabPress,
-  showQuickCommands,
   tabs
 }: MobileSessionTabStripProps): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null)
@@ -100,12 +96,7 @@ export function MobileSessionTabStrip({
           ))}
         </ScrollView>
       </View>
-      <MobileSessionTabActions
-        disabled={disabled}
-        onNewTabPress={onNewTabPress}
-        onQuickCommandsPress={onQuickCommandsPress}
-        showQuickCommands={showQuickCommands}
-      />
+      <MobileSessionTabActions disabled={disabled} onNewTabPress={onNewTabPress} />
     </View>
   )
 }

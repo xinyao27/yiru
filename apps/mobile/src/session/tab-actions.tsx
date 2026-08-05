@@ -2,14 +2,11 @@ import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { translate } from '~/i18n/translate'
 
-import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type { MobileSessionTabActionsProps } from './tab-actions-props'
 
 export function MobileSessionTabActions({
   disabled,
-  onNewTabPress,
-  onQuickCommandsPress,
-  showQuickCommands
+  onNewTabPress
 }: MobileSessionTabActionsProps): React.JSX.Element {
   return (
     <MobileGlassGroup className="flex-row items-center" spacing={8}>
@@ -19,9 +16,6 @@ export function MobileSessionTabActions({
         icon="plus"
         onPress={onNewTabPress}
       />
-      {showQuickCommands ? (
-        <QuickCommandsTabButton disabled={disabled} onPress={onQuickCommandsPress} />
-      ) : null}
     </MobileGlassGroup>
   )
 }

@@ -8,9 +8,7 @@ import type { MobileSessionTabActionsProps } from './tab-actions-props'
 
 export function MobileSessionTabActions({
   disabled,
-  onNewTabPress,
-  onQuickCommandsPress,
-  showQuickCommands
+  onNewTabPress
 }: MobileSessionTabActionsProps): React.JSX.Element {
   const { theme } = useUniwind()
 
@@ -25,15 +23,6 @@ export function MobileSessionTabActions({
             size="regular"
             systemImage="plus"
           />
-          {showQuickCommands ? (
-            <MobileSwiftUiGlassCircleButton
-              disabled={disabled}
-              label={translate('mobile.session.quickCommands', 'Quick commands')}
-              onPress={onQuickCommandsPress}
-              size="regular"
-              systemImage="arrow.right.square"
-            />
-          ) : null}
         </HStack>
       </GlassEffectContainer>
     </Host>
