@@ -6,8 +6,8 @@ import type { TerminalAccessoryKey } from '~/terminal/accessory-keys'
 import type { CustomKey } from '~/terminal/custom-key-modal'
 import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
 
-import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileImageSource } from '../image-source-picker'
+import { MobileTerminalAttachmentMenu } from './accessory-attachment'
 import { MobileTerminalAccessoryKey } from './accessory-key'
 
 export type TerminalAccessoryInput = ReturnType<typeof createTerminalLiveAccessoryInput>
@@ -157,7 +157,7 @@ export function MobileTerminalAccessoryBar({
           />
         ) : null}
         {onAttachImage ? (
-          <MobileAttachmentMenu
+          <MobileTerminalAttachmentMenu
             disabled={!canSend || isAttaching}
             pending={isAttaching}
             onSelect={onAttachImage}
