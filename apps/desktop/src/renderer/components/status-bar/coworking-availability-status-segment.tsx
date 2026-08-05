@@ -138,11 +138,12 @@ function CoworkingSelfIdentityLine(): React.JSX.Element | null {
 
 function CoworkingPresenceDetails({ sharedCount }: { sharedCount: number }): React.JSX.Element {
   const connections = useAppStore((state) => state.coworkingOwnerActiveConnections)
+  const ownerWorktrees = useAppStore((state) => state.coworkingOwnerWorktrees)
+  // Why: returning filter() from the selector creates an uncached snapshot and
+  // makes React loop when the popover subscribes during its initial mount.
   // Why: a suspended share still reads as public in the sidebar, so without this
   // the owner believes they are sharing something no peer can actually open.
-  const suspended = useAppStore((state) =>
-    state.coworkingOwnerWorktrees.filter((worktree) => worktree.publicationStatus === 'suspended')
-  )
+  const suspended = ownerWorktrees.filter((worktree) => worktree.publicationStatus === 'suspended')
 
   return (
     <div className="flex flex-col gap-2 px-3 py-3">
