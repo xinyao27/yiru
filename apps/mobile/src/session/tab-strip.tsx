@@ -64,7 +64,7 @@ export function MobileSessionTabStrip({
   }, [activeTabId, scrollActiveTabIntoView])
 
   return (
-    <MobileGlassGroup className="mx-2 my-1 flex-row items-center gap-2 py-1" spacing={8}>
+    <View className="mx-2 my-1 flex-row items-center gap-2 py-1">
       <View className="min-h-11 min-w-0 flex-1 overflow-hidden">
         <ScrollView
           ref={scrollRef}
@@ -104,15 +104,17 @@ export function MobileSessionTabStrip({
           ))}
         </ScrollView>
       </View>
-      <MobileGlassIconButton
-        accessibilityLabel={translate('mobile.session.newTab', 'New tab')}
-        disabled={disabled}
-        icon="plus"
-        onPress={onNewTabPress}
-      />
-      {showQuickCommands ? (
-        <QuickCommandsTabButton disabled={disabled} onPress={onQuickCommandsPress} />
-      ) : null}
-    </MobileGlassGroup>
+      <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
+        <MobileGlassIconButton
+          accessibilityLabel={translate('mobile.session.newTab', 'New tab')}
+          disabled={disabled}
+          icon="plus"
+          onPress={onNewTabPress}
+        />
+        {showQuickCommands ? (
+          <QuickCommandsTabButton disabled={disabled} onPress={onQuickCommandsPress} />
+        ) : null}
+      </MobileGlassGroup>
+    </View>
   )
 }
