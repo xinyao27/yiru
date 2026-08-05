@@ -9679,7 +9679,12 @@
             "0e3e809a4b": "Filtrar",
             "b4271864bd": "MacBook Pro",
             "cefd048225": "Atrás",
-            "c5ad56786d": "hilandero"
+            "c5ad56786d": "hilandero",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {

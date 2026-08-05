@@ -9679,7 +9679,12 @@
             "0e3e809a4b": "필터",
             "b4271864bd": "맥북 프로",
             "cefd048225": "뒤로",
-            "c5ad56786d": "스피너"
+            "c5ad56786d": "스피너",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {

@@ -9679,7 +9679,12 @@
             "0e3e809a4b": "筛选",
             "b4271864bd": "MacBook Pro",
             "cefd048225": "返回",
-            "c5ad56786d": "旋转器"
+            "c5ad56786d": "旋转器",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {

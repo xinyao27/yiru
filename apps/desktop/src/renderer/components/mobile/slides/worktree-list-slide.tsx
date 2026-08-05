@@ -1,23 +1,169 @@
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { ClaudeIcon, GeminiIcon } from '~renderer/components/status-bar/icons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
 import { mobileWorktreePreviewStyles } from '../worktree-preview-tailwind'
 
-type Indicator = 'spinner' | 'green' | 'muted' | 'red'
+type RepoIconKind = 'bird' | 'cat' | 'folder' | 'pocket'
+type WorkspaceStatus = 'idle' | 'working'
+type AgentIconKind = 'claude' | 'gemini'
 
-type WorktreeRowProps = {
-  indicator: Indicator
-  name: string
-  pr?: string
-  repoColorClass: string
-  repo: string
-  branch: string
-  preview?: string
-  tcount?: number
-  tapping?: boolean
+type PreviewText = {
+  key: string
+  fallback: string
 }
+
+type PreviewAgent = {
+  icon: AgentIconKind
+  label: PreviewText
+  state: WorkspaceStatus
+  time: PreviewText
+}
+
+type PreviewRepository = {
+  branch?: PreviewText
+  branchStatus?: WorkspaceStatus
+  comment?: boolean
+  expanded: boolean
+  icon: RepoIconKind
+  name: PreviewText
+  agents?: PreviewAgent[]
+}
+
+const previewRepositories: PreviewRepository[] = [
+  {
+    branch: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.main',
+      fallback: 'main'
+    },
+    branchStatus: 'working',
+    expanded: true,
+    icon: 'cat',
+    name: { key: 'auto.components.mobile.slides.WorktreeListSlide.preview.yiru', fallback: 'yiru' },
+    agents: [
+      {
+        icon: 'claude',
+        label: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.screenshotPath',
+          fallback: '/Users/xinyao27/Downloads/截屏…'
+        },
+        state: 'working',
+        time: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.oneMinute',
+          fallback: '1m'
+        }
+      }
+    ]
+  },
+  {
+    expanded: false,
+    icon: 'pocket',
+    name: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.pocketjs',
+      fallback: 'pocketjs'
+    }
+  },
+  {
+    expanded: false,
+    icon: 'bird',
+    name: { key: 'auto.components.mobile.slides.WorktreeListSlide.preview.cat', fallback: 'cat' }
+  },
+  {
+    branch: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.main',
+      fallback: 'main'
+    },
+    branchStatus: 'idle',
+    comment: true,
+    expanded: true,
+    icon: 'folder',
+    name: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.reactvapor',
+      fallback: 'reactvapor'
+    },
+    agents: [
+      {
+        icon: 'claude',
+        label: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.completedCommit',
+          fallback: '已完成 D1 收口，本地提交 `391a6…'
+        },
+        state: 'idle',
+        time: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.sixHours',
+          fallback: '6h'
+        }
+      },
+      {
+        icon: 'gemini',
+        label: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.architectureDocument',
+          fallback: '架构文档已写入 `ARCHITECTURE…'
+        },
+        state: 'idle',
+        time: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.twoHours',
+          fallback: '2h'
+        }
+      }
+    ]
+  },
+  {
+    branch: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.main',
+      fallback: 'main'
+    },
+    branchStatus: 'working',
+    expanded: true,
+    icon: 'bird',
+    name: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.paperboy',
+      fallback: 'paperboy'
+    },
+    agents: [
+      {
+        icon: 'claude',
+        label: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.publish',
+          fallback: 'publish'
+        },
+        state: 'working',
+        time: {
+          key: 'auto.components.mobile.slides.WorktreeListSlide.preview.twoMinutes',
+          fallback: '2m'
+        }
+      }
+    ]
+  },
+  {
+    branch: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.main',
+      fallback: 'main'
+    },
+    branchStatus: 'idle',
+    expanded: true,
+    icon: 'cat',
+    name: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.mybrain',
+      fallback: 'mybrain'
+    }
+  },
+  {
+    branch: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.main',
+      fallback: 'main'
+    },
+    branchStatus: 'idle',
+    expanded: true,
+    icon: 'bird',
+    name: {
+      key: 'auto.components.mobile.slides.WorktreeListSlide.preview.spool',
+      fallback: 'spool'
+    }
+  }
+]
 
 export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.Element {
   return (
@@ -29,7 +175,7 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
             size="xs"
             type="button"
             className={cn(
-              'p-0 h-auto border-0 focus-visible:bg-accent',
+              'h-auto border-0 p-0 focus-visible:bg-accent',
               mobileWorktreePreviewStyles.back
             )}
             aria-label={translate(
@@ -39,231 +185,132 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
           >
             <ChevronLeftIcon />
           </Button>
-          <div className={mobileWorktreePreviewStyles.host}>
-            <span className={mobileWorktreePreviewStyles.statusDot} />
-            <span className={mobileWorktreePreviewStyles.hostName}>
-              {translate(
-                'auto.components.mobile.slides.WorktreeListSlide.b4271864bd',
-                'MacBook Pro'
+          <div className={mobileWorktreePreviewStyles.hostName}>
+            {translate('auto.components.mobile.slides.WorktreeListSlide.preview.host', 'Host 1')}
+          </div>
+          <div className={mobileWorktreePreviewStyles.headerActions}>
+            <Button
+              variant="ghost"
+              size="xs"
+              type="button"
+              className={cn(
+                'h-auto border-0 p-0 focus-visible:bg-accent',
+                mobileWorktreePreviewStyles.headerAction
               )}
-            </span>
+              aria-label={translate(
+                'auto.components.mobile.slides.WorktreeListSlide.preview.search',
+                'Search workspaces'
+              )}
+            >
+              <SearchIcon />
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              type="button"
+              className={cn(
+                'h-auto border-0 p-0 focus-visible:bg-accent',
+                mobileWorktreePreviewStyles.headerAction
+              )}
+              aria-label={translate(
+                'auto.components.mobile.slides.WorktreeListSlide.preview.more',
+                'More actions'
+              )}
+            >
+              <MoreIcon />
+            </Button>
           </div>
         </div>
-        <div className={mobileWorktreePreviewStyles.toolbar}>
-          <Button
-            variant="ghost"
-            size="xs"
-            type="button"
-            className={cn(
-              'p-0 h-auto border-0 focus-visible:bg-accent',
-              mobileWorktreePreviewStyles.chip
-            )}
-          >
-            <FilterIcon />
-            {translate('auto.components.mobile.slides.WorktreeListSlide.0e3e809a4b', 'Filter')}
-          </Button>
-          <Button
-            variant="ghost"
-            size="xs"
-            type="button"
-            className={cn(
-              'p-0 h-auto border-0 focus-visible:bg-accent',
-              mobileWorktreePreviewStyles.button
-            )}
-          >
-            <SortIcon />
-            {translate('auto.components.mobile.slides.WorktreeListSlide.17f9e0d226', 'Recent')}
-          </Button>
-          <Button
-            variant="ghost"
-            size="xs"
-            type="button"
-            className={cn(
-              'p-0 h-auto border-0 focus-visible:bg-accent',
-              mobileWorktreePreviewStyles.button
-            )}
-          >
-            <GroupIcon />
-            {translate('auto.components.mobile.slides.WorktreeListSlide.22971156df', 'Repo')}
-          </Button>
-          <span className={mobileWorktreePreviewStyles.spacer} />
-          <span className={mobileWorktreePreviewStyles.icon}>
-            <UserCircleIcon />
-          </span>
-          <span className={mobileWorktreePreviewStyles.icon}>
-            <PlusIcon />
-          </span>
-          <span className={mobileWorktreePreviewStyles.icon}>
-            <SearchIcon />
-          </span>
-        </div>
       </div>
 
-      <div className={mobileWorktreePreviewStyles.section}>
-        <CaretIcon />
-        <PinIcon />
-        <span className="ml-1">
-          {translate('auto.components.mobile.slides.WorktreeListSlide.79a24ff530', 'Pinned')}
-        </span>
-        <span className="ml-1 text-neutral-600">3</span>
-      </div>
-
-      <div className={mobileWorktreePreviewStyles.list}>
-        <WorktreeRow
-          indicator="spinner"
-          name="feat/mobile-page"
-          pr="#2491"
-          repoColorClass="bg-blue-500"
-          repo="yiru"
-          branch="feat/mobile-page"
-          preview="claude · refactoring v3 mock to use real screens…"
-          tcount={2}
-          tapping={tapping}
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="green"
-          name="runtime/web-pairing"
-          pr="#2487"
-          repoColorClass="bg-green-500"
-          repo="yiru"
-          branch="feat/web-pairing"
-          preview="$ pnpm test --filter web-runtime"
-          tcount={1}
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="red"
-          name="infra/notifier"
-          repoColorClass="bg-orange-500"
-          repo="yiru"
-          branch="main"
-          preview="awaiting permission · sudo apt install"
-          tcount={1}
-        />
-      </div>
-
-      <div className={mobileWorktreePreviewStyles.section}>
-        <CaretIcon />
-        <span>
-          {translate('auto.components.mobile.slides.WorktreeListSlide.357a519567', 'Active')}
-        </span>
-        <span className="ml-1 text-neutral-600">37</span>
-      </div>
-      <div className={mobileWorktreePreviewStyles.list}>
-        <WorktreeRow
-          indicator="green"
-          name="docs/styleguide-update"
-          repoColorClass="bg-violet-500"
-          repo="yiru"
-          branch="feat/styleguide"
-          preview="$ pnpm lint"
-          tcount={1}
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="muted"
-          name="feat/runtime-perf"
-          repoColorClass="bg-blue-500"
-          repo="yiru"
-          branch="feat/runtime-perf"
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="spinner"
-          name="fix/notifier-cooldown"
-          pr="#2483"
-          repoColorClass="bg-orange-500"
-          repo="yiru"
-          branch="feat/notifier-cooldown"
-          preview="claude · investigating macOS notification queue…"
-          tcount={1}
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="muted"
-          name="chore/deps-bump"
-          repoColorClass="bg-green-500"
-          repo="yiru"
-          branch="feat/deps-bump"
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="green"
-          name="experiment/ssh-multiplex"
-          repoColorClass="bg-blue-500"
-          repo="yiru"
-          branch="feat/ssh-mux"
-          preview="$ ssh -O check yiru-relay"
-          tcount={2}
-        />
-        <div className={mobileWorktreePreviewStyles.separator} />
-        <WorktreeRow
-          indicator="muted"
-          name="refactor/host-store"
-          repoColorClass="bg-violet-500"
-          repo="yiru"
-          branch="feat/host-store"
-        />
+      <div className={mobileWorktreePreviewStyles.listViewport}>
+        {previewRepositories.map((repository) => (
+          <RepositorySection key={repository.name.key} repository={repository} tapping={tapping} />
+        ))}
       </div>
     </div>
   )
 }
 
-function WorktreeRow({
-  indicator,
-  name,
-  pr,
-  repoColorClass,
-  repo,
-  branch,
-  preview,
-  tcount,
+function RepositorySection({
+  repository,
   tapping
-}: WorktreeRowProps): React.JSX.Element {
+}: {
+  repository: PreviewRepository
+  tapping: boolean
+}): React.JSX.Element {
   return (
-    <div
+    <section
       className={cn(
-        mobileWorktreePreviewStyles.row,
+        mobileWorktreePreviewStyles.repository,
         tapping && mobileWorktreePreviewStyles.tapping
       )}
     >
-      <div className={mobileWorktreePreviewStyles.indicator}>
-        {indicator === 'spinner' ? (
-          <LoadingIndicator className="text-annotation-highlight size-2" />
-        ) : (
-          <div
-            className={cn(
-              mobileWorktreePreviewStyles.dot,
-              indicator === 'green' && mobileWorktreePreviewStyles.dotGreen,
-              indicator === 'muted' && mobileWorktreePreviewStyles.dotMuted,
-              indicator === 'red' && mobileWorktreePreviewStyles.dotRed
-            )}
-          />
-        )}
+      <div className={mobileWorktreePreviewStyles.repositoryRow}>
+        <RepoIcon kind={repository.icon} />
+        <span className={mobileWorktreePreviewStyles.repositoryName}>
+          {translate(repository.name.key, repository.name.fallback)}
+        </span>
+        <ChevronDownIcon className={mobileWorktreePreviewStyles.repositoryChevron} />
       </div>
-      <div className={mobileWorktreePreviewStyles.main}>
-        <div className={mobileWorktreePreviewStyles.nameRow}>
-          <div className={mobileWorktreePreviewStyles.name}>{name}</div>
-          {pr ? (
-            <div className={mobileWorktreePreviewStyles.pullRequest}>
-              <PrIcon />
-              {pr}
+      {repository.expanded && repository.branch ? (
+        <div className={mobileWorktreePreviewStyles.workspaceTree}>
+          <div className={mobileWorktreePreviewStyles.workspaceRow}>
+            <div className={mobileWorktreePreviewStyles.workspaceStatus}>
+              <WorkspaceStatusIcon status={repository.branchStatus ?? 'idle'} />
             </div>
-          ) : null}
+            <div className={mobileWorktreePreviewStyles.workspaceMain}>
+              <div className={mobileWorktreePreviewStyles.branchRow}>
+                <span>{translate(repository.branch.key, repository.branch.fallback)}</span>
+                {repository.comment ? <ChatIcon /> : null}
+              </div>
+              {repository.agents?.length ? (
+                <div className={mobileWorktreePreviewStyles.agentTree}>
+                  {repository.agents.map((agent, index) => (
+                    <AgentPreviewRow key={`${agent.label.key}-${index}`} agent={agent} />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
-        <div className={mobileWorktreePreviewStyles.metaRow}>
-          <span className={cn(mobileWorktreePreviewStyles.repoDot, repoColorClass)} />
-          <span>{repo}</span>
-          <span className={mobileWorktreePreviewStyles.branch}>{branch}</span>
-        </div>
-        {preview ? <div className={mobileWorktreePreviewStyles.preview}>{preview}</div> : null}
-      </div>
-      {tcount !== undefined ? (
-        <div className={mobileWorktreePreviewStyles.terminalCount}>{tcount}</div>
       ) : null}
+    </section>
+  )
+}
+
+function AgentPreviewRow({ agent }: { agent: PreviewAgent }): React.JSX.Element {
+  return (
+    <div className={mobileWorktreePreviewStyles.agentRow}>
+      <div className={mobileWorktreePreviewStyles.agentIcon}>
+        {agent.icon === 'claude' ? <ClaudeIcon size={16} /> : <GeminiIcon size={16} />}
+      </div>
+      <span className={mobileWorktreePreviewStyles.agentLabel}>
+        {translate(agent.label.key, agent.label.fallback)}
+      </span>
+      <span className={mobileWorktreePreviewStyles.agentTime}>
+        {translate(agent.time.key, agent.time.fallback)}
+      </span>
+      <div className={mobileWorktreePreviewStyles.agentState}>
+        <WorkspaceStatusIcon status={agent.state} />
+      </div>
     </div>
   )
+}
+
+function WorkspaceStatusIcon({ status }: { status: WorkspaceStatus }): React.JSX.Element {
+  if (status === 'working') {
+    return <LoadingIndicator className="size-3.5" />
+  }
+  return <span className={mobileWorktreePreviewStyles.doneDot} />
+}
+
+function RepoIcon({ kind }: { kind: RepoIconKind }): React.JSX.Element {
+  if (kind === 'folder') {
+    return <FolderIcon />
+  }
+  const glyph = kind === 'cat' ? '🐈' : kind === 'bird' ? '🪽' : '▣'
+  return <span className={mobileWorktreePreviewStyles.repositoryEmoji}>{glyph}</span>
 }
 
 function ChevronLeftIcon(): React.JSX.Element {
@@ -274,92 +321,46 @@ function ChevronLeftIcon(): React.JSX.Element {
   )
 }
 
-function FilterIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  )
-}
-
-function SortIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <line x1="21" y1="4" x2="14" y2="4" />
-      <line x1="10" y1="4" x2="3" y2="4" />
-      <line x1="21" y1="12" x2="12" y2="12" />
-      <line x1="8" y1="12" x2="3" y2="12" />
-      <line x1="21" y1="20" x2="16" y2="20" />
-      <line x1="12" y1="20" x2="3" y2="20" />
-      <line x1="14" y1="2" x2="14" y2="6" />
-      <line x1="8" y1="10" x2="8" y2="14" />
-      <line x1="16" y1="18" x2="16" y2="22" />
-    </svg>
-  )
-}
-
-function GroupIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.91a1 1 0 0 0 0-1.83Z" />
-      <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
-      <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
-    </svg>
-  )
-}
-
-function UserCircleIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M18 20a6 6 0 0 0-12 0" />
-      <circle cx="12" cy="10" r="4" />
-    </svg>
-  )
-}
-
-function PlusIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}
-
 function SearchIcon(): React.JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
+      <circle cx="11" cy="11" r="7" />
+      <path d="m16.5 16.5 4 4" />
     </svg>
   )
 }
 
-function CaretIcon(): React.JSX.Element {
+function MoreIcon(): React.JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="8" cy="12" r=".75" fill="currentColor" />
+      <circle cx="12" cy="12" r=".75" fill="currentColor" />
+      <circle cx="16" cy="12" r=".75" fill="currentColor" />
+    </svg>
+  )
+}
+
+function ChevronDownIcon({ className }: { className?: string }): React.JSX.Element {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="m6 9 6 6 6-6" />
     </svg>
   )
 }
 
-function PinIcon(): React.JSX.Element {
+function FolderIcon(): React.JSX.Element {
   return (
-    <svg className="ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M12 17v5" />
-      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h5l2 2h8A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z" />
     </svg>
   )
 }
 
-function PrIcon(): React.JSX.Element {
+function ChatIcon(): React.JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <circle cx="6" cy="6" r="3" />
-      <path d="M6 9v12" />
-      <circle cx="18" cy="18" r="3" />
-      <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 4v-4.5a2.5 2.5 0 0 1-1.5-2.3Z" />
     </svg>
   )
 }

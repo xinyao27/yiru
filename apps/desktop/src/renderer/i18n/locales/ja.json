@@ -9679,7 +9679,12 @@
             "0e3e809a4b": "フィルター",
             "b4271864bd": "MacBook Pro",
             "cefd048225": "戻る",
-            "c5ad56786d": "スピナー"
+            "c5ad56786d": "スピナー",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {

@@ -9702,7 +9702,12 @@
             "0e3e809a4b": "Filter",
             "b4271864bd": "MacBook Pro",
             "cefd048225": "Back",
-            "c5ad56786d": "spinner"
+            "c5ad56786d": "spinner",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {
