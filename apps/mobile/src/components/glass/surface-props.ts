@@ -13,7 +13,7 @@ type MobileGlassSurfaceIntentProps =
       isInteractive?: boolean
     }
   | {
-      forceFallback?: false
+      forceFallback?: boolean
       isFunctional: true
       isInteractive?: boolean
     }

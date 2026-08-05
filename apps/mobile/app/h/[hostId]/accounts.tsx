@@ -1,42 +1,32 @@
 import { cn } from 'cnfast'
-import { Stack, useLocalSearchParams } from 'expo-router'
-import { useEffect, useState, useCallback } from 'react'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { useCallback, useEffect, useState } from 'react'
 import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
   ActivityIndicator,
+  Alert,
+  Platform,
   RefreshControl,
-  Alert
+  ScrollView,
+  Text,
+  View
 } from 'react-native'
 
 import {
   type AccountsSnapshot,
   type ProviderKey,
-  getActiveProviderRateLimits,
-  getInactiveProviderUsage,
-  getUsageBarState,
-  getWindowResetLabel,
-  hasActiveProviderUsage,
-  UsageBar
+  type UsageProviderKey,
+  getProviderRateLimits,
+  getUsageProviderLabel,
+  USAGE_PROVIDER_KEYS
 } from '~/components/account-usage'
-import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
-import { MobileContentSection } from '~/components/content-section'
-import { Check, User } from '~/components/uniwind-icons'
+import { AccountUsageProviderSection } from '~/components/account-usage-details'
+import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { translate } from '~/i18n/translate'
 import { useHostClient } from '~/transport/client-context'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcSuccess } from '~/transport/types'
 
 const accountScreenClassNames = {
-  row: 'flex-row items-center px-3 py-3',
-  rowPressedActive: 'active:bg-accent',
-  rowMain: 'flex-1 gap-1',
-  // Why: fixed-width trailing slot keeps usage bars the same width whether
-  // the selected row is showing a checkmark or not.
-  rowTrailing: 'ml-2 w-6 items-end justify-center',
-  rowTitle: 'text-sm font-medium text-foreground',
-  usageRow: 'mt-1 flex-row gap-3',
   errorText: 'text-xs text-destructive',
   placeholder: 'items-center gap-2 py-12',
   placeholderText: 'text-sm text-muted-foreground'
@@ -44,6 +34,7 @@ const accountScreenClassNames = {
 
 export default function AccountsScreen() {
   const { hostId } = useLocalSearchParams<{ hostId: string }>()
+  const router = useRouter()
 
   // Why: shared client per host. See docs/mobile-shared-client-per-host.md.
   const { client, state: connState } = useHostClient(hostId)
@@ -72,7 +63,7 @@ export default function AccountsScreen() {
       }
       const host = hosts.find((h) => h.id === hostId)
       if (!host) {
-        setError('Host not found')
+        setError(translate('mobile.host.notFound', 'Host not found'))
         return
       }
       setHostName(host.name)
@@ -133,7 +124,10 @@ export default function AccountsScreen() {
       try {
         const res = await client.sendRequest(method, { accountId })
         if (!res.ok) {
-          Alert.alert('Could not switch account', res.error.message)
+          Alert.alert(
+            translate('mobile.accounts.switchError', 'Could not switch account'),
+            res.error.message
+          )
         } else {
           // Why: optimistic refresh — the streaming subscription will also
           // emit, but a one-shot keeps the UI responsive even if the stream
@@ -141,7 +135,10 @@ export default function AccountsScreen() {
           await refresh()
         }
       } catch (e) {
-        Alert.alert('Could not switch account', e instanceof Error ? e.message : String(e))
+        Alert.alert(
+          translate('mobile.accounts.switchError', 'Could not switch account'),
+          e instanceof Error ? e.message : String(e)
+        )
       } finally {
         setBusyAccountId(null)
       }
@@ -149,134 +146,94 @@ export default function AccountsScreen() {
     [client, refresh]
   )
 
-  const renderProviderSection = (provider: ProviderKey, title: string) => {
+  const goBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back()
+      return
+    }
+    router.replace(`/h/${hostId}`)
+  }, [hostId, router])
+
+  const renderProviderSection = (
+    provider: UsageProviderKey,
+    title: string
+  ): React.JSX.Element | null => {
     if (!snapshot) {
       return null
     }
-    const state = provider === 'claude' ? snapshot.claude : snapshot.codex
-    const activeUsage = getActiveProviderRateLimits(snapshot, provider)
-    const activeSessionBar = getUsageBarState(activeUsage, 'session')
-    const activeWeeklyBar = getUsageBarState(activeUsage, 'weekly')
-    const Icon = provider === 'claude' ? ClaudeIcon : OpenAIIcon
+    const accounts =
+      provider === 'claude'
+        ? snapshot.claude.accounts
+        : provider === 'codex'
+          ? snapshot.codex.accounts
+          : []
+    const activeAccountId =
+      provider === 'claude'
+        ? snapshot.claude.activeAccountId
+        : provider === 'codex'
+          ? snapshot.codex.activeAccountId
+          : null
+    const activeUsage = getProviderRateLimits(snapshot, provider)
+    if (accounts.length === 0 && (activeUsage === null || activeUsage.status === 'unavailable')) {
+      return null
+    }
+    const inactiveUsage =
+      provider === 'claude'
+        ? snapshot.rateLimits.inactiveClaudeAccounts
+        : provider === 'codex'
+          ? snapshot.rateLimits.inactiveCodexAccounts
+          : []
+    const isAccountProvider = provider === 'claude' || provider === 'codex'
     return (
-      <View className="mb-6">
-        <View className="mb-2 flex-row items-center gap-2">
-          <Icon size={14} />
-          <Text className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-            {title}
-          </Text>
-        </View>
-        <MobileContentSection>
-          {/* System default row */}
-          <Pressable
-            className={cn(accountScreenClassNames.row, accountScreenClassNames.rowPressedActive)}
-            onPress={() => selectAccount(provider, null)}
-            disabled={busyAccountId !== null || connState !== 'connected'}
-          >
-            <View className={accountScreenClassNames.rowMain}>
-              <Text className={accountScreenClassNames.rowTitle}>System default</Text>
-              <Text className="text-muted-foreground text-xs">Use the agent's own login</Text>
-              {/* Why: when system default is the active selection, activeUsage
-                  holds the system-default login's rate limits — surface them
-                  here so non-managed users still see their usage. */}
-              {state.activeAccountId === null && hasActiveProviderUsage(activeUsage) ? (
-                <View className={accountScreenClassNames.usageRow}>
-                  <UsageBar
-                    label="5h"
-                    usedPercent={activeSessionBar.usedPercent}
-                    unavailable={activeSessionBar.unavailable}
-                    loading={activeSessionBar.loading}
-                    resetText={getWindowResetLabel(activeUsage, 'session', now)}
-                  />
-                  <UsageBar
-                    label="7d"
-                    usedPercent={activeWeeklyBar.usedPercent}
-                    unavailable={activeWeeklyBar.unavailable}
-                    loading={activeWeeklyBar.loading}
-                    resetText={getWindowResetLabel(activeUsage, 'weekly', now)}
-                  />
-                </View>
-              ) : null}
-            </View>
-            <View className={accountScreenClassNames.rowTrailing}>
-              {state.activeAccountId === null ? (
-                <Check size={16} colorClassName="accent-primary" />
-              ) : busyAccountId === `${provider}:default` ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : null}
-            </View>
-          </Pressable>
-
-          {state.accounts.map((account) => {
-            const isActive = state.activeAccountId === account.id
-            const inactiveEntry = !isActive
-              ? getInactiveProviderUsage(snapshot, provider, account.id)
-              : null
-            const usage = isActive ? activeUsage : (inactiveEntry?.rateLimits ?? null)
-            const isFetching =
-              (isActive && usage?.status === 'fetching') ||
-              (!isActive && inactiveEntry?.isFetching === true)
-            const sessionBar = getUsageBarState(usage, 'session', isFetching)
-            const weeklyBar = getUsageBarState(usage, 'weekly', isFetching)
-            return (
-              <View key={account.id}>
-                <View className="h-hairline bg-border mx-3" />
-                <Pressable
-                  className={cn(
-                    accountScreenClassNames.row,
-                    accountScreenClassNames.rowPressedActive
-                  )}
-                  onPress={() => selectAccount(provider, account.id)}
-                  disabled={busyAccountId !== null || connState !== 'connected' || isActive}
-                >
-                  <View className={accountScreenClassNames.rowMain}>
-                    <Text className={accountScreenClassNames.rowTitle} numberOfLines={1}>
-                      {account.email}
-                    </Text>
-                    <View className={accountScreenClassNames.usageRow}>
-                      <UsageBar
-                        label="5h"
-                        usedPercent={sessionBar.usedPercent}
-                        unavailable={sessionBar.unavailable}
-                        loading={sessionBar.loading}
-                        resetText={getWindowResetLabel(usage, 'session', now)}
-                      />
-                      <UsageBar
-                        label="7d"
-                        usedPercent={weeklyBar.usedPercent}
-                        unavailable={weeklyBar.unavailable}
-                        loading={weeklyBar.loading}
-                        resetText={getWindowResetLabel(usage, 'weekly', now)}
-                      />
-                    </View>
-                    {usage?.error ? (
-                      <Text className={accountScreenClassNames.errorText} numberOfLines={1}>
-                        {usage.error}
-                      </Text>
-                    ) : null}
-                  </View>
-                  <View className={accountScreenClassNames.rowTrailing}>
-                    {isActive ? (
-                      <Check size={16} colorClassName="accent-primary" />
-                    ) : busyAccountId === account.id ? (
-                      <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-                    ) : null}
-                  </View>
-                </Pressable>
-              </View>
-            )
-          })}
-        </MobileContentSection>
-      </View>
+      <AccountUsageProviderSection
+        accounts={accounts}
+        activeAccountId={activeAccountId}
+        activeUsage={activeUsage}
+        busyAccountId={busyAccountId}
+        inactiveUsage={inactiveUsage}
+        isConnected={connState === 'connected'}
+        now={now}
+        onSelectAccount={
+          isAccountProvider ? (accountId) => void selectAccount(provider, accountId) : undefined
+        }
+        provider={provider}
+        title={title}
+      />
     )
   }
 
   return (
     <View className="bg-background flex-1">
-      <Stack.Screen options={{ title: hostName ? `Accounts · ${hostName}` : 'Accounts' }} />
+      <Stack.Screen
+        options={{
+          headerBackVisible: false,
+          headerLeft:
+            Platform.OS !== 'ios'
+              ? () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate('mobile.accounts.back', 'Back')}
+                    icon="back"
+                    onPress={goBack}
+                  />
+                )
+              : undefined,
+          title: hostName
+            ? `${translate('mobile.accounts.title', 'Accounts')} · ${hostName}`
+            : translate('mobile.accounts.title', 'Accounts')
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel={translate('mobile.accounts.back', 'Back')}
+            icon="chevron.left"
+            onPress={goBack}
+          />
+        </Stack.Toolbar>
+      ) : null}
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
-          accessibilityLabel="Refresh accounts"
+          accessibilityLabel={translate('mobile.accounts.refresh', 'Refresh accounts')}
           disabled={!client || refreshing || connState !== 'connected'}
           icon="arrow.clockwise"
           onPress={refresh}
@@ -297,7 +254,9 @@ export default function AccountsScreen() {
           <View className={accountScreenClassNames.placeholder}>
             <ActivityIndicator colorClassName="accent-muted-foreground" />
             <Text className={accountScreenClassNames.placeholderText}>
-              Connecting to {hostName || 'host'}…
+              {translate('mobile.accounts.connecting', 'Connecting to {{host}}…', {
+                host: hostName || translate('mobile.host.host', 'host')
+              })}
             </Text>
           </View>
         ) : error && !snapshot ? (
@@ -307,16 +266,21 @@ export default function AccountsScreen() {
         ) : !snapshot ? (
           <View className={accountScreenClassNames.placeholder}>
             <ActivityIndicator colorClassName="accent-muted-foreground" />
-            <Text className={accountScreenClassNames.placeholderText}>Loading accounts…</Text>
+            <Text className={accountScreenClassNames.placeholderText}>
+              {translate('mobile.accounts.loading', 'Loading accounts…')}
+            </Text>
           </View>
         ) : (
           <>
-            {renderProviderSection('claude', 'Claude')}
-            {renderProviderSection('codex', 'Codex')}
-            <View className="flex-row items-start gap-2 px-2 pt-2">
-              <User size={14} colorClassName="accent-muted-foreground" />
+            {USAGE_PROVIDER_KEYS.map((provider) =>
+              renderProviderSection(provider, getUsageProviderLabel(provider))
+            )}
+            <View className="px-2 pt-2">
               <Text className="text-muted-foreground flex-1 text-xs leading-5">
-                Add or re-authenticate accounts from desktop Settings → Accounts.
+                {translate(
+                  'mobile.accounts.manageFromDesktop',
+                  'Add or re-authenticate accounts from desktop Settings → Accounts.'
+                )}
               </Text>
             </View>
           </>

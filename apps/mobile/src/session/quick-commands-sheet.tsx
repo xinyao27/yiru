@@ -140,22 +140,19 @@ export function QuickCommandsSheet({
 
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
-      <View className="flex-row items-center pb-2">
-        {view === 'list' ? (
-          <View className="w-8" />
-        ) : (
+      <View className="flex-row items-center gap-2 pb-2">
+        {view !== 'list' ? (
           <MobileGlassIconButton
             accessibilityLabel="Back"
             icon="back"
             onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
             size="small"
           />
-        )}
-        <Text className="text-foreground flex-1 text-center text-sm font-bold">{title}</Text>
-        <View className="w-8" />
+        ) : null}
+        <Text className="text-foreground text-sm font-bold">{title}</Text>
       </View>
       {view === 'editor' && draft ? (
-        <Text className="text-muted-foreground px-1 pb-2 text-xs">
+        <Text className="text-muted-foreground pb-2 text-xs">
           Save terminal commands or agent prompts for quick access.
         </Text>
       ) : null}

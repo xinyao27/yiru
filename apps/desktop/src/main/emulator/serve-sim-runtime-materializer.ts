@@ -1,9 +1,19 @@
 import { execFileSync } from 'node:child_process'
-import { chmodSync, cpSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  symlinkSync
+} from 'node:fs'
+import { join, relative } from 'node:path'
 
 export type ServeSimRuntimeMaterializerOptions = {
   bundledPackageDir: string
+  bundledNodeModulesDir?: string
   targetRootDir: string
   version: string
   clearQuarantine?: (dir: string) => void
@@ -56,11 +66,12 @@ function pruneStaleServeSimRuntimes(targetRootDir: string, keepVersion: string):
 export function materializeServeSimRuntime(
   options: ServeSimRuntimeMaterializerOptions
 ): string | null {
-  const { bundledPackageDir, targetRootDir, version } = options
+  const { bundledPackageDir, bundledNodeModulesDir, targetRootDir, version } = options
   const clearQuarantine = options.clearQuarantine ?? defaultClearQuarantine
   const targetDir = join(targetRootDir, version)
   const entryPath = join(targetDir, 'dist', 'serve-sim.js')
-  if (existsSync(entryPath)) {
+  const targetNodeModulesDir = join(targetDir, 'node_modules')
+  if (existsSync(entryPath) && (!bundledNodeModulesDir || existsSync(targetNodeModulesDir))) {
     return targetDir
   }
   const stagingDir = join(targetRootDir, `.staging-${version}-${process.pid}`)
@@ -77,6 +88,16 @@ export function materializeServeSimRuntime(
       }
     }
     clearQuarantine(stagingDir)
+    if (bundledNodeModulesDir && existsSync(bundledNodeModulesDir)) {
+      // Why: the relocated ESM entry keeps resolving bare imports from its own
+      // directory. Link the packaged closure into the copy so updates do not
+      // depend on whatever node_modules happens to exist beside userData.
+      symlinkSync(
+        relative(stagingDir, bundledNodeModulesDir),
+        join(stagingDir, 'node_modules'),
+        'dir'
+      )
+    }
     try {
       renameSync(stagingDir, targetDir)
     } catch (error) {

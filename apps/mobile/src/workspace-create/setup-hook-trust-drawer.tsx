@@ -39,7 +39,7 @@ export function SetupHookTrustDrawer({
     <BottomDrawer visible={visible && prompt != null} onClose={onClose}>
       {prompt ? (
         <View>
-          <View className="mb-3 px-1">
+          <View className="mb-3">
             <Text className="text-foreground text-sm font-semibold">
               {prompt.previouslyApproved
                 ? translate(

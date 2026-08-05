@@ -655,7 +655,7 @@ function NewWorkspaceModalContent({
       onRequestClose={onClose}
     >
       <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
-        <View className="mb-3 px-1">
+        <View className="mb-3">
           <Text className="text-foreground text-sm font-semibold">
             {translate('mobile.newWorkspace.title', 'Create Workspace')}
           </Text>

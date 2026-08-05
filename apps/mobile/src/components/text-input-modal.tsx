@@ -61,7 +61,7 @@ export function TextInputModal({
 
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
-      <View className="px-1 pb-2">
+      <View className="pb-2">
         <Text className="text-foreground text-sm font-semibold">{title}</Text>
         {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
       </View>

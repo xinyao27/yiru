@@ -88,17 +88,19 @@ export function MobileSearchField({
   return (
     // Why: the raised fill makes search read as a control against base and panel surfaces.
     <MobileGlassSurface
-      className="min-h-11 flex-row items-center gap-2 overflow-hidden rounded-full pr-1 pl-3"
+      className="h-11 flex-row items-center gap-2 overflow-hidden rounded-full pr-1 pl-3"
       isFunctional
     >
-      <Search
-        size={15}
-        colorClassName={focused ? 'accent-foreground' : 'accent-muted-foreground'}
-      />
+      <View className="h-11 w-4 shrink-0 items-center justify-center">
+        <Search
+          size={16}
+          colorClassName={focused ? 'accent-foreground' : 'accent-muted-foreground'}
+        />
+      </View>
       <TextInput
         ref={inputRef}
-        // Why: zero padding keeps Android text aligned with the icon and clear chip.
-        className="text-foreground m-0 min-h-11 min-w-0 flex-1 p-0 text-sm"
+        // Why: the native line box must share the field's fixed 44pt center with its icons.
+        className="text-foreground h-11 min-w-0 flex-1 p-0 text-sm leading-5"
         style={{ includeFontPadding: false, textAlignVertical: 'center' }}
         value={value}
         onChangeText={onChangeText}

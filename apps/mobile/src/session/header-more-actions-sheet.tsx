@@ -1,13 +1,29 @@
 import { MobileAgentSessionHistoryIcon } from '~/agent-history/icon'
-import { ListChecks } from '~/components/uniwind-icons'
+import {
+  ArrowSquareRight,
+  Chat,
+  Files,
+  GitMerge,
+  ListChecks,
+  TerminalWindow
+} from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 
 import { ActionSheetModal } from '../components/action-sheet-modal'
 
 type Props = {
   visible: boolean
+  showChatTerminalSwitch: boolean
+  isChatView: boolean
+  showQuickCommands: boolean
+  showFileExplorer: boolean
+  showSourceControl: boolean
   showAgentSessionHistory: boolean
   showChecks: boolean
+  onToggleChatTerminal: () => void
+  onOpenQuickCommands: () => void
+  onOpenFileExplorer: () => void
+  onOpenSourceControl: () => void
   onOpenAgentSessionHistory: () => void
   onOpenChecks: () => void
   onClose: () => void
@@ -15,8 +31,17 @@ type Props = {
 
 export function MobileSessionHeaderMoreActionsSheet({
   visible,
+  showChatTerminalSwitch,
+  isChatView,
+  showQuickCommands,
+  showFileExplorer,
+  showSourceControl,
   showAgentSessionHistory,
   showChecks,
+  onToggleChatTerminal,
+  onOpenQuickCommands,
+  onOpenFileExplorer,
+  onOpenSourceControl,
   onOpenAgentSessionHistory,
   onOpenChecks,
   onClose
@@ -25,6 +50,58 @@ export function MobileSessionHeaderMoreActionsSheet({
     <ActionSheetModal
       visible={visible}
       actions={[
+        ...(showChatTerminalSwitch
+          ? [
+              {
+                id: 'toggle-terminal-chat-view',
+                label: isChatView
+                  ? translate(
+                      'mobile.session.terminalActions.switchToTerminalView',
+                      'Switch to terminal view'
+                    )
+                  : translate(
+                      'mobile.session.terminalActions.switchToChatView',
+                      'Switch to chat view'
+                    ),
+                icon: isChatView ? TerminalWindow : Chat,
+                dismiss: 'immediate' as const,
+                onPress: onToggleChatTerminal
+              }
+            ]
+          : []),
+        ...(showQuickCommands
+          ? [
+              {
+                id: 'quick-commands',
+                label: translate('mobile.session.quickCommands', 'Quick commands'),
+                icon: ArrowSquareRight,
+                dismiss: 'immediate' as const,
+                onPress: onOpenQuickCommands
+              }
+            ]
+          : []),
+        ...(showFileExplorer
+          ? [
+              {
+                id: 'file-explorer',
+                label: translate('mobile.session.header.openFileExplorer', 'Open file explorer'),
+                icon: Files,
+                dismiss: 'immediate' as const,
+                onPress: onOpenFileExplorer
+              }
+            ]
+          : []),
+        ...(showSourceControl
+          ? [
+              {
+                id: 'source-control',
+                label: translate('mobile.session.header.openSourceControl', 'Open source control'),
+                icon: GitMerge,
+                dismiss: 'immediate' as const,
+                onPress: onOpenSourceControl
+              }
+            ]
+          : []),
         ...(showAgentSessionHistory
           ? [
               {

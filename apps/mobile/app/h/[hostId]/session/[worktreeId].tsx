@@ -68,6 +68,7 @@ import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
 import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
 import { MarkdownReader } from '~/session/markdown-reader'
+import { canShowMobileNativeChat } from '~/session/native-chat/eligibility'
 import { MobileNativeChatOverlay } from '~/session/native-chat/overlay'
 import { useMobileNativeChatController } from '~/session/native-chat/use-controller'
 import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
@@ -104,10 +105,10 @@ import type {
 } from '~/session/screen-state'
 import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
 import { MobileSessionTabStrip } from '~/session/tab-strip'
-import { MobileTerminalAccessoryBar } from '~/session/terminal/accessory-bar'
 import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
+import { useMobileTerminalControlMode } from '~/session/terminal/control-mode'
+import { MobileTerminalDock } from '~/session/terminal/dock'
 import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
-import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
 import { TerminalPaneView } from '~/session/terminal/pane-view'
 import { mergeTerminalListWithKnownRecords, terminalRecordsEqual } from '~/session/terminal/records'
 import { useMobileTerminalForegroundRecovery } from '~/session/terminal/use-foreground-recovery'
@@ -151,8 +152,6 @@ import {
   TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
 } from '~/terminal/gesture-input'
-import { dismissTerminalKeyboard } from '~/terminal/keyboard-dismiss'
-import { getTerminalLiveInputKeyboardType } from '~/terminal/keyboard-type'
 import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
 import { getTerminalLiveAccessoryRawSendTarget } from '~/terminal/live/accessory-raw-send-target'
 import {
@@ -292,7 +291,6 @@ export default function SessionScreen(): React.JSX.Element {
   const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)
   const [terminalLinkOpenMode, setTerminalLinkOpenMode] =
     useState<MobileTerminalLinkOpenMode>('yiru-browser')
-  const [liveInputCapture, setLiveInputCapture] = useState('')
   const {
     clearTerminalLiveInputDefault,
     defaultTerminalHandlesToLiveInput,
@@ -386,6 +384,7 @@ export default function SessionScreen(): React.JSX.Element {
   > | null>(null)
   const sessionTabActionSheetRequestSeqRef = useRef(0)
   const activeHandleRef = useRef<string | null>(null)
+  const controlModeSenderRef = useRef<(bytes: string) => void>(() => {})
   // Why: a browser tab opened from a terminal-tapped HTML must be focused as an
   // Yiru session tab (bridge auto-activate only flags the live webContents, not
   // the app-level active tab). We remember the page id and, once its session tab
@@ -412,6 +411,17 @@ export default function SessionScreen(): React.JSX.Element {
   // refit hook re-fit the PTY on those resizes — see terminal-viewport-refit.ts.
   const [terminalFrameWidth, setTerminalFrameWidth] = useState(0)
   const {
+    controlModeActive,
+    handleInputChange: handleControlModeInputChange,
+    liveInputCapture,
+    reset: resetControlMode,
+    setLiveInputCapture,
+    toggle: toggleControlMode
+  } = useMobileTerminalControlMode({
+    activeHandleRef,
+    onSendControlByte: (bytes) => controlModeSenderRef.current(bytes)
+  })
+  const {
     clearPendingLiveInputCommit,
     flushPendingLiveInputBeforeExternalSend,
     handleLiveInputAccessoryBytes,
@@ -429,6 +439,10 @@ export default function SessionScreen(): React.JSX.Element {
     sendLiveTerminalInputRef,
     setLiveInputCapture
   })
+  const handleTerminalLiveInputChange = useCallback(
+    (text: string) => handleControlModeInputChange(text, handleLiveInputChange),
+    [handleControlModeInputChange, handleLiveInputChange]
+  )
   const canSend =
     connState === 'connected' &&
     activeHandle != null &&
@@ -573,6 +587,9 @@ export default function SessionScreen(): React.JSX.Element {
     onSendError: showNativeChatSendError
   })
   const { toggleTabChatView, showNativeChat, showNativeChatRef } = nativeChatController
+  const showChatTerminalAction =
+    activeSessionTab?.type === 'terminal' &&
+    canShowMobileNativeChat(activeSessionTab, nativeChatTranscriptIsLocalReadable)
 
   const {
     clearTerminalCache,
@@ -614,9 +631,9 @@ export default function SessionScreen(): React.JSX.Element {
     unsubscribe: unsubscribeTerminal
   })
 
-  // Why: toggles between phone and desktop mode via server RPC. The server
-  // handles the actual resize and emits a 'resized' event on the existing
-  // subscription stream — no client-side state tracking needed.
+  // Why: update the affordance immediately, then reconcile it with the server
+  // response and the existing resize stream. Waiting only for the stream makes
+  // a successful toggle look inert when no resize is needed.
   const toggleInFlightRef = useRef<Set<string>>(new Set())
   const toggleDisplayMode = useCallback(
     async (handle: string) => {
@@ -627,13 +644,26 @@ export default function SessionScreen(): React.JSX.Element {
         return
       }
       const current = terminalModes.get(handle) ?? 'auto'
+      const hadCurrentMode = terminalModes.has(handle)
       // Why: 'phone' on the wire is an observation ("currently phone-fitted"),
       // not a setting. The toggle only ever requests 'auto' or 'desktop'.
       const next: 'auto' | 'desktop' =
         current === 'auto' || current === 'phone' ? 'desktop' : 'auto'
       toggleInFlightRef.current.add(handle)
+      setTerminalModes((previous) => new Map(previous).set(handle, next))
+      const restorePreviousMode = (): void => {
+        setTerminalModes((previous) => {
+          const restored = new Map(previous)
+          if (hadCurrentMode) {
+            restored.set(handle, current)
+          } else {
+            restored.delete(handle)
+          }
+          return restored
+        })
+      }
       try {
-        await client.sendRequest('terminal.setDisplayMode', {
+        const response = await client.sendRequest('terminal.setDisplayMode', {
           terminal: handle,
           mode: next,
           // Why: presence-lock take-floor signal — requesting 'auto' is the
@@ -646,8 +676,19 @@ export default function SessionScreen(): React.JSX.Element {
           // server's stored viewport is null and auto toggles no-op.
           ...(viewportRef.current && next === 'auto' ? { viewport: viewportRef.current } : {})
         })
+        if (!response.ok) {
+          restorePreviousMode()
+          return
+        }
+        const responseMode =
+          typeof response.result === 'object' && response.result !== null
+            ? Reflect.get(response.result, 'mode')
+            : undefined
+        if (responseMode === 'auto' || responseMode === 'phone' || responseMode === 'desktop') {
+          setTerminalModes((previous) => new Map(previous).set(handle, responseMode))
+        }
       } catch {
-        // Mode change failed — server state unchanged, UI stays in sync.
+        restorePreviousMode()
       } finally {
         toggleInFlightRef.current.delete(handle)
       }
@@ -1545,7 +1586,9 @@ export default function SessionScreen(): React.JSX.Element {
         () => undefined
       )
   }
-
+  controlModeSenderRef.current = (bytes) => {
+    void handleAccessoryKey({ bytes })
+  }
   const sendLiveTerminalInput = useCallback(
     async (handle: string, bytes: string): Promise<boolean> => {
       const text = normalizeTerminalTextInput(bytes)
@@ -1662,15 +1705,6 @@ export default function SessionScreen(): React.JSX.Element {
     ]
   )
 
-  const dismissSoftwareKeyboard = useCallback(() => {
-    dismissTerminalKeyboard({
-      clearPendingLiveInputFocus: () => clearTerminalLiveInputFocusTimer(liveInputFocusTimerRef),
-      commandInput: commandInputRef.current,
-      dismissKeyboard: () => Keyboard.dismiss(),
-      liveInput: liveInputRef.current
-    })
-  }, [])
-
   const handleTerminalTap = useCallback(
     (handle: string) => {
       if (handle !== activeHandleRef.current) {
@@ -1784,6 +1818,9 @@ export default function SessionScreen(): React.JSX.Element {
       return
     }
     const nextEnabled = toggleTerminalLiveInput(activeHandle)
+    if (!nextEnabled) {
+      resetControlMode()
+    }
     clearPendingLiveInputCommit()
     if (nextEnabled) {
       scheduleTerminalLiveInputFocus(liveInputFocusTimerRef, () => liveInputRef.current?.focus())
@@ -1791,7 +1828,7 @@ export default function SessionScreen(): React.JSX.Element {
       clearTerminalLiveInputFocusTimer(liveInputFocusTimerRef)
       liveInputRef.current?.blur()
     }
-  }, [activeHandle, clearPendingLiveInputCommit, toggleTerminalLiveInput])
+  }, [activeHandle, clearPendingLiveInputCommit, resetControlMode, toggleTerminalLiveInput])
 
   const allowTerminalGestureInput = useCallback(
     (handle: string, sequenceCount: number): boolean => {
@@ -2906,12 +2943,39 @@ export default function SessionScreen(): React.JSX.Element {
   }
   const showAgentSessionHistoryAction =
     !isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && agentSessionHistorySupported === true
+  const showQuickCommandsAction = shouldShowMobileQuickCommandsAction(quickCommandsSupported)
+  const showFileExplorerAction = !isFloatingWorkspaceRoute
+  const showSourceControlAction = !isFolderWorkspaceRoute && !isFloatingWorkspaceRoute
   const showChecksAction = shouldShowSessionHeaderChecksAction({
     isFolderWorkspaceRoute: isFolderWorkspaceRoute || isFloatingWorkspaceRoute,
     repoContextLoaded: prRepoContextLoaded,
     hostedChecksSupported: prIsGithubRepo
   })
-  const showHeaderMoreButton = showAgentSessionHistoryAction || showChecksAction
+  const showHeaderMoreButton =
+    showChatTerminalAction ||
+    showQuickCommandsAction ||
+    showFileExplorerAction ||
+    showSourceControlAction ||
+    showAgentSessionHistoryAction ||
+    showChecksAction
+  const openQuickCommands = (): void => {
+    if (quickCommandsSupported === true) {
+      setShowQuickCommands(true)
+      return
+    }
+    showToast(
+      translate(
+        'mobile.session.capabilities.checking',
+        'Checking desktop capabilities - try again in a moment'
+      ),
+      1600
+    )
+  }
+  const toggleChatTerminalView = (): void => {
+    if (activeSessionTabId) {
+      toggleTabChatView(activeSessionTabId)
+    }
+  }
   const useNativeSessionHeader = shouldUseNativeSessionHeader(isWideLayout)
   const hasDirtyMarkdownDrafts = getDirtyMarkdownDrafts().length > 0
   const nativeHeaderOptions = useMemo(
@@ -2941,26 +3005,6 @@ export default function SessionScreen(): React.JSX.Element {
             />
           </Stack.Toolbar>
           <Stack.Toolbar placement="right">
-            <Stack.Toolbar.Button
-              accessibilityLabel={translate(
-                'mobile.session.header.openFileExplorer',
-                'Open file explorer'
-              )}
-              hidden={isFloatingWorkspaceRoute}
-              icon="folder"
-              onPress={() => handlePanelTap('files')}
-              selected={activePanel === 'files'}
-            />
-            <Stack.Toolbar.Button
-              accessibilityLabel={translate(
-                'mobile.session.header.openSourceControl',
-                'Open source control'
-              )}
-              hidden={isFolderWorkspaceRoute || isFloatingWorkspaceRoute}
-              icon="arrow.triangle.branch"
-              onPress={() => handlePanelTap('sourceControl')}
-              selected={activePanel === 'sourceControl'}
-            />
             <Stack.Toolbar.Menu
               accessibilityLabel={translate(
                 'mobile.session.header.moreActions',
@@ -2970,6 +3014,42 @@ export default function SessionScreen(): React.JSX.Element {
               icon="ellipsis"
               separateBackground
             >
+              <Stack.Toolbar.MenuAction
+                hidden={!showChatTerminalAction}
+                icon={showNativeChat ? 'terminal' : 'bubble.left'}
+                onPress={toggleChatTerminalView}
+              >
+                {showNativeChat
+                  ? translate(
+                      'mobile.session.terminalActions.switchToTerminalView',
+                      'Switch to terminal view'
+                    )
+                  : translate(
+                      'mobile.session.terminalActions.switchToChatView',
+                      'Switch to chat view'
+                    )}
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showQuickCommandsAction}
+                icon="arrow.right.square"
+                onPress={openQuickCommands}
+              >
+                {translate('mobile.session.quickCommands', 'Quick commands')}
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showFileExplorerAction}
+                icon="folder"
+                onPress={() => handlePanelTap('files')}
+              >
+                {translate('mobile.session.header.openFileExplorer', 'Open file explorer')}
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showSourceControlAction}
+                icon="arrow.triangle.branch"
+                onPress={() => handlePanelTap('sourceControl')}
+              >
+                {translate('mobile.session.header.openSourceControl', 'Open source control')}
+              </Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction
                 hidden={!showAgentSessionHistoryAction}
                 icon="clock.arrow.circlepath"
@@ -3027,28 +3107,6 @@ export default function SessionScreen(): React.JSX.Element {
                 </View>
               </Pressable>
               <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-                {!isFloatingWorkspaceRoute ? (
-                  <MobileGlassIconButton
-                    accessibilityLabel={translate(
-                      'mobile.session.header.openFileExplorer',
-                      'Open file explorer'
-                    )}
-                    icon="folder"
-                    isSelected={activePanel === 'files'}
-                    onPress={() => handlePanelTap('files')}
-                  />
-                ) : null}
-                {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-                  <MobileGlassIconButton
-                    accessibilityLabel={translate(
-                      'mobile.session.header.openSourceControl',
-                      'Open source control'
-                    )}
-                    icon="source-control"
-                    isSelected={activePanel === 'sourceControl'}
-                    onPress={() => handlePanelTap('sourceControl')}
-                  />
-                )}
                 {showHeaderMoreButton ? (
                   <MobileGlassIconButton
                     accessibilityLabel={translate(
@@ -3056,7 +3114,7 @@ export default function SessionScreen(): React.JSX.Element {
                       'More session actions'
                     )}
                     icon="more"
-                    isSelected={activePanel === 'pr'}
+                    isSelected={activePanel !== null}
                     onPress={() => setShowHeaderMoreActions(true)}
                   />
                 ) : null}
@@ -3095,7 +3153,6 @@ export default function SessionScreen(): React.JSX.Element {
             activeTabId={activeSessionTabId}
             disabled={creating || creatingBrowser || creatingMarkdown || connState !== 'connected'}
             tabs={visibleTabs}
-            showQuickCommands={shouldShowMobileQuickCommandsAction(quickCommandsSupported)}
             onTabPress={switchSessionTab}
             onTabLongPress={(tab) => {
               triggerMediumImpact()
@@ -3104,19 +3161,6 @@ export default function SessionScreen(): React.JSX.Element {
             onNewTabPress={() => {
               setCreateError('')
               setShowCreateTabDrawer(true)
-            }}
-            onQuickCommandsPress={() => {
-              if (quickCommandsSupported === true) {
-                setShowQuickCommands(true)
-                return
-              }
-              showToast(
-                translate(
-                  'mobile.session.capabilities.checking',
-                  'Checking desktop capabilities - try again in a moment'
-                ),
-                1600
-              )
             }}
           />
         ) : null}
@@ -3296,79 +3340,44 @@ export default function SessionScreen(): React.JSX.Element {
             trigger a server-side PTY viewport change. The dock hides in native
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
-              <View
-                className="z-20 px-3 pt-1"
-                style={[
-                  {
-                    paddingBottom: insets.bottom,
-                    transform: [{ translateY: -terminalComposerKeyboardOffset }]
+              <MobileTerminalDock
+                autocompleteEnabled={autocompleteEnabled}
+                bottomInset={insets.bottom}
+                builtInKeys={visibleBuiltInAccessoryKeys}
+                canPaste={canPaste}
+                canSend={canSend}
+                commandInputRef={commandInputRef}
+                controlModeActive={controlModeActive}
+                customKeys={customKeys}
+                input={input}
+                isAttaching={isAttaching}
+                isPhoneDisplayMode={isPhoneMode(activeHandle)}
+                keyboardOffset={terminalComposerKeyboardOffset}
+                liveInputCapture={liveInputCapture}
+                liveInputEnabled={liveInputEnabled}
+                liveInputRef={liveInputRef}
+                onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
+                onAttachImage={attachImage}
+                onChangeCommandText={setInput}
+                onChangeLiveInput={handleTerminalLiveInputChange}
+                onCustomKeyLongPress={(key) => {
+                  triggerMediumImpact()
+                  setDeleteKeyTarget(key)
+                }}
+                onKeyPressLiveInput={handleLiveInputKeyPress}
+                onPaste={() => void handlePaste()}
+                onRepeatStart={startAccessoryRepeat}
+                onRepeatStop={stopAccessoryRepeat}
+                onSendCommand={() => void handleSend()}
+                onSubmitLiveInput={handleLiveInputSubmit}
+                onToggleControl={toggleControlMode}
+                onToggleDisplayMode={() => {
+                  if (activeHandle) {
+                    void toggleDisplayMode(activeHandle)
                   }
-                ]}
-              >
-                <MobileTerminalAccessoryBar
-                  builtInKeys={visibleBuiltInAccessoryKeys}
-                  canPaste={canPaste}
-                  canSend={canSend}
-                  customKeys={customKeys}
-                  isKeyboardVisible={keyboardLift > 0}
-                  isPhoneDisplayMode={isPhoneMode(activeHandle)}
-                  liveInputEnabled={liveInputEnabled}
-                  onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
-                  onAddCustomKey={() => setShowCustomKeyModal(true)}
-                  onCustomKeyLongPress={(key) => {
-                    triggerMediumImpact()
-                    setDeleteKeyTarget(key)
-                  }}
-                  onDismissKeyboard={dismissSoftwareKeyboard}
-                  onPaste={() => void handlePaste()}
-                  onRepeatStart={startAccessoryRepeat}
-                  onRepeatStop={stopAccessoryRepeat}
-                  onToggleDisplayMode={() => {
-                    if (activeHandle) {
-                      void toggleDisplayMode(activeHandle)
-                    }
-                  }}
-                  onToggleLiveInput={toggleLiveInput}
-                />
-
-                {/* Input bar */}
-                <MobileTerminalInputBar
-                  autocompleteEnabled={autocompleteEnabled}
-                  canSend={canSend}
-                  commandInputRef={commandInputRef}
-                  input={input}
-                  isAttaching={isAttaching}
-                  liveInputEnabled={liveInputEnabled}
-                  onAttachImage={attachImage}
-                  onChangeText={setInput}
-                  onFocusLiveInput={focusLiveInput}
-                  onSend={() => void handleSend()}
-                />
-                {liveInputEnabled ? (
-                  <TextInput
-                    ref={liveInputRef}
-                    className="text-foreground absolute h-px w-px opacity-0"
-                    value={liveInputCapture}
-                    onChangeText={handleLiveInputChange}
-                    onKeyPress={handleLiveInputKeyPress}
-                    onSubmitEditing={handleLiveInputSubmit}
-                    placeholder=""
-                    showSoftInputOnFocus
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    spellCheck={false}
-                    smartInsertDelete={false}
-                    // Why: iOS textContentType wins over autoComplete and can
-                    // narrow the keyboard surface; keep IME switching available.
-                    autoComplete="off"
-                    keyboardType={getTerminalLiveInputKeyboardType(Platform.OS)}
-                    returnKeyType="default"
-                    blurOnSubmit={false}
-                    editable={canSend}
-                    importantForAutofill="no"
-                  />
-                ) : null}
-              </View>
+                }}
+                onToggleLiveInput={toggleLiveInput}
+              />
             )}
           </View>
           {canDockPanel && activePanel !== null && (
@@ -3388,8 +3397,17 @@ export default function SessionScreen(): React.JSX.Element {
 
       <MobileSessionHeaderMoreActionsSheet
         visible={!useNativeSessionHeader && showHeaderMoreActions}
+        showChatTerminalSwitch={showChatTerminalAction}
+        isChatView={showNativeChat}
+        showQuickCommands={showQuickCommandsAction}
+        showFileExplorer={showFileExplorerAction}
+        showSourceControl={showSourceControlAction}
         showAgentSessionHistory={showAgentSessionHistoryAction}
         showChecks={showChecksAction}
+        onToggleChatTerminal={toggleChatTerminalView}
+        onOpenQuickCommands={openQuickCommands}
+        onOpenFileExplorer={() => handlePanelTap('files')}
+        onOpenSourceControl={() => handlePanelTap('sourceControl')}
         onOpenAgentSessionHistory={openAgentSessionHistory}
         onOpenChecks={() => handlePanelTap('pr')}
         onClose={() => setShowHeaderMoreActions(false)}

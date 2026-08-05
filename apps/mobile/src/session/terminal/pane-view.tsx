@@ -68,25 +68,27 @@ export function TerminalPaneView({
       className={cn('absolute inset-0', !active && 'opacity-0')}
       style={[keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] }]}
     >
-      <TerminalWebView
-        ref={setRef}
-        className="flex-1"
-        terminalTheme={terminalTheme}
-        textScale={textScale}
-        onWebReady={() => onWebReady(handle)}
-        onSelectionMode={(a) => onSelectionMode(handle, a)}
-        onSelectionCopy={(t) => onSelectionCopy(handle, t)}
-        onSelectionEvicted={() => onSelectionEvicted(handle)}
-        onModesChanged={(m) => onModesChanged(handle, m)}
-        onKeyboardAvoidanceMetrics={(m) => onKeyboardAvoidanceMetrics(handle, m)}
-        onHaptic={onHaptic}
-        onTerminalInput={(bytes) => onTerminalInput(handle, bytes)}
-        onTerminalQueryReply={(bytes) => onTerminalQueryReply(handle, bytes)}
-        onTerminalTap={() => onTerminalTap(handle)}
-        onFileTap={(pathText, line, column) => onFileTap(handle, pathText, line, column)}
-        onOpenUrl={(url) => onOpenUrl(handle, url)}
-        onTextScaleChange={onTextScaleChange}
-      />
+      <View className="absolute inset-0 px-3">
+        <TerminalWebView
+          ref={setRef}
+          className="flex-1"
+          terminalTheme={terminalTheme}
+          textScale={textScale}
+          onWebReady={() => onWebReady(handle)}
+          onSelectionMode={(a) => onSelectionMode(handle, a)}
+          onSelectionCopy={(t) => onSelectionCopy(handle, t)}
+          onSelectionEvicted={() => onSelectionEvicted(handle)}
+          onModesChanged={(m) => onModesChanged(handle, m)}
+          onKeyboardAvoidanceMetrics={(m) => onKeyboardAvoidanceMetrics(handle, m)}
+          onHaptic={onHaptic}
+          onTerminalInput={(bytes) => onTerminalInput(handle, bytes)}
+          onTerminalQueryReply={(bytes) => onTerminalQueryReply(handle, bytes)}
+          onTerminalTap={() => onTerminalTap(handle)}
+          onFileTap={(pathText, line, column) => onFileTap(handle, pathText, line, column)}
+          onOpenUrl={(url) => onOpenUrl(handle, url)}
+          onTextScaleChange={onTextScaleChange}
+        />
+      </View>
     </View>
   )
 }

@@ -1841,20 +1841,6 @@
     "count": 1
   },
   {
-    "filePath": "src/session/terminal/live-input-status.tsx",
-    "kind": "jsx-text",
-    "text": "Live input",
-    "dynamic": false,
-    "count": 1
-  },
-  {
-    "filePath": "src/session/terminal/live-input-status.tsx",
-    "kind": "jsx-text",
-    "text": "Uploading image to host",
-    "dynamic": false,
-    "count": 1
-  },
-  {
     "filePath": "src/session/terminal/use-paste.ts",
     "kind": "user-visible-call",
     "text": "Paste too large (max 256 KiB)",

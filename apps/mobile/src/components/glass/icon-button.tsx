@@ -6,6 +6,7 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowSquareOut,
+  ArrowSquareRight,
   CaretLeft,
   CaretRight,
   ChartBar,
@@ -17,6 +18,7 @@ import {
   Gear,
   GitMerge,
   ListChecks,
+  MagnifyingGlass,
   Minus,
   Pencil,
   Play,
@@ -50,8 +52,10 @@ type MobileGlassIconName =
   | 'more'
   | 'play'
   | 'plus'
+  | 'quick-commands'
   | 'refresh'
   | 'save'
+  | 'search'
   | 'send'
   | 'settings'
   | 'sidebar'
@@ -61,6 +65,7 @@ type MobileGlassIconName =
 type MobileGlassIconButtonProps = {
   accessibilityLabel: string
   disabled?: boolean
+  hitSlop?: PressableProps['hitSlop']
   icon: MobileGlassIconName
   isDestructive?: boolean
   isProminent?: boolean
@@ -107,10 +112,14 @@ function iconForName(name: MobileGlassIconName): Icon {
       return Play
     case 'plus':
       return Plus
+    case 'quick-commands':
+      return ArrowSquareRight
     case 'refresh':
       return ArrowClockwise
     case 'save':
       return FloppyDisk
+    case 'search':
+      return MagnifyingGlass
     case 'send':
       return ArrowUp
     case 'settings':
@@ -127,6 +136,7 @@ function iconForName(name: MobileGlassIconName): Icon {
 export function MobileGlassIconButton({
   accessibilityLabel,
   disabled = false,
+  hitSlop,
   icon,
   isDestructive = false,
   isProminent = false,
@@ -154,6 +164,7 @@ export function MobileGlassIconButton({
       contentClassName="h-full w-full items-center justify-center rounded-full"
       disabled={disabled}
       fallbackClassName={hasPrimaryFill ? 'bg-primary' : undefined}
+      hitSlop={hitSlop}
       onPress={onPress}
       size={size}
       tintColorClassName={

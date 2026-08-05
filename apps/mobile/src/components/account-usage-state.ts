@@ -15,11 +15,22 @@ export type RateLimitWindow = {
 }
 
 export type ProviderRateLimits = {
-  provider: 'claude' | 'codex' | 'gemini' | 'opencode-go' | 'kimi'
+  provider:
+    | 'claude'
+    | 'codex'
+    | 'cursor'
+    | 'gemini'
+    | 'opencode-go'
+    | 'kimi'
+    | 'minimax'
+    | 'grok'
+    | 'antigravity'
   session: RateLimitWindow | null
   weekly: RateLimitWindow | null
+  fableWeekly?: RateLimitWindow | null
   monthly?: RateLimitWindow | null
   buckets?: (RateLimitWindow & { name: string })[]
+  planType?: string | null
   updatedAt: number
   error: string | null
   status: 'idle' | 'fetching' | 'ok' | 'error' | 'unavailable'
@@ -50,12 +61,44 @@ export type AccountsSnapshot = {
   rateLimits: {
     claude: ProviderRateLimits | null
     codex: ProviderRateLimits | null
+    cursor?: ProviderRateLimits | null
+    gemini?: ProviderRateLimits | null
+    opencodeGo?: ProviderRateLimits | null
+    kimi?: ProviderRateLimits | null
+    antigravity?: ProviderRateLimits | null
+    minimax?: ProviderRateLimits | null
+    grok?: ProviderRateLimits | null
+    minimaxCookieConfigured?: boolean
+    grokAuthConfigured?: boolean
     inactiveClaudeAccounts: InactiveAccountUsage[]
     inactiveCodexAccounts: InactiveAccountUsage[]
   }
 }
 
 export type ProviderKey = 'claude' | 'codex'
+
+export type UsageProviderKey =
+  | 'claude'
+  | 'codex'
+  | 'cursor'
+  | 'gemini'
+  | 'opencode-go'
+  | 'kimi'
+  | 'antigravity'
+  | 'minimax'
+  | 'grok'
+
+export const USAGE_PROVIDER_KEYS = [
+  'claude',
+  'codex',
+  'cursor',
+  'gemini',
+  'opencode-go',
+  'kimi',
+  'antigravity',
+  'minimax',
+  'grok'
+] as const satisfies readonly UsageProviderKey[]
 
 export type UsageBarState = {
   usedPercent: number | null
@@ -67,7 +110,33 @@ export function getActiveProviderRateLimits(
   snapshot: AccountsSnapshot,
   provider: ProviderKey
 ): ProviderRateLimits | null {
-  return provider === 'claude' ? snapshot.rateLimits.claude : snapshot.rateLimits.codex
+  return getProviderRateLimits(snapshot, provider)
+}
+
+export function getProviderRateLimits(
+  snapshot: AccountsSnapshot,
+  provider: UsageProviderKey
+): ProviderRateLimits | null {
+  switch (provider) {
+    case 'claude':
+      return snapshot.rateLimits.claude
+    case 'codex':
+      return snapshot.rateLimits.codex
+    case 'cursor':
+      return snapshot.rateLimits.cursor ?? null
+    case 'gemini':
+      return snapshot.rateLimits.gemini ?? null
+    case 'opencode-go':
+      return snapshot.rateLimits.opencodeGo ?? null
+    case 'kimi':
+      return snapshot.rateLimits.kimi ?? null
+    case 'antigravity':
+      return snapshot.rateLimits.antigravity ?? null
+    case 'minimax':
+      return snapshot.rateLimits.minimax ?? null
+    case 'grok':
+      return snapshot.rateLimits.grok ?? null
+  }
 }
 
 export function getInactiveProviderUsage(
@@ -94,6 +163,7 @@ export function hasActiveProviderUsage(limits: ProviderRateLimits | null): boole
   if (
     limits.session != null ||
     limits.weekly != null ||
+    limits.fableWeekly != null ||
     limits.monthly != null ||
     (limits.buckets && limits.buckets.length > 0)
   ) {
@@ -106,7 +176,7 @@ export function hasActiveProviderUsage(limits: ProviderRateLimits | null): boole
 // is per window rather than per provider status.
 export function getUsageBarState(
   limits: ProviderRateLimits | null,
-  windowKey: 'session' | 'weekly',
+  windowKey: 'session' | 'weekly' | 'fableWeekly',
   isFetchingOverride?: boolean
 ): UsageBarState {
   const window = limits?.[windowKey] ?? null
@@ -133,20 +203,56 @@ export function getWindowResetLabel(
   windowKey: 'session' | 'weekly',
   now: number
 ): string | null {
-  const resetsAt = limits?.[windowKey]?.resetsAt
+  return getUsageWindowResetLabel(limits?.[windowKey] ?? null, now)
+}
+
+export function getUsageWindowResetLabel(
+  window: RateLimitWindow | null,
+  now: number
+): string | null {
+  const resetsAt = window?.resetsAt
   if (resetsAt == null) {
     return null
   }
   return formatResetCountdown(resetsAt - now)
 }
 
+export function getProviderResetLabel(
+  limits: ProviderRateLimits | null,
+  now: number
+): string | null {
+  const resets = [
+    limits?.session?.resetsAt,
+    limits?.weekly?.resetsAt,
+    limits?.fableWeekly?.resetsAt,
+    limits?.monthly?.resetsAt,
+    ...(limits?.buckets ?? []).map((bucket) => bucket.resetsAt)
+  ].filter((reset): reset is number => typeof reset === 'number' && Number.isFinite(reset))
+  if (resets.length === 0) {
+    return null
+  }
+  return formatResetCountdown(Math.min(...resets) - now)
+}
+
 // Why: the usage UI must render for the system-default login, not only for
 // Yiru-managed accounts. Show a provider when it has at least one managed
 // account OR active rate-limit data for the system-default target.
-export function hasRenderableUsage(snapshot: AccountsSnapshot, provider: ProviderKey): boolean {
-  const accounts = provider === 'claude' ? snapshot.claude.accounts : snapshot.codex.accounts
+export function hasRenderableUsage(
+  snapshot: AccountsSnapshot,
+  provider: UsageProviderKey
+): boolean {
+  const accounts =
+    provider === 'claude'
+      ? snapshot.claude.accounts
+      : provider === 'codex'
+        ? snapshot.codex.accounts
+        : []
   if (accounts.length > 0) {
     return true
   }
-  return hasActiveProviderUsage(getActiveProviderRateLimits(snapshot, provider))
+  const limits = getProviderRateLimits(snapshot, provider)
+  return (
+    hasActiveProviderUsage(limits) ||
+    (limits !== null && limits.status !== 'unavailable' && limits.status !== 'idle')
+  )
 }

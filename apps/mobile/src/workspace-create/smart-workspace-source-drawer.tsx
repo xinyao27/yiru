@@ -132,7 +132,7 @@ export function SmartWorkspaceSourceDrawer({
 
   return (
     <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
-      <View className="flex-row items-center justify-between px-1 pb-2">
+      <View className="flex-row items-center justify-between pb-2">
         <Text className="text-foreground text-sm font-semibold">
           {translate('mobile.newWorkspace.source.title', "Name or 'Create From'")}
         </Text>
@@ -237,14 +237,14 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {needsGitHubRemote ? (
-        <Text className="text-muted-foreground px-1 pb-2 text-xs">
+        <Text className="text-muted-foreground pb-2 text-xs">
           {translate(
             'mobile.newWorkspace.source.githubRemoteRequired',
             'This repository needs a GitHub remote to list pull requests.'
           )}
         </Text>
       ) : error ? (
-        <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>
+        <Text className="text-destructive pb-2 text-xs">{error}</Text>
       ) : null}
 
       <MobileContentSection className="max-h-96 grow-0">
@@ -260,7 +260,7 @@ export function SmartWorkspaceSourceDrawer({
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               </View>
             ) : showEmpty ? (
-              <Text className="text-muted-foreground py-4 text-center text-xs">
+              <Text className="text-muted-foreground py-4 text-xs">
                 {emptyHintForMode(effectiveMode)}
               </Text>
             ) : null

@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { ScrollView, View } from 'react-native'
 
-import { MobileGlassGroup } from '~/components/glass/group'
-import { MobileGlassIconButton } from '~/components/glass/icon-button'
-import { translate } from '~/i18n/translate'
-
-import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type { MobileSessionTab } from './screen-state'
+import { MobileSessionTabActions } from './tab-actions'
 import { MobileSessionTabButton } from './tab-button'
 import { resolveTabStripScrollOffset } from './tab-strip-scroll'
 
@@ -14,10 +10,8 @@ export type MobileSessionTabStripProps = {
   activeTabId: string | null
   disabled: boolean
   onNewTabPress: () => void
-  onQuickCommandsPress: () => void
   onTabLongPress: (tab: MobileSessionTab) => void
   onTabPress: (tab: MobileSessionTab) => void
-  showQuickCommands: boolean
   tabs: MobileSessionTab[]
 }
 
@@ -25,10 +19,8 @@ export function MobileSessionTabStrip({
   activeTabId,
   disabled,
   onNewTabPress,
-  onQuickCommandsPress,
   onTabLongPress,
   onTabPress,
-  showQuickCommands,
   tabs
 }: MobileSessionTabStripProps): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null)
@@ -64,7 +56,7 @@ export function MobileSessionTabStrip({
   }, [activeTabId, scrollActiveTabIntoView])
 
   return (
-    <MobileGlassGroup className="mx-2 my-1 flex-row items-center gap-2 py-1" spacing={8}>
+    <View className="mx-3 flex-row items-center gap-2">
       <View className="min-h-11 min-w-0 flex-1 overflow-hidden">
         <ScrollView
           ref={scrollRef}
@@ -104,15 +96,7 @@ export function MobileSessionTabStrip({
           ))}
         </ScrollView>
       </View>
-      <MobileGlassIconButton
-        accessibilityLabel={translate('mobile.session.newTab', 'New tab')}
-        disabled={disabled}
-        icon="plus"
-        onPress={onNewTabPress}
-      />
-      {showQuickCommands ? (
-        <QuickCommandsTabButton disabled={disabled} onPress={onQuickCommandsPress} />
-      ) : null}
-    </MobileGlassGroup>
+      <MobileSessionTabActions disabled={disabled} onNewTabPress={onNewTabPress} />
+    </View>
   )
 }

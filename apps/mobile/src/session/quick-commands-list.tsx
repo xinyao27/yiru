@@ -59,7 +59,7 @@ export function QuickCommandsList(props: ListProps) {
   const hasVisible = repoCommands.length + globalCommands.length > 0
   const showSearch = totalCount > 1 || query.length > 0
   return (
-    <View className="gap-2 pb-2">
+    <View className="gap-2">
       {showSearch ? (
         <MobileSearchField
           value={query.slice(0, QUICK_COMMAND_SEARCH_QUERY_MAX_LENGTH)}
@@ -73,7 +73,7 @@ export function QuickCommandsList(props: ListProps) {
           editable={!disabled}
         />
       ) : null}
-      {error ? <Text className="text-destructive px-1 text-xs">{error}</Text> : null}
+      {error ? <Text className="text-destructive text-xs">{error}</Text> : null}
       {loading && !hasVisible ? (
         <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       ) : null}
@@ -143,7 +143,7 @@ function QuickCommandGroup({
 }) {
   return (
     <View>
-      <Text className="text-muted-foreground px-1 pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
+      <Text className="text-muted-foreground pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
         {label}
       </Text>
       <MobileContentSection>
@@ -281,7 +281,7 @@ export function QuickCommandAgentPicker({
 
 const styles = {
   disabled: cn('opacity-50'),
-  empty: cn('py-4 text-center text-sm text-muted-foreground'),
+  empty: cn('py-4 text-sm text-muted-foreground'),
   rowBorder: cn('border-t border-t-border'),
   rowIcon: cn('h-7 w-7 items-center justify-center bg-muted')
 } as const

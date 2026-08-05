@@ -12,7 +12,6 @@ import { Uniwind, useCSSVariable, useResolveClassNames, useUniwind } from 'uniwi
 import { MobileThemeProvider } from '~/appearance/theme-preference'
 import { MobileGlassAvailabilityProvider } from '~/components/glass/availability'
 import { IconContext } from '~/components/uniwind-icons'
-import { YiruLogo } from '~/components/yiru-logo'
 import { MobileLoaderStyleProvider } from '~/loading/loader-style-context'
 import { getNotificationNavigationPath } from '~/notifications/notification-routing'
 import { RpcClientProvider } from '~/transport/client-context'
@@ -236,11 +235,9 @@ function ThemedRootLayout(): React.JSX.Element {
                         name="index"
                         options={{
                           headerBackVisible: false,
-                          title: 'Yiru',
                           headerShown: true,
-                          headerTitle: () => (
-                            <YiruLogo size={22} colorClassName="accent-foreground" />
-                          )
+                          headerTitle: () => null,
+                          title: ''
                         }}
                       />
                       <Stack.Screen name="pair-scan" options={{ title: 'Pair with desktop' }} />

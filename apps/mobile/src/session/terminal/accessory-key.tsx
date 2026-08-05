@@ -1,36 +1,22 @@
-import type { PressableProps } from 'react-native'
 import { Text, View } from 'react-native'
 
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
   CaretDown as ChevronDown,
-  CaretDoubleRight as ChevronsRight,
+  DeviceMobile,
   Keyboard as KeyboardIcon,
-  Monitor,
-  Plus,
-  DeviceMobile as Smartphone
+  Laptop
 } from '~/components/uniwind-icons'
 
-export type MobileTerminalAccessoryIcon =
-  | 'add'
-  | 'desktop'
-  | 'dismiss-keyboard'
-  | 'live-input'
-  | 'phone'
+import type {
+  MobileTerminalAccessoryIcon,
+  MobileTerminalAccessoryKeyProps
+} from './accessory-key-props'
 
-type MobileTerminalAccessoryKeyContent =
-  | { icon: MobileTerminalAccessoryIcon; label?: never }
-  | { icon?: never; label: string }
-
-export type MobileTerminalAccessoryKeyProps = Omit<
-  PressableProps,
-  'children' | 'disabled' | 'onPress'
-> &
-  MobileTerminalAccessoryKeyContent & {
-    disabled?: boolean
-    isSelected?: boolean
-    onPress: NonNullable<PressableProps['onPress']>
-  }
+export type {
+  MobileTerminalAccessoryIcon,
+  MobileTerminalAccessoryKeyProps
+} from './accessory-key-props'
 
 function MobileTerminalAccessoryIconView({
   icon
@@ -38,10 +24,6 @@ function MobileTerminalAccessoryIconView({
   icon: MobileTerminalAccessoryIcon
 }): React.JSX.Element {
   switch (icon) {
-    case 'add':
-      return <Plus size={16} colorClassName="accent-muted-foreground" />
-    case 'desktop':
-      return <Monitor size={14} colorClassName="accent-muted-foreground" />
     case 'dismiss-keyboard':
       return (
         <View className="relative h-5 w-5 items-center justify-start">
@@ -51,10 +33,12 @@ function MobileTerminalAccessoryIconView({
           </View>
         </View>
       )
-    case 'live-input':
-      return <ChevronsRight size={14} colorClassName="accent-muted-foreground" />
-    case 'phone':
-      return <Smartphone size={14} colorClassName="accent-muted-foreground" />
+    case 'device-mobile':
+      return <DeviceMobile size={20} colorClassName="accent-muted-foreground" />
+    case 'keyboard':
+      return <KeyboardIcon size={20} colorClassName="accent-muted-foreground" />
+    case 'laptop':
+      return <Laptop size={20} colorClassName="accent-muted-foreground" />
   }
 }
 
@@ -62,6 +46,7 @@ export function MobileTerminalAccessoryKey({
   accessibilityState,
   disabled = false,
   icon,
+  isCircular = false,
   isSelected,
   label,
   onPress,
@@ -76,15 +61,21 @@ export function MobileTerminalAccessoryKey({
         disabled,
         ...(isSelected === undefined ? {} : { selected: isSelected })
       }}
-      className="rounded-full"
-      contentClassName="min-h-8 min-w-10 items-center justify-center rounded-full px-3 py-1"
+      className={
+        isCircular ? 'bg-card h-9 w-9 overflow-hidden rounded-full' : 'bg-card rounded-full'
+      }
+      contentClassName={
+        isCircular
+          ? 'h-9 w-9 items-center justify-center rounded-full px-0'
+          : 'min-h-9 min-w-9 items-center justify-center rounded-full px-3'
+      }
       disabled={disabled}
-      isSelected={isSelected === true}
+      fallbackClassName={isSelected ? 'border-transparent' : 'border-transparent bg-secondary'}
       onPress={onPress}
-      tintColorClassName="accent-secondary"
+      size="regular"
     >
       {icon ? <MobileTerminalAccessoryIconView icon={icon} /> : null}
-      {label ? <Text className="text-muted-foreground font-mono text-xs">{label}</Text> : null}
+      {label ? <Text className="text-foreground font-mono text-sm">{label}</Text> : null}
     </MobileGlassPressable>
   )
 }
