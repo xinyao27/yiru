@@ -362,11 +362,6 @@ const BASE_LOCALE_KEY_OVERRIDES = {
     zh: '例如 feature',
     ja: '例: feature'
   },
-  'auto.components.mobile.slides.TerminalSlide.985373052e': {
-    ko: '휴대폰 모드로 전환',
-    zh: '切换到手机模式',
-    ja: 'スマートフォンモードに切り替え'
-  },
   'auto.components.right.sidebar.PortsPanel.c9d106547a': { ja: '転送' },
   // Distinguish clipboard copying from creating a second file in the same directory.
   'auto.components.right.sidebar.FileExplorerRow.98a79948b3': { zh: '复制到剪贴板' },
