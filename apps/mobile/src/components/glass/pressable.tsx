@@ -107,6 +107,9 @@ export function MobileGlassPressable({
           <MobileGlassSurface
             className={cn('overflow-hidden', isTab && 'max-w-40 rounded-full', className)}
             fallbackClassName={resolvedFallbackClassName}
+            // Why: dynamic tab labels need a deterministic capsule shape across iOS Glass
+            // and fallback paths.
+            forceFallback={isTab}
             isFunctional
             isInteractive={!disabled}
             pointerEvents="none"
