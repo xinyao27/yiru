@@ -35,7 +35,7 @@ export function SelectionDrawer<TValue, TId extends string>({
 }: SelectionDrawerProps<TValue, TId>): React.JSX.Element {
   return (
     <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
-      <View className="px-1 pb-2">
+      <View className="pb-2">
         <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
           {title}
         </Text>

@@ -18,6 +18,7 @@ import {
   Gear,
   GitMerge,
   ListChecks,
+  MagnifyingGlass,
   Minus,
   Pencil,
   Play,
@@ -54,6 +55,7 @@ type MobileGlassIconName =
   | 'quick-commands'
   | 'refresh'
   | 'save'
+  | 'search'
   | 'send'
   | 'settings'
   | 'sidebar'
@@ -116,6 +118,8 @@ function iconForName(name: MobileGlassIconName): Icon {
       return ArrowClockwise
     case 'save':
       return FloppyDisk
+    case 'search':
+      return MagnifyingGlass
     case 'send':
       return ArrowUp
     case 'settings':

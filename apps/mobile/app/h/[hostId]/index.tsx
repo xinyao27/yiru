@@ -47,7 +47,6 @@ import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { RpcSuccess } from '~/transport/types'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
-import { NewWorkspaceFab } from '~/workspace-create/fab'
 import { NewWorkspaceModalController } from '~/workspace-create/modal-controller'
 import { WorkspaceDetailPlaceholder } from '~/workspace/detail-placeholder'
 import { getMobileWorkspaceLineageGroupKey } from '~/workspace/lineage'
@@ -60,8 +59,8 @@ import {
   type Worktree
 } from '~/workspace/list-sections'
 import { areWorktreeListsEqual } from '~/workspace/list-snapshot'
-import { MobileWorkspaceListToolbar } from '~/workspace/list-toolbar'
 import { repoColor } from '~/workspace/repo-color'
+import { WorkspaceSearchSheet } from '~/workspace/search-sheet'
 import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/workspace/statuses'
 import { useActiveWorktreeScroll } from '~/workspace/use-active-scroll'
 import { useWorkspaceSections } from '~/workspace/use-list-sections'
@@ -158,6 +157,7 @@ export function HostScreen({
   const [error, setError] = useState('')
   const [lastKnownWorktrees, setLastKnownWorktrees] = useState<Worktree[]>(initialCache ?? [])
   const [search, setSearch] = useState('')
+  const [searchVisible, setSearchVisible] = useState(false)
   const [sortMode, setSortMode] = useState<MobileSortMode>('recent')
   const [filters, setFilters] = useState<FilterState>({
     filterRepoIds: new Set(),
@@ -714,6 +714,10 @@ export function HostScreen({
     navigateFromHostList(`/h/${hostId}/accounts`)
   }, [hostId, navigateFromHostList])
 
+  const openWorkspaceSearch = useCallback(() => {
+    setSearchVisible(true)
+  }, [])
+
   const reconnectHost = useCallback(() => {
     if (hostId) {
       void forceReconnectHost(hostId)
@@ -834,24 +838,24 @@ export function HostScreen({
       <MobileWorkspaceListChrome
         canUseHost={connState === 'connected'}
         embedded={embedded}
+        floatingWorkspaceEnabled={floatingWorkspaceEnabled}
         hostName={hostName}
         onAccounts={openAccounts}
         onBack={leaveHost}
+        onFloatingWorkspace={openFloatingWorkspace}
         onHideSidebar={onHideSidebar}
+        onNewWorkspace={openNewWorkspaceModal}
+        onOpenSearch={openWorkspaceSearch}
         onReconnect={reconnectHost}
         showReconnect={showReconnectButton}
-      >
-        <MobileWorkspaceListToolbar
-          canUseHost={connState === 'connected'}
-          embedded={embedded}
-          floatingWorkspaceEnabled={floatingWorkspaceEnabled}
-          search={search}
-          onAccounts={openAccounts}
-          onFloatingWorkspace={openFloatingWorkspace}
-          onNewWorkspace={openNewWorkspaceModal}
-          onSearchChange={setSearch}
-        />
-      </MobileWorkspaceListChrome>
+      />
+
+      <WorkspaceSearchSheet
+        onChangeText={setSearch}
+        onClose={() => setSearchVisible(false)}
+        value={search}
+        visible={searchVisible}
+      />
 
       {connState === 'auth-failed' && (
         <AuthFailedBanner
@@ -980,10 +984,6 @@ export function HostScreen({
             />
           )}
         />
-      )}
-
-      {!embedded && (
-        <NewWorkspaceFab onPress={openNewWorkspaceModal} disabled={connState !== 'connected'} />
       )}
 
       <MobileWorktreeActionsDrawer

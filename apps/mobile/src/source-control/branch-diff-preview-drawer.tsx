@@ -48,7 +48,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
           <Text className={styles.stateText}>{branchDiffPreview.message}</Text>
         </View>
       ) : (
-        <View className="pt-3 pb-4">
+        <View className="pt-3">
           {branchDiffPreview.truncated ? (
             <Text className="text-muted-foreground mb-2 text-xs">
               Diff truncated for mobile preview.

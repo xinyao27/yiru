@@ -167,7 +167,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
 
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
-      <View className="flex-row items-center pb-2">
+      <View className="flex-row items-center gap-2 pb-2">
         {showBack ? (
           <MobileGlassIconButton
             accessibilityLabel={CUSTOM_KEY_COPY.back}
@@ -175,13 +175,10 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
             onPress={onBack}
             size="small"
           />
-        ) : (
-          <View className="w-8" />
-        )}
-        <Text className="text-foreground flex-1 text-center text-sm font-semibold">
+        ) : null}
+        <Text className="text-foreground text-sm font-semibold">
           {CUSTOM_KEY_STEP_TITLES[step]}
         </Text>
-        <View className="w-8" />
       </View>
 
       {step === 'choose-type' && (
@@ -223,7 +220,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
       )}
 
       {step === 'shortcut-combo' && (
-        <View className="pt-2">
+        <View>
           <View className="flex-row flex-wrap items-center justify-center gap-2 py-5">
             {orderedActiveModifiers.map((modifier, index) => (
               <View key={modifier.id} className="flex-row items-center gap-2">
@@ -256,7 +253,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
           </View>
 
           <View className="mt-3">
-            <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
+            <Text className="text-muted-foreground mb-2 text-xs tracking-wider uppercase">
               {CUSTOM_KEY_COPY.modifiers}
             </Text>
             <MobileGlassGroup className="flex-row gap-2" spacing={8}>
@@ -291,7 +288,7 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
           </View>
 
           <View className="mt-3">
-            <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
+            <Text className="text-muted-foreground mb-2 text-xs tracking-wider uppercase">
               {CUSTOM_KEY_COPY.key}
             </Text>
             <MobileGlassSurface className="h-14 w-full overflow-hidden rounded-xl" isInteractive>
@@ -331,10 +328,10 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
       )}
 
       {step === 'special-keys' && (
-        <View className="gap-3 pt-1 pb-3">
+        <View className="gap-3">
           {CUSTOM_KEY_GROUPS.map((group) => (
             <View key={group.title} className="gap-1">
-              <Text className="text-muted-foreground mb-1 pl-1 text-xs tracking-wider uppercase">
+              <Text className="text-muted-foreground mb-1 text-xs tracking-wider uppercase">
                 {group.title}
               </Text>
               <MobileGlassGroup className="-mx-1 flex-row flex-wrap" spacing={8}>

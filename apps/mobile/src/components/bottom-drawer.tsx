@@ -5,6 +5,7 @@ import { View } from 'react-native'
 import { BottomDrawerSheet } from './bottom-drawer-sheet'
 
 const BottomDrawerModalHostContext = createContext(false)
+const BOTTOM_DRAWER_CONTENT_CLASS_NAME = 'px-3 pt-3 pb-4'
 
 export type BottomDrawerProps = {
   visible: boolean
@@ -72,7 +73,7 @@ function BottomDrawerContent({
   if (!contentScrollable) {
     return (
       <BottomSheetView>
-        <View className="px-3 pb-4">{children}</View>
+        <View className={BOTTOM_DRAWER_CONTENT_CLASS_NAME}>{children}</View>
       </BottomSheetView>
     )
   }
@@ -80,7 +81,7 @@ function BottomDrawerContent({
   return (
     <BottomSheetScrollView
       bounces={false}
-      contentContainerClassName="px-3 pb-4"
+      contentContainerClassName={BOTTOM_DRAWER_CONTENT_CLASS_NAME}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >

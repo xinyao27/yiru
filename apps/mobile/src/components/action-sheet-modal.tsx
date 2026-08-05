@@ -71,7 +71,7 @@ export function ActionSheetContent({
   return (
     <>
       {(title || message) && (
-        <View className="px-1 pb-2">
+        <View className="pb-2">
           {title ? (
             <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
               {title}

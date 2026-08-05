@@ -84,7 +84,7 @@ export function QuickCommandEditorForm({
   const isAgent = draft.action === 'agent-prompt'
   const canSave = isQuickCommandDraftValid(draft) && !saving
   return (
-    <View className="gap-3 pt-1 pb-2">
+    <View className="gap-3">
       <View className="gap-2">
         <Text className="text-muted-foreground text-xs">
           {translate('mobile.quickCommand.editor.label', 'Label')}
@@ -248,7 +248,7 @@ export function QuickCommandEditorForm({
                 }
               />
               {draft.scope.type === 'repo' && repoName ? (
-                <Text className="text-muted-foreground px-1 font-mono text-xs">{repoName}</Text>
+                <Text className="text-muted-foreground font-mono text-xs">{repoName}</Text>
               ) : null}
             </View>
           </View>
