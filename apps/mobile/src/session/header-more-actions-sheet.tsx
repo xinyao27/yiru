@@ -1,16 +1,26 @@
 import { MobileAgentSessionHistoryIcon } from '~/agent-history/icon'
-import { ArrowSquareRight, Files, GitMerge, ListChecks } from '~/components/uniwind-icons'
+import {
+  ArrowSquareRight,
+  Chat,
+  Files,
+  GitMerge,
+  ListChecks,
+  TerminalWindow
+} from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 
 import { ActionSheetModal } from '../components/action-sheet-modal'
 
 type Props = {
   visible: boolean
+  showChatTerminalSwitch: boolean
+  isChatView: boolean
   showQuickCommands: boolean
   showFileExplorer: boolean
   showSourceControl: boolean
   showAgentSessionHistory: boolean
   showChecks: boolean
+  onToggleChatTerminal: () => void
   onOpenQuickCommands: () => void
   onOpenFileExplorer: () => void
   onOpenSourceControl: () => void
@@ -21,11 +31,14 @@ type Props = {
 
 export function MobileSessionHeaderMoreActionsSheet({
   visible,
+  showChatTerminalSwitch,
+  isChatView,
   showQuickCommands,
   showFileExplorer,
   showSourceControl,
   showAgentSessionHistory,
   showChecks,
+  onToggleChatTerminal,
   onOpenQuickCommands,
   onOpenFileExplorer,
   onOpenSourceControl,
@@ -37,6 +50,25 @@ export function MobileSessionHeaderMoreActionsSheet({
     <ActionSheetModal
       visible={visible}
       actions={[
+        ...(showChatTerminalSwitch
+          ? [
+              {
+                id: 'toggle-terminal-chat-view',
+                label: isChatView
+                  ? translate(
+                      'mobile.session.terminalActions.switchToTerminalView',
+                      'Switch to terminal view'
+                    )
+                  : translate(
+                      'mobile.session.terminalActions.switchToChatView',
+                      'Switch to chat view'
+                    ),
+                icon: isChatView ? TerminalWindow : Chat,
+                dismiss: 'immediate' as const,
+                onPress: onToggleChatTerminal
+              }
+            ]
+          : []),
         ...(showQuickCommands
           ? [
               {

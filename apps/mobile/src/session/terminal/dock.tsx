@@ -35,7 +35,6 @@ type MobileTerminalDockProps = {
   onChangeLiveInput: (text: string) => void
   onCustomKeyLongPress: (key: MobileTerminalDockProps['customKeys'][number]) => void
   onKeyPressLiveInput: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void
-  onOpenChat: (() => void) | null
   onPaste: () => void
   onRepeatStart: (input: TerminalAccessoryInput) => void
   onRepeatStop: () => void
@@ -68,7 +67,6 @@ export function MobileTerminalDock({
   onChangeLiveInput,
   onCustomKeyLongPress,
   onKeyPressLiveInput,
-  onOpenChat,
   onPaste,
   onRepeatStart,
   onRepeatStop,
@@ -115,7 +113,6 @@ export function MobileTerminalDock({
         onAttachImage={onAttachImage}
         onCustomKeyLongPress={onCustomKeyLongPress}
         onToggleCommandInput={toggleCommandInput}
-        onOpenChat={onOpenChat}
         onPaste={onPaste}
         onRepeatStart={onRepeatStart}
         onRepeatStop={onRepeatStop}

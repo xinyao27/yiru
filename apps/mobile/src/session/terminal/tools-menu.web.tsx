@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native'
 
 import { ActionSheetModal, type ActionSheetAction } from '~/components/action-sheet-modal'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { Camera, Chat, Clipboard, Folder, ImageSquare, Plus } from '~/components/uniwind-icons'
+import { Camera, Clipboard, Folder, ImageSquare, Plus } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 
 import type { MobileImageSource } from '../image-source-picker'
@@ -100,16 +100,6 @@ export function MobileTerminalToolsMenu(props: MobileTerminalToolsMenuProps): Re
       disabled: !props.canSend || props.isAttaching,
       dismiss: 'immediate',
       onPress: () => setAttachmentsVisible(true)
-    })
-  }
-
-  if (props.onOpenChat) {
-    actions.push({
-      id: 'chat',
-      label: translate('mobile.terminal.openChat', 'Open chat'),
-      icon: Chat,
-      dismiss: 'immediate',
-      onPress: props.onOpenChat
     })
   }
 

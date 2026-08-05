@@ -12,11 +12,10 @@ export type MobileTerminalToolsMenuProps = {
   canSend: boolean
   isAttaching: boolean
   onAttachImage: ((source: MobileImageSource) => void) | null
-  onOpenChat: (() => void) | null
   onPaste: () => void
 }
 
-type TerminalToolsActionId = 'attachment' | 'camera' | 'chat' | 'files' | 'library' | 'paste'
+type TerminalToolsActionId = 'attachment' | 'camera' | 'files' | 'library' | 'paste'
 
 function getAttachmentSource(actionId: string): MobileImageSource | null {
   if (actionId === 'camera' || actionId === 'library' || actionId === 'files') {
@@ -40,8 +39,7 @@ function buildMenuActions({
   canPaste,
   canSend,
   isAttaching,
-  onAttachImage,
-  onOpenChat
+  onAttachImage
 }: MobileTerminalToolsMenuProps): MenuAction[] {
   const actions: MenuAction[] = [
     {
@@ -75,14 +73,6 @@ function buildMenuActions({
           title: translate('mobile.session.attachments.files', 'Files')
         }
       ]
-    })
-  }
-
-  if (onOpenChat) {
-    actions.push({
-      id: 'chat',
-      image: 'bubble.left',
-      title: translate('mobile.terminal.openChat', 'Open chat')
     })
   }
 
@@ -133,10 +123,6 @@ export function MobileTerminalToolsMenu(props: MobileTerminalToolsMenuProps): Re
           return
         }
         if (actionId === 'attachment') {
-          return
-        }
-        if (actionId === 'chat') {
-          props.onOpenChat?.()
           return
         }
         const source = getAttachmentSource(actionId)

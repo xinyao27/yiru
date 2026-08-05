@@ -26,7 +26,6 @@ export type MobileTerminalAccessoryBarProps = {
   onAccessoryInput: (input: TerminalAccessoryInput) => void
   onCustomKeyLongPress: (key: CustomKey) => void
   onToggleCommandInput: () => void
-  onOpenChat: (() => void) | null
   onPaste: () => void
   onRepeatStart: (input: TerminalAccessoryInput) => void
   onRepeatStop: () => void
@@ -49,7 +48,6 @@ export function MobileTerminalAccessoryBar({
   onAttachImage,
   onCustomKeyLongPress,
   onToggleCommandInput,
-  onOpenChat,
   onPaste,
   onRepeatStart,
   onRepeatStop,
@@ -103,7 +101,6 @@ export function MobileTerminalAccessoryBar({
             canSend={canSend}
             isAttaching={isAttaching}
             onAttachImage={onAttachImage}
-            onOpenChat={onOpenChat}
             onPaste={onPaste}
           />
         </View>

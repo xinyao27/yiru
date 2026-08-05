@@ -2,7 +2,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import type { AccountsSnapshot } from '~/components/account-usage'
 import { MobileContentSection } from '~/components/content-section'
-import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
   ClockCounterClockwise,
   Monitor,
@@ -15,6 +14,7 @@ import {
 import type { ConnectionState, HostProfile } from '~/transport/types'
 
 import { translate } from '../i18n/translate'
+import { HomePrimaryActionButton } from './primary-action-button'
 import { getUsageHosts, HomeUsageSection } from './usage-section'
 
 type HomeWorktreeInfo = {
@@ -134,18 +134,15 @@ export function HomeOverview({
           className="self-center"
           style={isWideLayout ? { maxWidth: contentMaxWidth, width: '100%' } : undefined}
         >
-          <MobileGlassPressable
-            accessibilityLabel={actionLabel}
+          <HomePrimaryActionButton
             className="self-stretch rounded-full"
             containerClassName="self-stretch"
             contentClassName="min-h-11 flex-row items-center justify-center gap-2 rounded-full px-5"
+            icon={ActionIcon}
+            label={actionLabel}
             onPress={actionPress}
-            size="large"
-            tintColorClassName="accent-secondary"
-          >
-            <ActionIcon size={20} colorClassName="accent-foreground" />
-            <Text className="text-foreground text-base">{actionLabel}</Text>
-          </MobileGlassPressable>
+            systemImage={primaryConnectedHost ? 'plus' : 'desktopcomputer'}
+          />
         </View>
       </View>
     </View>

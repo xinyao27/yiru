@@ -587,7 +587,7 @@ export default function SessionScreen(): React.JSX.Element {
     onSendError: showNativeChatSendError
   })
   const { toggleTabChatView, showNativeChat, showNativeChatRef } = nativeChatController
-  const showTerminalChatAction =
+  const showChatTerminalAction =
     activeSessionTab?.type === 'terminal' &&
     canShowMobileNativeChat(activeSessionTab, nativeChatTranscriptIsLocalReadable)
 
@@ -2952,6 +2952,7 @@ export default function SessionScreen(): React.JSX.Element {
     hostedChecksSupported: prIsGithubRepo
   })
   const showHeaderMoreButton =
+    showChatTerminalAction ||
     showQuickCommandsAction ||
     showFileExplorerAction ||
     showSourceControlAction ||
@@ -2969,6 +2970,11 @@ export default function SessionScreen(): React.JSX.Element {
       ),
       1600
     )
+  }
+  const toggleChatTerminalView = (): void => {
+    if (activeSessionTabId) {
+      toggleTabChatView(activeSessionTabId)
+    }
   }
   const useNativeSessionHeader = shouldUseNativeSessionHeader(isWideLayout)
   const hasDirtyMarkdownDrafts = getDirtyMarkdownDrafts().length > 0
@@ -3008,6 +3014,21 @@ export default function SessionScreen(): React.JSX.Element {
               icon="ellipsis"
               separateBackground
             >
+              <Stack.Toolbar.MenuAction
+                hidden={!showChatTerminalAction}
+                icon={showNativeChat ? 'terminal' : 'bubble.left'}
+                onPress={toggleChatTerminalView}
+              >
+                {showNativeChat
+                  ? translate(
+                      'mobile.session.terminalActions.switchToTerminalView',
+                      'Switch to terminal view'
+                    )
+                  : translate(
+                      'mobile.session.terminalActions.switchToChatView',
+                      'Switch to chat view'
+                    )}
+              </Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction
                 hidden={!showQuickCommandsAction}
                 icon="arrow.right.square"
@@ -3344,11 +3365,6 @@ export default function SessionScreen(): React.JSX.Element {
                   setDeleteKeyTarget(key)
                 }}
                 onKeyPressLiveInput={handleLiveInputKeyPress}
-                onOpenChat={
-                  showTerminalChatAction && activeSessionTabId
-                    ? () => toggleTabChatView(activeSessionTabId)
-                    : null
-                }
                 onPaste={() => void handlePaste()}
                 onRepeatStart={startAccessoryRepeat}
                 onRepeatStop={stopAccessoryRepeat}
@@ -3381,11 +3397,14 @@ export default function SessionScreen(): React.JSX.Element {
 
       <MobileSessionHeaderMoreActionsSheet
         visible={!useNativeSessionHeader && showHeaderMoreActions}
+        showChatTerminalSwitch={showChatTerminalAction}
+        isChatView={showNativeChat}
         showQuickCommands={showQuickCommandsAction}
         showFileExplorer={showFileExplorerAction}
         showSourceControl={showSourceControlAction}
         showAgentSessionHistory={showAgentSessionHistoryAction}
         showChecks={showChecksAction}
+        onToggleChatTerminal={toggleChatTerminalView}
         onOpenQuickCommands={openQuickCommands}
         onOpenFileExplorer={() => handlePanelTap('files')}
         onOpenSourceControl={() => handlePanelTap('sourceControl')}
