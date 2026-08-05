@@ -152,7 +152,6 @@ import {
   TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
 } from '~/terminal/gesture-input'
-import { dismissTerminalKeyboard } from '~/terminal/keyboard-dismiss'
 import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
 import { getTerminalLiveAccessoryRawSendTarget } from '~/terminal/live/accessory-raw-send-target'
 import {
@@ -632,9 +631,9 @@ export default function SessionScreen(): React.JSX.Element {
     unsubscribe: unsubscribeTerminal
   })
 
-  // Why: toggles between phone and desktop mode via server RPC. The server
-  // handles the actual resize and emits a 'resized' event on the existing
-  // subscription stream — no client-side state tracking needed.
+  // Why: update the affordance immediately, then reconcile it with the server
+  // response and the existing resize stream. Waiting only for the stream makes
+  // a successful toggle look inert when no resize is needed.
   const toggleInFlightRef = useRef<Set<string>>(new Set())
   const toggleDisplayMode = useCallback(
     async (handle: string) => {
@@ -645,13 +644,26 @@ export default function SessionScreen(): React.JSX.Element {
         return
       }
       const current = terminalModes.get(handle) ?? 'auto'
+      const hadCurrentMode = terminalModes.has(handle)
       // Why: 'phone' on the wire is an observation ("currently phone-fitted"),
       // not a setting. The toggle only ever requests 'auto' or 'desktop'.
       const next: 'auto' | 'desktop' =
         current === 'auto' || current === 'phone' ? 'desktop' : 'auto'
       toggleInFlightRef.current.add(handle)
+      setTerminalModes((previous) => new Map(previous).set(handle, next))
+      const restorePreviousMode = (): void => {
+        setTerminalModes((previous) => {
+          const restored = new Map(previous)
+          if (hadCurrentMode) {
+            restored.set(handle, current)
+          } else {
+            restored.delete(handle)
+          }
+          return restored
+        })
+      }
       try {
-        await client.sendRequest('terminal.setDisplayMode', {
+        const response = await client.sendRequest('terminal.setDisplayMode', {
           terminal: handle,
           mode: next,
           // Why: presence-lock take-floor signal — requesting 'auto' is the
@@ -664,8 +676,19 @@ export default function SessionScreen(): React.JSX.Element {
           // server's stored viewport is null and auto toggles no-op.
           ...(viewportRef.current && next === 'auto' ? { viewport: viewportRef.current } : {})
         })
+        if (!response.ok) {
+          restorePreviousMode()
+          return
+        }
+        const responseMode =
+          typeof response.result === 'object' && response.result !== null
+            ? Reflect.get(response.result, 'mode')
+            : undefined
+        if (responseMode === 'auto' || responseMode === 'phone' || responseMode === 'desktop') {
+          setTerminalModes((previous) => new Map(previous).set(handle, responseMode))
+        }
       } catch {
-        // Mode change failed — server state unchanged, UI stays in sync.
+        restorePreviousMode()
       } finally {
         toggleInFlightRef.current.delete(handle)
       }
@@ -1681,27 +1704,6 @@ export default function SessionScreen(): React.JSX.Element {
       scheduleDelayedAction
     ]
   )
-
-  const dismissSoftwareKeyboard = useCallback(() => {
-    dismissTerminalKeyboard({
-      clearPendingLiveInputFocus: () => clearTerminalLiveInputFocusTimer(liveInputFocusTimerRef),
-      commandInput: commandInputRef.current,
-      dismissKeyboard: () => Keyboard.dismiss(),
-      liveInput: liveInputRef.current
-    })
-  }, [])
-  const focusTerminalKeyboard = useCallback(() => {
-    if (keyboardHeight > 0) {
-      return dismissSoftwareKeyboard()
-    }
-    if (!canSend) {
-      return
-    }
-    if (liveInputEnabled) {
-      return focusLiveInput()
-    }
-    commandInputRef.current?.focus()
-  }, [canSend, dismissSoftwareKeyboard, focusLiveInput, keyboardHeight, liveInputEnabled])
 
   const handleTerminalTap = useCallback(
     (handle: string) => {
@@ -3328,14 +3330,12 @@ export default function SessionScreen(): React.JSX.Element {
                 customKeys={customKeys}
                 input={input}
                 isAttaching={isAttaching}
-                isKeyboardVisible={keyboardLift > 0}
                 isPhoneDisplayMode={isPhoneMode(activeHandle)}
                 keyboardOffset={terminalComposerKeyboardOffset}
                 liveInputCapture={liveInputCapture}
                 liveInputEnabled={liveInputEnabled}
                 liveInputRef={liveInputRef}
                 onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
-                onAddCustomKey={() => setShowCustomKeyModal(true)}
                 onAttachImage={attachImage}
                 onChangeCommandText={setInput}
                 onChangeLiveInput={handleTerminalLiveInputChange}
@@ -3343,14 +3343,12 @@ export default function SessionScreen(): React.JSX.Element {
                   triggerMediumImpact()
                   setDeleteKeyTarget(key)
                 }}
-                onKeyboardPress={focusTerminalKeyboard}
                 onKeyPressLiveInput={handleLiveInputKeyPress}
                 onOpenChat={
                   showTerminalChatAction && activeSessionTabId
                     ? () => toggleTabChatView(activeSessionTabId)
                     : null
                 }
-                onOpenHistory={showAgentSessionHistoryAction ? openAgentSessionHistory : null}
                 onPaste={() => void handlePaste()}
                 onRepeatStart={startAccessoryRepeat}
                 onRepeatStop={stopAccessoryRepeat}

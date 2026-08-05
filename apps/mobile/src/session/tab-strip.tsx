@@ -56,7 +56,7 @@ export function MobileSessionTabStrip({
   }, [activeTabId, scrollActiveTabIntoView])
 
   return (
-    <View className="mx-2 my-1 flex-row items-center gap-2 py-1">
+    <View className="mx-3 flex-row items-center gap-2">
       <View className="min-h-11 min-w-0 flex-1 overflow-hidden">
         <ScrollView
           ref={scrollRef}

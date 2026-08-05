@@ -1,5 +1,5 @@
 import { cn } from 'cnfast'
-import type { RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { Platform, Pressable, TextInput, View } from 'react-native'
 
 import { MobileGlassSurface } from '~/components/glass/surface'
@@ -7,16 +7,12 @@ import { ArrowUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 import { getTerminalCommandKeyboardType } from '~/terminal/keyboard-type'
 
-import { MobileAttachmentMenu } from '../attachment-menu'
-import type { MobileImageSource } from '../image-source-picker'
-
 export type MobileTerminalInputBarProps = {
   autocompleteEnabled: boolean
   canSend: boolean
   commandInputRef: RefObject<TextInput | null>
+  commandInputFocusRequest: number
   input: string
-  isAttaching: boolean
-  onAttachImage: (source: MobileImageSource) => void
   onChangeText: (text: string) => void
   onSend: () => void
 }
@@ -25,19 +21,20 @@ export function MobileTerminalInputBar({
   autocompleteEnabled,
   canSend,
   commandInputRef,
+  commandInputFocusRequest,
   input,
-  isAttaching,
-  onAttachImage,
   onChangeText,
   onSend
 }: MobileTerminalInputBarProps): React.JSX.Element {
+  useEffect(() => {
+    if (commandInputFocusRequest === 0) {
+      return
+    }
+    requestAnimationFrame(() => commandInputRef.current?.focus())
+  }, [commandInputFocusRequest, commandInputRef])
+
   return (
     <View className="min-h-14 flex-row items-center gap-2 py-1">
-      <MobileAttachmentMenu
-        disabled={!canSend || isAttaching}
-        pending={isAttaching}
-        onSelect={onAttachImage}
-      />
       <MobileGlassSurface
         className="h-11 flex-1 overflow-hidden rounded-full"
         isFunctional

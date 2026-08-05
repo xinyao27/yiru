@@ -1,4 +1,11 @@
-import { GlassEffectContainer, Host, HStack, TextField, useNativeState } from '@expo/ui/swift-ui'
+import {
+  GlassEffectContainer,
+  Host,
+  HStack,
+  TextField,
+  type TextFieldRef,
+  useNativeState
+} from '@expo/ui/swift-ui'
 import {
   autocorrectionDisabled,
   disabled as disabledModifier,
@@ -16,18 +23,17 @@ import { MobileSwiftUiGlassInputShell } from '~/components/glass/swift-ui-input-
 import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
 
-import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileTerminalInputBarProps } from './input-bar'
 
 export function MobileTerminalInputBar({
   autocompleteEnabled,
   canSend,
+  commandInputFocusRequest,
   input,
-  isAttaching,
-  onAttachImage,
   onChangeText,
   onSend
 }: MobileTerminalInputBarProps): React.JSX.Element {
+  const inputRef = useRef<TextFieldRef>(null)
   const nativeText = useNativeState(input)
   const nativeValueRef = useRef(input)
   const { theme } = useUniwind()
@@ -40,6 +46,13 @@ export function MobileTerminalInputBar({
       nativeText.set(input)
     }
   }, [input, nativeText])
+
+  useEffect(() => {
+    if (commandInputFocusRequest === 0) {
+      return
+    }
+    void inputRef.current?.focus()
+  }, [commandInputFocusRequest])
 
   const fullWidthModifiers = useMemo(() => [frame({ maxWidth: Infinity })], [])
   const inputModifiers = useMemo(
@@ -64,13 +77,9 @@ export function MobileTerminalInputBar({
     >
       <GlassEffectContainer modifiers={fullWidthModifiers} spacing={8}>
         <HStack alignment="center" spacing={8} modifiers={fullWidthModifiers}>
-          <MobileAttachmentMenu
-            disabled={!canSend || isAttaching}
-            pending={isAttaching}
-            onSelect={onAttachImage}
-          />
           <MobileSwiftUiGlassInputShell hasTrailingAction>
             <TextField
+              ref={inputRef}
               placeholder={translate(
                 'mobile.session.terminal.commandPlaceholder',
                 'Type a command…'

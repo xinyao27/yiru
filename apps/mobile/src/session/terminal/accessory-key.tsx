@@ -1,41 +1,22 @@
-import type { PressableProps } from 'react-native'
 import { Text, View } from 'react-native'
 
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import {
-  ArrowElbowDownRight as LiveInputIcon,
-  ArrowsOutCardinal,
   CaretDown as ChevronDown,
-  Chat,
-  Clipboard,
-  ClockCounterClockwise,
+  DeviceMobile,
   Keyboard as KeyboardIcon,
-  Plus
+  Laptop
 } from '~/components/uniwind-icons'
 
-export type MobileTerminalAccessoryIcon =
-  | 'add'
-  | 'chat'
-  | 'clipboard'
-  | 'dismiss-keyboard'
-  | 'display'
-  | 'history'
-  | 'keyboard'
-  | 'live-input'
+import type {
+  MobileTerminalAccessoryIcon,
+  MobileTerminalAccessoryKeyProps
+} from './accessory-key-props'
 
-type MobileTerminalAccessoryKeyContent =
-  | { icon: MobileTerminalAccessoryIcon; label?: never }
-  | { icon?: never; label: string }
-
-export type MobileTerminalAccessoryKeyProps = Omit<
-  PressableProps,
-  'children' | 'disabled' | 'onPress'
-> &
-  MobileTerminalAccessoryKeyContent & {
-    disabled?: boolean
-    isSelected?: boolean
-    onPress: NonNullable<PressableProps['onPress']>
-  }
+export type {
+  MobileTerminalAccessoryIcon,
+  MobileTerminalAccessoryKeyProps
+} from './accessory-key-props'
 
 function MobileTerminalAccessoryIconView({
   icon
@@ -43,12 +24,6 @@ function MobileTerminalAccessoryIconView({
   icon: MobileTerminalAccessoryIcon
 }): React.JSX.Element {
   switch (icon) {
-    case 'add':
-      return <Plus size={16} colorClassName="accent-muted-foreground" />
-    case 'chat':
-      return <Chat size={20} colorClassName="accent-muted-foreground" />
-    case 'clipboard':
-      return <Clipboard size={20} colorClassName="accent-muted-foreground" />
     case 'dismiss-keyboard':
       return (
         <View className="relative h-5 w-5 items-center justify-start">
@@ -58,14 +33,12 @@ function MobileTerminalAccessoryIconView({
           </View>
         </View>
       )
-    case 'display':
-      return <ArrowsOutCardinal size={20} colorClassName="accent-muted-foreground" />
-    case 'history':
-      return <ClockCounterClockwise size={20} colorClassName="accent-muted-foreground" />
+    case 'device-mobile':
+      return <DeviceMobile size={20} colorClassName="accent-muted-foreground" />
     case 'keyboard':
       return <KeyboardIcon size={20} colorClassName="accent-muted-foreground" />
-    case 'live-input':
-      return <LiveInputIcon size={20} colorClassName="accent-muted-foreground" />
+    case 'laptop':
+      return <Laptop size={20} colorClassName="accent-muted-foreground" />
   }
 }
 
@@ -73,6 +46,7 @@ export function MobileTerminalAccessoryKey({
   accessibilityState,
   disabled = false,
   icon,
+  isCircular = false,
   isSelected,
   label,
   onPress,
@@ -87,16 +61,21 @@ export function MobileTerminalAccessoryKey({
         disabled,
         ...(isSelected === undefined ? {} : { selected: isSelected })
       }}
-      contentClassName="min-h-9 min-w-9 items-center justify-center px-3"
+      className={
+        isCircular ? 'bg-card h-9 w-9 overflow-hidden rounded-full' : 'bg-card rounded-full'
+      }
+      contentClassName={
+        isCircular
+          ? 'h-9 w-9 items-center justify-center rounded-full px-0'
+          : 'min-h-9 min-w-9 items-center justify-center rounded-full px-3'
+      }
       disabled={disabled}
       fallbackClassName={isSelected ? 'border-transparent' : 'border-transparent bg-secondary'}
-      isSelected={isSelected === true}
       onPress={onPress}
       size="regular"
-      tintColorClassName="accent-secondary"
     >
       {icon ? <MobileTerminalAccessoryIconView icon={icon} /> : null}
-      {label ? <Text className="text-muted-foreground font-mono text-sm">{label}</Text> : null}
+      {label ? <Text className="text-foreground font-mono text-sm">{label}</Text> : null}
     </MobileGlassPressable>
   )
 }

@@ -173,9 +173,12 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
       case 'worktree.set':
       case 'session.tabs.activate':
       case 'terminal.focus':
-      case 'terminal.setDisplayMode':
       case 'terminal.clearBuffer':
         return success({})
+      case 'terminal.setDisplayMode': {
+        const mode = requestParameter(params, 'mode')
+        return success({ mode: mode === 'desktop' ? 'desktop' : 'auto' })
+      }
       default:
         return failure(method)
     }
