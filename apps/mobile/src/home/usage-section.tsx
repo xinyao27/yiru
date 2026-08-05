@@ -1,14 +1,19 @@
+import { useEffect, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 
 import {
-  getActiveProviderRateLimits,
-  getUsageBarState,
-  hasActiveProviderUsage,
+  getProviderRateLimits,
+  getProviderResetLabel,
+  getProviderUsageStatusLabel,
+  getProviderUsageWindows,
+  formatUsagePlanLabel,
+  getUsageProviderLabel,
   hasRenderableUsage,
+  USAGE_PROVIDER_KEYS,
   UsageBar,
+  UsageProviderMark,
   type AccountsSnapshot
 } from '~/components/account-usage'
-import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
 import { MobileContentSection } from '~/components/content-section'
 import type { ConnectionState, HostProfile } from '~/transport/types'
 
@@ -32,12 +37,6 @@ export type HomeUsageSectionProps = {
   onRequestRemove: (host: HostProfile) => void
 }
 
-const USAGE_PROVIDERS = ['claude', 'codex'] as const
-const USAGE_WINDOWS = [
-  { key: 'session', label: translate('mobile.home.usage.fiveHours', '5h') },
-  { key: 'weekly', label: translate('mobile.home.usage.week', 'wk') }
-] as const
-
 export function HomeUsageSection({
   usageHosts,
   hostStates,
@@ -49,6 +48,13 @@ export function HomeUsageSection({
   onReconnect,
   onRequestRemove
 }: HomeUsageSectionProps): React.JSX.Element | null {
+  // Why: reset copy is time-sensitive even when the host has not pushed a new snapshot.
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
   if (usageHosts.length === 0) {
     return null
   }
@@ -88,21 +94,19 @@ export function HomeUsageSection({
                         {host.name}
                       </Text>
                     ) : null}
-                    {USAGE_PROVIDERS.map((provider) => {
-                      const accounts =
-                        provider === 'claude' ? snapshot.claude.accounts : snapshot.codex.accounts
-                      const limits = getActiveProviderRateLimits(snapshot, provider)
-                      if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
+                    {USAGE_PROVIDER_KEYS.map((provider) => {
+                      const limits = getProviderRateLimits(snapshot, provider)
+                      if (!hasRenderableUsage(snapshot, provider)) {
                         return null
                       }
+                      const usageWindows = getProviderUsageWindows(limits, 'compact')
+                      const resetText =
+                        usageWindows.length > 0 ? getProviderResetLabel(limits, now) : null
+                      const plan = formatUsagePlanLabel(limits?.planType)
                       return (
                         <View key={provider} className="flex-row items-start gap-2">
                           <View className="h-5 w-5 items-center justify-center">
-                            {provider === 'claude' ? (
-                              <ClaudeIcon size={16} />
-                            ) : (
-                              <OpenAIIcon size={16} colorClassName="accent-foreground" />
-                            )}
+                            <UsageProviderMark provider={provider} />
                           </View>
                           <View className="min-w-0 flex-1 gap-1">
                             <View className="flex-row items-center gap-2">
@@ -112,21 +116,37 @@ export function HomeUsageSection({
                               >
                                 {getUsageProviderLabel(provider)}
                               </Text>
+                              {plan ? (
+                                <Text
+                                  className="text-muted-foreground min-w-0 flex-1 text-xs"
+                                  numberOfLines={1}
+                                >
+                                  · {plan}
+                                </Text>
+                              ) : null}
+                              {resetText ? (
+                                <Text className="text-muted-foreground shrink-0 text-xs">
+                                  {resetText}
+                                </Text>
+                              ) : null}
                             </View>
-                            <View className="min-w-0 flex-row gap-3">
-                              {USAGE_WINDOWS.map(({ key, label }) => {
-                                const state = getUsageBarState(limits, key)
-                                return (
+                            {usageWindows.length > 0 ? (
+                              <View className="min-w-0 flex-row flex-wrap gap-x-3 gap-y-1">
+                                {usageWindows.map((usageWindow) => (
                                   <UsageBar
-                                    key={key}
-                                    label={label}
-                                    usedPercent={state.usedPercent}
-                                    unavailable={state.unavailable}
-                                    loading={state.loading}
+                                    key={usageWindow.key}
+                                    className="min-w-[116px]"
+                                    label={usageWindow.label}
+                                    usedPercent={usageWindow.window.usedPercent}
+                                    unavailable={false}
                                   />
-                                )
-                              })}
-                            </View>
+                                ))}
+                              </View>
+                            ) : (
+                              <Text className="text-muted-foreground text-xs">
+                                {getProviderUsageStatusLabel(limits)}
+                              </Text>
+                            )}
                           </View>
                         </View>
                       )
@@ -140,12 +160,6 @@ export function HomeUsageSection({
       </MobileContentSection>
     </View>
   )
-}
-
-function getUsageProviderLabel(provider: (typeof USAGE_PROVIDERS)[number]): string {
-  return provider === 'claude'
-    ? translate('mobile.home.usageProvider.claude', 'Claude')
-    : translate('mobile.home.usageProvider.codex', 'Codex')
 }
 
 export function getUsageHosts(
@@ -162,7 +176,7 @@ export function getUsageHosts(
     if (!snapshot) {
       continue
     }
-    if (hasRenderableUsage(snapshot, 'claude') || hasRenderableUsage(snapshot, 'codex')) {
+    if (USAGE_PROVIDER_KEYS.some((provider) => hasRenderableUsage(snapshot, provider))) {
       usageHosts.push({ host, snapshot })
     }
   }
