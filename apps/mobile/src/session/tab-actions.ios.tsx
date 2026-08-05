@@ -17,7 +17,7 @@ export function MobileSessionTabActions({
   return (
     <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
       <GlassEffectContainer spacing={8}>
-        <HStack spacing={8}>
+        <HStack spacing={0}>
           <MobileSwiftUiGlassCircleButton
             disabled={disabled}
             label={translate('mobile.session.newTab', 'New tab')}

@@ -12,7 +12,7 @@ export function MobileSessionTabActions({
   showQuickCommands
 }: MobileSessionTabActionsProps): React.JSX.Element {
   return (
-    <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
+    <MobileGlassGroup className="flex-row items-center" spacing={8}>
       <MobileGlassIconButton
         accessibilityLabel={translate('mobile.session.newTab', 'New tab')}
         disabled={disabled}
