@@ -18,6 +18,7 @@ export type ProviderRateLimits = {
   provider: 'claude' | 'codex' | 'gemini' | 'opencode-go' | 'kimi'
   session: RateLimitWindow | null
   weekly: RateLimitWindow | null
+  fableWeekly?: RateLimitWindow | null
   monthly?: RateLimitWindow | null
   buckets?: (RateLimitWindow & { name: string })[]
   updatedAt: number
@@ -94,6 +95,7 @@ export function hasActiveProviderUsage(limits: ProviderRateLimits | null): boole
   if (
     limits.session != null ||
     limits.weekly != null ||
+    limits.fableWeekly != null ||
     limits.monthly != null ||
     (limits.buckets && limits.buckets.length > 0)
   ) {
@@ -106,7 +108,7 @@ export function hasActiveProviderUsage(limits: ProviderRateLimits | null): boole
 // is per window rather than per provider status.
 export function getUsageBarState(
   limits: ProviderRateLimits | null,
-  windowKey: 'session' | 'weekly',
+  windowKey: 'session' | 'weekly' | 'fableWeekly',
   isFetchingOverride?: boolean
 ): UsageBarState {
   const window = limits?.[windowKey] ?? null
@@ -138,6 +140,23 @@ export function getWindowResetLabel(
     return null
   }
   return formatResetCountdown(resetsAt - now)
+}
+
+export function getProviderResetLabel(
+  limits: ProviderRateLimits | null,
+  now: number
+): string | null {
+  const resets = [
+    limits?.session?.resetsAt,
+    limits?.weekly?.resetsAt,
+    limits?.fableWeekly?.resetsAt,
+    limits?.monthly?.resetsAt,
+    ...(limits?.buckets ?? []).map((bucket) => bucket.resetsAt)
+  ].filter((reset): reset is number => typeof reset === 'number' && Number.isFinite(reset))
+  if (resets.length === 0) {
+    return null
+  }
+  return formatResetCountdown(Math.min(...resets) - now)
 }
 
 // Why: the usage UI must render for the system-default login, not only for

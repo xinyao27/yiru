@@ -16,6 +16,7 @@ export type {
 export {
   getActiveProviderRateLimits,
   getInactiveProviderUsage,
+  getProviderResetLabel,
   getUsageBarState,
   getWindowResetLabel,
   hasActiveProviderUsage,
@@ -52,7 +53,9 @@ export function UsageBar({
   return (
     <View className="flex-1 gap-1">
       <View className="flex-row items-center gap-1">
-        <Text className="text-muted-foreground w-6">{label}</Text>
+        <Text className="text-muted-foreground w-8 shrink-0" numberOfLines={1}>
+          {label}
+        </Text>
         <View className="bg-secondary h-1.5 flex-1 overflow-hidden rounded-full">
           <View
             className={cn('h-full', unavailable ? 'bg-muted' : barColorClassName)}
@@ -66,7 +69,7 @@ export function UsageBar({
             className="w-9"
           />
         ) : (
-          <Text className="text-muted-foreground w-9 text-right">
+          <Text className="text-muted-foreground w-8 shrink-0 text-right" numberOfLines={1}>
             {unavailable || used == null ? '—' : `${used}%`}
           </Text>
         )}
