@@ -1,29 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { cn } from 'cnfast'
-import { Link, Stack, useRouter, useFocusEffect } from 'expo-router'
+import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
-import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
+import { View, Text, Alert, Platform } from 'react-native'
 
 import { loadHomeSnapshot, saveHomeSnapshot } from '~/cache/home-snapshot-cache'
 import { setCachedWorktrees, getCachedWorktrees } from '~/cache/worktree-cache'
-import {
-  type AccountsSnapshot,
-  type ProviderKey,
-  getActiveProviderRateLimits,
-  getUsageBarState,
-  hasActiveProviderUsage,
-  hasRenderableUsage,
-  UsageBar
-} from '~/components/account-usage'
-import { ClaudeIcon, OpenAIIcon } from '~/components/agent-icons'
-import { MobileContentSection } from '~/components/content-section'
+import type { AccountsSnapshot } from '~/components/account-usage'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
-import { CaretRight as ChevronRight, Terminal } from '~/components/uniwind-icons'
 import { HostActionsDrawer } from '~/home/host-actions-drawer'
-import { MobileHostCard } from '~/home/host-card'
-import { HostMenu } from '~/home/host-menu'
+import { HomeOverview } from '~/home/overview'
 import { refreshHomeStatsForHost } from '~/home/stats-refresh'
 import {
   getHomeStatsByHost,
@@ -37,13 +25,11 @@ import { subscribeToDesktopNotifications } from '~/notifications/notifications'
 import { triggerMediumImpact } from '~/platform/haptics'
 import { useAllHostClients } from '~/transport/all-host-clients'
 import { useCloseHost, useForceReconnect, usePrimeHosts } from '~/transport/client-context'
-import { classifyConnection } from '~/transport/connection-health'
 import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
 import type { ConnectionState, HostProfile } from '~/transport/types'
 import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
-import { repoColor } from '~/workspace/repo-color'
 import { pickResumeWorktree } from '~/worktree/resume-pick'
 
 type WorktreeSummary = {
@@ -193,7 +179,6 @@ export default function HomeScreen(): React.JSX.Element {
   const [actionTarget, setActionTarget] = useState<HostProfile | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<HostProfile | null>(null)
   const [hostStates, setHostStates] = useState<Record<string, ConnectionState>>({})
-  const [hostAttempts, setHostAttempts] = useState<Record<string, number>>({})
   const [hostLastConnected, setHostLastConnected] = useState<Record<string, number | null>>({})
   const statsByHost = useSyncExternalStore(
     subscribeHomeStatsByHost,
@@ -212,10 +197,6 @@ export default function HomeScreen(): React.JSX.Element {
   // docs/mobile-shared-client-per-host.md.
   const hostIds = useMemo(() => hosts.map((h) => h.id), [hosts])
   const allClients = useAllHostClients(hostIds)
-  const hostPaths = useMemo(
-    () => Object.fromEntries(allClients.map(({ hostId, path }) => [hostId, path])),
-    [allClients]
-  )
   const closeHostClient = useCloseHost()
   const forceReconnectHost = useForceReconnect()
   const primeHosts = usePrimeHosts()
@@ -341,18 +322,6 @@ export default function HomeScreen(): React.JSX.Element {
   // Why: mirror per-host connection state into hostStates so existing
   // render code (status dots, connecting indicators) keeps working.
   useEffect(() => {
-    setHostAttempts((prev) => {
-      const next: Record<string, number> = { ...prev }
-      let changed = false
-      for (const entry of allClients) {
-        const a = entry.client.getReconnectAttempt()
-        if (next[entry.hostId] !== a) {
-          next[entry.hostId] = a
-          changed = true
-        }
-      }
-      return changed ? next : prev
-    })
     setHostLastConnected((prev) => {
       const next: Record<string, number | null> = { ...prev }
       let changed = false
@@ -519,29 +488,6 @@ export default function HomeScreen(): React.JSX.Element {
     return null
   }, [sortedHosts, hostStates, worktreeInfo, lastVisited])
 
-  // Why: only show the Account usage section for hosts that are currently
-  // connected. Showing stale cached usage for a disconnected host implies
-  // live data; better to hide until the host reconnects and we can refresh.
-  const accountsHosts = useMemo(() => {
-    const items: { host: HostProfile; snapshot: AccountsSnapshot }[] = []
-    for (const host of sortedHosts) {
-      if (hostStates[host.id] !== 'connected') {
-        continue
-      }
-      const snap = accountsByHost[host.id]
-      if (!snap) {
-        continue
-      }
-      // Why: also show hosts whose only usage is the system-default login
-      // (no Yiru-managed accounts but live rate-limit data for the active
-      // target), otherwise system-default users see no usage section at all.
-      if (hasRenderableUsage(snap, 'claude') || hasRenderableUsage(snap, 'codex')) {
-        items.push({ host, snapshot: snap })
-      }
-    }
-    return items
-  }, [sortedHosts, hostStates, accountsByHost])
-
   const primaryConnectedHost = useMemo(
     () => sortedHosts.find((host) => hostStates[host.id] === 'connected') ?? null,
     [sortedHosts, hostStates]
@@ -570,19 +516,24 @@ export default function HomeScreen(): React.JSX.Element {
     <View className="bg-background flex-1">
       <Stack.Screen
         options={{
+          headerLeft:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel={translate(
+                      'mobile.home.openInsights',
+                      'Open activity insights'
+                    )}
+                    icon="insights"
+                    onPress={() => router.push('/activity-insights')}
+                  />
+                ),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
               : () => (
                   <MobileGlassGroup className="flex-row gap-2" spacing={8}>
-                    <MobileGlassIconButton
-                      accessibilityLabel={translate(
-                        'mobile.home.openInsights',
-                        'Open activity insights'
-                      )}
-                      icon="insights"
-                      onPress={() => router.push('/activity-insights')}
-                    />
                     <MobileGlassIconButton
                       accessibilityLabel={translate('mobile.settings.title', 'Settings')}
                       icon="settings"
@@ -593,18 +544,22 @@ export default function HomeScreen(): React.JSX.Element {
         }}
       />
       {Platform.OS === 'ios' ? (
-        <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button
-            accessibilityLabel={translate('mobile.home.openInsights', 'Open activity insights')}
-            icon="chart.line.uptrend.xyaxis"
-            onPress={() => router.push('/activity-insights')}
-          />
-          <Stack.Toolbar.Button
-            accessibilityLabel={translate('mobile.settings.title', 'Settings')}
-            icon="gearshape"
-            onPress={() => router.push('/settings')}
-          />
-        </Stack.Toolbar>
+        <>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button
+              accessibilityLabel={translate('mobile.home.openInsights', 'Open activity insights')}
+              icon="chart.line.uptrend.xyaxis"
+              onPress={() => router.push('/activity-insights')}
+            />
+          </Stack.Toolbar>
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+              accessibilityLabel={translate('mobile.settings.title', 'Settings')}
+              icon="gearshape"
+              onPress={() => router.push('/settings')}
+            />
+          </Stack.Toolbar>
+        </>
       ) : null}
 
       {hasLoadedHosts && hosts.length === 0 ? (
@@ -658,220 +613,35 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
       ) : (
         /* ─── Populated state ─── */
-        <FlatList
-          data={sortedHosts}
-          keyExtractor={(h) => h.id}
-          // Why: edge-to-edge — let the list scroll under the system nav bar
-          // but reserve insets.bottom so the last row stays reachable above
-          // the Samsung 3-button nav / iOS home indicator.
-          contentContainerClassName="px-4 pb-6 pb-safe-offset-6"
-          contentContainerStyle={
-            isWideLayout
-              ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
-              : undefined
-          }
-          ListHeaderComponent={
-            <View className="pt-2 pb-2">
-              <SectionHeading>{translate('mobile.home.desktops', 'Desktops')}</SectionHeading>
-            </View>
-          }
-          ItemSeparatorComponent={CardGap}
-          renderItem={({ item }) => {
-            const state = hostStates[item.id] ?? 'connecting'
-            const attempts = hostAttempts[item.id] ?? 0
-            const lastConnectedAt = hostLastConnected[item.id] ?? null
-            const info = worktreeInfo[item.id]
-            const verdict = classifyConnection({
-              state,
-              reconnectAttempts: attempts,
-              lastConnectedAt,
-              endpoint: item.endpoint
-            })
-            return (
-              <HostMenu
-                connectionState={state}
-                hasEverConnected={lastConnectedAt !== null}
-                host={item}
-                onDisconnect={() => closeHostClient(item.id)}
-                onEdit={() => router.push(`/h/${item.id}/edit`)}
-                onOpenFallback={() => {
-                  triggerMediumImpact()
-                  setActionTarget(item)
-                }}
-                onReconnect={() => void forceReconnectHost(item.id)}
-                onRequestRemove={() => setConfirmRemove(item)}
-              >
-                {(menuTriggerProps) => (
-                  <MobileContentSection>
-                    <MobileHostCard
-                      host={item}
-                      state={state}
-                      verdict={verdict}
-                      path={hostPaths[item.id] ?? 'lan'}
-                      worktreeCounts={
-                        info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
-                      }
-                      onPress={() => router.push(`/h/${item.id}`)}
-                      {...menuTriggerProps}
-                    />
-                  </MobileContentSection>
-                )}
-              </HostMenu>
-            )
+        <HomeOverview
+          accountsByHost={accountsByHost}
+          contentMaxWidth={contentMaxWidth}
+          hostLastConnected={hostLastConnected}
+          hostStates={hostStates}
+          hosts={sortedHosts}
+          onDisconnect={closeHostClient}
+          onEdit={(hostId) => router.push(`/h/${hostId}/edit`)}
+          onOpenFallback={(host) => {
+            triggerMediumImpact()
+            setActionTarget(host)
           }}
-          ListFooterComponent={
-            <View className="gap-6 pt-6">
-              {/* ─── Resume card ─── */}
-              {resumeWorktree ? (
-                <View className="gap-2">
-                  <SectionHeading>{translate('mobile.home.resume', 'Resume')}</SectionHeading>
-                  <MobileContentSection>
-                    <Link
-                      href={`/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`}
-                      asChild
-                    >
-                      <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3">
-                        <View className="h-8 w-5 items-center justify-center">
-                          <Terminal size={20} colorClassName="accent-muted-foreground" />
-                        </View>
-                        <View className="min-w-0 flex-1">
-                          <Text className="text-foreground" numberOfLines={1}>
-                            {resumeWorktree.worktree.displayName}
-                          </Text>
-                          <View className="mt-1 flex-row items-center gap-2">
-                            <View
-                              className="h-2 w-2"
-                              style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
-                            />
-                            <Text className="text-muted-foreground flex-1" numberOfLines={1}>
-                              {resumeWorktree.worktree.repo}
-                              {'  ·  '}
-                              {resumeWorktree.worktree.branch}
-                            </Text>
-                          </View>
-                        </View>
-                        <View className="h-6 w-5 items-center justify-center">
-                          <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-                        </View>
-                      </Pressable>
-                    </Link>
-                  </MobileContentSection>
-                </View>
-              ) : null}
-
-              {/* ─── Quick actions ─── */}
-              <View className="gap-2">
-                <SectionHeading>
-                  {translate('mobile.home.quickActions', 'Quick Actions')}
-                </SectionHeading>
-                <MobileContentSection className="p-3">
-                  <MobileGlassGroup className="flex-row gap-2" spacing={8}>
-                    <MobileGlassTextButton
-                      label={translate('mobile.home.pairDesktop', 'Pair Desktop')}
-                      onPress={() => router.push('/pair-scan')}
-                    />
-                    <MobileGlassTextButton
-                      disabled={!primaryConnectedHost}
-                      isProminent
-                      label={translate('mobile.home.newWorkspace', 'New Workspace')}
-                      onPress={() => {
-                        if (primaryConnectedHost) {
-                          router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
-                        }
-                      }}
-                    />
-                  </MobileGlassGroup>
-                </MobileContentSection>
-              </View>
-
-              {/* ─── Account usage ─── */}
-              {accountsHosts.length > 0 ? (
-                <View className="gap-2">
-                  <SectionHeading>
-                    {translate('mobile.home.accountUsage', 'Account usage')}
-                  </SectionHeading>
-                  <MobileContentSection>
-                    {accountsHosts.map(({ host, snapshot }, index) => {
-                      const claudeActiveId = snapshot.claude.activeAccountId
-                      const claudeActive =
-                        snapshot.claude.accounts.find((a) => a.id === claudeActiveId) ?? null
-                      const codexActiveId = snapshot.codex.activeAccountId
-                      const codexActive =
-                        snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
-                      const showHostName = accountsHosts.length > 1
-                      return (
-                        <Link key={host.id} href={`/h/${host.id}/accounts`} asChild>
-                          <Pressable
-                            className={cn(
-                              'active:bg-accent gap-3 px-3 py-3',
-                              index > 0 && 'border-t-hairline border-border'
-                            )}
-                          >
-                            {showHostName ? (
-                              <Text
-                                className="text-muted-foreground tracking-wide uppercase"
-                                numberOfLines={1}
-                              >
-                                {host.name}
-                              </Text>
-                            ) : null}
-                            {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
-                              const active = provider === 'claude' ? claudeActive : codexActive
-                              const accounts =
-                                provider === 'claude'
-                                  ? snapshot.claude.accounts
-                                  : snapshot.codex.accounts
-                              const limits = getActiveProviderRateLimits(snapshot, provider)
-                              // Why: with no managed accounts, still render a
-                              // "System default" row when the active target has
-                              // live usage data; the row label already falls back
-                              // to "System default" below.
-                              if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
-                                return null
-                              }
-                              const sessionBar = getUsageBarState(limits, 'session')
-                              const weeklyBar = getUsageBarState(limits, 'weekly')
-                              return (
-                                <View key={provider} className="flex-row items-start gap-3">
-                                  <View className="h-6 w-8 items-center justify-center">
-                                    {provider === 'claude' ? (
-                                      <ClaudeIcon size={18} />
-                                    ) : (
-                                      <OpenAIIcon size={18} colorClassName="accent-foreground" />
-                                    )}
-                                  </View>
-                                  <View className="min-w-0 flex-1 gap-1">
-                                    <Text className="text-foreground" numberOfLines={1}>
-                                      {active?.email ??
-                                        translate('mobile.home.systemDefault', 'System default')}
-                                    </Text>
-                                    <View className="gap-1">
-                                      <UsageBar
-                                        label={translate('mobile.home.usage.fiveHours', '5h')}
-                                        usedPercent={sessionBar.usedPercent}
-                                        unavailable={sessionBar.unavailable}
-                                        loading={sessionBar.loading}
-                                      />
-                                      <UsageBar
-                                        label={translate('mobile.home.usage.sevenDays', '7d')}
-                                        usedPercent={weeklyBar.usedPercent}
-                                        unavailable={weeklyBar.unavailable}
-                                        loading={weeklyBar.loading}
-                                      />
-                                    </View>
-                                  </View>
-                                </View>
-                              )
-                            })}
-                          </Pressable>
-                        </Link>
-                      )
-                    })}
-                  </MobileContentSection>
-                </View>
-              ) : null}
-            </View>
-          }
+          isWideLayout={isWideLayout}
+          onNewWorkspace={(hostId) => router.push(`/h/${hostId}?action=newWorktree`)}
+          onOpenAccounts={(hostId) => router.push(`/h/${hostId}/accounts`)}
+          onOpenHost={(hostId) => router.push(`/h/${hostId}`)}
+          onOpenResume={() => {
+            if (resumeWorktree) {
+              router.push(
+                `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
+              )
+            }
+          }}
+          onPairDesktop={() => router.push('/pair-scan')}
+          onReconnect={(hostId) => void forceReconnectHost(hostId)}
+          onRequestRemove={(host) => setConfirmRemove(host)}
+          primaryConnectedHost={primaryConnectedHost}
+          resumeWorktree={resumeWorktree}
+          worktreeInfo={worktreeInfo}
         />
       )}
 
@@ -900,18 +670,6 @@ export default function HomeScreen(): React.JSX.Element {
         onRequestRemove={setConfirmRemove}
       />
     </View>
-  )
-}
-
-function CardGap(): React.JSX.Element {
-  return <View className="h-1" />
-}
-
-function SectionHeading({ children }: { children: string }): React.JSX.Element {
-  return (
-    <Text className="text-muted-foreground px-1 text-xs font-semibold tracking-wide uppercase">
-      {children}
-    </Text>
   )
 }
 
