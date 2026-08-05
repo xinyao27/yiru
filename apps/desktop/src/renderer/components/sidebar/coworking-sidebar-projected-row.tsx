@@ -2,7 +2,6 @@ import type React from 'react'
 import { CoworkingWindowsFirewallNotice } from '~renderer/components/coworking/windows-firewall-notice'
 import { useAppStore } from '~renderer/store'
 
-import { CoworkingRemoteDesktopStatusRow } from './coworking-remote-desktop-status-row'
 import { CoworkingRemoteWorktreesHeader } from './coworking-remote-worktrees-header'
 import { CoworkingSessionRow } from './coworking-session-row'
 import { CoworkingWorktreeRow } from './coworking-worktree-row'
@@ -35,8 +34,6 @@ export function CoworkingSidebarProjectedRow({
 
   const row = projected.row
   switch (row.type) {
-    case 'coworking-desktop-status':
-      return <CoworkingRemoteDesktopStatusRow row={row} />
     case 'coworking-worktree':
       return (
         <CoworkingWorktreeRow

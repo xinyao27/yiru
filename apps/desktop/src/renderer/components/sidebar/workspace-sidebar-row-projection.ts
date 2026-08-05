@@ -229,9 +229,6 @@ export function estimateWorkspaceSidebarRowSize(args: {
   if (projected.kind === 'coworking-remote-worktrees-header') {
     return 32
   }
-  if (projected.row.type === 'coworking-desktop-status') {
-    return 32
-  }
   if (projected.row.type === 'coworking-worktree') {
     return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
   }

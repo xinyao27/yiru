@@ -2190,6 +2190,17 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
+          },
+          "CoworkingRemoteHosts": {
+            "connecting": "Connecting…",
+            "disconnected": "Disconnected",
+            "title": "Remote hosts",
+            "hostAccessDenied": "Remote host access was denied.",
+            "hostAccessCancelled": "Remote host access request was cancelled.",
+            "hostAdded": "{{value0}} is ready as a remote host.",
+            "hostAccessFailed": "Could not request remote host access.",
+            "requesting": "Waiting…",
+            "useAsHost": "Use as host"
           }
         }
       },
@@ -3731,7 +3742,8 @@
           "suspendedIncarnation": "工作区已被替换",
           "suspendedOverlapping": "共享路径重叠",
           "suspendedUnknown": "未在提供服务",
-          "sharingAs": "以 {{node}} 共享"
+          "sharingAs": "以 {{node}} 共享",
+          "remoteHostsAvailable": "{{count}} remote host(s) available"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 防火墙规则已修复。",

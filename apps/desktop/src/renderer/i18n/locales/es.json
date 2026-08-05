@@ -2190,6 +2190,17 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
+          },
+          "CoworkingRemoteHosts": {
+            "connecting": "Connecting…",
+            "disconnected": "Disconnected",
+            "title": "Remote hosts",
+            "hostAccessDenied": "Remote host access was denied.",
+            "hostAccessCancelled": "Remote host access request was cancelled.",
+            "hostAdded": "{{value0}} is ready as a remote host.",
+            "hostAccessFailed": "Could not request remote host access.",
+            "requesting": "Waiting…",
+            "useAsHost": "Use as host"
           }
         }
       },
@@ -3731,7 +3742,8 @@
           "suspendedIncarnation": "Árbol de trabajo reemplazado",
           "suspendedOverlapping": "Recurso compartido superpuesto",
           "suspendedUnknown": "No servido",
-          "sharingAs": "Compartiendo como {{node}}"
+          "sharingAs": "Compartiendo como {{node}}",
+          "remoteHostsAvailable": "{{count}} remote host(s) available"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Se reparó la regla de Firewall de Windows.",

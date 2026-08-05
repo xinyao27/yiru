@@ -16,13 +16,6 @@ export type CoworkingRemoteDesktopSidebarContext = {
   quota: readonly CoworkingProviderQuota[]
 }
 
-export type CoworkingRemoteDesktopStatusSidebarRow = {
-  type: 'coworking-desktop-status'
-  key: string
-  desktopRef: string
-  desktop: CoworkingRemoteDesktopSidebarContext
-}
-
 export type CoworkingWorktreeSidebarRow = {
   type: 'coworking-worktree'
   kind: CoworkingWorktreeCatalogEntry['kind']
@@ -57,10 +50,7 @@ export type CoworkingSessionSidebarRow = {
   active: boolean
 } & CoworkingSessionSidebarRowIdentity
 
-export type CoworkingSidebarRow =
-  | CoworkingRemoteDesktopStatusSidebarRow
-  | CoworkingWorktreeSidebarRow
-  | CoworkingSessionSidebarRow
+export type CoworkingSidebarRow = CoworkingWorktreeSidebarRow | CoworkingSessionSidebarRow
 
 export type CoworkingSidebarProjectionInput = {
   desktops: readonly CoworkingRemoteDesktop[]
@@ -101,14 +91,6 @@ export function projectCoworkingSidebarRows(
       connectionStatus: desktop.connectionStatus,
       quota: catalog?.quota ?? []
     }
-    // Why: the desktop row is the Coworking-only remote-host admission point;
-    // it must remain reachable whether or not this peer publishes worktrees.
-    rows.push({
-      type: 'coworking-desktop-status',
-      key: createCoworkingSidebarRowKey('coworking-desktop-status', desktop.desktopRef),
-      desktopRef: desktop.desktopRef,
-      desktop: sidebarDesktop
-    })
     if (!catalog) {
       continue
     }

@@ -2190,6 +2190,17 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
+          },
+          "CoworkingRemoteHosts": {
+            "connecting": "Connecting…",
+            "disconnected": "Disconnected",
+            "title": "Remote hosts",
+            "hostAccessDenied": "Remote host access was denied.",
+            "hostAccessCancelled": "Remote host access request was cancelled.",
+            "hostAdded": "{{value0}} is ready as a remote host.",
+            "hostAccessFailed": "Could not request remote host access.",
+            "requesting": "Waiting…",
+            "useAsHost": "Use as host"
           }
         }
       },
@@ -3731,7 +3742,8 @@
           "suspendedIncarnation": "워크트리가 교체됨",
           "suspendedOverlapping": "공유 경로 중복",
           "suspendedUnknown": "제공되지 않음",
-          "sharingAs": "{{node}}(으)로 공유 중"
+          "sharingAs": "{{node}}(으)로 공유 중",
+          "remoteHostsAvailable": "{{count}} remote host(s) available"
         },
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",
