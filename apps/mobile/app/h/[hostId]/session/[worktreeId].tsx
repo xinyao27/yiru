@@ -68,6 +68,7 @@ import { isFloatingWorkspaceWorktreeId } from '~/session/floating-workspace'
 import { shouldUseNativeSessionHeader } from '~/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '~/session/header-more-actions-sheet'
 import { MarkdownReader } from '~/session/markdown-reader'
+import { canShowMobileNativeChat } from '~/session/native-chat/eligibility'
 import { MobileNativeChatOverlay } from '~/session/native-chat/overlay'
 import { useMobileNativeChatController } from '~/session/native-chat/use-controller'
 import { useMobileNativeChatInputLease } from '~/session/native-chat/use-input-lease'
@@ -104,10 +105,10 @@ import type {
 } from '~/session/screen-state'
 import { activateMobileSessionTab, focusMobileTerminal } from '~/session/tab-activation'
 import { MobileSessionTabStrip } from '~/session/tab-strip'
-import { MobileTerminalAccessoryBar } from '~/session/terminal/accessory-bar'
 import { getMobileTerminalActionSheetActions } from '~/session/terminal/action-sheet-actions'
+import { useMobileTerminalControlMode } from '~/session/terminal/control-mode'
+import { MobileTerminalDock } from '~/session/terminal/dock'
 import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
-import { MobileTerminalInputBar } from '~/session/terminal/input-bar'
 import { TerminalPaneView } from '~/session/terminal/pane-view'
 import { mergeTerminalListWithKnownRecords, terminalRecordsEqual } from '~/session/terminal/records'
 import { useMobileTerminalForegroundRecovery } from '~/session/terminal/use-foreground-recovery'
@@ -152,7 +153,6 @@ import {
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
 } from '~/terminal/gesture-input'
 import { dismissTerminalKeyboard } from '~/terminal/keyboard-dismiss'
-import { getTerminalLiveInputKeyboardType } from '~/terminal/keyboard-type'
 import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
 import { getTerminalLiveAccessoryRawSendTarget } from '~/terminal/live/accessory-raw-send-target'
 import {
@@ -292,7 +292,6 @@ export default function SessionScreen(): React.JSX.Element {
   const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)
   const [terminalLinkOpenMode, setTerminalLinkOpenMode] =
     useState<MobileTerminalLinkOpenMode>('yiru-browser')
-  const [liveInputCapture, setLiveInputCapture] = useState('')
   const {
     clearTerminalLiveInputDefault,
     defaultTerminalHandlesToLiveInput,
@@ -386,6 +385,7 @@ export default function SessionScreen(): React.JSX.Element {
   > | null>(null)
   const sessionTabActionSheetRequestSeqRef = useRef(0)
   const activeHandleRef = useRef<string | null>(null)
+  const controlModeSenderRef = useRef<(bytes: string) => void>(() => {})
   // Why: a browser tab opened from a terminal-tapped HTML must be focused as an
   // Yiru session tab (bridge auto-activate only flags the live webContents, not
   // the app-level active tab). We remember the page id and, once its session tab
@@ -412,6 +412,17 @@ export default function SessionScreen(): React.JSX.Element {
   // refit hook re-fit the PTY on those resizes — see terminal-viewport-refit.ts.
   const [terminalFrameWidth, setTerminalFrameWidth] = useState(0)
   const {
+    controlModeActive,
+    handleInputChange: handleControlModeInputChange,
+    liveInputCapture,
+    reset: resetControlMode,
+    setLiveInputCapture,
+    toggle: toggleControlMode
+  } = useMobileTerminalControlMode({
+    activeHandleRef,
+    onSendControlByte: (bytes) => controlModeSenderRef.current(bytes)
+  })
+  const {
     clearPendingLiveInputCommit,
     flushPendingLiveInputBeforeExternalSend,
     handleLiveInputAccessoryBytes,
@@ -429,6 +440,10 @@ export default function SessionScreen(): React.JSX.Element {
     sendLiveTerminalInputRef,
     setLiveInputCapture
   })
+  const handleTerminalLiveInputChange = useCallback(
+    (text: string) => handleControlModeInputChange(text, handleLiveInputChange),
+    [handleControlModeInputChange, handleLiveInputChange]
+  )
   const canSend =
     connState === 'connected' &&
     activeHandle != null &&
@@ -573,6 +588,9 @@ export default function SessionScreen(): React.JSX.Element {
     onSendError: showNativeChatSendError
   })
   const { toggleTabChatView, showNativeChat, showNativeChatRef } = nativeChatController
+  const showTerminalChatAction =
+    activeSessionTab?.type === 'terminal' &&
+    canShowMobileNativeChat(activeSessionTab, nativeChatTranscriptIsLocalReadable)
 
   const {
     clearTerminalCache,
@@ -1545,7 +1563,9 @@ export default function SessionScreen(): React.JSX.Element {
         () => undefined
       )
   }
-
+  controlModeSenderRef.current = (bytes) => {
+    void handleAccessoryKey({ bytes })
+  }
   const sendLiveTerminalInput = useCallback(
     async (handle: string, bytes: string): Promise<boolean> => {
       const text = normalizeTerminalTextInput(bytes)
@@ -1670,6 +1690,18 @@ export default function SessionScreen(): React.JSX.Element {
       liveInput: liveInputRef.current
     })
   }, [])
+  const focusTerminalKeyboard = useCallback(() => {
+    if (keyboardHeight > 0) {
+      return dismissSoftwareKeyboard()
+    }
+    if (!canSend) {
+      return
+    }
+    if (liveInputEnabled) {
+      return focusLiveInput()
+    }
+    commandInputRef.current?.focus()
+  }, [canSend, dismissSoftwareKeyboard, focusLiveInput, keyboardHeight, liveInputEnabled])
 
   const handleTerminalTap = useCallback(
     (handle: string) => {
@@ -1784,6 +1816,9 @@ export default function SessionScreen(): React.JSX.Element {
       return
     }
     const nextEnabled = toggleTerminalLiveInput(activeHandle)
+    if (!nextEnabled) {
+      resetControlMode()
+    }
     clearPendingLiveInputCommit()
     if (nextEnabled) {
       scheduleTerminalLiveInputFocus(liveInputFocusTimerRef, () => liveInputRef.current?.focus())
@@ -1791,7 +1826,7 @@ export default function SessionScreen(): React.JSX.Element {
       clearTerminalLiveInputFocusTimer(liveInputFocusTimerRef)
       liveInputRef.current?.blur()
     }
-  }, [activeHandle, clearPendingLiveInputCommit, toggleTerminalLiveInput])
+  }, [activeHandle, clearPendingLiveInputCommit, resetControlMode, toggleTerminalLiveInput])
 
   const allowTerminalGestureInput = useCallback(
     (handle: string, sequenceCount: number): boolean => {
@@ -3296,79 +3331,53 @@ export default function SessionScreen(): React.JSX.Element {
             trigger a server-side PTY viewport change. The dock hides in native
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
-              <View
-                className="z-20 px-3 pt-1"
-                style={[
-                  {
-                    paddingBottom: insets.bottom,
-                    transform: [{ translateY: -terminalComposerKeyboardOffset }]
+              <MobileTerminalDock
+                autocompleteEnabled={autocompleteEnabled}
+                bottomInset={insets.bottom}
+                builtInKeys={visibleBuiltInAccessoryKeys}
+                canPaste={canPaste}
+                canSend={canSend}
+                commandInputRef={commandInputRef}
+                controlModeActive={controlModeActive}
+                customKeys={customKeys}
+                input={input}
+                isAttaching={isAttaching}
+                isKeyboardVisible={keyboardLift > 0}
+                isPhoneDisplayMode={isPhoneMode(activeHandle)}
+                keyboardOffset={terminalComposerKeyboardOffset}
+                liveInputCapture={liveInputCapture}
+                liveInputEnabled={liveInputEnabled}
+                liveInputRef={liveInputRef}
+                onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
+                onAddCustomKey={() => setShowCustomKeyModal(true)}
+                onAttachImage={attachImage}
+                onChangeCommandText={setInput}
+                onChangeLiveInput={handleTerminalLiveInputChange}
+                onCustomKeyLongPress={(key) => {
+                  triggerMediumImpact()
+                  setDeleteKeyTarget(key)
+                }}
+                onKeyboardPress={focusTerminalKeyboard}
+                onKeyPressLiveInput={handleLiveInputKeyPress}
+                onOpenChat={
+                  showTerminalChatAction && activeSessionTabId
+                    ? () => toggleTabChatView(activeSessionTabId)
+                    : null
+                }
+                onOpenHistory={showAgentSessionHistoryAction ? openAgentSessionHistory : null}
+                onPaste={() => void handlePaste()}
+                onRepeatStart={startAccessoryRepeat}
+                onRepeatStop={stopAccessoryRepeat}
+                onSendCommand={() => void handleSend()}
+                onSubmitLiveInput={handleLiveInputSubmit}
+                onToggleControl={toggleControlMode}
+                onToggleDisplayMode={() => {
+                  if (activeHandle) {
+                    void toggleDisplayMode(activeHandle)
                   }
-                ]}
-              >
-                <MobileTerminalAccessoryBar
-                  builtInKeys={visibleBuiltInAccessoryKeys}
-                  canPaste={canPaste}
-                  canSend={canSend}
-                  customKeys={customKeys}
-                  isKeyboardVisible={keyboardLift > 0}
-                  isPhoneDisplayMode={isPhoneMode(activeHandle)}
-                  liveInputEnabled={liveInputEnabled}
-                  onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
-                  onAddCustomKey={() => setShowCustomKeyModal(true)}
-                  onCustomKeyLongPress={(key) => {
-                    triggerMediumImpact()
-                    setDeleteKeyTarget(key)
-                  }}
-                  onDismissKeyboard={dismissSoftwareKeyboard}
-                  onPaste={() => void handlePaste()}
-                  onRepeatStart={startAccessoryRepeat}
-                  onRepeatStop={stopAccessoryRepeat}
-                  onToggleDisplayMode={() => {
-                    if (activeHandle) {
-                      void toggleDisplayMode(activeHandle)
-                    }
-                  }}
-                  onToggleLiveInput={toggleLiveInput}
-                />
-
-                {/* Input bar */}
-                <MobileTerminalInputBar
-                  autocompleteEnabled={autocompleteEnabled}
-                  canSend={canSend}
-                  commandInputRef={commandInputRef}
-                  input={input}
-                  isAttaching={isAttaching}
-                  liveInputEnabled={liveInputEnabled}
-                  onAttachImage={attachImage}
-                  onChangeText={setInput}
-                  onFocusLiveInput={focusLiveInput}
-                  onSend={() => void handleSend()}
-                />
-                {liveInputEnabled ? (
-                  <TextInput
-                    ref={liveInputRef}
-                    className="text-foreground absolute h-px w-px opacity-0"
-                    value={liveInputCapture}
-                    onChangeText={handleLiveInputChange}
-                    onKeyPress={handleLiveInputKeyPress}
-                    onSubmitEditing={handleLiveInputSubmit}
-                    placeholder=""
-                    showSoftInputOnFocus
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    spellCheck={false}
-                    smartInsertDelete={false}
-                    // Why: iOS textContentType wins over autoComplete and can
-                    // narrow the keyboard surface; keep IME switching available.
-                    autoComplete="off"
-                    keyboardType={getTerminalLiveInputKeyboardType(Platform.OS)}
-                    returnKeyType="default"
-                    blurOnSubmit={false}
-                    editable={canSend}
-                    importantForAutofill="no"
-                  />
-                ) : null}
-              </View>
+                }}
+                onToggleLiveInput={toggleLiveInput}
+              />
             )}
           </View>
           {canDockPanel && activePanel !== null && (

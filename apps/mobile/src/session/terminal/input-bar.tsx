@@ -2,15 +2,13 @@ import { cn } from 'cnfast'
 import type { RefObject } from 'react'
 import { Platform, Pressable, TextInput, View } from 'react-native'
 
-import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { ArrowUp, Keyboard as KeyboardIcon } from '~/components/uniwind-icons'
+import { ArrowUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
 import { getTerminalCommandKeyboardType } from '~/terminal/keyboard-type'
 
 import { MobileAttachmentMenu } from '../attachment-menu'
 import type { MobileImageSource } from '../image-source-picker'
-import { MobileTerminalLiveInputStatus } from './live-input-status'
 
 export type MobileTerminalInputBarProps = {
   autocompleteEnabled: boolean
@@ -18,10 +16,8 @@ export type MobileTerminalInputBarProps = {
   commandInputRef: RefObject<TextInput | null>
   input: string
   isAttaching: boolean
-  liveInputEnabled: boolean
   onAttachImage: (source: MobileImageSource) => void
   onChangeText: (text: string) => void
-  onFocusLiveInput: () => void
   onSend: () => void
 }
 
@@ -31,44 +27,10 @@ export function MobileTerminalInputBar({
   commandInputRef,
   input,
   isAttaching,
-  liveInputEnabled,
   onAttachImage,
   onChangeText,
-  onFocusLiveInput,
   onSend
 }: MobileTerminalInputBarProps): React.JSX.Element {
-  if (liveInputEnabled) {
-    return (
-      <View className="min-h-14 flex-row items-center gap-2 py-1">
-        <MobileAttachmentMenu
-          disabled={!canSend || isAttaching}
-          pending={isAttaching}
-          onSelect={onAttachImage}
-        />
-        <MobileGlassPressable
-          accessibilityHint={translate(
-            'mobile.terminal.liveInput.accessibilityHint',
-            'Typed text is sent directly to the active terminal'
-          )}
-          accessibilityLabel={translate(
-            'mobile.terminal.liveInput.accessibilityLabel',
-            'Show keyboard for live terminal input'
-          )}
-          accessibilityRole="button"
-          className="min-h-12 w-full rounded-full"
-          containerClassName="flex-1"
-          contentClassName="min-h-12 flex-1 flex-row items-center gap-3 rounded-full px-4"
-          disabled={!canSend}
-          onPress={onFocusLiveInput}
-          tintColorClassName="accent-secondary"
-        >
-          <KeyboardIcon size={20} colorClassName="accent-muted-foreground" />
-          <MobileTerminalLiveInputStatus isAttaching={isAttaching} />
-        </MobileGlassPressable>
-      </View>
-    )
-  }
-
   return (
     <View className="min-h-14 flex-row items-center gap-2 py-1">
       <MobileAttachmentMenu

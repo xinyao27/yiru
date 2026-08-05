@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
 import { MobileGlassGroup } from '~/components/glass/group'
 import { translate } from '~/i18n/translate'
@@ -6,25 +6,33 @@ import type { TerminalAccessoryKey } from '~/terminal/accessory-keys'
 import type { CustomKey } from '~/terminal/custom-key-modal'
 import { createTerminalLiveAccessoryInput } from '~/terminal/live/accessory-input'
 
+import { MobileAttachmentMenu } from '../attachment-menu'
+import type { MobileImageSource } from '../image-source-picker'
 import { MobileTerminalAccessoryKey } from './accessory-key'
 
-type TerminalAccessoryInput = ReturnType<typeof createTerminalLiveAccessoryInput>
+export type TerminalAccessoryInput = ReturnType<typeof createTerminalLiveAccessoryInput>
 
 type MobileTerminalAccessoryBarProps = {
   builtInKeys: readonly TerminalAccessoryKey[]
   canPaste: boolean
   canSend: boolean
+  controlModeActive: boolean
   customKeys: readonly CustomKey[]
   isKeyboardVisible: boolean
+  isAttaching: boolean
   isPhoneDisplayMode: boolean
   liveInputEnabled: boolean
+  onAttachImage: ((source: MobileImageSource) => void) | null
   onAccessoryInput: (input: TerminalAccessoryInput) => void
   onAddCustomKey: () => void
   onCustomKeyLongPress: (key: CustomKey) => void
-  onDismissKeyboard: () => void
+  onKeyboardPress: () => void
+  onOpenChat: (() => void) | null
+  onOpenHistory: (() => void) | null
   onPaste: () => void
   onRepeatStart: (input: TerminalAccessoryInput) => void
   onRepeatStop: () => void
+  onToggleControl: () => void
   onToggleDisplayMode: () => void
   onToggleLiveInput: () => void
 }
@@ -33,43 +41,79 @@ export function MobileTerminalAccessoryBar({
   builtInKeys,
   canPaste,
   canSend,
+  controlModeActive,
   customKeys,
+  isAttaching,
   isKeyboardVisible,
   isPhoneDisplayMode,
   liveInputEnabled,
   onAccessoryInput,
   onAddCustomKey,
+  onAttachImage,
   onCustomKeyLongPress,
-  onDismissKeyboard,
+  onKeyboardPress,
+  onOpenChat,
+  onOpenHistory,
   onPaste,
   onRepeatStart,
   onRepeatStop,
+  onToggleControl,
   onToggleDisplayMode,
   onToggleLiveInput
 }: MobileTerminalAccessoryBarProps): React.JSX.Element {
+  const renderBuiltInKey = (key: TerminalAccessoryKey): React.JSX.Element => (
+    <MobileTerminalAccessoryKey
+      key={key.id}
+      accessibilityLabel={
+        key.accessibilityLabel ??
+        translate('mobile.terminal.sendAccessoryKey', 'Send {{label}}', {
+          label: key.label
+        })
+      }
+      disabled={!canSend}
+      label={key.label}
+      onPress={() => {
+        if (!key.repeatable) {
+          onAccessoryInput(createTerminalLiveAccessoryInput(key))
+        }
+      }}
+      onPressIn={() => {
+        if (key.repeatable) {
+          const input = createTerminalLiveAccessoryInput(key)
+          onAccessoryInput(input)
+          onRepeatStart(input)
+        }
+      }}
+      onPressOut={() => {
+        if (key.repeatable) {
+          onRepeatStop()
+        }
+      }}
+    />
+  )
+
   return (
-    <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-      {/* Why: this fixed escape hatch must not scroll away or enter the terminal-byte path. */}
-      {isKeyboardVisible ? (
-        <MobileTerminalAccessoryKey
-          accessibilityHint={translate(
-            'mobile.terminal.dismissKeyboardHint',
-            'Hides the software keyboard and keeps the current terminal session open.'
-          )}
-          accessibilityLabel={translate('mobile.terminal.dismissKeyboard', 'Dismiss keyboard')}
-          hitSlop={8}
-          icon="dismiss-keyboard"
-          onPress={onDismissKeyboard}
-        />
-      ) : null}
-      {/* Why: preserving taps keeps the keyboard open when Esc, Tab, or another key is sent. */}
+    <MobileGlassGroup className="h-16 flex-row items-center overflow-hidden p-2" spacing={8}>
       <ScrollView
         className="min-w-0 flex-1 overflow-visible"
-        contentContainerClassName="gap-2 py-2"
+        contentContainerClassName="items-center gap-2"
         horizontal
         keyboardShouldPersistTaps="always"
         showsHorizontalScrollIndicator={false}
       >
+        <MobileTerminalAccessoryKey
+          accessibilityLabel={translate(
+            controlModeActive
+              ? 'mobile.terminal.controlModifierActive'
+              : 'mobile.terminal.controlModifier',
+            controlModeActive ? 'Control modifier active' : 'Control modifier'
+          )}
+          disabled={!canSend || !liveInputEnabled}
+          isSelected={controlModeActive}
+          label={translate('mobile.terminal.controlKey', 'Ctrl')}
+          onPress={onToggleControl}
+        />
+        {builtInKeys.filter((key) => key.id === 'escape' || key.id === 'tab').map(renderBuiltInKey)}
         <MobileTerminalAccessoryKey
           accessibilityLabel={
             isPhoneDisplayMode
@@ -77,7 +121,7 @@ export function MobileTerminalAccessoryBar({
               : translate('mobile.terminal.switchToPhoneMode', 'Switch to phone mode')
           }
           disabled={!canSend}
-          icon={isPhoneDisplayMode ? 'desktop' : 'phone'}
+          icon="display"
           onPress={onToggleDisplayMode}
         />
         <MobileTerminalAccessoryKey
@@ -101,40 +145,25 @@ export function MobileTerminalAccessoryBar({
               'Paste from clipboard'
             )}
             disabled={!canSend}
-            label={translate('mobile.common.paste', 'Paste')}
+            icon="clipboard"
             onPress={onPaste}
           />
         ) : null}
-        {builtInKeys.map((key) => (
+        {onOpenHistory ? (
           <MobileTerminalAccessoryKey
-            key={key.id}
-            accessibilityLabel={
-              key.accessibilityLabel ??
-              translate('mobile.terminal.sendAccessoryKey', 'Send {{label}}', {
-                label: key.label
-              })
-            }
-            disabled={!canSend}
-            label={key.label}
-            onPress={() => {
-              if (!key.repeatable) {
-                onAccessoryInput(createTerminalLiveAccessoryInput(key))
-              }
-            }}
-            onPressIn={() => {
-              if (key.repeatable) {
-                const input = createTerminalLiveAccessoryInput(key)
-                onAccessoryInput(input)
-                onRepeatStart(input)
-              }
-            }}
-            onPressOut={() => {
-              if (key.repeatable) {
-                onRepeatStop()
-              }
-            }}
+            accessibilityLabel={translate('mobile.terminal.openAgentHistory', 'Open agent history')}
+            icon="history"
+            onPress={onOpenHistory}
           />
-        ))}
+        ) : null}
+        {onAttachImage ? (
+          <MobileAttachmentMenu
+            disabled={!canSend || isAttaching}
+            pending={isAttaching}
+            onSelect={onAttachImage}
+          />
+        ) : null}
+        {builtInKeys.filter((key) => key.id !== 'escape' && key.id !== 'tab').map(renderBuiltInKey)}
         {customKeys.map((key) => (
           <MobileTerminalAccessoryKey
             key={key.id}
@@ -154,6 +183,32 @@ export function MobileTerminalAccessoryBar({
           onPress={onAddCustomKey}
         />
       </ScrollView>
+      <View className="shrink-0 flex-row items-center gap-2 pl-2">
+        {onOpenChat ? (
+          <MobileTerminalAccessoryKey
+            accessibilityLabel={translate('mobile.terminal.openChat', 'Open chat')}
+            icon="chat"
+            onPress={onOpenChat}
+          />
+        ) : null}
+        <MobileTerminalAccessoryKey
+          accessibilityHint={
+            isKeyboardVisible
+              ? translate(
+                  'mobile.terminal.dismissKeyboardHint',
+                  'Hides the software keyboard and keeps the current terminal session open.'
+                )
+              : undefined
+          }
+          accessibilityLabel={
+            isKeyboardVisible
+              ? translate('mobile.terminal.dismissKeyboard', 'Dismiss keyboard')
+              : translate('mobile.terminal.showKeyboard', 'Show keyboard')
+          }
+          icon={isKeyboardVisible ? 'dismiss-keyboard' : 'keyboard'}
+          onPress={onKeyboardPress}
+        />
+      </View>
     </MobileGlassGroup>
   )
 }
