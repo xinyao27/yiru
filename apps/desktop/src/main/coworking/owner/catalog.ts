@@ -16,7 +16,10 @@ import { CoworkingPeerConnection } from '../peer/connection'
 import type { CoworkingSubscription } from '../peer/connection-contract'
 import type { CoworkingProbeClient } from '../probe-client'
 import type { DiscoveredCoworkingDesktop, TailnetPeerDirectory } from '../tailnet-peer-directory'
-import { requestCoworkingHostAccess } from './host-access'
+import {
+  reconnectCoworkingOwnerHostAccess,
+  requestCoworkingOwnerHostAccess
+} from './host-access-request'
 import {
   createCoworkingOwnerRecord,
   projectCoworkingRemoteDesktop,
@@ -102,7 +105,18 @@ export class CoworkingOwnerCatalog {
   }
 
   async requestHostAccess(desktopRef: string): Promise<CoworkingRequestHostAccessResult> {
-    return await requestCoworkingHostAccess(this.records.get(desktopRef), this.userDataPath)
+    return await requestCoworkingOwnerHostAccess(
+      this.records.get(desktopRef),
+      this.userDataPath,
+      (currentRecord) =>
+        reconnectCoworkingOwnerHostAccess(
+          currentRecord,
+          () => this.started,
+          (candidate) => this.records.get(candidate.descriptor.desktopRef) === candidate,
+          (candidate, connection) => this.handleConnectionLoss(candidate, connection),
+          (candidate) => this.connect(candidate)
+        )
+    )
   }
 
   async invokeRequester(args: CoworkingRequesterInvokeArgs): Promise<unknown> {

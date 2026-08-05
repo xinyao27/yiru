@@ -21,6 +21,28 @@ function getConnectionLabel(status: CoworkingRemoteDesktop['connectionStatus']):
   }
 }
 
+function getHostAccessErrorMessage(
+  error: unknown,
+  translateMessage: (key: string, fallback: string) => string
+): string {
+  if (
+    error instanceof Error &&
+    (error.message === 'disconnected' || error.message.endsWith(': disconnected'))
+  ) {
+    return translateMessage(
+      'auto.components.status.bar.CoworkingRemoteHosts.hostAccessFailed',
+      'Could not request remote host access.'
+    )
+  }
+
+  return error instanceof Error
+    ? error.message
+    : translateMessage(
+        'auto.components.status.bar.CoworkingRemoteHosts.hostAccessFailed',
+        'Could not request remote host access.'
+      )
+}
+
 export function CoworkingRemoteHosts({
   desktops
 }: {
@@ -88,14 +110,7 @@ function CoworkingRemoteHostRow({
         )
       )
     } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate(
-              'auto.components.status.bar.CoworkingRemoteHosts.hostAccessFailed',
-              'Could not request remote host access.'
-            )
-      )
+      toast.error(getHostAccessErrorMessage(error, translate))
     } finally {
       setIsRequesting(false)
     }
