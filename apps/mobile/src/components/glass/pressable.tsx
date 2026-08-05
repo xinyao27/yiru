@@ -87,7 +87,7 @@ export function MobileGlassPressable({
                   : size === 'small'
                     ? 'min-h-8'
                     : undefined,
-              isTab && 'min-h-9 items-center justify-center px-3',
+              isTab && 'min-h-9 items-center justify-center rounded-full px-3',
               contentClassName
             )}
           >
