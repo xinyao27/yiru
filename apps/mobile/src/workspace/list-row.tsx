@@ -134,11 +134,11 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
             className={cn('absolute inset-x-0 top-0 items-center', !endsProjectRail && 'bottom-0')}
             style={endsProjectRail ? { height: PROJECT_RAIL_STATUS_CENTER_TOP_PT } : undefined}
           >
-            <View className="bg-border w-hairline h-full" />
+            <View className="bg-foreground/30 w-hairline h-full" />
           </View>
           <View
             pointerEvents="none"
-            className="bg-border h-hairline absolute left-1/2"
+            className="bg-foreground/30 h-hairline absolute left-1/2"
             style={{
               top: PROJECT_RAIL_STATUS_CENTER_TOP_PT,
               width: PROJECT_RAIL_BASE_ELBOW_WIDTH_PT + spacing4 * lineageDepth
