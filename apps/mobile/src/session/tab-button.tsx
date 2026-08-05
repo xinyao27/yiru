@@ -55,15 +55,13 @@ export function MobileSessionTabButton({
     <MobileGlassPressable
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
-      className="max-w-40 min-w-24 rounded-full"
-      contentClassName="min-h-9 items-center justify-center rounded-full px-3"
       delayLongPress={400}
-      fallbackClassName={active ? 'border-ring' : undefined}
       isSelected={active}
       onLayout={onLayout}
       onLongPress={onLongPress}
       onPress={onPress}
       size="regular"
+      variant="tab"
     >
       <MobileSessionTabLabel tab={tab} active={active} />
     </MobileGlassPressable>
