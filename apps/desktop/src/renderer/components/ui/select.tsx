@@ -68,6 +68,9 @@ function SelectContent({
     <SelectPrimitive.Portal container={portalContainer ?? undefined}>
       {/* Positioner carries anchoring; alignItemWithTrigger replaces radix position="item-aligned". */}
       <SelectPrimitive.Positioner
+        // Why: Base UI positions this wrapper with a transform, which traps the
+        // popup's z-index unless the wrapper itself sits above page surfaces.
+        className="isolate z-[70]"
         align={align}
         sideOffset={sideOffset}
         alignItemWithTrigger={alignItemWithTrigger}
@@ -77,7 +80,7 @@ function SelectContent({
           className={cn(
             floatingSurfaceClass,
             floatingSurfaceMotionClass,
-            'relative isolate z-[70] max-h-(--available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto scrollbar-sleek',
+            'relative isolate z-[70] max-h-(--available-height) min-w-(--anchor-width) overflow-x-hidden overflow-y-auto scrollbar-sleek',
             className
           )}
           {...props}
