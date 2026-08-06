@@ -9,6 +9,7 @@ import type { WorkspacePort, WorkspacePortScanResult } from '~shared/workspace/p
 export type OpenHttpLinkOptions = {
   worktreeId?: string | null
   forceSystemBrowser?: boolean
+  forceInAppBrowser?: boolean
   sourceOwner?: HttpLinkSourceOwner
 }
 
@@ -61,10 +62,10 @@ export function registerHttpLinkStoreAccessor(fn: StoreAccessor): void {
 // Scope: http(s) URLs only. file: URIs and in-worktree markdown targets are
 // owned by resolveMarkdownLinkTarget and must stay on that path — this helper
 // is only invoked on target.kind === 'external' (and for the terminal's http
-// branch). Shift+Cmd/Ctrl is the escape hatch: callers pass forceSystemBrowser
-// to bypass the setting entirely.
+// branch). Callers can pass forceSystemBrowser to bypass in-app routing or
+// forceInAppBrowser to select the Yiru browser explicitly.
 export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void {
-  const { worktreeId, forceSystemBrowser, sourceOwner } = opts
+  const { forceInAppBrowser, forceSystemBrowser, sourceOwner, worktreeId } = opts
   if (sourceOwner?.kind === 'unknown') {
     return
   }
@@ -75,7 +76,7 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
     sourceIsLocal &&
     !forceSystemBrowser &&
     Boolean(worktreeId) &&
-    state?.settings?.openLinksInApp === true
+    (forceInAppBrowser || state?.settings?.openLinksInApp === true)
 
   if (routeToYiru && worktreeId && state) {
     // Why: http clicks from inside a worktree should not push a worktree-switch

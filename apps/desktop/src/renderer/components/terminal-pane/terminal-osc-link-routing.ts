@@ -82,7 +82,10 @@ export function handleOscLink(
   if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
     openTerminalHttpLink(parsed.toString(), {
       worktreeId: deps.worktreeId,
-      forceSystemBrowser: Boolean(event?.shiftKey),
+      // Why: OSC 8 links must share plain-text terminal URL semantics and open
+      // in the system browser on Command/Ctrl+click, or Yiru on Shift+Command/Ctrl.
+      forceSystemBrowser: !event?.shiftKey,
+      forceInAppBrowser: Boolean(event?.shiftKey),
       requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
     })
     return true

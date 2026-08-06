@@ -13,6 +13,7 @@ import { buildWrappedLogicalLine, rangeForParsedFileLink } from './wrapped-termi
 type UrlLinkHitTestDeps = {
   worktreeId: string
   forceSystemBrowser?: boolean
+  forceInAppBrowser?: boolean
   requestOpenLinksInAppPreference?: TerminalLinkRoutingPreferenceRequester
 }
 
@@ -226,7 +227,10 @@ export function installHttpLinkClickFallback(
     // never established, while defaultPrevented avoids duplicate opens.
     const opened = openHttpLinkAtTerminalMouseEvent(terminal, event, {
       worktreeId: deps.worktreeId,
-      forceSystemBrowser: event.shiftKey,
+      // Why: the fallback must match WebLinksAddon's Command/Ctrl+click path,
+      // including when the link was not hovered before the click.
+      forceSystemBrowser: !event.shiftKey,
+      forceInAppBrowser: event.shiftKey,
       requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
     })
     if (opened) {
@@ -304,6 +308,11 @@ function rangeContainsBufferPosition(
 }
 
 export function openTerminalHttpLink(url: string, deps: UrlLinkHitTestDeps): void {
+  if (deps.forceInAppBrowser) {
+    openHttpLink(url, { worktreeId: deps.worktreeId, forceInAppBrowser: true })
+    return
+  }
+
   if (deps.forceSystemBrowser) {
     openHttpLink(url, { worktreeId: deps.worktreeId, forceSystemBrowser: true })
     return
