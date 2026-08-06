@@ -12,7 +12,7 @@ import { useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
 
-import type { SubmitActionProps } from './submit-action-props'
+import type { SubmitActionProps } from './props'
 
 export function SubmitAction({ disabled, label, onPress }: SubmitActionProps): React.JSX.Element {
   const { theme } = useUniwind()

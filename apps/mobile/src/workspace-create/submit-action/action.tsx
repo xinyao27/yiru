@@ -1,6 +1,6 @@
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 
-import type { SubmitActionProps } from './submit-action-props'
+import type { SubmitActionProps } from './props'
 
 export function SubmitAction({ disabled, label, onPress }: SubmitActionProps): React.JSX.Element {
   return (

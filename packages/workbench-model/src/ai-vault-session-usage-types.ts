@@ -1,3 +1,8 @@
+export type AiVaultSessionDayTokens = {
+  day: string
+  tokens: number
+}
+
 export type AiVaultSessionTokenUsage = {
   provider: string | null
   model: string | null

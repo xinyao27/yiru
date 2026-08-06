@@ -1,4 +1,10 @@
-import type { AiVaultSessionTokenUsage, TuiAgent } from './agent-types'
+import type { TuiAgent } from './agent-types'
+import type { AiVaultSessionPreviewMessage } from './ai-vault-session-preview-types'
+import type { AiVaultSessionSubagentInfo } from './ai-vault-session-subagent-types'
+import type {
+  AiVaultSessionDayTokens,
+  AiVaultSessionTokenUsage
+} from './ai-vault-session-usage-types'
 import type { ExecutionHostId, ExecutionHostScope } from './execution-host'
 import { commandSeparator, quoteStartupArg, type AgentStartupShell } from './shell-command'
 
@@ -69,28 +75,20 @@ const AI_VAULT_DEFAULT_COMMANDS: Record<AiVaultAgent, string> = {
   rovo: 'acli'
 }
 
-export type AiVaultSessionPreviewMessage = {
-  role: 'user' | 'assistant' | 'system' | 'tool' | 'unknown'
-  text: string
-  timestamp: string | null
-}
-
-// Terminal statuses come from <task-notification> records in the parent
-// transcript; 'running' is inferred from recent transcript activity.
-export type AiVaultSubagentRunStatus = 'running' | 'completed' | 'failed' | 'stopped'
-
-// Set only on Task subagent transcript rows (listed on demand under their
-// parent session); null for every top-level scanned session.
-export type AiVaultSessionSubagentInfo = {
-  parentSessionId: string
-  agentType: string | null
-  status: AiVaultSubagentRunStatus | null
-}
-
-export type AiVaultSessionDayTokens = {
-  day: string
-  tokens: number
-}
+export type {
+  AiVaultSessionDayTokens,
+  AiVaultSessionTokenUsage
+} from './ai-vault-session-usage-types'
+export type { AiVaultSessionPreviewMessage } from './ai-vault-session-preview-types'
+export type {
+  AiVaultSessionSubagentInfo,
+  AiVaultSubagentRunStatus
+} from './ai-vault-session-subagent-types'
+export {
+  aiVaultSessionRecoverableSignalCount,
+  isAiVaultSessionRecoverableEmpty,
+  isAiVaultSessionResumableContent
+} from './ai-vault-session-recovery'
 
 export type AiVaultSession = {
   id: string
@@ -140,40 +138,6 @@ export type AiVaultSubagentListArgs = {
 export type AiVaultSubagentListResult = {
   sessions: AiVaultSession[]
   issues: AiVaultScanIssue[]
-}
-
-// A session is only offered for normal resume when its transcript actually holds
-// conversation turns; resuming a zero-turn transcript lands in an empty session.
-// Conversation previews count as evidence too: some parsers (e.g. Grok, OpenCode
-// fallback schemas) only learn the turn count from metadata that may be absent.
-export function isAiVaultSessionResumableContent(
-  session: Pick<AiVaultSession, 'messageCount' | 'previewMessages'>
-): boolean {
-  return (
-    session.messageCount > 0 ||
-    session.previewMessages.some(
-      (message) => message.role === 'user' || message.role === 'assistant'
-    )
-  )
-}
-
-export function aiVaultSessionRecoverableSignalCount(
-  session: Pick<AiVaultSession, 'queuedMessageCount' | 'subagentTranscriptCount'>
-): number {
-  return Math.max(0, session.queuedMessageCount) + Math.max(0, session.subagentTranscriptCount)
-}
-
-// Zero-turn transcript that still carries recoverable content (queued prompts
-// and/or subagent transcripts). Surfaced distinctly instead of hidden as empty.
-export function isAiVaultSessionRecoverableEmpty(
-  session: Pick<
-    AiVaultSession,
-    'messageCount' | 'previewMessages' | 'queuedMessageCount' | 'subagentTranscriptCount'
-  >
-): boolean {
-  return (
-    !isAiVaultSessionResumableContent(session) && aiVaultSessionRecoverableSignalCount(session) > 0
-  )
 }
 
 export type AiVaultScanIssue = {

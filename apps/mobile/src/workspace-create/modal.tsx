@@ -59,7 +59,7 @@ import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
 import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { createWorkspaceFromComposerSource } from './source-workspace-create'
-import { SubmitAction } from './submit-action'
+import { SubmitAction } from './submit-action/action'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
