@@ -62,6 +62,7 @@ import type {
 import type { SpeechModelState } from '~shared/speech-types'
 import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '~shared/types'
 
+import { ScrollArea } from '../ui/scroll-area'
 import { registerWindowCloseGuard } from '../window-close-request-coordinator'
 import { AccountsPane } from './accounts-pane'
 import { AdvancedPane } from './advanced-pane'
@@ -163,6 +164,7 @@ const SETTINGS_NAV_GROUP_BY_ID = new Map<string, SettingsNavGroupDefinition>(
 
 const SHORTCUTS_ESCAPE_CONFIRM_TOAST_ID = 'shortcuts-escape-confirm'
 const SHORTCUTS_ESCAPE_CONFIRM_WINDOW_MS = 2200
+const SHELL_WIDTH_CLASS = '[--settings-shell-max-width:1040px]'
 // Why: native material must not flash through the opaque Settings canvas during entry.
 const SETTINGS_SHELL_ANIMATION_CLASS_NAME =
   "animate-[settings-shell-enter_180ms_ease-out] [[data-native-sidebar-material='true']_&]:animate-none"
@@ -1117,14 +1119,15 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
         ref={setSettingsRootNode}
         className={cn(
           'relative flex min-h-0 min-w-0 w-full flex-1 justify-center overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+          SHELL_WIDTH_CLASS,
           SETTINGS_SHELL_ANIMATION_CLASS_NAME
         )}
       >
         <div
           aria-hidden
-          className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_1040px)/2_+_var(--settings-sidebar-width)))]"
+          className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
         />
-        <div className="relative z-10 flex min-h-0 w-full max-w-[1040px] overflow-hidden">
+        <div className="relative z-10 flex min-h-0 w-full max-w-[var(--settings-shell-max-width)] overflow-hidden">
           {/* Why: preserve the final split surfaces while settings load so native
               sidebar material never flashes to an opaque full-window canvas. */}
           <div
@@ -1176,36 +1179,37 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       ref={setSettingsRootNode}
       className={cn(
         'relative flex min-h-0 min-w-0 w-full flex-1 overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+        SHELL_WIDTH_CLASS,
         SETTINGS_SHELL_ANIMATION_CLASS_NAME
       )}
     >
       <div
         aria-hidden
-        className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_1040px)/2_+_var(--settings-sidebar-width)))]"
+        className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
       />
-      <div
-        ref={setContentScrollNode}
-        className={cn(
-          'scrollbar-sleek relative z-10 min-h-0 min-w-0 w-full flex-1 overflow-x-hidden',
-          isFocusedShortcutsPane ? 'overflow-y-hidden' : 'overflow-y-auto'
-        )}
+      <div className="absolute inset-y-0 left-[max(0px,calc((100%_-_var(--settings-shell-max-width))/2))] z-20 flex min-h-0 w-[var(--settings-sidebar-width)]">
+        <SettingsSidebar
+          appearanceStyle={sidebarAppearanceStyle}
+          activeSectionId={activeSectionId}
+          generalGroups={generalNavGroups}
+          repoSections={repoNavSections}
+          hasRepos={repos.length > 0}
+          searchQuery={settingsSearchInputQuery}
+          searchInputRef={searchInputRef}
+          onBack={closeSettingsPageWithPromptGuard}
+          onSearchChange={setSettingsSearchQuery}
+          onSelectSection={scrollToSection}
+        />
+      </div>
+      <ScrollArea
+        viewportRef={setContentScrollNode}
+        hasVerticalScrollBar={!isFocusedShortcutsPane}
+        className="relative z-10 min-h-0 w-full min-w-0 flex-1"
+        viewportClassName={cn('overflow-x-hidden', isFocusedShortcutsPane && 'overflow-y-hidden')}
       >
         <div className="flex min-h-full w-full min-w-0 justify-center">
-          <div className="flex min-h-full w-full max-w-[1040px]">
-            <div className="sticky top-0 flex h-dvh min-h-0 w-[var(--settings-sidebar-width)] shrink-0 self-start">
-              <SettingsSidebar
-                appearanceStyle={sidebarAppearanceStyle}
-                activeSectionId={activeSectionId}
-                generalGroups={generalNavGroups}
-                repoSections={repoNavSections}
-                hasRepos={repos.length > 0}
-                searchQuery={settingsSearchInputQuery}
-                searchInputRef={searchInputRef}
-                onBack={closeSettingsPageWithPromptGuard}
-                onSearchChange={setSettingsSearchQuery}
-                onSelectSection={scrollToSection}
-              />
-            </div>
+          <div className="flex min-h-full w-full max-w-[var(--settings-shell-max-width)]">
+            <div aria-hidden className="w-[var(--settings-sidebar-width)] shrink-0" />
 
             {/* Why: only the left rail should reveal the OS material; Settings content
                 remains an opaque canvas for contrast and cross-platform parity. */}
@@ -1787,7 +1791,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
             </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   )
 }

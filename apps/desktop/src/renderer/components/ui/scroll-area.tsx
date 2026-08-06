@@ -5,6 +5,7 @@ import { cn } from '~renderer/lib/class-names'
 function ScrollArea({
   className,
   horizontalScrollBar,
+  hasVerticalScrollBar = true,
   viewportClassName,
   viewportRef,
   viewportTabIndex,
@@ -17,6 +18,7 @@ function ScrollArea({
   /** Renders the horizontal track for content that scrolls on both axes (grids,
    *  tables). base-ui hides it on its own when there is no horizontal overflow. */
   horizontalScrollBar?: boolean
+  hasVerticalScrollBar?: boolean
   /** Set e.g. -1 so the viewport can receive programmatic focus (explorer keyboard shortcuts after inline rename). */
   viewportTabIndex?: number
   viewportProps?: ScrollAreaPrimitive.Viewport.Props
@@ -39,7 +41,7 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      {hasVerticalScrollBar ? <ScrollBar /> : null}
       {horizontalScrollBar ? <ScrollBar orientation="horizontal" /> : null}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>

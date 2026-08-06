@@ -16,6 +16,7 @@ import { SetupGuideProgressRing } from '../setup-guide/progress-ring'
 import { ShortcutKeyCombo } from '../shortcut-key-combo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { ScrollArea } from '../ui/scroll-area'
 import { useSettingsSetupGuideProgress } from './setup-guide-progress'
 import type { SettingsSetupGuideProgress } from './setup-guide-progress'
 
@@ -235,8 +236,8 @@ export function SettingsSidebar({
         </div>
       ) : null}
 
-      <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-4">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-4 px-3 py-4">
           {generalGroups.map((group, groupIndex) => (
             <div
               key={group.id}
@@ -356,7 +357,7 @@ export function SettingsSidebar({
             )}
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </aside>
   )
 }
