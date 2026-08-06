@@ -544,6 +544,7 @@ overrides:
   vite: npm:@voidzero-dev/vite-plus-core@0.2.4
 
 patchedDependencies:
+  '@expo/ui@57.0.8': 164ac85a8777f72b99c1fb2377930ee78644e5651789357ba9da9489ab2ed47b
   '@pierre/diffs@1.3.0': 67564c4cb09430c9d8bb43c09784459097ccb6115b14b9e13f325b28e30a7dc1
   '@xterm/addon-ligatures@0.11.0-beta.287': 47405b9994b5acf1b4e90b49250358c1ca03649854d59560e7732b72fe336920
   '@xterm/addon-serialize@0.15.0-beta.287': c4f9f5ec7b05e0a31bfbe94cec8692941bca70b6badc5a066e27faa1ef644e66
@@ -994,7 +995,7 @@ importers:
         version: 0.1.1
       '@expo/ui':
         specifier: catalog:mobile
-        version: 57.0.8(9206458341e229b68f663dfdd12f7145)
+        version: 57.0.8(patch_hash=164ac85a8777f72b99c1fb2377930ee78644e5651789357ba9da9489ab2ed47b)(9206458341e229b68f663dfdd12f7145)
       '@noble/hashes':
         specifier: catalog:mobile
         version: 2.2.0
@@ -13119,7 +13120,7 @@ snapshots:
 
   '@expo/sudo-prompt@9.3.2': {}
 
-  '@expo/ui@57.0.8(9206458341e229b68f663dfdd12f7145)':
+  '@expo/ui@57.0.8(patch_hash=164ac85a8777f72b99c1fb2377930ee78644e5651789357ba9da9489ab2ed47b)(9206458341e229b68f663dfdd12f7145)':
     dependencies:
       expo: 57.0.8(87a17ec7da957b1fd79a0a857dcc3093)
       react: 19.2.3
@@ -18072,7 +18073,7 @@ snapshots:
       '@expo/log-box': 57.0.1(@expo/dom-webview@57.0.1)(expo@57.0.8)(react-native@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3)
       '@expo/metro-runtime': 57.0.7(@expo/log-box@57.0.1)(expo@57.0.8)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3)
       '@expo/schema-utils': 57.0.2
-      '@expo/ui': 57.0.8(9206458341e229b68f663dfdd12f7145)
+      '@expo/ui': 57.0.8(patch_hash=164ac85a8777f72b99c1fb2377930ee78644e5651789357ba9da9489ab2ed47b)(9206458341e229b68f663dfdd12f7145)
       '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.3)
       '@radix-ui/react-tabs': 1.1.17(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@react-native-masked-view/masked-view': 0.3.2(react-native@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3)
@@ -18155,7 +18156,7 @@ snapshots:
   expo-widgets@57.0.6(9206458341e229b68f663dfdd12f7145):
     dependencies:
       '@expo/plist': 0.8.1
-      '@expo/ui': 57.0.8(9206458341e229b68f663dfdd12f7145)
+      '@expo/ui': 57.0.8(patch_hash=164ac85a8777f72b99c1fb2377930ee78644e5651789357ba9da9489ab2ed47b)(9206458341e229b68f663dfdd12f7145)
       expo: 57.0.8(87a17ec7da957b1fd79a0a857dcc3093)
       react: 19.2.3
       react-native: 0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2)

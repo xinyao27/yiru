@@ -1,0 +1,55 @@
+diff --git a/build/swift-ui/ScrollView/index.d.ts b/build/swift-ui/ScrollView/index.d.ts
+--- a/build/swift-ui/ScrollView/index.d.ts
++++ b/build/swift-ui/ScrollView/index.d.ts
+@@ -35,4 +35,9 @@ export interface ScrollViewProps extends CommonViewModifierProps {
+      * @default true
+      */
+     showsIndicators?: boolean;
++    /**
++     * Hides the system scroll edge effect on iOS 26 and later.
++     * @default false
++     */
++    hidesEdgeEffects?: boolean;
+ }
+diff --git a/ios/ScrollViewComponent.swift b/ios/ScrollViewComponent.swift
+--- a/ios/ScrollViewComponent.swift
++++ b/ios/ScrollViewComponent.swift
+@@ -6,4 +6,5 @@ import ExpoModulesCore
+ public final class ScrollViewComponentProps: UIBaseViewProps {
+   @Field var axes: AxisOptions = .vertical
+   @Field var showsIndicators: Bool = true
++  @Field var hidesEdgeEffects: Bool = false
+ }
+@@ -19,6 +20,19 @@ public struct ScrollViewComponent: ExpoSwiftUI.View {
+   public var body: some View {
++#if compiler(>=6.2)
++    if #available(iOS 26.0, macOS 26.0, tvOS 26.0, *) {
++      ScrollView(props.axes.toAxis(), showsIndicators: props.showsIndicators) {
++        Children()
++      }
++      .scrollEdgeEffectHidden(props.hidesEdgeEffects, for: .horizontal)
++    } else {
++      ScrollView(props.axes.toAxis(), showsIndicators: props.showsIndicators) {
++        Children()
++      }
++    }
++#else
+     ScrollView(props.axes.toAxis(), showsIndicators: props.showsIndicators) {
+       Children()
+     }
++#endif
+   }
+ }
+diff --git a/src/swift-ui/ScrollView/index.tsx b/src/swift-ui/ScrollView/index.tsx
+--- a/src/swift-ui/ScrollView/index.tsx
++++ b/src/swift-ui/ScrollView/index.tsx
+@@ -43,4 +43,9 @@ export interface ScrollViewProps extends CommonViewModifierProps {
+    * @default true
+    */
+   showsIndicators?: boolean;
++  /**
++   * Hides the system scroll edge effect on iOS 26 and later.
++   * @default false
++   */
++  hidesEdgeEffects?: boolean;
+ }

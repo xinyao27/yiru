@@ -240,6 +240,7 @@ allowBuilds:
 overrides:
   vite: 'catalog:'
 patchedDependencies:
+  '@expo/ui@57.0.8': apps/mobile/config/patches/@expo__ui@57.0.8.patch
   '@pierre/diffs@1.3.0': apps/desktop/config/patches/@pierre__diffs@1.3.0.patch
   '@xterm/addon-ligatures@0.11.0-beta.287': apps/desktop/config/patches/@xterm__addon-ligatures@0.11.0-beta.287.patch
   '@xterm/addon-serialize@0.15.0-beta.287': apps/desktop/config/patches/@xterm__addon-serialize@0.15.0-beta.287.patch
