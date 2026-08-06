@@ -45,7 +45,27 @@
         "orbSolving": "求解中",
         "orbListening": "聆听中",
         "orbComposing": "创作中",
-        "orbShaping": "塑形中"
+        "orbShaping": "塑形中",
+        "orbS1": "S1 · 思考",
+        "orbS2": "S2 · 处理中",
+        "orbS3": "S3 · 工作中",
+        "orbS4": "S4 · 搜索中",
+        "orbS5": "S5 · 收尾中",
+        "orbB1": "B1 · 思考",
+        "orbB2": "B2 · 搜索中",
+        "orbB3": "B3 · 生成中",
+        "orbB4": "B4 · 求解中",
+        "orbB5": "B5 · 路由中",
+        "orbC1": "C1 · 加载中",
+        "orbC2": "C2 · 聆听中",
+        "orbC3": "C3 · 流式输出",
+        "orbC4": "C4 · 分析中",
+        "orbC5": "C5 · 编译中",
+        "orbM1": "M1 · 塑形",
+        "orbM2": "M2 · 扩展",
+        "orbM3": "M3 · 展开",
+        "orbM4": "M4 · 变换",
+        "orbM5": "M5 · 发散"
       }
     }
   },

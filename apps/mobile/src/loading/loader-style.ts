@@ -1,39 +1,25 @@
-// Why: ids mirror the expo-thinking-orbs OrbState union so a stored style can be
-// handed straight to the orb without a translation table.
-export const MOBILE_LOADER_STYLES = [
-  'working',
-  'searching',
-  'solving',
-  'listening',
-  'composing',
-  'shaping'
-] as const
+import {
+  DEFAULT_LOADER_VARIANT,
+  LOADER_VARIANTS,
+  LOADER_VARIANT_TASKS,
+  isLegacyLoaderVariant,
+  normalizeLoaderVariant,
+  type LoaderVariant
+} from '@yiru/workbench-model/loader'
 
-export type MobileLoaderStyle = (typeof MOBILE_LOADER_STYLES)[number]
+import { translate } from '../i18n/translate'
 
-export const DEFAULT_MOBILE_LOADER_STYLE: MobileLoaderStyle = 'working'
-
-const MOBILE_LOADER_STYLE_SET = new Set<MobileLoaderStyle>(MOBILE_LOADER_STYLES)
+export const MOBILE_LOADER_STYLES = LOADER_VARIANTS
+export type MobileLoaderStyle = LoaderVariant
+export const DEFAULT_MOBILE_LOADER_STYLE: MobileLoaderStyle = DEFAULT_LOADER_VARIANT
 
 export function normalizeMobileLoaderStyle(value: unknown): MobileLoaderStyle {
-  return MOBILE_LOADER_STYLE_SET.has(value as MobileLoaderStyle)
-    ? (value as MobileLoaderStyle)
-    : DEFAULT_MOBILE_LOADER_STYLE
+  return normalizeLoaderVariant(value)
 }
 
 export function getMobileLoaderStyleLabel(style: MobileLoaderStyle): string {
-  switch (style) {
-    case 'working':
-      return 'Working'
-    case 'searching':
-      return 'Searching'
-    case 'solving':
-      return 'Solving'
-    case 'listening':
-      return 'Listening'
-    case 'composing':
-      return 'Composing'
-    case 'shaping':
-      return 'Shaping'
-  }
+  const fallback = isLegacyLoaderVariant(style)
+    ? LOADER_VARIANT_TASKS[style]
+    : `${style} · ${LOADER_VARIANT_TASKS[style]}`
+  return translate(`mobile.appearance.loader.style.${style}`, fallback)
 }

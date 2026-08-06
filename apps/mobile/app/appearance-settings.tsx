@@ -12,7 +12,11 @@ import { MobileSegmentedControl, type MobileSegmentOption } from '~/components/s
 import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
-import { MOBILE_LOADER_STYLES, type MobileLoaderStyle } from '~/loading/loader-style'
+import {
+  getMobileLoaderStyleLabel,
+  MOBILE_LOADER_STYLES,
+  type MobileLoaderStyle
+} from '~/loading/loader-style'
 import { useMobileLoaderStyle } from '~/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
@@ -32,7 +36,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
       MOBILE_LOADER_STYLES.map((style) => ({
         id: style,
         value: style,
-        label: getLoaderStyleLabel(style),
+        label: getMobileLoaderStyleLabel(style),
         leading: <LoadingIndicator size={20} loaderStyle={style} />
       })),
     []
@@ -83,7 +87,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
                 {translate('mobile.appearance.loader.label', 'Loader')}
               </Text>
               <Text className="text-muted-foreground mt-1 text-xs">
-                {getLoaderStyleLabel(loaderStyle)}
+                {getMobileLoaderStyleLabel(loaderStyle)}
               </Text>
             </View>
             <View className="w-5 items-center">
@@ -113,22 +117,5 @@ function getThemeModeLabel(mode: MobileThemeMode): string {
       return translate('mobile.appearance.theme.light.label', 'Light')
     case 'dark':
       return translate('mobile.appearance.theme.dark.label', 'Dark')
-  }
-}
-
-function getLoaderStyleLabel(style: MobileLoaderStyle): string {
-  switch (style) {
-    case 'working':
-      return translate('mobile.appearance.loader.style.working', 'Working')
-    case 'searching':
-      return translate('mobile.appearance.loader.style.searching', 'Searching')
-    case 'solving':
-      return translate('mobile.appearance.loader.style.solving', 'Solving')
-    case 'listening':
-      return translate('mobile.appearance.loader.style.listening', 'Listening')
-    case 'composing':
-      return translate('mobile.appearance.loader.style.composing', 'Composing')
-    case 'shaping':
-      return translate('mobile.appearance.loader.style.shaping', 'Shaping')
   }
 }

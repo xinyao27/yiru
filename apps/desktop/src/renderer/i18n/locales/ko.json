@@ -45,7 +45,27 @@
         "orbSolving": "해결 중",
         "orbListening": "듣는 중",
         "orbComposing": "작성 중",
-        "orbShaping": "변형 중"
+        "orbShaping": "변형 중",
+        "orbS1": "S1 · Thinking",
+        "orbS2": "S2 · Processing",
+        "orbS3": "S3 · Working",
+        "orbS4": "S4 · Searching",
+        "orbS5": "S5 · Finalizing",
+        "orbB1": "B1 · Thinking",
+        "orbB2": "B2 · Searching",
+        "orbB3": "B3 · Generating",
+        "orbB4": "B4 · Solving",
+        "orbB5": "B5 · Routing",
+        "orbC1": "C1 · Loading",
+        "orbC2": "C2 · Listening",
+        "orbC3": "C3 · Streaming",
+        "orbC4": "C4 · Analyzing",
+        "orbC5": "C5 · Compiling",
+        "orbM1": "M1 · Shaping",
+        "orbM2": "M2 · Expanding",
+        "orbM3": "M3 · Unfolding",
+        "orbM4": "M4 · Transforming",
+        "orbM5": "M5 · Dispersing"
       }
     }
   },

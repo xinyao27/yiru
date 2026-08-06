@@ -51,6 +51,24 @@
       "require": "./dist/ui.js",
       "default": "./dist/ui.js"
     },
+    "./loader": {
+      "types": "./src/loader.ts",
+      "react-native": "./src/loader.ts",
+      "browser": "./src/loader.ts",
+      "development": "./src/loader.ts",
+      "import": "./dist/esm/loader.mjs",
+      "require": "./dist/loader.js",
+      "default": "./dist/loader.js"
+    },
+    "./loader-geometry": {
+      "types": "./src/loader-geometry.ts",
+      "react-native": "./src/loader-geometry.ts",
+      "browser": "./src/loader-geometry.ts",
+      "development": "./src/loader-geometry.ts",
+      "import": "./dist/esm/loader-geometry.mjs",
+      "require": "./dist/loader-geometry.js",
+      "default": "./dist/loader-geometry.js"
+    },
     "./workspace": {
       "types": "./src/workspace.ts",
       "react-native": "./src/workspace.ts",
