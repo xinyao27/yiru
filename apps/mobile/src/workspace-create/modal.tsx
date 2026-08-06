@@ -1,4 +1,3 @@
-import { Button } from '@expo/ui'
 import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
@@ -8,7 +7,6 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, Keyboard } from 'r
 
 import { MobileAgentIcon } from '~/components/agent-icon'
 import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
-import { ExpoUiHost } from '~/components/expo-ui-host'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
@@ -61,6 +59,7 @@ import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
 import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { createWorkspaceFromComposerSource } from './source-workspace-create'
+import { WorkspaceCreateSubmitAction } from './submit-action'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
@@ -852,14 +851,11 @@ function NewWorkspaceModalContent({
               {creating ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
-                <ExpoUiHost>
-                  <Button
-                    disabled={!canCreate}
-                    label={translate('mobile.newWorkspace.title', 'Create Workspace')}
-                    onPress={() => void handleCreate()}
-                    variant="filled"
-                  />
-                </ExpoUiHost>
+                <WorkspaceCreateSubmitAction
+                  disabled={!canCreate}
+                  label={translate('mobile.newWorkspace.title', 'Create Workspace')}
+                  onPress={() => void handleCreate()}
+                />
               )}
             </View>
           </>
