@@ -258,7 +258,7 @@ function AgentCapabilitySetupChecklist(props: {
 }): React.JSX.Element {
   return (
     <section className="mt-6">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
         {AGENT_CAPABILITY_SETUP_ROWS.map((row) => {
           const selected = props.value[row.id]
           const installStatus = props.installStatus[row.id]

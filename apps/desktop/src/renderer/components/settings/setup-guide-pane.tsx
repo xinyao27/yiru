@@ -71,7 +71,7 @@ export function SettingsSetupGuidePane(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-[min(740px,calc(100vh-14rem))] min-h-[540px] flex-col px-7 py-6">
+    <div className="flex min-w-0 flex-col">
       <div className="border-border/60 mb-6 flex shrink-0 flex-wrap items-center justify-between gap-4 border-b pb-5">
         <div className="min-w-0 space-y-1">
           <h3 className="text-foreground text-sm font-semibold">
@@ -102,7 +102,7 @@ export function SettingsSetupGuidePane(): React.JSX.Element {
           )}
         </Button>
       </div>
-      <div className="min-h-0 flex-1">
+      <div>
         <FeatureWallSetupChecklist
           layout="embedded"
           activeStep={activeStep}
