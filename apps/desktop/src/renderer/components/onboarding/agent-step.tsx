@@ -310,20 +310,16 @@ function AgentButton({
 }) {
   return (
     <Button
-      variant="outline"
-      size="xs"
+      variant="choice-card"
+      size="choice-row"
       type="button"
       data-agent-card
       aria-pressed={selected}
-      className={cn(
-        'h-auto justify-start gap-0 whitespace-normal font-normal focus-visible:bg-muted/60',
-        'group relative overflow-hidden p-3.5 text-left',
-        selected ? 'border-violet-500/60 bg-violet-500/10' : 'bg-muted/30 hover:bg-muted/60'
-      )}
+      className="relative overflow-hidden"
       onClick={onClick}
     >
       {selected ? (
-        <div className="absolute top-2 right-2 grid size-5 place-items-center bg-violet-500 text-white">
+        <div className="bg-primary text-primary-foreground absolute top-2 right-2 grid size-5 place-items-center">
           <Check className="size-3" strokeWidth={3} />
         </div>
       ) : null}

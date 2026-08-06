@@ -37,7 +37,7 @@ function ChromeMock({ dark }: { dark: boolean }) {
   const row = dark ? 'bg-white/10' : 'bg-black/10'
   const rowDim = dark ? 'bg-white/5' : 'bg-black/5'
   const tab = dark ? 'bg-[#1d2026] border-white/5' : 'bg-white border-black/5'
-  const accent = 'bg-violet-500/80'
+  const accent = 'bg-primary/80'
   return (
     <div className={cn('flex size-full', bg)}>
       <div className={cn('flex w-[34%] flex-col gap-1 border-r p-1.5', sidebar, sidebarBorder)}>

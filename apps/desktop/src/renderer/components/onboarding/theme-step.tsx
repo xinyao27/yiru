@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
 import { track } from '~renderer/lib/telemetry'
 import type { DiscoveryStatusEmitted, GhosttyImportPreview, GlobalSettings } from '~shared/types'
 
@@ -215,35 +214,32 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {themes.map(({ id, label, hint, icon: Icon }) => {
           const selected = theme === id
           return (
             <Button
-              variant="outline"
-              size="xs"
+              variant="choice-card"
+              size="choice-card"
               key={id}
-              className={cn(
-                'h-auto justify-start gap-0 whitespace-normal font-normal focus-visible:bg-muted/60',
-                'group overflow-hidden p-3 text-left',
-                selected ? 'border-violet-500/60 bg-violet-500/10' : 'bg-muted/30 hover:bg-muted/60'
-              )}
+              className="overflow-hidden"
+              aria-pressed={selected}
               onClick={() => applyOnboardingThemeSelection(id, onThemeChange, updateSettings)}
             >
-              <div className="border-border relative mb-3 h-24 overflow-hidden border">
+              <div className="border-border relative mb-3 h-24 w-full overflow-hidden border">
                 <ChromePreview variant={id} />
                 {selected && (
-                  <div className="absolute top-1.5 right-1.5 grid size-5 place-items-center bg-violet-500 text-white">
+                  <div className="bg-primary text-primary-foreground absolute top-1.5 right-1.5 grid size-5 place-items-center">
                     <Check className="size-3" strokeWidth={3} />
                   </div>
                 )}
               </div>
-              <div className="flex items-baseline justify-between gap-2">
-                <div className="text-foreground flex items-center gap-1.5 text-sm font-medium">
+              <div className="flex w-full min-w-0 items-baseline justify-between gap-2">
+                <div className="text-foreground flex min-w-0 items-center gap-1.5 text-sm font-medium">
                   <Icon className="text-muted-foreground size-3.5" />
-                  {label}
+                  <span className="truncate">{label}</span>
                 </div>
-                <div className="text-muted-foreground text-[11px]">{hint}</div>
+                <div className="text-muted-foreground shrink-0 text-[11px]">{hint}</div>
               </div>
             </Button>
           )

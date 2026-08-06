@@ -55,8 +55,8 @@ function getMetadataIconStyle(label: string): MetadataIconStyle {
   if (/(^|\s)(job\s*id|id)(\s|$)/.test(normalized)) {
     return {
       icon: Fingerprint,
-      iconClass: 'text-violet-400',
-      ringClass: 'bg-violet-500/10'
+      iconClass: 'text-primary',
+      ringClass: 'bg-primary/10'
     }
   }
   if (/time|run/.test(normalized)) {

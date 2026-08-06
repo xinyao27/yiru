@@ -44,6 +44,10 @@ const buttonVariants = cva(
         // border that remains legible while the user types.
         'picker-row':
           'text-foreground hover:bg-accent hover:text-accent-foreground aria-selected:border-border aria-selected:bg-accent aria-selected:text-accent-foreground',
+        // Why: visual choices need full-card activation while preserving the
+        // same semantic hover, focus, and persistent selection grammar as rows.
+        'choice-card':
+          'border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent aria-pressed:border-primary aria-pressed:bg-accent',
         // Why: inline actions floating above an editor need opaque popover
         // paint while retaining the standard outline interaction states.
         'popover-outline':
@@ -61,6 +65,10 @@ const buttonVariants = cva(
         // Why: multi-line list actions need content-driven height without bypassing Button chrome.
         'list-row': 'h-auto px-3 py-2',
         'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
+        'choice-card':
+          'h-auto w-full flex-col items-stretch justify-start gap-0 p-3 text-left font-normal whitespace-normal',
+        'choice-row':
+          'h-auto w-full justify-start gap-0 p-3.5 text-left font-normal whitespace-normal',
         chart: 'h-auto w-full p-0 whitespace-normal',
         'chart-plot': 'h-48 w-full p-0 whitespace-normal',
         'sidebar-row':
