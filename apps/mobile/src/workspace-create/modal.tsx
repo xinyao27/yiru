@@ -59,7 +59,7 @@ import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
 import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { createWorkspaceFromComposerSource } from './source-workspace-create'
-import { WorkspaceCreateSubmitAction } from './submit-action'
+import { SubmitAction } from './submit-action'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
@@ -851,7 +851,7 @@ function NewWorkspaceModalContent({
               {creating ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
-                <WorkspaceCreateSubmitAction
+                <SubmitAction
                   disabled={!canCreate}
                   label={translate('mobile.newWorkspace.title', 'Create Workspace')}
                   onPress={() => void handleCreate()}

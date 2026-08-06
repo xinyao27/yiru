@@ -12,17 +12,9 @@ import { useUniwind } from 'uniwind'
 import { useMobileGlassAvailable } from '~/components/glass/availability'
 import { mobileSwiftUiGlassButtonStyle } from '~/components/glass/swift-ui-button.ios'
 
-type WorkspaceCreateSubmitActionProps = {
-  disabled: boolean
-  label: string
-  onPress: () => void
-}
+import type { SubmitActionProps } from './submit-action-props'
 
-export function WorkspaceCreateSubmitAction({
-  disabled,
-  label,
-  onPress
-}: WorkspaceCreateSubmitActionProps): React.JSX.Element {
+export function SubmitAction({ disabled, label, onPress }: SubmitActionProps): React.JSX.Element {
   const { theme } = useUniwind()
   const isGlassAvailable = useMobileGlassAvailable()
   const modifiers = useMemo<ViewModifier[]>(
