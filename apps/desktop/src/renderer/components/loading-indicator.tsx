@@ -1,8 +1,10 @@
+import { isAICSSLoaderVariant } from '@yiru/workbench-model/loader'
 import { createContext, useContext } from 'react'
 import type React from 'react'
 import { cn } from '~renderer/lib/class-names'
 import { DEFAULT_LOADER_STYLE, normalizeLoaderStyle, type LoaderStyle } from '~shared/loader-style'
 
+import { LoaderOrb } from './loading/orb'
 import { ThinkingOrbLoader } from './thinking-orb-loader'
 
 const LoadingIndicatorStyleContext = createContext<LoaderStyle>(DEFAULT_LOADER_STYLE)
@@ -53,7 +55,11 @@ function LoadingIndicatorVisual({
         ...(dimension ? { width: dimension, height: dimension } : {})
       }}
     >
-      <ThinkingOrbLoader state={loaderStyle} />
+      {isAICSSLoaderVariant(loaderStyle) ? (
+        <LoaderOrb variant={loaderStyle} />
+      ) : (
+        <ThinkingOrbLoader state={loaderStyle} />
+      )}
     </span>
   )
 }

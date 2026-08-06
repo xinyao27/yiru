@@ -22,8 +22,8 @@ export function getTerminalHtmlFileOpenHint(): string {
 
 export function getTerminalUrlOpenHint(): string {
   return isMacPlatform()
-    ? '⌘+click to open or ⇧⌘+click for system browser'
-    : 'Ctrl+click to open or Shift+Ctrl+click for system browser'
+    ? '⌘+click for system browser or ⇧⌘+click for Yiru browser'
+    : 'Ctrl+click for system browser or Shift+Ctrl+click for Yiru browser'
 }
 
 export function getTerminalUrlSystemBrowserHint(): string {

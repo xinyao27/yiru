@@ -113,7 +113,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
       cursor.style.transition = ''
     }
 
-    // Why: sweeps the violet tint through the changes list once so the viewer
+    // Why: sweeps the primary tint through the changes list once so the viewer
     // sees the AI "reading" the staged diff before any text appears — the
     // file-row pulse is the read signal (the icons themselves no longer spin).
     async function pulseFileRows(holdLastMs = 0): Promise<void> {

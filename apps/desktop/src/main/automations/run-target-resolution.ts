@@ -46,7 +46,7 @@ export function resolveAutomationRunTarget(
     return {
       ok: false,
       error:
-        'Remote-server automation scheduling is not available from this Yiru client yet. Run this automation on the remote server or update Yiru when durable remote scheduling is available.'
+        'Coworking-host automation scheduling is not available from this Yiru client yet. Run this automation on the host or update Yiru when durable host scheduling is available.'
     }
   }
 

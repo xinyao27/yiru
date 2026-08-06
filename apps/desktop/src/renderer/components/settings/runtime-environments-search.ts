@@ -8,11 +8,11 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
   (): SettingsSearchEntry => ({
     title: translate(
       'auto.components.settings.runtime.environments.search.3517fb2ec0',
-      'Remote Yiru Servers'
+      'Coworking Hosts'
     ),
     description: translate(
       'auto.components.settings.runtime.environments.search.4575341c77',
-      'Manage Coworking-authorized hosts, generate a client pairing URL, or adjust the advanced default runtime.'
+      'Manage hosts authorized through Coworking or choose the active runtime.'
     ),
     keywords: [
       ...translateSearchKeyword(
@@ -25,11 +25,11 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.09568ccc65',
-        'server'
+        'host'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.d760866285',
-        'client'
+        'coworking'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.5cd7dca3b8',
@@ -37,15 +37,7 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.104f4d7dbd',
-        'pairing'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.runtime.environments.search.81444c4102',
-        'pairing url'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.runtime.environments.search.f1575f1e09',
-        'web client'
+        'authorization'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.45501ff2c3',
@@ -67,11 +59,11 @@ export const getWebRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
   (): SettingsSearchEntry => ({
     title: translate(
       'auto.components.settings.runtime.environments.search.3517fb2ec0',
-      'Remote Yiru Servers'
+      'Coworking Hosts'
     ),
     description: translate(
       'auto.components.settings.runtime.environments.search.baec27aa8f',
-      'Connect this browser to a saved Yiru server.'
+      'Use Coworking-authorized hosts from this browser.'
     ),
     keywords: [
       ...translateSearchKeyword(
@@ -84,11 +76,11 @@ export const getWebRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.09568ccc65',
-        'server'
+        'host'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.d760866285',
-        'client'
+        'coworking'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.5cd7dca3b8',
@@ -96,7 +88,7 @@ export const getWebRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.2bd988d041',
-        'pairing code'
+        'authorization'
       ),
       ...translateSearchKeyword(
         'auto.components.settings.runtime.environments.search.45501ff2c3',

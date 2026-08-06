@@ -817,14 +817,14 @@ function TermEntryView(props: { entry: TermEntry }): JSX.Element {
   if (entry.kind === 'tool') {
     return (
       <span>
-        <span className="text-violet-600 dark:text-violet-400">{entry.tool}</span>{' '}
+        <span className="text-primary">{entry.tool}</span>{' '}
         <span className="text-emerald-600 dark:text-emerald-400">{entry.arg}</span>
       </span>
     )
   }
   return (
     <span>
-      <span className="text-violet-600 dark:text-violet-400">{entry.tool}</span>{' '}
+      <span className="text-primary">{entry.tool}</span>{' '}
       <span className="text-muted-foreground">{entry.muted}</span>
     </span>
   )

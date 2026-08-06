@@ -46,7 +46,7 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
       // install. A PTY that survived a Yiru restart has stale PORT/TOKEN
       // baked into its env from the old instance — loading `endpoint.cmd`
       // (`set KEY=VALUE` lines) via `call` refreshes them so the hook
-      // reaches the current server. Falls through to PTY env if the file
+      // reaches the current runtime host. Falls through to PTY env if the file
       // is missing (first run / pre-endpoint-file / running outside Yiru).
       'if defined YIRU_AGENT_HOOK_ENDPOINT if exist "%YIRU_AGENT_HOOK_ENDPOINT%" call "%YIRU_AGENT_HOOK_ENDPOINT%" 2>nul',
       ...buildWindowsHookEnvironmentGuardLines(),

@@ -9,7 +9,7 @@ Usage: yiru <command> [options]
 
 Startup:
   open [directory]          Open Yiru or open a directory as a workspace
-  serve                     Start a headless Yiru runtime server
+  serve                     Start a headless Yiru runtime host
   status                    Show app/runtime/graph readiness
 
 Diagnostics:
@@ -21,12 +21,6 @@ Agent Discovery:
 Skills:
   skills list               List version-matched skill guides bundled with this Yiru CLI
   skills get                Print a version-matched skill guide as Markdown
-
-Environments:
-  environment add           Save a remote Yiru runtime from a pairing code
-  environment list          List saved remote Yiru runtimes
-  environment show          Show one saved remote Yiru runtime
-  environment rm            Remove a saved remote Yiru runtime
 
 Automations:
   automations list          List scheduled Yiru automations
@@ -97,7 +91,7 @@ Orchestration:
   orchestration task-update Update a task status
   orchestration dispatch    Dispatch a task to a terminal
   orchestration dispatch-show Show dispatch context for a task
-  orchestration worker-start Start a supervised worker locally or on a connected Yiru server
+  orchestration worker-start Start a supervised worker locally or through a connected Coworking host
   orchestration worker-show Inspect one supervised worker
   orchestration worker-read Read bounded output from one supervised worker
   orchestration worker-stop Stop one supervised worker
@@ -203,14 +197,10 @@ Browser Automation:
 Common Commands:
   yiru open [directory] [--json]
   yiru .
-  yiru serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--json]
+  yiru serve [--port <port>] [--mobile-pairing [--pairing-address <host>]] [--json]
   yiru status [--json]
   yiru diagnostics memory [--json]
   yiru agent-context [--json]
-  yiru environment add --name <name> --pairing-code <code> [--json]
-  yiru environment list [--json]
-  yiru environment show --environment <selector> [--json]
-  yiru environment rm --environment <selector> [--json]
   yiru worktree list [--repo <selector>] [--limit <n>] [--json]
   yiru worktree create --name <name> [--repo <selector>|--project <id> [--host <host-id>]|--project-host-setup <id>] [--agent <id>] [--prompt <text>] [--setup run|skip|inherit] [--base-branch <ref>] [--comment <text>] [--parent-worktree <selector>] [--no-parent] [--run-hooks] [--activate] [--json]
   yiru worktree show --worktree <selector> [--json]
@@ -262,14 +252,12 @@ Wait Options:
 
 Output Options:
   --json                    Emit machine-readable JSON instead of human text
-  --pairing-code <code>      Connect to a remote Yiru runtime using a yiru://pair?... code
-  --environment <selector>   Connect using a saved environment id or name
   --help                    Show this help message
 
 Behavior:
   Most commands require a running Yiru runtime. If Yiru is not open yet, run \`yiru open\` first.
   A single bare directory is shorthand for open, so \`yiru .\` opens the current directory.
-  Remote runtime access can also be supplied with YIRU_PAIRING_CODE or YIRU_ENVIRONMENT.
+  Remote host access is authorized through Coworking in the Yiru app.
   Use selectors for discovery and handles for repeated live terminal operations.
 
 Agent Sessions And Worktrees:

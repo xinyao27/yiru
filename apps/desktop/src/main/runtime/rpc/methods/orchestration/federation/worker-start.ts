@@ -53,14 +53,14 @@ export async function startFederatedWorker(args: {
   if (!status.capabilities?.includes(ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY)) {
     throw new OrchestrationError(
       'orchestration_migration_required',
-      `Connected server ${server.name} does not support the current orchestration contract. No effects were applied.`,
+      `Connected host ${server.name} does not support the current orchestration contract. No effects were applied.`,
       orchestrationMigrationData('runtime_capability_missing')
     )
   }
   if (!status.capabilities?.includes(ORCHESTRATION_FEDERATION_RUNTIME_CAPABILITY)) {
     throw new OrchestrationError(
       'capability_unsupported',
-      `Connected server ${server.name} does not support orchestration federation.`
+      `Connected host ${server.name} does not support orchestration federation.`
     )
   }
   const federationProtocolVersion = status.capabilities?.includes(
@@ -132,7 +132,7 @@ export async function startFederatedWorker(args: {
     if (remote.dispatchId !== started.dispatch.id) {
       throw new OrchestrationError(
         'resource_server_mismatch',
-        'The worker server returned a different Dispatch attachment.'
+        'The worker host returned a different Dispatch attachment.'
       )
     }
     if (remote.state === 'ready' && remote.worktreeId && remote.terminalHandle) {
@@ -170,14 +170,14 @@ export async function startFederatedWorker(args: {
       const worker = db.markWorkerStartUnknown(
         started.dispatch.id,
         remote.failedStage ?? 'remote_attach',
-        remote.lastError ?? 'The worker server reported an unknown start outcome.'
+        remote.lastError ?? 'The worker host reported an unknown start outcome.'
       )
       return federatedUnknownReceipt(worker, task.id, server.name)
     }
     const worker = db.failWorkerStart(
       started.dispatch.id,
       remote.failedStage ?? 'remote_attach',
-      remote.lastError ?? `The worker server returned ${remote.state}.`
+      remote.lastError ?? `The worker host returned ${remote.state}.`
     )
     return {
       runId,

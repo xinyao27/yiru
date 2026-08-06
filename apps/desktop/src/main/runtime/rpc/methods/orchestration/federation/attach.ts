@@ -162,7 +162,7 @@ export const ORCHESTRATION_FEDERATION_ATTACH_METHODS: RpcMethod[] = [
           worktree = await runtime.showManagedWorktree(params.worktree).catch(() => {
             throw new OrchestrationError(
               'worktree_not_found_on_server',
-              `Worktree ${params.worktree} was not found on the selected worker server.`
+              `Worktree ${params.worktree} was not found on the selected worker host.`
             )
           })
           effects.push(

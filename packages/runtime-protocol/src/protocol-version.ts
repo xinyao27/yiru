@@ -1,7 +1,7 @@
 import { REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY } from './runtime-capability-contract'
 
 // Why: declares the Yiru runtime RPC compatibility contract. Desktop,
-// headless server, CLI, and mobile builds may drift in app version, but
+// headless runtime, CLI, and mobile builds may drift in app version, but
 // they must agree on this protocol range before runtime RPCs are allowed.
 //
 // Bump RUNTIME_PROTOCOL_VERSION when:
@@ -14,9 +14,9 @@ import { REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY } from './runtime-capability-
 //   - Adding new optional fields on existing methods.
 //   - Adding new ignorable event types.
 //
-// Bump MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION when a runtime server must
+// Bump MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION when a runtime host must
 // refuse older clients. Bump MIN_COMPATIBLE_RUNTIME_SERVER_VERSION when
-// this client build requires a newer server. Exact app-version equality is
+// this client build requires a newer host. Exact app-version equality is
 // never required; these numbers define the supported compatibility window.
 
 export const RUNTIME_PROTOCOL_VERSION = 3

@@ -14,9 +14,7 @@ export function scheduleSharedControlReconnectOrFinish(args: {
   open: () => void
 }): { timer: ReturnType<typeof setTimeout> | null; reconnectAttempt: number } {
   if (args.reconnectAttempt >= args.delaysMs.length) {
-    const error = remoteRuntimeUnavailableError(
-      'Remote Yiru runtime connection could not be restored.'
-    )
+    const error = remoteRuntimeUnavailableError('Runtime host connection could not be restored.')
     for (const subscription of Array.from(args.subscriptions.values())) {
       finishSharedControlSubscription(args.subscriptions, subscription, true, error)
     }

@@ -112,6 +112,7 @@ function UsageRefreshButton(): React.JSX.Element {
   const refreshClaudeUsage = useAppStore((state) => state.refreshClaudeUsage)
   const refreshCodexUsage = useAppStore((state) => state.refreshCodexUsage)
   const refreshOpenCodeUsage = useAppStore((state) => state.refreshOpenCodeUsage)
+  const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const recordFeatureInteraction = useAppStore((state) => state.recordFeatureInteraction)
   const isScanning =
     claudeScanState === null ||
@@ -123,7 +124,9 @@ function UsageRefreshButton(): React.JSX.Element {
 
   const refreshUsage = (): void => {
     recordFeatureInteraction('usage-tracking')
-    void Promise.all([refreshClaudeUsage(), refreshCodexUsage(), refreshOpenCodeUsage()])
+    void Promise.all([refreshClaudeUsage(), refreshCodexUsage(), refreshOpenCodeUsage()]).then(() =>
+      fetchStatsSummary(true)
+    )
   }
 
   return (

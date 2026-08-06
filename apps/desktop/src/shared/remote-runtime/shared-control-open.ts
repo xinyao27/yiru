@@ -82,7 +82,7 @@ export function openSharedControlSocket(
       }
       liveness.onDead(
         remoteRuntimeUnavailableError(
-          'Remote Yiru runtime stopped responding; resetting the control connection.'
+          'Runtime host stopped responding; resetting the control connection.'
         )
       )
     },

@@ -106,7 +106,7 @@ type RuntimeFileWatchEvent =
 const REMOTE_UPLOAD_BASE64_CHUNK_CHARS = 512 * 1024
 const REMOTE_DOWNLOAD_CHUNK_BYTES = 384 * 1024
 const REMOTE_DOWNLOAD_UPDATE_REQUIRED_MESSAGE =
-  'Remote file download requires a newer Yiru server. Update the headless server and try again.'
+  'Remote file download requires a newer runtime host. Update the runtime host and try again.'
 
 type RemoteFileDownloadArgs = NonNullable<ReturnType<typeof getRemoteFileArgs>>
 
@@ -318,7 +318,7 @@ async function remoteChunkedDownloadAvailable(
     )
     return true
   } catch (error) {
-    // Why: compatible older headless servers may lack chunked downloads while
+    // Why: compatible older runtime hosts may lack chunked downloads while
     // still supporting preview-sized file reads that can complete the request.
     if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
       return false

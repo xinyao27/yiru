@@ -4,20 +4,19 @@ import { GLOBAL_FLAGS } from '../args'
 export const SERVE_COMMAND_SPECS: CommandSpec[] = [
   {
     path: ['serve'],
-    summary: 'Start a Yiru runtime server without opening a desktop window',
-    usage:
-      'yiru serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'port', 'pairing-address', 'mobile-pairing', 'no-pairing'],
+    summary: 'Start Yiru without opening a desktop window',
+    usage: 'yiru serve [--port <port>] [--mobile-pairing [--pairing-address <host>]] [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'port', 'pairing-address', 'mobile-pairing'],
     notes: [
       'Runs in the foreground and prints the runtime endpoint. Stop it with Ctrl+C.',
-      'Use --pairing-address when clients should connect through a LAN, Tailscale, SSH-forward, or public tunnel address.',
-      'Use --mobile-pairing to print a mobile-scoped pairing QR/link instead of the default runtime-environment pairing link.',
-      'When the web client bundle is available, the server also prints a browser URL with the pairing data embedded.'
+      'Desktop-to-desktop connections are managed through Coworking.',
+      'Use --mobile-pairing to print a Yiru Mobile pairing QR/link.',
+      'Use --pairing-address with --mobile-pairing to advertise a reachable phone-facing address.'
     ],
     examples: [
       'yiru serve',
       'yiru serve --json',
-      'yiru serve --port 6768 --pairing-address 100.64.1.20',
+      'yiru serve --mobile-pairing',
       'yiru serve --pairing-address 100.64.1.20 --mobile-pairing'
     ]
   }

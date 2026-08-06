@@ -65,30 +65,31 @@ export function TerminalPaneView({
       // Why: inactive terminal WebViews stay mounted to preserve xterm state,
       // while touch and visibility are disabled until the tab is active again.
       pointerEvents={active ? 'auto' : 'none'}
-      className={cn('absolute inset-0', !active && 'opacity-0')}
+      // Why: keep the native WebView as the pane's direct flex child; an extra
+      // absolute flex wrapper can leave iOS with a stale WebView height after
+      // the tab strip or terminal dock changes size.
+      className={cn('absolute inset-0 px-3', !active && 'opacity-0')}
       style={[keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] }]}
     >
-      <View className="absolute inset-0 px-3">
-        <TerminalWebView
-          ref={setRef}
-          className="flex-1"
-          terminalTheme={terminalTheme}
-          textScale={textScale}
-          onWebReady={() => onWebReady(handle)}
-          onSelectionMode={(a) => onSelectionMode(handle, a)}
-          onSelectionCopy={(t) => onSelectionCopy(handle, t)}
-          onSelectionEvicted={() => onSelectionEvicted(handle)}
-          onModesChanged={(m) => onModesChanged(handle, m)}
-          onKeyboardAvoidanceMetrics={(m) => onKeyboardAvoidanceMetrics(handle, m)}
-          onHaptic={onHaptic}
-          onTerminalInput={(bytes) => onTerminalInput(handle, bytes)}
-          onTerminalQueryReply={(bytes) => onTerminalQueryReply(handle, bytes)}
-          onTerminalTap={() => onTerminalTap(handle)}
-          onFileTap={(pathText, line, column) => onFileTap(handle, pathText, line, column)}
-          onOpenUrl={(url) => onOpenUrl(handle, url)}
-          onTextScaleChange={onTextScaleChange}
-        />
-      </View>
+      <TerminalWebView
+        ref={setRef}
+        className="flex-1"
+        terminalTheme={terminalTheme}
+        textScale={textScale}
+        onWebReady={() => onWebReady(handle)}
+        onSelectionMode={(a) => onSelectionMode(handle, a)}
+        onSelectionCopy={(t) => onSelectionCopy(handle, t)}
+        onSelectionEvicted={() => onSelectionEvicted(handle)}
+        onModesChanged={(m) => onModesChanged(handle, m)}
+        onKeyboardAvoidanceMetrics={(m) => onKeyboardAvoidanceMetrics(handle, m)}
+        onHaptic={onHaptic}
+        onTerminalInput={(bytes) => onTerminalInput(handle, bytes)}
+        onTerminalQueryReply={(bytes) => onTerminalQueryReply(handle, bytes)}
+        onTerminalTap={() => onTerminalTap(handle)}
+        onFileTap={(pathText, line, column) => onFileTap(handle, pathText, line, column)}
+        onOpenUrl={(url) => onOpenUrl(handle, url)}
+        onTextScaleChange={onTextScaleChange}
+      />
     </View>
   )
 }

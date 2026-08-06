@@ -1388,7 +1388,7 @@ function watchWindowsRuntimeFileExplorer(
   }
 
   // Why: Parcel probes Watchman before the Windows backend and its native
-  // watcher can abort the headless server process. For remote Windows runtimes,
+  // watcher can abort the headless runtime process. For remote Windows runtimes,
   // a conservative overflow refresh is safer than a process-wide native crash.
   const watcher = watchFs(rootPath, { recursive: true }, scheduleOverflow)
   const onClose = (): void => {

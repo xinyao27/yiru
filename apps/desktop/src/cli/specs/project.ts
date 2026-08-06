@@ -27,7 +27,7 @@ export const PROJECT_COMMAND_SPECS: CommandSpec[] = [
     usage:
       'yiru project setup-existing-folder --project <id> --host <host-id> --path <path> [--kind git|folder] [--display-name <name>] [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'project', 'host', 'path', 'kind', 'display-name'],
-    notes: ['For remote runtimes, --path must be an absolute path on the remote server.'],
+    notes: ['For Coworking hosts, --path must be an absolute path on that host.'],
     examples: [
       'yiru project setup-existing-folder --project github:xinyao27/yiru --host local --path ~/yiru',
       'yiru project setup-existing-folder --project github:xinyao27/yiru --host runtime:gpu --path /home/me/yiru --kind git --json'
@@ -40,8 +40,7 @@ export const PROJECT_COMMAND_SPECS: CommandSpec[] = [
       'yiru project setup-clone --project <id> --host <host-id> --url <clone-url> --destination <path> [--display-name <name>] [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'project', 'host', 'url', 'destination', 'display-name'],
     notes: [
-      'For remote runtimes, --destination must be an absolute parent directory on the remote server.',
-      'SSH targets are cloned through the desktop UI because the desktop client owns SSH connections.'
+      'For Coworking hosts, --destination must be an absolute parent directory on that host.'
     ],
     examples: [
       'yiru project setup-clone --project github:xinyao27/yiru --host local --url https://github.com/xinyao27/yiru.git --destination ~/src',

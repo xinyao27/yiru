@@ -12,7 +12,6 @@ import { COMPUTER_HANDLERS } from './handlers/computer'
 import { CORE_HANDLERS } from './handlers/core'
 import { DIAGNOSTICS_HANDLERS } from './handlers/diagnostics'
 import { EMULATOR_HANDLERS } from './handlers/emulator'
-import { ENVIRONMENT_HANDLERS } from './handlers/environment'
 import { FILE_HANDLERS } from './handlers/file'
 import { INTROSPECTION_HANDLERS } from './handlers/introspection'
 import { ORCHESTRATION_HANDLERS } from './handlers/orchestration'
@@ -62,7 +61,6 @@ function buildHandlers(): Map<string, CommandHandler> {
     DIAGNOSTICS_HANDLERS,
     INTROSPECTION_HANDLERS,
     MOBILE_HANDLERS,
-    ENVIRONMENT_HANDLERS,
     SKILL_HANDLERS
   ]
   for (const group of groups) {

@@ -30,7 +30,10 @@ export function handleTerminalWebLinkClick(
     deps.terminal &&
     openHttpLinkAtTerminalMouseEvent(deps.terminal, event, {
       worktreeId: deps.worktreeId,
-      forceSystemBrowser: Boolean(event.shiftKey),
+      // Why: terminal Command/Ctrl+click is the explicit system-browser
+      // gesture; Shift+Command/Ctrl is the explicit Yiru-browser escape hatch.
+      forceSystemBrowser: !event.shiftKey,
+      forceInAppBrowser: event.shiftKey,
       requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
     })
   ) {

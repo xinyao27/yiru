@@ -159,7 +159,7 @@ catalogs:
     react-native: '*'
   mobile:
     '@expo/material-symbols': 0.1.1
-    '@expo/ui': 57.0.8
+    '@expo/ui': 57.0.9
     '@noble/hashes': 2.2.0
     '@react-native-async-storage/async-storage': 2.2.0
     '@react-navigation/native': 7.3.14
@@ -240,6 +240,7 @@ allowBuilds:
 overrides:
   vite: 'catalog:'
 patchedDependencies:
+  '@expo/ui@57.0.9': apps/mobile/config/patches/@expo__ui@57.0.9.patch
   '@pierre/diffs@1.3.0': apps/desktop/config/patches/@pierre__diffs@1.3.0.patch
   '@xterm/addon-ligatures@0.11.0-beta.287': apps/desktop/config/patches/@xterm__addon-ligatures@0.11.0-beta.287.patch
   '@xterm/addon-serialize@0.15.0-beta.287': apps/desktop/config/patches/@xterm__addon-serialize@0.15.0-beta.287.patch

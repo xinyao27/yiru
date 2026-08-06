@@ -125,7 +125,7 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
       "Write-Output '{}'",
       '$inputData = [Console]::In.ReadToEnd()',
       // Why: endpoint.cmd is cmd syntax, not PowerShell. Parse its `set KEY=...`
-      // lines so surviving PTYs can refresh to the current Yiru server.
+      // lines so surviving PTYs can refresh to the current runtime host.
       'if ($env:YIRU_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT)) {',
       '  try {',
       '    Get-Content -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT | ForEach-Object {',

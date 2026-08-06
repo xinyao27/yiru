@@ -79,7 +79,7 @@ function getHostSetupAvailability(host: ExecutionHostRegistryEntry): {
       isAvailable: false,
       detail: translate(
         'auto.components.settings.RepositoryPane.hostSetupBlockedVersion',
-        'Yiru server version is incompatible'
+        'Runtime host version is incompatible'
       )
     }
   }

@@ -6,13 +6,10 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { DeviceScope } from '~shared/runtime-types'
 import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 import { DEVICE_REGISTRY_FILENAME } from './mobile-pairing-files'
 import { isRpcAccessTier, type RpcAccessTier } from './rpc/access'
-
-export type { DeviceScope }
 
 type DeviceEntryBase = {
   deviceId: string
@@ -37,11 +34,17 @@ export type CoworkingHostDeviceEntry = DeviceEntryBase & {
   revokedAt: number | null
 }
 
-export type DeviceEntry =
-  | (DeviceEntryBase & { scope: 'mobile' | 'runtime' })
-  | CoworkingHostDeviceEntry
+export type MobileDeviceEntry = DeviceEntryBase & { scope: 'mobile' }
 
-type LegacyRelayDeviceEntry = DeviceEntry & {
+export type DeviceEntry = MobileDeviceEntry | CoworkingHostDeviceEntry
+
+type StoredDeviceEntry = DeviceEntryBase & {
+  scope?: unknown
+  subject?: { nodeId?: unknown; userDisplayName?: unknown }
+  hostScopeKey?: unknown
+  tier?: unknown
+  expiresAt?: unknown
+  revokedAt?: unknown
   relayBinding?: unknown
   mobilePairingConnectionMode?: unknown
 }
@@ -59,7 +62,7 @@ function isNonEmptyString(value: unknown): value is string {
  * default — that would hand a broken host grant the phone-pairing powers
  * instead of discarding it. Returned as an array so `load` can drop entries.
  */
-function readStoredDeviceEntry(device: LegacyRelayDeviceEntry): DeviceEntry[] {
+function readStoredDeviceEntry(device: StoredDeviceEntry): DeviceEntry[] {
   const base = {
     deviceId: device.deviceId,
     name: device.name,
@@ -68,11 +71,10 @@ function readStoredDeviceEntry(device: LegacyRelayDeviceEntry): DeviceEntry[] {
     lastSeenAt: device.lastSeenAt
   }
   if (device.scope === 'coworking-host') {
-    const grant = device as Partial<CoworkingHostDeviceEntry>
     if (
-      !isNonEmptyString(grant.hostScopeKey) ||
-      !isNonEmptyString(grant.subject?.nodeId) ||
-      !isNonEmptyString(grant.subject?.userDisplayName)
+      !isNonEmptyString(device.hostScopeKey) ||
+      !isNonEmptyString(device.subject?.nodeId) ||
+      !isNonEmptyString(device.subject?.userDisplayName)
     ) {
       return []
     }
@@ -80,19 +82,30 @@ function readStoredDeviceEntry(device: LegacyRelayDeviceEntry): DeviceEntry[] {
       {
         ...base,
         scope: 'coworking-host',
-        subject: grant.subject,
-        hostScopeKey: grant.hostScopeKey,
+        subject: {
+          nodeId: device.subject.nodeId,
+          userDisplayName: device.subject.userDisplayName
+        },
+        hostScopeKey: device.hostScopeKey,
         // Why: an unrecognised persisted tier falls back to the least power
         // rather than the most — a corrupted record must not escalate.
-        tier: isRpcAccessTier(grant.tier) ? grant.tier : 'read',
-        expiresAt: typeof grant.expiresAt === 'number' ? grant.expiresAt : null,
-        revokedAt: typeof grant.revokedAt === 'number' ? grant.revokedAt : null
+        tier: isRpcAccessTier(device.tier) ? device.tier : 'read',
+        expiresAt: typeof device.expiresAt === 'number' ? device.expiresAt : null,
+        revokedAt: typeof device.revokedAt === 'number' ? device.revokedAt : null
       }
     ]
   }
+  // Why: runtime-scoped tokens came from the removed direct server pairing
+  // flow. Dropping them on load revokes that access while preserving phones
+  // and Coworking grants.
+  if (device.scope === 'runtime') {
+    return []
+  }
   // Why: older registries only existed for phone pairing. Treat missing
   // scope as mobile so legacy device tokens do not gain new CLI powers.
-  return [{ ...base, scope: device.scope === 'runtime' ? 'runtime' : 'mobile' }]
+  return device.scope === undefined || device.scope === 'mobile'
+    ? [{ ...base, scope: 'mobile' }]
+    : []
 }
 
 export class DeviceRegistry {
@@ -111,12 +124,12 @@ export class DeviceRegistry {
     }
   }
 
-  addDevice(name: string, scope: 'mobile' | 'runtime' = 'mobile'): DeviceEntry {
-    const entry: DeviceEntry = {
+  addDevice(name: string): MobileDeviceEntry {
+    const entry: MobileDeviceEntry = {
       deviceId: randomUUID(),
       name,
       token: randomBytes(24).toString('hex'),
-      scope,
+      scope: 'mobile',
       pairedAt: Date.now(),
       lastSeenAt: 0
     }
@@ -131,20 +144,23 @@ export class DeviceRegistry {
   // copy-button flow that encourages regeneration) leaves an orphaned token
   // forever. Returns an existing never-scanned entry if present; otherwise
   // mints a new one and drops any stale pending entries.
-  getOrCreatePendingDevice(name: string, scope: 'mobile' | 'runtime' = 'mobile'): DeviceEntry {
-    const existing = this.devices.find((d) => d.lastSeenAt === 0 && d.scope === scope)
+  getOrCreatePendingDevice(name: string): MobileDeviceEntry {
+    const existing = this.devices.find(
+      (device): device is MobileDeviceEntry => device.lastSeenAt === 0 && device.scope === 'mobile'
+    )
     if (existing) {
       return existing
     }
-    return this.addDevice(name, scope)
+    return this.addDevice(name)
   }
 
   // Why: local development reopens the same simulator on every `pnpm dev`.
   // Reusing its named credential prevents one paired-device row per restart.
-  getOrCreateNamedDevice(name: string, scope: 'mobile' | 'runtime' = 'mobile'): DeviceEntry {
+  getOrCreateNamedDevice(name: string): MobileDeviceEntry {
     return (
-      this.devices.find((device) => device.name === name && device.scope === scope) ??
-      this.addDevice(name, scope)
+      this.devices.find(
+        (device): device is MobileDeviceEntry => device.name === name && device.scope === 'mobile'
+      ) ?? this.addDevice(name)
     )
   }
 
@@ -154,9 +170,11 @@ export class DeviceRegistry {
   // this, getOrCreatePendingDevice keeps returning the same token forever
   // until a phone actually pairs, so users have no way to revoke a leaked
   // pre-pairing token.
-  rotatePendingDevice(name: string, scope: 'mobile' | 'runtime' = 'mobile'): DeviceEntry {
-    this.devices = this.devices.filter((d) => d.lastSeenAt !== 0 || d.scope !== scope)
-    return this.addDevice(name, scope)
+  rotatePendingDevice(name: string): MobileDeviceEntry {
+    this.devices = this.devices.filter(
+      (device) => device.lastSeenAt !== 0 || device.scope !== 'mobile'
+    )
+    return this.addDevice(name)
   }
 
   // Why: the Coworking consent moment issues the credential over the already
@@ -213,10 +231,6 @@ export class DeviceRegistry {
     return this.devices.find((d) => d.deviceId === deviceId) ?? null
   }
 
-  getPendingDevice(scope: DeviceScope = 'mobile'): DeviceEntry | null {
-    return this.devices.find((device) => device.lastSeenAt === 0 && device.scope === scope) ?? null
-  }
-
   listDevices(): readonly DeviceEntry[] {
     return this.devices
   }
@@ -228,7 +242,7 @@ export class DeviceRegistry {
     }
     // Why: expiry and revocation are enforced here rather than at each call site,
     // so a withdrawn grant cannot survive by reaching a transport that forgot to
-    // re-check. Mobile/runtime devices carry neither field and are unaffected.
+    // re-check. Mobile devices carry neither field and are unaffected.
     if (device.scope === 'coworking-host') {
       if (device.revokedAt !== null) {
         return null
@@ -255,21 +269,19 @@ export class DeviceRegistry {
     }
     try {
       hardenExistingSecureFile(this.registryPath)
-      const parsed = JSON.parse(
-        readFileSync(this.registryPath, 'utf-8')
-      ) as LegacyRelayDeviceEntry[]
+      const parsed = JSON.parse(readFileSync(this.registryPath, 'utf-8')) as StoredDeviceEntry[]
       const removedLegacyRelayFields = parsed.some(
         (device) =>
           Object.hasOwn(device, 'relayBinding') ||
           Object.hasOwn(device, 'mobilePairingConnectionMode')
       )
       this.devices = parsed.flatMap((device) => readStoredDeviceEntry(device))
-      if (removedLegacyRelayFields) {
+      if (removedLegacyRelayFields || this.devices.length !== parsed.length) {
         try {
           this.save()
         } catch {
-          // Keep direct pairing usable in memory; the legacy fields trigger
-          // another best-effort rewrite on the next startup.
+          // Keep valid mobile and Coworking access usable in memory; the stale
+          // entries trigger another best-effort rewrite on the next startup.
         }
       }
     } catch {

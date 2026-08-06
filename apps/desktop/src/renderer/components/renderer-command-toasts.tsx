@@ -23,7 +23,7 @@ function presentRendererCommandResult(result: RendererCommandResult): void {
       presentSparsePresetResult(result)
       return
     case 'runtime-environment-switch-failed':
-      toast.error(translate('auto.store.slices.settings.e12dab333b', 'Failed to switch servers'), {
+      toast.error(translate('auto.store.slices.settings.e12dab333b', 'Failed to switch hosts'), {
         description: result.error
       })
       return
@@ -53,7 +53,7 @@ function presentRendererCommandResult(result: RendererCommandResult): void {
           id: 'runtime-scope-forbidden',
           description: translate(
             'auto.store.slices.worktrees.runtimeScopeForbiddenDescription',
-            'Workspaces are unavailable on a mobile-scope pairing. Reconnect using the browser access link from Settings → Runtime Environments → Share this Yiru server.'
+            'Workspaces are unavailable on a mobile-scope connection. Ask the host owner to authorize this client through Coworking for full workspace access.'
           )
         }
       )

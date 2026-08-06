@@ -10,12 +10,14 @@ import {
   accumulatorFoldResumeState,
   addPreviewContent,
   addPreviewMessage,
+  addSessionTokenUsage,
   addSessionTokens,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
   updateTimeline
 } from './scanner-accumulator'
+import { normalizeTokenUsage } from './scanner-token-values'
 import type { FileWithMtime, ResumableSessionParseState, SessionAccumulator } from './scanner-types'
 import {
   arrayValue,
@@ -105,7 +107,7 @@ export function consumeRovoHistoryEntry(
   if (!record) {
     return
   }
-  updateTimeline(accumulator, extractString(record.timestamp))
+  updateTimeline(accumulator, record.timestamp)
   const role = extractString(record.role) ?? rovoRoleFromKind(record.kind)
   if (role !== 'user' && role !== 'assistant') {
     return
@@ -199,7 +201,7 @@ function consumeMessageGraphRecordLine(accumulator: SessionAccumulator, line: st
   if (!record) {
     return
   }
-  updateTimeline(accumulator, extractString(record.timestamp))
+  updateTimeline(accumulator, record.timestamp)
   if (record.type === 'session') {
     const sessionId = extractString(record.id)
     if (sessionId) {
@@ -213,6 +215,7 @@ function consumeMessageGraphRecordLine(accumulator: SessionAccumulator, line: st
     // session shows its model before the first assistant reply lands.
     accumulator.model =
       extractString(record.modelId) ?? extractString(record.model) ?? accumulator.model
+    accumulator.provider = extractString(record.provider) ?? accumulator.provider
     return
   }
   if (record.type !== 'message') {
@@ -221,14 +224,29 @@ function consumeMessageGraphRecordLine(accumulator: SessionAccumulator, line: st
   const message = asRecord(record.message)
   const role = extractString(message?.role)
   if (role === 'user' || role === 'assistant') {
+    const messageTimestamp = message?.timestamp ?? record.timestamp
+    updateTimeline(accumulator, messageTimestamp)
     accumulator.messageCount++
     if (role === 'user') {
       accumulator.title ??= extractMessageText(message)
     } else {
-      accumulator.model = extractString(message?.model) ?? accumulator.model
-      addSessionTokens(accumulator, tokenTotal(message?.usage), record.timestamp)
+      accumulator.model =
+        extractString(message?.model) ?? extractString(record.model) ?? accumulator.model
+      accumulator.provider =
+        extractString(message?.provider) ?? extractString(record.provider) ?? accumulator.provider
+      const usage = normalizeTokenUsage(message?.usage ?? record.usage)
+      if (usage) {
+        addSessionTokenUsage(accumulator, {
+          ...usage,
+          provider: accumulator.provider,
+          model: accumulator.model,
+          timestamp: messageTimestamp
+        })
+      } else {
+        addSessionTokens(accumulator, tokenTotal(message?.usage ?? record.usage), messageTimestamp)
+      }
     }
-    addPreviewContent(accumulator, role, message?.content, record.timestamp)
+    addPreviewContent(accumulator, role, message?.content, messageTimestamp)
   }
 }
 

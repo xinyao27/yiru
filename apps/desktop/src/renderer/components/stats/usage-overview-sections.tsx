@@ -136,7 +136,7 @@ export function DailyIntensityGrid({
           <p className="text-muted-foreground text-xs">
             {translate(
               'auto.components.stats.usage.overview.sections.f28ff1f852',
-              'A year of combined Claude, Codex, and OpenCode token activity.'
+              'A year of combined provider-reported token activity.'
             )}
           </p>
         </div>
@@ -165,7 +165,7 @@ export function ProviderUsageRow({
 }: {
   provider: UsageProviderOverview
   totalTokens: number
-  onEnable: () => void
+  onEnable?: () => void
 }): React.JSX.Element {
   const share = totalTokens > 0 ? provider.totalTokens / totalTokens : 0
   const status = provider.enabled ? (provider.isScanning ? 'Scanning' : 'Enabled') : 'Off'
@@ -185,7 +185,7 @@ export function ProviderUsageRow({
             {provider.topProject ? ` - ${provider.topProject}` : ''}
           </p>
         </div>
-        {!provider.enabled ? (
+        {!provider.enabled && provider.canEnable ? (
           <Button variant="outline" size="xs" onClick={onEnable}>
             {translate('auto.components.stats.usage.overview.sections.57d1448ef8', 'Enable')}
           </Button>
@@ -198,15 +198,17 @@ export function ProviderUsageRow({
           {translate('auto.components.stats.usage.overview.sections.6762f6a682', 'tokens')}
         </span>
         <span>
-          {translate(
-            'auto.components.stats.usage.overview.sections.a7f937fb29',
-            '{{value0}} sessions - {{value1}} {{value2}}',
-            {
-              value0: provider.sessions.toLocaleString(),
-              value1: provider.activityCount.toLocaleString(),
-              value2: translateActivityLabel(provider.activityLabel)
-            }
-          )}
+          {provider.sessions === null || provider.activityCount === null
+            ? translate('auto.components.stats.usage.overview.sections.usageLedger', 'Token ledger')
+            : translate(
+                'auto.components.stats.usage.overview.sections.a7f937fb29',
+                '{{value0}} sessions - {{value1}} {{value2}}',
+                {
+                  value0: provider.sessions.toLocaleString(),
+                  value1: provider.activityCount.toLocaleString(),
+                  value2: translateActivityLabel(provider.activityLabel)
+                }
+              )}
         </span>
         <span>{formatUsageCost(provider.estimatedCostUsd)}</span>
       </div>

@@ -4,15 +4,15 @@ import type { StatsSummary } from '~shared/types'
 
 export type StatsSlice = {
   statsSummary: StatsSummary | null
-  fetchStatsSummary: () => Promise<void>
+  fetchStatsSummary: (refreshUsage?: boolean) => Promise<void>
 }
 
 export const createStatsSlice: StateCreator<AppState, [], [], StatsSlice> = (set) => ({
   statsSummary: null,
 
-  fetchStatsSummary: async () => {
+  fetchStatsSummary: async (refreshUsage = false) => {
     try {
-      const summary = await window.api.stats.getSummary()
+      const summary = await window.api.stats.getSummary({ refreshUsage })
       set({ statsSummary: summary })
     } catch (err) {
       console.error('Failed to fetch stats summary:', err)

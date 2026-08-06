@@ -51,6 +51,46 @@ function getLoaderStyleLabel(loaderStyle: LoaderStyle): string {
       return translate('settings.appearance.loader.orbComposing', 'Composing')
     case 'shaping':
       return translate('settings.appearance.loader.orbShaping', 'Shaping')
+    case 'S1':
+      return translate('settings.appearance.loader.orbS1', 'S1 · Thinking')
+    case 'S2':
+      return translate('settings.appearance.loader.orbS2', 'S2 · Processing')
+    case 'S3':
+      return translate('settings.appearance.loader.orbS3', 'S3 · Working')
+    case 'S4':
+      return translate('settings.appearance.loader.orbS4', 'S4 · Searching')
+    case 'S5':
+      return translate('settings.appearance.loader.orbS5', 'S5 · Finalizing')
+    case 'B1':
+      return translate('settings.appearance.loader.orbB1', 'B1 · Thinking')
+    case 'B2':
+      return translate('settings.appearance.loader.orbB2', 'B2 · Searching')
+    case 'B3':
+      return translate('settings.appearance.loader.orbB3', 'B3 · Generating')
+    case 'B4':
+      return translate('settings.appearance.loader.orbB4', 'B4 · Solving')
+    case 'B5':
+      return translate('settings.appearance.loader.orbB5', 'B5 · Routing')
+    case 'C1':
+      return translate('settings.appearance.loader.orbC1', 'C1 · Loading')
+    case 'C2':
+      return translate('settings.appearance.loader.orbC2', 'C2 · Listening')
+    case 'C3':
+      return translate('settings.appearance.loader.orbC3', 'C3 · Streaming')
+    case 'C4':
+      return translate('settings.appearance.loader.orbC4', 'C4 · Analyzing')
+    case 'C5':
+      return translate('settings.appearance.loader.orbC5', 'C5 · Compiling')
+    case 'M1':
+      return translate('settings.appearance.loader.orbM1', 'M1 · Shaping')
+    case 'M2':
+      return translate('settings.appearance.loader.orbM2', 'M2 · Expanding')
+    case 'M3':
+      return translate('settings.appearance.loader.orbM3', 'M3 · Unfolding')
+    case 'M4':
+      return translate('settings.appearance.loader.orbM4', 'M4 · Transforming')
+    case 'M5':
+      return translate('settings.appearance.loader.orbM5', 'M5 · Dispersing')
   }
 }
 
@@ -72,7 +112,7 @@ export function LoaderStyleSetting({
           )}
         </p>
       </div>
-      <div role="radiogroup" aria-label={title} className="grid grid-cols-3 gap-2">
+      <div role="radiogroup" aria-label={title} className="grid grid-cols-4 gap-2">
         {LOADER_STYLES.map((loaderStyle, index) => {
           const active = loaderStyle === selected
           const label = getLoaderStyleLabel(loaderStyle)

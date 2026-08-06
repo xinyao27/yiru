@@ -249,7 +249,7 @@ async function readLegacyFederatedTerminal(args: {
   if (args.source === 'transcript' || cursor?.source === 'transcript') {
     throw new OrchestrationError(
       'transcript_required',
-      `Connected server ${args.server.name} does not support structured worker output.`,
+      `Connected worker host ${args.server.name} does not support structured worker output.`,
       { reason: 'remote_capability_unavailable' }
     )
   }

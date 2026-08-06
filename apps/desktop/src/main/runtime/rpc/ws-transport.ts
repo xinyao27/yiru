@@ -44,7 +44,7 @@ export type WebSocketTransportOptions = {
   port: number
   tlsCert?: string
   tlsKey?: string
-  // Why: the pairing server can also serve the browser client, so users do
+  // Why: the pairing host can also serve the browser client, so users do
   // not need a second dev/static server once the web bundle is built.
   staticRoot?: string
   // Why: paired mobile devices store the full ws://ip:port endpoint. Once a

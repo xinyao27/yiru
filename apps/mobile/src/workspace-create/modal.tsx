@@ -10,7 +10,6 @@ import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
@@ -60,6 +59,7 @@ import { SmartWorkspaceAdvancedFields } from './smart-workspace-advanced-fields'
 import { SmartWorkspaceSourceDrawer } from './smart-workspace-source-drawer'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
 import { createWorkspaceFromComposerSource } from './source-workspace-create'
+import { SubmitAction } from './submit-action/action'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
@@ -847,16 +847,14 @@ function NewWorkspaceModalContent({
 
             {error ? <Text className="text-destructive mb-3 text-xs">{error}</Text> : null}
 
-            <View className="mt-2 items-end">
+            <View className="mt-2 min-h-11 items-end justify-center">
               {creating ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
-                <MobileGlassTextButton
+                <SubmitAction
                   disabled={!canCreate}
-                  isProminent
                   label={translate('mobile.newWorkspace.title', 'Create Workspace')}
                   onPress={() => void handleCreate()}
-                  size="regular"
                 />
               )}
             </View>

@@ -171,7 +171,7 @@ export function WindowsFirewallNotice({
                     )
                   : translate(
                       'auto.components.mobile.WindowsFirewallNotice.missing-description',
-                      'Windows may block the pairing server. Add a rule for this Yiru app and TCP port {{port}} on Private networks.',
+                      'Windows may block the pairing host. Add a rule for this Yiru app and TCP port {{port}} on Private networks.',
                       { port: firewallStatus.port }
                     )}
             </p>

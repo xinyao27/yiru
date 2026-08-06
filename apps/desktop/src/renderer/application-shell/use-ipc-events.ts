@@ -635,7 +635,7 @@ export function useIpcEvents(): void {
     ): Promise<void> => {
       if (!options.allowRuntimeEnvironment && isRuntimeEnvironmentActive()) {
         // Why: local CLI-created worktree events carry local repo/worktree
-        // ids. Runtime server activation arrives through the remote event
+        // ids. Runtime host activation arrives through the remote event
         // stream and is allowed through this helper separately.
         return
       }

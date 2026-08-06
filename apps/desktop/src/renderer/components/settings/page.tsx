@@ -62,6 +62,7 @@ import type {
 import type { SpeechModelState } from '~shared/speech-types'
 import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '~shared/types'
 
+import { ScrollArea } from '../ui/scroll-area'
 import { registerWindowCloseGuard } from '../window-close-request-coordinator'
 import { AccountsPane } from './accounts-pane'
 import { AdvancedPane } from './advanced-pane'
@@ -134,9 +135,9 @@ const SETTINGS_NAV_GROUPS = [
     titleDefault: 'Workflows'
   },
   {
-    id: 'remote',
+    id: 'coworking',
     titleKey: 'auto.components.settings.Settings.23931df7e8',
-    titleDefault: 'Remote Hosts'
+    titleDefault: 'Coworking'
   },
   {
     id: 'security',
@@ -163,6 +164,7 @@ const SETTINGS_NAV_GROUP_BY_ID = new Map<string, SettingsNavGroupDefinition>(
 
 const SHORTCUTS_ESCAPE_CONFIRM_TOAST_ID = 'shortcuts-escape-confirm'
 const SHORTCUTS_ESCAPE_CONFIRM_WINDOW_MS = 2200
+const SHELL_WIDTH_CLASS = '[--settings-shell-max-width:1040px]'
 // Why: native material must not flash through the opaque Settings canvas during entry.
 const SETTINGS_SHELL_ANIMATION_CLASS_NAME =
   "animate-[settings-shell-enter_180ms_ease-out] [[data-native-sidebar-material='true']_&]:animate-none"
@@ -530,8 +532,8 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   }, [closeSettingsPage, confirmDiscardSourceControlAiPromptChanges])
 
   useEffect(() => {
-    fetchSettings()
-    fetchKeybindings()
+    void fetchSettings()
+    void fetchKeybindings()
   }, [fetchKeybindings, fetchSettings])
 
   useEffect(() => {
@@ -1116,19 +1118,26 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       <div
         ref={setSettingsRootNode}
         className={cn(
-          'flex min-h-0 flex-1 overflow-hidden bg-transparent',
+          'relative flex min-h-0 min-w-0 w-full flex-1 justify-center overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+          SHELL_WIDTH_CLASS,
           SETTINGS_SHELL_ANIMATION_CLASS_NAME
         )}
       >
-        {/* Why: preserve the final split surfaces while settings load so native
-            sidebar material never flashes to an opaque full-window canvas. */}
         <div
           aria-hidden
-          className="worktree-sidebar-theme border-sidebar-border bg-sidebar w-[var(--settings-sidebar-width)] shrink-0 border-r"
-          style={sidebarAppearanceStyle}
+          className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
         />
-        <div className="bg-background text-muted-foreground flex min-w-0 flex-1 items-center justify-center">
-          {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
+        <div className="relative z-10 flex min-h-0 w-full max-w-[var(--settings-shell-max-width)] overflow-hidden">
+          {/* Why: preserve the final split surfaces while settings load so native
+              sidebar material never flashes to an opaque full-window canvas. */}
+          <div
+            aria-hidden
+            className="worktree-sidebar-theme border-sidebar-border bg-sidebar w-[var(--settings-sidebar-width)] shrink-0 border-r"
+            style={sidebarAppearanceStyle}
+          />
+          <div className="bg-background text-muted-foreground flex min-w-0 flex-1 items-center justify-center">
+            {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
+          </div>
         </div>
       </div>
     )
@@ -1143,6 +1152,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     .map((group) => ({
       id: group.id,
       title: translate(group.titleKey, group.titleDefault),
+      hideTitle: group.id === 'coworking',
       sections: generalNavSections.filter((section) => section.group === group.id)
     }))
     .filter((group) => group.sections.length > 0 || group.id === 'setup')
@@ -1168,612 +1178,620 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     <div
       ref={setSettingsRootNode}
       className={cn(
-        'flex min-h-0 flex-1 overflow-hidden bg-transparent',
+        'relative flex min-h-0 min-w-0 w-full flex-1 overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+        SHELL_WIDTH_CLASS,
         SETTINGS_SHELL_ANIMATION_CLASS_NAME
       )}
     >
-      <SettingsSidebar
-        appearanceStyle={sidebarAppearanceStyle}
-        activeSectionId={activeSectionId}
-        generalGroups={generalNavGroups}
-        repoSections={repoNavSections}
-        hasRepos={repos.length > 0}
-        searchQuery={settingsSearchInputQuery}
-        searchInputRef={searchInputRef}
-        onBack={closeSettingsPageWithPromptGuard}
-        onSearchChange={setSettingsSearchQuery}
-        onSelectSection={scrollToSection}
+      <div
+        aria-hidden
+        className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
       />
+      <div className="absolute inset-y-0 left-[max(0px,calc((100%_-_var(--settings-shell-max-width))/2))] z-20 flex min-h-0 w-[var(--settings-sidebar-width)]">
+        <SettingsSidebar
+          appearanceStyle={sidebarAppearanceStyle}
+          activeSectionId={activeSectionId}
+          generalGroups={generalNavGroups}
+          repoSections={repoNavSections}
+          hasRepos={repos.length > 0}
+          searchQuery={settingsSearchInputQuery}
+          searchInputRef={searchInputRef}
+          onBack={closeSettingsPageWithPromptGuard}
+          onSearchChange={setSettingsSearchQuery}
+          onSelectSection={scrollToSection}
+        />
+      </div>
+      <ScrollArea
+        viewportRef={setContentScrollNode}
+        hasVerticalScrollBar={!isFocusedShortcutsPane}
+        className="relative z-10 min-h-0 w-full min-w-0 flex-1"
+        viewportClassName={cn('overflow-x-hidden', isFocusedShortcutsPane && 'overflow-y-hidden')}
+      >
+        <div className="flex min-h-full w-full min-w-0 justify-center">
+          <div className="flex min-h-full w-full max-w-[var(--settings-shell-max-width)]">
+            <div aria-hidden className="w-[var(--settings-sidebar-width)] shrink-0" />
 
-      {/* Why: only the left rail should reveal the OS material; Settings content
-          remains an opaque canvas for contrast and cross-platform parity. */}
-      <div className="bg-background flex min-h-0 flex-1 flex-col">
-        <div
-          ref={setContentScrollNode}
-          className={cn(
-            'min-h-0 flex-1',
-            isFocusedShortcutsPane ? 'overflow-hidden' : 'overflow-y-auto scrollbar-sleek'
-          )}
-        >
-          <div
-            className={cn(
-              'mx-auto flex w-full flex-col gap-10 px-8 pt-10',
-              isFocusedShortcutsPane ? 'h-full pb-6' : 'pb-24',
-              isFocusedSetupGuidePane ? 'max-w-6xl' : 'max-w-4xl'
-            )}
-          >
-            {visibleNavSections.length === 0 ? (
-              <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[24rem] items-center justify-center border border-dashed text-sm">
-                {translate(
-                  'auto.components.settings.Settings.3c88ec55d6',
-                  'No settings found for "'
+            {/* Why: only the left rail should reveal the OS material; Settings content
+                remains an opaque canvas for contrast and cross-platform parity. */}
+            <div className="bg-background flex min-h-dvh min-w-0 flex-1 flex-col">
+              <div
+                className={cn(
+                  'mx-auto flex w-full min-w-0 flex-col gap-8 px-8 pt-14 pr-8 xl:pr-24',
+                  isFocusedShortcutsPane ? 'h-full pb-6' : 'pb-24',
+                  isFocusedSetupGuidePane ? 'max-w-6xl' : 'max-w-4xl'
                 )}
-                {settingsSearchQuery.trim()}
-                {translate('auto.components.settings.Settings.add3b97ee6', '"')}
-              </div>
-            ) : (
-              <ActiveSettingsSectionProvider value={activeSectionId}>
-                <SettingsSection
-                  id="agents"
-                  title={translate('auto.components.settings.Settings.8afa676615', 'Agents')}
-                  description={translate(
-                    'auto.components.settings.Settings.ec1ba547f7',
-                    'Manage AI agents, set a default, and customize commands.'
-                  )}
-                  searchEntries={getSectionSearchEntries('agents')}
-                >
-                  {isSectionMounted('agents') ? (
-                    <AgentsPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      wslSupportedPlatform={wslSupportedPlatform}
-                      wslAvailable={windowsTerminalCapabilities.wslAvailable}
-                      wslDistros={windowsTerminalCapabilities.wslDistros}
-                      wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="accounts"
-                  title={translate(
-                    'auto.components.settings.Settings.ad6c529693',
-                    'AI Provider Accounts'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.21f09426ea',
-                    'Optional. Yiru works with your existing provider logins; add accounts only if you want Yiru to help switch between them.'
-                  )}
-                  badge={translate(
-                    'auto.hooks.useSettingsNavigationMetadata.7c79d3b7bf',
-                    'Optional'
-                  )}
-                  searchEntries={getSectionSearchEntries('accounts')}
-                >
-                  {isSectionMounted('accounts') ? (
-                    <AccountsPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      wslSupportedPlatform={wslSupportedPlatform}
-                      wslAvailable={windowsTerminalCapabilities.wslAvailable}
-                      wslDistros={windowsTerminalCapabilities.wslDistros}
-                      wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
-                      accountOwnerPlatform={windowsTerminalCapabilities.hostPlatform}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="orchestration"
-                  title={translate('auto.components.settings.Settings.00c3a7950d', 'Orchestration')}
-                  description={translate(
-                    'auto.components.settings.Settings.475980f53d',
-                    'Coordinate multiple coding agents through Yiru.'
-                  )}
-                  searchEntries={getSectionSearchEntries('orchestration')}
-                >
-                  {isSectionMounted('orchestration') ? <OrchestrationPane /> : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <>
+              >
+                {visibleNavSections.length === 0 ? (
+                  <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[24rem] items-center justify-center border border-dashed text-sm">
+                    {translate(
+                      'auto.components.settings.Settings.3c88ec55d6',
+                      'No settings found for "'
+                    )}
+                    {settingsSearchQuery.trim()}
+                    {translate('auto.components.settings.Settings.add3b97ee6', '"')}
+                  </div>
+                ) : (
+                  <ActiveSettingsSectionProvider value={activeSectionId}>
                     <SettingsSection
-                      id="computer-use"
-                      title={translate(
-                        'auto.components.settings.Settings.c9841721cb',
-                        'Computer Use'
-                      )}
+                      id="agents"
+                      title={translate('auto.components.settings.Settings.8afa676615', 'Agents')}
                       description={translate(
-                        'auto.components.settings.Settings.7118953f14',
-                        'Enable agents to control any app on your computer.'
+                        'auto.components.settings.Settings.ec1ba547f7',
+                        'Manage AI agents, set a default, and customize commands.'
                       )}
-                      searchEntries={getSectionSearchEntries('computer-use')}
+                      searchEntries={getSectionSearchEntries('agents')}
                     >
-                      {isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
-                    </SettingsSection>
-
-                    <SettingsSection
-                      id="voice"
-                      title={translate('auto.components.settings.Settings.5063bb47a5', 'Voice')}
-                      description={translate(
-                        'auto.components.settings.Settings.eb1176a14e',
-                        'Local speech-to-text dictation with on-device models.'
-                      )}
-                      searchEntries={getSectionSearchEntries('voice')}
-                    >
-                      {isSectionMounted('voice') ? (
-                        <VoicePane settings={settings} updateSettings={updateSettings} />
-                      ) : null}
-                    </SettingsSection>
-                  </>
-                ) : null}
-
-                <SettingsSection
-                  id="setup-guide"
-                  title={translate(
-                    'auto.components.settings.Settings.6d119427ef',
-                    'Onboarding checklist'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.6855b0f77d',
-                    'Finish the core workflows that make Yiru useful for parallel agent work.'
-                  )}
-                  searchEntries={getSectionSearchEntries('setup-guide')}
-                  bodyClassName="overflow-hidden border-0 bg-transparent p-0"
-                >
-                  {isSectionMounted('setup-guide') ? <SettingsSetupGuidePane /> : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="general"
-                  title={translate('auto.components.settings.Settings.7807c11c4d', 'General')}
-                  description={translate(
-                    'auto.components.settings.Settings.f9b77539fd',
-                    'Workspace defaults, app setup, and maintenance.'
-                  )}
-                  searchEntries={getSectionSearchEntries('general')}
-                >
-                  {isSectionMounted('general') ? (
-                    <GeneralPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      fontSuggestions={terminalFontSuggestions}
-                      onRequestFontSuggestions={requestFontSuggestions}
-                      wslSupportedPlatform={wslSupportedPlatform}
-                      wslAvailable={windowsTerminalCapabilities.wslAvailable}
-                      wslDistros={windowsTerminalCapabilities.wslDistros}
-                      wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="integrations"
-                  title={translate('auto.components.settings.Settings.c9ca101a3b', 'Integrations')}
-                  description={translate(
-                    'auto.components.settings.Settings.b07041697f',
-                    'Connect GitHub, GitLab, and source-hosting services.'
-                  )}
-                  searchEntries={getSectionSearchEntries('integrations')}
-                  bodyClassName="border-0 bg-transparent p-0"
-                >
-                  {isSectionMounted('integrations') ? <IntegrationsPane /> : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="mobile"
-                    title={translate('auto.components.settings.Settings.c40dadaac8', 'Mobile')}
-                    badge="Beta"
-                    description={translate(
-                      'auto.components.settings.Settings.c6c01ac209',
-                      'Control terminals and agents from your phone.'
-                    )}
-                    searchEntries={getSectionSearchEntries('mobile')}
-                  >
-                    {isSectionMounted('mobile') ? <MobileSettingsPane /> : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="git"
-                  title={translate(
-                    'auto.components.settings.Settings.70100f94c7',
-                    'Git & Source Control'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.cfa34f4465',
-                    'Branch naming, base refs, attribution, and Git AI Author.'
-                  )}
-                  searchEntries={getSectionSearchEntries('git')}
-                  forceVisible={hasUnsavedSourceControlAiPromptChanges}
-                >
-                  {isSectionMounted('git') ? (
-                    <>
-                      <GitPane
-                        settings={settings}
-                        updateSettings={updateSettings}
-                        writeSourceControlAiSettings={writeSourceControlAiSettings}
-                        displayedGitUsername={displayedGitUsername}
-                        hasUnsavedBranchPromptChanges={hasUnsavedBranchPromptChanges}
-                        onBranchPromptDirtyChange={setHasUnsavedBranchPromptChanges}
-                        branchPromptDiscardSignal={sourceControlAiPromptDiscardSignal}
-                        settingsSearchQuery={settingsSearchQuery}
-                      />
-                      <CommitMessageAiPane
-                        settings={settings}
-                        updateSettings={updateSettings}
-                        writeSourceControlAiSettings={writeSourceControlAiSettings}
-                        onCustomPromptDirtyChange={setHasUnsavedCommitPromptChanges}
-                        customPromptDiscardSignal={sourceControlAiPromptDiscardSignal}
-                        settingsSearchQuery={settingsSearchQuery}
-                      />
-                      <GitProviderApiBudgetPane settingsSearchQuery={settingsSearchQuery} />
-                    </>
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="terminal"
-                  title={translate('auto.components.settings.Settings.3de4bbb841', 'Terminal')}
-                  description={translate(
-                    'auto.components.settings.Settings.b79b5b31e9',
-                    'Shells, renderer, sessions, and terminal behavior.'
-                  )}
-                  searchEntries={getSectionSearchEntries('terminal')}
-                >
-                  {isSectionMounted('terminal') ? (
-                    <TerminalPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      scrollbackMode={scrollbackMode}
-                      setScrollbackMode={setScrollbackMode}
-                      wslAvailable={windowsTerminalCapabilities.wslAvailable}
-                      wslDistros={windowsTerminalCapabilities.wslDistros}
-                      wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
-                      pwshAvailable={windowsTerminalCapabilities.pwshAvailable}
-                      gitBashAvailable={windowsTerminalCapabilities.gitBashAvailable}
-                      isWindowsTerminalHost={isWindowsTerminalHost}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="quick-commands"
-                  title={translate(
-                    'auto.components.settings.Settings.13d4fe30ad',
-                    'Quick Commands'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.6742c7932c',
-                    'Saved terminal commands, scoped globally or per project.'
-                  )}
-                  searchEntries={getSectionSearchEntries('quick-commands')}
-                >
-                  {isSectionMounted('quick-commands') ? (
-                    <QuickCommandsPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      addCommandIntentSignal={quickCommandAddIntentSignal}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="browser"
-                    title={translate('auto.components.settings.Settings.c46215ea03', 'Browser')}
-                    description={translate(
-                      'auto.components.settings.Settings.ad9788036f',
-                      'Home page, link routing, and session cookies.'
-                    )}
-                    searchEntries={getSectionSearchEntries('browser')}
-                  >
-                    {isSectionMounted('browser') ? (
-                      <BrowserPane
-                        settings={settings}
-                        updateSettings={updateSettings}
-                        onOpenComputerUse={openComputerUseFromBrowser}
-                      />
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="mobile-emulator"
-                    title={translate(
-                      'auto.components.settings.Settings.f75daf1002',
-                      'Mobile Emulator'
-                    )}
-                    description={translate(
-                      'auto.components.settings.Settings.01f9d36292',
-                      'Configure mobile emulator support for Yiru and coding agents.'
-                    )}
-                    searchEntries={getSectionSearchEntries('mobile-emulator')}
-                  >
-                    {isSectionMounted('mobile-emulator') ? (
-                      <MobileEmulatorSettingsPane
-                        settings={settings}
-                        updateSettings={updateSettings}
-                      />
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="floating-workspace"
-                  title={translate(
-                    'auto.components.settings.Settings.3eb22a3ada',
-                    'Floating Workspace'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.3d9adfe6a5',
-                    'Global terminal, browser, and markdown tabs.'
-                  )}
-                  searchEntries={getSectionSearchEntries('floating-workspace')}
-                >
-                  {isSectionMounted('floating-workspace') ? (
-                    <FloatingWorkspacePane settings={settings} updateSettings={updateSettings} />
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="appearance"
-                  title={translate('auto.components.settings.Settings.2b4474780a', 'Appearance')}
-                  description={translate(
-                    'auto.components.settings.Settings.6d1a27e193',
-                    'Theme, zoom, app and terminal appearance, sidebars, and status bar.'
-                  )}
-                  searchEntries={getSectionSearchEntries('appearance')}
-                >
-                  {isSectionMounted('appearance') ? (
-                    <AppearancePane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      applyTheme={applyTheme}
-                      fontSuggestions={fontSuggestions}
-                      terminalFontSuggestions={terminalFontSuggestions}
-                      onRequestFontSuggestions={requestFontSuggestions}
-                      systemPrefersDark={systemPrefersDark}
-                      ghostty={ghostty}
-                      warpThemes={warpThemes}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="notifications"
-                    title={translate(
-                      'auto.components.settings.Settings.9907545fa3',
-                      'Notifications'
-                    )}
-                    description={translate(
-                      'auto.components.settings.Settings.7210ac09c4',
-                      'Native desktop notifications for agent activity and terminal events.'
-                    )}
-                    searchEntries={getSectionSearchEntries('notifications')}
-                  >
-                    {isSectionMounted('notifications') ? (
-                      <NotificationsPane settings={settings} updateSettings={updateSettings} />
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="shortcuts"
-                  title={translate('auto.components.settings.Settings.23bf7a1ad4', 'Shortcuts')}
-                  description={translate(
-                    'auto.components.settings.Settings.a737a4bb22',
-                    'Keyboard shortcuts for common actions.'
-                  )}
-                  searchEntries={getSectionSearchEntries('shortcuts')}
-                  className={
-                    isFocusedShortcutsPane
-                      ? 'flex min-h-0 flex-1 flex-col gap-6 space-y-0'
-                      : undefined
-                  }
-                  bodyClassName={
-                    isFocusedShortcutsPane ? 'min-h-0 flex-1 overflow-hidden' : undefined
-                  }
-                >
-                  {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="coworking"
-                    title={translate(
-                      'auto.components.settings.Settings.coworkingTitle',
-                      'Coworking'
-                    )}
-                    description={translate(
-                      'auto.components.settings.Settings.coworkingDescription',
-                      'Review and revoke persistent remote host authorizations.'
-                    )}
-                    searchEntries={getSectionSearchEntries('coworking')}
-                  >
-                    {isSectionMounted('coworking') ? <CoworkingSettingsPane /> : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="servers"
-                  title={translate(
-                    'auto.components.settings.Settings.bd0181eeca',
-                    'Remote Yiru Servers'
-                  )}
-                  badge="Beta"
-                  description={
-                    isWebClient
-                      ? translate(
-                          'auto.components.settings.Settings.7686cb5c36',
-                          'Connect this browser to a saved Yiru server.'
-                        )
-                      : translate(
-                          'auto.components.settings.Settings.b5ee17826b',
-                          'Pair remote Yiru runtimes for persistent sessions, richer remote state, and web or mobile handoff.'
-                        )
-                  }
-                  searchEntries={getSectionSearchEntries('servers')}
-                >
-                  {isSectionMounted('servers') ? (
-                    <RuntimeEnvironmentsPane
-                      settings={settings}
-                      switchRuntimeEnvironment={switchRuntimeEnvironment}
-                      canGeneratePairingUrl={!isWebClient}
-                      allowLocalRuntime={!isWebClient}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings && isMac ? (
-                  <SettingsSection
-                    id="developer-permissions"
-                    title={translate(
-                      'auto.components.settings.Settings.65660d4548',
-                      'macOS Permissions'
-                    )}
-                    description={translate(
-                      'auto.components.settings.Settings.9b83cc62c2',
-                      'macOS privacy access for terminal-launched developer tools.'
-                    )}
-                    searchEntries={getSectionSearchEntries('developer-permissions')}
-                  >
-                    {isSectionMounted('developer-permissions') ? (
-                      <DeveloperPermissionsPane />
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="privacy"
-                  title={translate(
-                    'auto.components.settings.Settings.d7e3f62d70',
-                    'Privacy & Telemetry'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.c1b43dc4e2',
-                    'Anonymous usage data and telemetry controls.'
-                  )}
-                  searchEntries={getSectionSearchEntries('privacy')}
-                >
-                  {isSectionMounted('privacy') ? <PrivacyPane settings={settings} /> : null}
-                </SettingsSection>
-
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="advanced"
-                    title={translate('auto.components.settings.Settings.1c87f8d024', 'Advanced')}
-                    description={translate(
-                      'auto.components.settings.Settings.499c1cd7f9',
-                      'Low-level compatibility settings for troubleshooting.'
-                    )}
-                    searchEntries={getSectionSearchEntries('advanced')}
-                  >
-                    {isSectionMounted('advanced') ? (
-                      <AdvancedPane settings={settings} updateSettings={updateSettings} />
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                {showDesktopOnlySettings && import.meta.env.DEV ? (
-                  <SettingsSection
-                    id="dev"
-                    title={translate('auto.components.settings.Settings.dev', 'Dev Tools')}
-                    description={translate(
-                      'auto.components.settings.Settings.devDescription',
-                      'Dev-only tools for exercising UI states.'
-                    )}
-                    searchEntries={getSectionSearchEntries('dev')}
-                  >
-                    {DevToolsPane && isSectionMounted('dev') ? (
-                      <Suspense fallback={null}>
-                        <DevToolsPane />
-                      </Suspense>
-                    ) : null}
-                  </SettingsSection>
-                ) : null}
-
-                <SettingsSection
-                  id="experimental"
-                  title={translate('auto.components.settings.Settings.8b017f2506', 'Experimental')}
-                  description={translate(
-                    'auto.components.settings.Settings.075341c763',
-                    'New features that are still taking shape. Give them a try.'
-                  )}
-                  searchEntries={getSectionSearchEntries('experimental')}
-                >
-                  {isSectionMounted('experimental') ? (
-                    <ExperimentalPane
-                      settings={settings}
-                      updateSettings={updateSettings}
-                      hiddenExperimentalUnlocked={hiddenExperimentalUnlocked}
-                    />
-                  ) : null}
-                </SettingsSection>
-
-                {settingsProjectList.map((settingsProject) => {
-                  const repoSectionId = `repo-${settingsProject.representativeRepoId}`
-                  // Why: render the switcher-selected host's repo row (validated
-                  // against live setups) so identity edits and host-specific
-                  // settings follow the "Available Hosts" selection.
-                  const repo = getSettingsProjectHostRepo(
-                    settingsProject,
-                    repos,
-                    settingsProjectHostSelection[settingsProject.projectId]
-                  )
-                  if (!repo) {
-                    return null
-                  }
-                  const repoHostIdentity = getRepoHostIdentity(repo)
-                  const repoHooksState = repoHooksMap[repoHostIdentity]
-                  const project = projectByRepoId.get(repo.id) ?? settingsProject.project
-
-                  return (
-                    <SettingsSection
-                      key={repoSectionId}
-                      id={repoSectionId}
-                      title={translate(
-                        'auto.components.settings.Settings.3bf149e873',
-                        'Project Settings > {{value0}}',
-                        { value0: project.displayName }
-                      )}
-                      description={repo.path}
-                      searchEntries={getSectionSearchEntries(repoSectionId)}
-                    >
-                      {isSectionMounted(repoSectionId) ? (
-                        // Why: same-id hosts otherwise reuse drafts and effects
-                        // from the previously selected host inside this pane.
-                        <RepositoryPane
-                          key={repoHostIdentity}
-                          repo={repo}
-                          yamlHooks={repoHooksState?.hooks ?? null}
-                          hasHooksFile={repoHooksState?.hasHooks ?? false}
-                          hooksInspectionReady={Boolean(repoHooksState)}
-                          mayNeedUpdate={repoHooksState?.mayNeedUpdate ?? false}
-                          updateRepo={updateRepo}
-                          removeProject={() => void removeProjectAllHosts(settingsProject.setups)}
-                          project={project}
-                          isLocalWindowsProject={
-                            getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
-                            isWindowsTerminalHost
-                          }
+                      {isSectionMounted('agents') ? (
+                        <AgentsPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          wslSupportedPlatform={wslSupportedPlatform}
                           wslAvailable={windowsTerminalCapabilities.wslAvailable}
                           wslDistros={windowsTerminalCapabilities.wslDistros}
                           wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
-                          updateProject={updateProject}
                         />
                       ) : null}
                     </SettingsSection>
-                  )
-                })}
-              </ActiveSettingsSectionProvider>
-            )}
+
+                    <SettingsSection
+                      id="accounts"
+                      title={translate(
+                        'auto.components.settings.Settings.ad6c529693',
+                        'AI Provider Accounts'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.21f09426ea',
+                        'Optional. Yiru works with your existing provider logins; add accounts only if you want Yiru to help switch between them.'
+                      )}
+                      badge={translate(
+                        'auto.hooks.useSettingsNavigationMetadata.7c79d3b7bf',
+                        'Optional'
+                      )}
+                      searchEntries={getSectionSearchEntries('accounts')}
+                    >
+                      {isSectionMounted('accounts') ? (
+                        <AccountsPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          wslSupportedPlatform={wslSupportedPlatform}
+                          wslAvailable={windowsTerminalCapabilities.wslAvailable}
+                          wslDistros={windowsTerminalCapabilities.wslDistros}
+                          wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
+                          accountOwnerPlatform={windowsTerminalCapabilities.hostPlatform}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="orchestration"
+                      title={translate(
+                        'auto.components.settings.Settings.00c3a7950d',
+                        'Orchestration'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.475980f53d',
+                        'Coordinate multiple coding agents through Yiru.'
+                      )}
+                      searchEntries={getSectionSearchEntries('orchestration')}
+                    >
+                      {isSectionMounted('orchestration') ? <OrchestrationPane /> : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings ? (
+                      <>
+                        <SettingsSection
+                          id="computer-use"
+                          title={translate(
+                            'auto.components.settings.Settings.c9841721cb',
+                            'Computer Use'
+                          )}
+                          description={translate(
+                            'auto.components.settings.Settings.7118953f14',
+                            'Enable agents to control any app on your computer.'
+                          )}
+                          searchEntries={getSectionSearchEntries('computer-use')}
+                        >
+                          {isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
+                        </SettingsSection>
+
+                        <SettingsSection
+                          id="voice"
+                          title={translate('auto.components.settings.Settings.5063bb47a5', 'Voice')}
+                          description={translate(
+                            'auto.components.settings.Settings.eb1176a14e',
+                            'Local speech-to-text dictation with on-device models.'
+                          )}
+                          searchEntries={getSectionSearchEntries('voice')}
+                        >
+                          {isSectionMounted('voice') ? (
+                            <VoicePane settings={settings} updateSettings={updateSettings} />
+                          ) : null}
+                        </SettingsSection>
+                      </>
+                    ) : null}
+
+                    <SettingsSection
+                      id="setup-guide"
+                      title={translate(
+                        'auto.components.settings.Settings.6d119427ef',
+                        'Onboarding checklist'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.6855b0f77d',
+                        'Finish the core workflows that make Yiru useful for parallel agent work.'
+                      )}
+                      searchEntries={getSectionSearchEntries('setup-guide')}
+                      bodyClassName="overflow-hidden border-0 bg-transparent p-0"
+                    >
+                      {isSectionMounted('setup-guide') ? <SettingsSetupGuidePane /> : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="general"
+                      title={translate('auto.components.settings.Settings.7807c11c4d', 'General')}
+                      description={translate(
+                        'auto.components.settings.Settings.f9b77539fd',
+                        'Workspace defaults, app setup, and maintenance.'
+                      )}
+                      searchEntries={getSectionSearchEntries('general')}
+                    >
+                      {isSectionMounted('general') ? (
+                        <GeneralPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          fontSuggestions={terminalFontSuggestions}
+                          onRequestFontSuggestions={requestFontSuggestions}
+                          wslSupportedPlatform={wslSupportedPlatform}
+                          wslAvailable={windowsTerminalCapabilities.wslAvailable}
+                          wslDistros={windowsTerminalCapabilities.wslDistros}
+                          wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="integrations"
+                      title={translate(
+                        'auto.components.settings.Settings.c9ca101a3b',
+                        'Integrations'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.b07041697f',
+                        'Connect GitHub, GitLab, and source-hosting services.'
+                      )}
+                      searchEntries={getSectionSearchEntries('integrations')}
+                      bodyClassName="border-0 bg-transparent p-0"
+                    >
+                      {isSectionMounted('integrations') ? <IntegrationsPane /> : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings ? (
+                      <SettingsSection
+                        id="mobile"
+                        title={translate('auto.components.settings.Settings.c40dadaac8', 'Mobile')}
+                        badge="Beta"
+                        description={translate(
+                          'auto.components.settings.Settings.c6c01ac209',
+                          'Control terminals and agents from your phone.'
+                        )}
+                        searchEntries={getSectionSearchEntries('mobile')}
+                      >
+                        {isSectionMounted('mobile') ? <MobileSettingsPane /> : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    <SettingsSection
+                      id="git"
+                      title={translate(
+                        'auto.components.settings.Settings.70100f94c7',
+                        'Git & Source Control'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.cfa34f4465',
+                        'Branch naming, base refs, attribution, and Git AI Author.'
+                      )}
+                      searchEntries={getSectionSearchEntries('git')}
+                      forceVisible={hasUnsavedSourceControlAiPromptChanges}
+                    >
+                      {isSectionMounted('git') ? (
+                        <>
+                          <GitPane
+                            settings={settings}
+                            updateSettings={updateSettings}
+                            writeSourceControlAiSettings={writeSourceControlAiSettings}
+                            displayedGitUsername={displayedGitUsername}
+                            hasUnsavedBranchPromptChanges={hasUnsavedBranchPromptChanges}
+                            onBranchPromptDirtyChange={setHasUnsavedBranchPromptChanges}
+                            branchPromptDiscardSignal={sourceControlAiPromptDiscardSignal}
+                            settingsSearchQuery={settingsSearchQuery}
+                          />
+                          <CommitMessageAiPane
+                            settings={settings}
+                            updateSettings={updateSettings}
+                            writeSourceControlAiSettings={writeSourceControlAiSettings}
+                            onCustomPromptDirtyChange={setHasUnsavedCommitPromptChanges}
+                            customPromptDiscardSignal={sourceControlAiPromptDiscardSignal}
+                            settingsSearchQuery={settingsSearchQuery}
+                          />
+                          <GitProviderApiBudgetPane settingsSearchQuery={settingsSearchQuery} />
+                        </>
+                      ) : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="terminal"
+                      title={translate('auto.components.settings.Settings.3de4bbb841', 'Terminal')}
+                      description={translate(
+                        'auto.components.settings.Settings.b79b5b31e9',
+                        'Shells, renderer, sessions, and terminal behavior.'
+                      )}
+                      searchEntries={getSectionSearchEntries('terminal')}
+                    >
+                      {isSectionMounted('terminal') ? (
+                        <TerminalPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          scrollbackMode={scrollbackMode}
+                          setScrollbackMode={setScrollbackMode}
+                          wslAvailable={windowsTerminalCapabilities.wslAvailable}
+                          wslDistros={windowsTerminalCapabilities.wslDistros}
+                          wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
+                          pwshAvailable={windowsTerminalCapabilities.pwshAvailable}
+                          gitBashAvailable={windowsTerminalCapabilities.gitBashAvailable}
+                          isWindowsTerminalHost={isWindowsTerminalHost}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="quick-commands"
+                      title={translate(
+                        'auto.components.settings.Settings.13d4fe30ad',
+                        'Quick Commands'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.6742c7932c',
+                        'Saved terminal commands, scoped globally or per project.'
+                      )}
+                      searchEntries={getSectionSearchEntries('quick-commands')}
+                    >
+                      {isSectionMounted('quick-commands') ? (
+                        <QuickCommandsPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          addCommandIntentSignal={quickCommandAddIntentSignal}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings ? (
+                      <SettingsSection
+                        id="browser"
+                        title={translate('auto.components.settings.Settings.c46215ea03', 'Browser')}
+                        description={translate(
+                          'auto.components.settings.Settings.ad9788036f',
+                          'Home page, link routing, and session cookies.'
+                        )}
+                        searchEntries={getSectionSearchEntries('browser')}
+                      >
+                        {isSectionMounted('browser') ? (
+                          <BrowserPane
+                            settings={settings}
+                            updateSettings={updateSettings}
+                            onOpenComputerUse={openComputerUseFromBrowser}
+                          />
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    {showDesktopOnlySettings ? (
+                      <SettingsSection
+                        id="mobile-emulator"
+                        title={translate(
+                          'auto.components.settings.Settings.f75daf1002',
+                          'Mobile Emulator'
+                        )}
+                        description={translate(
+                          'auto.components.settings.Settings.01f9d36292',
+                          'Configure mobile emulator support for Yiru and coding agents.'
+                        )}
+                        searchEntries={getSectionSearchEntries('mobile-emulator')}
+                      >
+                        {isSectionMounted('mobile-emulator') ? (
+                          <MobileEmulatorSettingsPane
+                            settings={settings}
+                            updateSettings={updateSettings}
+                          />
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    <SettingsSection
+                      id="floating-workspace"
+                      title={translate(
+                        'auto.components.settings.Settings.3eb22a3ada',
+                        'Floating Workspace'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.3d9adfe6a5',
+                        'Global terminal, browser, and markdown tabs.'
+                      )}
+                      searchEntries={getSectionSearchEntries('floating-workspace')}
+                    >
+                      {isSectionMounted('floating-workspace') ? (
+                        <FloatingWorkspacePane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="appearance"
+                      title={translate(
+                        'auto.components.settings.Settings.2b4474780a',
+                        'Appearance'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.6d1a27e193',
+                        'Theme, zoom, app and terminal appearance, sidebars, and status bar.'
+                      )}
+                      searchEntries={getSectionSearchEntries('appearance')}
+                    >
+                      {isSectionMounted('appearance') ? (
+                        <AppearancePane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          applyTheme={applyTheme}
+                          fontSuggestions={fontSuggestions}
+                          terminalFontSuggestions={terminalFontSuggestions}
+                          onRequestFontSuggestions={requestFontSuggestions}
+                          systemPrefersDark={systemPrefersDark}
+                          ghostty={ghostty}
+                          warpThemes={warpThemes}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings ? (
+                      <SettingsSection
+                        id="notifications"
+                        title={translate(
+                          'auto.components.settings.Settings.9907545fa3',
+                          'Notifications'
+                        )}
+                        description={translate(
+                          'auto.components.settings.Settings.7210ac09c4',
+                          'Native desktop notifications for agent activity and terminal events.'
+                        )}
+                        searchEntries={getSectionSearchEntries('notifications')}
+                      >
+                        {isSectionMounted('notifications') ? (
+                          <NotificationsPane settings={settings} updateSettings={updateSettings} />
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    <SettingsSection
+                      id="shortcuts"
+                      title={translate('auto.components.settings.Settings.23bf7a1ad4', 'Shortcuts')}
+                      description={translate(
+                        'auto.components.settings.Settings.a737a4bb22',
+                        'Keyboard shortcuts for common actions.'
+                      )}
+                      searchEntries={getSectionSearchEntries('shortcuts')}
+                      className={
+                        isFocusedShortcutsPane
+                          ? 'flex min-h-0 flex-1 flex-col gap-6 space-y-0'
+                          : undefined
+                      }
+                      bodyClassName={
+                        isFocusedShortcutsPane ? 'min-h-0 flex-1 overflow-hidden' : undefined
+                      }
+                    >
+                      {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
+                    </SettingsSection>
+
+                    <SettingsSection
+                      id="coworking"
+                      title={translate(
+                        'auto.components.settings.Settings.coworkingTitle',
+                        'Coworking'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.coworkingDescription',
+                        'Review and revoke persistent remote host authorizations.'
+                      )}
+                      searchEntries={getSectionSearchEntries('coworking')}
+                    >
+                      {isSectionMounted('coworking') ? (
+                        <>
+                          <RuntimeEnvironmentsPane
+                            settings={settings}
+                            switchRuntimeEnvironment={switchRuntimeEnvironment}
+                            allowLocalRuntime={!isWebClient}
+                          />
+                          {showDesktopOnlySettings ? <CoworkingSettingsPane /> : null}
+                        </>
+                      ) : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings && isMac ? (
+                      <SettingsSection
+                        id="developer-permissions"
+                        title={translate(
+                          'auto.components.settings.Settings.65660d4548',
+                          'macOS Permissions'
+                        )}
+                        description={translate(
+                          'auto.components.settings.Settings.9b83cc62c2',
+                          'macOS privacy access for terminal-launched developer tools.'
+                        )}
+                        searchEntries={getSectionSearchEntries('developer-permissions')}
+                      >
+                        {isSectionMounted('developer-permissions') ? (
+                          <DeveloperPermissionsPane />
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    <SettingsSection
+                      id="privacy"
+                      title={translate(
+                        'auto.components.settings.Settings.d7e3f62d70',
+                        'Privacy & Telemetry'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.c1b43dc4e2',
+                        'Anonymous usage data and telemetry controls.'
+                      )}
+                      searchEntries={getSectionSearchEntries('privacy')}
+                    >
+                      {isSectionMounted('privacy') ? <PrivacyPane settings={settings} /> : null}
+                    </SettingsSection>
+
+                    {showDesktopOnlySettings ? (
+                      <SettingsSection
+                        id="advanced"
+                        title={translate(
+                          'auto.components.settings.Settings.1c87f8d024',
+                          'Advanced'
+                        )}
+                        description={translate(
+                          'auto.components.settings.Settings.499c1cd7f9',
+                          'Low-level compatibility settings for troubleshooting.'
+                        )}
+                        searchEntries={getSectionSearchEntries('advanced')}
+                      >
+                        {isSectionMounted('advanced') ? (
+                          <AdvancedPane settings={settings} updateSettings={updateSettings} />
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    {showDesktopOnlySettings && import.meta.env.DEV ? (
+                      <SettingsSection
+                        id="dev"
+                        title={translate('auto.components.settings.Settings.dev', 'Dev Tools')}
+                        description={translate(
+                          'auto.components.settings.Settings.devDescription',
+                          'Dev-only tools for exercising UI states.'
+                        )}
+                        searchEntries={getSectionSearchEntries('dev')}
+                      >
+                        {DevToolsPane && isSectionMounted('dev') ? (
+                          <Suspense fallback={null}>
+                            <DevToolsPane />
+                          </Suspense>
+                        ) : null}
+                      </SettingsSection>
+                    ) : null}
+
+                    <SettingsSection
+                      id="experimental"
+                      title={translate(
+                        'auto.components.settings.Settings.8b017f2506',
+                        'Experimental'
+                      )}
+                      description={translate(
+                        'auto.components.settings.Settings.075341c763',
+                        'New features that are still taking shape. Give them a try.'
+                      )}
+                      searchEntries={getSectionSearchEntries('experimental')}
+                    >
+                      {isSectionMounted('experimental') ? (
+                        <ExperimentalPane
+                          settings={settings}
+                          updateSettings={updateSettings}
+                          hiddenExperimentalUnlocked={hiddenExperimentalUnlocked}
+                        />
+                      ) : null}
+                    </SettingsSection>
+
+                    {settingsProjectList.map((settingsProject) => {
+                      const repoSectionId = `repo-${settingsProject.representativeRepoId}`
+                      // Why: render the switcher-selected host's repo row (validated
+                      // against live setups) so identity edits and host-specific
+                      // settings follow the "Available Hosts" selection.
+                      const repo = getSettingsProjectHostRepo(
+                        settingsProject,
+                        repos,
+                        settingsProjectHostSelection[settingsProject.projectId]
+                      )
+                      if (!repo) {
+                        return null
+                      }
+                      const repoHostIdentity = getRepoHostIdentity(repo)
+                      const repoHooksState = repoHooksMap[repoHostIdentity]
+                      const project = projectByRepoId.get(repo.id) ?? settingsProject.project
+
+                      return (
+                        <SettingsSection
+                          key={repoSectionId}
+                          id={repoSectionId}
+                          title={translate(
+                            'auto.components.settings.Settings.3bf149e873',
+                            'Project Settings > {{value0}}',
+                            { value0: project.displayName }
+                          )}
+                          description={repo.path}
+                          searchEntries={getSectionSearchEntries(repoSectionId)}
+                        >
+                          {isSectionMounted(repoSectionId) ? (
+                            // Why: same-id hosts otherwise reuse drafts and effects
+                            // from the previously selected host inside this pane.
+                            <RepositoryPane
+                              key={repoHostIdentity}
+                              repo={repo}
+                              yamlHooks={repoHooksState?.hooks ?? null}
+                              hasHooksFile={repoHooksState?.hasHooks ?? false}
+                              hooksInspectionReady={Boolean(repoHooksState)}
+                              mayNeedUpdate={repoHooksState?.mayNeedUpdate ?? false}
+                              updateRepo={updateRepo}
+                              removeProject={() =>
+                                void removeProjectAllHosts(settingsProject.setups)
+                              }
+                              project={project}
+                              isLocalWindowsProject={
+                                getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID &&
+                                isWindowsTerminalHost
+                              }
+                              wslAvailable={windowsTerminalCapabilities.wslAvailable}
+                              wslDistros={windowsTerminalCapabilities.wslDistros}
+                              wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
+                              updateProject={updateProject}
+                            />
+                          ) : null}
+                        </SettingsSection>
+                      )
+                    })}
+                  </ActiveSettingsSectionProvider>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   )
 }

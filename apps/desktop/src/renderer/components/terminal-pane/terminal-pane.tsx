@@ -1524,7 +1524,7 @@ export default function TerminalPane({
       return
     }
     // Host-owned split layouts (web clients, or a desktop client viewing a
-    // remote server worktree) arrive via the host snapshot, so the reconciler
+    // Coworking host worktree) arrive via the host snapshot, so the reconciler
     // must materialize their panes; local desktop tabs split directly.
     if (
       !isHostAuthoritativeLayout({

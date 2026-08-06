@@ -64,10 +64,10 @@ export function SettingsSection({
   }
 
   return (
-    <section id={id} data-settings-section={id} className={cn('scroll-mt-8 space-y-6', className)}>
-      <div className="border-border/60 flex flex-wrap items-start justify-between gap-4 border-b pb-5">
+    <section id={id} data-settings-section={id} className={cn('scroll-mt-8 space-y-8', className)}>
+      <div className="border-border/60 flex flex-wrap items-start justify-between gap-4 border-b pb-6">
         <div className="min-w-0 space-y-2">
-          <h2 className="text-foreground flex flex-wrap items-center gap-2 text-2xl leading-tight font-semibold">
+          <h2 className="text-foreground flex flex-wrap items-center gap-2 text-xl leading-7 font-semibold">
             {title}
             {badge ? (
               <span className="bg-muted text-muted-foreground px-2 py-0.5 text-[10px] font-medium tracking-[0.05em] uppercase">
@@ -76,16 +76,11 @@ export function SettingsSection({
             ) : null}
             {badgeAccessory}
           </h2>
-          <p className="text-muted-foreground max-w-3xl text-sm leading-6">{description}</p>
+          <p className="text-muted-foreground max-w-3xl text-sm leading-5">{description}</p>
         </div>
         {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
       </div>
-      {/* Why: body content sits in a visually distinct band — a soft card with
-           corners and tight inner padding — so each row group reads as
-          contained inside the section, not as a continuation of the sidebar. */}
-      <div className={cn('border border-border/50 bg-card/50 px-7 py-6', bodyClassName)}>
-        {children}
-      </div>
+      <div className={cn('space-y-6', bodyClassName)}>{children}</div>
     </section>
   )
 }

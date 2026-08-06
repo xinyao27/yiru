@@ -16,6 +16,7 @@ import { SetupGuideProgressRing } from '../setup-guide/progress-ring'
 import { ShortcutKeyCombo } from '../shortcut-key-combo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { ScrollArea } from '../ui/scroll-area'
 import { useSettingsSetupGuideProgress } from './setup-guide-progress'
 import type { SettingsSetupGuideProgress } from './setup-guide-progress'
 
@@ -30,6 +31,7 @@ type NavSection = {
 type NavGroup = {
   id: string
   title: string
+  hideTitle?: boolean
   sections: NavSection[]
 }
 
@@ -139,7 +141,7 @@ export function SettingsSidebar({
   const searchShortcutCombos = useShortcutKeyComboDetails('settings.search')
   const navItemClassName = (isActive: boolean): string =>
     cn(
-      'flex w-full items-center justify-start gap-2 px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
+      'flex w-full items-center justify-start px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
       isActive
         ? 'bg-accent text-accent-foreground font-medium'
         : 'text-sidebar-foreground/60 hover:bg-accent hover:text-sidebar-foreground'
@@ -183,7 +185,7 @@ export function SettingsSidebar({
       className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[var(--settings-sidebar-width)] shrink-0 flex-col border-r pt-9"
       style={appearanceStyle}
     >
-      <div className="border-sidebar-border border-b px-3 pt-2 pb-3">
+      <div className="px-3 pt-2 pb-1">
         <Button
           variant="ghost"
           size="sm"
@@ -195,7 +197,7 @@ export function SettingsSidebar({
         </Button>
       </div>
 
-      <div className="border-sidebar-border border-b px-3 py-3">
+      <div className="px-3 py-1">
         <div className="relative">
           <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
@@ -225,7 +227,7 @@ export function SettingsSidebar({
       </div>
 
       {showSetupGuideTopRow ? (
-        <div className="border-sidebar-border border-b px-3 py-3">
+        <div className="border-sidebar-border border-b px-3 py-1">
           <SettingsSetupGuideNavRow
             progress={setupGuideProgress}
             setupActive={setupActive}
@@ -234,18 +236,25 @@ export function SettingsSidebar({
         </div>
       ) : null}
 
-      <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-5">
-          {generalGroups.map((group) => (
-            <div key={group.id} className="space-y-2">
-              <p className="text-muted-foreground px-3 text-[11px] font-medium tracking-[0.18em] uppercase">
-                {group.title}
-              </p>
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-4 px-3 py-4">
+          {generalGroups.map((group, groupIndex) => (
+            <div
+              key={group.id}
+              className={cn(
+                'space-y-2 pb-4',
+                groupIndex < generalGroups.length - 1 && 'border-sidebar-border border-b'
+              )}
+            >
+              {group.hideTitle ? null : (
+                <p className="text-muted-foreground px-3 text-[11px] font-medium tracking-[0.18em] uppercase">
+                  {group.title}
+                </p>
+              )}
               <div className="space-y-1">
                 {group.sections
                   .filter((section) => section.id !== 'setup-guide')
                   .map((section) => {
-                    const Icon = section.icon
                     const isActive = activeSectionId === section.id
 
                     return (
@@ -264,11 +273,10 @@ export function SettingsSidebar({
                           })
                         }
                         className={cn(
-                          'p-0 h-auto border-0 focus-visible:bg-accent',
+                          'h-auto border-0 p-0 focus-visible:bg-accent',
                           navItemClassName(isActive)
                         )}
                       >
-                        <Icon className="size-4 shrink-0" />
                         <span className="truncate">{section.title}</span>
                         {section.installStatus ? (
                           <span className={installStatusClassName(section.installStatus)}>
@@ -312,7 +320,7 @@ export function SettingsSidebar({
                         })
                       }
                       className={cn(
-                        'p-0 h-auto border-0 focus-visible:bg-accent',
+                        'h-auto border-0 p-0 focus-visible:bg-accent',
                         navItemClassName(isActive)
                       )}
                     >
@@ -349,7 +357,7 @@ export function SettingsSidebar({
             )}
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </aside>
   )
 }

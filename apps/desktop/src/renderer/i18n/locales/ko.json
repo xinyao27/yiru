@@ -26,7 +26,7 @@
         "opencodeGoToggleDescription": "활성 워크스페이스에 대한 OpenCode Go 토큰 및 비용 사용량을 표시합니다.",
         "kimiToggleDescription": "활성 워크스페이스의 Kimi 구독 사용량을 표시합니다.",
         "minimaxToggleDescription": "활성 워크스페이스의 MiniMax 구독 사용량을 표시합니다.",
-        "sshToggleDescription": "사용 가능한 SSH 및 원격 Yiru 호스트가 있으면 표시합니다.",
+        "sshToggleDescription": "사용 가능한 SSH 및 Coworking 호스트가 있으면 표시합니다.",
         "resourceUsageToggleDescription": "리소스 관리자를 표시합니다. 클릭하면 CPU, 메모리, 세션, 데몬 제어, 워크스페이스 디스크 스캔을 볼 수 있습니다.",
         "portsToggleDescription": "라이브 워크스페이스 포트를 표시합니다. 워크스페이스 범위 포트 및 외부 수신기를 보려면 클릭하세요.",
         "antigravityToggleDescription": "활성 워크스페이스에 대한 Antigravity 구독 사용량을 표시합니다.",
@@ -45,7 +45,27 @@
         "orbSolving": "해결 중",
         "orbListening": "듣는 중",
         "orbComposing": "작성 중",
-        "orbShaping": "변형 중"
+        "orbShaping": "변형 중",
+        "orbS1": "S1 · Thinking",
+        "orbS2": "S2 · Processing",
+        "orbS3": "S3 · Working",
+        "orbS4": "S4 · Searching",
+        "orbS5": "S5 · Finalizing",
+        "orbB1": "B1 · Thinking",
+        "orbB2": "B2 · Searching",
+        "orbB3": "B3 · Generating",
+        "orbB4": "B4 · Solving",
+        "orbB5": "B5 · Routing",
+        "orbC1": "C1 · Loading",
+        "orbC2": "C2 · Listening",
+        "orbC3": "C3 · Streaming",
+        "orbC4": "C4 · Analyzing",
+        "orbC5": "C5 · Compiling",
+        "orbM1": "M1 · Shaping",
+        "orbM2": "M2 · Expanding",
+        "orbM3": "M3 · Unfolding",
+        "orbM4": "M4 · Transforming",
+        "orbM5": "M5 · Dispersing"
       }
     }
   },
@@ -144,14 +164,14 @@
     "web": {
       "WebConnect": {
         "b411ec0069": "연결",
-        "2cf9e5a294": "저장된 서버 지우기",
+        "2cf9e5a294": "저장된 호스트 지우기",
         "4a4c017be1": "엔드포인트:",
         "27393856e4": "yiru://pair?code=...",
         "7a566540de": "페어링 URL 또는 코드",
-        "cb4d287238": "서버 이름",
-        "3affe7de3a": "이 브라우저가 연결할 수 있는 Yiru 서버의 페어링 URL을 붙여넣습니다.",
+        "cb4d287238": "호스트 이름",
+        "3affe7de3a": "이 브라우저가 연결할 수 있는 런타임 호스트의 페어링 URL을 붙여넣습니다.",
         "e3bcd082ac": "Yiru에 연결",
-        "mobileScopeRejected": "이 QR 코드는 제한된(모바일) 액세스 권한만 제공합니다. 전체 웹 앱을 사용하려면 설정 → 원격 Yiru 서버 → 이 Yiru 서버 공유 → 새 링크에서 브라우저 액세스 링크를 여세요."
+        "mobileScopeRejected": "이 연결은 제한된 모바일 액세스만 제공합니다. 전체 웹 앱을 사용하려면 호스트 소유자에게 Coworking을 통해 이 클라이언트를 승인해 달라고 요청하세요."
       },
       "webPreloadApi": {
         "aiVaultUnavailableForHost": "이 실행 호스트에서는 Agent 세션 기록을 사용할 수 없습니다."
@@ -191,7 +211,7 @@
         "notDownloaded": "서버 업데이트 다운로드가 아직 완료되지 않았습니다.",
         "legacyServer": "원격 업데이트를 활성화하려면 이 서버를 한 번 수동으로 업데이트하세요.",
         "updaterTimeout": "서버 업데이트 프로그램을 기다리는 동안 시간이 초과되었습니다.",
-        "requestedVersionUnavailable": "서버 업데이트 프로그램에서 요청한 Yiru 버전을 제공하지 않았습니다.",
+        "requestedVersionUnavailable": "호스트 업데이트 프로그램에서 요청한 Yiru 버전을 제공하지 않았습니다.",
         "updateUnavailable": "서버에서 사용 가능한 업데이트를 보고하지 않았습니다.",
         "downloadIncomplete": "서버 업데이트 다운로드가 완료되지 않았습니다.",
         "reconnectTimeout": "업데이트된 버전으로 서버가 다시 연결되지 않았습니다.",
@@ -257,10 +277,10 @@
           "3b57982bf6": "\"{{value1}}\" 워크스페이스를 삭제한 후 Git이 \"{{value0}}\" 브랜치를 안전하게 삭제할 수 없어 Yiru가 로컬 커밋 손실을 방지하기 위해 유지했습니다.",
           "81f13f48d2": "\"{{value1}}\" 워크트리를 삭제한 후 Git이 \"{{value0}}\" 브랜치를 안전하게 삭제할 수 없어 Yiru가 로컬 커밋 손실을 방지하기 위해 유지했습니다.",
           "runtimeScopeForbiddenTitle": "이 연결은 제한된(모바일) 액세스입니다",
-          "runtimeScopeForbiddenDescription": "모바일 범위 페어링에서는 워크스페이스를 사용할 수 없습니다. 설정 → 원격 Yiru 서버 → 이 Yiru 서버 공유에서 브라우저 액세스 링크로 다시 연결하세요."
+          "runtimeScopeForbiddenDescription": "모바일 범위 연결에서는 워크스페이스를 사용할 수 없습니다. 전체 워크스페이스 액세스를 사용하려면 호스트 소유자에게 Coworking을 통해 이 클라이언트를 승인해 달라고 요청하세요."
         },
         "repos": {
-          "2975400634": "이 런타임에서 Git이 아닌 폴더를 열려면 Yiru 서버를 업데이트하세요.",
+          "2975400634": "Git이 아닌 폴더를 열려면 런타임 호스트를 업데이트하세요.",
           "b7e14472ae": "폴더를 추가하지 못했습니다.",
           "e649269645": "선택한 호스트에 경로를 입력하려면 프로젝트 추가를 사용하세요.",
           "c6e022ddfc": "프로젝트를 추가하지 못했습니다.",
@@ -274,8 +294,8 @@
           "presenceProfileOverflow": "{{names}} 외 {{count}}개"
         },
         "settings": {
-          "e12dab333b": "서버를 전환하지 못했습니다.",
-          "faa8fb83dd": "서버를 전환하기 전에 저장되지 않은 편집기 탭을 저장하거나 닫으십시오."
+          "e12dab333b": "호스트를 전환하지 못했습니다.",
+          "faa8fb83dd": "호스트를 전환하기 전에 저장되지 않은 편집기 탭을 저장하거나 닫으십시오."
         },
         "ui": {
           "66e3bd7ce6": "{{value0}}(으)로 보냄",
@@ -638,7 +658,7 @@
         "95a1886d94": "휴대폰에서 terminals과 agents를 제어하세요.",
         "1cd25673df": "모바일",
         "40d80bad8a": "베타",
-        "de0c2907a1": "원격 Yiru 서버",
+        "de0c2907a1": "Coworking 호스트",
         "b351014180": "Yiru 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
         "d72a58b5b9": "통계 및 사용량",
         "dcd0d9b74f": "일반 작업에 대한 키보드 단축키입니다.",
@@ -692,7 +712,7 @@
         "projectHostsSummary": "호스트 {{value0}}개",
         "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
         "coworkingTitle": "Coworking",
-        "coworkingDescription": "Review and revoke persistent remote host authorizations."
+        "coworkingDescription": "영구적인 Coworking 호스트 승인을 검토하고 취소합니다."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "붙여넣기 내용이 너무 큽니다."
@@ -1907,7 +1927,7 @@
             "fbb3f9f05e": "충돌",
             "95e4ff5b4b": "푸시 중",
             "63a2b965f6": "가져오는 중",
-            "remote_server": "원격 서버",
+            "remote_server": "Coworking 호스트",
             "runtime_checking": "확인 중",
             "runtime_online": "연결됨",
             "runtime_unavailable": "연결 끊김",
@@ -1971,7 +1991,7 @@
             "c0e972d726": "취소",
             "06741a2f3d": "MiniMax 사용량 세부 정보 열기",
             "3bbf140864": "MiniMax 사용량",
-            "remoteServerLabel": "원격 서버",
+            "remoteServerLabel": "Coworking 호스트",
             "antigravityUsage": "Antigravity 사용량",
             "antigravityUsageDetails": "Antigravity 사용량 세부 정보 열기",
             "grokUsageAria": "Grok 사용량 세부 정보 열기",
@@ -1998,13 +2018,13 @@
           },
           "RemoteServerUpdateStatusSegment": {
             "updating": "업데이트 중 {{value0}}/{{value1}}",
-            "updatingTooltip": "원격 Yiru 서버 업데이트가 진행 중입니다",
-            "failed": "서버 업데이트 {{value0}}개 실패",
-            "failedTooltip": "원격 Yiru 서버 업데이트를 열어 검토하고 다시 시도",
-            "updated": "서버 {{value0}}개 업데이트됨",
-            "updatedTooltip": "원격 Yiru 서버 업데이트가 완료되었습니다",
-            "failedOne": "서버 업데이트 1개 실패",
-            "updatedOne": "서버 1개 업데이트됨"
+            "updatingTooltip": "Coworking 호스트 업데이트가 진행 중입니다",
+            "failed": "호스트 업데이트 {{value0}}개 실패",
+            "failedTooltip": "Coworking 호스트 업데이트를 열어 검토하고 다시 시도",
+            "updated": "호스트 {{value0}}개 업데이트됨",
+            "updatedTooltip": "Coworking 호스트 업데이트가 완료되었습니다",
+            "failedOne": "호스트 업데이트 1개 실패",
+            "updatedOne": "호스트 1개 업데이트됨"
           },
           "SkillUpdateStatusSegment": {
             "stoppingLabel": "Stopping skill update",
@@ -2394,7 +2414,7 @@
           "444585cb41": "데이터 있음",
           "ecb0cd8a4c": "활성화됨 -",
           "33f7b043d2": "공급자",
-          "60002bb22f": "아직 로컬 Claude, Codex 또는 OpenCode 사용을 찾을 수 없습니다. 개요는 다음 agent 세션에서 토큰 로그를 작성한 후에 채워집니다.",
+          "60002bb22f": "아직 provider 사용량을 찾을 수 없습니다. 개요는 다음 지원 에이전트 세션에서 토큰 로그를 작성한 후 채워집니다.",
           "70f36452d4": "캐시 공유",
           "327603fe8b": "활성 일수",
           "0eaf937335": "예상 비용",
@@ -2407,7 +2427,8 @@
           "ca6bc5fded": "새로고침",
           "e06d1baf5c": "사용량 개요 새로고침",
           "c760c481c5": "사용량 개요",
-          "55c910f4f1": "- 일부 모델 가격 확인 불가"
+          "55c910f4f1": "- 일부 모델 가격 확인 불가",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2437,7 +2458,7 @@
             "0bba8ca244": "통계",
             "0e2a0b6431": "사용량",
             "372debfac0": "통계",
-            "26bb901fcd": "Yiru 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
+            "26bb901fcd": "Yiru 통계와 provider 토큰 분석 및 Grok 구독 사용량.",
             "cb2430ae6a": "통계 및 사용량",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "구독",
@@ -2451,7 +2472,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "세션 -",
@@ -2461,7 +2483,7 @@
               "1dd166c920": "적음",
               "52d9221dc0": "최근 토큰 활동 히트맵",
               "c424eb3f8e": "최고:",
-              "f28ff1f852": "최근 Claude, Codex 및 OpenCode 토큰 결합 활동.",
+              "f28ff1f852": "최근 provider 토큰 결합 활동.",
               "69e2b50427": "일일 강도",
               "3a795542fa": "통합 토큰 구성",
               "e65084cb4b": "추론",
@@ -2474,7 +2496,8 @@
               "6762f6a682": "토큰",
               "a7f937fb29": "{{value0}}개 세션 - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "턴",
-              "d9a4b3e2f1c5": "이벤트"
+              "d9a4b3e2f1c5": "이벤트",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -3166,8 +3189,8 @@
           "0d224eff10": "기본 작업 트리",
           "ca74db7550": "SSH를 통한 원격 프로젝트",
           "021538e1d1": "SSH 연결이 끊어졌습니다.",
-          "runtimeHostDisconnected": "서버 연결 끊김",
-          "runtimeHostProject": "Yiru 서버의 프로젝트",
+          "runtimeHostDisconnected": "런타임 호스트 연결 끊김",
+          "runtimeHostProject": "런타임 호스트의 프로젝트",
           "automationCreated": "자동화로 생성됨",
           "branchIdentity": "브랜치",
           "branchFolderPathIdentity": "브랜치 또는 폴더 경로",
@@ -3425,7 +3448,7 @@
               "669e12dd97": "로컬 폴더 및 Git 리포지토리",
               "ffc769ca29": "프로젝트를 추가하려면 폴더를 드롭하세요.",
               "740e8d0d46": "서버 경로는 프로젝트 추가를 사용하세요",
-              "e344666fb8": "서버 런타임 활성",
+              "e344666fb8": "런타임 호스트 활성",
               "d0f8943f8b": "프로젝트 추가 흐름 준비",
               "18d3cf40e9": "폴더 확인 중"
             }
@@ -3457,7 +3480,7 @@
           "f34a286c0d": "드롭한 폴더를 추가할 수 없습니다.",
           "451a4638db": "폴더를 끌어서 프로젝트로 추가하세요.",
           "5ccb56c7be": "프로젝트 추가를 사용하여 서버 경로를 입력하세요.",
-          "849ef13dc0": "서버 런타임에서는 로컬 폴더 드롭을 사용할 수 없습니다.",
+          "849ef13dc0": "런타임 호스트에서는 로컬 폴더 드롭을 사용할 수 없습니다.",
           "c0315153d1": "한 번에 폴더 하나만 드롭하세요."
         },
         "workspace": {
@@ -3572,7 +3595,7 @@
           "1a2b3c4d5e": "{{value0}} 제거됨",
           "2b3c4d5e6f": "호스트를 제거하지 못했습니다.",
           "3c4d5e6f7a": "{{value0}}을(를) 제거할까요?",
-          "4d5e6f7a8b": "이 작업은 이 서버를 제거할 수 있는 Yiru 서버 설정을 엽니다.",
+          "4d5e6f7a8b": "이 작업은 이 호스트를 제거할 수 있는 Coworking 호스트 설정을 엽니다.",
           "5e6f7a8b9c": "이 컴퓨터에서 저장된 SSH 호스트와 인증 정보를 제거합니다. 원격 파일은 삭제되지 않습니다.",
           "6f7a8b9c0d": "취소",
           "7a8b9c0d1e": "설정 열기",
@@ -3596,7 +3619,7 @@
           "6f7a8b9c0d": "저장"
         },
         "HostSectionHeaderMenu": {
-          "5b8b4b6a01": "서버 업데이트 필요",
+          "5b8b4b6a01": "호스트 업데이트 필요",
           "9b3c1d2e44": "클라이언트 업데이트 필요",
           "2c29e2de68": "연결 실패",
           "bf07aee59e": "연결 해제 실패",
@@ -4415,7 +4438,7 @@
           "7b649a578a": "만드는 중…",
           "4399c77caa": "기본",
           "4af9a17947": "kagi",
-          "c0f85056d9": "이 Yiru 서버의 브라우저 프로필입니다.",
+          "c0f85056d9": "이 Yiru 호스트의 브라우저 프로필입니다.",
           "86b7c83fee": "이 컴퓨터",
           "6480776a03": "선택한 호스트의 브라우저 프로필입니다.",
           "5e19a692f7": "호스트"
@@ -4721,8 +4744,8 @@
           "currentCount": "{{value0}}개 최신 상태",
           "manualCount": "{{value0}}개 수동 업데이트",
           "offlineCount": "{{value0}}개 오프라인",
-          "title": "원격 Yiru 서버",
-          "description": "이 클라이언트에서 페어링된 Yiru 서버를 확인하고 업데이트합니다.",
+          "title": "Coworking 호스트",
+          "description": "이 클라이언트에서 페어링된 Coworking 호스트를 확인하고 업데이트합니다.",
           "updating": "서버 업데이트 중…",
           "reviewServers": "서버 업데이트 확인",
           "serverCountOne": "페어링된 서버 1개"
@@ -4732,11 +4755,11 @@
           "restartingHelp": "새 버전의 교체 서버가 다시 연결되기를 기다리는 중입니다.",
           "retry": "다시 시도",
           "update": "이 서버 업데이트",
-          "title": "원격 Yiru 서버 업데이트",
-          "description": "페어링된 서버를 검토하고 이 Yiru 클라이언트에서 지원되는 설치를 업데이트합니다.",
+          "title": "Coworking 호스트 업데이트",
+          "description": "페어링된 Coworking 호스트를 검토하고 이 Yiru 클라이언트에서 지원되는 설치를 업데이트합니다.",
           "restartWarning": "업데이트하면 서버가 다시 시작됩니다. 라이브 탭 {{value0}}개와 터미널 창 {{value1}}개가 잠시 연결 해제될 수 있습니다.",
           "checking": "페어링된 서버 확인 중…",
-          "empty": "페어링된 원격 Yiru 서버가 없습니다.",
+          "empty": "페어링된 Coworking 호스트가 없습니다.",
           "updateAll": "서버 {{value0}}개 모두 업데이트",
           "noUpdates": "모든 서버가 최신 상태입니다.",
           "downloadProgress": "{{value0}} 다운로드 진행률"
@@ -4753,9 +4776,9 @@
           "restarting": "다시 시작 중…",
           "updated": "업데이트됨",
           "failed": "업데이트 실패",
-          "serviceManagerHelp": "이 서버를 시작하는 서비스 관리자를 통해 Yiru를 업데이트하세요.",
+          "serviceManagerHelp": "이 호스트를 시작하는 서비스 관리자를 통해 Yiru를 업데이트하세요.",
           "unpackedHelp": "개발 빌드는 소스 체크아웃에서 업데이트해야 합니다.",
-          "legacyHelp": "원격 업데이트를 활성화하려면 이 서버를 한 번 수동으로 업데이트하세요."
+          "legacyHelp": "호스트 업데이트를 활성화하려면 이 호스트를 한 번 수동으로 업데이트하세요."
         },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "로컬호스트, 127.0.0.1, *.internal",
@@ -5020,7 +5043,7 @@
           "7c4889a724": "세션을 종료하거나 기본 데몬을 다시 시작하여 정지되거나 오작동하는 terminal을 복구합니다.",
           "d1b80fd5cd": "세션 관리",
           "9c940434af": "로컬 런타임으로 다시 전환하여 로컬 데몬 세션을 다시 시작하거나 종료합니다.",
-          "ad467eaadc": "원격 런타임 서버가 활성 상태인 동안에는 세션 관리를 사용할 수 없습니다.",
+          "ad467eaadc": "원격 런타임 호스트가 활성 상태인 동안에는 세션 관리를 사용할 수 없습니다.",
           "8dbd96b463": "세션을 종료할 수 없습니다.",
           "0735b7a586": "세션을 종료할 수 없습니다. 이미 사라졌을 수 있습니다.",
           "bfba05dccd": "세션이 종료되었습니다.",
@@ -5442,7 +5465,7 @@
           "setupPathPending": "경로 대기 중",
           "openSetup": "열기",
           "removeSetup": "제거",
-          "hostSetupBlockedVersion": "Yiru 서버 버전이 호환되지 않습니다.",
+          "hostSetupBlockedVersion": "Yiru 호스트 버전이 호환되지 않습니다.",
           "hostSetupMissingCapability": "프로젝트를 설정하려면 이 호스트의 Yiru를 업데이트하세요.",
           "hostSetupConnectionRequired": "프로젝트를 가져오거나 클론하기 전에 이 호스트에 연결하세요.",
           "setupProjectOnHost": "다른 호스트에 설정",
@@ -5544,63 +5567,63 @@
         "RuntimeEnvironmentsPane": {
           "aeb26635d2": "{{value0}} 제거",
           "af53761f31": "취소",
-          "bb90dd6487": "서버 제거",
+          "bb90dd6487": "호스트 제거",
           "d2e00809e4": "전환",
           "05e0fc3ebf": "전환 대상",
           "b2290ed203": "Yiru가 이 호스트로 포커스를 옮기고 해당 프로젝트를 로드합니다. 다른 호스트의 기존 terminals과 브라우저 탭은 계속 유지됩니다.",
-          "d570c35a99": "서버 전환",
+          "d570c35a99": "호스트 전환",
           "84b9b2be05": "브라우저나 다른 Yiru 클라이언트가 연결할 수 있도록 취소 가능한 액세스 권한을 생성합니다.",
-          "6e1280ca55": "이 Yiru 서버 공유",
-          "9a3758d983": "저장된 서버가 없습니다.",
-          "1826bd0608": "저장된 서버",
-          "6ce4664003": "서버 새로 고침",
-          "b07070ed3c": "연결된 서버가 없습니다",
+          "6e1280ca55": "이 Coworking 호스트 공유",
+          "9a3758d983": "저장된 Coworking 호스트가 없습니다.",
+          "1826bd0608": "저장된 Coworking 호스트",
+          "6ce4664003": "호스트 새로 고침",
+          "b07070ed3c": "연결된 Coworking 호스트가 없습니다",
           "78692becbd": "로컬 데스크탑",
-          "64b6bea541": "활성 서버",
+          "64b6bea541": "기본 호스트",
           "99ac81fb43": "{{value0}}(으)로 전환되었습니다.",
           "b5b5114cb0": "{{value0}}을(를) 삭제했습니다.",
           "e6410d72c3": "런타임 환경을 로드하지 못했습니다.",
           "6ef71985da": "엔드포인트 없음",
-          "ed3e3f069d": "그러면 Yiru에서 저장된 서버가 제거됩니다. 활성 서버는 변경되지 않습니다.",
-          "b2fda48c39": "활성 서버를 제거하면 이 브라우저가 해당 호스트에서 연결 해제됩니다. 기존 호스트 세션은 그대로 유지됩니다.",
-          "9f7665a01b": "활성 서버를 제거하면 먼저 Yiru가 로컬 데스크톱으로 다시 전환됩니다. 기존 호스트 세션은 그대로 유지됩니다.",
+          "ed3e3f069d": "그러면 Yiru에서 저장된 호스트가 제거됩니다. 활성 호스트는 변경되지 않습니다.",
+          "b2fda48c39": "활성 호스트를 제거하면 이 브라우저가 해당 호스트에서 연결 해제됩니다. 기존 호스트 세션은 그대로 유지됩니다.",
+          "9f7665a01b": "활성 호스트를 제거하면 먼저 Yiru가 로컬 데스크톱으로 다시 전환됩니다. 기존 호스트 세션은 그대로 유지됩니다.",
           "3595fd1948": "새 링크",
           "54dee18f5c": "양식 숨기기",
-          "8cf8790697": "저장된 서버는 페어링된 Yiru 런타임을 통해 이 브라우저를 라우팅합니다.",
-          "f75ce1c7a5": "로컬은 현재 데스크톱 동작을 유지합니다. 저장된 서버는 지원되는 클라이언트 호출을 원격 런타임을 통해 라우팅합니다.",
+          "8cf8790697": "저장된 Coworking 호스트는 페어링된 런타임을 통해 이 브라우저를 라우팅합니다.",
+          "f75ce1c7a5": "로컬은 현재 데스크톱 동작을 유지합니다. 저장된 Coworking 호스트는 지원되는 클라이언트 호출을 페어링된 런타임을 통해 라우팅합니다.",
           "d25f0688b1": "제거",
           "f3a3d6d834": "{{value0}} 기능",
           "0ef838094a": "프로토콜 {{value0}}",
           "9a91c4a0eb": "호환됨",
-          "86ed75bec8": "서버 업데이트",
+          "86ed75bec8": "호스트 업데이트",
           "62ac182a27": "클라이언트 업데이트",
           "c8791efc45": "상태를 사용할 수 없음",
           "5120beaac6": "확인 중…",
           "4b5c6d7e8f": "보고된 기능 없음",
-          "hostModelCapabilityUnknown": "호스트 모델 지원: 서버 기능 확인 중",
+          "hostModelCapabilityUnknown": "호스트 모델 지원: 호스트 기능 확인 중",
           "hostModelCapabilitySupported": "호스트 모델 지원: 준비됨",
-          "hostModelCapabilityMissing": "호스트 모델 지원: {{value0}}을(를) 사용하려면 서버 업데이트 필요",
+          "hostModelCapabilityMissing": "호스트 모델 지원: {{value0}}을(를) 사용하려면 호스트 업데이트 필요",
           "hostModelCapabilityProjectSetup": "프로젝트 설정",
           "hostModelCapabilityWorkspaceRunContext": "워크스페이스 실행 컨텍스트",
-          "3f67e8078a": "기본적으로 이 컴퓨터를 사용합니다. 지원되는 프로젝트, 파일, terminals, 공급자 확인, 브라우저/모바일 핸드오프를 해당 서버를 통해 실행하려는 경우에만 저장된 서버를 선택하세요.",
-          "2c85efb3e8": "저장된 서버를 선택하면 이 브라우저가 페어링된 Yiru 런타임을 기본 호스트로 사용합니다.",
+          "3f67e8078a": "기본적으로 이 컴퓨터를 사용합니다. 지원되는 프로젝트, 파일, terminals, 공급자 확인, 브라우저/모바일 핸드오프를 Coworking 호스트를 통해 실행하려는 경우에만 저장된 호스트를 선택하세요.",
+          "2c85efb3e8": "저장된 Coworking 호스트를 선택하면 이 브라우저가 페어링된 런타임을 기본 호스트로 사용합니다.",
           "serverConnected": "연결됨",
           "serverChecking": "확인 중…",
           "serverDisconnected": "연결 해제됨",
           "disconnectedServer": "{{value0}}에서 연결이 해제되었습니다.",
-          "connectToRemoteServers": "원격 서버에 연결",
+          "connectToRemoteServers": "Coworking 호스트",
           "connectToRemoteServersHelp": "Coworking을 통해 승인된 호스트를 연결하거나 연결 해제하고 살펴봅니다.",
-          "activeServerRowHelp": "서버를 통해 라우팅되는 프로젝트, terminals, 공급자 확인에 사용할 활성 서버입니다.",
+          "activeServerRowHelp": "호스트를 통해 라우팅되는 프로젝트, terminals, 공급자 확인에 사용할 활성 Coworking 호스트입니다.",
           "disconnect": "연결 해제",
           "connect": "연결",
           "advanced": "고급",
-          "serverDetails": "서버 세부 정보",
+          "serverDetails": "호스트 세부 정보",
           "advertiseThisApp": "이 앱을 서버로 알리기",
           "advertiseThisAppHelp": "브라우저, 모바일 클라이언트 또는 다른 Yiru 클라이언트가 실행 중인 이 앱에 다시 연결할 수 있도록 액세스 링크를 만듭니다.",
           "runtimeReachable": "{{value0}}에 연결할 수 있습니다.",
           "hostModelCapabilityProjectSourceContext": "project source context",
-          "reviewServerUpdates": "서버 업데이트 확인",
-          "updatingServers": "서버 업데이트 중…",
+          "reviewServerUpdates": "호스트 업데이트 확인",
+          "updatingServers": "호스트 업데이트 중…",
           "yiruVersion": "Yiru v{{value0}}",
           "versionUnavailable": "Yiru 버전을 사용할 수 없음",
           "updateServer": "업데이트"
@@ -5622,7 +5645,7 @@
           "de6d5cff95": "이 컴퓨터(",
           "de77eb1b65": "연결 주소",
           "ff80904fc4": "브라우저 또는 데스크톱 클라이언트에 대해 취소 가능한 액세스 권한을 만듭니다.",
-          "f8500e134a": "이 Yiru 서버 공유",
+          "f8500e134a": "이 Coworking 호스트 공유",
           "d6c081adf4": "URL을 복사하지 못했습니다.",
           "df0aa45a86": "페어링 URL을 복사했습니다.",
           "13704d635e": "웹 클라이언트 URL을 복사했습니다.",
@@ -5656,9 +5679,9 @@
           "65660d4548": "macOS 권한",
           "c6c01ac209": "휴대폰에서 terminals과 agents를 제어하세요.",
           "c40dadaac8": "모바일",
-          "b5ee17826b": "지속 세션, 더 풍부한 원격 상태, 웹 또는 모바일 핸드오프를 위해 원격 Yiru 런타임을 페어링합니다.",
-          "7686cb5c36": "이 브라우저를 저장된 Yiru 서버에 연결하세요.",
-          "bd0181eeca": "원격 Yiru 서버",
+          "b5ee17826b": "Coworking을 통해 승인된 호스트를 관리하고 기본 런타임을 선택합니다.",
+          "7686cb5c36": "이 브라우저에서 Coworking을 통해 승인된 호스트를 사용합니다.",
+          "bd0181eeca": "Coworking 호스트",
           "8acf3f22e0": "Yiru 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
           "954a8f5aef": "통계 및 사용량",
           "a737a4bb22": "일반 작업에 대한 키보드 단축키입니다.",
@@ -5701,7 +5724,7 @@
           "43b68e10f0": "저장되지 않은 Git AI Author 변경사항이 있습니다. 떠나면 폐기됩니다.",
           "17bdee4ff1": "저장되지 않은 Git AI Author 변경사항을 삭제하시겠습니까?",
           "084d8fac5b": "개인 정보 보호 및 보안",
-          "23931df7e8": "원격 호스트",
+          "23931df7e8": "Coworking",
           "mobile_group": "모바일",
           "8bd117d669": "인터페이스",
           "e1578cd4bc": "워크플로",
@@ -5713,7 +5736,7 @@
           "devDescription": "Dev-only tools for exercising UI states.",
           "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
           "coworkingTitle": "Coworking",
-          "coworkingDescription": "Review and revoke persistent remote host authorizations."
+          "coworkingDescription": "영구적인 Coworking 호스트 승인을 검토하고 취소합니다."
         },
         "SettingsFormControls": {
           "42a4d15a30": "일치하는 글꼴이 없습니다.",
@@ -7332,13 +7355,13 @@
               "09568ccc65": "서버",
               "ebd5369acf": "환경",
               "d198440ce3": "런타임",
-              "baec27aa8f": "이 브라우저를 저장된 Yiru 서버에 연결하세요.",
-              "3517fb2ec0": "활성 서버",
+              "baec27aa8f": "이 브라우저에서 Coworking을 통해 승인된 호스트를 사용합니다.",
+              "3517fb2ec0": "Coworking 호스트",
               "c6e5a03aa0": "개발 박스",
               "f1575f1e09": "웹 클라이언트",
               "81444c4102": "페어링 URL",
               "104f4d7dbd": "페어링",
-              "4575341c77": "Coworking에서 승인된 호스트를 관리하고 클라이언트 페어링 URL을 생성하거나 고급 기본 런타임을 조정합니다."
+              "4575341c77": "Coworking에서 승인된 호스트를 관리하고 기본 런타임을 선택합니다."
             }
           }
         },
@@ -7823,28 +7846,28 @@
         },
         "ProviderHostScopeControl": {
           "scope_label": "{{value0}}: {{value1}}",
-          "change_host": "원격 서버 열기"
+          "change_host": "Coworking 호스트 열기"
         },
         "providerAccountScope": {
-          "remoteServer": "원격 서버: {{value0}}",
-          "remoteServerCredentials": "이 공급자의 자격 증명과 계정 확인은 이 원격 서버가 소유합니다. 다른 기본 런타임 범위를 편집하려면 설정 > 원격 Yiru 서버 > 고급을 사용하세요.",
+          "remoteServer": "Coworking 호스트: {{value0}}",
+          "remoteServerCredentials": "이 공급자의 자격 증명과 계정 확인은 이 Coworking 호스트가 소유합니다. 다른 기본 런타임 범위를 편집하려면 설정 > Coworking 호스트 > 고급을 사용하세요.",
           "localMac": "로컬 Mac",
-          "localCredentials": "이 제공자의 자격 증명과 계정 확인은 이 데스크톱 클라이언트가 소유합니다. 서버 소유 자격 증명은 설정 > 원격 Yiru 서버 > 고급에서 편집하세요.",
-          "remoteServerRateLimit": "{{value0}} API 예산은 이 원격 서버의 CLI에서 가져옵니다. 다른 기본 런타임 예산을 보려면 설정 > 원격 Yiru 서버 > 고급을 사용하세요.",
-          "localRateLimit": "{{value0}} API 예산은 이 데스크톱 클라이언트의 CLI에서 가져옵니다. 서버 소유 예산을 보려면 설정 > 원격 Yiru 서버 > 고급을 사용하세요."
+          "localCredentials": "이 제공자의 자격 증명과 계정 확인은 이 데스크톱 클라이언트가 소유합니다. 호스트 소유 자격 증명은 설정 > Coworking 호스트 > 고급에서 편집하세요.",
+          "remoteServerRateLimit": "{{value0}} API 예산은 이 Coworking 호스트의 CLI에서 가져옵니다. 다른 기본 런타임 예산을 보려면 설정 > Coworking 호스트 > 고급을 사용하세요.",
+          "localRateLimit": "{{value0}} API 예산은 이 데스크톱 클라이언트의 CLI에서 가져옵니다. 호스트 소유 예산을 보려면 설정 > Coworking 호스트 > 고급을 사용하세요."
         },
         "settingOwnership": {
           "clientDefault": "클라이언트 기본값",
           "sourceControlAiDefaults": "레시피, 프롬프트, 호스팅 리뷰 기본값은 이 클라이언트에서 공유됩니다. 모델 선택과 탐색은 agent가 실행되는 호스트 범위에 유지됩니다.",
           "projectOnThisHost": "이 호스트의 프로젝트",
           "repositorySourceControlAi": "이 재정의는 이 프로젝트 설정에 적용되며, 사용자 지정하기 전까지 클라이언트의 Source Control AI 기본값을 상속합니다.",
-          "agentLaunchDefaults": "기본 agent, 명령 재정의, CLI 인수, 실행 환경은 클라이언트 환경설정입니다. SSH 및 원격 서버 실행은 실행 시점에 여전히 호스트 사용 가능 여부를 확인합니다.",
+          "agentLaunchDefaults": "기본 agent, 명령 재정의, CLI 인수, 실행 환경은 클라이언트 환경설정입니다. Coworking 호스트 실행은 실행 시점에 호스트 사용 가능 여부를 확인합니다.",
           "clientDefaultProjectScopes": "클라이언트 기본값 + 프로젝트 범위",
           "terminalQuickCommands": "명령은 이 클라이언트에 저장된 뒤 전역 또는 프로젝트 설정 범위로 지정되어 선택한 terminal 컨텍스트에서 실행됩니다.",
           "hostOverride": "호스트 재정의",
           "workspaceDirectory": "호스트에 자체 워크트리 디렉터리가 필요하기 전까지 클라이언트 기본값을 상속합니다.",
           "providerHost": "공급자 호스트",
-          "providerAccounts": "자격 증명과 계정 확인은 공급자 연동을 소유한 로컬 클라이언트 또는 선택한 원격 서버에 속합니다."
+          "providerAccounts": "자격 증명과 계정 확인은 공급자 연동을 소유한 로컬 클라이언트 또는 선택한 Coworking 호스트에 속합니다."
         },
         "RepositoryForkSyncSection": {
           "defaultBranch": "기본 브랜치",
@@ -9679,7 +9702,12 @@
             "0e3e809a4b": "필터",
             "b4271864bd": "맥북 프로",
             "cefd048225": "뒤로",
-            "c5ad56786d": "스피너"
+            "c5ad56786d": "스피너",
+            "preview": {
+              "host": "Host 1",
+              "search": "Search workspaces",
+              "more": "More actions"
+            }
           }
         },
         "CustomNetworkAddressDialog": {
@@ -9702,7 +9730,7 @@
           "public-title": "Windows marks this network as public",
           "missing-title": "Allow phone connections through Windows Firewall",
           "public-description": "Change this trusted Wi-Fi network to Private before allowing Yiru Mobile connections.",
-          "missing-description": "Windows may block the pairing server. Add a rule for this Yiru app and TCP port {{port}} on Private networks.",
+          "missing-description": "Windows may block the pairing host. Add a rule for this Yiru app and TCP port {{port}} on Private networks.",
           "open-settings": "Open network settings",
           "waiting": "Waiting for Windows…",
           "allow": "Allow phone connections",
@@ -10026,7 +10054,7 @@
                 },
                 "ship": {
                   "styles": {
-                    "90cdcd2ecc": ".ravs-ship-root { position: absolute; inset: 0; } .ravs-ship-stack { position: absolute; inset: 0; display: grid; grid-template-columns: 232px minmax(0,1fr); gap: 14px; padding: 4px 2px; /* Why: cards size to their content rather than stretch to the parent's full height, so the two cards don't show empty space below their content. */ align-items: start; } /* Source Control mini-sidebar — ahead-count header, commit textarea + split Commit button, then a CHANGES section with file rows. The file rows are the surface the \"reading\" pulse animates over. */ .ravs-sc-card { display: flex; flex-direction: column; background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } /* Both card headers share the same fixed height so the SC card and PR dialog align across the top edge regardless of header content. */ .ravs-sc-header, .ravs-pr-head { height: 36px; box-sizing: border-box; } .ravs-sc-header { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-sc-ahead { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } .ravs-sc-ahead svg { color: var(--muted-foreground, #71717a); } .ravs-sc-commit-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; } .ravs-sc-textarea { position: relative; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); padding: 6px 26px 6px 8px; min-height: 56px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-sc-textarea .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-sc-sparkle { position: absolute; right: 6px; top: 6px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; transition: color 160ms ease, background 160ms ease; } .ravs-sc-sparkle.is-scanning { color: rgb(109 40 217); background: color-mix(in srgb, rgb(139 92 246) 18%, transparent); } .ravs-sc-split { display: flex; align-items: stretch; } /* Why: Commit + Create PR are surrounding chrome — the violet AI affordances are the focal points. Render them as quiet secondary buttons so they don't compete with the sparkle/scan signals. */ .ravs-sc-split .ravs-primary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 5px 10px; background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); font-size: 11px; font-weight: 500; border-radius: 6px 0 0 6px; border: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } .ravs-sc-split .ravs-chev { display: inline-flex; align-items: center; justify-content: center; width: 22px; background: var(--secondary, #f5f5f5); color: var(--muted-foreground, #71717a); border-radius: 0 6px 6px 0; border: 1px solid var(--border); border-left: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } /* Why: when AI has filled the commit message, tint the Commit button green to signal \"ready to commit\". Uses the same success-green family as the PR flash so the two beats rhyme. Mix is intentionally strong (~28%) — at 14% it disappeared next to the violet sparkle and PR flash, so users only saw the PR change color. */ .ravs-sc-split.is-ready .ravs-primary, .ravs-sc-split.is-ready .ravs-chev { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); transition: background 220ms ease, border-color 220ms ease, color 220ms ease; } .ravs-sc-split.is-ready .ravs-chev { border-left-color: rgba(34, 197, 94, 0.55); } .ravs-sc-changes-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-sc-changes-count { color: var(--foreground, #18181b); font-weight: 600; margin-left: 2px; } .ravs-sc-view-all { font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted-foreground, #71717a); } .ravs-sc-files { display: flex; flex-direction: column; padding: 2px 6px 8px; flex: 1; min-height: 0; overflow: hidden; } .ravs-sc-file { display: grid; grid-template-columns: 14px minmax(0,1fr) 12px; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: 11px; line-height: 1.35; color: var(--foreground, #18181b); position: relative; transition: background 220ms ease; } .ravs-sc-ficon { color: rgb(180 83 9); display: inline-flex; } .ravs-sc-fname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ravs-sc-fmark { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-align: right; color: rgb(180 83 9); } .ravs-sc-file.is-reading { background: color-mix(in srgb, rgb(139 92 246) 14%, transparent); } /* PR dialog — matches the .ravs-sc-card chrome (same border, radius, elevation) so the two cards read as one design language. */ .ravs-pr-dialog { background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; min-width: 0; overflow: hidden; } .ravs-pr-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-pr-title-text { font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } /* Icon-only AI-assist chip — mirrors .ravs-sc-sparkle so the affordance reads identically across both cards. */ .ravs-pr-gen-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; border: 0; cursor: pointer; transition: color 160ms ease, background 160ms ease; } .ravs-pr-gen-btn:hover { background: rgba(24,24,27,0.06); color: var(--foreground, #18181b); } .ravs-pr-gen-btn.is-scanning { color: rgb(109 40 217); background: color-mix(in srgb, rgb(139 92 246) 18%, transparent); } .ravs-pr-body { display: flex; flex-direction: column; gap: 8px; padding: 10px; } .ravs-pr-field { display: flex; flex-direction: column; gap: 4px; } .ravs-pr-field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-pr-base { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--foreground, #18181b); background: var(--editor-surface, var(--card)); align-self: flex-start; } .ravs-pr-base svg { color: var(--muted-foreground, #71717a); } .ravs-pr-input { position: relative; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); min-height: 28px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-pr-input.is-body { min-height: 50px; font-size: 11px; line-height: 1.4; } .ravs-pr-input .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-pr-footer { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 2px; } .ravs-pr-btn { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px; line-height: 1; border: 1px solid transparent; outline: none; } .ravs-pr-btn:focus, .ravs-pr-btn:focus-visible { outline: none; } /* Cancel reads as a quiet ghost button so it doesn't compete with the affirmative Create PR action. */ .ravs-pr-btn.is-outline { background: transparent; color: var(--muted-foreground, #71717a); border-color: transparent; } .ravs-pr-btn.is-outline:hover { background: rgba(24,24,27,0.05); color: var(--foreground, #18181b); } /* Quiet secondary fill — see the .ravs-sc-split note above. The flash ring still uses success-green so the \"PR created\" beat reads. The Create-PR button is slightly larger than Cancel so the affirmative action remains the bigger target. */ .ravs-pr-btn.is-solid { background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); border-color: var(--border); font-size: 12px; padding: 7px 14px; transition: background 220ms ease, border-color 220ms ease, color 220ms ease; } .ravs-pr-btn.is-solid.is-ready { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); } .ravs-pr-btn.is-solid.is-flash { } .ravs-cursor { position: absolute; z-index: 40; pointer-events: none; transition: transform 600ms cubic-bezier(.45,.05,.2,1), opacity 200ms ease; transform: translate(-30px, 220px); opacity: 0; } .ravs-cursor.is-visible { opacity: 1; } .ravs-cursor .ravs-ripple { position: absolute; left: -6px; top: -6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(24,24,27,0.5); opacity: 0; } .ravs-cursor.is-clicking .ravs-ripple { animation: ravs-ripple 460ms ease-out forwards; } @keyframes ravs-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } .ravs-caret { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: ravs-caret-blink 1.05s steps(1) infinite; } @keyframes ravs-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } }"
+                    "c7a1f2d9e4": ".ravs-ship-root { position: absolute; inset: 0; } .ravs-ship-stack { position: absolute; inset: 0; display: grid; grid-template-columns: 232px minmax(0,1fr); gap: 14px; padding: 4px 2px; /* Why: cards size to their content rather than stretch to the parent's full height, so the two cards don't show empty space below their content. */ align-items: start; } /* Source Control mini-sidebar — ahead-count header, commit textarea + split Commit button, then a CHANGES section with file rows. The file rows are the surface the \"reading\" pulse animates over. */ .ravs-sc-card { display: flex; flex-direction: column; background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } /* Both card headers share the same fixed height so the SC card and PR dialog align across the top edge regardless of header content. */ .ravs-sc-header, .ravs-pr-head { height: 36px; box-sizing: border-box; } .ravs-sc-header { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-sc-ahead { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } .ravs-sc-ahead svg { color: var(--muted-foreground, #71717a); } .ravs-sc-commit-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; } .ravs-sc-textarea { position: relative; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); padding: 6px 26px 6px 8px; min-height: 56px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-sc-textarea .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-sc-sparkle { position: absolute; right: 6px; top: 6px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; transition: color 160ms ease, background 160ms ease; } .ravs-sc-sparkle.is-scanning { color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, transparent); } .ravs-sc-split { display: inline-flex; align-items: stretch; } /* Why: Commit + Create PR are surrounding chrome — the primary AI affordances are the focal points. Render them as quiet secondary buttons so they don't compete with the sparkle/scan signals. */ .ravs-sc-split .ravs-primary { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 10.5rem; padding: 5px 10px; background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); font-size: 11px; font-weight: 500; border-radius: 6px 0 0 6px; border: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } .ravs-sc-split .ravs-chev { display: inline-flex; align-items: center; justify-content: center; width: 22px; background: var(--secondary, #f5f5f5); color: var(--muted-foreground, #71717a); border-radius: 0 6px 6px 0; border: 1px solid var(--border); border-left: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } /* Why: when AI has filled the commit message, tint the Commit button green to signal \"ready to commit\". Uses the same success-green family as the PR flash so the two beats rhyme. Mix is intentionally strong (~28%) — at 14% it disappeared next to the primary sparkle and PR flash, so users only saw the PR change color. */ .ravs-sc-split.is-ready .ravs-primary, .ravs-sc-split.is-ready .ravs-chev { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); transition: background 220ms ease, border-color 220ms ease, color 220ms ease; } .ravs-sc-split.is-ready .ravs-chev { border-left-color: rgba(34, 197, 94, 0.55); } .ravs-sc-changes-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-sc-changes-count { color: var(--foreground, #18181b); font-weight: 600; margin-left: 2px; } .ravs-sc-view-all { font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted-foreground, #71717a); } .ravs-sc-files { display: flex; flex-direction: column; padding: 2px 6px 8px; flex: 1; min-height: 0; overflow: hidden; } .ravs-sc-file { display: grid; grid-template-columns: 14px minmax(0,1fr) 12px; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: 11px; line-height: 1.35; color: var(--foreground, #18181b); position: relative; transition: background 220ms ease; } .ravs-sc-ficon { color: rgb(180 83 9); display: inline-flex; } .ravs-sc-fname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ravs-sc-fmark { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-align: right; color: rgb(180 83 9); } .ravs-sc-file.is-reading { background: color-mix(in srgb, var(--primary) 14%, transparent); } /* PR dialog — matches the .ravs-sc-card chrome (same border, radius, elevation) so the two cards read as one design language. */ .ravs-pr-dialog { background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; min-width: 0; overflow: hidden; } .ravs-pr-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-pr-title-text { font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } /* Icon-only AI-assist chip — mirrors .ravs-sc-sparkle so the affordance reads identically across both cards. */ .ravs-pr-gen-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; border: 0; cursor: pointer; transition: color 160ms ease, background 160ms ease; } .ravs-pr-gen-btn:hover { background: rgba(24,24,27,0.06); color: var(--foreground, #18181b); } .ravs-pr-gen-btn.is-scanning { color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, transparent); } .ravs-pr-body { display: flex; flex-direction: column; gap: 8px; padding: 10px; } .ravs-pr-field { display: flex; flex-direction: column; gap: 4px; } .ravs-pr-field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-pr-base { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--foreground, #18181b); background: var(--editor-surface, var(--card)); align-self: flex-start; } .ravs-pr-base svg { color: var(--muted-foreground, #71717a); } .ravs-pr-input { position: relative; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); min-height: 28px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-pr-input.is-body { min-height: 50px; font-size: 11px; line-height: 1.4; } .ravs-pr-input .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-pr-footer { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 2px; } .ravs-pr-btn { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px; line-height: 1; border: 1px solid transparent; outline: none; } .ravs-pr-btn:focus, .ravs-pr-btn:focus-visible { outline: none; } /* Cancel reads as a quiet ghost button so it doesn't compete with the affirmative Create PR action. */ .ravs-pr-btn.is-outline { background: transparent; color: var(--muted-foreground, #71717a); border-color: transparent; } .ravs-pr-btn.is-outline:hover { background: rgba(24,24,27,0.05); color: var(--foreground, #18181b); } /* Quiet secondary fill — see the .ravs-sc-split note above. The ready state still uses success-green so the \"PR created\" beat reads. The Create-PR button is slightly larger than Cancel so the affirmative action remains the bigger target. */ .ravs-pr-btn.is-solid { background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); border-color: var(--border); font-size: 12px; padding: 7px 14px; transition: background 220ms ease, border-color 220ms ease, color 220ms ease; } .ravs-pr-btn.is-solid.is-ready { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); } .ravs-cursor { position: absolute; z-index: 40; pointer-events: none; transition: transform 600ms cubic-bezier(.45,.05,.2,1), opacity 200ms ease; transform: translate(-30px, 220px); opacity: 0; } .ravs-cursor.is-visible { opacity: 1; } .ravs-cursor .ravs-ripple { position: absolute; left: -6px; top: -6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(24,24,27,0.5); opacity: 0; } .ravs-cursor.is-clicking .ravs-ripple { animation: ravs-ripple 460ms ease-out forwards; } @keyframes ravs-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } .ravs-caret { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: ravs-caret-blink 1.05s steps(1) infinite; } @keyframes ravs-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } }"
                   }
                 },
                 "notes": {
@@ -11152,7 +11180,7 @@
             "87eb75f7d2": "유효한 http(s) 또는 localhost URL을 입력하세요.",
             "27d863542c": "브라우저 주석",
             "e48569ac6d": "이 사이트에 접속할 수 없습니다.",
-            "bbe8f15e83": "이 분할창은 활성 런타임 서버에서 렌더링됩니다.",
+            "bbe8f15e83": "이 분할창은 활성 런타임 호스트에서 렌더링됩니다.",
             "8b7e6d1f5a": "브라우저 주석은 로컬 브라우저 탭에서만 사용할 수 있습니다.",
             "deb5293610": "원격 런타임에서는 브라우저 주석을 사용할 수 없습니다.",
             "90d021f2ad": "추가",
@@ -11851,9 +11879,10 @@
           "lifetime": "누적",
           "peakDay": "최고 기록일",
           "longestStreakLabel": "최장 연속 기록",
-          "tokensUnavailable": "Yiru 워크트리에 귀속된 Claude, Codex 또는 OpenCode 토큰 사용량이 아직 없습니다.",
-          "tokenCoverage": "토큰 합계는 Yiru 워크트리에서 요청 단위로 귀속할 수 있는 Claude, Codex, OpenCode 기록을 사용합니다. 캐시 입력은 중복 계산하지 않으며 요청 단위로 귀속할 수 없는 세션 합계는 제외합니다.",
-          "unpricedCoverage": "공식 가격 세부 정보가 없는 토큰은 가치 합계에서 제외됩니다."
+          "tokensUnavailable": "Yiru 워크트리에 귀속된 provider 토큰 사용량이 아직 없습니다.",
+          "tokenCoverage": "토큰 합계는 Yiru 워크트리에서 지원되는 에이전트의 요청 단위 귀속 기록을 사용합니다. 캐시 입력은 중복 계산하지 않으며 요청 단위로 귀속할 수 없는 세션 합계는 제외합니다.",
+          "unpricedCoverage": "공식 가격 세부 정보가 없는 토큰은 가치 합계에서 제외됩니다.",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "시작한 에이전트",

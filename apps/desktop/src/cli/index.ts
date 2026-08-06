@@ -20,16 +20,6 @@ export { buildCurrentWorktreeSelector, normalizeWorktreeSelector } from './selec
 
 const COMMAND_PATHS = COMMAND_SPECS.flatMap((spec) => specPaths(spec))
 
-function shouldIgnoreRemoteSelection(commandPath: string[]): boolean {
-  return (
-    commandPath[0] === 'environment' ||
-    (commandPath[0] === 'mobile' && commandPath[1] === 'development-pairing') ||
-    commandPath[0] === 'serve' ||
-    commandPath[0] === 'agent' ||
-    commandPath[0] === 'agent-context'
-  )
-}
-
 // Why: the SSH relay bridge executes this CLI on the Yiru host while the
 // caller's shell cwd lives on the remote machine (which cannot be chdir'd
 // into). YIRU_CLI_CWD carries that remote cwd so cwd-based selectors like
@@ -78,28 +68,12 @@ export async function main(
     // lookup so users do not get misleading "Yiru is not running" failures for
     // simple command typos or unsupported flags.
     validateCommandAndFlags(COMMAND_SPECS, parsed)
-    const ignoreRemoteSelection = shouldIgnoreRemoteSelection(parsed.commandPath)
-    const pairingCode = ignoreRemoteSelection ? null : parsed.flags.get('pairing-code')
-    const environmentSelector = ignoreRemoteSelection ? null : parsed.flags.get('environment')
-    // Why: pass `null` (not `undefined`) when remote selection is suppressed
-    // so the RuntimeClient default parameter does not re-activate the
-    // YIRU_PAIRING_CODE / YIRU_ENVIRONMENT env-var fallback for commands
-    // that must run locally (environment / serve).
     let client: RuntimeClient | undefined
     await dispatch(parsed.commandPath, {
       flags: parsed.flags,
       // Why: local-only handlers must not resolve runtime metadata just to dispatch.
       get client() {
-        client ??= new RuntimeClient(
-          undefined,
-          undefined,
-          typeof pairingCode === 'string' ? pairingCode : ignoreRemoteSelection ? null : undefined,
-          typeof environmentSelector === 'string'
-            ? environmentSelector
-            : ignoreRemoteSelection
-              ? null
-              : undefined
-        )
+        client ??= new RuntimeClient()
         return client
       },
       cwd,
@@ -115,7 +89,7 @@ async function runClaudeTeams(argv: string[], cwd: string): Promise<void> {
   try {
     // Why: everything after `yiru claude-teams` belongs to Claude Code, not
     // Yiru's own flag parser, so new Claude flags work without Yiru changes.
-    const client = new RuntimeClient(undefined, undefined, null, null)
+    const client = new RuntimeClient()
     await dispatch(['claude-teams'], {
       flags: new Map(),
       client,

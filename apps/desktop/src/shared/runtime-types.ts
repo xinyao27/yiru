@@ -154,7 +154,7 @@ export type RuntimeMobileSessionTerminalTab = {
   launchAgent?: TuiAgent
   startupCwd?: string
   parentLayout?: TerminalLayoutSnapshot
-  /** Tab-level color/pin (per parentTabId), host-persisted for remote servers. */
+  /** Tab-level color/pin (per parentTabId), host-persisted for runtime hosts. */
   color?: string | null
   isPinned?: boolean
   /** Per-tab view preference (terminal xterm vs native chat). Host-persisted so
@@ -179,7 +179,7 @@ export type RuntimeMobileSessionMarkdownTab = {
   sourceFilePath: string
   sourceRelativePath: string
   documentVersion: string
-  /** Tab-level color/pin, host-persisted for remote servers. */
+  /** Tab-level color/pin, host-persisted for runtime hosts. */
   color?: string | null
   isPinned?: boolean
 }
@@ -194,7 +194,7 @@ export type RuntimeMobileSessionFileTab = {
   mode?: 'edit' | 'diff'
   diffSource?: 'staged' | 'unstaged'
   isDirty: boolean
-  /** Tab-level color/pin, host-persisted for remote servers. */
+  /** Tab-level color/pin, host-persisted for runtime hosts. */
   color?: string | null
   isPinned?: boolean
   isActive: boolean

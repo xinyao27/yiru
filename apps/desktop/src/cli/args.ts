@@ -24,8 +24,7 @@ export type CommandSpec = {
   notes?: string[]
 }
 
-export const GLOBAL_FLAGS = ['help', 'json', 'pairing-code', 'environment']
-const GLOBAL_VALUE_FLAGS = new Set(['pairing-code', 'environment'])
+export const GLOBAL_FLAGS = ['help', 'json']
 export const BOOLEAN_FLAGS = new Set([
   'all',
   'attachments',
@@ -45,7 +44,6 @@ export const BOOLEAN_FLAGS = new Set([
   'me',
   'mobile',
   'mobile-pairing',
-  'no-pairing',
   'parent-current',
   'ready',
   'relations',
@@ -320,11 +318,8 @@ export function validateCommandAndFlags(specs: CommandSpec[], parsed: ParsedArgs
   }
 
   const pageAllowed = supportsBrowserPageFlag(spec.path)
-  for (const [flag, value] of parsed.flags) {
+  for (const flag of parsed.flags.keys()) {
     const isGlobalFlag = GLOBAL_FLAGS.includes(flag)
-    if (GLOBAL_VALUE_FLAGS.has(flag) && (typeof value !== 'string' || value.length === 0)) {
-      throw new RuntimeClientError('invalid_argument', `Flag --${flag} requires a value.`)
-    }
     if (!isGlobalFlag && !spec.allowedFlags.includes(flag) && !(flag === 'page' && pageAllowed)) {
       throw new RuntimeClientError(
         'invalid_argument',

@@ -3,7 +3,7 @@ export const mobilePageStyles = {
   toolbar:
     'absolute top-3 right-[calc(0.75rem+var(--window-controls-width,0px))] left-3 z-[3] flex items-start gap-3 [-webkit-app-region:drag]',
   toolbarClose: 'mt-px size-7 shrink-0 [-webkit-app-region:no-drag]',
-  hero: 'relative grid size-full grid-cols-[minmax(360px,560px)_minmax(300px,420px)] items-center justify-center gap-[clamp(56px,7vw,112px)] overflow-hidden bg-[radial-gradient(circle,color-mix(in_srgb,var(--foreground)_8%,transparent)_1px,transparent_1.2px)] bg-[length:5px_5px] bg-repeat p-14 max-[920px]:grid-cols-1 max-[920px]:grid-rows-[auto_minmax(0,1fr)] max-[920px]:items-start max-[920px]:gap-6 max-[920px]:px-7 max-[920px]:pb-7 max-[920px]:pt-[52px] min-[921px]:max-[1180px]:grid-cols-[minmax(330px,520px)_minmax(280px,360px)] min-[921px]:max-[1180px]:gap-10 min-[921px]:max-[1180px]:px-10 min-[921px]:max-[1180px]:pb-10 min-[921px]:max-[1180px]:pt-[52px] [@media(max-height:840px)_and_(min-width:921px)]:p-12',
+  hero: 'relative flex size-full items-center justify-center overflow-hidden bg-[radial-gradient(circle,color-mix(in_srgb,var(--foreground)_8%,transparent)_1px,transparent_1.2px)] bg-[length:5px_5px] bg-repeat p-14 max-[920px]:items-start max-[920px]:px-7 max-[920px]:pb-7 max-[920px]:pt-[52px] [@media(max-height:840px)_and_(min-width:921px)]:p-12',
   heroCopy:
     'relative z-[1] flex min-h-[400px] max-w-[560px] flex-col [&>*]:flex [&>*]:flex-1 [&>*]:flex-col max-[920px]:min-h-0',
   introShell: 'min-h-[400px] max-[920px]:min-h-0',
@@ -81,16 +81,5 @@ export const mobilePageStyles = {
   networkSelect: 'min-w-0 max-w-60 flex-[1_1_180px]',
   networkRefresh:
     'inline-flex size-7 cursor-pointer items-center justify-center border border-border bg-transparent text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
-  actionDivider: 'text-xs text-muted-foreground opacity-60',
-  stage:
-    'relative z-[1] grid h-[min(100%,calc(100vh-112px))] min-h-0 place-items-center max-[920px]:h-[min(420px,42vh)]',
-  phoneFrame:
-    'relative aspect-[9/19.5] w-[min(100%,420px,calc((100vh-112px)*9/19.5))] bg-neutral-950 p-[7px] max-[920px]:w-[min(290px,100%)]',
-  phoneScreen: 'relative isolate size-full overflow-hidden bg-neutral-950 [contain:paint]',
-  screenSlide:
-    'pointer-events-none absolute inset-0 translate-x-full transition-transform duration-300 ease-out will-change-transform motion-reduce:transition-none',
-  screenSlideActive: 'pointer-events-auto translate-x-0',
-  screenSlidePast: '-translate-x-[22%]',
-  screenSlideReset: 'transition-none',
-  tapping: 'animate-pulse motion-reduce:animate-none'
+  actionDivider: 'text-xs text-muted-foreground opacity-60'
 } as const

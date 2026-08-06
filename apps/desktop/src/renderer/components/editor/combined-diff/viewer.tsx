@@ -1466,7 +1466,7 @@ export default function CombinedDiffViewer({
                           }
                         )}
                       >
-                        <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
+                        <Sparkles className="text-primary size-3" />
                         <span>
                           {translate(
                             'auto.components.editor.CombinedDiffViewer.bb84b4c374',

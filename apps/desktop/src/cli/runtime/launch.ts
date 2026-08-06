@@ -73,7 +73,6 @@ export function serveYiruApp(
     json?: boolean
     port?: string | null
     pairingAddress?: string | null
-    noPairing?: boolean
     mobilePairing?: boolean
   } = {}
 ): Promise<number> {
@@ -87,9 +86,6 @@ export function serveYiruApp(
   }
   if (args.pairingAddress) {
     childArgs.push('--serve-pairing-address', args.pairingAddress)
-  }
-  if (args.noPairing) {
-    childArgs.push('--serve-no-pairing')
   }
   if (args.mobilePairing) {
     childArgs.push('--serve-mobile-pairing')
@@ -160,7 +156,7 @@ function resolveForegroundYiruExecutable(): string {
   }
   throw new RuntimeClientError(
     'runtime_serve_failed',
-    'Could not determine how to start Yiru server. Set YIRU_APP_EXECUTABLE to the Yiru executable.'
+    'Could not determine how to start the Yiru runtime host. Set YIRU_APP_EXECUTABLE to the Yiru executable.'
   )
 }
 

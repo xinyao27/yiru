@@ -18,7 +18,6 @@ import {
   Layout as PanelsTopLeft,
   Play,
   ShareNetwork,
-  HardDrives as Server,
   ShieldCheck,
   SlidersHorizontal,
   DeviceMobile as Smartphone,
@@ -400,37 +399,19 @@ export function buildSettingsNavigationMetadata({
       searchEntries: getFloatingWorkspaceSearchEntries(),
       group: 'workflows'
     },
-    ...(showDesktopOnlySettings
-      ? [
-          {
-            id: 'coworking',
-            title: translate(
-              'auto.hooks.useSettingsNavigationMetadata.coworkingTitle',
-              'Coworking'
-            ),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.coworkingDescription',
-              'Review and revoke persistent remote host authorizations.'
-            ),
-            icon: ShareNetwork,
-            searchEntries: getCoworkingSettingsSearchEntries(),
-            group: 'remote'
-          }
-        ]
-      : []),
     {
-      id: 'servers',
-      title: translate(
-        'auto.hooks.useSettingsNavigationMetadata.de0c2907a1',
-        'Remote Yiru Servers'
+      id: 'coworking',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.coworkingTitle', 'Coworking'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.coworkingDescription',
+        'Review and revoke persistent Coworking host authorizations.'
       ),
-      description: isWebClient
-        ? 'Connect this browser to a saved Yiru server.'
-        : 'Pair remote Yiru runtimes for persistent sessions, richer remote state, and web or mobile handoff.',
-      icon: Server,
-      searchEntries: [runtimeEnvironmentsSearchEntry],
-      group: 'remote',
-      badge: translate('auto.hooks.useSettingsNavigationMetadata.40d80bad8a', 'Beta')
+      icon: ShareNetwork,
+      searchEntries: [
+        runtimeEnvironmentsSearchEntry,
+        ...(showDesktopOnlySettings ? getCoworkingSettingsSearchEntries() : [])
+      ],
+      group: 'coworking'
     },
     ...(showDesktopOnlySettings && isMac
       ? [
@@ -511,7 +492,7 @@ export function buildSettingsNavigationMetadata({
       group: 'experimental'
     },
     // Why: one nav row per project, not per repo row — a project set up on
-    // multiple hosts (local + a Remote Yiru Server, or two clones) collapses to
+    // multiple hosts (local + a Coworking host, or two clones) collapses to
     // a single entry. Derived from repos alone so this list matches the panes.
     ...buildSettingsProjectList(repos).map(({ project, representativeRepoId, setups }) => {
       const representativeRepo = reposById.get(representativeRepoId) ?? repos[0]

@@ -12,7 +12,7 @@ const TAILSCALE_DOWNLOAD_URL = 'https://tailscale.com/download'
 // Why: only the "runtime is unreachable" family of failures has a Tailscale
 // remedy; auth/protocol errors pass through untouched.
 const REMOTE_RUNTIME_UNREACHABLE_RE =
-  /could not connect to the remote yiru runtime|remote yiru runtime closed the connection|timed out (?:waiting for|while connecting to) the remote yiru runtime/i
+  /could not connect to the runtime host|runtime host closed the connection|timed out (?:waiting for|while connecting to) the runtime host/i
 
 const TAILSCALE_MAGIC_DNS_SUFFIX_RE = /(?:^|\.)ts\.net$/i
 // Why: gate the CGNAT check on a full IPv4 literal — the range regex alone also
@@ -70,11 +70,11 @@ export function withRemoteRuntimeTailscaleHint(
     return message
   }
   if (isTailscaleEndpoint(endpoint)) {
-    // Why: a server already reached over Tailscale fails for tailnet-specific
+    // Why: a host already reached over Tailscale fails for tailnet-specific
     // reasons, so "use Tailscale" would be useless — point at the real causes.
-    // Already-paired devices keep their saved token across server restarts, so
+    // Already-paired devices keep their saved token across host restarts, so
     // re-pairing only matters when adding a new device.
-    return `${message} The server may be offline on your tailnet, or its Tailscale Funnel reverted to tailnet-only. Confirm it's reachable; re-pair only when adding a new device, since already-paired devices reconnect with their saved token.`
+    return `${message} The host may be offline on your tailnet, or its Tailscale Funnel reverted to tailnet-only. Confirm it's reachable; re-pair only when adding a new device, since already-paired devices reconnect with their saved token.`
   }
-  return `${message} If the server is on another network, connect both devices to Tailscale and pair using its Tailscale address (100.x or a *.ts.net name). See ${TAILSCALE_DOWNLOAD_URL}.`
+  return `${message} If the host is on another network, connect both devices to Tailscale and pair using its Tailscale address (100.x or a *.ts.net name). See ${TAILSCALE_DOWNLOAD_URL}.`
 }

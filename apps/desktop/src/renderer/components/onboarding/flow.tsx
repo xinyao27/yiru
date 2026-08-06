@@ -214,17 +214,12 @@ export default function OnboardingFlow({
           )}
         >
           <div className="relative flex h-full min-h-0 flex-col px-6 pt-8 pb-6 sm:px-8 sm:pt-9 sm:pb-8">
-            <div className="flex items-center gap-3 text-base font-semibold tracking-tight">
-              <img
-                src={logo}
-                alt=""
-                aria-hidden="true"
-                className="h-7 w-auto shrink-0 invert dark:invert-0"
-              />
-              <span>
-                {translate('auto.components.onboarding.OnboardingFlow.a249f81538', 'Yiru')}
-              </span>
-            </div>
+            <img
+              src={logo}
+              alt=""
+              aria-hidden="true"
+              className="h-7 w-auto shrink-0 invert dark:invert-0"
+            />
 
             <div className="mt-10 flex items-center gap-2 transition-[margin-top] duration-[760ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none">
               {flow.progressSteps.map(({ step, index: realStepIndex }, progressIdx) => {

@@ -491,7 +491,7 @@ export function ensureWorktreeHasInitialTerminal(
     wrappedSetupCommandStr = sequenced.setupCommand
   }
 
-  // Why: remote web clients mirror the runtime server's session tabs. A local
+  // Why: remote web clients mirror the runtime host's session tabs. A local
   // activation fallback can spawn a second host terminal before the mirror lands,
   // but returned setup fallbacks still need to run on an already mirrored tab.
   if (isWebRuntimeSessionActive(getRuntimeEnvironmentIdForWorktree(ownerState, worktreeId))) {

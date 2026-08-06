@@ -28,7 +28,7 @@ type FeatureWallSetupChecklistProps = {
   onSelectStep: (id: FeatureWallSetupStepId) => void
   onOrchestrationSkillInstalledChange: (installed: boolean) => void
   onBrowserUseSkillInstalledChange: (installed: boolean) => void
-  /** Modal keeps a compact rail; embedded (settings pane) gets more column breathing room. */
+  /** The embedded settings pane gives the checklist its own row so details can use the full width. */
   layout?: FeatureWallSetupChecklistLayout
 }
 
@@ -88,7 +88,7 @@ function SetupSection(props: {
 }): React.JSX.Element {
   const doneCount = props.steps.filter((step) => props.progress.stepDone[step.id]).length
   return (
-    <section className="space-y-2">
+    <section className="min-w-0 space-y-2">
       <div className="flex items-center justify-between gap-3">
         <h4 className="text-muted-foreground text-xs font-semibold tracking-[0.08em] uppercase">
           {props.title}
@@ -121,7 +121,7 @@ function SelectedStepAction(props: FeatureWallSetupChecklistProps): React.JSX.El
   }
   const activeDone = props.progress.stepDone[activeStep.id]
   if (activeStep.id === 'default-agent') {
-    return <DefaultAgentAction />
+    return <DefaultAgentAction isEmbedded={props.layout === 'embedded'} />
   }
   if (activeStep.id === 'add-two-repos') {
     return <AddReposAction />
@@ -162,7 +162,7 @@ function SelectedStepVisual(props: { stepId: FeatureWallSetupStepId }): React.JS
   return null
 }
 
-function DefaultAgentAction(): React.JSX.Element {
+function DefaultAgentAction(props: { isEmbedded: boolean }): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const refreshDetectedAgents = useAppStore((s) => s.refreshDetectedAgents)
@@ -191,6 +191,7 @@ function DefaultAgentAction(): React.JSX.Element {
         onSelect={handleSelectAgent}
         detectedSet={detectedSet}
         isDetecting={isDetectingAgents}
+        isEmbedded={props.isEmbedded}
       />
     </div>
   )
@@ -226,21 +227,22 @@ export function FeatureWallSetupChecklist(
       ? 'gap-8 xl:grid-cols-[minmax(0,1fr)_auto] xl:gap-12'
       : 'gap-8 sm:grid-cols-[minmax(0,48ch)_auto] sm:gap-10'
 
-  // Why: in the modal, a stacked checklist can leave medium-width windows with
-  // only a tiny action pane; switch to the rail/content layout sooner.
+  // Why: settings needs one readable content column; the checklist sits above it
+  // so the selected action is never squeezed by a permanent side rail.
   return (
     <div
       className={cn(
-        'grid h-full min-h-0',
         isEmbedded
-          ? 'grid-rows-[auto_minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-16'
-          : 'grid-rows-[auto_minmax(0,1fr)] gap-5 md:grid-cols-[minmax(190px,260px)_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]'
+          ? 'flex min-w-0 flex-col gap-6'
+          : 'grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-5 md:grid-cols-[minmax(190px,260px)_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]'
       )}
     >
       <div
         className={cn(
-          'scrollbar-sleek min-h-0 space-y-5 overflow-y-auto',
-          isEmbedded ? 'pr-4' : 'max-h-[min(18rem,40vh)] pr-1 md:max-h-none'
+          'min-w-0',
+          isEmbedded
+            ? 'grid shrink-0 grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-6'
+            : 'scrollbar-sleek min-h-0 max-h-[min(18rem,40vh)] space-y-5 overflow-y-auto pr-1 md:max-h-none'
         )}
       >
         <SetupSection
@@ -271,14 +273,20 @@ export function FeatureWallSetupChecklist(
 
       <section
         className={cn(
-          'scrollbar-sleek min-h-0 overflow-y-auto',
+          'min-w-0',
           isEmbedded
-            ? 'pt-10 lg:border-l lg:border-border/50 lg:pl-14 lg:pt-0'
-            : 'border-t border-border pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0'
+            ? 'pt-2'
+            : 'scrollbar-sleek min-h-0 overflow-y-auto border-t border-border pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0'
         )}
       >
         {activeStep ? (
-          <div className={cn('flex h-full flex-col', isEmbedded ? 'gap-7' : 'gap-5')}>
+          <div
+            className={cn(
+              'flex flex-col',
+              !isEmbedded ? 'h-full' : null,
+              isEmbedded ? 'gap-7' : 'gap-5'
+            )}
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="text-foreground text-2xl leading-tight font-semibold">

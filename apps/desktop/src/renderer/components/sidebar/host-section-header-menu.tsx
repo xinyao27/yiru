@@ -53,7 +53,7 @@ function openManageHost(row: HostHeaderRow): void {
   if (row.kind === 'runtime') {
     const parsed = parseExecutionHostId(row.hostId)
     state.openSettingsTarget({
-      pane: 'servers',
+      pane: 'coworking',
       repoId: null,
       sectionId: parsed?.kind === 'runtime' ? parsed.environmentId : undefined
     })

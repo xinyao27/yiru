@@ -285,7 +285,7 @@ export function getCanonicalUserDataPath(): string {
  * Copy legacy mobile pairing credentials into the canonical userData directory.
  *
  * Existing installs may already have credentials in the late app.getPath('userData')
- * directory. Before switching the runtime server to the canonical path, copy the
+ * directory. Before switching the runtime host to the canonical path, copy the
  * registry and E2EE keypair forward as a pair so an update does not force one
  * last re-pair or mix devices with the wrong key.
  */

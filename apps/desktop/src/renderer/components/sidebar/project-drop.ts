@@ -57,7 +57,7 @@ export function getSidebarProjectDropAffordance(args: {
       tone: 'blocked',
       label: translate(
         'auto.components.sidebar.sidebar.project.drop.e344666fb8',
-        'Server runtime active'
+        'Runtime host active'
       ),
       description: translate(
         'auto.components.sidebar.sidebar.project.drop.740e8d0d46',

@@ -18,12 +18,7 @@ if (parsed.help) {
   process.exit(0)
 }
 
-if (hasForwardedServeFlag(parsed.serveArgs, 'no-pairing')) {
-  console.error('serve-headless-fresh-profile-pairing: --no-pairing cannot print a pairing code.')
-  process.exit(2)
-}
-
-const serveArgs = withDefaultPairingAddress(parsed.serveArgs)
+const serveArgs = withDefaultPairingAddress(withMobilePairing(parsed.serveArgs))
 
 ensureElectronRuntime()
 
@@ -112,7 +107,7 @@ function parseArgs(args) {
 function printHelp() {
   console.log(`Usage: node scripts/serve-headless-fresh-profile-pairing.mjs [--keep] [yiru serve flags]
 
-Starts yiru-dev serve --json with a fresh isolated userData profile, ensures Electron's dev runtime is usable, and prints the pairing URL.
+Starts yiru-dev serve --mobile-pairing --json with a fresh isolated userData profile, ensures Electron's dev runtime is usable, and prints the Yiru Mobile pairing URL.
 
 Wrapper flags:
   --keep        Keep the fresh profile after the server exits.
@@ -121,12 +116,18 @@ Wrapper flags:
 Forwarded examples:
   node scripts/serve-headless-fresh-profile-pairing.mjs --port 6768
   node scripts/serve-headless-fresh-profile-pairing.mjs --pairing-address 100.64.1.20
-  node scripts/serve-headless-fresh-profile-pairing.mjs --mobile-pairing
 
 Environment:
   YIRU_HEADLESS_PAIRING_ADDRESS=<host|host:port|ws://...>  Override the auto pairing address.
   YIRU_HEADLESS_PAIRING_PROFILE_DIR=/path/to/profile       Use a fixed profile directory.
 `)
+}
+
+/**
+ * This maintenance script exists only for the Yiru Mobile pairing flow.
+ */
+function withMobilePairing(args) {
+  return hasForwardedServeFlag(args, 'mobile-pairing') ? args : [...args, '--mobile-pairing']
 }
 
 /**
@@ -242,20 +243,17 @@ function printReadyLine(line) {
   } catch {
     return false
   }
-  if (!payload || payload.type !== 'yiru_server_ready') {
+  if (!payload || payload.type !== 'yiru_runtime_ready') {
     return false
   }
-  console.log(`Yiru server ready: ${payload.endpoint ?? 'websocket unavailable'}`)
+  console.log(`Yiru runtime host ready: ${payload.endpoint ?? 'websocket unavailable'}`)
   if (payload.pairing?.endpoint) {
     console.log(`Pairing endpoint: ${payload.pairing.endpoint}`)
-  }
-  if (payload.pairing?.webClientUrl) {
-    console.log(`Web client URL: ${payload.pairing.webClientUrl}`)
   }
   if (payload.pairing?.url) {
     sawPairingUrl = true
     console.log(`Pairing URL: ${payload.pairing.url}`)
-    console.error('[headless-pairing] server is running; press Ctrl+C to stop.')
+    console.error('[headless-pairing] runtime host is running; press Ctrl+C to stop.')
     return true
   }
   console.log('Pairing URL: unavailable')

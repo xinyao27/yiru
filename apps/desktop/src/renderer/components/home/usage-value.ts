@@ -1,7 +1,12 @@
+import type { RuntimeStatsSupplementalUsage } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '~renderer/store'
-import { buildUsageValueSnapshot, type UsageValueModel } from '~shared/stats/usage-value'
+import {
+  buildUsageValueSnapshot,
+  type UsageValueModel,
+  type UsageValueSupplementalInput
+} from '~shared/stats/usage-value'
 
 export type ModelUsageValue = UsageValueModel
 
@@ -13,6 +18,7 @@ export type UsageValue = {
   isReady: boolean
   isScanning: boolean
   models: ModelUsageValue[]
+  meteredValueUsd?: number | null
 }
 
 export function useUsageValue(): UsageValue {
@@ -31,11 +37,16 @@ export function useUsageValue(): UsageValue {
   const openCodeSnapshotReady = useAppStore((state) => state.openCodeUsageSnapshotReady)
   const openCodeDaily = useAppStore((state) => state.openCodeUsageDaily)
   const openCodeModels = useAppStore((state) => state.openCodeUsageModelBreakdown)
+  const supplementalUsage = useAppStore((state) => state.statsSummary?.supplementalUsage)
 
   useEffect(() => {
     void prepareUsageSnapshots()
   }, [])
 
+  const supplemental = useMemo<UsageValueSupplementalInput | undefined>(
+    () => (supplementalUsage ? mapSupplementalUsage(supplementalUsage) : undefined),
+    [supplementalUsage]
+  )
   const usage = useMemo(
     () =>
       buildUsageValueSnapshot({
@@ -50,9 +61,18 @@ export function useUsageValue(): UsageValue {
         openCode: {
           daily: openCodeDaily,
           modelBreakdown: openCodeModels
-        }
+        },
+        supplemental
       }),
-    [claudeDaily, claudeModels, codexDaily, codexModels, openCodeDaily, openCodeModels]
+    [
+      claudeDaily,
+      claudeModels,
+      codexDaily,
+      codexModels,
+      openCodeDaily,
+      openCodeModels,
+      supplemental
+    ]
   )
   const isReady =
     claudeRange === 'all' &&
@@ -75,7 +95,8 @@ export function useUsageValue(): UsageValue {
         claudeScanState?.isScanning === true ||
         codexScanState?.isScanning === true ||
         openCodeScanState?.isScanning === true,
-      models: usage.models
+      models: usage.models,
+      ...(usage.meteredValueUsd === undefined ? {} : { meteredValueUsd: usage.meteredValueUsd })
     }),
     [
       claudeScanState?.isScanning,
@@ -85,6 +106,19 @@ export function useUsageValue(): UsageValue {
       usage
     ]
   )
+}
+
+function mapSupplementalUsage(usage: RuntimeStatsSupplementalUsage): UsageValueSupplementalInput {
+  return {
+    daily: usage.dailyTokens.map((point) => ({
+      day: point.day,
+      tokens: point.tokens,
+      valueUsd: point.valueUsd,
+      unpricedTokens: point.unpricedTokens
+    })),
+    models: usage.modelUsage,
+    ...(usage.meteredValueUsd === undefined ? {} : { meteredValueUsd: usage.meteredValueUsd })
+  }
 }
 
 async function prepareUsageSnapshots(): Promise<void> {

@@ -2560,7 +2560,7 @@ export class YiruRuntimeService {
     if (!this.orchestrationEnvironmentTransport) {
       throw new OrchestrationError(
         'server_required',
-        'Connected-server orchestration is unavailable in this runtime.'
+        'Coworking orchestration is unavailable in this runtime host.'
       )
     }
     return this.orchestrationEnvironmentTransport.resolve(selector)
@@ -2576,7 +2576,7 @@ export class YiruRuntimeService {
     if (!this.orchestrationEnvironmentTransport) {
       throw new OrchestrationError(
         'server_required',
-        'Connected-server orchestration is unavailable in this runtime.'
+        'Coworking orchestration is unavailable in this runtime host.'
       )
     }
     if (isOrchestrationMutation(method, params)) {
@@ -2597,7 +2597,7 @@ export class YiruRuntimeService {
       if (!status.capabilities?.includes(ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY)) {
         throw new OrchestrationError(
           'orchestration_migration_required',
-          'The connected worker server does not support the current orchestration contract. No effects were applied.',
+          'The connected worker host does not support the current orchestration contract. No effects were applied.',
           orchestrationMigrationData('runtime_capability_missing')
         )
       }

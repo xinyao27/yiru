@@ -3573,7 +3573,8 @@ const api = {
   } satisfies PreloadApi['ui'],
 
   stats: {
-    getSummary: (): Promise<StatsSummary> => ipcRenderer.invoke('stats:summary')
+    getSummary: (args?: { refreshUsage?: boolean }): Promise<StatsSummary> =>
+      ipcRenderer.invoke('stats:summary', args)
   } satisfies PreloadApi['stats'],
 
   memory: {
@@ -3762,11 +3763,6 @@ const api = {
   runtimeEnvironments: {
     list: (): Promise<PublicKnownRuntimeEnvironment[]> =>
       ipcRenderer.invoke('runtimeEnvironments:list'),
-    addFromPairingCode: (args: {
-      name: string
-      pairingCode: string
-    }): Promise<{ environment: PublicKnownRuntimeEnvironment }> =>
-      ipcRenderer.invoke('runtimeEnvironments:addFromPairingCode', args),
     resolve: (args: { selector: string }): Promise<PublicKnownRuntimeEnvironment> =>
       ipcRenderer.invoke('runtimeEnvironments:resolve', args),
     remove: (args: { selector: string }): Promise<{ removed: PublicKnownRuntimeEnvironment }> =>
@@ -3993,31 +3989,12 @@ const api = {
 
     openWindowsNetworkSettings: () => ipcRenderer.invoke('mobile:openWindowsNetworkSettings'),
 
-    getRuntimePairingUrl: (args?: {
-      address?: string
-      rotate?: boolean
-    }): Promise<
-      | { available: false }
-      | {
-          available: true
-          pairingUrl: string
-          webClientUrl: string | null
-          endpoint: string
-          deviceId: string
-        }
-    > => ipcRenderer.invoke('mobile:getRuntimePairingUrl', args),
-
     listDevices: (): Promise<{
       devices: { deviceId: string; name: string; pairedAt: number; lastSeenAt: number }[]
     }> => ipcRenderer.invoke('mobile:listDevices'),
 
     revokeDevice: (args: { deviceId: string }): Promise<{ revoked: boolean }> =>
       ipcRenderer.invoke('mobile:revokeDevice', args),
-
-    listRuntimeAccessGrants: () => ipcRenderer.invoke('mobile:listRuntimeAccessGrants'),
-
-    revokeRuntimeAccess: (args: { deviceId: string }): Promise<{ revoked: boolean }> =>
-      ipcRenderer.invoke('mobile:revokeRuntimeAccess', args),
 
     isWebSocketReady: (): Promise<{ ready: boolean; endpoint: string | null }> =>
       ipcRenderer.invoke('mobile:isWebSocketReady')

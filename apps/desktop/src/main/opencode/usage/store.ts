@@ -20,9 +20,9 @@ import type {
 import { createWorktreeRefs, scanOpenCodeUsageDatabases } from './scanner'
 import type { OpenCodeUsageDailyAggregate, OpenCodeUsagePersistedState } from './types'
 
-// Why: v3 prefers request-level message rows so model and day attribution are
-// retained. Older caches collapsed those records into one session-level row.
-const SCHEMA_VERSION = 3
+// Why: v4 applies the OpenCode Go step-finish ledger rule and nonnegative
+// request token normalization. Older caches may contain a zero or generic cost.
+const SCHEMA_VERSION = 4
 const STALE_MS = 5 * 60_000
 
 let _openCodeUsageFile: string | null = null
@@ -298,6 +298,7 @@ export class OpenCodeUsageStore {
     let totalTokens = 0
     let events = 0
     let estimatedCostUsd: number | null = null
+    let hasUnpricedCost = false
     const byModel = new Map<string, number>()
     const byProject = new Map<string, number>()
 
@@ -309,6 +310,7 @@ export class OpenCodeUsageStore {
       totalTokens += row.totalTokens
       events += row.eventCount
       estimatedCostUsd = addCost(estimatedCostUsd, row.estimatedCostUsd)
+      hasUnpricedCost ||= row.totalTokens > 0 && row.estimatedCostUsd === null
       byModel.set(
         row.model ?? 'Unknown model',
         (byModel.get(row.model ?? 'Unknown model') ?? 0) + row.totalTokens
@@ -331,7 +333,7 @@ export class OpenCodeUsageStore {
       outputTokens,
       reasoningOutputTokens,
       totalTokens,
-      estimatedCostUsd,
+      estimatedCostUsd: hasUnpricedCost ? null : estimatedCostUsd,
       topModel,
       topProject,
       hasAnyOpenCodeData: filteredSessions.length > 0 || filteredDaily.length > 0
@@ -367,10 +369,13 @@ export class OpenCodeUsageStore {
       existing.outputTokens += row.outputTokens
       existing.reasoningOutputTokens += row.reasoningOutputTokens
       existing.totalTokens += row.totalTokens
-      existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, row.estimatedCostUsd)
       if (row.estimatedCostUsd === null) {
         existing.unpricedTokens += row.totalTokens
       }
+      existing.estimatedCostUsd =
+        existing.unpricedTokens > 0
+          ? null
+          : addCost(existing.estimatedCostUsd, row.estimatedCostUsd)
       byDay.set(row.day, existing)
     }
     return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
@@ -391,6 +396,7 @@ export class OpenCodeUsageStore {
     kind: OpenCodeUsageBreakdownKind
   ): OpenCodeUsageBreakdownRow[] {
     const rows = new Map<string, OpenCodeUsageBreakdownRow>()
+    const unpricedKeys = new Set<string>()
     const filteredDaily = this.getFilteredDaily(scope, range)
     const filteredSessions = this.getFilteredSessions(scope, range)
 
@@ -416,6 +422,9 @@ export class OpenCodeUsageStore {
       existing.reasoningOutputTokens += daily.reasoningOutputTokens
       existing.totalTokens += daily.totalTokens
       existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
+      if (daily.totalTokens > 0 && daily.estimatedCostUsd === null) {
+        unpricedKeys.add(key)
+      }
       rows.set(key, existing)
     }
 
@@ -439,7 +448,9 @@ export class OpenCodeUsageStore {
       }
     }
 
-    return [...rows.values()].sort((left, right) => right.totalTokens - left.totalTokens)
+    return [...rows.values()]
+      .map((row) => (unpricedKeys.has(row.key) ? { ...row, estimatedCostUsd: null } : row))
+      .sort((left, right) => right.totalTokens - left.totalTokens)
   }
 
   async getRecentSessions(

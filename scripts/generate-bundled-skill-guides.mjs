@@ -22,7 +22,6 @@ const CANONICAL_GUIDE_NAMES = [
   'yiru-debug',
   'yiru-emulator',
   'yiru-emulator-android',
-  'yiru-per-workspace-env',
   'orchestration'
 ]
 
@@ -34,7 +33,6 @@ const GUIDE_ALIASES = {
   'yiru-debug': [],
   'yiru-emulator': [],
   'yiru-emulator-android': [],
-  'yiru-per-workspace-env': [],
   orchestration: []
 }
 

@@ -63,7 +63,7 @@ export function useSidebarProjectDrop(): {
         toast.error(
           translate(
             'auto.components.sidebar.useSidebarProjectDrop.849ef13dc0',
-            'Local folder drops are unavailable for server runtimes.'
+            'Local folder drops are unavailable for runtime hosts.'
           ),
           {
             description: translate(

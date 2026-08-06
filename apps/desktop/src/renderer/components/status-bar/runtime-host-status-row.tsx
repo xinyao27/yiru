@@ -98,7 +98,7 @@ export function RuntimeHostStatusRow({
           <span>
             {translate(
               'auto.components.status.bar.SshStatusSegment.remote_server',
-              'Remote Server'
+              'Coworking Host'
             )}
           </span>
           <span aria-hidden="true">·</span>

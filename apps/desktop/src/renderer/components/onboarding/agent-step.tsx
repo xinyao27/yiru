@@ -25,15 +25,21 @@ type AgentStepProps = {
   isDetecting: boolean
   yoloPermissions?: boolean
   onYoloPermissionsChange?: (enabled: boolean) => void
+  isEmbedded?: boolean
 }
 
 function useAgentGridScrollMaxHeight(
   scrollRef: React.RefObject<HTMLDivElement | null>,
-  remeasureKey: string
+  remeasureKey: string,
+  enabled: boolean
 ): number | undefined {
   const [maxHeight, setMaxHeight] = useState<number | undefined>(undefined)
 
   useLayoutEffect(() => {
+    if (!enabled) {
+      setMaxHeight(undefined)
+      return
+    }
     const scroll = scrollRef.current
     if (!scroll) {
       return
@@ -59,7 +65,7 @@ function useAgentGridScrollMaxHeight(
       observer.observe(card)
     }
     return () => observer.disconnect()
-  }, [remeasureKey, scrollRef])
+  }, [enabled, remeasureKey, scrollRef])
 
   return maxHeight
 }
@@ -70,7 +76,8 @@ export function AgentStep({
   detectedSet,
   isDetecting,
   yoloPermissions = true,
-  onYoloPermissionsChange
+  onYoloPermissionsChange,
+  isEmbedded = false
 }: AgentStepProps) {
   const agentCatalog = getAgentCatalog()
   const detected = agentCatalog.filter((agent) => detectedSet.has(agent.id))
@@ -111,11 +118,12 @@ export function AgentStep({
   const agentGridScrollRef = useRef<HTMLDivElement>(null)
   const agentGridScrollMaxHeight = useAgentGridScrollMaxHeight(
     agentGridScrollRef,
-    `${primary.length}:${fallbackRest.length}:${openState}:${hasDetected}`
+    `${primary.length}:${fallbackRest.length}:${openState}:${hasDetected}`,
+    !isEmbedded
   )
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-5">
+    <div className={cn(isEmbedded ? 'flex flex-col gap-5' : 'flex min-h-0 flex-1 flex-col gap-5')}>
       {!hasDetected && !isDetecting && (
         <div className="shrink-0 border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-700 dark:text-amber-200/90">
           {translate(
@@ -145,7 +153,11 @@ export function AgentStep({
           </Button>
         </div>
       )}
-      <section className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+      <section
+        className={cn(
+          isEmbedded ? 'flex flex-col gap-3' : 'flex min-h-0 flex-1 flex-col gap-3 overflow-hidden'
+        )}
+      >
         <SectionHeader
           label={
             hasDetected
@@ -161,8 +173,14 @@ export function AgentStep({
         <div
           ref={agentGridScrollRef}
           data-agent-grid-scroll
-          className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto pr-1"
-          style={agentGridScrollMaxHeight ? { maxHeight: agentGridScrollMaxHeight } : undefined}
+          className={cn(
+            isEmbedded ? 'pr-1' : 'scrollbar-sleek min-h-0 flex-1 overflow-y-auto pr-1'
+          )}
+          style={
+            !isEmbedded && agentGridScrollMaxHeight
+              ? { maxHeight: agentGridScrollMaxHeight }
+              : undefined
+          }
         >
           <div className="space-y-3">
             <div data-agent-grid className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
@@ -292,20 +310,16 @@ function AgentButton({
 }) {
   return (
     <Button
-      variant="outline"
-      size="xs"
+      variant="choice-card"
+      size="choice-row"
       type="button"
       data-agent-card
       aria-pressed={selected}
-      className={cn(
-        'h-auto justify-start gap-0 whitespace-normal font-normal focus-visible:bg-muted/60',
-        'group relative overflow-hidden p-3.5 text-left',
-        selected ? 'border-violet-500/60 bg-violet-500/10' : 'bg-muted/30 hover:bg-muted/60'
-      )}
+      className="relative overflow-hidden"
       onClick={onClick}
     >
       {selected ? (
-        <div className="absolute top-2 right-2 grid size-5 place-items-center bg-violet-500 text-white">
+        <div className="bg-primary text-primary-foreground absolute top-2 right-2 grid size-5 place-items-center">
           <Check className="size-3" strokeWidth={3} />
         </div>
       ) : null}

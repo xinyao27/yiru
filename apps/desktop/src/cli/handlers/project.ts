@@ -58,7 +58,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
     const args: ProjectHostSetupExistingFolderArgs = {
       projectId: getRequiredStringFlag(flags, 'project'),
       hostId: getRequiredStringFlag(flags, 'host') as ProjectHostSetupExistingFolderArgs['hostId'],
-      path: resolveRepoPathArgument(rawPath, cwd, client.isRemote, 'Remote project setup'),
+      path: resolveRepoPathArgument(rawPath, cwd),
       kind: getOptionalRepoKind(flags),
       displayName: getOptionalStringFlag(flags, 'display-name')
     }
@@ -74,12 +74,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       projectId: getRequiredStringFlag(flags, 'project'),
       hostId: getRequiredStringFlag(flags, 'host') as ProjectHostSetupCloneArgs['hostId'],
       url: getRequiredStringFlag(flags, 'url'),
-      destination: resolveRepoPathArgument(
-        rawDestination,
-        cwd,
-        client.isRemote,
-        'Project setup clone'
-      ),
+      destination: resolveRepoPathArgument(rawDestination, cwd),
       displayName: getOptionalStringFlag(flags, 'display-name')
     }
     const result = await client.call<{ result: ProjectHostSetupResult }>(
@@ -94,10 +89,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       projectId: getRequiredStringFlag(flags, 'project'),
       hostId: getRequiredStringFlag(flags, 'host') as ProjectHostSetupCreateArgs['hostId'],
       setupId: getOptionalStringFlag(flags, 'setup-id'),
-      path:
-        path === undefined
-          ? undefined
-          : resolveRepoPathArgument(path, cwd, client.isRemote, 'Project setup create'),
+      path: path === undefined ? undefined : resolveRepoPathArgument(path, cwd),
       kind: getOptionalRepoKind(flags),
       displayName: getOptionalStringFlag(flags, 'display-name'),
       worktreeBasePath: getOptionalStringFlag(flags, 'worktree-base-path'),
@@ -117,10 +109,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       setupId: getRequiredStringFlag(flags, 'setup'),
       updates: {
         displayName: getOptionalStringFlag(flags, 'display-name'),
-        path:
-          path === undefined
-            ? undefined
-            : resolveRepoPathArgument(path, cwd, client.isRemote, 'Project setup update'),
+        path: path === undefined ? undefined : resolveRepoPathArgument(path, cwd),
         worktreeBasePath: getOptionalStringFlag(flags, 'worktree-base-path'),
         gitUsername: getOptionalStringFlag(flags, 'git-username'),
         kind: getOptionalRepoKind(flags),

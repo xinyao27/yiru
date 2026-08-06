@@ -3,11 +3,9 @@ import {
   Group,
   LinearGradient,
   matchFont,
-  Picture,
   Text as SkiaText,
   vec
 } from '@shopify/react-native-skia'
-import { useThinkingOrbPicture } from 'expo-thinking-orbs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Pressable, ScrollView, Text, View } from 'react-native'
 import {
@@ -22,6 +20,7 @@ import {
 import { useCSSVariable } from 'uniwind'
 
 import { MobileContentSection } from '~/components/content-section'
+import { LoadingIndicator } from '~/components/loading-indicator'
 import { useMobileLoaderStyle } from '~/loading/loader-style-context'
 import { resolveCssNumber, resolveCssString } from '~/style/resolve-css-variable'
 
@@ -88,12 +87,6 @@ function MobileAgentWorkingGraphic(): React.JSX.Element {
     (canvasHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent
   const labelOffset = orbSize + gap
   const shimmerProgress = useSharedValue(reduceMotion ? 0.5 : 0)
-  const orbPicture = useThinkingOrbPicture({
-    state: loaderStyle,
-    size: orbSize,
-    color: foreground,
-    paused: reduceMotion
-  })
   const shimmerStart = useDerivedValue(
     () => vec((shimmerProgress.value * 2 - 1) * labelWidth, 0),
     [labelWidth]
@@ -117,25 +110,47 @@ function MobileAgentWorkingGraphic(): React.JSX.Element {
 
   return (
     <View accessibilityRole="text" accessibilityLabel={WORKING_STATUS_LABEL}>
-      <Canvas style={{ width: labelOffset + labelWidth, height: canvasHeight }}>
-        <Group transform={[{ translateY: (canvasHeight - orbSize) / 2 }]}>
-          <Picture picture={orbPicture} />
-        </Group>
-        <Group transform={[{ translateX: labelOffset }]}>
-          <SkiaText x={0} y={baseline} text={WORKING_STATUS_LABEL} font={font}>
-            <LinearGradient
-              start={shimmerStart}
-              end={shimmerEnd}
-              colors={
-                reduceMotion
-                  ? [foreground, foreground]
-                  : [mutedForeground, mutedForeground, foreground, mutedForeground, mutedForeground]
-              }
-              positions={reduceMotion ? [0, 1] : [0, 0.35, 0.5, 0.65, 1]}
-            />
-          </SkiaText>
-        </Group>
-      </Canvas>
+      <View
+        style={{
+          width: labelOffset + labelWidth,
+          height: canvasHeight,
+          position: 'relative'
+        }}
+      >
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: (canvasHeight - orbSize) / 2,
+            width: orbSize,
+            height: orbSize
+          }}
+        >
+          <LoadingIndicator color={foreground} loaderStyle={loaderStyle} size={orbSize} />
+        </View>
+        <Canvas style={{ width: labelOffset + labelWidth, height: canvasHeight }}>
+          <Group transform={[{ translateX: labelOffset }]}>
+            <SkiaText x={0} y={baseline} text={WORKING_STATUS_LABEL} font={font}>
+              <LinearGradient
+                start={shimmerStart}
+                end={shimmerEnd}
+                colors={
+                  reduceMotion
+                    ? [foreground, foreground]
+                    : [
+                        mutedForeground,
+                        mutedForeground,
+                        foreground,
+                        mutedForeground,
+                        mutedForeground
+                      ]
+                }
+                positions={reduceMotion ? [0, 1] : [0, 0.35, 0.5, 0.65, 1]}
+              />
+            </SkiaText>
+          </Group>
+        </Canvas>
+      </View>
     </View>
   )
 }

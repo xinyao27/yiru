@@ -14,6 +14,8 @@ await build({
         product: resolve(import.meta.dirname, 'src/product.ts'),
         review: resolve(import.meta.dirname, 'src/review.ts'),
         ui: resolve(import.meta.dirname, 'src/ui.ts'),
+        loader: resolve(import.meta.dirname, 'src/loader.ts'),
+        'loader-geometry': resolve(import.meta.dirname, 'src/loader-geometry.ts'),
         workspace: resolve(import.meta.dirname, 'src/workspace.ts')
       },
       output: {

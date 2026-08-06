@@ -49,7 +49,7 @@ export function createStoredWebRuntimeEnvironment(args: {
   const now = Date.now()
   return {
     id,
-    name: args.name.trim() || 'Yiru Server',
+    name: args.name.trim() || 'Runtime host',
     createdAt: now,
     updatedAt: now,
     lastUsedAt: null,

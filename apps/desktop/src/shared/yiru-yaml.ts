@@ -13,9 +13,6 @@ function asTrimmedString(value: unknown): string | undefined {
 }
 
 const DEFAULT_TAB_COLOR_RE = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/
-export const YIRU_VM_RECIPE_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/
-export const YIRU_VM_RECIPE_ID_RULE =
-  'Use 1-64 lowercase letters, numbers, dots, underscores, or hyphens, starting with a letter or number.'
 const MAX_SHARED_DIRECTORIES = 100
 
 function normalizeSharedDirectories(value: unknown): string[] {

@@ -1,7 +1,13 @@
+import { findModelsDevPricing, type ModelsDevPricing } from '~main/stats/models-dev-pricing'
+
+import { normalizeCodexModel } from './model-names'
+import { codexPriorityMultiplier } from './priority-pricing'
+
 type CodexTokenPricing = {
   input: number
   cachedInput: number
   output: number
+  cacheWriteRate?: number
   cacheWriteMultiplier?: number
 }
 
@@ -11,29 +17,33 @@ type CodexModelPricing = CodexTokenPricing & {
   } & CodexTokenPricing
 }
 
+type CodexUsagePricingOptions = {
+  isPriority?: boolean
+  priorityModel?: string | null
+}
+
 const LONG_CONTEXT_THRESHOLD_TOKENS = 272_000
 
 const MODEL_PRICING: Record<string, CodexModelPricing> = {
   'gpt-5': { input: 1.25, cachedInput: 0.125, output: 10 },
+  'gpt-5-mini': { input: 0.25, cachedInput: 0.025, output: 2 },
+  'gpt-5-nano': { input: 0.05, cachedInput: 0.005, output: 0.4 },
+  'gpt-5-pro': { input: 15, cachedInput: 15, output: 120 },
   'gpt-5.1': { input: 1.25, cachedInput: 0.125, output: 10 },
   'gpt-5.1-codex': { input: 1.25, cachedInput: 0.125, output: 10 },
   'gpt-5.1-codex-max': { input: 1.25, cachedInput: 0.125, output: 10 },
+  'gpt-5.1-codex-mini': { input: 0.25, cachedInput: 0.025, output: 2 },
   'gpt-5.2': { input: 1.75, cachedInput: 0.175, output: 14 },
   'gpt-5.2-codex': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.3': { input: 1.75, cachedInput: 0.175, output: 14 },
+  'gpt-5.2-pro': { input: 21, cachedInput: 21, output: 168 },
   'gpt-5.3-codex': { input: 1.75, cachedInput: 0.175, output: 14 },
+  'gpt-5.3-codex-spark': { input: 0, cachedInput: 0, output: 0 },
   'gpt-5.4-mini': { input: 0.75, cachedInput: 0.075, output: 4.5 },
   'gpt-5.4-nano': { input: 0.2, cachedInput: 0.02, output: 1.25 },
   'gpt-5.4-pro': {
     input: 30,
     cachedInput: 30,
-    output: 180,
-    longContext: {
-      thresholdTokens: LONG_CONTEXT_THRESHOLD_TOKENS,
-      input: 60,
-      cachedInput: 60,
-      output: 270
-    }
+    output: 180
   },
   'gpt-5.4': {
     input: 2.5,
@@ -72,67 +82,74 @@ const MODEL_PRICING: Record<string, CodexModelPricing> = {
     }
   },
   'gpt-5.6-terra': {
-    input: 2.5,
-    cachedInput: 0.25,
-    output: 15,
+    input: 2,
+    cachedInput: 0.2,
+    output: 12,
     cacheWriteMultiplier: 1.25,
     longContext: {
       thresholdTokens: LONG_CONTEXT_THRESHOLD_TOKENS,
-      input: 5,
-      cachedInput: 0.5,
-      output: 22.5,
+      input: 4,
+      cachedInput: 0.4,
+      output: 18,
       cacheWriteMultiplier: 1.25
     }
   },
   'gpt-5.6-luna': {
-    input: 1,
-    cachedInput: 0.1,
-    output: 6,
-    cacheWriteMultiplier: 1.25,
+    input: 0.2,
+    cachedInput: 0.3,
+    output: 1.2,
+    cacheWriteRate: 3.75,
     longContext: {
-      thresholdTokens: LONG_CONTEXT_THRESHOLD_TOKENS,
-      input: 2,
-      cachedInput: 0.2,
-      output: 9,
-      cacheWriteMultiplier: 1.25
+      thresholdTokens: 200_000,
+      input: 6,
+      cachedInput: 0.6,
+      output: 22.5,
+      cacheWriteRate: 7.5
     }
   }
 }
-
-const REASONING_TIER_SUFFIXES = ['minimal', 'low', 'medium', 'high', 'xhigh', 'auto', 'none']
 
 export function priceCodexUsage(
   model: string | null,
   inputTokens: number,
   cachedInputTokens: number,
   cacheWriteTokens: number,
-  outputTokens: number
+  outputTokens: number,
+  options: CodexUsagePricingOptions = {}
 ): number | null {
-  const normalized = normalizeModelForPricing(model)
-  if (!normalized) {
+  const resolution = resolveCodexPricing(model)
+  if (!resolution) {
     return null
   }
-  const basePricing = MODEL_PRICING[normalized]
+  const basePricing = resolution.pricing
   const pricing =
     basePricing.longContext && inputTokens > basePricing.longContext.thresholdTokens
       ? basePricing.longContext
       : basePricing
-  const clampedCached = Math.min(cachedInputTokens, inputTokens)
-  const clampedCacheWrite = Math.min(cacheWriteTokens, inputTokens)
-  if (
-    (clampedCacheWrite > 0 && pricing.cacheWriteMultiplier === undefined) ||
-    clampedCached + clampedCacheWrite > inputTokens
-  ) {
-    return null
-  }
-  const nonCachedInputTokens = Math.max(inputTokens - clampedCached - clampedCacheWrite, 0)
-  return (
+  const totalInputTokens = Math.max(inputTokens, 0)
+  const clampedCached = Math.min(Math.max(cachedInputTokens, 0), totalInputTokens)
+  const clampedCacheWrite = Math.min(
+    Math.max(cacheWriteTokens, 0),
+    Math.max(totalInputTokens - clampedCached, 0)
+  )
+  const nonCachedInputTokens = totalInputTokens - clampedCached - clampedCacheWrite
+  // Why: CodexBar treats a cache-write field without a dedicated SKU as ordinary input.
+  const cacheWriteRate =
+    pricing.cacheWriteRate ?? pricing.input * (pricing.cacheWriteMultiplier ?? 1)
+  const standardCost =
     (nonCachedInputTokens * pricing.input +
       clampedCached * pricing.cachedInput +
-      clampedCacheWrite * pricing.input * (pricing.cacheWriteMultiplier ?? 0) +
-      outputTokens * pricing.output) /
+      clampedCacheWrite * cacheWriteRate +
+      Math.max(outputTokens, 0) * pricing.output) /
     1_000_000
-  )
+  if (!options.isPriority) {
+    return standardCost
+  }
+  const priorityModel = options.priorityModel ?? model
+  const multiplier = codexPriorityMultiplier(priorityModel)
+  return multiplier !== null && totalInputTokens <= LONG_CONTEXT_THRESHOLD_TOKENS
+    ? standardCost * multiplier
+    : standardCost
 }
 
 export function priceCodexAggregateUsage(
@@ -141,11 +158,11 @@ export function priceCodexAggregateUsage(
   cachedInputTokens: number,
   outputTokens: number
 ): number | null {
-  const normalized = normalizeModelForPricing(model)
-  if (!normalized) {
+  const resolution = resolveCodexPricing(model)
+  if (!resolution) {
     return null
   }
-  const pricing = MODEL_PRICING[normalized]
+  const pricing = resolution.pricing
   if (
     pricing.cacheWriteMultiplier !== undefined ||
     (pricing.longContext && inputTokens > pricing.longContext.thresholdTokens)
@@ -157,75 +174,63 @@ export function priceCodexAggregateUsage(
   return priceCodexUsage(model, inputTokens, cachedInputTokens, 0, outputTokens)
 }
 
-function stripParenthesizedReasoningTier(model: string): string | null {
-  const match = model.match(/^(.*)\(([^()]*)\)$/)
-  if (!match) {
-    return model
-  }
-  const tier = match[2].trim().toLowerCase()
-  return REASONING_TIER_SUFFIXES.includes(tier) ? match[1] : null
-}
-
-function stripDashReasoningTiers(model: string): string {
-  let current = model
-  for (let index = 0; index < 4; index++) {
-    const suffix = REASONING_TIER_SUFFIXES.find((tier) => current.endsWith(`-${tier}`))
-    if (!suffix) {
-      return current
-    }
-    current = current.slice(0, -suffix.length - 1)
-  }
-  return current
-}
-
-function normalizeModelForPricing(model: string | null): string | null {
-  if (!model) {
-    return null
-  }
-  const lower = stripParenthesizedReasoningTier(model.toLowerCase().trim())
-  if (!lower) {
-    return null
-  }
-  const normalized = stripDashReasoningTiers(lower)
-  if (normalized === 'gpt-5' || normalized === 'gpt-5-codex') {
-    return 'gpt-5'
-  }
-  if (normalized === 'gpt-5.6' || isModelOrSnapshot(normalized, 'gpt-5.6-sol')) {
-    return 'gpt-5.6-sol'
-  }
-  if (normalized === 'gpt-5.3-codex-spark' || normalized.startsWith('gpt-5.3-codex-spark-')) {
-    return null
-  }
-  for (const modelKey of [
-    'gpt-5.1-codex-max',
-    'gpt-5.1-codex',
-    'gpt-5.1',
-    'gpt-5.2-codex',
-    'gpt-5.2',
-    'gpt-5.3-codex',
-    'gpt-5.3',
-    'gpt-5.4-mini',
-    'gpt-5.4-nano',
-    'gpt-5.4-pro',
-    'gpt-5.4',
-    'gpt-5.5-pro',
-    'gpt-5.5',
-    'gpt-5.6-terra',
-    'gpt-5.6-luna'
-  ]) {
-    if (isModelOrSnapshot(normalized, modelKey)) {
-      return modelKey
+function resolveCodexPricing(
+  model: string | null
+): { pricing: CodexModelPricing; normalizedModel: string | null } | null {
+  const normalized = normalizeCodexModel(model)
+  const modelsDevPricing = findModelsDevPricing('openai', model)
+  if (modelsDevPricing) {
+    return {
+      pricing: fromModelsDevPricing(
+        modelsDevPricing,
+        normalized ? MODEL_PRICING[normalized] : null
+      ),
+      normalizedModel: normalized
     }
   }
-  // Why: GPT-5.3-Codex-Spark is still a research preview without final token
-  // rates, so it deliberately remains unpriced instead of inheriting 5.3.
-  return null
+  if (!normalized) {
+    return null
+  }
+  const pricing = MODEL_PRICING[normalized]
+  return pricing ? { pricing, normalizedModel: normalized } : null
 }
 
-function isModelOrSnapshot(model: string, modelKey: string): boolean {
-  if (model === modelKey) {
-    return true
+function fromModelsDevPricing(
+  pricing: ModelsDevPricing,
+  bundled: CodexModelPricing | null
+): CodexModelPricing {
+  const input = pricing.input
+  const cachedInput = pricing.cacheRead ?? bundled?.cachedInput ?? input
+  const bundledCacheWriteRate =
+    bundled?.cacheWriteRate ??
+    (bundled ? bundled.input * (bundled.cacheWriteMultiplier ?? 1) : undefined)
+  const cacheWriteRate = pricing.cacheWrite ?? bundledCacheWriteRate
+  const bundledLongContext = pricing.thresholdTokens === null ? bundled?.longContext : null
+  const longCachedInput =
+    pricing.cacheReadAboveThreshold ??
+    (pricing.thresholdTokens !== null
+      ? (pricing.cacheRead ?? pricing.inputAboveThreshold ?? input)
+      : (bundledLongContext?.cachedInput ?? cachedInput))
+  const longCacheWriteRate =
+    pricing.cacheWriteAboveThreshold ??
+    (pricing.thresholdTokens !== null
+      ? (pricing.cacheWrite ?? pricing.inputAboveThreshold ?? input)
+      : (bundledLongContext?.cacheWriteRate ?? cacheWriteRate))
+  return {
+    input,
+    cachedInput,
+    output: pricing.output,
+    cacheWriteRate,
+    ...(pricing.thresholdTokens || bundled?.longContext
+      ? {
+          longContext: {
+            thresholdTokens: bundled?.longContext?.thresholdTokens ?? pricing.thresholdTokens ?? 0,
+            input: pricing.inputAboveThreshold ?? bundledLongContext?.input ?? input,
+            cachedInput: longCachedInput,
+            output: pricing.outputAboveThreshold ?? bundledLongContext?.output ?? pricing.output,
+            cacheWriteRate: longCacheWriteRate
+          }
+        }
+      : {})
   }
-  const escapedKey = modelKey.replace(/\./g, '\\.')
-  return new RegExp(`^${escapedKey}-20\\d{2}-\\d{2}-\\d{2}$`).test(model)
 }

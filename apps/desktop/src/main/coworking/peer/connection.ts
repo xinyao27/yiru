@@ -157,7 +157,9 @@ export class CoworkingPeerConnection {
       return
     }
     this.state = 'closed'
-    rejectCoworkingPendingPeerRequests(this.pending, false)
+    // Why: explicit teardown can race an in-flight mutation just like transport loss;
+    // callers must not retry when the remote side may already have received it.
+    rejectCoworkingPendingPeerRequests(this.pending, true)
     this.readyWaiter?.reject(new CoworkingPeerConnectionError('disconnected'))
     this.readyWaiter = null
     this.sharedKey = null

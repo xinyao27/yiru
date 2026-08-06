@@ -43,7 +43,7 @@ function WebRoot(): React.JSX.Element {
   const [hasEnvironment, setHasEnvironment] = useState(() => {
     if (startupDecision.kind === 'auto-save-runtime-offer') {
       saveStoredWebRuntimeEnvironment(
-        createStoredWebRuntimeEnvironment({ name: 'Yiru Server', offer: startupDecision.offer })
+        createStoredWebRuntimeEnvironment({ name: 'Runtime host', offer: startupDecision.offer })
       )
       return true
     }

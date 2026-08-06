@@ -62,11 +62,24 @@ type ClaudeUsageParsedSourceTurn = Omit<
   'estimatedCostUsd' | 'unpricedTokens'
 > & {
   dedupeKey: string | null
-  cacheWrite5mTokens: number
   cacheWrite1hTokens: number
+  isVertexAI: boolean
 }
 
 type ClaudeUsageWorktreeEntry = [string, ClaudeUsageWorktreeRef]
+
+const VERTEX_PROVIDER_KEYS = new Set([
+  'provider',
+  'platform',
+  'backend',
+  'api_provider',
+  'apiprovider',
+  'api_type',
+  'apitype',
+  'source',
+  'vendor',
+  'client'
+])
 
 const sortedWorktreeEntriesByLookup = new WeakMap<
   Map<string, ClaudeUsageWorktreeRef>,
@@ -207,16 +220,24 @@ async function getProcessedFileStat(
 }
 
 function stripClaudeSourceMetadata(turn: ClaudeUsageParsedSourceTurn): ClaudeUsageParsedTurn {
-  const price = priceClaudeUsage({
-    model: turn.model,
-    timestamp: turn.timestamp,
-    inputTokens: turn.inputTokens,
-    outputTokens: turn.outputTokens,
-    cacheReadTokens: turn.cacheReadTokens,
-    cacheWriteTokens: turn.cacheWriteTokens,
-    cacheWrite5mTokens: turn.cacheWrite5mTokens,
-    cacheWrite1hTokens: turn.cacheWrite1hTokens
-  })
+  // Why: CodexBar keeps Vertex AI transcript rows out of Anthropic API pricing.
+  // Yiru has no Vertex billing source yet, so retain their tokens as explicitly
+  // unpriced instead of silently charging them at the Anthropic tariff.
+  const price = turn.isVertexAI
+    ? {
+        estimatedCostUsd: null,
+        unpricedTokens:
+          turn.inputTokens + turn.outputTokens + turn.cacheReadTokens + turn.cacheWriteTokens
+      }
+    : priceClaudeUsage({
+        model: turn.model,
+        timestamp: turn.timestamp,
+        inputTokens: turn.inputTokens,
+        outputTokens: turn.outputTokens,
+        cacheReadTokens: turn.cacheReadTokens,
+        cacheWriteTokens: turn.cacheWriteTokens,
+        cacheWrite1hTokens: turn.cacheWrite1hTokens
+      })
   return {
     sessionId: turn.sessionId,
     timestamp: turn.timestamp,
@@ -248,8 +269,8 @@ function dedupeClaudeUsageTurns(
         existing.outputTokens = Math.max(existing.outputTokens, turn.outputTokens)
         existing.cacheReadTokens = Math.max(existing.cacheReadTokens, turn.cacheReadTokens)
         existing.cacheWriteTokens = Math.max(existing.cacheWriteTokens, turn.cacheWriteTokens)
-        existing.cacheWrite5mTokens = Math.max(existing.cacheWrite5mTokens, turn.cacheWrite5mTokens)
         existing.cacheWrite1hTokens = Math.max(existing.cacheWrite1hTokens, turn.cacheWrite1hTokens)
+        existing.isVertexAI ||= turn.isVertexAI
         continue
       }
     }
@@ -283,12 +304,14 @@ function parseClaudeUsageSourceRecord(
   }
 
   const usage = parsed.message?.usage
-  const inputTokens = usage?.input_tokens ?? 0
-  const outputTokens = usage?.output_tokens ?? 0
-  const cacheReadTokens = usage?.cache_read_input_tokens ?? 0
-  const cacheWriteTokens = usage?.cache_creation_input_tokens ?? 0
-  const cacheWrite5mTokens = usage?.cache_creation?.ephemeral_5m_input_tokens ?? 0
-  const cacheWrite1hTokens = usage?.cache_creation?.ephemeral_1h_input_tokens ?? 0
+  const inputTokens = nonNegativeTokenCount(usage?.input_tokens)
+  const outputTokens = nonNegativeTokenCount(usage?.output_tokens)
+  const cacheReadTokens = nonNegativeTokenCount(usage?.cache_read_input_tokens)
+  const cacheWriteTokens = nonNegativeTokenCount(usage?.cache_creation_input_tokens)
+  const cacheWrite1hTokens = Math.min(
+    nonNegativeTokenCount(usage?.cache_creation?.ephemeral_1h_input_tokens),
+    cacheWriteTokens
+  )
 
   if (inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens <= 0) {
     return null
@@ -308,9 +331,50 @@ function parseClaudeUsageSourceRecord(
     outputTokens,
     cacheReadTokens,
     cacheWriteTokens,
-    cacheWrite5mTokens,
-    cacheWrite1hTokens
+    cacheWrite1hTokens,
+    isVertexAI: isVertexAIUsageRecord(parsed)
   }
+}
+
+function nonNegativeTokenCount(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(Math.trunc(value), 0) : 0
+}
+
+function isVertexAIUsageRecord(parsed: ClaudeUsageSourceRecord): boolean {
+  if (parsed.message?.id?.includes('_vrtx_') || parsed.requestId?.includes('_vrtx_')) {
+    return true
+  }
+  if (parsed.message?.model && modelNameLooksVertex(parsed.message.model)) {
+    return true
+  }
+  return containsVertexAIMetadata(parsed as unknown as Record<string, unknown>)
+}
+
+function modelNameLooksVertex(model: string): boolean {
+  return model.startsWith('claude-') && model.includes('@')
+}
+
+function containsVertexAIMetadata(value: unknown): boolean {
+  if (Array.isArray(value)) {
+    return value.some(containsVertexAIMetadata)
+  }
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+  return Object.entries(value).some(([key, nestedValue]) => {
+    const lowerKey = key.toLowerCase()
+    if (lowerKey.includes('vertex') || lowerKey.includes('gcp')) {
+      return true
+    }
+    if (
+      VERTEX_PROVIDER_KEYS.has(lowerKey) &&
+      typeof nestedValue === 'string' &&
+      nestedValue.toLowerCase().includes('vertex')
+    ) {
+      return true
+    }
+    return containsVertexAIMetadata(nestedValue)
+  })
 }
 
 function buildClaudeUsageDedupeKey(parsed: ClaudeUsageSourceRecord): string | null {

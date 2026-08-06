@@ -14,7 +14,6 @@ import { useAppStore } from '~renderer/store'
 
 import { SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
-import { GeneralRemoteServerUpdates } from './remote-server-updates'
 
 export function GeneralUpdateSettingsSection(): React.JSX.Element {
   const updateStatus = useAppStore((s) => s.updateStatus)
@@ -247,7 +246,6 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 ))}
         </p>
       </SearchableSetting>
-      <GeneralRemoteServerUpdates />
     </section>
   )
 }

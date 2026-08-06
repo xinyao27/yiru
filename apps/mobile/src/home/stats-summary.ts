@@ -43,6 +43,14 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
           : []
       })
     : undefined
+  const dailyUnpricedTokens = Array.isArray(record.dailyUnpricedTokens)
+    ? record.dailyUnpricedTokens.flatMap((entry) => {
+        const item = recordValue(entry)
+        return item && typeof item.day === 'string' && typeof item.tokens === 'number'
+          ? [{ day: item.day, tokens: item.tokens }]
+          : []
+      })
+    : undefined
   const modelUsage = Array.isArray(record.modelUsage)
     ? record.modelUsage.flatMap((entry) => {
         const item = recordValue(entry)
@@ -62,6 +70,7 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
           : []
       })
     : undefined
+  const supplementalUsage = parseSupplementalUsage(record.supplementalUsage)
   const tokenUnavailableAgents = Array.isArray(record.tokenUnavailableAgents)
     ? record.tokenUnavailableAgents.filter(isAiVaultAgent)
     : undefined
@@ -72,8 +81,10 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
     firstEventAt: record.firstEventAt,
     dailyActivity,
     dailyTokens,
+    dailyUnpricedTokens,
     dailyValues,
     modelUsage,
+    supplementalUsage,
     tokenDataAvailable:
       typeof record.tokenDataAvailable === 'boolean' ? record.tokenDataAvailable : undefined,
     tokenUnavailableAgents,
@@ -91,15 +102,23 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
   }
   const dailyActivity = new Map<string, { agentStarts: number; prsCreated: number }>()
   const dailyTokens = new Map<string, number>()
+  const dailyUnpricedTokens = new Set<string>()
   const dailyValues = new Map<string, number>()
   const models = new Map<
     string,
-    { key: string; label: string; tokens: number; valueUsd: number | null }
+    {
+      key: string
+      label: string
+      tokens: number
+      valueUsd: number | null
+      hasUnpricedValue: boolean
+    }
   >()
   const unavailableAgents = new Set<
     NonNullable<RuntimeStatsSummary['tokenUnavailableAgents']>[number]
   >()
   let firstEventAt: number | null = null
+  const supplementalUsage = aggregateSupplementalUsage(summaries)
 
   for (const summary of summaries) {
     if (summary.firstEventAt !== null) {
@@ -118,17 +137,25 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
     for (const entry of summary.dailyValues ?? []) {
       dailyValues.set(entry.day, (dailyValues.get(entry.day) ?? 0) + entry.valueUsd)
     }
+    for (const entry of summary.dailyUnpricedTokens ?? []) {
+      if (entry.tokens > 0) {
+        dailyUnpricedTokens.add(entry.day)
+      }
+    }
     for (const entry of summary.modelUsage ?? []) {
-      const key = entry.label.trim().toLowerCase() || entry.key
+      const key = entry.key.trim().toLowerCase() || entry.label.trim().toLowerCase()
       const current = models.get(key) ?? {
         key,
         label: entry.label,
         tokens: 0,
-        valueUsd: null
+        valueUsd: null,
+        hasUnpricedValue: false
       }
       current.tokens += entry.tokens
       if (entry.valueUsd !== null) {
         current.valueUsd = (current.valueUsd ?? 0) + entry.valueUsd
+      } else if (entry.tokens > 0) {
+        current.hasUnpricedValue = true
       }
       models.set(key, current)
     }
@@ -149,16 +176,126 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
       .map(([day, tokens]) => ({ day, tokens }))
       .sort((left, right) => left.day.localeCompare(right.day)),
     dailyValues: [...dailyValues.entries()]
-      .map(([day, valueUsd]) => ({ day, valueUsd }))
+      .flatMap(([day, valueUsd]) => (dailyUnpricedTokens.has(day) ? [] : [{ day, valueUsd }]))
       .sort((left, right) => left.day.localeCompare(right.day)),
-    modelUsage: [...models.values()].sort((left, right) => right.tokens - left.tokens),
+    modelUsage: [...models.values()]
+      .map((model) => ({
+        key: model.key,
+        label: model.label,
+        tokens: model.tokens,
+        valueUsd: model.hasUnpricedValue ? null : model.valueUsd
+      }))
+      .sort((left, right) => right.tokens - left.tokens),
     tokenDataAvailable: summaries.every((entry) => entry.tokenDataAvailable === true),
     tokenUnavailableAgents: [...unavailableAgents],
+    supplementalUsage,
     usageValueAvailable: summaries.some((entry) => entry.usageValueAvailable === true),
     hasUnpricedUsage:
       summaries.some((entry) => entry.hasUnpricedUsage === true) ||
       summaries.some((entry) => entry.usageValueAvailable !== true)
   }
+}
+
+function parseSupplementalUsage(
+  value: unknown
+): RuntimeStatsSummary['supplementalUsage'] | undefined {
+  const record = recordValue(value)
+  if (!record || !Array.isArray(record.dailyTokens) || !Array.isArray(record.modelUsage)) {
+    return undefined
+  }
+  const dailyTokens = record.dailyTokens.flatMap((entry) => {
+    const item = recordValue(entry)
+    return item &&
+      typeof item.day === 'string' &&
+      typeof item.tokens === 'number' &&
+      (item.valueUsd === null || typeof item.valueUsd === 'number') &&
+      typeof item.unpricedTokens === 'number'
+      ? [
+          {
+            day: item.day,
+            tokens: item.tokens,
+            valueUsd: item.valueUsd,
+            unpricedTokens: item.unpricedTokens
+          }
+        ]
+      : []
+  })
+  const modelUsage = record.modelUsage.flatMap((entry) => {
+    const item = recordValue(entry)
+    return item &&
+      typeof item.key === 'string' &&
+      typeof item.label === 'string' &&
+      typeof item.tokens === 'number' &&
+      (item.valueUsd === null || typeof item.valueUsd === 'number')
+      ? [
+          {
+            key: item.key,
+            label: item.label,
+            tokens: item.tokens,
+            valueUsd: item.valueUsd
+          }
+        ]
+      : []
+  })
+  const meteredValueUsd = parseOptionalMeteredValue(record.meteredValueUsd)
+  return {
+    dailyTokens,
+    modelUsage,
+    ...(meteredValueUsd === undefined ? {} : { meteredValueUsd })
+  }
+}
+
+function aggregateSupplementalUsage(
+  summaries: readonly RuntimeStatsSummary[]
+): RuntimeStatsSummary['supplementalUsage'] | undefined {
+  const dailyTokens = [] as NonNullable<RuntimeStatsSummary['supplementalUsage']>['dailyTokens']
+  const modelUsage = [] as NonNullable<RuntimeStatsSummary['supplementalUsage']>['modelUsage']
+  let meteredValueUsd: number | null | undefined
+  let hasSupplementalUsage = false
+  for (const summary of summaries) {
+    const usage = summary.supplementalUsage
+    if (!usage) {
+      continue
+    }
+    hasSupplementalUsage = true
+    dailyTokens.push(...usage.dailyTokens)
+    modelUsage.push(...usage.modelUsage)
+    meteredValueUsd = mergeMeteredValue(meteredValueUsd, usage.meteredValueUsd)
+  }
+  if (!hasSupplementalUsage) {
+    return undefined
+  }
+  return {
+    dailyTokens,
+    modelUsage,
+    ...(meteredValueUsd === undefined ? {} : { meteredValueUsd })
+  }
+}
+
+function mergeMeteredValue(
+  left: number | null | undefined,
+  right: number | null | undefined
+): number | null | undefined {
+  if (left === undefined) {
+    return right
+  }
+  if (right === undefined) {
+    return left
+  }
+  if (left === null || right === null) {
+    return null
+  }
+  return left + right
+}
+
+function parseOptionalMeteredValue(value: unknown): number | null | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (value === null) {
+    return null
+  }
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
 function recordValue(value: unknown): Record<string, unknown> | null {

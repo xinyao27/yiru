@@ -56,8 +56,8 @@ function isRemoteTerminalGoneMessage(message: string): boolean {
 }
 
 /**
- * PTY transport backing a renderer terminal pane with a terminal on a remote Yiru
- * runtime, over runtime RPC plus the multiplexed stream (create, subscribe, input,
+ * PTY transport backing a renderer terminal pane with a terminal on a remote
+ * runtime host, over runtime RPC plus the multiplexed stream (create, subscribe, input,
  * resize, close, reattach).
  */
 export function createRemoteRuntimePtyTransport(

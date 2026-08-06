@@ -53,12 +53,12 @@ export function evaluateRuntimeCompat(input: {
 
 export function describeRuntimeCompatBlock(verdict: RuntimeCompatVerdict): string {
   if (verdict.kind === 'ok') {
-    return 'Runtime client and server are compatible.'
+    return 'Runtime client and host are compatible.'
   }
   if (verdict.reason === 'client-too-old') {
-    return `This Yiru client is too old for the selected server. Update Yiru on this machine. Client protocol ${verdict.clientProtocolVersion}, server requires client protocol ${verdict.requiredClientProtocolVersion}.`
+    return `This Yiru client is too old for the selected runtime host. Update Yiru on this machine. Client protocol ${verdict.clientProtocolVersion}, host requires client protocol ${verdict.requiredClientProtocolVersion}.`
   }
-  return `The selected Yiru server is too old for this client. Update Yiru on the server. Server protocol ${verdict.serverProtocolVersion}, client requires server protocol ${verdict.requiredServerProtocolVersion}.`
+  return `The selected runtime host is too old for this client. Update Yiru on the host. Host protocol ${verdict.serverProtocolVersion}, client requires host protocol ${verdict.requiredServerProtocolVersion}.`
 }
 
 export type MobileRuntimeCompatVerdict =

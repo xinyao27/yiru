@@ -6,7 +6,8 @@ import {
   type AiVaultAgent,
   type AiVaultSession,
   type AiVaultSessionDayTokens,
-  type AiVaultSessionPreviewMessage
+  type AiVaultSessionPreviewMessage,
+  type AiVaultSessionTokenUsage
 } from '@yiru/workbench-model/agent'
 import { localCalendarDayKey } from '@yiru/workbench-model/ui'
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
@@ -34,6 +35,7 @@ export function createAccumulator(args: {
     cwd: null,
     branch: null,
     model: null,
+    provider: null,
     filePath: args.file.path,
     createdAt: null,
     updatedAt: null,
@@ -41,6 +43,7 @@ export function createAccumulator(args: {
     messageCount: 0,
     totalTokens: 0,
     tokensByDay: new Map(),
+    tokenUsage: [],
     previewMessages: [],
     lastUserPrompt: null,
     queuedMessageCount: 0,
@@ -53,7 +56,8 @@ export function cloneSessionAccumulator(accumulator: SessionAccumulator): Sessio
   return {
     ...accumulator,
     previewMessages: [...accumulator.previewMessages],
-    tokensByDay: new Map(accumulator.tokensByDay)
+    tokensByDay: new Map(accumulator.tokensByDay),
+    tokenUsage: [...accumulator.tokenUsage]
   }
 }
 
@@ -80,6 +84,32 @@ export function addSessionTokens(
   }
   const day = localCalendarDayKey(at)
   accumulator.tokensByDay.set(day, (accumulator.tokensByDay.get(day) ?? 0) + tokens)
+}
+
+export function addSessionTokenUsage(
+  accumulator: SessionAccumulator,
+  usage: Omit<AiVaultSessionTokenUsage, 'timestamp'> & { timestamp?: unknown }
+): void {
+  const totalTokens = Math.max(
+    usage.totalTokens,
+    usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens
+  )
+  if (!Number.isFinite(totalTokens) || totalTokens <= 0) {
+    return
+  }
+  addSessionTokens(accumulator, totalTokens, usage.timestamp)
+  const parsed = usage.timestamp === undefined ? Number.NaN : timestampMs(usage.timestamp)
+  accumulator.tokenUsage.push({
+    provider: usage.provider,
+    model: usage.model,
+    timestamp: Number.isFinite(parsed) ? new Date(parsed).toISOString() : null,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    cacheReadTokens: usage.cacheReadTokens,
+    cacheWriteTokens: usage.cacheWriteTokens,
+    reasoningOutputTokens: usage.reasoningOutputTokens,
+    totalTokens
+  })
 }
 
 function tokensByDayList(accumulator: SessionAccumulator): AiVaultSessionDayTokens[] {
@@ -149,6 +179,7 @@ export function finalizeSession(
     messageCount: accumulator.messageCount,
     totalTokens: accumulator.totalTokens,
     ...(accumulator.tokensByDay.size > 0 ? { tokensByDay: tokensByDayList(accumulator) } : {}),
+    ...(accumulator.tokenUsage.length > 0 ? { tokenUsage: [...accumulator.tokenUsage] } : {}),
     previewMessages: accumulator.previewMessages,
     ...(accumulator.lastUserPrompt ? { lastUserPrompt: accumulator.lastUserPrompt } : {}),
     queuedMessageCount: accumulator.queuedMessageCount,

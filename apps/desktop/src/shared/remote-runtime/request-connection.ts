@@ -167,9 +167,7 @@ export class RemoteRuntimeRequestConnection {
     }
     const plaintext = decrypt(frame, sharedKey)
     if (plaintext === null) {
-      this.close(
-        invalidRemoteRuntimeResponseError('Remote Yiru runtime returned an undecryptable frame.')
-      )
+      this.close(invalidRemoteRuntimeResponseError('Runtime host returned an undecryptable frame.'))
       return
     }
 

@@ -242,19 +242,19 @@ function getRuntimeAutomationAvailability(
   if (!entry) {
     return unavailable(
       'runtime-checking',
-      'Checking the selected remote server before running manually.'
+      'Checking the selected Coworking host before running manually.'
     )
   }
   if (!entry.status) {
     return unavailable(
       'runtime-unavailable',
-      'Reconnect this remote server before running manually.'
+      'Reconnect this Coworking host before running manually.'
     )
   }
   if (entry.status.graphStatus !== 'ready') {
     return unavailable(
       'runtime-unavailable',
-      'The selected remote server is not ready to run automations yet.'
+      'The selected Coworking host is not ready to run automations yet.'
     )
   }
   const compat = evaluateRuntimeCompat({

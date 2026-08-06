@@ -2128,7 +2128,7 @@ export class OrchestrationDb {
           )
           .run(params.stage, params.lastError ?? worker.last_error, params.dispatchId)
       } else {
-        const reason = params.lastError ?? `The worker server reported ${params.state}.`
+        const reason = params.lastError ?? `The worker host reported ${params.state}.`
         this.db
           .prepare(
             `UPDATE worker_dispatches

@@ -1,13 +1,11 @@
-import { createHash } from 'node:crypto'
-
 import {
   CoworkingHostAccessRequestResultSchema,
   type CoworkingHostAccessRequestResult
 } from '~shared/coworking/host-access-contract'
 import type { CoworkingRequestHostAccessResult } from '~shared/coworking/ipc-contract'
+import { createCoworkingRuntimeEnvironmentId } from '~shared/coworking/runtime-environment-id'
 import type { PairingOffer } from '~shared/pairing'
 import { upsertEnvironmentFromPairingOffer } from '~shared/runtime-environment-store'
-import { redactRuntimeEnvironment } from '~shared/runtime-environments'
 
 import type { CoworkingOwnerRecord } from './record'
 
@@ -30,15 +28,11 @@ export async function requestCoworkingHostAccess(
     return result
   }
   const environment = upsertEnvironmentFromPairingOffer(userDataPath, {
-    id: coworkingRuntimeEnvironmentId(record.descriptor.tailnetNodeId),
+    id: createCoworkingRuntimeEnvironmentId(record.descriptor.tailnetNodeId),
     name: record.descriptor.nodeDisplayName,
     offer: pairingOfferAtAddress(result.offer, record.descriptor.address)
   })
-  return { status: 'granted', environment: redactRuntimeEnvironment(environment) }
-}
-
-function coworkingRuntimeEnvironmentId(nodeId: string): string {
-  return `coworking-${createHash('sha256').update(nodeId).digest('hex').slice(0, 32)}`
+  return { status: 'granted', environmentId: environment.id }
 }
 
 function pairingOfferAtAddress(offer: PairingOffer, address: string): PairingOffer {
