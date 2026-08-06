@@ -44,7 +44,7 @@ export function hasHooksFile(repoPath: string): boolean {
 // return `null` from `parseYiruYaml` and show a confusing "could not be parsed"
 // error.  Detecting well-formed but unrecognised keys lets the UI suggest an
 // update instead of implying the file is broken.
-const RECOGNIZED_YIRU_YAML_KEYS = new Set(['scripts', 'defaultTabs', 'environmentRecipes'])
+const RECOGNIZED_YIRU_YAML_KEYS = new Set(['scripts', 'defaultTabs', 'worktree'])
 
 /**
  * Return true when `yiru.yaml` contains at least one top-level key that this

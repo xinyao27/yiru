@@ -1,7 +1,8 @@
 import { existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import SyncDatabase from '../../sqlite/sync-database'
+import SyncDatabase from '~main/sqlite/sync-database'
+
 import { getCodexAccountHomeSessionDirectories } from '../account-home-discovery'
 import { getSystemCodexHomePath, getYiruManagedCodexHomePath } from '../home-paths'
 

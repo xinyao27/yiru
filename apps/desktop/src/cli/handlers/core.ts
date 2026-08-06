@@ -63,12 +63,8 @@ function isCurrentDirectoryShorthand(path: string): boolean {
   return normalize(path) === '.'
 }
 
-function getSshContextWorktree(path: string, clientIsRemote: boolean): string | undefined {
-  if (
-    clientIsRemote ||
-    process.env.YIRU_CLI_EXECUTION_HOST_KIND !== 'ssh' ||
-    !isCurrentDirectoryShorthand(path)
-  ) {
+function getSshContextWorktree(path: string): string | undefined {
+  if (process.env.YIRU_CLI_EXECUTION_HOST_KIND !== 'ssh' || !isCurrentDirectoryShorthand(path)) {
     return undefined
   }
   const worktreeId = process.env.YIRU_WORKTREE_ID
@@ -141,12 +137,8 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       return
     }
 
-    const contextWorktree = getSshContextWorktree(directory, client.isRemote)
-    if (
-      process.env.YIRU_CLI_EXECUTION_HOST_KIND === 'ssh' &&
-      !client.isRemote &&
-      !contextWorktree
-    ) {
+    const contextWorktree = getSshContextWorktree(directory)
+    if (process.env.YIRU_CLI_EXECUTION_HOST_KIND === 'ssh' && !contextWorktree) {
       // Why: the host CLI cannot safely interpret an arbitrary SSH path as a
       // local path; managed `yiru .` uses the validated worktree context instead.
       throw new RuntimeClientError(
@@ -155,9 +147,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       )
     }
 
-    const targetPath = contextWorktree
-      ? cwd
-      : resolveRepoPathArgument(directory, cwd, client.isRemote, 'Remote workspace path')
+    const targetPath = contextWorktree ? cwd : resolveRepoPathArgument(directory, cwd)
     await client.openYiru()
     const result = await client.call<RuntimeWorkspaceOpenPathResult>('workspace.openPath', {
       path: targetPath,
@@ -166,22 +156,23 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatWorkspaceOpen)
   },
   serve: async ({ flags, json }) => {
-    if (flags.get('no-pairing') === true && flags.get('mobile-pairing') === true) {
+    const mobilePairing = flags.get('mobile-pairing') === true
+    const pairingAddress =
+      typeof flags.get('pairing-address') === 'string'
+        ? (flags.get('pairing-address') as string)
+        : null
+    if (pairingAddress && !mobilePairing) {
       throw new RuntimeClientError(
         'invalid_argument',
-        'Use either --mobile-pairing or --no-pairing, not both.'
+        '--pairing-address requires --mobile-pairing. Desktop connections use Coworking.'
       )
     }
     const port = getOptionalServePort(flags)
     const exitCode = await serveYiruApp({
       json,
       port,
-      pairingAddress:
-        typeof flags.get('pairing-address') === 'string'
-          ? (flags.get('pairing-address') as string)
-          : null,
-      noPairing: flags.get('no-pairing') === true,
-      mobilePairing: flags.get('mobile-pairing') === true
+      pairingAddress,
+      mobilePairing
     })
     process.exitCode = exitCode
   },

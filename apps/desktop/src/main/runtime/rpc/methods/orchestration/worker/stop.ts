@@ -60,7 +60,7 @@ export const ORCHESTRATION_WORKER_STOP_METHODS: RpcMethod[] = [
             params.dispatch,
             db.markWorkerStopUnknown(
               params.dispatch,
-              remote.lastError ?? `The worker server returned ${remote.state}.`
+              remote.lastError ?? `The worker host returned ${remote.state}.`
             ),
             remote.processAction
           )

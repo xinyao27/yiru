@@ -38,7 +38,7 @@ function buildSummaries(): Record<string, SettingOwnershipSummary> {
       label: translate('auto.components.settings.settingOwnership.clientDefault', 'Client default'),
       description: translate(
         'auto.components.settings.settingOwnership.agentLaunchDefaults',
-        'Default agent, command overrides, CLI arguments, and launch environment are client preferences. SSH and remote server launches still validate host availability at run time.'
+        'Default agent, command overrides, CLI arguments, and launch environment are client preferences. Coworking host launches still validate host availability at run time.'
       )
     },
     terminalQuickCommands: {
@@ -65,7 +65,7 @@ function buildSummaries(): Record<string, SettingOwnershipSummary> {
       label: translate('auto.components.settings.settingOwnership.providerHost', 'Provider host'),
       description: translate(
         'auto.components.settings.settingOwnership.providerAccounts',
-        'Credentials and account checks belong to the local client or selected remote server that owns the provider integration.'
+        'Credentials and account checks belong to the local client or selected Coworking host that owns the provider integration.'
       )
     }
   }

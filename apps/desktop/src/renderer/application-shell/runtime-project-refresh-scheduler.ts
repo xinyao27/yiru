@@ -71,7 +71,7 @@ export function createRuntimeProjectRefreshScheduler(
     } finally {
       entry.inFlight = false
       if (entry.pending) {
-        // Why: runtime repo events can be noisy while a remote server is merely
+        // Why: runtime repo events can be noisy while a remote host is merely
         // connected; keep discovery live without letting it drive the renderer.
         schedule(environmentId, entry)
       }

@@ -368,9 +368,6 @@ async function resolveDefaultTarget(
   if (repo || workspace) {
     return { repo, workspace }
   }
-  if (client.isRemote) {
-    return {}
-  }
   try {
     return { workspace: await resolveCurrentWorktreeSelector(cwd, client) }
   } catch {

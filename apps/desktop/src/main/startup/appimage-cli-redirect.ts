@@ -24,7 +24,6 @@ type RedirectOptions = {
 
 const HELP_FLAGS = new Set(['--help', '-h', 'help'])
 const APPIMAGE_DESKTOP_FLAGS = new Set(['--no-sandbox'])
-const CLI_FLAGS_WITH_VALUES = new Set(['--environment', '--pairing-code'])
 // Why: the main tsconfig cannot import the CLI project, but AppImage direct
 // launches need a conservative allow-list before bypassing the GUI startup.
 const APPIMAGE_CLI_COMMAND_NAMES = [
@@ -160,10 +159,6 @@ function findFirstCommandCandidate(args: string[]): string | null {
     const arg = args[index]
     if (!arg.startsWith('-')) {
       return arg
-    }
-    const flagName = arg.includes('=') ? arg.slice(0, arg.indexOf('=')) : arg
-    if (CLI_FLAGS_WITH_VALUES.has(flagName) && !arg.includes('=')) {
-      index += 1
     }
   }
   return null

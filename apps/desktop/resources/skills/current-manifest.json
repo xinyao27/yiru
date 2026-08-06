@@ -22,18 +22,18 @@
     {
       "name": "orchestration",
       "sourcePath": "skills/orchestration",
-      "releaseRevision": 26,
-      "packageDigest": "6cb47cd98851a0458c4aef35447772e8423b31dd034c52d8532d9a1b4628c2f3",
-      "gitTreeSha": "e9ff923e74dffc1b618937efd5b297aca44ec1f4",
+      "releaseRevision": 27,
+      "packageDigest": "3b27b8058c258487cb9ea07cc7bd7b387385f1dd2df30cf54177e71ea0243441",
+      "gitTreeSha": "f445a8dd2eca9eeae4181b9074312abac8587a5d",
       "files": [
         {
           "path": "SKILL.md",
-          "size": 33037,
+          "size": 33044,
           "executable": false,
           "classification": "text",
-          "exactSha256": "1ad56a0ce6e064046e3d214f1e72cfb2d88c3947af57e1bde13661fa7a9fa593",
-          "textNormalizedSha256": "1ad56a0ce6e064046e3d214f1e72cfb2d88c3947af57e1bde13661fa7a9fa593",
-          "identitySha256": "1ad56a0ce6e064046e3d214f1e72cfb2d88c3947af57e1bde13661fa7a9fa593"
+          "exactSha256": "cd5e29dc2dfc060e348bff933e2daefbdf0fab80dc00e21a1e4021795ebbfb13",
+          "textNormalizedSha256": "cd5e29dc2dfc060e348bff933e2daefbdf0fab80dc00e21a1e4021795ebbfb13",
+          "identitySha256": "cd5e29dc2dfc060e348bff933e2daefbdf0fab80dc00e21a1e4021795ebbfb13"
         }
       ]
     },
@@ -106,24 +106,6 @@
           "exactSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
           "textNormalizedSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
           "identitySha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879"
-        }
-      ]
-    },
-    {
-      "name": "yiru-per-workspace-env",
-      "sourcePath": "skills/yiru-per-workspace-env",
-      "releaseRevision": 4,
-      "packageDigest": "ac7962ec512d871a0ec1f0251d11bc3befbf578e177316a7f0a7844415c6ad57",
-      "gitTreeSha": "8808fa1570b1edd5c350d03919a43ae7b06d4532",
-      "files": [
-        {
-          "path": "SKILL.md",
-          "size": 43760,
-          "executable": false,
-          "classification": "text",
-          "exactSha256": "21380049ff23597f954257236151e0e4c21db50c367d4e90e3e0d54dd1a83064",
-          "textNormalizedSha256": "21380049ff23597f954257236151e0e4c21db50c367d4e90e3e0d54dd1a83064",
-          "identitySha256": "21380049ff23597f954257236151e0e4c21db50c367d4e90e3e0d54dd1a83064"
         }
       ]
     }

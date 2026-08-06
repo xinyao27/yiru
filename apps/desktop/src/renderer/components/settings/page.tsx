@@ -134,9 +134,9 @@ const SETTINGS_NAV_GROUPS = [
     titleDefault: 'Workflows'
   },
   {
-    id: 'remote',
+    id: 'coworking',
     titleKey: 'auto.components.settings.Settings.23931df7e8',
-    titleDefault: 'Remote Hosts'
+    titleDefault: 'Coworking'
   },
   {
     id: 'security',
@@ -1143,6 +1143,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     .map((group) => ({
       id: group.id,
       title: translate(group.titleKey, group.titleDefault),
+      hideTitle: group.id === 'coworking',
       sections: generalNavSections.filter((section) => section.group === group.id)
     }))
     .filter((group) => group.sections.length > 0 || group.id === 'setup')
@@ -1581,50 +1582,24 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                   {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
                 </SettingsSection>
 
-                {showDesktopOnlySettings ? (
-                  <SettingsSection
-                    id="coworking"
-                    title={translate(
-                      'auto.components.settings.Settings.coworkingTitle',
-                      'Coworking'
-                    )}
-                    description={translate(
-                      'auto.components.settings.Settings.coworkingDescription',
-                      'Review and revoke persistent remote host authorizations.'
-                    )}
-                    searchEntries={getSectionSearchEntries('coworking')}
-                  >
-                    {isSectionMounted('coworking') ? <CoworkingSettingsPane /> : null}
-                  </SettingsSection>
-                ) : null}
-
                 <SettingsSection
-                  id="servers"
-                  title={translate(
-                    'auto.components.settings.Settings.bd0181eeca',
-                    'Remote Yiru Servers'
+                  id="coworking"
+                  title={translate('auto.components.settings.Settings.coworkingTitle', 'Coworking')}
+                  description={translate(
+                    'auto.components.settings.Settings.coworkingDescription',
+                    'Review and revoke persistent remote host authorizations.'
                   )}
-                  badge="Beta"
-                  description={
-                    isWebClient
-                      ? translate(
-                          'auto.components.settings.Settings.7686cb5c36',
-                          'Connect this browser to a saved Yiru server.'
-                        )
-                      : translate(
-                          'auto.components.settings.Settings.b5ee17826b',
-                          'Pair remote Yiru runtimes for persistent sessions, richer remote state, and web or mobile handoff.'
-                        )
-                  }
-                  searchEntries={getSectionSearchEntries('servers')}
+                  searchEntries={getSectionSearchEntries('coworking')}
                 >
-                  {isSectionMounted('servers') ? (
-                    <RuntimeEnvironmentsPane
-                      settings={settings}
-                      switchRuntimeEnvironment={switchRuntimeEnvironment}
-                      canGeneratePairingUrl={!isWebClient}
-                      allowLocalRuntime={!isWebClient}
-                    />
+                  {isSectionMounted('coworking') ? (
+                    <>
+                      <RuntimeEnvironmentsPane
+                        settings={settings}
+                        switchRuntimeEnvironment={switchRuntimeEnvironment}
+                        allowLocalRuntime={!isWebClient}
+                      />
+                      {showDesktopOnlySettings ? <CoworkingSettingsPane /> : null}
+                    </>
                   ) : null}
                 </SettingsSection>
 

@@ -340,8 +340,8 @@ function skillsTreeShasAtRefs(refs) {
   })
 }
 
-function normalizeReleasedSkillName(name, currentSkillNames) {
-  if (currentSkillNames.has(name)) {
+function normalizeReleasedSkillName(name, canonicalSkillNames) {
+  if (canonicalSkillNames.has(name)) {
     return name
   }
   const separator = name.indexOf('-')
@@ -350,8 +350,8 @@ function normalizeReleasedSkillName(name, currentSkillNames) {
   }
   const renamedCandidate = `${PRODUCT_SKILL_PREFIX}${name.slice(separator + 1)}`
   // Why: released tags keep their original package paths after a product rename;
-  // the stable skill suffix joins that history to the current branded package.
-  return currentSkillNames.has(renamedCandidate) ? renamedCandidate : name
+  // retained names must keep joining that history after a current package is removed.
+  return canonicalSkillNames.has(renamedCandidate) ? renamedCandidate : name
 }
 
 function buildReleasedHistory(currentSkillNames = new Set(), retainedSkillNames = null) {
@@ -381,7 +381,7 @@ function buildReleasedHistory(currentSkillNames = new Set(), retainedSkillNames 
       throw new Error(`Missing released skill tree ${skillsTreeSha} at ${tag}`)
     }
     for (const sourceName of [...packages.keys()].sort(compareCodeUnits)) {
-      const name = normalizeReleasedSkillName(sourceName, currentSkillNames)
+      const name = normalizeReleasedSkillName(sourceName, retainedSkillNames ?? currentSkillNames)
       // Why: old tags contain deliberately purged packages; only current or
       // registry-preserved names may contribute to generated artifacts.
       if (retainedSkillNames && !retainedSkillNames.has(name)) {

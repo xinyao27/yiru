@@ -550,7 +550,7 @@ function getClaudeStatusAccountsFromSettings(
   }
 }
 
-// Why: with a Remote Yiru Server active, accounts persisted in local
+// Why: with a Coworking host active, accounts persisted in local
 // GlobalSettings describe this desktop, not the account owner; the snapshot
 // fetched from the server must win (#7973).
 export function resolveCodexStatusAccountState(
@@ -722,7 +722,7 @@ export function ClaudeSwitcherMenu({
     ? (runtimeEnvironments.find(
         (environment) => environment.id === settings?.activeRuntimeEnvironmentId?.trim()
       )?.name ??
-      translate('auto.components.status.bar.StatusBar.remoteServerLabel', 'Remote server'))
+      translate('auto.components.status.bar.StatusBar.remoteServerLabel', 'Coworking host'))
     : undefined
   const windowsTerminalCapabilities = useWindowsTerminalCapabilities(
     navigator.userAgent.includes('Windows') || hasActiveRuntimeEnvironment,
@@ -1161,7 +1161,7 @@ export function CodexSwitcherMenu({
     ? (runtimeEnvironments.find(
         (environment) => environment.id === settings?.activeRuntimeEnvironmentId?.trim()
       )?.name ??
-      translate('auto.components.status.bar.StatusBar.remoteServerLabel', 'Remote server'))
+      translate('auto.components.status.bar.StatusBar.remoteServerLabel', 'Coworking host'))
     : undefined
   const windowsTerminalCapabilities = useWindowsTerminalCapabilities(
     navigator.userAgent.includes('Windows') || hasActiveRuntimeEnvironment,

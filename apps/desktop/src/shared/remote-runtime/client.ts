@@ -55,8 +55,8 @@ function formatRemoteRuntimeCloseMessage(code: number, reason: Buffer): string {
     suffixParts.push(reasonText)
   }
   return suffixParts.length > 0
-    ? `Remote Yiru runtime closed the connection (${suffixParts.join(': ')}).`
-    : 'Remote Yiru runtime closed the connection.'
+    ? `Runtime host closed the connection (${suffixParts.join(': ')}).`
+    : 'Runtime host closed the connection.'
 }
 
 export type RemoteRuntimeSubscription = {
@@ -126,7 +126,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
         ok: false,
         error: new RemoteRuntimeClientError(
           'runtime_timeout',
-          'Timed out waiting for the remote Yiru runtime to respond.'
+          'Timed out waiting for the runtime host to respond.'
         )
       })
     }
@@ -192,7 +192,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
         ok: false,
         error: new RemoteRuntimeClientError(
           'remote_runtime_unavailable',
-          'Could not connect to the remote Yiru runtime.'
+          'Could not connect to the runtime host.'
         )
       })
     }
@@ -218,7 +218,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an unexpected binary frame.'
+            'Runtime host returned an unexpected binary frame.'
           )
         })
         return
@@ -236,7 +236,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an undecryptable frame.'
+            'Runtime host returned an undecryptable frame.'
           )
         })
         return
@@ -264,7 +264,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid E2EE handshake frame.'
+            'Runtime host returned an invalid E2EE handshake frame.'
           )
         })
         return
@@ -278,7 +278,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an unexpected E2EE handshake frame.'
+            'Runtime host returned an unexpected E2EE handshake frame.'
           )
         })
         return
@@ -298,7 +298,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid E2EE auth frame.'
+            'Runtime host returned an invalid E2EE auth frame.'
           )
         })
         return
@@ -313,10 +313,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
             : 'invalid_runtime_response'
         finish({
           ok: false,
-          error: new RemoteRuntimeClientError(
-            code,
-            'Remote Yiru runtime rejected the pairing token.'
-          )
+          error: new RemoteRuntimeClientError(code, 'Runtime host rejected the pairing token.')
         })
         return
       }
@@ -359,7 +356,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid response frame.'
+            'Runtime host returned an invalid response frame.'
           )
         })
         return
@@ -374,7 +371,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid response frame.'
+            'Runtime host returned an invalid response frame.'
           )
         })
         return
@@ -385,7 +382,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
           ok: false,
           error: new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned a mismatched response id.'
+            'Runtime host returned a mismatched response id.'
           )
         })
         return
@@ -450,7 +447,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       fail(
         new RemoteRuntimeClientError(
           'runtime_timeout',
-          'Timed out waiting for the remote Yiru runtime subscription to start.'
+          'Timed out waiting for the runtime host subscription to start.'
         )
       )
     }, timeoutMs)
@@ -481,7 +478,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
             fail(
               new RemoteRuntimeClientError(
                 'remote_runtime_unavailable',
-                'Remote Yiru runtime send buffer overflow; reconnecting.'
+                'Runtime host send buffer overflow; reconnecting.'
               )
             )
         })
@@ -543,7 +540,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       fail(
         new RemoteRuntimeClientError(
           'remote_runtime_unavailable',
-          'Could not connect to the remote Yiru runtime.'
+          'Could not connect to the runtime host.'
         )
       )
     }
@@ -582,7 +579,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an undecryptable frame.'
+            'Runtime host returned an undecryptable frame.'
           )
         )
         return
@@ -624,7 +621,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'remote_runtime_unavailable',
-            'Remote Yiru runtime stopped responding; the stream connection was reset.'
+            'Runtime host stopped responding; the stream connection was reset.'
           )
         )
         try {
@@ -645,7 +642,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid E2EE handshake frame.'
+            'Runtime host returned an invalid E2EE handshake frame.'
           )
         )
         return
@@ -658,7 +655,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an unexpected E2EE handshake frame.'
+            'Runtime host returned an unexpected E2EE handshake frame.'
           )
         )
         return
@@ -677,7 +674,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid E2EE auth frame.'
+            'Runtime host returned an invalid E2EE auth frame.'
           )
         )
         return
@@ -690,7 +687,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
           (authenticated as { error?: { code?: unknown } }).error?.code === 'unauthorized'
             ? 'unauthorized'
             : 'invalid_runtime_response'
-        fail(new RemoteRuntimeClientError(code, 'Remote Yiru runtime rejected the pairing token.'))
+        fail(new RemoteRuntimeClientError(code, 'Runtime host rejected the pairing token.'))
         return
       }
       state = 'ready'
@@ -716,7 +713,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an invalid response frame.'
+            'Runtime host returned an invalid response frame.'
           )
         )
         return
@@ -730,7 +727,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned a mismatched response id.'
+            'Runtime host returned a mismatched response id.'
           )
         )
         return
@@ -743,7 +740,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned binary data before authentication.'
+            'Runtime host returned binary data before authentication.'
           )
         )
         return
@@ -753,7 +750,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(
           new RemoteRuntimeClientError(
             'invalid_runtime_response',
-            'Remote Yiru runtime returned an undecryptable binary frame.'
+            'Runtime host returned an undecryptable binary frame.'
           )
         )
         return

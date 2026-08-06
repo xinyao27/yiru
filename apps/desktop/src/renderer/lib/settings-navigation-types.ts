@@ -31,7 +31,6 @@ export type SettingsNavTarget =
   | 'experimental'
   | 'agents'
   | 'orchestration'
-  | 'servers'
   | 'coworking'
   | 'mobile'
   | 'mobile-emulator'
@@ -51,5 +50,6 @@ export type SettingsNavSection = {
 export type SettingsNavGroup = {
   id: string
   title: string
+  hideTitle?: boolean
   sections: SettingsNavSection[]
 }

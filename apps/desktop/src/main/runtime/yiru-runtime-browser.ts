@@ -1619,7 +1619,7 @@ export class RuntimeBrowserCommands {
   async browserProfileDetectBrowsers(): Promise<BrowserDetectProfilesResult> {
     return {
       // Why: clients only need display metadata for the picker; filesystem
-      // paths and keychain identifiers stay on the runtime server.
+      // paths and keychain identifiers stay on the runtime host.
       browsers: detectInstalledBrowsers().map((browser) => ({
         family: browser.family,
         label: browser.label,

@@ -135,15 +135,12 @@ import { createDefaultLocalYiruProfile, DEFAULT_LOCAL_YIRU_PROFILE_ID } from '~s
 
 import { callAbortableRuntimeEnvironment } from '../runtime/abortable-runtime-environment-call'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
-import { parseWebPairingInput } from './pairing'
 import { WebRuntimeClient } from './runtime-client'
 import {
   clearStoredWebRuntimeEnvironment,
-  createStoredWebRuntimeEnvironment,
   getPreferredWebPairingOffer,
   readStoredWebRuntimeEnvironment,
   redactStoredWebRuntimeEnvironment,
-  saveStoredWebRuntimeEnvironment,
   updateStoredEnvironmentRuntimeId,
   type StoredWebRuntimeEnvironment
 } from './runtime-environment'
@@ -659,11 +656,8 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       getWindowsFirewallStatus: () => Promise.resolve({ supported: false }),
       repairWindowsFirewall: () => Promise.resolve({ ok: false, reason: 'unsupported' }),
       openWindowsNetworkSettings: () => Promise.resolve(false),
-      getRuntimePairingUrl: () => Promise.resolve({ available: false }),
       listDevices: () => Promise.resolve({ devices: [] }),
       revokeDevice: () => Promise.resolve({ revoked: false }),
-      listRuntimeAccessGrants: () => Promise.resolve({ grants: [] }),
-      revokeRuntimeAccess: () => Promise.resolve({ revoked: false }),
       isWebSocketReady: () => Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null })
     },
     telemetryTrack: () => Promise.resolve(),
@@ -1145,16 +1139,6 @@ function createRuntimeEnvironmentsApi(): NonNullable<Partial<PreloadApi>['runtim
     list: async () => {
       const environment = requireActiveEnvironmentOrNull()
       return environment ? [redactStoredWebRuntimeEnvironment(environment)] : []
-    },
-    addFromPairingCode: async ({ name, pairingCode }) => {
-      const offer = parseWebPairingInput(pairingCode)
-      if (!offer) {
-        throw new Error('Invalid Yiru pairing code.')
-      }
-      closeActiveRuntimeClients()
-      activeEnvironment = createStoredWebRuntimeEnvironment({ name, offer })
-      saveStoredWebRuntimeEnvironment(activeEnvironment)
-      return { environment: redactStoredWebRuntimeEnvironment(activeEnvironment) }
     },
     resolve: async ({ selector }) =>
       redactStoredWebRuntimeEnvironment(resolveEnvironment(selector)),
@@ -2528,7 +2512,7 @@ function createCliApi(): NonNullable<Partial<PreloadApi>['cli']> {
     state: 'unsupported',
     currentTarget: null,
     unsupportedReason: 'launch_mode_unavailable',
-    detail: 'CLI registration is managed on the Yiru server, not in the web browser.'
+    detail: 'CLI registration is managed by the runtime host, not in the web browser.'
   } as const
   return {
     getInstallStatus: () => Promise.resolve(status),
@@ -2562,7 +2546,7 @@ function createAgentHooksApi(): NonNullable<Partial<PreloadApi>['agentHooks']> {
       state: 'not_installed',
       configPath: '',
       managedHooksPresent: false,
-      detail: 'Agent hook status is only available on the Yiru server.'
+      detail: 'Agent hook status is only available on the runtime host.'
     } as const)
   return {
     claudeStatus: () => status('claude'),
@@ -2610,7 +2594,7 @@ function createComputerUsePermissionsApi(): NonNullable<
         helperAppPath: null,
         openedSettings: false,
         launchedHelper: false,
-        nextStep: 'Computer-use permissions are managed on the Yiru server.'
+        nextStep: 'Computer-use permissions are managed on the runtime host.'
       })),
     reset: () =>
       Promise.resolve({
@@ -3059,7 +3043,7 @@ function resolveEnvironment(selector: string): StoredWebRuntimeEnvironment {
 function requireActiveEnvironment(): StoredWebRuntimeEnvironment {
   activeEnvironment = activeEnvironment ?? readStoredWebRuntimeEnvironment()
   if (!activeEnvironment) {
-    throw new Error('Pair this web client with a Yiru server first.')
+    throw new Error('Connect this web client to a runtime host first.')
   }
   return activeEnvironment
 }
@@ -3253,7 +3237,7 @@ function getStoredOnboarding(): OnboardingState {
     return closed
   }
   const closed = closeWebOnboarding(getDefaultOnboardingState())
-  // Why: pairing already means the user has a Yiru server. Desktop first-run
+  // Why: a paired web client already has a runtime host. Desktop first-run
   // onboarding would incorrectly probe browser-local tools and block the client.
   writeJson(ONBOARDING_STORAGE_KEY, closed)
   return closed

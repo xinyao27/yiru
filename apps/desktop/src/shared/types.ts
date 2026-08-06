@@ -766,7 +766,7 @@ export type TerminalTab = {
   quickCommandLabel?: string | null
   customTitle: string | null
   color: string | null
-  /** Pinned tabs survive "close others"; host-persisted for remote servers. */
+  /** Pinned tabs survive "close others"; host-persisted for runtime hosts. */
   isPinned?: boolean
   /** Per-tab view preference (terminal xterm vs native chat); host-persisted so
    *  paired clients converge. Optional: older persisted tabs default to 'terminal'. */

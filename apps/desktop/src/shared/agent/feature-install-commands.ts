@@ -5,7 +5,6 @@ export const YIRU_SKILLS_REPOSITORY_URL = YIRU_GITHUB_REPOSITORY_URL
 export const YIRU_CLI_SKILL_NAME = 'yiru-cli'
 export const COMPUTER_USE_SKILL_NAME = 'computer-use'
 export const ORCHESTRATION_SKILL_NAME = 'orchestration'
-export const EPHEMERAL_VMS_SKILL_NAME = 'yiru-per-workspace-env'
 export const YIRU_DEBUG_SKILL_NAME = 'yiru-debug'
 
 export function buildAgentFeatureSkillInstallCommand(skillNames: readonly string[]): string {
@@ -43,13 +42,6 @@ export const ORCHESTRATION_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstall
 
 export const ORCHESTRATION_SKILL_UPDATE_COMMAND =
   buildAgentFeatureSkillUpdateCommand(ORCHESTRATION_SKILL_NAME)
-
-export const EPHEMERAL_VMS_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  EPHEMERAL_VMS_SKILL_NAME
-])
-
-export const EPHEMERAL_VMS_SKILL_UPDATE_COMMAND =
-  buildAgentFeatureSkillUpdateCommand(EPHEMERAL_VMS_SKILL_NAME)
 
 // Why: debug isn't gated behind a feature of its own — it rides along whenever
 // the agent skills are installed as a batch, so every agent can run debug mode.

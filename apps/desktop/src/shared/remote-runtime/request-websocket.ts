@@ -48,19 +48,14 @@ export function openRemoteRuntimeWebSocket(
     )
   }
   const onError = (): void => {
-    callbacks.onError(
-      ws,
-      remoteRuntimeUnavailableError('Could not connect to the remote Yiru runtime.')
-    )
+    callbacks.onError(ws, remoteRuntimeUnavailableError('Could not connect to the runtime host.'))
   }
   const onClose = (code: number, reason: Buffer): void => callbacks.onClose(ws, code, reason)
   const onMessage = (data: WebSocket.RawData, isBinary: boolean): void => {
     if (isBinary) {
       callbacks.onError(
         ws,
-        invalidRemoteRuntimeResponseError(
-          'Remote Yiru runtime returned an unexpected binary frame.'
-        )
+        invalidRemoteRuntimeResponseError('Runtime host returned an unexpected binary frame.')
       )
       return
     }

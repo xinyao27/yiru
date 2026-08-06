@@ -20,12 +20,12 @@ export function getProviderAccountScope(
     return {
       label: translate(
         'auto.components.settings.providerAccountScope.remoteServer',
-        'Remote server: {{value0}}',
+        'Coworking host: {{value0}}',
         { value0: runtimeId }
       ),
       description: translate(
         'auto.components.settings.providerAccountScope.remoteServerCredentials',
-        'Credentials and account checks for this provider are owned by this remote server. Use Settings > Remote Yiru Servers > Advanced to edit another default runtime scope.'
+        'Credentials and account checks for this provider are owned by this Coworking host. Use Settings > Coworking Hosts > Advanced to edit another default runtime scope.'
       )
     }
   }
@@ -33,7 +33,7 @@ export function getProviderAccountScope(
     label: getLocalExecutionHostLabel(),
     description: translate(
       'auto.components.settings.providerAccountScope.localCredentials',
-      'Credentials and account checks for this provider are owned by this desktop client. Use Settings > Remote Yiru Servers > Advanced to edit server-owned credentials.'
+      'Credentials and account checks for this provider are owned by this desktop client. Use Settings > Coworking Hosts > Advanced to edit host-owned credentials.'
     )
   }
 }
@@ -47,12 +47,12 @@ export function getProviderRateLimitScope(
     return {
       label: translate(
         'auto.components.settings.providerAccountScope.remoteServer',
-        'Remote server: {{value0}}',
+        'Coworking host: {{value0}}',
         { value0: runtimeId }
       ),
       description: translate(
         'auto.components.settings.providerAccountScope.remoteServerRateLimit',
-        '{{value0}} API budget is fetched from the CLI on this remote server. Use Settings > Remote Yiru Servers > Advanced to view another default runtime budget.',
+        '{{value0}} API budget is fetched from the CLI on this Coworking host. Use Settings > Coworking Hosts > Advanced to view another default runtime budget.',
         { value0: providerLabel }
       )
     }
@@ -61,7 +61,7 @@ export function getProviderRateLimitScope(
     label: getLocalExecutionHostLabel(),
     description: translate(
       'auto.components.settings.providerAccountScope.localRateLimit',
-      '{{value0}} API budget is fetched from the CLI on this desktop client. Use Settings > Remote Yiru Servers > Advanced to view server-owned budgets.',
+      '{{value0}} API budget is fetched from the CLI on this desktop client. Use Settings > Coworking Hosts > Advanced to view host-owned budgets.',
       { value0: providerLabel }
     )
   }

@@ -137,13 +137,13 @@ export function RemoteServerUpdateDialog(): React.JSX.Element {
           <DialogTitle>
             {translate(
               'auto.components.settings.RemoteServerUpdateDialog.title',
-              'Update Remote Yiru Servers'
+              'Update Coworking Hosts'
             )}
           </DialogTitle>
           <DialogDescription>
             {translate(
               'auto.components.settings.RemoteServerUpdateDialog.description',
-              'Review paired servers and update supported installs from this Yiru client.'
+              'Review Coworking-authorized hosts and update supported installs.'
             )}
           </DialogDescription>
         </DialogHeader>
@@ -154,7 +154,7 @@ export function RemoteServerUpdateDialog(): React.JSX.Element {
             <p>
               {translate(
                 'auto.components.settings.RemoteServerUpdateDialog.restartWarning',
-                'Updating restarts these servers. {{value0}} live tabs and {{value1}} terminal panes may briefly disconnect.',
+                'Updating restarts these hosts. {{value0}} live tabs and {{value1}} terminal panes may briefly disconnect.',
                 { value0: liveTabCount, value1: liveLeafCount }
               )}
             </p>
@@ -169,13 +169,13 @@ export function RemoteServerUpdateDialog(): React.JSX.Element {
                   <LoadingIndicator className="size-4" />
                   {translate(
                     'auto.components.settings.RemoteServerUpdateDialog.checking',
-                    'Checking paired servers…'
+                    'Checking Coworking hosts…'
                   )}
                 </span>
               ) : (
                 translate(
                   'auto.components.settings.RemoteServerUpdateDialog.empty',
-                  'No paired Remote Yiru Servers.'
+                  'No Coworking hosts found.'
                 )
               )}
             </div>
@@ -198,14 +198,14 @@ export function RemoteServerUpdateDialog(): React.JSX.Element {
             <LoadingIndicator className="size-3.5" />
             {translate(
               'auto.components.settings.RemoteServerUpdateDialog.checking',
-              'Checking paired servers…'
+              'Checking Coworking hosts…'
             )}
           </div>
         ) : allCurrent ? (
           <p className="text-muted-foreground text-xs">
             {translate(
               'auto.components.settings.RemoteServerUpdateDialog.noUpdates',
-              'All servers are up to date.'
+              'All Coworking hosts are up to date.'
             )}
           </p>
         ) : null}
@@ -221,7 +221,7 @@ export function RemoteServerUpdateDialog(): React.JSX.Element {
             >
               {translate(
                 'auto.components.settings.RemoteServerUpdateDialog.updateAll',
-                'Update all {{value0}} servers',
+                'Update all {{value0}} hosts',
                 { value0: eligible.length }
               )}
             </Button>

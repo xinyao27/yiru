@@ -1,5 +1,4 @@
 import type { TailnetPrincipal } from '../rpc-principal'
-import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
 import type { CoworkingRemoteDesktop } from './catalog-contract'
 import type {
   CoworkingHostAccessDecision,
@@ -203,7 +202,7 @@ export type CoworkingRequestHostAccessArgs = {
 
 export type CoworkingRequestHostAccessResult =
   | { status: 'denied' | 'cancelled' }
-  | { status: 'granted'; environment: PublicKnownRuntimeEnvironment }
+  | { status: 'granted'; environmentId: string }
 
 export type CoworkingDecideHostAccessArgs = CoworkingHostAccessDecision
 

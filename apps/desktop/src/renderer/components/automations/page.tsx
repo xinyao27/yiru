@@ -827,7 +827,7 @@ export default function AutomationsPage(): React.JSX.Element {
       if (parsed?.kind !== 'runtime') {
         continue
       }
-      // Why: automation sources can be owned by a different remote server than
+      // Why: automation sources can be owned by a different Coworking host than
       // the run target; provider auth/tooling must be checked on the source host.
       void callRuntimeRpc<PreflightStatus>(
         { kind: 'environment', environmentId: parsed.environmentId },

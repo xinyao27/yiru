@@ -38,12 +38,6 @@ async function getFileWorktreeSelector({ flags, cwd, client }: HandlerContext): 
   if (explicit) {
     return explicit
   }
-  if (client.isRemote) {
-    throw new RuntimeClientError(
-      'invalid_argument',
-      'Remote file commands require --worktree because the client cwd cannot identify a server worktree.'
-    )
-  }
   return await resolveCurrentWorktreeSelector(cwd, client)
 }
 

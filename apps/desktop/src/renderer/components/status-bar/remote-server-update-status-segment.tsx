@@ -39,7 +39,7 @@ export function RemoteServerUpdateStatusSegment({
         ),
         tooltip: translate(
           'auto.components.status.bar.RemoteServerUpdateStatusSegment.updatingTooltip',
-          'Remote Yiru Server updates are in progress'
+          'Coworking host updates are in progress'
         )
       }
     : failed > 0
@@ -49,16 +49,16 @@ export function RemoteServerUpdateStatusSegment({
             failed === 1
               ? translate(
                   'auto.components.status.bar.RemoteServerUpdateStatusSegment.failedOne',
-                  '1 server update failed'
+                  '1 host update failed'
                 )
               : translate(
                   'auto.components.status.bar.RemoteServerUpdateStatusSegment.failed',
-                  '{{value0}} server updates failed',
+                  '{{value0}} host updates failed',
                   { value0: failed }
                 ),
           tooltip: translate(
             'auto.components.status.bar.RemoteServerUpdateStatusSegment.failedTooltip',
-            'Open Remote Yiru Server updates to review and retry'
+            'Open Coworking host updates to review and retry'
           )
         }
       : {
@@ -67,16 +67,16 @@ export function RemoteServerUpdateStatusSegment({
             updated === 1
               ? translate(
                   'auto.components.status.bar.RemoteServerUpdateStatusSegment.updatedOne',
-                  '1 server updated'
+                  '1 host updated'
                 )
               : translate(
                   'auto.components.status.bar.RemoteServerUpdateStatusSegment.updated',
-                  '{{value0}} servers updated',
+                  '{{value0}} hosts updated',
                   { value0: updated }
                 ),
           tooltip: translate(
             'auto.components.status.bar.RemoteServerUpdateStatusSegment.updatedTooltip',
-            'Remote Yiru Server updates completed'
+            'Coworking host updates completed'
           )
         }
 

@@ -2710,7 +2710,7 @@ function RemoteBrowserPagePane({
               <div className="text-muted-foreground text-xs leading-5">
                 {translate(
                   'auto.components.browser.pane.BrowserPane.bbe8f15e83',
-                  'This pane is rendered from the active runtime server.'
+                  'This pane is rendered from the active runtime host.'
                 )}
               </div>
             </div>

@@ -237,7 +237,7 @@ export function CreateStep({
 
           {advancedOpen && (
             <div className="border-border space-y-3 border-t px-3 py-3">
-              {/* The local picker returns client paths; runtime servers browse host paths via RPC. */}
+              {/* The local picker returns client paths; runtime hosts browse host paths via RPC. */}
               <CreateProjectLocationField
                 createParent={createParent}
                 isCreating={isCreating}

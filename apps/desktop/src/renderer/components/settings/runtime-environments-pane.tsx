@@ -1,11 +1,10 @@
-/* eslint-disable max-lines -- Why: the server settings pane keeps active
-   server selection, saved server mutation, and confirmation dialogs together so
+/* eslint-disable max-lines -- Why: the Coworking host settings pane keeps active
+   host selection, saved host mutation, and confirmation dialogs together so
    the state transitions stay auditable. */
 import {
   Warning as AlertTriangle,
-  HardDrives as Server,
-  HardDrive as ServerOff,
-  ShareNetwork as Share2,
+  HardDrives as Host,
+  HardDrive as HostOff,
   Trash as Trash2,
   CaretDown as ChevronDown,
   ArrowClockwise as RefreshCw
@@ -51,11 +50,7 @@ import {
   getRemoteServerManualUpdateHelp,
   RemoteServerUpdateStatus
 } from './remote-server-update-status'
-import {
-  getRuntimeEnvironmentsSearchEntry,
-  getWebRuntimeEnvironmentsSearchEntry
-} from './runtime-environments-search'
-import { RuntimePairingUrlGenerator } from './runtime-pairing-url-generator'
+import { getRuntimeEnvironmentsSearchEntry } from './runtime-environments-search'
 import { SearchableSetting } from './searchable-setting'
 
 const LOCAL_RUNTIME_VALUE = '__local__'
@@ -64,7 +59,6 @@ const NO_RUNTIME_VALUE = '__none__'
 type RuntimeEnvironmentsPaneProps = {
   settings: GlobalSettings
   switchRuntimeEnvironment: (environmentId: string | null) => Promise<boolean>
-  canGeneratePairingUrl?: boolean
   allowLocalRuntime?: boolean
 }
 
@@ -98,7 +92,7 @@ export function getHostDetailsSummary(details: RuntimeHostDetails | undefined): 
   if (details.compatibility?.kind === 'blocked') {
     return details.compatibility.reason === 'client-too-old'
       ? translate('auto.components.settings.RuntimeEnvironmentsPane.62ac182a27', 'Update client')
-      : translate('auto.components.settings.RuntimeEnvironmentsPane.86ed75bec8', 'Update server')
+      : translate('auto.components.settings.RuntimeEnvironmentsPane.86ed75bec8', 'Update host')
   }
   return translate('auto.components.settings.RuntimeEnvironmentsPane.9a91c4a0eb', 'Compatible')
 }
@@ -139,7 +133,7 @@ export function getHostModelCapabilitySummary(
   if (!capabilities) {
     return translate(
       'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityUnknown',
-      'Host model support: checking server capabilities'
+      'Host model support: checking host capabilities'
     )
   }
   const missing = [
@@ -156,7 +150,7 @@ export function getHostModelCapabilitySummary(
   const missingLabels = missing.map(getHostModelCapabilityLabel)
   return translate(
     'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityMissing',
-    'Host model support: update server for {{value0}}',
+    'Host model support: update host for {{value0}}',
     { value0: missingLabels.join(', ') }
   )
 }
@@ -187,11 +181,11 @@ export function getActiveServerModeDescription(allowLocalRuntime: boolean): stri
   return allowLocalRuntime
     ? translate(
         'auto.components.settings.RuntimeEnvironmentsPane.3f67e8078a',
-        'Use this computer by default. Choose a saved server only when you want supported projects, files, terminals, provider checks, and browser/mobile handoff to run through that server.'
+        'Use this computer by default. Choose a saved Coworking host only when you want supported projects, files, terminals, provider checks, and browser/mobile handoff to run through that host.'
       )
     : translate(
         'auto.components.settings.RuntimeEnvironmentsPane.2c85efb3e8',
-        'Selecting a saved server makes this browser use that paired Yiru runtime as its default Host.'
+        'Selecting a saved Coworking host makes this browser use that paired runtime as its default host.'
       )
 }
 
@@ -207,8 +201,8 @@ export function getRuntimeServerConnectionState(
     return 'disconnected'
   }
   // Why: an attached, reachable, compatible host is "Connected" (and exposes
-  // Disconnect). Whether it is the default *active* server is a separate concept,
-  // surfaced by the Advanced > Active Server selector and the row's help text —
+  // Disconnect). Whether it is the default *active* host is a separate concept,
+  // surfaced by the Advanced > active host selector and the row's help text —
   // it must not change this connection label, or the dot/label/button disagree.
   return 'connected'
 }
@@ -247,7 +241,6 @@ function getRuntimeServerDotClass(state: RuntimeServerConnectionState): string {
 export function RuntimeEnvironmentsPane({
   settings,
   switchRuntimeEnvironment,
-  canGeneratePairingUrl = true,
   allowLocalRuntime = true
 }: RuntimeEnvironmentsPaneProps): React.JSX.Element {
   const [environments, setEnvironments] = useState<PublicKnownRuntimeEnvironment[]>([])
@@ -261,7 +254,6 @@ export function RuntimeEnvironmentsPane({
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null)
   const [pendingSwitchValue, setPendingSwitchValue] = useState<string | null>(null)
   const [pendingRemove, setPendingRemove] = useState<PublicKnownRuntimeEnvironment | null>(null)
-  const [shareServerFormOpen, setShareServerFormOpen] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [switchError, setSwitchError] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
@@ -282,10 +274,8 @@ export function RuntimeEnvironmentsPane({
     switchingValue !== null ||
     removingId !== null ||
     disconnectingId !== null
-  const removingActiveServer = pendingRemove?.id === settings.activeRuntimeEnvironmentId
-  const searchEntry = canGeneratePairingUrl
-    ? getRuntimeEnvironmentsSearchEntry()
-    : getWebRuntimeEnvironmentsSearchEntry()
+  const removingActiveHost = pendingRemove?.id === settings.activeRuntimeEnvironmentId
+  const searchEntry = getRuntimeEnvironmentsSearchEntry()
 
   const loadEnvironments = useCallback(async (): Promise<void> => {
     if (mountedRef.current) {
@@ -293,7 +283,7 @@ export function RuntimeEnvironmentsPane({
     }
     try {
       const nextEnvironments = await window.api.runtimeEnvironments.list()
-      // Why: drop store status for servers no longer saved so stale hosts don't
+      // Why: drop store status for hosts no longer saved so stale hosts don't
       // linger in the sidebar registry.
       useAppStore.getState().setRuntimeEnvironments(nextEnvironments)
       if (mountedRef.current) {
@@ -399,7 +389,7 @@ export function RuntimeEnvironmentsPane({
             setRemoveError(
               allowLocalRuntime
                 ? 'Could not switch to Local desktop. Fix the issue and try again.'
-                : 'Could not disconnect from this server. Fix the issue and try again.'
+                : 'Could not disconnect from this Coworking host. Fix the issue and try again.'
             )
           }
           return false
@@ -458,14 +448,14 @@ export function RuntimeEnvironmentsPane({
             setSwitchError(
               allowLocalRuntime
                 ? 'Could not switch to Local desktop. Fix the issue and try again.'
-                : 'Could not disconnect from this server. Fix the issue and try again.'
+                : 'Could not disconnect from this Coworking host. Fix the issue and try again.'
             )
           }
           return false
         }
       }
       await window.api.runtimeEnvironments.disconnect({ selector: environment.id })
-      // Why: disconnect is non-destructive; keep the saved server but show the
+      // Why: disconnect is non-destructive; keep the saved host but show the
       // user that this live client is no longer attached to it.
       useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
         status: null,
@@ -491,7 +481,7 @@ export function RuntimeEnvironmentsPane({
       }
       return true
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to disconnect server.'
+      const message = error instanceof Error ? error.message : 'Failed to disconnect host.'
       if (mountedRef.current) {
         setSwitchError(message)
         toast.error(message)
@@ -517,7 +507,7 @@ export function RuntimeEnvironmentsPane({
       const runtimeStatus = unwrapRuntimeRpcResult<RuntimeStatus>(response)
       const compatibility = evaluateHostDetails(runtimeStatus)
       // Why: row Connect is reachability only. The Advanced selector is the
-      // explicit default-host control and should be the only active-server path.
+      // explicit default-host control and should be the only active-host path.
       useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
         status: runtimeStatus,
         checkedAt: Date.now()
@@ -542,7 +532,7 @@ export function RuntimeEnvironmentsPane({
         return false
       }
       const store = useAppStore.getState()
-      // Why: Connect is not the Active Server selector anymore, but connected
+      // Why: Connect is not the active-host selector anymore, but connected
       // hosts should still contribute their projects/workspaces to the sidebar.
       const repos = await store.fetchRuntimeEnvironmentRepos(environment.id)
       await Promise.all(repos.map((repo) => useAppStore.getState().fetchWorktrees(repo.id)))
@@ -558,7 +548,7 @@ export function RuntimeEnvironmentsPane({
       }
       return true
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to connect server.'
+      const message = error instanceof Error ? error.message : 'Failed to connect host.'
       useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
         status: null,
         checkedAt: Date.now()
@@ -607,11 +597,11 @@ export function RuntimeEnvironmentsPane({
         return true
       }
       if (mountedRef.current) {
-        setSwitchError('Could not switch servers. Fix the issue and try again.')
+        setSwitchError('Could not switch hosts. Fix the issue and try again.')
       }
       return false
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to switch servers.'
+      const message = error instanceof Error ? error.message : 'Failed to switch hosts.'
       if (mountedRef.current) {
         setSwitchError(message)
         toast.error(message)
@@ -629,9 +619,9 @@ export function RuntimeEnvironmentsPane({
       return 'Local desktop'
     }
     if (value === NO_RUNTIME_VALUE) {
-      return 'No server connected'
+      return 'No host connected'
     }
-    return environments.find((environment) => environment.id === value)?.name ?? 'remote server'
+    return environments.find((environment) => environment.id === value)?.name ?? 'Coworking host'
   }
 
   return (
@@ -650,7 +640,7 @@ export function RuntimeEnvironmentsPane({
             <div className="text-sm font-medium">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServers',
-                'Connect to remote servers'
+                'Coworking hosts'
               )}
             </div>
             <p className="text-muted-foreground text-xs">
@@ -682,11 +672,11 @@ export function RuntimeEnvironmentsPane({
                 {remoteServerUpdatesRunning
                   ? translate(
                       'auto.components.settings.RuntimeEnvironmentsPane.updatingServers',
-                      'Updating servers…'
+                      'Updating hosts…'
                     )
                   : translate(
                       'auto.components.settings.RuntimeEnvironmentsPane.reviewServerUpdates',
-                      'Check for Server Updates'
+                      'Check for host updates'
                     )}
               </Button>
             ) : null}
@@ -698,7 +688,7 @@ export function RuntimeEnvironmentsPane({
             <div className="text-muted-foreground px-3 py-4 text-sm">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.9a3758d983',
-                'No saved servers.'
+                'No Coworking hosts connected.'
               )}
             </div>
           ) : (
@@ -724,7 +714,7 @@ export function RuntimeEnvironmentsPane({
                       removingId === environment.id
                     return (
                       <>
-                        <Server className="text-muted-foreground size-4 shrink-0" />
+                        <Host className="text-muted-foreground size-4 shrink-0" />
                         <div className="min-w-0 flex-1">
                           <div className="flex min-w-0 items-center gap-2">
                             <div className="truncate text-sm font-medium">{environment.name}</div>
@@ -747,7 +737,7 @@ export function RuntimeEnvironmentsPane({
                             {isActive
                               ? translate(
                                   'auto.components.settings.RuntimeEnvironmentsPane.activeServerRowHelp',
-                                  'Active server for server-routed projects, terminals, and provider checks.'
+                                  'Active Coworking host for host-routed projects, terminals, and provider checks.'
                                 )
                               : getHostDetailsSummary(details)}
                           </p>
@@ -817,7 +807,7 @@ export function RuntimeEnvironmentsPane({
                               {disconnectingId === environment.id ? (
                                 <LoadingIndicator className="size-3" />
                               ) : (
-                                <ServerOff className="size-3" />
+                                <HostOff className="size-3" />
                               )}
                               {translate(
                                 'auto.components.settings.RuntimeEnvironmentsPane.disconnect',
@@ -836,7 +826,7 @@ export function RuntimeEnvironmentsPane({
                               {connectingId === environment.id ? (
                                 <LoadingIndicator className="size-3" />
                               ) : (
-                                <Server className="size-3" />
+                                <Host className="size-3" />
                               )}
                               {translate(
                                 'auto.components.settings.RuntimeEnvironmentsPane.connect',
@@ -948,7 +938,7 @@ export function RuntimeEnvironmentsPane({
                       <SelectItem value={NO_RUNTIME_VALUE} disabled>
                         {translate(
                           'auto.components.settings.RuntimeEnvironmentsPane.b07070ed3c',
-                          'No server connected'
+                          'No Coworking host connected'
                         )}
                       </SelectItem>
                     ) : null}
@@ -965,11 +955,11 @@ export function RuntimeEnvironmentsPane({
                   size="icon-sm"
                   aria-label={translate(
                     'auto.components.settings.RuntimeEnvironmentsPane.6ce4664003',
-                    'Refresh servers'
+                    'Refresh hosts'
                   )}
                   title={translate(
                     'auto.components.settings.RuntimeEnvironmentsPane.6ce4664003',
-                    'Refresh servers'
+                    'Refresh hosts'
                   )}
                   onClick={() => void loadEnvironments()}
                   disabled={isLoading || isBusy}
@@ -982,7 +972,7 @@ export function RuntimeEnvironmentsPane({
                   <div className="text-xs font-medium">
                     {translate(
                       'auto.components.settings.RuntimeEnvironmentsPane.serverDetails',
-                      'Server details'
+                      'Host details'
                     )}
                   </div>
                   <div className="border-border/50 bg-card/30 space-y-1 border p-2">
@@ -1040,68 +1030,6 @@ export function RuntimeEnvironmentsPane({
         </div>
       </div>
 
-      {canGeneratePairingUrl ? (
-        <div className="space-y-3 pt-2">
-          <div className="space-y-0.5">
-            <div className="text-sm font-medium">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.advertiseThisApp',
-                'Advertise this app as a server'
-              )}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.advertiseThisAppHelp',
-                'Create access links for browsers, mobile clients, or another Yiru client to connect back to this running app.'
-              )}
-            </p>
-          </div>
-          <div className="border-border/50 bg-card/30 overflow-hidden border">
-            <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
-              <div className="min-w-0 space-y-0.5">
-                <div className="text-sm font-medium">
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.6e1280ca55',
-                    'Share this Yiru server'
-                  )}
-                </div>
-                <p className="text-muted-foreground text-xs">
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.84b9b2be05',
-                    'Create a revocable access grant so a browser or another Yiru client can connect.'
-                  )}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => setShareServerFormOpen((open) => !open)}
-              >
-                <Share2 />
-                {shareServerFormOpen
-                  ? translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.54dee18f5c',
-                      'Hide Form'
-                    )
-                  : translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.3595fd1948',
-                      'New Link'
-                    )}
-              </Button>
-            </div>
-            <div className="border-border/40 border-t px-3 py-3">
-              <RuntimePairingUrlGenerator
-                framed={false}
-                showHeader={false}
-                showGeneratorForm={shareServerFormOpen}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       <Dialog
         open={pendingSwitchValue !== null}
         onOpenChange={(open) => {
@@ -1116,7 +1044,7 @@ export function RuntimeEnvironmentsPane({
             <DialogTitle className="text-sm">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.d570c35a99',
-                'Switch Server'
+                'Switch Host'
               )}
             </DialogTitle>
             <DialogDescription>
@@ -1186,23 +1114,23 @@ export function RuntimeEnvironmentsPane({
             <DialogTitle className="text-sm">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.bb90dd6487',
-                'Remove Server'
+                'Remove Host'
               )}
             </DialogTitle>
             <DialogDescription>
-              {removingActiveServer
+              {removingActiveHost
                 ? allowLocalRuntime
                   ? translate(
                       'auto.components.settings.RuntimeEnvironmentsPane.9f7665a01b',
-                      'Removing the active server first switches Yiru back to Local desktop. Existing host sessions are left alone.'
+                      'Removing the active host first switches Yiru back to Local desktop. Existing host sessions are left alone.'
                     )
                   : translate(
                       'auto.components.settings.RuntimeEnvironmentsPane.b2fda48c39',
-                      'Removing the active server disconnects this browser from that host. Existing host sessions are left alone.'
+                      'Removing the active host disconnects this browser from that host. Existing host sessions are left alone.'
                     )
                 : translate(
                     'auto.components.settings.RuntimeEnvironmentsPane.ed3e3f069d',
-                    'This removes the saved server from Yiru. It does not change the active server.'
+                    'This removes the saved host from Yiru. It does not change the active host.'
                   )}
             </DialogDescription>
           </DialogHeader>

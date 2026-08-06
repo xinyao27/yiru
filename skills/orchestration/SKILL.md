@@ -123,7 +123,7 @@ Rules:
 - Omit `--from` unless impersonating another terminal; Yiru auto-resolves it from the current terminal.
 - A coordinator `check` returns the bound Run's oldest FIFO Delivery (up to 50 messages) and replays that exact batch until `--ack <delivery_id>`. Process every message before acknowledging; `check --ack <id> --wait` acknowledges, checks, and waits in one operation.
 - Use `--peek` and `--all` only for read-only history/debugging. Type filters decide when a waiter wakes; the returned actionable Delivery is still the oldest full batch.
-- Use `dispatch:<id>` for coordinator guidance to one supervised worker. Yiru routes that stable address locally or through the connected-server relay; do not substitute a remote terminal handle.
+- Use `dispatch:<id>` for coordinator guidance to one supervised worker. Yiru routes that stable address locally or through the connected Coworking relay; do not substitute a remote terminal handle.
 - Terminal handles remain appropriate for low-level pre-Dispatch messaging. Prefer `agentTerminalHandle` from the create response, fall back to `startupTerminal.handle` for older runtimes, then re-resolve with `yiru terminal list --worktree ... --json` if missing or stale. Continue with the replacement handle only; never dual-send to old and new handles.
 - `yiru orchestration check --peek --format --json` returns locally formatted unread mail without consuming it; it never writes to terminal input or remotely wakes another terminal. Use `orchestration dispatch --inject` to deliver a tracked task, or `terminal send` when an existing agent needs a free-form prompt.
 - While supervising workers manually, use `check --wait --types worker_done,escalation,question --timeout-ms <n>` instead of sleep/poll loops. Process the whole Delivery, reply to `question` messages with `yiru orchestration reply --id <msg_id> --body <answer> --json`, then acknowledge and keep waiting.
@@ -188,7 +188,7 @@ Setup normally starts alongside the agent. Only a repository explicitly configur
 
 Read the returned receipt before continuing: `ready` plus setup `running` is normal for start-immediately, while wait-for-setup returns setup `succeeded` before accepting task input. A failed or unknown start exits nonzero; inspect its `stage`, `effects`, and `residualResources` instead of guessing or automatically retrying. A wait-for-setup timeout can honestly leave setup `running`, which is not proof of failure.
 
-To run the worker on another connected Yiru server, add `--on <saved-environment>`. The Run and Tasks remain authoritative on the current server; later commands route by Dispatch ID, so never repeat `--on`:
+To run the worker on another connected Coworking host, add `--on <saved-environment>`. The Run and Tasks remain authoritative on the current host; later commands route by Dispatch ID, so never repeat `--on`:
 
 ```bash
 # Mac Run home -> Windows worker (the reverse is identical from a Windows Run home)
@@ -201,7 +201,7 @@ yiru orchestration send --to dispatch:<dispatch_id> --subject "Follow-up" --body
 Remote `current` and `new-child` are intentionally invalid because those words are ambiguous across servers. Use an exact discovered remote worktree selector or `new-top-level` with an explicit remote repo selector.
 
 The follow-up is structured inbox mail, not prompt injection. The worker's next
-`orchestration check` receives it even when the Dispatch is on another connected Yiru server.
+`orchestration check` receives it even when the Dispatch is on another connected Coworking host.
 
 `worker-read` defaults to `--source auto`: Yiru returns the exact hook-reported Codex, Claude, OpenClaude, or Grok transcript when it can prove the worker session, otherwise it returns bounded terminal output with `source: "terminal"` and a typed `fallbackReason`. Continue with the returned top-level `cursor`; it stays pinned to that exact source. If Yiru reports `source_changed`, start a fresh read without the old cursor. Never supply or guess a provider session ID or transcript path.
 

@@ -131,7 +131,6 @@ import type {
   PtyRendererDeliveryStateReport
 } from '~shared/pty-renderer-delivery-health'
 import type { RichMarkdownContextMenuCommandPayload } from '~shared/rich-markdown-context-menu'
-import type { RuntimeAccessGrant } from '~shared/runtime-access-grants'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeBrowserDriverState,
@@ -2689,10 +2688,6 @@ export type PreloadApi = {
   }
   runtimeEnvironments: {
     list: () => Promise<PublicKnownRuntimeEnvironment[]>
-    addFromPairingCode: (args: {
-      name: string
-      pairingCode: string
-    }) => Promise<{ environment: PublicKnownRuntimeEnvironment }>
     resolve: (args: { selector: string }) => Promise<PublicKnownRuntimeEnvironment>
     remove: (args: { selector: string }) => Promise<{ removed: PublicKnownRuntimeEnvironment }>
     disconnect: (args: {
@@ -2875,22 +2870,10 @@ export type PreloadApi = {
       { ok: true } | { ok: false; reason: 'cancelled' | 'failed' | 'unsupported' }
     >
     openWindowsNetworkSettings: () => Promise<boolean>
-    getRuntimePairingUrl: (args?: { address?: string; rotate?: boolean }) => Promise<
-      | { available: false }
-      | {
-          available: true
-          pairingUrl: string
-          webClientUrl: string | null
-          endpoint: string
-          deviceId: string
-        }
-    >
     listDevices: () => Promise<{
       devices: { deviceId: string; name: string; pairedAt: number; lastSeenAt: number }[]
     }>
     revokeDevice: (args: { deviceId: string }) => Promise<{ revoked: boolean }>
-    listRuntimeAccessGrants: () => Promise<{ grants: RuntimeAccessGrant[] }>
-    revokeRuntimeAccess: (args: { deviceId: string }) => Promise<{ revoked: boolean }>
     isWebSocketReady: () => Promise<{ ready: boolean; endpoint: string | null }>
   }
   speech: {

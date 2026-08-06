@@ -31,11 +31,11 @@ function getHostMetadata(host: SidebarHostOption): string {
     host.presence === 'active'
       ? translate(
           'auto.components.sidebar.SidebarWorkspaceOptionsMenu.activeRuntimeHost',
-          'Active server'
+          'Active host'
         )
       : translate(
           'auto.components.sidebar.SidebarWorkspaceOptionsMenu.projectRuntimeHost',
-          'Project server'
+          'Project host'
         )
   return `${presenceLabel} · ${healthLabel}`
 }

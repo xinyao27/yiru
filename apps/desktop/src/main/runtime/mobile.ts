@@ -1,10 +1,8 @@
 import { networkInterfaces } from 'node:os'
 
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
-import type { RuntimeAccessGrant } from '~shared/runtime-access-grants'
 import { isTailnetIPv4Address } from '~shared/tailnet-address'
 
-import type { DeviceEntry } from './device-registry'
 import type { YiruRuntimeRpcServer } from './rpc'
 import {
   getWebSocketPort,
@@ -43,15 +41,6 @@ function getNetworkInterfaces(): NetworkInterface[] {
 function getDefaultPairingAddress(): string | null {
   const ifaces = getNetworkInterfaces()
   return ifaces.length > 0 ? ifaces[0]!.address : null
-}
-
-function toRuntimeAccessGrant(device: DeviceEntry): RuntimeAccessGrant {
-  return {
-    deviceId: device.deviceId,
-    name: device.name,
-    createdAt: device.pairedAt,
-    lastSeenAt: device.lastSeenAt > 0 ? device.lastSeenAt : null
-  }
 }
 
 // Why: the mobile IPC handlers provide the renderer with QR code pairing data,
@@ -128,36 +117,6 @@ export function registerMobileHandlers(
     }
   )
 
-  ipcMain.handle(
-    'mobile:getRuntimePairingUrl',
-    async (_event, args?: { address?: string; rotate?: boolean }) => {
-      const ip = args?.address ?? getDefaultPairingAddress()
-      if (!ip) {
-        return { available: false as const }
-      }
-
-      // Why: web/desktop runtime clients need full runtime access, not the
-      // mobile allowlist used by phone QR pairing.
-      const offer = rpcServer.createPairingOffer({
-        address: ip,
-        credentialPolicy: args?.rotate ? 'rotate-pending' : 'reuse-pending',
-        name: `Runtime ${new Date().toLocaleDateString()}`,
-        scope: 'runtime'
-      })
-      if (!offer.available) {
-        return { available: false as const }
-      }
-
-      return {
-        available: true as const,
-        pairingUrl: offer.pairingUrl,
-        webClientUrl: offer.webClientUrl,
-        endpoint: offer.endpoint,
-        deviceId: offer.deviceId
-      }
-    }
-  )
-
   ipcMain.handle('mobile:listDevices', () => {
     const registry = rpcServer.getDeviceRegistry()
     if (!registry) {
@@ -179,36 +138,12 @@ export function registerMobileHandlers(
     }
   })
 
-  ipcMain.handle('mobile:listRuntimeAccessGrants', () => {
-    const registry = rpcServer.getDeviceRegistry()
-    if (!registry) {
-      return { grants: [] }
-    }
-    // Why: generated web/runtime links are bearer credentials even before a
-    // client first connects, so pending runtime grants must stay revocable.
-    return {
-      grants: registry
-        .listDevices()
-        .filter((d) => d.scope === 'runtime')
-        .sort((a, b) => b.pairedAt - a.pairedAt)
-        .map(toRuntimeAccessGrant)
-    }
-  })
-
   ipcMain.handle('mobile:revokeDevice', async (_event, args: { deviceId: string }) => {
     const registry = rpcServer.getDeviceRegistry()
     if (!registry) {
       return { revoked: false }
     }
     return { revoked: await rpcServer.revokeMobileDevice(args.deviceId) }
-  })
-
-  ipcMain.handle('mobile:revokeRuntimeAccess', (_event, args: { deviceId: string }) => {
-    const registry = rpcServer.getDeviceRegistry()
-    if (!registry) {
-      return { revoked: false }
-    }
-    return { revoked: rpcServer.revokeRuntimeAccess(args.deviceId) }
   })
 
   ipcMain.handle('mobile:isWebSocketReady', () => {

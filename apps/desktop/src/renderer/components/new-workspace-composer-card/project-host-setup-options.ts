@@ -161,7 +161,7 @@ function getHostSetupAvailability(host: ExecutionHostRegistryEntry): {
   if (host.health === 'blocked') {
     return {
       isAvailable: false,
-      detail: 'Yiru server version is incompatible'
+      detail: 'Runtime host version is incompatible'
     }
   }
   if (host.kind === 'runtime') {

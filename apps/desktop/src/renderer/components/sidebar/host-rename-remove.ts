@@ -38,7 +38,7 @@ export function clearHostRename(
 
 export type HostRemovalTarget = { kind: 'runtime'; environmentId: string } | null
 
-/** Why: runtime environments deep-link into the Yiru servers pane because
+/** Why: runtime environments deep-link into the Coworking Hosts pane because
  *  their removal needs active-environment/error context that lives there. */
 export function resolveHostRemoval(hostId: ExecutionHostId): HostRemovalTarget {
   const parsed = parseExecutionHostId(hostId)

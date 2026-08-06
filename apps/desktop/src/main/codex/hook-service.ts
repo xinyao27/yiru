@@ -795,7 +795,7 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
       'setlocal',
       // Why: see claude/hook-service.ts for rationale. The endpoint file holds
       // the live port/token for this Yiru install; sourcing it here lets a
-      // surviving PTY reach the current server even though its env points at
+      // surviving PTY reach the current runtime host even though its env points at
       // the prior Yiru's coordinates.
       'if defined YIRU_AGENT_HOOK_ENDPOINT if exist "%YIRU_AGENT_HOOK_ENDPOINT%" call "%YIRU_AGENT_HOOK_ENDPOINT%" 2>nul',
       ...buildWindowsHookEnvironmentGuardLines(),

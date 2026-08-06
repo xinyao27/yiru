@@ -94,7 +94,7 @@ import { reconcileHydratedWorktreeReferences } from './worktree-hydration-reconc
 import { routeListingBranchSwitchesThroughGitIdentity } from './worktree-listing-branch-switch'
 export type { WorktreeSlice, WorktreeDeleteState } from './worktree-helpers'
 
-// Why: old runtime servers only have `worktree.list`; preserve the large-list
+// Why: old runtime hosts only have `worktree.list`; preserve the large-list
 // UI hydration parity this slice used before `worktree.detectedList` existed.
 const REMOTE_WORKTREE_LIST_PARITY_LIMIT = 10_000
 const WORKTREE_REMOVAL_AMBIGUOUS_ERROR =

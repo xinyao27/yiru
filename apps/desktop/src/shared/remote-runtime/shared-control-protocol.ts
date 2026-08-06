@@ -23,16 +23,14 @@ export function parseSharedControlFrame(
   if (!sharedKey) {
     return {
       type: 'error',
-      error: invalidRemoteRuntimeResponseError('Remote Yiru runtime returned a frame before E2EE.')
+      error: invalidRemoteRuntimeResponseError('Runtime host returned a frame before E2EE.')
     }
   }
   const plaintext = decrypt(frame, sharedKey)
   if (plaintext === null) {
     return {
       type: 'error',
-      error: invalidRemoteRuntimeResponseError(
-        'Remote Yiru runtime returned an undecryptable frame.'
-      )
+      error: invalidRemoteRuntimeResponseError('Runtime host returned an undecryptable frame.')
     }
   }
   if (state === 'awaiting_authenticated') {
@@ -111,12 +109,12 @@ export function getCleanupRequest(
 export function formatSharedControlCloseMessage(code: number, reason: Buffer): string {
   const reasonText = reason.toString().trim()
   if (code !== 1005 && code !== 1006 && reasonText) {
-    return `Remote Yiru runtime closed the connection (${code}: ${reasonText}).`
+    return `Runtime host closed the connection (${code}: ${reasonText}).`
   }
   if (code !== 1005 && code !== 1006) {
-    return `Remote Yiru runtime closed the connection (${code}).`
+    return `Runtime host closed the connection (${code}).`
   }
-  return 'Remote Yiru runtime closed the connection.'
+  return 'Runtime host closed the connection.'
 }
 
 export function sendSharedControlEncrypted(args: {

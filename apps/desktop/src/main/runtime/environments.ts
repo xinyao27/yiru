@@ -4,7 +4,6 @@ import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { app, ipcMain } from 'electron'
 import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
 import {
-  addEnvironmentFromPairingCode,
   listEnvironments,
   removeEnvironment,
   resolveEnvironment
@@ -28,7 +27,6 @@ import {
 
 const RUNTIME_ENVIRONMENT_HANDLER_CHANNELS = [
   'runtimeEnvironments:list',
-  'runtimeEnvironments:addFromPairingCode',
   'runtimeEnvironments:resolve',
   'runtimeEnvironments:remove',
   'runtimeEnvironments:disconnect',
@@ -78,15 +76,6 @@ export function registerRuntimeEnvironmentHandlers(store: Store): void {
 
   ipcMain.handle('runtimeEnvironments:list', (): PublicKnownRuntimeEnvironment[] =>
     listPublicRuntimeEnvironments()
-  )
-  ipcMain.handle(
-    'runtimeEnvironments:addFromPairingCode',
-    (
-      _event,
-      args: { name: string; pairingCode: string }
-    ): { environment: PublicKnownRuntimeEnvironment } => ({
-      environment: redactRuntimeEnvironment(addEnvironmentFromPairingCode(getUserDataPath(), args))
-    })
   )
   ipcMain.handle(
     'runtimeEnvironments:resolve',

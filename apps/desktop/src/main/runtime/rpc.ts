@@ -26,13 +26,14 @@ import {
 } from '~shared/remote-runtime/request-cancellation'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '~shared/runtime-bootstrap'
 import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import type { DeviceScope } from '~shared/runtime-types'
 import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
 } from '~shared/terminal/stream-protocol'
 
 import type { CoworkingGrantJournal } from '../coworking/grant-journal'
-import { DeviceRegistry, type CoworkingHostDeviceEntry, type DeviceScope } from './device-registry'
+import { DeviceRegistry, type CoworkingHostDeviceEntry } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
@@ -111,24 +112,6 @@ function parsePairingAddressOverride(address: string): { host: string; port: str
 function formatWebSocketUrl(url: URL): string {
   const formatted = url.toString()
   return url.pathname === '/' && !url.search && !url.hash ? formatted.replace(/\/$/, '') : formatted
-}
-
-function createWebClientUrl(endpoint: string, pairingUrl: string): string {
-  const url = new URL(endpoint)
-  url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:'
-  url.pathname = webClientPathForEndpoint(url.pathname)
-  url.search = ''
-  // Why: pairing URLs include full runtime credentials. Keeping them in the
-  // fragment avoids proxy logs and Referer headers while the web app loads.
-  url.hash = `pairing=${encodeURIComponent(pairingUrl)}`
-  return url.toString()
-}
-
-function webClientPathForEndpoint(pathname: string): string {
-  if (!pathname || pathname === '/') {
-    return '/web-index.html'
-  }
-  return `${pathname.replace(/\/$/, '')}/web-index.html`
 }
 
 // Why: stamp the authenticated connection's scope onto the status.get success
@@ -243,15 +226,6 @@ export class YiruRuntimeRpcServer {
     return true
   }
 
-  revokeRuntimeAccess(deviceId: string): boolean {
-    const device = this.deviceRegistry?.getDevice(deviceId)
-    if (device?.scope !== 'runtime' || !this.deviceRegistry?.removeDevice(deviceId)) {
-      return false
-    }
-    this.mobileSocketWiring?.terminateDeviceConnections(device.token)
-    return true
-  }
-
   createCoworkingHostPairingOffer(args: {
     name: string
     subject: { nodeId: string; userDisplayName: string }
@@ -311,10 +285,9 @@ export class YiruRuntimeRpcServer {
     return ws?.endpoint ?? null
   }
 
-  createPairingOffer(args: {
+  createMobilePairingOffer(args: {
     address?: string | null
     name?: string
-    scope?: DeviceScope
     credentialPolicy?: PairingCredentialPolicy
   }):
     | { available: false }
@@ -323,7 +296,6 @@ export class YiruRuntimeRpcServer {
         pairingUrl: string
         endpoint: string
         deviceId: string
-        webClientUrl: string | null
       } {
     const rawEndpoint = this.getWebSocketEndpoint()
     const publicKeyB64 = this.getE2EEPublicKey()
@@ -332,43 +304,27 @@ export class YiruRuntimeRpcServer {
     }
 
     const endpoint = resolvePairingEndpoint(rawEndpoint, args.address)
-    const deviceName = args.name ?? `CLI ${new Date().toLocaleDateString()}`
-    const scope = args.scope === 'mobile' ? 'mobile' : 'runtime'
+    const deviceName = args.name ?? `Mobile ${new Date().toLocaleDateString()}`
     const credentialPolicy = args.credentialPolicy ?? 'reuse-pending'
     const device =
       credentialPolicy === 'reuse-named'
-        ? this.deviceRegistry.getOrCreateNamedDevice(deviceName, scope)
+        ? this.deviceRegistry.getOrCreateNamedDevice(deviceName)
         : credentialPolicy === 'rotate-pending'
-          ? this.deviceRegistry.rotatePendingDevice(deviceName, scope)
-          : this.deviceRegistry.getOrCreatePendingDevice(deviceName, scope)
+          ? this.deviceRegistry.rotatePendingDevice(deviceName)
+          : this.deviceRegistry.getOrCreatePendingDevice(deviceName)
     const pairingUrl = encodePairingOffer({
       v: PAIRING_OFFER_VERSION,
       endpoint,
       deviceToken: device.token,
       publicKeyB64,
-      scope
+      scope: 'mobile'
     })
     return {
       available: true,
       pairingUrl,
       endpoint,
-      deviceId: device.deviceId,
-      webClientUrl:
-        this.webClientRoot && scope === 'runtime' ? createWebClientUrl(endpoint, pairingUrl) : null
+      deviceId: device.deviceId
     }
-  }
-
-  createMobilePairingOffer(args: {
-    address?: string | null
-    name?: string
-    credentialPolicy?: PairingCredentialPolicy
-  }): ReturnType<YiruRuntimeRpcServer['createPairingOffer']> {
-    // Why: Yiru Mobile is direct-only; the advertised address may still be a
-    // LAN, Tailscale, ZeroTier, or user-provided private-network endpoint.
-    return this.createPairingOffer({
-      ...args,
-      scope: 'mobile'
-    })
   }
 
   private registerBinaryStreamHandler(

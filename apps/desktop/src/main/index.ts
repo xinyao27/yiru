@@ -1529,7 +1529,6 @@ type ServeOptions = {
   json: boolean
   wsPort?: number
   pairingAddress: string | null
-  noPairing: boolean
   mobilePairing: boolean
 }
 
@@ -1555,7 +1554,6 @@ function getServeOptions(argv = process.argv): ServeOptions {
     json: argv.includes('--serve-json'),
     ...(wsPort !== undefined ? { wsPort } : {}),
     pairingAddress: valueAfter('--serve-pairing-address'),
-    noPairing: argv.includes('--serve-no-pairing'),
     mobilePairing: argv.includes('--serve-mobile-pairing')
   }
 }
@@ -1581,24 +1579,20 @@ async function renderTerminalPairingQr(pairingUrl: string): Promise<string | nul
 
 async function printServeReady(options: ServeOptions): Promise<void> {
   if (!runtime || !runtimeRpc) {
-    throw new Error('Runtime server must be initialized before printing serve readiness')
+    throw new Error('Runtime host must be initialized before printing serve readiness')
   }
   const endpoint = runtimeRpc.getWebSocketEndpoint()
-  const pairing = options.noPairing
-    ? ({ available: false } as const)
-    : runtimeRpc.createPairingOffer({
+  const pairing = options.mobilePairing
+    ? runtimeRpc.createMobilePairingOffer({
         address: options.pairingAddress,
-        name: `${options.mobilePairing ? 'Mobile' : 'CLI'} ${new Date().toLocaleDateString()}`,
-        scope: options.mobilePairing ? 'mobile' : 'runtime'
+        name: `Mobile ${new Date().toLocaleDateString()}`
       })
-  const pairingQr =
-    pairing.available && options.mobilePairing
-      ? await renderTerminalPairingQr(pairing.pairingUrl)
-      : null
+    : ({ available: false } as const)
+  const pairingQr = pairing.available ? await renderTerminalPairingQr(pairing.pairingUrl) : null
   if (options.json) {
     console.log(
       JSON.stringify({
-        type: 'yiru_server_ready',
+        type: 'yiru_runtime_ready',
         runtimeId: runtime.getRuntimeId(),
         endpoint,
         // Why: the WSL reconciliation barrier fails open, so 'pending' warns clients
@@ -1609,8 +1603,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
               url: pairing.pairingUrl,
               endpoint: pairing.endpoint,
               deviceId: pairing.deviceId,
-              webClientUrl: pairing.webClientUrl,
-              scope: options.mobilePairing ? 'mobile' : 'runtime',
+              scope: 'mobile',
               qr: pairingQr
             }
           : null
@@ -1618,12 +1611,9 @@ async function printServeReady(options: ServeOptions): Promise<void> {
     )
     return
   }
-  console.log(`Yiru server ready: ${endpoint ?? 'websocket unavailable'}`)
+  console.log(`Yiru runtime host ready: ${endpoint ?? 'websocket unavailable'}`)
   if (pairing.available) {
-    if (pairing.webClientUrl) {
-      console.log(`Web client URL: ${pairing.webClientUrl}`)
-    }
-    if (options.mobilePairing && pairingQr) {
+    if (pairingQr) {
       console.log(`Mobile pairing QR:\n${pairingQr}`)
     }
     console.log(`Pairing URL: ${pairing.pairingUrl}`)
@@ -2411,7 +2401,7 @@ app.whenReady().then(async () => {
   app.on('activate', requestDesktopActivation)
 
   if (serveOptions) {
-    // Why: headless servers have no BrowserWindow to initialize updater
+    // Why: headless runtimes have no BrowserWindow to initialize updater
     // listeners, so use a silent status sink before advertising control.
     setupAutoUpdater(
       { webContents: { send: () => undefined } },
@@ -2438,14 +2428,14 @@ app.whenReady().then(async () => {
       (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target),
       store
     )
-    // Why: headless servers have no renderer to mount <webview> browser panes.
+    // Why: headless runtimes have no renderer to mount <webview> browser panes.
     // Back them with main-process offscreen WebContents instead, so this host can
     // own browser pages and advertise browser.headless.v1 — but only when a
     // display is actually available (set up above), so the capability stays honest.
     if (headlessBrowserDisplayAvailable) {
       runtime.setOffscreenBrowserBackend(new OffscreenBrowserBackend(browserManager))
     }
-    // Why: headless servers have no renderer graph publisher. Publish an
+    // Why: headless runtimes have no renderer graph publisher. Publish an
     // explicit empty graph so status clients see a ready server while
     // renderer-only operations still fail at their own window boundary.
     runtime.syncWindowGraph(HEADLESS_RUNTIME_WINDOW_ID, { tabs: [], leaves: [] })
@@ -2635,7 +2625,7 @@ app.on('will-quit', (e) => {
           .then(() => awaitRuntimeFileWatcherUnsubscribes())
           .then(() => {
             if (ownedRuntimeId) {
-              // Why: must match the path the runtime server wrote metadata to
+              // Why: must match the path the runtime host wrote metadata to
               // (getCanonicalUserDataPath), not late app.getPath('userData').
               clearRuntimeMetadataIfOwned(getCanonicalUserDataPath(), ownedPid, ownedRuntimeId)
             }

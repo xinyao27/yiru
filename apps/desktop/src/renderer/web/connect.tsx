@@ -31,7 +31,7 @@ export default function WebConnect({
   onConnected
 }: WebConnectProps): React.JSX.Element {
   const existingEnvironment = readStoredWebRuntimeEnvironment()
-  const [name, setName] = useState(existingEnvironment?.name ?? 'Yiru Server')
+  const [name, setName] = useState(existingEnvironment?.name ?? 'Runtime host')
   const [pairingCode, setPairingCode] = useState(initialPairingInput ?? '')
   const [error, setError] = useState<string | null>(null)
   const [connecting, setConnecting] = useState(false)
@@ -48,14 +48,14 @@ export default function WebConnect({
       setError(
         translate(
           'auto.web.WebConnect.mobileScopeRejected',
-          'This QR code grants limited (mobile) access. To use the full web app, open the browser access link from Settings → Runtime Environments → Share this Yiru server → New Link.'
+          'This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.'
         )
       )
       return
     }
     if (isMixedContentWebSocket(parsedOffer.endpoint)) {
       setError(
-        'This HTTPS page cannot connect to a plain ws:// Yiru server. Open the web client over HTTP or pair with a wss:// endpoint.'
+        'This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.'
       )
       return
     }
@@ -69,13 +69,13 @@ export default function WebConnect({
       if (!response.ok) {
         throw new Error(response.error.message)
       }
-      // Why: older pairing offers may not carry scope metadata. The server
+      // Why: older pairing offers may not carry scope metadata. The host
       // stamps it onto status.get so those links still fail before app entry.
       if (response.result.deviceScope === 'mobile') {
         setError(
           translate(
             'auto.web.WebConnect.mobileScopeRejected',
-            'This QR code grants limited (mobile) access. To use the full web app, open the browser access link from Settings → Runtime Environments → Share this Yiru server → New Link.'
+            'This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.'
           )
         )
         return
@@ -126,7 +126,7 @@ export default function WebConnect({
             <p className="text-muted-foreground mt-1 text-sm leading-5">
               {translate(
                 'auto.web.WebConnect.3affe7de3a',
-                'Paste a pairing URL from a Yiru server that this browser can reach.'
+                'Paste a pairing URL from a runtime host that this browser can reach.'
               )}
             </p>
           </div>
@@ -134,7 +134,7 @@ export default function WebConnect({
 
         <div className="grid gap-2">
           <Label htmlFor="web-runtime-name">
-            {translate('auto.web.WebConnect.cb4d287238', 'Server name')}
+            {translate('auto.web.WebConnect.cb4d287238', 'Host name')}
           </Label>
           <Input
             id="web-runtime-name"
@@ -173,7 +173,7 @@ export default function WebConnect({
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
           <Button type="button" variant="outline" onClick={clear} className="gap-2">
             <Trash2 size={15} aria-hidden />
-            {translate('auto.web.WebConnect.2cf9e5a294', 'Clear saved server')}
+            {translate('auto.web.WebConnect.2cf9e5a294', 'Clear saved host')}
           </Button>
           <Button
             type="button"

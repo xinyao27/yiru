@@ -147,7 +147,7 @@ export function getOpenCodeFamilyPluginSource(hookPathname: string): string {
     '  // Why: prefer the on-disk endpoint file over process.env because env was',
     '  // frozen when OpenCode was fork()ed — stale after a Yiru restart. The',
     '  // file is rewritten on every Yiru start(), so sourcing it per post lets',
-    '  // a long-running OpenCode session reach the current server. Falls back',
+    '  // a long-running OpenCode session reach the current runtime host. Falls back',
     '  // to process.env when the file is absent (first-run / pre-endpoint-file / Yiru',
     '  // never started writing the file).',
     '  const fileEnv = readEndpointFile() || {};',

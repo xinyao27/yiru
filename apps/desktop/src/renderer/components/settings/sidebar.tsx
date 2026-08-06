@@ -30,6 +30,7 @@ type NavSection = {
 type NavGroup = {
   id: string
   title: string
+  hideTitle?: boolean
   sections: NavSection[]
 }
 
@@ -238,9 +239,11 @@ export function SettingsSidebar({
         <div className="space-y-5">
           {generalGroups.map((group) => (
             <div key={group.id} className="space-y-2">
-              <p className="text-muted-foreground px-3 text-[11px] font-medium tracking-[0.18em] uppercase">
-                {group.title}
-              </p>
+              {group.hideTitle ? null : (
+                <p className="text-muted-foreground px-3 text-[11px] font-medium tracking-[0.18em] uppercase">
+                  {group.title}
+                </p>
+              )}
               <div className="space-y-1">
                 {group.sections
                   .filter((section) => section.id !== 'setup-guide')

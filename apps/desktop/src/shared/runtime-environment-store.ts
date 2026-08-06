@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { parsePairingCode, type PairingOffer } from './pairing'
+import { isCoworkingRuntimeEnvironmentId } from './coworking/runtime-environment-id'
+import type { PairingOffer } from './pairing'
 import {
   createEnvironmentFromPairingOffer,
   getPreferredPairingOffer,
@@ -35,48 +35,16 @@ export function listEnvironments(userDataPath: string): KnownRuntimeEnvironment[
   return readEnvironmentStore(userDataPath).environments
 }
 
-export function addEnvironmentFromPairingCode(
-  userDataPath: string,
-  args: { name: string; pairingCode: string; now?: number }
-): KnownRuntimeEnvironment {
-  const offer = parsePairingCode(args.pairingCode)
-  if (!offer) {
-    throw new RuntimeEnvironmentStoreError(
-      'invalid_argument',
-      'Invalid pairing code. Expected a yiru://pair?... URL or bare pairing payload.'
-    )
-  }
-  const store = readEnvironmentStore(userDataPath)
-  const now = args.now ?? Date.now()
-  const existing = store.environments.find((entry) => entry.name === args.name)
-  if (existing) {
-    throw new RuntimeEnvironmentStoreError(
-      'invalid_argument',
-      `A server named "${args.name}" already exists.`
-    )
-  }
-  const environment = createEnvironmentFromPairingOffer({
-    id: randomUUID(),
-    name: args.name,
-    now,
-    offer,
-    runtimeId: null
-  })
-  const next = {
-    version: 1 as const,
-    environments: [
-      ...store.environments.filter((entry) => entry.id !== environment.id),
-      environment
-    ].sort((a, b) => a.name.localeCompare(b.name))
-  }
-  writeEnvironmentStore(userDataPath, next)
-  return environment
-}
-
 export function upsertEnvironmentFromPairingOffer(
   userDataPath: string,
   args: { id: string; name: string; offer: PairingOffer; now?: number }
 ): KnownRuntimeEnvironment {
+  if (!isCoworkingRuntimeEnvironmentId(args.id)) {
+    throw new RuntimeEnvironmentStoreError(
+      'invalid_argument',
+      'Runtime environments can only be created through Coworking.'
+    )
+  }
   const store = readEnvironmentStore(userDataPath)
   const now = args.now ?? Date.now()
   const existing = store.environments.find((entry) => entry.id === args.id)
@@ -112,43 +80,6 @@ export function removeEnvironment(userDataPath: string, selector: string): Known
     environments: store.environments.filter((entry) => entry.id !== environment.id)
   })
   return environment
-}
-
-export function updateEnvironmentFromPairingCode(
-  userDataPath: string,
-  selector: string,
-  args: { pairingCode: string; now?: number }
-): KnownRuntimeEnvironment {
-  const offer = parsePairingCode(args.pairingCode)
-  if (!offer) {
-    throw new RuntimeEnvironmentStoreError(
-      'invalid_argument',
-      'Invalid pairing code. Expected a yiru://pair?... URL or bare pairing payload.'
-    )
-  }
-  const store = readEnvironmentStore(userDataPath)
-  const existing = resolveEnvironmentFromStore(store, selector)
-  const now = args.now ?? Date.now()
-  const environment = createEnvironmentFromPairingOffer({
-    id: existing.id,
-    name: existing.name,
-    now: existing.createdAt,
-    offer,
-    runtimeId: existing.runtimeId
-  })
-  const next = {
-    ...environment,
-    createdAt: existing.createdAt,
-    updatedAt: now,
-    lastUsedAt: existing.lastUsedAt
-  }
-  writeEnvironmentStore(userDataPath, {
-    version: 1,
-    environments: store.environments
-      .map((entry) => (entry.id === existing.id ? next : entry))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  })
-  return next
 }
 
 export function resolveEnvironment(
@@ -228,11 +159,25 @@ function readEnvironmentStore(userDataPath: string): RuntimeEnvironmentStore {
   try {
     hardenExistingSecureFile(path)
     const parsed = RuntimeEnvironmentStoreSchema.parse(JSON.parse(readFileSync(path, 'utf8')))
+    const storedEnvironments = parsed.environments
+      .map((entry) => KnownRuntimeEnvironmentSchema.parse(entry))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    const environments = storedEnvironments.filter((environment) =>
+      isCoworkingRuntimeEnvironmentId(environment.id)
+    )
+    if (environments.length !== storedEnvironments.length) {
+      try {
+        // Why: these entries contain credentials from the removed direct
+        // server-pairing flow. Rewrite the registry so they cannot become
+        // active again through a later code path.
+        writeEnvironmentStore(userDataPath, { version: 1, environments })
+      } catch {
+        // The filtered in-memory view still disables them; retry cleanup next read.
+      }
+    }
     return {
       version: 1,
-      environments: parsed.environments
-        .map((entry) => KnownRuntimeEnvironmentSchema.parse(entry))
-        .sort((a, b) => a.name.localeCompare(b.name))
+      environments
     }
   } catch {
     throw new RuntimeEnvironmentStoreError(

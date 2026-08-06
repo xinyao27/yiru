@@ -76,7 +76,7 @@ function runtimeHealth(
   status: RuntimeStatus | null | undefined,
   compatibility: RuntimeCompatVerdict | null
 ): ExecutionHostHealth {
-  // Why: with no live status we have no evidence the Yiru server is reachable, so
+  // Why: with no live status we have no evidence the runtime host is reachable, so
   // it must read 'disconnected' (like SSH) rather than defaulting to 'available'.
   // A configured-but-never-connected host was showing "Connected" otherwise.
   if (!status) {
@@ -139,7 +139,7 @@ function addRuntimeHost(
     id: hostId,
     kind: 'runtime',
     label,
-    detail: 'Yiru server',
+    detail: 'Runtime host',
     health: controlHealth ?? runtimeHealth(status, compatibility),
     compatibility: compatibility ?? undefined,
     capabilities: status?.capabilities,

@@ -49,13 +49,6 @@ export class ClaudeAgentTeamsService {
       YIRU_AGENT_TEAMS_SHIM_DIR: args.shimDir,
       YIRU_AGENT_TEAMS_SHIM_BIN: args.shimBin
     }
-    if (args.baseEnv.YIRU_PAIRING_CODE) {
-      env.YIRU_PAIRING_CODE = args.baseEnv.YIRU_PAIRING_CODE
-    }
-    if (args.baseEnv.YIRU_ENVIRONMENT) {
-      env.YIRU_ENVIRONMENT = args.baseEnv.YIRU_ENVIRONMENT
-    }
-
     const leader: TeamPane = { fakePaneId: leaderPane, handle: args.leaderHandle, index: 0 }
     this.teams.set(teamId, {
       teamId,

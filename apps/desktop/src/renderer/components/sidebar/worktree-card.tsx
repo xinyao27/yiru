@@ -318,7 +318,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
     return state?.status ?? 'disconnected'
   })
   const isSshDisconnected = sshStatus != null && sshStatus !== 'connected'
-  // Why: runtime ("Yiru server") hosts get the same disconnected treatment as
+  // Why: runtime hosts get the same disconnected treatment as
   // SSH — when the host's runtime environment has no live status, its worktrees
   // are dimmed and marked disconnected instead of looking fully available.
   const isRuntimeDisconnected = useAppStore((s) => {
@@ -1073,11 +1073,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     {isRuntimeDisconnected
                       ? translate(
                           'auto.components.sidebar.WorktreeCard.runtimeHostDisconnected',
-                          'Server disconnected'
+                          'Runtime host disconnected'
                         )
                       : translate(
                           'auto.components.sidebar.WorktreeCard.runtimeHostProject',
-                          'Project on Yiru server'
+                          'Project on runtime host'
                         )}
                   </TooltipContent>
                 </Tooltip>

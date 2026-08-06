@@ -19,7 +19,7 @@ export type RuntimeEnvironmentStatus = {
 }
 
 export type RuntimeStatusSlice = {
-  /** Saved remote Yiru servers. Host pickers use this to show user-chosen names
+  /** Saved Coworking hosts. Host pickers use this to show user-chosen names
    * instead of opaque runtime ids. */
   runtimeEnvironments: PublicKnownRuntimeEnvironment[]
   /** Keyed by runtime environment id. Fed into buildExecutionHostRegistry so

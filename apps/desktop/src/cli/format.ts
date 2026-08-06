@@ -49,8 +49,6 @@ export {
   formatAutomationRun,
   formatAutomationRuns,
   formatAutomationShow,
-  formatEnvironment,
-  formatEnvironmentList,
   formatMemorySnapshot,
   formatRepoList,
   formatRepoRefs,

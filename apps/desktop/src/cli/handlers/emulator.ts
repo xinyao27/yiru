@@ -239,12 +239,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator install': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const apkPath = resolveRepoPathArgument(
-      getRequiredStringFlag(flags, 'path'),
-      cwd,
-      client.isRemote,
-      'Remote emulator install'
-    )
+    const apkPath = resolveRepoPathArgument(getRequiredStringFlag(flags, 'path'), cwd)
     const res = await client.call('emulator.install', {
       path: apkPath,
       reinstall: flags.get('reinstall') === true,

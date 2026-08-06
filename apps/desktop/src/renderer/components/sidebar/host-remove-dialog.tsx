@@ -28,7 +28,11 @@ export function HostRemoveDialog({
 }: HostRemoveDialogProps): React.JSX.Element {
   const handleOpenRuntimeSettings = (): void => {
     const state = useAppStore.getState()
-    state.openSettingsTarget({ pane: 'servers', repoId: null, sectionId: target.environmentId })
+    state.openSettingsTarget({
+      pane: 'coworking',
+      repoId: null,
+      sectionId: target.environmentId
+    })
     state.openSettingsPage()
     onOpenChange(false)
   }
@@ -49,7 +53,7 @@ export function HostRemoveDialog({
           <DialogDescription>
             {translate(
               'auto.components.sidebar.HostRemoveDialog.4d5e6f7a8b',
-              'This opens the Yiru servers settings where you can remove this server.'
+              'This opens Coworking Hosts settings where you can remove this host.'
             )}
           </DialogDescription>
         </DialogHeader>

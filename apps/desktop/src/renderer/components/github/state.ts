@@ -93,7 +93,7 @@ function getPRRefreshRuntimeRepoTarget(
   if (repoMatches.length !== 1) {
     return null
   }
-  // Why: PR refreshes must follow the repo owner host, not the Active Server
+  // Why: PR refreshes must follow the repo owner host, not the active-host
   // dropdown. A runtime-owned worktree can be visible while Local desktop is focused.
   return getRuntimeRepoTarget(
     state,

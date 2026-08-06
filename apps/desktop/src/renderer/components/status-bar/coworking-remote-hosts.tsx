@@ -101,7 +101,7 @@ function CoworkingRemoteHostRow({
         return
       }
       setRuntimeEnvironments(await window.api.runtimeEnvironments.list())
-      await refreshRuntimeEnvironmentStatus(result.environment.id)
+      await refreshRuntimeEnvironmentStatus(result.environmentId)
       toast.success(
         translate(
           'auto.components.status.bar.CoworkingRemoteHosts.hostAdded',

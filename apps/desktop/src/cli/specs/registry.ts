@@ -8,7 +8,6 @@ import { COMPUTER_COMMAND_SPECS } from './computer'
 import { CORE_COMMAND_SPECS } from './core'
 import { DIAGNOSTICS_COMMAND_SPECS } from './diagnostics'
 import { EMULATOR_COMMAND_SPECS } from './emulator'
-import { ENVIRONMENT_COMMAND_SPECS } from './environment'
 import { FILE_COMMAND_SPECS } from './file'
 import { INTROSPECTION_COMMAND_SPECS } from './introspection'
 import { ORCHESTRATION_COMMAND_SPECS } from './orchestration'
@@ -30,7 +29,6 @@ export const COMMAND_SPECS: CommandSpec[] = [
   ...DIAGNOSTICS_COMMAND_SPECS,
   ...INTROSPECTION_COMMAND_SPECS,
   ...MOBILE_COMMAND_SPECS,
-  ...ENVIRONMENT_COMMAND_SPECS,
   ...EMULATOR_COMMAND_SPECS,
   ...SKILL_COMMAND_SPECS
 ]

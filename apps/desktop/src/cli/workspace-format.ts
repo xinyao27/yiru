@@ -2,7 +2,6 @@ import { formatAutomationPrecheckTimeout } from '~shared/automation/precheck'
 import { getAutomationLegacyRepoId } from '~shared/automation/run-identity'
 import { formatAutomationSchedule } from '~shared/automation/schedules'
 import type { Automation, AutomationRun } from '~shared/automations-types'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeRepoList,
   RuntimeRepoSearchRefs,
@@ -72,33 +71,6 @@ function formatByteCount(bytes: number): string {
   }
   const formatted = value >= 10 || unitIndex === 0 ? value.toFixed(0) : value.toFixed(1)
   return `${formatted} ${units[unitIndex]}`
-}
-
-export function formatEnvironmentList(result: {
-  environments: PublicKnownRuntimeEnvironment[]
-}): string {
-  if (result.environments.length === 0) {
-    return 'No saved environments.'
-  }
-  return result.environments
-    .map(
-      (environment) =>
-        `${environment.id}  ${environment.name}  ${environment.endpoints[0]?.endpoint ?? 'no-endpoint'}`
-    )
-    .join('\n')
-}
-
-export function formatEnvironment(environment: PublicKnownRuntimeEnvironment): string {
-  return [
-    `id: ${environment.id}`,
-    `name: ${environment.name}`,
-    `runtimeId: ${environment.runtimeId ?? 'unknown'}`,
-    `lastUsedAt: ${environment.lastUsedAt ?? 'never'}`,
-    `preferredEndpointId: ${environment.preferredEndpointId}`,
-    ...environment.endpoints.map(
-      (endpoint) => `endpoint: ${endpoint.id} ${endpoint.kind} ${endpoint.endpoint}`
-    )
-  ].join('\n')
 }
 
 export function formatWorktreePs(result: RuntimeWorktreePsResult): string {

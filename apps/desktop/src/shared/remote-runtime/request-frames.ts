@@ -12,7 +12,7 @@ export type ParsedRemoteRuntimeFrame =
   | { type: 'error'; error: RemoteRuntimeClientError }
 
 export function remoteRuntimeUnavailableError(
-  message = 'Remote Yiru runtime closed the connection.'
+  message = 'Runtime host closed the connection.'
 ): RemoteRuntimeClientError {
   return new RemoteRuntimeClientError('remote_runtime_unavailable', message)
 }
@@ -20,7 +20,7 @@ export function remoteRuntimeUnavailableError(
 export function remoteRuntimeTimeoutError(): RemoteRuntimeClientError {
   return new RemoteRuntimeClientError(
     'runtime_timeout',
-    'Timed out waiting for the remote Yiru runtime to respond.'
+    'Timed out waiting for the runtime host to respond.'
   )
 }
 
@@ -34,7 +34,7 @@ export function parseReadyFrame(frame: string): RemoteRuntimeClientError | null 
     ready = JSON.parse(frame)
   } catch {
     return invalidRemoteRuntimeResponseError(
-      'Remote Yiru runtime returned an invalid E2EE handshake frame.'
+      'Runtime host returned an invalid E2EE handshake frame.'
     )
   }
   if (
@@ -43,7 +43,7 @@ export function parseReadyFrame(frame: string): RemoteRuntimeClientError | null 
     (ready as { type?: unknown }).type !== 'e2ee_ready'
   ) {
     return invalidRemoteRuntimeResponseError(
-      'Remote Yiru runtime returned an unexpected E2EE handshake frame.'
+      'Runtime host returned an unexpected E2EE handshake frame.'
     )
   }
   return null
@@ -54,9 +54,7 @@ export function parseAuthenticatedFrame(plaintext: string): RemoteRuntimeClientE
   try {
     authenticated = JSON.parse(plaintext)
   } catch {
-    return invalidRemoteRuntimeResponseError(
-      'Remote Yiru runtime returned an invalid E2EE auth frame.'
-    )
+    return invalidRemoteRuntimeResponseError('Runtime host returned an invalid E2EE auth frame.')
   }
   const type = (authenticated as { type?: unknown }).type
   if (type === 'e2ee_authenticated') {
@@ -68,7 +66,7 @@ export function parseAuthenticatedFrame(plaintext: string): RemoteRuntimeClientE
     (authenticated as { error?: { code?: unknown } }).error?.code === 'unauthorized'
       ? 'unauthorized'
       : 'invalid_runtime_response'
-  return new RemoteRuntimeClientError(code, 'Remote Yiru runtime rejected the pairing token.')
+  return new RemoteRuntimeClientError(code, 'Runtime host rejected the pairing token.')
 }
 
 export function parseRemoteRuntimeRpcFrame(plaintext: string): ParsedRemoteRuntimeFrame {
@@ -78,9 +76,7 @@ export function parseRemoteRuntimeRpcFrame(plaintext: string): ParsedRemoteRunti
   } catch {
     return {
       type: 'error',
-      error: invalidRemoteRuntimeResponseError(
-        'Remote Yiru runtime returned an invalid response frame.'
-      )
+      error: invalidRemoteRuntimeResponseError('Runtime host returned an invalid response frame.')
     }
   }
   if (isKeepaliveFrame(raw)) {
@@ -90,9 +86,7 @@ export function parseRemoteRuntimeRpcFrame(plaintext: string): ParsedRemoteRunti
   if (!parsed.success || '_keepalive' in parsed.data) {
     return {
       type: 'error',
-      error: invalidRemoteRuntimeResponseError(
-        'Remote Yiru runtime returned an invalid response frame.'
-      )
+      error: invalidRemoteRuntimeResponseError('Runtime host returned an invalid response frame.')
     }
   }
   return { type: 'response', response: parsed.data as RuntimeRpcResponse<unknown> }
