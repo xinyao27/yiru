@@ -1,3 +1,4 @@
+import { Button } from '@expo/ui'
 import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
@@ -7,10 +8,10 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, Keyboard } from 'r
 
 import { MobileAgentIcon } from '~/components/agent-icon'
 import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
+import { ExpoUiHost } from '~/components/expo-ui-host'
 import { MobileGlassGroup } from '~/components/glass/group'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
-import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { SelectionDrawer, type SelectionDrawerOption } from '~/components/selection-drawer'
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
@@ -847,17 +848,18 @@ function NewWorkspaceModalContent({
 
             {error ? <Text className="text-destructive mb-3 text-xs">{error}</Text> : null}
 
-            <View className="mt-2 items-end">
+            <View className="mt-2 min-h-11 items-end justify-center">
               {creating ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
-                <MobileGlassTextButton
-                  disabled={!canCreate}
-                  isProminent
-                  label={translate('mobile.newWorkspace.title', 'Create Workspace')}
-                  onPress={() => void handleCreate()}
-                  size="regular"
-                />
+                <ExpoUiHost>
+                  <Button
+                    disabled={!canCreate}
+                    label={translate('mobile.newWorkspace.title', 'Create Workspace')}
+                    onPress={() => void handleCreate()}
+                    variant="filled"
+                  />
+                </ExpoUiHost>
               )}
             </View>
           </>
