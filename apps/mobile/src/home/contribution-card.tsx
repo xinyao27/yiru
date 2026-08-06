@@ -223,43 +223,79 @@ function TokenCoverage({
   }
   if (!hasTokens) {
     return (
-      <Text className="text-muted-foreground mt-3 text-[11px]">
-        {translate(
-          'mobile.home.tokensUnavailable',
-          'No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.'
-        )}
-      </Text>
+      <>
+        <Text className="text-muted-foreground mt-3 text-[11px]">
+          {translate(
+            'mobile.home.tokensUnavailable',
+            'No provider-reported token usage attributed to Yiru worktrees is available yet.'
+          )}
+        </Text>
+        <CursorMeteredDisclosure valueUsd={summary.supplementalUsage?.meteredValueUsd} />
+      </>
     )
   }
   if (metric === 'value') {
     return (
-      <Text className="text-muted-foreground mt-3 text-[11px]">
-        {summary.usageValueAvailable === true
-          ? translate(
-              'mobile.home.valueCoverage',
-              'API-equivalent value uses authoritative per-request model pricing. Unpriced categories are excluded; this is not a bill.'
-            )
-          : translate(
-              'mobile.home.valueUnavailable',
-              'No known model pricing is available for this estimate yet.'
-            )}
-      </Text>
+      <>
+        <Text className="text-muted-foreground mt-3 text-[11px]">
+          {summary.usageValueAvailable === true
+            ? translate(
+                'mobile.home.valueCoverage',
+                'API-equivalent value uses authoritative per-request model pricing. Unpriced categories are excluded; this is not a bill.'
+              )
+            : translate(
+                'mobile.home.valueUnavailable',
+                'No known model pricing is available for this estimate yet.'
+              )}
+        </Text>
+        <CursorMeteredDisclosure valueUsd={summary.supplementalUsage?.meteredValueUsd} />
+      </>
     )
   }
   return (
-    <Text className="text-muted-foreground mt-3 text-[11px]">
+    <>
+      <Text className="text-muted-foreground mt-3 text-[11px]">
+        {translate(
+          'mobile.home.tokenCoverage',
+          'Token totals use request-attributed records from supported agents in Yiru worktrees.'
+        )}
+        {summary.hasUnpricedUsage === true
+          ? ` ${translate(
+              'mobile.home.unpricedCoverage',
+              'Tokens without authoritative pricing are excluded from value totals.'
+            )}`
+          : ''}
+      </Text>
+      <CursorMeteredDisclosure valueUsd={summary.supplementalUsage?.meteredValueUsd} />
+    </>
+  )
+}
+
+function CursorMeteredDisclosure({
+  valueUsd
+}: {
+  valueUsd?: number | null
+}): React.JSX.Element | null {
+  if (valueUsd === undefined || valueUsd === null) {
+    return null
+  }
+  return (
+    <Text className="text-muted-foreground mt-2 text-[11px]">
       {translate(
-        'mobile.home.tokenCoverage',
-        'Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees.'
+        'mobile.home.cursorMeteredValue',
+        'Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate).',
+        { value: formatUsd(valueUsd) }
       )}
-      {summary.hasUnpricedUsage === true
-        ? ` ${translate(
-            'mobile.home.unpricedCoverage',
-            'Tokens without authoritative pricing are excluded from value totals.'
-          )}`
-        : ''}
     </Text>
   )
+}
+
+function formatUsd(value: number): string {
+  return Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2
+  }).format(value)
 }
 
 function formatSelectedDay(

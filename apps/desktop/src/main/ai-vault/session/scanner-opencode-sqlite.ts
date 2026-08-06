@@ -228,7 +228,10 @@ export async function parseOpenCodeSqliteSession(args: {
       // Why: transitional schemas expose only session totals, so retain them on the update day.
       addSessionTokens(
         accumulator,
-        (row.tokens_input ?? 0) + (row.tokens_output ?? 0) + (row.tokens_reasoning ?? 0),
+        (row.tokens_input ?? 0) +
+          (row.tokens_output ?? 0) +
+          (row.tokens_reasoning ?? 0) +
+          (row.tokens_cache_read ?? 0),
         row.time_updated
       )
     }

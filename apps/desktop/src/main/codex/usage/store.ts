@@ -28,9 +28,9 @@ import type {
   CodexUsageSession
 } from './types'
 
-// Why: v7 restores the v5 ownership identity so v5/v6 can migrate without
-// discarding their token snapshot or rescanning the complete rollout history.
-const SCHEMA_VERSION = 7
+// Why: v8 aligns raw token normalization with CodexBar and recomputes totals
+// from input + cache-read + output. Older rows may retain duplicate wire totals.
+const SCHEMA_VERSION = 8
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
@@ -371,6 +371,7 @@ export class CodexUsageStore {
     let events = 0
     let estimatedCostUsd = 0
     let hasAnyBillableCost = false
+    let hasUnpricedCost = false
     const byModel = new Map<string, number>()
     const byProject = new Map<string, number>()
 
@@ -387,6 +388,7 @@ export class CodexUsageStore {
       )
       byProject.set(row.projectLabel, (byProject.get(row.projectLabel) ?? 0) + row.totalTokens)
       const cost = row.estimatedCostUsd
+      hasUnpricedCost ||= row.unpricedTokens > 0
       if (cost !== null) {
         hasAnyBillableCost = true
         estimatedCostUsd += cost
@@ -408,7 +410,7 @@ export class CodexUsageStore {
       outputTokens,
       reasoningOutputTokens,
       totalTokens,
-      estimatedCostUsd: hasAnyBillableCost ? estimatedCostUsd : null,
+      estimatedCostUsd: hasUnpricedCost || !hasAnyBillableCost ? null : estimatedCostUsd,
       topModel,
       topProject,
       hasAnyCodexData: filteredSessions.length > 0 || filteredDaily.length > 0
@@ -460,6 +462,7 @@ export class CodexUsageStore {
     kind: CodexUsageBreakdownKind
   ): CodexUsageBreakdownRow[] {
     const rows = new Map<string, CodexUsageBreakdownRow>()
+    const unpricedKeys = new Set<string>()
     const filteredDaily = this.getFilteredDaily(scope, range)
     const filteredSessions = this.getFilteredSessions(scope, range)
 
@@ -487,6 +490,9 @@ export class CodexUsageStore {
       existing.totalTokens += daily.totalTokens
       existing.hasInferredPricing ||= daily.hasInferredPricing
       existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
+      if (daily.unpricedTokens > 0) {
+        unpricedKeys.add(key)
+      }
       rows.set(key, existing)
     }
 
@@ -521,7 +527,9 @@ export class CodexUsageStore {
       }
     }
 
-    return [...rows.values()].sort((left, right) => right.totalTokens - left.totalTokens)
+    return [...rows.values()]
+      .map((row) => (unpricedKeys.has(row.key) ? { ...row, estimatedCostUsd: null } : row))
+      .sort((left, right) => right.totalTokens - left.totalTokens)
   }
 
   async getRecentSessions(

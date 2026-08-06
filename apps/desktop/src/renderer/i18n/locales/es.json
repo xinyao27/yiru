@@ -2394,7 +2394,7 @@
           "444585cb41": "con datos",
           "ecb0cd8a4c": "habilitado -",
           "33f7b043d2": "Proveedores",
-          "60002bb22f": "Aún no se encontró uso local de Claude, Codex u OpenCode. El resumen se completará después de que la siguiente sesión de agente escriba logs de tokens.",
+          "60002bb22f": "Aún no se encontró uso de proveedores. El resumen se completará después de que la siguiente sesión de un agente compatible escriba logs de tokens.",
           "70f36452d4": "Porcentaje de caché",
           "327603fe8b": "Días activos",
           "0eaf937335": "Est. costo",
@@ -2407,7 +2407,8 @@
           "ca6bc5fded": "Actualizar",
           "e06d1baf5c": "Actualizar resumen de uso",
           "c760c481c5": "Resumen de uso",
-          "55c910f4f1": "- algunos precios de modelos no están disponibles"
+          "55c910f4f1": "- algunos precios de modelos no están disponibles",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2437,7 +2438,7 @@
             "0bba8ca244": "estadísticas",
             "0e2a0b6431": "uso",
             "372debfac0": "estadísticas",
-            "26bb901fcd": "Estadísticas de Yiru más análisis de tokens de Claude, Codex y OpenCode y uso de suscripción de Grok.",
+            "26bb901fcd": "Estadísticas de Yiru más análisis de tokens de proveedores y uso de suscripción de Grok.",
             "cb2430ae6a": "Estadísticas y uso",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "suscripción",
@@ -2451,7 +2452,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "sesiones -",
@@ -2461,7 +2463,7 @@
               "1dd166c920": "Menos",
               "52d9221dc0": "Heatmap de actividad reciente de tokens",
               "c424eb3f8e": "Mejor:",
-              "f28ff1f852": "Actividad reciente de tokens combinados de Claude, Codex y OpenCode.",
+              "f28ff1f852": "Actividad reciente de tokens combinados de proveedores.",
               "69e2b50427": "Intensidad diaria",
               "3a795542fa": "Mix combinado de tokens",
               "e65084cb4b": "razonamiento",
@@ -2474,7 +2476,8 @@
               "6762f6a682": "tokens",
               "a7f937fb29": "{{value0}} sesiones - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "turnos",
-              "d9a4b3e2f1c5": "eventos"
+              "d9a4b3e2f1c5": "eventos",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -11856,9 +11859,10 @@
           "lifetime": "Histórico",
           "peakDay": "Día máximo",
           "longestStreakLabel": "Racha más larga",
-          "tokensUnavailable": "Aún no hay uso de tokens de Claude, Codex u OpenCode atribuido a worktrees de Yiru.",
-          "tokenCoverage": "Los totales usan registros de Claude, Codex y OpenCode atribuibles por solicitud en worktrees de Yiru; la entrada en caché no se cuenta dos veces y se excluyen los totales de sesión sin esa atribución.",
-          "unpricedCoverage": "Los tokens sin detalles de precios autorizados se excluyen de los totales de valor."
+          "tokensUnavailable": "Aún no hay uso de tokens de proveedores atribuido a los worktrees de Yiru.",
+          "tokenCoverage": "Los totales usan registros atribuibles por solicitud de los agentes compatibles en los worktrees de Yiru; la entrada en caché no se cuenta dos veces y se excluyen los totales de sesión sin esa atribución.",
+          "unpricedCoverage": "Los tokens sin detalles de precios autorizados se excluyen de los totales de valor.",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "Agentes iniciados",

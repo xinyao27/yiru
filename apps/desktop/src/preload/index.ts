@@ -3573,7 +3573,8 @@ const api = {
   } satisfies PreloadApi['ui'],
 
   stats: {
-    getSummary: (): Promise<StatsSummary> => ipcRenderer.invoke('stats:summary')
+    getSummary: (args?: { refreshUsage?: boolean }): Promise<StatsSummary> =>
+      ipcRenderer.invoke('stats:summary', args)
   } satisfies PreloadApi['stats'],
 
   memory: {

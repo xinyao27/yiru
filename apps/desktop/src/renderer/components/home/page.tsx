@@ -30,6 +30,7 @@ type MetricDisclosureProps = {
   hasValue: boolean
   isValueScanning: boolean
   metric: ContributionDisplayMetric
+  meteredValueUsd?: number | null
 }
 
 type SummaryMetricProps = {
@@ -192,6 +193,7 @@ export default function HomePage(): React.JSX.Element {
               hasValue={hasValue}
               isValueScanning={usageValue.isScanning}
               metric={metric}
+              meteredValueUsd={usageValue.meteredValueUsd}
             />
           </CardContent>
         </Card>
@@ -219,54 +221,91 @@ function MetricDisclosure({
   hasUnpricedUsage,
   hasValue,
   isValueScanning,
-  metric
+  metric,
+  meteredValueUsd
 }: MetricDisclosureProps): React.JSX.Element | null {
   if (metric === 'activity') {
     return null
   }
   if (!hasTokens) {
     return (
-      <p className="text-muted-foreground mt-4 text-xs">
-        {isValueScanning
-          ? translate('auto.components.home.page.calculatingValue', 'Calculating…')
-          : translate(
-              'auto.components.home.page.tokensUnavailable',
-              'No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.'
-            )}
-      </p>
+      <>
+        <p className="text-muted-foreground mt-4 text-xs">
+          {isValueScanning
+            ? translate('auto.components.home.page.calculatingValue', 'Calculating…')
+            : translate(
+                'auto.components.home.page.tokensUnavailable',
+                'No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.'
+              )}
+        </p>
+        <CursorMeteredDisclosure valueUsd={meteredValueUsd} />
+      </>
     )
   }
   if (metric === 'value') {
     return (
-      <p className="text-muted-foreground mt-4 text-xs">
-        {isValueScanning
-          ? translate('auto.components.home.page.calculatingValue', 'Calculating…')
-          : hasValue
-            ? translate(
-                'auto.components.home.page.valueCoverage',
-                'Standard global API-equivalent value sums authoritative per-request model pricing for usage attributed to Yiru worktrees. Unpriced token categories and session totals without request attribution are excluded; this is not a bill.'
-              )
-            : translate(
-                'auto.components.home.page.valueUnavailable',
-                'No known model pricing is available for this estimate yet.'
-              )}
-      </p>
+      <>
+        <p className="text-muted-foreground mt-4 text-xs">
+          {isValueScanning
+            ? translate('auto.components.home.page.calculatingValue', 'Calculating…')
+            : hasValue
+              ? translate(
+                  'auto.components.home.page.valueCoverage',
+                  'Standard global API-equivalent value sums authoritative per-request model pricing for usage attributed to Yiru worktrees. Unpriced token categories and session totals without request attribution are excluded; this is not a bill.'
+                )
+              : translate(
+                  'auto.components.home.page.valueUnavailable',
+                  'No known model pricing is available for this estimate yet.'
+                )}
+        </p>
+        <CursorMeteredDisclosure valueUsd={meteredValueUsd} />
+      </>
     )
   }
   return (
-    <p className="text-muted-foreground mt-4 text-xs">
+    <>
+      <p className="text-muted-foreground mt-4 text-xs">
+        {translate(
+          'auto.components.home.page.tokenCoverage',
+          'Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.'
+        )}
+        {hasUnpricedUsage
+          ? ` ${translate(
+              'auto.components.home.page.unpricedCoverage',
+              'Tokens without authoritative pricing details are excluded from value totals.'
+            )}`
+          : null}
+      </p>
+      <CursorMeteredDisclosure valueUsd={meteredValueUsd} />
+    </>
+  )
+}
+
+function CursorMeteredDisclosure({
+  valueUsd
+}: {
+  valueUsd?: number | null
+}): React.JSX.Element | null {
+  if (valueUsd === undefined || valueUsd === null) {
+    return null
+  }
+  return (
+    <p className="text-muted-foreground mt-2 text-xs">
       {translate(
-        'auto.components.home.page.tokenCoverage',
-        'Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.'
+        'auto.components.home.page.cursorMeteredValue',
+        'Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate).',
+        { value: formatUsd(valueUsd) }
       )}
-      {hasUnpricedUsage
-        ? ` ${translate(
-            'auto.components.home.page.unpricedCoverage',
-            'Tokens without authoritative pricing details are excluded from value totals.'
-          )}`
-        : null}
     </p>
   )
+}
+
+function formatUsd(value: number): string {
+  return Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2
+  }).format(value)
 }
 
 function SummaryMetric({ label, value }: SummaryMetricProps): React.JSX.Element {

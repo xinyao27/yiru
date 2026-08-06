@@ -13,6 +13,7 @@ import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../home-pat
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../session-bridge'
 import { buildCodexUsageEventKey } from './event-key'
 import { priceCodexUsage } from './pricing'
+import { loadCodexPrioritySnapshot, type CodexPrioritySnapshot } from './priority'
 import type {
   CodexUsageAttributedEvent,
   CodexUsageDailyAggregate,
@@ -52,6 +53,7 @@ type CodexUsageParseContext = {
   sessionCwd: string | null
   currentCwd: string | null
   currentModel: string | null
+  currentTurnId: string | null
   previousTotals: CodexUsageRawUsage | null
   totalOnlyBaselinePending?: boolean
 }
@@ -64,7 +66,7 @@ const YIELD_EVERY_FILES = 10
 const YIELD_EVERY_DISCOVERY_ENTRIES = 100
 
 function ensureNumber(value: unknown): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(Math.trunc(value), 0) : 0
 }
 
 function normalizeComparablePath(pathValue: string, platform = process.platform): string {
@@ -259,16 +261,24 @@ function normalizeRawUsage(value: unknown): CodexUsageRawUsage | null {
   }
 
   const record = value as Record<string, unknown>
-  const inputTokens = ensureNumber(record.input_tokens)
-  const cachedInputTokens = ensureNumber(
-    record.cached_input_tokens ?? record.cache_read_input_tokens
+  const inputTokens = Math.max(ensureNumber(record.input_tokens), 0)
+  const cachedInputTokens = Math.max(
+    ensureNumber(record.cached_input_tokens ?? record.cache_read_input_tokens),
+    0
   )
-  const cacheWriteTokens = ensureNumber(
-    record.cache_write_input_tokens ?? record.cache_write_tokens
+  const cacheWriteTokens = Math.max(
+    ensureNumber(record.cache_write_input_tokens ?? record.cache_write_tokens),
+    0
   )
-  const outputTokens = ensureNumber(record.output_tokens)
-  const reasoningOutputTokens = ensureNumber(record.reasoning_output_tokens)
-  const totalTokens = ensureNumber(record.total_tokens)
+  const outputTokens = Math.max(ensureNumber(record.output_tokens), 0)
+  const reasoningOutputTokens = Math.min(
+    Math.max(ensureNumber(record.reasoning_output_tokens), 0),
+    outputTokens
+  )
+  // Why: CodexBar's usage rows define total tokens as input + cache-read +
+  // output. The wire-level total_tokens field is not stable across Codex
+  // versions and can omit or duplicate cached input.
+  const totalTokens = inputTokens + cachedInputTokens + outputTokens
 
   return {
     inputTokens,
@@ -276,10 +286,7 @@ function normalizeRawUsage(value: unknown): CodexUsageRawUsage | null {
     cacheWriteTokens,
     outputTokens,
     reasoningOutputTokens,
-    // Why: legacy Codex logs can omit total_tokens. Reasoning is already billed
-    // inside output, so synthesizing input+output matches Codex pricing instead
-    // of double-counting reasoning as another billable bucket.
-    totalTokens: totalTokens > 0 ? totalTokens : inputTokens + outputTokens
+    totalTokens
   }
 }
 
@@ -414,6 +421,19 @@ function extractString(value: unknown): string | null {
   }
   const trimmed = value.trim()
   return trimmed.length > 0 ? trimmed : null
+}
+
+function extractTurnId(value: unknown): string | null {
+  if (value == null || typeof value !== 'object') {
+    return null
+  }
+  const record = value as Record<string, unknown>
+  return (
+    extractString(record.turn_id) ??
+    extractString(record.turnId) ??
+    extractString(record.id) ??
+    (record.info && typeof record.info === 'object' ? extractTurnId(record.info) : null)
+  )
 }
 
 function extractModel(value: unknown): string | null {
@@ -702,7 +722,10 @@ function mergeLocationModelBreakdown(
   })
 }
 
-function aggregateCodexUsage(events: CodexUsageAttributedEvent[]): {
+function aggregateCodexUsage(
+  events: CodexUsageAttributedEvent[],
+  prioritySnapshot: CodexPrioritySnapshot
+): {
   sessions: CodexUsageSession[]
   dailyAggregates: CodexUsageDailyAggregate[]
 } {
@@ -743,15 +766,21 @@ function aggregateCodexUsage(events: CodexUsageAttributedEvent[]): {
     daily.reasoningOutputTokens += event.reasoningOutputTokens
     daily.totalTokens += event.totalTokens
     daily.hasInferredPricing ||= event.hasInferredPricing
-    const estimatedCostUsd = event.hasInferredPricing
-      ? null
-      : priceCodexUsage(
-          event.model,
-          event.inputTokens,
-          event.cachedInputTokens,
-          event.cacheWriteTokens,
-          event.outputTokens
-        )
+    const priorityModel = event.turnId
+      ? prioritySnapshot.modelsByTurnId.get(event.turnId)
+      : undefined
+    const pricingModel = priorityModel ?? event.model
+    const estimatedCostUsd =
+      event.hasInferredPricing && pricingModel === null
+        ? null
+        : priceCodexUsage(
+            pricingModel,
+            event.inputTokens,
+            event.cachedInputTokens,
+            event.cacheWriteTokens,
+            event.outputTokens,
+            priorityModel !== undefined ? { isPriority: true, priorityModel } : undefined
+          )
     daily.estimatedCostUsd = addKnownCost(daily.estimatedCostUsd, estimatedCostUsd)
     if (estimatedCostUsd === null) {
       daily.unpricedTokens += event.totalTokens
@@ -927,6 +956,7 @@ export function parseCodexUsageRecord(
   if (parsed.type === 'session_meta') {
     context.sessionId = extractString(parsed.payload.id) ?? context.sessionId
     context.sessionCwd = extractString(parsed.payload.cwd)
+    context.currentTurnId = null
     if (!context.currentCwd && context.sessionCwd) {
       context.currentCwd = context.sessionCwd
     }
@@ -937,6 +967,12 @@ export function parseCodexUsageRecord(
     context.currentCwd =
       extractString(parsed.payload.cwd) ?? context.currentCwd ?? context.sessionCwd
     context.currentModel = extractModel(parsed.payload) ?? context.currentModel
+    context.currentTurnId = extractTurnId(parsed.payload) ?? context.currentTurnId
+    return null
+  }
+
+  if (parsed.type === 'event_msg' && parsed.payload.type === 'task_started') {
+    context.currentTurnId = extractTurnId(parsed.payload) ?? context.currentTurnId
     return null
   }
 
@@ -993,12 +1029,14 @@ export function parseCodexUsageRecord(
   context.previousTotals = resolvedUsage.nextTotals
 
   const resolvedModel = extractModel(parsed.payload) ?? context.currentModel
+  const turnId = extractTurnId(parsed.payload) ?? context.currentTurnId
   const hasInferredPricing = resolvedModel === null
 
   return {
     sessionId: context.sessionId,
     timestamp: parsed.timestamp,
     eventKey: buildCodexUsageEventKey(parsed.timestamp, totalUsage, lastUsage),
+    turnId,
     cwd: context.currentCwd ?? context.sessionCwd,
     model: resolvedModel,
     hasInferredPricing,
@@ -1014,8 +1052,13 @@ export function parseCodexUsageRecord(
 export async function parseCodexUsageFile(
   filePath: string,
   worktrees: (CodexUsageWorktreeRef & { canonicalPath: string })[],
-  options: { skipInitialBytes?: number; claimEventKey?: (eventKey: string) => boolean } = {}
+  options: {
+    skipInitialBytes?: number
+    claimEventKey?: (eventKey: string) => boolean
+    prioritySnapshot?: CodexPrioritySnapshot
+  } = {}
 ): Promise<CodexUsagePersistedFile> {
+  const prioritySnapshot = options.prioritySnapshot ?? loadCodexPrioritySnapshot()
   const processedFile = await getProcessedFileInfo(filePath)
   const lines = createInterface({
     input: createReadStream(filePath, {
@@ -1030,6 +1073,7 @@ export async function parseCodexUsageFile(
     sessionCwd: null,
     currentCwd: null,
     currentModel: null,
+    currentTurnId: null,
     previousTotals: null,
     // Why: suffix-only legacy copy parsing lacks the copied prefix context. A
     // leading total-only snapshot is a baseline, not the suffix's billable delta.
@@ -1059,9 +1103,10 @@ export async function parseCodexUsageFile(
 
   return {
     ...processedFile,
-    ...aggregateCodexUsage(events),
+    ...aggregateCodexUsage(events, prioritySnapshot),
     ownedEventKeys: [...ownedEventKeys],
-    hasDeferredClaims
+    hasDeferredClaims,
+    priorityFingerprint: prioritySnapshot.fingerprint
   }
 }
 
@@ -1073,6 +1118,7 @@ export async function scanCodexUsageFiles(
   sessions: CodexUsageSession[]
   dailyAggregates: CodexUsageDailyAggregate[]
 }> {
+  const prioritySnapshot = loadCodexPrioritySnapshot()
   const files = await listCodexSessionFiles()
   const previousByPath = new Map(previousProcessedFiles.map((file) => [file.path, file]))
   const worktreesWithCanonicalPaths = await buildWorktreesWithCanonicalPaths(worktrees)
@@ -1105,7 +1151,8 @@ export async function scanCodexUsageFiles(
       previous.mtimeMs === fileInfo.mtimeMs &&
       previous.size === fileInfo.size &&
       Array.isArray(previous.ownedEventKeys) &&
-      typeof previous.hasDeferredClaims === 'boolean'
+      typeof previous.hasDeferredClaims === 'boolean' &&
+      previous.priorityFingerprint === prioritySnapshot.fingerprint
     if (canReuse) {
       reusedByPath.set(filePath, previous)
     } else {
@@ -1143,7 +1190,8 @@ export async function scanCodexUsageFiles(
         }
         eventOwnerByKey.set(eventKey, filePath)
         return true
-      }
+      },
+      prioritySnapshot
     })
     parsedByPath.set(filePath, processed)
 

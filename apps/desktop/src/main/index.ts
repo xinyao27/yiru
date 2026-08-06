@@ -210,6 +210,8 @@ import { shouldQuitWhenAllWindowsClosed } from './startup/window-all-closed-quit
 import { ensureWindowsUserDataAclGrant } from './startup/windows-user-data-acl'
 import { createWslCliReconciliationStartupBarrier } from './startup/wsl-cli-reconciliation-startup-barrier'
 import { StatsCollector, initStatsPath } from './stats/collector'
+import { fetchCursorUsageForStats } from './stats/cursor-usage'
+import { getUsageScopePaths } from './stats/usage-scope'
 import { shouldCopySyntheticTitleFrameToPtyData } from './synthetic-title-frame-routing'
 import {
   advanceSyntheticTitleSpinnerEntries,
@@ -2121,7 +2123,9 @@ app.whenReady().then(async () => {
     statsUsageStores: {
       claude: claudeUsage,
       codex: codexUsage,
-      openCode: openCodeUsage
+      openCode: openCodeUsage,
+      getUsageScopePaths: () => (store ? getUsageScopePaths(store) : []),
+      getCursorUsage: fetchCursorUsageForStats
     }
   })
   runtime = runtimeService

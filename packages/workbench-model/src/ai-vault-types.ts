@@ -1,4 +1,4 @@
-import type { TuiAgent } from './agent-types'
+import type { AiVaultSessionTokenUsage, TuiAgent } from './agent-types'
 import type { ExecutionHostId, ExecutionHostScope } from './execution-host'
 import { commandSeparator, quoteStartupArg, type AgentStartupShell } from './shell-command'
 
@@ -111,6 +111,9 @@ export type AiVaultSession = {
   totalTokens: number
   // Why: attributing totalTokens to updatedAt would collapse multi-day sessions into one cell.
   tokensByDay?: AiVaultSessionDayTokens[]
+  // Why: Pi and OMP can route one transcript through several providers; retain
+  // request identity so cost pricing can follow the underlying provider.
+  tokenUsage?: AiVaultSessionTokenUsage[]
   previewMessages: AiVaultSessionPreviewMessage[]
   /** Latest provider-authenticated user prompt; absent when the transcript has no trustworthy signal. */
   lastUserPrompt?: string | null

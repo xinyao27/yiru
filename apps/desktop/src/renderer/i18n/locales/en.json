@@ -2417,7 +2417,7 @@
           "444585cb41": "with data",
           "ecb0cd8a4c": "enabled -",
           "33f7b043d2": "Providers",
-          "60002bb22f": "No local Claude, Codex, or OpenCode usage found yet. The overview will populate after the next agent session writes token logs.",
+          "60002bb22f": "No provider-reported usage found yet. The overview will populate after the next supported agent session writes token logs.",
           "70f36452d4": "Cache share",
           "327603fe8b": "Active days",
           "0eaf937335": "Est. cost",
@@ -2430,7 +2430,8 @@
           "ca6bc5fded": "Refresh",
           "e06d1baf5c": "Refresh usage overview",
           "c760c481c5": "Usage Overview",
-          "55c910f4f1": "- some model prices are unavailable"
+          "55c910f4f1": "- some model prices are unavailable",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2460,7 +2461,7 @@
             "0bba8ca244": "statistics",
             "0e2a0b6431": "usage",
             "372debfac0": "stats",
-            "26bb901fcd": "Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.",
+            "26bb901fcd": "Yiru stats plus provider token analytics and Grok subscription usage.",
             "cb2430ae6a": "Stats & Usage",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "subscription",
@@ -2474,7 +2475,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "sessions -",
@@ -2484,7 +2486,7 @@
               "1dd166c920": "Less",
               "52d9221dc0": "Recent token activity heatmap",
               "c424eb3f8e": "Best:",
-              "f28ff1f852": "Recent combined Claude, Codex, and OpenCode token activity.",
+              "f28ff1f852": "Recent combined provider-reported token activity.",
               "69e2b50427": "Daily intensity",
               "3a795542fa": "Combined token mix",
               "e65084cb4b": "reasoning",
@@ -2497,7 +2499,8 @@
               "6762f6a682": "tokens",
               "a7f937fb29": "{{value0}} sessions - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "turns",
-              "d9a4b3e2f1c5": "events"
+              "d9a4b3e2f1c5": "events",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -11879,9 +11882,10 @@
           "lifetime": "Lifetime",
           "peakDay": "Peak day",
           "longestStreakLabel": "Longest streak",
-          "tokensUnavailable": "No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.",
-          "tokenCoverage": "Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.",
-          "unpricedCoverage": "Tokens without authoritative pricing details are excluded from value totals."
+          "tokensUnavailable": "No provider-reported token usage attributed to Yiru worktrees is available yet.",
+          "tokenCoverage": "Token totals use request-attributed records from supported agents in Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.",
+          "unpricedCoverage": "Tokens without authoritative pricing details are excluded from value totals.",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "Agents spawned",

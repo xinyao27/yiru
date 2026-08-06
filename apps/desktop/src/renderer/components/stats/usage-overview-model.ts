@@ -1,6 +1,15 @@
-import { translate } from '~renderer/i18n/i18n'
 /* eslint-disable max-lines -- Why: provider normalization, totals, and heatmap aggregation share
    one tested model so the overview UI cannot drift from the math. */
+import type {
+  RuntimeStatsModelUsage,
+  RuntimeStatsSupplementalUsage
+} from '@yiru/runtime-protocol/mobile-runtime-types'
+import {
+  AI_VAULT_AGENTS,
+  AI_VAULT_AGENT_LABELS,
+  type AiVaultAgent
+} from '@yiru/workbench-model/agent'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   ClaudeUsageDailyPoint,
   ClaudeUsageScanState,
@@ -17,7 +26,7 @@ import type {
   OpenCodeUsageSummary
 } from '~shared/opencode-usage-types'
 
-export type UsageProviderId = 'claude' | 'codex' | 'opencode'
+export type UsageProviderId = 'claude' | 'codex' | 'opencode' | `supplemental:${string}`
 
 export type UsageProviderOverview = {
   id: UsageProviderId
@@ -25,11 +34,12 @@ export type UsageProviderOverview = {
   enabled: boolean
   isScanning: boolean
   hasData: boolean
+  canEnable: boolean
   lastScanCompletedAt: number | null
   lastScanError: string | null
-  sessions: number
+  sessions: number | null
   activityLabel: 'turns' | 'events'
-  activityCount: number
+  activityCount: number | null
   totalTokens: number
   newInputTokens: number
   outputTokens: number
@@ -47,6 +57,7 @@ export type UsageOverviewDailyPoint = {
   claudeTokens: number
   codexTokens: number
   openCodeTokens: number
+  supplementalTokens: number
   intensity: 0 | 1 | 2 | 3 | 4
 }
 
@@ -67,6 +78,7 @@ export type UsageOverviewModel = {
   estimatedCostUsd: number | null
   hasPartialCost: boolean
   cacheShare: number | null
+  meteredValueUsd?: number | null
   daily: UsageOverviewDailyPoint[]
   bestDay: UsageOverviewDailyPoint | null
   lastUpdatedAt: number | null
@@ -88,7 +100,10 @@ export type UsageOverviewInput = {
     summary: OpenCodeUsageSummary | null
     daily: OpenCodeUsageDailyPoint[]
   }
+  supplemental?: RuntimeStatsSupplementalUsage
 }
+
+const AI_VAULT_AGENT_SET = new Set<string>(AI_VAULT_AGENTS)
 
 function getClaudeDailyTotal(entry: ClaudeUsageDailyPoint): number {
   return entry.inputTokens + entry.outputTokens + entry.cacheReadTokens + entry.cacheWriteTokens
@@ -140,6 +155,7 @@ function createClaudeProvider(input: UsageOverviewInput['claude']): UsageProvide
     enabled: input.scanState?.enabled ?? false,
     isScanning: input.scanState?.isScanning ?? false,
     hasData: summary?.hasAnyClaudeData ?? input.scanState?.hasAnyClaudeData ?? false,
+    canEnable: true,
     lastScanCompletedAt: input.scanState?.lastScanCompletedAt ?? null,
     lastScanError: input.scanState?.lastScanError ?? null,
     sessions: summary?.sessions ?? 0,
@@ -173,6 +189,7 @@ function createCodexProvider(input: UsageOverviewInput['codex']): UsageProviderO
     enabled: input.scanState?.enabled ?? false,
     isScanning: input.scanState?.isScanning ?? false,
     hasData: summary?.hasAnyCodexData ?? input.scanState?.hasAnyCodexData ?? false,
+    canEnable: true,
     lastScanCompletedAt: input.scanState?.lastScanCompletedAt ?? null,
     lastScanError: input.scanState?.lastScanError ?? null,
     sessions: summary?.sessions ?? 0,
@@ -201,6 +218,7 @@ function createOpenCodeProvider(input: UsageOverviewInput['opencode']): UsagePro
     enabled: input.scanState?.enabled ?? false,
     isScanning: input.scanState?.isScanning ?? false,
     hasData: summary?.hasAnyOpenCodeData ?? input.scanState?.hasAnyOpenCodeData ?? false,
+    canEnable: true,
     lastScanCompletedAt: input.scanState?.lastScanCompletedAt ?? null,
     lastScanError: input.scanState?.lastScanError ?? null,
     sessions: summary?.sessions ?? 0,
@@ -218,6 +236,100 @@ function createOpenCodeProvider(input: UsageOverviewInput['opencode']): UsagePro
   }
 }
 
+type SupplementalProviderAccumulator = {
+  id: `supplemental:${string}`
+  label: string
+  totalTokens: number
+  knownValueUsd: number
+  hasKnownValue: boolean
+  hasUnpricedValue: boolean
+  topModel: string | null
+  topModelTokens: number
+}
+
+function createSupplementalProviders(
+  usage: RuntimeStatsSupplementalUsage | undefined
+): UsageProviderOverview[] {
+  if (!usage) {
+    return []
+  }
+  const providers = new Map<string, SupplementalProviderAccumulator>()
+  for (const model of usage.modelUsage) {
+    const provider = resolveSupplementalProvider(model)
+    const current = providers.get(provider.id) ?? {
+      id: provider.id,
+      label: provider.label,
+      totalTokens: 0,
+      knownValueUsd: 0,
+      hasKnownValue: false,
+      hasUnpricedValue: false,
+      topModel: null,
+      topModelTokens: 0
+    }
+    current.totalTokens += model.tokens
+    if (model.valueUsd === null) {
+      if (model.tokens > 0) {
+        current.hasUnpricedValue = true
+      }
+    } else {
+      current.knownValueUsd += model.valueUsd
+      current.hasKnownValue = true
+    }
+    if (model.tokens > current.topModelTokens) {
+      current.topModel = model.label
+      current.topModelTokens = model.tokens
+    }
+    providers.set(provider.id, current)
+  }
+  return [...providers.values()]
+    .filter((provider) => provider.totalTokens > 0)
+    .map((provider) => ({
+      id: provider.id,
+      label: provider.label,
+      enabled: true,
+      canEnable: false,
+      isScanning: false,
+      hasData: true,
+      lastScanCompletedAt: null,
+      lastScanError: null,
+      sessions: null,
+      activityLabel: 'events',
+      activityCount: null,
+      totalTokens: provider.totalTokens,
+      newInputTokens: provider.totalTokens,
+      outputTokens: 0,
+      cacheTokens: 0,
+      reasoningTokens: 0,
+      estimatedCostUsd:
+        provider.hasKnownValue && !provider.hasUnpricedValue ? provider.knownValueUsd : null,
+      topModel: provider.topModel,
+      topProject: null,
+      activeDays: 0
+    }))
+}
+
+function resolveSupplementalProvider(model: RuntimeStatsModelUsage): {
+  id: `supplemental:${string}`
+  label: string
+} {
+  const parts = model.key.split(':')
+  if (parts[0] === 'cursor') {
+    return { id: 'supplemental:cursor', label: AI_VAULT_AGENT_LABELS.cursor }
+  }
+  const agent = parts[0] === 'ai-vault' ? parts[1] : undefined
+  if (agent && isAiVaultAgent(agent)) {
+    return { id: `supplemental:${agent}`, label: AI_VAULT_AGENT_LABELS[agent] }
+  }
+  return {
+    id: 'supplemental:other',
+    label: translate('auto.components.stats.usage.overview.model.other', 'Other agents')
+  }
+}
+
+function isAiVaultAgent(value: string): value is AiVaultAgent {
+  return AI_VAULT_AGENT_SET.has(value)
+}
+
 function buildDailyOverview(input: UsageOverviewInput): UsageOverviewDailyPoint[] {
   const byDay = new Map<string, Omit<UsageOverviewDailyPoint, 'intensity'>>()
 
@@ -227,7 +339,8 @@ function buildDailyOverview(input: UsageOverviewInput): UsageOverviewDailyPoint[
       totalTokens: 0,
       claudeTokens: 0,
       codexTokens: 0,
-      openCodeTokens: 0
+      openCodeTokens: 0,
+      supplementalTokens: 0
     }
     const total = getClaudeDailyTotal(entry)
     current.totalTokens += total
@@ -241,7 +354,8 @@ function buildDailyOverview(input: UsageOverviewInput): UsageOverviewDailyPoint[
       totalTokens: 0,
       claudeTokens: 0,
       codexTokens: 0,
-      openCodeTokens: 0
+      openCodeTokens: 0,
+      supplementalTokens: 0
     }
     current.totalTokens += entry.totalTokens
     current.codexTokens += entry.totalTokens
@@ -254,10 +368,25 @@ function buildDailyOverview(input: UsageOverviewInput): UsageOverviewDailyPoint[
       totalTokens: 0,
       claudeTokens: 0,
       codexTokens: 0,
-      openCodeTokens: 0
+      openCodeTokens: 0,
+      supplementalTokens: 0
     }
     current.totalTokens += entry.totalTokens
     current.openCodeTokens += entry.totalTokens
+    byDay.set(entry.day, current)
+  }
+
+  for (const entry of input.supplemental?.dailyTokens ?? []) {
+    const current = byDay.get(entry.day) ?? {
+      day: entry.day,
+      totalTokens: 0,
+      claudeTokens: 0,
+      codexTokens: 0,
+      openCodeTokens: 0,
+      supplementalTokens: 0
+    }
+    current.totalTokens += entry.tokens
+    current.supplementalTokens += entry.tokens
     byDay.set(entry.day, current)
   }
 
@@ -304,6 +433,7 @@ export function getRecentUsageDays(
         claudeTokens: 0,
         codexTokens: 0,
         openCodeTokens: 0,
+        supplementalTokens: 0,
         intensity: 0
       }
     )
@@ -315,7 +445,8 @@ export function buildUsageOverview(input: UsageOverviewInput): UsageOverviewMode
   const providers = [
     createClaudeProvider(input.claude),
     createCodexProvider(input.codex),
-    createOpenCodeProvider(input.opencode)
+    createOpenCodeProvider(input.opencode),
+    ...createSupplementalProviders(input.supplemental)
   ]
   const daily = buildDailyOverview(input)
   const bestDay =
@@ -330,8 +461,8 @@ export function buildUsageOverview(input: UsageOverviewInput): UsageOverviewMode
   const outputTokens = providers.reduce((sum, provider) => sum + provider.outputTokens, 0)
   const cacheTokens = providers.reduce((sum, provider) => sum + provider.cacheTokens, 0)
   const reasoningTokens = providers.reduce((sum, provider) => sum + provider.reasoningTokens, 0)
-  const sessions = providers.reduce((sum, provider) => sum + provider.sessions, 0)
-  const activityCount = providers.reduce((sum, provider) => sum + provider.activityCount, 0)
+  const sessions = providers.reduce((sum, provider) => sum + (provider.sessions ?? 0), 0)
+  const activityCount = providers.reduce((sum, provider) => sum + (provider.activityCount ?? 0), 0)
   const knownCost = providers.reduce((sum, provider) => sum + (provider.estimatedCostUsd ?? 0), 0)
   const hasKnownCost = providers.some((provider) => provider.estimatedCostUsd !== null)
   const hasPartialCost = providers.some(
@@ -366,6 +497,9 @@ export function buildUsageOverview(input: UsageOverviewInput): UsageOverviewMode
     hasPartialCost,
     cacheShare:
       newInputTokens + cacheTokens > 0 ? cacheTokens / (newInputTokens + cacheTokens) : null,
+    ...(input.supplemental?.meteredValueUsd === undefined
+      ? {}
+      : { meteredValueUsd: input.supplemental.meteredValueUsd }),
     daily,
     bestDay,
     lastUpdatedAt

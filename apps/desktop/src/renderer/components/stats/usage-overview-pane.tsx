@@ -49,12 +49,14 @@ export function UsageOverviewPane(): React.JSX.Element {
   const openCodeScanState = useAppStore((state) => state.openCodeUsageScanState)
   const openCodeSummary = useAppStore((state) => state.openCodeUsageSummary)
   const openCodeDaily = useAppStore((state) => state.openCodeUsageDaily)
+  const supplementalUsage = useAppStore((state) => state.statsSummary?.supplementalUsage)
   const fetchClaudeUsage = useAppStore((state) => state.fetchClaudeUsage)
   const fetchCodexUsage = useAppStore((state) => state.fetchCodexUsage)
   const fetchOpenCodeUsage = useAppStore((state) => state.fetchOpenCodeUsage)
   const refreshClaudeUsage = useAppStore((state) => state.refreshClaudeUsage)
   const refreshCodexUsage = useAppStore((state) => state.refreshCodexUsage)
   const refreshOpenCodeUsage = useAppStore((state) => state.refreshOpenCodeUsage)
+  const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const enableClaudeUsage = useAppStore((state) => state.enableClaudeUsage)
   const enableCodexUsage = useAppStore((state) => state.enableCodexUsage)
   const enableOpenCodeUsage = useAppStore((state) => state.enableOpenCodeUsage)
@@ -83,7 +85,8 @@ export function UsageOverviewPane(): React.JSX.Element {
           scanState: openCodeScanState,
           summary: openCodeSummary,
           daily: openCodeDaily
-        }
+        },
+        supplemental: supplementalUsage
       }),
     [
       claudeDaily,
@@ -94,7 +97,8 @@ export function UsageOverviewPane(): React.JSX.Element {
       codexSummary,
       openCodeDaily,
       openCodeScanState,
-      openCodeSummary
+      openCodeSummary,
+      supplementalUsage
     ]
   )
   const recentDays = useMemo(
@@ -108,7 +112,7 @@ export function UsageOverviewPane(): React.JSX.Element {
       claudeScanState?.enabled ? refreshClaudeUsage() : Promise.resolve(),
       codexScanState?.enabled ? refreshCodexUsage() : Promise.resolve(),
       openCodeScanState?.enabled ? refreshOpenCodeUsage() : Promise.resolve()
-    ])
+    ]).then(() => fetchStatsSummary(true))
   }
 
   return (
@@ -242,12 +246,21 @@ export function UsageOverviewPane(): React.JSX.Element {
                 icon={<DatabaseZap className="size-4" />}
               />
             </div>
+            {overview.meteredValueUsd !== undefined && overview.meteredValueUsd !== null ? (
+              <p className="text-muted-foreground mt-3 text-xs">
+                {translate(
+                  'auto.components.stats.UsageOverviewPane.cursorMeteredValue',
+                  'Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate).',
+                  { value: formatUsageCost(overview.meteredValueUsd) }
+                )}
+              </p>
+            ) : null}
 
             {!overview.hasAnyData ? (
               <div className="border-border/60 bg-card/30 text-muted-foreground mt-4 border border-dashed px-4 py-5 text-sm">
                 {translate(
                   'auto.components.stats.UsageOverviewPane.60002bb22f',
-                  'No local Claude, Codex, or OpenCode usage found yet. The overview will populate after the next agent session writes token logs.'
+                  'No provider-reported usage found yet. The overview will populate after the next supported agent session writes token logs.'
                 )}
               </div>
             ) : (
@@ -291,7 +304,7 @@ export function UsageOverviewPane(): React.JSX.Element {
                   void enableClaudeUsage()
                 } else if (provider.id === 'codex') {
                   void enableCodexUsage()
-                } else {
+                } else if (provider.id === 'opencode') {
                   void enableOpenCodeUsage()
                 }
               }}

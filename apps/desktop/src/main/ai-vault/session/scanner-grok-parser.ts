@@ -77,9 +77,9 @@ async function consumeGrokTokenUpdates(
       if (total > previousTotal) {
         addSessionTokens(accumulator, total - previousTotal, meta.agentTimestampMs)
       }
-      if (total > 0) {
-        previousTotal = total
-      }
+      // A compaction can reset the cumulative counter to zero; retain that
+      // reset so the next positive snapshot is not silently discarded.
+      previousTotal = total
     }
   } catch {}
 }

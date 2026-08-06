@@ -21,12 +21,20 @@ export type UsageValueSnapshot = {
   hasUnpricedUsage: boolean
   hasValue: boolean
   models: UsageValueModel[]
+  meteredValueUsd?: number | null
+}
+
+export type UsageValueSupplementalInput = {
+  daily: UsageValueDay[]
+  models: UsageValueModel[]
+  meteredValueUsd?: number | null
 }
 
 export type UsageValueInput = {
   claude: Pick<ClaudeUsageSnapshot, 'daily' | 'modelBreakdown'>
   codex: Pick<CodexUsageSnapshot, 'daily' | 'modelBreakdown'>
   openCode: Pick<OpenCodeUsageSnapshot, 'daily' | 'modelBreakdown'>
+  supplemental?: UsageValueSupplementalInput
 }
 
 type ModelAccumulator = {
@@ -35,33 +43,44 @@ type ModelAccumulator = {
   tokens: number
   knownValueUsd: number
   hasKnownValue: boolean
+  unpricedTokens: number
+}
+
+type DailyAccumulator = {
+  day: string
+  tokens: number
+  knownValueUsd: number
+  hasKnownValue: boolean
+  unpricedTokens: number
 }
 
 export function buildUsageValueSnapshot({
   claude,
   codex,
-  openCode
+  openCode,
+  supplemental
 }: UsageValueInput): UsageValueSnapshot {
   const models = mergeModelUsage([
     ...claude.modelBreakdown.map((model) => ({
-      key: model.key,
+      key: `claude:${model.key}`,
       label: model.label,
       tokens:
         model.inputTokens + model.outputTokens + model.cacheReadTokens + model.cacheWriteTokens,
       valueUsd: model.estimatedCostUsd
     })),
     ...codex.modelBreakdown.map((model) => ({
-      key: model.key,
+      key: `codex:${model.key}`,
       label: model.label,
       tokens: model.totalTokens,
       valueUsd: model.estimatedCostUsd
     })),
     ...openCode.modelBreakdown.map((model) => ({
-      key: model.key,
+      key: `opencode:${model.key}`,
       label: model.label,
       tokens: model.totalTokens,
-      valueUsd: null
-    }))
+      valueUsd: model.estimatedCostUsd
+    })),
+    ...(supplemental?.models ?? [])
   ])
   const daily = mergeDailyUsage([
     ...claude.daily.map((point) => ({
@@ -80,9 +99,10 @@ export function buildUsageValueSnapshot({
     ...openCode.daily.map((point) => ({
       day: point.day,
       tokens: point.totalTokens,
-      valueUsd: null,
-      unpricedTokens: point.totalTokens
-    }))
+      valueUsd: point.estimatedCostUsd,
+      unpricedTokens: point.unpricedTokens
+    })),
+    ...(supplemental?.daily ?? [])
   ])
   return {
     daily,
@@ -92,27 +112,39 @@ export function buildUsageValueSnapshot({
     hasValue:
       daily.some((point) => point.valueUsd !== null) ||
       models.some((model) => model.valueUsd !== null),
-    models
+    models,
+    ...(supplemental?.meteredValueUsd === undefined
+      ? {}
+      : { meteredValueUsd: supplemental.meteredValueUsd })
   }
 }
 
 function mergeDailyUsage(points: UsageValueDay[]): UsageValueDay[] {
-  const byDay = new Map<string, UsageValueDay>()
+  const byDay = new Map<string, DailyAccumulator>()
   for (const point of points) {
     const current = byDay.get(point.day) ?? {
       day: point.day,
       tokens: 0,
-      valueUsd: null,
+      knownValueUsd: 0,
+      hasKnownValue: false,
       unpricedTokens: 0
     }
     current.tokens += point.tokens
     current.unpricedTokens += point.unpricedTokens
     if (point.valueUsd !== null) {
-      current.valueUsd = (current.valueUsd ?? 0) + point.valueUsd
+      current.knownValueUsd += point.valueUsd
+      current.hasKnownValue = true
     }
     byDay.set(point.day, current)
   }
-  return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
+  return [...byDay.values()]
+    .map((point) => ({
+      day: point.day,
+      tokens: point.tokens,
+      valueUsd: point.hasKnownValue && point.unpricedTokens === 0 ? point.knownValueUsd : null,
+      unpricedTokens: point.unpricedTokens
+    }))
+    .sort((left, right) => left.day.localeCompare(right.day))
 }
 
 function mergeModelUsage(models: UsageValueModel[]): UsageValueModel[] {
@@ -124,12 +156,15 @@ function mergeModelUsage(models: UsageValueModel[]): UsageValueModel[] {
       label: model.label,
       tokens: 0,
       knownValueUsd: 0,
-      hasKnownValue: false
+      hasKnownValue: false,
+      unpricedTokens: 0
     }
     current.tokens += model.tokens
     if (model.valueUsd !== null) {
       current.knownValueUsd += model.valueUsd
       current.hasKnownValue = true
+    } else {
+      current.unpricedTokens += model.tokens
     }
     byModel.set(key, current)
   }
@@ -138,11 +173,11 @@ function mergeModelUsage(models: UsageValueModel[]): UsageValueModel[] {
       key: model.key,
       label: model.label,
       tokens: model.tokens,
-      valueUsd: model.hasKnownValue ? model.knownValueUsd : null
+      valueUsd: model.hasKnownValue && model.unpricedTokens === 0 ? model.knownValueUsd : null
     }))
     .sort((left, right) => right.tokens - left.tokens)
 }
 
-function normalizedModelKey(label: string, fallback: string): string {
-  return label.trim().toLowerCase() || fallback
+function normalizedModelKey(label: string, key: string): string {
+  return key.trim().toLowerCase() || label.trim().toLowerCase()
 }

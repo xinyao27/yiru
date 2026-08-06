@@ -23,6 +23,19 @@ export type RuntimeStatsModelUsage = {
   valueUsd: number | null
 }
 
+export type RuntimeStatsSupplementalDailyUsage = RuntimeStatsDailyTokens & {
+  valueUsd: number | null
+  unpricedTokens: number
+}
+
+export type RuntimeStatsSupplementalUsage = {
+  dailyTokens: RuntimeStatsSupplementalDailyUsage[]
+  modelUsage: RuntimeStatsModelUsage[]
+  // Why: Cursor reports plan-metered spend separately from its vendor list-price
+  // estimate, so an absent value must remain distinct from an unknown value.
+  meteredValueUsd?: number | null
+}
+
 export type RuntimeStatsSummary = {
   totalAgentsSpawned: number
   totalPRsCreated: number
@@ -31,10 +44,16 @@ export type RuntimeStatsSummary = {
   // Why: optional fields preserve compatibility with older runtime hosts.
   dailyActivity?: RuntimeStatsDailyActivity[]
   dailyTokens?: RuntimeStatsDailyTokens[]
+  // Why: a known-cost day from one host must not hide unpriced tokens from
+  // another host when mobile combines several runtime summaries.
+  dailyUnpricedTokens?: RuntimeStatsDailyTokens[]
   tokenDataAvailable?: boolean
   tokenUnavailableAgents?: AiVaultAgent[]
   dailyValues?: RuntimeStatsDailyValue[]
   modelUsage?: RuntimeStatsModelUsage[]
+  // Why: desktop keeps provider stores live for fast refreshes, while this
+  // snapshot carries token-only agents that do not have a dedicated store.
+  supplementalUsage?: RuntimeStatsSupplementalUsage
   usageValueAvailable?: boolean
   hasUnpricedUsage?: boolean
 }

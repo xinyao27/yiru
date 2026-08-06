@@ -659,7 +659,7 @@ export type ExportApi = {
 }
 
 export type StatsApi = {
-  getSummary: () => Promise<StatsSummary>
+  getSummary: (args?: { refreshUsage?: boolean }) => Promise<StatsSummary>
 }
 
 // Diagnostics — error-tracking-lane payload shapes that cross the IPC

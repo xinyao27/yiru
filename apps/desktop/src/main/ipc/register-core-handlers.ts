@@ -67,7 +67,9 @@ import { registerSkillsHandlers } from '../skills/skills'
 import { registerHostedReviewHandlers } from '../source-control/hosted-review-ipc'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
+import { fetchCursorUsageForStats } from '../stats/cursor-usage'
 import { registerStatsHandlers } from '../stats/stats'
+import { getUsageScopePaths } from '../stats/usage-scope'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import { registerUpdaterHandlers } from '../window/attach-main-window-services'
@@ -148,7 +150,9 @@ export function registerCoreHandlers(
   registerStatsHandlers(stats, {
     claude: claudeUsage,
     codex: codexUsage,
-    openCode: openCodeUsage
+    openCode: openCodeUsage,
+    getUsageScopePaths: () => getUsageScopePaths(store),
+    getCursorUsage: fetchCursorUsageForStats
   })
   registerMemoryHandlers(store)
   registerNotificationHandlers(store, runtime)

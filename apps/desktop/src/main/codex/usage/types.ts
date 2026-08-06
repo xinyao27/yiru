@@ -88,6 +88,8 @@ export type CodexUsageDailyAggregate = {
 export type CodexUsagePersistedFile = CodexUsageProcessedFile & {
   sessions: CodexUsageSession[]
   dailyAggregates: CodexUsageDailyAggregate[]
+  /** Priority pricing metadata revision used when this file was scanned. */
+  priorityFingerprint?: string
   /** Event keys this file counted. Resumed/forked rollouts copy earlier
    *  token_count records into new files; ownership keeps each record counted
    *  by exactly one cached file across incremental scans. */
@@ -119,6 +121,7 @@ export type CodexUsageParsedEvent = {
    *  token_count record copied across fork/resume rollout files. Session id is
    *  omitted because forks rewrite session_meta while copying the record. */
   eventKey: string
+  turnId?: string | null
   model: string | null
   cwd: string | null
   hasInferredPricing: boolean

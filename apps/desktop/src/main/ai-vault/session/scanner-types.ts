@@ -1,4 +1,4 @@
-import type { AiVaultAgent } from '@yiru/workbench-model/agent'
+import type { AiVaultAgent, AiVaultSessionTokenUsage } from '@yiru/workbench-model/agent'
 import type {
   AiVaultScanIssue,
   AiVaultSession,
@@ -106,6 +106,8 @@ export type SessionAccumulator = {
   totalTokens: number
   // Why: all parsers write through addSessionTokens so long sessions split consistently.
   tokensByDay: Map<string, number>
+  tokenUsage: AiVaultSessionTokenUsage[]
+  provider: string | null
   previewMessages: AiVaultSessionPreviewMessage[]
   lastUserPrompt: string | null
   // Recoverable signal for a zero-turn transcript (see AiVaultSession).

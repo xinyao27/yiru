@@ -55,3 +55,5 @@ export type TuiAgent =
   | 'devin' // Devin CLI
   | 'ante' // Ante (Antigma Labs)
   | 'trae' // Trae CLI
+
+export type { AiVaultSessionTokenUsage } from './ai-vault-session-usage-types'

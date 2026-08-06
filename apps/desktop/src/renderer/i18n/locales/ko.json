@@ -2394,7 +2394,7 @@
           "444585cb41": "데이터 있음",
           "ecb0cd8a4c": "활성화됨 -",
           "33f7b043d2": "공급자",
-          "60002bb22f": "아직 로컬 Claude, Codex 또는 OpenCode 사용을 찾을 수 없습니다. 개요는 다음 agent 세션에서 토큰 로그를 작성한 후에 채워집니다.",
+          "60002bb22f": "아직 provider 사용량을 찾을 수 없습니다. 개요는 다음 지원 에이전트 세션에서 토큰 로그를 작성한 후 채워집니다.",
           "70f36452d4": "캐시 공유",
           "327603fe8b": "활성 일수",
           "0eaf937335": "예상 비용",
@@ -2407,7 +2407,8 @@
           "ca6bc5fded": "새로고침",
           "e06d1baf5c": "사용량 개요 새로고침",
           "c760c481c5": "사용량 개요",
-          "55c910f4f1": "- 일부 모델 가격 확인 불가"
+          "55c910f4f1": "- 일부 모델 가격 확인 불가",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2437,7 +2438,7 @@
             "0bba8ca244": "통계",
             "0e2a0b6431": "사용량",
             "372debfac0": "통계",
-            "26bb901fcd": "Yiru 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
+            "26bb901fcd": "Yiru 통계와 provider 토큰 분석 및 Grok 구독 사용량.",
             "cb2430ae6a": "통계 및 사용량",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "구독",
@@ -2451,7 +2452,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "세션 -",
@@ -2461,7 +2463,7 @@
               "1dd166c920": "적음",
               "52d9221dc0": "최근 토큰 활동 히트맵",
               "c424eb3f8e": "최고:",
-              "f28ff1f852": "최근 Claude, Codex 및 OpenCode 토큰 결합 활동.",
+              "f28ff1f852": "최근 provider 토큰 결합 활동.",
               "69e2b50427": "일일 강도",
               "3a795542fa": "통합 토큰 구성",
               "e65084cb4b": "추론",
@@ -2474,7 +2476,8 @@
               "6762f6a682": "토큰",
               "a7f937fb29": "{{value0}}개 세션 - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "턴",
-              "d9a4b3e2f1c5": "이벤트"
+              "d9a4b3e2f1c5": "이벤트",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -11856,9 +11859,10 @@
           "lifetime": "누적",
           "peakDay": "최고 기록일",
           "longestStreakLabel": "최장 연속 기록",
-          "tokensUnavailable": "Yiru 워크트리에 귀속된 Claude, Codex 또는 OpenCode 토큰 사용량이 아직 없습니다.",
-          "tokenCoverage": "토큰 합계는 Yiru 워크트리에서 요청 단위로 귀속할 수 있는 Claude, Codex, OpenCode 기록을 사용합니다. 캐시 입력은 중복 계산하지 않으며 요청 단위로 귀속할 수 없는 세션 합계는 제외합니다.",
-          "unpricedCoverage": "공식 가격 세부 정보가 없는 토큰은 가치 합계에서 제외됩니다."
+          "tokensUnavailable": "Yiru 워크트리에 귀속된 provider 토큰 사용량이 아직 없습니다.",
+          "tokenCoverage": "토큰 합계는 Yiru 워크트리에서 지원되는 에이전트의 요청 단위 귀속 기록을 사용합니다. 캐시 입력은 중복 계산하지 않으며 요청 단위로 귀속할 수 없는 세션 합계는 제외합니다.",
+          "unpricedCoverage": "공식 가격 세부 정보가 없는 토큰은 가치 합계에서 제외됩니다.",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "시작한 에이전트",

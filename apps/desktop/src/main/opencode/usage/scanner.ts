@@ -40,12 +40,32 @@ type OpenCodeUsageRow = {
   title: string | null
   worktree: string | null
   session_model: string | null
+  cost_override: number | null
+  has_step_finish_parts: number
 }
 
 const YIELD_EVERY_DATABASES = 2
 
 function ensureNumber(value: unknown): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? Math.max(Math.trunc(value), 0) : 0
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? Math.max(Math.trunc(parsed), 0) : 0
+  }
+  return 0
+}
+
+function extractFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
 }
 
 function normalizeComparablePath(pathValue: string, platform = process.platform): string {
@@ -169,6 +189,67 @@ function getAssistantMessageCount(db: Database.Database): number {
   return row?.count ?? 0
 }
 
+function getMessageUsageQuery(db: Database.Database): string {
+  const projectJoin = getProjectJoin(db)
+  const sessionModelSelect = getSessionModelSelect(db)
+  const partJoin = tableExists(db, 'part')
+    ? 'LEFT JOIN part part_row ON part_row.message_id = m.id'
+    : ''
+  const partCostSelect = tableExists(db, 'part')
+    ? `
+       CASE
+         WHEN COUNT(
+           CASE
+             WHEN json_valid(part_row.data)
+               AND json_extract(part_row.data, '$.type') = 'step-finish'
+               AND json_type(part_row.data, '$.cost') IN ('integer', 'real')
+             THEN 1
+           END
+         ) > 0
+         THEN SUM(
+           CASE
+             WHEN json_valid(part_row.data)
+               AND json_extract(part_row.data, '$.type') = 'step-finish'
+               AND json_type(part_row.data, '$.cost') IN ('integer', 'real')
+             THEN CAST(json_extract(part_row.data, '$.cost') AS REAL)
+             ELSE 0
+           END
+         )
+         ELSE NULL
+       END AS cost_override,
+       CASE
+         WHEN COUNT(
+           CASE
+             WHEN json_valid(part_row.data)
+               AND json_extract(part_row.data, '$.type') = 'step-finish'
+               AND json_type(part_row.data, '$.cost') IN ('integer', 'real')
+             THEN 1
+           END
+         ) > 0
+         THEN 1
+         ELSE 0
+       END AS has_step_finish_parts`
+    : 'NULL AS cost_override, 0 AS has_step_finish_parts'
+  const groupBy = tableExists(db, 'part')
+    ? `
+       GROUP BY m.id, m.session_id, m.time_created, m.time_updated, m.data,
+                s.directory, s.title, p.worktree, ${sessionModelSelect.replace(' AS session_model', '')}`
+    : ''
+
+  return `
+    SELECT m.id, m.session_id, m.time_created, m.time_updated, m.data,
+           s.directory, s.title, p.worktree, ${sessionModelSelect},
+           ${partCostSelect}
+    FROM message m
+    JOIN session s ON s.id = m.session_id
+    ${projectJoin}
+    ${partJoin}
+    WHERE json_extract(m.data, '$.role') = 'assistant'
+      AND json_extract(m.data, '$.tokens.input') IS NOT NULL
+    ${groupBy}
+    ORDER BY m.time_created, m.id`
+}
+
 function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
   if (!tableExists(db, 'session')) {
     return []
@@ -185,7 +266,8 @@ function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
     detailedRows = db
       .prepare(
         `SELECT sm.id, sm.session_id, sm.time_created, sm.time_updated, sm.data,
-                s.directory, s.title, p.worktree, ${sessionModelSelect}
+                s.directory, s.title, p.worktree, ${sessionModelSelect},
+                NULL AS cost_override, 0 AS has_step_finish_parts
          FROM session_message sm
          JOIN session s ON s.id = sm.session_id
          ${projectJoin}
@@ -196,18 +278,7 @@ function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
   }
   if (getAssistantMessageCount(db) > 0) {
     const modernSessionIds = new Set(detailedRows.map((row) => row.session_id))
-    const legacyRows = db
-      .prepare(
-        `SELECT m.id, m.session_id, m.time_created, m.time_updated, m.data,
-                s.directory, s.title, p.worktree, ${sessionModelSelect}
-         FROM message m
-         JOIN session s ON s.id = m.session_id
-         ${projectJoin}
-         WHERE json_extract(m.data, '$.role') = 'assistant'
-           AND json_extract(m.data, '$.tokens.input') IS NOT NULL
-         ORDER BY m.time_created, m.id`
-      )
-      .all() as OpenCodeUsageRow[]
+    const legacyRows = db.prepare(getMessageUsageQuery(db)).all() as OpenCodeUsageRow[]
     detailedRows.push(...legacyRows.filter((row) => !modernSessionIds.has(row.session_id)))
   }
 
@@ -262,6 +333,19 @@ function extractModelLabel(data: Record<string, unknown>, sessionModel: unknown)
   return providerID ? `${providerID}/${modelID}` : modelID
 }
 
+function extractProviderId(data: Record<string, unknown>, sessionModel: unknown): string | null {
+  const directProvider = extractString(data.providerID) ?? extractString(data.providerId)
+  if (directProvider) {
+    return directProvider
+  }
+  const modelObject = parseJsonObject(data.model) ?? parseJsonObject(sessionModel)
+  return extractString(modelObject?.providerID) ?? extractString(modelObject?.providerId)
+}
+
+function isOpenCodeGoProvider(providerId: string | null): boolean {
+  return providerId?.toLowerCase() === 'opencode-go'
+}
+
 function extractCwd(data: Record<string, unknown>, row: OpenCodeUsageRow): string | null {
   const pathData = parseJsonObject(data.path)
   return (
@@ -304,11 +388,11 @@ export function parseOpenCodeUsageRow(row: OpenCodeUsageRow): OpenCodeUsageParse
   const inputTokens = ensureNumber(tokens.input)
   const outputTokens = ensureNumber(tokens.output)
   const reasoningOutputTokens = ensureNumber(tokens.reasoning)
-  const cachedInputTokens = Math.min(ensureNumber(cache?.read), inputTokens)
+  const cachedInputTokens = ensureNumber(cache?.read)
   const totalTokens =
     ensureNumber(tokens.total) > 0
       ? ensureNumber(tokens.total)
-      : inputTokens + outputTokens + reasoningOutputTokens
+      : inputTokens + outputTokens + reasoningOutputTokens + cachedInputTokens
 
   if (inputTokens + outputTokens + reasoningOutputTokens + cachedInputTokens + totalTokens <= 0) {
     return null
@@ -319,12 +403,21 @@ export function parseOpenCodeUsageRow(row: OpenCodeUsageRow): OpenCodeUsageParse
     return null
   }
 
+  const providerId = extractProviderId(data, row.session_model)
+  const rawCost = row.has_step_finish_parts
+    ? extractFiniteNumber(row.cost_override)
+    : extractFiniteNumber(data.cost)
+
   return {
     sessionId: row.session_id,
     timestamp,
     cwd: extractCwd(data, row),
     model: extractModelLabel(data, row.session_model),
-    estimatedCostUsd: ensureNumber(data.cost) > 0 ? ensureNumber(data.cost) : null,
+    // Why: CodexBar only treats the OpenCode Go ledger as a supported local
+    // cost source. Generic OpenCode rows still contribute tokens, but their
+    // `cost` field is not a comparable provider-cost contract.
+    estimatedCostUsd:
+      isOpenCodeGoProvider(providerId) && rawCost !== null && rawCost >= 0 ? rawCost : null,
     inputTokens,
     cachedInputTokens,
     outputTokens,
@@ -449,6 +542,21 @@ function addCost(left: number | null, right: number | null): number | null {
   return (left ?? 0) + (right ?? 0)
 }
 
+function mergeCost(
+  left: number | null,
+  right: number | null,
+  leftTokens: number,
+  rightTokens: number
+): number | null {
+  // Why: a null cost means that at least one token-bearing request has no
+  // comparable price. Preserve that uncertainty while flattening requests
+  // into sessions, days, and database projections.
+  if ((leftTokens > 0 && left === null) || (rightTokens > 0 && right === null)) {
+    return null
+  }
+  return addCost(left, right)
+}
+
 function createEmptySession(event: OpenCodeUsageAttributedEvent): OpenCodeUsageSession {
   return {
     sessionId: event.sessionId,
@@ -499,13 +607,19 @@ function mergeLocationBreakdown(
 ): void {
   const existing = target.find((entry) => entry.locationKey === event.projectKey) ?? null
   if (existing) {
+    const previousTokens = existing.totalTokens
     existing.eventCount++
     existing.inputTokens += event.inputTokens
     existing.cachedInputTokens += event.cachedInputTokens
     existing.outputTokens += event.outputTokens
     existing.reasoningOutputTokens += event.reasoningOutputTokens
     existing.totalTokens += event.totalTokens
-    existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, event.estimatedCostUsd)
+    existing.estimatedCostUsd = mergeCost(
+      existing.estimatedCostUsd,
+      event.estimatedCostUsd,
+      previousTokens,
+      event.totalTokens
+    )
     return
   }
 
@@ -531,13 +645,19 @@ function mergeModelBreakdown(
   const key = event.model ?? 'unknown'
   const existing = target.find((entry) => entry.modelKey === key) ?? null
   if (existing) {
+    const previousTokens = existing.totalTokens
     existing.eventCount++
     existing.inputTokens += event.inputTokens
     existing.cachedInputTokens += event.cachedInputTokens
     existing.outputTokens += event.outputTokens
     existing.reasoningOutputTokens += event.reasoningOutputTokens
     existing.totalTokens += event.totalTokens
-    existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, event.estimatedCostUsd)
+    existing.estimatedCostUsd = mergeCost(
+      existing.estimatedCostUsd,
+      event.estimatedCostUsd,
+      previousTokens,
+      event.totalTokens
+    )
     return
   }
 
@@ -563,13 +683,19 @@ function mergeLocationModelBreakdown(
     target.find((entry) => entry.locationKey === event.projectKey && entry.modelKey === modelKey) ??
     null
   if (existing) {
+    const previousTokens = existing.totalTokens
     existing.eventCount++
     existing.inputTokens += event.inputTokens
     existing.cachedInputTokens += event.cachedInputTokens
     existing.outputTokens += event.outputTokens
     existing.reasoningOutputTokens += event.reasoningOutputTokens
     existing.totalTokens += event.totalTokens
-    existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, event.estimatedCostUsd)
+    existing.estimatedCostUsd = mergeCost(
+      existing.estimatedCostUsd,
+      event.estimatedCostUsd,
+      previousTokens,
+      event.totalTokens
+    )
     return
   }
 
@@ -607,13 +733,19 @@ function aggregateOpenCodeUsage(events: OpenCodeUsageAttributedEvent[]): {
     if (event.timestamp >= session.lastTimestamp) {
       session.lastTimestamp = event.timestamp
     }
+    const previousSessionTokens = session.totalTokens
     session.eventCount++
     session.totalInputTokens += event.inputTokens
     session.totalCachedInputTokens += event.cachedInputTokens
     session.totalOutputTokens += event.outputTokens
     session.totalReasoningOutputTokens += event.reasoningOutputTokens
     session.totalTokens += event.totalTokens
-    session.estimatedCostUsd = addCost(session.estimatedCostUsd, event.estimatedCostUsd)
+    session.estimatedCostUsd = mergeCost(
+      session.estimatedCostUsd,
+      event.estimatedCostUsd,
+      previousSessionTokens,
+      event.totalTokens
+    )
     mergeLocationBreakdown(session.locationBreakdown, event)
     mergeModelBreakdown(session.modelBreakdown, event)
     mergeLocationModelBreakdown(session.locationModelBreakdown, event)
@@ -623,13 +755,19 @@ function aggregateOpenCodeUsage(events: OpenCodeUsageAttributedEvent[]): {
     if (!dailyByKey.has(dailyKey)) {
       dailyByKey.set(dailyKey, daily)
     }
+    const previousDailyTokens = daily.totalTokens
     daily.eventCount++
     daily.inputTokens += event.inputTokens
     daily.cachedInputTokens += event.cachedInputTokens
     daily.outputTokens += event.outputTokens
     daily.reasoningOutputTokens += event.reasoningOutputTokens
     daily.totalTokens += event.totalTokens
-    daily.estimatedCostUsd = addCost(daily.estimatedCostUsd, event.estimatedCostUsd)
+    daily.estimatedCostUsd = mergeCost(
+      daily.estimatedCostUsd,
+      event.estimatedCostUsd,
+      previousDailyTokens,
+      event.totalTokens
+    )
   }
 
   return {
@@ -684,28 +822,37 @@ function mergeSessions(
       session.lastTimestamp > existing.lastTimestamp
         ? session.lastTimestamp
         : existing.lastTimestamp
+    const previousSessionTokens = existing.totalTokens
     existing.eventCount += session.eventCount
     existing.totalInputTokens += session.totalInputTokens
     existing.totalCachedInputTokens += session.totalCachedInputTokens
     existing.totalOutputTokens += session.totalOutputTokens
     existing.totalReasoningOutputTokens += session.totalReasoningOutputTokens
     existing.totalTokens += session.totalTokens
-    existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, session.estimatedCostUsd)
+    existing.estimatedCostUsd = mergeCost(
+      existing.estimatedCostUsd,
+      session.estimatedCostUsd,
+      previousSessionTokens,
+      session.totalTokens
+    )
 
     for (const location of session.locationBreakdown) {
       const existingLocation =
         existing.locationBreakdown.find((entry) => entry.locationKey === location.locationKey) ??
         null
       if (existingLocation) {
+        const previousLocationTokens = existingLocation.totalTokens
         existingLocation.eventCount += location.eventCount
         existingLocation.inputTokens += location.inputTokens
         existingLocation.cachedInputTokens += location.cachedInputTokens
         existingLocation.outputTokens += location.outputTokens
         existingLocation.reasoningOutputTokens += location.reasoningOutputTokens
         existingLocation.totalTokens += location.totalTokens
-        existingLocation.estimatedCostUsd = addCost(
+        existingLocation.estimatedCostUsd = mergeCost(
           existingLocation.estimatedCostUsd,
-          location.estimatedCostUsd
+          location.estimatedCostUsd,
+          previousLocationTokens,
+          location.totalTokens
         )
       } else {
         existing.locationBreakdown.push({ ...location })
@@ -716,15 +863,18 @@ function mergeSessions(
       const existingModel =
         existing.modelBreakdown.find((entry) => entry.modelKey === model.modelKey) ?? null
       if (existingModel) {
+        const previousModelTokens = existingModel.totalTokens
         existingModel.eventCount += model.eventCount
         existingModel.inputTokens += model.inputTokens
         existingModel.cachedInputTokens += model.cachedInputTokens
         existingModel.outputTokens += model.outputTokens
         existingModel.reasoningOutputTokens += model.reasoningOutputTokens
         existingModel.totalTokens += model.totalTokens
-        existingModel.estimatedCostUsd = addCost(
+        existingModel.estimatedCostUsd = mergeCost(
           existingModel.estimatedCostUsd,
-          model.estimatedCostUsd
+          model.estimatedCostUsd,
+          previousModelTokens,
+          model.totalTokens
         )
       } else {
         existing.modelBreakdown.push({ ...model })
@@ -739,15 +889,18 @@ function mergeSessions(
             entry.modelKey === locationModel.modelKey
         ) ?? null
       if (existingLocationModel) {
+        const previousLocationModelTokens = existingLocationModel.totalTokens
         existingLocationModel.eventCount += locationModel.eventCount
         existingLocationModel.inputTokens += locationModel.inputTokens
         existingLocationModel.cachedInputTokens += locationModel.cachedInputTokens
         existingLocationModel.outputTokens += locationModel.outputTokens
         existingLocationModel.reasoningOutputTokens += locationModel.reasoningOutputTokens
         existingLocationModel.totalTokens += locationModel.totalTokens
-        existingLocationModel.estimatedCostUsd = addCost(
+        existingLocationModel.estimatedCostUsd = mergeCost(
           existingLocationModel.estimatedCostUsd,
-          locationModel.estimatedCostUsd
+          locationModel.estimatedCostUsd,
+          previousLocationModelTokens,
+          locationModel.totalTokens
         )
       } else {
         existing.locationModelBreakdown.push({ ...locationModel })
@@ -767,13 +920,19 @@ function mergeDailyAggregates(
       target.set(key, { ...aggregate })
       continue
     }
+    const previousTokens = existing.totalTokens
     existing.eventCount += aggregate.eventCount
     existing.inputTokens += aggregate.inputTokens
     existing.cachedInputTokens += aggregate.cachedInputTokens
     existing.outputTokens += aggregate.outputTokens
     existing.reasoningOutputTokens += aggregate.reasoningOutputTokens
     existing.totalTokens += aggregate.totalTokens
-    existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, aggregate.estimatedCostUsd)
+    existing.estimatedCostUsd = mergeCost(
+      existing.estimatedCostUsd,
+      aggregate.estimatedCostUsd,
+      previousTokens,
+      aggregate.totalTokens
+    )
   }
 }
 

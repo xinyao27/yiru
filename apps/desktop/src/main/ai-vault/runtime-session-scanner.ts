@@ -41,6 +41,23 @@ const aiVaultSessionPreviewMessageSchema = z.object({
   timestamp: z.string().nullable()
 })
 
+const aiVaultSessionDayTokensSchema = z.object({
+  day: z.string(),
+  tokens: z.number()
+})
+
+const aiVaultSessionTokenUsageSchema = z.object({
+  provider: z.string().nullable(),
+  model: z.string().nullable(),
+  timestamp: z.string().nullable(),
+  inputTokens: z.number(),
+  outputTokens: z.number(),
+  cacheReadTokens: z.number(),
+  cacheWriteTokens: z.number(),
+  reasoningOutputTokens: z.number(),
+  totalTokens: z.number()
+})
+
 const executionHostIdSchema = z.string().transform((value, ctx) => {
   const normalized = normalizeExecutionHostId(value)
   if (normalized) {
@@ -72,6 +89,10 @@ const aiVaultListResultSchema = z.object({
       modifiedAt: z.string(),
       messageCount: z.number(),
       totalTokens: z.number(),
+      // Why: remote session consumers need the same per-day and per-request
+      // token evidence as the local scanner before they can price a provider.
+      tokensByDay: z.array(aiVaultSessionDayTokensSchema).optional(),
+      tokenUsage: z.array(aiVaultSessionTokenUsageSchema).optional(),
       previewMessages: z.array(aiVaultSessionPreviewMessageSchema),
       // Optional keeps paired hosts on older builds compatible.
       lastUserPrompt: z.string().nullable().optional(),

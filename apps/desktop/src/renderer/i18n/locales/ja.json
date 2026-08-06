@@ -2394,7 +2394,7 @@
           "444585cb41": "データ付き",
           "ecb0cd8a4c": "有効 -",
           "33f7b043d2": "プロバイダー",
-          "60002bb22f": "ローカルの Claude、Codex、または OpenCode の使用法はまだ見つかりません。概要は、次の agent セッションがトークン ログを書き込んだ後に表示されます。",
+          "60002bb22f": "プロバイダーの使用状況はまだ見つかりません。概要は、次の対応エージェントのセッションがトークンログを書き込んだ後に表示されます。",
           "70f36452d4": "キャッシュシェア",
           "327603fe8b": "アクティブ日数",
           "0eaf937335": "推定コスト",
@@ -2407,7 +2407,8 @@
           "ca6bc5fded": "更新",
           "e06d1baf5c": "リフレッシュの使用法の概要",
           "c760c481c5": "使用方法の概要",
-          "55c910f4f1": "- 一部のモデルの価格は利用できません"
+          "55c910f4f1": "- 一部のモデルの価格は利用できません",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2437,7 +2438,7 @@
             "0bba8ca244": "統計",
             "0e2a0b6431": "使用法",
             "372debfac0": "統計",
-            "26bb901fcd": "Yiru の統計に加え、Claude、Codex、OpenCode のトークン分析と Grok サブスクリプション使用状況。",
+            "26bb901fcd": "Yiru の統計に加え、プロバイダーのトークン分析と Grok サブスクリプション使用状況。",
             "cb2430ae6a": "統計と使用状況",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "サブスクリプション",
@@ -2451,7 +2452,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "セッション -",
@@ -2461,7 +2463,7 @@
               "1dd166c920": "少ない",
               "52d9221dc0": "最近のトークンアクティビティのヒートマップ",
               "c424eb3f8e": "最高：",
-              "f28ff1f852": "最近の Claude、Codex、および OpenCode トークン アクティビティの組み合わせ。",
+              "f28ff1f852": "最近のプロバイダーのトークン アクティビティの組み合わせ。",
               "69e2b50427": "毎日の強度",
               "3a795542fa": "組み合わせたトークンミックス",
               "e65084cb4b": "推論",
@@ -2474,7 +2476,8 @@
               "6762f6a682": "トークン",
               "a7f937fb29": "{{value0}} セッション - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "ターン",
-              "d9a4b3e2f1c5": "イベント"
+              "d9a4b3e2f1c5": "イベント",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -11856,9 +11859,10 @@
           "lifetime": "累計",
           "peakDay": "ピーク日",
           "longestStreakLabel": "最長連続日数",
-          "tokensUnavailable": "Yiru ワークツリーに帰属する Claude、Codex、OpenCode のトークン使用量はまだありません。",
-          "tokenCoverage": "トークン合計には Yiru ワークツリー内でリクエスト単位に帰属できる Claude、Codex、OpenCode の記録を使います。キャッシュ入力は重複計上せず、リクエスト単位で帰属できないセッション合計は除外します。",
-          "unpricedCoverage": "正式な価格情報がないトークンは価値合計から除外されます。"
+          "tokensUnavailable": "Yiru ワークツリーに帰属するプロバイダーのトークン使用量はまだありません。",
+          "tokenCoverage": "トークン合計には Yiru ワークツリー内の対応エージェントのリクエスト単位で帰属できる記録を使います。キャッシュ入力は重複計上せず、リクエスト単位で帰属できないセッション合計は除外します。",
+          "unpricedCoverage": "正式な価格情報がないトークンは価値合計から除外されます。",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "起動したエージェント",

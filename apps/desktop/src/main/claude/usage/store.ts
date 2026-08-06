@@ -22,9 +22,9 @@ import { priceClaudeUsage } from './pricing'
 import { createWorktreeRefs, getSessionProjectLabel, scanClaudeUsageFiles } from './scanner'
 import type { ClaudeUsagePersistedState } from './types'
 
-// Why: v6 persists per-request value and unpriced coverage after Claude's
-// cache-TTL split. Older aggregates cannot reconstruct those categories.
-const SCHEMA_VERSION = 6
+// Why: v7 adds provider-aware Vertex AI exclusion and nonnegative token
+// normalization. Older aggregates may have priced Vertex rows as Anthropic.
+const SCHEMA_VERSION = 7
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
@@ -291,6 +291,7 @@ export class ClaudeUsageStore {
     const byProject = new Map<string, number>()
     let estimatedCostUsd = 0
     let hasAnyBillableCost = false
+    let hasUnpricedCost = false
 
     for (const row of filteredDaily) {
       inputTokens += row.inputTokens
@@ -306,6 +307,7 @@ export class ClaudeUsageStore {
         (byProject.get(row.projectLabel) ?? 0) + row.inputTokens + row.outputTokens
       )
       const cost = row.estimatedCostUsd
+      hasUnpricedCost ||= row.unpricedTokens > 0
       if (cost !== null) {
         hasAnyBillableCost = true
         estimatedCostUsd += cost
@@ -331,7 +333,7 @@ export class ClaudeUsageStore {
         inputTokens + cacheReadTokens > 0
           ? cacheReadTokens / (inputTokens + cacheReadTokens)
           : null,
-      estimatedCostUsd: hasAnyBillableCost ? estimatedCostUsd : null,
+      estimatedCostUsd: hasUnpricedCost || !hasAnyBillableCost ? null : estimatedCostUsd,
       topModel,
       topProject,
       // Why: the empty-state UX is scope/range specific. Using global persisted
@@ -387,6 +389,7 @@ export class ClaudeUsageStore {
     kind: ClaudeUsageBreakdownKind
   ): ClaudeUsageBreakdownRow[] {
     const rows = new Map<string, ClaudeUsageBreakdownRow>()
+    const unpricedKeys = new Set<string>()
     const filteredDaily = this.getFilteredDaily(scope, range)
     const filteredSessions = this.getFilteredSessions(scope, range)
 
@@ -410,6 +413,9 @@ export class ClaudeUsageStore {
       existing.cacheReadTokens += daily.cacheReadTokens
       existing.cacheWriteTokens += daily.cacheWriteTokens
       existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
+      if (daily.unpricedTokens > 0) {
+        unpricedKeys.add(key)
+      }
       rows.set(key, existing)
     }
 
@@ -438,11 +444,13 @@ export class ClaudeUsageStore {
       }
     }
 
-    return [...rows.values()].sort((left, right) => {
-      const leftTotal = left.inputTokens + left.outputTokens
-      const rightTotal = right.inputTokens + right.outputTokens
-      return rightTotal - leftTotal
-    })
+    return [...rows.values()]
+      .map((row) => (unpricedKeys.has(row.key) ? { ...row, estimatedCostUsd: null } : row))
+      .sort((left, right) => {
+        const leftTotal = left.inputTokens + left.outputTokens
+        const rightTotal = right.inputTokens + right.outputTokens
+        return rightTotal - leftTotal
+      })
   }
 
   async getRecentSessions(

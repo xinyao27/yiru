@@ -2394,7 +2394,7 @@
           "444585cb41": "有数据",
           "ecb0cd8a4c": "已启用 -",
           "33f7b043d2": "供应商",
-          "60002bb22f": "尚未找到本地 Claude、Codex 或 OpenCode 使用情况。概览将在下一个 Agent 会话写入token日志后填充。",
+          "60002bb22f": "尚未找到 Provider 用量。概览将在下一个支持的 Agent 会话写入 Token 日志后填充。",
           "70f36452d4": "缓存共享",
           "327603fe8b": "活跃天数",
           "0eaf937335": "预计成本",
@@ -2407,7 +2407,8 @@
           "ca6bc5fded": "刷新",
           "e06d1baf5c": "刷新使用概览",
           "c760c481c5": "使用概述",
-          "55c910f4f1": "- 部分型号价格不详"
+          "55c910f4f1": "- 部分型号价格不详",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "share": {
           "card": {
@@ -2437,7 +2438,7 @@
             "0bba8ca244": "统计数据",
             "0e2a0b6431": "用法",
             "372debfac0": "统计数据",
-            "26bb901fcd": "Yiru 统计，以及 Claude、Codex、OpenCode Token 分析和 Grok 订阅使用量。",
+            "26bb901fcd": "Yiru 统计，以及 Provider Token 分析和 Grok 订阅使用量。",
             "cb2430ae6a": "统计和使用情况",
             "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "订阅",
@@ -2451,7 +2452,8 @@
             "model": {
               "bc474051e5": "OpenCode",
               "eb220d193b": "Codex",
-              "544d6d4c16": "Claude"
+              "544d6d4c16": "Claude",
+              "other": "Other agents"
             },
             "sections": {
               "9564a3b21b": "会话 -",
@@ -2461,7 +2463,7 @@
               "1dd166c920": "较少的",
               "52d9221dc0": "近期token活动热图",
               "c424eb3f8e": "最好的：",
-              "f28ff1f852": "近期 Claude、Codex 和 OpenCode 的综合token活动。",
+              "f28ff1f852": "近期各 Provider 的综合 Token 活动。",
               "69e2b50427": "每日强度",
               "3a795542fa": "综合token分布",
               "e65084cb4b": "推理",
@@ -2474,7 +2476,8 @@
               "6762f6a682": "token",
               "a7f937fb29": "{{value0}} 个会话 - {{value1}} {{value2}}",
               "c8f3a2d1e0b4": "轮次",
-              "d9a4b3e2f1c5": "事件"
+              "d9a4b3e2f1c5": "事件",
+              "usageLedger": "Token ledger"
             }
           }
         },
@@ -11856,9 +11859,10 @@
           "lifetime": "累计",
           "peakDay": "峰值日",
           "longestStreakLabel": "最长连续",
-          "tokensUnavailable": "暂时没有归因到 Yiru 工作树的 Claude、Codex 或 OpenCode Token 用量。",
-          "tokenCoverage": "Token 总数使用 Yiru 工作树中可归因到请求的 Claude、Codex 与 OpenCode 记录；缓存输入不会重复计算，缺少请求级归因的会话汇总会被排除。",
-          "unpricedCoverage": "缺少权威定价明细的 Token 不会计入价值总额。"
+          "tokensUnavailable": "暂时没有归因到 Yiru 工作树的 Provider Token 用量。",
+          "tokenCoverage": "Token 总数使用 Yiru 工作树中各支持 Agent 的请求级归因记录；缓存输入不会重复计算，缺少请求级归因的会话汇总会被排除。",
+          "unpricedCoverage": "缺少权威定价明细的 Token 不会计入价值总额。",
+          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
         },
         "activitySummary": {
           "agentsSpawned": "启动的 Agent",

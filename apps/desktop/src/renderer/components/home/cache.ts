@@ -8,7 +8,7 @@ const HOME_DATA_CACHE_SCHEMA_VERSION = 1
 
 export type HomeCachedUsageValue = Pick<
   UsageValue,
-  'dailyTokens' | 'dailyValues' | 'hasUnpricedUsage' | 'hasValue' | 'models'
+  'dailyTokens' | 'dailyValues' | 'hasUnpricedUsage' | 'hasValue' | 'models' | 'meteredValueUsd'
 >
 
 export type HomeDataSnapshot = {
@@ -47,7 +47,8 @@ export function saveHomeDataSnapshot(stats: StatsSummary, usage: UsageValue): Ho
       dailyValues: usage.dailyValues,
       hasUnpricedUsage: usage.hasUnpricedUsage,
       hasValue: usage.hasValue,
-      models: usage.models
+      models: usage.models,
+      ...(usage.meteredValueUsd === undefined ? {} : { meteredValueUsd: usage.meteredValueUsd })
     }
   }
   try {
@@ -118,7 +119,15 @@ function parseUsageValue(value: unknown): HomeCachedUsageValue | null {
     dailyValues,
     hasUnpricedUsage: value.hasUnpricedUsage,
     hasValue: value.hasValue,
-    models
+    models,
+    ...(value.meteredValueUsd === undefined
+      ? {}
+      : {
+          meteredValueUsd:
+            value.meteredValueUsd === null || isFiniteNumber(value.meteredValueUsd)
+              ? value.meteredValueUsd
+              : null
+        })
   }
 }
 
