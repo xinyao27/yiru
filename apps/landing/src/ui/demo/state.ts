@@ -32,10 +32,10 @@ export type DemoState = {
   groups: PaneGroup[]
   promptChars: number
   working: boolean
-  elapsedSeconds: number
-  tokens: number
+  /** How many entries of SESSION_TRANSCRIPT the session has printed so far. */
+  transcript: number
+  answered: boolean
   diffLines: number
-  checksVisible: boolean
   /** Shared by both surfaces — the phone drives it, the desktop mirrors it. */
   browserReloading: boolean
   browserFresh: boolean
@@ -51,11 +51,14 @@ export type DemoState = {
 
 export const PROJECT_NAME = 'storefront'
 export const ACTIVE_BRANCH = 'fix/stale-search'
-export const AGENT_LABEL = 'Claude Code'
-export const AGENT_MODEL = 'Opus 5'
+export const AGENT_VERSION = 'v2.1.206'
+export const AGENT_USER = 'Xinyao'
+export const AGENT_MODEL = 'Opus 5 · Claude Max'
 export const AGENT_CWD = '~/code/storefront'
 export const PROMPT = 'search results come back stale'
 export const FOLLOW_UP = 'add a test for the race'
+export const SESSION_ANSWER =
+  'The fetch was never awaited, so a slower earlier query could resolve last.'
 
 export const SEARCH_QUERY = 'running shoes'
 
@@ -115,6 +118,42 @@ export const DIFF_LINES: DiffLine[] = [
   { kind: 'context', number: 52, text: '  }' }
 ]
 
+/**
+ * Why: the pane replays real Claude Code output, so a beat is one of the shapes
+ * the brainless components model — a tool line or an edit hunk — rather than a
+ * line of prose the view has to pattern-match. `wide` marks the entries the
+ * phone drops: a six-line hunk cannot be read at 170px without scrolling
+ * sideways, and the phone's job in this story is to follow along and reply.
+ */
+export type SessionEntry =
+  | { kind: 'tool'; tool: string; arg: string; result: string; wide?: false }
+  | {
+      kind: 'edit'
+      file: string
+      summary: string
+      lines: { type: 'add' | 'del' | 'ctx'; n?: number; text: string }[]
+      wide: true
+    }
+
+export const SESSION_TRANSCRIPT: SessionEntry[] = [
+  { kind: 'tool', tool: 'Read', arg: DIFF_FILE, result: 'Read 68 lines' },
+  {
+    kind: 'edit',
+    file: DIFF_FILE,
+    summary: 'Updated with 2 additions and 2 removals',
+    wide: true,
+    lines: [
+      { type: 'ctx', n: 48, text: '    setLoading(true)' },
+      { type: 'del', n: 49, text: '    const results = fetchResults(query)' },
+      { type: 'add', n: 49, text: '    const results = await fetchResults(query)' },
+      { type: 'ctx', n: 50, text: '    setResults(results)' },
+      { type: 'del', n: 51, text: '    setLoading(true)' },
+      { type: 'add', n: 51, text: '    setLoading(false)' }
+    ]
+  },
+  { kind: 'tool', tool: 'Bash', arg: 'pnpm check', result: '✓ typecheck ✓ lint ✓ build' }
+]
+
 export const TAB_LABELS: Record<TabId, string> = {
   claude: 'claude',
   diff: 'Diff',
@@ -126,10 +165,9 @@ export const initialState: DemoState = {
   groups: [{ tabs: ['claude'], activeTab: 'claude' }],
   promptChars: 0,
   working: false,
-  elapsedSeconds: 0,
-  tokens: 0,
+  transcript: 0,
+  answered: false,
   diffLines: 0,
-  checksVisible: false,
   browserReloading: false,
   browserFresh: false,
   composerText: '',

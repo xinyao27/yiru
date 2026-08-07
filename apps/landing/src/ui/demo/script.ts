@@ -1,4 +1,11 @@
-import { ACTIVE_BRANCH, BASE_WORKTREES, DIFF_LINES, FOLLOW_UP, PROMPT } from './state'
+import {
+  ACTIVE_BRANCH,
+  BASE_WORKTREES,
+  DIFF_LINES,
+  FOLLOW_UP,
+  PROMPT,
+  SESSION_TRANSCRIPT
+} from './state'
 import type { DemoState } from './state'
 
 export type Frame = {
@@ -20,22 +27,13 @@ const promptTyping: Frame[] = Array.from({ length: Math.ceil(PROMPT.length / 2) 
   patch: { promptChars: Math.min((index + 1) * 2, PROMPT.length) }
 }))
 
-// Why: react.doctor's counter climbs continuously rather than stepping, so the
-// token total is driven in small increments and the seconds tick alongside it.
-const WORK_STEPS = 26
-const WORK_STEP_MS = 90
-const TOKEN_TARGET = 812
-const workProgress: Frame[] = Array.from({ length: WORK_STEPS }, (_, index) => {
-  const progress = (index + 1) / WORK_STEPS
-  return {
-    ms: WORK_STEP_MS,
-    patch: {
-      working: true,
-      elapsedSeconds: Math.max(1, Math.ceil(progress * 4)),
-      tokens: Math.round(TOKEN_TARGET * progress)
-    }
-  }
-})
+// Why: a real turn prints its tool lines one at a time with the working line
+// still running underneath, so the transcript grows against a live spinner
+// rather than appearing all at once when the turn ends.
+const workProgress: Frame[] = [
+  { ms: 600, patch: { working: true } },
+  ...SESSION_TRANSCRIPT.map((_, index) => ({ ms: 800, patch: { transcript: index + 1 } }))
+]
 
 // Why: typed from the phone; the desktop composer shows the same characters
 // because both read state.composerText.
@@ -72,7 +70,7 @@ export const frames: Frame[] = [
   ...promptTyping,
   { ms: 350, patch: {} },
   ...workProgress,
-  { ms: 500, patch: { working: false, checksVisible: true } },
+  { ms: 500, patch: { working: false, answered: true } },
 
   // 3 · Browser — verify the behaviour before reading the change. The rows are
   // still answering the previous query until the page picks the fix up.

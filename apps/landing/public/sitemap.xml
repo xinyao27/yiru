@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Why: the site is a single document. /download and /docs/* are advertised by
+     the desktop app and README but are not routes here yet, so listing them
+     would submit URLs that only echo the homepage. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://yiru.ai/</loc>
+  </url>
+</urlset>

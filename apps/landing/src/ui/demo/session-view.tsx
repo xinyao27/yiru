@@ -1,8 +1,21 @@
 import { cn } from 'cnfast'
 
-import { ClaudeSpinner } from './claude-spinner'
-import { AGENT_CWD, AGENT_LABEL, AGENT_MODEL, PROMPT } from './state'
-import type { DemoState } from './state'
+import { ClaudeDiff } from '../../components/brainless/claude/claude-diff'
+import { ClaudeHeader } from '../../components/brainless/claude/claude-header'
+import { ClaudeMessage } from '../../components/brainless/claude/claude-message'
+import { ClaudePrompt } from '../../components/brainless/claude/claude-prompt'
+import { ClaudeThinking } from '../../components/brainless/claude/claude-thinking'
+import { ClaudeToolCall } from '../../components/brainless/claude/claude-tool-call'
+import {
+  AGENT_CWD,
+  AGENT_MODEL,
+  AGENT_USER,
+  AGENT_VERSION,
+  PROMPT,
+  SESSION_ANSWER,
+  SESSION_TRANSCRIPT
+} from './state'
+import type { DemoState, SessionEntry } from './state'
 
 export type SessionViewProps = {
   state: DemoState
@@ -10,113 +23,120 @@ export type SessionViewProps = {
   compact?: boolean
 }
 
+const entryKey = (entry: SessionEntry): string =>
+  entry.kind === 'tool' ? `tool-${entry.tool}` : `edit-${entry.file}`
+
 /**
  * Why: desktop and phone render this one component from one state object, so the
  * two surfaces cannot drift — the mirroring the beat is claiming is structural
  * rather than two scripts kept in step by hand.
+ *
+ * Every line of the session is a brainless component rather than terminal chrome
+ * drawn by hand, so the welcome box stays a fieldset/legend, a tool line stays a
+ * keyboard-operable <details>, the working line stays an aria-live region and
+ * the composer stays a real input. What the demo owns is the script; what the
+ * output looks like is Claude Code's, not this page's guess at it.
  */
 export function SessionView({ state, compact = false }: SessionViewProps): React.JSX.Element {
   // Why: size and leading must ship as one class. twMerge treats `text-[13px]`
   // as a font-size utility that may carry its own line-height, so a separate
   // `leading-*` placed before it is dropped — silently, and the line inherits.
-  const body = compact ? 'text-[10px]/[1.6]' : 'text-[12.5px]/[1.6]'
+  const line = compact ? 'text-[9px]/[1.55]' : 'text-[12px]/[1.55]'
   const typed = PROMPT.slice(0, state.promptChars)
+  const entries = SESSION_TRANSCRIPT.slice(0, state.transcript).filter(
+    (entry) => !compact || entry.wide !== true
+  )
 
   return (
     // Why: a flex item with only min-w-0 shrinks to its content — the desktop
     // pane needs flex-1 to keep filling its column.
-    <div className={cn('flex h-full w-full min-w-0 flex-1 flex-col font-mono', body)}>
-      <div className={cn('min-h-0 flex-1', compact ? 'p-2' : 'p-3.5')}>
-        {/* Why: the card is sized to its content, not the pane — stretched
-            across a wide split it stops reading as a terminal banner. The
-            legend clears the corner radius and interrupts the top rule. */}
-        <div
-          className={cn(
-            'border-claude/80 relative rounded-[6px] border',
-            compact ? 'px-3 py-2.5' : 'max-w-[300px] px-3.5 py-3'
-          )}
-        >
-          {/* Why: left offset is the card's content inset minus the legend's own
-              px-1.5 mask padding, so the label's text edge lines up with the
-              text beneath it. -translate-y-1/2 centres the span on the rule
-              itself, which stays exact whatever the font metrics are. */}
-          <span
-            className={cn(
-              'bg-page text-claude absolute top-0 -translate-y-1/2 px-1.5',
-              compact ? 'text-[9px]/[1]' : 'text-[11.5px]/[1]',
-              compact ? 'left-1.5' : 'left-2'
-            )}
-          >
-            {AGENT_LABEL}
-          </span>
-          {/* Why: leading-none makes each line box exactly its font size, so the
-              flex gap is the whole gap. With inherited leading plus a margin the
-              real spacing was three values stacked, and never the one written. */}
-          <div className="flex flex-col gap-[5px]">
-            <p className={cn('text-ink', compact ? 'text-[11px]/[1]' : 'text-[13px]/[1]')}>
-              {AGENT_MODEL}
-            </p>
-            <p className={cn('text-faint', compact ? 'text-[9px]/[1]' : 'text-[11.5px]/[1]')}>
-              {AGENT_CWD}
-            </p>
-          </div>
-        </div>
+    <div className="flex h-full w-full min-w-0 flex-1 flex-col font-mono">
+      {/* Why: a terminal scrolls off the top, and this transcript outgrows the
+          pane on purpose. justify-end with the overflow clipped puts the oldest
+          output past the top edge and keeps the newest line against the
+          composer — the same place a real session leaves it, and without a
+          scrollbar the visitor has no way to drive. */}
+      <div
+        className={cn(
+          'flex min-h-0 flex-1 flex-col justify-end gap-2 overflow-hidden',
+          compact ? 'p-2' : 'p-3.5'
+        )}
+      >
+        {/* Why: the welcome box is a two-up grid around a sprite logo — it needs
+            more width than the phone screen has, and a phone client would not
+            print the desktop launch banner anyway. */}
+        {compact ? null : (
+          <ClaudeHeader
+            version={AGENT_VERSION}
+            user={AGENT_USER}
+            model={AGENT_MODEL}
+            org=""
+            cwd={AGENT_CWD}
+            tips={[]}
+            whatsNew={[]}
+            logoScale={3}
+            className={cn('shrink-0', line)}
+          />
+        )}
 
         {state.promptChars > 0 ? (
-          <p className="text-copy mt-3 break-words">
-            <span className="text-claude mr-1.5">›</span>
+          <ClaudeMessage role="user" className={cn('shrink-0', line)}>
             {typed}
-            {state.promptChars < PROMPT.length ? (
-              <span className="caret text-claude">▊</span>
-            ) : null}
-          </p>
+            {state.promptChars < PROMPT.length ? <span className="caret">▊</span> : null}
+          </ClaudeMessage>
         ) : null}
+
+        {entries.map((entry) =>
+          entry.kind === 'tool' ? (
+            <ClaudeToolCall
+              key={entryKey(entry)}
+              tool={entry.tool}
+              arg={entry.arg}
+              result={entry.result}
+              className={cn('shrink-0', line)}
+            />
+          ) : (
+            <ClaudeDiff
+              key={entryKey(entry)}
+              file={entry.file}
+              summary={entry.summary}
+              lines={entry.lines}
+              className={cn('shrink-0', line)}
+            />
+          )
+        )}
 
         {state.working ? (
-          <p className="text-ink mt-2.5">
-            <ClaudeSpinner className="text-claude mr-1.5 w-3" />
-            Fixing issues…{' '}
-            <span className="text-faint tabular-nums">
-              ({state.elapsedSeconds}s · ↓ {state.tokens.toLocaleString('en-US')} tokens)
-            </span>
-          </p>
+          <ClaudeThinking showTokens={false} className={cn('shrink-0', line)} />
         ) : null}
 
-        {state.checksVisible ? (
-          <p className="text-add-ink mt-2">✓ typecheck ✓ lint ✓ build</p>
+        {state.answered ? (
+          <ClaudeMessage className={cn('shrink-0', line)}>{SESSION_ANSWER}</ClaudeMessage>
         ) : null}
 
         {state.followUp ? (
-          <p className="text-copy mt-3 break-words">
-            <span className="text-claude mr-1.5">›</span>
+          <ClaudeMessage role="user" className={cn('shrink-0', line)}>
             {state.followUp}
-          </p>
+          </ClaudeMessage>
         ) : null}
 
         {state.followUpWorking ? (
-          <p className="text-ink mt-2.5">
-            <ClaudeSpinner className="text-claude mr-1.5 w-3" />
-            Cooking…
-          </p>
+          <ClaudeThinking showTokens={false} className={cn('shrink-0', line)} />
         ) : null}
       </div>
 
-      {/* Composer — the surface being driven from the phone. Why: full-bleed
-          rules rather than an inset box, so it reads as the terminal's own
-          prompt line. Only a top rule: it is the last element in the pane, so a
-          bottom one would double up against the window's own border. */}
-      <div
-        className={cn(
-          'border-hairline flex shrink-0 items-center gap-2 border-t',
-          compact ? 'px-2 py-1.5' : 'px-3.5 py-2.5'
-        )}
-      >
-        <span className="text-claude shrink-0">›</span>
-        <span className="text-ink min-w-0 flex-1 truncate">
-          {state.composerText}
-          {state.composerActive ? <span className="caret text-claude">▊</span> : null}
-        </span>
-      </div>
+      {/* Composer — the surface being driven from the phone. Why: readOnly
+          because the script owns the value; without it React reports a
+          controlled input with no change handler. The mode line is dropped on
+          the phone, where it wraps to three. */}
+      <ClaudePrompt
+        value={state.composerText}
+        readOnly
+        effort={false}
+        mode={compact ? false : 'auto'}
+        className={cn('shrink-0', compact ? 'px-2 py-1.5' : 'px-3.5 py-2', line)}
+        inputClassName={line}
+      />
     </div>
   )
 }
