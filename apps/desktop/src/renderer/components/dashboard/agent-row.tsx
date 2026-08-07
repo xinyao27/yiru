@@ -12,6 +12,7 @@ import { agentTypeToIconAgent, formatAgentTypeLabel } from '~renderer/lib/agent-
 import { cn } from '~renderer/lib/class-names'
 
 import { DashboardAgentChildDisclosure } from './agent-child-disclosure'
+import { isDismissibleAgentRow } from './agent-row-dismissible'
 import { DashboardAgentRowMessage } from './agent-row-message'
 import { DashboardAgentRowToolStep } from './agent-row-tool-step'
 import { DashboardAgentRowTrailingControls } from './agent-row-trailing-controls'
@@ -435,7 +436,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
           relativeTimestamp={relativeTimestamp}
           expanded={expanded}
           hideExpand={hideExpand}
-          hideDismiss={agent.rowSource === 'subagent'}
+          hideDismiss={!isDismissibleAgentRow(agent)}
           sendTargetStatus={sendTargetStatus}
           onDismiss={onDismiss}
           onToggleExpanded={handleToggleExpanded}

@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import DashboardAgentRow from '~renderer/components/dashboard/agent-row'
+import { isDismissibleAgentRow } from '~renderer/components/dashboard/agent-row-dismissible'
 import { buildAgentRowLineageTree } from '~renderer/components/dashboard/agent-row-lineage-model'
 import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
 import { useNow } from '~renderer/components/dashboard/use-now'
@@ -397,7 +398,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
           // Why: retained completion rows outlive the tab they came from, so
           // the compact list is the only surface left that can clear them.
           // Without an X here a stale row has no user-reachable exit.
-          onDismiss={agent.rowSource === 'subagent' ? undefined : handleDismissAgent}
+          onDismiss={isDismissibleAgentRow(agent) ? handleDismissAgent : undefined}
         />
         {childBranches.length > 0 ? (
           <div

@@ -21,7 +21,10 @@ export type DashboardAgentRow = {
   entry: AgentStatusEntry
   tab: TerminalTab
   agentType: AgentType
-  rowSource?: 'live' | 'retained' | 'subagent'
+  /** Where the row came from. 'title' rows are inferred from a live pane's
+   *  terminal title and have no entry in agentStatusByPaneKey, so nothing
+   *  about them is dismissible. */
+  rowSource?: 'live' | 'retained' | 'subagent' | 'title'
   state: AgentStatusState | 'idle'
   /** Pane to focus when the row is activated, when it differs from paneKey.
    *  Subagent rows have no pane of their own and activate their parent's. */

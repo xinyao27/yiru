@@ -2288,6 +2288,19 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         // guard used in setAgentStatus.
         const needsSuppressorWrite = hasLive && !(paneKey in s.retentionSuppressedPaneKeys)
 
+        // Why: when no tab in this renderer owns the pane, deleting the entry
+        // is not enough. Such rows only exist because the sidebar keeps
+        // worktree-attributed statuses whose tab never arrived (or was
+        // reconciled away), and the agent behind them can still be alive in a
+        // pane we no longer track — its next hook ping re-adds the row within
+        // seconds, so the dismiss X reads as dead. Retire the paneKey the way
+        // dropAgentStatusByTabPrefix retires a closed tab's panes; setAgentStatus
+        // then refuses late pings for it. paneKeys embed tab+leaf uuids that
+        // never recur, so this cannot block a pane the user can still reach.
+        const needsRetirementWrite =
+          findAgentPaneWorktreeId(s, paneKey) === null &&
+          !(paneKey in s.recentlyRetiredAgentStatusPaneKeys)
+
         return {
           agentStatusByPaneKey: nextLive,
           agentLaunchConfigByPaneKey: nextLaunchConfigs,
@@ -2295,6 +2308,14 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           migrationUnsupportedByPtyId: migrationUnsupported.next,
           ...(nextAck !== s.acknowledgedAgentsByPaneKey
             ? { acknowledgedAgentsByPaneKey: nextAck }
+            : {}),
+          ...(needsRetirementWrite
+            ? {
+                recentlyRetiredAgentStatusPaneKeys: boundRecentlyRetiredAgentStatusPaneKeys(
+                  s.recentlyRetiredAgentStatusPaneKeys,
+                  [paneKey]
+                )
+              }
             : {}),
           ...(needsSuppressorWrite
             ? {
