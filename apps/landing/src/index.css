@@ -1,6 +1,76 @@
 @import 'tailwindcss';
 
+/* Why: Geist is self-hosted rather than fetched from fonts.googleapis.com. That
+   stylesheet is render-blocking on a third-party origin, so first paint waited on
+   DNS, TLS, and the CSS response *before* the font request to gstatic could even
+   begin — a serialized two-hop chain in front of every glyph. Preloading two
+   same-origin files collapses it to one hop.
+
+   Variable faces rather than static instances: these two cover 400/500/600 in
+   141 kB, where the five static weights the page uses come to 240 kB across five
+   requests. */
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/geist-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
+
+/* Why: the demo is a fixed-geometry mock of the desktop app. It has a hard
+   min-content width — 343px as measured today, a 168px worktree rail plus 173px of
+   pane content — and the narrowest phones are below that, so it is zoomed to fit
+   rather than clipped or scrolled sideways. The demo is an illustration, so
+   shrinking it costs less than hiding any part of it.
+
+   `zoom` rather than `transform: scale()`: zoom scales layout, so the box height
+   follows the shrink and there is no dead space to reserve — and the demo's
+   height is not constant across its timeline, so there would be nothing reliable
+   to reserve.
+
+   Discrete steps rather than a fluid ratio because CSS cannot divide a length by
+   a length to get one, and a JS-measured ratio would either disagree with the
+   prerendered markup or shift the page right after hydration.
+
+   Each step is the largest value that fits that minimum into the viewport less
+   32px of gutters, so 1:1 already covers every phone from 375px up. Only the
+   narrow end needs help. These are the one place a demo-geometry number is
+   unavoidable, so they are deliberately the *approximate* half of the mechanism:
+   ui/demo/demo.tsx holds the window at min-content and keeps a scroll track, so a
+   step that a future redesign outgrows degrades to a scrollable demo rather than
+   a broken page. Below the sm breakpoint the demo goes full-bleed, which is what
+   keeps these steps this close to 1. */
+:root {
+  --demo-zoom: 1;
+}
+
+@media (max-width: 374px) {
+  :root {
+    --demo-zoom: 0.9;
+  }
+}
+
+@media (max-width: 340px) {
+  :root {
+    --demo-zoom: 0.84;
+  }
+}
+
+@media (max-width: 320px) {
+  :root {
+    --demo-zoom: 0.78;
+  }
+}
 
 @theme {
   --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -78,6 +148,29 @@
   --status-idle: #73737366;
   --claude: #d97757;
   /* Why: Claude's brand coral, as used in the desktop status-bar icons. */
+
+  /* Why: the brainless registry components ship one hardcoded terminal palette,
+     which is Claude Code's own — correct on a dark terminal, unreadable on this
+     page's light theme. Vendoring them means the constants at the top of each
+     file point here instead, so the one thing that has to change per theme is
+     the only thing that was edited. Dark keeps the shipped values verbatim. */
+  --claude-rose: #cd694a;
+  --claude-hilite: #e79475;
+  --claude-fg: #c0caf5;
+  --claude-dim: #8b8fa3;
+  --claude-gray: #949494;
+  --claude-punct: #565f89;
+  --claude-arg: #7dcfff;
+  --claude-rule: #808080;
+  --claude-ok: #4ea96f;
+  --claude-err: #f7768e;
+  --claude-pending: #e0af68;
+  --claude-user-bg: #3a3a3a;
+  --claude-user-mark: #4e4e4e;
+  --claude-user-fg: #ffffff;
+  --claude-code-bg: #101010;
+  --claude-code-border: #202022;
+  --claude-lineno: #3b3f52;
 }
 
 .light {
@@ -109,6 +202,28 @@
   --status-attention: #f59e0b;
   --status-idle: #73737366;
   --claude: #d97757;
+
+  /* Why: same roles as the dark set above, re-picked for a light ground. The
+     hues are held (terracotta stays terracotta, the argument colour stays
+     cyan-blue) and only the lightness is inverted, so the session still reads
+     as Claude Code rather than as a generic light code block. */
+  --claude-rose: #b8502f;
+  --claude-hilite: #d97757;
+  --claude-fg: #1f2430;
+  --claude-dim: #5b6070;
+  --claude-gray: #6b6b6b;
+  --claude-punct: #8a90a6;
+  --claude-arg: #0a6c9c;
+  --claude-rule: #b4b4b4;
+  --claude-ok: #1a7f4b;
+  --claude-err: #c1344e;
+  --claude-pending: #9a6700;
+  --claude-user-bg: #e6e6e6;
+  --claude-user-mark: #a8a8a8;
+  --claude-user-fg: #101010;
+  --claude-code-bg: #f1f1f1;
+  --claude-code-border: #e0e0e0;
+  --claude-lineno: #a3a7b8;
 }
 
 @layer base {
