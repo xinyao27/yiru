@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server'
 
 import { App } from './app'
+import { renderFaqStructuredData } from './structured-data'
 
 /**
  * Why: the build-time counterpart of main.tsx. `vp build` emits a document whose
@@ -15,3 +16,5 @@ import { App } from './app'
 export function renderApp(): string {
   return renderToString(<App />)
 }
+
+export { renderFaqStructuredData }

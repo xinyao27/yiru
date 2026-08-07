@@ -1,7 +1,9 @@
 import { DownloadMenu } from './chrome/download-menu'
 import { ThemeToggle } from './chrome/theme-toggle'
 import { siteLinks } from './site-links'
+import { Capabilities } from './ui/capabilities'
 import { Demo } from './ui/demo/demo'
+import { Faq } from './ui/faq/list'
 
 // Why: the architecture is a choice rather than a second download, because
 // browsers report "Intel Mac OS X" even on Apple Silicon — detecting it would
@@ -74,6 +76,10 @@ export function App(): React.JSX.Element {
           </div>
 
           <Demo />
+
+          <Capabilities />
+
+          <Faq />
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             {footerLinks.map((link) => (
