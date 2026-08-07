@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "catalog:",
+    "@tanstack/react-router": "catalog:",
     "@yiru/workbench-model": "workspace:*",
     "cnfast": "catalog:",
     "react": "catalog:",

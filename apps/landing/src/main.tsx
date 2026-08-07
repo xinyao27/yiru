@@ -1,28 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot, hydrateRoot } from 'react-dom/client'
+import { createBrowserHistory } from '@tanstack/react-router'
+import { RouterClient } from '@tanstack/react-router/ssr/client'
+import { hydrateRoot } from 'react-dom/client'
 
-import { App } from './app'
+import { createAppRouter } from './router'
 
 import './index.css'
 
-const container = document.getElementById('root')
-if (!container) {
-  throw new Error('Root element not found')
-}
+/**
+ * Why: hydrating `document`, not a container inside it. The root route's
+ * shellComponent renders `<html>`, so the router owns the whole document — that is
+ * the pairing TanStack Router documents, and `RouterClient` is the half that reads
+ * the dehydrated payload `Scripts` emitted on the server. Without it the two renders
+ * disagree about Suspense boundaries and hydration fails outright (React #418).
+ *
+ * StrictMode is deliberately absent: RouterClient suspends on the hydration promise,
+ * and StrictMode's double-invoke around that buys nothing here.
+ */
+const router = createAppRouter(createBrowserHistory())
 
-const tree = (
-  <StrictMode>
-    <App />
-  </StrictMode>
-)
-
-// Why: only the built document carries a prerendered tree, injected by
-// apps/landing/scripts/prerender.mjs. `vp dev` still serves an empty #root, and
-// hydrating an empty container logs a mismatch before falling back to a client
-// render — so branch on the DOM that is actually there rather than on a build
-// flag, and the dev server stays quiet.
-if (container.firstChild) {
-  hydrateRoot(container, tree)
-} else {
-  createRoot(container).render(tree)
-}
+hydrateRoot(document, <RouterClient router={router} />)

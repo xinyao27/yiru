@@ -21,6 +21,7 @@ catalog:
   '@react-native-async-storage/async-storage': ^3.1.1
   '@sanity/diff-match-patch': ^3.2.0
   '@tailwindcss/vite': ^4.3.3
+  '@tanstack/react-router': ^1.170.21
   '@tiptap/core': ^3.28.0
   '@tiptap/extension-code': ^3.28.0
   '@tiptap/extension-code-block-lowlight': ^3.28.0
@@ -265,3 +266,6 @@ supportedArchitectures:
 minimumReleaseAgeExclude:
   - thinking-orbs@0.1.1
   - '@pierre/diffs@1.3.0'
+  - '@tanstack/history@1.162.1'
+  - '@tanstack/react-router@1.170.21'
+  - '@tanstack/router-core@1.171.18'
