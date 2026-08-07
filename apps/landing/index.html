@@ -3,24 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yiru — Run coding agents anywhere your code lives</title>
+    <title>Yiru — The AI Agent Editor IDE for Claude Code and Codex</title>
     <meta
       name="description"
-      content="Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or an SSH box. Review and merge from your desk or your phone. Open source, MIT."
+      content="Open-source AI agent editor IDE. Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or SSH. Review and merge from your phone."
     />
-    <meta property="og:title" content="Yiru — Run coding agents anywhere your code lives" />
+    <!-- Why: this is the site's only indexable document, so every way of reaching
+         it — a campaign query string, a stray trailing path, the www hostname —
+         has to declare the same URL or Google splits the signals across them. -->
+    <link rel="canonical" href="https://yiru.ai/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e0e0e" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa" />
+    <meta property="og:title" content="Yiru — The AI Agent Editor IDE for Claude Code and Codex" />
     <meta
       property="og:description"
       content="Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or an SSH box. Review and merge from your desk or your phone."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://yiru.ai/og.png" />
+    <meta property="og:url" content="https://yiru.ai/" />
+    <meta property="og:site_name" content="Yiru" />
+    <meta property="og:locale" content="en_US" />
+    <!-- Why: 1200x675 keeps the artwork's own 16:9 framing. Cropping to the
+         1.91:1 that Facebook documents clips the wordmark top and bottom, and
+         both networks letterbox 16:9 in the large card anyway. JPEG because the
+         source is a smooth gradient: 133 kB against 925 kB as PNG. -->
+    <meta property="og:image" content="https://yiru.ai/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
+    <meta
+      property="og:image:alt"
+      content="Yiru running coding agents across isolated git worktrees"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Yiru — The AI Agent Editor IDE for Claude Code and Codex" />
+    <meta
+      name="twitter:description"
+      content="Run Claude Code, Codex, and any CLI agent in isolated git worktrees — on macOS, Windows, Linux, WSL, or an SSH box. Review and merge from your desk or your phone."
+    />
+    <meta name="twitter:image" content="https://yiru.ai/og.jpg" />
+    <!-- Why: the page is client-rendered, so this block is the only product
+         description a non-JS crawler can read. Claims here must stay checkable
+         against the release — no ratings, no version, nothing that goes stale. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://yiru.ai/#website",
+            "url": "https://yiru.ai/",
+            "name": "Yiru",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://yiru.ai/#publisher" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://yiru.ai/#publisher",
+            "name": "Yiru",
+            "url": "https://yiru.ai/",
+            "logo": "https://yiru.ai/favicon.png",
+            "sameAs": ["https://github.com/xinyao27/yiru", "https://github.com/xinyao27"]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://yiru.ai/#app",
+            "name": "Yiru",
+            "alternateName": "Yiru AI agent editor IDE",
+            "description": "An open-source AI agent editor IDE that runs Claude Code, Codex, and any CLI coding agent in isolated git worktrees across local, WSL, SSH, and relay-connected hosts.",
+            "applicationCategory": "DeveloperApplication",
+            "applicationSubCategory": "Integrated Development Environment",
+            "operatingSystem": "macOS, Windows, Linux, iOS",
+            "url": "https://yiru.ai/",
+            "image": "https://yiru.ai/og.jpg",
+            "downloadUrl": "https://github.com/xinyao27/yiru/releases/latest",
+            "license": "https://github.com/xinyao27/yiru/blob/main/LICENSE",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "featureList": [
+              "Runs Claude Code, Codex, and any CLI coding agent",
+              "One isolated git worktree per agent session",
+              "Local, WSL, SSH, and relay-connected hosts",
+              "Review diffs and merge from an iOS companion app",
+              "Open source under the MIT license"
+            ],
+            "publisher": { "@id": "https://yiru.ai/#publisher" }
+          }
+        ]
+      }
+    </script>
     <link rel="icon" href="/favicon.png" type="image/png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Why: both faces are needed above the fold — the heading is sans, the
+         download row is mono — and @font-face inside the bundled stylesheet is
+         only discovered after that CSS parses. Preload starts them in parallel
+         with it. `crossorigin` is required even same-origin, or the preload is
+         fetched twice. The faces themselves are declared in src/index.css. -->
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap"
+      rel="preload"
+      href="/fonts/geist-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/geist-mono-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <script>
       // Why: follow the system preference unless the visitor picked a theme.

@@ -23,7 +23,7 @@
     "dev": "vp dev",
     "preview": "vp preview",
     "build:workspace-deps": "vp run --filter '{.}^...' build",
-    "build": "vp run build:workspace-deps && vp build",
+    "build": "vp run build:workspace-deps && vp build && node scripts/prerender.mjs",
     "typecheck": "vp run build:workspace-deps && tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.worker.json",
     "deploy": "vp run build && wrangler deploy",
     "deploy:dry-run": "wrangler deploy --dry-run"
