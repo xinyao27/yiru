@@ -12,6 +12,7 @@ APP_ICONS_DIR="$PROJECT_DIR/resources/app-icons"
 TRAY_ASSETS_DIR="$PROJECT_DIR/resources/tray"
 WEB_PUBLIC_DIR="$PROJECT_DIR/src/renderer/public"
 ONBOARDING_ASSETS_DIR="$PROJECT_DIR/resources/onboarding/feature-wall"
+LANDING_PUBLIC_DIR="$REPO_ROOT/apps/landing/public"
 
 QLMANAGE_BIN=$(command -v qlmanage || true)
 if [ -z "$QLMANAGE_BIN" ]; then
@@ -32,10 +33,19 @@ render_svg() {
   mv "$rendered" "$output"
 }
 
-mkdir -p "$MOBILE_ASSETS_DIR" "$APP_ICONS_DIR" "$TRAY_ASSETS_DIR" "$WEB_PUBLIC_DIR"
+mkdir -p "$MOBILE_ASSETS_DIR" "$APP_ICONS_DIR" "$TRAY_ASSETS_DIR" "$WEB_PUBLIC_DIR" \
+  "$LANDING_PUBLIC_DIR"
 
 render_svg "$ADAPTIVE_BACKGROUND_SOURCE" 1024 "$MOBILE_ASSETS_DIR/adaptive-icon-background.png"
 node "$DERIVE_ASSETS_SCRIPT"
+
+# Why: the landing page's og:image is this same artwork, but social scrapers want
+# at least 1200px wide and the hero is only shipped at README size. JPEG rather
+# than PNG because a full-bleed gradient costs 925 kB losslessly against 133 kB
+# here. Derived from the hero so a brand change reaches yiru.ai instead of
+# leaving a stale card behind.
+sips -s format jpeg -s formatOptions 90 --resampleWidth 1200 "$README_HERO_SOURCE" \
+  --out "$LANDING_PUBLIC_DIR/og.jpg" >/dev/null
 
 # Why: these recordings exposed the previous brand in pixels. Keep packaged
 # onboarding honest until each workflow is recorded again under Yiru.
