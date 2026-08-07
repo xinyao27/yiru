@@ -60,8 +60,11 @@
   --hairline: #1b1b1b;
   --rule: #2a2a2a;
   --rule-strong: #3a3a3a;
-  --accent: #599ce7;
-  --accent-ink: #0b1522;
+  /* Why: single source of truth for the brand hue; both themes derive --accent
+     from it, so a rebrand is a one-line change here. */
+  --brand: #fd6523;
+  --accent: var(--brand);
+  --accent-ink: #191c22;
   --ok: #3fb950;
   --warn: #d29922;
   --add-ink: #3fa266;
@@ -92,8 +95,8 @@
   --hairline: #e4e4e4;
   --rule: #d4d4d4;
   --rule-strong: #bcbcbc;
-  --accent: #2778c1;
-  --accent-ink: #ffffff;
+  --accent: var(--brand);
+  --accent-ink: #191c22;
   --ok: #1a7f37;
   --warn: #9a6700;
   --add-ink: #007041;

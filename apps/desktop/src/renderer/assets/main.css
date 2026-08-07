@@ -110,8 +110,11 @@
   --card-foreground: #141414;
   --popover: #fcfcfc;
   --popover-foreground: #141414;
-  --primary: #2778c1;
-  --primary-foreground: #fcfcfc;
+  /* Why: single source of truth for the brand hue — every primary/ring role in
+     both themes derives from it, so a rebrand is a one-line change here. */
+  --brand: #fd6523;
+  --primary: var(--brand);
+  --primary-foreground: #191c22;
   --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);
   --secondary-foreground: #141414;
   --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
@@ -123,7 +126,7 @@
   --destructive-foreground: #fcfcfc;
   --border: color-mix(in srgb, var(--foreground) 8%, transparent);
   --input: color-mix(in srgb, var(--foreground) 12%, transparent);
-  --ring: #2778c1;
+  --ring: var(--brand);
   --terminal-pane-locate: var(--primary);
   --ai-action-accent: #7565cc;
   --chart-1: #2778c1;
@@ -133,12 +136,12 @@
   --chart-5: #7565cc;
   --sidebar: #f3f3f3;
   --sidebar-foreground: #141414;
-  --sidebar-primary: #2778c1;
-  --sidebar-primary-foreground: #fcfcfc;
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #191c22;
   --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
   --sidebar-accent-foreground: #141414;
   --sidebar-border: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
-  --sidebar-ring: #2778c1;
+  --sidebar-ring: var(--brand);
   --git-decoration-added: #007041;
   --git-decoration-modified: #a46700;
   --git-decoration-deleted: #be1744;
@@ -178,7 +181,7 @@
   --card-foreground: #f0f0f0;
   --popover: #181818;
   --popover-foreground: #f0f0f0;
-  --primary: #599ce7;
+  --primary: var(--brand);
   --primary-foreground: #191c22;
   --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);
   --secondary-foreground: #f0f0f0;
@@ -200,7 +203,7 @@
   --chart-5: #9386f2;
   --sidebar: #181818;
   --sidebar-foreground: #f0f0f0;
-  --sidebar-primary: #599ce7;
+  --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: #191c22;
   --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
   --sidebar-accent-foreground: #f0f0f0;
