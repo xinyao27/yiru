@@ -54,8 +54,14 @@ function extractAssetTags(shell) {
       body.push(tag)
     }
   }
+  // Why: both, not just the script. A missing stylesheet does not break the page
+  // loudly — it ships every document unstyled and the build still passes, which is
+  // the one failure here that nothing downstream would catch.
   if (!body.length) {
     throw new Error(`${shellPath} has no /assets/ script tag — the client entry is missing`)
+  }
+  if (!head.length) {
+    throw new Error(`${shellPath} has no /assets/ stylesheet link — every page would ship unstyled`)
   }
   return { head, body }
 }

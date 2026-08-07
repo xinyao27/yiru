@@ -42,7 +42,7 @@ export function Shell({ children }: ShellProps): React.JSX.Element {
             before main.tsx has run. `?direct` asks Vite for the compiled text rather
             than the module, which makes it a real render-blocking stylesheet. The
             import in main.tsx stays: that is what HMR listens to.
-            The build has no need for this; scripts/prerender.mjs injects the hashed
+            The build has no need for this; apps/landing/scripts/prerender.mjs injects the hashed
             stylesheet right after the charset instead. */}
         {import.meta.env.DEV ? <link rel="stylesheet" href="/src/index.css?direct" /> : null}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
