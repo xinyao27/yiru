@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { chmodSync, copyFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, copyFileSync, cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const repoRoot = path.resolve(import.meta.dirname, '..')
@@ -7,8 +7,16 @@ const packagePath = path.join(repoRoot, 'native', 'computer-use-macos')
 const binaryPath = path.join(packagePath, '.build', 'release', 'yiru-computer-use-macos')
 const appPath = path.join(packagePath, '.build', 'release', 'Yiru Computer Use.app')
 const appExecutablePath = path.join(appPath, 'Contents', 'MacOS', 'yiru-computer-use-macos')
-const appIconPath = path.join(appPath, 'Contents', 'Resources', 'AppIcon.icns')
+const appResourcesPath = path.join(appPath, 'Contents', 'Resources')
+const appIconPath = path.join(appResourcesPath, 'AppIcon.icns')
 const computerUseIconPath = path.join(packagePath, 'resources', 'app-icon.icns')
+const localizationPath = path.join(packagePath, 'resources', 'localization')
+const askForPermissionLicensePath = path.join(
+  packagePath,
+  'vendor',
+  'ask-for-permission',
+  'LICENSE'
+)
 const entitlementsPath = path.join(
   repoRoot,
   'resources',
@@ -40,9 +48,18 @@ function buildUniversalBinary() {
 function createHelperApp() {
   rmSync(appPath, { recursive: true, force: true })
   mkdirSync(path.dirname(appExecutablePath), { recursive: true })
-  mkdirSync(path.join(appPath, 'Contents', 'Resources'), { recursive: true })
+  mkdirSync(appResourcesPath, { recursive: true })
   copyFileSync(binaryPath, appExecutablePath)
   copyFileSync(computerUseIconPath, appIconPath)
+  copyFileSync(
+    askForPermissionLicensePath,
+    path.join(appResourcesPath, 'AskForPermission-LICENSE.txt')
+  )
+  for (const locale of ['en.lproj', 'zh-Hans.lproj']) {
+    cpSync(path.join(localizationPath, locale), path.join(appResourcesPath, locale), {
+      recursive: true
+    })
+  }
   chmodSync(appExecutablePath, 0o755)
   writeFileSync(path.join(appPath, 'Contents', 'Info.plist'), infoPlist(), 'utf8')
   const signer = spawnSync('codesign', codesignArgs(signingIdentity, appPath), { stdio: 'inherit' })

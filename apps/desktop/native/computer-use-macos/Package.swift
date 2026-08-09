@@ -22,9 +22,20 @@ let package = Package(
             name: "YiruComputerUseMacOSCore",
             path: "Sources/YiruComputerUseMacOSCore"
         ),
+        .target(
+            name: "AskForPermission",
+            path: "vendor/ask-for-permission/Sources/AskForPermission",
+            swiftSettings: [
+                // Why: the vendored package is authored for the Swift 5.9 language mode.
+                .swiftLanguageMode(.v5)
+            ]
+        ),
         .executableTarget(
             name: "YiruComputerUseMacOS",
-            dependencies: ["YiruComputerUseMacOSCore"],
+            dependencies: [
+                "YiruComputerUseMacOSCore",
+                "AskForPermission"
+            ],
             path: "Sources/YiruComputerUseMacOS"
         )
     ]
