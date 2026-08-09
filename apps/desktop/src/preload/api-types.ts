@@ -843,9 +843,6 @@ export type NativeChatApi = {
 export type AppApi = {
   /** Returns the app identity currently exposed to native chrome and the titlebar. */
   getIdentity: () => Promise<AppIdentity>
-  /** Returns a URL base for feature-wall assets. In dev this is Vite /@fs;
-   *  in packaged builds this is file:// resources. Renderer appends filenames. */
-  getFeatureWallAssetBaseUrl: () => Promise<string>
   /** Relaunches the app via Electron's app.relaunch() + app.exit(0). Used
    *  by settings panes that need a full restart to apply changes (e.g. the
    *  terminal-window blur setting in TerminalWindowSection). */

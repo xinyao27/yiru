@@ -12,7 +12,6 @@ host and operator intent.
 | `macos-launch-diagnostics.sh` | Download and diagnose a published macOS build; it intentionally rejects non-macOS hosts. |
 | `repair-locale-catalog.mjs` | Reapply deterministic locale repair policy, optionally with `--locale <code>`, and rewrite catalog caches. |
 | `serve-headless-fresh-profile-pairing.mjs` | Start a disposable headless runtime and print its mobile pairing URL for manual pairing tests. |
-| `vendor-feature-wall-assets.mjs` | Copy and normalize feature-wall media from the marketing repository; set `YIRU_MARKETING_REPO` when it is not in the default location. |
 
 Scripts absent from this list must have a repository-owned caller (package script, workflow, test,
 or imported module). A zero-reference file is not a supported entrypoint by accident.

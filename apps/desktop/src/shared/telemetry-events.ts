@@ -223,20 +223,7 @@ export type LaunchSource = z.infer<typeof launchSourceSchema>
 export const requestKindSchema = z.enum(['new', 'resume', 'followup'])
 export type RequestKind = z.infer<typeof requestKindSchema>
 
-export const featureWallTileIdSchema = z.enum([
-  'tile-01',
-  'tile-02',
-  'tile-03',
-  'tile-04',
-  'tile-05',
-  'tile-06',
-  'tile-07',
-  'tile-08',
-  'tile-09',
-  'tile-10',
-  'tile-11',
-  'tile-12'
-])
+export const featureWallTileIdSchema = z.enum(['tile-01', 'tile-02', 'tile-04', 'tile-08'])
 export type FeatureWallTileIdTelemetry = z.infer<typeof featureWallTileIdSchema>
 
 export const featureWallOpenSourceSchema = z.enum(['help_menu', 'popup', 'onboarding', 'unknown'])
@@ -545,11 +532,6 @@ const featureWallTileFocusedSchema = z
     tile_id: featureWallTileIdSchema
   })
   .strict()
-const featureWallTileClickedSchema = z
-  .object({
-    tile_id: featureWallTileIdSchema
-  })
-  .strict()
 const featureWallGroupSelectedSchema = z
   .object({
     group_id: featureWallWorkflowIdSchema,
@@ -563,14 +545,6 @@ const featureWallFeatureSelectedSchema = z
     source: featureWallOpenSourceSchema
   })
   .strict()
-const featureWallDocsClickedSchema = z
-  .object({
-    group_id: featureWallWorkflowIdSchema,
-    tile_id: featureWallTileIdSchema,
-    source: featureWallOpenSourceSchema
-  })
-  .strict()
-
 const existingWorkspaceCountSchema = z.number().int().min(1).max(50)
 const addRepoExistingWorkspaceContextSchema = {
   source: addRepoExistingWorkspaceSourceSchema,
@@ -1574,10 +1548,8 @@ export const eventSchemas = {
   feature_wall_opened: featureWallOpenedSchema,
   feature_wall_closed: featureWallClosedSchema,
   feature_wall_tile_focused: featureWallTileFocusedSchema,
-  feature_wall_tile_clicked: featureWallTileClickedSchema,
   feature_wall_group_selected: featureWallGroupSelectedSchema,
   feature_wall_feature_selected: featureWallFeatureSelectedSchema,
-  feature_wall_docs_clicked: featureWallDocsClickedSchema,
 
   onboarding_started: onboardingStartedSchema,
   onboarding_step_viewed: onboardingStepViewedSchema,

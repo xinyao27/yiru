@@ -488,8 +488,6 @@ async function invokeRuntimeMethod<TContract extends RuntimeMethodContract>(
 const api = {
   app: {
     getIdentity: (): Promise<AppIdentity> => ipcRenderer.invoke('app:getIdentity'),
-    getFeatureWallAssetBaseUrl: (): Promise<string> =>
-      ipcRenderer.invoke('app:getFeatureWallAssetBaseUrl'),
     relaunch: (): Promise<void> => ipcRenderer.invoke('app:relaunch'),
     restart: async (): Promise<void> => {
       await prepareRendererForAppRestart({

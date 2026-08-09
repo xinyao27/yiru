@@ -42,9 +42,6 @@ export function FeatureWallTourPanel(props: {
   reviewSteps: readonly ReviewStep[]
   reviewActiveStep: ReviewStep | null
   onSelectReviewStep: (id: ReviewStepId) => void
-  posterUrl: string | null
-  gifUrl: string | null
-  showGif: boolean
   prefersReducedMotion: boolean
   source: FeatureWallOpenSourceTelemetry
   orchestrationSkill: InstalledAgentSkillState
@@ -129,9 +126,6 @@ export function FeatureWallTourPanel(props: {
           <div className={contentStageClassName}>
             <FeatureWallBody
               selected={props.selected}
-              posterUrl={props.posterUrl}
-              gifUrl={props.gifUrl}
-              showGif={props.showGif}
               prefersReducedMotion={props.prefersReducedMotion}
               source={props.source}
               agentsActiveStep={props.agentsActiveStep}
