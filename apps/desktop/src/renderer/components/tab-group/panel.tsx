@@ -8,8 +8,7 @@ import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import { TabBarMoreButton } from '../tab-bar/more-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'
-import { WorkspacePanelTitlebarActions } from '../workspace-panel/titlebar-actions'
-import { useWorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
+import { CollapsedWorkspaceSidebarChrome } from '../workspace-panel/sidebar-chrome'
 import { tabGroupBodyAnchorName } from './body-anchor'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-drag-split'
 import { useTabGroupWorkspaceModel } from './use-tab-group-workspace-model'
@@ -184,11 +183,8 @@ export default function TabGroupPanel({
     />
   )
 
-  const panelTitlebar = useWorkspacePanelTitlebarModel(worktreeId, groupId)
-
-  // Why: focused-only — workspace actions and Close split pane stay with the
-  // active pane so unfocused strips stay compact. One ButtonGroup owns every
-  // trailing control (panel pins, Open in, More) so they share a single seam strip.
+  // Why: pane-specific actions stay with the focused split, while the collapsed
+  // workspace sidebar chrome is anchored once to the top-right split below.
   const focusedActionChromeClassName = cn(
     'h-full shrink-0 overflow-hidden transition-[opacity] duration-150',
     isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
@@ -211,22 +207,22 @@ export default function TabGroupPanel({
       stripId={groupId}
       tabBar={tabBar}
       trailingActions={
-        isFocused ? (
-          <ButtonGroup
-            className={focusedActionChromeClassName}
-            data-workspace-titlebar-strip={worktreeId}
-          >
-            {panelTitlebar ? <WorkspacePanelTitlebarActions model={panelTitlebar} /> : null}
-            <TabBarMoreButton
-              worktreeId={worktreeId}
-              groupId={groupId}
-              onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
-              panelTitlebar={panelTitlebar}
-            />
-          </ButtonGroup>
-        ) : (
-          <div className={focusedActionChromeClassName} />
-        )
+        <>
+          {isFocused ? (
+            <ButtonGroup className={focusedActionChromeClassName}>
+              <TabBarMoreButton
+                worktreeId={worktreeId}
+                groupId={groupId}
+                onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
+              />
+            </ButtonGroup>
+          ) : (
+            <div className={focusedActionChromeClassName} />
+          )}
+          {reserveWindowControlsSpace ? (
+            <CollapsedWorkspaceSidebarChrome worktreeId={worktreeId} />
+          ) : null}
+        </>
       }
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
       reserveWindowControlsSpace={reserveWindowControlsSpace}

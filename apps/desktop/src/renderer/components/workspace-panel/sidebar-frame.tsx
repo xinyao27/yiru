@@ -1,6 +1,4 @@
-import { SidebarSimple as PanelRight } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,7 +7,6 @@ import {
   ContextMenuRadioItem,
   ContextMenuTrigger
 } from '~renderer/components/ui/context-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -21,7 +18,7 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import { getTopActivityBarLayout } from './activity-bar-overflow'
-import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
+import { WorkspaceSidebarToggleButton } from './sidebar-chrome'
 import {
   WORKSPACE_SIDEBAR_MIN_WIDTH,
   canFitWorkspaceSidebar,
@@ -114,32 +111,11 @@ export function WorkspaceSidebarFrame({
   )
 
   const closeButton = isVisible ? (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className={cn(RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME, 'mr-1')}
-            onClick={onToggle}
-            aria-label={translate(
-              'auto.components.right.sidebar.index.e8e2e4ce74',
-              'Toggle right sidebar'
-            )}
-          >
-            <PanelRight className="-scale-x-100" />
-          </Button>
-        }
-      />
-      <TooltipContent side="bottom" sideOffset={6}>
-        {translate(
-          'auto.components.right.sidebar.index.9fffaf17c1',
-          'Toggle right sidebar ({{value0}})',
-          { value0: toggleShortcut }
-        )}
-      </TooltipContent>
-    </Tooltip>
+    <WorkspaceSidebarToggleButton
+      presentation="sidebar"
+      shortcut={toggleShortcut}
+      onToggle={onToggle}
+    />
   ) : null
 
   return (
