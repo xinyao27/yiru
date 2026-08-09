@@ -111,10 +111,10 @@
   --popover: #fcfcfc;
   --popover-foreground: #141414;
   /* Why: single source of truth for the brand hue — every primary/ring role in
-     both themes derives from it, so a rebrand is a one-line change here. */
-  --brand: #fd6523;
+     the light theme derives from it, while dark mode provides its brighter counterpart. */
+  --brand: #2778c1;
   --primary: var(--brand);
-  --primary-foreground: #191c22;
+  --primary-foreground: #fcfcfc;
   --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);
   --secondary-foreground: #141414;
   --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
@@ -137,7 +137,7 @@
   --sidebar: #f3f3f3;
   --sidebar-foreground: #141414;
   --sidebar-primary: var(--brand);
-  --sidebar-primary-foreground: #191c22;
+  --sidebar-primary-foreground: #fcfcfc;
   --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
   --sidebar-accent-foreground: #141414;
   --sidebar-border: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
@@ -181,6 +181,7 @@
   --card-foreground: #f0f0f0;
   --popover: #181818;
   --popover-foreground: #f0f0f0;
+  --brand: #599ce7;
   --primary: var(--brand);
   --primary-foreground: #191c22;
   --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);

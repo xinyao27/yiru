@@ -60,11 +60,10 @@
   --hairline: #1b1b1b;
   --rule: #2a2a2a;
   --rule-strong: #3a3a3a;
-  /* Why: single source of truth for the brand hue; both themes derive --accent
-     from it, so a rebrand is a one-line change here. */
-  --brand: #fd6523;
+  /* Why: each mode keeps the established blue at the contrast needed by its surface. */
+  --brand: #599ce7;
   --accent: var(--brand);
-  --accent-ink: #191c22;
+  --accent-ink: #0b1522;
   --ok: #3fb950;
   --warn: #d29922;
   --add-ink: #3fa266;
@@ -95,8 +94,9 @@
   --hairline: #e4e4e4;
   --rule: #d4d4d4;
   --rule-strong: #bcbcbc;
+  --brand: #2778c1;
   --accent: var(--brand);
-  --accent-ink: #191c22;
+  --accent-ink: #ffffff;
   --ok: #1a7f37;
   --warn: #9a6700;
   --add-ink: #007041;

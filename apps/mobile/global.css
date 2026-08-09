@@ -12,8 +12,8 @@
       --color-card-foreground: #141414;
       --color-popover: #fcfcfc;
       --color-popover-foreground: #141414;
-      --color-primary: #fd6523;
-      --color-primary-foreground: #191c22;
+      --color-primary: #2778c1;
+      --color-primary-foreground: #fcfcfc;
       --color-secondary: rgba(20, 20, 20, 0.08);
       --color-secondary-foreground: #141414;
       --color-muted: rgba(20, 20, 20, 0.06);
@@ -24,7 +24,7 @@
       --color-destructive-foreground: #fcfcfc;
       --color-border: rgba(20, 20, 20, 0.08);
       --color-input: rgba(20, 20, 20, 0.12);
-      --color-ring: #fd6523;
+      --color-ring: #2778c1;
       --color-chart-1: #2778c1;
       --color-chart-2: #007041;
       --color-chart-3: #a46700;
@@ -32,12 +32,12 @@
       --color-chart-5: #7565cc;
       --color-sidebar: #f3f3f3;
       --color-sidebar-foreground: #141414;
-      --color-sidebar-primary: #fd6523;
-      --color-sidebar-primary-foreground: #191c22;
+      --color-sidebar-primary: #2778c1;
+      --color-sidebar-primary-foreground: #fcfcfc;
       --color-sidebar-accent: rgba(20, 20, 20, 0.14);
       --color-sidebar-accent-foreground: #141414;
       --color-sidebar-border: rgba(20, 20, 20, 0.08);
-      --color-sidebar-ring: #fd6523;
+      --color-sidebar-ring: #2778c1;
       --color-editor-surface: #fcfcfc;
       --color-git-added: #007041;
       --color-git-modified: #a46700;
@@ -66,7 +66,7 @@
       --color-card-foreground: #f0f0f0;
       --color-popover: #181818;
       --color-popover-foreground: #f0f0f0;
-      --color-primary: #fd6523;
+      --color-primary: #599ce7;
       --color-primary-foreground: #191c22;
       --color-secondary: rgba(240, 240, 240, 0.08);
       --color-secondary-foreground: #f0f0f0;
@@ -86,7 +86,7 @@
       --color-chart-5: #9386f2;
       --color-sidebar: #181818;
       --color-sidebar-foreground: #f0f0f0;
-      --color-sidebar-primary: #fd6523;
+      --color-sidebar-primary: #599ce7;
       --color-sidebar-primary-foreground: #191c22;
       --color-sidebar-accent: rgba(240, 240, 240, 0.14);
       --color-sidebar-accent-foreground: #f0f0f0;
