@@ -86,7 +86,7 @@ export default function SourceControlWorkspacePanel({
 
   return (
     <Tabs value={view} onValueChange={handleViewChange} className="h-full min-h-0 gap-0">
-      <div className="border-border shrink-0 border-b p-2">
+      <div className="shrink-0 p-2">
         <TabsList
           aria-label={translate(
             'auto.components.workspace.panel.source.control.workspace.panel.views',
