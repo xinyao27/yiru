@@ -14,10 +14,7 @@
         "description": "选择 Yiru 界面使用的语言。",
         "system": "系统",
         "english": "English",
-        "chinese": "中文（简体）",
-        "korean": "한국어",
-        "japanese": "日本語",
-        "spanish": "Español"
+        "chinese": "中文（简体）"
       },
       "statusBar": {
         "claudeToggleDescription": "显示当前工作区的 Claude Token 与费用消耗情况。",

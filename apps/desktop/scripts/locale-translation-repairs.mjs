@@ -1,104 +1,53 @@
-import { JA_PHRASE_FIXES } from './locale-ja-phrase-fixes.mjs'
-import { KO_PHRASE_FIXES_ROUND4 } from './locale-ko-phrase-fixes.mjs'
-import { ZH_PHRASE_FIXES_ROUND5 } from './locale-zh-phrase-fixes-round5.mjs'
+// Simplified Chinese repair rules applied after machine translation.\n\n// Latin workflow/brand terms that get a space inserted around them when CJK machine
+// translation glues them to native text (see applyCjkLatinTermSpacing).
+export const CJK_LATIN_SPACED_TERMS = [
+  'Issues',
+  'Issue',
+  'Terminal',
+  'Terminals',
+  'terminal',
+  'terminals',
+  'Agents',
+  'Agent',
+  'agents',
+  'agent',
+  'Markdown',
+  'markdown',
+  'Repos',
+  'Repo',
+  'repos',
+  'repo',
+  'Commits',
+  'Commit',
+  'commits',
+  'commit',
+  'GitHub',
+  'GitLab',
+  'Claude',
+  'Claude Code',
+  'Codex',
+  'Gemini',
+  'Kimi',
+  'OpenCode',
+  'Yiru',
+  'Cursor',
+  'Bitbucket',
+  'Tailscale',
+  'Kagi',
+  'SSH',
+  'WSL',
+  'PR',
+  'MR',
+  'REST',
+  'HEAD',
+  'Bash',
+  'PowerShell',
+  'Git AI Author',
+  'Token',
+  'token'
+]
 
 export const LOCALE_PHRASE_FIXES = {
-  ko: [
-    { pattern: /해고하다/g, replacement: '닫기', whenEnIncludes: 'Dismiss' },
-    { pattern: /선택 과목/g, replacement: '선택 사항', whenEnIncludes: 'Optional' },
-    { pattern: /상담원/g, replacement: '에이전트', whenEnIncludes: 'agent' },
-    { pattern: /상담사/g, replacement: '에이전트', whenEnIncludes: 'agent' },
-    { pattern: /지점/g, replacement: '브랜치', whenEnIncludes: 'ranch' },
-    { pattern: /분기/g, replacement: '브랜치', whenEnIncludes: 'ranch' },
-    { pattern: /나뭇가지/g, replacement: '브랜치', whenEnIncludes: 'ranch' },
-    { pattern: /홍보/g, replacement: 'PR', whenEnIncludes: 'PR' },
-    { pattern: /관현악법/g, replacement: '오케스트레이션', whenEnIncludes: 'Orchestration' },
-    { pattern: /자치령 대표/g, replacement: '에이전트', whenEnIncludes: 'Agents' },
-    { pattern: /찾다\.\.\./g, replacement: '검색...', whenEnIncludes: 'Search' },
-    { pattern: /찾다/g, replacement: '검색', whenEnIncludes: 'Search' },
-    { pattern: /구하다/g, replacement: '저장', whenEnIncludes: 'Save' },
-    { pattern: /설치하다/g, replacement: '설치', whenEnIncludes: 'Install' },
-    { pattern: /장애가 있는/g, replacement: '비활성', whenEnIncludes: 'Disabled' },
-    { pattern: /준비가 된/g, replacement: '준비됨', whenEnIncludes: 'Ready' },
-    { pattern: /다시 놓기/g, replacement: '재설정', whenEnIncludes: 'Reset' },
-    { pattern: /새로 고치다/g, replacement: '새로고침', whenEnIncludes: 'Refresh' },
-    { pattern: /분명한/g, replacement: '지우기', whenEnIncludes: 'Clear' },
-    { pattern: /할 수 있게 하다/g, replacement: '활성화', whenEnIncludes: 'Enable' },
-    { pattern: /갈등/g, replacement: '충돌', whenEnIncludes: 'conflict' },
-    { pattern: /절약/g, replacement: '저장', whenEnIncludes: 'Saving' },
-    { pattern: /이동하는/g, replacement: '모바일', whenEnIncludes: 'Mobile' },
-    { pattern: /체크 무늬/g, replacement: '검사', whenEnIncludes: 'Checks' },
-    { pattern: /양수인/g, replacement: '담당자', whenEnIncludes: 'assignee' },
-    { pattern: /논평/g, replacement: '댓글', whenEnIncludes: 'Comment' },
-    {
-      pattern: /이력서 작업공간/g,
-      replacement: '워크스페이스',
-      whenEnIncludes: 'Resume workspace'
-    },
-    {
-      pattern: /이력서 워크스페이스/g,
-      replacement: '워크스페이스',
-      whenEnIncludes: 'Resume workspace'
-    },
-    { pattern: /부동/g, replacement: '플로팅', whenEnIncludes: 'Floating' },
-    { pattern: /합격/g, replacement: '통과', whenEnIncludes: 'passing' },
-    { pattern: /작업공간/g, replacement: '워크스페이스', whenEnIncludes: 'workspace' },
-    { pattern: /작업 공간/g, replacement: '워크스페이스', whenEnIncludes: 'workspace' },
-    { pattern: /보다/g, replacement: '보기', whenEnIncludes: 'View' },
-    { pattern: /다시 해 보다/g, replacement: '다시 시도', whenEnIncludes: 'Retry' },
-    { pattern: /버리다/g, replacement: '버리기', whenEnIncludes: 'Discard' },
-    { pattern: /일반적인/g, replacement: '일반', whenEnIncludes: 'General' },
-    { pattern: /모습/g, replacement: '외관', whenEnIncludes: 'Appearance' },
-    { pattern: /목소리/g, replacement: '음성', whenEnIncludes: 'Voice' },
-    { pattern: /원격 측정/g, replacement: '텔레메트리', whenEnIncludes: 'Telemetry' },
-    { pattern: /충돌 신고/g, replacement: '크래시 신고', whenEnIncludes: 'Crash' },
-    { pattern: /충돌 보고서/g, replacement: '크래시 보고서', whenEnIncludes: 'crash report' },
-    { pattern: /충돌 세부/g, replacement: '크래시 세부', whenEnIncludes: 'crash' },
-    { pattern: /워크스페이스이/g, replacement: '워크스페이스가', whenEnIncludes: 'workspace' },
-    { pattern: /워크스페이스을/g, replacement: '워크스페이스를', whenEnIncludes: 'workspace' },
-    { pattern: /워크스페이스은/g, replacement: '워크스페이스는', whenEnIncludes: 'workspace' },
-    { pattern: /워크스페이스으로/g, replacement: '워크스페이스로', whenEnIncludes: 'workspace' },
-    { pattern: /작업 영역/g, replacement: '워크스페이스', whenEnIncludes: 'workspace' },
-    { pattern: /새로 고치는 중/g, replacement: '새로고침 중', whenEnIncludes: 'refresh' },
-    { pattern: /새로 고치지/g, replacement: '새로고침하지', whenEnIncludes: 'refresh' },
-    { pattern: /새로 고치는/g, replacement: '새로고침', whenEnIncludes: 'Refreshing' },
-    { pattern: /새로 고치고/g, replacement: '새로고침하고', whenEnIncludes: 'refresh' },
-    { pattern: /새로 고치/g, replacement: '새로고침', whenEnIncludes: 'Refresh' },
-    { pattern: /GitHub 문제/g, replacement: 'GitHub 이슈', whenEnIncludes: 'issue' },
-    { pattern: /미리 보는/g, replacement: '미리보기', whenEnIncludes: 'Preview' },
-    { pattern: /미리 보고/g, replacement: '미리보기하고', whenEnIncludes: 'Preview' },
-    { pattern: /풀 리퀘스트/g, replacement: 'PR', whenEnIncludes: 'pull request' },
-    { pattern: /풀 요청/g, replacement: 'PR', whenEnIncludes: 'pull request' },
-    { pattern: /풀 요청/g, replacement: 'PR', whenEnIncludes: 'pull-request' },
-    { pattern: /어린이들/g, replacement: '하위', whenEnIncludes: 'children' },
-    { pattern: /어린이/g, replacement: '하위', whenEnIncludes: 'child' },
-    { pattern: /배상/g, replacement: '전송 중', whenEnIncludes: 'sending' },
-    { pattern: /보내다/g, replacement: '보내기', whenEnIncludes: 'Send' },
-    { pattern: /파견/g, replacement: '디스패치', whenEnIncludes: 'dispatch' },
-    { pattern: /전시/g, replacement: '표시 중', whenEnIncludes: 'Showing' },
-    { pattern: /현재의/g, replacement: '현재', whenEnIncludes: 'Current' },
-    { pattern: /강제삭제/g, replacement: '강제 삭제', whenEnIncludes: 'Force Delete' },
-    { pattern: /끈/g, replacement: '문자열', whenEnIncludes: 'string' },
-    { pattern: /나뉘다/g, replacement: '분할', whenEnIncludes: 'split' },
-    { pattern: /제1터미널/g, replacement: '터미널 1', whenEnIncludes: 'Terminal 1' },
-    { pattern: /알았어요/g, replacement: '확인', whenEnIncludes: 'Got it' },
-    { pattern: /선택 해제/g, replacement: '거부', whenEnIncludes: 'Opt out' },
-    { pattern: /사이드바 전환/g, replacement: '사이드바 표시/숨기기', whenEnIncludes: 'Toggle' },
-    { pattern: /GitLab 문제/g, replacement: 'GitLab 이슈', whenEnIncludes: 'issue' },
-    { pattern: /문제 #/g, replacement: '이슈 #', whenEnIncludes: 'issue' },
-    { pattern: /문제를 제기하다/g, replacement: '이슈 등록', whenEnIncludes: 'file an issue' },
-    { pattern: /병합 요청/g, replacement: 'MR', whenEnIncludes: 'merge request' },
-    { pattern: /풀이/g, replacement: '제거 중', whenEnIncludes: 'Removing' },
-    { pattern: /풀 중/g, replacement: '가져오는 중', whenEnIncludes: 'pulling' },
-    { pattern: /보풀/g, replacement: 'lint', whenEnIncludes: 'lint' },
-    { pattern: /모의 실험 장치/g, replacement: '시뮬레이터', whenEnIncludes: 'simulator' },
-    { pattern: /재방송/g, replacement: '재실행', whenEnIncludes: 'Rerun' },
-    { pattern: /검토가 요청됨/g, replacement: '리뷰 요청됨', whenEnIncludes: 'Review requested' },
-    { pattern: /PR, 문제/g, replacement: 'PR, 이슈', whenEnIncludes: 'issues' },
-    { pattern: /, 문제,/g, replacement: ', 이슈,', whenEnIncludes: 'issues' },
-    { pattern: /및 문제/g, replacement: '및 이슈', whenEnIncludes: 'issues' },
-    ...KO_PHRASE_FIXES_ROUND4
-  ],
   zh: [
     { pattern: /客服人员/g, replacement: '代理', whenEnIncludes: 'agent' },
     { pattern: /会议/g, replacement: '会话', whenEnIncludes: 'session' },
@@ -106,7 +55,6 @@ export const LOCALE_PHRASE_FIXES = {
     { pattern: /公关/g, replacement: 'PR', whenEnIncludes: 'PR' },
     { pattern: /虎鲸:\/\//g, replacement: 'yiru://', whenEnIncludes: 'yiru://' },
     { pattern: /代理商/g, replacement: '代理', whenEnIncludes: 'agent' },
-    // Why: Agent is a product term in Chinese UI copy and must remain in English.
     { pattern: /智能体/g, replacement: 'Agent', whenEnIncludes: 'agent' },
     { pattern: /分支机构/g, replacement: '分支', whenEnIncludes: 'ranch' },
     { pattern: /座席/g, replacement: '代理', whenEnIncludes: 'agent' },
@@ -285,15 +233,76 @@ export const LOCALE_PHRASE_FIXES = {
     { pattern: /中性的/g, replacement: 'Neutral', whenEnIncludes: 'Neutral' },
     { pattern: /破坏性的/g, replacement: 'destructive', whenEnIncludes: 'destructive' },
     { pattern: /注解/g, replacement: '批注', whenEnIncludes: 'Annotation' },
-    ...ZH_PHRASE_FIXES_ROUND5
-  ],
-  ja: JA_PHRASE_FIXES,
-  es: [
-    // Why: machine translation renders the abbreviation "PR" (pull request) as
-    // "relaciones públicas" (public relations). Unlike the ko/zh glossary fixes whose
-    // patterns are CJK-only, "relaciones públicas" is a real Spanish phrase, so the guard
-    // matches the actual `PR`/`PRs` token (not a loose "pr" substring) to avoid rewriting
-    // English that is genuinely about public relations.
-    { pattern: /relaciones públicas/g, replacement: 'PR', whenEnMatches: /\bPRs?\b/ }
+    { pattern: /Yiru集成开发环境/g, replacement: 'Yiru IDE', whenEnIncludes: 'Yiru IDE' },
+    { pattern: /Yiru第一/g, replacement: 'Yiru 优先', whenEnIncludes: 'Yiru first' },
+    { pattern: /Yiru移动/g, replacement: 'Yiru Mobile', whenEnIncludes: 'Yiru Mobile' },
+    { pattern: /Yiru归属/g, replacement: 'Yiru 归因', whenEnIncludes: 'Yiru Attribution' },
+    { pattern: /Yiru标志/g, replacement: 'Yiru 标志', whenEnIncludes: 'Yiru logo' },
+    { pattern: /喜欢Yiru/g, replacement: '喜欢 Yiru', whenEnIncludes: 'Enjoying Yiru' },
+    { pattern: /认识Yiru/g, replacement: '了解 Yiru', whenEnIncludes: 'Get to know Yiru' },
+    { pattern: /支持Yiru/g, replacement: '支持 Yiru', whenEnIncludes: 'Support Yiru' },
+    { pattern: /展开Yiru/g, replacement: '展开 Yiru', whenEnIncludes: 'Expand Yiru' },
+    { pattern: /来自Yiru/g, replacement: '来自 Yiru', whenEnIncludes: 'from Yiru' },
+    {
+      pattern: /正在重新启动Yiru/g,
+      replacement: '正在重启 Yiru',
+      whenEnIncludes: 'Restarting Yiru'
+    },
+    { pattern: /Yiru([\u4e00-\u9fff])/g, replacement: 'Yiru $1', whenEnIncludes: 'Yiru' },
+    { pattern: /Codex([\u4e00-\u9fff])/g, replacement: 'Codex $1', whenEnIncludes: 'Codex' },
+    {
+      pattern: /Claude([\u4e00-\u9fff])/g,
+      replacement: 'Claude $1',
+      whenEnIncludes: 'Claude'
+    },
+    { pattern: /Claude代码/g, replacement: 'Claude Code', whenEnIncludes: 'Claude Code' },
+    { pattern: /托管审阅/g, replacement: '托管评审', whenEnIncludes: 'hosted-review' },
+    { pattern: /托管审阅/g, replacement: '托管评审', whenEnIncludes: 'Hosted-review' },
+    { pattern: /审阅笔记/g, replacement: '评审笔记', whenEnIncludes: 'review note' },
+    { pattern: /审阅任务/g, replacement: '评审任务', whenEnIncludes: 'review task' },
+    { pattern: /待审阅/g, replacement: '待评审', whenEnIncludes: 'need review' },
+    { pattern: /重新审核/g, replacement: '重新评审', whenEnIncludes: 'Re-review' },
+    { pattern: /依赖项审核/g, replacement: '依赖项审计', whenEnIncludes: 'dependency audit' },
+    { pattern: /Git AI 作者/g, replacement: 'Git AI Author', whenEnIncludes: 'Git AI Author' },
+    { pattern: /基本引用/g, replacement: '基础引用', whenEnIncludes: 'base ref' },
+    { pattern: /重新开放/g, replacement: '重新打开', whenEnIncludes: 'reopen' },
+    { pattern: /更换钥匙/g, replacement: '更换密钥', whenEnIncludes: 'Replace key' },
+    {
+      pattern: /根据所看到的内容采取行动/g,
+      replacement: '根据所看到的内容执行操作',
+      whenEnIncludes: 'act on what they see'
+    },
+    { pattern: /可操作的问题/g, replacement: '需处理的问题', whenEnIncludes: 'actionable issues' },
+    {
+      pattern: /显示 Yiru 移动按钮/g,
+      replacement: '显示 Yiru Mobile 按钮',
+      whenEnIncludes: 'Show Yiru Mobile Button'
+    }
   ]
+}
+
+// Distinguishes the on-screen cursor (光标) from the "Cursor" product so the brand
+// revert in the translation policy doesn't force terminal/theme cursor settings back to Latin.
+
+// Multi-word "Cursor …" labels always mean the screen cursor, never the Cursor product.
+const SCREEN_CURSOR_ENVALUES = new Set([
+  'Cursor Text',
+  'Cursor color',
+  'Cursor Opacity',
+  'Cursor Shape',
+  'Blinking Cursor',
+  'Terminal Cursor'
+])
+
+// Bare "Cursor" is ambiguous; these keys are the terminal/theme cursor settings (screen cursor).
+const SCREEN_CURSOR_KEYS = new Set([
+  'auto.components.settings.TerminalWindowSection.c9e1fdf42f',
+  'auto.components.onboarding.ThemeStep.ab2a583a97'
+])
+
+export function isScreenCursorContext(brand, enValue, key) {
+  if (brand !== 'Cursor') {
+    return false
+  }
+  return SCREEN_CURSOR_ENVALUES.has(enValue) || SCREEN_CURSOR_KEYS.has(key)
 }

@@ -21,7 +21,6 @@ const PACKAGED_RUNTIME_PACKAGE_ROOTS = [
   '@yiru/runtime-protocol',
   '@yiru/workbench-model',
   'electron-updater',
-  'i18next',
   'jsonc-parser',
   'node-pty',
   'posthog-node',

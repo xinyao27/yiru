@@ -1,7 +1,6 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ContributionHeatmap } from '~renderer/components/contribution-heatmap/heatmap'
 import type {
   ContributionDisplayMetric,
@@ -16,6 +15,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { useAppStore } from '~renderer/store'
 
 import { loadHomeDataSnapshot, saveHomeDataSnapshot } from './cache'
@@ -39,7 +39,7 @@ type SummaryMetricProps = {
 }
 
 export default function HomePage(): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   const liveStats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const [initialCachedSnapshot] = useState(loadHomeDataSnapshot)

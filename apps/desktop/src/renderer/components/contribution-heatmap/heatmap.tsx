@@ -1,10 +1,10 @@
 import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench-model/ui'
 import { buildContributionCalendar } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { cn } from '~renderer/lib/class-names'
 
 import type { ContributionDisplayMetric } from './metric'
@@ -39,7 +39,7 @@ export function ContributionHeatmap({
   anchorDate,
   onActivate
 }: ContributionHeatmapProps): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   const isInteractive = activationLabel !== undefined && onActivate !== undefined
   const calendar = useMemo(
     () => buildContributionCalendar(points, anchorDate),

@@ -154,7 +154,7 @@ export function registerSettingsHandlers(
       }
     }
     if ('uiLanguage' in sanitizedArgs && before.uiLanguage !== result.uiLanguage) {
-      await setMainUiLanguage(result.uiLanguage)
+      setMainUiLanguage(result.uiLanguage)
       rebuildAppMenu()
     }
     if (

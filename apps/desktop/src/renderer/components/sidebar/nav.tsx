@@ -5,11 +5,11 @@ import {
   House
 } from '@phosphor-icons/react'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { getSelectableControlStateClasses } from '~renderer/components/selectable-control-state-classes'
 import { Button } from '~renderer/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 import type { GlobalSettings } from '~shared/types'
@@ -36,9 +36,8 @@ export function shouldShowAutomationsButton(
 }
 
 const SidebarNav = React.memo(function SidebarNav() {
-  // Why: this memo boundary needs its own language subscription, while
-  // translate() preserves Yiru's pseudo-localization behavior.
-  useTranslation()
+  // Why: this memo boundary needs its own language subscription.
+  useUiLocale()
   const openHomePage = useAppStore((s) => s.openHomePage)
   const openSkillsPage = useAppStore((s) => s.openSkillsPage)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)

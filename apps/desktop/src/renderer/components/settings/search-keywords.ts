@@ -1,5 +1,4 @@
-import { i18n } from '~renderer/i18n/i18n'
-import { translate } from '~renderer/i18n/i18n'
+import { getRendererLocale, translate } from '~renderer/i18n/i18n'
 
 export type SearchKeywordSpec = {
   key: string
@@ -16,7 +15,7 @@ export function translateSearchKeyword(
   fallback: string,
   options?: Omit<SearchKeywordSpec, 'key' | 'fallback'>
 ): string[] {
-  if (options?.englishOnly || i18n.language === 'en') {
+  if (options?.englishOnly || getRendererLocale() === 'en') {
     return uniqueKeywords([fallback, ...(options?.aliases ?? [])])
   }
 

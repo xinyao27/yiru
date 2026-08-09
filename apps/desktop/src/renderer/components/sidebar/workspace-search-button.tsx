@@ -1,11 +1,11 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import type { ComponentProps } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 
@@ -21,7 +21,7 @@ export function SidebarWorkspaceSearchButton({
   stretch = false
 }: SidebarWorkspaceSearchButtonProps): React.JSX.Element {
   // Why: this control moved outside SidebarNav's translation subscription into titlebar chrome.
-  useTranslation()
+  useUiLocale()
   const worktreePaletteShortcutCombos = useShortcutKeyComboDetails('worktree.palette')
   const openModal = useAppStore((state) => state.openModal)
 

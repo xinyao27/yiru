@@ -112,7 +112,7 @@ import { closeAllWatchers } from './filesystem/watcher'
 import { FridayService } from './friday/service'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
-import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
+import { setMainUiLanguage } from './i18n/main-i18n'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -2275,8 +2275,7 @@ app.whenReady().then(async () => {
   })
 
   logStartupMilestone('services-initialized')
-  await ensureMainI18n()
-  await setMainUiLanguage(store.getSettings().uiLanguage)
+  setMainUiLanguage(store.getSettings().uiLanguage)
   logStartupMilestone('i18n-ready')
 
   registerAppMenu({

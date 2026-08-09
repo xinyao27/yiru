@@ -28,7 +28,6 @@ import {
 } from '@phosphor-icons/react'
 /* oxlint-disable max-lines */
 import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { getAccountsPaneSearchEntries } from '~renderer/components/settings/accounts-search'
 import { getAdvancedPaneSearchEntries } from '~renderer/components/settings/advanced-search'
 import { getAgentsPaneSearchEntries } from '~renderer/components/settings/agents-search'
@@ -54,6 +53,7 @@ import { getVoicePaneSearchEntries } from '~renderer/components/settings/voice-p
 import { YiruLogoSettingsIcon } from '~renderer/components/settings/yiru-logo-settings-icon'
 import { isMacUserAgent, isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import type { SettingsNavSection } from '~renderer/lib/settings-navigation-types'
 import { isWebClientLocation } from '~renderer/lib/web-client-location'
 import {
@@ -519,12 +519,11 @@ export function buildSettingsNavigationMetadata({
 }
 
 export function useSettingsNavigationMetadata(): SettingsNavSection[] {
-  // Why: useTranslation subscribes to language changes, but the active locale
-  // must also be a memo dependency below — a rerender alone returns the cached
+  // Why: useUiLocale subscribes to language changes, but the active locale must
+  // also be a memo dependency below — a rerender alone returns the cached
   // previous-language sections, leaving the Settings sidebar and Cmd+J palette
   // stuck in the old language until Settings is remounted.
-  const { i18n } = useTranslation()
-  const activeLocale = i18n.language
+  const activeLocale = useUiLocale()
   const repos = useAppStore((state) => state.repos)
   const settings = useAppStore((state) => state.settings)
   const isMac = isMacUserAgent()

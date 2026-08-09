@@ -19,21 +19,6 @@ const LOCALE_CONFIG = {
     targetLanguage: 'zh-CN',
     displayName: 'Simplified Chinese',
     cacheFile: '.zh-catalog-cache.json'
-  },
-  ko: {
-    targetLanguage: 'ko',
-    displayName: 'Korean',
-    cacheFile: '.ko-catalog-cache.json'
-  },
-  ja: {
-    targetLanguage: 'ja',
-    displayName: 'Japanese',
-    cacheFile: '.ja-catalog-cache.json'
-  },
-  es: {
-    targetLanguage: 'es',
-    displayName: 'Spanish',
-    cacheFile: '.es-catalog-cache.json'
   }
 }
 

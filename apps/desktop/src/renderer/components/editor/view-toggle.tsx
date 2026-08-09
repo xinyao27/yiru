@@ -9,7 +9,6 @@ import {
   type Icon as PhosphorIcon
 } from '@phosphor-icons/react'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import type { MarkdownViewMode } from '~renderer/components/editor/state'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import {
@@ -19,6 +18,7 @@ import {
   TooltipTrigger
 } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 
 // Why: 'changes' is not a MarkdownViewMode in the store — it lives on the
 // orthogonal editorViewMode slice. This toggle unifies both dimensions into a
@@ -107,7 +107,7 @@ export default function EditorViewToggle({
 }: EditorViewToggleProps): React.JSX.Element {
   // Why: metadata labels are lightweight getters, so subscribe this compact
   // control to repaint when the active language changes.
-  useTranslation()
+  useUiLocale()
   return (
     <TooltipProvider>
       <ToggleGroup

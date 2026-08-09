@@ -1,7 +1,6 @@
 import './assets/main.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { useTranslation } from 'react-i18next'
 
 import App from './application-shell/shell'
 import { applyDocumentTheme } from './components/editor/document-theme'
@@ -9,6 +8,7 @@ import { RecoverableRenderErrorBoundary } from './components/error-boundaries/re
 import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { translate } from './i18n/i18n'
 import { I18nProvider } from './i18n/provider'
+import { useUiLocale } from './i18n/use-ui-locale'
 import {
   installRendererCrashDiagnostics,
   recordRendererCrashBreadcrumb
@@ -39,7 +39,7 @@ if (!rootElement) {
 }
 
 function RendererRoot(): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   return (
     <RecoverableRenderErrorBoundary
       boundaryId="app.root"

@@ -1,13 +1,13 @@
 import '../assets/main.css'
 import { Suspense, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom/client'
-import { useTranslation } from 'react-i18next'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
 import { translate } from '../i18n/i18n'
 import { I18nProvider } from '../i18n/provider'
+import { useUiLocale } from '../i18n/use-ui-locale'
 import WebConnect from './connect'
 import {
   clearPairingInputFromAddressBar,
@@ -70,7 +70,7 @@ function WebRoot(): React.JSX.Element {
 }
 
 function WebRootBoundary(): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   return (
     <RecoverableRenderErrorBoundary
       boundaryId="web.root"
