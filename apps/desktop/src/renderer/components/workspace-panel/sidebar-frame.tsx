@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -18,7 +19,11 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import { getTopActivityBarLayout } from './activity-bar-overflow'
-import { WorkspaceSidebarToggleButton } from './sidebar-chrome'
+import {
+  CollapsedWorkspaceSidebarChrome,
+  WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
+  WorkspaceSidebarToggleButton
+} from './sidebar-chrome'
 import {
   WORKSPACE_SIDEBAR_MIN_WIDTH,
   canFitWorkspaceSidebar,
@@ -38,12 +43,13 @@ type WorkspaceSidebarFrameProps = {
   isOpen: boolean
   items: readonly ActivityBarItem[]
   onActivityBarPositionChange: (position: ActivityBarPosition) => void
+  onOpenChange: (open: boolean) => void
   onSelectView: (view: ActiveRightSidebarTab) => void
-  onToggle: () => void
   onWidthChange: (width: number) => void
   reservedLeftWidth: number
   toggleShortcut: string
   width: number
+  worktreeId: string
 }
 
 export function WorkspaceSidebarFrame({
@@ -53,14 +59,16 @@ export function WorkspaceSidebarFrame({
   isOpen,
   items,
   onActivityBarPositionChange,
+  onOpenChange,
   onSelectView,
-  onToggle,
   onWidthChange,
   reservedLeftWidth,
   toggleShortcut,
-  width
+  width,
+  worktreeId
 }: WorkspaceSidebarFrameProps): React.JSX.Element {
   const [activityStripWidth, setActivityStripWidth] = useState<number | null>(null)
+  const collapsedChromeRef = useRef<HTMLDivElement | null>(null)
   const windowWidth = useWindowWidth()
   const workspaceWidth = windowWidth === null ? null : windowWidth - reservedLeftWidth
   const activityBarWidth = activityBarPosition === 'side' ? SIDE_ACTIVITY_BAR_WIDTH : 0
@@ -83,6 +91,8 @@ export function WorkspaceSidebarFrame({
     [activeView, activityStripWidth, items]
   )
   const activeTitle = items.find((item) => item.id === activeView)?.title ?? ''
+
+  useCollapsedChromeWidth(collapsedChromeRef, isVisible)
 
   const handleResizeKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -114,18 +124,24 @@ export function WorkspaceSidebarFrame({
     <WorkspaceSidebarToggleButton
       presentation="sidebar"
       shortcut={toggleShortcut}
-      onToggle={onToggle}
+      onToggle={() => onOpenChange(false)}
     />
   ) : null
 
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        'relative flex shrink-0 flex-row',
-        isVisible ? 'overflow-visible' : 'overflow-hidden'
-      )}
-    >
+    <div ref={containerRef} className="relative flex shrink-0 flex-row overflow-visible">
+      {!isVisible ? (
+        <div
+          ref={collapsedChromeRef}
+          className="fixed top-0 right-[var(--window-controls-width,0px)] z-20 h-[var(--titlebar-height)] [-webkit-app-region:no-drag]"
+        >
+          <CollapsedWorkspaceSidebarChrome
+            worktreeId={worktreeId}
+            shortcut={toggleShortcut}
+            onOpen={() => onOpenChange(true)}
+          />
+        </div>
+      ) : null}
       <div
         className={cn(
           'bg-sidebar flex min-w-0 flex-1 flex-col overflow-hidden',
@@ -139,7 +155,7 @@ export function WorkspaceSidebarFrame({
                 <div className="border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] items-center border-b pr-[var(--window-controls-width,0px)] [-webkit-app-region:drag]">
                   <div
                     ref={activityStripRef}
-                    className="flex min-w-0 flex-1 items-center overflow-hidden pl-2 [-webkit-app-region:no-drag]"
+                    className="flex h-full min-w-0 flex-1 items-center overflow-hidden [-webkit-app-region:no-drag]"
                   >
                     <TopActivityItems
                       activeView={activeView}
@@ -214,6 +230,34 @@ export function WorkspaceSidebarFrame({
   )
 }
 
+function useCollapsedChromeWidth(
+  chromeRef: React.RefObject<HTMLDivElement | null>,
+  isVisible: boolean
+): void {
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    const chrome = chromeRef.current
+    if (isVisible || !chrome) {
+      root.style.setProperty(WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, '0px')
+      return
+    }
+
+    const updateWidth = (): void => {
+      root.style.setProperty(
+        WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
+        `${chrome.getBoundingClientRect().width}px`
+      )
+    }
+    updateWidth()
+    const observer = new ResizeObserver(updateWidth)
+    observer.observe(chrome)
+    return () => {
+      observer.disconnect()
+      root.style.setProperty(WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, '0px')
+    }
+  }, [chromeRef, isVisible])
+}
+
 function TopActivityItems({
   activeView,
   layout,
@@ -224,8 +268,8 @@ function TopActivityItems({
   onSelectView: (view: ActiveRightSidebarTab) => void
 }): React.JSX.Element {
   return (
-    <div className="flex min-w-0 flex-1 shrink">
-      <div className="flex min-w-0 shrink gap-0.5">
+    <div className="flex h-full min-w-0 flex-1 shrink">
+      <ButtonGroup presentation="titlebar" className="min-w-0 shrink-0">
         {layout.visibleItems.map((item) => (
           <ActivityBarButton
             key={item.id}
@@ -235,14 +279,14 @@ function TopActivityItems({
             layout="top"
           />
         ))}
-      </div>
-      {layout.overflowItems.length > 0 ? (
-        <TopActivityOverflowMenu
-          items={layout.overflowItems}
-          activeTab={activeView}
-          onSelect={onSelectView}
-        />
-      ) : null}
+        {layout.overflowItems.length > 0 ? (
+          <TopActivityOverflowMenu
+            items={layout.overflowItems}
+            activeTab={activeView}
+            onSelect={onSelectView}
+          />
+        ) : null}
+      </ButtonGroup>
     </div>
   )
 }

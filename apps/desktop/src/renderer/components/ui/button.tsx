@@ -23,6 +23,9 @@ const buttonVariants = cva(
         // Why: titlebar chrome shares the row seams, so controls only draw vertical separators.
         'outline-transparent':
           'border border-y-0 border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
+        // Why: segmented titlebar actions rest quietly and use the primary color only for current state.
+        'titlebar-segment':
+          'border border-y-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground aria-[current=page]:text-primary dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
@@ -30,6 +33,9 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
+        // Why: quiet actions inside sidebar headers must not paint the main-canvas surface.
+        'sidebar-quiet':
+          'bg-sidebar text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:bg-sidebar dark:hover:bg-accent',
         // Why: tab-strip arrows use accent-only focus so their transparent
         // chrome never reads as a bordered control beside the tab viewport.
         'tab-strip-scroll':

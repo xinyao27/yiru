@@ -1,7 +1,7 @@
 import type { ActiveRightSidebarTab } from '~shared/types'
 
 const TOP_ACTIVITY_BUTTON_WIDTH = 36
-const TOP_ACTIVITY_MORE_BUTTON_WIDTH = 32
+const TOP_ACTIVITY_MORE_BUTTON_WIDTH = 36
 
 export function getTopActivityBarLayout<T extends { id: ActiveRightSidebarTab }>(
   items: readonly T[],

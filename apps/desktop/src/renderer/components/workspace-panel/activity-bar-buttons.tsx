@@ -1,7 +1,6 @@
 import { DotsThree as MoreHorizontal, type IconProps } from '@phosphor-icons/react'
 import React from 'react'
 import type { ActiveRightSidebarTab } from '~renderer/components/editor/state'
-import { getSelectableControlStateClasses } from '~renderer/components/selectable-control-state-classes'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
@@ -15,7 +14,6 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import type { CheckStatus } from '~shared/types'
 
-import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME } from './right-sidebar-titlebar-drag-regions'
 
 export type ActivityBarItem = {
@@ -62,13 +60,9 @@ export function TopActivityOverflowMenu({
         render={
           <Button
             type="button"
-            variant="outline"
-            size="icon-sm"
-            className={cn(
-              'relative my-auto h-7',
-              RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
-              RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
-            )}
+            variant="titlebar-segment"
+            size="icon-titlebar-wide"
+            className={cn('relative', RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)}
             aria-label={translate(
               'auto.components.right.sidebar.activity.bar.buttons.1fd284e931',
               'More sidebar tabs'
@@ -130,17 +124,16 @@ export function ActivityBarButton({
         render={
           <Button
             type="button"
-            variant="ghost"
-            size={isTop ? 'icon-sm' : 'icon-lg'}
+            variant={isTop ? 'titlebar-segment' : 'ghost'}
+            size={isTop ? 'icon-titlebar-wide' : 'icon-lg'}
             className={cn(
               'relative',
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
-              isTop ? 'my-auto h-7 w-9' : 'w-10 h-10',
-              isTop
-                ? getSelectableControlStateClasses(active)
-                : active
+              !isTop && 'w-10 h-10',
+              !isTop &&
+                (active
                   ? 'text-foreground'
-                  : 'text-muted-foreground/60 hover:text-muted-foreground'
+                  : 'text-muted-foreground/60 hover:text-muted-foreground')
             )}
             onClick={onClick}
             aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}

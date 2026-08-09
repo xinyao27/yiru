@@ -8,7 +8,7 @@ import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import { TabBarMoreButton } from '../tab-bar/more-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'
-import { CollapsedWorkspaceSidebarChrome } from '../workspace-panel/sidebar-chrome'
+import { WorkspaceSidebarChromeSpacer } from '../workspace-panel/sidebar-chrome'
 import { tabGroupBodyAnchorName } from './body-anchor'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-drag-split'
 import { useTabGroupWorkspaceModel } from './use-tab-group-workspace-model'
@@ -219,9 +219,7 @@ export default function TabGroupPanel({
           ) : (
             <div className={focusedActionChromeClassName} />
           )}
-          {reserveWindowControlsSpace ? (
-            <CollapsedWorkspaceSidebarChrome worktreeId={worktreeId} />
-          ) : null}
+          {reserveWindowControlsSpace ? <WorkspaceSidebarChromeSpacer /> : null}
         </>
       }
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}

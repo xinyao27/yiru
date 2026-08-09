@@ -1,14 +1,11 @@
 import { SidebarSimple as PanelRight } from '@phosphor-icons/react'
-import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
+import { TabBarOpenInMenuButton } from '~renderer/components/tab-bar/open-in-menu-button'
+import { Button } from '~renderer/components/ui/button'
+import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
-import { useAppStore } from '~renderer/store'
 
-import { TabBarOpenInMenuButton } from '../tab-bar/open-in-menu-button'
-import { Button } from '../ui/button'
-import { ButtonGroup } from '../ui/button-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
+export const WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY = '--workspace-sidebar-chrome-width'
 
 type WorkspaceSidebarToggleButtonProps = {
   onToggle: () => void
@@ -27,13 +24,9 @@ export function WorkspaceSidebarToggleButton({
         render={
           <Button
             type="button"
-            variant={presentation === 'sidebar' ? 'ghost' : 'outline-transparent'}
+            variant={presentation === 'sidebar' ? 'sidebar-quiet' : 'titlebar-segment'}
             size={presentation === 'sidebar' ? 'icon-sm' : 'icon-titlebar-wide'}
-            className={cn(
-              presentation === 'sidebar'
-                ? cn(RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME, 'mr-1')
-                : 'text-muted-foreground [-webkit-app-region:no-drag]'
-            )}
+            className={presentation === 'sidebar' ? 'mr-1' : '[-webkit-app-region:no-drag]'}
             onClick={onToggle}
             aria-label={translate(
               'auto.components.right.sidebar.index.e8e2e4ce74',
@@ -56,26 +49,27 @@ export function WorkspaceSidebarToggleButton({
 }
 
 export function CollapsedWorkspaceSidebarChrome({
+  onOpen,
+  shortcut,
   worktreeId
 }: {
+  onOpen: () => void
+  shortcut: string
   worktreeId: string
-}): React.JSX.Element | null {
-  const isOpen = useAppStore((state) => state.rightSidebarOpen)
-  const setOpen = useAppStore((state) => state.setRightSidebarOpen)
-  const shortcut = useShortcutLabel('sidebar.right.toggle')
-
-  if (isOpen) {
-    return null
-  }
-
+}): React.JSX.Element {
   return (
-    <ButtonGroup className="h-full shrink-0">
+    <ButtonGroup presentation="titlebar" className="shrink-0">
       <TabBarOpenInMenuButton worktreeId={worktreeId} />
-      <WorkspaceSidebarToggleButton
-        presentation="titlebar"
-        shortcut={shortcut}
-        onToggle={() => setOpen(true)}
-      />
+      <WorkspaceSidebarToggleButton presentation="titlebar" shortcut={shortcut} onToggle={onOpen} />
     </ButtonGroup>
+  )
+}
+
+export function WorkspaceSidebarChromeSpacer(): React.JSX.Element {
+  return (
+    <div
+      className="h-full shrink-0 [-webkit-app-region:no-drag]"
+      style={{ width: `var(${WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY}, 0px)` }}
+    />
   )
 }
