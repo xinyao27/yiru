@@ -23,7 +23,6 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '~shared/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 import { folderWorkspaceKey } from '~shared/workspace/scope'
 
 import type { AppState } from '../types'
@@ -1046,9 +1045,6 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
       }
     })
 
-    get().clearSourceControlPanelView(tabId)
-    get().clearGitGraphOpen(tabId)
-
     if (opts?.recordInteraction !== false) {
       get().recordFeatureInteraction?.('terminal-tabs')
     }
@@ -1961,7 +1957,7 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
       if (tab.contentType === 'simulator') {
         return true
       }
-      if (isWorkspacePanelTabContentType(tab.contentType)) {
+      if (tab.contentType === 'git-graph') {
         return true
       }
       return liveEditorIds.has(tab.entityId)

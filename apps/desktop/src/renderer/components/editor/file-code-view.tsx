@@ -99,13 +99,24 @@ export default function FileCodeView({
   const lastItemInputRef = useRef({ content, annotations, readOnly })
   const items = useMemo<CodeViewFileItem<DiffCodeViewAnnotation>[]>(() => {
     const previous = lastItemInputRef.current
+    const hasContentChanged = previous.content !== content
+    const hasExternalContentChanged = hasContentChanged && editedContentRef.current !== content
     if (
-      previous.content !== content ||
+      hasExternalContentChanged ||
       previous.annotations !== annotations ||
       previous.readOnly !== readOnly
     ) {
       versionRef.current += 1
+    }
+    if (
+      hasContentChanged ||
+      previous.annotations !== annotations ||
+      previous.readOnly !== readOnly
+    ) {
       lastItemInputRef.current = { content, annotations, readOnly }
+    }
+    if (hasExternalContentChanged) {
+      editedContentRef.current = content
     }
     return [
       {
@@ -115,9 +126,9 @@ export default function FileCodeView({
           name: relativePath,
           contents: content,
           lang: pierreLanguage,
-          // Why: Pierre keys its line cache on this alone and never rechecks the
-          // contents, so a constant key serves stale lines — and a shorter file
-          // then indexes past the cached array and throws.
+          // Why: Pierre owns the live document while editing. Bump this for
+          // external content only; bumping for a local draft echo rebuilds the
+          // document on every keystroke and drops focus.
           cacheKey: `${viewStateKey}:${versionRef.current}`
         },
         annotations,

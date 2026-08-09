@@ -31,7 +31,6 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
     pendingCommentEditorRevealFrameIdsRef,
     refreshActiveGitStatusAfterMutation,
     resolveSplitTargetGroupId,
-    revealCombinedDiffSection,
     setCollapsedSections,
     setCollapsedTreeDirs,
     setEditorViewMode,
@@ -102,23 +101,6 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       ) {
         return
       }
-      if (
-        revealCombinedDiffSection(
-          {
-            kind: 'branch',
-            entry,
-            compare: {
-              baseRef: branchSummary.baseRef,
-              baseOid: branchSummary.baseOid,
-              headOid: branchSummary.headOid,
-              mergeBase: branchSummary.mergeBase
-            }
-          },
-          event
-        )
-      ) {
-        return
-      }
       const targetGroupId = resolveSplitTargetGroupId(event)
       const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       openBranchDiff(
@@ -139,7 +121,6 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       branchSummary,
       openBranchDiff,
       resolveSplitTargetGroupId,
-      revealCombinedDiffSection,
       workspacePanelTabId,
       worktreePath
     ]
@@ -152,10 +133,9 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       workspacePanelTabId,
       resolveSplitTargetGroupId
     })
-  // Why: a diff row click may be answered by revealing a section inside an
-  // already-open combined diff, and that scroll lands two frames later — stamping
-  // the note target synchronously would be consumed first and then scrolled over.
-  const stampCommentScrollAfterReveal = useCallback(
+  // Why: opening a diff can mount its viewer this frame, so wait until its
+  // scroll listener is attached before sending the note target.
+  const stampCommentScrollAfterOpen = useCallback(
     (commentId: string | undefined) => {
       if (!commentId) {
         return
@@ -215,13 +195,13 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
         matches[0]
       if (uncommitted) {
         handleOpenDiff(uncommitted)
-        stampCommentScrollAfterReveal(commentId)
+        stampCommentScrollAfterOpen(commentId)
         return
       }
       const branchEntry = branchEntries.find((e) => e.path === filePath)
       if (branchEntry && branchSummary?.status === 'ready') {
         openCommittedDiff(branchEntry)
-        stampCommentScrollAfterReveal(commentId)
+        stampCommentScrollAfterOpen(commentId)
         return
       }
       // Why: stale notes may outlive both diff sources; open the normal editor
@@ -256,7 +236,7 @@ export function useSourceControlHistory(scope: SourceControlBranchCompareControl
       setScrollToDiffCommentId,
       setMarkdownViewMode,
       setPendingEditorReveal,
-      stampCommentScrollAfterReveal,
+      stampCommentScrollAfterOpen,
       workspacePanelTabId,
       worktreePath
     ]

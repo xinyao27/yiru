@@ -1,5 +1,6 @@
 import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
 import type { OpenFile } from '~renderer/components/editor/state'
+import { translate } from '~renderer/i18n/i18n'
 import { resolveTerminalTabTitle, resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
 import type { Tab, TabContentType, TabGroup, TerminalTab, Worktree } from '~shared/types'
 
@@ -19,6 +20,7 @@ export type WorkspaceTabContentType =
   | 'diff'
   | 'conflict-review'
   | 'check-details'
+  | 'git-graph'
 
 export type SearchableWorkspaceTab = {
   tab: Tab & { contentType: WorkspaceTabContentType }
@@ -114,6 +116,9 @@ function isCurrentWorkspaceTab({
   if (visibleType === 'terminal') {
     return (activeTabIdByWorktree[tab.worktreeId] ?? activeTabId) === tab.entityId
   }
+  if (tab.contentType === 'git-graph') {
+    return true
+  }
   return (activeFileIdByWorktree[tab.worktreeId] ?? activeFileId) === tab.entityId
 }
 
@@ -125,7 +130,8 @@ function isWorkspaceTabContentType(
     contentType === 'editor' ||
     contentType === 'diff' ||
     contentType === 'conflict-review' ||
-    contentType === 'check-details'
+    contentType === 'check-details' ||
+    contentType === 'git-graph'
   )
 }
 
@@ -216,6 +222,23 @@ export function buildSearchableWorkspaceTabs({
             retainedAgentsByPaneKey,
             sleepingAgentSessionsByPaneKey
           })
+        })
+        continue
+      }
+
+      if (tab.contentType === 'git-graph') {
+        const title = resolveUnifiedTabLabel(
+          tab,
+          generatedTitlesEnabled,
+          translate('auto.components.right.sidebar.SourceControl.e7f8a9b0c1', 'Git Graph')
+        )
+        entries.push({
+          ...baseEntry,
+          title,
+          secondaryText: title,
+          titleSearchText: title,
+          secondarySearchTexts: [title],
+          agentMetadata: []
         })
         continue
       }

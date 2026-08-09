@@ -6,7 +6,6 @@ import {
 } from '~renderer/components/terminal/tab-type-cycle'
 import { useAppStore } from '~renderer/store'
 import { sanitizeRecentTabIds } from '~renderer/store/slices/tab-group-state'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import { getActiveTabNavOrder } from './group-tab-order'
 
@@ -76,18 +75,16 @@ export function activateCyclableTab(store: AppStoreState, next: TypeCyclableTab)
       store.activateTab?.(next.tabId)
     }
     store.setActiveTabType('simulator')
-  } else if (next.type === 'workspace-panel') {
+  } else if (next.type === 'git-graph') {
     const tab = next.tabId
       ? Object.values(store.unifiedTabsByWorktree)
           .flat()
           .find((candidate) => candidate.id === next.tabId)
       : null
-    if (!tab || !isWorkspacePanelTabContentType(tab.contentType)) {
+    if (!tab || tab.contentType !== 'git-graph') {
       return
     }
     store.activateTab(tab.id)
-    store.setRightSidebarTab(tab.contentType)
-    store.setRightSidebarOpen(true)
     store.setActiveTabType('editor')
   } else {
     // Why: `setActiveFile` targets the file entity (its implicit activateTab

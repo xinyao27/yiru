@@ -101,7 +101,8 @@ const tabContentTypeSchema = z.enum([
   'conflict-review',
   'check-details',
   'browser',
-  'simulator'
+  'simulator',
+  'git-graph'
 ])
 
 const workspaceVisibleTabTypeSchema = z.enum(['terminal', 'editor', 'browser', 'simulator'])

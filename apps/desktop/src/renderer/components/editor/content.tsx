@@ -12,10 +12,10 @@ import type {
   PendingEditorReveal
 } from '~renderer/components/editor/state'
 import { Button } from '~renderer/components/ui/button'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { translate } from '~renderer/i18n/i18n'
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { joinPath } from '~renderer/lib/path'
 import { useAppStore } from '~renderer/store'
 import type { GitStatusEntry, GitDiffResult } from '~shared/types'
@@ -670,7 +670,7 @@ export function EditorContent({
           )
         }
         onReturnToSourceControl={() =>
-          openWorkspacePanelTab({ panel: 'source-control', worktreeId: activeFile.worktreeId })
+          showWorkspaceSidebar({ view: 'source-control', worktreeId: activeFile.worktreeId })
         }
       />
     )

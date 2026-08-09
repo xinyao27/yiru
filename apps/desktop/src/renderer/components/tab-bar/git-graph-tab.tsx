@@ -1,17 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable'
-import {
-  ClockCounterClockwise,
-  Folder,
-  FolderOpen,
-  FlowArrow as Workflow,
-  GitMerge,
-  ListChecks,
-  Plug
-} from '@phosphor-icons/react'
+import { GitBranch } from '@phosphor-icons/react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import type { WorkspacePanelTabContentType } from '~shared/types'
 
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
@@ -25,33 +16,8 @@ import { TabCloseButton } from './tab-close-button'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
-function WorkspacePanelIcon({
-  panel,
-  isActive
-}: {
-  panel: WorkspacePanelTabContentType
-  isActive: boolean
-}): React.JSX.Element {
-  const className = TAB_LEADING_ICON_CLASSES
-  switch (panel) {
-    case 'explorer':
-      return isActive ? <FolderOpen className={className} /> : <Folder className={className} />
-    case 'vault':
-      return <ClockCounterClockwise className={className} />
-    case 'workspaces':
-      return <Workflow className={className} />
-    case 'pr-checks':
-      return <ListChecks className={className} />
-    case 'source-control':
-      return <GitMerge className={className} />
-    case 'ports':
-      return <Plug className={className} />
-  }
-}
-
-export function WorkspacePanelTab({
+export function GitGraphTab({
   id,
-  panel,
   label,
   isActive,
   onActivate,
@@ -60,7 +26,6 @@ export function WorkspacePanelTab({
   dropIndicator
 }: {
   id: string
-  panel: WorkspacePanelTabContentType
   label: string
   isActive: boolean
   onActivate: () => void
@@ -105,7 +70,7 @@ export function WorkspacePanelTab({
           }
         }}
       >
-        <WorkspacePanelIcon panel={panel} isActive={isActive} />
+        <GitBranch className={TAB_LEADING_ICON_CLASSES} />
         <Tooltip>
           <TooltipTrigger
             render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{label}</span>}
@@ -119,9 +84,7 @@ export function WorkspacePanelTab({
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',
-            {
-              value0: label
-            }
+            { value0: label }
           )}
           onClose={onClose}
         />

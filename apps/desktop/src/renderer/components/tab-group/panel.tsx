@@ -4,7 +4,6 @@ import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import { TabBarMoreButton } from '../tab-bar/more-button'
 import TabBar from '../tab-bar/tab-bar'
@@ -16,9 +15,9 @@ import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-d
 import { useTabGroupWorkspaceModel } from './use-tab-group-workspace-model'
 import { resolveGroupTabFromVisibleId } from './visible-id'
 import { WorkspacePaneFrame } from './workspace-pane-frame'
-import { WorkspacePanelTabContent } from './workspace-panel-tab-content'
 
 const EditorPanel = lazy(() => import('../editor/panel'))
+const GitGraphView = lazy(() => import('../workspace-panel/git-graph/view'))
 
 export default function TabGroupPanel({
   groupId,
@@ -53,10 +52,7 @@ export default function TabGroupPanel({
 }): React.JSX.Element {
   const model = useTabGroupWorkspaceModel({ groupId, worktreeId })
   const { activeTab, browserItems, commands, editorItems, tabBarOrder, terminalTabs } = model
-  const activeWorkspacePanelType =
-    activeTab && isWorkspacePanelTabContentType(activeTab.contentType)
-      ? activeTab.contentType
-      : null
+  const activeGitGraphTabId = activeTab?.contentType === 'git-graph' ? activeTab.id : null
   const { setNodeRef: setBodyDropRef } = useDroppable({
     id: getTabPaneBodyDroppableId(groupId),
     data: {
@@ -133,13 +129,13 @@ export default function TabGroupPanel({
         activeTab.contentType === 'terminal' ||
         activeTab?.contentType === 'browser' ||
         activeTab?.contentType === 'simulator' ||
-        isWorkspacePanelTabContentType(activeTab.contentType)
+        activeTab?.contentType === 'git-graph'
           ? null
           : activeTab.id
       }
       activeBrowserTabId={activeTab?.contentType === 'browser' ? activeTab.entityId : null}
       activeSimulatorTabId={activeTab?.contentType === 'simulator' ? activeTab.id : null}
-      activeWorkspacePanelTabId={activeWorkspacePanelType ? activeTab?.id : null}
+      activeGitGraphTabId={activeGitGraphTabId}
       activeTabType={
         activeTab?.contentType === 'terminal'
           ? 'terminal'
@@ -152,7 +148,7 @@ export default function TabGroupPanel({
       onActivateFile={commands.activateEditor}
       onCloseFile={commands.closeItem}
       onActivateBrowserTab={commands.activateBrowser}
-      onActivateWorkspacePanelTab={commands.activateWorkspacePanel}
+      onActivateGitGraphTab={commands.activateGitGraph}
       onCloseBrowserTab={(browserTabId) => {
         const item = model.groupTabs.find(
           (candidate) => candidate.entityId === browserTabId && candidate.contentType === 'browser'
@@ -258,7 +254,7 @@ export default function TabGroupPanel({
         activeTab.contentType !== 'terminal' &&
         activeTab.contentType !== 'browser' &&
         activeTab.contentType !== 'simulator' &&
-        !isWorkspacePanelTabContentType(activeTab.contentType) && (
+        activeTab.contentType !== 'git-graph' && (
           <div className="absolute inset-0 flex min-h-0 min-w-0">
             {/* Why: split groups render editor content inside a plain relative pane body
                 instead of the legacy flex column in Terminal.tsx. */}
@@ -277,15 +273,12 @@ export default function TabGroupPanel({
           </div>
         )}
 
-      {activeWorkspacePanelType && activeTab ? (
-        <WorkspacePanelTabContent
-          panel={activeWorkspacePanelType}
-          panelTabId={activeTab.id}
-          worktreeId={worktreeId}
-          groupId={groupId}
-          onNewTerminalTab={commands.newTerminalTab}
-          onNewBrowserTab={commands.newBrowserTab}
-        />
+      {activeTab?.contentType === 'git-graph' ? (
+        <div className="absolute inset-0 flex min-h-0 min-w-0">
+          <Suspense fallback={null}>
+            <GitGraphView worktreeId={worktreeId} tabId={activeTab.id} />
+          </Suspense>
+        </div>
       ) : null}
 
       {/* Why: terminal/browser/simulator panes are rendered at the worktree level by

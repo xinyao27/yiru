@@ -696,6 +696,8 @@ export type WorkspacePanelTabContentType =
   | 'source-control'
   | 'ports'
 
+export type GitGraphTabContentType = 'git-graph'
+
 export type TabContentType =
   | 'terminal'
   | 'editor'
@@ -704,7 +706,7 @@ export type TabContentType =
   | 'check-details'
   | 'browser'
   | 'simulator'
-  | WorkspacePanelTabContentType
+  | GitGraphTabContentType
 
 export type WorkspaceVisibleTabType = 'terminal' | 'editor' | 'browser' | 'simulator'
 export type CtrlTabOrderMode = 'mru' | 'sequential'

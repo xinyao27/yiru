@@ -825,24 +825,9 @@ function setWorkspacePanelEditorTarget(
 }
 
 function resolveSourceControlWorkspacePanelTabId(
-  state: AppState,
-  worktreeId: string,
   requestedTarget?: WorkspacePanelEditorOpenOptions
 ): string | undefined {
-  if (requestedTarget) {
-    return requestedTarget.workspacePanelTabId
-  }
-  const activeTabId = state.activeTabId
-  if (!activeTabId) {
-    return undefined
-  }
-  const activeTab = (state.unifiedTabsByWorktree[worktreeId] ?? []).find(
-    (tab) => tab.id === activeTabId
-  )
-  if (activeTab?.contentType !== 'source-control') {
-    return undefined
-  }
-  return state.workspacePanelEditorFileIdByTab[activeTab.id] ? activeTab.id : undefined
+  return requestedTarget?.workspacePanelTabId
 }
 
 function isEditorTabContentType(contentType: Tab['contentType']): boolean {
@@ -1552,6 +1537,14 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     set((s) => ({
       rightSidebarTab: tab,
       rightSidebarRouteRequestId: s.rightSidebarRouteRequestId + 1,
+      ...(s.activeWorktreeId
+        ? {
+            rightSidebarTabByWorktree: {
+              ...s.rightSidebarTabByWorktree,
+              [s.activeWorktreeId]: tab
+            }
+          }
+        : {}),
       ...(tab === 'explorer' ? { rightSidebarExplorerView: 'files' as const } : {})
     })),
   setRightSidebarExplorerView: (view) =>
@@ -1575,6 +1568,10 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       rightSidebarRouteRequestId: s.rightSidebarRouteRequestId + 1,
       ...(s.activeWorktreeId
         ? {
+            rightSidebarTabByWorktree: {
+              ...s.rightSidebarTabByWorktree,
+              [s.activeWorktreeId]: 'explorer'
+            },
             rightSidebarExplorerViewByWorktree: {
               ...s.rightSidebarExplorerViewByWorktree,
               [s.activeWorktreeId]: 'files'
@@ -1591,6 +1588,10 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         rightSidebarRouteRequestId: s.rightSidebarRouteRequestId + 1,
         ...(s.activeWorktreeId
           ? {
+              rightSidebarTabByWorktree: {
+                ...s.rightSidebarTabByWorktree,
+                [s.activeWorktreeId]: 'explorer' as const
+              },
               rightSidebarExplorerViewByWorktree: {
                 ...s.rightSidebarExplorerViewByWorktree,
                 [s.activeWorktreeId]: 'search' as const
@@ -1679,6 +1680,10 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       rightSidebarTab: 'explorer',
       rightSidebarExplorerView: 'files',
       rightSidebarRouteRequestId: s.rightSidebarRouteRequestId + 1,
+      rightSidebarTabByWorktree: {
+        ...s.rightSidebarTabByWorktree,
+        [worktreeId]: 'explorer'
+      },
       rightSidebarExplorerViewByWorktree: {
         ...s.rightSidebarExplorerViewByWorktree,
         [worktreeId]: 'files'
@@ -2957,7 +2962,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openAllDiffs: (worktreeId, worktreePath, alternate, areaFilter, entriesSnapshot, options) => {
-    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(get(), worktreeId, options)
+    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(options)
     const id = areaFilter
       ? `${worktreeId}::all-diffs::uncommitted::${areaFilter}`
       : `${worktreeId}::all-diffs::uncommitted`
@@ -3183,7 +3188,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openConflictReviewFile: (reviewFileId, worktreeId, worktreePath, entry, language, options) => {
-    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(get(), worktreeId, options)
+    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(options)
     const absolutePath = joinPath(worktreePath, entry.path)
     const reviewTab = (get().unifiedTabsByWorktree?.[worktreeId] ?? []).find(
       (tab) => tab.entityId === reviewFileId && tab.contentType === 'conflict-review'
@@ -3294,7 +3299,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   // from live status on every paint, so the list is stable even if the live
   // unresolved set changes between polls.
   openConflictReview: (worktreeId, worktreePath, entries, source, options) => {
-    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(get(), worktreeId, options)
+    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(options)
     const id = `${worktreeId}::conflict-review`
     set((s) => {
       const conflictReview: ConflictReviewState = {
@@ -3539,7 +3544,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openBranchAllDiffs: (worktreeId, worktreePath, compare, alternate, options) => {
-    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(get(), worktreeId, options)
+    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(options)
     const branchCompare = toBranchCompareSnapshot(compare)
     const id = `${worktreeId}::all-diffs::branch::${compare.baseRef}::${branchCompare.compareVersion}`
     set((s) => {
@@ -3606,7 +3611,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openCommitAllDiffs: (worktreeId, worktreePath, compare, entries, subject, message, options) => {
-    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(get(), worktreeId, options)
+    const workspacePanelTabId = resolveSourceControlWorkspacePanelTabId(options)
     const commitCompare = toCommitCompareSnapshot(compare, subject, message)
     const id = `${worktreeId}::all-diffs::commit::${commitCompare.commitOid}`
     const label = subject

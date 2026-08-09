@@ -143,7 +143,7 @@ export function MatchResultRow({
 }: {
   match: SearchMatch
   relativePath: string
-  onClick: () => void
+  onClick: (preview: boolean) => void
 }): React.JSX.Element {
   // Highlight the matched text within the line
   const parts = useMemo(() => {
@@ -195,7 +195,7 @@ export function MatchResultRow({
                 event.preventDefault()
               }
             }}
-            onClick={onClick}
+            onClick={(event) => onClick(event.detail < 2)}
           >
             <span className="text-muted-foreground mt-px flex-shrink-0 text-[10px] tabular-nums">
               {match.line}

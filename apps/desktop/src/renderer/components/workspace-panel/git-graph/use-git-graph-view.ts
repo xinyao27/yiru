@@ -7,6 +7,7 @@ import { useRepoById, useWorktreeById } from '~renderer/store/selectors'
 import type { GitHistoryItem } from '~shared/git/history'
 import type { GitBranchChangeEntry } from '~shared/types'
 
+import { showWorkspaceSidebar } from '../show-sidebar'
 import type { SourceControlRowOpenEvent } from '../source-control/split-open'
 import { useGitHistoryCommitActions } from '../use-git-history-commit-actions'
 import { collectGitGraphBranchOptions, filterGitGraphItemsByBranches } from './branch-filter'
@@ -30,13 +31,7 @@ const EMPTY_GIT_STATUS_ENTRIES: readonly unknown[] = []
 // ?? []` would otherwise allocate a fresh empty array each render.
 const EMPTY_GIT_GRAPH_ITEMS: readonly GitHistoryItem[] = []
 
-export function useGitGraphView({
-  worktreeId,
-  workspacePanelTabId
-}: {
-  worktreeId: string
-  workspacePanelTabId: string
-}) {
+export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tabId: string }) {
   const worktree = useWorktreeById(worktreeId)
   const repo = useRepoById(worktree?.repoId ?? null)
   const settings = useAppStore((s) => s.settings)
@@ -49,7 +44,7 @@ export function useGitGraphView({
   const graphState = useAppStore((s) => s.gitGraphByWorktree[worktreeId] ?? EMPTY_GIT_GRAPH_STATE)
   const refreshGitGraph = useAppStore((s) => s.refreshGitGraph)
   const loadMoreGitGraph = useAppStore((s) => s.loadMoreGitGraph)
-  const setGitGraphOpen = useAppStore((s) => s.setGitGraphOpen)
+  const closeUnifiedTab = useAppStore((s) => s.closeUnifiedTab)
   const includeRemoteBranches = useAppStore(
     (s) => s.gitGraphIncludeRemoteBranchesByWorktree[worktreeId] ?? true
   )
@@ -57,7 +52,7 @@ export function useGitGraphView({
   const selectedRefIds = useAppStore((s) => s.gitGraphSelectedRefIdsByWorktree[worktreeId] ?? null)
   const setGitGraphSelectedRefIds = useAppStore((s) => s.setGitGraphSelectedRefIds)
   const columnWidths = useAppStore(
-    (s) => s.gitGraphColumnWidthsByPanelTab[workspacePanelTabId] ?? DEFAULT_GIT_GRAPH_COLUMN_WIDTHS
+    (s) => s.gitGraphColumnWidthsByWorktree[worktreeId] ?? DEFAULT_GIT_GRAPH_COLUMN_WIDTHS
   )
   const setGitGraphColumnWidths = useAppStore((s) => s.setGitGraphColumnWidths)
   const dirtyEntries = useAppStore(
@@ -152,7 +147,6 @@ export function useGitGraphView({
     activeWorktreeId: worktreeId,
     worktreePath,
     activeRepoSettings,
-    workspacePanelTabId,
     resolveSplitTargetGroupId
   })
   const { handleCommitAction, writeDialog, isWriting, closeWriteDialog, submitWriteDialog } =
@@ -240,13 +234,14 @@ export function useGitGraphView({
   ])
 
   const handleColumnWidthsChange = useCallback(
-    (widths: GitGraphColumnWidths) => setGitGraphColumnWidths(workspacePanelTabId, widths),
-    [setGitGraphColumnWidths, workspacePanelTabId]
+    (widths: GitGraphColumnWidths) => setGitGraphColumnWidths(worktreeId, widths),
+    [setGitGraphColumnWidths, worktreeId]
   )
 
-  const close = useCallback(
-    () => setGitGraphOpen(workspacePanelTabId, false),
-    [setGitGraphOpen, workspacePanelTabId]
+  const close = useCallback(() => closeUnifiedTab(tabId), [closeUnifiedTab, tabId])
+  const openUncommittedChanges = useCallback(
+    () => showWorkspaceSidebar({ view: 'source-control', worktreeId }),
+    [worktreeId]
   )
 
   return {
@@ -295,6 +290,7 @@ export function useGitGraphView({
     closeFind,
     onRefresh: () => void refreshGitGraph(worktreeId),
     onLoadMore: () => void loadMoreGitGraph(worktreeId),
+    onOpenUncommittedChanges: openUncommittedChanges,
     onCloseGraph: close
   }
 }

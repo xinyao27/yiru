@@ -1635,6 +1635,11 @@ const WORKTREE_ID_KEYED_MAP_KEYS = [
   'pendingReconnectTabByWorktree',
   'rightSidebarTabByWorktree',
   'rightSidebarExplorerViewByWorktree',
+  'sourceControlPanelViewByWorktree',
+  'gitGraphByWorktree',
+  'gitGraphIncludeRemoteBranchesByWorktree',
+  'gitGraphSelectedRefIdsByWorktree',
+  'gitGraphColumnWidthsByWorktree',
   'unifiedTabsByWorktree',
   'groupsByWorktree',
   'layoutByWorktree',
@@ -2103,6 +2108,13 @@ function buildWorktreePurgeState(s: AppState, worktreeIds: string[]): Partial<Ap
     pendingReconnectTabByWorktree: omitByWorktree(s.pendingReconnectTabByWorktree),
     rightSidebarTabByWorktree: pruneRightSidebarTabByWorktree(),
     rightSidebarExplorerViewByWorktree: omitByWorktree(s.rightSidebarExplorerViewByWorktree ?? {}),
+    sourceControlPanelViewByWorktree: omitByWorktree(s.sourceControlPanelViewByWorktree),
+    gitGraphByWorktree: omitByWorktree(s.gitGraphByWorktree),
+    gitGraphIncludeRemoteBranchesByWorktree: omitByWorktree(
+      s.gitGraphIncludeRemoteBranchesByWorktree
+    ),
+    gitGraphSelectedRefIdsByWorktree: omitByWorktree(s.gitGraphSelectedRefIdsByWorktree),
+    gitGraphColumnWidthsByWorktree: omitByWorktree(s.gitGraphColumnWidthsByWorktree),
     // Split-tab / unified tab state
     unifiedTabsByWorktree: omitByWorktree(s.unifiedTabsByWorktree),
     groupsByWorktree: omitByWorktree(s.groupsByWorktree),
@@ -4332,6 +4344,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       // must switch with the worktree instead of leaking the previous one.
       const restoredRightSidebarExplorerView =
         s.rightSidebarExplorerViewByWorktree?.[worktreeId] ?? 'files'
+      const restoredRightSidebarTab = s.rightSidebarTabByWorktree?.[worktreeId] ?? 'explorer'
       const restoredFileId = s.activeFileIdByWorktree[worktreeId] ?? null
       const restoredBrowserTabId = s.activeBrowserTabIdByWorktree[worktreeId] ?? null
       const restoredTabType = s.activeTabTypeByWorktree[worktreeId] ?? 'terminal'
@@ -4524,6 +4537,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         s.activeFileId !== activeFileId ||
         s.activeBrowserTabId !== activeBrowserTabId ||
         s.activeTabType !== activeTabType ||
+        s.rightSidebarTab !== restoredRightSidebarTab ||
         s.rightSidebarExplorerView !== restoredRightSidebarExplorerView ||
         s.activeTabId !== activeTabId ||
         nextActiveTabTypeByWorktree !== s.activeTabTypeByWorktree ||
@@ -4545,6 +4559,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         activeBrowserTabId,
         activeTabType,
         activeTabTypeByWorktree: nextActiveTabTypeByWorktree,
+        rightSidebarTab: restoredRightSidebarTab,
         rightSidebarExplorerView: restoredRightSidebarExplorerView,
         activeTabId,
         everActivatedWorktreeIds: nextEverActivated,
@@ -4651,6 +4666,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     const reconciledActiveTabId =
       get().reconcileWorktreeTabModel(workspaceKey).activeRenderableTabId
     set((s) => {
+      const restoredRightSidebarTab = s.rightSidebarTabByWorktree?.[workspaceKey] ?? 'explorer'
+      const restoredRightSidebarExplorerView =
+        s.rightSidebarExplorerViewByWorktree?.[workspaceKey] ?? 'files'
       const restoredFileId = s.activeFileIdByWorktree[workspaceKey] ?? null
       const restoredBrowserTabId = s.activeBrowserTabIdByWorktree[workspaceKey] ?? null
       const restoredTabType = s.activeTabTypeByWorktree[workspaceKey] ?? 'terminal'
@@ -4732,6 +4750,8 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           s.activeTabTypeByWorktree[workspaceKey] === activeTabType
             ? s.activeTabTypeByWorktree
             : { ...s.activeTabTypeByWorktree, [workspaceKey]: activeTabType },
+        rightSidebarTab: restoredRightSidebarTab,
+        rightSidebarExplorerView: restoredRightSidebarExplorerView,
         activeTabId,
         everActivatedWorktreeIds: nextEverActivated,
         folderWorkspaces: workspace.isUnread

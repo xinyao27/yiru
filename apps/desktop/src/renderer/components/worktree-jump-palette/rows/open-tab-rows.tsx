@@ -1,5 +1,6 @@
 import {
   FileText,
+  GitBranch,
   Globe,
   DeviceMobile as Smartphone,
   TerminalWindow as SquareTerminal
@@ -41,7 +42,12 @@ export function WorkspaceTabRow({
     : undefined
   const workspaceTabRepoName = workspaceTabRepo?.displayName ?? result.repoName
   const workspaceTabHostBadge = getPaletteHostBadge(workspaceTabRepo, hostOptions)
-  const WorkspaceTabIcon = result.contentType === 'terminal' ? SquareTerminal : FileText
+  const WorkspaceTabIcon =
+    result.contentType === 'terminal'
+      ? SquareTerminal
+      : result.contentType === 'git-graph'
+        ? GitBranch
+        : FileText
 
   return (
     <CommandItem

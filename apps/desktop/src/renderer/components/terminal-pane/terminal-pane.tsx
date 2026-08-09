@@ -34,13 +34,13 @@ import {
 } from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '~renderer/components/terminal-search'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '~renderer/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { requestFriday } from '~renderer/lib/friday'
 import { useEffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   getAllDrivers,
   getDriverForPty,
@@ -1381,8 +1381,8 @@ export default function TerminalPane({
 
   const handleSearchSelectedText = useCallback(
     (selectedText: string): void => {
-      openWorkspacePanelTab({
-        panel: 'explorer',
+      showWorkspaceSidebar({
+        view: 'explorer',
         worktreeId,
         explorerDestination: { view: 'search', query: selectedText }
       })

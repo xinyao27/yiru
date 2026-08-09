@@ -107,11 +107,7 @@ function toSwitcherItem(
     label: getTabLabel(backingTab, generatedTitlesEnabled, entry.id),
     contentType:
       backingTab?.contentType ??
-      (entry.type === 'workspace-panel'
-        ? 'explorer'
-        : entry.type === 'editor'
-          ? 'editor'
-          : entry.type),
+      (entry.type === 'git-graph' ? 'git-graph' : entry.type === 'editor' ? 'editor' : entry.type),
     isDirty: entry.type === 'editor' && dirtyFileIds.has(entry.id)
   }
 }

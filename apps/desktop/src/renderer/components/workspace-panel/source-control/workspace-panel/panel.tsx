@@ -51,11 +51,13 @@ export default function SourceControlWorkspacePanel({
   view: controlledView,
   onViewChange
 }: SourceControlWorkspacePanelProps): React.JSX.Element {
+  const activeWorktreeId = useAppStore((state) => state.activeWorktreeId)
   const storedView = useAppStore((state) =>
-    workspacePanelTabId ? state.sourceControlPanelViewByTab[workspacePanelTabId] : undefined
+    activeWorktreeId ? state.sourceControlPanelViewByWorktree[activeWorktreeId] : undefined
   )
   const setStoredView = useAppStore((state) => state.setSourceControlPanelView)
-  const view = controlledView ?? storedView ?? 'changes'
+  const requestedView = useAppStore((state) => state.requestedSourceControlPanelView)
+  const view = controlledView ?? storedView ?? requestedView
   const { changeLineCounts, reviewDetails } = useSourceControlTabDetails(source)
   useAutoOpenAllDiffs({ source, isVisible, workspacePanelTabId })
   // Why: Base UI unmounts an inactive panel, so every Changes/Review switch tore
@@ -77,8 +79,8 @@ export default function SourceControlWorkspacePanel({
       onViewChange(value)
       return
     }
-    if (workspacePanelTabId) {
-      setStoredView(workspacePanelTabId, value)
+    if (activeWorktreeId) {
+      setStoredView(activeWorktreeId, value)
     }
   }
 

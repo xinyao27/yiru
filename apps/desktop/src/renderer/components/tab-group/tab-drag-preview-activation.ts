@@ -1,6 +1,5 @@
 import { useAppStore } from '~renderer/store'
 import type { AppState } from '~renderer/store/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 export type TabDragActivationSnapshot = {
   activeGroupId: string | null
@@ -58,7 +57,7 @@ function previewActiveSurfacePatch(
       activeTabTypeByWorktree: nextActiveTabTypeByWorktree('simulator')
     }
   }
-  if (isWorkspacePanelTabContentType(unifiedTab.contentType)) {
+  if (unifiedTab.contentType === 'git-graph') {
     return {
       activeTabType: 'editor',
       activeTabTypeByWorktree: nextActiveTabTypeByWorktree('editor')

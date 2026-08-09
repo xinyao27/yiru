@@ -1,4 +1,4 @@
-export type TabCycleType = 'terminal' | 'editor' | 'browser' | 'simulator' | 'workspace-panel'
+export type TabCycleType = 'terminal' | 'editor' | 'browser' | 'simulator' | 'git-graph'
 
 export type TypeCyclableTab = {
   type: TabCycleType
@@ -91,7 +91,9 @@ export function getNextTabWithinActiveType({
   activeGroupTabId,
   direction
 }: GetNextTabWithinActiveTypeParams): TypeCyclableTab | null {
-  const tabsOfActiveType = tabs.filter((tab) => tab.type === activeTabType)
+  const tabsOfActiveType = tabs.filter(
+    (tab) => tab.type === activeTabType || (activeTabType === 'editor' && tab.type === 'git-graph')
+  )
   if (tabsOfActiveType.length <= 1) {
     return null
   }

@@ -12,7 +12,6 @@ import {
   type ShortcutKeyComboDetails
 } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { canShowRightSidebarForView } from '~renderer/lib/right-sidebar-visibility'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { useAppStore } from '~renderer/store'
@@ -25,6 +24,7 @@ import {
 } from '~shared/workspace/panel-titlebar-pinned'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
+import { showWorkspaceSidebar } from './show-sidebar'
 import {
   resolveItemIcon,
   resolvePanelIcon,
@@ -47,7 +47,7 @@ export type WorkspacePanelTitlebarModel = {
   groupId: string
   visibleItems: WorkspaceTitlebarStripItem[]
   overflowItems: WorkspaceTitlebarStripItem[]
-  activeTabContentType: string | null
+  activePanelId: ActiveRightSidebarTab | null
   dropTarget: WorkspacePanelTitlebarDropTarget
   isPanelDragActive: boolean
   resolvePanelIcon: (item: ActivityBarItem, active: boolean) => ActivityBarItem['icon']
@@ -67,9 +67,9 @@ export function useWorkspacePanelTitlebarModel(
   groupId: string
 ): WorkspacePanelTitlebarModel | null {
   const activeView = useAppStore((state) => state.activeView)
-  const activeTabContentType = useAppStore((state) => {
-    return state.getActiveTab(worktreeId)?.contentType ?? null
-  })
+  const activePanelId = useAppStore((state) =>
+    state.activeWorktreeId === worktreeId && state.rightSidebarOpen ? state.rightSidebarTab : null
+  )
   const pinnedIds = useAppStore((state) => state.workspacePanelTitlebarPinnedIds)
   const setPinnedIds = useAppStore((state) => state.setWorkspacePanelTitlebarPinnedIds)
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
@@ -164,19 +164,17 @@ export function useWorkspacePanelTitlebarModel(
   const togglePanel = useCallback(
     (id: ActiveRightSidebarTab) => {
       const state = useAppStore.getState()
-      const activeTabId = (state.groupsByWorktree[worktreeId] ?? []).find(
-        (group) => group.id === groupId
-      )?.activeTabId
-      const activeTab = (state.unifiedTabsByWorktree[worktreeId] ?? []).find(
-        (tab) => tab.id === activeTabId
-      )
-      if (activeTab?.contentType === id) {
-        state.closeUnifiedTab(activeTab.id)
+      if (
+        state.activeWorktreeId === worktreeId &&
+        state.rightSidebarOpen &&
+        state.rightSidebarTab === id
+      ) {
+        state.setRightSidebarOpen(false)
         return
       }
-      openWorkspacePanelTab({ panel: id, worktreeId, groupId })
+      showWorkspaceSidebar({ view: id, worktreeId })
     },
-    [groupId, worktreeId]
+    [worktreeId]
   )
 
   const activateItem = useCallback(
@@ -228,7 +226,7 @@ export function useWorkspacePanelTitlebarModel(
     groupId,
     visibleItems,
     overflowItems,
-    activeTabContentType,
+    activePanelId,
     dropTarget,
     isPanelDragActive,
     resolvePanelIcon,

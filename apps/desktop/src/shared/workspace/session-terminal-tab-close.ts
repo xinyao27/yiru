@@ -5,7 +5,6 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../types'
-import { isWorkspacePanelTabContentType } from './panel-tab'
 
 export type WorkspaceSessionTerminalTabCloseResult = {
   session: WorkspaceSessionState
@@ -127,7 +126,7 @@ function deriveActiveSurface(
       type: 'browser'
     }
   }
-  if (activeUnified && isWorkspacePanelTabContentType(activeUnified.contentType)) {
+  if (activeUnified?.contentType === 'git-graph') {
     return {
       terminalTabId: terminalFallback,
       browserTabId: browserFallback,

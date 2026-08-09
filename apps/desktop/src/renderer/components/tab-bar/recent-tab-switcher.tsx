@@ -1,5 +1,6 @@
 import {
   FileText,
+  GitBranch,
   GitDiff as GitCompare,
   Globe as Globe2,
   TerminalWindow as TerminalSquare
@@ -40,6 +41,9 @@ function TabIcon({ item }: { item: RecentTabSwitcherItem }): React.JSX.Element {
   }
   if (item.type === 'browser') {
     return <Globe2 className={className} />
+  }
+  if (item.contentType === 'git-graph') {
+    return <GitBranch className={className} />
   }
   if (
     item.contentType === 'diff' ||

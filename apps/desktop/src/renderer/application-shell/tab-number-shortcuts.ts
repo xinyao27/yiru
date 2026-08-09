@@ -8,7 +8,6 @@ import { useAppStore } from '~renderer/store'
 import { dedupeTabOrder } from '~renderer/store/slices/tab-group-state'
 import type { AppState } from '~renderer/store/types'
 import type { Tab } from '~shared/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 type TabNumberShortcutState = Pick<
   AppState,
@@ -100,9 +99,7 @@ export function activateTabNumberShortcut(index: number): boolean {
     return true
   }
 
-  if (isWorkspacePanelTabContentType(target.contentType)) {
-    store.setRightSidebarTab(target.contentType)
-    store.setRightSidebarOpen(true)
+  if (target.contentType === 'git-graph') {
     store.setActiveTabType('editor')
     return true
   }

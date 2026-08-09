@@ -39,6 +39,10 @@ import {
   TooltipTrigger
 } from '~renderer/components/ui/tooltip'
 import {
+  showWorkspaceSidebar,
+  toggleWorkspaceSidebar
+} from '~renderer/components/workspace-panel/show-sidebar'
+import {
   SYNC_FIT_PANES_EVENT,
   TOGGLE_TERMINAL_PANE_EXPAND_EVENT
 } from '~renderer/constants/terminal'
@@ -56,7 +60,6 @@ import {
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
 } from '~renderer/lib/floating-workspace-terminal-actions'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   canGoBackWorktreeHistory,
   canGoForwardWorktreeHistory
@@ -349,6 +352,7 @@ const AutomationsPage = lazy(() => import('../components/automations/page'))
 const Settings = lazy(() => import('../components/settings/page'))
 const SkillsPage = lazy(() => import('../components/skills/page'))
 const WorkspaceSpacePage = lazy(() => import('../components/workspace-space/page'))
+const WorkspaceSidebar = lazy(() => import('../components/workspace-panel/sidebar'))
 const MobilePage = lazy(() => import('../components/mobile/page'))
 const QuickOpen = lazy(() => import('../components/quick-open'))
 const WorktreeJumpPalette = lazy(() => import('../components/worktree-jump-palette/panel'))
@@ -1577,7 +1581,7 @@ function App(): React.JSX.Element {
         })
       }
 
-      const canOpenWorkspacePanel =
+      const canOpenWorkspaceSidebar =
         !creationLayoutActive &&
         activeView === 'terminal' &&
         activeWorktreeId !== null &&
@@ -1586,25 +1590,25 @@ function App(): React.JSX.Element {
       const coworkingWorkspaceActive =
         activeView === 'terminal' && useAppStore.getState().activeCoworkingWorkspaceRoute !== null
 
-      const openSearchTab = (query: string | null): void => {
-        openWorkspacePanelTab({
-          panel: 'explorer',
+      const toggleSearchSidebar = (query: string | null): void => {
+        toggleWorkspaceSidebar({
+          view: 'explorer',
           explorerDestination: { view: 'search', ...(query ? { query } : {}) }
         })
       }
 
       // Why: this command is intentionally assignable over editor/terminal
       // focus; consume its chord only while unsent notes make the action valid.
-      if (matchShortcut('sourceControl.sendReviewNotes') && canOpenWorkspacePanel) {
+      if (matchShortcut('sourceControl.sendReviewNotes') && canOpenWorkspaceSidebar) {
         if (actions.openDiffNotesSendMenuForActiveWorktree()) {
           input.preventDefault()
           notifyTerminalCapture('sourceControl.sendReviewNotes')
-          openWorkspacePanelTab({ panel: 'source-control' })
+          showWorkspaceSidebar({ view: 'source-control' })
           return
         }
       }
 
-      if (matchShortcut('sidebar.search.toggle') && canOpenWorkspacePanel) {
+      if (matchShortcut('sidebar.search.toggle') && canOpenWorkspaceSidebar) {
         // Why: when focus is inside the file explorer and a folder is selected,
         // Cmd/Ctrl+Shift+F means "Find in Folder" — seed the include pattern
         // with that folder instead of treating the chord as a text-search seed.
@@ -1615,8 +1619,8 @@ function App(): React.JSX.Element {
         if (selectedFolderRelativePath !== null && activeWorktreeId) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.search.toggle')
-          openWorkspacePanelTab({
-            panel: 'explorer',
+          toggleWorkspaceSidebar({
+            view: 'explorer',
             explorerDestination: {
               view: 'search',
               includePattern: folderRelativePathToIncludeGlob(selectedFolderRelativePath)
@@ -1629,7 +1633,7 @@ function App(): React.JSX.Element {
         if (selectedText) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.search.toggle')
-          openSearchTab(selectedText)
+          toggleSearchSidebar(selectedText)
           return
         }
       }
@@ -1817,24 +1821,23 @@ function App(): React.JSX.Element {
         return
       }
 
-      if (!canOpenWorkspacePanel) {
+      if (!canOpenWorkspaceSidebar) {
         return
       }
 
-      // Why: keep the established shortcut, but route it to the first workspace
-      // panel now that the standalone right-sidebar shell no longer exists.
       if (matchShortcut('sidebar.right.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.right.toggle')
-        openWorkspacePanelTab({ panel: 'explorer' })
+        const store = useAppStore.getState()
+        store.setRightSidebarOpen(!store.rightSidebarOpen)
         return
       }
 
       if (matchShortcut('sidebar.explorer.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.explorer.toggle')
-        openWorkspacePanelTab({
-          panel: 'explorer',
+        toggleWorkspaceSidebar({
+          view: 'explorer',
           explorerDestination: { view: 'files' }
         })
         return
@@ -1843,11 +1846,11 @@ function App(): React.JSX.Element {
       if (matchShortcut('sidebar.search.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.search.toggle')
-        openSearchTab(null)
+        toggleSearchSidebar(null)
         return
       }
 
-      // Cmd/Ctrl+Shift+G — open Changes & Review in a workspace tab.
+      // Cmd/Ctrl+Shift+G — toggle Changes & Review in the workspace sidebar.
       // Skip when terminal search is open — Cmd+Shift+G means "find previous"
       // in that context (handled by keyboard-handlers.ts). Both listeners share
       // the window capture phase and registration order can vary with React
@@ -1858,24 +1861,24 @@ function App(): React.JSX.Element {
         }
         input.preventDefault()
         notifyTerminalCapture('sidebar.sourceControl.toggle')
-        openWorkspacePanelTab({ panel: 'source-control' })
+        toggleWorkspaceSidebar({ view: 'source-control' })
         return
       }
 
       if (matchShortcut('sidebar.checks.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.checks.toggle')
-        openWorkspacePanelTab({ panel: 'source-control', sourceControlView: 'review' })
+        toggleWorkspaceSidebar({ view: 'source-control', sourceControlView: 'review' })
         return
       }
 
-      // Cmd+Shift+I — open the Ports workspace tab (macOS only).
+      // Cmd+Shift+I — toggle the Ports workspace sidebar view (macOS only).
       // Why: Ctrl+Shift+I is the built-in DevTools accelerator on Windows/Linux;
       // intercepting it would break an essential developer tool.
       if (matchShortcut('sidebar.ports.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.ports.toggle')
-        openWorkspacePanelTab({ panel: 'ports' })
+        toggleWorkspaceSidebar({ view: 'ports' })
       }
     }
 
@@ -2450,6 +2453,22 @@ function App(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
+                {localWorkspaceChromeActive && activeWorktreeId ? (
+                  <Suspense fallback={null}>
+                    <RecoverableRenderErrorBoundary
+                      boundaryId="workspace.sidebar"
+                      surface="right-sidebar"
+                      resetKey="workspace-sidebar"
+                      title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
+                      description={translate(
+                        'auto.App.8d1e160ed1',
+                        'Retry the sidebar or switch tabs to reload this surface.'
+                      )}
+                    >
+                      <WorkspaceSidebar />
+                    </RecoverableRenderErrorBoundary>
+                  </Suspense>
+                ) : null}
               </div>
             </RecoverableRenderErrorBoundary>
             {shouldMountFloatingTerminalPanel ? (

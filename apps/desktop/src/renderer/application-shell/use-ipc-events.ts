@@ -39,6 +39,7 @@ import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/ter
 import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
 import { SPLIT_TERMINAL_PANE_EVENT, CLOSE_TERMINAL_PANE_EVENT } from '~renderer/constants/terminal'
 import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '~renderer/constants/terminal'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
@@ -57,7 +58,6 @@ import { detectLanguage } from '~renderer/lib/language-detect'
 import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-view-mode'
 import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
 import { openMobileEmulatorTab } from '~renderer/lib/open-mobile-emulator-tab'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   hydrateBrowserDrivers,
   setDriverForBrowserPage
@@ -943,7 +943,7 @@ export function useIpcEvents(): void {
         if (!store.activeWorktreeId) {
           return
         }
-        openWorkspacePanelTab({ panel: 'explorer' })
+        showWorkspaceSidebar({ view: 'explorer' })
       })
     )
 
