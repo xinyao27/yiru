@@ -101,14 +101,19 @@
   --radius: 0;
   /* Why: project Cursor's core surfaces and semantic opacity ramps onto the
      existing shadcn roles without expanding Yiru's closed token vocabulary. */
-  --background: #f8f8f8;
+  /* Why: *-base holds the opaque value so a workspace theme gradient can thin
+     the chrome roles without any surface losing its original color. */
+  --background-base: #f8f8f8;
+  --background: var(--background-base);
   /* Why: tab-hosted editors share the app canvas so selected tabs connect
      visually to every content surface, including Monaco and markdown. */
   --editor-surface: var(--background);
   --foreground: #141414;
-  --card: #fcfcfc;
+  --card-base: #fcfcfc;
+  --card: var(--card-base);
   --card-foreground: #141414;
-  --popover: #fcfcfc;
+  --popover-base: #fcfcfc;
+  --popover: var(--popover-base);
   --popover-foreground: #141414;
   /* Why: single source of truth for the brand hue — every primary/ring role in
      the light theme derives from it, while dark mode provides its brighter counterpart. */
@@ -134,7 +139,8 @@
   --chart-3: #a46700;
   --chart-4: #92156a;
   --chart-5: #7565cc;
-  --sidebar: #f3f3f3;
+  --sidebar-base: #f3f3f3;
+  --sidebar: var(--sidebar-base);
   --sidebar-foreground: #141414;
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: #fcfcfc;
@@ -174,12 +180,15 @@
 /* ── Dark Mode ───────────────────────────────────────── */
 
 .dark {
-  --background: #141414;
+  --background-base: #141414;
+  --background: var(--background-base);
   --editor-surface: var(--background);
   --foreground: #f0f0f0;
-  --card: #181818;
+  --card-base: #181818;
+  --card: var(--card-base);
   --card-foreground: #f0f0f0;
-  --popover: #181818;
+  --popover-base: #181818;
+  --popover: var(--popover-base);
   --popover-foreground: #f0f0f0;
   --brand: #599ce7;
   --primary: var(--brand);
@@ -202,7 +211,8 @@
   --chart-3: #f1b467;
   --chart-4: #b48ead;
   --chart-5: #9386f2;
-  --sidebar: #181818;
+  --sidebar-base: #181818;
+  --sidebar: var(--sidebar-base);
   --sidebar-foreground: #f0f0f0;
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: #191c22;
@@ -258,6 +268,32 @@
     transparent var(--titlebar-height),
     var(--background) var(--titlebar-height)
   );
+}
+
+/* Why: the opt-in workspace theme gradient (Settings → Appearance) is the one
+   sanctioned exception to the grayscale, opaque-surface baseline — see
+   DESIGN.md § "Workspace theme gradient". Inert until a theme is picked. Only
+   the sidebar thins out to reveal the wash; every other surface takes an opaque
+   tint so dialogs, menus, and editors never turn see-through over content. */
+[data-theme-gradient='on'],
+[data-theme-gradient-portals='on'] {
+  /* Why: aliases declared on :root resolve before a local --brand
+     override, so rebind them in the same scope as the picked workspace hue. */
+  --primary: var(--brand);
+  --ring: var(--brand);
+  --sidebar-primary: var(--brand);
+  --sidebar-ring: var(--brand);
+  --terminal-pane-locate: var(--primary);
+}
+
+[data-theme-gradient='on'] {
+  --background: color-mix(in srgb, var(--brand) var(--app-theme-tint), var(--background-base));
+  --card: color-mix(in srgb, var(--brand) var(--app-theme-tint), var(--card-base));
+  --popover: color-mix(in srgb, var(--brand) var(--app-theme-tint), var(--popover-base));
+  --sidebar: color-mix(in srgb, var(--sidebar-base) var(--app-theme-surface-alpha), transparent);
+  background-color: var(--background-base);
+  background-image: var(--app-theme-gradient);
+  background-attachment: fixed;
 }
 
 [data-sonner-toaster] {
@@ -340,6 +376,158 @@
     /* Why: the flat, rectilinear design must also cover legacy utilities,
        inline styles, and third-party components that bypass design tokens. */
     border-radius: 0 !important;
+  }
+
+  /* Why: the theme picker visualizes color geometry, so its field, samples,
+     and direct manipulation controls retain the round shapes sanctioned by DESIGN.md. */
+  :root:root [data-theme-color-picker] {
+    --theme-picker-field-background: rgb(0 0 0 / 0.05);
+    --theme-picker-field-dot: rgb(0 0 0 / 0.1);
+    --theme-picker-control-foreground: rgb(0 0 0 / 0.7);
+    --theme-picker-control-hover: rgb(0 0 0 / 0.1);
+    --theme-picker-texture-dot: rgb(0 0 0 / 0.3);
+    --theme-picker-texture-handle: #757575;
+    --theme-picker-texture-center-background: linear-gradient(
+      -45deg,
+      transparent -10%,
+      rgb(0 0 0 / 0.1) 110%
+    );
+    --theme-picker-position-easing: linear(
+      0,
+      0.2254,
+      0.5901,
+      0.8609,
+      0.9995,
+      1.0436,
+      1.0411,
+      1.0248,
+      1.0102,
+      1.0017,
+      0.9984,
+      0.9979,
+      1
+    );
+    --theme-picker-wave-strong: rgb(90 90 90);
+    --theme-picker-wave-soft: rgb(77 77 77 / 0.5);
+  }
+
+  :root:root.dark [data-theme-color-picker] {
+    --theme-picker-field-background: rgb(255 255 255 / 0.03);
+    --theme-picker-field-dot: rgb(255 255 255 / 0.05);
+    --theme-picker-control-foreground: rgb(255 255 255 / 0.9);
+    --theme-picker-control-hover: rgb(255 255 255 / 0.1);
+    --theme-picker-texture-dot: rgb(255 255 255 / 0.3);
+    --theme-picker-texture-handle: #d1d1d1;
+    --theme-picker-texture-center-background: linear-gradient(
+      -45deg,
+      transparent -10%,
+      rgb(255 255 255 / 0.1) 110%
+    );
+    --theme-picker-wave-strong: rgb(161 161 161);
+    --theme-picker-wave-soft: rgb(161 161 161 / 0.5);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-field] {
+    background-color: var(--theme-picker-field-background);
+    background-image: radial-gradient(var(--theme-picker-field-dot) 1px, transparent 0);
+    background-position: -23px -23px;
+    background-size: 6px 6px;
+    border-radius: 8px !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-field-button] {
+    color: var(--theme-picker-control-foreground) !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-field-button]:hover,
+  :root:root [data-theme-color-picker] [data-theme-color-field-button][aria-pressed='true'] {
+    background: var(--theme-picker-control-hover) !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-dot],
+  :root:root [data-theme-color-picker] [data-theme-color-swatch],
+  :root:root [data-theme-color-picker] [data-theme-color-swatch-fill],
+  :root:root [data-theme-color-picker] [data-theme-texture-dial],
+  :root:root [data-theme-color-picker] [data-theme-texture-dot],
+  :root:root [data-theme-color-picker] [data-theme-texture-center] {
+    border-radius: 50% !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-dot][data-primary='true'] {
+    transition:
+      transform 0.2s,
+      left 0.4s var(--theme-picker-position-easing),
+      top 0.4s var(--theme-picker-position-easing);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-dot] {
+    border-color: #fff !important;
+    transition:
+      left 0.4s var(--theme-picker-position-easing),
+      top 0.4s var(--theme-picker-position-easing);
+  }
+
+  :root:root.dark [data-theme-color-picker] [data-theme-color-dot] {
+    box-shadow: 0 0 0 2px rgb(0 0 0 / 0.1);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-swatch-fill] {
+    box-shadow: 0 0 1px 1px rgb(0 0 0 / 0.1);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-dot][data-primary='true']:hover {
+    transform: scale(1.05) translate(-50%, -50%) !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-color-dot][data-dragging='true'] {
+    transform: scale(1.2) translate(-25%, -25%) !important;
+    transition:
+      transform 0.2s,
+      left 0s,
+      top 0s;
+  }
+
+  :root:root
+    [data-theme-color-picker]
+    [data-theme-color-field][data-dragging='true']
+    [data-theme-color-dot]:not([data-primary='true']) {
+    transition:
+      left 0s,
+      top 0s;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-texture-handle] {
+    background: var(--theme-picker-texture-handle);
+    border-radius: 2px !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-texture-dot] {
+    background: var(--theme-picker-texture-dot);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-texture-center] {
+    background: var(--theme-picker-texture-center-background);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-texture-grain] {
+    background-image: url('./theme-gradient/grain-bg.png');
+    mix-blend-mode: hard-light;
+    border-radius: 50% !important;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-preset-pages] {
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-preset-pages]::-webkit-scrollbar {
+    display: none;
+  }
+
+  :root:root [data-theme-color-picker] [data-theme-intensity] [data-slot='slider-track'],
+  :root:root [data-theme-color-picker] [data-theme-intensity] [data-slot='slider-thumb'] {
+    border-radius: 9999px !important;
   }
 
   body {

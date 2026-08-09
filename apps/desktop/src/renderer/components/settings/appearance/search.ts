@@ -8,6 +8,7 @@ import { getTerminalAppearanceSearchEntries } from '../terminal/search'
 import { getLeftSidebarAppearanceEntry, getSidebarEntries } from './sidebar-search'
 import { getStatusBarToggles } from './status-bar-search'
 import { getMenuBarIconEntries, getSystemTrayEntries } from './system-presence-search'
+import { getThemeColorEntries } from './theme-color-search'
 import { getUsagePercentageDisplayEntry } from './usage-percentage-search'
 
 export {
@@ -202,6 +203,13 @@ const getAppearanceSectionEntries = createLocalizedCatalog((): SettingsSearchEnt
     title: translate('auto.components.settings.AppearancePane.terminalTitle', 'Terminal')
   },
   {
+    title: translate('themeGradient.section.title', 'Theme color'),
+    description: translate(
+      'themeGradient.section.summary',
+      'Workspace accent color and background wash'
+    )
+  },
+  {
     title: translate(
       'auto.components.settings.AppearancePane.windowSidebarTitle',
       'Window & Sidebar'
@@ -235,7 +243,8 @@ function buildAppearancePaneSearchEntries(
     ...getSidebarEntries(),
     ...getAppIconEntries(),
     ...getSystemTrayEntries(options),
-    ...getMenuBarIconEntries(options)
+    ...getMenuBarIconEntries(options),
+    ...getThemeColorEntries()
   ]
 }
 

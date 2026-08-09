@@ -39,6 +39,10 @@ const buttonVariants = cva(
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-transparent focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 dark:hover:bg-accent',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
+        // Why: color-picking controls use their geometry as data, so this variant
+        // owns the exact compact chrome sanctioned for that single domain.
+        'color-field': 'border-0 p-0 transition-[background-color] duration-200',
+        'color-swatch': 'border-0 p-0 transition-transform hover:scale-105 active:scale-95',
         // Why: actions revealed over an accent row need contrast from the row
         // surface while remaining transparent at rest.
         'row-action':
@@ -87,6 +91,9 @@ const buttonVariants = cva(
         icon: 'size-9',
         'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         'icon-toolbar': "size-7 [&_svg:not([class*='size-'])]:size-3.5",
+        'icon-palette-control': "size-[30px] p-0 [&_svg:not([class*='size-'])]:size-[18px]",
+        'icon-palette-page': "size-7 [&_svg:not([class*='size-'])]:size-[18px]",
+        'icon-palette-swatch': 'size-[26px] p-0',
         'icon-status-bar': "h-full w-5 [&_svg:not([class*='size-'])]:size-3",
         'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',

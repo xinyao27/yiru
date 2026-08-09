@@ -133,6 +133,7 @@ import {
   hasRequestedBackgroundTerminalWorktreeMount,
   subscribeBackgroundTerminalWorktreeMountRequests
 } from '../components/terminal/background-terminal-worktree-mount'
+import { useThemeGradientStyleVariables } from '../components/theme-gradient/style-variables'
 import { dispatchWindowCloseRequest } from '../components/window-close-request-coordinator'
 import {
   folderRelativePathToIncludeGlob,
@@ -716,6 +717,7 @@ function App(): React.JSX.Element {
     [settings, systemPrefersDark]
   )
   const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
+  const themeGradientVariables = useThemeGradientStyleVariables(systemPrefersDark)
   const dictationState = useAppStore((s) => s.dictationState)
   const shouldMountDictationController =
     settings?.voice?.enabled === true || dictationState !== 'idle'
@@ -2198,8 +2200,10 @@ function App(): React.JSX.Element {
       ref={setAppRootNode}
       className="flex h-dvh w-screen flex-col overflow-hidden"
       data-native-sidebar-material={hasNativeSidebarMaterial ? 'true' : undefined}
+      data-theme-gradient={themeGradientVariables ? 'on' : undefined}
       style={
         {
+          ...themeGradientVariables,
           '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
           // Why: Settings renders its overlaid window controls and navigation in
           // sibling trees; one seam value keeps their left-column widths aligned.

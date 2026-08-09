@@ -19,6 +19,7 @@ import { createStatsSlice } from '../components/stats/state'
 import { createMemorySlice } from '../components/status-bar/memory-state'
 import { createPaneForegroundAgentSlice } from '../components/terminal-pane/pane-foreground-agent-state'
 import { createPinnedTabCloseConfirmSlice } from '../components/terminal-pane/pinned-tab-close-confirm-state'
+import { createThemeGradientSlice } from '../components/theme-gradient/state'
 import { createWorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
 import { createCommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
 import { createGitGraphSlice } from '../components/workspace-panel/git-graph/state'
@@ -63,6 +64,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createStatsSlice(...a),
   ...createMemorySlice(...a),
   ...createWorkspaceSpaceSlice(...a),
+  ...createThemeGradientSlice(...a),
   ...createClaudeUsageSlice(...a),
   ...createCodexUsageSlice(...a),
   ...createOpenCodeUsageSlice(...a),

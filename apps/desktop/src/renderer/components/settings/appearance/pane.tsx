@@ -1,5 +1,6 @@
 import {
   AppWindow,
+  Palette,
   SidebarSimple as PanelLeft,
   TerminalWindow as TerminalSquare
 } from '@phosphor-icons/react'
@@ -37,6 +38,8 @@ import {
 } from './search'
 import { AppearanceSection } from './section'
 import { getLeftSidebarAppearanceEntry } from './sidebar-search'
+import { getThemeColorEntries } from './theme-color-search'
+import { AppearanceThemeColorSection } from './theme-color-section'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from './usage-percentage-search'
 import { AppearanceWindowSidebarSection } from './window-sidebar-section'
 export { getAppearancePaneSearchEntries }
@@ -53,7 +56,7 @@ type AppearancePaneProps = {
   warpThemes: UseWarpThemeImportReturn
 }
 
-type AppearanceSectionKey = 'interface' | 'terminal' | 'window'
+type AppearanceSectionKey = 'interface' | 'terminal' | 'window' | 'theme-color'
 
 function resolveThemeSummary(theme: GlobalSettings['theme']): string {
   if (theme === 'system') {
@@ -154,7 +157,18 @@ export function AppearancePane({
     getLeftSidebarAppearanceEntry()
   ]
 
+  const themeColorTitle = translate('themeGradient.section.title', 'Theme color')
+  const themeColorSummary = translate(
+    'themeGradient.section.summary',
+    'Workspace accent color and background wash'
+  )
+  const themeColorSearchEntries = [
+    { title: themeColorTitle, description: themeColorSummary },
+    ...getThemeColorEntries()
+  ]
+
   const interfaceMatches = matchesSettingsSearch(searchQuery, interfaceSearchEntries)
+  const themeColorMatches = matchesSettingsSearch(searchQuery, themeColorSearchEntries)
   const terminalMatches = matchesSettingsSearch(searchQuery, terminalSearchEntries)
   const windowMatches = matchesSettingsSearch(searchQuery, windowSearchEntries)
   const interfaceLabelMatches = matchesSettingsSearch(searchQuery, { title: interfaceTitle })
@@ -170,11 +184,13 @@ export function AppearancePane({
   // shows exactly one manually-chosen section.
   function isSectionOpen(key: AppearanceSectionKey): boolean {
     if (isSearching) {
-      return key === 'interface'
-        ? interfaceMatches
-        : key === 'terminal'
-          ? terminalMatches
-          : windowMatches
+      const matchesByKey: Record<AppearanceSectionKey, boolean> = {
+        interface: interfaceMatches,
+        terminal: terminalMatches,
+        window: windowMatches,
+        'theme-color': themeColorMatches
+      }
+      return matchesByKey[key]
     }
     return manuallyOpenSection === key
   }
@@ -240,6 +256,25 @@ export function AppearancePane({
             ghostty={ghostty}
             warpThemes={warpThemes}
             forceVisiblePrimary={terminalLabelMatches}
+          />
+        </AppearanceSection>
+      ) : null}
+
+      {themeColorMatches ? (
+        <AppearanceSection
+          id="theme-color"
+          icon={<Palette aria-hidden="true" />}
+          title={themeColorTitle}
+          summary={themeColorSummary}
+          open={isSectionOpen('theme-color')}
+          onToggle={() => toggleSection('theme-color')}
+        >
+          <AppearanceThemeColorSection
+            themeMode={settings.theme}
+            onThemeModeChange={(theme) => {
+              updateSettings({ theme })
+              applyTheme(theme)
+            }}
           />
         </AppearanceSection>
       ) : null}

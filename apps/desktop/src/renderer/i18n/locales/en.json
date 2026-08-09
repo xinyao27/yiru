@@ -12352,5 +12352,59 @@
     },
     "workspace": "Workspace",
     "workspaceIndicator": "{{agent}} will automatically continue at {{time}}"
+  },
+  "themeGradient": {
+    "section": {
+      "title": "Theme color",
+      "summary": "Workspace accent color and background wash"
+    },
+    "search": {
+      "paletteTitle": "Theme color",
+      "paletteDescription": "Pick an accent color and background wash for a workspace.",
+      "grainTitle": "Grain",
+      "grainDescription": "Film-grain texture layered over the workspace theme gradient."
+    },
+    "scope": {
+      "label": "Applies to",
+      "workspaceDescription": "Only this workspace uses this theme. Others fall back to the default.",
+      "defaultDescription": "Used by every workspace without a theme of its own.",
+      "workspace": "This workspace: {{value0}}",
+      "workspaceUnavailable": "This workspace",
+      "default": "All workspaces (default)",
+      "inheriting": "This workspace currently shows the default theme."
+    },
+    "pad": {
+      "label": "Theme color pad",
+      "clickToAdd": "Click to add a color"
+    },
+    "scheme": {
+      "system": "Follow system appearance",
+      "light": "Use light appearance",
+      "dark": "Use dark appearance"
+    },
+    "colors": {
+      "add": "Add color",
+      "remove": "Remove color",
+      "harmony": "Change color harmony"
+    },
+    "harmony": {
+      "floating": "Single color",
+      "complementary": "Complementary",
+      "singleAnalogous": "Analogous pair",
+      "splitComplementary": "Split complementary",
+      "analogous": "Analogous",
+      "triadic": "Triadic",
+      "label": "Color harmony"
+    },
+    "opacity": "Intensity",
+    "texture": "Grain",
+    "customColor": "Custom color",
+    "reset": "Clear theme",
+    "presets": {
+      "previous": "Previous palette row",
+      "apply": "Apply palette preset",
+      "applyNumbered": "Apply palette preset {{value0}} of {{value1}}",
+      "next": "Next palette row"
+    }
   }
 }

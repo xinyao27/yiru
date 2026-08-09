@@ -44,6 +44,7 @@ import type { VoiceSettings } from './speech-types'
 import type { StatusBarUsageMode } from './status-bar-usage-mode'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
 import type { TerminalCustomTheme } from './terminal/custom-themes'
+import type { ThemeGradientTheme } from './theme-gradient/theme'
 import type { UiLanguage } from './ui-language'
 import type { UsagePercentageDisplay } from './usage-percentage-display'
 import type { WorkspaceCleanupUIState } from './workspace/cleanup'
@@ -2505,6 +2506,11 @@ export type PersistedUIState = {
    *  Main-owned so remote/web clients cannot spoof the once-per-version cap. */
   starNagAgentValueMomentAppVersion?: string | null
   trustedYiruHooks?: PersistedTrustedYiruHooks
+  /** Workspace theme gradient used by workspaces without their own. `null` is a
+   *  deliberate "no theme", distinct from an absent key. */
+  themeGradientDefault?: ThemeGradientTheme | null
+  /** Per-workspace theme gradient overrides, keyed by worktree ID. */
+  themeGradientsByWorkspaceId?: Record<string, ThemeGradientTheme>
   setupScriptPromptDismissedRepoIds?: string[]
   /** Whether the experimental pet overlay is currently visible. Separate
    *  from the experimentalPet settings flag so "Hide pet" from the

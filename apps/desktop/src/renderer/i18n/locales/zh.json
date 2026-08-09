@@ -12352,5 +12352,59 @@
     },
     "workspace": "工作区",
     "workspaceIndicator": "{{agent}} 将于 {{time}} 自动继续运行"
+  },
+  "themeGradient": {
+    "section": {
+      "title": "主题颜色",
+      "summary": "工作区强调色和背景渐变"
+    },
+    "search": {
+      "paletteTitle": "主题颜色",
+      "paletteDescription": "为工作区选择强调色和背景渐变。",
+      "grainTitle": "颗粒",
+      "grainDescription": "叠加在工作区主题渐变上的胶片颗粒纹理。"
+    },
+    "scope": {
+      "label": "应用于",
+      "workspaceDescription": "仅此工作区使用该主题，其他工作区回退到默认主题。",
+      "defaultDescription": "用于所有没有专属主题的工作区。",
+      "workspace": "此工作区：{{value0}}",
+      "workspaceUnavailable": "此工作区",
+      "default": "所有工作区（默认）",
+      "inheriting": "此工作区当前使用默认主题。"
+    },
+    "pad": {
+      "label": "主题颜色面板",
+      "clickToAdd": "点击以添加颜色"
+    },
+    "scheme": {
+      "system": "跟随系统外观",
+      "light": "使用浅色外观",
+      "dark": "使用深色外观"
+    },
+    "colors": {
+      "add": "添加颜色",
+      "remove": "移除颜色",
+      "harmony": "切换配色关系"
+    },
+    "harmony": {
+      "floating": "单色",
+      "complementary": "互补色",
+      "singleAnalogous": "邻近色对",
+      "splitComplementary": "分裂互补色",
+      "analogous": "邻近色",
+      "triadic": "三等分配色",
+      "label": "配色关系"
+    },
+    "opacity": "强度",
+    "texture": "颗粒",
+    "customColor": "自定义颜色",
+    "reset": "清除主题",
+    "presets": {
+      "previous": "上一组配色",
+      "apply": "应用配色预设",
+      "applyNumbered": "应用第 {{value0}} 个配色预设，共 {{value1}} 个",
+      "next": "下一组配色"
+    }
   }
 }

@@ -67,6 +67,10 @@ import {
   type StatusBarUsageMode
 } from '~shared/status-bar-usage-mode'
 import type { LaunchSource } from '~shared/telemetry-events'
+import {
+  normalizeThemeGradient,
+  normalizeThemeGradientsByWorkspace
+} from '~shared/theme-gradient/theme'
 import type {
   ChangelogData,
   CustomPet,
@@ -2005,6 +2009,10 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         // start from the new default: sleeping workspaces visible.
         showSleepingWorkspaces: !(ui.hideSleepingWorkspaces ?? DEFAULT_HIDE_SLEEPING_WORKSPACES),
         workspaceHostScope: normalizeExecutionHostScope(ui.workspaceHostScope),
+        themeGradientDefault: normalizeThemeGradient(ui.themeGradientDefault),
+        themeGradientsByWorkspaceId: normalizeThemeGradientsByWorkspace(
+          ui.themeGradientsByWorkspaceId
+        ),
         visibleWorkspaceHostIds: normalizeHydratedVisibleWorkspaceHostIds(ui),
         workspaceHostOrder: normalizeExecutionHostOrder(ui.workspaceHostOrder),
         manualRepoOrder,
