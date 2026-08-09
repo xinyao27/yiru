@@ -2872,9 +2872,9 @@ if arguments.first == "--agent" {
     }
     runAgent(socketPath: arguments[1], token: token)
 } else if arguments.first == "--permissions" {
-    runAskForPermissionSetup()
+    runPermissionFlowSetup()
 } else if arguments.first == "--permission" {
-    runAskForPermissionSetup(initialPermissionValue: arguments.dropFirst().first)
+    runPermissionFlowSetup(initialPermissionValue: arguments.dropFirst().first)
 } else if arguments.first == "--permission-status" {
     printPermissionStatus()
 } else if arguments.first == "--permission-status-file" {

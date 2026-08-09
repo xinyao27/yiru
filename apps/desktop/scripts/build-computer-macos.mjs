@@ -11,12 +11,7 @@ const appResourcesPath = path.join(appPath, 'Contents', 'Resources')
 const appIconPath = path.join(appResourcesPath, 'AppIcon.icns')
 const computerUseIconPath = path.join(packagePath, 'resources', 'app-icon.icns')
 const localizationPath = path.join(packagePath, 'resources', 'localization')
-const askForPermissionLicensePath = path.join(
-  packagePath,
-  'vendor',
-  'ask-for-permission',
-  'LICENSE'
-)
+const permissionFlowLicensePath = path.join(packagePath, 'vendor', 'permission-flow', 'LICENSE')
 const entitlementsPath = path.join(
   repoRoot,
   'resources',
@@ -51,10 +46,7 @@ function createHelperApp() {
   mkdirSync(appResourcesPath, { recursive: true })
   copyFileSync(binaryPath, appExecutablePath)
   copyFileSync(computerUseIconPath, appIconPath)
-  copyFileSync(
-    askForPermissionLicensePath,
-    path.join(appResourcesPath, 'AskForPermission-LICENSE.txt')
-  )
+  copyFileSync(permissionFlowLicensePath, path.join(appResourcesPath, 'PermissionFlow-LICENSE.txt'))
   for (const locale of ['en.lproj', 'zh-Hans.lproj']) {
     cpSync(path.join(localizationPath, locale), path.join(appResourcesPath, locale), {
       recursive: true
