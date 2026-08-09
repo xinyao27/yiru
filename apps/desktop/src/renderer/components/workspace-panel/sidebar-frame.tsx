@@ -19,11 +19,7 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import { getTopActivityBarLayout } from './activity-bar-overflow'
-import {
-  CollapsedWorkspaceSidebarChrome,
-  WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
-  WorkspaceSidebarToggleButton
-} from './sidebar-chrome'
+import { WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, WorkspaceSidebarActions } from './sidebar-chrome'
 import {
   WORKSPACE_SIDEBAR_MIN_WIDTH,
   canFitWorkspaceSidebar,
@@ -120,9 +116,9 @@ export function WorkspaceSidebarFrame({
     [maxWidth, onWidthChange, renderedWidth]
   )
 
-  const closeButton = isVisible ? (
-    <WorkspaceSidebarToggleButton
-      presentation="sidebar"
+  const sidebarActions = isVisible ? (
+    <WorkspaceSidebarActions
+      worktreeId={worktreeId}
       shortcut={toggleShortcut}
       onToggle={() => onOpenChange(false)}
     />
@@ -135,17 +131,19 @@ export function WorkspaceSidebarFrame({
           ref={collapsedChromeRef}
           className="fixed top-0 right-[var(--window-controls-width,0px)] z-20 h-[var(--titlebar-height)] [-webkit-app-region:no-drag]"
         >
-          <CollapsedWorkspaceSidebarChrome
+          <WorkspaceSidebarActions
             worktreeId={worktreeId}
             shortcut={toggleShortcut}
-            onOpen={() => onOpenChange(true)}
+            onToggle={() => onOpenChange(true)}
           />
         </div>
       ) : null}
       <div
         className={cn(
           'bg-sidebar flex min-w-0 flex-1 flex-col overflow-hidden',
-          isVisible ? 'border-sidebar-border border-l' : 'border-l-0'
+          isVisible && activityBarPosition === 'side'
+            ? 'border-sidebar-border border-l'
+            : 'border-l-0'
         )}
       >
         {activityBarPosition === 'top' ? (
@@ -163,7 +161,9 @@ export function WorkspaceSidebarFrame({
                       onSelectView={onSelectView}
                     />
                   </div>
-                  <div className="shrink-0 [-webkit-app-region:no-drag]">{closeButton}</div>
+                  <div className="h-full shrink-0 [-webkit-app-region:no-drag]">
+                    {sidebarActions}
+                  </div>
                 </div>
               }
             />
@@ -177,12 +177,17 @@ export function WorkspaceSidebarFrame({
             <span className="text-foreground truncate text-[11px] font-semibold tracking-wider uppercase">
               {activeTitle}
             </span>
-            <div className="[-webkit-app-region:no-drag]">{closeButton}</div>
+            <div className="h-full [-webkit-app-region:no-drag]">{sidebarActions}</div>
           </div>
         )}
 
         {isVisible ? (
-          <div className="scrollbar-sleek-parent flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div
+            className={cn(
+              'scrollbar-sleek-parent flex min-h-0 flex-1 flex-col overflow-hidden',
+              activityBarPosition === 'top' && 'border-sidebar-border border-l'
+            )}
+          >
             {children}
           </div>
         ) : null}

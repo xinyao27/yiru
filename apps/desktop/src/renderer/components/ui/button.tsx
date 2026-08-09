@@ -33,9 +33,6 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
-        // Why: quiet actions inside sidebar headers must not paint the main-canvas surface.
-        'sidebar-quiet':
-          'bg-sidebar text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:bg-sidebar dark:hover:bg-accent',
         // Why: tab-strip arrows use accent-only focus so their transparent
         // chrome never reads as a bordered control beside the tab viewport.
         'tab-strip-scroll':
@@ -99,11 +96,17 @@ const buttonVariants = cva(
         'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-wide': "h-full w-9 [&_svg:not([class*='size-'])]:size-4"
+      },
+      seam: {
+        default: '',
+        // Why: adjacent titlebar regions let the following control own their one shared seam.
+        'merge-next': 'border-r-0'
       }
     },
     defaultVariants: {
       variant: 'default',
-      size: 'default'
+      size: 'default',
+      seam: 'default'
     }
   }
 )
@@ -114,7 +117,10 @@ const Button = React.forwardRef<
   // className a plain string so it stays compatible with the cva call below.
   Omit<ButtonPrimitive.Props, 'className'> &
     VariantProps<typeof buttonVariants> & { className?: string }
->(function Button({ className, variant = 'default', size = 'default', ...props }, ref) {
+>(function Button(
+  { className, seam = 'default', variant = 'default', size = 'default', ...props },
+  ref
+) {
   // Base UI Button supports `render` natively, replacing the Slot/asChild idiom.
   return (
     <ButtonPrimitive
@@ -122,7 +128,7 @@ const Button = React.forwardRef<
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, seam, className }))}
       {...props}
     />
   )

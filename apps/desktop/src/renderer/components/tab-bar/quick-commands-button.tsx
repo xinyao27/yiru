@@ -42,6 +42,7 @@ type TabBarQuickCommandsButtonProps = {
   moreMenuOpen?: boolean
   onMoreMenuOpenChange?: (open: boolean) => void
   separatorAfter?: boolean
+  mergeNextSeam?: boolean
   titlebarModel?: WorkspacePanelTitlebarModel | null
   titlebarIndex?: number
   titlebarSource?: 'visible' | 'overflow'
@@ -55,6 +56,7 @@ export function TabBarQuickCommandsButton({
   moreMenuOpen = false,
   onMoreMenuOpenChange,
   separatorAfter = false,
+  mergeNextSeam = false,
   titlebarModel = null,
   titlebarIndex,
   titlebarSource = 'visible',
@@ -286,13 +288,14 @@ export function TabBarQuickCommandsButton({
             render={
               <Button
                 type="button"
-                variant="outline-transparent"
+                variant="titlebar-segment"
                 size="icon-titlebar-wide"
+                seam={mergeNextSeam ? 'merge-next' : 'default'}
                 data-workspace-titlebar-slot={
                   titlebarIndex != null ? String(titlebarIndex) : undefined
                 }
                 className={cn(
-                  'relative text-muted-foreground [-webkit-app-region:no-drag]',
+                  'relative [-webkit-app-region:no-drag]',
                   pinDraggable && 'cursor-grab active:cursor-grabbing',
                   getDropIndicatorClasses(dropIndicator)
                 )}

@@ -9,13 +9,11 @@ export const WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY = '--workspace-sidebar-chro
 
 type WorkspaceSidebarToggleButtonProps = {
   onToggle: () => void
-  presentation: 'sidebar' | 'titlebar'
   shortcut: string
 }
 
 export function WorkspaceSidebarToggleButton({
   onToggle,
-  presentation,
   shortcut
 }: WorkspaceSidebarToggleButtonProps): React.JSX.Element {
   return (
@@ -24,9 +22,9 @@ export function WorkspaceSidebarToggleButton({
         render={
           <Button
             type="button"
-            variant={presentation === 'sidebar' ? 'sidebar-quiet' : 'titlebar-segment'}
-            size={presentation === 'sidebar' ? 'icon-sm' : 'icon-titlebar-wide'}
-            className={presentation === 'sidebar' ? 'mr-1' : '[-webkit-app-region:no-drag]'}
+            variant="titlebar-segment"
+            size="icon-titlebar-wide"
+            className="[-webkit-app-region:no-drag]"
             onClick={onToggle}
             aria-label={translate(
               'auto.components.right.sidebar.index.e8e2e4ce74',
@@ -48,19 +46,19 @@ export function WorkspaceSidebarToggleButton({
   )
 }
 
-export function CollapsedWorkspaceSidebarChrome({
-  onOpen,
+export function WorkspaceSidebarActions({
+  onToggle,
   shortcut,
   worktreeId
 }: {
-  onOpen: () => void
+  onToggle: () => void
   shortcut: string
   worktreeId: string
 }): React.JSX.Element {
   return (
     <ButtonGroup presentation="titlebar" className="shrink-0">
       <TabBarOpenInMenuButton worktreeId={worktreeId} />
-      <WorkspaceSidebarToggleButton presentation="titlebar" shortcut={shortcut} onToggle={onOpen} />
+      <WorkspaceSidebarToggleButton shortcut={shortcut} onToggle={onToggle} />
     </ButtonGroup>
   )
 }

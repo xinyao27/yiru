@@ -1,11 +1,14 @@
 import { useDroppable } from '@dnd-kit/core'
+import { X } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
+import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 
-import { TabBarMoreButton } from '../tab-bar/more-button'
+import { TabBarQuickCommandsButton } from '../tab-bar/quick-commands-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'
 import { WorkspaceSidebarChromeSpacer } from '../workspace-panel/sidebar-chrome'
@@ -186,8 +189,8 @@ export default function TabGroupPanel({
   // Why: pane-specific actions stay with the focused split, while the collapsed
   // workspace sidebar chrome is anchored once to the top-right split below.
   const focusedActionChromeClassName = cn(
-    'h-full shrink-0 overflow-hidden transition-[opacity] duration-150',
-    isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
+    'shrink-0 overflow-hidden transition-[opacity] duration-150',
+    isFocused ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
   )
   // Why: the split wrapper already paints edge-touching seams; duplicating them
   // inside a pane makes the sidebar boundary look two pixels wide.
@@ -209,19 +212,52 @@ export default function TabGroupPanel({
       trailingActions={
         <>
           {isFocused ? (
-            <ButtonGroup className={focusedActionChromeClassName}>
-              <TabBarMoreButton
+            <ButtonGroup presentation="titlebar" className={focusedActionChromeClassName}>
+              <TabBarQuickCommandsButton
                 worktreeId={worktreeId}
                 groupId={groupId}
-                onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
+                presentation="titlebar-icon"
+                mergeNextSeam={!hasSplitGroups}
               />
+              {hasSplitGroups ? (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="titlebar-segment"
+                        size="icon-titlebar-wide"
+                        seam="merge-next"
+                        className="[-webkit-app-region:no-drag]"
+                        aria-label={translate(
+                          'auto.components.tab.group.TabGroupPanel.closePaneColumn',
+                          'Close split pane'
+                        )}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          commands.closeGroup()
+                        }}
+                      >
+                        <X />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent side="bottom" sideOffset={6}>
+                    {translate(
+                      'auto.components.tab.group.TabGroupPanel.closePaneColumn',
+                      'Close split pane'
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
             </ButtonGroup>
           ) : (
-            <div className={focusedActionChromeClassName} />
+            <div className={cn('h-full', focusedActionChromeClassName)} />
           )}
           {reserveWindowControlsSpace ? <WorkspaceSidebarChromeSpacer /> : null}
         </>
       }
+      trailingActionsConnected
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
       reserveWindowControlsSpace={reserveWindowControlsSpace}
       rootClassName={splitFrameClassName}
