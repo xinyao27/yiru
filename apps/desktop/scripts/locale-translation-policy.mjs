@@ -98,8 +98,7 @@ export const NEVER_TRANSLATE_VALUES = new Set([
   'GitHub',
   'no_proxy',
   'Beta',
-  // Round 6: product/tool names, language names, and code tokens that machine
-  // translation wrongly localized (e.g. tailscale→尾鱗, Swift→迅速, yarn→糸).
+  // Why: MT localizes product, language, and code names that must remain exact.
   'Tailscale',
   'tailscale',
   'Ghostty',

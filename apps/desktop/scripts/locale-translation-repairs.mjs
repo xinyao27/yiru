@@ -1,5 +1,4 @@
-// Simplified Chinese repair rules applied after machine translation.\n\n// Latin workflow/brand terms that get a space inserted around them when CJK machine
-// translation glues them to native text (see applyCjkLatinTermSpacing).
+// Why: CJK machine translation can glue Latin workflow and brand terms to native text.
 export const CJK_LATIN_SPACED_TERMS = [
   'Issues',
   'Issue',
@@ -281,10 +280,9 @@ export const LOCALE_PHRASE_FIXES = {
   ]
 }
 
-// Distinguishes the on-screen cursor (光标) from the "Cursor" product so the brand
-// revert in the translation policy doesn't force terminal/theme cursor settings back to Latin.
+// Why: distinguish the on-screen 光标 from the Cursor product before restoring brand names.
 
-// Multi-word "Cursor …" labels always mean the screen cursor, never the Cursor product.
+// Why: multi-word "Cursor …" labels name the screen cursor, never the Cursor product.
 const SCREEN_CURSOR_ENVALUES = new Set([
   'Cursor Text',
   'Cursor color',
@@ -294,7 +292,7 @@ const SCREEN_CURSOR_ENVALUES = new Set([
   'Terminal Cursor'
 ])
 
-// Bare "Cursor" is ambiguous; these keys are the terminal/theme cursor settings (screen cursor).
+// Why: bare "Cursor" is ambiguous; these keys identify terminal/theme screen-cursor settings.
 const SCREEN_CURSOR_KEYS = new Set([
   'auto.components.settings.TerminalWindowSection.c9e1fdf42f',
   'auto.components.onboarding.ThemeStep.ab2a583a97'

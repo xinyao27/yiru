@@ -1,4 +1,3 @@
-// Simplified Chinese translations that require exact key, value, or search-term context.\n\n// Key-specific Simplified Chinese overrides from high-visibility UI audits.
 // Why: some fixes depend on full key context, not English value alone.
 export const LOCALE_KEY_OVERRIDES = {
   'menu.reportCrash': { zh: '报告崩溃...' },
