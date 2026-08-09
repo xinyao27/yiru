@@ -8,6 +8,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 
+import { TabBarOpenInMenuButton } from '../tab-bar/open-in-menu-button'
 import { TabBarQuickCommandsButton } from '../tab-bar/quick-commands-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'
@@ -213,6 +214,7 @@ export default function TabGroupPanel({
         <>
           {isFocused ? (
             <ButtonGroup presentation="titlebar" className={focusedActionChromeClassName}>
+              <TabBarOpenInMenuButton worktreeId={worktreeId} />
               <TabBarQuickCommandsButton
                 worktreeId={worktreeId}
                 groupId={groupId}

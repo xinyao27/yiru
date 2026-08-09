@@ -65,7 +65,6 @@ function WorkspaceSidebarInner(): React.JSX.Element | null {
       reservedLeftWidth={worktreeSidebarOpen ? worktreeSidebarWidth : 0}
       toggleShortcut={toggleShortcut}
       width={width}
-      worktreeId={activeWorktreeId}
     >
       <RightSidebarPanelContent
         effectiveTab={effectiveView}

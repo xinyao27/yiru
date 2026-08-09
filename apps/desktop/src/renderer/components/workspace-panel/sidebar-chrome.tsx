@@ -1,7 +1,5 @@
 import { SidebarSimple as PanelRight } from '@phosphor-icons/react'
-import { TabBarOpenInMenuButton } from '~renderer/components/tab-bar/open-in-menu-button'
 import { Button } from '~renderer/components/ui/button'
-import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 
@@ -43,23 +41,6 @@ export function WorkspaceSidebarToggleButton({
         )}
       </TooltipContent>
     </Tooltip>
-  )
-}
-
-export function WorkspaceSidebarActions({
-  onToggle,
-  shortcut,
-  worktreeId
-}: {
-  onToggle: () => void
-  shortcut: string
-  worktreeId: string
-}): React.JSX.Element {
-  return (
-    <ButtonGroup presentation="titlebar" className="shrink-0">
-      <TabBarOpenInMenuButton worktreeId={worktreeId} />
-      <WorkspaceSidebarToggleButton shortcut={shortcut} onToggle={onToggle} />
-    </ButtonGroup>
   )
 }
 

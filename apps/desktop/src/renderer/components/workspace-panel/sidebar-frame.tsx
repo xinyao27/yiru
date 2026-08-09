@@ -19,7 +19,10 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import { getTopActivityBarLayout } from './activity-bar-overflow'
-import { WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, WorkspaceSidebarActions } from './sidebar-chrome'
+import {
+  WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
+  WorkspaceSidebarToggleButton
+} from './sidebar-chrome'
 import {
   WORKSPACE_SIDEBAR_MIN_WIDTH,
   canFitWorkspaceSidebar,
@@ -45,7 +48,6 @@ type WorkspaceSidebarFrameProps = {
   reservedLeftWidth: number
   toggleShortcut: string
   width: number
-  worktreeId: string
 }
 
 export function WorkspaceSidebarFrame({
@@ -60,8 +62,7 @@ export function WorkspaceSidebarFrame({
   onWidthChange,
   reservedLeftWidth,
   toggleShortcut,
-  width,
-  worktreeId
+  width
 }: WorkspaceSidebarFrameProps): React.JSX.Element {
   const [activityStripWidth, setActivityStripWidth] = useState<number | null>(null)
   const collapsedChromeRef = useRef<HTMLDivElement | null>(null)
@@ -116,12 +117,8 @@ export function WorkspaceSidebarFrame({
     [maxWidth, onWidthChange, renderedWidth]
   )
 
-  const sidebarActions = isVisible ? (
-    <WorkspaceSidebarActions
-      worktreeId={worktreeId}
-      shortcut={toggleShortcut}
-      onToggle={() => onOpenChange(false)}
-    />
+  const sidebarToggle = isVisible ? (
+    <WorkspaceSidebarToggleButton shortcut={toggleShortcut} onToggle={() => onOpenChange(false)} />
   ) : null
 
   return (
@@ -131,8 +128,7 @@ export function WorkspaceSidebarFrame({
           ref={collapsedChromeRef}
           className="fixed top-0 right-[var(--window-controls-width,0px)] z-20 h-[var(--titlebar-height)] [-webkit-app-region:no-drag]"
         >
-          <WorkspaceSidebarActions
-            worktreeId={worktreeId}
+          <WorkspaceSidebarToggleButton
             shortcut={toggleShortcut}
             onToggle={() => onOpenChange(true)}
           />
@@ -162,7 +158,7 @@ export function WorkspaceSidebarFrame({
                     />
                   </div>
                   <div className="h-full shrink-0 [-webkit-app-region:no-drag]">
-                    {sidebarActions}
+                    {sidebarToggle}
                   </div>
                 </div>
               }
@@ -177,7 +173,7 @@ export function WorkspaceSidebarFrame({
             <span className="text-foreground truncate text-[11px] font-semibold tracking-wider uppercase">
               {activeTitle}
             </span>
-            <div className="h-full [-webkit-app-region:no-drag]">{sidebarActions}</div>
+            <div className="h-full [-webkit-app-region:no-drag]">{sidebarToggle}</div>
           </div>
         )}
 
