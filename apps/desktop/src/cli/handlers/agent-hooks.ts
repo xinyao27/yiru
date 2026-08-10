@@ -92,7 +92,7 @@ async function updateRunningRuntime(client: RuntimeClient, enabled: boolean): Pr
       return false
     }
     await client.call(
-      'settings.update',
+      client.rpc.settings.update,
       { agentStatusHooksEnabled: enabled },
       { timeoutMs: 10_000 }
     )

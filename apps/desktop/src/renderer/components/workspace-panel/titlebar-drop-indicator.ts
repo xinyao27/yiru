@@ -14,27 +14,6 @@ export function getDropIndicatorClasses(dropIndicator: DropIndicator): string {
   return ''
 }
 
-export function getTitlebarSlotDropIndicator({
-  dropTarget,
-  slotIndex,
-  visibleCount
-}: {
-  dropTarget: WorkspacePanelTitlebarDropTarget
-  slotIndex: number
-  visibleCount: number
-}): DropIndicator {
-  if (typeof dropTarget !== 'number') {
-    return null
-  }
-  if (dropTarget === slotIndex) {
-    return 'left'
-  }
-  if (dropTarget === visibleCount && slotIndex === visibleCount - 1) {
-    return 'right'
-  }
-  return null
-}
-
 export function getTitlebarMoreDropIndicatorClasses({
   dropTarget,
   visibleCount

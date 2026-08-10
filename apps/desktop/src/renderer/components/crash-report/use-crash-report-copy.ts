@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { CrashReportCopySubmissionFailure, CrashReportRecord } from '~shared/crash-reporting'
 
 export const CRASH_REPORT_COPY_FAILURE_TOAST_ID = 'crash-report-copy-failure'
@@ -38,7 +39,7 @@ export function useCrashReportCopy(
   return useCallback(
     async (submissionFailure?: CrashReportCopySubmissionFailure): Promise<void> => {
       try {
-        const result = await window.api.crashReports.copyLatestDiagnostics({
+        const result = await rendererHostClient.crashReports.copyLatestDiagnostics({
           ...(report ? { reportId: report.id } : {}),
           notes: reportNotes.value,
           ...(submissionFailure ? { submissionFailure } : {})

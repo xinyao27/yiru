@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { arch as osArch, platform as osPlatform, release as osRelease } from 'node:os'
 
-import { app } from 'electron'
 import { PostHog } from 'posthog-node'
 import type { SupportReportDraft } from '~shared/telemetry-events'
 
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { consumeBurstToken } from '../telemetry/burst-cap'
 import { validate } from '../telemetry/validator'
 
@@ -46,7 +46,7 @@ export async function sendSupportReport(
   const result = validate('support_report_submitted', {
     ...draft,
     report_id: reportId,
-    app_version: app.getVersion(),
+    app_version: getRuntimeHostPathsProvider().version(),
     platform: osPlatform(),
     arch: osArch(),
     os_release: osRelease(),

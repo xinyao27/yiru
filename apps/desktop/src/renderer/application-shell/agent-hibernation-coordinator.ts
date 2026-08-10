@@ -1,8 +1,8 @@
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { useAppStore } from '~renderer/store'
 import type { AppState } from '~renderer/store/types'
-import type { RuntimeTerminalListResult, RuntimeTerminalSummary } from '~shared/runtime-types'
+import type { RuntimeTerminalSummary } from '~shared/runtime-types'
 
 import {
   planAgentHibernationCandidates,
@@ -107,9 +107,9 @@ async function collectRuntimePtyLiveness(state: AppState): Promise<RuntimePtyLiv
   await Promise.all(
     [...targets].map(async ([worktreeId, runtimeEnvironmentId]) => {
       try {
-        const result = await callRuntimeRpc<RuntimeTerminalListResult>(
+        const result = await callRuntimeOrpc(
           { kind: 'environment', environmentId: runtimeEnvironmentId },
-          'terminal.list',
+          (client) => client.terminal.list,
           {
             worktree: toRuntimeWorktreeSelector(worktreeId),
             limit: 10_000,

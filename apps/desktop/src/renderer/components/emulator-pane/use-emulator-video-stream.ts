@@ -1,30 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
+import { getEmulatorVideoClient } from '~renderer/runtime/emulator-video-client'
 
 // Decodes the Android H.264 stream (scrcpy access units forwarded over the
 // emulator:videoStream* IPC) with WebCodecs and paints it to a <canvas>. The
 // Android sibling of use-emulator-frame-stream (MJPEG/<img>). Validated against
 // a real emulator; the byte framing is unit-tested in scrcpy-video-frame-parser.
-
-type VideoFrameMessage = {
-  streamId: string
-  deviceId: string
-  config: boolean
-  keyFrame: boolean
-  bytes: ArrayBuffer
-}
-type VideoMetaMessage = {
-  streamId: string
-  deviceId: string
-  meta: { codecId: string; width: number; height: number }
-}
-
-type EmulatorVideoApi = {
-  startVideoStream?: (args: { deviceId: string; streamId: string }) => Promise<{ streamId: string }>
-  stopVideoStream?: (args: { streamId: string }) => Promise<void>
-  onVideoStreamMeta?: (cb: (msg: VideoMetaMessage) => void) => () => void
-  onVideoStreamFrame?: (cb: (msg: VideoFrameMessage) => void) => () => void
-}
 
 // scrcpy emits Annex-B H.264; the decoder is configured without an avcC
 // description and the SPS/PPS config packet is prepended to the first keyframe.
@@ -65,7 +46,7 @@ export function useEmulatorVideoStream(
   onSizeRef.current = onSize
 
   useEffect(() => {
-    const api = (window as { api?: { emulator?: EmulatorVideoApi } }).api?.emulator
+    const api = getEmulatorVideoClient()
     // Why: the `!deviceId` check is redundant with `!streamIdentity` (identity
     // is only non-null when deviceId is set) but narrows deviceId's type below.
     if (!streamIdentity || !deviceId) {

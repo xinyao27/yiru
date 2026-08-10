@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react'
+import { subscribeGitHubWorkItemMutations } from '~renderer/runtime/github-events-client'
 import type { PRInfo, PRCheckDetail } from '~shared/types'
 
 import { checksPanelAsyncResultKey } from './async-result-key'
@@ -160,7 +161,7 @@ export function useChecksPanelCommentsLoading(context: useChecksPanelChecksLoadi
     if (activeGitLabReview || !repo || !prNumber || !isPanelVisible) {
       return undefined
     }
-    return window.api.gh.onWorkItemMutated((payload) => {
+    return subscribeGitHubWorkItemMutations(repo, (payload) => {
       const sameRepo =
         payload.repoId != null ? payload.repoId === repo.id : payload.repoPath === repo.path
       if (!sameRepo || payload.type !== 'pr' || payload.number !== prNumber) {

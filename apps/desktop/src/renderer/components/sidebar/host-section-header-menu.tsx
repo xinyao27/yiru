@@ -27,6 +27,7 @@ import {
   clearRuntimeCompatibilityCache,
   unwrapRuntimeRpcResult
 } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { useAppStore } from '~renderer/store'
 import type { RuntimeStatus } from '~shared/runtime-types'
 
@@ -90,7 +91,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
     // version skew instead of trusting the prior pass.
     clearRuntimeCompatibilityCache(parsed.environmentId)
     try {
-      const response = await window.api.runtimeEnvironments.getStatus({
+      const response = await runtimeEnvironmentsClient.getStatus({
         selector: parsed.environmentId,
         timeoutMs: 10_000
       })

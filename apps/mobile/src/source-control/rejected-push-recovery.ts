@@ -6,18 +6,17 @@ import {
 import { getMobileSourceControlRemoteOperation, isMobileSyncPushStageError } from './operation'
 import type { LoadStatusOptions } from './screen-state'
 
-type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
 type LoadStatus = (options?: LoadStatusOptions) => Promise<boolean>
 
 export async function recoverMobileRejectedPush({
   actionId,
   error,
-  sendGitRequest,
+  gitFetch,
   loadStatus
 }: {
   actionId: string
   error: unknown
-  sendGitRequest: SendGitRequest
+  gitFetch: () => Promise<unknown>
   loadStatus: LoadStatus
 }): Promise<boolean> {
   const operation = getMobileSourceControlRemoteOperation(actionId, error)
@@ -38,7 +37,7 @@ export async function recoverMobileRejectedPush({
 
   // Why: mobile reads upstream state through git.status; recover on the same
   // paired runtime so SSH/WSL host ownership stays intact.
-  await sendGitRequest<unknown>('git.fetch').catch(() => undefined)
+  await gitFetch().catch(() => undefined)
   await loadStatus({
     preserveReadyOnFailure: followUp.statusRefresh === 'preserve_previous',
     clearActionErrorOnSuccess: false,

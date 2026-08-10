@@ -55,26 +55,6 @@ export async function parseCodexSessionFile(
   })
 }
 
-export async function parseCodexSessionContent(args: {
-  file: FileWithMtime
-  content: string
-  platform?: NodeJS.Platform
-  codexHome?: string | null
-  executionHostId?: ExecutionHostId
-  executionHostPlatform?: NodeJS.Platform | null
-  readIndexedTitle?: (sessionId: string) => Promise<string | null>
-}): Promise<AiVaultSession | null> {
-  return parseCodexSessionLines({
-    file: args.file,
-    lines: args.content.split(/\r?\n/),
-    platform: args.platform ?? process.platform,
-    codexHome: args.codexHome ?? null,
-    executionHostId: args.executionHostId,
-    executionHostPlatform: args.executionHostPlatform,
-    titleReader: args.readIndexedTitle
-  })
-}
-
 export type CodexSessionParseState = {
   accumulator: SessionAccumulator
   previousTotals: CodexUsageSnapshot | null

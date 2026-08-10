@@ -1,5 +1,6 @@
+import type { GitHubMutationResult } from '@yiru/runtime-protocol/contract'
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-import { callRuntimeRpc, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 import type { GitHubPRMergeMethod, PRInfo, Repo } from '~shared/types'
 
 type GitHubPRRepo = PRInfo['prRepo']
@@ -18,28 +19,19 @@ export async function mergeGitHubHostedReview(args: {
   prNumber: number
   method: GitHubPRMergeMethod
   prRepo?: GitHubPRRepo | null
-}): Promise<Awaited<ReturnType<typeof window.api.gh.mergePR>>> {
+}): Promise<GitHubMutationResult> {
   const target = getGitHubActionTarget(args.repo)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<Awaited<ReturnType<typeof window.api.gh.mergePR>>>(
-      target,
-      'github.mergePR',
-      {
-        repo: args.repo.id,
-        prNumber: args.prNumber,
-        method: args.method,
-        prRepo: args.prRepo ?? null
-      },
-      { timeoutMs: 30_000 }
-    )
-  }
-  return window.api.gh.mergePR({
-    repoPath: args.repo.path,
-    repoId: args.repo.id,
-    prNumber: args.prNumber,
-    method: args.method,
-    prRepo: args.prRepo ?? null
-  })
+  return callRuntimeOrpc(
+    target,
+    (client) => client.github.mergePR,
+    {
+      repo: args.repo.id,
+      prNumber: args.prNumber,
+      method: args.method,
+      prRepo: args.prRepo ?? null
+    },
+    { timeoutMs: 30_000 }
+  )
 }
 
 export async function setGitHubHostedReviewAutoMerge(args: {
@@ -48,54 +40,36 @@ export async function setGitHubHostedReviewAutoMerge(args: {
   enabled: boolean
   method?: GitHubPRMergeMethod
   prRepo?: GitHubPRRepo | null
-}): Promise<Awaited<ReturnType<typeof window.api.gh.setPRAutoMerge>>> {
+}): Promise<GitHubMutationResult> {
   const target = getGitHubActionTarget(args.repo)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<Awaited<ReturnType<typeof window.api.gh.setPRAutoMerge>>>(
-      target,
-      'github.setPRAutoMerge',
-      {
-        repo: args.repo.id,
-        prNumber: args.prNumber,
-        enabled: args.enabled,
-        method: args.method,
-        prRepo: args.prRepo ?? null
-      },
-      { timeoutMs: 30_000 }
-    )
-  }
-  return window.api.gh.setPRAutoMerge({
-    repoPath: args.repo.path,
-    repoId: args.repo.id,
-    prNumber: args.prNumber,
-    enabled: args.enabled,
-    method: args.method,
-    prRepo: args.prRepo ?? null
-  })
+  return callRuntimeOrpc(
+    target,
+    (client) => client.github.setPRAutoMerge,
+    {
+      repo: args.repo.id,
+      prNumber: args.prNumber,
+      enabled: args.enabled,
+      method: args.method,
+      prRepo: args.prRepo ?? null
+    },
+    { timeoutMs: 30_000 }
+  )
 }
 
 export async function updateGitHubHostedReviewState(args: {
   repo: Repo
   prNumber: number
   nextState: 'open' | 'closed'
-}): Promise<Awaited<ReturnType<typeof window.api.gh.updatePRState>>> {
+}): Promise<GitHubMutationResult> {
   const target = getGitHubActionTarget(args.repo)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<Awaited<ReturnType<typeof window.api.gh.updatePRState>>>(
-      target,
-      'github.updatePRState',
-      {
-        repo: args.repo.id,
-        prNumber: args.prNumber,
-        updates: { state: args.nextState }
-      },
-      { timeoutMs: 30_000 }
-    )
-  }
-  return window.api.gh.updatePRState({
-    repoPath: args.repo.path,
-    repoId: args.repo.id,
-    prNumber: args.prNumber,
-    updates: { state: args.nextState }
-  })
+  return callRuntimeOrpc(
+    target,
+    (client) => client.github.updatePRState,
+    {
+      repo: args.repo.id,
+      prNumber: args.prNumber,
+      updates: { state: args.nextState }
+    },
+    { timeoutMs: 30_000 }
+  )
 }

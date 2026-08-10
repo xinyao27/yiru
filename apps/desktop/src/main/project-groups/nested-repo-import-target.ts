@@ -75,14 +75,3 @@ export function createNestedRepoImportTargetResolver(): NestedRepoImportTargetRe
     }
   }
 }
-
-export async function resolveLocalNestedRepoImportTargetPath(repoPath: string): Promise<string> {
-  return createNestedRepoImportTargetResolver().resolveLocal(repoPath)
-}
-
-export async function resolveSshNestedRepoImportTargetPath(
-  repoPath: string,
-  gitProvider: WorktreeLister
-): Promise<string> {
-  return createNestedRepoImportTargetResolver().resolveSsh(repoPath, gitProvider)
-}

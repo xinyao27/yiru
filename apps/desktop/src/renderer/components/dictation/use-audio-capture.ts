@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { feedRuntimeDictationAudio } from '~renderer/runtime/speech-client'
 
 type BufferedAudioChunk = {
   samples: Float32Array
@@ -167,9 +168,9 @@ export function useAudioCapture() {
             })
             return
           }
-          void window.api.speech
-            .feedAudio(samples, actualRate, sessionIdRef.current)
-            .catch(() => undefined)
+          void feedRuntimeDictationAudio(samples, actualRate, sessionIdRef.current).catch(
+            () => undefined
+          )
         }
 
         source.connect(processor)
@@ -224,7 +225,7 @@ export function useAudioCapture() {
           break
         }
         removeOldestBufferedAudioChunk()
-        await window.api.speech.feedAudio(chunk.samples, chunk.sampleRate, chunk.sessionId)
+        await feedRuntimeDictationAudio(chunk.samples, chunk.sampleRate, chunk.sessionId)
       }
     } finally {
       if (bufferedAudioGenerationRef.current === flushGeneration) {

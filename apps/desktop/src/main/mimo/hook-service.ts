@@ -2,10 +2,9 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { app } from 'electron'
-
 import { getOpenCodeFamilyPluginSource } from '../opencode/hook-service'
 import { mirrorEntry, safeRemoveTree } from '../pty/overlay-mirror'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 const YIRU_MIMOCODE_PLUGIN_FILE = 'yiru-mimocode-status.js'
 const MIMOCODE_HOOKS_DIR = 'mimocode-hooks'
@@ -55,7 +54,11 @@ export class MimoCodeHookService {
   buildPtyEnv(_ptyId: string, existingMimocodeHome?: string): Record<string, string> {
     // Why: MiMo currently uses a shared home; per-source subdirs can come
     // later if concurrent MiMo panes need isolated runtime state.
-    const home = join(app.getPath('userData'), MIMOCODE_HOOKS_DIR, MIMOCODE_SHARED_HOME)
+    const home = join(
+      getRuntimeHostPathsProvider().userDataPath(),
+      MIMOCODE_HOOKS_DIR,
+      MIMOCODE_SHARED_HOME
+    )
     try {
       for (const sub of ['config', 'data', 'cache', 'state'] as const) {
         mkdirSync(join(home, sub), { recursive: true })

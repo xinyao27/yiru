@@ -33,7 +33,7 @@ export function MobileSourceControlModals({
     setCreatedPrWarning,
     branchLabel,
     checkoutBranch,
-    runGitAction
+    runGitStep
   } = state
 
   const branchOptions = (localBranches?.branches ?? []).map(
@@ -100,7 +100,8 @@ export function MobileSourceControlModals({
         destructive
         onConfirm={() => {
           if (discardTarget) {
-            void runGitAction(`discard:${discardTarget.path}`, 'git.discard', {
+            void runGitStep(`discard:${discardTarget.path}`, {
+              kind: 'discard',
               filePath: discardTarget.path
             })
           }

@@ -18,16 +18,12 @@ import { BrowserAnimatedVisual } from './browser-animated-visual'
 import { BrowserUseSkillSetupCard } from './browser-use-skill-setup-card'
 import { EditorAnimatedVisual } from './editor-animated-visual'
 import { KeepAwakeCard } from './keep-awake-card'
-import { PreviewMedia, RelatedFeatures } from './preview'
 import { ReviewAnimatedVisual } from './review-animated-visual'
 import { WorkbenchAnimatedVisual } from './workbench-animated-visual'
 import { WorkspacesAnimatedVisual } from './workspaces-animated-visual'
 
 export function FeatureWallBody(props: {
   selected: FeatureWallWorkflow
-  posterUrl: string | null
-  gifUrl: string | null
-  showGif: boolean
   prefersReducedMotion: boolean
   source: FeatureWallOpenSourceTelemetry
   agentsActiveStep: AgentsStep | null
@@ -41,9 +37,6 @@ export function FeatureWallBody(props: {
 }): JSX.Element {
   const {
     selected,
-    posterUrl,
-    gifUrl,
-    showGif,
     prefersReducedMotion,
     source,
     agentsActiveStep,
@@ -64,7 +57,6 @@ export function FeatureWallBody(props: {
   const isWorkbenchBrowser = isWorkbench && workbenchActiveStep?.id === 'browser'
   const isReviewPrView = isReview && reviewActiveStep?.id === 'pr-view'
   const isReviewShip = isReview && reviewActiveStep?.id === 'ship'
-  const hasAnimatedVisual = isWorkspaces || isAgents || isWorkbench || isReview
   const isOnboardingUsage = isAgentsUsage && source === 'onboarding'
   const isOnboardingStatuses = isAgentsStatuses && source === 'onboarding'
   const isOnboardingWorkbenchBrowser = isWorkbenchBrowser && source === 'onboarding'
@@ -137,8 +129,7 @@ export function FeatureWallBody(props: {
     ) : isReviewShip ? (
       <AiCommitPrSettingsCard />
     ) : null
-  const shouldUseOnboardingTourZones =
-    source === 'onboarding' && hasAnimatedVisual && Boolean(settingContent)
+  const shouldUseOnboardingTourZones = source === 'onboarding' && Boolean(settingContent)
   const shouldStickSetupToBottom = shouldUseOnboardingTourZones
   // Why: several visuals expand/collapse internally; setup controls should sit
   // after a stable stage so they do not jump with the animation loop.
@@ -221,31 +212,8 @@ export function FeatureWallBody(props: {
 
   return (
     <div className="flex min-h-full flex-col gap-4 px-8 pt-1 pb-0">
-      <div
-        className={cn(
-          'grid grid-cols-1 items-start gap-7',
-          hasAnimatedVisual ? 'justify-items-center' : 'lg:grid-cols-[minmax(0,1fr)_320px]'
-        )}
-      >
-        {!hasAnimatedVisual ? (
-          <PreviewMedia
-            key={selected.id}
-            posterUrl={posterUrl}
-            gifUrl={gifUrl}
-            showGif={showGif}
-            workflowTitle={selected.title}
-          />
-        ) : null}
-
-        {hasAnimatedVisual ? (
-          previewVisualNode
-        ) : (
-          <aside className="flex flex-col gap-5">
-            {selected.relatedTileIds.length > 0 ? (
-              <RelatedFeatures workflow={selected} source={source} />
-            ) : null}
-          </aside>
-        )}
+      <div className="grid grid-cols-1 items-start justify-items-center gap-7">
+        {previewVisualNode}
       </div>
       {settingContent && shouldStickSetupToBottom ? (
         <div className="border-border bg-card sticky bottom-0 z-10 -mx-8 mt-auto border-t px-8 py-3">

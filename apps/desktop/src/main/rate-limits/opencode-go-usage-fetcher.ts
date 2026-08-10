@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { net } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 import type { ProviderRateLimits, RateLimitWindow } from '~shared/rate-limit-types'
 
 import { parseSubscriptionFromPageText } from './opencode-go-page-scraper'
@@ -137,7 +137,7 @@ export async function fetchOpenCodeGoRateLimits(
       // and X-Server-Id / X-Server-Instance headers for routing.
       const instanceId = `server-fn:${randomUUID()}`
       const workspacesUrl = `${OPENCODE_SERVER_URL}?id=${WORKSPACES_SERVER_ID}`
-      const workspacesRes = await net.fetch(workspacesUrl, {
+      const workspacesRes = await fetchHttp(workspacesUrl, {
         method: 'GET',
         headers: {
           Cookie: cookieHeader,
@@ -197,7 +197,7 @@ export async function fetchOpenCodeGoRateLimits(
   for (const candidateId of ids) {
     try {
       const usagePageUrl = `${OPENCODE_BASE_URL}/workspace/${candidateId}/go`
-      const pageRes = await net.fetch(usagePageUrl, {
+      const pageRes = await fetchHttp(usagePageUrl, {
         method: 'GET',
         headers: {
           Cookie: cookieHeader,

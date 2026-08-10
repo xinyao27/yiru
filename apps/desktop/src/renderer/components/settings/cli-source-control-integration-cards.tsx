@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import {
@@ -110,7 +111,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.api.shell.openUrl('https://cli.github.com')}
+                  onClick={() => shellClient.shell.openUrl('https://cli.github.com')}
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
                   {translate(
@@ -146,7 +147,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    window.api.shell.openUrl('https://cli.github.com/manual/gh_auth_login')
+                    shellClient.shell.openUrl('https://cli.github.com/manual/gh_auth_login')
                   }
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
@@ -240,7 +241,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    window.api.shell.openUrl('https://gitlab.com/gitlab-org/cli#installation')
+                    shellClient.shell.openUrl('https://gitlab.com/gitlab-org/cli#installation')
                   }
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
@@ -277,7 +278,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    window.api.shell.openUrl(
+                    shellClient.shell.openUrl(
                       'https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/auth/login.md'
                     )
                   }

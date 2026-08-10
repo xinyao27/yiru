@@ -93,33 +93,3 @@ export function reconcileMissingSessions(args: {
     binding.reconcileIfSessionMissing?.(args.hasPty, requestedAt)
   }
 }
-
-/**
- * Thin orchestration: fetch the live session listing once and invoke each
- * binding's `reconcileIfSessionDead` with the resolved set.
- *
- * Why a rejected `listSessions()` is swallowed (no reconcile): the local
- * provider listing is NOT `.catch`-wrapped in main, so a rejection means the
- * listing is unknown — closing a pane on an IPC/listing failure is unacceptable.
- * A RESOLVED list (even empty `[]`) is AUTHORITATIVE for local ids: a local id
- * absent from it is genuinely reaped, so there is no zero-total skip.
- */
-export async function reconcileDeadSessions(args: {
-  bindings: Iterable<ReconcilableBinding>
-  listSessions: () => Promise<{ id: string; cwd: string; title: string }[]>
-}): Promise<void> {
-  let sessions: { id: string }[]
-  // Why: capture the request time BEFORE the round-trip so the decision can tell
-  // a snapshot that predates a fresh binding from one that postdates it.
-  const requestedAt = performance.now()
-  try {
-    sessions = await args.listSessions()
-  } catch {
-    // Why: a rejected listing is "unknown" — never close a pane on it.
-    return
-  }
-  const liveSessionIds = new Set(sessions.map((session) => session.id))
-  for (const binding of args.bindings) {
-    binding.reconcileIfSessionDead?.(liveSessionIds, requestedAt)
-  }
-}

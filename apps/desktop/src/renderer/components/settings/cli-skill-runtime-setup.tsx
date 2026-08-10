@@ -4,6 +4,8 @@ import {
   isYiruCliAvailableOnPath,
   showYiruCliRegistrationPromptToast
 } from '~renderer/lib/agent-skill-cli-prerequisite'
+import { installWslCliCommand, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { buildAgentFeatureSkillInstallCommand } from '~shared/agent/feature-install-commands'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import {
@@ -126,7 +128,7 @@ function normalizeWindowsSkillUpdateCommand(
 
 function getSkillCommandPlatform(): NodeJS.Platform {
   const platform =
-    typeof window === 'undefined' ? undefined : window.api?.platform?.get?.()?.platform
+    typeof window === 'undefined' ? undefined : rendererHostClient?.platform?.get?.()?.platform
   if (platform) {
     return platform
   }
@@ -175,7 +177,7 @@ export async function ensureWslCliAvailableForAgentSkillTerminal(
 ): Promise<CliInstallStatus | null> {
   const args = getWslCliDistroRequest(runtime)
   try {
-    const status = await window.api.cli.getWslInstallStatus(args)
+    const status = await readWslCliInstallStatus(args)
     if (!status.supported) {
       toast.warning(
         translate(
@@ -195,7 +197,7 @@ export async function ensureWslCliAvailableForAgentSkillTerminal(
     }
     if (status.state !== 'installed' || !status.pathConfigured) {
       await showYiruCliRegistrationPromptToast()
-      const next = await window.api.cli.installWsl(args)
+      const next = await installWslCliCommand(args)
       if (!isYiruCliAvailableOnPath(next)) {
         toast.warning(
           translate(

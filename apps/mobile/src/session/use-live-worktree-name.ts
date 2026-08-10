@@ -1,12 +1,12 @@
-import type { RuntimeClientInvalidationStreamMessage } from '@yiru/runtime-protocol/client-invalidations'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { ConnectionState, RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '../transport/runtime-orpc-client'
+import type { ConnectionState } from '../transport/types'
 import { FLOATING_WORKSPACE_TITLE, isFloatingWorkspaceWorktreeId } from './floating-workspace'
-import { getLiveWorktreeDisplayName, type WorktreeDisplayNameSource } from './worktree-display-name'
+import { getLiveWorktreeDisplayName } from './worktree-display-name'
 
 const WORKTREE_NAME_FALLBACK_POLL_MS = 3000
 
@@ -57,14 +57,11 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
         // only the newest read may publish or stop the retry poll.
         const generation = ++refreshGeneration
         try {
-          const response = await client.sendRequest('worktree.show', {
+          const result = await callRuntimeOrpc(client, (runtime) => runtime.worktree.show, {
             worktree: `id:${worktreeId}`
           })
-          if (stale || generation !== refreshGeneration || !response.ok) {
+          if (stale || generation !== refreshGeneration) {
             return
-          }
-          const result = (response as RpcSuccess).result as {
-            worktree?: WorktreeDisplayNameSource
           }
           const liveName = result.worktree
             ? getLiveWorktreeDisplayName([result.worktree], worktreeId)
@@ -94,6 +91,13 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
           WORKTREE_NAME_FALLBACK_POLL_MS
         )
       }
+      const onEventStreamLost = (): void => {
+        if (stale) {
+          return
+        }
+        eventStreamReady = false
+        startFallbackPoll()
+      }
       const invalidateAndRefresh = (): void => {
         hasSuccessfulRefresh = false
         startFallbackPoll()
@@ -101,14 +105,14 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
       }
 
       startFallbackPoll()
-      const unsubscribe = client.subscribe(
-        'runtime.clientEvents.subscribe',
-        null,
-        (payload: unknown) => {
-          if (stale || !payload || typeof payload !== 'object') {
+      const unsubscribe = subscribeRuntimeOrpc(
+        client,
+        (runtime) => runtime.runtime.clientEvents.subscribe,
+        undefined,
+        (event) => {
+          if (stale) {
             return
           }
-          const event = payload as RuntimeClientInvalidationStreamMessage | { type: 'error' }
           if (event.type === 'ready') {
             const replayedAfterReconnect = eventStreamReady
             eventStreamReady = true
@@ -122,9 +126,8 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
             }
             return
           }
-          if (event.type === 'end' || event.type === 'error') {
-            eventStreamReady = false
-            startFallbackPoll()
+          if (event.type === 'end') {
+            onEventStreamLost()
             return
           }
           if (
@@ -133,7 +136,10 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
           ) {
             invalidateAndRefresh()
           }
-        }
+        },
+        // Why: under oRPC a broken stream rejects instead of emitting a
+        // synthetic 'error' event, so the fallback poll is restarted here.
+        { onError: onEventStreamLost }
       )
       // Why: route params are only an entry hint. The desktop/runtime owns
       // displayName. Modern runtimes push invalidations; the poll remains only

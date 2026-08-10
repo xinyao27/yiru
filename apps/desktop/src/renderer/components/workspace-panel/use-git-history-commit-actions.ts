@@ -14,6 +14,7 @@ import {
   getRuntimeGitRemoteCommitUrl,
   type RuntimeGitContext
 } from '~renderer/runtime/git-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { GitHistoryItem } from '~shared/git/history'
 import type { GitBranchChangeEntry, GitCommitCompareResult } from '~shared/types'
@@ -179,7 +180,7 @@ export function useGitHistoryCommitActions({
 
   const copyCommitText = useCallback(async (text: string, label: string): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(text)
+      await shellClient.ui.writeClipboardText(text)
       toast.success(
         translate('auto.components.right.sidebar.SourceControl.bf5082de46', '{{value0}} copied', {
           value0: label

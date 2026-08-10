@@ -5,13 +5,14 @@ import {
   Check,
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
+import type { RuntimeSpeechModelSummary } from '@yiru/runtime-protocol/contract'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import type { VoiceSettings } from '~shared/speech-types'
-import type { SpeechModelManifest, SpeechModelState } from '~shared/speech-types'
 
 import { Button } from '../ui/button'
 import {
@@ -23,16 +24,12 @@ import {
 import { Label } from '../ui/label'
 
 function describeSpeechModelDownloadError(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error)
-  // Why: ipcRenderer.invoke wraps main-process rejections; strip the transport
-  // prefix so the toast shows only the underlying download failure.
-  return message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')
+  return error instanceof Error ? error.message : String(error)
 }
 
 type VoiceSpeechModelSectionProps = {
   voiceSettings: VoiceSettings
-  catalog: SpeechModelManifest[]
-  modelStates: SpeechModelState[]
+  modelStates: RuntimeSpeechModelSummary[]
   onUpdateVoiceSettings: (updates: Partial<VoiceSettings>) => void
   onOpenOpenAiDialog: (modelId: string) => void
   onRefreshModelStates: () => void
@@ -110,21 +107,17 @@ function describeSpeechModel(modelId: string): string {
 
 export function VoiceSpeechModelSection({
   voiceSettings,
-  catalog,
   modelStates,
   onUpdateVoiceSettings,
   onOpenOpenAiDialog,
   onRefreshModelStates
 }: VoiceSpeechModelSectionProps): React.JSX.Element {
   const [pendingDeleteModelIds, setPendingDeleteModelIds] = useState<Set<string>>(() => new Set())
-  const getModelState = (id: string): SpeechModelState | undefined =>
-    modelStates.find((s) => s.id === id)
 
-  const selectedModel = catalog.find((m) => m.id === voiceSettings.sttModel)
-  const selectedModelState = voiceSettings.sttModel
-    ? getModelState(voiceSettings.sttModel)
+  const selectedModel = voiceSettings.sttModel
+    ? modelStates.find((m) => m.id === voiceSettings.sttModel)
     : undefined
-  const selectedIsReady = selectedModelState?.status === 'ready'
+  const selectedIsReady = selectedModel?.status === 'ready'
 
   return (
     <div className="flex items-center justify-between gap-4 py-2">
@@ -156,11 +149,10 @@ export function VoiceSpeechModelSection({
           }
         />
         <DropdownMenuContent align="end" className="w-96">
-          {catalog.map((manifest) => {
-            const mState = getModelState(manifest.id)
-            const isReady = mState?.status === 'ready'
+          {modelStates.map((manifest) => {
+            const isReady = manifest.status === 'ready'
             const isDownloading =
-              mState?.status === 'downloading' || mState?.status === 'extracting'
+              manifest.status === 'downloading' || manifest.status === 'extracting'
             const isActive = voiceSettings.sttModel === manifest.id
             const isCloud = manifest.provider === 'openai'
             const deletePending = pendingDeleteModelIds.has(manifest.id)
@@ -178,7 +170,11 @@ export function VoiceSpeechModelSection({
                   } else if (!isDownloading) {
                     // Why: download progress appears in this menu, so starting one should not dismiss it.
                     event.preventDefault()
-                    void window.api.speech.downloadModel(manifest.id).catch((error: unknown) =>
+                    void callRuntimeOrpc(
+                      { kind: 'local' },
+                      (client) => client.speech.models.download,
+                      { modelId: manifest.id }
+                    ).catch((error: unknown) =>
                       toast.error(
                         translate(
                           'auto.components.settings.VoicePane.cfde55c7b0',
@@ -222,13 +218,13 @@ export function VoiceSpeechModelSection({
                       </span>
                     )}
                     <span className="text-muted-foreground/60 text-[10px]">
-                      {isDownloading && mState?.progress !== undefined
-                        ? mState.status === 'extracting'
+                      {isDownloading && manifest.progress !== null
+                        ? manifest.status === 'extracting'
                           ? translate(
                               'auto.components.settings.VoicePane.61a16c8141',
                               'Extracting...'
                             )
-                          : `${Math.round(mState.progress * 100)}%`
+                          : `${Math.round(manifest.progress * 100)}%`
                         : isCloud
                           ? null
                           : translate(
@@ -270,8 +266,11 @@ export function VoiceSpeechModelSection({
                         next.add(manifest.id)
                         return next
                       })
-                      void window.api.speech
-                        .deleteModel(manifest.id)
+                      void callRuntimeOrpc(
+                        { kind: 'local' },
+                        (client) => client.speech.models.delete,
+                        { modelId: manifest.id }
+                      )
                         .then(onRefreshModelStates)
                         .catch(() =>
                           toast.error(

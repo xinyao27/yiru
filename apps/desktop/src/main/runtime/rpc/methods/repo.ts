@@ -1,18 +1,19 @@
+import type {
+  RepoSparsePresetRemoveInput,
+  RuntimeRepoSparsePresetRemoveResult
+} from '@yiru/runtime-protocol/contract'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 import {
-  OptionalFiniteNumber,
   OptionalString,
   requiredString
 } from '~shared/runtime-method-contracts/runtime-method-params'
-import {
+import type {
   REPO_ADD_CONTRACT,
-  REPO_LIST_CONTRACT,
   REPO_SEARCH_REFS_CONTRACT
 } from '~shared/runtime-method-contracts/workspace-contracts'
 
-import { defineMethod, type RpcMethod } from '../core'
-import { FOLDER_WORKSPACE_METHODS } from './folder-workspace'
-import { PROJECT_RUNTIME_METHODS } from './project-runtime-rpc-methods'
+import type { RpcContext, RpcHandler } from '../core'
 import { createRepoUpdateSchema } from './repo-update-schema'
 
 const RepoSelector = z.object({
@@ -41,240 +42,99 @@ const RepoReorder = z.object({
   orderedIds: z.array(z.string())
 })
 
-const ProjectGroupCreate = z.object({
-  name: requiredString('Missing group name'),
-  parentPath: OptionalString,
-  connectionId: OptionalString.nullable().optional(),
-  parentGroupId: OptionalString.nullable().optional(),
-  createdFrom: z.enum(['manual', 'folder-scan', 'migration']).optional()
-})
-
-const ProjectGroupUpdate = z.object({
-  groupId: requiredString('Missing group id'),
-  updates: z.object({
-    name: OptionalString,
-    isCollapsed: z.boolean().optional(),
-    tabOrder: OptionalFiniteNumber,
-    color: OptionalString.nullable().optional()
-  })
-})
-
-const ProjectGroupSelector = z.object({
-  groupId: requiredString('Missing group id')
-})
-
-const ProjectGroupMoveProject = z.object({
-  repo: requiredString('Missing repo selector'),
-  groupId: OptionalString.nullable(),
-  order: OptionalFiniteNumber
-})
-
-const ProjectGroupScanNested = z.object({
-  path: requiredString('Missing folder path')
-})
-
-const ProjectGroupImportNested = z.discriminatedUnion('mode', [
-  z.object({
-    parentPath: requiredString('Missing parent path'),
-    groupName: z.string().optional().default(''),
-    projectPaths: z.array(z.string()),
-    mode: z.literal('group')
-  }),
-  z.object({
-    parentPath: requiredString('Missing parent path'),
-    // Why: blank group names fall back to the scanned folder basename; separate
-    // imports do not create a group but share the same renderer payload shape.
-    groupName: z.string().optional().default(''),
-    projectPaths: z.array(z.string()),
-    mode: z.literal('separate')
-  })
-])
-
 const RepoSparsePresetSave = RepoSelector.extend({
   id: OptionalString,
   name: requiredString('Missing preset name'),
   directories: z.array(z.string())
 })
 
-export const REPO_METHODS: RpcMethod[] = [
-  defineMethod({
-    contract: REPO_LIST_CONTRACT,
-    access: { scope: 'project', tier: 'read' },
-    handler: (_params, { runtime }) => {
-      runtime.enrichMissingRepoGitRemoteIdentities?.()
-      return { repos: runtime.listRepos() }
-    }
-  }),
-  ...PROJECT_RUNTIME_METHODS,
-  defineMethod({
-    name: 'projectGroup.list',
-    mobile: true,
-    params: null,
-    access: { scope: 'project', tier: 'read' },
-    handler: (_params, { runtime }) => ({ groups: runtime.listProjectGroups() })
-  }),
-  defineMethod({
-    name: 'projectGroup.create',
-    params: ProjectGroupCreate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      group: await runtime.createProjectGroup(params)
-    })
-  }),
-  defineMethod({
-    name: 'projectGroup.update',
-    params: ProjectGroupUpdate,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      group: await runtime.updateProjectGroup(params.groupId, params.updates)
-    })
-  }),
-  defineMethod({
-    name: 'projectGroup.delete',
-    params: ProjectGroupSelector,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => runtime.deleteProjectGroup(params.groupId)
-  }),
-  defineMethod({
-    name: 'projectGroup.moveProject',
-    params: ProjectGroupMoveProject,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      repo: await runtime.moveProjectToGroup(params.repo, params.groupId ?? null, params.order)
-    })
-  }),
-  ...FOLDER_WORKSPACE_METHODS,
-  defineMethod({
-    name: 'projectGroup.scanNested',
-    params: ProjectGroupScanNested,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.scanNestedRepos(params.path)
-  }),
-  defineMethod({
-    name: 'projectGroup.importNested',
-    params: ProjectGroupImportNested,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.importNestedRepos(params)
-  }),
-  defineMethod({
-    name: 'repo.sparsePresets',
-    mobile: true,
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => ({
-      presets: await runtime.listSparsePresets(params.repo)
-    })
-  }),
-  defineMethod({
-    name: 'repo.saveSparsePreset',
-    mobile: true,
-    params: RepoSparsePresetSave,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      preset: await runtime.saveSparsePreset(params.repo, {
-        ...(params.id ? { id: params.id } : {}),
-        name: params.name,
-        directories: params.directories
-      })
-    })
-  }),
-  defineMethod({
-    contract: REPO_ADD_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      repo: await runtime.addRepo(params.path, params.kind)
-    })
-  }),
-  defineMethod({
-    name: 'repo.create',
-    params: RepoCreate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.createRepo(params.parentPath, params.name, params.kind)
-  }),
-  defineMethod({
-    name: 'repo.gitAvailable',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (_params, { runtime }) => ({ available: await runtime.isGitAvailable() })
-  }),
-  defineMethod({
-    name: 'repo.clone',
-    params: RepoClone,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      repo: await runtime.cloneRepo(params.url, params.destination)
-    })
-  }),
-  defineMethod({
-    name: 'repo.show',
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => ({ repo: await runtime.showRepo(params.repo) })
-  }),
-  defineMethod({
-    name: 'repo.update',
-    mobile: true,
-    params: RepoUpdate,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      repo: await runtime.updateRepo(
-        params.repo,
-        params.updates as Parameters<typeof runtime.updateRepo>[1]
-      )
-    })
-  }),
-  defineMethod({
-    name: 'repo.rm',
-    params: RepoSelector,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.removeProject(params.repo)
-  }),
-  defineMethod({
-    name: 'repo.reorder',
-    params: RepoReorder,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => runtime.reorderRepos(params.orderedIds)
-  }),
-  defineMethod({
-    name: 'repo.setBaseRef',
-    params: RepoSetBaseRef,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      repo: await runtime.setRepoBaseRef(params.repo, params.ref)
-    })
-  }),
-  defineMethod({
-    name: 'repo.baseRefDefault',
-    mobile: true,
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.getRepoBaseRefDefault(params.repo)
-  }),
-  defineMethod({
-    contract: REPO_SEARCH_REFS_CONTRACT,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.searchRepoRefs(params.repo, params.query, params.limit)
-  }),
-  defineMethod({
-    name: 'repo.hooks',
-    mobile: true,
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.getRepoHooks(params.repo)
-  }),
-  defineMethod({
-    name: 'repo.hooksCheck',
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.checkRepoHooks(params.repo)
-  }),
-  defineMethod({
-    name: 'repo.setupScriptImports',
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.inspectRepoSetupScriptImports(params.repo)
+type RepoSelectorInput = z.infer<typeof RepoSelector>
+
+export function handleRepoList(_params: unknown, { runtime }: RpcContext) {
+  runtime.enrichMissingRepoGitRemoteIdentities?.()
+  return { repos: runtime.listRepos() }
+}
+
+export const handleRepoSparsePresets = async (
+  params: RepoSelectorInput,
+  { runtime }: RpcContext
+) => ({ presets: await runtime.listSparsePresets(params.repo) })
+
+export const handleRepoSaveSparsePreset = (async (params, { runtime }) => ({
+  preset: await runtime.saveSparsePreset(params.repo, {
+    ...(params.id ? { id: params.id } : {}),
+    name: params.name,
+    directories: params.directories
   })
-]
+})) satisfies RpcHandler<z.infer<typeof RepoSparsePresetSave>>
+
+export const handleRepoAdd = (async (params, { runtime }) => ({
+  repo: await runtime.addRepo(params.path, params.kind)
+})) satisfies RpcHandler<z.infer<(typeof REPO_ADD_CONTRACT)['params']>>
+
+export const handleRepoCreate = (params: z.infer<typeof RepoCreate>, { runtime }: RpcContext) =>
+  runtime.createRepo(params.parentPath, params.name, params.kind)
+
+export const handleRepoGitAvailable = async (_params: unknown, { runtime }: RpcContext) => ({
+  available: await runtime.isGitAvailable()
+})
+
+export const handleRepoClone = (async (params, { runtime }) => ({
+  repo: await runtime.cloneRepo(params.url, params.destination)
+})) satisfies RpcHandler<z.infer<typeof RepoClone>>
+
+export const handleRepoShow = async (params: RepoSelectorInput, { runtime }: RpcContext) => ({
+  repo: await runtime.showRepo(params.repo)
+})
+
+export const handleRepoUpdate = (async (params, { runtime }) => ({
+  repo: await runtime.updateRepo(
+    params.repo,
+    params.updates as Parameters<typeof runtime.updateRepo>[1]
+  )
+})) satisfies RpcHandler<z.infer<typeof RepoUpdate>>
+
+export const handleRepoRemove = (params: RepoSelectorInput, { runtime }: RpcContext) =>
+  runtime.removeProject(params.repo)
+
+export const handleRepoReorder = (params: z.infer<typeof RepoReorder>, { runtime }: RpcContext) =>
+  runtime.reorderRepos(params.orderedIds)
+
+export const handleRepoSetBaseRef = async (
+  params: z.infer<typeof RepoSetBaseRef>,
+  { runtime }: RpcContext
+) => ({ repo: await runtime.setRepoBaseRef(params.repo, params.ref) })
+
+export const handleRepoBaseRefDefault = (
+  params: RepoSelectorInput & { hostId?: ExecutionHostId },
+  { runtime }: RpcContext
+) => runtime.getRepoBaseRefDefault(params.repo, params.hostId)
+
+export const handleRepoSearchRefs = ((params, { runtime }) =>
+  runtime.searchRepoRefs(
+    params.repo,
+    params.query,
+    params.limit,
+    params.hostId
+  )) satisfies RpcHandler<
+  z.infer<(typeof REPO_SEARCH_REFS_CONTRACT)['params']> & { hostId?: ExecutionHostId }
+>
+
+export const handleRepoHooks = (params: RepoSelectorInput, { runtime }: RpcContext) =>
+  runtime.getRepoHooks(params.repo)
+
+export const handleRepoHooksCheck = (
+  params: RepoSelectorInput & { hostId?: ExecutionHostId },
+  { runtime }: RpcContext
+) => runtime.checkRepoHooks(params.repo, params.hostId)
+
+export const handleRepoSetupScriptImports = (params: RepoSelectorInput, { runtime }: RpcContext) =>
+  runtime.inspectRepoSetupScriptImports(params.repo)
+
+export async function handleRepoRemoveSparsePreset(
+  params: RepoSparsePresetRemoveInput,
+  { runtime }: RpcContext
+): Promise<RuntimeRepoSparsePresetRemoveResult> {
+  await runtime.removeSparsePreset(params.repo, params.presetId)
+  return { removed: true }
+}

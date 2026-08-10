@@ -3,11 +3,13 @@ import { mkdir, open, rm, stat } from 'node:fs/promises'
 import type { FileHandle } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-import { BrowserWindow, dialog, ipcMain } from 'electron'
+import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
 
+import type { MainIpcRegistration } from '../ipc-registration'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import { promoteLocalDownloadedFolder } from '../local-downloaded-folder-promotion'
 import { isENOENT } from './auth'
+import type { NativePathServices } from './native-path-services'
 
 type DownloadedFolderSession = {
   destinationPath: string
@@ -15,7 +17,7 @@ type DownloadedFolderSession = {
   senderId: number
   cleanupTimer: ReturnType<typeof setTimeout>
   activeFile: { key: string; handle: FileHandle; position: number } | null
-  sender: Electron.WebContents
+  sender: RuntimeRendererTarget
   onSenderDestroyed: () => void
 }
 
@@ -85,7 +87,7 @@ async function cleanupTransferDirectory(dirPath: string): Promise<void> {
   }
 }
 
-function senderIdForEvent(event: Electron.IpcMainInvokeEvent): number {
+function senderIdForEvent(event: { sender: { id: number } }): number {
   return typeof event.sender.id === 'number' ? event.sender.id : Number.NaN
 }
 
@@ -125,7 +127,10 @@ async function writeFileChunk(
   session.activeFile.position += written
 }
 
-export function registerDownloadedFolderSessionHandlers(): void {
+export function registerDownloadedFolderSessionHandlers(
+  ipcMain: MainIpcRegistration,
+  nativePathServices: NativePathServices
+): void {
   const sessions = new Map<string, DownloadedFolderSession>()
 
   const closeSession = async (transferId: string, cleanupTemp: boolean) => {
@@ -152,53 +157,49 @@ export function registerDownloadedFolderSessionHandlers(): void {
     }
   }
 
-  ipcMain.handle('fs:startDownloadedFolder', async (event, args: { suggestedName?: string }) => {
-    const suggestedName = sanitizeLocalDownloadFilename(
-      validateRequiredString(args?.suggestedName, 'suggestedName')
-    )
-    const parentWindow = BrowserWindow.fromWebContents(event.sender) ?? undefined
-    const dialogOptions: Electron.OpenDialogOptions = {
-      properties: ['openDirectory', 'createDirectory']
-    }
-    const dialogResult = parentWindow
-      ? await dialog.showOpenDialog(parentWindow, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-    const destinationParent = dialogResult.filePaths[0]
-    if (dialogResult.canceled || !destinationParent) {
-      return { canceled: true as const }
-    }
-    const destinationPath = join(destinationParent, suggestedName)
-    await assertDestinationAvailable(destinationPath)
-    const tempPath = join(dirname(destinationPath), `.${randomUUID()}.download`)
-    const transferId = randomUUID()
-    try {
-      await mkdir(tempPath, { recursive: false })
-      const senderId = senderIdForEvent(event)
-      const cleanupTimer = setTimeout(
-        () => void closeSession(transferId, true),
-        DOWNLOAD_SESSION_TTL_MS
+  ipcMain.handle(
+    'file-host:startDownloadedFolder',
+    async (event, args: { suggestedName?: string }) => {
+      const suggestedName = sanitizeLocalDownloadFilename(
+        validateRequiredString(args?.suggestedName, 'suggestedName')
       )
-      cleanupTimer.unref?.()
-      const onSenderDestroyed = (): void => cleanupSessionsForSender(senderId)
-      sessions.set(transferId, {
-        destinationPath,
-        tempPath,
-        senderId,
-        cleanupTimer,
-        activeFile: null,
-        sender: event.sender,
-        onSenderDestroyed
-      })
-      event.sender.once('destroyed', onSenderDestroyed)
-      return { canceled: false as const, destinationPath, transferId }
-    } catch (error) {
-      await cleanupTransferDirectory(tempPath)
-      throw error
+      const destinationParent = await nativePathServices.chooseDownloadDirectory(event.sender.id)
+      if (!destinationParent) {
+        return { canceled: true as const }
+      }
+      const destinationPath = join(destinationParent, suggestedName)
+      await assertDestinationAvailable(destinationPath)
+      const tempPath = join(dirname(destinationPath), `.${randomUUID()}.download`)
+      const transferId = randomUUID()
+      try {
+        await mkdir(tempPath, { recursive: false })
+        const senderId = senderIdForEvent(event)
+        const cleanupTimer = setTimeout(
+          () => void closeSession(transferId, true),
+          DOWNLOAD_SESSION_TTL_MS
+        )
+        cleanupTimer.unref?.()
+        const onSenderDestroyed = (): void => cleanupSessionsForSender(senderId)
+        sessions.set(transferId, {
+          destinationPath,
+          tempPath,
+          senderId,
+          cleanupTimer,
+          activeFile: null,
+          sender: event.sender,
+          onSenderDestroyed
+        })
+        event.sender.once('destroyed', onSenderDestroyed)
+        return { canceled: false as const, destinationPath, transferId }
+      } catch (error) {
+        await cleanupTransferDirectory(tempPath)
+        throw error
+      }
     }
-  })
+  )
 
   ipcMain.handle(
-    'fs:createDownloadedFolderDirectory',
+    'file-host:createDownloadedFolderDirectory',
     async (event, args: { transferId?: string; pathSegments?: unknown }) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       const session = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
@@ -213,7 +214,7 @@ export function registerDownloadedFolderSessionHandlers(): void {
   )
 
   ipcMain.handle(
-    'fs:appendDownloadedFolderFileChunk',
+    'file-host:appendDownloadedFolderFileChunk',
     async (
       event,
       args: {
@@ -256,28 +257,34 @@ export function registerDownloadedFolderSessionHandlers(): void {
     }
   )
 
-  ipcMain.handle('fs:finishDownloadedFolder', async (event, args: { transferId?: string }) => {
-    const transferId = validateRequiredString(args?.transferId, 'transferId')
-    const owned = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
-    if (owned.activeFile) {
-      throw new Error('Downloaded folder still has an active file')
+  ipcMain.handle(
+    'file-host:finishDownloadedFolder',
+    async (event, args: { transferId?: string }) => {
+      const transferId = validateRequiredString(args?.transferId, 'transferId')
+      const owned = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      if (owned.activeFile) {
+        throw new Error('Downloaded folder still has an active file')
+      }
+      const session = await closeSession(transferId, false)
+      if (!session) {
+        throw new Error('Folder download session not found')
+      }
+      try {
+        await promoteLocalDownloadedFolder(session.tempPath, session.destinationPath)
+        return { canceled: false as const, destinationPath: session.destinationPath }
+      } finally {
+        await cleanupTransferDirectory(session.tempPath)
+      }
     }
-    const session = await closeSession(transferId, false)
-    if (!session) {
-      throw new Error('Folder download session not found')
-    }
-    try {
-      await promoteLocalDownloadedFolder(session.tempPath, session.destinationPath)
-      return { canceled: false as const, destinationPath: session.destinationPath }
-    } finally {
-      await cleanupTransferDirectory(session.tempPath)
-    }
-  })
+  )
 
-  ipcMain.handle('fs:cancelDownloadedFolder', async (event, args: { transferId?: string }) => {
-    const transferId = validateRequiredString(args?.transferId, 'transferId')
-    requireOwnedSession(sessions, transferId, senderIdForEvent(event))
-    await closeSession(transferId, true)
-    return { ok: true as const }
-  })
+  ipcMain.handle(
+    'file-host:cancelDownloadedFolder',
+    async (event, args: { transferId?: string }) => {
+      const transferId = validateRequiredString(args?.transferId, 'transferId')
+      requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      await closeSession(transferId, true)
+      return { ok: true as const }
+    }
+  )
 }

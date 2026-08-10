@@ -1,11 +1,9 @@
 import { emulatorProbe, emulatorProbeError } from '~main/emulator/probe'
 import type { FeatureInteractionId } from '~shared/feature-interactions'
-import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
-import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { YiruRuntimeService } from '../yiru-runtime'
-import type { RpcAccess } from './access'
 import { denyAccess, denyRedirectedProjectAccess } from './access-adjudication'
+import { isMethodAvailableToMobile } from './contract-mobile-availability'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport
 // makes it unit-testable without spinning up a socket, and keeps
@@ -31,51 +29,80 @@ import {
   mapRuntimeError,
   successResponse
 } from './errors'
-import { getRuntimeFeatureInteractionId } from './feature-interaction'
+import { recordRuntimeFeatureInteraction } from './feature-interaction'
+import {
+  legacyStreamingDispatchFallbackProcedure,
+  serveLegacyDispatchFallback,
+  serveLegacyStreamingDispatchFallback,
+  type RpcConnectionState
+} from './legacy-dispatch-fallback'
 import { orchestrationMigrationFence } from './orchestration-contract-fence'
 import {
   authenticatedCallerFingerprint,
-  OrchestrationMutationExecutor,
+  orchestrationMutationExecutorFor,
+  type OrchestrationMutationExecutor,
   type DurableMutationInvocation
 } from './orchestration-mutation-executor'
+import { createStreamingEmit } from './streaming-emit'
 
 export type DispatcherOptions = {
   runtime: YiruRuntimeService
   methods: readonly RpcAnyMethod[]
+  mobileDevelopmentPairing?: RpcContext['mobileDevelopmentPairing']
 }
 
+// Why: `ALL_RPC_METHODS` (methods/index.ts) is empty as of slice 112 — every
+// bare-envelope request now misses `this.registry` and falls through to
+// `serveLegacyDispatchFallback`/its streaming sibling below. That does not
+// make this class dead code: `dispatch`/`dispatchStreaming` remain the entry
+// point every bare-string caller (Unix socket, WebSocket, shared-control) is
+// still funneled through, and the two fallback tables in
+// legacy-dispatch-fallback.ts are a small, audited allowlist rather than "any
+// direct-wired leaf" — an unlisted bare method name still correctly resolves
+// to `method_not_found`. What *is* dead code, and predates this slice: once
+// every top-level `runtimeContract` domain became direct-wired
+// (`DIRECTLY_WIRED_RUNTIME_DOMAINS` in router-direct.ts, complete since 切片
+// 88's `terminal`), `router.ts`'s `bridgeRuntimeRouter(bridgedRuntimeImplementation)`
+// call has been receiving an empty object — `bridgeRuntimeProcedure`/
+// router-bridge.ts have had nothing to bridge since then, independent of
+// whether any individual leaf still carried a legacy *dispatch* registration.
 export class RpcDispatcher {
   private readonly registry: RpcRegistry
   private readonly moduleContext: RpcContext
   private readonly orchestrationMutations: OrchestrationMutationExecutor
 
-  constructor({ runtime, methods }: DispatcherOptions) {
+  constructor({ runtime, methods, mobileDevelopmentPairing }: DispatcherOptions) {
     this.registry = buildRegistry(methods)
-    this.orchestrationMutations = new OrchestrationMutationExecutor(runtime)
+    this.orchestrationMutations = orchestrationMutationExecutorFor(runtime)
     this.moduleContext = {
       runtime,
       fileCommands: runtime.fileCommands,
       gitCommands: runtime.gitCommands,
       browserCommands: runtime.browserCommands,
       emulatorCommands: runtime.emulatorCommands,
-      mobileNotifications: runtime.mobileNotifications
+      mobileNotifications: runtime.mobileNotifications,
+      mobileDevelopmentPairing
     }
   }
 
   isAvailableToMobile(method: string): boolean {
-    return this.registry.get(method)?.mobile === true
+    // Why: consult the contract, not just the legacy registry — Phase 6 retires
+    // legacy twins domain by domain, and a retired mobile-flagged procedure
+    // must not read as "denied to mobile" just because its twin is gone.
+    return isMethodAvailableToMobile(method, this.registry.get(method)?.mobile === true)
   }
 
   async dispatch(request: RpcRequest, options?: { signal?: AbortSignal }): Promise<RpcResponse> {
     const meta = this.meta()
     const method = this.registry.get(request.method)
     if (!method) {
-      return errorResponse(
-        request.id,
-        meta,
-        'method_not_found',
-        `Unknown method: ${request.method}`
-      )
+      // Why: mirrors the legacy-registered check below — a streaming leaf
+      // resolved only through the fallback (legacy-dispatch-fallback.ts)
+      // still requires a transport that can call `reply` more than once.
+      if (legacyStreamingDispatchFallbackProcedure(request.method)) {
+        return this.streamingTransportRequiredResponse(request, meta)
+      }
+      return serveLegacyDispatchFallback(request, meta, this.moduleContext, options ?? {})
     }
 
     const migrationFence = orchestrationMigrationFence(request, meta)
@@ -92,12 +119,7 @@ export class RpcDispatcher {
     // Unix sockets. They require a reply function that can be called multiple
     // times, which is only available via dispatchStreaming.
     if (isStreamingMethod(method)) {
-      return errorResponse(
-        request.id,
-        meta,
-        'method_not_supported',
-        `Method ${request.method} requires a streaming transport`
-      )
+      return this.streamingTransportRequiredResponse(request, meta)
     }
 
     const isEmulator = request.method.startsWith('emulator.')
@@ -106,15 +128,10 @@ export class RpcDispatcher {
     }
     try {
       const invoke = (mutation?: DurableMutationInvocation): Promise<unknown> | unknown =>
-        method.handler(parsedParams.value, {
-          ...this.moduleContext,
-          signal: options?.signal,
-          requestId: request.id,
-          orchestrationCapability: request.orchestrationCapability,
-          authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
-          recordMutationReceipt: mutation?.recordReceipt,
-          orchestrationMutation: mutation?.identity
-        })
+        method.handler(
+          parsedParams.value,
+          this.handlerInvocationContext(request, { signal: options?.signal }, mutation)
+        )
       const result = await this.orchestrationMutations.run(request, parsedParams.value, invoke)
       this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
       return successResponse(request.id, meta, result)
@@ -129,36 +146,40 @@ export class RpcDispatcher {
   // Why: streaming dispatch sends multiple responses through the reply callback
   // instead of returning a single Promise. This enables terminal.subscribe and
   // other subscription-style methods that push data over time.
+  // `options.grantedAccess` is the authority this caller was granted, for
+  // callers whose admission carries one. Absent for `local`/`mobile`/`runtime`,
+  // which are the owner's own clients and are not scope-limited today.
   async dispatchStreaming(
     request: RpcRequest,
     reply: (response: string) => void,
-    options?: {
-      connectionId?: string
-      signal?: AbortSignal
-      clientId?: string
-      clientKind?: 'mobile' | 'runtime'
-      principal?: AuthenticatedRpcPrincipal
-      /**
-       * The authority this caller was granted, for callers whose admission
-       * carries one. Absent for `local` / `mobile` / `runtime`, which are the
-       * owner's own clients and are not scope-limited today.
-       */
-      grantedAccess?: RpcAccess
-      sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
-      registerBinaryStreamHandler?: (
-        streamId: number,
-        handler: (frame: TerminalStreamFrame) => void
-      ) => () => void
-    }
+    options?: RpcConnectionState
   ): Promise<void> {
     const meta = this.meta()
     const method = this.registry.get(request.method)
     if (!method) {
-      reply(
-        JSON.stringify(
-          errorResponse(request.id, meta, 'method_not_found', `Unknown method: ${request.method}`)
+      // Why: the streaming fallback (legacy-dispatch-fallback.ts, slice 112)
+      // resolves the 7 streaming leaves this migration couldn't retire —
+      // checked before the unary fallback below because it drains a
+      // generator through `emit` instead of producing one reply envelope.
+      const streamingFallback = legacyStreamingDispatchFallbackProcedure(request.method)
+      if (streamingFallback) {
+        await serveLegacyStreamingDispatchFallback(
+          streamingFallback,
+          request,
+          meta,
+          this.moduleContext,
+          options ?? {},
+          reply
         )
+        return
+      }
+      const fallback = await serveLegacyDispatchFallback(
+        request,
+        meta,
+        this.moduleContext,
+        options ?? {}
       )
+      reply(JSON.stringify(fallback))
       return
     }
 
@@ -201,22 +222,10 @@ export class RpcDispatcher {
     if (!isStreamingMethod(method)) {
       try {
         const invoke = (mutation?: DurableMutationInvocation): Promise<unknown> | unknown =>
-          method.handler(parsedParams.value, {
-            ...this.moduleContext,
-            signal: options?.signal,
-            requestId: request.id,
-            connectionId: options?.connectionId,
-            clientId: options?.clientId,
-            clientKind: options?.clientKind,
-            principal: options?.principal,
-            grantedAccess: options?.grantedAccess,
-            orchestrationCapability: request.orchestrationCapability,
-            authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
-            recordMutationReceipt: mutation?.recordReceipt,
-            orchestrationMutation: mutation?.identity,
-            sendBinary: options?.sendBinary,
-            registerBinaryStreamHandler: options?.registerBinaryStreamHandler
-          })
+          method.handler(
+            parsedParams.value,
+            this.handlerInvocationContext(request, options ?? {}, mutation)
+          )
         const result = await this.orchestrationMutations.run(request, parsedParams.value, invoke)
         this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
         reply(JSON.stringify(successResponse(request.id, meta, result)))
@@ -226,35 +235,28 @@ export class RpcDispatcher {
       return
     }
 
-    const recordedStreamingFeatureInteractions = new Set<FeatureInteractionId>()
-    const emit = (result: unknown): void => {
-      this.recordRuntimeFeatureInteraction(
-        request.method,
-        result,
-        recordedStreamingFeatureInteractions,
-        request.params
-      )
-      const response = successResponse(request.id, meta, result)
-      response.streaming = true
-      reply(JSON.stringify(response))
-    }
+    const [emit, recordedStreamingFeatureInteractions] = createStreamingEmit(
+      this.moduleContext.runtime,
+      request,
+      meta,
+      reply
+    )
 
     try {
+      // Why: unlike the unary branch above, a streaming handler's context has
+      // never carried `grantedAccess` — preserved here rather than passing
+      // `options` wholesale.
       const result = await method.handler(
         parsedParams.value,
-        {
-          ...this.moduleContext,
+        this.handlerInvocationContext(request, {
           signal: options?.signal,
-          requestId: request.id,
           connectionId: options?.connectionId,
           clientId: options?.clientId,
           clientKind: options?.clientKind,
           principal: options?.principal,
-          orchestrationCapability: request.orchestrationCapability,
-          authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler
-        },
+        }),
         emit
       )
       this.recordRuntimeFeatureInteraction(
@@ -265,6 +267,27 @@ export class RpcDispatcher {
       )
     } catch (error) {
       reply(JSON.stringify(this.mapError(request, meta, error)))
+    }
+  }
+
+  // Why: the field list a legacy handler's `RpcContext` needs was repeated at
+  // every call site (dispatch's unary path, dispatchStreaming's unary path,
+  // dispatchStreaming's streaming path) with only `connectionState` varying —
+  // naming it once keeps `RpcConnectionState`'s shape and this object's
+  // shape from drifting apart from each other silently.
+  private handlerInvocationContext(
+    request: RpcRequest,
+    connectionState: RpcConnectionState,
+    mutation?: DurableMutationInvocation
+  ): RpcContext {
+    return {
+      ...this.moduleContext,
+      ...connectionState,
+      requestId: request.id,
+      orchestrationCapability: request.orchestrationCapability,
+      authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
+      recordMutationReceipt: mutation?.recordReceipt,
+      orchestrationMutation: mutation?.identity
     }
   }
 
@@ -321,6 +344,21 @@ export class RpcDispatcher {
     )
   }
 
+  // Why: shared by the legacy-registered streaming check (dispatch's own
+  // `isStreamingMethod`) and the streaming-fallback check above it — a
+  // one-shot transport can't call `reply` more than once either way.
+  private streamingTransportRequiredResponse(
+    request: RpcRequest,
+    meta: RpcEnvelopeMeta
+  ): RpcResponse {
+    return errorResponse(
+      request.id,
+      meta,
+      'method_not_supported',
+      `Method ${request.method} requires a streaming transport`
+    )
+  }
+
   private meta(): RpcEnvelopeMeta {
     return { runtimeId: this.moduleContext.runtime.getRuntimeId() }
   }
@@ -331,18 +369,12 @@ export class RpcDispatcher {
     alreadyRecorded?: Set<FeatureInteractionId>,
     rawParams?: unknown
   ): void {
-    const id = getRuntimeFeatureInteractionId(method, result, rawParams)
-    if (!id) {
-      return
-    }
-    if (alreadyRecorded?.has(id)) {
-      return
-    }
-    try {
-      this.moduleContext.runtime.recordFeatureInteraction(id)
-      alreadyRecorded?.add(id)
-    } catch {
-      // Best-effort education state must not break runtime tools.
-    }
+    recordRuntimeFeatureInteraction(
+      this.moduleContext.runtime,
+      method,
+      result,
+      alreadyRecorded,
+      rawParams
+    )
   }
 }

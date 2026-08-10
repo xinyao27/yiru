@@ -15,6 +15,7 @@ import {
 import { Input } from '~renderer/components/ui/input'
 import { Label } from '~renderer/components/ui/label'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import type {
   CoworkingHostAccessTier,
@@ -51,7 +52,7 @@ function CoworkingHostAccessRequestPrompt({
     }
     setIsDeciding(true)
     try {
-      await window.api.coworkingSharing.decideHostAccess({
+      await coworkingSharingClient.decideHostAccess({
         requestId: request.requestId,
         decision: 'deny'
       })
@@ -79,7 +80,7 @@ function CoworkingHostAccessRequestPrompt({
     }
     setIsDeciding(true)
     try {
-      await window.api.coworkingSharing.decideHostAccess({
+      await coworkingSharingClient.decideHostAccess({
         requestId: request.requestId,
         decision: 'allow',
         name: grantName,

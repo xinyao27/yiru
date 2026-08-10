@@ -27,41 +27,13 @@ export function sshTargetLabelsEqual(
   return targets.every((target) => labels.get(target.id) === target.label)
 }
 
-function collectSshTargetTerminalTabIds(state: AppState, targetId: string): Set<string> {
-  const repoIds = new Set(
-    state.repos.filter((repo) => repo.connectionId === targetId).map((repo) => repo.id)
-  )
-  const tabIds = new Set<string>()
-  for (const [repoId, worktrees] of Object.entries(state.worktreesByRepo)) {
-    if (!repoIds.has(repoId)) {
-      continue
-    }
-    for (const worktree of worktrees) {
-      for (const tab of state.tabsByWorktree[worktree.id] ?? []) {
-        tabIds.add(tab.id)
-      }
-    }
-  }
-  return tabIds
-}
-
 function isSshTargetSessionId(sessionId: string, targetId: string): boolean {
   return parseAppSshPtyId(sessionId)?.connectionId === targetId
 }
 
-function shouldRemoveDeferredSshSession(
-  tabId: string,
-  sessionId: string,
-  targetId: string,
-  targetTabIds: Set<string>
-): boolean {
-  return targetTabIds.has(tabId) || isSshTargetSessionId(sessionId, targetId)
-}
-
 function clearSshTargetTabPtyState(
   state: AppState,
-  targetId: string,
-  targetTabIds: Set<string>
+  targetId: string
 ): Pick<
   AppState,
   | 'tabsByWorktree'
@@ -88,8 +60,7 @@ function clearSshTargetTabPtyState(
           ...(lastKnownPtyId ? [lastKnownPtyId] : [])
         ])
       ]
-      const shouldClearTab =
-        targetTabIds.has(tab.id) || ptyIds.some((ptyId) => isSshTargetSessionId(ptyId, targetId))
+      const shouldClearTab = ptyIds.some((ptyId) => isSshTargetSessionId(ptyId, targetId))
       if (!shouldClearTab) {
         continue
       }
@@ -129,18 +100,7 @@ export function buildRemovedSshTargetCleanupPatch(
   state: AppState,
   targetId: string
 ): Partial<AppState> | null {
-  const targetTabIds = collectSshTargetTerminalTabIds(state, targetId)
-  const tabPtyState = clearSshTargetTabPtyState(state, targetId, targetTabIds)
-  const nextDeferredSessions: Record<string, string> = {}
-  let removedDeferredSession = false
-  for (const [tabId, sessionId] of Object.entries(state.deferredSshSessionIdsByTabId)) {
-    if (shouldRemoveDeferredSshSession(tabId, sessionId, targetId, targetTabIds)) {
-      removedDeferredSession = true
-      continue
-    }
-    nextDeferredSessions[tabId] = sessionId
-  }
-
+  const tabPtyState = clearSshTargetTabPtyState(state, targetId)
   const nextDeferredTargets = state.deferredSshReconnectTargets.filter((id) => id !== targetId)
   const nextConnectionStates = new Map(state.sshConnectionStates)
   const removedConnectionState = nextConnectionStates.delete(targetId)
@@ -179,8 +139,7 @@ export function buildRemovedSshTargetCleanupPatch(
     removedDetectedPorts ||
     tabPtyState.changed ||
     removedCredentialRequest ||
-    removedDeferredTarget ||
-    removedDeferredSession
+    removedDeferredTarget
   if (!changed) {
     return null
   }
@@ -202,7 +161,6 @@ export function buildRemovedSshTargetCleanupPatch(
         }
       : {}),
     ...(removedCredentialRequest ? { sshCredentialQueue: nextCredentialQueue } : {}),
-    ...(removedDeferredTarget ? { deferredSshReconnectTargets: nextDeferredTargets } : {}),
-    ...(removedDeferredSession ? { deferredSshSessionIdsByTabId: nextDeferredSessions } : {})
+    ...(removedDeferredTarget ? { deferredSshReconnectTargets: nextDeferredTargets } : {})
   }
 }

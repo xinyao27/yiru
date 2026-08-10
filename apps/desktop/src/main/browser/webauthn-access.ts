@@ -1,4 +1,10 @@
-import type { Session } from 'electron'
+import type {
+  BrowserHidDevice,
+  BrowserSelectHidDeviceDetails,
+  BrowserSelectWebAuthnAccountDetails,
+  BrowserSession,
+  BrowserSessionEvent
+} from './session'
 
 const FIDO_HID_USAGE_PAGE = 0xf1d0
 const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
@@ -15,7 +21,7 @@ function isSecureBrowserOrigin(rawOrigin: string | undefined): boolean {
   }
 }
 
-function isFidoHidDevice(device: Electron.HIDDevice | unknown): device is Electron.HIDDevice {
+function isFidoHidDevice(device: unknown): device is BrowserHidDevice {
   if (!device || typeof device !== 'object') {
     return false
   }
@@ -40,12 +46,12 @@ export function allowsBrowserWebAuthnPermission(
 }
 
 function handleBrowserSelectHidDevice(
-  event: Electron.Event,
-  details: Electron.SelectHidDeviceDetails,
-  callback: (deviceId?: string) => void
+  event: BrowserSessionEvent,
+  details: BrowserSelectHidDeviceDetails,
+  callback: (deviceId?: string | null) => void
 ): void {
   event.preventDefault()
-  if (!isSecureBrowserOrigin(details.frame?.url)) {
+  if (!isSecureBrowserOrigin(details.frameUrl)) {
     callback(undefined)
     return
   }
@@ -54,8 +60,8 @@ function handleBrowserSelectHidDevice(
 }
 
 function handleBrowserSelectWebAuthnAccount(
-  event: Electron.Event,
-  details: Electron.SelectWebauthnAccountDetails,
+  event: BrowserSessionEvent,
+  details: BrowserSelectWebAuthnAccountDetails,
   callback: (credentialId?: string | null) => void
 ): void {
   event.preventDefault()
@@ -64,7 +70,7 @@ function handleBrowserSelectWebAuthnAccount(
   callback(details.accounts.length === 1 ? details.accounts[0].credentialId : null)
 }
 
-export function installBrowserWebAuthnAccessHandlers(browserSession: Session): void {
+export function installBrowserWebAuthnAccessHandlers(browserSession: BrowserSession): void {
   browserSession.setDevicePermissionHandler((details) => {
     return (
       details.deviceType === 'hid' &&
@@ -72,14 +78,12 @@ export function installBrowserWebAuthnAccessHandlers(browserSession: Session): v
       isFidoHidDevice(details.device)
     )
   })
-  browserSession.removeListener('select-hid-device', handleBrowserSelectHidDevice)
-  browserSession.on('select-hid-device', handleBrowserSelectHidDevice)
-  browserSession.removeListener('select-webauthn-account', handleBrowserSelectWebAuthnAccount)
-  browserSession.on('select-webauthn-account', handleBrowserSelectWebAuthnAccount)
+  browserSession.setSelectHidDeviceHandler(handleBrowserSelectHidDevice)
+  browserSession.setSelectWebAuthnAccountHandler(handleBrowserSelectWebAuthnAccount)
 }
 
-export function clearBrowserWebAuthnAccessHandlers(browserSession: Session): void {
-  browserSession.removeListener('select-hid-device', handleBrowserSelectHidDevice)
-  browserSession.removeListener('select-webauthn-account', handleBrowserSelectWebAuthnAccount)
+export function clearBrowserWebAuthnAccessHandlers(browserSession: BrowserSession): void {
+  browserSession.removeSelectHidDeviceHandler()
+  browserSession.removeSelectWebAuthnAccountHandler()
   browserSession.setDevicePermissionHandler(null)
 }

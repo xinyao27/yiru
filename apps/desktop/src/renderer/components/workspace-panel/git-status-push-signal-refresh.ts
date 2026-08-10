@@ -4,6 +4,7 @@ import {
   type TerminalCommandFinishedEventDetail
 } from '~renderer/hooks/terminal-command-finished-event'
 import { isWindowVisible } from '~renderer/lib/window-visibility-interval'
+import { worktreeHostClient } from '~renderer/runtime/worktree-host-client'
 
 type UseGitStatusPushSignalRefreshParams = {
   activeRepoId: string | null
@@ -30,13 +31,6 @@ export function useGitStatusPushSignalRefresh({
     if (!enabled || !activeRepoId) {
       return
     }
-    // Why: remote web surfaces have no preload bridge; the fallback poll
-    // still covers them.
-    const subscribeToWorktreesChanged = window.api?.worktrees?.onChanged
-    const subscribeToGitStatusMetadataChanged = window.api?.worktrees?.onGitStatusMetadataChanged
-    if (!subscribeToWorktreesChanged && !subscribeToGitStatusMetadataChanged) {
-      return
-    }
     const handleRepoSignal = ({ repoId }: { repoId: string }): void => {
       if (repoId !== activeRepoId || !isWindowVisible()) {
         return
@@ -46,9 +40,9 @@ export function useGitStatusPushSignalRefresh({
     // Repo metadata changed on disk. Hidden windows skip the nudge; the
     // visibility interval refreshes immediately on reveal.
     const unsubs = [
-      subscribeToWorktreesChanged?.(handleRepoSignal),
-      subscribeToGitStatusMetadataChanged?.(handleRepoSignal)
-    ].filter((unsubscribe): unsubscribe is () => void => typeof unsubscribe === 'function')
+      worktreeHostClient.onChanged(handleRepoSignal),
+      worktreeHostClient.onGitStatusMetadataChanged(handleRepoSignal)
+    ]
     return () => {
       for (const unsubscribe of unsubs) {
         unsubscribe()

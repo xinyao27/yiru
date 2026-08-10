@@ -1,4 +1,4 @@
-import type { Repo, TerminalTab, Worktree } from '~shared/types'
+import type { TerminalTab } from '~shared/types'
 
 function indexFirstById<T extends { id: string }>(rows: readonly T[]): Map<string, T> {
   const index = new Map<string, T>()
@@ -10,29 +10,6 @@ function indexFirstById<T extends { id: string }>(rows: readonly T[]): Map<strin
     }
   }
   return index
-}
-
-export function buildTerminalSessionOwnerIndexes(
-  worktreesByRepo: Record<string, Worktree[]>,
-  repos: readonly Repo[]
-): {
-  worktreeById: Map<string, Worktree>
-  repoById: Map<string, Repo>
-} {
-  const worktreeById = new Map<string, Worktree>()
-  for (const worktrees of Object.values(worktreesByRepo)) {
-    for (const worktree of worktrees) {
-      // Why: preserve the first-match hydration behavior without flattening
-      // every repo's worktree list into another transient array.
-      if (!worktreeById.has(worktree.id)) {
-        worktreeById.set(worktree.id, worktree)
-      }
-    }
-  }
-  return {
-    worktreeById,
-    repoById: indexFirstById(repos)
-  }
 }
 
 export function buildTerminalSessionTabIndex(

@@ -66,20 +66,22 @@ const CLAUDE_FAST_MODE: CatalogOption = {
 }
 
 export const CLAUDE_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
+  // Why: ids are Claude Code aliases that always resolve to the newest model of
+  // each tier, so labels stay version-free to avoid going stale on releases.
   models: [
     {
       id: 'fable',
-      label: 'Fable 5',
+      label: 'Fable',
       options: [claudeEffort(true)]
     },
     {
       id: 'opus',
-      label: 'Opus 4.8',
+      label: 'Opus',
       options: [claudeEffort(true), CLAUDE_FAST_MODE]
     },
     {
       id: 'sonnet',
-      label: 'Sonnet 5',
+      label: 'Sonnet',
       isDefault: true,
       options: [claudeEffort(true)]
     },

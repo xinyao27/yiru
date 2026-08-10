@@ -2,8 +2,9 @@ import type { GitLabWorkItem } from '@yiru/workbench-model/review'
 import type { GitHubWorkItem } from '@yiru/workbench-model/review'
 import type { BaseRefSearchResult } from '@yiru/workbench-model/workspace'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import type { MrStateFilter } from './composer-source-types'
 import { PER_REPO_FETCH_LIMIT } from './work-items'
 
@@ -20,15 +21,11 @@ export async function searchGitHubItems(
   repoId: string,
   query: string
 ): Promise<GitHubWorkItem[]> {
-  const response = await client.sendRequest('github.listWorkItems', {
+  const envelope = await callRuntimeOrpc(client, (runtime) => runtime.github.listWorkItems, {
     repo: `id:${repoId}`,
     limit: PER_REPO_FETCH_LIMIT,
     query: scopeGitHubQuery(query)
   })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const envelope = (response as RpcSuccess).result as { items: GitHubWorkItem[] }
   return (envelope.items ?? []).map((item) => ({ ...item, repoId }))
 }
 
@@ -38,20 +35,13 @@ export async function searchGitLabItems(
   query: string,
   state: MrStateFilter
 ): Promise<GitLabWorkItem[]> {
-  const response = await client.sendRequest('gitlab.listMRs', {
+  const envelope = await callRuntimeOrpc(client, (runtime) => runtime.gitlab.listMRs, {
     repo: `id:${repoId}`,
     state,
     page: 1,
     perPage: GITLAB_PER_PAGE,
     query: query.trim() || undefined
   })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const envelope = (response as RpcSuccess).result as {
-    items: GitLabWorkItem[]
-    error?: { type?: string; message: string }
-  }
   if (envelope.error?.type && envelope.error.type !== 'not_found') {
     throw new Error(envelope.error.message)
   }
@@ -63,18 +53,12 @@ export async function searchBranches(
   repoId: string,
   query: string
 ): Promise<BaseRefSearchResult[]> {
-  const response = await client.sendRequest(
-    'repo.searchRefs',
+  const result = await callRuntimeOrpc(
+    client,
+    (runtime) => runtime.repo.searchRefs,
     { repo: `id:${repoId}`, query: query.trim(), limit: BRANCH_LIMIT },
     { timeoutMs: 30_000 }
   )
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const result = (response as RpcSuccess).result as {
-    refDetails?: BaseRefSearchResult[]
-    refs?: string[]
-  }
   return (
     result.refDetails ??
     (result.refs ?? []).map((refName) => ({ refName, localBranchName: refName }))

@@ -1,7 +1,5 @@
 import {
   getRuntimePathBasename,
-  isPathInsideOrEqual,
-  isRuntimePathAbsolute,
   normalizeRuntimePathForComparison,
   relativePathInsideRoot,
   resolveRuntimePath
@@ -32,13 +30,6 @@ type FolderScope = {
   name: string
   folderPath: string
   parentRelativePath: string | null
-}
-
-function canonicalizeImportPath(path: string): string | null {
-  if (!isRuntimePathAbsolute(path)) {
-    return null
-  }
-  return resolveRuntimePath(path, path)
 }
 
 function trimPathSeparators(path: string): string {
@@ -245,45 +236,6 @@ export function resolveNestedRepoSelection(args: {
       // callers must not smuggle unrelated paths into the group hierarchy.
       rejectedPaths.push(repoPath)
     }
-  }
-
-  return { selectedPaths, rejectedPaths }
-}
-
-export function resolveNestedRepoImportPaths(args: {
-  parentPath: string
-  projectPaths: readonly string[]
-}): ResolvedNestedRepoSelection {
-  const selectedPaths: string[] = []
-  const rejectedPaths: string[] = []
-  const seen = new Set<string>()
-  const canonicalParentPath = canonicalizeImportPath(args.parentPath)
-
-  if (!canonicalParentPath) {
-    return { selectedPaths, rejectedPaths: [...args.projectPaths] }
-  }
-  const normalizedParentPath = normalizeRuntimePathForComparison(canonicalParentPath)
-
-  for (const repoPath of args.projectPaths) {
-    const canonicalRepoPath = canonicalizeImportPath(repoPath)
-    const normalizedPath = canonicalRepoPath
-      ? normalizeRuntimePathForComparison(canonicalRepoPath)
-      : normalizeRuntimePathForComparison(repoPath)
-    if (seen.has(normalizedPath)) {
-      continue
-    }
-    seen.add(normalizedPath)
-    if (
-      !canonicalRepoPath ||
-      normalizedPath === normalizedParentPath ||
-      !isPathInsideOrEqual(canonicalParentPath, canonicalRepoPath)
-    ) {
-      // Why: stopped scans import a caller-provided partial selection, so the
-      // parent boundary still blocks dot-segment escapes without rescanning.
-      rejectedPaths.push(repoPath)
-      continue
-    }
-    selectedPaths.push(canonicalRepoPath)
   }
 
   return { selectedPaths, rejectedPaths }

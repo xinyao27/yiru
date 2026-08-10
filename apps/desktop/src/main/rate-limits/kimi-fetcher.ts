@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { net } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 import type {
   ProviderRateLimits,
   RateLimitWindow,
@@ -264,7 +264,7 @@ export async function fetchKimiRateLimits(): Promise<ProviderRateLimits> {
   }
 
   try {
-    const res = await net.fetch(`${KIMI_BASE_URL.replace(/\/$/, '')}/usages`, {
+    const res = await fetchHttp(`${KIMI_BASE_URL.replace(/\/$/, '')}/usages`, {
       // Why: identical to the CLI's fetchManagedUsage — bearer token + Accept.
       // No extra User-Agent: the usages endpoint authenticates by token only.
       headers: { Authorization: `Bearer ${creds.access_token}`, Accept: 'application/json' },

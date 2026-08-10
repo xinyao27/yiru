@@ -41,11 +41,10 @@ import {
 } from '~/transport/client-context-connection-metrics'
 import { classifyConnection, type ConnectionVerdict } from '~/transport/connection-health'
 import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
-import type { RepoSummary } from '~/transport/host-rpc-types'
 import { useHostStatusGates } from '~/transport/host-status-gates'
 import { loadHosts, updateLastConnected } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
-import type { RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import { useWorktreeResync } from '~/transport/use-worktree-resync'
 import { NewWorkspaceModalController } from '~/workspace-create/modal-controller'
 import { WorkspaceDetailPlaceholder } from '~/workspace/detail-placeholder'
@@ -249,7 +248,7 @@ export function HostScreen({
         filterRepoIds: next.filterRepoIds,
         collapsedGroups: next.collapsedGroups
       }
-      void client.sendRequest('ui.set', payload).catch(() => {
+      void callRuntimeOrpc(client, (runtime) => runtime.ui.set, payload).catch(() => {
         // Best-effort: view settings are a convenience preference.
       })
     },
@@ -309,11 +308,11 @@ export function HostScreen({
     const requestClient = client
     const requestHostId = hostId
     try {
-      const response = await requestClient.sendRequest('ui.get')
-      if (clientRef.current !== requestClient || hostId !== requestHostId || !response.ok) {
+      const result = await callRuntimeOrpc(requestClient, (runtime) => runtime.ui.get, undefined)
+      if (clientRef.current !== requestClient || hostId !== requestHostId) {
         return
       }
-      const ui = ((response as RpcSuccess).result as { ui?: WorkspaceViewSettings }).ui
+      const ui = result.ui
       if (!ui) {
         return
       }
@@ -390,11 +389,14 @@ export function HostScreen({
       const requestClient = client,
         requestHostId = hostId
       try {
-        const repoResponse = await requestClient.sendRequest('repo.list')
-        if (clientRef.current !== requestClient || hostId !== requestHostId || !repoResponse.ok) {
+        const repoResult = await callRuntimeOrpc(
+          requestClient,
+          (runtime) => runtime.repo.list,
+          undefined
+        )
+        if (clientRef.current !== requestClient || hostId !== requestHostId) {
           return
         }
-        const repoResult = (repoResponse as RpcSuccess).result as { repos: RepoSummary[] }
         repoMetadataFetchedAtRef.current = Date.now()
         setCachedRepos(requestHostId, repoResult.repos)
         setRepoColorsByName(
@@ -442,77 +444,76 @@ export function HostScreen({
       try {
         // Why: worktree.ps defaults to 200 and silently truncates; match the
         // desktop's high cap so large hosts don't drop workspaces on mobile.
-        const response = await requestClient.sendRequest('worktree.ps', { limit: 10000 })
+        const result = await callRuntimeOrpc(requestClient, (runtime) => runtime.worktree.ps, {
+          limit: 10000
+        })
         if (clientRef.current !== requestClient || hostId !== requestHostId) {
           return
         }
         if (!options.allowDuringModal && newWorktreeModalVisibleRef.current) {
           return
         }
-        if (response.ok) {
-          const result = (response as RpcSuccess).result as { worktrees: Worktree[] }
-          const worktreeSnapshot = applyPendingPinChanges(
-            result.worktrees,
-            pendingPinChangesRef.current
-          )
-          // Why: large hosts can return identical worktree.ps snapshots every
-          // poll. Preserving the existing array keeps SectionList/sort rebuilds
-          // off the JS tap path unless something actually changed.
-          setWorktrees((current) =>
-            areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
-          )
-          setLastKnownWorktrees((current) =>
-            areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
-          )
-          setWorktreesLoaded(true)
-          // Why (#8498): the host detail screen seeds its list from the
-          // home-written cache, so a partial home fetch could poison it until a
-          // focus poll corrected it. Write the confirmed snapshot back through
-          // the same cache so a reconnect refetch (or a remount) can't serve a
-          // stale worktree list.
-          if (hostId) {
-            setCachedWorktrees(hostId, worktreeSnapshot)
-          }
-          // Drop the optimistic active override once the host confirms it (the
-          // activate RPC has landed and worktree.ps now reports it active), so we
-          // stop overriding and respect any later desktop-driven change.
-          setOptimisticActiveWorktreeId((pending) =>
-            pending && worktreeSnapshot.some((w) => w.worktreeId === pending && w.isActive)
-              ? null
-              : pending
-          )
-
-          // Clear optimistic sleep overrides once the server confirms the
-          // worktree is actually inactive (liveTerminalCount dropped to 0).
-          setSleptIds((prev) => {
-            if (prev.size === 0) {
-              return prev
-            }
-            const still = new Set<string>()
-            for (const id of prev) {
-              const wt = worktreeSnapshot.find((w) => w.worktreeId === id)
-              if (wt && wt.liveTerminalCount > 0) {
-                still.add(id)
-              }
-            }
-            return still.size === prev.size ? prev : still
-          })
-
-          // Sync local pin state from server so desktop-initiated pins/unpins
-          // are reflected without relying on stale AsyncStorage.
-          const serverPinned = new Set(
-            worktreeSnapshot.filter((w) => w.isPinned).map((w) => w.worktreeId)
-          )
-          setPinnedIds((prev) => {
-            if (serverPinned.size === prev.size && [...serverPinned].every((id) => prev.has(id))) {
-              return prev
-            }
-            if (hostId) {
-              void savePinnedIds(hostId, serverPinned)
-            }
-            return serverPinned
-          })
+        const worktreeSnapshot = applyPendingPinChanges(
+          result.worktrees,
+          pendingPinChangesRef.current
+        )
+        // Why: large hosts can return identical worktree.ps snapshots every
+        // poll. Preserving the existing array keeps SectionList/sort rebuilds
+        // off the JS tap path unless something actually changed.
+        setWorktrees((current) =>
+          areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
+        )
+        setLastKnownWorktrees((current) =>
+          areWorktreeListsEqual(current, worktreeSnapshot) ? current : worktreeSnapshot
+        )
+        setWorktreesLoaded(true)
+        // Why (#8498): the host detail screen seeds its list from the
+        // home-written cache, so a partial home fetch could poison it until a
+        // focus poll corrected it. Write the confirmed snapshot back through
+        // the same cache so a reconnect refetch (or a remount) can't serve a
+        // stale worktree list.
+        if (hostId) {
+          setCachedWorktrees(hostId, worktreeSnapshot)
         }
+        // Drop the optimistic active override once the host confirms it (the
+        // activate RPC has landed and worktree.ps now reports it active), so we
+        // stop overriding and respect any later desktop-driven change.
+        setOptimisticActiveWorktreeId((pending) =>
+          pending && worktreeSnapshot.some((w) => w.worktreeId === pending && w.isActive)
+            ? null
+            : pending
+        )
+
+        // Clear optimistic sleep overrides once the server confirms the
+        // worktree is actually inactive (liveTerminalCount dropped to 0).
+        setSleptIds((prev) => {
+          if (prev.size === 0) {
+            return prev
+          }
+          const still = new Set<string>()
+          for (const id of prev) {
+            const wt = worktreeSnapshot.find((w) => w.worktreeId === id)
+            if (wt && wt.liveTerminalCount > 0) {
+              still.add(id)
+            }
+          }
+          return still.size === prev.size ? prev : still
+        })
+
+        // Sync local pin state from server so desktop-initiated pins/unpins
+        // are reflected without relying on stale AsyncStorage.
+        const serverPinned = new Set(
+          worktreeSnapshot.filter((w) => w.isPinned).map((w) => w.worktreeId)
+        )
+        setPinnedIds((prev) => {
+          if (serverPinned.size === prev.size && [...serverPinned].every((id) => prev.has(id))) {
+            return prev
+          }
+          if (hostId) {
+            void savePinnedIds(hostId, serverPinned)
+          }
+          return serverPinned
+        })
       } catch {
         // Will retry on reconnect
       } finally {
@@ -625,11 +626,10 @@ export function HostScreen({
             pendingPinChangesRef.current.delete(worktreeId)
           }
         }
-        client
-          .sendRequest('worktree.set', {
-            worktree: `id:${worktreeId}`,
-            isPinned: newPinned
-          })
+        callRuntimeOrpc(client, (runtime) => runtime.worktree.set, {
+          worktree: `id:${worktreeId}`,
+          isPinned: newPinned
+        })
           .then(clearPending)
           .catch(clearPending)
       }
@@ -655,15 +655,10 @@ export function HostScreen({
         list.some((w) => w.worktreeId === item.worktreeId) ? list : [...list, item]
 
       try {
-        const response = await client.sendRequest('worktree.rm', {
+        await callRuntimeOrpc(client, (runtime) => runtime.worktree.rm, {
           worktree: `id:${item.worktreeId}`,
           force: true
         })
-        if (!response.ok) {
-          setWorktrees(restoreToList)
-          setLastKnownWorktrees(restoreToList)
-          return
-        }
         void fetchWorktrees()
       } catch {
         setWorktrees(restoreToList)
@@ -736,12 +731,10 @@ export function HostScreen({
       if (client && connState === 'connected') {
         // Why: opening a mobile session should hydrate host-owned tabs without
         // pulling other paired clients, especially desktop, into this worktree.
-        void client
-          .sendRequest('worktree.activate', {
-            worktree: `id:${item.worktreeId}`,
-            notifyClients: false
-          })
-          .catch(() => null)
+        void callRuntimeOrpc(client, (runtime) => runtime.worktree.activate, {
+          worktree: `id:${item.worktreeId}`,
+          notifyClients: false
+        }).catch(() => null)
       }
       const target = `/h/${hostId}/session/${encodeURIComponent(item.worktreeId)}?name=${encodeURIComponent(item.displayName || item.repo)}`
       navigateFromHostList(target)
@@ -997,9 +990,9 @@ export function HostScreen({
         onSleep={(target) => {
           if (client) {
             setSleptIds((previous) => new Set(previous).add(target.worktreeId))
-            void client
-              .sendRequest('worktree.sleep', { worktree: `id:${target.worktreeId}` })
-              .catch(() => null)
+            void callRuntimeOrpc(client, (runtime) => runtime.worktree.sleep, {
+              worktree: `id:${target.worktreeId}`
+            }).catch(() => null)
           }
         }}
         onTogglePin={(target) => togglePin(target.worktreeId)}

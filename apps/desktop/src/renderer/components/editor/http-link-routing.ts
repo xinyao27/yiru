@@ -1,3 +1,5 @@
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   parseLoopbackUrlWithPort,
@@ -101,11 +103,11 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
 
   const localhostRoute = state ? localhostLabelRouteForHttpLink(url, state, sourceOwner) : null
   if (!localhostRoute) {
-    void window.api.shell.openUrl(url)
+    void shellClient.shell.openUrl(url)
     return
   }
   void openLabeledLocalhostLink(url, localhostRoute, (labeledUrl) => {
-    void window.api.shell.openUrl(labeledUrl)
+    void shellClient.shell.openUrl(labeledUrl)
   })
 }
 
@@ -137,7 +139,7 @@ export async function resolveLocalhostHttpLinkDisplayUrl(url: string): Promise<s
     return null
   }
   try {
-    const result = await window.api.localhostWorktreeLabels.register(localhostRoute)
+    const result = await rendererHostClient.localhostWorktreeLabels.register(localhostRoute)
     return result.url
   } catch {
     return null
@@ -150,7 +152,7 @@ async function openLabeledLocalhostLink(
   open: (url: string) => void
 ): Promise<void> {
   try {
-    const result = await window.api.localhostWorktreeLabels.register(route)
+    const result = await rendererHostClient.localhostWorktreeLabels.register(route)
     open(result.url)
   } catch {
     open(fallbackUrl)

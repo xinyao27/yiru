@@ -12,6 +12,8 @@ import {
   ORCHESTRATION_SKILL_NAME
 } from '~renderer/lib/agent-feature-install-commands'
 import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import { hasFeatureInteraction } from '~shared/feature-interactions'
 import { isGitRepoKind } from '~shared/repo-kind'
@@ -135,7 +137,11 @@ export function useSetupGuideProgress(
   }, [orderedGitRepos, settings, setupScriptProbeSignature, shouldRefreshCoreState])
 
   const readComputerUsePermissions = useCallback(async (isStale: () => boolean): Promise<void> => {
-    const status = await window.api.computerUsePermissions.getStatus().catch(() => null)
+    const status = await callRuntimeOrpc(
+      getActiveRuntimeTarget(useAppStore.getState().settings),
+      (client) => client.computer.permissionsStatus,
+      {}
+    ).catch(() => null)
     if (isStale()) {
       return
     }

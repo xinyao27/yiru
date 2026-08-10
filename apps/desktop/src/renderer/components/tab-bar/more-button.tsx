@@ -118,7 +118,7 @@ export function TabBarMoreButton({
                   }
                   const Icon = panelTitlebar.resolveItemIcon(
                     item,
-                    panelTitlebar.activeTabContentType === item.id
+                    panelTitlebar.activePanelId === item.id
                   )
                   const shortcut = item.kind === 'panel' ? panelTitlebar.shortcutFor(item.id) : null
                   return (
@@ -134,7 +134,7 @@ export function TabBarMoreButton({
                       className={cn(
                         'cursor-grab active:cursor-grabbing',
                         item.kind === 'panel' &&
-                          panelTitlebar.activeTabContentType === item.id &&
+                          panelTitlebar.activePanelId === item.id &&
                           'text-primary'
                       )}
                     >

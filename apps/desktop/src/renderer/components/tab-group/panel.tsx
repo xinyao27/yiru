@@ -1,24 +1,26 @@
 import { useDroppable } from '@dnd-kit/core'
+import { X } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
+import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
-import { TabBarMoreButton } from '../tab-bar/more-button'
+import { TabBarOpenInMenuButton } from '../tab-bar/open-in-menu-button'
+import { TabBarQuickCommandsButton } from '../tab-bar/quick-commands-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'
-import { WorkspacePanelTitlebarActions } from '../workspace-panel/titlebar-actions'
-import { useWorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
+import { WorkspaceSidebarChromeSpacer } from '../workspace-panel/sidebar-chrome'
 import { tabGroupBodyAnchorName } from './body-anchor'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-drag-split'
 import { useTabGroupWorkspaceModel } from './use-tab-group-workspace-model'
 import { resolveGroupTabFromVisibleId } from './visible-id'
 import { WorkspacePaneFrame } from './workspace-pane-frame'
-import { WorkspacePanelTabContent } from './workspace-panel-tab-content'
 
 const EditorPanel = lazy(() => import('../editor/panel'))
+const GitGraphView = lazy(() => import('../workspace-panel/git-graph/view'))
 
 export default function TabGroupPanel({
   groupId,
@@ -53,10 +55,7 @@ export default function TabGroupPanel({
 }): React.JSX.Element {
   const model = useTabGroupWorkspaceModel({ groupId, worktreeId })
   const { activeTab, browserItems, commands, editorItems, tabBarOrder, terminalTabs } = model
-  const activeWorkspacePanelType =
-    activeTab && isWorkspacePanelTabContentType(activeTab.contentType)
-      ? activeTab.contentType
-      : null
+  const activeGitGraphTabId = activeTab?.contentType === 'git-graph' ? activeTab.id : null
   const { setNodeRef: setBodyDropRef } = useDroppable({
     id: getTabPaneBodyDroppableId(groupId),
     data: {
@@ -133,13 +132,13 @@ export default function TabGroupPanel({
         activeTab.contentType === 'terminal' ||
         activeTab?.contentType === 'browser' ||
         activeTab?.contentType === 'simulator' ||
-        isWorkspacePanelTabContentType(activeTab.contentType)
+        activeTab?.contentType === 'git-graph'
           ? null
           : activeTab.id
       }
       activeBrowserTabId={activeTab?.contentType === 'browser' ? activeTab.entityId : null}
       activeSimulatorTabId={activeTab?.contentType === 'simulator' ? activeTab.id : null}
-      activeWorkspacePanelTabId={activeWorkspacePanelType ? activeTab?.id : null}
+      activeGitGraphTabId={activeGitGraphTabId}
       activeTabType={
         activeTab?.contentType === 'terminal'
           ? 'terminal'
@@ -152,7 +151,7 @@ export default function TabGroupPanel({
       onActivateFile={commands.activateEditor}
       onCloseFile={commands.closeItem}
       onActivateBrowserTab={commands.activateBrowser}
-      onActivateWorkspacePanelTab={commands.activateWorkspacePanel}
+      onActivateGitGraphTab={commands.activateGitGraph}
       onCloseBrowserTab={(browserTabId) => {
         const item = model.groupTabs.find(
           (candidate) => candidate.entityId === browserTabId && candidate.contentType === 'browser'
@@ -188,14 +187,11 @@ export default function TabGroupPanel({
     />
   )
 
-  const panelTitlebar = useWorkspacePanelTitlebarModel(worktreeId, groupId)
-
-  // Why: focused-only — workspace actions and Close split pane stay with the
-  // active pane so unfocused strips stay compact. One ButtonGroup owns every
-  // trailing control (panel pins, Open in, More) so they share a single seam strip.
+  // Why: pane-specific actions stay with the focused split, while the collapsed
+  // workspace sidebar chrome is anchored once to the top-right split below.
   const focusedActionChromeClassName = cn(
-    'h-full shrink-0 overflow-hidden transition-[opacity] duration-150',
-    isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
+    'shrink-0 overflow-hidden transition-[opacity] duration-150',
+    isFocused ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
   )
   // Why: the split wrapper already paints edge-touching seams; duplicating them
   // inside a pane makes the sidebar boundary look two pixels wide.
@@ -215,23 +211,55 @@ export default function TabGroupPanel({
       stripId={groupId}
       tabBar={tabBar}
       trailingActions={
-        isFocused ? (
-          <ButtonGroup
-            className={focusedActionChromeClassName}
-            data-workspace-titlebar-strip={worktreeId}
-          >
-            {panelTitlebar ? <WorkspacePanelTitlebarActions model={panelTitlebar} /> : null}
-            <TabBarMoreButton
-              worktreeId={worktreeId}
-              groupId={groupId}
-              onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
-              panelTitlebar={panelTitlebar}
-            />
-          </ButtonGroup>
-        ) : (
-          <div className={focusedActionChromeClassName} />
-        )
+        <>
+          {isFocused ? (
+            <ButtonGroup presentation="titlebar" className={focusedActionChromeClassName}>
+              <TabBarOpenInMenuButton worktreeId={worktreeId} />
+              <TabBarQuickCommandsButton
+                worktreeId={worktreeId}
+                groupId={groupId}
+                presentation="titlebar-icon"
+                mergeNextSeam={!hasSplitGroups}
+              />
+              {hasSplitGroups ? (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="titlebar-segment"
+                        size="icon-titlebar-wide"
+                        seam="merge-next"
+                        className="[-webkit-app-region:no-drag]"
+                        aria-label={translate(
+                          'auto.components.tab.group.TabGroupPanel.closePaneColumn',
+                          'Close split pane'
+                        )}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          commands.closeGroup()
+                        }}
+                      >
+                        <X />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent side="bottom" sideOffset={6}>
+                    {translate(
+                      'auto.components.tab.group.TabGroupPanel.closePaneColumn',
+                      'Close split pane'
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
+            </ButtonGroup>
+          ) : (
+            <div className={cn('h-full', focusedActionChromeClassName)} />
+          )}
+          {reserveWindowControlsSpace ? <WorkspaceSidebarChromeSpacer /> : null}
+        </>
       }
+      trailingActionsConnected
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
       reserveWindowControlsSpace={reserveWindowControlsSpace}
       rootClassName={splitFrameClassName}
@@ -258,7 +286,7 @@ export default function TabGroupPanel({
         activeTab.contentType !== 'terminal' &&
         activeTab.contentType !== 'browser' &&
         activeTab.contentType !== 'simulator' &&
-        !isWorkspacePanelTabContentType(activeTab.contentType) && (
+        activeTab.contentType !== 'git-graph' && (
           <div className="absolute inset-0 flex min-h-0 min-w-0">
             {/* Why: split groups render editor content inside a plain relative pane body
                 instead of the legacy flex column in Terminal.tsx. */}
@@ -277,15 +305,12 @@ export default function TabGroupPanel({
           </div>
         )}
 
-      {activeWorkspacePanelType && activeTab ? (
-        <WorkspacePanelTabContent
-          panel={activeWorkspacePanelType}
-          panelTabId={activeTab.id}
-          worktreeId={worktreeId}
-          groupId={groupId}
-          onNewTerminalTab={commands.newTerminalTab}
-          onNewBrowserTab={commands.newBrowserTab}
-        />
+      {activeTab?.contentType === 'git-graph' ? (
+        <div className="absolute inset-0 flex min-h-0 min-w-0">
+          <Suspense fallback={null}>
+            <GitGraphView worktreeId={worktreeId} tabId={activeTab.id} />
+          </Suspense>
+        </div>
       ) : null}
 
       {/* Why: terminal/browser/simulator panes are rendered at the worktree level by

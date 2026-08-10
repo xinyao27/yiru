@@ -42,7 +42,6 @@ export function buildWorktreeChecksReviewIndex({
       repo.id,
       branch,
       settings,
-      repo.connectionId,
       repo.executionHostId,
       true
     )
@@ -51,7 +50,6 @@ export function buildWorktreeChecksReviewIndex({
       branch,
       settings,
       repo.id,
-      repo.connectionId,
       repo.executionHostId,
       true
     )

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
 
 import { rankSuggestions } from './autocomplete'
 
@@ -90,16 +91,18 @@ export function useMobileNativeChatFileSearch(args: {
         const loadLegacyPaths = async (): Promise<void> => {
           if (!legacyPathsRef.current) {
             if (!legacyLoadRef.current) {
-              const request = client
-                .sendRequest('files.list', { worktree: `id:${worktreeId}` })
-                .then((response) => {
-                  if (!response.ok || generationRef.current !== generation) {
+              const request = callRuntimeOrpc(client, (runtime) => runtime.files.list, {
+                worktree: `id:${worktreeId}`
+              })
+                .then((result) => {
+                  if (generationRef.current !== generation) {
                     return null
                   }
-                  const paths = extractPaths(response.result)
+                  const paths = extractPaths(result)
                   legacyPathsRef.current = paths
                   return paths
                 })
+                .catch(() => null)
                 .finally(() => {
                   if (legacyLoadRef.current === request && !legacyPathsRef.current) {
                     legacyLoadRef.current = null
@@ -124,19 +127,21 @@ export function useMobileNativeChatFileSearch(args: {
             await loadLegacyPaths()
             return
           }
-          const response = await client.sendRequest('files.searchPaths', {
-            worktree: `id:${worktreeId}`,
-            query: normalizedQuery,
-            limit: FILE_SEARCH_RESULT_LIMIT
-          })
-          if (response.ok) {
+          try {
+            const result = await callRuntimeOrpc(client, (runtime) => runtime.files.searchPaths, {
+              worktree: `id:${worktreeId}`,
+              query: normalizedQuery,
+              limit: FILE_SEARCH_RESULT_LIMIT
+            })
             searchSupportedRef.current = true
-            applyPaths(extractPaths(response.result))
-            return
-          }
-          if (response.error.code === 'method_not_found') {
-            searchSupportedRef.current = false
-            await loadLegacyPaths()
+            applyPaths(extractPaths(result))
+          } catch (error) {
+            // Why: hosts predating the indexed search fall back to the full
+            // inventory read; any other failure leaves suggestions unchanged.
+            if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
+              searchSupportedRef.current = false
+              await loadLegacyPaths()
+            }
           }
         })().catch(() => {})
       }, FILE_SEARCH_DEBOUNCE_MS)

@@ -17,7 +17,7 @@ type RemotePrerequisiteResult =
   | { ok: false; error: string; remoteOperation: SourceControlRemoteOpKind }
 
 export async function applyMobileHostedReviewRemotePrerequisite(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   prefill: MobilePrPrefill,
   input: RemotePrerequisiteInput
@@ -34,8 +34,7 @@ export async function applyMobileHostedReviewRemotePrerequisite(
       input.onProgress?.('publishing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
-        'git.push',
-        { worktree: `id:${worktreeId}`, publish: true },
+        { kind: 'push', input: { worktree: `id:${worktreeId}`, publish: true } },
         'Failed to publish branch'
       )
       return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'publish' }
@@ -44,8 +43,7 @@ export async function applyMobileHostedReviewRemotePrerequisite(
       input.onProgress?.('pushing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
-        'git.push',
-        { worktree: `id:${worktreeId}` },
+        { kind: 'push', input: { worktree: `id:${worktreeId}` } },
         'Failed to push commits'
       )
       return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'push' }
@@ -54,8 +52,7 @@ export async function applyMobileHostedReviewRemotePrerequisite(
       input.onProgress?.('force_pushing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
-        'git.push',
-        { worktree: `id:${worktreeId}`, forceWithLease: true },
+        { kind: 'push', input: { worktree: `id:${worktreeId}`, forceWithLease: true } },
         'Failed to force push with lease'
       )
       return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'force_push' }
@@ -64,8 +61,7 @@ export async function applyMobileHostedReviewRemotePrerequisite(
       input.onProgress?.('fast_forwarding')
       const result = await sendMobileHostedReviewGitMutation(
         client,
-        'git.fastForward',
-        { worktree: `id:${worktreeId}` },
+        { kind: 'fastForward', input: { worktree: `id:${worktreeId}` } },
         'Failed to update branch'
       )
       return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'fast_forward' }

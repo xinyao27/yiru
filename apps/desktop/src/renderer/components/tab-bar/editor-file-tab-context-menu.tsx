@@ -18,6 +18,7 @@ import {
 } from '~renderer/components/ui/context-menu'
 import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import type { OpenFile } from '../editor/state'
@@ -174,7 +175,7 @@ export function EditorFileTabContextMenu({
       ) : null}
       <ContextMenuItem
         onClick={() => {
-          void window.api.ui.writeClipboardText(file.filePath)
+          void shellClient.ui.writeClipboardText(file.filePath)
         }}
       >
         <Copy className="size-3.5" />
@@ -182,7 +183,7 @@ export function EditorFileTabContextMenu({
       </ContextMenuItem>
       <ContextMenuItem
         onClick={() => {
-          void window.api.ui.writeClipboardText(file.relativePath)
+          void shellClient.ui.writeClipboardText(file.relativePath)
         }}
       >
         <Copy className="size-3.5" />
@@ -204,7 +205,7 @@ export function EditorFileTabContextMenu({
             showLocalPathOpenBlockedToast()
             return
           }
-          window.api.shell.openPath(file.filePath)
+          shellClient.shell.openPath(file.filePath)
         }}
       >
         <ExternalLink className="size-3.5" />

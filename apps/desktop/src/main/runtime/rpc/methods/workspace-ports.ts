@@ -1,37 +1,29 @@
-import { z } from 'zod'
-import {
-  OptionalString,
-  requiredNumber
-} from '~shared/runtime-method-contracts/runtime-method-params'
+import type {
+  RuntimeWorkspacePortKillResult,
+  RuntimeWorkspacePortScanResult,
+  WorkspacePortKillInput,
+  WorkspacePortScanInput
+} from '@yiru/runtime-protocol/contract'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-const WorkspacePortScanParams = z.object({
-  repoId: OptionalString
-})
+// Why: Phase 6 D-stage — direct-wired only (orpc/router-direct/workspace.ts
+// calls these plain handlers via `wireRuntimeMethod`). The legacy dual
+// registration this domain used to need is gone: it existed only because the
+// web client's `isWebRuntimeClient()` branch fell to a bare string method
+// name on the legacy dispatcher, and that branch now dispatches through a
+// negotiated oRPC peer instead (`createWebEnvironmentRuntimeOrpcClient`,
+// docs/runtime-orpc-migration.md Phase 6 D-stage 切片 63/86).
+export function scanRuntimeWorkspacePorts(
+  params: WorkspacePortScanInput,
+  { runtime }: RpcContext
+): Promise<RuntimeWorkspacePortScanResult> {
+  return runtime.scanWorkspacePorts(params.repoId)
+}
 
-const WorkspacePortKillParams = z.object({
-  repoId: OptionalString,
-  pid: requiredNumber('Missing process id'),
-  port: requiredNumber('Missing port')
-})
-
-export const WORKSPACE_PORT_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'workspacePorts.scan',
-    params: WorkspacePortScanParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.scanWorkspacePorts(params.repoId)
-  }),
-  defineMethod({
-    name: 'workspacePorts.kill',
-    params: WorkspacePortKillParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.killWorkspacePort({
-        repoId: params.repoId,
-        pid: params.pid,
-        port: params.port
-      })
-  })
-]
+export function killRuntimeWorkspacePort(
+  params: WorkspacePortKillInput,
+  { runtime }: RpcContext
+): Promise<RuntimeWorkspacePortKillResult> {
+  return runtime.killWorkspacePort(params)
+}

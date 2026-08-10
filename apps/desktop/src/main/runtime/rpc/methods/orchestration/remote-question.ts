@@ -1,11 +1,10 @@
+import type { OrchestrationAskInput, OrchestrationAskResult } from '@yiru/runtime-protocol/contract'
 import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import { clampOrchestrationAskTimeoutMs } from '~shared/orchestration-ask-timeout'
 
-import type { AskInput } from './question-params'
-
 export async function askRemoteRunHome(args: {
-  params: AskInput
+  params: OrchestrationAskInput
   runtime: YiruRuntimeService
   signal?: AbortSignal
   orchestrationCapability?: string
@@ -14,7 +13,7 @@ export async function askRemoteRunHome(args: {
   paneKey: string
   dispatchId: string
   taskId: string
-}): Promise<unknown> {
+}): Promise<OrchestrationAskResult> {
   const db = args.runtime.getOrchestrationDb()
   const timeoutMs = clampOrchestrationAskTimeoutMs(args.params.timeoutMs)
   if (

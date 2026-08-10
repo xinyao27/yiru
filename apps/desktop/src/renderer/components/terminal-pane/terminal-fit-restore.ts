@@ -1,4 +1,5 @@
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
@@ -29,13 +30,13 @@ export async function restoreTerminalFitToDesktop(
     getRemoteRuntimePtyEnvironmentId(ptyId) ?? settings?.activeRuntimeEnvironmentId ?? null
   const result =
     remoteHandle && environmentId
-      ? await callRuntimeRpc<{ restored: boolean }>(
+      ? await callRuntimeOrpc(
           { kind: 'environment', environmentId },
-          'terminal.restoreFit',
+          (client) => client.terminal.restoreFit,
           { terminal: remoteHandle },
           { timeoutMs: 15_000 }
         ).catch(restoreFailedResult)
-      : await window.api.runtime.restoreTerminalFit(ptyId).catch(restoreFailedResult)
+      : await rendererHostClient.runtime.restoreTerminalFit(ptyId).catch(restoreFailedResult)
 
   return result.restored
 }

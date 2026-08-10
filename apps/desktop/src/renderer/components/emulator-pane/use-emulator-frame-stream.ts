@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 
 const FIRST_FRAME_TIMEOUT_MS = 6_000
 
@@ -35,7 +36,7 @@ export function useEmulatorFrameStream(
   const currentFrameUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
-    const emulatorApi = window.api?.emulator
+    const emulatorApi = rendererHostClient?.emulator
     if (!enabled || !streamUrl || !emulatorApi?.startFrameStream) {
       // Why: tag with the real streamIdentity (not a literal null) so the reset
       // stays prop-derived; error/frameUrl are null either way, so the value

@@ -20,21 +20,11 @@ export function registerAgentTrustHandlers(): void {
   ipcMain.removeHandler('agentTrust:markTrusted')
   ipcMain.handle(
     'agentTrust:markTrusted',
-    async (
-      _event,
-      args: { preset: AgentTrustPreset; workspacePath: string; connectionId?: string }
-    ): Promise<void> => {
+    async (_event, args: { preset: AgentTrustPreset; workspacePath: string }): Promise<void> => {
       if (!args || typeof args.workspacePath !== 'string' || !args.workspacePath) {
         return
       }
       try {
-        // Why: a connectionId means the agent reads its trust artifacts from a
-        // remote user's home. Writing this machine's artifacts for a remote path
-        // would trust the wrong folder, so skip rather than mislabel.
-        const connectionId = typeof args.connectionId === 'string' ? args.connectionId.trim() : ''
-        if (connectionId) {
-          return
-        }
         if (args.preset === 'cursor') {
           markCursorWorkspaceTrusted(args.workspacePath)
         } else if (args.preset === 'copilot') {

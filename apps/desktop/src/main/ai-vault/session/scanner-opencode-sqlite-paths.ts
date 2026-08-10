@@ -44,13 +44,3 @@ export function splitOpenCodeSqliteCandidate(
   }
   return { dbPath, sessionId }
 }
-
-/**
- * Type guard: returns `true` if the path is a valid synthetic OpenCode SQLite
- * candidate path (i.e. `splitOpenCodeSqliteCandidate` would return non-null).
- * @param candidatePath - The path to test.
- * @returns `true` if the path is a synthetic SQLite candidate, `false` otherwise.
- */
-export function looksLikeOpenCodeSqliteCandidate(candidatePath: string): boolean {
-  return splitOpenCodeSqliteCandidate(candidatePath) !== null
-}

@@ -1,37 +1,16 @@
 import type { ElectronAPI } from '@electron-toolkit/preload'
+import type {
+  ShellServicesNotificationsDismissOutput,
+  ShellServicesNotificationsDisplayInput,
+  ShellServicesNotificationsDisplayOutput
+} from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-import type {
-  AgentStatusIpcPayload,
-  MigrationUnsupportedPtyEntry
-} from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
-import type {
-  CreateHostedReviewArgs,
-  CreateHostedReviewResult,
-  HostedReviewCreationEligibility,
-  HostedReviewCreationEligibilityArgs,
-  HostedReviewForBranchArgs,
-  HostedReviewInfo,
-  HostedReviewProvider
-} from '@yiru/workbench-model/review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { AgentHookInstallStatus } from '~shared/agent/hook-types'
-import type { AgentInterruptInferenceRequest } from '~shared/agent/interrupt-intent'
 import type { AppIdentity } from '~shared/app-identity'
-import type { BrowserSetAnnotationViewportBridgeArgs } from '~shared/browser/annotation-viewport-bridge'
-import type {
-  BrowserSetGrabModeArgs,
-  BrowserSetGrabModeResult,
-  BrowserAwaitGrabSelectionArgs,
-  BrowserGrabResult,
-  BrowserCancelGrabArgs,
-  BrowserCaptureSelectionScreenshotArgs,
-  BrowserCaptureSelectionScreenshotResult,
-  BrowserExtractHoverArgs,
-  BrowserExtractHoverResult
-} from '~shared/browser/grab-types'
 import type {
   BrowserContextMenuDismissedEvent,
   BrowserContextMenuRequestedEvent,
@@ -41,36 +20,11 @@ import type {
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
 } from '~shared/browser/guest-events'
-import type { CliInstallStatus } from '~shared/cli-install-types'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
 } from '~shared/commit-message/agent-spec'
-import type {
-  CoworkingDecideHostAccessArgs,
-  CoworkingDecideControlArgs,
-  CoworkingListHostDevicesResult,
-  CoworkingRequestHostAccessArgs,
-  CoworkingRequestHostAccessResult,
-  CoworkingRequestControlArgs,
-  CoworkingRequesterInvokeArgs,
-  CoworkingRequesterSubscriptionArgs,
-  CoworkingRequesterSubscriptionEvent,
-  CoworkingRequesterSubscriptionStartResult,
-  CoworkingRequesterSubscriptionStopArgs,
-  CoworkingRequesterSubscriptionStopResult,
-  CoworkingRevokeControlArgs,
-  CoworkingRevokeHostDeviceArgs,
-  CoworkingRevokeHostDeviceResult,
-  CoworkingSetProjectVisibilityArgs,
-  CoworkingSetWorktreeVisibilityArgs,
-  CoworkingSharingSnapshot
-} from '~shared/coworking/ipc-contract'
-import type {
-  CoworkingWindowsFirewallRepairResult,
-  CoworkingWindowsFirewallStatus
-} from '~shared/coworking/windows-firewall-contract'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
@@ -80,17 +34,7 @@ import type {
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
 } from '~shared/crash-reporting'
-import type {
-  HostQualifiedDetectedWorktreeResult,
-  ListDetectedWorktreesArgs,
-  ProviderRequestId
-} from '~shared/detected-worktree-provider-contract'
-import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '~shared/feature-interactions'
-import type {
-  FolderWorkspacePathStatus,
-  FolderWorkspacePathStatusRequest
-} from '~shared/folder-workspace-path-status'
 import type { FridaySession } from '~shared/friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
 import type {
@@ -104,20 +48,6 @@ import type {
   GitResetToCommitResult,
   GitRevertResult
 } from '~shared/git/write-op-results'
-import type {
-  HostLineageSnapshot,
-  ListDesktopLineageForHostArgs
-} from '~shared/host-lineage-contract'
-import type {
-  HostRepoCatalogSnapshot,
-  ListReposForExecutionHostArgs
-} from '~shared/host-repo-catalog-contract'
-import type {
-  LocalLogTailChangedPayload,
-  LocalLogTailReadArgs,
-  LocalLogTailReadResult,
-  LocalLogTailWatchArgs
-} from '~shared/local-log-tail-types'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
@@ -134,59 +64,28 @@ import type { RichMarkdownContextMenuCommandPayload } from '~shared/rich-markdow
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type {
   RuntimeBrowserDriverState,
-  RuntimeMobileSessionTabMove,
   RuntimeStatus,
   RuntimeSyncWindowGraphResult,
   RuntimeSyncWindowGraph,
-  RuntimeTerminalCreateRequestPayload,
-  RuntimeTerminalDriverState,
-  RuntimeTerminalPresentation
+  RuntimeTerminalDriverState
 } from '~shared/runtime-types'
-import type { SetupScriptImportCandidate } from '~shared/setup/script-imports'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
 } from '~shared/shell-open-types'
-import type {
-  SkillFreshnessInventory,
-  SkillManageScope,
-  SkillUpdateRun,
-  SkillUpdateStartResult
-} from '~shared/skill-freshness'
-import type {
-  SkillDirectoryListing,
-  SkillDiscoveryResult,
-  SkillDiscoveryTarget,
-  SkillFileReadResult
-} from '~shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
 import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
-import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
 import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
-import type { TerminalTabCloseRequest, TerminalTabCloseResponse } from '~shared/terminal/tab-close'
 import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
 import type {
-  BaseRefDefaultResult,
-  BaseRefSearchResult,
   BrowserCookieImportResult,
   BrowserCertificateFailure,
-  BrowserCertificateProceedResult,
   BrowserLoadError,
-  BrowserSessionProfile,
-  BrowserSessionProfileScope,
   BrowserSessionProfileSource,
-  BrowserViewportOverride,
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
-  CreateWorktreeArgs,
-  CreateWorktreeResult,
   CustomPet,
-  DetectedWorktreeListResult,
-  DirEntry,
-  ForceDeleteWorktreeBranchResult,
-  FsChangedPayload,
-  GhosttyImportPreview,
   GlobalSettings,
   GitBranchCompareResult,
   GitCommitCompareResult,
@@ -198,93 +97,24 @@ import type {
   GitStagingArea,
   GitStatusResult,
   GitUpstreamStatus,
-  GitHubAssignableUser,
-  GitHubPRFile,
-  GitHubPRFileContents,
-  GitHubPrStartPoint,
-  GitHubPRReviewCommentInput,
-  GitHubCommentResult,
-  GitHubOwnerRepo,
-  GitHubWorkItem,
-  GitHubWorkItemDetails,
   GitHubViewer,
-  GitLabAssignableUser,
-  GitLabAuthDiagnostic,
-  GitLabCommentResult,
-  GitLabDiscussionResolveResult,
-  GitLabJobTraceResult,
-  GitLabMRInlineCommentInput,
-  GitLabMRReviewersUpdateResult,
-  GitLabMRUpdate,
-  GitLabProjectRef,
-  GitLabRetryJobResult,
-  GitLabViewer,
-  GitLabWorkItem,
-  GitLabWorkItemDetails,
-  GetGitLabRateLimitResult,
-  ListMergeRequestsResult,
-  MRInfo,
-  MRListState,
-  ListWorkItemsResult,
   MarkdownDocument,
   FloatingTerminalCwdRequest,
   GitHubPRRefreshCandidate,
   GitHubPRRefreshEnqueueResult,
-  GitHubPRRefreshEvent,
   GitHubPRRefreshReason,
-  GetRateLimitResult,
-  NotificationDispatchRequest,
-  NotificationDispatchResult,
   NotificationDeliveryProbeResult,
-  NotificationDismissResult,
   NotificationPermissionStatusResult,
   NotificationSoundResult,
   OnboardingState,
-  YiruHooks,
   PathSource,
   PersistedUIState,
-  PRCheckDetail,
-  PRCheckRunDetails,
-  PRComment,
   PRInfo,
-  PRRefreshOutcome,
-  Project,
-  ProjectUpdateArgs,
-  Repo,
-  ProjectGroup,
-  ProjectHostSetup,
-  ProjectHostSetupCreateArgs,
-  ProjectHostSetupCreateResult,
-  ProjectHostSetupDeleteArgs,
-  ProjectHostSetupDeleteResult,
-  ProjectHostSetupExistingFolderArgs,
-  ProjectHostSetupResult,
-  ProjectHostSetupUpdateArgs,
-  ProjectHostSetupUpdateResult,
-  FolderWorkspace,
-  ProjectGroupImportResult,
-  ProjectGroupImportMode,
   ShellHydrationFailureReason,
-  SparsePreset,
-  SearchOptions,
-  NestedRepoScanResult,
-  SearchResult,
   StatsSummary,
-  MemorySnapshot,
   TuiAgent,
   UpdateCheckOptions,
   UpdateStatus,
-  Worktree,
-  WorktreeBaseStatusEvent,
-  WorktreeHeadIdentity,
-  WorktreeLineage,
-  WorkspaceLineage,
-  WorktreeMeta,
-  WorktreeRemoteBranchConflictEvent,
-  RemoveWorktreeResult,
-  WorktreeDefaultTabsLaunch,
-  WorktreeSetupLaunch,
-  WorktreeStartupLaunch,
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '~shared/types'
@@ -316,21 +146,10 @@ import type {
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
 } from '@yiru/workbench-model/agent'
-import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
 import type {
-  Automation,
-  AutomationCreateInput,
-  AutomationDispatchRequest,
   AutomationDispatchResult,
-  ExternalAutomationCreateInput,
-  ExternalAutomationActionInput,
-  ExternalAutomationManager,
-  ExternalAutomationRunsInput,
-  ExternalAutomationRunsPage,
-  ExternalAutomationUpdateInput,
-  AutomationRun,
   AutomationPrecheckResult,
-  AutomationUpdateInput
+  AutomationRun
 } from '~shared/automations-types'
 import type {
   ClaudeUsageBreakdownKind,
@@ -355,23 +174,12 @@ import type {
   CodexUsageSummary
 } from '~shared/codex-usage-types'
 import type {
-  ComputerUsePermissionId,
-  ComputerUsePermissionResetResult,
-  ComputerUsePermissionSetupResult,
-  ComputerUsePermissionStatusResult
-} from '~shared/computer-use-permissions-types'
-import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState
 } from '~shared/developer-permissions-types'
 import type { AppStarSource } from '~shared/gh-star-source'
-import type { GhAuthDiagnostic } from '~shared/github-auth-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
-import type {
-  RuntimeMobileMarkdownRequest,
-  RuntimeMobileMarkdownResponse
-} from '~shared/mobile-markdown-document'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -383,146 +191,73 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '~shared/opencode-usage-types'
-import type {
-  RateLimitBannerReport,
-  RateLimitHit,
-  RateLimitResumeSchedule
-} from '~shared/rate-limit-resume/types'
-import type {
-  CodexRateLimitResetResult,
-  CursorRateLimitRefreshContext,
-  GrokAccountStatus,
-  RateLimitRuntimeTarget,
-  RateLimitState
-} from '~shared/rate-limit-types'
-import type {
-  SpeechErrorEvent,
-  SpeechLifecycleEvent,
-  SpeechModelManifest,
-  SpeechModelState,
-  SpeechTranscriptEvent
-} from '~shared/speech-types'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
-import type {
-  WorkspaceCleanupDismissArgs,
-  WorkspaceCleanupLocalProcessArgs,
-  WorkspaceCleanupLocalProcessResult,
-  WorkspaceCleanupScanArgs,
-  WorkspaceCleanupScanProgress,
-  WorkspaceCleanupScanResult
-} from '~shared/workspace/cleanup'
-import type {
-  WorkspacePortAdvertisedUrlChangedEvent,
-  WorkspacePortKillRequest,
-  WorkspacePortKillResult,
-  WorkspacePortScanRequest,
-  WorkspacePortScanResult
-} from '~shared/workspace/ports'
-import type {
-  WorkspaceSpaceAnalyzeResult,
-  WorkspaceSpaceScanProgress
-} from '~shared/workspace/space-types'
-
-type GitLabRepoSelectorArgs = {
-  repoPath: string
-  repoId?: string | null
-}
-
-type GitHubRepoSelectorArgs = {
-  repoPath: string
-  repoId?: string | null
-}
 
 export type BrowserApi = {
-  registerGuest: (args: {
-    browserPageId: string
-    workspaceId: string
-    worktreeId: string
-    sessionProfileId?: string | null
-    webContentsId: number
-  }) => Promise<boolean>
-  unregisterGuest: (args: {
-    browserPageId: string
-    expectedWebContentsId?: number
-  }) => Promise<void>
-  openDevTools: (args: { browserPageId: string }) => Promise<boolean>
-  setViewportOverride: (args: {
-    browserPageId: string
-    override: BrowserViewportOverride | null
-  }) => Promise<boolean>
-  setAnnotationViewportBridge: (args: BrowserSetAnnotationViewportBridgeArgs) => Promise<boolean>
+  // Why: host-state events also flow through `browser.guestEvents.subscribe`;
+  // these callbacks are the Electron shell's local guest-UI delivery adapter.
   onGuestLoadFailed: (
     callback: (args: { browserPageId: string; loadError: BrowserLoadError }) => void
   ) => () => void
   onCertificateFailureChanged: (
     callback: (event: { browserPageId: string; failure: BrowserCertificateFailure | null }) => void
   ) => () => void
-  proceedCertificate: (args: {
-    browserPageId: string
-    challengeId: string
-  }) => Promise<BrowserCertificateProceedResult>
   onPermissionDenied: (callback: (event: BrowserPermissionDeniedEvent) => void) => () => void
   onPopup: (callback: (event: BrowserPopupEvent) => void) => () => void
   onDownloadRequested: (callback: (event: BrowserDownloadRequestedEvent) => void) => () => void
   onDownloadProgress: (callback: (event: BrowserDownloadProgressEvent) => void) => () => void
   onDownloadFinished: (callback: (event: BrowserDownloadFinishedEvent) => void) => () => void
+  // Why: shell-only — Electron's native right-click menu, positioned with
+  // screen coordinates. Only meaningful for a window the OS is drawing.
   onContextMenuRequested: (
     callback: (event: BrowserContextMenuRequestedEvent) => void
   ) => () => void
   onContextMenuDismissed: (
     callback: (event: BrowserContextMenuDismissedEvent) => void
   ) => () => void
+  /** already covered: navigationUpdate flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
   onNavigationUpdate: (
     callback: (event: { browserPageId: string; url: string; title: string }) => void
   ) => () => void
+  // Why: shell-only — view activation and browser-pane focus are Electron
+  // window/pane concerns dispatched by the shell (see 附录 A.2 in
+  // docs/runtime-orpc-migration.md); they carry no host state of their own.
   onActivateView: (
     callback: (data: { worktreeId?: string; browserPageId?: string }) => void
   ) => () => void
   onPaneFocus: (
     callback: (data: { worktreeId: string | null; browserPageId: string }) => void
   ) => () => void
+  /** already covered: openLinkInYiruTab flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
   onOpenLinkInYiruTab: (
     callback: (event: { browserPageId: string; url: string }) => void
   ) => () => void
-  cancelDownload: (args: { downloadId: string }) => Promise<boolean>
-  setGrabMode: (args: BrowserSetGrabModeArgs) => Promise<BrowserSetGrabModeResult>
-  awaitGrabSelection: (args: BrowserAwaitGrabSelectionArgs) => Promise<BrowserGrabResult>
-  cancelGrab: (args: BrowserCancelGrabArgs) => Promise<boolean>
-  captureSelectionScreenshot: (
-    args: BrowserCaptureSelectionScreenshotArgs
-  ) => Promise<BrowserCaptureSelectionScreenshotResult>
-  extractHoverPayload: (args: BrowserExtractHoverArgs) => Promise<BrowserExtractHoverResult>
+  // Why: shell-only — grab-mode toggle and the c/s action keys are Electron
+  // global keyboard shortcuts forwarded from the OS to the focused window.
   onGrabModeToggle: (callback: (browserPageId: string) => void) => () => void
   onGrabActionShortcut: (
     callback: (args: { browserPageId: string; key: 'c' | 's' }) => void
   ) => () => void
-  sessionListProfiles: () => Promise<BrowserSessionProfile[]>
-  sessionCreateProfile: (args: {
-    scope: BrowserSessionProfileScope
-    label: string
-  }) => Promise<BrowserSessionProfile | null>
-  sessionDeleteProfile: (args: { profileId: string }) => Promise<boolean>
+  // Why: the native picker and selected absolute path remain confined to main;
+  // only the completed import result crosses this shell adapter.
   sessionImportCookies: (args: { profileId: string }) => Promise<BrowserCookieImportResult>
-  sessionResolvePartition: (args: { profileId: string | null }) => Promise<string | null>
-  sessionDetectBrowsers: () => Promise<DetectedBrowserInfo[]>
-  sessionImportFromBrowser: (args: {
-    profileId: string
-    browserFamily: string
-    browserProfile?: string
-  }) => Promise<BrowserCookieImportResult>
-  sessionClearDefaultCookies: () => Promise<boolean>
-  notifyActiveTabChanged: (args: { browserPageId: string }) => Promise<boolean>
 }
 
 export type EmulatorApi = {
-  onPaneFocus: (callback: (data: { worktreeId: string }) => void) => () => void
-  onAutoAttach: (
-    callback: (data: {
-      worktreeId: string
-      info: { deviceUdid: string; streamUrl: string; wsUrl: string; axUrl?: string }
-    }) => void
-  ) => () => void
+  // Why: startFrameStream/stopFrameStream (+ onFrameStreamFrame/
+  // onFrameStreamError below) and startVideoStream/stopVideoStream (+
+  // onVideoStreamMeta/onVideoStreamFrame below) are the MJPEG/H.264 binary
+  // frame side-channel for the mobile emulator screen — deliberately kept off
+  // the `emulator.*` oRPC contract (see the matching `Why:` on
+  // `emulatorContract` in packages/runtime-protocol/src/contract/emulator.ts
+  // and `emulatorRuntimeHandlers` in main/runtime/rpc/orpc/router-direct/
+  // emulator.ts). An event-iterator procedure has no channel for raw bytes
+  // outside its JSON envelope; carrying frame data through one would mean
+  // base64-encoding every frame. This is a documented, repeatedly-judged
+  // holdout (docs/runtime-orpc-migration.md Phase 3 "明确豁免" / §1.5), not an
+  // unstarted migration — a real fix needs its own binary side-channel
+  // design, not a Phase 4/5 call-site move.
   startFrameStream: (args: { streamUrl: string; streamKey?: string }) => Promise<{
     streamId: string
   }>
@@ -609,45 +344,12 @@ export type PreflightRuntimeContext = {
   projectRuntime?: ProjectExecutionRuntimeResolution
 }
 
-export type PreflightApi = {
-  check: (args?: PreflightRuntimeContext & { force?: boolean }) => Promise<PreflightStatus>
-  detectAgents: (args?: PreflightRuntimeContext) => Promise<string[]>
-  refreshAgents: (args?: PreflightRuntimeContext) => Promise<RefreshAgentsResult>
-  detectRemoteAgents: (args: { connectionId: string }) => Promise<string[]>
-}
-
 // Why: renderer-facing mirror of the daemon's `SessionInfo` + protocolVersion
 // annotation (src/main/daemon/types.ts `DaemonSessionInfo`). Kept here instead
 // of imported from main because the preload boundary must not depend on
 // main-only protocol types — those are subprocess-facing. Keep the two shapes
 // in sync when adding fields on either side; the Manage Sessions panel reads
 // these directly.
-export type PtyManagementSession = {
-  sessionId: string
-  state: 'created' | 'spawning' | 'running' | 'exiting' | 'exited'
-  shellState: 'pending' | 'ready' | 'timed_out' | 'unsupported'
-  isAlive: boolean
-  pid: number | null
-  cwd: string | null
-  cols: number
-  rows: number
-  createdAt: number
-  protocolVersion: number
-}
-
-export type PtyManagementApi = {
-  // `degraded` is true when the daemon is alive but cannot spawn fresh PTYs, so
-  // new terminals run on the local provider without daemon persistence.
-  listSessions: () => Promise<{ sessions: PtyManagementSession[]; degraded: boolean }>
-  killAll: () => Promise<{
-    killedCount: number
-    remainingCount: number
-    killedSessionIds?: string[]
-  }>
-  killOne: (args: { sessionId: string }) => Promise<{ success: boolean }>
-  restart: () => Promise<{ success: boolean }>
-}
-
 export type ExportApi = {
   htmlToPdf: (args: {
     html: string
@@ -690,10 +392,24 @@ export type DiagnosticsUploadPayload =
       readonly canceled: true
     }
 
-export type MemoryApi = {
-  getSnapshot: () => Promise<MemorySnapshot>
-}
-
+// Why: shell-only, but not for the `platform`/`settings` "local store" reason
+// above — this feature never had a host-routing concept to begin with.
+// `ClaudeUsageStore` (main/claude/usage/store.ts) unconditionally scans
+// `homedir()/.claude/projects` on the machine running Yiru's own Electron
+// main process and correlates it against that same process's local
+// `store.getRepos()`; there is no `target`/host parameter anywhere in the
+// store, the scanner, or these IPC handlers, unlike `git`/`diagnostics.memory`
+// which branch on `target.kind`. A Claude Code session running on a paired
+// SSH/relay host writes its transcripts on *that* host, so this dashboard
+// already cannot see remote sessions today — routing it through the runtime
+// contract would mean inventing per-host transcript scanning from scratch,
+// not moving a channel; a real capability gap, but a feature-scoped one, not
+// this migration's. Also not the same shape as `contract/provider-usage.ts`'s
+// `usage.cursor`: that is rate-limit state (`ProviderRateLimits`, mirrors
+// `rateLimits` below), this is local token/cost/session-history analytics —
+// same "usage" word, unrelated capability. `codexUsage`/`openCodeUsage` below
+// are the identical pattern (`~/.codex` / opencode's local app-data dir
+// instead of `~/.claude`), judged together.
 export type ClaudeUsageApi = {
   getScanState: () => Promise<ClaudeUsageScanState>
   setEnabled: (args: { enabled: boolean }) => Promise<ClaudeUsageScanState>
@@ -723,6 +439,10 @@ export type ClaudeUsageApi = {
   }) => Promise<ClaudeUsageSessionRow[]>
 }
 
+// Why: shell-only, same reasoning as `ClaudeUsageApi` above — `CodexUsageStore`
+// scans `getSystemCodexHomePath()`/`getYiruManagedCodexHomePath()` (both under
+// `homedir()`/Electron's local `userData`) on the machine running the main
+// process, with no host/target parameter anywhere in the chain.
 export type CodexUsageApi = {
   getScanState: () => Promise<CodexUsageScanState>
   setEnabled: (args: { enabled: boolean }) => Promise<CodexUsageScanState>
@@ -752,6 +472,10 @@ export type CodexUsageApi = {
   }) => Promise<CodexUsageSessionRow[]>
 }
 
+// Why: shell-only, same reasoning as `ClaudeUsageApi` above — the OpenCode
+// scanner reads its local sqlite db under `getXdgDataHome()`/`LOCALAPPDATA`
+// (still `homedir()`-derived) on the machine running the main process, again
+// with no host/target parameter anywhere in the chain.
 export type OpenCodeUsageApi = {
   getScanState: () => Promise<OpenCodeUsageScanState>
   setEnabled: (args: { enabled: boolean }) => Promise<OpenCodeUsageScanState>
@@ -782,70 +506,31 @@ export type OpenCodeUsageApi = {
 }
 
 export type AiVaultApi = {
-  listSessions: (args?: AiVaultListArgs) => Promise<AiVaultListResult>
   /** Lists the Task subagent transcripts of one session, on demand. */
+  listSessions: (args?: AiVaultListArgs) => Promise<AiVaultListResult>
   listSubagentSessions: (args: AiVaultSubagentListArgs) => Promise<AiVaultSubagentListResult>
   /** Fires when any app window regains OS focus; returns an unsubscribe. */
+  // Why: shell-only — fires only from Electron's app-level
+  // `browser-window-focus` (main/ai-vault/ai-vault.ts), a workaround for
+  // macOS app-activation not raising a DOM focus event. The consumer
+  // (workspace-panel/ai-vault/session-refresh.ts) already re-triggers the
+  // same forced rescan off `document.visibilitychange`, which fires in a
+  // browser tab — a paired web client already gets the equivalent refresh
+  // without this channel, so there is nothing to route through runtime.
   onWindowFocused: (callback: () => void) => () => void
 }
 
-// notFound marks a miss caused by the transcript not existing on disk yet
-// (retry-worthy), as opposed to a real read/parse error (#8401).
-export type NativeChatReadSessionResult =
-  | { messages: NativeChatMessage[] }
-  | { error: string; notFound?: true }
-
-/** Messages appended to a live-tailed transcript since the previous emit. */
-export type NativeChatAppendedMessages = NativeChatMessage[]
-
-export type NativeChatSubscriptionFrame =
-  | { type: 'snapshot'; messages: NativeChatMessage[]; hasMore: boolean; error?: string }
-  | { type: 'replacement'; messages: NativeChatMessage[]; hasMore: boolean }
-  | { type: 'appended'; messages: NativeChatMessage[] }
-
-/** Wire payload for the `nativeChat:appended` push channel. */
-export type NativeChatAppendedPayload = {
-  subscriptionId: string
-  frame: NativeChatSubscriptionFrame
-}
-
-export type NativeChatSubscribeArgs = {
-  /** Unique per-caller id, echoed on every append so multiple live panes in
-   *  one renderer don't cross-talk. */
-  subscriptionId: string
-  agent: AgentType
-  sessionId: string
-  /** Authoritative transcript path from the agent hook (providerSession). */
-  transcriptPath?: string
-  /** First snapshot size; later readSession calls grow this for pagination. */
-  limit?: number
-}
-
-export type NativeChatApi = {
-  /** Read the on-disk transcript for an agent + session id, windowed to the most
-   *  recent `limit` turns (defaults to the desktop window). The renderer raises
-   *  `limit` to page in older history as it scrolls to the top. `transcriptPath`
-   *  is the hook-reported authoritative file path, preferred over the id glob. */
-  readSession: (
-    agent: AgentType,
-    sessionId: string,
-    limit?: number,
-    transcriptPath?: string
-  ) => Promise<NativeChatReadSessionResult>
-  /** Live-tail a transcript. The first frame is a bounded race-safe snapshot;
-   *  later frames contain only newly appended messages. */
-  subscribe: (
-    args: NativeChatSubscribeArgs,
-    onFrame: (frame: NativeChatSubscriptionFrame) => void
-  ) => () => void
-}
-
+// Why: shell-only — every member acts on the Electron process itself (its own
+// identity/lifecycle, this machine's Dock badge and IME probe, native
+// dialogs, and this installation's userData-scoped Floating Workspace
+// directory via `app.getPath()`). None takes a host/target parameter and
+// none has a runtime-side counterpart to migrate to. The web adapter
+// (`renderer/web/preload-api.ts`) independently confirms this — every member
+// is a hardcoded local no-op (`Promise.resolve(...)`), never a
+// `callRuntimeProcedure` call.
 export type AppApi = {
   /** Returns the app identity currently exposed to native chrome and the titlebar. */
   getIdentity: () => Promise<AppIdentity>
-  /** Returns a URL base for feature-wall assets. In dev this is Vite /@fs;
-   *  in packaged builds this is file:// resources. Renderer appends filenames. */
-  getFeatureWallAssetBaseUrl: () => Promise<string>
   /** Relaunches the app via Electron's app.relaunch() + app.exit(0). Used
    *  by settings panes that need a full restart to apply changes (e.g. the
    *  terminal-window blur setting in TerminalWindowSection). */
@@ -858,6 +543,13 @@ export type AppApi = {
   reload: () => Promise<void>
   /** Resolves when the daemon PTY provider and hook receiver have either
    *  started or failed open for the first BrowserWindow. */
+  // Why: this is the bootstrap gate for the very runtime a contract call would
+  // route through, so it cannot be provided by the runtime it is waiting on.
+  // `startTerminalRuntimeStartupServices()` runs unconditionally in
+  // `main/index.ts` before branching on headless `--serve` vs. a
+  // `BrowserWindow`, so the barrier itself is process-startup state, not a
+  // window-scoped concept with a host-side twin — only a windowed renderer
+  // ever calls this channel to await it.
   awaitFirstWindowStartupServices: () => Promise<void>
   /** Emits a startup benchmark marker when YIRU_STARTUP_DIAGNOSTICS is enabled. */
   startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
@@ -883,8 +575,30 @@ export type AppApi = {
   pickFloatingWorkspaceDirectory: () => Promise<string | null>
 }
 
+export type RepoHostAdapter = {
+  // Why: these pickers operate on the machine rendering the UI, not the
+  // selected runtime target, so they remain an explicit shell dependency.
+  pickFolder: () => Promise<string | null>
+  pickFolders: () => Promise<string[]>
+  pickDirectory: () => Promise<string | null>
+  // Why: these mutate desktop-owned host rows or an Electron-owned in-flight
+  // clone. They are adapter state, not repo capability procedures.
+  removeForHost: (args: { repoId: string; hostId: string }) => Promise<void>
+  reorderForHost: (args: {
+    orderedIds: string[]
+    hostId: string
+  }) => Promise<{ status: 'applied' | 'rejected' }>
+  cloneAbort: () => Promise<void>
+  // Why: the local renderer cannot derive the Electron host's home directory.
+  getDefaultCreateProjectParent: () => Promise<string>
+}
+
 export type PreloadApi = {
   app: AppApi
+  // Why: shell-only — a "Yiru profile" is a separate userData directory for
+  // *this* Electron installation (own store, own relaunch via app.relaunch())
+  // used to run multiple identities of the app side by side on one machine.
+  // It is not a runtime-host concept; no contract analog exists or should.
   yiruProfiles: {
     list: () => Promise<YiruProfileListResult>
     createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
@@ -896,6 +610,14 @@ export type PreloadApi = {
       args: FindYiruProfileProjectsByPathArgs
     ) => Promise<FindYiruProfileProjectsByPathResult>
   }
+  // Why: shell-only — despite the name, this reports the platform of the
+  // machine *rendering* the UI (used for terminal WebGL policy and keyboard-
+  // protocol quirks tied to this window's OS release), not the target host a
+  // worktree's agent runs on. The web adapter independently returns the
+  // browser's own platform rather than calling the contract's `host.platform`
+  // (a different concept: the host a runtime target executes on) — routing
+  // this to `host.platform` for a remote environment would report the wrong
+  // machine's platform to a local rendering decision.
   platform: {
     get: () => {
       platform: NodeJS.Platform
@@ -903,295 +625,24 @@ export type PreloadApi = {
       displayServer: 'wayland' | 'x11' | null
     }
   }
-  repos: {
-    list: () => Promise<Repo[]>
-    listForExecutionHost: (args: ListReposForExecutionHostArgs) => Promise<HostRepoCatalogSnapshot>
-    // Why: error union matches the IPC handler's return shape; renderer callers branch on `'error' in result`.
-    add: (args: {
-      path: string
-      kind?: 'git' | 'folder'
-    }) => Promise<{ repo: Repo } | { error: string }>
-    remove: (args: { repoId: string }) => Promise<void>
-    // Forget a project on one execution host only, leaving the same repo id on
-    // other hosts (local or a re-added SSH target) intact.
-    removeForHost: (args: { repoId: string; hostId: string }) => Promise<void>
-    reorder: (args: { orderedIds: string[] }) => Promise<{ status: 'applied' | 'rejected' }>
-    reorderForHost: (args: {
-      orderedIds: string[]
-      hostId: string
-    }) => Promise<{ status: 'applied' | 'rejected' }>
-    update: (args: {
-      repoId: string
-      updates: Partial<
-        Pick<
-          Repo,
-          | 'displayName'
-          | 'badgeColor'
-          | 'repoIcon'
-          | 'upstream'
-          | 'hookSettings'
-          | 'worktreeBaseRef'
-          | 'worktreeBasePath'
-          | 'kind'
-          | 'forgeRemotePreference'
-          | 'externalWorktreeVisibility'
-          | 'externalWorktreeVisibilityPromptDismissedAt'
-          | 'externalWorktreeInboxBaselinePaths'
-          | 'importedExternalWorktreePaths'
-          | 'projectGroupId'
-          | 'projectGroupOrder'
-          | 'forkSyncMode'
-        >
-      > & {
-        sourceControlAi?: Repo['sourceControlAi'] | null
-        externalWorktreeDiscoverySuppressedAt?: Repo['externalWorktreeDiscoverySuppressedAt'] | null
-      }
-    }) => Promise<Repo>
-    pickFolder: () => Promise<string | null>
-    pickFolders: () => Promise<string[]>
-    pickDirectory: () => Promise<string | null>
-    clone: (args: { url: string; destination: string }) => Promise<Repo>
-    cloneRemote: (args: { connectionId: string; url: string; destination: string }) => Promise<Repo>
-    createRemote: (args: {
-      connectionId: string
-      parentPath: string
-      name: string
-      kind: 'git' | 'folder'
-    }) => Promise<{ repo: Repo } | { error: string }>
-    cloneAbort: () => Promise<void>
-    // Why: error union matches the IPC handler's return shape; renderer callers branch on `'error' in result`.
-    addRemote: (args: {
-      connectionId: string
-      remotePath: string
-      displayName?: string
-      kind?: 'git' | 'folder'
-    }) => Promise<{ repo: Repo } | { error: string }>
-    // Why: error union matches the IPC handler's return shape; renderer callers branch on `'error' in result`.
-    create: (args: {
-      parentPath: string
-      name: string
-      kind: 'git' | 'folder'
-    }) => Promise<{ repo: Repo } | { error: string }>
-    isGitAvailable: () => Promise<boolean>
-    getDefaultCreateProjectParent: () => Promise<string>
-    onCloneProgress: (callback: (data: { phase: string; percent: number }) => void) => () => void
-    getGitUsername: (args: { repoId: string }) => Promise<string>
-    getBaseRefDefault: (args: {
-      repoId: string
-      hostId?: ExecutionHostId
-    }) => Promise<BaseRefDefaultResult>
-    searchBaseRefs: (args: {
-      repoId: string
-      query: string
-      limit?: number
-      hostId?: ExecutionHostId
-    }) => Promise<string[]>
-    searchBaseRefDetails: (args: {
-      repoId: string
-      query: string
-      limit?: number
-      hostId?: ExecutionHostId
-    }) => Promise<BaseRefSearchResult[]>
-    onChanged: (callback: () => void) => () => void
-  }
-  projects: {
-    list: () => Promise<Project[]>
-    update: (args: ProjectUpdateArgs) => Promise<Project | null>
-    listHostSetups: () => Promise<ProjectHostSetup[]>
-    createHostSetup: (args: ProjectHostSetupCreateArgs) => Promise<ProjectHostSetupCreateResult>
-    setupExistingFolder: (
-      args: ProjectHostSetupExistingFolderArgs
-    ) => Promise<ProjectHostSetupResult>
-    updateHostSetup: (args: ProjectHostSetupUpdateArgs) => Promise<ProjectHostSetupUpdateResult>
-    deleteHostSetup: (args: ProjectHostSetupDeleteArgs) => Promise<ProjectHostSetupDeleteResult>
-  }
-  projectGroups: {
-    list: () => Promise<ProjectGroup[]>
-    create: (args: {
-      name: string
-      parentPath?: string | null
-      connectionId?: string | null
-      parentGroupId?: string | null
-      createdFrom?: ProjectGroup['createdFrom']
-    }) => Promise<ProjectGroup>
-    update: (args: {
-      groupId: string
-      updates: Partial<Pick<ProjectGroup, 'name' | 'isCollapsed' | 'tabOrder' | 'color'>>
-    }) => Promise<ProjectGroup | null>
-    delete: (args: { groupId: string }) => Promise<boolean>
-    moveProject: (args: {
-      projectId: string
-      groupId: string | null
-      order?: number
-    }) => Promise<Repo | null>
-    scanNested: (args: {
-      path: string
-      connectionId?: string
-      scanId?: string
-      options?: Record<string, unknown>
-    }) => Promise<NestedRepoScanResult>
-    cancelNestedScan: (args: { scanId: string }) => Promise<boolean>
-    onNestedScanProgress: (
-      callback: (data: { scanId: string; scan: NestedRepoScanResult }) => void
-    ) => () => void
-    importNested: (args: {
-      parentPath: string
-      groupName: string
-      projectPaths: string[]
-      connectionId?: string
-      scanId?: string
-      mode: ProjectGroupImportMode
-    }) => Promise<ProjectGroupImportResult>
-  }
-  folderWorkspaces: {
-    list: () => Promise<FolderWorkspace[]>
-    getPathStatus: (args: FolderWorkspacePathStatusRequest) => Promise<FolderWorkspacePathStatus>
-    create: (args: {
-      projectGroupId: string
-      name?: string
-      folderPath?: string | null
-      connectionId?: string | null
-      linkedReview?: FolderWorkspace['linkedReview']
-      createdWithAgent?: FolderWorkspace['createdWithAgent']
-      pendingFirstAgentMessageRename?: boolean
-    }) => Promise<FolderWorkspace>
-    update: (args: {
-      folderWorkspaceId: string
-      updates: Partial<
-        Pick<
-          FolderWorkspace,
-          | 'name'
-          | 'folderPath'
-          | 'linkedReview'
-          | 'comment'
-          | 'isArchived'
-          | 'isUnread'
-          | 'isPinned'
-          | 'sortOrder'
-          | 'manualOrder'
-          | 'workspaceStatus'
-          | 'createdWithAgent'
-          | 'pendingFirstAgentMessageRename'
-          | 'firstAgentMessageRenameError'
-          | 'lastActivityAt'
-        >
-      >
-    }) => Promise<FolderWorkspace | null>
-    delete: (args: { folderWorkspaceId: string }) => Promise<boolean>
-  }
-  sparsePresets: {
-    list: (args: { repoId: string }) => Promise<SparsePreset[]>
-    save: (args: {
-      repoId: string
-      id?: string
-      name: string
-      directories: string[]
-    }) => Promise<SparsePreset>
-    remove: (args: { repoId: string; presetId: string }) => Promise<void>
-    onChanged: (callback: (data: { repoId: string }) => void) => () => void
-  }
-  worktrees: {
-    list: (args: { repoId: string }) => Promise<Worktree[]>
-    listDetected: (args: { repoId: string }) => Promise<DetectedWorktreeListResult>
-    listDetectedForHost: (
-      args: ListDetectedWorktreesArgs
-    ) => Promise<HostQualifiedDetectedWorktreeResult>
-    cancelListDetected: (args: { providerRequestId: ProviderRequestId }) => Promise<void>
-    listAll: () => Promise<Worktree[]>
-    create: (args: CreateWorktreeArgs) => Promise<CreateWorktreeResult>
-    /** Two-phase progress for a background `create`, correlated by
-     *  `creationId`. Renderer routes each event to its pending creation's
-     *  status surface; the remote/runtime create path emits nothing, so the
-     *  surface falls back to an indeterminate spinner. */
-    onCreateProgress: (
-      callback: (data: { creationId?: string; phase: 'fetching' | 'creating' }) => void
-    ) => () => void
-    prefetchCreateBase: (args: { repoId: string; baseBranch?: string }) => Promise<void>
-    resolvePrBase: (args: {
-      repoId: string
-      prNumber: number
-      headRefName?: string
-      baseRefName?: string
-      isCrossRepository?: boolean
-    }) => Promise<GitHubPrStartPoint | { error: string }>
-    /** GitLab parallel of resolvePrBase. For same-project MRs returns
-     *  `<remote>/<source_branch>`; for fork MRs fetches
-     *  refs/merge-requests/<iid>/head and returns the SHA. */
-    resolveMrBase: (args: {
-      repoId: string
-      mrIid: number
-      sourceBranch?: string
-      targetBranch?: string
-      isCrossRepository?: boolean
-    }) => Promise<
-      | { baseBranch: string; compareBaseRef?: string; pushTarget?: GitPushTarget }
-      | { error: string }
-    >
-    remove: (args: {
-      worktreeId: string
-      hostId?: ExecutionHostId
-      force?: boolean
-      skipArchive?: boolean
-    }) => Promise<RemoveWorktreeResult>
-    // Forget a workspace from Yiru only — no remote Git/filesystem work. Used
-    // for workspaces pinned to a removed/disconnected SSH host.
-    forgetLocal: (args: {
-      worktreeId: string
-      hostId?: ExecutionHostId
-    }) => Promise<RemoveWorktreeResult>
-    forceDeletePreservedBranch: (args: {
-      worktreeId: string
-      branchName: string
-      expectedHead: string
-    }) => Promise<ForceDeleteWorktreeBranchResult>
-    updateMeta: (args: { worktreeId: string; updates: Partial<WorktreeMeta> }) => Promise<Worktree>
-    listLineage: () => Promise<{
-      lineage: Record<string, WorktreeLineage>
-      workspaceLineage?: Record<string, WorkspaceLineage>
-    }>
-    listLineageForHost: (args: ListDesktopLineageForHostArgs) => Promise<HostLineageSnapshot>
-    updateLineage: (args: {
-      worktreeId: string
-      parentWorktreeId?: string
-      noParent?: boolean
-    }) => Promise<WorktreeLineage | null>
-    persistSortOrder: (args: { orderedIds: string[] }) => Promise<void>
-    /** Full CLI output of the last branch auto-rename generation failure, held
-     *  in main memory only — null after a restart or once the failure clears. */
-    getBranchRenameFailureOutput: (args: { worktreeId: string }) => Promise<string | null>
-    onChanged: (callback: (data: { repoId: string }) => void) => () => void
-    onGitStatusMetadataChanged: (callback: (data: { repoId: string }) => void) => () => void
-    onHeadIdentitiesChanged: (
-      callback: (data: { repoId: string; identities: WorktreeHeadIdentity[] }) => void
-    ) => () => void
-    onBaseStatus: (callback: (data: WorktreeBaseStatusEvent) => void) => () => void
-    onRemoteBranchConflict: (
-      callback: (data: WorktreeRemoteBranchConflictEvent) => void
-    ) => () => void
-  }
-  workspaceCleanup: {
-    scan: (
-      args?: WorkspaceCleanupScanArgs,
-      onProgress?: (progress: WorkspaceCleanupScanProgress) => void
-    ) => Promise<WorkspaceCleanupScanResult>
-    dismiss: (args: WorkspaceCleanupDismissArgs) => Promise<void>
-    clearDismissals: () => Promise<void>
-    hasKillableLocalProcesses: (
-      args: WorkspaceCleanupLocalProcessArgs
-    ) => Promise<WorkspaceCleanupLocalProcessResult>
-  }
-  workspaceSpace: {
-    analyze: () => Promise<WorkspaceSpaceAnalyzeResult>
-    cancel: () => Promise<boolean>
-    onProgress: (callback: (progress: WorkspaceSpaceScanProgress) => void) => () => void
-  }
-  workspacePorts: {
-    scan: (args: WorkspacePortScanRequest) => Promise<WorkspacePortScanResult>
-    kill: (args: WorkspacePortKillRequest) => Promise<WorkspacePortKillResult>
-    onAdvertisedUrlChanged: (
-      callback: (event: WorkspacePortAdvertisedUrlChangedEvent) => void
-    ) => () => void
-  }
+  repoHost: RepoHostAdapter
+  // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
+  // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
+  // onClearBufferRequest) are never a runtime migration gap.
+  // `onSerializeBufferRequest`/`sendSerializedBuffer` moved to the
+  // shell-services reverse contract (Phase 5 step 4, `pty` group A —
+  // contract/shell-services-pty.ts) and no longer live here. Per-keystroke
+  // terminal I/O is Appendix A's explicit
+  // binary/flow-control exemption (`pty:data`, §1.5's "明确豁免" bucket), and
+  // Phase 3's "误报更正 2" found the whole control-plane batch already
+  // covered a different way: web panes never call `window.api.pty.*` at all.
+  // `terminal-pane/pty/connection.ts` branches on `runtimeEnvironmentId` and
+  // always resolves to `createRemoteRuntimePtyTransport`
+  // (`remote-runtime-pty-transport.ts`), which rides the runtime's
+  // `terminal.subscribe`/`terminal.multiplex` event-iterator streams
+  // end-to-end and never touches this preload surface. A paired web client
+  // always has an environment id, so it never takes the
+  // `createIpcPtyTransport` branch these stubs would otherwise serve.
   pty: {
     spawn: (opts: {
       cols: number
@@ -1358,30 +809,15 @@ export type PreloadApi = {
     /** Title-only replay snapshot for (re)attach; attention facts never replay. */
     getSideEffectSnapshot: (id: string) => Promise<TerminalSideEffectBatch | null>
     onExit: (callback: (data: { id: string; code: number }) => void) => () => void
-    onSerializeBufferRequest: (
-      callback: (data: {
-        requestId: string
-        ptyId: string
-        opts?: { scrollbackRows?: number; altScreenForcesZeroRows?: boolean }
-      }) => void
-    ) => () => void
     onClearBufferRequest: (callback: (data: { ptyId: string }) => void) => () => void
-    sendSerializedBuffer: (
-      requestId: string,
-      snapshot: {
-        data: string
-        cols: number
-        rows: number
-        seq?: number
-        lastTitle?: string
-      } | null
-    ) => void
     declarePendingPaneSerializer: (paneKey: string) => Promise<number>
     settlePaneSerializer: (paneKey: string, gen: number) => Promise<void>
     clearPendingPaneSerializer: (paneKey: string, gen: number) => Promise<void>
     reportRendererSerializerReady?: (ptyId: string) => Promise<void>
-    management: PtyManagementApi
   }
+  // Why: shell-only — posts telemetry about this app instance straight to
+  // the support backend over HTTP from the main process; there is no
+  // runtime host in the loop to route through.
   feedback: {
     submit: (args: {
       feedback: string
@@ -1390,6 +826,11 @@ export type PreloadApi = {
       githubEmail: string | null
     }) => Promise<{ ok: true } | { ok: false; status: number | null; error: string }>
   }
+  // Why: shell-only — every member reports on or reads back crashes/errors of
+  // *this* Electron process (main + renderer), backed by a local
+  // CrashReportStore and Electron's own `clipboard`/`app.getVersion()`. A
+  // crash belongs to whichever process crashed, which is always this shell,
+  // never a runtime host.
   crashReports: {
     getLatestPending: () => Promise<CrashReportRecord | null>
     getLatestReport: () => Promise<CrashReportRecord | null>
@@ -1403,27 +844,21 @@ export type PreloadApi = {
       args?: CrashReportCopyDiagnosticsArgs
     ) => Promise<{ ok: true } | { ok: false; error: string }>
   }
+  // Why: shell-only — `htmlToPdf` opens a hidden Electron `BrowserWindow` and
+  // calls its own `webContents.printToPDF()` (main/export/html-to-pdf.ts),
+  // then shows a native `dialog.showSaveDialog` on the window that asked and
+  // writes the PDF to the chosen local path (main/export/export.ts). Every
+  // step is an API of the machine rendering this window; there is no
+  // host/target parameter anywhere in the chain and no runtime-host
+  // equivalent of "print this window's content to a local PDF file."
   export: ExportApi
+  // Why: this group now contains only shell semantics. `viewer` and the Yiru
+  // star methods use this installation's own `gh` login; paired web clients
+  // deliberately return fallback values. The coordinator calls are keyed by
+  // Electron renderer id so visible-refresh ownership follows the asking
+  // window. Repo-host reads and writes use the `github.*` contract.
   gh: {
     viewer: () => Promise<GitHubViewer | null>
-    repoSlug: (args: {
-      repoPath: string
-      repoId?: string
-    }) => Promise<{ owner: string; repo: string } | null>
-    repoUpstream: (args: {
-      repoPath: string
-      repoId?: string
-    }) => Promise<{ owner: string; repo: string } | null>
-    prForBranch: (args: {
-      repoPath: string
-      repoId?: string
-      branch: string
-      linkedPRNumber?: number | null
-      fallbackPRNumber?: number | null
-      acceptMergedFallbackPR?: boolean
-      currentHeadOid?: string | null
-    }) => Promise<PRInfo | null>
-    refreshPRNow: (args: { candidate: GitHubPRRefreshCandidate }) => Promise<PRRefreshOutcome>
     enqueuePRRefresh: (args: {
       candidate: GitHubPRRefreshCandidate
       reason: GitHubPRRefreshReason
@@ -1433,304 +868,15 @@ export type PreloadApi = {
       candidates: GitHubPRRefreshCandidate[]
       generation: number
     }) => Promise<boolean>
-    onPRRefreshEvent: (callback: (event: GitHubPRRefreshEvent) => void) => () => void
-    workItem: (args: {
-      repoPath: string
-      repoId?: string
-      number: number
-      type?: 'pr'
-    }) => Promise<Omit<GitHubWorkItem, 'repoId'> | null>
-    workItemByOwnerRepo: (args: {
-      repoPath: string
-      repoId?: string
-      owner: string
-      repo: string
-      number: number
-      type: 'pr'
-    }) => Promise<Omit<GitHubWorkItem, 'repoId'> | null>
-    workItemDetails: (
-      args: GitHubRepoSelectorArgs & {
-        number: number
-        type?: 'pr'
-      }
-    ) => Promise<GitHubWorkItemDetails | null>
-    notifyWorkItemMutated: (args: {
-      repoPath: string
-      repoId?: string
-      type: 'pr'
-      number: number
-    }) => Promise<boolean>
-    prFileContents: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        path: string
-        oldPath?: string
-        status: GitHubPRFile['status']
-        headSha: string
-        baseSha: string
-      }
-    ) => Promise<GitHubPRFileContents>
-    listWorkItems: (args: {
-      repoPath: string
-      repoId?: string
-      limit?: number
-      query?: string
-      page?: number
-      noCache?: boolean
-    }) => Promise<ListWorkItemsResult<Omit<GitHubWorkItem, 'repoId'>>>
-    prChecks: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        headSha?: string
-        prRepo?: GitHubOwnerRepo | null
-        noCache?: boolean
-      }
-    ) => Promise<PRCheckDetail[]>
-    prCheckDetails: (args: {
-      repoPath: string
-      repoId?: string
-      checkRunId?: number
-      workflowRunId?: number
-      checkName?: string
-      url?: string | null
-      prRepo?: GitHubOwnerRepo | null
-    }) => Promise<PRCheckRunDetails | null>
-    rerunPRChecks: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        headSha?: string
-        failedOnly?: boolean
-      }
-    ) => Promise<{ ok: true; count: number } | { ok: false; error: string }>
-    prComments: (args: {
-      repoPath: string
-      repoId?: string
-      prNumber: number
-      prRepo?: GitHubOwnerRepo | null
-      noCache?: boolean
-    }) => Promise<PRComment[]>
-    resolveReviewThread: (args: {
-      repoPath: string
-      repoId?: string
-      threadId: string
-      resolve: boolean
-    }) => Promise<boolean>
-    setPRFileViewed: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        pullRequestId: string
-        path: string
-        viewed: boolean
-      }
-    ) => Promise<boolean>
-    updatePRTitle: (args: {
-      repoPath: string
-      repoId?: string
-      prNumber: number
-      title: string
-      prRepo?: GitHubOwnerRepo | null
-    }) => Promise<boolean>
-    mergePR: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        method?: 'merge' | 'squash' | 'rebase'
-        prRepo?: GitHubOwnerRepo | null
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    setPRAutoMerge: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        enabled: boolean
-        method?: 'merge' | 'squash' | 'rebase'
-        prRepo?: GitHubOwnerRepo | null
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    updatePRState: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        updates: { state: 'open' | 'closed' }
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    requestPRReviewers: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        reviewers: string[]
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    removePRReviewers: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        reviewers: string[]
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    addPRComment: (
-      args: GitHubRepoSelectorArgs & {
-        number: number
-        body: string
-        /** Why: GitHub stores PR conversation comments under `/issues/N/comments`,
-         *  but the product contract remains scoped to pull requests. */
-        prRepo?: GitHubOwnerRepo | null
-      }
-    ) => Promise<GitHubCommentResult>
-    addPRReviewCommentReply: (
-      args: GitHubRepoSelectorArgs & {
-        prNumber: number
-        commentId: number
-        body: string
-        threadId?: string
-        path?: string
-        line?: number
-        prRepo?: GitHubOwnerRepo | null
-      }
-    ) => Promise<GitHubCommentResult>
-    addPRReviewComment: (
-      args: GitHubPRReviewCommentInput & {
-        repoId?: string
-      }
-    ) => Promise<GitHubCommentResult>
-    listLabels: (args: { repoPath: string; repoId?: string }) => Promise<string[]>
-    listAssignableUsers: (args: {
-      repoPath: string
-      repoId?: string
-    }) => Promise<GitHubAssignableUser[]>
-    /**
-     * Subscribe to local-mutation broadcasts. Used by the work-item-drawer
-     * cache to invalidate entries across windows after a successful mutation.
-     * Returns an unsubscribe function.
-     */
-    onWorkItemMutated: (
-      callback: (payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }) => void
-    ) => () => void
     checkYiruStarred: () => Promise<boolean | null>
     starYiru: (source: AppStarSource) => Promise<boolean>
-    /**
-     * GitHub API rate-limit snapshot. Does NOT consume quota (the
-     * `rate_limit` endpoint is exempt). Cached 30s server-side — pass
-     * `force: true` to bust after a known-expensive op.
-     */
-    rateLimit: (args?: { force?: boolean }) => Promise<GetRateLimitResult>
-    /**
-     * Probe `gh auth status` and the Electron process env to explain
-     * why GitHub calls are failing with scope_missing. Surfaces the
-     * common gotcha where `GITHUB_TOKEN` is exported in the user's
-     * shell and silently shadows the keyring credential — in that case
-     * `gh auth refresh` is a no-op and the UI must say so.
-     */
-    diagnoseAuth: () => Promise<GhAuthDiagnostic>
   }
-  hostedReview: {
-    forBranch: (args: HostedReviewForBranchArgs) => Promise<HostedReviewInfo | null>
-    getCreationEligibility: (
-      args: HostedReviewCreationEligibilityArgs
-    ) => Promise<HostedReviewCreationEligibility>
-    create: (args: CreateHostedReviewArgs) => Promise<CreateHostedReviewResult>
-  }
-  // ── GitLab merge-request review surface ────────────────────────
-  // Shapes mirror gh.* one-to-one where the data matches; diverge
-  // where GitLab's API differs (MR state values, project path with
-  // host, paginated envelope from `glab api -i`).
-  gl: {
-    viewer: () => Promise<GitLabViewer | null>
-    diagnoseAuth: () => Promise<GitLabAuthDiagnostic>
-    rateLimit: (args?: {
-      force?: boolean
-      host?: string | null
-    }) => Promise<GetGitLabRateLimitResult>
-    projectSlug: (args: GitLabRepoSelectorArgs) => Promise<GitLabProjectRef | null>
-    mrForBranch: (
-      args: GitLabRepoSelectorArgs & {
-        branch: string
-        linkedMRIid?: number | null
-      }
-    ) => Promise<MRInfo | null>
-    mr: (args: GitLabRepoSelectorArgs & { iid: number }) => Promise<MRInfo | null>
-    listMRs: (
-      args: GitLabRepoSelectorArgs & {
-        state?: MRListState
-        page?: number
-        perPage?: number
-        query?: string
-      }
-    ) => Promise<ListMergeRequestsResult>
-    listLabels: (args: GitLabRepoSelectorArgs) => Promise<string[]>
-    listAssignableUsers: (args: GitLabRepoSelectorArgs) => Promise<GitLabAssignableUser[]>
-    /** Aggregated dialog payload — body + discussions + pipeline jobs. */
-    workItemDetails: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        type: 'mr'
-      }
-    ) => Promise<GitLabWorkItemDetails | null>
-    closeMR: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    reopenMR: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    mergeMR: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        method?: 'merge' | 'squash' | 'rebase'
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    updateMR: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        updates: GitLabMRUpdate
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    updateMRReviewers: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        reviewerIds: number[]
-        projectRef?: GitLabProjectRef | null
-      }
-    ) => Promise<GitLabMRReviewersUpdateResult>
-    addMRComment: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        body: string
-      }
-    ) => Promise<GitLabCommentResult>
-    addMRInlineComment: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        input: GitLabMRInlineCommentInput
-        projectRef?: GitLabProjectRef | null
-      }
-    ) => Promise<GitLabCommentResult>
-    resolveMRDiscussion: (
-      args: GitLabRepoSelectorArgs & {
-        iid: number
-        discussionId: string
-        resolved: boolean
-      }
-    ) => Promise<GitLabDiscussionResolveResult>
-    jobTrace: (
-      args: GitLabRepoSelectorArgs & {
-        jobId: number
-        projectRef?: GitLabProjectRef | null
-      }
-    ) => Promise<GitLabJobTraceResult>
-    retryJob: (
-      args: GitLabRepoSelectorArgs & {
-        jobId: number
-        projectRef?: GitLabProjectRef | null
-      }
-    ) => Promise<GitLabRetryJobResult>
-    workItemByPath: (
-      args: GitLabRepoSelectorArgs & {
-        host: string
-        path: string
-        iid: number
-        type: 'mr'
-      }
-    ) => Promise<Omit<GitLabWorkItem, 'repoId'> | null>
-  }
+  // Why: shell-only — confirmed via `main/star-nag/service.ts`. `StarNagService`
+  // is an in-memory singleton scoped to this Electron process's own
+  // `BrowserWindow`s (agent-spawn counters, cooldown timers, `gh`-CLI star
+  // checks against this machine's credentials); it has no host/multi-client
+  // concept. The web client deliberately no-ops the whole group rather than
+  // routing it anywhere — the growth nudge never surfaces there.
   starNag: {
     onShow: (
       callback: (payload?: { mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }) => void
@@ -1747,11 +893,24 @@ export type PreloadApi = {
     showAgentValueMoment: () => Promise<void>
     onboardingCompleted: () => Promise<void>
   }
+  // Why: shell-only, and the four `telemetry*` members below are one judgment
+  // — consent and event emission are properties of *this installation*, not of
+  // any runtime host. Routing them through the runtime contract would mean
+  // asking a remote machine about this machine's consent. The PostHog client
+  // and the opt-in store are main-side (gated on IS_OFFICIAL_BUILD plus the
+  // build-identity/write-key pair), the effective-consent reason includes env
+  // vars the renderer cannot read, and the per-session consent-mutation rate
+  // limit is enforced in main. Same reasoning as the `diagnostics` group below,
+  // which is the same pipeline's file/bundle half. These four were the group
+  // the Phase 4/5 acceptance audit found had never been judged anywhere — the
+  // code was already right; only the judgment was missing, and it was missing
+  // because a `name: {` group count skips bare function members like these.
   /** Fire-and-forget track. Loose typing at the IPC boundary on purpose —
    *  the main-side validator is the single enforcement point. Renderer call
    *  sites should import `track<N>()` from `src/renderer/lib/telemetry.ts`
    *  for the `EventMap`-based type safety, not reach for this directly. */
   telemetryTrack: (name: string, props: Record<string, unknown>) => Promise<void>
+  // Why: shell-only — see the `telemetry*` group judgment above.
   /** Flip the persisted opt-in preference. Subject to a per-session
    *  consent-mutation rate limit on the main side (≤5/session). */
   telemetrySetOptIn: (optedIn: boolean) => Promise<void>
@@ -1759,7 +918,13 @@ export type PreloadApi = {
    *  §User controls. The renderer triggers flows; main does the filesystem /
    *  network work and returns serializable metadata. Main retains collected
    *  upload payloads so the renderer can confirm without reading or
-   *  substituting arbitrary bytes. */
+   *  substituting arbitrary bytes.
+   *  Why: shell-only — despite the name, this is unrelated to the contract's
+   *  `diagnostics.memory` (host CPU/memory snapshot). It is *this Electron
+   *  installation's* trace-file/crash-bundle telemetry pipeline, uploaded to
+   *  PostHog; the web adapter hardcodes it disabled and rejects the
+   *  collect/open/upload actions with "unavailable on web" — a deliberate
+   *  non-goal, not a gap. Same-named groups, unrelated concepts. */
   diagnostics: {
     getStatus: () => Promise<DiagnosticsStatusPayload>
     collectBundle: (lookbackMinutes?: number) => Promise<DiagnosticsBundlePayload>
@@ -1767,11 +932,17 @@ export type PreloadApi = {
     discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
     uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
   }
+  // Why: shell-only — see the `telemetry*` group judgment above. The env-var
+  // half of the reason is main-side state a renderer cannot read at all, so
+  // there is no host-routable version of this answer.
   /** Read-only view of effective consent state, including the reason if
    *  disabled (env var / user opt-out / CI / pending banner). Used by the
    *  Privacy pane to render the correct "blocked by X" helper text — env
    *  vars are main-side state the renderer cannot read directly. */
   telemetryGetConsentState: () => Promise<TelemetryConsentState>
+  // Why: shell-only — same judgment as the `telemetry*` block above (the
+  // `diagnostics` group sits between them, so this repeats the tag rather than
+  // relying on comment proximity).
   /** Banner ✕ — persist `optedIn = true` silently, emit nothing. Deliberately
    *  a separate channel from `telemetrySetOptIn` because main's `via`
    *  derivation on that channel would tag this path as `first_launch_banner`
@@ -1780,6 +951,23 @@ export type PreloadApi = {
    *  intervene). Subject to the same per-session consent-mutation rate
    *  limit as `telemetrySetOptIn`. */
   telemetryAcknowledgeBanner: () => Promise<void>
+  // Why: shell-only — CIRCULAR, not just unmigrated. `get`/`getSync`/`set`/
+  // `updatePRBotAuthorOverride` all read and write `store.getSettings()` /
+  // `store.updateSettings()` (`main/ipc/settings.ts`), this Electron
+  // installation's own `GlobalSettings` — the object that carries
+  // `activeRuntimeEnvironmentId`, the very field that selects which runtime
+  // host a call should target. Routing these through the runtime contract
+  // would mean asking a host for the setting that decides which host to ask.
+  // The contract's identically-named `settings.get`/`settings.update`/
+  // `settings.updatePRBotAuthorOverride` (`main/runtime/rpc/methods/client-ui.ts`)
+  // are a different, narrower object (`RuntimeClientSettings` from
+  // `runtime.getClientSettings()`) scoped to whichever host answers — no
+  // `activeRuntimeEnvironmentId`, no theme/proxy/appearance fields. Same
+  // group name, unrelated concepts, same shape as the `diagnostics` over-merge
+  // above and the `session` over-merge below. `getSync` additionally can't
+  // cross a network hop by
+  // construction (terminal side-effect authority needs it before async
+  // hydration completes).
   settings: {
     get: () => Promise<GlobalSettings>
     /** Synchronous persisted-settings read for startup decisions that cannot
@@ -1788,17 +976,19 @@ export type PreloadApi = {
     getSync: () => GlobalSettings | null
     set: (args: Partial<GlobalSettings>) => Promise<GlobalSettings>
     updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }) => Promise<GlobalSettings>
-    listFonts: () => Promise<string[]>
-    previewGhosttyImport: () => Promise<GhosttyImportPreview>
-    previewWarpThemeImport: (source: WarpThemeImportSource) => Promise<WarpThemeImportPreview>
-    /** Subscribe to out-of-band settings updates (e.g. the View > Appearance
-     *  menu toggles) so the renderer can stay in sync with main's persisted
-     *  state without round-tripping through settings:get. */
-    onChanged: (callback: (updates: Partial<GlobalSettings>) => void) => () => void
   }
+  // Why: shell-only — `register` spins up a loopback-proxy route on the
+  // machine that will open the link, gated to `sourceOwner.kind === 'local'`
+  // call sites only. It never fires for an environment-hosted workspace.
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
   }
+  // Why: shell-only — confirmed. `openFile`/`revealFile` need a native editor
+  // and Finder/Explorer, and `get`/`set`/`ensureFile`/`reload` read the local
+  // keybindings.json this installation owns. The web client keeps its own
+  // parallel per-browser localStorage document (`createWebKeybindingsApi` in
+  // `renderer/web/preload-api.ts`) rather than routing through any host
+  // contract — keyboard shortcuts are inherently per-client, not host state.
   keybindings: {
     get: () => Promise<KeybindingFileSnapshot>
     ensureFile: () => Promise<KeybindingFileSnapshot>
@@ -1811,6 +1001,16 @@ export type PreloadApi = {
     revealFile: () => Promise<KeybindingFileSnapshot>
     onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
   }
+  // Why: select/remove moved to the runtime contract (`accounts.selectCodex` /
+  // `accounts.removeCodex`) — see provider-accounts-client.ts. add/reauthenticate
+  // stay here because they spawn `codex login` PTYs that need a desktop browser.
+  // `list` stays too: it is a plain, non-blocking read of `CodexAccountService`'s
+  // own cache with no equivalent on the contract — `accounts.list` looks
+  // same-shaped but is a different call, not a duplicate route to this one: it
+  // forces `runtime.refreshAccountsForMobile()` before returning and can hang
+  // for minutes behind broken provider auth (see the `Why:` on
+  // `watchProviderAccounts` in provider-accounts-client.ts, which deliberately
+  // avoids it for the local target for exactly that reason).
   codexAccounts: {
     list: () => Promise<CodexRateLimitAccountsState>
     add: (args?: {
@@ -1818,13 +1018,15 @@ export type PreloadApi = {
       wslDistro?: string | null
     }) => Promise<CodexRateLimitAccountsState>
     reauthenticate: (args: { accountId: string }) => Promise<CodexRateLimitAccountsState>
-    remove: (args: { accountId: string }) => Promise<CodexRateLimitAccountsState>
-    select: (args: {
-      accountId: string | null
-      runtime?: 'host' | 'wsl'
-      wslDistro?: string | null
-    }) => Promise<CodexRateLimitAccountsState>
   }
+  // Why: select/remove moved to the runtime contract (`accounts.selectClaude` /
+  // `accounts.removeClaude`) — see provider-accounts-client.ts. add/reauthenticate/
+  // cancelPendingLogin stay here because they spawn `claude login` PTYs that need
+  // a desktop browser. `list` stays too, same reason as `codexAccounts.list`
+  // above: `accounts.list` is not a duplicate route to it, it forces a
+  // provider-usage refresh first and can hang behind broken auth, which is why
+  // `watchProviderAccounts` (provider-accounts-client.ts) reads this IPC member
+  // for the local target instead of the contract call of the same-shaped name.
   claudeAccounts: {
     list: () => Promise<ClaudeRateLimitAccountsState>
     add: (args?: {
@@ -1833,52 +1035,46 @@ export type PreloadApi = {
     }) => Promise<ClaudeRateLimitAccountsState>
     cancelPendingLogin: () => Promise<boolean>
     reauthenticate: (args: { accountId: string }) => Promise<ClaudeRateLimitAccountsState>
-    remove: (args: { accountId: string }) => Promise<ClaudeRateLimitAccountsState>
-    select: (args: {
-      accountId: string | null
-      runtime?: 'host' | 'wsl'
-      wslDistro?: string | null
-    }) => Promise<ClaudeRateLimitAccountsState>
   }
-  cli: {
-    getInstallStatus: () => Promise<CliInstallStatus>
-    install: () => Promise<CliInstallStatus>
-    remove: () => Promise<CliInstallStatus>
-    getWslInstallStatus: (args?: { distro?: string | null }) => Promise<CliInstallStatus>
-    installWsl: (args?: { distro?: string | null }) => Promise<CliInstallStatus>
-    removeWsl: (args?: { distro?: string | null }) => Promise<CliInstallStatus>
-  }
-  agentHooks: {
-    claudeStatus: () => Promise<AgentHookInstallStatus>
-    openClaudeStatus: () => Promise<AgentHookInstallStatus>
-    codexStatus: () => Promise<AgentHookInstallStatus>
-    geminiStatus: () => Promise<AgentHookInstallStatus>
-    antigravityStatus: () => Promise<AgentHookInstallStatus>
-    ampStatus: () => Promise<AgentHookInstallStatus>
-    cursorStatus: () => Promise<AgentHookInstallStatus>
-    droidStatus: () => Promise<AgentHookInstallStatus>
-    commandCodeStatus: () => Promise<AgentHookInstallStatus>
-    grokStatus: () => Promise<AgentHookInstallStatus>
-    copilotStatus: () => Promise<AgentHookInstallStatus>
-    hermesStatus: () => Promise<AgentHookInstallStatus>
-    devinStatus: () => Promise<AgentHookInstallStatus>
-  }
+  // Why: shell-only — pre-writes the same trust-marker files cursor-agent/
+  // Copilot CLI/Codex write into this machine's homedir() config
+  // (~/.cursor, ~/.copilot, ~/.codex) ahead of a locally-spawned PTY, so the
+  // first-run "trust this folder?" TUI prompt never intercepts a pasted
+  // draft.
   agentTrust: {
     markTrusted: (args: {
       preset: 'cursor' | 'copilot' | 'codex'
       workspacePath: string
-      connectionId?: string
     }) => Promise<void>
   }
-  preflight: PreflightApi
   notifications: {
-    dispatch: (args: NotificationDispatchRequest) => Promise<NotificationDispatchResult>
-    dismiss: (ids: string[]) => Promise<NotificationDismissResult>
+    // Why: Phase 5 slice S3 — the shell's implementation of the
+    // shellServices.notifications.display/.dismiss reverse procedures, called
+    // only from renderer/runtime/shell-services-handler.ts (never from
+    // feature code — go through the runtime's notifications.report/dismiss
+    // for that). Settings/throttle/dedup/mobile-push judgment already
+    // happened on the runtime side; these two do only the OS-native part.
+    displayNative: (
+      args: ShellServicesNotificationsDisplayInput
+    ) => Promise<ShellServicesNotificationsDisplayOutput>
+    dismissNative: (notificationIds: string[]) => Promise<ShellServicesNotificationsDismissOutput>
+    // Why: shell-only — pure OS permission queries (Notification.isSupported,
+    // the System Settings deep-link, the native authorization probe); no
+    // runtime involvement at all.
     openSystemSettings: () => Promise<void>
     getPermissionStatus: () => Promise<NotificationPermissionStatusResult>
     probeDelivery: (args?: { force?: boolean }) => Promise<NotificationDeliveryProbeResult>
+    // Why: shell-only — same reverse-direction family as `dispatch` above;
+    // plays a locally cached sound file through a preload-context `Audio`.
     playSound: (options?: { force?: boolean; volume?: number }) => Promise<NotificationSoundResult>
   }
+  // Why: shell-only — confirmed. `get`/`update` read the local `Store`-backed
+  // onboarding checklist (`main/persisted-state/onboarding.ts`), the same
+  // per-installation-file shape as `settings.get`/`set`. There is no
+  // `onboarding` contract namespace; the web client keeps a fully independent
+  // per-browser localStorage copy (`ONBOARDING_STORAGE_KEY` in
+  // `renderer/web/preload-api.ts`) rather than routing through any host. This
+  // first-run checklist is inherently per-client, not host state.
   onboarding: {
     get: () => Promise<OnboardingState>
     // Why: main-process `updateOnboarding` merges checklist field-by-field, so
@@ -1890,21 +1086,35 @@ export type PreloadApi = {
       }
     ) => Promise<OnboardingState>
   }
+  // Why: shell-only — every check here (systemPreferences, osascript Apple
+  // Events probe, a UDP bind for the local-network prompt) targets the OS
+  // permission state of the Electron shell bundle running on this machine.
+  // Not the same domain as `computer.permissions*`: that pair only covers
+  // the Computer Use sidecar's accessibility/screenshot access on the
+  // targeted runtime host (2 ids); this covers this app's own mic/camera/
+  // screen/accessibility/full-disk-access/automation/local-network/usb/
+  // bluetooth TCC status (9 ids). Same field name (`id`), disjoint domains.
+  // `openSettings` was dropped as dead code (zero callers, confirmed by
+  // typecheck) — `request` already falls back to the same privacy pane.
   developerPermissions: {
     getStatus: () => Promise<DeveloperPermissionState[]>
     request: (args: { id: DeveloperPermissionId }) => Promise<DeveloperPermissionRequestResult>
-    openSettings: (args: { id: DeveloperPermissionId }) => Promise<void>
   }
-  computerUsePermissions: {
-    getStatus: () => Promise<ComputerUsePermissionStatusResult>
-    openSetup: (args?: {
-      id?: ComputerUsePermissionId
-    }) => Promise<ComputerUsePermissionSetupResult>
-    reset: () => Promise<ComputerUsePermissionResetResult>
-  }
+  /**
+   * shell-only: every member here acts on the machine running the Electron
+   * shell — native pickers, the OS default handler, and the user's own file
+   * manager and browser. None of it is a runtime-host capability, so this
+   * group stays on the preload face rather than moving to the oRPC contract.
+   */
   shell: {
     openPath: (path: string) => Promise<void>
     openInFileManager: (path: string) => Promise<ShellOpenLocalPathResult>
+    /**
+     * Why: the `externalEditor.openRemoteSsh` contract procedure looks like a
+     * migrated remote path, but its caller is gated on `connectionId`, which
+     * nothing has set since remote hosts were removed. Every reachable call
+     * lands here, on the local machine.
+     */
     openInExternalEditor: {
       (request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult>
       (path: string, command?: string): Promise<ShellOpenLocalPathResult>
@@ -1912,37 +1122,29 @@ export type PreloadApi = {
     openUrl: (url: string) => Promise<void>
     openFilePath: (path: string) => Promise<boolean>
     openFileUri: (uri: string) => Promise<void>
+    /**
+     * Why: the handler `stat`s this path on the machine running the Electron
+     * shell, with no `target`/host argument — a caller meaning "does this
+     * exist on the paired runtime host" would get the wrong answer. All four
+     * desktop call sites (mcp-config-section.tsx, terminal-link-handlers.ts,
+     * markdown-preview.tsx, editor-click-routing.ts) verified gated on
+     * `isLocalRepo` / `isLocalPathOpenBlocked` before reaching this member,
+     * so the mismatch this shape could cause is not actually reachable today.
+     */
     pathExists: (path: string) => Promise<boolean>
     pickAttachment: () => Promise<string | null>
     pickImage: () => Promise<string | null>
     pickRepoIconImage: () => Promise<{ dataUrl: string; fileName: string } | null>
     pickAudio: () => Promise<string | null>
     pickDirectory: (args: { defaultPath?: string }) => Promise<string | null>
-    copyFile: (args: { srcPath: string; destPath: string }) => Promise<void>
   }
-  skills: {
-    discover: (target?: SkillDiscoveryTarget) => Promise<SkillDiscoveryResult>
-    freshnessInventory: () => Promise<SkillFreshnessInventory>
-    startUpdateRun: (names: string[]) => Promise<SkillUpdateStartResult>
-    startInstallRun: (request: {
-      source: string
-      skillNames?: string[]
-      scope: SkillManageScope
-    }) => Promise<SkillUpdateStartResult>
-    startRemoveRun: (request: {
-      names: string[]
-      scope: SkillManageScope
-    }) => Promise<SkillUpdateStartResult>
-    listSkillFiles: (directoryPath: string) => Promise<SkillDirectoryListing>
-    readSkillDirFile: (request: {
-      directoryPath: string
-      relativePath: string
-    }) => Promise<SkillFileReadResult>
-    cancelUpdateRun: () => Promise<void>
-    acknowledgeUpdateRun: () => Promise<void>
-    getUpdateRun: () => Promise<SkillUpdateRun>
-    onUpdateRun: (callback: (run: SkillUpdateRun) => void) => () => void
-  }
+  // Why: shell-only — confirmed. `import`/`importPetBundle` open a native
+  // Electron `dialog.showOpenDialog` tied to the sender's `BrowserWindow`;
+  // `read`/`delete` operate on files under this installation's
+  // `app.getPath('userData')`, addressable only by the id the native picker
+  // just minted. There is no host-wide pet-asset contract and no web
+  // implementation at all (`window.api.pet` is undefined on web builds) —
+  // building one would be a new host-shared-asset feature, not a Phase 4 move.
   pet: {
     import: () => Promise<CustomPet | null>
     importPetBundle: () => Promise<CustomPet | null>
@@ -1951,15 +1153,16 @@ export type PreloadApi = {
   }
   browser: BrowserApi
   emulator: EmulatorApi
-  hooks: {
-    check: (args: { repoId: string; hostId?: ExecutionHostId }) => Promise<{
-      status?: 'ok' | 'error'
-      hasHooks: boolean
-      hooks: YiruHooks | null
-      mayNeedUpdate: boolean
-    }>
-    inspectSetupScriptImports: (args: { repoId: string }) => Promise<SetupScriptImportCandidate[]>
-  }
+  // Why: shell-only — this is the renderer's own client-side cache of GitHub
+  // PR info it already fetched, persisted so it survives a restart. The web
+  // adapter independently mirrors it with `localStorage` rather than calling
+  // any runtime procedure, confirming there is no host-side source behind it.
+  // Host-scoping already holds: the persisted blob is one flat map, but every
+  // key baked into it (`getGitHubPRCacheKey`/`getGitHubRepoCacheKey` in
+  // `renderer/store/slices/github-cache-key.ts`) is prefixed by the repo's
+  // owning execution host (or the focused runtime environment id when the
+  // repo has none), so entries from different hosts coexist in the same file
+  // without one host's cached PR data ever answering for another's.
   cache: {
     getGitHub: () => Promise<{
       pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
@@ -1970,6 +1173,12 @@ export type PreloadApi = {
       }
     }) => Promise<void>
   }
+  // Why: shell-only — this is the shell's own per-remembered-host cache of
+  // window/tab state (`store.getWorkspaceSession`), addressed by `hostId` so
+  // switching runtimes restores that host's tabs. It is not the contract's
+  // `session.tabs` (worktree tab management) — same name, unrelated concept.
+  // The web adapter independently mirrors it with `localStorage`, never a
+  // runtime call, confirming there is no host-side source to route to.
   session: {
     // hostId is optional and defaults to the 'local' partition on the main
     // side, so existing callers that omit it behave exactly as before.
@@ -1980,6 +1189,15 @@ export type PreloadApi = {
     readTerminalScrollback: (args: { ref: string }) => string | null
     setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
   }
+  // Why: shell-only, confirmed by slice 19 — every member here drives
+  // `electron-updater` checking/downloading/installing a new build of *this*
+  // Electron binary, on *this* machine. Distinct from the runtime contract's
+  // own `updater` namespace (`client.updater.getStatus/check/download/install`,
+  // consumed by `store/slices/remote-server-updates.ts`), which asks a paired
+  // *runtime environment host* whether its `yiru serve` build is current —
+  // same name, unrelated concepts, same shape as the `diagnostics`/`settings`/
+  // `session` over-merges elsewhere in this file. Nothing here should ever
+  // route through the contract.
   updater: {
     getVersion: () => Promise<string>
     getStatus: () => Promise<UpdateStatus>
@@ -1990,27 +1208,46 @@ export type PreloadApi = {
     onStatus: (callback: (status: UpdateStatus) => void) => () => void
     onClearDismissal: (callback: () => void) => () => void
   }
-  notebook: {
-    runPythonCell: (args: {
-      filePath: string
-      code: string
-      preamble?: string
-      connectionId?: string | null
-    }) => Promise<{ stdout: string; stderr: string; exitCode: number | null; error?: string }>
-  }
   stats: StatsApi
-  memory: MemoryApi
   claudeUsage: ClaudeUsageApi
   codexUsage: CodexUsageApi
   openCodeUsage: OpenCodeUsageApi
+  // Why: shell-only, not a missing-procedure gap — `aiVaultContract.listSessions`
+  // (see `main/runtime/rpc/orpc/router-direct/ai-vault.ts`) already exists and
+  // the web adapter calls it, but it only ever answers for one host: it wraps
+  // `runtime.listAiVaultSessions()`, the same local-only scan cache this
+  // preload member's `executionHostScope: 'local'` case also hits (see the
+  // `Why:` in `main/ai-vault/ai-vault.ts`). The `'all'`/remote-host case this
+  // preload member also serves goes through a *different*, Electron-bootstrap-
+  // wired function in that same file (`scanAiVaultSessionsByHostScope`,
+  // configured via `registerAiVaultHandlers`'s `getActiveRuntimeAiVaultHostInfos`/
+  // `scanRuntimeAiVaultSessions` options) that fans this same host out to every
+  // paired runtime peer and merges the results — the orchestrator side of the
+  // same peer-to-peer call the contract procedure answers on the *other* end.
+  // Routing this call site to the bare contract procedure would quietly drop
+  // that merge for any panel not scoped to `'local'`. `listSubagentSessions`
+  // stays too: a local-filesystem-only read (explicitly empty for a non-local
+  // `executionHostId`) with no contract leaf yet — the web adapter's own
+  // `Why:` next to its no-op stub already says so.
   aiVault: AiVaultApi
-  nativeChat: NativeChatApi
+  // Why: genuine forward gap, not migrated this slice. `main/friday/service.ts`
+  // Why: shell-only by construction, not an un-migrated gap. The session
+  // itself is host-side (`runtime.createTerminal`/`closeTerminal`), but
+  // `revealFridayChat` requires `notifier.revealTerminalSession` and throws
+  // `runtime_unavailable` without it — Friday's visible surface is a tab in
+  // the *local* floating workspace, so it needs a renderer window on the
+  // machine running the shell. A paired web client has none on the runtime
+  // host, which is why the web adapter rejects rather than routing. Adding a
+  // `friday.*` contract procedure would not make it work.
   friday: {
     getOrCreate: () => Promise<FridaySession>
     restart: () => Promise<FridaySession>
   }
-  fs: {
-    readDir: (args: { dirPath: string }) => Promise<DirEntry[]>
+  // Why: worktree-owned reads, writes, listings, searches, imports, and watches
+  // route through `files.*`. This adapter is limited to native downloads and
+  // explicitly authorized absolute paths that cannot use worktree-relative
+  // addressing, including OS drag-and-drop sources.
+  fileHost: {
     readFile: (args: {
       filePath: string
       connectionId?: string
@@ -2022,18 +1259,6 @@ export type PreloadApi = {
       mimeType?: string
       fileIdentity?: string
     }>
-    readLocalLogTail: (args: LocalLogTailReadArgs) => Promise<LocalLogTailReadResult>
-    startLocalLogTail: (args: LocalLogTailWatchArgs) => Promise<void>
-    stopLocalLogTail: (args: { subscriptionId: string }) => Promise<void>
-    onLocalLogTailChanged: (callback: (payload: LocalLogTailChangedPayload) => void) => () => void
-    downloadFile: (args: {
-      filePath: string
-      connectionId: string
-    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
-    downloadFolder: (args: {
-      dirPath: string
-      connectionId: string
-    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
     saveDownloadedFile: (args: {
       suggestedName: string
       content: string
@@ -2072,10 +1297,6 @@ export type PreloadApi = {
       transferId: string
     }) => Promise<{ canceled: false; destinationPath: string }>
     cancelDownloadedFolder: (args: { transferId: string }) => Promise<{ ok: true }>
-    listMarkdownDocuments: (args: {
-      rootPath: string
-      connectionId?: string
-    }) => Promise<MarkdownDocument[]>
     writeFile: (args: { filePath: string; content: string; connectionId?: string }) => Promise<void>
     createFile: (args: { filePath: string; connectionId?: string }) => Promise<void>
     createDir: (args: { dirPath: string; connectionId?: string }) => Promise<void>
@@ -2096,40 +1317,6 @@ export type PreloadApi = {
       connectionId?: string
     }) => Promise<{ size: number; isDirectory: boolean; mtime: number }>
     pathExists: (args: { filePath: string; connectionId?: string }) => Promise<boolean>
-    listFiles: (args: {
-      rootPath: string
-      connectionId?: string
-      excludePaths?: string[]
-      requestToken?: string
-    }) => Promise<string[]>
-    cancelListFiles: (args: { requestToken: string }) => Promise<void>
-    search: (args: SearchOptions & { connectionId?: string }) => Promise<SearchResult>
-    importExternalPaths: (args: {
-      sourcePaths: string[]
-      destDir: string
-      connectionId?: string
-      ensureDir?: boolean
-    }) => Promise<{
-      results: (
-        | {
-            sourcePath: string
-            status: 'imported'
-            destPath: string
-            kind: 'file' | 'directory'
-            renamed: boolean
-          }
-        | {
-            sourcePath: string
-            status: 'skipped'
-            reason: 'missing' | 'symlink' | 'permission-denied' | 'unsupported'
-          }
-        | {
-            sourcePath: string
-            status: 'failed'
-            reason: string
-          }
-      )[]
-    }>
     stageExternalPathsForRuntimeUpload: (args: { sourcePaths: string[] }) => Promise<{
       sources: (
         | {
@@ -2166,9 +1353,6 @@ export type PreloadApi = {
       }[]
       failed: { sourcePath: string; reason: string }[]
     }>
-    watchWorktree: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
-    unwatchWorktree: (args: { worktreePath: string; connectionId?: string }) => Promise<void>
-    onFsChanged: (callback: (payload: FsChangedPayload) => void) => () => void
   }
   git: {
     status: (args: {
@@ -2179,6 +1363,13 @@ export type PreloadApi = {
       reuseLineStats?: boolean
       requestToken?: string
     }) => Promise<GitStatusResult>
+    // Why: cancellation partner for the `status` call above, not a separate
+    // gap. It is only reachable via `git-client.ts`'s `callLocalGitStatus`,
+    // itself gated on `!context.worktreeId` — the same retained local-fallback
+    // branch as the rest of this group (Phase 5 step 1: the runtime `path:`
+    // selector can't resolve an unregistered worktree yet). The registered-
+    // worktree path cancels via `AbortSignal` instead (`client.git.status`
+    // with `{ signal }`); the two are equivalent, not duplicates.
     cancelStatus: (args: { requestToken: string }) => Promise<void>
     submoduleStatus: (args: {
       worktreePath: string
@@ -2191,6 +1382,14 @@ export type PreloadApi = {
       paths: string[]
       connectionId?: string
     }) => Promise<string[]>
+    // Why: genuine gap, not part of the git-client.ts local/runtime split —
+    // no contract member exists for either. Scans this machine's filesystem
+    // for oversized untracked folders and offers to append one to
+    // .gitignore; the only caller (source-control/controller/status-refresh.tsx)
+    // is gated to `getActiveRuntimeTarget(...).kind === 'local'` so a worktree
+    // hosted on a non-local runtime environment is never scanned/written on
+    // the wrong machine. Building a runtime equivalent would be new work, not
+    // a migration of an existing one.
     findHugeFoldersToIgnore: (args: { worktreePath: string }) => Promise<string[]>
     appendGitignore: (args: { worktreePath: string; folderName: string }) => Promise<boolean>
     history: (
@@ -2286,6 +1485,11 @@ export type PreloadApi = {
       connectionId?: string
       pushTarget?: GitPushTarget
     }) => Promise<void>
+    // Why: same-named-nothing-alike trap avoided, not a gap — the contract
+    // member for this is `client.git.forkSync` (renamed, not missing).
+    // `git-client.ts`'s `syncRuntimeGitForkDefaultBranch` already routes
+    // registered worktrees there; this preload member only serves the same
+    // `!context.worktreeId` local fallback as the rest of this group.
     syncFork: (args: {
       worktreePath: string
       connectionId?: string
@@ -2435,12 +1639,19 @@ export type PreloadApi = {
     }) => Promise<string | null>
   }
   ui: {
+    // Why: the web build layers browser-localStorage offline caching and
+    // cross-tab merge semantics on top of the runtime contract.
     get: () => Promise<PersistedUIState>
     set: (args: Partial<PersistedUIState>) => Promise<void>
     recordFeatureInteraction: (id: FeatureInteractionId) => Promise<PersistedUIState>
-    onStateChanged: (callback: (ui: PersistedUIState) => void) => () => void
+    // Why: shell-only — menu-accelerator / global-shortcut intent events fired
+    // by native menu items or OS-level shortcuts, dispatched to whichever
+    // window/pane currently owns focus. Not a runtime capability.
     onOpenSettings: (callback: () => void) => () => void
-    /** Consumes a one-shot tray/menu-bar "open settings" intent queued before mount. */
+    // Why: shell-only — consumes a one-shot tray/menu-bar "open settings"
+    // intent queued in the main process before the window mounted. A paired
+    // web client has no tray/menu bar, so there is never a queued intent to
+    // consume (its adapter hardcodes `false`); not a runtime capability.
     consumePendingOpenSettings: () => Promise<boolean>
     onOpenSetupGuide: (callback: () => void) => () => void
     onOpenFeatureTour: (callback: () => void) => () => void
@@ -2463,30 +1674,8 @@ export type PreloadApi = {
     onNewBrowserTab: (callback: () => void) => () => void
     onNewMarkdownTab: (callback: () => void) => () => void
     onNewSimulatorTab: (callback: () => void) => () => void
-    onRequestTabCreate: (
-      callback: (data: {
-        requestId: string
-        url: string
-        worktreeId?: string
-        sessionProfileId?: string | null
-        sessionPartition?: string
-        activate?: boolean
-      }) => void
-    ) => () => void
-    replyTabCreate: (reply: { requestId: string; browserPageId?: string; error?: string }) => void
-    onRequestTabSetProfile: (
-      callback: (data: {
-        requestId: string
-        browserPageId: string
-        profileId: string
-        sessionPartition?: string
-      }) => void
-    ) => () => void
-    replyTabSetProfile: (reply: { requestId: string; error?: string }) => void
-    onRequestTabClose: (
-      callback: (data: { requestId: string; tabId: string | null; worktreeId?: string }) => void
-    ) => () => void
-    replyTabClose: (reply: { requestId: string; error?: string }) => void
+    // Why: shell-only — more menu-accelerator / global-shortcut intents (see
+    // `onOpenSettings` above).
     onNewTerminalTab: (callback: () => void) => () => void
     onFocusBrowserAddressBar: (callback: () => void) => () => void
     onFindInBrowserPage: (callback: () => void) => () => void
@@ -2502,117 +1691,36 @@ export type PreloadApi = {
     onCtrlTabKeyDown: (callback: (data: { shiftKey: boolean }) => void) => () => void
     onCtrlTabKeyUp: (callback: () => void) => () => void
     onToggleStatusBar: (callback: () => void) => () => void
+    // Why: shell-only — native focus/paste mediation (OS-level dictation key,
+    // app-menu Paste routed to whichever surface owns focus).
     onDictationKeyDown: (callback: () => void) => () => void
+    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
     onExportPdfRequested: (callback: () => void) => () => void
+    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
     onAppMenuPaste: (callback: () => void) => () => void
     onEditableContextPaste: (callback: (data: { plainTextOnly: boolean }) => void) => () => void
-    onActivateWorktree: (
-      callback: (data: {
-        repoId: string
-        worktreeId: string
-        setup?: WorktreeSetupLaunch
-        startup?: WorktreeStartupLaunch
-        defaultTabs?: WorktreeDefaultTabsLaunch
-      }) => void
-    ) => () => void
-    onCreateTerminal: (
-      callback: (data: {
-        requestId?: string
-        worktreeId: string
-        command?: string
-        cwd?: string
-        env?: Record<string, string>
-        launchConfig?: SleepingAgentLaunchConfig
-        launchToken?: string
-        launchAgent?: TuiAgent
-        viewMode?: 'terminal' | 'chat'
-        isFriday?: boolean
-        title?: string
-        ptyId?: string
-        activate?: boolean
-        presentation?: RuntimeTerminalPresentation
-        tabId?: string
-        leafId?: string
-        splitFromLeafId?: string
-        splitDirection?: 'horizontal' | 'vertical'
-        splitTelemetrySource?: TerminalPaneSplitSource
-      }) => void
-    ) => () => void
-    onRequestTerminalCreate: (
-      callback: (data: RuntimeTerminalCreateRequestPayload) => void
-    ) => () => void
-    onRequestTerminalTabMount: (
-      callback: (data: { worktreeId: string; tabId?: string; ptyId?: string }) => void
-    ) => () => void
-    replyTerminalCreate: (reply: {
-      requestId: string
-      tabId?: string
-      title?: string
-      error?: string
-    }) => void
-    onSplitTerminal: (
-      callback: (data: {
-        tabId: string
-        paneRuntimeId: number
-        direction: 'horizontal' | 'vertical'
-        command?: string
-        telemetrySource?: TerminalPaneSplitSource
-      }) => void
-    ) => () => void
-    onRenameTerminal: (
-      callback: (data: { tabId: string; title: string | null }) => void
-    ) => () => void
-    onFocusTerminal: (
-      callback: (data: {
-        tabId: string
-        worktreeId: string
-        leafId?: string | null
-        ackPaneKeyOnSuccess?: string
-        flashFocusedPane?: boolean
-        scrollToBottomIfOutputSinceLastView?: boolean
-      }) => void
-    ) => () => void
-    onFocusEditorTab: (
-      callback: (data: { tabId: string; worktreeId: string }) => void
-    ) => () => void
-    onCloseSessionTab: (
-      callback: (data: { tabId: string; worktreeId: string }) => void
-    ) => () => void
-    onMoveSessionTab: (
-      callback: (data: { worktreeId: string } & RuntimeMobileSessionTabMove) => void
-    ) => () => void
-    onOpenFileFromMobile: (
-      callback: (data: {
-        worktreeId: string
-        filePath: string
-        relativePath: string
-        runtimeEnvironmentId?: string
-      }) => void
-    ) => () => void
-    onOpenDiffFromMobile: (
-      callback: (data: {
-        worktreeId: string
-        filePath: string
-        relativePath: string
-        staged: boolean
-        runtimeEnvironmentId?: string
-      }) => void
-    ) => () => void
-    onMobileMarkdownRequest: (
-      callback: (request: RuntimeMobileMarkdownRequest) => void
-    ) => () => void
-    respondMobileMarkdownRequest: (response: RuntimeMobileMarkdownResponse) => void
-    onCloseTerminal: (
-      callback: (data: { tabId: string; paneRuntimeId?: number }) => void
-    ) => () => void
-    onTerminalTabCloseRequest: (callback: (request: TerminalTabCloseRequest) => void) => () => void
-    respondTerminalTabClose: (response: TerminalTabCloseResponse) => void
-    onSleepWorktree: (callback: (data: { worktreeId: string }) => void) => () => void
-    onResumeSleepingAgents: (callback: (data: { worktreeId: string }) => void) => () => void
+    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
     onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
+    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
     onSystemResumed: (callback: () => void) => () => void
+    // Why: shell-only — the OS clipboard belongs to the machine running the
+    // shell (through `readClipboardImageBase64` below, and `writeClipboardText`/
+    // `writeClipboardImage`/`writeClipboardFile`/`performNativePaste` further
+    // down); covers `readSelectionClipboardText`/`writeSelectionClipboardText`
+    // too — the X11 primary-selection clipboard has no browser equivalent, so
+    // the web adapter rejects both as unavailable rather than no-opping.
     readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
     readSelectionClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
+    /** shell-only: reads the current OS clipboard image without choosing a runtime target. */
+    readClipboardImageBase64: () => Promise<string | null>
+    // Why: kept on preload, not collapsed onto `clipboard.saveImageAsTempFile` —
+    // main already reads the OS clipboard natively and, for a local target,
+    // writes the temp file directly with zero base64 round-trip; collapsing to
+    // the renderer-side chunked-upload protocol would add a
+    // read-clipboard-as-base64 IPC hop plus encode/decode overhead to every
+    // local paste for no benefit (web/mobile/cli already reach the same
+    // contract methods from their own code paths). `runtimeEnvironmentId` set
+    // still delegates to the same chunked upload, just issued from main.
     saveClipboardImageAsTempFile: (args?: {
       connectionId?: string | null
       runtimeEnvironmentId?: string | null
@@ -2622,24 +1730,27 @@ export type PreloadApi = {
     writeClipboardImage: (dataUrl: string) => Promise<void>
     performNativePaste: (options?: { mode?: 'paste' | 'paste-and-match-style' }) => void
     writeClipboardFile: (
-      args:
-        | {
-            filePath: string
-            connectionId?: string | null
-          }
-        | string
+      args: { filePath: string } | string
     ) => Promise<{ ok: boolean; reason?: string }>
+    // Why: shell-only — native file-drop mediation.
     onFileDrop: (callback: (data: NativeFileDropPayload) => void) => () => void
+    // Why: shell-only — BrowserWindow/webContents zoom geometry.
     getZoomLevel: () => number
     setZoomLevel: (level: number) => void
     syncTrafficLights: (zoomFactor: number) => void
+    // Why: shell-only — native focus mediation (which surface currently owns
+    // keyboard focus, mirrored so main can route accelerators correctly).
     setMarkdownEditorFocused: (focused: boolean) => void
     setTerminalInputFocused: (focused: boolean) => void
     setFloatingTerminalInputFocused: (focused: boolean) => void
     setShortcutRecorderFocused: (focused: boolean) => void
+    // Why: shell-only — native context-menu command mediation (see
+    // `onDictationKeyDown` above).
     onRichMarkdownContextCommand: (
       callback: (payload: RichMarkdownContextMenuCommandPayload) => void
     ) => () => void
+    // Why: shell-only — window control (fullscreen/minimize/maximize/close),
+    // Electron's native chrome.
     onFullscreenChanged: (callback: (isFullScreen: boolean) => void) => () => void
     minimize: () => void
     maximize: () => void
@@ -2650,10 +1761,25 @@ export type PreloadApi = {
     onWindowCloseRequested: (callback: (data: { isQuitting: boolean }) => void) => () => void
     confirmWindowClose: () => void
   }
+  // Why: `runtime.driverEvents.subscribe` carries all three live driver
+  // changes, so this shell adapter retains only members with no equivalent
+  // forward procedure. `syncWindowGraph` is
+  // the *only* writer of `TerminalSessionAuthority.graph.leaves`
+  // (`renderer/runtime/sync-runtime-graph.ts`'s `syncRuntimeGraph` walks this
+  // renderer's mounted `PaneManager`s/DOM containers, which exist only in this
+  // process) — there is no contractual ordering guarantee between "pane just
+  // created" and "first keystroke" (slice 53 declined a pty migration over
+  // exactly this gap), so this must not be restructured or routed elsewhere.
+  // `getTerminalFitOverrides` and `getTerminalDrivers` hydrate local PTY
+  // arbitration state after renderer reload. `getBrowserDrivers` does the same
+  // for BrowserViews owned by this Electron process. `restoreTerminalFit`
+  // reclaims a local PTY addressed only by its opaque ptyId, while
+  // `reclaimBrowserForDesktop` reclaims a local BrowserView page id. These are
+  // data-plane ownership operations, not the connected runtime's status. The
+  // remote-terminal branch already uses `client.terminal.restoreFit` with its
+  // runtime handle before falling back to this local member.
   runtime: {
     syncWindowGraph: (graph: RuntimeSyncWindowGraph) => Promise<RuntimeSyncWindowGraphResult>
-    getStatus: () => Promise<RuntimeStatus>
-    call: (args: { method: string; params?: unknown }) => Promise<RuntimeRpcResponse<unknown>>
     getTerminalFitOverrides: () => Promise<
       { ptyId: string; mode: 'mobile-fit' | 'remote-desktop-fit'; cols: number; rows: number }[]
     >
@@ -2671,21 +1797,23 @@ export type PreloadApi = {
     >
     restoreTerminalFit: (ptyId: string) => Promise<{ restored: boolean }>
     reclaimBrowserForDesktop: (browserPageId: string) => Promise<{ reclaimed: boolean }>
-    onTerminalFitOverrideChanged: (
-      callback: (event: {
-        ptyId: string
-        mode: 'mobile-fit' | 'remote-desktop-fit' | 'desktop-fit'
-        cols: number
-        rows: number
-      }) => void
-    ) => () => void
-    onTerminalDriverChanged: (
-      callback: (event: { ptyId: string; driver: RuntimeTerminalDriverState }) => void
-    ) => () => void
-    onBrowserDriverChanged: (
-      callback: (event: { browserPageId: string; driver: RuntimeBrowserDriverState }) => void
-    ) => () => void
   }
+  // Why: shell-only by construction — this group IS the transport, not a
+  // capability a runtime could provide. `list`/`resolve`/`remove`/
+  // `disconnect`/`getStatus` manage *which* runtime environment to connect to
+  // (deciding the target), so they cannot themselves be routed through a
+  // target's contract without circularity. `call`/`subscribe` are the legacy
+  // bare-method-name dispatcher this migration spent many slices eliminating
+  // from feature call sites; the only remaining direct callers are
+  // infrastructure that must precede or bypass typed oRPC negotiation by
+  // design: `environment-compatibility.ts`'s two `call` sites pass
+  // `STATUS_GET_CONTRACT.name`, the capability-negotiation bootstrap probe
+  // itself (negotiating oRPC before negotiation is impossible), and
+  // `orpc-legacy-client.ts`'s `callRuntimeRpc`/`createLegacyRuntimeOrpcClient`
+  // is the oRPC `ClientLink` adapter for hosts that fell back to the legacy
+  // JSON-RPC envelope — its "method" is `procedure.method` read off
+  // `runtimeContract` by walking the oRPC path, not a literal string authored
+  // in feature code. No remaining feature call site passes a bare method name.
   runtimeEnvironments: {
     list: () => Promise<PublicKnownRuntimeEnvironment[]>
     resolve: (args: { selector: string }) => Promise<PublicKnownRuntimeEnvironment>
@@ -2717,143 +1845,98 @@ export type PreloadApi = {
         onClose?: () => void
       }
     ) => Promise<RuntimeEnvironmentSubscriptionHandle>
+    // Why: lets shared renderer code (`renderer/runtime/orpc-client.ts`) reach a
+    // paired web client's already-negotiated oRPC peer by contract path instead
+    // of the legacy string-method dispatcher that `call`/`subscribe` above still
+    // speak. Desktop never calls this — its environment oRPC goes through the
+    // MessagePort tunnel in `orpc-environment-client.ts` — so the real
+    // implementation lives only in the web preload shim.
+    callOrpcProcedure: (
+      args: {
+        selector: string
+        path: readonly string[]
+        input: unknown
+        timeoutMs?: number
+      },
+      options?: {
+        signal?: AbortSignal
+        // Why: carries `browser.screencast.subscribe` video frames — the one
+        // event-iterator leaf a paired web client dispatches through this
+        // member. `window.api` is a same-realm object on web (no
+        // contextBridge boundary), so passing the callback through costs
+        // nothing extra; Electron never calls this member at all.
+        onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
+      }
+    ) => Promise<unknown>
   }
-  rateLimits: {
-    get: () => Promise<RateLimitState>
-    refresh: (cursorContext?: CursorRateLimitRefreshContext) => Promise<RateLimitState>
-    refreshCodexForTarget: (target: RateLimitRuntimeTarget) => Promise<RateLimitState>
-    consumeCodexResetCredit: () => Promise<CodexRateLimitResetResult>
-    refreshClaudeForTarget: (target: RateLimitRuntimeTarget) => Promise<RateLimitState>
-    setPollingInterval: (ms: number) => Promise<void>
-    fetchInactiveClaudeAccounts: () => Promise<void>
-    fetchInactiveCodexAccounts: () => Promise<void>
-    refreshMiniMax: () => Promise<RateLimitState>
-    refreshGrok: () => Promise<RateLimitState>
-    onUpdate: (callback: (state: RateLimitState) => void) => () => void
-  }
-  coworkingSharing: {
-    getSnapshot: () => Promise<CoworkingSharingSnapshot>
-    setWorktreeVisibility: (args: CoworkingSetWorktreeVisibilityArgs) => Promise<void>
-    setProjectVisibility: (args: CoworkingSetProjectVisibilityArgs) => Promise<void>
-    requestControl: (args: CoworkingRequestControlArgs) => Promise<void>
-    decideControl: (args: CoworkingDecideControlArgs) => Promise<void>
-    revokeControl: (args: CoworkingRevokeControlArgs) => Promise<void>
-    requestHostAccess: (
-      args: CoworkingRequestHostAccessArgs
-    ) => Promise<CoworkingRequestHostAccessResult>
-    decideHostAccess: (args: CoworkingDecideHostAccessArgs) => Promise<void>
-    listHostDevices: () => Promise<CoworkingListHostDevicesResult>
-    revokeHostDevice: (
-      args: CoworkingRevokeHostDeviceArgs
-    ) => Promise<CoworkingRevokeHostDeviceResult>
-    getWindowsFirewallStatus: () => Promise<CoworkingWindowsFirewallStatus>
-    repairWindowsFirewall: () => Promise<CoworkingWindowsFirewallRepairResult>
-    retryAvailability: () => Promise<void>
-    invoke: (args: CoworkingRequesterInvokeArgs) => Promise<unknown>
-    startSubscription: (
-      args: CoworkingRequesterSubscriptionArgs
-    ) => Promise<CoworkingRequesterSubscriptionStartResult>
-    stopSubscription: (
-      args: CoworkingRequesterSubscriptionStopArgs
-    ) => Promise<CoworkingRequesterSubscriptionStopResult>
-    onSubscriptionEvent: (
-      callback: (event: CoworkingRequesterSubscriptionEvent) => void
-    ) => () => void
-    onChanged: (callback: (snapshot: CoworkingSharingSnapshot) => void) => () => void
-  }
+  // Why: shell-only, same test as `speech`'s OpenAI key methods (切片 20) —
+  // the session cookie is Electron `safeStorage`-encrypted (falls back to a
+  // sniffed plaintext envelope) into a machine-bound
+  // `~/.yiru/minimax-session-cookie.enc`. A secret bound to this OS
+  // keychain is not a routable host concept.
   minimaxCredentials: {
     getStatus: () => Promise<{ configured: boolean }>
     saveCookie: (cookie: string) => Promise<{ configured: boolean }>
     clearCookie: () => Promise<{ configured: boolean }>
   }
-  grokAccounts: {
-    getStatus: () => Promise<GrokAccountStatus>
-  }
+  // Why: list/listRuns/create/update/delete/runNow migrated onto the
+  // `automation.*` oRPC contract (packages/runtime-protocol/src/contract/
+  // automations.ts) — `automation.runs` covers `listRuns` under a renamed
+  // member, everything else kept its name. listExternalManagers/
+  // listExternalRuns/createExternal/updateExternal/runExternalAction/
+  // snapshotWorkspaceName migrated the same way onto `automation-
+  // external.ts`'s members. Every renderer caller now goes through
+  // `renderer/components/automations/automation-host-client.ts`'s
+  // `callRuntimeOrpc`-backed helpers for both local and remote targets — this
+  // preload group no longer carries any of them (2026-08-08, this slice).
+  // `create`'s `projectId`/`workspaceId` looked like a contract gap (the
+  // contract only takes `repo`/`workspace`) but is a verified false positive:
+  // `YiruRuntime.createAutomation`/`updateAutomation` resolve
+  // `repo`/`workspace` into `projectId`/`workspaceId` via
+  // `resolveAutomationTarget` before calling the same `store.createAutomation`
+  // the old IPC handler called directly — a remodeling, not a dropped field.
   automations: {
-    list: () => Promise<Automation[]>
-    listRuns: (args?: { automationId?: string }) => Promise<AutomationRun[]>
-    listExternalManagers: () => Promise<ExternalAutomationManager[]>
-    listExternalRuns: (input: ExternalAutomationRunsInput) => Promise<ExternalAutomationRunsPage>
-    createExternal: (input: ExternalAutomationCreateInput) => Promise<void>
-    updateExternal: (input: ExternalAutomationUpdateInput) => Promise<void>
-    runExternalAction: (input: ExternalAutomationActionInput) => Promise<void>
-    create: (input: AutomationCreateInput) => Promise<Automation>
-    update: (args: { id: string; updates: AutomationUpdateInput }) => Promise<Automation>
-    delete: (args: { id: string }) => Promise<void>
-    runNow: (args: { id: string }) => Promise<AutomationRun>
+    // Why: runPrecheck only ever runs inside the local dispatch handshake
+    // below — the precheck execution target (main/automations/
+    // precheck-runner.ts) is `{type:'local'}` only, resolved against this
+    // same process's store. It never executes for a remote host, so it stays
+    // local-dispatch machinery rather than a Phase 4 target; see
+    // markDispatchResult below.
     runPrecheck: (args: {
       automationId: string
       runId: string
     }) => Promise<AutomationPrecheckResult | null>
+    // Why: local IPC mechanics — markDispatchResult/rendererReady report a
+    // dispatch outcome back to the machine that just ran it, not a host
+    // capability an independent client calls, so they stay off the
+    // `automation.*` oRPC contract (Phase 5 slice S5). The dispatch *request*
+    // that used to pair with these over `onDispatchRequested` now arrives as
+    // the reverse `shellServices.automations.dispatch` call instead (see
+    // renderer/components/automations/use-automation-dispatch-events.ts and
+    // main/automations/service.ts `requestDispatch`) — this preload surface
+    // no longer carries it.
     markDispatchResult: (result: AutomationDispatchResult) => Promise<AutomationRun>
-    snapshotWorkspaceName: (args: { workspaceId: string; displayName: string }) => Promise<number>
     rendererReady: () => Promise<void>
-    onDispatchRequested: (callback: (request: AutomationDispatchRequest) => void) => () => void
   }
-  rateLimitResume: {
-    report: (report: RateLimitBannerReport) => Promise<RateLimitHit>
-    list: () => Promise<RateLimitResumeSchedule[]>
-    schedule: (hit: RateLimitHit) => Promise<RateLimitResumeSchedule>
-    cancel: (args: { id: string }) => Promise<RateLimitResumeSchedule>
-    runNow: (args: { id: string }) => Promise<RateLimitResumeSchedule>
-    markFired: (args: { id: string }) => Promise<RateLimitResumeSchedule>
-    markFailed: (args: { id: string; reason: string }) => Promise<RateLimitResumeSchedule>
-    markStale: (args: { id: string }) => Promise<RateLimitResumeSchedule>
-    rendererReady: () => Promise<void>
-    onDispatchRequested: (callback: (schedule: RateLimitResumeSchedule) => void) => () => void
-  }
-  wsl: {
-    isAvailable: () => Promise<boolean>
-    listDistros: () => Promise<string[]>
-  }
-  pwsh: {
-    isAvailable: () => Promise<boolean>
-  }
-  gitBash: {
-    isAvailable: () => Promise<boolean>
-  }
-  agentStatus: {
-    /** Listen for agent status updates forwarded from native hook receivers. */
-    onSet: (callback: (data: AgentStatusIpcPayload) => void) => () => void
-    /** Listen for main-process pane teardown that evicted a cached hook status. */
-    onClear: (callback: (data: { paneKey: string }) => void) => () => void
-    /** Return the current main-process hook cache after renderer hydration. */
-    getSnapshot: () => Promise<AgentStatusIpcPayload[]>
-    inferInterrupt: (request: AgentInterruptInferenceRequest) => Promise<boolean>
-    /** Listen for PTYs that still use a legacy numeric pane key but have
-     *  registry-backed UUID pane proof. */
-    onMigrationUnsupported: (callback: (entry: MigrationUnsupportedPtyEntry) => void) => () => void
-    onMigrationUnsupportedClear: (callback: (data: { ptyId: string }) => void) => () => void
-    getMigrationUnsupportedSnapshot: () => Promise<MigrationUnsupportedPtyEntry[]>
-    /** Drop a paneKey from the main-process hook cache and the on-disk
-     *  last-status file. Fire-and-forget. */
-    drop: (paneKey: string) => void
-    /** Drop every cached hook status under one terminal tab prefix.
-     *  Fire-and-forget. */
-    dropByTabPrefix: (tabId: string) => void
-    /** Permanently retire one pane's hook authority while siblings stay live. */
-    retirePaneAuthority: (paneKey: string) => void
-    /** Move hook authority when a live pane is detached into another tab. */
-    transferPaneAuthority: (args: {
-      fromPaneKey: string
-      toPaneKey: string
-      ptyId?: string
-    }) => void
-  }
+  // Why: already-covered, verified against `contract/host-capabilities.ts` —
+  // `host.wsl.isAvailable`/`listDistros`, `host.pwsh.isAvailable`,
+  // `host.gitBash.isAvailable` call the exact same `isWslAvailable`/
+  // `listWslDistros`/`isPwshAvailable`/`isGitBashAvailable` from `~main/wsl`/
+  // `~main/pwsh`/`~main/git-bash` (see `rpc/methods/host-capabilities.ts`).
+  // `windows-terminal-capability-read.ts` already routes an environment
+  // target through the contract; kept here only for the `target.kind ===
+  // 'local'` branch — collapsing that local branch (as `memory-state.ts`'s
+  // `diagnostics.memory` call now does for both targets) is separate Phase 5
+  // work, not yet done for this group.
+  /**
+   * shell-only: listNetworkInterfaces/getPairingQR/listDevices/revokeDevice/
+   * isWebSocketReady moved to the `mobile.*` oRPC contract
+   * (mobile-host-pairing.ts) — they describe a runtime host's own reachable
+   * addresses and device registry, not this shell. The three members left
+   * here inspect/repair the Windows Defender Firewall on the machine running
+   * this Electron shell, an OS-level operation with no runtime-host meaning.
+   */
   mobile: {
-    listNetworkInterfaces: () => Promise<{
-      interfaces: { name: string; address: string }[]
-    }>
-    getPairingQR: (args?: { address?: string; rotate?: boolean }) => Promise<
-      | { available: false }
-      | {
-          available: true
-          qrDataUrl: string
-          pairingUrl: string
-          endpoint: string
-          deviceId: string
-        }
-    >
     getWindowsFirewallStatus: (args?: { address?: string }) => Promise<
       | { supported: false }
       | {
@@ -2870,36 +1953,28 @@ export type PreloadApi = {
       { ok: true } | { ok: false; reason: 'cancelled' | 'failed' | 'unsupported' }
     >
     openWindowsNetworkSettings: () => Promise<boolean>
-    listDevices: () => Promise<{
-      devices: { deviceId: string; name: string; pairedAt: number; lastSeenAt: number }[]
-    }>
-    revokeDevice: (args: { deviceId: string }) => Promise<{ revoked: boolean }>
-    isWebSocketReady: () => Promise<{ ready: boolean; endpoint: string | null }>
   }
+  // Why: catalog reads, model download/delete, and OpenAI-key management
+  // moved to the `speech.models.*`/`speech.openaiKey.*` runtime contract —
+  // host-CRUD with no per-client identity, the same shape mobile already
+  // drives remotely (see `main/runtime/yiru-runtime.ts`'s
+  // `listMobileSpeechModels`/`downloadMobileSpeechModel`/
+  // `deleteMobileSpeechModel`/`getSpeechOpenAiKeyStatus` family and
+  // `dictation/state.ts`'s `refreshModelStates`, which now calls
+  // `speech.models.list` on the local target instead of this preload).
+  // `cancelDownload` (formerly here) had zero renderer callers and was
+  // dropped rather than migrated — `model-manager.ts`'s own
+  // `cancelDownload` stays, just no longer preload-exposed.
+  // What's left below is genuinely shell-only: microphone capture is local
+  // (getUserMedia -> preload -> main). Its lifecycle events now use
+  // `speech.events.subscribe`; the 16kHz audio feed does not.
+  // Model-download progress/failure now comes off the shared
+  // `speech.events.subscribe` stream instead (`speech-events-client.ts`),
+  // since that part of the flow has no per-client identity either.
   speech: {
-    getCatalog: () => Promise<SpeechModelManifest[]>
-    getModelStates: () => Promise<SpeechModelState[]>
-    getOpenAiApiKeyStatus: () => Promise<{ configured: boolean }>
-    saveOpenAiApiKey: (apiKey: string) => Promise<{ configured: boolean }>
-    clearOpenAiApiKey: () => Promise<{ configured: boolean }>
-    downloadModel: (modelId: string) => Promise<void>
-    cancelDownload: (modelId: string) => Promise<void>
-    deleteModel: (modelId: string) => Promise<void>
-    startDictation: (
-      modelId: string,
-      hotwords: string[] | undefined,
-      sessionId: string
-    ) => Promise<void>
-    feedAudio: (samples: Float32Array, sampleRate: number, sessionId?: string) => Promise<void>
-    stopDictation: (sessionId?: string) => Promise<void>
-    onPartialTranscript: (callback: (data: SpeechTranscriptEvent) => void) => () => void
-    onFinalTranscript: (callback: (data: SpeechTranscriptEvent) => void) => () => void
-    onDownloadProgress: (
-      callback: (data: { modelId: string; progress: number }) => void
-    ) => () => void
-    onReady: (callback: (data: SpeechLifecycleEvent) => void) => () => void
-    onStopped: (callback: (data: SpeechLifecycleEvent) => void) => () => void
-    onError: (callback: (data: SpeechErrorEvent) => void) => () => void
+    // Why: microphone permission belongs to the shell. Dictation lifecycle and
+    // audio chunks use `speech.dictation.*` on the selected runtime host.
+    ensureMicrophoneAccess: () => Promise<void>
   }
 }
 

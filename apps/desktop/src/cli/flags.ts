@@ -1,4 +1,3 @@
-import { REPEATED_FLAG_SEPARATOR } from './args'
 import { RuntimeClientError } from './runtime-client'
 
 export function getRequiredStringFlag(flags: Map<string, string | boolean>, name: string): string {
@@ -26,16 +25,6 @@ export function getOptionalStringFlag(
 ): string | undefined {
   const value = flags.get(name)
   return typeof value === 'string' && value.length > 0 ? value : undefined
-}
-
-export function getRepeatedStringFlag(
-  flags: Map<string, string | boolean>,
-  name: string
-): string[] {
-  const value = getOptionalStringFlag(flags, name)
-  return value === undefined
-    ? []
-    : value.split(REPEATED_FLAG_SEPARATOR).filter((entry) => entry.length > 0)
 }
 
 export function getOptionalNumberFlag(
@@ -103,15 +92,4 @@ export function getRequiredFiniteNumber(
     throw new RuntimeClientError('invalid_argument', `--${name} must be a valid number`)
   }
   return value
-}
-
-export function getOptionalNullableNumberFlag(
-  flags: Map<string, string | boolean>,
-  name: string
-): number | null | undefined {
-  const value = flags.get(name)
-  if (value === 'null') {
-    return null
-  }
-  return getOptionalNumberFlag(flags, name)
 }

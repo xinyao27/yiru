@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { DiagnosticsBundlePayload, DiagnosticsStatusPayload } from '~preload/api-types'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
@@ -26,7 +28,7 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
 
   const refreshStatus = useCallback(async (): Promise<void> => {
     try {
-      const next = await window.api.diagnostics.getStatus()
+      const next = await rendererHostClient.diagnostics.getStatus()
       if (mountedRef.current) {
         setStatus(next)
       }
@@ -44,7 +46,9 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     return () => {
       mountedRef.current = false
       if (activeBundleSubmissionIdRef.current) {
-        void window.api.diagnostics.discardBundlePreview(activeBundleSubmissionIdRef.current)
+        void rendererHostClient.diagnostics.discardBundlePreview(
+          activeBundleSubmissionIdRef.current
+        )
       }
     }
   }, [])
@@ -52,9 +56,9 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
   const handleCollectBundle = useCallback(async (): Promise<void> => {
     setCollecting(true)
     try {
-      const nextBundle = await window.api.diagnostics.collectBundle()
+      const nextBundle = await rendererHostClient.diagnostics.collectBundle()
       if (!mountedRef.current) {
-        await window.api.diagnostics.discardBundlePreview(nextBundle.bundleSubmissionId)
+        await rendererHostClient.diagnostics.discardBundlePreview(nextBundle.bundleSubmissionId)
         return
       }
       // Why: unmount cleanup may run before a passive ref mirror would fire;
@@ -86,7 +90,7 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     }
     setOpeningPreview(true)
     try {
-      await window.api.diagnostics.openBundlePreview(bundle.bundleSubmissionId)
+      await rendererHostClient.diagnostics.openBundlePreview(bundle.bundleSubmissionId)
       if (!mountedRef.current) {
         return
       }
@@ -114,7 +118,7 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     }
     setUploading(true)
     try {
-      const upload = await window.api.diagnostics.uploadBundle(bundle.bundleSubmissionId)
+      const upload = await rendererHostClient.diagnostics.uploadBundle(bundle.bundleSubmissionId)
       if (!mountedRef.current) {
         return
       }
@@ -148,7 +152,7 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     }
     setDiscarding(true)
     try {
-      await window.api.diagnostics.discardBundlePreview(bundle.bundleSubmissionId)
+      await rendererHostClient.diagnostics.discardBundlePreview(bundle.bundleSubmissionId)
       if (!mountedRef.current) {
         return
       }
@@ -178,7 +182,7 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     }
     setCopyingTicket(true)
     try {
-      await window.api.ui.writeClipboardText(ticketId)
+      await shellClient.ui.writeClipboardText(ticketId)
       if (!mountedRef.current) {
         return
       }

@@ -1,4 +1,4 @@
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import type { ProjectSourceContext } from '~shared/project-source-context'
 import type { GitHubWorkItem, GitHubWorkItemDetails } from '~shared/types'
 
@@ -38,24 +38,12 @@ export async function lookupGitHubWorkItemForSource(
   args: GitHubWorkItemLookupArgs
 ): Promise<GitHubWorkItem | null> {
   const target = getGitHubSourceRuntimeTarget(args.sourceContext)
-  const item =
-    target.kind === 'environment'
-      ? await callRuntimeRpc<Omit<GitHubWorkItem, 'repoId'> | null>(
-          target,
-          'github.workItem',
-          {
-            repo: runtimeRepoId(args),
-            number: args.number,
-            type: args.type
-          },
-          { timeoutMs: 30_000 }
-        )
-      : await window.api.gh.workItem({
-          repoPath: args.repoPath,
-          repoId: args.repoId,
-          number: args.number,
-          type: args.type
-        })
+  const item = await callRuntimeOrpc(
+    target,
+    (client) => client.github.workItem,
+    { repo: runtimeRepoId(args), number: args.number, type: args.type },
+    { timeoutMs: 30_000 }
+  )
   return item ? ({ ...item, repoId: args.repoId } as GitHubWorkItem) : null
 }
 
@@ -63,28 +51,18 @@ export async function lookupGitHubWorkItemByOwnerRepoForSource(
   args: GitHubWorkItemByOwnerRepoLookupArgs
 ): Promise<GitHubWorkItem | null> {
   const target = getGitHubSourceRuntimeTarget(args.sourceContext)
-  const item =
-    target.kind === 'environment'
-      ? await callRuntimeRpc<Omit<GitHubWorkItem, 'repoId'> | null>(
-          target,
-          'github.workItemByOwnerRepo',
-          {
-            repo: runtimeRepoId(args),
-            owner: args.owner,
-            ownerRepo: args.repo,
-            number: args.number,
-            type: args.type
-          },
-          { timeoutMs: 30_000 }
-        )
-      : await window.api.gh.workItemByOwnerRepo({
-          repoPath: args.repoPath,
-          repoId: args.repoId,
-          owner: args.owner,
-          repo: args.repo,
-          number: args.number,
-          type: args.type
-        })
+  const item = await callRuntimeOrpc(
+    target,
+    (client) => client.github.workItemByOwnerRepo,
+    {
+      repo: runtimeRepoId(args),
+      owner: args.owner,
+      ownerRepo: args.repo,
+      number: args.number,
+      type: args.type
+    },
+    { timeoutMs: 30_000 }
+  )
   return item ? ({ ...item, repoId: args.repoId } as GitHubWorkItem) : null
 }
 
@@ -93,22 +71,16 @@ export function lookupGitHubWorkItemDetailsForSource(
 ): Promise<GitHubWorkItemDetails | null> {
   const sourceContext = args.sourceContext
   const runtimeHost = getGitHubSourceRuntimeHost(sourceContext)
-  if (runtimeHost) {
-    return callRuntimeRpc<GitHubWorkItemDetails | null>(
-      { kind: 'environment', environmentId: runtimeHost.environmentId },
-      'github.workItemDetails',
-      {
-        repo: getGitHubRuntimeRepoId(sourceContext, args.repoId),
-        number: args.number,
-        type: args.type
-      },
-      { timeoutMs: 30_000 }
-    )
-  }
-  return window.api.gh.workItemDetails({
-    repoPath: args.repoPath,
-    repoId: args.repoId,
-    number: args.number,
-    type: args.type
-  })
+  return callRuntimeOrpc(
+    runtimeHost
+      ? { kind: 'environment', environmentId: runtimeHost.environmentId }
+      : { kind: 'local' },
+    (client) => client.github.workItemDetails,
+    {
+      repo: getGitHubRuntimeRepoId(sourceContext, args.repoId),
+      number: args.number,
+      type: args.type
+    },
+    { timeoutMs: 30_000 }
+  )
 }

@@ -14,6 +14,7 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
 import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identity-display'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { useActiveWorktree, useRepoById, useWorktreeMap } from '~renderer/store/selectors'
 import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
@@ -82,7 +83,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
           branchName,
           settings,
           activeRepo.id,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )
@@ -94,7 +94,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
           activeRepo.id,
           branchName,
           settings,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )
@@ -185,7 +184,7 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
       return
     }
     try {
-      await window.api.ui.writeClipboardText(diffCommentsPrompt)
+      await shellClient.ui.writeClipboardText(diffCommentsPrompt)
       showDiffCommentsCopied(true)
     } catch {
       // Why: swallow — clipboard write can fail when the window isn't focused.

@@ -17,6 +17,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
 import { basename, dirname } from '~renderer/lib/path'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeSearchFileMatchCount } from '~shared/search-match-count'
 import type { SearchFileResult, SearchMatch } from '~shared/types'
 
@@ -113,7 +114,7 @@ export function FileResultRow({
             />
             <ContextMenuContent>
               <ContextMenuItem
-                onClick={() => window.api.ui.writeClipboardText(fileResult.relativePath)}
+                onClick={() => shellClient.ui.writeClipboardText(fileResult.relativePath)}
               >
                 <Copy className="size-3.5" />
                 {translate(
@@ -143,7 +144,7 @@ export function MatchResultRow({
 }: {
   match: SearchMatch
   relativePath: string
-  onClick: () => void
+  onClick: (preview: boolean) => void
 }): React.JSX.Element {
   // Highlight the matched text within the line
   const parts = useMemo(() => {
@@ -195,7 +196,7 @@ export function MatchResultRow({
                 event.preventDefault()
               }
             }}
-            onClick={onClick}
+            onClick={(event) => onClick(event.detail < 2)}
           >
             <span className="text-muted-foreground mt-px flex-shrink-0 text-[10px] tabular-nums">
               {match.line}
@@ -212,7 +213,7 @@ export function MatchResultRow({
       />
       <ContextMenuContent>
         <ContextMenuItem
-          onClick={() => window.api.ui.writeClipboardText(`${relativePath}#L${match.line}`)}
+          onClick={() => shellClient.ui.writeClipboardText(`${relativePath}#L${match.line}`)}
         >
           <Copy className="size-3.5" />
           {translate(

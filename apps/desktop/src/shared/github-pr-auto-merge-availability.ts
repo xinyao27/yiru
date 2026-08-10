@@ -52,9 +52,3 @@ export function canEnableGitHubPRAutoMerge(item: GitHubPRAutoMergeAvailabilityIn
     item.autoMergeEnabled !== true && item.mergeQueueRequired !== true && canRequestWhenReady(item)
   )
 }
-
-export function canShowGitHubPRAutoMergeControl(item: GitHubPRAutoMergeAvailabilityInput): boolean {
-  // Why: GitHub auto-merge waits for branch requirements, not arbitrary optional CI.
-  // Keep already-enabled PRs visible so users can disable the setting.
-  return isOpenPR(item) && (item.autoMergeEnabled === true || canRequestWhenReady(item))
-}

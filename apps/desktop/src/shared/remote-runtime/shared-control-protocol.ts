@@ -1,7 +1,13 @@
+import {
+  decodeRuntimeOrpcBinaryFrame,
+  decodeRuntimeOrpcSideChannelBinaryFrame,
+  decodeRuntimeOrpcTextFrame,
+  encodeRuntimeOrpcBinaryFrame,
+  encodeRuntimeOrpcTextFrame
+} from '@yiru/runtime-protocol/orpc-peer-frame'
 import type WebSocket from 'ws'
 
-import { decrypt } from '../e2ee-crypto'
-import { encrypt } from '../e2ee-crypto'
+import { decrypt, decryptBytes, encrypt, encryptBytes } from '../e2ee-crypto'
 import { RemoteRuntimeClientError } from './client'
 import { invalidRemoteRuntimeResponseError, parseRemoteRuntimeRpcFrame } from './request-frames'
 import type {
@@ -19,6 +25,7 @@ export function parseSharedControlFrame(
       type: 'frame'
       frame: Exclude<ReturnType<typeof parseRemoteRuntimeRpcFrame>, { type: 'error' }>
     }
+  | { type: 'orpc'; frame: string }
   | { type: 'error'; error: RemoteRuntimeClientError } {
   if (!sharedKey) {
     return {
@@ -36,11 +43,56 @@ export function parseSharedControlFrame(
   if (state === 'awaiting_authenticated') {
     return { type: 'auth', plaintext }
   }
+  const orpcFrame = decodeRuntimeOrpcTextFrame(plaintext)
+  if (orpcFrame !== null) {
+    return { type: 'orpc', frame: orpcFrame }
+  }
   const parsed = parseRemoteRuntimeRpcFrame(plaintext)
   if (parsed.type === 'error') {
     return parsed
   }
   return { type: 'frame', frame: parsed }
+}
+
+export function parseSharedControlBinaryFrame(
+  frame: Uint8Array<ArrayBufferLike>,
+  sharedKey: Uint8Array | null,
+  state: SharedControlConnectionState
+):
+  | { type: 'orpc'; frame: Uint8Array<ArrayBufferLike> }
+  | {
+      type: 'orpc-side-channel'
+      requestId: string
+      frame: Uint8Array<ArrayBufferLike>
+    }
+  | { type: 'error'; error: RemoteRuntimeClientError } {
+  if (!sharedKey || state !== 'ready') {
+    return {
+      type: 'error',
+      error: invalidRemoteRuntimeResponseError(
+        'Runtime host returned binary data before shared control was ready.'
+      )
+    }
+  }
+  const plaintext = decryptBytes(frame, sharedKey)
+  const orpcFrame = plaintext ? decodeRuntimeOrpcBinaryFrame(plaintext) : null
+  if (orpcFrame) {
+    return { type: 'orpc', frame: orpcFrame }
+  }
+  const sideChannel = plaintext ? decodeRuntimeOrpcSideChannelBinaryFrame(plaintext) : null
+  if (!sideChannel) {
+    return {
+      type: 'error',
+      error: invalidRemoteRuntimeResponseError(
+        'Runtime host returned an invalid encrypted oRPC binary frame.'
+      )
+    }
+  }
+  return {
+    type: 'orpc-side-channel',
+    requestId: sideChannel.requestId,
+    frame: sideChannel.payload
+  }
 }
 
 export function getSubscriptionId(result: unknown): string | null {
@@ -133,6 +185,33 @@ export function sendSharedControlEncrypted(args: {
   return true
 }
 
+export function sendSharedControlOrpcText(args: {
+  state: SharedControlConnectionState
+  ws: WebSocket | null
+  sharedKey: Uint8Array | null
+  frame: string
+}): boolean {
+  if (!isSharedControlWritable(args)) {
+    return false
+  }
+  args.ws.send(encrypt(encodeRuntimeOrpcTextFrame(args.frame), args.sharedKey))
+  return true
+}
+
+export function sendSharedControlOrpcBinary(args: {
+  state: SharedControlConnectionState
+  ws: WebSocket | null
+  sharedKey: Uint8Array | null
+  frame: Uint8Array<ArrayBufferLike>
+}): boolean {
+  if (!isSharedControlWritable(args)) {
+    return false
+  }
+  const plaintext = encodeRuntimeOrpcBinaryFrame(args.frame)
+  args.ws.send(Buffer.from(encryptBytes(plaintext, args.sharedKey)), { binary: true })
+  return true
+}
+
 export function toRemoteRuntimeClientError(error: unknown): RemoteRuntimeClientError {
   if (error instanceof RemoteRuntimeClientError) {
     return error
@@ -148,4 +227,16 @@ function cleanupBySubscriptionId(
   subscriptionId: string
 ): { method: string; params: unknown } {
   return { method, params: { subscriptionId } }
+}
+
+function isSharedControlWritable(args: {
+  state: SharedControlConnectionState
+  ws: WebSocket | null
+  sharedKey: Uint8Array | null
+}): args is {
+  state: 'ready'
+  ws: WebSocket
+  sharedKey: Uint8Array
+} {
+  return args.state === 'ready' && args.ws?.readyState === 1 && args.sharedKey !== null
 }

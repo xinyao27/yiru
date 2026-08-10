@@ -4,6 +4,7 @@ import { resolveCreateReviewDraftTitle } from '~renderer/components/workspace-pa
 import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
 import { translate } from '~renderer/i18n/i18n'
 import { generateRuntimePullRequestFields } from '~renderer/runtime/git-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 import {
@@ -175,7 +176,7 @@ export function useSourceControlCreateReviewSubmit(scope: SourceControlCreateRev
             }
           )
           if (openChecks && resolvedPrCreationDefaults.openAfterCreate) {
-            window.api.shell.openUrl(result.url)
+            shellClient.shell.openUrl(result.url)
           }
           setCreatePrIntentNoticeForWorktree(token.worktreeId, null)
           return true

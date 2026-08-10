@@ -30,7 +30,6 @@ import {
 
 import { recordSubprocessSpawn } from '../diagnostics/main-thread-churn-probe'
 import { withGitSpan } from '../observability/instrumentation'
-import { getSpawnArgsForWindows, isWindowsBatchScript, resolveWindowsCommand } from '../win32-utils'
 import { getDefaultWslDistro, parseWslPath, toWindowsWslPath, type WslPathInfo } from '../wsl'
 import { addWslEnvKeys } from '../wsl-env'
 import {
@@ -291,35 +290,6 @@ type GitExecOptions = {
   useConfiguredSshCommandForNetwork?: boolean
 }
 
-type CommandExecOptions = {
-  cwd?: string
-  encoding?: BufferEncoding
-  maxBuffer?: number
-  timeout?: number
-  env?: NodeJS.ProcessEnv
-  signal?: AbortSignal
-}
-
-function isMissingCommandError(error: unknown): boolean {
-  return Boolean(
-    error && typeof error === 'object' && (error as { code?: unknown }).code === 'ENOENT'
-  )
-}
-
-function hasPathSeparator(command: string): boolean {
-  return command.includes('/') || command.includes('\\')
-}
-
-function shouldRetryWindowsCommandShim(error: unknown, resolved: ResolvedCommand): boolean {
-  return (
-    process.platform === 'win32' &&
-    resolved.wsl === null &&
-    isMissingCommandError(error) &&
-    !hasPathSeparator(resolved.binary) &&
-    !/\.[A-Za-z0-9]+$/.test(resolved.binary)
-  )
-}
-
 function createAbortError(): Error {
   const error = new Error('The operation was aborted.')
   error.name = 'AbortError'
@@ -458,100 +428,6 @@ function execFileCapture(
       }, options.timeout)
     }
     options.signal?.addEventListener('abort', onAbort, { once: true })
-  })
-}
-
-async function spawnCommandCapture(
-  command: string,
-  args: string[],
-  options: CommandExecOptions
-): Promise<{ stdout: string; stderr: string }> {
-  const { spawnCmd, spawnArgs } = getSpawnArgsForWindows(command, args)
-  return new Promise((resolve, reject) => {
-    if (options.signal?.aborted) {
-      reject(createAbortError())
-      return
-    }
-    let settled = false
-    let stdout = ''
-    let stderr = ''
-    let stdoutBytes = 0
-    let stderrBytes = 0
-    const spawnStartedAt = performance.now()
-    const child = spawn(spawnCmd, spawnArgs, {
-      cwd: options.cwd,
-      env: options.env,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      windowsHide: true
-    })
-    recordSubprocessSpawn(spawnCmd, spawnArgs, performance.now() - spawnStartedAt)
-    let timer: NodeJS.Timeout | null = null
-    const onAbort = (): void => {
-      killSpawnedCommandTree(child)
-      finish(createAbortError())
-    }
-    const cleanupListeners = (): void => {
-      if (timer) {
-        clearTimeout(timer)
-        timer = null
-      }
-      options.signal?.removeEventListener('abort', onAbort)
-      child.stdout?.off('data', onStdoutData)
-      child.stderr?.off('data', onStderrData)
-      child.off('error', onError)
-      child.off('close', onClose)
-    }
-    const finish = (error: Error | null): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      cleanupListeners()
-      if (error) {
-        reject(Object.assign(error, { stdout, stderr }))
-        return
-      }
-      resolve({ stdout, stderr })
-    }
-    timer = options.timeout
-      ? setTimeout(() => {
-          killSpawnedCommandTree(child)
-          finish(new Error(`${command} timed out.`))
-        }, options.timeout)
-      : null
-    options.signal?.addEventListener('abort', onAbort, { once: true })
-    function onStdoutData(chunk: Buffer): void {
-      stdoutBytes += chunk.byteLength
-      if (options.maxBuffer && stdoutBytes > options.maxBuffer) {
-        killSpawnedCommandTree(child)
-        finish(new Error(`${command} stdout exceeded maxBuffer.`))
-        return
-      }
-      stdout += chunk.toString(options.encoding ?? 'utf-8')
-    }
-    function onStderrData(chunk: Buffer): void {
-      stderrBytes += chunk.byteLength
-      if (options.maxBuffer && stderrBytes > options.maxBuffer) {
-        killSpawnedCommandTree(child)
-        finish(new Error(`${command} stderr exceeded maxBuffer.`))
-        return
-      }
-      stderr += chunk.toString(options.encoding ?? 'utf-8')
-    }
-    function onError(error: Error): void {
-      finish(error)
-    }
-    function onClose(code: number | null): void {
-      if (code === 0) {
-        finish(null)
-        return
-      }
-      finish(new Error(`${command} exited with ${code}.`))
-    }
-    child.stdout?.on('data', onStdoutData)
-    child.stderr?.on('data', onStderrData)
-    child.on('error', onError)
-    child.on('close', onClose)
   })
 }
 
@@ -850,49 +726,6 @@ export async function gitExecFileAsync(
       return { stdout: stdout as string, stderr: stderr as string }
     }
   )
-}
-
-/**
- * Async command execution with the same WSL cwd translation as repo-scoped git.
- * Keep this for fixed binary+argv call sites; never pass shell fragments.
- */
-export async function commandExecFileAsync(
-  command: string,
-  args: string[],
-  options: CommandExecOptions = {}
-): Promise<{ stdout: string; stderr: string }> {
-  const resolved = resolveCommand(command, args, options.cwd)
-  const binary =
-    resolved.wsl === null ? resolveWindowsCommand(resolved.binary, options.env) : resolved.binary
-  if (isWindowsBatchScript(binary)) {
-    return spawnCommandCapture(binary, resolved.args, {
-      ...options,
-      cwd: resolved.cwd
-    })
-  }
-  try {
-    const { stdout, stderr } = await execFileCapture(binary, resolved.args, {
-      cwd: resolved.cwd,
-      encoding: options.encoding ?? 'utf-8',
-      maxBuffer: options.maxBuffer,
-      timeout: options.timeout,
-      env: options.env,
-      signal: options.signal
-    })
-    return { stdout: stdout as string, stderr: stderr as string }
-  } catch (error) {
-    if (shouldRetryWindowsCommandShim(error, resolved)) {
-      return spawnCommandCapture(
-        resolveWindowsCommand(`${resolved.binary}.cmd`, options.env),
-        resolved.args,
-        {
-          ...options,
-          cwd: resolved.cwd
-        }
-      )
-    }
-    throw error
-  }
 }
 
 /**

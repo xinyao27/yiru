@@ -81,7 +81,9 @@ export function validateDragTarget(value: {
   }
 }
 
-export function validateMouseButton(mouseButton: string | undefined): void {
+export function validateMouseButton(
+  mouseButton: string | undefined
+): asserts mouseButton is 'left' | 'middle' | 'right' | undefined {
   if (
     mouseButton !== undefined &&
     mouseButton !== 'left' &&
@@ -95,7 +97,9 @@ export function validateMouseButton(mouseButton: string | undefined): void {
   }
 }
 
-export function validateScrollDirection(direction: string): void {
+export function validateScrollDirection(
+  direction: string
+): asserts direction is 'down' | 'left' | 'right' | 'up' {
   if (direction !== 'up' && direction !== 'down' && direction !== 'left' && direction !== 'right') {
     throw new RuntimeClientError(
       'invalid_argument',

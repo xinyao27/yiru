@@ -9,5 +9,6 @@
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": false
-  }
+  },
+  "exclude": ["src/contract"]
 }

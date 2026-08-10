@@ -6,6 +6,8 @@ import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { listSkillManageFiles } from '~renderer/runtime/skill-manage-client'
 import {
   skillDirectoryName,
   skillPlacements,
@@ -38,7 +40,7 @@ function SkillDetailActions({
   onRemove
 }: SkillDetailProps): React.JSX.Element {
   const revealSkill = async (): Promise<void> => {
-    const result = await window.api.shell.openInFileManager(skill.skillFilePath)
+    const result = await shellClient.shell.openInFileManager(skill.skillFilePath)
     if (!result.ok) {
       toast.error(
         translate('auto.components.skills.SkillsPage.995fde8337', 'Could not reveal skill file')
@@ -126,8 +128,7 @@ export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
   useEffect(() => {
     let cancelled = false
     setListing(null)
-    window.api.skills
-      .listSkillFiles(directoryPath)
+    listSkillManageFiles(directoryPath)
       .then((result) => {
         if (!cancelled) {
           setListing(result)

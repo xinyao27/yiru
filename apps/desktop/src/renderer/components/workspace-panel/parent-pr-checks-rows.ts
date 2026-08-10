@@ -258,7 +258,6 @@ function getGitHubChecksEntry(
     args.repo.id,
     prChecksCacheSuffix(review.number, prRepo, review.headSha),
     args.settings,
-    args.repo.connectionId,
     args.repo.executionHostId,
     true
   )
@@ -267,7 +266,6 @@ function getGitHubChecksEntry(
     args.repo.id,
     prChecksCacheSuffix(review.number, prRepo),
     args.settings,
-    args.repo.connectionId,
     args.repo.executionHostId,
     true
   )
@@ -283,7 +281,6 @@ function getHostedReviewKey(
     branch,
     args.settings,
     args.repo.id,
-    args.repo.connectionId,
     args.repo.executionHostId,
     true
   )

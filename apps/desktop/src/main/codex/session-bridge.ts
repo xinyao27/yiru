@@ -12,10 +12,7 @@ import {
 import { dirname, isAbsolute, join, relative, sep } from 'node:path'
 
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './home-paths'
-import {
-  listCodexSessionJsonlFiles,
-  listCodexSessionJsonlFilesIncrementally
-} from './session-file-listing'
+import { listCodexSessionJsonlFilesIncrementally } from './session-file-listing'
 type LegacyCopiedSessionMarker = {
   sourcePath: string
   sourceSize: number
@@ -31,24 +28,6 @@ export type LegacyCopiedCodexSessionBridgeScanPreference = {
 }
 
 let backgroundSessionBridgeTask: Promise<void> | null = null
-
-/**
- * Synchronously mirrors system session files into the managed runtime home.
- *
- * `sourceCodexHomePath` overrides the default ~/.codex history source for users
- * who run Codex with a custom CODEX_HOME; it only affects history discovery.
- */
-export function syncSystemCodexSessionsIntoManagedHome(sourceCodexHomePath?: string): void {
-  const systemSessionsRoot = join(sourceCodexHomePath || getSystemCodexHomePath(), 'sessions')
-  if (!existsSync(systemSessionsRoot)) {
-    return
-  }
-
-  const managedSessionsRoot = join(getYiruManagedCodexHomePath(), 'sessions')
-  for (const systemSessionFilePath of listCodexSessionJsonlFiles(systemSessionsRoot)) {
-    bridgeSystemCodexSessionFile(systemSessionsRoot, managedSessionsRoot, systemSessionFilePath)
-  }
-}
 
 /**
  * Starts a single background bridge task for historical system sessions.

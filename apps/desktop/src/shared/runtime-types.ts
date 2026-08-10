@@ -1,10 +1,8 @@
 import type { RuntimeCapability } from '@yiru/runtime-protocol/capabilities'
 import type * as RuntimeMobileTypes from '@yiru/runtime-protocol/mobile-runtime-types'
-import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: shared type definitions for all runtime RPC methods live in one file for discoverability and import simplicity. */
 import type { AgentStatusEntry, AgentStatusOrchestrationContext } from '@yiru/workbench-model/agent'
 
-import type { StartupCommandDelivery } from './codex-startup-delivery'
 import type {
   RuntimeMarkdownReadTabResult,
   RuntimeMarkdownSaveTabResult
@@ -468,33 +466,6 @@ export type RuntimeTerminalAgentStatus = {
 }
 
 export type RuntimeTerminalPresentation = 'background' | 'focused'
-type RuntimeTerminalCreateBaseRequestPayload = {
-  requestId: string
-  worktreeId?: string
-  afterTabId?: string
-  targetGroupId?: string
-  command?: string
-  cwd?: string
-  env?: Record<string, string>
-  envToDelete?: string[]
-  launchConfig?: SleepingAgentLaunchConfig
-  launchToken?: string
-  launchAgent?: TuiAgent
-  viewMode?: 'terminal' | 'chat'
-  startupCommandDelivery?: StartupCommandDelivery
-  title?: string
-  activate?: boolean
-  presentation?: RuntimeTerminalPresentation
-}
-
-export type RuntimeTerminalCreateRequestPayload =
-  | (RuntimeTerminalCreateBaseRequestPayload & { source?: undefined })
-  | (RuntimeTerminalCreateBaseRequestPayload & {
-      worktreeId: string
-      // Why: only the host-owned runtime-session bridge may bypass the renderer's
-      // active-runtime local terminal guard; ordinary UI requests must omit this.
-      source: 'runtime-session'
-    })
 
 export type RuntimeTerminalCreate = {
   handle: string

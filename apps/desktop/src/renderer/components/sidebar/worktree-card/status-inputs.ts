@@ -50,16 +50,3 @@ export function selectTerminalLayoutRootsForWorktree(
   }
   return out
 }
-
-export function selectTerminalLayoutRootsForWorktrees(
-  state: WorktreeCardLayoutRootInputState,
-  worktreeIds: readonly string[]
-): Record<string, TerminalPaneLayoutNode | null | undefined> {
-  const out: Record<string, TerminalPaneLayoutNode | null | undefined> = {}
-  for (const worktreeId of worktreeIds) {
-    for (const tab of state.tabsByWorktree[worktreeId] ?? []) {
-      out[tab.id] = state.terminalLayoutsByTabId[tab.id]?.root
-    }
-  }
-  return out
-}

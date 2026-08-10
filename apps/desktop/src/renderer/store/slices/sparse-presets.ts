@@ -1,5 +1,7 @@
 import type { StateCreator } from 'zustand'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { SparsePreset } from '~shared/types'
 
 import type { AppState } from '../types'
@@ -99,7 +101,11 @@ export const createSparsePresetsSlice: StateCreator<AppState, [], [], SparsePres
       sparsePresetsErrorByRepo: { ...s.sparsePresetsErrorByRepo, [repoId]: undefined }
     }))
     try {
-      const presets = await window.api.sparsePresets.list({ repoId })
+      const { presets } = await callRuntimeOrpc(
+        getActiveRuntimeTarget(get().settings),
+        (client) => client.repo.sparsePresets,
+        { repo: repoId }
+      )
       set((s) => ({
         sparsePresetsByRepo: { ...s.sparsePresetsByRepo, [repoId]: presets },
         sparsePresetsLoadingByRepo: { ...s.sparsePresetsLoadingByRepo, [repoId]: false },
@@ -132,7 +138,16 @@ export const createSparsePresetsSlice: StateCreator<AppState, [], [], SparsePres
           return null
         }
       }
-      const saved = await window.api.sparsePresets.save(args)
+      const { preset: saved } = await callRuntimeOrpc(
+        getActiveRuntimeTarget(get().settings),
+        (client) => client.repo.saveSparsePreset,
+        {
+          repo: args.repoId,
+          ...(args.id ? { id: args.id } : {}),
+          name: args.name,
+          directories: args.directories
+        }
+      )
       set((s) => {
         const existing = s.sparsePresetsByRepo[args.repoId]
         if (existing === undefined) {
@@ -177,7 +192,11 @@ export const createSparsePresetsSlice: StateCreator<AppState, [], [], SparsePres
       }
     }))
     try {
-      await window.api.sparsePresets.remove({ repoId, presetId })
+      await callRuntimeOrpc(
+        getActiveRuntimeTarget(get().settings),
+        (client) => client.repo.removeSparsePreset,
+        { repo: repoId, presetId }
+      )
       publishRendererCommandResult({
         type: 'sparse-preset',
         operation: 'remove',

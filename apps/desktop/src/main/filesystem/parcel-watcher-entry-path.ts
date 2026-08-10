@@ -1,15 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-type ElectronAppPath = { getAppPath(): string; isPackaged: boolean }
-
-function loadElectronApp(): ElectronAppPath | null {
-  try {
-    return require('electron').app ?? null
-  } catch {
-    return null
-  }
-}
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 export function resolveWatcherProcessEntryPath(
   appPath: string,
@@ -51,9 +43,12 @@ export function resolveWatcherProcessEntryPathWithoutApp(
 }
 
 export function getWatcherProcessEntryPath(): string {
-  const app = loadElectronApp()
-  if (app) {
-    return resolveWatcherProcessEntryPath(app.getAppPath(), app.isPackaged)
+  const pathsProvider = getRuntimeHostPathsProvider()
+  if (pathsProvider.isPackaged()) {
+    return resolveWatcherProcessEntryPath(pathsProvider.appPath(), true)
   }
-  return resolveWatcherProcessEntryPathWithoutApp(process.cwd(), process.resourcesPath)
+  return resolveWatcherProcessEntryPathWithoutApp(
+    pathsProvider.appPath(),
+    pathsProvider.resourcesPath() ?? undefined
+  )
 }

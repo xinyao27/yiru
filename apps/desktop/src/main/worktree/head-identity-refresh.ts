@@ -1,12 +1,9 @@
-import type { BrowserWindow } from 'electron'
-
 import { readGitCommonHeadIdentities } from './head-identity-reader'
 import { notifyWorktreeHeadIdentitiesChanged } from './remote'
 
 type HeadIdentityWatchHost = {
   path: string
   repos: ReadonlyMap<string, unknown>
-  mainWindow: BrowserWindow
   disposed: boolean
 }
 
@@ -36,7 +33,7 @@ export async function refreshWorktreeHeadIdentities(
   state: WorktreeHeadIdentityRefreshState,
   emit: boolean
 ): Promise<void> {
-  if (host.disposed || host.mainWindow.isDestroyed()) {
+  if (host.disposed) {
     return
   }
   if (state.inFlight) {
@@ -47,7 +44,7 @@ export async function refreshWorktreeHeadIdentities(
   state.inFlight = true
   try {
     const identities = await readGitCommonHeadIdentities(host.path)
-    if (host.disposed || host.mainWindow.isDestroyed()) {
+    if (host.disposed) {
       return
     }
     const baseline = state.baseline
@@ -64,7 +61,7 @@ export async function refreshWorktreeHeadIdentities(
       return
     }
     for (const repoId of host.repos.keys()) {
-      notifyWorktreeHeadIdentitiesChanged(host.mainWindow, repoId, changed)
+      notifyWorktreeHeadIdentitiesChanged(repoId, changed)
     }
   } catch (error) {
     console.warn(`[worktree-base-watcher] head identity read failed for ${host.path}:`, error)

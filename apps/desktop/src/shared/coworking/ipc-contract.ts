@@ -44,25 +44,13 @@ export type CoworkingRequesterRoute = {
 
 export type CoworkingRequesterInvokeArgs = CoworkingRequesterRoute & {
   method: CoworkingRequesterInvokeMethod
-  params: unknown
+  params: Record<string, unknown>
 }
 
 export type CoworkingRequesterSubscriptionArgs = CoworkingRequesterRoute & {
   subscriptionId: string
   method: CoworkingRequesterSubscriptionMethod
-  params: unknown
-}
-
-export type CoworkingRequesterSubscriptionStartResult = {
-  subscriptionId: string
-}
-
-export type CoworkingRequesterSubscriptionStopArgs = {
-  subscriptionId: string
-}
-
-export type CoworkingRequesterSubscriptionStopResult = {
-  stopped: boolean
+  params: Record<string, unknown>
 }
 
 export type CoworkingRequesterTransportErrorCode =

@@ -1,8 +1,8 @@
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: repository hook saves synchronize debounced persistence state with external repo settings. */
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { useAppStore } from '~renderer/store'
 import { resolveHookCommandSourcePolicy } from '~shared/hook-command-source-policy'
 import type {
@@ -60,7 +60,7 @@ export function RepositoryHooksSection({
 }: RepositoryHooksSectionProps): React.JSX.Element {
   // Why: this component uses the lightweight translate() helper; subscribe here
   // so render-time option/copy builders refresh when the UI language changes.
-  useTranslation()
+  useUiLocale()
   const settingsSearchQuery = useAppStore((s) => s.settingsSearchQuery)
   const selectedHostId = getRepoExecutionHostId(repo)
   const repoHostIdentity = `${selectedHostId}\0${repo.id}`

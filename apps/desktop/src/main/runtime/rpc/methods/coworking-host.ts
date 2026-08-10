@@ -1,15 +1,17 @@
+import type {
+  CoworkingPairedRuntimeCanonicalizeParams,
+  CoworkingPairedRuntimeInspectParams,
+  CoworkingPairedRuntimeInvokeParams,
+  CoworkingPairedRuntimeReleaseChannelParams,
+  CoworkingPairedRuntimeRevokeWorktreeParams,
+  CoworkingPairedRuntimeSubscribeParams,
+  CoworkingPairedRuntimeWorktreeCatalogParams,
+  RuntimeCoworkingExecutionResult,
+  RuntimeCoworkingTerminalEvent,
+  RuntimeCoworkingWorktreeCatalog
+} from '@yiru/runtime-protocol/contract'
 import type { CoworkingHostSubscription } from '~main/coworking/execution-gateway'
 import { isCoworkingMutationOperation } from '~shared/coworking/operation-contract'
-import {
-  CoworkingPairedRuntimeCanonicalizeParamsSchema,
-  CoworkingPairedRuntimeInspectParamsSchema,
-  CoworkingPairedRuntimeInvokeParamsSchema,
-  CoworkingPairedRuntimeReleaseChannelParamsSchema,
-  CoworkingPairedRuntimeRevokeWorktreeParamsSchema,
-  CoworkingPairedRuntimeSubscribeParamsSchema,
-  CoworkingPairedRuntimeWorktreeCatalogParamsSchema,
-  parseCoworkingPairedRuntimeOperation
-} from '~shared/coworking/paired-runtime-host-contract'
 import {
   CoworkingPairedRuntimeCanonicalizeResultSchema,
   CoworkingPairedRuntimeInspectionSchema,
@@ -17,7 +19,7 @@ import {
   CoworkingPairedRuntimeWorktreeCatalogSchema
 } from '~shared/coworking/paired-runtime-result-contract'
 
-import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
+import type { RpcAnyMethod, RpcContext } from '../core'
 import { getCoworkingHostChannelLifetimes } from './coworking-host-channel-lifetimes'
 import { projectCoworkingHostExecutionResult } from './coworking-host-result-projection'
 import {
@@ -34,150 +36,176 @@ import {
 } from './coworking-host-runtime-authority'
 import { COWORKING_HOST_SESSION_METHODS } from './coworking-host-session-methods'
 
-export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [
-  defineMethod({
-    name: 'coworking.host.listWorktrees',
-    params: CoworkingPairedRuntimeWorktreeCatalogParamsSchema,
-    access: { scope: 'project', tier: 'read', principals: ['runtime'] },
-    handler: async (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      const actualHostScope = resolvePairedRuntimeRepoActualHostScope(
-        context.runtime,
-        params.repoId
-      )
-      const inventory = await context.runtime.listDetectedManagedWorktrees(`id:${params.repoId}`)
-      return CoworkingPairedRuntimeWorktreeCatalogSchema.parse({ actualHostScope, inventory })
+export async function handleCoworkingHostListWorktrees(
+  params: CoworkingPairedRuntimeWorktreeCatalogParams,
+  context: RpcContext
+): Promise<RuntimeCoworkingWorktreeCatalog> {
+  requirePairedRuntimePrincipal(context)
+  const actualHostScope = resolvePairedRuntimeRepoActualHostScope(context.runtime, params.repoId)
+  const inventory = await context.runtime.listDetectedManagedWorktrees(`id:${params.repoId}`)
+  // Why: the wire schema validates only the envelope shape (`inventory: z.unknown()`)
+  // so a large worktree catalog isn't walked twice — `listDetectedManagedWorktrees`
+  // already produces the shape the contract declares.
+  return CoworkingPairedRuntimeWorktreeCatalogSchema.parse({
+    actualHostScope,
+    inventory
+  }) as RuntimeCoworkingWorktreeCatalog
+}
+
+export async function handleCoworkingHostInspectWorktree(
+  params: CoworkingPairedRuntimeInspectParams,
+  context: RpcContext
+) {
+  requirePairedRuntimePrincipal(context)
+  try {
+    const resolved = await resolveActualHostWorktree(context.runtime, params.target)
+    const result = await createIncarnationHost(resolved).inspect(
+      toOwnerWorktree(resolved),
+      params.mode
+    )
+    return CoworkingPairedRuntimeInspectionSchema.parse(result)
+  } catch (error) {
+    return {
+      status: 'unavailable' as const,
+      reason: isInvalidPairedRuntimeTarget(error)
+        ? ('invalid-host-response' as const)
+        : ('host-unavailable' as const)
     }
-  }),
-  defineMethod({
-    name: 'coworking.host.inspectWorktree',
-    params: CoworkingPairedRuntimeInspectParamsSchema,
-    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
-    handler: async (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      try {
-        const resolved = await resolveActualHostWorktree(context.runtime, params.target)
-        const result = await createIncarnationHost(resolved).inspect(
-          toOwnerWorktree(resolved),
-          params.mode
-        )
-        return CoworkingPairedRuntimeInspectionSchema.parse(result)
-      } catch (error) {
-        return {
-          status: 'unavailable',
-          reason: isInvalidPairedRuntimeTarget(error)
-            ? ('invalid-host-response' as const)
-            : ('host-unavailable' as const)
-        }
-      }
+  }
+}
+
+export async function handleCoworkingHostCanonicalizePath(
+  params: CoworkingPairedRuntimeCanonicalizeParams,
+  context: RpcContext
+) {
+  requirePairedRuntimePrincipal(context)
+  try {
+    const resolved = await resolveActualHostWorktree(context.runtime, params.target)
+    const result = await createIncarnationHost(resolved).canonicalizePath(
+      toOwnerWorktree(resolved),
+      params.path
+    )
+    return CoworkingPairedRuntimeCanonicalizeResultSchema.parse(result)
+  } catch (error) {
+    return isInvalidPairedRuntimeTarget(error)
+      ? { status: 'invalid' as const }
+      : { status: 'unavailable' as const }
+  }
+}
+
+export async function handleCoworkingHostInvoke(
+  params: CoworkingPairedRuntimeInvokeParams,
+  context: RpcContext
+) {
+  requirePairedRuntimePrincipal(context)
+  const operation = params.operation
+  try {
+    const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
+    const adapter = requireActualHostAdapter(context.runtime, target)
+    getCoworkingHostChannelLifetimes(context.runtime).ensure(
+      context,
+      params.channelRef,
+      (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+    )
+    const result = await adapter.invoke(
+      target,
+      operation,
+      operationContext(params.channelRef, context, isCoworkingMutationOperation(operation))
+    )
+    return {
+      status: 'ok' as const,
+      // Why: `projectCoworkingHostExecutionResult` dispatches on `operation.kind` and
+      // returns `unknown` because its result shape varies per operation — the schema it
+      // parses through already matches the contract's per-member shape for every
+      // `CoworkingExecutionOperation` this invoke leaf can receive.
+      result: projectCoworkingHostExecutionResult(
+        operation,
+        result
+      ) as RuntimeCoworkingExecutionResult
     }
-  }),
-  defineMethod({
-    name: 'coworking.host.canonicalizePath',
-    params: CoworkingPairedRuntimeCanonicalizeParamsSchema,
-    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
-    handler: async (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      try {
-        const resolved = await resolveActualHostWorktree(context.runtime, params.target)
-        const result = await createIncarnationHost(resolved).canonicalizePath(
-          toOwnerWorktree(resolved),
-          params.path
-        )
-        return CoworkingPairedRuntimeCanonicalizeResultSchema.parse(result)
-      } catch (error) {
-        return isInvalidPairedRuntimeTarget(error)
-          ? { status: 'invalid' as const }
-          : { status: 'unavailable' as const }
-      }
-    }
-  }),
-  defineMethod({
-    name: 'coworking.host.invoke',
-    params: CoworkingPairedRuntimeInvokeParamsSchema,
-    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
-    handler: async (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      const operation = parseCoworkingPairedRuntimeOperation(params.operation)
-      try {
-        const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
-        const adapter = requireActualHostAdapter(context.runtime, target)
-        getCoworkingHostChannelLifetimes(context.runtime).ensure(
-          context,
-          params.channelRef,
-          (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
-        )
-        const result = await adapter.invoke(
+  } catch (error) {
+    return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
+  }
+}
+
+export function handleCoworkingHostReleaseChannel(
+  params: CoworkingPairedRuntimeReleaseChannelParams,
+  context: RpcContext
+) {
+  requirePairedRuntimePrincipal(context)
+  getCoworkingHostChannelLifetimes(context.runtime).release(
+    context,
+    params.channelRef,
+    (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+  )
+  return { ok: true as const }
+}
+
+export function handleCoworkingHostRevokeWorktree(
+  params: CoworkingPairedRuntimeRevokeWorktreeParams,
+  context: RpcContext
+) {
+  requirePairedRuntimePrincipal(context)
+  getHostBundle(context.runtime).adapter.revokeWorktree(params.channelRef, params.instanceId)
+  return { ok: true as const }
+}
+
+// Why: kept as a plain streaming handler (not inline in a legacy
+// registration) — reached only through `orpc/router-direct/coworking-host.ts`'s
+// direct wiring and, for its bare-envelope caller
+// (`main/coworking/paired-runtime/host-adapter.ts`'s `subscribe()`, via
+// `subscribeRuntimeEnvironmentExistingRoute` with no oRPC negotiation),
+// slice 112's streaming fallback (legacy-dispatch-fallback.ts's
+// `LEGACY_STREAMING_DISPATCH_FALLBACK_PROCEDURES`), which retired this
+// leaf's legacy registration — see COWORKING_HOST_METHODS's own note below.
+export async function handleCoworkingHostSubscribeTerminal(
+  params: CoworkingPairedRuntimeSubscribeParams,
+  context: RpcContext,
+  emit: (event: RuntimeCoworkingTerminalEvent) => void
+): Promise<void> {
+  requirePairedRuntimePrincipal(context)
+  const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
+  const adapter = requireActualHostAdapter(context.runtime, target)
+  getCoworkingHostChannelLifetimes(context.runtime).ensure(
+    context,
+    params.channelRef,
+    (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+  )
+  try {
+    await runTerminalSubscription(
+      context,
+      (emitEvent) =>
+        adapter.subscribe(
           target,
-          operation,
-          operationContext(params.channelRef, context, isCoworkingMutationOperation(operation))
-        )
-        return {
-          status: 'ok' as const,
-          result: projectCoworkingHostExecutionResult(operation, result)
-        }
-      } catch (error) {
-        return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
-      }
-    }
-  }),
-  defineStreamingMethod({
-    name: 'coworking.host.subscribeTerminal',
-    params: CoworkingPairedRuntimeSubscribeParamsSchema,
-    access: { scope: 'worktree', tier: 'read', principals: ['runtime'] },
-    handler: async (params, context, emit) => {
-      requirePairedRuntimePrincipal(context)
-      const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
-      const adapter = requireActualHostAdapter(context.runtime, target)
-      getCoworkingHostChannelLifetimes(context.runtime).ensure(
-        context,
-        params.channelRef,
-        (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
-      )
-      try {
-        await runTerminalSubscription(
-          context,
-          (emitEvent) =>
-            adapter.subscribe(
-              target,
-              params.operation,
-              operationContext(params.channelRef, context, false),
-              emitEvent
-            ),
-          emit
-        )
-      } finally {
-        // Why: the streaming socket is the crash-safe lifetime anchor for remote viewport claims.
-        adapter.revokeWorktree?.(params.channelRef, target.instanceId)
-      }
-    }
-  }),
-  defineMethod({
-    name: 'coworking.host.releaseChannel',
-    params: CoworkingPairedRuntimeReleaseChannelParamsSchema,
-    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
-    handler: (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      getCoworkingHostChannelLifetimes(context.runtime).release(
-        context,
-        params.channelRef,
-        (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
-      )
-      return { ok: true }
-    }
-  }),
-  defineMethod({
-    name: 'coworking.host.revokeWorktree',
-    params: CoworkingPairedRuntimeRevokeWorktreeParamsSchema,
-    access: { scope: 'worktree', tier: 'control', principals: ['runtime'] },
-    handler: (params, context) => {
-      requirePairedRuntimePrincipal(context)
-      getHostBundle(context.runtime).adapter.revokeWorktree(params.channelRef, params.instanceId)
-      return { ok: true }
-    }
-  }),
-  ...COWORKING_HOST_SESSION_METHODS
-]
+          params.operation,
+          operationContext(params.channelRef, context, false),
+          emitEvent
+        ),
+      emit
+    )
+  } finally {
+    // Why: the streaming socket is the crash-safe lifetime anchor for remote viewport claims.
+    adapter.revokeWorktree?.(params.channelRef, target.instanceId)
+  }
+}
+
+// Why: Phase 6 D-stage full retirement (docs/runtime-orpc-migration.md) —
+// listWorktrees/inspectWorktree/canonicalizePath/invoke/releaseChannel/
+// revokeWorktree moved to direct contract wiring (orpc/router-direct/
+// coworking-host.ts), reusing these same handler exports. subscribeTerminal
+// kept a legacy registration through 切片 81 because its only caller
+// (main/coworking/paired-runtime/host-adapter.ts's `subscribe()`) reaches it
+// through `subscribeRuntimeEnvironmentExistingRoute` — a bare-method-name
+// shared-control subscribe with no oRPC-capability negotiation, main-process
+// to main-process, the same hazard pattern that pinned `terminal`/`session`/
+// `runtime`'s own streaming leaves. Slice 112 gave `RpcDispatcher` a
+// streaming fallback into the same direct wiring for exactly that shape of
+// caller, so this dropped too — the direct wiring alone (below, still
+// required because a directly-wired domain must supply every procedure under
+// its top-level contract key or the omitted ones vanish from the router
+// entirely — see router-direct.ts's own note) now serves both the real oRPC
+// path and the bare-envelope caller.
+export const COWORKING_HOST_METHODS: RpcAnyMethod[] = [...COWORKING_HOST_SESSION_METHODS]
 
 function isInvalidPairedRuntimeTarget(error: unknown): boolean {
   const message = error instanceof Error ? error.message : ''
@@ -191,7 +219,7 @@ function isInvalidPairedRuntimeTarget(error: unknown): boolean {
 async function runTerminalSubscription(
   context: RpcContext,
   subscribe: (emit: (event: unknown) => void) => CoworkingHostSubscription,
-  emit: (result: unknown) => void
+  emit: (result: RuntimeCoworkingTerminalEvent) => void
 ): Promise<void> {
   const signal = context.signal ?? new AbortController().signal
   await new Promise<void>((resolve) => {

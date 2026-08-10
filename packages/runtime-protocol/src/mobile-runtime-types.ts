@@ -158,6 +158,8 @@ export type RuntimeSpeechModelSummary = {
   provider: 'local' | 'openai'
   sizeBytes: number | null
   recommended: boolean
+  /** Whether the model streams partial results while listening vs. only a final transcript. */
+  streaming: boolean
   status: 'ready' | 'not-downloaded' | 'downloading' | 'extracting' | 'error'
   progress: number | null
 }

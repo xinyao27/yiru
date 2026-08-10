@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getLiveBrowserUrl } from '~renderer/runtime/browser-live-url'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { redactKagiSessionToken } from '~shared/browser/url'
 import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
 import type { BrowserTab as BrowserTabState } from '~shared/types'
@@ -291,7 +292,7 @@ export default function BrowserTab({
           {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
         </ContextMenuItem>
         <ContextMenuItem
-          onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
+          onClick={() => void shellClient.shell.openUrl(openInBrowserUrl)}
           disabled={!isHttpUrl}
         >
           <ExternalLink className="size-4" />

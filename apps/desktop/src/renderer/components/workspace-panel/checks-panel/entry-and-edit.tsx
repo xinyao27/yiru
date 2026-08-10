@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
 import { ENTRY_REFRESH_GRACE_MS, shouldEntryRefresh } from '../checks-entry-refresh'
@@ -251,12 +254,16 @@ export function useChecksPanelEntryAndEdit(context: useChecksPanelRefreshActionS
     setTitleSaving(true)
     try {
       if (activeReview.provider === 'gitlab') {
-        const result = await window.api.gl.updateMR({
-          repoPath: repo.path,
-          repoId: repo.id,
-          iid: activeReview.number,
-          updates: { title: nextTitle }
-        })
+        const result = await callRuntimeOrpc(
+          getActiveRuntimeTarget(useAppStore.getState().settings),
+          (client) => client.gitlab.updateMR,
+          {
+            repo: repo.id,
+            iid: activeReview.number,
+            updates: { title: nextTitle }
+          },
+          { timeoutMs: 30_000 }
+        )
         if (!result.ok) {
           toast.error(result.error)
           return
@@ -266,13 +273,17 @@ export function useChecksPanelEntryAndEdit(context: useChecksPanelRefreshActionS
         if (!pr) {
           return
         }
-        const ok = await window.api.gh.updatePRTitle({
-          repoPath: repo.path,
-          repoId: repo.id,
-          prNumber: pr.number,
-          title: nextTitle,
-          prRepo: pr.prRepo ?? null
-        })
+        const ok = await callRuntimeOrpc(
+          getActiveRuntimeTarget(useAppStore.getState().settings),
+          (client) => client.github.updatePRTitle,
+          {
+            repo: repo.id,
+            prNumber: pr.number,
+            title: nextTitle,
+            prRepo: pr.prRepo ?? null
+          },
+          { timeoutMs: 30_000 }
+        )
         if (ok) {
           await refreshHostedReviewAfterMutation()
         }

@@ -1,5 +1,6 @@
 import { useEditorState, type Editor } from '@tiptap/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 // Why: this module is the RichMarkdownEditor lazy chunk's entry — Tiptap
 // renders its markdown content into DOM it owns (headings, lists, tables,
@@ -207,7 +208,7 @@ export default function RichMarkdownEditor({
         clearTransientReviewState()
         cancelAutoFocusRef.current?.()
         cancelAutoFocusRef.current = null
-        window.api.ui.setMarkdownEditorFocused(false)
+        shellClient.ui.setMarkdownEditorFocused(false)
       }
       rootRef.current = node
     },
@@ -335,7 +336,7 @@ export default function RichMarkdownEditor({
   })
 
   useEffect(() => {
-    return window.api.ui.onRichMarkdownContextCommand((payload) => {
+    return shellClient.ui.onRichMarkdownContextCommand((payload) => {
       const ed = editorRef.current
       if (!ed || !isRichMarkdownContextCommandTarget(payload, rootRef.current)) {
         return

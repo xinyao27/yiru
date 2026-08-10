@@ -9,6 +9,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
+import { AgentSessionContinuationDialog } from '~renderer/components/agent-session-continuation/dialog'
 
 // Why: this component is the shared entry every lazy() boundary that mounts a
 // real terminal goes through (terminal-workspace panel, floating-terminal
@@ -17,7 +18,6 @@ import { useShallow } from 'zustand/react/shallow'
 // shared lazy chunk instead of the app's eager first-paint CSS.
 import '@xterm/xterm/css/xterm.css'
 import './terminal.css'
-import { AgentSessionContinuationDialog } from '~renderer/components/agent-session-continuation/dialog'
 import {
   DaemonActionDialog,
   useDaemonActions
@@ -34,13 +34,13 @@ import {
 } from '~renderer/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '~renderer/components/terminal-search'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '~renderer/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { requestFriday } from '~renderer/lib/friday'
 import { useEffectiveMacOptionAsAlt } from '~renderer/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import {
   getAllDrivers,
   getDriverForPty,
@@ -77,6 +77,7 @@ import {
   WORKSPACE_FILE_PATHS_MIME
 } from '~renderer/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { shellClient } from '~renderer/runtime/shell-client'
 import {
   inspectRuntimeTerminalProcess,
   isRemoteRuntimePtyId
@@ -1381,8 +1382,8 @@ export default function TerminalPane({
 
   const handleSearchSelectedText = useCallback(
     (selectedText: string): void => {
-      openWorkspacePanelTab({
-        panel: 'explorer',
+      showWorkspaceSidebar({
+        view: 'explorer',
         worktreeId,
         explorerDestination: { view: 'search', query: selectedText }
       })
@@ -1844,7 +1845,7 @@ export default function TerminalPane({
         releasedHelperOnWindowBlur = null
       }
       setRegularTerminalInputFocusAttribute(focused)
-      window.api.ui.setTerminalInputFocused?.(focused)
+      shellClient.ui.setTerminalInputFocused?.(focused)
     }
     const onFocusIn = (event: FocusEvent): void => {
       if (!isXtermHelperTextarea(event.target)) {
@@ -2038,7 +2039,7 @@ export default function TerminalPane({
     const pasteFromClipboard = (
       pane: ManagedPane,
       source: Extract<TerminalPasteSource, 'keyboard' | 'paste-event'>,
-      readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string> = window.api.ui
+      readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string> = shellClient.ui
         .readClipboardText
     ): void => {
       const connectionId = getConnectionId(worktreeId) ?? null
@@ -2049,7 +2050,7 @@ export default function TerminalPane({
       const activeElementAtDispatch = document.activeElement
       void pasteTerminalClipboard({
         readClipboardText,
-        saveClipboardImageAsTempFile: window.api.ui.saveClipboardImageAsTempFile,
+        saveClipboardImageAsTempFile: shellClient.ui.saveClipboardImageAsTempFile,
         connectionId,
         runtimeEnvironmentId,
         forceBracketedMultilineTextPaste,
@@ -2196,8 +2197,8 @@ export default function TerminalPane({
         worktreeId
       )
       void pasteTerminalClipboard({
-        readClipboardText: window.api.ui.readClipboardText,
-        saveClipboardImageAsTempFile: window.api.ui.saveClipboardImageAsTempFile,
+        readClipboardText: shellClient.ui.readClipboardText,
+        saveClipboardImageAsTempFile: shellClient.ui.saveClipboardImageAsTempFile,
         connectionId,
         runtimeEnvironmentId,
         forceBracketedMultilineTextPaste,

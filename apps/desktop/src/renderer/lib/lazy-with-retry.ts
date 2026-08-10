@@ -1,4 +1,6 @@
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+import { lazy, type LazyExoticComponent } from 'react'
+
+import { recordRendererCrashBreadcrumb } from './crash-breadcrumb-recorder'
 
 /**
  * Resilient replacement for React.lazy.
@@ -13,10 +15,10 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
  * through to the error boundary.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- mirror React.lazy's own ComponentType<any> constraint so every existing call site type-checks unchanged.
-type AnyComponent = ComponentType<any>
+type ReactLazyFactory = Parameters<typeof lazy>[0]
+type LazyComponent = Awaited<ReturnType<ReactLazyFactory>>['default']
 
-type LazyFactory<T extends AnyComponent> = () => Promise<{ default: T }>
+type LazyFactory<T extends LazyComponent> = () => Promise<{ default: T }>
 
 type ReloadGuardState = 'not-attempted' | 'attempted' | 'unavailable'
 
@@ -73,15 +75,7 @@ function markChunkReloadAttempted(): boolean {
 }
 
 function recordReloadBreadcrumb(reloadKey: string, message: string): void {
-  // Inlined rather than importing crash-diagnostics so this low-level recovery
-  // primitive stays free of the renderer/webview module graph and remains SSR-safe.
-  // Mirrors crash-diagnostics' best-effort breadcrumb call.
-  try {
-    const api = (window as Window & { api?: Window['api'] }).api
-    api?.crashReports.recordBreadcrumb({ name: 'lazy_chunk_reload', data: { reloadKey, message } })
-  } catch {
-    // Crash evidence is best-effort and must never mask the original failure.
-  }
+  recordRendererCrashBreadcrumb('lazy_chunk_reload', { reloadKey, message })
 }
 
 const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
@@ -120,7 +114,7 @@ function isKnownDynamicImportFailure(error: unknown): boolean {
   ].some((pattern) => pattern.test(error.message))
 }
 
-export async function loadLazyWithRetry<T extends AnyComponent>(
+export async function loadLazyWithRetry<T extends LazyComponent>(
   factory: LazyFactory<T>,
   options: LazyWithRetryOptions = {}
 ): Promise<{ default: T }> {
@@ -162,7 +156,7 @@ export async function loadLazyWithRetry<T extends AnyComponent>(
   throw lastError
 }
 
-export function lazyWithRetry<T extends AnyComponent>(
+export function lazyWithRetry<T extends LazyComponent>(
   factory: LazyFactory<T>,
   options?: LazyWithRetryOptions
 ): LazyExoticComponent<T> {

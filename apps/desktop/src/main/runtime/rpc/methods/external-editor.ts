@@ -1,22 +1,20 @@
 import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
-import { openInExternalEditor } from '~main/ipc/shell'
-import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '~shared/runtime-method-contracts/external-editor-contracts'
+import type {
+  ExternalEditorOpenRemoteSshInput,
+  ExternalEditorOpenResult
+} from '@yiru/runtime-protocol/contract'
+import { openInExternalEditor } from '~main/external-editor/open'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-export const EXTERNAL_EDITOR_METHODS: RpcMethod[] = [
-  defineMethod({
-    contract: EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => {
-      // Why: the method exists in every build, but headless hosts must never
-      // launch an editor merely because a client skipped capability probing.
-      if (
-        !runtime.getStatus().capabilities?.includes(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)
-      ) {
-        return { ok: false as const, reason: 'remote-runtime-unsupported' as const }
-      }
-      return await openInExternalEditor(params)
-    }
-  })
-]
+export async function openRuntimeRemoteSshEditor(
+  params: ExternalEditorOpenRemoteSshInput,
+  { runtime }: RpcContext
+): Promise<ExternalEditorOpenResult> {
+  // Why: the method exists in every build, but headless hosts must never
+  // launch an editor merely because a client skipped capability probing.
+  if (!runtime.getStatus().capabilities?.includes(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)) {
+    return { ok: false, reason: 'remote-runtime-unsupported' }
+  }
+  return await openInExternalEditor(params)
+}

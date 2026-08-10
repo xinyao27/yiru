@@ -1,3 +1,5 @@
+import type { WorktreeCreateInput } from '@yiru/runtime-protocol/contract'
+
 import type { RpcClient } from '../transport/rpc-client'
 import { resolveComposerMrBase, resolveComposerPrBase } from './composer-source-base-resolve'
 import type { MobileComposerCreateSelection, MobileLinkedWorkItem } from './composer-source-types'
@@ -123,7 +125,7 @@ async function createBranchWorkspace(args: {
   const { client, selection, targetRepoId, setupDecision, agent, workspaceName, note } = args
   const createdWithAgentId = agent.choice === 'blank' ? undefined : agent.choice
   const comment = note?.trim()
-  const applyCommon = (params: Record<string, unknown>): Record<string, unknown> => {
+  const applyCommon = (params: WorktreeCreateInput): WorktreeCreateInput => {
     Object.assign(
       params,
       buildMobileWorkspaceAgentLaunchFields({
@@ -171,7 +173,7 @@ async function createBranchWorkspace(args: {
     client,
     baseName,
     buildParams: (candidate) => {
-      const params: Record<string, unknown> = {
+      const params: WorktreeCreateInput = {
         repo: `id:${targetRepoId}`,
         name: candidate,
         setupDecision,
@@ -205,7 +207,7 @@ async function createNewBranchWorkspace(args: {
     client,
     baseName: selection.branchName,
     buildParams: (candidate) => {
-      const params: Record<string, unknown> = {
+      const params: WorktreeCreateInput = {
         repo: `id:${targetRepoId}`,
         name: candidate,
         setupDecision,

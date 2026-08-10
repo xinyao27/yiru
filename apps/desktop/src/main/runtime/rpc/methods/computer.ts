@@ -1,4 +1,27 @@
-import { z } from 'zod'
+import type {
+  ComputerClickInput,
+  ComputerDragInput,
+  ComputerEmptyInput,
+  ComputerHotkeyInput,
+  ComputerListAppsInput,
+  ComputerListWindowsInput,
+  ComputerObserveTargetInput,
+  ComputerPasteTextInput,
+  ComputerPermissionsInput,
+  ComputerPressKeyInput,
+  ComputerScrollInput,
+  ComputerSecondaryActionInput,
+  ComputerSetValueInput,
+  ComputerTypeTextInput,
+  RuntimeComputerActionResult,
+  RuntimeComputerListAppsResult,
+  RuntimeComputerListWindowsResult,
+  RuntimeComputerPermissionResetResult,
+  RuntimeComputerPermissionSetupResult,
+  RuntimeComputerPermissionStatusResult,
+  RuntimeComputerProviderCapabilities,
+  RuntimeComputerSnapshotResult
+} from '@yiru/runtime-protocol/contract'
 import {
   callComputerSidecarAction,
   callComputerSidecarCapabilities,
@@ -7,146 +30,114 @@ import {
   callComputerSidecarSnapshot
 } from '~main/computer/sidecar-client'
 
-import { defineMethod, type RpcMethod } from '../core'
-import {
-  Click,
-  ComputerObserveTarget,
-  ComputerPermissions,
-  Drag,
-  Hotkey,
-  ListApps,
-  ListWindows,
-  PasteText,
-  PerformSecondaryAction,
-  PressKey,
-  Scroll,
-  SetValue,
-  TypeText
-} from './computer-schemas'
+export async function handleComputerCapabilities(
+  _params: ComputerEmptyInput
+): Promise<RuntimeComputerProviderCapabilities> {
+  return await callComputerSidecarCapabilities()
+}
 
-export const COMPUTER_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'computer.capabilities',
-    params: z.object({}),
-    access: { scope: 'host', tier: 'host' },
-    handler: async () => {
-      return await callComputerSidecarCapabilities()
-    }
-  }),
-  defineMethod({
-    name: 'computer.listApps',
-    params: ListApps,
-    access: { scope: 'host', tier: 'host' },
-    handler: async () => {
-      return await callComputerSidecarListApps()
-    }
-  }),
-  defineMethod({
-    name: 'computer.permissions',
-    params: ComputerPermissions,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      const { openComputerUsePermissions } =
-        await import('~main/computer/macos-computer-use-permissions')
-      return openComputerUsePermissions(params.id)
-    }
-  }),
-  defineMethod({
-    name: 'computer.permissionsStatus',
-    params: z.object({}),
-    access: { scope: 'host', tier: 'host' },
-    handler: async () => {
-      const { getComputerUsePermissionStatus } =
-        await import('~main/computer/macos-computer-use-permissions')
-      return getComputerUsePermissionStatus()
-    }
-  }),
-  defineMethod({
-    name: 'computer.listWindows',
-    params: ListWindows,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarListWindows(params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.getAppState',
-    params: ComputerObserveTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarSnapshot(params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.click',
-    params: Click,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('click', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.performSecondaryAction',
-    params: PerformSecondaryAction,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('performSecondaryAction', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.scroll',
-    params: Scroll,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('scroll', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.drag',
-    params: Drag,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('drag', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.typeText',
-    params: TypeText,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('typeText', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.pressKey',
-    params: PressKey,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('pressKey', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.hotkey',
-    params: Hotkey,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('hotkey', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.pasteText',
-    params: PasteText,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('pasteText', params)
-    }
-  }),
-  defineMethod({
-    name: 'computer.setValue',
-    params: SetValue,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params) => {
-      return await callComputerSidecarAction('setValue', params)
-    }
-  })
-]
+export async function handleComputerListApps(
+  _params: ComputerListAppsInput
+): Promise<RuntimeComputerListAppsResult> {
+  return await callComputerSidecarListApps()
+}
+
+export async function handleComputerPermissions(
+  params: ComputerPermissionsInput
+): Promise<RuntimeComputerPermissionSetupResult> {
+  const { openComputerUsePermissions } =
+    await import('~main/computer/macos-computer-use-permissions')
+  return openComputerUsePermissions(params.id)
+}
+
+export async function handleComputerPermissionsStatus(
+  _params: ComputerEmptyInput
+): Promise<RuntimeComputerPermissionStatusResult> {
+  const { getComputerUsePermissionStatus } =
+    await import('~main/computer/macos-computer-use-permissions')
+  return getComputerUsePermissionStatus()
+}
+
+export async function handleComputerPermissionsReset(
+  _params: ComputerEmptyInput
+): Promise<RuntimeComputerPermissionResetResult> {
+  const { resetComputerUsePermissions } =
+    await import('~main/computer/macos-computer-use-permissions')
+  return resetComputerUsePermissions()
+}
+
+// Why: `~shared/runtime-types`'s `ComputerWindowInfo.platform` predates the
+// contract's `RuntimeComputerWindowInfo` sibling and is typed
+// `Record<string, unknown>` rather than the contract's JSON-safe value type
+// — the value itself is already JSON-safe (parsed straight from a
+// provider's JSON output), so the handlers below narrow to the contract's
+// real result type at the boundary rather than widening the contract to
+// match the looser internal type.
+export async function handleComputerListWindows(
+  params: ComputerListWindowsInput
+): Promise<RuntimeComputerListWindowsResult> {
+  return (await callComputerSidecarListWindows(params)) as RuntimeComputerListWindowsResult
+}
+
+export async function handleComputerGetAppState(
+  params: ComputerObserveTargetInput
+): Promise<RuntimeComputerSnapshotResult> {
+  return (await callComputerSidecarSnapshot(params)) as RuntimeComputerSnapshotResult
+}
+
+export async function handleComputerClick(
+  params: ComputerClickInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('click', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerPerformSecondaryAction(
+  params: ComputerSecondaryActionInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction(
+    'performSecondaryAction',
+    params
+  )) as RuntimeComputerActionResult
+}
+
+export async function handleComputerScroll(
+  params: ComputerScrollInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('scroll', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerDrag(
+  params: ComputerDragInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('drag', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerTypeText(
+  params: ComputerTypeTextInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('typeText', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerPressKey(
+  params: ComputerPressKeyInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('pressKey', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerHotkey(
+  params: ComputerHotkeyInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('hotkey', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerPasteText(
+  params: ComputerPasteTextInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('pasteText', params)) as RuntimeComputerActionResult
+}
+
+export async function handleComputerSetValue(
+  params: ComputerSetValueInput
+): Promise<RuntimeComputerActionResult> {
+  return (await callComputerSidecarAction('setValue', params)) as RuntimeComputerActionResult
+}

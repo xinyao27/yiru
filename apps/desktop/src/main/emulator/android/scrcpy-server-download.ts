@@ -4,7 +4,7 @@ import { get } from 'node:https'
 import { dirname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 
-import { app } from 'electron'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 
 import { EmulatorError } from '../errors'
 import { emulatorProbe, emulatorProbeError } from '../probe'
@@ -17,7 +17,11 @@ const DOWNLOAD_URL = `https://github.com/Genymobile/scrcpy/releases/download/v${
 const MIN_VALID_BYTES = 10_000
 
 export function scrcpyServerJarPath(): string {
-  return join(app.getPath('userData'), 'scrcpy', `scrcpy-server-v${SCRCPY_SERVER_VERSION}.jar`)
+  return join(
+    getRuntimeHostPathsProvider().userDataPath(),
+    'scrcpy',
+    `scrcpy-server-v${SCRCPY_SERVER_VERSION}.jar`
+  )
 }
 
 export function isScrcpyServerJarReady(): boolean {

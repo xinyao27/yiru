@@ -7,7 +7,7 @@ import {
   type TerminalQuickCommandMutation
 } from '../terminal/quick-commands'
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 
 type QuickCommandsState = {
   commands: TerminalQuickCommand[]
@@ -78,7 +78,11 @@ export function useQuickCommands({
         ) {
           return
         }
-        const response = await client.sendRequest('settings.getTerminalQuickCommands')
+        const response = await callRuntimeOrpc(
+          client,
+          (runtime) => runtime.settings.getTerminalQuickCommands,
+          undefined
+        )
         if (
           stale ||
           operationId !== operationIdRef.current ||
@@ -86,11 +90,7 @@ export function useQuickCommands({
         ) {
           return
         }
-        if (!response.ok) {
-          setError((response as RpcFailure).error.message || 'Failed to load quick commands')
-          return
-        }
-        const next = readQuickCommands((response as RpcSuccess).result)
+        const next = readQuickCommands(response)
         if (!next) {
           setError('Failed to load quick commands')
           return
@@ -140,15 +140,12 @@ export function useQuickCommands({
         let succeeded = false
         let failureMessage: string | null = null
         try {
-          const response = await client.sendRequest('settings.updateTerminalQuickCommands', {
-            mutation: commandMutation
-          })
-          if (!response.ok) {
-            throw new Error(
-              (response as RpcFailure).error.message || 'Failed to save quick command'
-            )
-          }
-          const confirmed = readQuickCommands((response as RpcSuccess).result)
+          const response = await callRuntimeOrpc(
+            client,
+            (runtime) => runtime.settings.updateTerminalQuickCommands,
+            { mutation: commandMutation }
+          )
+          const confirmed = readQuickCommands(response)
           if (!confirmed) {
             throw new Error('Failed to save quick command')
           }

@@ -3,6 +3,7 @@ import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import { updateMobileDiffComment } from './comment-edit'
@@ -62,14 +63,11 @@ export function useMobileDiffReviewCommentActions(input: CommentActionsInput) {
       if (!client || connState !== 'connected') {
         throw new Error('Waiting for desktop...')
       }
-      const response = await client.sendRequest('worktree.set', {
+      await callRuntimeOrpc(client, (runtime) => runtime.worktree.set, {
         worktree: `id:${worktreeId}`,
-        diffComments: comments,
+        diffComments: [...comments],
         mobileDiffReview: reviewState
       })
-      if (!response.ok) {
-        throw new Error(response.error?.message || 'Failed to save review state')
-      }
     },
     [client, connState, worktreeId]
   )

@@ -2,42 +2,39 @@ import { isGitBashAvailable } from '~main/git-bash'
 import { isPwshAvailable } from '~main/pwsh'
 import { isWslAvailable, listWslDistros } from '~main/wsl'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-export const HOST_CAPABILITY_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'host.platform',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async () => ({ platform: process.platform })
-  }),
-  defineMethod({
-    name: 'host.wsl.isAvailable',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async () => isWslAvailable()
-  }),
-  defineMethod({
-    name: 'host.wsl.listDistros',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async () => listWslDistros()
-  }),
-  defineMethod({
-    name: 'host.pwsh.isAvailable',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async () => isPwshAvailable()
-  }),
-  defineMethod({
-    name: 'host.gitBash.isAvailable',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async () => isGitBashAvailable()
-  })
-]
+export async function handleHostPlatform(
+  _params: void,
+  _context: RpcContext
+): Promise<{ platform: NodeJS.Platform }> {
+  return { platform: process.platform }
+}
+
+export async function handleHostWslIsAvailable(
+  _params: void,
+  _context: RpcContext
+): Promise<boolean> {
+  return isWslAvailable()
+}
+
+export async function handleHostWslListDistros(
+  _params: void,
+  _context: RpcContext
+): Promise<string[]> {
+  return listWslDistros()
+}
+
+export async function handleHostPwshIsAvailable(
+  _params: void,
+  _context: RpcContext
+): Promise<boolean> {
+  return isPwshAvailable()
+}
+
+export async function handleHostGitBashIsAvailable(
+  _params: void,
+  _context: RpcContext
+): Promise<boolean> {
+  return isGitBashAvailable()
+}

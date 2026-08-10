@@ -1,9 +1,10 @@
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { OnboardingState } from '~shared/types'
 
 const ONBOARDING_REOPENED_EVENT = 'yiru:onboarding-reopened'
 
 export async function showOnboardingFromRenderer(): Promise<void> {
-  const nextOnboarding = await window.api.onboarding.update({
+  const nextOnboarding = await rendererHostClient.onboarding.update({
     closedAt: null,
     outcome: null,
     lastCompletedStep: -1,

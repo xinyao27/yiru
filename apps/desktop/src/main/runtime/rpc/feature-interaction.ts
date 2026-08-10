@@ -1,6 +1,27 @@
 import type { FeatureInteractionId } from '~shared/feature-interactions'
 import { isBrowserPaneUiRuntimeRpcParams } from '~shared/runtime-rpc-feature-interaction-source'
 
+import type { YiruRuntimeService } from '../yiru-runtime'
+
+export function recordRuntimeFeatureInteraction(
+  runtime: YiruRuntimeService,
+  method: string,
+  result: unknown,
+  alreadyRecorded?: Set<FeatureInteractionId>,
+  rawParams?: unknown
+): void {
+  const id = getRuntimeFeatureInteractionId(method, result, rawParams)
+  if (!id || alreadyRecorded?.has(id)) {
+    return
+  }
+  try {
+    runtime.recordFeatureInteraction(id)
+    alreadyRecorded?.add(id)
+  } catch {
+    // Best-effort education state must not break runtime tools.
+  }
+}
+
 export function getRuntimeFeatureInteractionId(
   method: string,
   result: unknown,

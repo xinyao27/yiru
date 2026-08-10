@@ -48,13 +48,6 @@ export function resolveDeviceFrameKind(
   return screenAspectRatio > 0.62 && screenAspectRatio < 1.62 ? 'tablet' : 'phone'
 }
 
-export function resolveVisualScreenAspectRatio(
-  streamSize: StreamSize | null,
-  visualOrientation: EmulatorDeviceVisualOrientation
-): number {
-  return resolveVisualStreamGeometry(streamSize, visualOrientation).aspectRatio
-}
-
 export function resolveVisualStreamGeometry(
   streamSize: StreamSize | null,
   visualOrientation: EmulatorDeviceVisualOrientation

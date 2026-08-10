@@ -26,21 +26,31 @@ function requiresGrant(caller: RpcCallerClass): boolean {
   }
 }
 
-export function denyAccess(
-  method: RpcAnyMethod,
-  meta: RpcEnvelopeMeta,
-  requestId: string,
+export type RpcAccessDenial = {
+  code: 'forbidden' | 'unauthorized'
+  message: string
+}
+
+type RpcAdmissionMethod = Pick<RpcAnyMethod, 'access' | 'mobile' | 'name'>
+
+export function adjudicateRpcAccess(
+  method: RpcAdmissionMethod,
   context: { principal?: AuthenticatedRpcPrincipal; grantedAccess?: RpcAccess }
-): RpcResponse | null {
+): RpcAccessDenial | null {
   const caller = callerClassOf(context.principal)
 
+  if (caller === 'mobile' && !method.mobile) {
+    return {
+      code: 'forbidden',
+      message: `Method '${method.name}' is not available to mobile clients`
+    }
+  }
+
   if (!principalsSatisfy(method.access, caller)) {
-    return errorResponse(
-      requestId,
-      meta,
-      'unauthorized',
-      `Method ${method.name} is not available to this admission path`
-    )
+    return {
+      code: 'unauthorized',
+      message: `Method ${method.name} is not available to this admission path`
+    }
   }
 
   if (!requiresGrant(caller)) {
@@ -49,25 +59,32 @@ export function denyAccess(
 
   // Why: a missing grant must lose access instead of silently becoming unrestricted.
   if (!context.grantedAccess) {
-    return errorResponse(
-      requestId,
-      meta,
-      'unauthorized',
-      `Method ${method.name} requires a grant that could not be resolved`
-    )
+    return {
+      code: 'unauthorized',
+      message: `Method ${method.name} requires a grant that could not be resolved`
+    }
   }
 
   if (!accessSatisfies(context.grantedAccess, method.access)) {
-    return errorResponse(
-      requestId,
-      meta,
-      'unauthorized',
-      `Method ${method.name} requires ${method.access.scope}/${method.access.tier}; ` +
+    return {
+      code: 'unauthorized',
+      message:
+        `Method ${method.name} requires ${method.access.scope}/${method.access.tier}; ` +
         `grant provides ${context.grantedAccess.scope}/${context.grantedAccess.tier}`
-    )
+    }
   }
 
   return null
+}
+
+export function denyAccess(
+  method: RpcAnyMethod,
+  meta: RpcEnvelopeMeta,
+  requestId: string,
+  context: { principal?: AuthenticatedRpcPrincipal; grantedAccess?: RpcAccess }
+): RpcResponse | null {
+  const denial = adjudicateRpcAccess(method, context)
+  return denial ? errorResponse(requestId, meta, denial.code, denial.message) : null
 }
 
 type ProjectRedirectParams = {
@@ -125,48 +142,40 @@ function sameGitLabProject(
   )
 }
 
-function redirectedProjectDenied(
-  method: RpcAnyMethod,
-  meta: RpcEnvelopeMeta,
-  requestId: string
-): RpcResponse {
-  return errorResponse(
-    requestId,
-    meta,
-    'unauthorized',
-    `Method ${method.name} may only target the project selected by its repo parameter`
-  )
+function redirectedProjectDenied(methodName: string): RpcAccessDenial {
+  return {
+    code: 'unauthorized',
+    message: `Method ${methodName} may only target the project selected by its repo parameter`
+  }
 }
 
 // Why: a Coworking host grant must not redirect owner credentials outside its selected project.
-export async function denyRedirectedProjectAccess(
-  method: RpcAnyMethod,
+export async function adjudicateRedirectedProjectAccess(
+  methodName: string,
   params: unknown,
-  meta: RpcEnvelopeMeta,
-  requestId: string,
   context: { principal?: AuthenticatedRpcPrincipal; runtime: YiruRuntimeService }
-): Promise<RpcResponse | null> {
+): Promise<RpcAccessDenial | null> {
   if (!requiresGrant(callerClassOf(context.principal))) {
     return null
   }
   // Why: method-specific Zod parsing validates these fields before this authorization boundary.
   const request = params as ProjectRedirectParams
-  if (method.name === 'github.workItemByOwnerRepo') {
+  if (methodName === 'github.workItemByOwnerRepo') {
     const project = await context.runtime.getRepoSlug(request.repo).catch(() => null)
     return project &&
       request.owner &&
       request.ownerRepo &&
       sameGitHubProject(project, { owner: request.owner, repo: request.ownerRepo })
       ? null
-      : redirectedProjectDenied(method, meta, requestId)
+      : redirectedProjectDenied(methodName)
   }
 
   const requestedGitLabProject =
-    method.name === 'gitlab.workItemByPath'
+    methodName === 'gitlab.workItemByPath'
       ? request.host && request.path
         ? { host: request.host, path: request.path }
         : null
-      : GITLAB_PROJECT_REF_METHODS.has(method.name)
+      : GITLAB_PROJECT_REF_METHODS.has(methodName)
         ? (request.projectRef ?? null)
         : null
   if (!requestedGitLabProject) {
@@ -175,7 +184,18 @@ export async function denyRedirectedProjectAccess(
   const project = await context.runtime.getGitLabRepoProjectRef(request.repo).catch(() => null)
   return project && sameGitLabProject(project, requestedGitLabProject)
     ? null
-    : redirectedProjectDenied(method, meta, requestId)
+    : redirectedProjectDenied(methodName)
+}
+
+export async function denyRedirectedProjectAccess(
+  method: RpcAnyMethod,
+  params: unknown,
+  meta: RpcEnvelopeMeta,
+  requestId: string,
+  context: { principal?: AuthenticatedRpcPrincipal; runtime: YiruRuntimeService }
+): Promise<RpcResponse | null> {
+  const denial = await adjudicateRedirectedProjectAccess(method.name, params, context)
+  return denial ? errorResponse(requestId, meta, denial.code, denial.message) : null
 }
 
 // Why: a host grant is valid only in the exact machine namespace it was issued for.

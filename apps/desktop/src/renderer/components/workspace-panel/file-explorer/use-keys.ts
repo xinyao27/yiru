@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { isEditableTarget } from '~renderer/lib/editable-target'
 import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { keybindingMatchesAction } from '~shared/keybindings'
 
@@ -280,7 +281,7 @@ export function useFileExplorerKeys(opts: {
       // ⌥⇧⌘C (Mac) / Ctrl+Shift+Alt+C (Win) — Copy Relative Path
       if (wantsCopyRelativePath) {
         e.preventDefault()
-        window.api.ui.writeClipboardText(
+        shellClient.ui.writeClipboardText(
           formatFileExplorerPathsForClipboard(fallbackNodes, 'relative')
         )
         return
@@ -288,7 +289,7 @@ export function useFileExplorerKeys(opts: {
       // ⌥⌘C (Mac) / Shift+Alt+C (Win) — Copy Path
       if (wantsCopyPath) {
         e.preventDefault()
-        window.api.ui.writeClipboardText(
+        shellClient.ui.writeClipboardText(
           formatFileExplorerPathsForClipboard(fallbackNodes, 'absolute')
         )
       }

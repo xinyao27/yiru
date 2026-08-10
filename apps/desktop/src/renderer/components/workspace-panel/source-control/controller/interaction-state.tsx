@@ -213,9 +213,10 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     (generateInFlightByWorktree[activeWorktreeId ?? ''] ?? false)
   const generateError =
     activeCommitMessageGenerationRecord?.error ?? generateErrors[activeWorktreeId ?? ''] ?? null
-  const activeConnectionId = activeWorktreeId
-    ? (getConnectionId(activeWorktreeId) ?? activeRepo?.connectionId ?? null)
-    : null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — getConnectionId already resolves to null for any found
+  // repo, so a fallback read of activeRepo.connectionId can never differ.
+  const activeConnectionId = activeWorktreeId ? (getConnectionId(activeWorktreeId) ?? null) : null
   const activeSourceControlLaunchPlatform = resolveSourceControlLaunchPlatform({
     connectionId: activeConnectionId,
     worktreePath,

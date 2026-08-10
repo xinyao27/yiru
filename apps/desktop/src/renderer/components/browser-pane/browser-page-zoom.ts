@@ -81,14 +81,6 @@ export function getBrowserPageZoomIndicatorState({
   }
 }
 
-export function dispatchBrowserPageZoomEvent(detail: BrowserPageZoomEventDetail): void {
-  window.dispatchEvent(
-    new CustomEvent<BrowserPageZoomEventDetail>(YIRU_BROWSER_PAGE_ZOOM_EVENT, {
-      detail
-    })
-  )
-}
-
 export function addBrowserPageZoomEventListener(
   callback: (detail: BrowserPageZoomEventDetail) => void
 ): () => void {

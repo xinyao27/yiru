@@ -30,10 +30,10 @@ export function isStrictWorkspaceCleanupDescendant(
   parent: WorkspaceCleanupCandidate,
   child: WorkspaceCleanupCandidate
 ): boolean {
-  return (
-    parent.connectionId === child.connectionId &&
-    isStrictWorkspaceCleanupDescendantPath(parent.path, child.path)
-  )
+  // Why: WorkspaceCleanupCandidate.connectionId always derives from
+  // Repo.connectionId, which is dead — nothing sets it since remote hosts
+  // were removed (#63) — so every candidate shares the same (null) connection.
+  return isStrictWorkspaceCleanupDescendantPath(parent.path, child.path)
 }
 
 function isStrictWorkspaceCleanupDescendantPath(parentPath: string, childPath: string): boolean {

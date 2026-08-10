@@ -1,121 +1,118 @@
-import { z } from 'zod'
-import {
-  OptionalString,
-  requiredString
-} from '~shared/runtime-method-contracts/runtime-method-params'
+import type {
+  RuntimeSpeechDictationFinishResult,
+  RuntimeSpeechDictationHandleResult,
+  RuntimeSpeechDictationStartResult,
+  RuntimeSpeechModelDownloadResult,
+  RuntimeSpeechOpenAiKeyStatus,
+  RuntimeSpeechSetupState,
+  SpeechDictationChunkInput,
+  SpeechDictationHandleInput,
+  SpeechDictationSetupInput,
+  SpeechDictationStartInput,
+  SpeechModelActionInput,
+  SpeechOpenAiKeySaveInput
+} from '@yiru/runtime-protocol/contract'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-const AUDIO_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/
-const DICTATION_SAMPLE_RATE = 16_000
-const PCM_BYTES_PER_SAMPLE = 2
-const MAX_DICTATION_AUDIO_SECONDS = 5
-const MAX_DICTATION_AUDIO_CHUNK_BYTES =
-  DICTATION_SAMPLE_RATE * PCM_BYTES_PER_SAMPLE * MAX_DICTATION_AUDIO_SECONDS
-const MAX_DICTATION_AUDIO_CHUNK_BASE64_LENGTH = Math.ceil(MAX_DICTATION_AUDIO_CHUNK_BYTES / 3) * 4
-
-function isValidAudioBase64(value: string): boolean {
-  return value.length % 4 !== 1 && AUDIO_BASE64_PATTERN.test(value)
+// Why: the contract leaf has no `.input()` (a plain read), so oRPC infers
+// `unknown` rather than `void` — direct wiring checks against the real
+// contract shape, unlike the legacy registry's erased `params: null`.
+export async function handleSpeechModelsList(
+  _params: unknown,
+  { runtime }: RpcContext
+): Promise<RuntimeSpeechSetupState> {
+  return runtime.listMobileSpeechModels()
 }
 
-const DictationStart = z.object({
-  dictationId: requiredString('Missing dictation ID'),
-  modelId: OptionalString
-})
+export async function handleSpeechModelsDownload(
+  params: SpeechModelActionInput,
+  { runtime }: RpcContext
+): Promise<RuntimeSpeechModelDownloadResult> {
+  return runtime.downloadMobileSpeechModel(params.modelId)
+}
 
-const DictationChunk = z.object({
-  dictationId: requiredString('Missing dictation ID'),
-  audioBase64: requiredString('Missing audio chunk')
-    // Why: feedMobileDictation decodes into Buffer + Float32Array; reject
-    // oversized chunks before allocation. This mirrors the mobile pending-audio budget.
-    .refine(
-      (value) => value.length <= MAX_DICTATION_AUDIO_CHUNK_BASE64_LENGTH,
-      'Audio chunk is too large'
-    )
-    // Why: Buffer.from(..., 'base64') silently drops malformed bytes; reject
-    // bad mobile audio chunks instead of feeding empty/corrupt PCM.
-    .refine(isValidAudioBase64, 'Audio chunk must be base64'),
-  sampleRate: z.number().finite().positive()
-})
+export async function handleSpeechModelsDelete(
+  params: SpeechModelActionInput,
+  { runtime }: RpcContext
+): Promise<RuntimeSpeechSetupState> {
+  return runtime.deleteMobileSpeechModel(params.modelId)
+}
 
-const DictationHandle = z.object({
-  dictationId: requiredString('Missing dictation ID')
-})
+// Why: the contract leaf has no `.input()` (a plain read), same reasoning as
+// `handleSpeechModelsList`.
+export function handleSpeechOpenAiKeyGetStatus(
+  _params: unknown,
+  { runtime }: RpcContext
+): RuntimeSpeechOpenAiKeyStatus {
+  return runtime.getSpeechOpenAiKeyStatus()
+}
 
-const SpeechModelAction = z.object({
-  modelId: requiredString('Missing model ID')
-})
+export function handleSpeechOpenAiKeySave(
+  params: SpeechOpenAiKeySaveInput,
+  { runtime }: RpcContext
+): RuntimeSpeechOpenAiKeyStatus {
+  return runtime.saveSpeechOpenAiKey(params.apiKey)
+}
 
-const DictationSetup = z.object({
-  enabled: z.boolean().optional(),
-  modelId: OptionalString,
-  dictationMode: z.enum(['toggle', 'hold']).optional()
-})
+export function handleSpeechOpenAiKeyClear(
+  _params: unknown,
+  { runtime }: RpcContext
+): RuntimeSpeechOpenAiKeyStatus {
+  return runtime.clearSpeechOpenAiKey()
+}
 
-export const SPEECH_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'speech.models.list',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (_params, { runtime }) => runtime.listMobileSpeechModels()
-  }),
-  defineMethod({
-    name: 'speech.models.download',
-    mobile: true,
-    params: SpeechModelAction,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.downloadMobileSpeechModel(params.modelId)
-  }),
-  defineMethod({
-    name: 'speech.models.delete',
-    mobile: true,
-    params: SpeechModelAction,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.deleteMobileSpeechModel(params.modelId)
-  }),
-  defineMethod({
-    name: 'speech.dictation.setup',
-    mobile: true,
-    params: DictationSetup,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.configureMobileDictation({
-        ...(params.enabled !== undefined ? { enabled: params.enabled } : {}),
-        ...(params.modelId !== undefined ? { modelId: params.modelId } : {}),
-        ...(params.dictationMode !== undefined ? { dictationMode: params.dictationMode } : {})
-      })
-  }),
-  defineMethod({
-    name: 'speech.dictation.start',
-    mobile: true,
-    params: DictationStart,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime, clientId, connectionId }) =>
-      runtime.startMobileDictation({ ...params, clientId, connectionId })
-  }),
-  defineMethod({
-    name: 'speech.dictation.chunk',
-    mobile: true,
-    params: DictationChunk,
-    access: { scope: 'host', tier: 'host' },
-    handler: (params, { runtime, clientId, connectionId }) =>
-      runtime.feedMobileDictation({ ...params, clientId, connectionId })
-  }),
-  defineMethod({
-    name: 'speech.dictation.finish',
-    mobile: true,
-    params: DictationHandle,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime, clientId, connectionId }) =>
-      runtime.finishMobileDictation({ ...params, clientId, connectionId })
-  }),
-  defineMethod({
-    name: 'speech.dictation.cancel',
-    mobile: true,
-    params: DictationHandle,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime, clientId, connectionId }) =>
-      runtime.cancelMobileDictation({ ...params, clientId, connectionId })
+export async function handleSpeechDictationSetup(
+  params: SpeechDictationSetupInput,
+  { runtime }: RpcContext
+): Promise<RuntimeSpeechSetupState> {
+  return runtime.configureMobileDictation({
+    ...(params.enabled !== undefined ? { enabled: params.enabled } : {}),
+    ...(params.modelId !== undefined ? { modelId: params.modelId } : {}),
+    ...(params.dictationMode !== undefined ? { dictationMode: params.dictationMode } : {})
   })
-]
+}
+
+export async function handleSpeechDictationStart(
+  params: SpeechDictationStartInput,
+  { runtime, clientId, connectionId }: RpcContext
+): Promise<RuntimeSpeechDictationStartResult> {
+  return runtime.startMobileDictation({
+    ...params,
+    clientId: clientId ?? connectionId,
+    connectionId
+  })
+}
+
+export function handleSpeechDictationChunk(
+  params: SpeechDictationChunkInput,
+  { runtime, clientId, connectionId }: RpcContext
+): RuntimeSpeechDictationHandleResult {
+  return runtime.feedMobileDictation({
+    ...params,
+    clientId: clientId ?? connectionId,
+    connectionId
+  })
+}
+
+export async function handleSpeechDictationFinish(
+  params: SpeechDictationHandleInput,
+  { runtime, clientId, connectionId }: RpcContext
+): Promise<RuntimeSpeechDictationFinishResult> {
+  return runtime.finishMobileDictation({
+    ...params,
+    clientId: clientId ?? connectionId,
+    connectionId
+  })
+}
+
+export async function handleSpeechDictationCancel(
+  params: SpeechDictationHandleInput,
+  { runtime, clientId, connectionId }: RpcContext
+): Promise<RuntimeSpeechDictationHandleResult> {
+  return runtime.cancelMobileDictation({
+    ...params,
+    clientId: clientId ?? connectionId,
+    connectionId
+  })
+}

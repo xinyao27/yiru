@@ -120,9 +120,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check feature wall asset budget
-        run: pnpm --filter yiru exec node scripts/check-feature-wall-assets.mjs
-
       - name: Verify macOS entitlements
         run: pnpm --filter yiru exec node scripts/verify-macos-entitlements.mjs
 

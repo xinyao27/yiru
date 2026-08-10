@@ -4,8 +4,10 @@ import { RemoteRuntimeRequestConnection } from '~shared/remote-runtime/request-c
 import { remoteRuntimeUnavailableError } from '~shared/remote-runtime/request-frames'
 import { RemoteRuntimeSharedControlConnection } from '~shared/remote-runtime/shared-control-connection'
 import type {
+  RemoteRuntimeOrpcTunnel,
   RemoteRuntimeSharedConnectionDiagnostics,
-  RemoteRuntimeSharedSubscription
+  RemoteRuntimeSharedSubscription,
+  SharedControlOrpcTunnelCallbacks
 } from '~shared/remote-runtime/shared-control-types'
 
 type CachedRuntimeConnection = {
@@ -72,6 +74,38 @@ export function sendRemoteRuntimeSharedControlRequest<TResult>(
     timeoutMs,
     options
   )
+}
+
+export function connectRemoteRuntimeSharedControlOrpcTunnel(
+  environmentId: string,
+  pairing: PairingOffer,
+  ownerId: string,
+  timeoutMs: number,
+  callbacks: SharedControlOrpcTunnelCallbacks
+): Promise<RemoteRuntimeOrpcTunnel> {
+  return getSharedControlConnection(environmentId, pairing).orpc.connect(
+    ownerId,
+    timeoutMs,
+    callbacks
+  )
+}
+
+// Why: main-process↔main-process callers (coworking's paired-runtime forwarding)
+// never provision a connection themselves — they only ride one an owner
+// operation already opened — so the oRPC tunnel must respect the same
+// existing-route-only gate as `sendRemoteRuntimeExistingSharedControlRequest`
+// instead of opportunistically opening a fresh shared-control connection.
+export function connectRemoteRuntimeExistingSharedControlOrpcTunnel(
+  environmentId: string,
+  pairing: PairingOffer,
+  ownerId: string,
+  timeoutMs: number,
+  callbacks: SharedControlOrpcTunnelCallbacks
+): Promise<RemoteRuntimeOrpcTunnel> {
+  const connection = getExistingSharedControlConnection(environmentId, pairing)
+  return connection
+    ? connection.orpc.connect(ownerId, timeoutMs, callbacks)
+    : Promise.reject(remoteRuntimeUnavailableError())
 }
 
 export function sendRemoteRuntimeExistingSharedControlRequest<TResult>(

@@ -39,20 +39,6 @@ export async function parseDroidSessionFile(
   return parseDroidSessionLines({ file, lines, platform })
 }
 
-export async function parseDroidSessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseDroidSessionLines({
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
-}
-
 function consumeDroidRecordLine(accumulator: SessionAccumulator, line: string): void {
   const record = parseJsonObject(line)
   if (!record) {

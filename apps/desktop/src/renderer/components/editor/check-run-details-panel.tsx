@@ -5,6 +5,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
 
 import { SourceControlFixSplitButton } from '../workspace-panel/source-control/fix-split-button'
@@ -315,7 +316,7 @@ export function CheckRunDetailsPanel({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => window.api.shell.openUrl(openUrl)}
+            onClick={() => shellClient.shell.openUrl(openUrl)}
           >
             {translate('auto.components.editor.CheckRunDetailsPanel.a916648574', 'Open details')}
             <ExternalLink className="size-3.5" />

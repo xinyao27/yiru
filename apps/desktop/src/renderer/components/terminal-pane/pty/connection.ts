@@ -94,6 +94,7 @@ import {
   getSettingsForWorktreeRuntimeOwner,
   getRuntimeEnvironmentIdForWorktree
 } from '~renderer/lib/worktree-runtime-owner'
+import { inferAgentStatusInterrupt } from '~renderer/runtime/agent-status-client'
 import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
 import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
 import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
@@ -1537,8 +1538,10 @@ export function connectPanePty(
       // Why: the explicit hook row is the authority for an in-flight agent turn.
       // Codex can reset its terminal title while handling Ctrl+C/Escape, so title
       // state must not veto clearing the row's working state.
-      return window.api.agentStatus
-        .inferInterrupt(request)
+      // Why: hook-status authority is the shell's own runtime. WSL/SSH/relay
+      // hook events already funnel back through `agent.hook`, so the semantic
+      // client intentionally does not target the pane's PTY host.
+      return inferAgentStatusInterrupt(request)
         .then((applied) => {
           if (applied) {
             clearInferredInterruptWorkingTitle()

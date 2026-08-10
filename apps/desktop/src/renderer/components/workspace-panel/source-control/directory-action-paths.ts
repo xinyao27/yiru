@@ -1,4 +1,4 @@
-import type { GitBranchChangeEntry, GitStatusEntry } from '~shared/types'
+import type { GitStatusEntry } from '~shared/types'
 
 import {
   getDiscardAllPaths,
@@ -15,13 +15,6 @@ export type GitStatusSourceControlTreeNode = SourceControlTreeNode<
 
 export type SourceControlTreeDirectoryNode = Extract<
   GitStatusSourceControlTreeNode,
-  { type: 'directory' }
->
-
-type BranchSourceControlTreeNode = SourceControlTreeNode<GitBranchChangeEntry, 'branch'>
-
-export type BranchSourceControlTreeDirectoryNode = Extract<
-  BranchSourceControlTreeNode,
   { type: 'directory' }
 >
 

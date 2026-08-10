@@ -31,20 +31,6 @@ export type LargeDiffRenderLimit =
       }
     }
 
-export function countLinesEmptyAsZero(content: string): number {
-  if (content.length === 0) {
-    return 0
-  }
-
-  let lineCount = 1
-  for (let index = 0; index < content.length; index += 1) {
-    if (content.charCodeAt(index) === 10) {
-      lineCount += 1
-    }
-  }
-  return lineCount
-}
-
 type BoundedLineCount = {
   count: number
   exceeded: boolean
@@ -71,72 +57,9 @@ export function countLinesEmptyAsZeroUpToLimit(
   return { count: lineCount, exceeded: false }
 }
 
-export function countLinesLikeSplit(content: string): number {
-  let lineCount = 1
-  for (let index = 0; index < content.length; index += 1) {
-    if (content.charCodeAt(index) === 10) {
-      lineCount += 1
-    }
-  }
-  return lineCount
-}
-
 type LargeDiffRenderLimitInput = {
   originalContent: string
   modifiedContent: string
-}
-
-type LargeDiffRenderLimitCountsInput = {
-  originalLineCount: number
-  modifiedLineCount: number
-  originalCharacterCount: number
-  modifiedCharacterCount: number
-}
-
-export function getLargeDiffRenderLimitFromCounts({
-  originalLineCount,
-  modifiedLineCount,
-  originalCharacterCount,
-  modifiedCharacterCount
-}: LargeDiffRenderLimitCountsInput): LargeDiffRenderLimit {
-  const lineCounts = {
-    original: originalLineCount,
-    modified: modifiedLineCount
-  }
-  const characterCount = originalCharacterCount + modifiedCharacterCount
-  const limits = {
-    maxLinesPerSide: MAX_RENDERED_DIFF_LINES_PER_SIDE,
-    maxCombinedCharacters: MAX_RENDERED_DIFF_COMBINED_CHARACTERS
-  }
-
-  if (
-    lineCounts.original > MAX_RENDERED_DIFF_LINES_PER_SIDE ||
-    lineCounts.modified > MAX_RENDERED_DIFF_LINES_PER_SIDE
-  ) {
-    return {
-      limited: true,
-      reason: 'line-count',
-      lineCounts,
-      characterCount,
-      limits
-    }
-  }
-
-  if (characterCount > MAX_RENDERED_DIFF_COMBINED_CHARACTERS) {
-    return {
-      limited: true,
-      reason: 'character-count',
-      lineCounts,
-      characterCount,
-      limits
-    }
-  }
-
-  return {
-    limited: false,
-    lineCounts,
-    characterCount
-  }
 }
 
 export function getLargeDiffRenderLimit({

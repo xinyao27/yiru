@@ -13,6 +13,7 @@ import {
   activateAndRevealFolderWorkspace,
   activateAndRevealWorktree
 } from '~renderer/lib/worktree-activation'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import type { Worktree } from '~shared/types'
@@ -74,7 +75,7 @@ export function useAiVaultSessionLaunchActions({
 
   const copyResumeCommand = useCallback(
     async (session: AiVaultSession, worktreeId?: string | null): Promise<void> => {
-      await window.api.ui.writeClipboardText(buildResumeCommand(session, worktreeId))
+      await shellClient.ui.writeClipboardText(buildResumeCommand(session, worktreeId))
       toast.success(
         translate(
           'auto.components.right.sidebar.AiVaultPanel.resumeCommandCopied',

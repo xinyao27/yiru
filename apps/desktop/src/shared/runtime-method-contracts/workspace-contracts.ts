@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 import { defineRuntimeMethodContract } from '../runtime-method-contract'
 import type {
-  RuntimeRepoList,
   RuntimeRepoSearchRefs,
   RuntimeWorktreeListResult,
   RuntimeWorktreeRecord,
@@ -29,12 +28,6 @@ const RepoSearchRefs = z.object({
     .transform((value) => (typeof value === 'string' ? value : undefined))
     .pipe(z.string({ message: 'Missing query' })),
   limit: OptionalFiniteNumber
-})
-
-export const REPO_LIST_CONTRACT = defineRuntimeMethodContract<RuntimeRepoList>()({
-  name: 'repo.list',
-  params: null,
-  mobile: true
 })
 
 export const REPO_ADD_CONTRACT = defineRuntimeMethodContract<{ repo: Repo }>()({

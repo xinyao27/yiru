@@ -56,7 +56,7 @@ export type TabDragItemData = {
   groupId: string
   unifiedTabId: string
   visibleTabId: string
-  tabType: 'terminal' | 'editor' | 'browser' | 'simulator' | 'workspace-panel'
+  tabType: 'terminal' | 'editor' | 'browser' | 'simulator' | 'git-graph'
   /** Rendered by the DragOverlay ghost that follows the cursor across
    *  groups. Source tab strips use overflow-hidden, so without the overlay
    *  the dragged tab would be invisible once the cursor leaves its own
@@ -112,23 +112,6 @@ export function canDropTabIntoPaneBody({
   }
 
   return true
-}
-
-export function canDropTabForPaneColumnSplit(args: {
-  activeDrag: TabDragItemData | null
-  groupsByWorktree: Record<string, TabGroup[]>
-  targetGroupId: string
-  worktreeId: string
-}): boolean {
-  if (!args.activeDrag || args.activeDrag.groupId !== args.targetGroupId) {
-    return false
-  }
-  return canDropTabIntoPaneBody({
-    activeDrag: args.activeDrag,
-    groupsByWorktree: args.groupsByWorktree,
-    overGroupId: args.targetGroupId,
-    worktreeId: args.worktreeId
-  })
 }
 
 export function isTabDragData(value: unknown): value is TabDragItemData {

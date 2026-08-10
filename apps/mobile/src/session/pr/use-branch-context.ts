@@ -4,6 +4,7 @@ import { resolveMobileBranchCompareBaseRef } from '~/source-control/branch-base-
 import type { MobileGitBranchCompareResult } from '~/source-control/branch-compare'
 import type { MobileGitStatusResult } from '~/source-control/git-status'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import { readMobileBranchCompareResult, readMobileGitStatusResult } from '../diff/review-rpc'
@@ -175,8 +176,10 @@ async function readGitStatus(
   client: RpcClient,
   worktreeId: string
 ): Promise<MobileGitStatusResult | null> {
-  const response = await client.sendRequest('git.status', { worktree: `id:${worktreeId}` })
-  return response.ok ? readMobileGitStatusResult(response.result) : null
+  const response = await callRuntimeOrpc(client, (runtime) => runtime.git.status, {
+    worktree: `id:${worktreeId}`
+  })
+  return readMobileGitStatusResult(response)
 }
 
 async function readBranchCompare(
@@ -189,9 +192,9 @@ async function readBranchCompare(
   if (!baseRef) {
     return null
   }
-  const response = await client.sendRequest('git.branchCompare', {
+  const response = await callRuntimeOrpc(client, (runtime) => runtime.git.branchCompare, {
     worktree: `id:${worktreeId}`,
     baseRef
   })
-  return response.ok ? readMobileBranchCompareResult(response.result) : null
+  return readMobileBranchCompareResult(response)
 }

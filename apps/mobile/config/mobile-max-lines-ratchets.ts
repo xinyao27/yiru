@@ -37,7 +37,7 @@ export const mobileMaxLinesRatchets = [
   },
   {
     files: ['src/transport/rpc-client.ts'],
-    rules: { 'max-lines': createMaxLinesRule(1_058) }
+    rules: { 'max-lines': createMaxLinesRule(700) }
   },
   {
     files: ['src/components/rich-markdown-editor-html.ts'],

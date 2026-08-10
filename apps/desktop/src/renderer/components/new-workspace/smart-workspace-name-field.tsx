@@ -16,7 +16,6 @@ import {
 search orchestration, and result rendering so the unified create flow stays
 in one predictable form control instead of splitting state across fragments. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { parseGitLabMergeRequestLink } from '~renderer/components/new-workspace/gitlab-links'
@@ -40,6 +39,7 @@ import { Popover, PopoverAnchor, PopoverContent } from '~renderer/components/ui/
 import { Tabs, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { cn } from '~renderer/lib/class-names'
 import {
   normalizeGitHubLinkQuery,
@@ -55,10 +55,13 @@ import {
   localPreflightContextKey
 } from '~renderer/lib/local-preflight-context'
 import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails
 } from '~renderer/runtime/repo-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   buildProjectSourceContextFromRepo,
@@ -191,7 +194,7 @@ export default function SmartWorkspaceNameField({
 }: SmartWorkspaceNameFieldProps): React.JSX.Element {
   // Why: tab/filter labels use the lightweight translate() helper; subscribing
   // here makes them refresh even when language changes don't remount the field.
-  useTranslation()
+  useUiLocale()
   const {
     addRepo,
     fetchWorkItems,
@@ -1264,7 +1267,7 @@ export default function SmartWorkspaceNameField({
                             type="button"
                             variant="quiet"
                             size="icon-xs"
-                            onClick={() => void window.api.shell.openUrl(selectedSource.url!)}
+                            onClick={() => void shellClient.shell.openUrl(selectedSource.url!)}
                             className="size-6 shrink-0"
                             aria-label={translate(
                               'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',
@@ -1615,7 +1618,11 @@ async function getRepoSlugCached(
     return cache.get(cacheKey) ?? null
   }
   try {
-    const slug = await window.api.gh.repoSlug({ repoPath: repo.path, repoId: repo.id })
+    const slug = await callRuntimeOrpc(
+      getActiveRuntimeTarget(useAppStore.getState().settings),
+      (client) => client.github.repoSlug,
+      { repo: repo.id }
+    )
     cache.set(cacheKey, slug)
     return slug
   } catch {

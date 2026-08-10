@@ -1,14 +1,8 @@
 import type {
-  Project,
-  ProjectHostSetup,
   ProjectHostSetupCloneArgs,
   ProjectHostSetupCreateArgs,
-  ProjectHostSetupCreateResult,
-  ProjectHostSetupDeleteResult,
   ProjectHostSetupExistingFolderArgs,
-  ProjectHostSetupResult,
   ProjectHostSetupUpdateArgs,
-  ProjectHostSetupUpdateResult,
   RepoKind
 } from '~shared/types'
 
@@ -39,13 +33,13 @@ function getOptionalRepoKind(flags: Map<string, string | boolean>): RepoKind | u
 
 export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
   'project list': async ({ client, json }) => {
-    const result = await client.call<{ projects: Project[] }>('project.list')
+    const result = await client.call(client.rpc.project.list, undefined)
     printResult(result, json, formatProjectList)
   },
   'project setups': async ({ flags, client, json }) => {
     const projectFilter = getOptionalStringFlag(flags, 'project')
     const hostFilter = getOptionalStringFlag(flags, 'host')
-    const result = await client.call<{ setups: ProjectHostSetup[] }>('projectHostSetup.list')
+    const result = await client.call(client.rpc.projectHostSetup.list, undefined)
     const setups = result.result.setups.filter(
       (setup) =>
         (projectFilter === undefined || setup.projectId === projectFilter) &&
@@ -62,10 +56,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       kind: getOptionalRepoKind(flags),
       displayName: getOptionalStringFlag(flags, 'display-name')
     }
-    const result = await client.call<{ result: ProjectHostSetupResult }>(
-      'projectHostSetup.setupExistingFolder',
-      args
-    )
+    const result = await client.call(client.rpc.projectHostSetup.setupExistingFolder, args)
     printResult(result, json, formatProjectHostSetupResult)
   },
   'project setup-clone': async ({ flags, client, cwd, json }) => {
@@ -77,10 +68,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       destination: resolveRepoPathArgument(rawDestination, cwd),
       displayName: getOptionalStringFlag(flags, 'display-name')
     }
-    const result = await client.call<{ result: ProjectHostSetupResult }>(
-      'projectHostSetup.clone',
-      args
-    )
+    const result = await client.call(client.rpc.projectHostSetup.clone, args)
     printResult(result, json, formatProjectHostSetupResult)
   },
   'project setup-create': async ({ flags, client, cwd, json }) => {
@@ -97,10 +85,7 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
       setupState: getOptionalSetupState(flags),
       setupMethod: getOptionalIndependentSetupMethod(flags)
     }
-    const result = await client.call<{ result: ProjectHostSetupCreateResult }>(
-      'projectHostSetup.create',
-      args
-    )
+    const result = await client.call(client.rpc.projectHostSetup.create, args)
     printResult(result, json, formatProjectHostSetupCreateResult)
   },
   'project setup-update': async ({ flags, client, cwd, json }) => {
@@ -117,19 +102,13 @@ export const PROJECT_HANDLERS: Record<string, CommandHandler> = {
         setupMethod: getOptionalSetupMethod(flags)
       }
     }
-    const result = await client.call<{ result: ProjectHostSetupUpdateResult }>(
-      'projectHostSetup.update',
-      args
-    )
+    const result = await client.call(client.rpc.projectHostSetup.update, args)
     printResult(result, json, formatProjectHostSetupUpdateResult)
   },
   'project setup-delete': async ({ flags, client, json }) => {
-    const result = await client.call<{ result: ProjectHostSetupDeleteResult }>(
-      'projectHostSetup.delete',
-      {
-        setupId: getRequiredStringFlag(flags, 'setup')
-      }
-    )
+    const result = await client.call(client.rpc.projectHostSetup.delete, {
+      setupId: getRequiredStringFlag(flags, 'setup')
+    })
     printResult(result, json, formatProjectHostSetupDeleteResult)
   }
 }

@@ -7,10 +7,6 @@ import type { PRCheckDetail } from '@yiru/workbench-model/review'
 
 export { getBrokenChecks }
 
-export function hasBrokenChecks(checks: PRCheckDetail[]): boolean {
-  return getBrokenChecks(checks).length > 0
-}
-
 export function buildFixChecksPrompt(input: {
   prNumber: number
   prTitle: string

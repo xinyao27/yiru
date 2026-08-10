@@ -1,12 +1,12 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type { RateLimitState } from '~shared/rate-limit-types'
+import type { GrokAccountStatus, RateLimitState } from '~shared/rate-limit-types'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   GlobalSettings
 } from '~shared/types'
 
-import { callRuntimeRpc, getActiveRuntimeTarget, RuntimeRpcCallError } from './rpc-client'
+import { callRuntimeOrpc, createRuntimeOrpcClient } from './orpc-client'
+import { getActiveRuntimeTarget } from './rpc-client'
 
 // Mirrors YiruRuntime.getAccountsSnapshot() / the accounts.subscribe payload.
 export type ProviderAccountsSnapshot = {
@@ -22,11 +22,6 @@ type ProviderAccountSelection = {
   accountId: string | null
   runtime: 'host' | 'wsl'
   wslDistro?: string | null
-}
-
-type ProviderAccountsSubscriptionMessage = {
-  type: 'ready' | 'snapshot' | 'end'
-  snapshot?: ProviderAccountsSnapshot
 }
 
 const REMOTE_ACCOUNTS_FIRST_SNAPSHOT_TIMEOUT_MS = 15_000
@@ -136,7 +131,8 @@ export function watchProviderAccounts(
   }
 
   let closed = false
-  let unsubscribe: (() => void) | null = null
+  const abort = new AbortController()
+  let closeConnection: (() => void) | null = null
   let receivedSnapshot = false
   // Why: a subscription that never produces a first snapshot looks identical
   // to a loading state; surface it as an error so the pane can say so.
@@ -146,58 +142,47 @@ export function watchProviderAccounts(
     }
   }, REMOTE_ACCOUNTS_FIRST_SNAPSHOT_TIMEOUT_MS)
 
-  void window.api.runtimeEnvironments
-    .subscribe(
-      {
-        selector: target.environmentId,
-        method: 'accounts.subscribe',
-        timeoutMs: REMOTE_ACCOUNTS_FIRST_SNAPSHOT_TIMEOUT_MS
-      },
-      {
-        onResponse: (response) => {
-          if (closed) {
-            return
-          }
-          const typed = response as RuntimeRpcResponse<ProviderAccountsSubscriptionMessage>
-          if (typed.ok === false) {
-            handlers.onError(new RuntimeRpcCallError(typed))
-            return
-          }
-          const message = typed.result
-          if ((message.type === 'ready' || message.type === 'snapshot') && message.snapshot) {
-            receivedSnapshot = true
-            handlers.onSnapshot(message.snapshot)
-          }
-        },
-        onError: (error) => {
-          if (!closed) {
-            handlers.onError(new Error(error.message))
-          }
-        },
-        onClose: () => {
-          if (!closed && !receivedSnapshot) {
-            handlers.onError(new Error('Remote provider account subscription closed.'))
-          }
+  void (async () => {
+    const connection = await createRuntimeOrpcClient(target, {
+      timeoutMs: REMOTE_ACCOUNTS_FIRST_SNAPSHOT_TIMEOUT_MS,
+      signal: abort.signal
+    })
+    closeConnection = connection.close
+    if (closed) {
+      connection.close()
+      return
+    }
+    try {
+      const stream = await connection.client.accounts.subscribe(undefined, {
+        signal: abort.signal
+      })
+      for await (const message of stream) {
+        if (closed) {
+          return
+        }
+        if ((message.type === 'ready' || message.type === 'snapshot') && message.snapshot) {
+          receivedSnapshot = true
+          handlers.onSnapshot(message.snapshot)
         }
       }
-    )
-    .then((handle) => {
-      unsubscribe = handle.unsubscribe
-      if (closed) {
-        unsubscribe()
+      if (!closed && !receivedSnapshot) {
+        handlers.onError(new Error('Remote provider account subscription closed.'))
       }
-    })
-    .catch((error: unknown) => {
-      if (!closed) {
-        handlers.onError(error)
-      }
-    })
+    } finally {
+      connection.close()
+    }
+  })().catch((error: unknown) => {
+    if (!closed) {
+      handlers.onError(error)
+    }
+  })
 
   return {
     close: () => {
       closed = true
       window.clearTimeout(firstSnapshotTimer)
-      unsubscribe?.()
+      abort.abort()
+      closeConnection?.()
     }
   }
 }
@@ -240,15 +225,12 @@ export async function selectClaudeProviderAccount(
   selection: ProviderAccountSelection
 ): Promise<ClaudeRateLimitAccountsState> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<ClaudeRateLimitAccountsState>(
-      target,
-      'accounts.selectClaude',
-      { accountId: selection.accountId },
-      { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
-    )
-  }
-  return window.api.claudeAccounts.select(selection)
+  return callRuntimeOrpc(
+    target,
+    (client) => client.accounts.selectClaude,
+    { accountId: selection.accountId, runtime: selection.runtime, wslDistro: selection.wslDistro },
+    { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
+  )
 }
 
 export async function selectCodexProviderAccount(
@@ -256,15 +238,12 @@ export async function selectCodexProviderAccount(
   selection: ProviderAccountSelection
 ): Promise<CodexRateLimitAccountsState> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<CodexRateLimitAccountsState>(
-      target,
-      'accounts.selectCodex',
-      { accountId: selection.accountId },
-      { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
-    )
-  }
-  return window.api.codexAccounts.select(selection)
+  return callRuntimeOrpc(
+    target,
+    (client) => client.accounts.selectCodex,
+    { accountId: selection.accountId, runtime: selection.runtime, wslDistro: selection.wslDistro },
+    { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
+  )
 }
 
 export async function removeClaudeProviderAccount(
@@ -272,15 +251,23 @@ export async function removeClaudeProviderAccount(
   accountId: string
 ): Promise<ClaudeRateLimitAccountsState> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<ClaudeRateLimitAccountsState>(
-      target,
-      'accounts.removeClaude',
-      { accountId },
-      { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
-    )
-  }
-  return window.api.claudeAccounts.remove({ accountId })
+  return callRuntimeOrpc(
+    target,
+    (client) => client.accounts.removeClaude,
+    { accountId },
+    { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
+  )
+}
+
+// Why: reads the Grok CLI's own `auth.json` off the active host — always the
+// local host today (no runtime-target support in `readGrokAuthSession`), but
+// routed through the active target so a future host-aware read doesn't need a
+// second call site update. Sole consumer is `grok-accounts-section.tsx`.
+export function fetchGrokAccountStatus(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
+): Promise<GrokAccountStatus> {
+  const target = getActiveRuntimeTarget(settings)
+  return callRuntimeOrpc(target, (client) => client.accounts.grokStatus, undefined)
 }
 
 export async function removeCodexProviderAccount(
@@ -288,13 +275,10 @@ export async function removeCodexProviderAccount(
   accountId: string
 ): Promise<CodexRateLimitAccountsState> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind === 'environment') {
-    return callRuntimeRpc<CodexRateLimitAccountsState>(
-      target,
-      'accounts.removeCodex',
-      { accountId },
-      { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
-    )
-  }
-  return window.api.codexAccounts.remove({ accountId })
+  return callRuntimeOrpc(
+    target,
+    (client) => client.accounts.removeCodex,
+    { accountId },
+    { timeoutMs: REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS }
+  )
 }

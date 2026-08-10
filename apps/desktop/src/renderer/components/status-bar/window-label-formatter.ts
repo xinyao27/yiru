@@ -1,5 +1,3 @@
-import { formatResetDuration } from '@yiru/workbench-model/ui'
-
 /**
  * Returns a short human-readable label for a usage window duration.
  *
@@ -29,23 +27,4 @@ export function formatWindowLabel(windowMinutes: number): string {
     return `${windowMinutes / 60}h`
   }
   return `${windowMinutes}m`
-}
-
-/**
- * Status-bar chip label for a rate-limit window.
- *
- * Why: the popup already shows remaining time via formatResetCountdown
- * ("Resets in 2h 33m"). The chip used fixed windowMinutes labels ("5h"),
- * so the same Codex session looked out of sync (#8378). Prefer remaining
- * duration when resetsAt is known; fall back to the fixed window size only
- * when no reset timestamp is available.
- */
-export function formatRateLimitWindowChipLabel(
-  window: { windowMinutes: number; resetsAt: number | null },
-  now: number = Date.now()
-): string {
-  if (window.resetsAt != null) {
-    return formatResetDuration(window.resetsAt - now)
-  }
-  return formatWindowLabel(window.windowMinutes)
 }

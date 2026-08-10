@@ -1,91 +1,16 @@
-import type { WebContents } from 'electron'
+import type { BrowserPageCdpLease, BrowserPageHandle } from './page/handle'
 
-const SCREENSHOT_TIMEOUT_MS = 8000
-const FALLBACK_CAPTURE_TIMEOUT_MS = 1000
+const SCREENSHOT_TIMEOUT_MS = 8_000
+const FALLBACK_CAPTURE_TIMEOUT_MS = 1_000
 const SCREENSHOT_TIMEOUT_MESSAGE =
   'Screenshot timed out — the browser tab may not be visible or the window may not have focus.'
-
-function applyFallbackClip(
-  image: Electron.NativeImage,
-  params: Record<string, unknown> | undefined
-): Electron.NativeImage | null {
-  if (params?.captureBeyondViewport) {
-    // Why: capturePage() can only see the currently painted viewport. If the
-    // caller asked for beyond-viewport pixels, returning a viewport-sized image
-    // would silently lie about what was captured.
-    return null
-  }
-
-  const clip = params?.clip
-  if (!clip || typeof clip !== 'object') {
-    return image
-  }
-  const clipRect = clip as Record<string, unknown>
-
-  const x = typeof clipRect.x === 'number' ? clipRect.x : Number.NaN
-  const y = typeof clipRect.y === 'number' ? clipRect.y : Number.NaN
-  const width = typeof clipRect.width === 'number' ? clipRect.width : Number.NaN
-  const height = typeof clipRect.height === 'number' ? clipRect.height : Number.NaN
-  const scale =
-    typeof clipRect.scale === 'number' && Number.isFinite(clipRect.scale) && clipRect.scale > 0
-      ? clipRect.scale
-      : 1
-
-  if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
-    return null
-  }
-
-  const cropRect = {
-    x: Math.round(x * scale),
-    y: Math.round(y * scale),
-    width: Math.round(width * scale),
-    height: Math.round(height * scale)
-  }
-  const imageSize = image.getSize()
-  if (
-    cropRect.x < 0 ||
-    cropRect.y < 0 ||
-    cropRect.width <= 0 ||
-    cropRect.height <= 0 ||
-    cropRect.x + cropRect.width > imageSize.width ||
-    cropRect.y + cropRect.height > imageSize.height
-  ) {
-    return null
-  }
-
-  return image.crop(cropRect)
-}
-
-function encodeNativeImageScreenshot(
-  image: Electron.NativeImage,
-  params: Record<string, unknown> | undefined
-): { data: string } | null {
-  if (image.isEmpty()) {
-    return null
-  }
-
-  const clippedImage = applyFallbackClip(image, params)
-  if (!clippedImage || clippedImage.isEmpty()) {
-    return null
-  }
-
-  const format = params?.format === 'jpeg' ? 'jpeg' : 'png'
-  const quality =
-    typeof params?.quality === 'number' && Number.isFinite(params.quality)
-      ? Math.max(0, Math.min(100, Math.round(params.quality)))
-      : undefined
-  const buffer = format === 'jpeg' ? clippedImage.toJPEG(quality ?? 90) : clippedImage.toPNG()
-  return { data: buffer.toString('base64') }
-}
 
 function getLayoutClip(metrics: {
   cssContentSize?: { width?: number; height?: number }
   contentSize?: { width?: number; height?: number }
 }): { x: number; y: number; width: number; height: number; scale: number } | null {
-  // Why: Page.captureScreenshot clip coordinates are in CSS pixels. On HiDPI
-  // Electron guests, `contentSize` can reflect device pixels, which makes
-  // Chromium tile the page into a duplicated 2x2 grid. Prefer cssContentSize
-  // and only fall back to contentSize when older Chromium builds omit it.
+  // Why: CDP clip coordinates are CSS pixels. Chromium contentSize can expose
+  // device pixels on HiDPI guests, producing a tiled image.
   const size = metrics.cssContentSize ?? metrics.contentSize
   const width = size?.width
   const height = size?.height
@@ -99,27 +24,20 @@ function getLayoutClip(metrics: {
   ) {
     return null
   }
-
-  return {
-    x: 0,
-    y: 0,
-    width: Math.ceil(width),
-    height: Math.ceil(height),
-    scale: 1
-  }
+  return { x: 0, y: 0, width: Math.ceil(width), height: Math.ceil(height), scale: 1 }
 }
 
-async function sendCommandWithTimeout<T>(
-  webContents: WebContents,
+async function sendCommandWithTimeout(
+  cdp: BrowserPageCdpLease,
   method: string,
   params: Record<string, unknown> | undefined,
   timeoutMessage: string
-): Promise<T> {
+): Promise<unknown> {
   let timer: NodeJS.Timeout | null = null
   try {
     return await Promise.race([
-      webContents.debugger.sendCommand(method, params ?? {}) as Promise<T>,
-      new Promise<T>((_, reject) => {
+      cdp.sendCommand(method, params),
+      new Promise<never>((_, reject) => {
         timer = setTimeout(() => reject(new Error(timeoutMessage)), SCREENSHOT_TIMEOUT_MS)
       })
     ])
@@ -131,97 +49,76 @@ async function sendCommandWithTimeout<T>(
 }
 
 export async function captureFullPageScreenshot(
-  webContents: WebContents,
+  page: BrowserPageHandle,
   format: 'png' | 'jpeg' = 'png'
 ): Promise<{ data: string; format: 'png' | 'jpeg' }> {
-  if (webContents.isDestroyed()) {
-    throw new Error('WebContents destroyed')
+  if (page.isClosed()) {
+    throw new Error('Browser tab is no longer available')
   }
-  const dbg = webContents.debugger
-  if (!dbg.isAttached()) {
-    throw new Error('Debugger not attached')
-  }
-
+  const cdp = page.acquireCdp()
   try {
-    webContents.invalidate()
-  } catch {
-    // Some guest teardown paths reject repaint requests. Fall through to CDP.
+    page.prepareForCapture()
+    const rawMetrics = await sendCommandWithTimeout(
+      cdp,
+      'Page.getLayoutMetrics',
+      undefined,
+      SCREENSHOT_TIMEOUT_MESSAGE
+    )
+    const metrics =
+      rawMetrics && typeof rawMetrics === 'object'
+        ? (rawMetrics as {
+            cssContentSize?: { width?: number; height?: number }
+            contentSize?: { width?: number; height?: number }
+          })
+        : {}
+    const clip = getLayoutClip(metrics)
+    if (!clip) {
+      throw new Error('Unable to determine full-page screenshot bounds')
+    }
+    const rawResult = await sendCommandWithTimeout(
+      cdp,
+      'Page.captureScreenshot',
+      { format, captureBeyondViewport: true, clip },
+      SCREENSHOT_TIMEOUT_MESSAGE
+    )
+    const result =
+      rawResult && typeof rawResult === 'object' ? (rawResult as Record<string, unknown>) : {}
+    if (typeof result.data !== 'string') {
+      throw new Error('Screenshot returned no image data')
+    }
+    return { data: result.data, format }
+  } finally {
+    cdp.release()
   }
-
-  const metrics = await sendCommandWithTimeout<{
-    cssContentSize?: { width?: number; height?: number }
-    contentSize?: { width?: number; height?: number }
-  }>(webContents, 'Page.getLayoutMetrics', undefined, SCREENSHOT_TIMEOUT_MESSAGE)
-  const clip = getLayoutClip(metrics)
-  if (!clip) {
-    throw new Error('Unable to determine full-page screenshot bounds')
-  }
-
-  const { data } = await sendCommandWithTimeout<{ data: string }>(
-    webContents,
-    'Page.captureScreenshot',
-    {
-      format,
-      captureBeyondViewport: true,
-      clip
-    },
-    SCREENSHOT_TIMEOUT_MESSAGE
-  )
-
-  return { data, format }
 }
 
-// Why: Electron's capturePage() is unreliable on webview guests — the compositor
-// may not produce frames when the webview panel is inactive, unfocused, or in a
-// split-pane layout. Instead, use the debugger's Page.captureScreenshot which
-// renders server-side in the Blink compositor and doesn't depend on OS-level
-// window focus or display state. Guard with a timeout so agent-browser doesn't
-// hang on its 30s CDP timeout if the debugger stalls.
+// Why: Electron webview CDP capture can stall when its compositor is parked.
+// The optional fallback is implemented by the Electron handle; Node Chrome
+// handles omit it and remain on the portable CDP path.
 export function captureScreenshot(
-  webContents: WebContents,
+  page: BrowserPageHandle,
+  cdp: BrowserPageCdpLease,
   params: Record<string, unknown> | undefined,
   onResult: (result: unknown) => void,
   onError: (message: string) => void
 ): void {
-  if (webContents.isDestroyed()) {
-    onError('WebContents destroyed')
+  if (page.isClosed() || !cdp.isConnected()) {
+    onError('Browser debugger is no longer attached')
     return
   }
-  const dbg = webContents.debugger
-  if (!dbg.isAttached()) {
-    onError('Debugger not attached')
-    return
-  }
-
-  const screenshotParams: Record<string, unknown> = {}
-  if (params?.format) {
-    screenshotParams.format = params.format
-  }
-  if (params?.quality) {
-    screenshotParams.quality = params.quality
-  }
-  if (params?.clip) {
-    screenshotParams.clip = params.clip
-  }
-  if (params?.captureBeyondViewport != null) {
-    screenshotParams.captureBeyondViewport = params.captureBeyondViewport
-  }
-  if (params?.fromSurface != null) {
-    screenshotParams.fromSurface = params.fromSurface
-  }
-
+  const screenshotParams = selectScreenshotParams(params)
   let settled = false
   let timeoutTimer: ReturnType<typeof setTimeout> | null = null
   let fallbackTimer: ReturnType<typeof setTimeout> | null = null
   const clearTimers = (): void => {
     if (timeoutTimer) {
       clearTimeout(timeoutTimer)
-      timeoutTimer = null
     }
     if (fallbackTimer) {
       clearTimeout(fallbackTimer)
-      fallbackTimer = null
     }
+    timeoutTimer = null
+    fallbackTimer = null
   }
   const settleResult = (result: unknown): void => {
     if (settled) {
@@ -239,60 +136,43 @@ export function captureScreenshot(
     clearTimers()
     onError(message)
   }
-  // Why: a compositor invalidate is cheap and can recover guest instances that
-  // are visible but have not produced a fresh frame since being reclaimed into
-  // the active browser tab.
+
   try {
-    webContents.invalidate()
+    page.prepareForCapture()
   } catch {
-    // Some guest teardown paths reject repaint requests. Fall through to CDP.
+    // A teardown race can reject repaint while CDP still has a useful response.
   }
   timeoutTimer = setTimeout(() => {
-    if (settled) {
+    const captureFallback = page.captureCompositorFrame
+    if (!captureFallback) {
+      settleError(SCREENSHOT_TIMEOUT_MESSAGE)
       return
     }
-    // Why: capturePage is only a best-effort fallback. If it also stalls, the
-    // CDP proxy must still settle instead of inheriting the compositor hang.
     fallbackTimer = setTimeout(
       () => settleError(SCREENSHOT_TIMEOUT_MESSAGE),
       FALLBACK_CAPTURE_TIMEOUT_MS
     )
-    void Promise.resolve()
-      .then(() => webContents.capturePage())
-      .then(
-        (image) => {
-          if (settled) {
-            return
-          }
-          if (fallbackTimer) {
-            clearTimeout(fallbackTimer)
-            fallbackTimer = null
-          }
-          let fallback: { data: string } | null = null
-          try {
-            fallback = encodeNativeImageScreenshot(image, params)
-          } catch {
-            settleError(SCREENSHOT_TIMEOUT_MESSAGE)
-            return
-          }
-          if (fallback) {
-            settleResult(fallback)
-            return
-          }
-          settleError(SCREENSHOT_TIMEOUT_MESSAGE)
-        },
-        () => {
-          if (fallbackTimer) {
-            clearTimeout(fallbackTimer)
-            fallbackTimer = null
-          }
-          settleError(SCREENSHOT_TIMEOUT_MESSAGE)
-        }
-      )
+    void captureFallback(params ?? {}).then(
+      (fallback) => (fallback ? settleResult(fallback) : settleError(SCREENSHOT_TIMEOUT_MESSAGE)),
+      () => settleError(SCREENSHOT_TIMEOUT_MESSAGE)
+    )
   }, SCREENSHOT_TIMEOUT_MS)
 
-  dbg
+  void cdp
     .sendCommand('Page.captureScreenshot', screenshotParams)
-    .then((result) => settleResult(result))
-    .catch((err) => settleError((err as Error).message))
+    .then(settleResult, (error: unknown) =>
+      settleError(error instanceof Error ? error.message : String(error))
+    )
+}
+
+function selectScreenshotParams(
+  params: Record<string, unknown> | undefined
+): Record<string, unknown> {
+  const selected: Record<string, unknown> = {}
+  for (const key of ['format', 'quality', 'clip', 'captureBeyondViewport', 'fromSurface']) {
+    if (params?.[key] !== undefined) {
+      selected[key] = params[key]
+    }
+  }
+  return selected
 }

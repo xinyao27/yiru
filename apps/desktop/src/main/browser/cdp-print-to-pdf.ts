@@ -1,7 +1,5 @@
 import { randomUUID } from 'node:crypto'
 
-import type { PrintToPDFOptions } from 'electron'
-
 const PDF_DEFAULT_MARGIN_INCHES = 1 / 2.54
 const PDF_STREAM_CHUNK_BYTES = 1024 * 1024
 const PDF_STREAM_HANDLE_PREFIX = 'yiru-pdf-'
@@ -11,13 +9,34 @@ function finiteNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
+export type BrowserPrintToPdfOptions = {
+  landscape?: boolean
+  displayHeaderFooter?: boolean
+  printBackground?: boolean
+  preferCSSPageSize?: boolean
+  generateTaggedPDF?: boolean
+  generateDocumentOutline?: boolean
+  scale?: number
+  pageSize?: { width: number; height: number }
+  margins?: {
+    marginType: 'custom'
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
+  pageRanges?: string
+  headerTemplate?: string
+  footerTemplate?: string
+}
+
 /**
  * Translate CDP `Page.printToPDF` params into Electron `printToPDF` options.
  * Only well-formed values are forwarded so a malformed param can never smuggle
  * NaN/Infinity into Electron; omitted margin sides default to CDP's 1cm.
  */
-export function buildPrintToPdfOptions(params: Record<string, unknown>): PrintToPDFOptions {
-  const options: PrintToPDFOptions = {}
+export function buildPrintToPdfOptions(params: Record<string, unknown>): BrowserPrintToPdfOptions {
+  const options: BrowserPrintToPdfOptions = {}
 
   if (typeof params.landscape === 'boolean') {
     options.landscape = params.landscape

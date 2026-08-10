@@ -15,9 +15,8 @@ import { join } from 'node:path'
    JS plugin source emitted into OpenCode's plugins directory as a single
    file; splitting the plugin source across TS modules would obscure the
    runtime artifact and scatter tightly coupled string-template logic. */
-import { app } from 'electron'
-
 import { mirrorEntry, safeRemoveTree } from '../pty/overlay-mirror'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 const YIRU_OPENCODE_PLUGIN_FILE = 'yiru-opencode-status.js'
 const OPENCODE_LEGACY_HOOKS_DIR = 'opencode-hooks'
@@ -469,7 +468,7 @@ export class OpenCodeHookService {
   }
 
   private getOverlayRoot(): string {
-    return join(app.getPath('userData'), OPENCODE_OVERLAY_DIR)
+    return join(getRuntimeHostPathsProvider().userDataPath(), OPENCODE_OVERLAY_DIR)
   }
 
   private getSourceOverlayDir(sourceConfigDir: string): string {
@@ -477,7 +476,11 @@ export class OpenCodeHookService {
   }
 
   private getSharedConfigDir(): string {
-    return join(app.getPath('userData'), OPENCODE_LEGACY_HOOKS_DIR, OPENCODE_SHARED_CONFIG_DIR)
+    return join(
+      getRuntimeHostPathsProvider().userDataPath(),
+      OPENCODE_LEGACY_HOOKS_DIR,
+      OPENCODE_SHARED_CONFIG_DIR
+    )
   }
 
   private readOverlayManifest(overlayDir: string): OpenCodeOverlayManifest {

@@ -1,15 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react'
 import type { View } from 'react-native'
 
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
+
 import type { RpcClient } from '../transport/rpc-client'
-import type { ConnectionState, RpcSuccess } from '../transport/types'
+import type { ConnectionState } from '../transport/types'
 import { resolveMobileBranchCompareBaseRef } from './branch-base-ref'
-import type { MobileGitBranchCompareResult } from './branch-compare'
-import {
-  isMobileGitUnavailable,
-  isMobileGitTransientRefreshError,
-  type MobileGitStatusResult
-} from './git-status'
+import { isMobileGitUnavailable, isMobileGitTransientRefreshError } from './git-status'
 import {
   SELECTOR_RETRY_COUNT,
   SELECTOR_RETRY_DELAY_MS,
@@ -118,28 +115,16 @@ export function useMobileSourceControlLoaders(params: Params): MobileSourceContr
           })
           return false
         }
-        const response = await client.sendRequest('git.branchCompare', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.git.branchCompare, {
           worktree: `id:${worktreeId}`,
           baseRef
         })
         if (!isCurrentLoad()) {
           return false
         }
-        if (!response.ok) {
-          if (isMobileGitUnavailable(response.error?.code, response.error?.message)) {
-            setBranchCompareState((prev) => {
-              if (options?.preserveReadyOnFailure && prev.kind === 'ready') {
-                return prev
-              }
-              return { kind: 'idle' }
-            })
-            return false
-          }
-          throw new Error(response.error?.message || 'Unable to load committed changes')
-        }
         setBranchCompareState({
           kind: 'ready',
-          result: (response as RpcSuccess).result as MobileGitBranchCompareResult
+          result
         })
         return true
       } catch (err) {
@@ -147,11 +132,15 @@ export function useMobileSourceControlLoaders(params: Params): MobileSourceContr
           return false
         }
         const message = err instanceof Error ? err.message : 'Unable to load committed changes'
+        const isUnavailable =
+          isRuntimeOrpcErrorCode(err, 'forbidden') ||
+          isRuntimeOrpcErrorCode(err, 'method_not_found') ||
+          isMobileGitUnavailable(undefined, message)
         setBranchCompareState((prev) => {
           if (options?.preserveReadyOnFailure && prev.kind === 'ready') {
             return prev
           }
-          return { kind: 'error', message }
+          return isUnavailable ? { kind: 'idle' } : { kind: 'error', message }
         })
         return false
       }
@@ -196,14 +185,13 @@ export function useMobileSourceControlLoaders(params: Params): MobileSourceContr
         setScreenState((prev) => (prev.kind === 'ready' ? prev : { kind: 'loading' }))
         try {
           for (let attempt = 0; attempt <= SELECTOR_RETRY_COUNT; attempt += 1) {
-            const response = await client.sendRequest('git.status', {
-              worktree: `id:${worktreeId}`
-            })
-            if (!isCurrentLoad()) {
-              return false
-            }
-            if (response.ok) {
-              const result = (response as RpcSuccess).result as MobileGitStatusResult
+            try {
+              const result = await callRuntimeOrpc(client, (runtime) => runtime.git.status, {
+                worktree: `id:${worktreeId}`
+              })
+              if (!isCurrentLoad()) {
+                return false
+              }
               setScreenState({ kind: 'ready', status: result })
               void loadBranchCompare({ preserveReadyOnFailure: true })
               if (options?.clearActionErrorOnSuccess !== false) {
@@ -213,25 +201,32 @@ export function useMobileSourceControlLoaders(params: Params): MobileSourceContr
               // snapshot; a fresh status means that snapshot may be stale.
               onStatusLoadSuccess?.()
               return true
-            }
-            if (isMobileGitUnavailable(response.error?.code, response.error?.message)) {
-              setScreenState({
-                kind: 'unavailable',
-                message: 'Update Yiru desktop to use Source Control on mobile.'
-              })
-              return false
-            }
-            const shouldRetry =
-              response.error?.code === 'selector_not_found' ||
-              isMobileGitTransientRefreshError(response.error?.code, response.error?.message)
-            if (shouldRetry && attempt < SELECTOR_RETRY_COUNT) {
-              await wait(SELECTOR_RETRY_DELAY_MS)
-              if (!isCurrentLoad()) {
+            } catch (error) {
+              const message = error instanceof Error ? error.message : undefined
+              const isUnavailable =
+                isRuntimeOrpcErrorCode(error, 'forbidden') ||
+                isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+                isMobileGitUnavailable(undefined, message)
+              if (isUnavailable) {
+                setScreenState({
+                  kind: 'unavailable',
+                  message: 'Update Yiru desktop to use Source Control on mobile.'
+                })
                 return false
               }
-              continue
+              const shouldRetry =
+                isRuntimeOrpcErrorCode(error, 'selector_not_found') ||
+                isRuntimeOrpcErrorCode(error, 'request_aborted') ||
+                isMobileGitTransientRefreshError(undefined, message)
+              if (shouldRetry && attempt < SELECTOR_RETRY_COUNT) {
+                await wait(SELECTOR_RETRY_DELAY_MS)
+                if (!isCurrentLoad()) {
+                  return false
+                }
+                continue
+              }
+              throw error
             }
-            throw new Error(response.error?.message || 'Unable to load source control')
           }
         } catch (err) {
           if (!isCurrentLoad()) {

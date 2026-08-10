@@ -20,8 +20,8 @@ import type {
 } from '~shared/coworking/windows-firewall-contract'
 
 import type { CoworkingHostDeviceRegistry } from './owner/service-options'
-import type { CoworkingSharingIpcSubscriptionSink } from './requester-subscriptions'
-import type { CoworkingSharingIpcController } from './sharing'
+import type { CoworkingSharingSubscriptionSink } from './requester-subscriptions'
+import type { CoworkingSharingController } from './sharing'
 
 const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   status: 'unavailable',
@@ -36,7 +36,7 @@ const UNAVAILABLE_SNAPSHOT: CoworkingSharingSnapshot = {
   requesterControlStates: []
 }
 
-export class CoworkingUnavailableOwnerService implements CoworkingSharingIpcController {
+export class CoworkingUnavailableOwnerService implements CoworkingSharingController {
   private readonly hostDevices?: CoworkingHostDeviceRegistry
 
   constructor(hostDevices?: CoworkingHostDeviceRegistry) {
@@ -112,7 +112,7 @@ export class CoworkingUnavailableOwnerService implements CoworkingSharingIpcCont
 
   subscribeRequester(
     _args: CoworkingRequesterSubscriptionArgs,
-    _sink: CoworkingSharingIpcSubscriptionSink
+    _sink: CoworkingSharingSubscriptionSink
   ): never {
     throw new Error('resource_unavailable')
   }

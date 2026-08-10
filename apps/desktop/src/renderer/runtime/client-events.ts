@@ -5,6 +5,8 @@ import type {
   RuntimeClientEventStreamMessage
 } from '~shared/runtime-client-events'
 
+import { createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
+
 export type RuntimeClientEventSubscription = {
   unsubscribe: () => void
 }
@@ -19,6 +21,15 @@ export async function subscribeRuntimeClientEvents(
   // per-environment SSH bucket) may have missed transitions and must resync.
   onReplayedAfterReconnect?: () => void
 ): Promise<RuntimeClientEventSubscription> {
+  // Why: on web, `window.api.runtimeEnvironments.subscribe` sends the raw
+  // `{id, method, params}` legacy envelope with no capability negotiation, so
+  // a host that has retired `runtime.clientEvents` from its legacy dispatcher
+  // (Phase 6 D-stage) would answer `method_not_found` — dispatch through the
+  // negotiated oRPC client instead. Electron's routing for the same preload
+  // member is already capability-aware, so that path below is left untouched.
+  if (isWebRuntimeClient()) {
+    return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
+  }
   const handle = await window.api.runtimeEnvironments.subscribe(
     {
       selector: environmentId,
@@ -33,6 +44,55 @@ export async function subscribeRuntimeClientEvents(
     }
   )
   return { unsubscribe: handle.unsubscribe }
+}
+
+// Why: a replayed-after-reconnect signal never applies here — that tag is only
+// ever set by Electron's shared-control connection reconnect logic (see
+// `shared-control-state.ts`), which this real oRPC event iterator does not go
+// through — so there is no `onReplayedAfterReconnect` callback to invoke. A
+// mid-stream drop ends the iterator without retrying, matching this method's
+// existing behavior on web before this change (it is not in the small set of
+// methods `WebRuntimeClient` replays after a reconnect).
+async function subscribeRuntimeClientEventsViaOrpc(
+  environmentId: string,
+  onEvent: (event: RuntimeClientEvent) => void,
+  onError: (error: unknown) => void
+): Promise<RuntimeClientEventSubscription> {
+  const controller = new AbortController()
+  const connection = await createRuntimeOrpcClient(
+    { kind: 'environment', environmentId },
+    { signal: controller.signal }
+  )
+  try {
+    const stream = await connection.client.runtime.clientEvents.subscribe(undefined, {
+      signal: controller.signal
+    })
+    void (async () => {
+      try {
+        for await (const message of stream) {
+          if (controller.signal.aborted) {
+            return
+          }
+          if (message.type === 'ready' || message.type === 'end') {
+            continue
+          }
+          if (isRuntimeClientEvent(message)) {
+            onEvent(message)
+          }
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          onError(error)
+        }
+      } finally {
+        connection.close()
+      }
+    })()
+    return { unsubscribe: () => controller.abort() }
+  } catch (error) {
+    connection.close()
+    throw error
+  }
 }
 
 function handleRuntimeClientEventResponse(
@@ -63,6 +123,7 @@ function isRuntimeClientEvent(
   return (
     message.type === 'reposChanged' ||
     message.type === 'worktreesChanged' ||
-    message.type === 'activateWorktree'
+    message.type === 'activateWorktree' ||
+    message.type === 'worktreeHeadIdentitiesChanged'
   )
 }

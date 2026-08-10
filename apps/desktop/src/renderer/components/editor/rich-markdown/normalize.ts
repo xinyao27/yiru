@@ -9,10 +9,6 @@ export function normalizeEmptyListItems(editor: Editor): void {
   normalizeRichMarkdownDocument(editor, { splitSoftBreakParagraphs: false })
 }
 
-export function normalizeSoftBreaks(editor: Editor): void {
-  normalizeRichMarkdownDocument(editor, { splitSoftBreakParagraphs: true })
-}
-
 function normalizeRichMarkdownDocument(editor: Editor, options: NormalizeOptions): void {
   // Why: we read from editor.view.state (not editor.state) so that the doc
   // we traverse and the transaction we later create share the same base state.

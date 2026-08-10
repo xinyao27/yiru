@@ -17,6 +17,7 @@ export function openSharedControlSocket(
     onClose: (close: { code: number; reason: string }, error: RemoteRuntimeClientError) => void
     onError: (error: RemoteRuntimeClientError) => void
     onTextFrame: (frame: string) => void
+    onBinaryFrame: (frame: Uint8Array<ArrayBufferLike>) => void
     // Why: reconnect is edge-triggered on `close`, but a half-open tunnel
     // never delivers one. Liveness pings and declares the socket dead when
     // the server goes silent, so the close/reconnect path can run (#7718).
@@ -45,6 +46,12 @@ export function openSharedControlSocket(
       if (callbacks.getCurrentSocket() === ws) {
         noteActivity()
         callbacks.onTextFrame(frame)
+      }
+    },
+    onBinaryFrame: (ws, frame) => {
+      if (callbacks.getCurrentSocket() === ws) {
+        noteActivity()
+        callbacks.onBinaryFrame(frame)
       }
     },
     onPong: (ws) => {

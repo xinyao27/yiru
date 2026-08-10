@@ -1,8 +1,9 @@
-import { BrowserWindow, ipcMain, webContents, type WebContents } from 'electron'
+import { BrowserWindow, ipcMain, type WebContents } from 'electron'
 import { isFeatureInteractionId } from '~shared/feature-interactions'
 import type { PersistedUIState } from '~shared/types'
 
 import type { Store } from '../persistence'
+import { publishUIChangedEvent } from '../runtime/ui-events'
 
 let trustedUIRendererWebContentsId: number | null = null
 
@@ -16,34 +17,11 @@ export function clearTrustedUIRendererWebContentsId(webContentsId: number): void
   }
 }
 
-export function sendToTrustedUIRenderer(
-  channel: string,
-  payload: unknown,
-  excludedWebContentsId?: number
-): void {
-  const rendererId = trustedUIRendererWebContentsId
-  if (rendererId == null || rendererId === excludedWebContentsId) {
-    return
-  }
-  const renderer = webContents.fromId(rendererId)
-  if (!renderer || renderer.isDestroyed()) {
-    return
-  }
-  // Why: app events belong to the registered UI renderer; enumerating every
-  // WebContents wakes retained browser guests that cannot consume the channel.
-  renderer.send(channel, payload)
-}
-
 export function registerUIHandlers(store: Store): void {
-  // Why: UI view-state is shared between the desktop renderer and mobile (ui.set
-  // RPC). Broadcast every change so the desktop re-hydrates when mobile (or
-  // another window) updates it — bi-directional sync, mirroring settings:changed.
+  // Why: UI view-state is shared between every client through the runtime event
+  // stream; publishing here makes Electron windows and paired clients peers.
   store.onUIChanged((ui) => {
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.isDestroyed()) {
-        window.webContents.send('ui:stateChanged', ui)
-      }
-    }
+    publishUIChangedEvent({ type: 'changed', ui })
   })
 
   ipcMain.handle('ui:get', () => {

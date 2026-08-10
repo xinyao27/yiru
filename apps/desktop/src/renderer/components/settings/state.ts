@@ -7,6 +7,8 @@ import {
   markRuntimeEnvironmentCompatible,
   unwrapRuntimeRpcResult
 } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
+import { getRendererSettings, updateRendererSettings } from '~renderer/runtime/settings-client'
 import type { AppState } from '~renderer/store/types'
 import { normalizeLoaderStyle } from '~shared/loader-style'
 import { normalizeOpenInApplications } from '~shared/open-in-applications'
@@ -51,7 +53,7 @@ async function verifyRuntimeEnvironmentReachable(environmentId: string | null): 
   if (!environmentId) {
     return
   }
-  const response = await window.api.runtimeEnvironments.getStatus({
+  const response = await runtimeEnvironmentsClient.getStatus({
     selector: environmentId,
     timeoutMs: 15_000
   })
@@ -68,7 +70,7 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
 
   fetchSettings: async () => {
     try {
-      const settings = await window.api.settings.get()
+      const settings = await getRendererSettings()
       set({ settings })
       // Why: best-effort boot probe so sidebar host pickers show live runtime
       // health before the settings pane is ever opened. Fire-and-forget to keep
@@ -124,7 +126,7 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
           updates.terminalScrollbackRows
         )
       }
-      const nextSettings = await window.api.settings.set(sanitizedUpdates)
+      const nextSettings = await updateRendererSettings(sanitizedUpdates)
       set((s) => ({ settings: (nextSettings as GlobalSettings | undefined) ?? s.settings }))
     } catch (err) {
       console.error('Failed to update settings:', err)
@@ -140,7 +142,7 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     try {
       clearRuntimeCompatibilityCache(nextId)
       await verifyRuntimeEnvironmentReachable(nextId)
-      const nextSettings = await window.api.settings.set({
+      const nextSettings = await updateRendererSettings({
         activeRuntimeEnvironmentId: nextId
       })
       bumpProviderRuntimeSessionGeneration()

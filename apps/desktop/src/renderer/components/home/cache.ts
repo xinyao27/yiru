@@ -1,14 +1,23 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import type { StatsSummary } from '~shared/types'
 
+import type { ProjectUsageValue, UsageProvider } from './usage-aggregation'
+import { isUsageRange } from './usage-range'
 import type { ModelUsageValue, UsageValue } from './usage-value'
 
 const HOME_DATA_CACHE_KEY = 'yiru.home.data-cache.v1'
-const HOME_DATA_CACHE_SCHEMA_VERSION = 1
+const HOME_DATA_CACHE_SCHEMA_VERSION = 3
 
 export type HomeCachedUsageValue = Pick<
   UsageValue,
-  'dailyTokens' | 'dailyValues' | 'hasUnpricedUsage' | 'hasValue' | 'models' | 'meteredValueUsd'
+  | 'dailyTokens'
+  | 'dailyValues'
+  | 'hasUnpricedUsage'
+  | 'hasValue'
+  | 'models'
+  | 'projects'
+  | 'range'
+  | 'meteredValueUsd'
 >
 
 export type HomeDataSnapshot = {
@@ -48,6 +57,8 @@ export function saveHomeDataSnapshot(stats: StatsSummary, usage: UsageValue): Ho
       hasUnpricedUsage: usage.hasUnpricedUsage,
       hasValue: usage.hasValue,
       models: usage.models,
+      projects: usage.projects,
+      range: usage.range,
       ...(usage.meteredValueUsd === undefined ? {} : { meteredValueUsd: usage.meteredValueUsd })
     }
   }
@@ -104,14 +115,16 @@ function parseUsageValue(value: unknown): HomeCachedUsageValue | null {
   if (
     !isRecord(value) ||
     typeof value.hasUnpricedUsage !== 'boolean' ||
-    typeof value.hasValue !== 'boolean'
+    typeof value.hasValue !== 'boolean' ||
+    !isUsageRange(value.range)
   ) {
     return null
   }
   const dailyTokens = parseContributionPoints(value.dailyTokens)
   const dailyValues = parseContributionPoints(value.dailyValues)
   const models = parseModels(value.models)
-  if (!dailyTokens || !dailyValues || !models) {
+  const projects = parseProjects(value.projects)
+  if (!dailyTokens || !dailyValues || !models || !projects) {
     return null
   }
   return {
@@ -120,6 +133,8 @@ function parseUsageValue(value: unknown): HomeCachedUsageValue | null {
     hasUnpricedUsage: value.hasUnpricedUsage,
     hasValue: value.hasValue,
     models,
+    projects,
+    range: value.range,
     ...(value.meteredValueUsd === undefined
       ? {}
       : {
@@ -129,6 +144,65 @@ function parseUsageValue(value: unknown): HomeCachedUsageValue | null {
               : null
         })
   }
+}
+
+function parseProjects(value: unknown): ProjectUsageValue[] | null {
+  if (!Array.isArray(value)) {
+    return null
+  }
+  const projects: ProjectUsageValue[] = []
+  for (const project of value) {
+    if (
+      !isRecord(project) ||
+      typeof project.key !== 'string' ||
+      typeof project.label !== 'string' ||
+      !isFiniteNumber(project.sessions) ||
+      !isFiniteNumber(project.tokens) ||
+      (project.valueUsd !== null && !isFiniteNumber(project.valueUsd))
+    ) {
+      return null
+    }
+    const providers = parseProjectProviders(project.providers)
+    if (!providers) {
+      return null
+    }
+    projects.push({
+      key: project.key,
+      label: project.label,
+      sessions: project.sessions,
+      tokens: project.tokens,
+      valueUsd: project.valueUsd,
+      providers
+    })
+  }
+  return projects
+}
+
+function parseProjectProviders(value: unknown): ProjectUsageValue['providers'] | null {
+  if (!Array.isArray(value)) {
+    return null
+  }
+  const providers: ProjectUsageValue['providers'] = []
+  for (const provider of value) {
+    if (
+      !isRecord(provider) ||
+      !isUsageProvider(provider.provider) ||
+      !isFiniteNumber(provider.tokens) ||
+      (provider.valueUsd !== null && !isFiniteNumber(provider.valueUsd))
+    ) {
+      return null
+    }
+    providers.push({
+      provider: provider.provider,
+      tokens: provider.tokens,
+      valueUsd: provider.valueUsd
+    })
+  }
+  return providers
+}
+
+function isUsageProvider(value: unknown): value is UsageProvider {
+  return value === 'claude' || value === 'codex' || value === 'open-code'
 }
 
 function parseDailyActivity(value: unknown): NonNullable<StatsSummary['dailyActivity']> | null {

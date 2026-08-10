@@ -25,6 +25,8 @@
  * fingerprint when the ID is unavailable (non-Darwin, sandboxed
  * defaults, IPC failure). See ./input-source-id.ts for the allowlist.
  */
+import { getRendererKeyboardInputSourceId } from '~renderer/runtime/keyboard-input-source-client'
+
 import {
   detectOptionAsAltFromLayoutMap,
   type DetectedLayoutCategory,
@@ -51,25 +53,7 @@ export type OptionAsAltProbe = {
 }
 
 function defaultInputSourceIdReader(): InputSourceIdReader {
-  return async () => {
-    const api = (
-      globalThis as {
-        window?: { api?: { app?: { getKeyboardInputSourceId?: () => Promise<string | null> } } }
-      }
-    ).window?.api
-    const reader = api?.app?.getKeyboardInputSourceId
-    if (!reader) {
-      return null
-    }
-    try {
-      return await reader()
-    } catch {
-      // Why: the IPC can transiently reject during main-process teardown
-      // (e.g. app quitting mid-probe). Treat as no signal so the
-      // fingerprint remains the sole input.
-      return null
-    }
-  }
+  return getRendererKeyboardInputSourceId
 }
 
 function createOptionAsAltProbe(): OptionAsAltProbe {

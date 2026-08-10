@@ -126,7 +126,15 @@ async function main(): Promise<void> {
     socketPath,
     tokenPath,
     log: daemonLog,
-    spawnSubprocess: (opts) => createPtySubprocess(opts)
+    spawnSubprocess: (opts) => createPtySubprocess(opts),
+    ...(process.env.YIRU_DAEMON_AGENT_HOOK_ENDPOINT_DIR
+      ? {
+          agentHookHost: {
+            endpointDir: process.env.YIRU_DAEMON_AGENT_HOOK_ENDPOINT_DIR,
+            env: process.env.YIRU_DAEMON_AGENT_HOOK_ENV ?? 'production'
+          }
+        }
+      : {})
   })
 
   // Signal readiness to parent via IPC (if available)

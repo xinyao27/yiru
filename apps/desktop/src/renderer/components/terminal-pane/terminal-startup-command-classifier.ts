@@ -50,11 +50,6 @@ export function getTerminalStartupCommandToken(command: string): string {
   return command.slice(tokenStart, index)
 }
 
-export function isCodexTerminalStartupCommand(command: string): boolean {
-  const executable = getTerminalStartupCommandExecutableName(command)
-  return executable === 'codex' || executable.startsWith('codex-')
-}
-
 export function isKnownTuiAgentTerminalStartupCommand(command: string): boolean {
   const executable = getTerminalStartupCommandExecutableName(command)
   return (

@@ -71,6 +71,7 @@ function runCommand(command: string, args: string[], stdin?: string): Promise<vo
 export function registerClipboardHandlers(store: Store): void {
   ipcMain.removeHandler('clipboard:readText')
   ipcMain.removeHandler('clipboard:readSelectionText')
+  ipcMain.removeHandler('clipboard:readImageBase64')
   ipcMain.removeHandler('clipboard:writeText')
   ipcMain.removeHandler('clipboard:writeSelectionText')
   ipcMain.removeHandler('clipboard:writeImage')
@@ -88,6 +89,17 @@ export function registerClipboardHandlers(store: Store): void {
       return assertClipboardTextWithinLimitWithYield(clipboard.readText('selection'), options)
     }
   )
+  ipcMain.handle('clipboard:readImageBase64', (event): string | null => {
+    assertTrustedClipboardSender(event)
+    const image = clipboard.readImage()
+    if (image.isEmpty()) {
+      return null
+    }
+    assertClipboardImageDimensionsWithinLimit(image.getSize())
+    const buffer = image.toPNG()
+    assertClipboardImageByteLengthWithinLimit(buffer.byteLength)
+    return buffer.toString('base64')
+  })
   // Why: terminals need to detect clipboard images to support tools like Claude
   // Code that accept image input via paste. Writes the clipboard image to a
   // temp file and returns the path, or null if the clipboard has no image.

@@ -1,5 +1,5 @@
 import type { RpcClient } from './rpc-client'
-import type { ConnectionState, RpcResponse } from './types'
+import type { ConnectionState } from './types'
 
 export type MobileConnectionPath = 'lan' | 'tailscale'
 
@@ -11,19 +11,6 @@ export class LogicalClientCutoverError extends Error {
 
 export function isLogicalClientCutoverError(error: unknown): boolean {
   return error instanceof LogicalClientCutoverError
-}
-
-type SubscriptionRecord = {
-  method: string
-  params: unknown
-  listener: (result: unknown) => void
-  options?: Parameters<RpcClient['subscribe']>[3]
-  disposePhysical: (() => void) | null
-  cancelled: boolean
-}
-
-type PendingRequest = {
-  reject: (error: Error) => void
 }
 
 export type StableLogicalRpcClient = RpcClient & {
@@ -42,89 +29,18 @@ export function createStableLogicalRpcClient(
   let generation = 1
   let closed = false
   let suspended = false
-  let nextSubscriptionId = 0
   let activeStateUnsubscribe: (() => void) | null = null
-  const subscriptions = new Map<number, SubscriptionRecord>()
-  const pendingRequests = new Set<PendingRequest>()
   const stateListeners = new Set<(state: ConnectionState) => void>()
   let state = initialSession.getState()
 
   bindActiveState(initialSession, generation)
 
   const logical: StableLogicalRpcClient = {
-    sendRequest(method, params, options) {
-      if (closed) {
-        return Promise.reject(new Error('Client closed'))
-      }
-      if (suspended) {
-        return Promise.reject(new Error('Client suspended'))
-      }
-      const requestGeneration = generation
-      const session = activeSession
-      return new Promise<RpcResponse>((resolve, reject) => {
-        const pending = { reject }
-        pendingRequests.add(pending)
-        void session.sendRequest(method, params, options).then(
-          (response) => {
-            pendingRequests.delete(pending)
-            if (closed) {
-              reject(new Error('Client closed'))
-            } else if (requestGeneration !== generation) {
-              reject(new LogicalClientCutoverError())
-            } else {
-              resolve(response)
-            }
-          },
-          (error: unknown) => {
-            pendingRequests.delete(pending)
-            reject(error)
-          }
-        )
-      })
-    },
-
-    subscribe(method, params, listener, options) {
-      if (closed) {
-        return () => {}
-      }
-      const id = ++nextSubscriptionId
-      const record: SubscriptionRecord = {
-        method,
-        params,
-        listener,
-        options,
-        disposePhysical: null,
-        cancelled: false
-      }
-      subscriptions.set(id, record)
-      if (!suspended) {
-        attachSubscription(record, activeSession, generation)
-      }
-      return () => {
-        if (record.cancelled) {
-          return
-        }
-        record.cancelled = true
-        record.disposePhysical?.()
-        record.disposePhysical = null
-        subscriptions.delete(id)
-      }
-    },
-
-    updateTerminalSubscriptionViewport(terminal, viewport) {
-      for (const record of subscriptions.values()) {
-        if (
-          record.params &&
-          typeof record.params === 'object' &&
-          'terminal' in record.params &&
-          record.params.terminal === terminal
-        ) {
-          record.params = { ...record.params, viewport }
-        }
-      }
-      if (!suspended) {
-        activeSession.updateTerminalSubscriptionViewport(terminal, viewport)
-      }
+    // Why: resolved on every access rather than captured once, so typed calls
+    // always land on the session that is live now — migrateTo swaps the
+    // physical client underneath this logical one.
+    get orpc() {
+      return activeSession.orpc
     },
 
     getState: () => state,
@@ -139,6 +55,8 @@ export function createStableLogicalRpcClient(
         activeSession.notifyForeground()
       }
     },
+    probeStatusForProtocolCompat: (timeoutMs) =>
+      activeSession.probeStatusForProtocolCompat(timeoutMs),
     close() {
       if (closed) {
         return
@@ -146,10 +64,6 @@ export function createStableLogicalRpcClient(
       closed = true
       activeStateUnsubscribe?.()
       activeStateUnsubscribe = null
-      for (const record of subscriptions.values()) {
-        record.disposePhysical?.()
-      }
-      subscriptions.clear()
       // Why: the physical client knows whether each request reached the wire and
       // preserves that ambiguity; a blanket logical rejection would erase it.
       activeSession.close()
@@ -163,10 +77,6 @@ export function createStableLogicalRpcClient(
       suspended = true
       activeStateUnsubscribe?.()
       activeStateUnsubscribe = null
-      for (const record of subscriptions.values()) {
-        record.disposePhysical?.()
-        record.disposePhysical = null
-      }
       // Why: let the physical close settle in-flight requests with delivery
       // evidence instead of turning every suspend into a definite rejection.
       activeSession.close()
@@ -192,23 +102,12 @@ export function createStableLogicalRpcClient(
       const previousStateUnsubscribe = activeStateUnsubscribe
       const nextGeneration = generation + 1
 
-      // Why: replay on the authenticated replacement before closing the old
-      // session, but fence callbacks until the generation becomes current.
-      for (const record of subscriptions.values()) {
-        const disposePrevious = record.disposePhysical
-        attachSubscription(record, nextSession, nextGeneration)
-        disposePrevious?.()
-      }
       generation = nextGeneration
       activeSession = nextSession
       activePath = path
       suspended = false
       previousStateUnsubscribe?.()
       bindActiveState(nextSession, nextGeneration)
-      for (const pending of pendingRequests) {
-        pending.reject(new LogicalClientCutoverError())
-      }
-      pendingRequests.clear()
       state = nextSession.getState()
       for (const listener of stateListeners) {
         listener(state)
@@ -220,24 +119,15 @@ export function createStableLogicalRpcClient(
     getGeneration: () => generation
   }
 
-  return logical
+  // Why: the oRPC client is a function Proxy whose `name` is another Proxy.
+  // React's development prop profiler enumerates client objects and cannot
+  // stringify that shape, so keep the transport handle callable but internal.
+  Object.defineProperty(logical, 'orpc', {
+    enumerable: false,
+    get: () => activeSession.orpc
+  })
 
-  function attachSubscription(
-    record: SubscriptionRecord,
-    session: RpcClient,
-    subscriptionGeneration: number
-  ): void {
-    record.disposePhysical = session.subscribe(
-      record.method,
-      record.params,
-      (result) => {
-        if (!closed && !record.cancelled && generation === subscriptionGeneration) {
-          record.listener(result)
-        }
-      },
-      record.options
-    )
-  }
+  return logical
 
   function bindActiveState(session: RpcClient, sessionGeneration: number): void {
     activeStateUnsubscribe = session.onStateChange((next) => {

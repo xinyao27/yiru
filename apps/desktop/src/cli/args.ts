@@ -32,6 +32,7 @@ export const BOOLEAN_FLAGS = new Set([
   'comments',
   'current',
   'dry-run',
+  'electron',
   'enter',
   'focus',
   'force',

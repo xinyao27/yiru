@@ -7,6 +7,7 @@ import { Switch } from '~renderer/components/ui/switch'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { clampNumber } from '~renderer/lib/terminal-theme'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { GlobalSettings } from '~shared/types'
 
 import { ColorField, NumberField } from '../form-controls'
@@ -42,7 +43,7 @@ export function TerminalWindowSection({
     }
     setRelaunchingBlur(true)
     try {
-      await window.api.app.relaunch()
+      await rendererHostClient.app.relaunch()
     } catch {
       if (mountedRef.current) {
         setRelaunchingBlur(false)

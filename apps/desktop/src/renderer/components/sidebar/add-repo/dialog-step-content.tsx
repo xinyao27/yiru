@@ -25,7 +25,6 @@ type AddRepoDialogStepContentProps = {
   cloneError: string | null
   cloneProgress: { phase: string; percent: number } | null
   isCloning: boolean
-  selectedSshTargetId?: string | null
   selectedHostLabel?: string | null
   nestedScan: NestedRepoScanResult | null
   nestedSelectedPaths: Set<string>
@@ -78,7 +77,6 @@ export function AddRepoDialogStepContent({
   cloneError,
   cloneProgress,
   isCloning,
-  selectedSshTargetId,
   selectedHostLabel,
   nestedScan,
   nestedSelectedPaths,
@@ -160,10 +158,7 @@ export function AddRepoDialogStepContent({
         isCloning={isCloning}
         disableDestinationPicker={isRuntimeEnvironmentActive}
         runtimeEnvironmentId={activeRuntimeEnvironmentId}
-        sshTargetId={selectedSshTargetId}
-        cloneTargetLabel={
-          isRuntimeEnvironmentActive || selectedSshTargetId ? selectedHostLabel : null
-        }
+        cloneTargetLabel={isRuntimeEnvironmentActive ? selectedHostLabel : null}
         onUrlChange={onCloneUrlChange}
         onDestChange={onCloneDestinationChange}
         onPickDestination={onPickCloneDestination}
@@ -202,7 +197,6 @@ export function AddRepoDialogStepContent({
         parentDefaultPending={createParentDefaultPending}
         manualParentEntry={manualCreateParentEntry}
         runtimeEnvironmentId={activeRuntimeEnvironmentId}
-        sshTargetId={selectedSshTargetId}
         onNameChange={onCreateNameChange}
         onParentChange={onCreateParentChange}
         onPickParent={onPickCreateParent}

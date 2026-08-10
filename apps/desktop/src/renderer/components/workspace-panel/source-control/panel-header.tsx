@@ -25,6 +25,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
 
+import { openGitGraphTab } from '../git-graph/open-tab'
 import type { SourceControlController } from './controller'
 import { DiffCommentsInlineList } from './diff-comments-inline-list'
 import { SourceControlHeaderToolbar } from './header-toolbar'
@@ -64,11 +65,21 @@ export function SourceControlPanelHeader({
     workspacePanelTabId,
     worktreePath
   } = controller
-  const gitGraphPanelTabId = workspacePanelTabId ?? activeTabId
-  const isGitGraphOpen = useAppStore(
-    (s) => s.gitGraphOpenByPanelTab[gitGraphPanelTabId ?? ''] ?? false
-  )
-  const toggleGitGraphOpen = useAppStore((s) => s.toggleGitGraphOpen)
+  const activeGitGraphTabId = useAppStore((s) => {
+    if (!activeWorktreeId || !activeGroupId) {
+      return null
+    }
+    const activeUnifiedTabId = (s.groupsByWorktree[activeWorktreeId] ?? []).find(
+      (group) => group.id === activeGroupId
+    )?.activeTabId
+    return (
+      (s.unifiedTabsByWorktree[activeWorktreeId] ?? []).find(
+        (tab) => tab.id === activeUnifiedTabId && tab.contentType === 'git-graph'
+      )?.id ?? null
+    )
+  })
+  const isGitGraphOpen = activeGitGraphTabId !== null
+  const closeUnifiedTab = useAppStore((s) => s.closeUnifiedTab)
 
   return (
     <>
@@ -88,7 +99,16 @@ export function SourceControlPanelHeader({
         diffCommentCount={diffCommentCount}
         onExpandNotes={() => setDiffCommentsExpanded(true)}
         isGitGraphOpen={isGitGraphOpen}
-        onToggleGitGraph={() => toggleGitGraphOpen(gitGraphPanelTabId ?? '')}
+        onToggleGitGraph={() => {
+          if (!activeWorktreeId) {
+            return
+          }
+          if (activeGitGraphTabId) {
+            closeUnifiedTab(activeGitGraphTabId)
+            return
+          }
+          openGitGraphTab(activeWorktreeId, activeGroupId ?? undefined)
+        }}
       />
 
       {detachedHeadDisplay ? (

@@ -9,7 +9,9 @@ import { getSelectedNestedRepoPathsInScanOrder } from '~renderer/lib/nested-repo
 import { buildOnboardingFolderAgentStartup } from '~renderer/lib/onboarding-folder-agent-startup'
 import { track } from '~renderer/lib/telemetry'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '~shared/constants'
 import {
@@ -22,13 +24,7 @@ import {
 } from '~shared/nested-repo-telemetry'
 import { isGitRepoKind } from '~shared/repo-kind'
 import { resolveAgentPermissionModeSummary } from '~shared/tui-agent/permissions'
-import type {
-  GlobalSettings,
-  NestedRepoScanResult,
-  OnboardingState,
-  Repo,
-  TuiAgent
-} from '~shared/types'
+import type { GlobalSettings, NestedRepoScanResult, OnboardingState, TuiAgent } from '~shared/types'
 
 import { openProjectDefaultCheckout } from '../sidebar/project-added-default-checkout'
 import { buildAgentPickedPayload } from './agent-picked-payload'
@@ -754,21 +750,21 @@ export function useOnboardingFlow(
         return
       }
       track('onboarding_step4_path_clicked', { path: 'open_folder' })
-      const path = await window.api.repos.pickFolder()
+      const path = await workspaceHostClient.repos.pickFolder()
       if (!path) {
         track('onboarding_step4_path_failed', { path: 'open_folder', reason: 'cancelled' })
         return
       }
       setBusyLabel('Opening project…')
       try {
-        let result = await window.api.repos.add({ path })
+        let result = await workspaceHostClient.repos.add({ path })
         if ('error' in result && result.error.includes('Not a valid git repository')) {
           setBusyLabel('Scanning for repositories...')
           const attemptId = createNestedRepoTelemetryAttemptId()
           const scanId = createNestedRepoScanId()
           nestedScanIdRef.current = scanId
           setNestedScanInProgress(true)
-          const scan = await scanNestedRepos(path, undefined, {
+          const scan = await scanNestedRepos(path, {
             scanId,
             onProgress: (progressScan) => {
               if (
@@ -799,7 +795,7 @@ export function useOnboardingFlow(
             showNestedRepoReview(scan, attemptId, 'local', false, scanId)
             return
           }
-          result = await window.api.repos.add({ path, kind: 'folder' })
+          result = await workspaceHostClient.repos.add({ path, kind: 'folder' })
         }
         if ('error' in result) {
           throw new Error(result.error)
@@ -1012,14 +1008,14 @@ export function useOnboardingFlow(
       const repo =
         target.kind === 'environment'
           ? (
-              await callRuntimeRpc<{ repo: Repo }>(
+              await callRuntimeOrpc(
                 target,
-                'repo.clone',
+                (client) => client.repo.clone,
                 { url: trimmed, destination },
                 { timeoutMs: 10 * 60_000 }
               )
             ).repo
-          : await window.api.repos.clone({
+          : await workspaceHostClient.repos.clone({
               url: trimmed,
               destination
             })

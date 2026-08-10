@@ -1,10 +1,10 @@
-import type { RuntimeTerminalSend } from '~shared/runtime-types'
 import { makePaneKey } from '~shared/stable-pane-id'
 import { isTerminalInputTooLargeWithDeferredMeasurement } from '~shared/terminal/input'
 import type { GlobalSettings } from '~shared/types'
 
 import { useAppStore } from '../store'
-import { RuntimeRpcCallError, callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from './orpc-client'
+import { getActiveRuntimeTarget } from './rpc-client'
 import { getRemoteRuntimePtyEnvironmentId, getRemoteRuntimeTerminalHandle } from './terminal-stream'
 
 export type RuntimeTerminalProcessInspection = {
@@ -25,16 +25,10 @@ export function isRemoteRuntimePtyId(ptyId: string): boolean {
 
 function isTerminalGoneError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  const code =
-    error instanceof RuntimeRpcCallError
-      ? error.code
-      : error && typeof error === 'object' && 'code' in error
-        ? String((error as { code?: unknown }).code)
-        : ''
   return (
-    code === 'terminal_handle_stale' ||
-    code === 'terminal_exited' ||
-    code === 'terminal_gone' ||
+    isRuntimeOrpcErrorCode(error, 'terminal_handle_stale') ||
+    isRuntimeOrpcErrorCode(error, 'terminal_exited') ||
+    isRuntimeOrpcErrorCode(error, 'terminal_gone') ||
     message.includes('terminal_handle_stale') ||
     message.includes('terminal_exited') ||
     message.includes('terminal_gone') ||
@@ -80,9 +74,9 @@ export async function inspectRuntimeTerminalProcess(
   }
 
   try {
-    const result = await callRuntimeRpc<{ process: RuntimeTerminalProcessInspection }>(
+    const result = await callRuntimeOrpc(
       target,
-      'terminal.inspectProcess',
+      (client) => client.terminal.inspectProcess,
       { terminal },
       { timeoutMs: 15_000 }
     )
@@ -135,9 +129,9 @@ function sendRuntimePtyInputWithinLimit(
     return true
   }
 
-  void callRuntimeRpc<{ send: RuntimeTerminalSend }>(
+  void callRuntimeOrpc(
     target,
-    'terminal.send',
+    (client) => client.terminal.send,
     { terminal, text: data, client: DESKTOP_RUNTIME_CLIENT },
     { timeoutMs: 15_000 }
   )
@@ -181,9 +175,9 @@ export async function sendRuntimePtyInputVerified(
   }
 
   try {
-    const result = await callRuntimeRpc<{ send: RuntimeTerminalSend }>(
+    const result = await callRuntimeOrpc(
       target,
-      'terminal.send',
+      (client) => client.terminal.send,
       { terminal, text: data, client: DESKTOP_RUNTIME_CLIENT },
       { timeoutMs: 15_000 }
     )

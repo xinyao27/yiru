@@ -7,6 +7,7 @@ import { getConnectionId } from '~renderer/lib/connection-context'
 import { openFilePreviewToSide } from '~renderer/lib/file-preview'
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { requestEditorFileSave } from './autosave'
@@ -216,7 +217,7 @@ function EditorPanelInner({
       return
     }
     try {
-      await window.api.ui.writeClipboardText(copyState.copyText)
+      await shellClient.ui.writeClipboardText(copyState.copyText)
       if (!pathCopyMountedRef.current) {
         return
       }
@@ -320,7 +321,7 @@ function EditorPanelInner({
       showLocalPathOpenBlockedToast()
       return
     }
-    window.api.shell.openPath(activeFile.filePath)
+    shellClient.shell.openPath(activeFile.filePath)
   }
   const disableRenameBrowse = Boolean(
     settingsForRuntimeOwner(

@@ -1,11 +1,11 @@
-import { session, type Session } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 
 export const MINIMAX_USAGE_ENDPOINT =
   'https://platform.minimax.io/v1/api/openplatform/coding_plan/remains'
 
 const MINIMAX_ORIGIN = 'https://platform.minimax.io'
 const MINIMAX_REFERER = 'https://platform.minimax.io/console/usage'
-const MINIMAX_SESSION_PARTITION = 'yiru-minimax-rate-limit-fetch'
+export const MINIMAX_SESSION_PARTITION = 'yiru-minimax-rate-limit-fetch'
 const SENSITIVE_COOKIE_NAMES = new Set([
   '_token',
   '_twpid',
@@ -24,6 +24,26 @@ export type MiniMaxFetchResponse = {
   requestHeaderNames: string[]
   cookieNames: string[]
   transport: MiniMaxFetchTransport
+}
+
+type MiniMaxSession = {
+  clearStorageData(options: { origin: string; storages: ['cookies'] }): Promise<void>
+  cookies: {
+    set(details: {
+      url: string
+      name: string
+      value: string
+      secure: boolean
+      path: string
+    }): Promise<void>
+  }
+  fetch(input: string | Request, init?: RequestInit): Promise<Response>
+}
+
+let miniMaxSessionProvider: (() => MiniMaxSession) | null = null
+
+export function setMiniMaxSessionProvider(provider: () => MiniMaxSession): void {
+  miniMaxSessionProvider = provider
 }
 
 // Why: MiniMax's usage endpoint rejects non-browser clients, so we send a real
@@ -104,12 +124,17 @@ export function makeMiniMaxRequestHeaders(groupId: string | null): Record<string
   return headers
 }
 
-async function clearMiniMaxSessionCookieJarForSession(miniMaxSession: Session): Promise<void> {
+async function clearMiniMaxSessionCookieJarForSession(
+  miniMaxSession: MiniMaxSession
+): Promise<void> {
   await miniMaxSession.clearStorageData({ origin: MINIMAX_ORIGIN, storages: ['cookies'] })
 }
 
 export async function clearMiniMaxSessionCookieJar(): Promise<void> {
-  await clearMiniMaxSessionCookieJarForSession(session.fromPartition(MINIMAX_SESSION_PARTITION))
+  const miniMaxSession = miniMaxSessionProvider?.()
+  if (miniMaxSession) {
+    await clearMiniMaxSessionCookieJarForSession(miniMaxSession)
+  }
 }
 
 export async function fetchMiniMaxWithSessionCookieJar(args: {
@@ -118,7 +143,10 @@ export async function fetchMiniMaxWithSessionCookieJar(args: {
   groupId: string | null
   signal: AbortSignal
 }): Promise<MiniMaxFetchResponse> {
-  const miniMaxSession = session.fromPartition(MINIMAX_SESSION_PARTITION)
+  const miniMaxSession = miniMaxSessionProvider?.()
+  if (!miniMaxSession) {
+    throw new Error('minimax_session_cookie_jar_unavailable')
+  }
   const cookiePairs = parseCookiePairs(args.cookie)
   try {
     await clearMiniMaxSessionCookieJarForSession(miniMaxSession)
@@ -157,7 +185,23 @@ export async function fetchMiniMaxWithManualCookieHeader(args: {
   groupId: string | null
   signal: AbortSignal
 }): Promise<MiniMaxFetchResponse> {
-  const miniMaxSession = session.fromPartition(MINIMAX_SESSION_PARTITION)
+  const miniMaxSession = miniMaxSessionProvider?.()
+  if (!miniMaxSession) {
+    const headers = {
+      ...makeMiniMaxRequestHeaders(args.groupId),
+      Cookie: normalizeMiniMaxCookieHeader(args.cookie)
+    }
+    return {
+      response: await fetchHttp(args.endpoint, {
+        method: 'GET',
+        headers,
+        signal: args.signal
+      }),
+      requestHeaderNames: Object.keys(headers),
+      cookieNames: getUniqueMiniMaxCookieNames(args.cookie),
+      transport: 'manual-cookie-header'
+    }
+  }
   try {
     await clearMiniMaxSessionCookieJarForSession(miniMaxSession)
     const headers = {

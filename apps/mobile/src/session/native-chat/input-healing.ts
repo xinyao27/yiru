@@ -21,7 +21,10 @@ export function createMobileNativeChatInputHealingState(): MobileNativeChatInput
 }
 
 export function getMobileNativeChatInputHealingState(
-  client: Pick<RpcClient, 'sendRequest'>
+  // Why: only used as a WeakMap identity key — `orpc` is a stable per-session
+  // reference, same as the `sendRequest` handle this used to key off before
+  // mobile's bare-string RPC path was removed.
+  client: Pick<RpcClient, 'orpc'>
 ): MobileNativeChatInputHealingState {
   const existing = inputHealingStateByClient.get(client)
   if (existing) {

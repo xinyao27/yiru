@@ -7,12 +7,26 @@ import os from 'node:os'
 import { join } from 'node:path'
 
 import { electronApp, is } from '@electron-toolkit/utils'
+import { CURSOR_USAGE_GET_CONTRACT } from '@yiru/runtime-protocol/contract'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  nativeTheme,
+  net,
+  powerMonitor,
+  safeStorage,
+  session,
+  shell,
+  systemPreferences,
+  type IncomingMessage,
+  type Tray
+} from 'electron'
 import { resolveEnvironment } from '~shared/runtime-environment-store'
 import { getPreferredPairingOffer } from '~shared/runtime-environments'
-import { CURSOR_USAGE_GET_CONTRACT } from '~shared/runtime-method-contracts/provider-usage-contracts'
 import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import {
   getSyntheticAgentTitleProfile,
@@ -45,12 +59,16 @@ import {
 import { agentHookServer } from './agent-hooks/server'
 import { wslHookRelayManager } from './agent-hooks/wsl-hook-relay-manager'
 import { applyAppIcon } from './app-icon'
-import { createHeadlessAutomationOutputSnapshotBuffer } from './automations/headless-dispatch'
-import { buildHeadlessAutomationWorktreeCreateArgs } from './automations/headless-workspace-create'
+import { createHeadlessAutomationDispatcher } from './automations/headless-dispatch'
 import { AutomationService } from './automations/service'
 import { AgentBrowserBridge } from './browser/agent-browser-bridge'
+import { electronRuntimeBrowserShellAdapter } from './browser/electron-runtime-adapter'
 import { browserCertificateTrustController, browserManager } from './browser/manager'
+import { setBrowserMediaAccessProvider } from './browser/media-access'
 import { OffscreenBrowserBackend } from './browser/offscreen-browser-backend'
+import { setBrowserSessionProvider } from './browser/session'
+import { BrowserSessionPolicies } from './browser/session-policies'
+import { browserSessionRegistry } from './browser/session-registry'
 import { initializeBrowserSessionsForApp } from './browser/session-startup'
 import {
   attachClaudeLivePtyPersistence,
@@ -81,7 +99,7 @@ import {
   createCoworkingOwnerComposition,
   type CoworkingOwnerComposition
 } from './coworking/owner/composition'
-import { registerCoworkingSharingHandlers } from './coworking/sharing'
+import { registerCoworkingSharingController } from './coworking/sharing'
 import { CoworkingUnavailableOwnerService } from './coworking/unavailable-owner-service'
 import {
   recordCoalescedCrashBreadcrumb,
@@ -108,11 +126,13 @@ import {
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/bridge'
-import { closeAllWatchers } from './filesystem/watcher'
 import { FridayService } from './friday/service'
+import { previewGhosttyImport } from './ghostty/import-preview'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
-import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
+import { getElectronSystemLocale } from './i18n/electron-system-locale'
+import { setMainSystemLocaleProvider, setMainUiLanguage } from './i18n/main-i18n'
+import { registerMobileHandlers } from './ipc/mobile'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -121,6 +141,7 @@ import {
   rebuildAppMenu
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
+import { setHttpFetchProvider } from './network/http-fetch'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
 import { initObservability, shutdownObservability } from './observability/service'
@@ -131,6 +152,7 @@ import {
   getCanonicalUserDataPath,
   migrateMobilePairingDataToCanonicalUserDataPath
 } from './persistence'
+import { setRepoChangeEventPublisher } from './project-groups/repo-events'
 import { LocalPtyProvider } from './providers/local-pty-provider'
 import { killAllPty } from './pty/pty'
 import {
@@ -143,24 +165,44 @@ import {
 import { RateLimitResumeService } from './rate-limit-resume/service'
 import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit-target'
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
+import {
+  MINIMAX_SESSION_PARTITION,
+  setMiniMaxSessionProvider
+} from './rate-limits/minimax-request-context'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { setAgentStatusEventPublisher } from './runtime/agent-status-events'
+import { publishAgentStatusEvent } from './runtime/agent-status-events'
 import { resolveCursorUsageRuntimeTarget } from './runtime/cursor-usage/target'
 import { callRuntimeEnvironment } from './runtime/environment-transport-routing'
+import { setGitHubEventPublisher } from './runtime/github-events'
+import { setHostProgressEventPublisher } from './runtime/host-progress-events'
+import { setRuntimeHostPathsProvider } from './runtime/host/paths-provider'
+import { setRuntimeHostSecureStorageProvider } from './runtime/host/secure-storage-provider'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
-import { registerMobileHandlers } from './runtime/mobile'
+import { setNotificationShellAttentionSignal } from './runtime/notification-shell-attention'
 import {
   fingerprintOrchestrationPeer,
   type OrchestrationEnvironmentTransport
 } from './runtime/orchestration/environment-transport'
 import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
 import { YiruRuntimeRpcServer } from './runtime/rpc'
+import { setSettingsEventPublisher } from './runtime/settings-events'
+import { setSkillUpdateRunEventPublisher } from './runtime/skill-update-run-events'
+import { setSpeechEventPublisher } from './runtime/speech-events'
+import { setUIEventPublisher } from './runtime/ui-events'
+import { setWorkspacePortEventPublisher } from './runtime/workspace-port-events'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
+import { RuntimeBrowserCommands } from './runtime/yiru-runtime-browser'
 import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
 import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
+import {
+  configureSpeechDownloadRequestFactory,
+  type SpeechDownloadResponse
+} from './speech/download-request'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -243,14 +285,22 @@ import {
   setupAutoUpdater
 } from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
+import { previewWarpThemeImport } from './warp-themes/electron-import-preview'
 import {
   attachMainWindowServices,
   ensureAutoUpdaterConfigured
 } from './window/attach-main-window-services'
+import { createElectronBrowserSessionProvider } from './window/browser-session'
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import { focusExistingMainWindow } from './window/focus-existing-window'
-import { notifyMainWindowBecameVisible } from './window/main-window-visibility'
-import { disposeWorktreeBaseDirectoryWatchers } from './worktree/base-directory-watcher'
+import { isMainWindowVisible, notifyMainWindowBecameVisible } from './window/main-window-visibility'
+import {
+  disposeWorktreeBaseDirectoryWatchers,
+  scheduleWorktreeBaseDirectoryWatcherSync,
+  setWorktreeBaseDirectoryWatcherSyncContext
+} from './worktree/base-directory-watcher'
+import { setWorktreeChangeEventPublisher } from './worktree/change-events'
+import { setWorktreeHeadIdentityEventPublisher } from './worktree/head-identity-events'
 import { getDefaultWslDistro } from './wsl'
 import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
 
@@ -273,7 +323,7 @@ let friday: FridayService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
 let coworkingOwner: CoworkingOwnerComposition | null = null
-let unregisterCoworkingSharingHandlers: (() => void) | null = null
+let unregisterCoworkingSharingController: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
 // offscreen browser backend (and thus advertises browser pane support).
 let headlessBrowserDisplayAvailable = false
@@ -313,6 +363,8 @@ const gpuCrashFallbackTracker = new GpuCrashFallbackTracker({
 let gpuFallbackActiveThisLaunch = false
 let localPtyStartupReady: Promise<void> = Promise.resolve()
 const AGENT_STATE_CRASH_BREADCRUMB_MIN_INTERVAL_MS = 30_000
+// Why: the public CLI now starts the portable Node host by default. Keep this
+// internal Electron entry only for `yiru serve --electron` compatibility.
 const isServeMode = process.argv.includes('--serve')
 const desktopActivationGate = createServeDesktopActivationGate({
   initialState: isServeMode ? 'initializing' : 'ready',
@@ -517,6 +569,26 @@ if (app.isPackaged && process.platform !== 'win32') {
 }
 configureDevUserDataPath(is.dev)
 configureYiruUserDataPathEnv()
+setMainSystemLocaleProvider(getElectronSystemLocale)
+setRuntimeHostPathsProvider({
+  appPath: () => app.getAppPath(),
+  downloadsPath: () => app.getPath('downloads'),
+  executablePath: () => process.execPath,
+  homePath: () => app.getPath('home'),
+  isPackaged: () => app.isPackaged,
+  resourcesPath: () => process.resourcesPath,
+  tempPath: () => app.getPath('temp'),
+  userDataPath: () => app.getPath('userData'),
+  version: () => app.getVersion()
+})
+setHttpFetchProvider((input, init) => net.fetch(input, init))
+setMiniMaxSessionProvider(() => session.fromPartition(MINIMAX_SESSION_PARTITION))
+setBrowserMediaAccessProvider({
+  hasAccess: (mediaType) => systemPreferences.getMediaAccessStatus(mediaType) === 'granted',
+  requestAccess: (mediaType) => systemPreferences.askForMediaAccess(mediaType)
+})
+setBrowserSessionProvider(createElectronBrowserSessionProvider())
+browserSessionRegistry.setPolicies(new BrowserSessionPolicies())
 configureRemoteServerUpdateInstallMode(resolveUpdateInstallMode(isServeMode))
 installServeSupervisorDisconnectQuit(isServeMode)
 
@@ -699,7 +771,7 @@ if (hasSingleInstanceLock) {
   // Why: must run after configureDevUserDataPath (which redirects userData to
   // yiru-dev in dev mode) but before app.setName('Yiru') inside whenReady
   // (which would change the resolved path on case-sensitive filesystems).
-  initDataPath()
+  initDataPath(app.getPath('userData'))
   initYiruProfilePaths()
   // Why: same timing constraint as initDataPath — capture the userData path
   // before app.setName changes it. See persistence.ts:20-28.
@@ -784,29 +856,45 @@ async function reapRestoredSubagentsWithoutLiveAgent(): Promise<void> {
 
 function startTerminalRuntimeStartupServices(): Promise<void> {
   logStartupMilestone('first-window-startup-services-start')
+  const agentHooksEnabled = isAgentStatusHooksEnabled(store?.getSettings())
+  const agentHookEndpointDir = devAgentHookEndpointNamespace
+    ? join(app.getPath('userData'), 'agent-hooks', devAgentHookEndpointNamespace)
+    : join(app.getPath('userData'), 'agent-hooks')
+  const agentHookEnvironment = app.isPackaged ? 'production' : 'development'
+  if (agentHooksEnabled) {
+    agentHookServer.initializeForwardedHost({
+      env: agentHookEnvironment,
+      userDataPath: app.getPath('userData'),
+      ...(devAgentHookEndpointNamespace ? { endpointNamespace: devAgentHookEndpointNamespace } : {})
+    })
+  }
   const startupServices = startFirstWindowStartupServices({
     // Why: desktop and headless serve must adopt the same persistent provider
     // before either path is allowed to create terminals or a renderer.
     startDaemonPtyProvider: async (signal) => {
       logStartupMilestone('startup-service-start', { service: 'daemon-pty-provider' })
-      await initDaemonPtyProvider(signal)
+      await initDaemonPtyProvider(
+        signal,
+        agentHooksEnabled
+          ? {
+              agentHookHost: {
+                endpointDir: agentHookEndpointDir,
+                env: agentHookEnvironment
+              }
+            }
+          : {}
+      )
       logStartupMilestone('startup-service-done', { service: 'daemon-pty-provider' })
     },
     // Why: PTY spawn env reads YIRU_AGENT_HOOK_* from the live server state, so
     // the renderer awaits this barrier before restored terminals reconnect.
     startAgentHookServer: async () => {
-      if (!isAgentStatusHooksEnabled(store?.getSettings())) {
+      if (!agentHooksEnabled) {
         return
       }
       logStartupMilestone('startup-service-start', { service: 'agent-hook-server' })
-      await agentHookServer.start({
-        env: app.isPackaged ? 'production' : 'development',
-        // Why: hooks source this endpoint file at invocation time, so old PTY
-        // env still reaches the current Yiru process after an app restart.
-        // Dev uses a namespace because all worktrees share `yiru-dev`.
-        userDataPath: app.getPath('userData'),
-        endpointNamespace: devAgentHookEndpointNamespace
-      })
+      // Why: the HTTP listener now lives in the persistent daemon. This
+      // startup lane only hydrates main's status cache before daemon events land.
       logStartupMilestone('startup-service-done', { service: 'agent-hook-server' })
     },
     onDaemonError: (error) => {
@@ -1174,12 +1262,10 @@ function openMainWindow(): BrowserWindow {
         isQuitting = true
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
       }
-    },
-    rateLimitResumes ?? undefined
+    }
   )
   automations.setWebContents(window.webContents)
   automations.start()
-  rateLimitResumes?.setWebContents(window.webContents)
   rateLimitResumes?.start()
   attachMainWindowServices(
     window,
@@ -1214,7 +1300,6 @@ function openMainWindow(): BrowserWindow {
     }
     clearExpectedRendererReload(rendererWebContentsId)
     automations?.setWebContents(null)
-    rateLimitResumes?.setWebContents(null)
     // Why: detach the agent hook listener on window close so the server
     // never fires into a destroyed webContents during the gap before
     // reopen (e.g. macOS dock re-activation). This also ensures the
@@ -1258,13 +1343,10 @@ function openMainWindow(): BrowserWindow {
       promptInteractionKey,
       isReplay
     }) => {
-      if (mainWindow?.isDestroyed()) {
-        return
-      }
       if (providerSessionOnly) {
         // Why: Pi session_start refreshes resume identity while the TUI is
         // idle, so it must not drive titles, telemetry, or visible status.
-        mainWindow?.webContents.send('agentStatus:set', {
+        const providerSessionStatus = {
           ...payload,
           paneKey,
           ...(launchToken ? { launchToken } : {}),
@@ -1275,13 +1357,14 @@ function openMainWindow(): BrowserWindow {
           stateStartedAt,
           ...(providerSession ? { providerSession } : {}),
           providerSessionOnly: true
-        })
+        }
+        publishAgentStatusEvent({ type: 'set', status: providerSessionStatus })
         return
       }
       maybeAutoRenameBranchOnFirstWorkFromHook({ paneKey, tabId, worktreeId, payload, isReplay })
       const orchestration = runtime?.getAgentStatusOrchestrationContextForPaneKey(paneKey)
       const terminalHandle = runtime?.getAgentStatusTerminalHandleForPaneKey(paneKey)
-      mainWindow?.webContents.send('agentStatus:set', {
+      const agentStatus = {
         ...payload,
         paneKey,
         ...(launchToken ? { launchToken } : {}),
@@ -1294,7 +1377,8 @@ function openMainWindow(): BrowserWindow {
         ...(providerSession ? { providerSession } : {}),
         ...(promptInteractionKey ? { promptInteractionKey } : {}),
         ...(orchestration ? { orchestration } : {})
-      })
+      }
+      publishAgentStatusEvent({ type: 'set', status: agentStatus })
       recordAgentStateCrashBreadcrumb(payload.agentType ?? 'unknown', payload.state)
       // Why: some native OSC titles miss terminal idle/permission frames.
       // Inject hook-derived frames so the renderer title tracker updates too.
@@ -1318,22 +1402,14 @@ function openMainWindow(): BrowserWindow {
     }
   )
   agentHookServer.setPaneStatusClearListener((paneKey) => {
-    if (mainWindow?.isDestroyed()) {
-      return
-    }
-    mainWindow?.webContents.send('agentStatus:clear', { paneKey })
+    publishAgentStatusEvent({ type: 'clear', paneKey })
   })
   setMigrationUnsupportedPtyListener((event) => {
-    if (mainWindow?.isDestroyed()) {
-      return
-    }
-    if (event.type === 'set') {
-      mainWindow?.webContents.send('agentStatus:migrationUnsupported', event.entry)
-    } else {
-      mainWindow?.webContents.send('agentStatus:migrationUnsupportedClear', {
-        ptyId: event.ptyId
-      })
-    }
+    publishAgentStatusEvent(
+      event.type === 'set'
+        ? { type: 'migrationUnsupported', entry: event.entry }
+        : { type: 'migrationUnsupportedClear', ptyId: event.ptyId }
+    )
   })
   logStartupMilestone('load-start')
   loadMainWindow(window)
@@ -1487,10 +1563,7 @@ function shutdownWatchersOnce(): Promise<void> {
   if (!watcherShutdownPromise) {
     // Why: @parcel/watcher tears down native async work during unsubscribe.
     // Electron must wait for that cleanup before Node's environment exits.
-    watcherShutdownPromise = Promise.allSettled([
-      closeAllWatchers(),
-      disposeWorktreeBaseDirectoryWatchers()
-    ])
+    watcherShutdownPromise = Promise.allSettled([disposeWorktreeBaseDirectoryWatchers()])
       .then((results) => {
         for (const result of results) {
           if (result.status === 'rejected') {
@@ -1831,8 +1904,85 @@ app.whenReady().then(async () => {
       })
     }
   )
+  // Why: DOM focus events do not fire when macOS reactivates the app. Keep
+  // this Electron-only signal in the shell adapter, outside the ai-vault
+  // capability module that also runs in a Node runtime host.
+  app.on('browser-window-focus', (_event, window) => {
+    if (!window.isDestroyed()) {
+      window.webContents.send('aiVault:windowFocused')
+    }
+  })
   electronApp.setAppUserModelId(devInstanceIdentity.appUserModelId)
   app.setName(devInstanceIdentity.name)
+  configureSpeechDownloadRequestFactory((url) => {
+    const request = net.request({ method: 'GET', url })
+    type ResponseListener = (response: SpeechDownloadResponse) => void
+    const responseListeners = new Map<ResponseListener, (response: IncomingMessage) => void>()
+    return {
+      abort: () => request.abort(),
+      end: () => request.end(),
+      offError: (listener) => request.off('error', listener),
+      offRedirect: (listener) => request.off('redirect', listener),
+      offResponse: (listener) => {
+        const electronListener = responseListeners.get(listener)
+        if (electronListener) {
+          request.off('response', electronListener)
+          responseListeners.delete(listener)
+        }
+      },
+      onError: (listener) => request.on('error', listener),
+      onRedirect: (listener) => request.on('redirect', listener),
+      onResponse: (listener) => {
+        const electronListener = (response: IncomingMessage): void => {
+          listener({
+            destroy: () => request.abort(),
+            headers: response.headers,
+            offData: (dataListener) => response.off('data', dataListener),
+            onData: (dataListener) => response.on('data', dataListener),
+            pipeTo: (destination) =>
+              new Promise<void>((resolvePromise, rejectPromise) => {
+                const onData = (chunk: Buffer): void => {
+                  destination.write(chunk)
+                }
+                const cleanup = (): void => {
+                  response.off('data', onData)
+                  response.off('end', onEnd)
+                  response.off('error', onError)
+                }
+                const onEnd = (): void => {
+                  cleanup()
+                  destination.end(resolvePromise)
+                }
+                const onError = (error: Error): void => {
+                  cleanup()
+                  destination.destroy(error)
+                  rejectPromise(error)
+                }
+                response.on('data', onData)
+                response.on('end', onEnd)
+                response.on('error', onError)
+              }),
+            statusCode: response.statusCode
+          })
+        }
+        responseListeners.set(listener, electronListener)
+        request.on('response', electronListener)
+      },
+      setHeader: (name, value) => request.setHeader(name, value)
+    }
+  })
+  setRuntimeHostSecureStorageProvider({
+    decryptString: (value) => safeStorage.decryptString(value),
+    encryptString: (value) => safeStorage.encryptString(value),
+    isEncryptionAvailable: () => safeStorage.isEncryptionAvailable()
+  })
+  setNotificationShellAttentionSignal(() => {
+    const activeWindow =
+      BrowserWindow.getAllWindows().find((window) => !window.isDestroyed()) ?? null
+    if (!isMainWindowVisible(activeWindow)) {
+      setTrayAttention(true)
+    }
+  })
 
   // Why: managed WSL launchers live outside the Windows app bundle, so keep
   // their launcher and bridge contract synchronized across app updates.
@@ -2074,8 +2224,8 @@ app.whenReady().then(async () => {
         peerFingerprint: fingerprintOrchestrationPeer(pairing.publicKeyB64)
       }
     },
-    call: (selector, method, params, timeoutMs, envelope) =>
-      callRuntimeEnvironment(app.getPath('userData'), selector, method, params, timeoutMs, {
+    call: (selector, contract, params, timeoutMs, envelope) =>
+      callRuntimeEnvironment(app.getPath('userData'), selector, contract, params, timeoutMs, {
         envelope
       })
   }
@@ -2098,6 +2248,10 @@ app.whenReady().then(async () => {
       }
     },
     getDesktopWindowStatus: getDesktopWindowStatus,
+    getWindowById: (windowId) => BrowserWindow.fromId(windowId),
+    getHostProcessMetrics: () => app.getAppMetrics(),
+    createBrowserCommands: (host) =>
+      new RuntimeBrowserCommands(host, electronRuntimeBrowserShellAdapter),
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
     getAgentStatusSnapshot: () =>
@@ -2109,6 +2263,14 @@ app.whenReady().then(async () => {
       claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
       isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {},
+    previewGhosttyImportForClient: () =>
+      store
+        ? previewGhosttyImport(store)
+        : Promise.resolve({ found: false, diff: {}, unsupportedKeys: [] }),
+    previewWarpThemeImportForClient: (source) =>
+      store
+        ? previewWarpThemeImport(store, source)
+        : Promise.resolve({ found: false, themes: [], skippedFiles: [] }),
     orchestrationEnvironmentTransport,
     statsUsageStores: {
       claude: claudeUsage,
@@ -2123,99 +2285,43 @@ app.whenReady().then(async () => {
   browserManager.setBrowserGuestStateChangedListener((worktreeId) => {
     runtimeService.notifyMobileSessionTabsChanged(worktreeId)
   })
-  rateLimitResumes = new RateLimitResumeService(store, rateLimits!)
+  browserManager.setGuestEventPublisher((event) => runtimeService.emitBrowserGuestEvent(event))
+  setHostProgressEventPublisher((event) => runtimeService.emitHostProgressEvent(event))
+  setGitHubEventPublisher((event) => runtimeService.emitGitHubEvent(event))
+  setSettingsEventPublisher((event) => runtimeService.emitSettingsChangedEvent(event))
+  setUIEventPublisher((event) => runtimeService.emitUIChangedEvent(event))
+  setAgentStatusEventPublisher((event) => runtimeService.emitAgentStatusEvent(event))
+  setSpeechEventPublisher((event) => runtimeService.emitSpeechEvent(event))
+  setSkillUpdateRunEventPublisher((event) => runtimeService.emitSkillUpdateRunEvent(event))
+  setWorkspacePortEventPublisher((event) =>
+    runtimeService.emitWorkspacePortAdvertisedUrlChangedEvent(event)
+  )
+  // Why: registered here (shared by windowed and headless serve boot) rather
+  // than inside attachMainWindowServices, so the head-identity signal reaches
+  // paired web/mobile clients even when serve never creates a BrowserWindow.
+  setWorktreeHeadIdentityEventPublisher((repoId, identities) =>
+    runtimeService.notifyWorktreeHeadIdentitiesChangedForRemoteClients(repoId, identities)
+  )
+  setWorktreeChangeEventPublisher((repoId) =>
+    runtimeService.notifyWorktreesChangedForRemoteClients(repoId)
+  )
+  setRepoChangeEventPublisher(() => runtimeService.notifyReposChangedForRemoteClients())
+  rateLimitResumes = new RateLimitResumeService(store, rateLimits!, {
+    // Why: the service is pure Node; Electron supplies its app-lifecycle wake
+    // signal only at this composition root.
+    subscribeToWake: (listener) => {
+      powerMonitor.on('resume', listener)
+      return () => powerMonitor.off('resume', listener)
+    }
+  })
+  runtimeService.setRateLimitResumeService(rateLimitResumes)
   automations = new AutomationService(store, {
     claudeUsage,
     codexUsage,
     // Why: desktop clients may mirror remote-host automations, but only a
     // server process should execute schedules owned by `remote_host_service`.
     allowRemoteHostScheduling: isServeMode,
-    headlessDispatcher: isServeMode
-      ? async ({ automation, run, target }) => {
-          const terminalSnapshotLimit = 2_000
-          let terminalHandle: string
-          let terminalSessionId: string | null = null
-          let terminalPaneKey: string | null = null
-          let terminalPtyId: string | null = null
-          let workspaceId: string
-          let workspaceDisplayName: string | null = null
-
-          if (automation.workspaceMode === 'new_per_run') {
-            const created = await runtimeService.createManagedWorktree({
-              ...buildHeadlessAutomationWorktreeCreateArgs({
-                automation,
-                run,
-                repo: target.repo
-              })
-            })
-            terminalHandle = created.startupTerminal?.handle ?? ''
-            terminalSessionId = created.startupTerminal?.tabId ?? null
-            terminalPaneKey = created.startupTerminal?.paneKey ?? null
-            terminalPtyId = created.startupTerminal?.ptyId ?? null
-            workspaceId = created.worktree.id
-            workspaceDisplayName = created.worktree.displayName ?? null
-            if (!terminalHandle) {
-              throw new Error(
-                created.warning ||
-                  'Automation workspace was created, but no agent terminal started.'
-              )
-            }
-          } else {
-            if (!automation.workspaceId) {
-              throw new Error('The target workspace is no longer available.')
-            }
-            const terminal = await runtimeService.launchAgentTerminal(
-              `id:${automation.workspaceId}`,
-              {
-                agent: automation.agentId,
-                prompt: automation.prompt,
-                title: run.title
-              }
-            )
-            terminalHandle = terminal.handle
-            terminalSessionId = terminal.tabId ?? null
-            terminalPaneKey = terminal.paneKey ?? null
-            terminalPtyId = terminal.ptyId ?? null
-            workspaceId = terminal.worktreeId
-            const worktree = await runtimeService.showManagedWorktree(`id:${workspaceId}`)
-            workspaceDisplayName = worktree.displayName ?? null
-          }
-
-          const completion = (async () => {
-            const wait = await runtimeService.waitForTerminal(terminalHandle, {
-              condition: 'tui-idle'
-            })
-            const read = await runtimeService.readTerminal(terminalHandle, {
-              limit: terminalSnapshotLimit
-            })
-            const snapshotBuffer = createHeadlessAutomationOutputSnapshotBuffer()
-            snapshotBuffer.append(read.tail.join('\n'))
-            if (wait.satisfied) {
-              return {
-                status: 'completed' as const,
-                outputSnapshot: snapshotBuffer.snapshot(),
-                error: null
-              }
-            }
-            return {
-              status: 'dispatch_failed' as const,
-              outputSnapshot: snapshotBuffer.snapshot(),
-              error: wait.blockedReason
-                ? `Automation agent is blocked: ${wait.blockedReason}.`
-                : 'Automation agent did not report completion.'
-            }
-          })()
-
-          return {
-            workspaceId,
-            workspaceDisplayName,
-            terminalSessionId,
-            terminalPaneKey,
-            terminalPtyId,
-            completion
-          }
-        }
-      : undefined
+    headlessDispatcher: isServeMode ? createHeadlessAutomationDispatcher(runtimeService) : undefined
   })
   runtimeService.setAutomationService(automations)
   runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
@@ -2275,8 +2381,7 @@ app.whenReady().then(async () => {
   })
 
   logStartupMilestone('services-initialized')
-  await ensureMainI18n()
-  await setMainUiLanguage(store.getSettings().uiLanguage)
+  setMainUiLanguage(store.getSettings().uiLanguage)
   logStartupMilestone('i18n-ready')
 
   registerAppMenu({
@@ -2395,7 +2500,9 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc)
+  registerMobileHandlers(runtimeRpc, {
+    openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
+  })
 
   startTerminalRuntimeStartupServices()
   app.on('activate', requestDesktopActivation)
@@ -2411,6 +2518,10 @@ app.whenReady().then(async () => {
         setLastUpdateCheckAt: (timestamp) => store!.updateUI({ lastUpdateCheckAt: timestamp })
       }
     )
+    // Why: attachMainWindowServices never runs in headless serve, but the
+    // host-state watcher must publish runtime events without a shell.
+    setWorktreeBaseDirectoryWatcherSyncContext(store!)
+    scheduleWorktreeBaseDirectoryWatcherSync(store!)
     // Why: give managed WSL launchers a brief chance to migrate before headless
     // PTYs become reachable without letting slow repairs withhold all RPC readiness.
     logStartupMilestone('wsl-cli-barrier-start')
@@ -2433,7 +2544,7 @@ app.whenReady().then(async () => {
     // own browser pages and advertise browser.headless.v1 — but only when a
     // display is actually available (set up above), so the capability stays honest.
     if (headlessBrowserDisplayAvailable) {
-      runtime.setOffscreenBrowserBackend(new OffscreenBrowserBackend(browserManager))
+      runtime.setBrowserBackend(new OffscreenBrowserBackend(browserManager))
     }
     // Why: headless runtimes have no renderer graph publisher. Publish an
     // explicit empty graph so status clients see a ready server while
@@ -2496,11 +2607,15 @@ app.whenReady().then(async () => {
         process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
     })
     runtimeRpc.setGrantJournal(coworkingOwner.grantJournal)
-    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(coworkingOwner.service)
+    unregisterCoworkingSharingController = registerCoworkingSharingController(
+      runtimeService,
+      coworkingOwner.service
+    )
   } catch (error) {
     // Why: corrupt sharing state or a missing platform dependency disables only Coworking.
     console.error('[coworking] Failed to compose Desktop sharing:', error)
-    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(
+    unregisterCoworkingSharingController = registerCoworkingSharingController(
+      runtimeService,
       new CoworkingUnavailableOwnerService(runtimeRpc)
     )
   }
@@ -2589,8 +2704,7 @@ app.on('will-quit', (e) => {
   runtime?.getAgentBrowserBridge()?.destroyAllSessions()
   // Why: headless offscreen browser windows are main-process owned; tear them
   // down explicitly on quit alongside the other browser/session shutdowns.
-  const offscreenBrowserShutdown =
-    runtime?.getOffscreenBrowserBackend()?.destroyAll?.() ?? Promise.resolve()
+  const offscreenBrowserShutdown = runtime?.getBrowserBackend()?.destroyAll?.() ?? Promise.resolve()
   browserManager.setBrowserGuestStateChangedListener(null)
   const emulatorShutdown = runtime?.getEmulatorBridge()?.destroyAllSessions() ?? Promise.resolve()
   const fridayShutdown = friday?.dispose() ?? Promise.resolve()
@@ -2605,8 +2719,8 @@ app.on('will-quit', (e) => {
   // app.quit() re-fires will-quit, but the second pass skips straight through.
   if (!daemonDisconnectDone) {
     e.preventDefault()
-    unregisterCoworkingSharingHandlers?.()
-    unregisterCoworkingSharingHandlers = null
+    unregisterCoworkingSharingController?.()
+    unregisterCoworkingSharingController = null
     // Why: capture ownership synchronously (before any await) so the guard
     // still has the right pid/runtimeId to compare against if shutdown
     // partially clears global state. Evaluating these inside .then() would

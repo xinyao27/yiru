@@ -1,7 +1,8 @@
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 // Typed renderer-side wrapper around the preload bridge.
 //
 // Renderer call sites import `track` from this module rather than reaching
-// for `window.api.telemetryTrack` directly, because this wrapper is what
+// for `rendererHostClient.telemetryTrack` directly, because this wrapper is what
 // gives them the `EventMap`-based type safety. The preload bridge is
 // deliberately typed as a loose `(name: string, props: Record<string,
 // unknown>) => Promise<void>` so it can cross the IPC boundary without
@@ -11,7 +12,6 @@
 // The renderer does NOT bundle `posthog-node` or any PostHog SDK. There is
 // one PostHog client in the process tree and it lives in main. That
 // invariant is what keeps the vendor out of the renderer's attack surface.
-
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { EventName, EventProps } from '~shared/telemetry-events'
 
@@ -49,16 +49,18 @@ function isTelemetryConsentState(x: unknown): x is TelemetryConsentState {
 
 export function track<N extends EventName>(name: N, props: EventProps<N>): void {
   // Why: telemetry must never throw into the renderer. A missing bridge
-  // (tests, early init, sandboxed iframe) would turn `window.api.telemetryTrack`
+  // (tests, early init, sandboxed iframe) would turn `rendererHostClient.telemetryTrack`
   // into a synchronous TypeError that defeats the documented fire-and-forget
   // contract. Log (do not rethrow) on both the sync throw and any promise
   // rejection so IPC failures leave a diagnostic breadcrumb while preserving
   // the fire-and-forget contract — silent swallowing would let disk state
   // drift out of sync with UI state with zero signal to anyone debugging.
   try {
-    void window.api?.telemetryTrack?.(name, props as Record<string, unknown>)?.catch((err) => {
-      console.warn('[telemetry] IPC track failed', err)
-    })
+    void rendererHostClient
+      ?.telemetryTrack?.(name, props as Record<string, unknown>)
+      ?.catch((err) => {
+        console.warn('[telemetry] IPC track failed', err)
+      })
   } catch (err) {
     console.warn('[telemetry] IPC track threw synchronously', err)
   }
@@ -71,7 +73,7 @@ export function track<N extends EventName>(name: N, props: EventProps<N>): void 
 export function setOptIn(optedIn: boolean): Promise<void> {
   try {
     return (
-      window.api?.telemetrySetOptIn?.(optedIn)?.catch((err) => {
+      rendererHostClient?.telemetrySetOptIn?.(optedIn)?.catch((err) => {
         console.warn('[telemetry] IPC setOptIn failed', err)
       }) ?? Promise.resolve()
     )
@@ -87,7 +89,7 @@ export function setOptIn(optedIn: boolean): Promise<void> {
 // pretending the toggle is live when we cannot confirm consent.
 export async function getConsentState(): Promise<TelemetryConsentState> {
   try {
-    const result = await window.api?.telemetryGetConsentState?.()
+    const result = await rendererHostClient?.telemetryGetConsentState?.()
     return isTelemetryConsentState(result) ? result : { effective: 'pending_banner' }
   } catch (err) {
     console.warn('[telemetry] IPC getConsentState failed', err)
@@ -112,7 +114,7 @@ export async function getConsentState(): Promise<TelemetryConsentState> {
 export function acknowledgeBanner(): Promise<void> {
   try {
     return (
-      window.api?.telemetryAcknowledgeBanner?.()?.catch((err) => {
+      rendererHostClient?.telemetryAcknowledgeBanner?.()?.catch((err) => {
         console.warn('[telemetry] IPC acknowledgeBanner failed', err)
       }) ?? Promise.resolve()
     )

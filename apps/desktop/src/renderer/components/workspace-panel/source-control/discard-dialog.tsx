@@ -22,18 +22,6 @@ export type PendingDiscardConfirmation =
   | { kind: 'entry'; entry: GitStatusEntry }
   | { kind: 'area'; area: DiscardAllArea; paths: readonly string[] }
 
-export function focusDiscardDialogConfirmButton(
-  event: Event,
-  confirmButton: HTMLButtonElement | null
-): void {
-  if (!confirmButton) {
-    return
-  }
-  // Why: Radix otherwise focuses Cancel first, making Enter dismiss this destructive confirm.
-  event.preventDefault()
-  confirmButton.focus()
-}
-
 export function SourceControlDiscardDialog({
   pendingDiscard,
   onCancel,

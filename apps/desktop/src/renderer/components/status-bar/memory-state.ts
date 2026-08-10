@@ -1,4 +1,6 @@
 import type { StateCreator } from 'zustand'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { AppState } from '~renderer/store/types'
 import type { MemorySnapshot } from '~shared/types'
 
@@ -8,7 +10,7 @@ export type MemorySlice = {
   fetchMemorySnapshot: () => Promise<void>
 }
 
-export const createMemorySlice: StateCreator<AppState, [], [], MemorySlice> = (set) => {
+export const createMemorySlice: StateCreator<AppState, [], [], MemorySlice> = (set, get) => {
   let inFlightSnapshot: Promise<void> | null = null
 
   return {
@@ -21,7 +23,18 @@ export const createMemorySlice: StateCreator<AppState, [], [], MemorySlice> = (s
       }
       const request = (async () => {
         try {
-          const snapshot = await window.api.memory.getSnapshot()
+          // Why: this segment reports the active runtime's own resource use —
+          // switching the active environment must show that host's memory,
+          // not the machine running the Electron shell. `diagnostics.memory`
+          // covers both targets identically (same `collectMemorySnapshot`
+          // call the desktop IPC handler used to make), so there is no
+          // local-vs-remote branch left to preserve.
+          const target = getActiveRuntimeTarget(get().settings)
+          const snapshot = await callRuntimeOrpc(
+            target,
+            (client) => client.diagnostics.memory,
+            undefined
+          )
           set({ memorySnapshot: snapshot, memorySnapshotError: null })
         } catch (err) {
           // Why: the always-on Resource Manager status-bar segment needs to know when

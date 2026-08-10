@@ -30,7 +30,7 @@ type SearchResultsPaneProps = {
   loading: boolean
   rows: SearchRow[]
   onToggleCollapsedFile: (filePath: string) => void
-  onMatchClick: (fileResult: SearchFileResult, match: SearchMatch) => void
+  onMatchClick: (fileResult: SearchFileResult, match: SearchMatch, preview: boolean) => void
 }
 
 export function SearchResultsPane({
@@ -92,7 +92,7 @@ export function SearchResultsPane({
               <MatchResultRow
                 match={row.match}
                 relativePath={row.fileResult.relativePath}
-                onClick={() => onMatchClick(row.fileResult, row.match)}
+                onClick={(preview) => onMatchClick(row.fileResult, row.match, preview)}
               />
             )
           }

@@ -19,7 +19,7 @@ import {
 } from '~/session/ai-vault-resume-launch'
 import { getWorktreeLabel } from '~/session/worktree-label'
 import { useHostClient } from '~/transport/client-context'
-import type { RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { Worktree } from '~/workspace/list-types'
 
 import { shouldShowMobileCurrentWorktreeBadge } from './current-worktree-badge'
@@ -71,14 +71,13 @@ export function MobileAgentSessionHistoryPanel({
     let cancelled = false
     void (async () => {
       try {
-        const worktreeResponse = await client.sendRequest('worktree.ps', { limit: 10000 })
+        const worktreeResponse = await callRuntimeOrpc(client, (runtime) => runtime.worktree.ps, {
+          limit: 10000
+        })
         if (cancelled) {
           return
         }
-        if (worktreeResponse.ok) {
-          const result = (worktreeResponse as RpcSuccess).result as { worktrees: Worktree[] }
-          setWorktrees(result.worktrees)
-        }
+        setWorktrees(worktreeResponse.worktrees)
       } catch {
         // Why: worktree list is best-effort context; the session scan still runs
         // (without it, scoped tabs can't narrow and fall back to the full list).

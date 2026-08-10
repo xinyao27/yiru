@@ -68,8 +68,6 @@ export function getWorktreeCardPropertyOptions({
   return [...WORKTREE_CARD_METADATA_OPTIONS, branchOption]
 }
 
-export const WORKTREE_CARD_PROPERTY_OPTIONS = getWorktreeCardPropertyOptions()
-
 export const SORT_OPTIONS = [
   {
     id: 'name',

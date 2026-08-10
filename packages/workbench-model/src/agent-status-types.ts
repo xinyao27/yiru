@@ -210,7 +210,7 @@ export type ParsedAgentStatusPayload = Omit<AgentStatusPayload, 'prompt'> & { pr
 
 /**
  * Wire shape for agent-status IPC. Both the push channel `agentStatus:set` and the
- * pull channel `agentStatus:getSnapshot` produce this shape so renderer call sites
+ * pull procedure `agentStatus.getSnapshot` produces this shape so renderer call sites
  * can apply entries through a single `setAgentStatus` path. Flattens the parsed
  * payload onto pane identity + timing because the renderer's slice expects them
  * destructured.

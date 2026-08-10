@@ -1,5 +1,5 @@
 import { shouldShutdownSimulatorForPaneUnmountFromTabs } from '~renderer/lib/simulator-tab-shutdown'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 
 type SimulatorTabReference = {
@@ -25,7 +25,7 @@ function getUnifiedTabsForWorktree(worktreeId: string): SimulatorTabReference[] 
 }
 
 function shutdownManagedSimulator(worktreeId: string): Promise<unknown> {
-  return callRuntimeRpc({ kind: 'local' }, 'emulator.shutdown', {
+  return callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.shutdown, {
     worktree: worktreeId,
     managedOnly: true
   })

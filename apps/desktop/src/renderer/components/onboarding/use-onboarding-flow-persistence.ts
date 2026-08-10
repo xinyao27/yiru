@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { track } from '~renderer/lib/telemetry'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '~shared/constants'
 import type { EventProps } from '~shared/telemetry-events'
@@ -12,7 +13,7 @@ export async function persistStep(
   stepNumber: number,
   updates: Partial<OnboardingState> = {}
 ): Promise<OnboardingState> {
-  return window.api.onboarding.update({
+  return rendererHostClient.onboarding.update({
     flowVersion: ONBOARDING_FLOW_VERSION,
     lastCompletedStep: Math.max(stepNumber, -1),
     ...updates
@@ -98,7 +99,7 @@ export function useCloseWith({
         // Why: main-process updateOnboarding already merges with current state,
         // so spreading the local (potentially stale) onboarding.checklist would
         // overwrite concurrent updates.
-        nextState = await window.api.onboarding.update({
+        nextState = await rendererHostClient.onboarding.update({
           flowVersion: ONBOARDING_FLOW_VERSION,
           closedAt: Date.now(),
           outcome,
@@ -146,7 +147,7 @@ export function useCloseWith({
         // Why: closeWith updates parent state synchronously from this hook's
         // perspective, but the modal unmounts on the next React commit.
         window.setTimeout(() => {
-          void window.api.starNag.onboardingCompleted()
+          void rendererHostClient.starNag.onboardingCompleted()
         }, 0)
       } else if (outcome === 'dismissed') {
         trackOnboardingDismissed(lastStepReached, dismissedExtras)

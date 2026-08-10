@@ -63,6 +63,7 @@ function validateTarget(
   }
   if (
     result.contentType !== 'terminal' &&
+    result.contentType !== 'git-graph' &&
     !state.openFiles.some(
       (file) => file.id === result.entityId && file.worktreeId === result.worktreeId
     )
@@ -107,6 +108,11 @@ export function activateWorkspaceTabPaletteResult(
     state.setActiveTab(result.entityId)
     state.setActiveTabType('terminal')
     focusTerminalTabSurface(result.entityId)
+    return { status: 'activated' }
+  }
+
+  if (result.contentType === 'git-graph') {
+    state.setActiveTabType('editor')
     return { status: 'activated' }
   }
 

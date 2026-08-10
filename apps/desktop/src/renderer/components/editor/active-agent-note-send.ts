@@ -5,8 +5,8 @@ import {
   sanitizeTerminalPasteText
 } from '~renderer/lib/terminal-bracketed-paste'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
-import type { RuntimeTerminalSend, RuntimeTerminalWait } from '~shared/runtime-types'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 
 import type { ActiveAgentNotesSendResult } from './active-agent-note-send-result'
 import {
@@ -92,9 +92,9 @@ export async function sendNotesToActiveAgentSession({
   }
 
   try {
-    const { wait } = await callRuntimeRpc<{ wait: RuntimeTerminalWait }>(
+    const { wait } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.wait',
+      (client) => client.terminal.wait,
       { terminal: terminal.handle, for: 'tui-idle', timeoutMs: effectiveTimeoutMs },
       { timeoutMs: effectiveTimeoutMs + 5000 }
     )
@@ -142,9 +142,9 @@ async function sendPromptWithLegacyCombinedSend(
   prompt: string
 ): Promise<ActiveAgentNotesSendResult> {
   try {
-    const { send } = await callRuntimeRpc<{ send: RuntimeTerminalSend }>(
+    const { send } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.send',
+      (client) => client.terminal.send,
       {
         terminal: terminalHandle,
         text: prompt,
@@ -180,9 +180,9 @@ async function sendPromptWithGuardedPasteAndEnter(
 
   const pastePayload = `${BRACKETED_PASTE_START}${sanitizeTerminalPasteText(prompt)}${BRACKETED_PASTE_END}`
   try {
-    const { send } = await callRuntimeRpc<{ send: RuntimeTerminalSend }>(
+    const { send } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.send',
+      (client) => client.terminal.send,
       {
         terminal: terminalHandle,
         text: pastePayload,
@@ -227,9 +227,9 @@ async function sendPromptWithGuardedPasteAndEnter(
   }
 
   try {
-    const { send } = await callRuntimeRpc<{ send: RuntimeTerminalSend }>(
+    const { send } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.send',
+      (client) => client.terminal.send,
       {
         terminal: terminalHandle,
         enter: true,

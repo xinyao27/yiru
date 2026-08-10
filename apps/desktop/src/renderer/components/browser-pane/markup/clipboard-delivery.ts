@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { MarkupComposeResult } from './screenshot-compose'
 
@@ -10,7 +11,7 @@ import type { MarkupComposeResult } from './screenshot-compose'
 // This reuses proven, environment-agnostic machinery instead of re-plumbing a
 // direct send.
 export async function deliverMarkupToClipboard(result: MarkupComposeResult): Promise<void> {
-  await window.api.ui.writeClipboardImage(result.dataUrl)
+  await shellClient.ui.writeClipboardImage(result.dataUrl)
   const isMac = navigator.userAgent.includes('Mac')
   toast.success(
     translate(

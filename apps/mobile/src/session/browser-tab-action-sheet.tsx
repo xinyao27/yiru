@@ -11,7 +11,7 @@ import type { MobileSessionTab } from './screen-state'
 import { getMobileSessionTabTitle } from './terminal/tab-agent'
 
 type BrowserTab = Extract<MobileSessionTab, { type: 'browser' }>
-export type MobileBrowserNavigationMethod = 'browser.back' | 'browser.forward' | 'browser.reload'
+export type MobileBrowserNavigationMethod = 'back' | 'forward' | 'reload'
 
 /** Keeps browser-tab navigation actions out of the session route while preserving
  *  the target captured at the moment each drawer action is pressed. */
@@ -41,7 +41,7 @@ export function MobileBrowserTabActionSheet(props: {
                 onPress: () => {
                   const current = target
                   if (current) {
-                    onNavigate(current, 'browser.back')
+                    onNavigate(current, 'back')
                   }
                 }
               }
@@ -57,7 +57,7 @@ export function MobileBrowserTabActionSheet(props: {
                 onPress: () => {
                   const current = target
                   if (current) {
-                    onNavigate(current, 'browser.forward')
+                    onNavigate(current, 'forward')
                   }
                 }
               }
@@ -71,7 +71,7 @@ export function MobileBrowserTabActionSheet(props: {
           onPress: () => {
             const current = target
             if (current) {
-              onNavigate(current, 'browser.reload')
+              onNavigate(current, 'reload')
             }
           }
         },

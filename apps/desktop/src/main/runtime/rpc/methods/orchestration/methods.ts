@@ -1,27 +1,11 @@
 import type { RpcMethod } from '~main/runtime/rpc/core'
 
-import { ORCHESTRATION_ASK_METHODS } from './ask'
-import { ORCHESTRATION_DISPATCH_METHODS } from './dispatch'
 import { ORCHESTRATION_FEDERATION_METHODS } from './federation/methods'
-import { ORCHESTRATION_GATE_METHODS } from './gates'
-import { ORCHESTRATION_MESSAGE_CHECK_METHODS } from './message-check'
-import { ORCHESTRATION_MESSAGE_HISTORY_METHODS } from './message-history'
-import { ORCHESTRATION_MESSAGE_SEND_METHODS } from './message-send'
-import { ORCHESTRATION_RESET_METHODS } from './reset'
-import { ORCHESTRATION_RUN_METHODS } from './runs'
-import { ORCHESTRATION_TASK_METHODS } from './tasks'
-import { ORCHESTRATION_WORKER_METHODS } from './worker/methods'
 
-export const ORCHESTRATION_METHODS: RpcMethod[] = [
-  ...ORCHESTRATION_RUN_METHODS,
-  ...ORCHESTRATION_WORKER_METHODS,
-  ...ORCHESTRATION_FEDERATION_METHODS,
-  ...ORCHESTRATION_MESSAGE_SEND_METHODS,
-  ...ORCHESTRATION_MESSAGE_CHECK_METHODS,
-  ...ORCHESTRATION_MESSAGE_HISTORY_METHODS,
-  ...ORCHESTRATION_TASK_METHODS,
-  ...ORCHESTRATION_DISPATCH_METHODS,
-  ...ORCHESTRATION_ASK_METHODS,
-  ...ORCHESTRATION_GATE_METHODS,
-  ...ORCHESTRATION_RESET_METHODS
-]
+// Why: this list is now empty (slice 84 retired the last 8 `federation*`
+// leaves) — every orchestration leaf is wired natively in
+// `runtime/rpc/orpc/router-direct/orchestration.ts` with no legacy
+// registration left (see that file's own note). Kept as a real aggregator
+// rather than deleted so a future structurally-blocked leaf (mirroring the
+// non-orchestration Phase 6 D-stage exceptions) has an obvious place to land.
+export const ORCHESTRATION_METHODS: RpcMethod[] = [...ORCHESTRATION_FEDERATION_METHODS]

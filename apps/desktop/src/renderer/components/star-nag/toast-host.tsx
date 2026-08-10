@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 type StarNagMode = 'gh' | 'web'
 type StarNagToastStatus = 'idle' | 'busy' | 'starred' | 'opened'
@@ -38,7 +40,7 @@ function StarNagToast({
       return
     }
     markResolved()
-    void window.api.starNag.later()
+    void rendererHostClient.starNag.later()
     toast.dismiss(id)
   }
 
@@ -50,8 +52,8 @@ function StarNagToast({
     setDismissSuppressed(true)
     if (mode === 'web') {
       try {
-        await window.api.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
-        await window.api.starNag.openWeb()
+        await shellClient.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
+        await rendererHostClient.starNag.openWeb()
         markResolved()
         setStatus('opened')
       } catch {
@@ -62,7 +64,7 @@ function StarNagToast({
     }
     let ok = false
     try {
-      ok = await window.api.starNag.starYiru()
+      ok = await rendererHostClient.starNag.starYiru()
     } catch {
       ok = false
     }
@@ -181,7 +183,7 @@ export function StarNagToastHost(): null {
       activeToastResolvedRef.current?.()
       toast.dismiss(activeToastIdRef.current)
     }
-    const unsubscribeShow = window.api.starNag.onShow((payload) => {
+    const unsubscribeShow = rendererHostClient.starNag.onShow((payload) => {
       if (payload?.surface !== 'toast') {
         return
       }
@@ -215,7 +217,7 @@ export function StarNagToastHost(): null {
               activeToastResolvedRef.current = null
             }
             if (!resolved && !dismissSuppressed) {
-              void window.api.starNag.dismiss()
+              void rendererHostClient.starNag.dismiss()
             }
           },
           onAutoClose: () => {
@@ -228,7 +230,7 @@ export function StarNagToastHost(): null {
       )
       activeToastIdRef.current = id
     })
-    const unsubscribeHide = window.api.starNag.onHide(dismissActiveToast)
+    const unsubscribeHide = rendererHostClient.starNag.onHide(dismissActiveToast)
     return () => {
       unsubscribeShow()
       unsubscribeHide()

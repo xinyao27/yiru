@@ -1,34 +1,4 @@
-// Why: keeping the base prompt and assembly here (in shared) lets both the
-// renderer (preview/tests) and main (actual generation) reach the exact same
-// string without duplicating the wording.
-
-const COMMIT_MESSAGE_BASE_PROMPT = `You are generating a single git commit message.
-Read the staged diff below and produce the message.
-
-Rules:
-- First line: imperative mood, <= 72 chars, no trailing period.
-- Optional body: blank line, then wrapped at 72 chars explaining WHY.
-- Output ONLY the commit message - no preamble, no code fences, no quotes.
-- Do not include "Co-authored-by" trailers - Yiru appends them after generation when configured.
-
-Staged diff:
-\`\`\`diff
-{{DIFF}}
-\`\`\`
-`
-
 export { cleanGeneratedCommitMessage, excerptAgentFailureOutput } from './agent-output'
-
-/** Builds the final prompt sent to the agent. The custom suffix is appended verbatim
- *  when non-empty so the user can override style (Conventional Commits, gitmoji, …). */
-export function buildCommitPrompt(diff: string, customSuffix: string): string {
-  const base = COMMIT_MESSAGE_BASE_PROMPT.replace('{{DIFF}}', diff)
-  const trimmedSuffix = customSuffix.trim()
-  if (!trimmedSuffix) {
-    return base
-  }
-  return `${base}\n\nAdditional user prompt:\n${trimmedSuffix}`
-}
 
 export const STAGED_DIFF_BYTE_BUDGET = 200_000
 

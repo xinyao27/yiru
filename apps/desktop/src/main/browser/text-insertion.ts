@@ -1,6 +1,4 @@
-import { measureClipboardTextByteLength, yieldToEventLoop } from '@yiru/workbench-model/ui'
-
-import type { CdpCommandSender } from './snapshot-engine'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
 
 export const BROWSER_TEXT_INSERT_CHUNK_BYTES = 64 * 1024
 
@@ -15,13 +13,6 @@ function getUtf8ByteLengthForCodePoint(codePoint: number): number {
     return 3
   }
   return 4
-}
-
-export function splitBrowserTextInsertionChunks(
-  text: string,
-  maxChunkBytes = BROWSER_TEXT_INSERT_CHUNK_BYTES
-): string[] {
-  return [...iterateBrowserTextInsertionChunks(text, maxChunkBytes)]
 }
 
 export function* iterateBrowserTextInsertionChunks(
@@ -56,23 +47,5 @@ export function* iterateBrowserTextInsertionChunks(
   }
   if (currentStart < text.length) {
     yield text.slice(currentStart)
-  }
-}
-
-export async function insertTextThroughCdp(
-  sender: CdpCommandSender,
-  text: string,
-  options?: { yieldBetweenChunks?: boolean; maxChunkBytes?: number }
-): Promise<void> {
-  const chunks = iterateBrowserTextInsertionChunks(text, options?.maxChunkBytes)
-  let chunk = chunks.next()
-  while (!chunk.done) {
-    await sender('Input.insertText', { text: chunk.value })
-    // Why: browser automation text can be paste-sized; yielding keeps the main
-    // process responsive between bounded CDP payloads.
-    chunk = chunks.next()
-    if (options?.yieldBetweenChunks !== false && !chunk.done) {
-      await yieldToEventLoop()
-    }
   }
 }

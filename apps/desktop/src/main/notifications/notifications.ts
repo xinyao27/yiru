@@ -1,15 +1,17 @@
 import { readFile, stat } from 'node:fs/promises'
 import { extname, isAbsolute, normalize } from 'node:path'
 
+import type {
+  ShellServicesNotificationsDismissOutput,
+  ShellServicesNotificationsDisplayInput,
+  ShellServicesNotificationsDisplayOutput
+} from '@yiru/runtime-protocol/contract'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: notification IPC keeps permission, dispatch, custom sound asset, and sound-loading handlers colocated so renderer/main contracts stay auditable. */
+/* eslint-disable max-lines -- Why: notification IPC keeps permission, native display/dismiss, custom sound asset, and sound-loading handlers colocated so renderer/main contracts stay auditable. */
 import { app, BrowserWindow, Notification, ipcMain, shell } from 'electron'
 import { parsePaneKey } from '~shared/stable-pane-id'
 import type {
   NotificationDeliveryProbeResult,
-  NotificationDispatchRequest,
-  NotificationDispatchResult,
-  NotificationDismissResult,
   NotificationPermissionStatusResult,
   NotificationSettings,
   NotificationSoundDataResult
@@ -25,14 +27,11 @@ import sonarSoundPath from '../../../resources/notification-sounds/sonar.mp3?ass
 import thumpSoundPath from '../../../resources/notification-sounds/thump.mp3?asset'
 import twoToneSoundPath from '../../../resources/notification-sounds/two-tone.mp3?asset'
 import type { Store } from '../persistence'
-import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import { setTrayAttention } from '../tray/system-tray'
-import { isMainWindowVisible } from '../window/main-window-visibility'
+import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
+import { dispatchShellUICommand } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import { readNotificationAuthorizationStatus } from './notification-authorization-status'
-import { buildNotificationOptions } from './notification-options'
+import { getEffectiveNotificationSoundId } from './notification-options'
 
-const NOTIFICATION_COOLDOWN_MS = 5000
-const MAX_RECENT_NOTIFICATION_KEYS = 50
 const NOTIFICATION_DISPLAY_CONFIRMATION_TIMEOUT_MS = 2500
 const NOTIFICATION_RELEASE_FALLBACK_MS = 5 * 60 * 1000
 const MAX_NOTIFICATION_SOUND_BYTES = 10 * 1024 * 1024
@@ -58,8 +57,6 @@ const BUILT_IN_NOTIFICATION_SOUNDS: ReadonlyMap<string, string> = new Map([
   ['clack', clackSoundPath],
   ['beep', beepSoundPath]
 ])
-type NotificationSoundId = NotificationSettings['customSoundId']
-
 // Why: Electron Notification objects are normal JS objects — if the only
 // reference is a local variable inside the ipcMain handler, the GC can
 // collect them (and their click handlers) before the user interacts with
@@ -222,10 +219,6 @@ function openNotificationSystemSettings(): void {
   }
 }
 
-function getEffectiveNotificationSoundId(settings: NotificationSettings): NotificationSoundId {
-  return settings.customSoundId ?? (settings.customSoundPath ? 'custom' : 'system')
-}
-
 function getSelectedNotificationSoundPath(settings: NotificationSettings): {
   path: string | null
   reason?: 'missing-path' | 'invalid-path' | 'unsupported-type'
@@ -294,44 +287,7 @@ function logNativeNotificationFailure(context: string, error?: string): void {
   )
 }
 
-function pruneRecentNotifications(recentNotifications: Map<string, number>, now: number): void {
-  if (recentNotifications.size <= MAX_RECENT_NOTIFICATION_KEYS) {
-    return
-  }
-
-  for (const [key, ts] of recentNotifications) {
-    if (now - ts >= NOTIFICATION_COOLDOWN_MS) {
-      recentNotifications.delete(key)
-    }
-  }
-
-  while (recentNotifications.size > MAX_RECENT_NOTIFICATION_KEYS) {
-    const oldest = recentNotifications.keys().next()
-    if (oldest.done) {
-      break
-    }
-    recentNotifications.delete(oldest.value)
-  }
-}
-
-function reserveNotificationCooldown(
-  recentNotifications: Map<string, number>,
-  dedupeKey: string,
-  now: number
-): boolean {
-  const lastSentAt = recentNotifications.get(dedupeKey) ?? 0
-  if (now - lastSentAt < NOTIFICATION_COOLDOWN_MS) {
-    return false
-  }
-  recentNotifications.delete(dedupeKey)
-  recentNotifications.set(dedupeKey, now)
-  pruneRecentNotifications(recentNotifications, now)
-  return true
-}
-
-export function registerNotificationHandlers(store: Store, runtime?: YiruRuntimeService): void {
-  const recentDesktopNotifications = new Map<string, number>()
-  const recentMobileNotifications = new Map<string, number>()
+export function registerNotificationHandlers(store: Store): void {
   // Why: handler registration marks a fresh session — permission evidence
   // from a previous registration must not leak into the new one.
   lastObservedDeliveryOutcome = null
@@ -406,97 +362,49 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
     }
   )
 
-  ipcMain.removeHandler('notifications:dismiss')
-  ipcMain.handle('notifications:dismiss', (_event, ids: string[]): NotificationDismissResult => {
-    const uniqueIds = Array.from(
-      new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0))
-    )
-    let dismissed = 0
-    for (const id of uniqueIds) {
-      const entry = activeNotificationsById.get(id)
-      if (entry) {
-        entry.notification.close()
-        entry.release()
-        dismissed += 1
-      }
-      runtime?.mobileNotifications.dismiss(id)
-    }
-    return { dismissed }
-  })
-
-  ipcMain.removeHandler('notifications:dispatch')
+  ipcMain.removeHandler('notifications:dismissNative')
   ipcMain.handle(
-    'notifications:dispatch',
+    'notifications:dismissNative',
+    (_event, notificationIds: string[]): ShellServicesNotificationsDismissOutput => {
+      const uniqueIds = Array.from(
+        new Set(
+          notificationIds.filter((id): id is string => typeof id === 'string' && id.length > 0)
+        )
+      )
+      let dismissed = 0
+      for (const id of uniqueIds) {
+        const entry = activeNotificationsById.get(id)
+        if (entry) {
+          entry.notification.close()
+          entry.release()
+          dismissed += 1
+        }
+      }
+      return { dismissed }
+    }
+  )
+
+  // Why: Phase 5 slice S3 — this is the shell's implementation of the
+  // shellServices.notifications.display reverse procedure, reached via
+  // shell-services-handler.ts. Settings/throttle/dedup judgment (job1) and the
+  // mobile replay stream (job2) already happened on the runtime side
+  // (main/runtime/rpc/methods/notifications.ts) before this was ever called —
+  // this handler owns only what's genuinely shell-local: window focus,
+  // Notification support/authorization, and the activeNotificationsById
+  // handle table.
+  ipcMain.removeHandler('notifications:displayNative')
+  ipcMain.handle(
+    'notifications:displayNative',
     (
       _event,
-      args: NotificationDispatchRequest
-    ): NotificationDispatchResult | Promise<NotificationDispatchResult> => {
-      // Why: a terminal bell or agent completion that arrives while the window
-      // is minimized/hidden lights the tray attention dot — a passive cue that
-      // clears on window show/restore (see index.ts). Placed before the
-      // focus-suppression, cooldown, and enabled gates below so those do not
-      // hold back the dot. It rides the notification dispatch, so it follows the
-      // renderer's per-source decision to notify: bells always reach here, while
-      // an agent completion is suppressed upstream when its notification is
-      // disabled. The status item exists on Windows and macOS, so
-      // setTrayAttention lights its attention dot there and no-ops on Linux.
-      if (args.source === 'agent-task-complete' || args.source === 'terminal-bell') {
-        const activeWindow = BrowserWindow.getAllWindows().find((win) => !win.isDestroyed()) ?? null
-        if (!isMainWindowVisible(activeWindow)) {
-          setTrayAttention(true)
-        }
-      }
-
-      const settings = store.getSettings().notifications
-      if (!settings.enabled) {
-        return { delivered: false, reason: 'disabled' }
-      }
-
-      if (
-        (args.source === 'agent-task-complete' && !settings.agentTaskComplete) ||
-        (args.source === 'terminal-bell' && !settings.terminalBell)
-      ) {
-        return { delivered: false, reason: 'source-disabled' }
-      }
-
-      const notificationOptions = buildNotificationOptions(args)
-
-      // Why: desktop focus only means this computer has the worktree visible;
-      // the paired phone may be locked or elsewhere and still needs the alert.
-      if (runtime && args.source !== 'test') {
-        const dedupeKey = args.worktreeId ?? args.worktreeLabel ?? 'global'
-        if (reserveNotificationCooldown(recentMobileNotifications, dedupeKey, Date.now())) {
-          runtime.mobileNotifications.dispatch({
-            type: 'notification',
-            source: args.source,
-            title: notificationOptions.title,
-            body: notificationOptions.body,
-            worktreeId: args.worktreeId,
-            ...(args.notificationId ? { notificationId: args.notificationId } : {})
-          })
-        }
-      }
-
+      args: ShellServicesNotificationsDisplayInput
+    ):
+      | ShellServicesNotificationsDisplayOutput
+      | Promise<ShellServicesNotificationsDisplayOutput> => {
       const browserWindow =
         BrowserWindow.getAllWindows().find((window) => !window.isDestroyed()) ?? null
-      if (
-        settings.suppressWhenFocused &&
-        args.isActiveWorktree &&
-        browserWindow &&
-        browserWindow.isFocused()
-      ) {
+      if (args.suppressWhenFocused && browserWindow && browserWindow.isFocused()) {
         return { delivered: false, reason: 'suppressed-focus' }
-      }
-
-      // Why: the Settings test button is an explicit user action, often
-      // clicked repeatedly while tuning sounds, so it must bypass burst dedupe.
-      if (args.source !== 'test') {
-        // Dedupe by worktree, not by source — an agent finishing and a terminal bell
-        // often fire within the same data chunk so only the first one should surface.
-        const dedupeKey = args.worktreeId ?? args.worktreeLabel ?? 'global'
-        if (!reserveNotificationCooldown(recentDesktopNotifications, dedupeKey, Date.now())) {
-          return { delivered: false, reason: 'cooldown' }
-        }
       }
 
       if (!Notification.isSupported()) {
@@ -504,9 +412,15 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
       }
 
       function deliverNativeNotification():
-        | NotificationDispatchResult
-        | Promise<NotificationDispatchResult> {
-        if (getEffectiveNotificationSoundId(settings) !== 'system') {
+        | ShellServicesNotificationsDisplayOutput
+        | Promise<ShellServicesNotificationsDisplayOutput> {
+        const notificationOptions: {
+          title: string
+          body: string
+          silent?: boolean
+          sound?: string
+        } = { title: args.title, body: args.body }
+        if (!args.useSystemSound) {
           notificationOptions.silent = true
         } else if (process.platform === 'darwin') {
           // Why: macOS treats an unset notification sound as silent. When Yiru is
@@ -553,7 +467,7 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
           // Why: Electron 42's macOS UNNotification backend reports unsigned
           // apps and native delivery errors here; release immediately instead
           // of retaining a dead notification until the fallback timer.
-          logNativeNotificationFailure(args.source, error)
+          logNativeNotificationFailure(args.source ?? 'notification', error)
           // A definitive rejection — feeds the permission card's evidence.
           lastObservedDeliveryOutcome = 'failed'
           release()
@@ -568,8 +482,9 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
         // separator is missing we cannot reliably extract a repoId, so skip
         // the click-to-navigate binding — the notification still fires but
         // clicking it will not attempt to switch to an unknown worktree.
-        if (args.worktreeId && args.worktreeId.includes('::')) {
-          const repoId = getRepoIdFromWorktreeId(args.worktreeId)
+        const notificationWorktreeId = args.worktreeId
+        if (notificationWorktreeId && notificationWorktreeId.includes('::')) {
+          const repoId = getRepoIdFromWorktreeId(notificationWorktreeId)
           clickHandler = () => {
             release()
             const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
@@ -583,15 +498,18 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
               win.restore()
             }
             win.focus()
-            win.webContents.send('ui:activateWorktree', {
+            const shellConnectionId = electronShellServicesConnectionId(win.webContents.id)
+            dispatchShellUICommand(shellConnectionId, {
+              type: 'activateWorktree',
               repoId,
-              worktreeId: args.worktreeId
+              worktreeId: notificationWorktreeId
             })
             const paneTarget = args.paneKey ? parsePaneKey(args.paneKey) : null
             if (paneTarget) {
-              win.webContents.send('ui:focusTerminal', {
+              dispatchShellUICommand(shellConnectionId, {
+                type: 'focusTerminal',
                 tabId: paneTarget.tabId,
-                worktreeId: args.worktreeId,
+                worktreeId: notificationWorktreeId,
                 leafId: paneTarget.leafId,
                 ackPaneKeyOnSuccess: args.paneKey,
                 flashFocusedPane: true,
@@ -627,9 +545,10 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
       // Why: macOS silently swallows accepted notifications while permission
       // is denied or the permission dialog is unanswered (verified on macOS
       // 26). Skip the doomed native notification and tell the caller, so the
-      // renderer can surface an in-app fallback pointing at System Settings.
-      // The mobile dispatch above is unaffected — paired devices have their
-      // own notification channel.
+      // runtime can surface `blocked-by-system` and the renderer its in-app
+      // fallback pointing at System Settings. The mobile push (job2) already
+      // happened on the runtime side before this was called — paired devices
+      // have their own notification channel, unaffected by this OS-level gate.
       return readNotificationAuthorizationStatus().then((authorization) => {
         if (authorization === 'denied' || authorization === 'not-determined') {
           lastObservedDeliveryOutcome = 'failed'

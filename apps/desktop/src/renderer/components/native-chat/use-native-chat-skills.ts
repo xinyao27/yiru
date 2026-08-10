@@ -2,7 +2,7 @@ import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { emitNativeChatSkillDiscovery } from '~renderer/components/native-chat/telemetry'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 import { getNativeChatAgentProfile } from '~shared/native-chat/agent-profiles'
 import { skillPlacements, type DiscoveredSkill, type SkillDiscoveryResult } from '~shared/skills'
@@ -196,9 +196,9 @@ function getOrStartDiscovery(
   // Why: the local runtime.call branch ignores timeoutMs, so the renderer must
   // enforce the design's scan timeout itself or a stalled local scan loads forever.
   const request = withDiscoveryTimeout(
-    callRuntimeRpc<SkillDiscoveryResult>(
+    callRuntimeOrpc(
       context.runtimeTarget,
-      'skills.discover',
+      (client) => client.skills.discover,
       context.discoveryTarget,
       {
         timeoutMs: DISCOVERY_TIMEOUT_MS
@@ -228,8 +228,4 @@ function withDiscoveryTimeout<T>(promise: Promise<T>, timeoutMs: number): Promis
       }
     )
   })
-}
-
-export function resetNativeChatSkillDiscoveryCacheForTests(): void {
-  inFlightDiscovery.clear()
 }

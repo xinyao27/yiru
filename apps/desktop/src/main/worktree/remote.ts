@@ -6,7 +6,6 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 
-import type { BrowserWindow } from 'electron'
 import { getProjectHostSetupWorktreeMeta } from '~shared/project-host-setup-projection'
 import { TUI_AGENT_CONFIG, isTuiAgent } from '~shared/tui-agent/config'
 import type {
@@ -44,7 +43,7 @@ import type { RemoteFetchResult, RemoteTrackingBase } from '../runtime/yiru-runt
 import type { ForgeProviderId } from '../source-control/forge-provider'
 import { getHostedReviewForBranch } from '../source-control/hosted-review'
 import { resolveWorktreeCreateBase } from '../worktree-create-base'
-import { runWorktreeChangeInvalidators } from './change-invalidators'
+import { publishWorktreeHeadIdentityEvent } from './head-identity-events'
 import { formatWorktreeIncludeCopyWarning } from './include-copy-budget'
 import { resolveWorktreeIncludePaths } from './include-file'
 
@@ -52,6 +51,7 @@ type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
   automationProvenance?: AutomationWorkspaceProvenance
 }
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import { publishHostProgressEvent } from '~main/runtime/host-progress-events'
 import type { BranchPrefixSettings } from '~shared/branch-prefix'
 import { createSequencedSetupAgentCommands } from '~shared/setup/agent-sequencing'
 import {
@@ -633,37 +633,23 @@ export async function configureCreatedWorktreePushTarget(
   )
 }
 
-export function notifyWorktreesChanged(mainWindow: BrowserWindow, repoId: string): void {
-  // Why: invalidate detected-worktree caches before renderer observers react,
-  // so follow-up listDetected reads post-change state.
-  runWorktreeChangeInvalidators(repoId)
-  if (!mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('worktrees:changed', { repoId })
-  }
+export function notifyWorktreesChanged(repoId: string): void {
+  publishWorktreeChangeEvent(repoId)
 }
 
-export function notifyWorktreeGitStatusMetadataChanged(
-  mainWindow: BrowserWindow,
-  repoId: string
-): void {
-  // Why: index churn is a Source Control freshness hint, not a worktree graph
-  // mutation; keep structural caches and runtime/mobile events untouched.
-  if (!mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('worktrees:gitStatusMetadataChanged', { repoId })
-  }
+export function notifyWorktreeGitStatusMetadataChanged(repoId: string): void {
+  // Why: the runtime client-event stream intentionally uses its coarser
+  // worktreesChanged signal for git-status refreshes.
+  publishWorktreeChangeEvent(repoId)
 }
 
 export function notifyWorktreeHeadIdentitiesChanged(
-  mainWindow: BrowserWindow,
   repoId: string,
   identities: WorktreeHeadIdentity[]
 ): void {
-  // Why: background worktrees have no active-scoped status refresh, so head
-  // moves detected from metadata files ride this targeted desktop event
-  // instead of re-entering the structural fanout or runtime/mobile events.
-  if (!mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('worktrees:headIdentitiesChanged', { repoId, identities })
-  }
+  // Why: this is host state, so headless and paired clients must receive it
+  // without a shell or BrowserWindow being present.
+  publishWorktreeHeadIdentityEvent(repoId, identities)
 }
 
 // Why: two-phase spinner. Main process fires `'fetching'` before waiting on
@@ -671,20 +657,18 @@ export function notifyWorktreeHeadIdentitiesChanged(
 // Renderer swaps its spinner label in response; fallback is the static
 // "Creating worktree..." label if no event arrives.
 export function emitCreateWorktreeProgress(
-  mainWindow: BrowserWindow,
   phase: 'fetching' | 'creating',
   creationId?: string
 ): void {
-  if (!mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('createWorktree:progress', { creationId, phase })
-  }
+  // Why: worktree creation can run without a shell, so progress belongs to the
+  // runtime stream rather than a BrowserWindow lifecycle.
+  publishHostProgressEvent({ type: 'worktreeCreateProgress', creationId, phase })
 }
 
 export async function createLocalWorktree(
   args: CreateWorktreeArgsWithSystemProvenance,
   repo: Repo,
   store: Store,
-  mainWindow: BrowserWindow,
   runtime?: YiruRuntimeService
 ): Promise<CreateWorktreeResult> {
   const timing = createWorktreeCreateTimingRecorder()
@@ -783,7 +767,7 @@ export async function createLocalWorktree(
       if (!hasRemoteTrackingBaseRef && hasLocalBaseRef) {
         remoteTrackingBase = null
       } else {
-        emitCreateWorktreeProgress(mainWindow, 'fetching', args.creationId)
+        emitCreateWorktreeProgress('fetching', args.creationId)
         remoteTrackingRefresh = {
           base: remoteTrackingBase,
           hadLocalBaseRef: hasRemoteTrackingBaseRef,
@@ -805,7 +789,7 @@ export async function createLocalWorktree(
         .fetchRemoteWithCache(repo.path, 'origin', ...localWorktreeGitOptionArgs)
         .then(() => undefined)
         .catch(() => undefined)
-      emitCreateWorktreeProgress(mainWindow, 'fetching', args.creationId)
+      emitCreateWorktreeProgress('fetching', args.creationId)
     }
   } else {
     if (
@@ -817,7 +801,7 @@ export async function createLocalWorktree(
       })
         .then(() => undefined)
         .catch(() => undefined)
-      emitCreateWorktreeProgress(mainWindow, 'fetching', args.creationId)
+      emitCreateWorktreeProgress('fetching', args.creationId)
     }
   }
   const workspaceRoot = computeWorkspaceRoot(repo.path, worktreePathSettings)
@@ -1034,7 +1018,7 @@ export async function createLocalWorktree(
       await legacyFetchPromise
     })
   }
-  emitCreateWorktreeProgress(mainWindow, 'creating', args.creationId)
+  emitCreateWorktreeProgress('creating', args.creationId)
 
   let preparedPushTarget: GitPushTarget | undefined
   if (args.pushTarget) {
@@ -1338,7 +1322,7 @@ export async function createLocalWorktree(
     })
   )
 
-  notifyWorktreesChanged(mainWindow, repo.id)
+  notifyWorktreesChanged(repo.id)
   return {
     worktree: { ...worktree, workspaceLineage },
     ...(workspaceLineage ? { workspaceLineage } : {}),
@@ -1361,3 +1345,4 @@ export async function createLocalWorktree(
     timing: timing.finish()
   }
 }
+import { publishWorktreeChangeEvent } from './change-events'

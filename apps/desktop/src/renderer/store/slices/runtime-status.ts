@@ -4,6 +4,7 @@ import {
   clearRuntimeCompatibilityCache,
   unwrapRuntimeRpcResult
 } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type { RuntimeStatus } from '~shared/runtime-types'
 
@@ -134,7 +135,7 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
 
   refreshRuntimeEnvironmentStatus: async (environmentId, timeoutMs = 10_000) => {
     try {
-      const response = await window.api.runtimeEnvironments.getStatus({
+      const response = await runtimeEnvironmentsClient.getStatus({
         selector: environmentId,
         timeoutMs
       })
@@ -155,7 +156,7 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
   hydrateRuntimeEnvironmentStatuses: async () => {
     let environments: PublicKnownRuntimeEnvironment[]
     try {
-      environments = await window.api.runtimeEnvironments.list()
+      environments = await runtimeEnvironmentsClient.list()
     } catch (err) {
       console.error('Failed to list runtime environments for status hydration:', err)
       return

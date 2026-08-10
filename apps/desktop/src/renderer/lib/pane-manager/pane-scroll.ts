@@ -196,58 +196,6 @@ export function resumePendingFitScrollRestoreAfterFit(terminal: Terminal): boole
   return pending.retryAfterFit()
 }
 
-export function restoreScrollStateAfterLayout(terminal: Terminal, state: ScrollState): void {
-  cancelDeferredScrollRestore(terminal)
-  restoreScrollStateNow(terminal, state)
-  if (typeof requestAnimationFrame !== 'function') {
-    releaseScrollStateMarker(state)
-    return
-  }
-
-  const pending = {
-    cancelled: false,
-    rafIds: [] as number[],
-    state,
-    timeoutIds: [] as ReturnType<typeof setTimeout>[]
-  }
-  const restore = (): void => {
-    if (!pending.cancelled) {
-      restoreScrollStateNow(terminal, state)
-    }
-  }
-  const cancelPendingRafs = (): void => {
-    pending.cancelled = true
-    if (typeof cancelAnimationFrame !== 'function') {
-      return
-    }
-    for (const rafId of pending.rafIds) {
-      cancelAnimationFrame(rafId)
-    }
-  }
-  const firstRaf = requestAnimationFrame(() => {
-    restore()
-    if (pending.cancelled) {
-      return
-    }
-    const secondRaf = requestAnimationFrame(restore)
-    pending.rafIds.push(secondRaf)
-  })
-  const timeoutId = setTimeout(() => {
-    if (!pending.cancelled) {
-      restoreScrollStateNow(terminal, state)
-    }
-    // Why: background tabs can throttle rAF past the timeout. Once the
-    // authoritative timeout restore has run, stale frame callbacks must not
-    // later rewind a user-initiated scroll or follow-output jump.
-    cancelPendingRafs()
-    releaseScrollStateMarker(state)
-    deferredScrollRestores.delete(terminal)
-  }, 80)
-  pending.rafIds.push(firstRaf)
-  pending.timeoutIds.push(timeoutId)
-  deferredScrollRestores.set(terminal, pending)
-}
-
 function restoreScrollStateNow(terminal: Terminal, state: ScrollState): ScrollRestoreResult {
   if (!terminal.element) {
     return 'retry'

@@ -302,9 +302,6 @@ export const getAgentCatalog = createLocalizedCatalog((): AgentCatalogEntry[] =>
   }
 ])
 
-// Why: tests and a few legacy call sites still import a catalog snapshot.
-export const AGENT_CATALOG: AgentCatalogEntry[] = getAgentCatalog()
-
 export function getAgentLabel(agent: TuiAgent): string {
   return getAgentCatalog().find((entry) => entry.id === agent)?.label ?? agent
 }

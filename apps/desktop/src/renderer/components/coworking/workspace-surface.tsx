@@ -23,6 +23,7 @@ import { WorkspacePaneFrame } from '~renderer/components/tab-group/workspace-pan
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import type {
   CoworkingSessionCatalogEntry,
@@ -107,7 +108,7 @@ function CoworkingWorkspaceSurfaceContent({
     }
     setRequesting(true)
     try {
-      await window.api.coworkingSharing.requestControl({
+      await coworkingSharingClient.requestControl({
         desktopRef: route.desktopRef,
         worktreeRef: route.worktreeRef
       })

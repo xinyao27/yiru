@@ -48,15 +48,6 @@ function candidateScore(row: ProcessTableRow & { depth: number }): number {
   return (row.stat.includes('+') ? 10_000 : 0) + row.depth
 }
 
-export async function resolveAgentForegroundProcess(
-  shellPid: number | null | undefined,
-  fallbackProcess: string | null,
-  options: AgentForegroundResolutionOptions = {}
-): Promise<string | null> {
-  return (await resolveAgentForegroundProcessWithAvailability(shellPid, fallbackProcess, options))
-    .processName
-}
-
 export async function resolveAgentForegroundProcessWithAvailability(
   shellPid: number | null | undefined,
   fallbackProcess: string | null,

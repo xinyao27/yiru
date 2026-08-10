@@ -68,14 +68,16 @@ function getWorkspaceExecutionHost(
     if (worktreeHost) {
       return worktreeHost.id
     }
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — only executionHostId can still make a repo non-local.
     const repo = getRepoForWorkspace(store, workspaceId)
-    if (repo?.executionHostId?.trim() || repo?.connectionId?.trim()) {
+    if (repo?.executionHostId?.trim()) {
       return getRepoExecutionHostId(repo)
     }
   }
 
   const activeRepo = activeRepoId ? store.getRepo(activeRepoId) : null
-  if (activeRepo?.executionHostId?.trim() || activeRepo?.connectionId?.trim()) {
+  if (activeRepo?.executionHostId?.trim()) {
     return getRepoExecutionHostId(activeRepo)
   }
   const environmentId = store.getSettings().activeRuntimeEnvironmentId?.trim()

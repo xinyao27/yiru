@@ -44,58 +44,6 @@ export function worktreePathComparisonKey(pathValue: string, platform = process.
   return `posix:${normalizePosixWorktreePathForComparison(pathValue, platform)}`
 }
 
-export function dedupeWorktreesByPath<T extends { path: string }>(
-  worktrees: readonly T[],
-  platform = process.platform
-): T[] {
-  // Why: large Git/relay listings should normalize each path once while still
-  // preserving the first row under the cross-platform equality contract above.
-  const unique: T[] = []
-  const posixAbsoluteKeys = new Set<string>()
-  const windowsKeys = new Set<string>()
-  const windowsPaths: string[] = []
-  const relativePaths: string[] = []
-
-  for (const worktree of worktrees) {
-    const pathValue = worktree.path
-    if (looksLikePosixAbsolutePath(pathValue)) {
-      const key = normalizePosixWorktreePathForComparison(pathValue, platform)
-      if (posixAbsoluteKeys.has(key)) {
-        continue
-      }
-      posixAbsoluteKeys.add(key)
-      unique.push(worktree)
-      continue
-    }
-
-    const windowsKey = normalizeWindowsWorktreePathForComparison(pathValue)
-    if (platform === 'win32' || isWindowsAbsolutePathLike(pathValue)) {
-      if (
-        windowsKeys.has(windowsKey) ||
-        relativePaths.some((existing) => areWorktreePathsEqual(existing, pathValue, platform))
-      ) {
-        continue
-      }
-      windowsKeys.add(windowsKey)
-      windowsPaths.push(pathValue)
-      unique.push(worktree)
-      continue
-    }
-
-    // Why: Git normally reports absolute paths. Retain pair-aware comparison
-    // only for malformed/legacy relative rows whose flavor depends on its peer.
-    if (
-      relativePaths.some((existing) => areWorktreePathsEqual(existing, pathValue, platform)) ||
-      windowsPaths.some((existing) => areWorktreePathsEqual(existing, pathValue, platform))
-    ) {
-      continue
-    }
-    relativePaths.push(pathValue)
-    unique.push(worktree)
-  }
-  return unique
-}
-
 function looksLikePosixAbsolutePath(pathValue: string): boolean {
   return pathValue.startsWith('/') && !pathValue.startsWith('//')
 }

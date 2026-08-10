@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { listRateLimitResumes } from '~renderer/runtime/rate-limit-resume-client'
 import type { RateLimitHit, RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
 import { isFinalRateLimitResumeStatus } from '~shared/rate-limit-resume/types'
 
@@ -60,7 +61,7 @@ export const createRateLimitResumeSlice: StateCreator<AppState, [], [], RateLimi
 
   loadRateLimitResumes: async () => {
     try {
-      const schedules = await window.api.rateLimitResume.list()
+      const schedules = await listRateLimitResumes()
       const live = schedules.filter((schedule) => !isFinalRateLimitResumeStatus(schedule.status))
       set({
         rateLimitResumeByPtyId: Object.fromEntries(

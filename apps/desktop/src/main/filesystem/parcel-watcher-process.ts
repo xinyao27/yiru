@@ -21,16 +21,9 @@ export type {
 } from './parcel-watcher-process-protocol'
 
 const sharedWatcherProcessSupervisor = new WatcherProcessSupervisor()
-// Why: the canary pauses during legitimate crawls, so production callers need
-// a separate liveness fuse once a child reports that it owns native setup.
-export const WATCHER_PROCESS_SUBSCRIBE_TIMEOUT_MS = 60_000
 // Why: healthy roots share one child; only fault quarantine scales to four,
 // containing a failed shard without paying that RSS cost during normal use.
 const runtimeWatcherProcessPool = new RuntimeWatcherProcessPool()
-
-export function createWatcherProcessSupervisor(): WatcherProcessSupervisor {
-  return new WatcherProcessSupervisor()
-}
 
 export function subscribeViaWatcherProcess(
   dir: string,
@@ -48,14 +41,6 @@ export function subscribeViaRuntimeWatcherProcess(
   hooks: WatcherProcessHooks = {}
 ): Promise<WatcherProcessSubscription> {
   return runtimeWatcherProcessPool.subscribe(dir, callback, opts, hooks)
-}
-
-/** Kill shared desktop and runtime watcher children at app/runtime shutdown. */
-export function disposeWatcherProcess(): void {
-  sharedWatcherProcessSupervisor.dispose()
-  // Why: the runtime pool owns independent children that otherwise outlive a
-  // shutdown sequence that does not immediately exit the main process.
-  runtimeWatcherProcessPool.dispose()
 }
 
 export function forgetRuntimeWatcherProcessRoot(rootPath: string): void {

@@ -34,6 +34,7 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
+import { createConnectionIdForFileSelector } from '~renderer/components/editor/connection-owner-resolution'
 
 // Why: this component is the only lazy() boundary (content.tsx's
 // `MarkdownPreview`) that mounts rehype-highlight's `.hljs-*` tree, the
@@ -42,7 +43,6 @@ import { toast } from 'sonner'
 import './markdown.css'
 import './markdown-review.css'
 import 'katex/dist/katex.min.css'
-import { createConnectionIdForFileSelector } from '~renderer/components/editor/connection-owner-resolution'
 import { isMarkdownComment } from '~renderer/components/editor/diff-comment-compat'
 import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
 import {
@@ -78,6 +78,7 @@ import { dirname } from '~renderer/lib/path'
 import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
 import { statRuntimePath } from '~renderer/runtime/file-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import type { DiffComment, MarkdownDocument, Worktree } from '~shared/types'
@@ -987,7 +988,7 @@ export default function MarkdownPreview({
       const copied = await copyMarkdownReviewNotesForAgent({
         notes: markdownReviewNotes,
         content: renderedContent,
-        writeClipboardText: window.api.ui.writeClipboardText
+        writeClipboardText: shellClient.ui.writeClipboardText
       })
       if (!copied || !reviewNotesCopyMountedRef.current) {
         return
@@ -1009,7 +1010,7 @@ export default function MarkdownPreview({
         const copied = await copyMarkdownReviewNotesForAgent({
           notes: [note],
           content: renderedContent,
-          writeClipboardText: window.api.ui.writeClipboardText
+          writeClipboardText: shellClient.ui.writeClipboardText
         })
         if (!copied || !reviewNotesCopyMountedRef.current) {
           return
@@ -1423,7 +1424,7 @@ export default function MarkdownPreview({
                 // Why: use the classifier's stripped absolutePath (no `:line:col`
                 // or `#L10` suffix) so the OS handler receives a clean file URI.
                 const cleanUri = absolutePathToFileUri(classified.absolutePath)
-                void window.api.shell.pathExists(classified.absolutePath).then((exists) => {
+                void shellClient.shell.pathExists(classified.absolutePath).then((exists) => {
                   if (!exists) {
                     toast.error(
                       translate(
@@ -1434,11 +1435,11 @@ export default function MarkdownPreview({
                     )
                     return
                   }
-                  void window.api.shell.openFileUri(cleanUri)
+                  void shellClient.shell.openFileUri(cleanUri)
                 })
                 return
               }
-              void window.api.shell.openFileUri(parsed.toString())
+              void shellClient.shell.openFileUri(parsed.toString())
             }
             return
           }
@@ -1528,7 +1529,7 @@ export default function MarkdownPreview({
               showLocalPathOpenBlockedToast()
               return
             }
-            void window.api.shell.openFileUri(target.toString())
+            void shellClient.shell.openFileUri(target.toString())
             return
           }
 

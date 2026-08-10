@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import type React from 'react'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { FileExplorerRowProjection } from './row-projection'
 import {
@@ -115,7 +116,7 @@ export function useFileExplorerSelection(
       ? rowProjectionRef.current.getRowsByPaths(selectedPaths)
       : []
     const actionNodes = selectedNodes.length > 0 ? selectedNodes : [node]
-    void window.api.ui.writeClipboardText(
+    void shellClient.ui.writeClipboardText(
       formatFileExplorerPathsForClipboard(actionNodes, pathKind)
     )
   }, [])

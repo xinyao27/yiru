@@ -1,4 +1,4 @@
-import type { PtyManagementSession } from '~preload/api-types'
+import type { TerminalManagementSession } from '@yiru/runtime-protocol/contract'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 
@@ -13,7 +13,7 @@ import {
 } from '../ui/dialog'
 
 type ManageSessionKillDialogProps = {
-  session: PtyManagementSession | null
+  session: TerminalManagementSession | null
   isBusy: boolean
   onCancel: () => void
   onConfirm: () => void

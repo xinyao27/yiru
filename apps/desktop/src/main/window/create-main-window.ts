@@ -46,6 +46,7 @@ import {
 } from '../crash-reporting/renderer-recovery-circuit-breaker'
 import { translateMain } from '../i18n/main-i18n'
 import type { Store } from '../persistence'
+import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
 import { resolveWindowCloseAction } from './close-decision'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
 import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from './ui'
@@ -533,7 +534,11 @@ export function createMainWindow(
     // the guest webContents. Waiting until renderer-driven registration leaves
     // a race where target=_blank or early redirects can bypass Yiru's intended
     // fallback behavior.
-    browserManager.attachGuestPolicies(guest)
+    browserManager.attachGuestPolicies(
+      guest,
+      null,
+      electronShellServicesConnectionId(mainWindow.webContents.id)
+    )
   })
 
   // Block ALL in-window navigations to prevent remote pages from inheriting

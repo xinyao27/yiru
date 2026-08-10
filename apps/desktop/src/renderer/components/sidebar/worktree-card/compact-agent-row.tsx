@@ -103,8 +103,9 @@ type CompactAgentRowProps = {
   childAgentCount?: number
   childAgentsExpanded?: boolean
   onToggleChildAgents?: (paneKey: string) => void
-  /** Omitted for subagent child rows, which have no store entry of their own
-   *  to dismiss — offering the X would be a silent no-op. */
+  /** Omitted for synthesized rows (subagent children, title-derived panes),
+   *  which have no store entry of their own to dismiss — offering the X would
+   *  be a silent no-op. See isDismissibleAgentRow. */
   onDismiss?: (paneKey: string) => void
 }
 

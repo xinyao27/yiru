@@ -1176,13 +1176,6 @@
     "count": 1
   },
   {
-    "filePath": "src/session/pr/base-picker.tsx",
-    "kind": "jsx-attribute:placeholder",
-    "text": "main",
-    "dynamic": false,
-    "count": 1
-  },
-  {
     "filePath": "src/session/pr/github-mutations.ts",
     "kind": "object-property:error",
     "text": "Failed to update title.",
@@ -2856,17 +2849,24 @@
     "count": 1
   },
   {
-    "filePath": "src/ui-lab/rpc-client.ts",
+    "filePath": "src/ui-lab/rpc-client-subscriptions.ts",
     "kind": "object-property:message",
     "text": "Fixture transcript is unavailable.",
     "dynamic": false,
     "count": 1
   },
   {
-    "filePath": "src/ui-lab/rpc-client.ts",
+    "filePath": "src/ui-lab/rpc-client-subscriptions.ts",
     "kind": "object-property:title",
     "text": "Yiru UI Lab",
     "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/ui-lab/rpc-client-subscriptions.ts",
+    "kind": "object-property:message",
+    "text": "UI Lab does not mock subscription",
+    "dynamic": true,
     "count": 1
   },
   {

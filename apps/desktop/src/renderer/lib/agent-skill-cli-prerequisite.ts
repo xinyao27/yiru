@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { installCliCommand, readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 
 type EnsureYiruCliAvailableOptions = {
@@ -23,7 +24,7 @@ export async function ensureYiruCliAvailableForAgentSkillTerminal({
   registrationPromptDelayMs = 700
 }: EnsureYiruCliAvailableOptions = {}): Promise<CliInstallStatus | null> {
   try {
-    const status = await window.api.cli.getInstallStatus()
+    const status = await readCliInstallStatus()
     onStatusChange?.(status)
 
     if (!status.supported) {
@@ -35,7 +36,7 @@ export async function ensureYiruCliAvailableForAgentSkillTerminal({
       // Why: macOS may immediately show a native authorization prompt, so the
       // user needs app-level context before that OS dialog appears.
       await showYiruCliRegistrationPromptToast(registrationPromptDelayMs)
-      const next = await window.api.cli.install()
+      const next = await installCliCommand()
       onStatusChange?.(next)
       showCliPrerequisiteWarning(next)
       return next

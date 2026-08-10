@@ -527,6 +527,20 @@ export class AgentHookServer {
   // exactly match the last successful disk write. Cheap protection against
   // re-firing trailing timers when nothing changed.
   private lastWrittenJson: string | null = null
+  private forwardedPtyEnv: Record<string, string> = {}
+  private statusHydrated = false
+
+  initializeForwardedHost(options: {
+    env: string
+    userDataPath: string
+    endpointNamespace?: string
+  }): void {
+    this.configureHostState(options)
+  }
+
+  setForwardedPtyEnv(env: Record<string, string>): void {
+    this.forwardedPtyEnv = { ...env }
+  }
 
   setListener(listener: ((payload: EnrichedAgentHookEventPayload) => void) | null): void {
     this.onAgentStatus = listener
@@ -561,7 +575,7 @@ export class AgentHookServer {
   }
 
   /** Snapshot of the current cached statuses, in the IPC-shaped form the
-   *  renderer consumes. Used by the `agentStatus:getSnapshot` IPC after
+   *  renderer consumes. Used by the `agentStatus.getSnapshot` procedure after
    *  workspace tabs have hydrated, so the dashboard catches up on any
    *  hook events that fired during startup. */
   getStatusSnapshot(): AgentStatusIpcPayload[] {
@@ -1399,16 +1413,13 @@ export class AgentHookServer {
       isReplay?: boolean
       payload: unknown
     },
-    connectionId: string
+    connectionId: string | null
   ): void {
     // Why: signature says non-empty, but the wire crosses a trust boundary —
     // re-check at runtime (and trim) so a whitespace-only or empty
     // connectionId can't poison caches.
-    if (typeof connectionId !== 'string') {
-      return
-    }
-    const trimmedConnectionId = connectionId.trim()
-    if (trimmedConnectionId.length === 0) {
+    const trimmedConnectionId = connectionId?.trim()
+    if (connectionId !== null && (!trimmedConnectionId || trimmedConnectionId.length === 0)) {
       return
     }
     if (!envelope || typeof envelope.paneKey !== 'string') {
@@ -1509,7 +1520,7 @@ export class AgentHookServer {
       launchToken: envelope.launchToken,
       tabId,
       worktreeId,
-      connectionId: trimmedConnectionId,
+      connectionId: trimmedConnectionId ?? null,
       hasExplicitPrompt: envelope.hasExplicitPrompt === true ? true : undefined,
       promptInteractionKey,
       hookEventName,
@@ -1533,19 +1544,7 @@ export class AgentHookServer {
       return
     }
 
-    if (options?.env) {
-      this.env = options.env
-    }
-    if (options?.userDataPath) {
-      // Why: dev builds share one userData path, so callers can namespace the
-      // endpoint file by dev instance while packaged builds keep the stable path
-      // that lets long-lived PTYs reconnect after app restart.
-      this.endpointDir = options.endpointNamespace
-        ? join(options.userDataPath, 'agent-hooks', options.endpointNamespace)
-        : join(options.userDataPath, 'agent-hooks')
-      this.endpointFilePathCache = join(this.endpointDir, getEndpointFileName())
-      this.lastStatusFilePath = join(this.endpointDir, LAST_STATUS_FILE_NAME)
-    }
+    this.configureHostState(options)
     this.token = randomUUID()
     this.endpointFileWritten = false
     this.lastWrittenJson = null
@@ -1553,9 +1552,6 @@ export class AgentHookServer {
     // (which goes through state.lastStatusByPaneKey.set) runs against an
     // already-populated map. The renderer later pulls this map as a snapshot
     // after workspace tabs are hydrated.
-    if (this.lastStatusFilePath) {
-      this.hydrateLastStatusFromDisk()
-    }
     this.server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
       if (req.method !== 'POST') {
         res.writeHead(404)
@@ -1655,6 +1651,8 @@ export class AgentHookServer {
     this.endpointFileWritten = false
     this.lastStatusFilePath = null
     this.lastWrittenJson = null
+    this.forwardedPtyEnv = {}
+    this.statusHydrated = false
     this.runtimeObservedStatusPaneKeys.clear()
     this.promptSentDedupeByPaneKey.clear()
     this.closedAgentStatusTabIds.clear()
@@ -1664,7 +1662,7 @@ export class AgentHookServer {
     this.notifyStatusChangeListeners()
   }
 
-  /** Why: invoked from the renderer-driven agentStatus:drop IPC when a user
+  /** Why: invoked from the renderer-driven agentStatus.drop procedure when a user
    *  dismisses a still-active pane's status row. We must NOT wipe
    *  lastPromptByPaneKey or lastToolByPaneKey here — the pane's agent may
    *  still be alive, and the next hook event would otherwise arrive with an
@@ -1858,6 +1856,9 @@ export class AgentHookServer {
   }
 
   buildPtyEnv(): Record<string, string> {
+    if (Object.keys(this.forwardedPtyEnv).length > 0) {
+      return { ...this.forwardedPtyEnv }
+    }
     if (this.port <= 0 || !this.token) {
       return {}
     }
@@ -1879,6 +1880,29 @@ export class AgentHookServer {
 
   get endpointFilePath(): string | null {
     return this.endpointFilePathCache
+  }
+
+  private configureHostState(options?: {
+    env?: string
+    userDataPath?: string
+    endpointNamespace?: string
+  }): void {
+    if (options?.env) {
+      this.env = options.env
+    }
+    if (options?.userDataPath) {
+      // Why: dev builds share one userData path, so callers can namespace the
+      // endpoint file while packaged builds keep a stable restart handoff.
+      this.endpointDir = options.endpointNamespace
+        ? join(options.userDataPath, 'agent-hooks', options.endpointNamespace)
+        : join(options.userDataPath, 'agent-hooks')
+      this.endpointFilePathCache = join(this.endpointDir, getEndpointFileName())
+      this.lastStatusFilePath = join(this.endpointDir, LAST_STATUS_FILE_NAME)
+    }
+    if (this.lastStatusFilePath && !this.statusHydrated) {
+      this.hydrateLastStatusFromDisk()
+      this.statusHydrated = true
+    }
   }
 
   /** Test/diagnostic accessor for the on-disk last-status file path. */

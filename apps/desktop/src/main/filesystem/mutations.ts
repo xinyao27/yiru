@@ -7,18 +7,15 @@ import {
   readdir,
   realpath,
   rename,
-  rm,
-  unlink,
   writeFile
 } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
-import { pipeline } from 'node:stream/promises'
 
 /* eslint-disable max-lines -- Why: filesystem mutation IPC handlers stay centralized so
 authorization and external import behavior remain audited together. */
-import { ipcMain } from 'electron'
 import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
+import type { MainIpcRegistration } from '../ipc-registration'
 import type { Store } from '../persistence'
 import { authorizeExternalPath, resolveAuthorizedPath, isENOENT } from './auth'
 import { resolveLocalDroppedPathsForAgent } from './dropped-path-resolution'
@@ -65,11 +62,14 @@ async function assertNotExists(targetPath: string): Promise<void> {
 
 /**
  * IPC handlers for file/folder creation and renaming.
- * Deletion is handled separately via `fs:deletePath` (shell.trashItem).
+ * Deletion is handled separately via `file-host:deletePath` (shell.trashItem).
  */
-export function registerFilesystemMutationHandlers(store: Store): void {
+export function registerFilesystemMutationHandlers(
+  ipcMain: MainIpcRegistration,
+  store: Store
+): void {
   ipcMain.handle(
-    'fs:createFile',
+    'file-host:createFile',
     async (_event, args: { filePath: string; connectionId?: string }): Promise<void> => {
       const filePath = await resolveAuthorizedPath(args.filePath, store)
       await mkdir(dirname(filePath), { recursive: true })
@@ -83,7 +83,7 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   )
 
   ipcMain.handle(
-    'fs:createDir',
+    'file-host:createDir',
     async (_event, args: { dirPath: string; connectionId?: string }): Promise<void> => {
       const dirPath = await resolveAuthorizedPath(args.dirPath, store)
       await assertNotExists(dirPath)
@@ -95,7 +95,7 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   // filesystems/volumes. This is unlikely since both paths are under the same
   // workspace root, but a cross-drive rename would surface as an IPC error.
   ipcMain.handle(
-    'fs:rename',
+    'file-host:rename',
     async (
       _event,
       args: { oldPath: string; newPath: string; connectionId?: string }
@@ -114,7 +114,7 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   )
 
   ipcMain.handle(
-    'fs:copy',
+    'file-host:copy',
     async (
       _event,
       args: { sourcePath: string; destinationPath: string; connectionId?: string }
@@ -133,38 +133,7 @@ export function registerFilesystemMutationHandlers(store: Store): void {
   )
 
   ipcMain.handle(
-    'fs:importExternalPaths',
-    async (
-      _event,
-      args: { sourcePaths: string[]; destDir: string; connectionId?: string; ensureDir?: boolean }
-    ): Promise<{ results: ImportItemResult[] }> => {
-      if (args.connectionId) {
-        // Why: legacy callers can still send a removed host id. Fail closed instead
-        // of authorizing another host's destination against this machine's roots.
-        throw new Error('Importing files into a remote host is no longer supported')
-      }
-
-      // Why: destDir must be authorized before any copy work begins. If the
-      // destination is outside allowed roots, the entire import fails.
-      const resolvedDest = await resolveAuthorizedPath(args.destDir, store)
-
-      const results: ImportItemResult[] = []
-      const reservedNames = new Set<string>()
-
-      for (const sourcePath of args.sourcePaths) {
-        const result = await importOneSource(sourcePath, resolvedDest, reservedNames)
-        results.push(result)
-        if (result.status === 'imported') {
-          reservedNames.add(basename(result.destPath))
-        }
-      }
-
-      return { results }
-    }
-  )
-
-  ipcMain.handle(
-    'fs:stageExternalPathsForRuntimeUpload',
+    'file-host:stageExternalPathsForRuntimeUpload',
     async (
       _event,
       args: { sourcePaths: string[] }
@@ -179,10 +148,10 @@ export function registerFilesystemMutationHandlers(store: Store): void {
 
   // Why: terminal drag-and-drop resolver. Local worktrees pass paths through
   // unchanged (reference-in-place; preserves zero-latency drop). Kept as a
-  // separate IPC from fs:importExternalPaths because terminal semantics differ
+  // separate IPC from file-host:importExternalPaths because terminal semantics differ
   // from the explorer's "copy into user-picked destDir".
   ipcMain.handle(
-    'fs:resolveDroppedPathsForAgent',
+    'file-host:resolveDroppedPathsForAgent',
     async (
       _event,
       args: { paths: string[]; worktreePath: string; connectionId?: string }
@@ -208,27 +177,6 @@ export type ResolveDroppedPathsResult = {
   skipped: { sourcePath: string; reason: ImportSkipReason }[]
   failed: { sourcePath: string; reason: string }[]
 }
-
-// ─── External Import Types ──────────────────────────────────────────
-
-export type ImportItemResult =
-  | {
-      sourcePath: string
-      status: 'imported'
-      destPath: string
-      kind: 'file' | 'directory'
-      renamed: boolean
-    }
-  | {
-      sourcePath: string
-      status: 'skipped'
-      reason: ImportSkipReason
-    }
-  | {
-      sourcePath: string
-      status: 'failed'
-      reason: string
-    }
 
 export type StagedExternalImportSource =
   | {
@@ -257,100 +205,6 @@ const REMOTE_IMPORT_MAX_FILE_BYTES = 25 * 1024 * 1024
 const REMOTE_IMPORT_MAX_TOTAL_BYTES = 100 * 1024 * 1024
 
 class RuntimeUploadSymlinkError extends Error {}
-
-// ─── External Import Implementation ─────────────────────────────────
-
-/**
- * Import a single top-level source into destDir, handling authorization,
- * validation, pre-scan, deconfliction, and copy.
- */
-async function importOneSource(
-  sourcePath: string,
-  destDir: string,
-  reservedNames: Set<string>
-): Promise<ImportItemResult> {
-  const resolvedSource = resolve(sourcePath)
-
-  // Why: authorize the external source path so downstream filesystem
-  // operations (lstat, readdir, copyFile) are permitted by Electron.
-  authorizeExternalPath(resolvedSource)
-
-  // Why: validate source using lstat on the unresolved path *before*
-  // canonicalization so top-level symlinks are rejected instead of being
-  // silently dereferenced by realpath.
-  let sourceStat: Awaited<ReturnType<typeof lstat>>
-  try {
-    sourceStat = await lstat(resolvedSource)
-  } catch (error) {
-    if (isENOENT(error)) {
-      return { sourcePath, status: 'skipped', reason: 'missing' }
-    }
-    if (
-      error instanceof Error &&
-      'code' in error &&
-      ((error as NodeJS.ErrnoException).code === 'EACCES' ||
-        (error as NodeJS.ErrnoException).code === 'EPERM')
-    ) {
-      return { sourcePath, status: 'skipped', reason: 'permission-denied' }
-    }
-    return {
-      sourcePath,
-      status: 'failed',
-      reason: error instanceof Error ? error.message : String(error)
-    }
-  }
-
-  // Why: reject symlinks in v1 — symlink copy semantics differ across
-  // platforms, and following them can escape the dropped subtree.
-  if (sourceStat.isSymbolicLink()) {
-    return { sourcePath, status: 'skipped', reason: 'symlink' }
-  }
-
-  if (!sourceStat.isFile() && !sourceStat.isDirectory()) {
-    return { sourcePath, status: 'skipped', reason: 'unsupported' }
-  }
-
-  const isDir = sourceStat.isDirectory()
-
-  // Why: for directories, pre-scan the entire tree for symlinks before
-  // creating any destination files. This prevents partially imported
-  // trees when a symlink is discovered halfway through recursive copy.
-  if (isDir) {
-    const hasSymlink = await preScanForSymlinks(resolvedSource)
-    if (hasSymlink) {
-      return { sourcePath, status: 'skipped', reason: 'symlink' }
-    }
-  }
-
-  // Top-level deconfliction: generate a unique name if collision exists
-  const originalName = basename(resolvedSource)
-  const finalName = await deconflictName(destDir, originalName, reservedNames)
-  const destPath = join(destDir, finalName)
-  const renamed = finalName !== originalName
-
-  try {
-    await (isDir
-      ? recursiveCopyDir(resolvedSource, destPath)
-      : copyLocalFileNoFollow(resolvedSource, destPath))
-  } catch (error) {
-    if (isDir) {
-      await rm(destPath, { recursive: true, force: true }).catch(() => {})
-    }
-    return {
-      sourcePath,
-      status: 'failed',
-      reason: error instanceof Error ? error.message : String(error)
-    }
-  }
-
-  return {
-    sourcePath,
-    status: 'imported',
-    destPath,
-    kind: isDir ? 'directory' : 'file',
-    renamed
-  }
-}
 
 async function stageOneSourceForRuntimeUpload(
   sourcePath: string
@@ -550,153 +404,4 @@ function assertRemoteUploadBudget(
 
 function normalizeRelativeUploadPath(path: string): string {
   return path.replace(/[\\/]+/g, '/').replace(/^\/+/, '')
-}
-
-/**
- * Pre-scan a directory tree for symlinks. Returns true if any symlink
- * is found anywhere in the subtree.
- */
-async function preScanForSymlinks(dirPath: string): Promise<boolean> {
-  const entries = await readdir(dirPath, { withFileTypes: true })
-  for (const entry of entries) {
-    if (entry.isSymbolicLink()) {
-      return true
-    }
-    if (entry.isDirectory()) {
-      const childPath = join(dirPath, entry.name)
-      if (await preScanForSymlinks(childPath)) {
-        return true
-      }
-    }
-  }
-  return false
-}
-
-/**
- * Recursively copy a directory and all its contents. Uses copyFile for
- * individual files to leverage native OS copy primitives instead of
- * buffering entire files into memory.
- */
-async function recursiveCopyDir(srcDir: string, destDir: string): Promise<void> {
-  await mkdir(destDir, { recursive: false })
-  const entries = await readdir(srcDir, { withFileTypes: true })
-  for (const entry of entries) {
-    const srcPath = join(srcDir, entry.name)
-    const dstPath = join(destDir, entry.name)
-    const statResult = await lstat(srcPath)
-    if (statResult.isSymbolicLink()) {
-      throw new Error(`Symlink not allowed in '${entry.name}'`)
-    }
-    if (statResult.isDirectory()) {
-      await recursiveCopyDir(srcPath, dstPath)
-      continue
-    }
-    if (!statResult.isFile()) {
-      throw new Error(`Unsupported file type in '${entry.name}'`)
-    }
-    await copyLocalFileNoFollow(srcPath, dstPath, statResult)
-  }
-}
-
-async function copyLocalFileNoFollow(
-  srcPath: string,
-  dstPath: string,
-  statResult?: Awaited<ReturnType<typeof lstat>>
-): Promise<void> {
-  const beforeOpenStat = statResult ?? (await lstat(srcPath))
-  if (beforeOpenStat.isSymbolicLink()) {
-    throw new Error(`Symlink not allowed in '${basename(srcPath)}'`)
-  }
-  if (!beforeOpenStat.isFile()) {
-    throw new Error(`Unsupported file type in '${basename(srcPath)}'`)
-  }
-
-  let destinationCreated = false
-  const sourceHandle = await open(srcPath, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0))
-  let destinationHandle: Awaited<ReturnType<typeof open>> | null = null
-  try {
-    const openedStat = await sourceHandle.stat()
-    if (
-      !openedStat.isFile() ||
-      (typeof beforeOpenStat.size === 'number' && openedStat.size !== beforeOpenStat.size) ||
-      (typeof beforeOpenStat.ino === 'number' &&
-        beforeOpenStat.ino !== 0 &&
-        openedStat.ino !== 0 &&
-        openedStat.ino !== beforeOpenStat.ino) ||
-      (typeof beforeOpenStat.dev === 'number' &&
-        beforeOpenStat.dev !== 0 &&
-        openedStat.dev !== 0 &&
-        openedStat.dev !== beforeOpenStat.dev)
-    ) {
-      throw new Error(`File changed during import: '${basename(srcPath)}'`)
-    }
-    // Why: copyFile(path, path) would follow a source symlink if the source is
-    // swapped after validation. Streaming from an O_NOFOLLOW handle keeps the
-    // authorized file identity pinned for the copy.
-    destinationHandle = await open(dstPath, 'wx')
-    destinationCreated = true
-    await pipeline(sourceHandle.createReadStream(), destinationHandle.createWriteStream())
-  } catch (error) {
-    if (destinationCreated) {
-      await unlink(dstPath).catch(() => {})
-    }
-    throw error
-  } finally {
-    await sourceHandle.close().catch(() => {})
-    await destinationHandle?.close().catch(() => {})
-  }
-}
-
-/**
- * Generate a unique sibling name in destDir to avoid overwriting existing
- * files or colliding with other items in the same import batch.
- *
- * Pattern: "name copy.ext", "name copy 2.ext", "name copy 3.ext", etc.
- * For directories: "name copy", "name copy 2", "name copy 3", etc.
- */
-async function deconflictName(
-  destDir: string,
-  originalName: string,
-  reservedNames: Set<string>
-): Promise<string> {
-  if (!(await nameExists(destDir, originalName)) && !reservedNames.has(originalName)) {
-    return originalName
-  }
-
-  const dotIndex = originalName.lastIndexOf('.')
-  // Treat the entire name as stem for dotfiles or names without extensions
-  const hasMeaningfulExt = dotIndex > 0
-  const stem = hasMeaningfulExt ? originalName.slice(0, dotIndex) : originalName
-  const ext = hasMeaningfulExt ? originalName.slice(dotIndex) : ''
-
-  let candidate = `${stem} copy${ext}`
-  if (!(await nameExists(destDir, candidate)) && !reservedNames.has(candidate)) {
-    return candidate
-  }
-
-  let counter = 2
-  while (counter < 10000) {
-    candidate = `${stem} copy ${counter}${ext}`
-    if (!(await nameExists(destDir, candidate)) && !reservedNames.has(candidate)) {
-      return candidate
-    }
-    counter += 1
-  }
-
-  // Extremely unlikely fallback
-  throw new Error(
-    `Could not generate a unique name for '${originalName}' after ${counter} attempts`
-  )
-}
-
-async function nameExists(dir: string, name: string): Promise<boolean> {
-  try {
-    await lstat(join(dir, name))
-    return true
-  } catch (error) {
-    if (isENOENT(error)) {
-      return false
-    }
-    throw error
-  }
 }

@@ -5,6 +5,7 @@ import { useCallback, type RefObject } from 'react'
 
 import type { TerminalModes } from '~/terminal/webview/contract'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import {
@@ -152,7 +153,7 @@ export function useMobileTerminalPaste({
       ) {
         return
       }
-      await currentClient.sendRequest('terminal.send', {
+      await callRuntimeOrpc(currentClient, (runtime) => runtime.terminal.send, {
         terminal: targetHandle,
         text: payload,
         enter: false,

@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import type { EmulatorStreamInfo } from '~renderer/components/emulator-pane/types'
 import { translate } from '~renderer/i18n/i18n'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 
 import {
@@ -99,14 +99,10 @@ export async function openMobileEmulatorTab(
     try {
       // Why: the pane is visible but inert while serve-sim settles; the actual
       // stream is handed to it only after attach returns ready info.
-      const result = await callRuntimeRpc<EmulatorAttachResult>(
-        { kind: 'local' },
-        'emulator.attach',
-        {
-          worktree: worktreeId,
-          focus: false
-        }
-      )
+      const result = (await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.attach, {
+        worktree: worktreeId,
+        focus: false
+      })) satisfies EmulatorAttachResult
       if (!result.attached || !result.info) {
         throw new Error('Could not start the emulator.')
       }

@@ -1,4 +1,4 @@
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 
 export type ParsedOrchestrationTaskLink = {
   taskId: string
@@ -56,9 +56,9 @@ export async function focusRuntimeOrchestrationTask(
   const target = environmentId
     ? ({ kind: 'environment', environmentId } as const)
     : ({ kind: 'local' } as const)
-  const result = await callRuntimeRpc<{
-    dispatch: { assignee_handle?: string | null } | null
-  }>(target, 'orchestration.dispatchShow', { task: taskId })
+  const result = await callRuntimeOrpc(target, (client) => client.orchestration.dispatchShow, {
+    task: taskId
+  })
   const terminal = result.dispatch?.assignee_handle?.trim()
   if (!terminal) {
     throw new Error(`No dispatched terminal for orchestration task ${taskId}`)
@@ -68,7 +68,7 @@ export async function focusRuntimeOrchestrationTask(
   }
   // Why: task IDs are stable orchestration DB records, but terminal.focus owns
   // the app-side navigation contract for local and SSH runtime terminals.
-  await callRuntimeRpc(target, 'terminal.focus', { terminal })
+  await callRuntimeOrpc(target, (client) => client.terminal.focus, { terminal })
 }
 
 function findOrchestrationTaskTokenEnd(lineText: string, startIndex: number): number {

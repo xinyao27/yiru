@@ -4,8 +4,12 @@ import { existsSync, accessSync, chmodSync, readFileSync, constants } from 'node
 import { platform, arch } from 'node:os'
 import { join } from 'node:path'
 
+import type {
+  BrowserAgentCommandResult,
+  BrowserInterceptListResult,
+  BrowserMouseClickResult
+} from '@yiru/runtime-protocol/contract'
 import { assertClipboardTextWriteWithinLimitWithYield } from '@yiru/workbench-model/ui'
-import { app, type WebContents } from 'electron'
 import type {
   BrowserTabInfo,
   BrowserTabListResult,
@@ -45,11 +49,12 @@ import type {
   BrowserCookie
 } from '~shared/runtime-types'
 
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { BrowserError } from './cdp-bridge'
 import { captureFullPageScreenshot } from './cdp-screenshot'
 import { CdpWsProxy } from './cdp-ws-proxy'
-import { acquireElectronDebugger } from './electron-debugger-lease'
-import type { BrowserManager } from './manager'
+import type { BrowserPageProvider } from './page/catalog'
+import type { BrowserPageCdpLease, BrowserPageHandle } from './page/handle'
 import { iterateBrowserTextInsertionChunks } from './text-insertion'
 
 // Why: must exceed agent-browser's internal per-command timeouts (goto defaults to 30s,
@@ -59,6 +64,8 @@ const EXEC_TIMEOUT_MS = 90_000
 const CONSECUTIVE_TIMEOUT_LIMIT = 3
 const WAIT_PROCESS_TIMEOUT_GRACE_MS = 1_000
 const STALE_SESSION_CLOSE_TIMEOUT_MS = 3_000
+const PAGE_REPLACEMENT_WAIT_TIMEOUT_MS = 2_000
+const PAGE_REPLACEMENT_POLL_MS = 25
 export const AGENT_BROWSER_TEXT_ARGUMENT_MAX_BYTES = 8 * 1024
 export const AGENT_BROWSER_CLIPBOARD_WRITE_MAX_BYTES = AGENT_BROWSER_TEXT_ARGUMENT_MAX_BYTES
 
@@ -70,9 +77,10 @@ type SessionState = {
   // Why: track active interception patterns so they can be re-enabled after session restart
   activeInterceptPatterns: string[]
   activeCapture: boolean
-  // Why: store the webContentsId so we can verify the tab is still alive at execution time,
-  // not just at enqueue time. The queue delay can allow the tab to be destroyed in between.
-  webContentsId: number
+  // Why: the backend page can be replaced while the stable product page remains.
+  // Queue-time checks compare this opaque identity instead of an Electron-only id.
+  backendPageId: string
+  browserPageId: string
   activeProcess: ChildProcess | null
 }
 
@@ -84,7 +92,7 @@ type QueuedCommand = {
 
 type ResolvedBrowserCommandTarget = {
   browserPageId: string
-  webContentsId: number
+  backendPageId: string
 }
 
 export type BrowserMouseModifier = 'cmd' | 'ctrl' | 'alt' | 'shift'
@@ -183,25 +191,26 @@ function agentBrowserNativeName(): string {
 }
 
 function resolveAgentBrowserBinary(): string {
+  const pathsProvider = getRuntimeHostPathsProvider()
   // Why: production builds copy the platform-specific binary into resources/
-  // via electron-builder extraResources. Use Electron's resolved resourcesPath
+  // via electron-builder extraResources. Use the host's resolved resources path
   // instead of hand-rolling ../resources so packaged macOS builds keep working
   // on case-sensitive filesystems where Contents/Resources casing matters.
   const bundledResourcesPath =
-    process.resourcesPath ??
+    pathsProvider.resourcesPath() ??
     (process.platform === 'darwin'
-      ? join(app.getPath('exe'), '..', '..', 'Resources')
-      : join(app.getPath('exe'), '..', 'resources'))
+      ? join(pathsProvider.executablePath(), '..', '..', 'Resources')
+      : join(pathsProvider.executablePath(), '..', 'resources'))
   const bundled = join(bundledResourcesPath, agentBrowserNativeName())
   if (existsSync(bundled)) {
     return bundled
   }
 
   // Why: in dev mode, resolve directly to the native binary inside node_modules.
-  // Use app.getAppPath() for a stable project root — __dirname is unreliable after
+  // Use the host app path for a stable project root — __dirname is unreliable after
   // electron-vite bundles main process code into out/main/index.js.
   const nmBin = join(
-    app.getAppPath(),
+    pathsProvider.appPath(),
     'node_modules',
     'agent-browser',
     'bin',
@@ -225,7 +234,7 @@ function resolveAgentBrowserBinary(): string {
 // Why: exec commands arrive as a single string (e.g. 'keyboard inserttext "hello world"').
 // Naive split on whitespace breaks quoted arguments. This parser respects double and
 // single quotes so the value arrives as a single argument without surrounding quotes.
-function parseShellArgs(input: string): string[] {
+export function parseShellArgs(input: string): string[] {
   const args: string[] = []
   let current = ''
   let inDouble = false
@@ -252,7 +261,7 @@ function parseShellArgs(input: string): string[] {
   return args
 }
 
-function stripAgentBrowserTargetArgs(args: string[]): string[] {
+export function stripAgentBrowserTargetArgs(args: string[]): string[] {
   const stripped: string[] = []
   for (let index = 0; index < args.length; index++) {
     const arg = args[index]
@@ -460,7 +469,7 @@ function mobileTouchClickExpression(
 }
 
 async function resolveMobileTouchClickPoint(
-  dbg: WebContents['debugger'],
+  cdp: BrowserPageCdpLease,
   x: number,
   y: number,
   radius: number | undefined,
@@ -471,7 +480,7 @@ async function resolveMobileTouchClickPoint(
     return fallback
   }
   try {
-    const result = await dbg.sendCommand('Runtime.evaluate', {
+    const result = await cdp.sendCommand('Runtime.evaluate', {
       expression: mobileTouchClickExpression(x, y, radius, allowDomActivation),
       returnByValue: true,
       silent: true
@@ -515,8 +524,8 @@ function translateResult(
 export class AgentBrowserBridge {
   // Why: per-worktree active tab prevents one worktree's tab switch from
   // affecting another worktree's command targeting.
-  private readonly activeWebContentsPerWorktree = new Map<string, number>()
-  private activeWebContentsId: number | null = null
+  private readonly activePagePerWorktree = new Map<string, string>()
+  private activePageId: string | null = null
   private readonly sessions = new Map<string, SessionState>()
   private readonly commandQueues = new Map<string, QueuedCommand[]>()
   private readonly processingQueues = new Set<string>()
@@ -538,43 +547,44 @@ export class AgentBrowserBridge {
   // finishes can let the old teardown close the new daemon session.
   private readonly pendingSessionDestruction = new Map<string, Promise<void>>()
   private readonly cancelledProcesses = new WeakSet<ChildProcess>()
+  private readonly browserPages: BrowserPageProvider
+  private readonly options: AgentBrowserBridgeOptions
 
-  constructor(
-    private readonly browserManager: BrowserManager,
-    private readonly options: AgentBrowserBridgeOptions = {}
-  ) {
+  constructor(browserPages: BrowserPageProvider, options: AgentBrowserBridgeOptions = {}) {
+    this.browserPages = browserPages
+    this.options = options
     this.agentBrowserBin = resolveAgentBrowserBinary()
   }
 
   // ── Tab tracking ──
 
-  setActiveTab(webContentsId: number, worktreeId?: string): void {
-    this.activeWebContentsId = webContentsId
+  setActiveTab(browserPageId: string, worktreeId?: string): void {
+    this.activePageId = browserPageId
     if (worktreeId) {
-      this.activeWebContentsPerWorktree.set(worktreeId, webContentsId)
+      this.activePagePerWorktree.set(worktreeId, browserPageId)
     }
     this.options.onTabsChanged?.(worktreeId)
   }
 
-  private selectFallbackActiveWebContents(
+  private selectFallbackActivePage(
     worktreeId: string,
-    excludedWebContentsId?: number
-  ): number | null {
-    for (const [, wcId] of this.getRegisteredTabs(worktreeId)) {
-      if (wcId === excludedWebContentsId) {
+    excludedBrowserPageId?: string
+  ): string | null {
+    for (const [browserPageId] of this.getRegisteredTabs(worktreeId)) {
+      if (browserPageId === excludedBrowserPageId) {
         continue
       }
-      if (this.getWebContents(wcId)) {
-        this.activeWebContentsPerWorktree.set(worktreeId, wcId)
-        return wcId
+      if (this.browserPages.getPage(browserPageId)) {
+        this.activePagePerWorktree.set(worktreeId, browserPageId)
+        return browserPageId
       }
     }
-    this.activeWebContentsPerWorktree.delete(worktreeId)
+    this.activePagePerWorktree.delete(worktreeId)
     return null
   }
 
-  getActiveWebContentsId(): number | null {
-    return this.activeWebContentsId
+  getActiveBrowserPageId(): string | null {
+    return this.activePageId
   }
 
   getPageInfo(
@@ -583,99 +593,96 @@ export class AgentBrowserBridge {
   ): { browserPageId: string; url: string; title: string } | null {
     try {
       const target = this.resolveCommandTarget(worktreeId, browserPageId)
-      const wc = this.getWebContents(target.webContentsId)
-      if (!wc) {
+      const page = this.browserPages.getPage(target.browserPageId)
+      if (!page) {
         return null
       }
+      const info = page.getInfo()
       return {
         browserPageId: target.browserPageId,
-        url: wc.getURL() ?? '',
-        title: wc.getTitle() ?? ''
+        url: info.url,
+        title: info.title
       }
     } catch {
       return null
     }
   }
 
-  onTabChanged(webContentsId: number, worktreeId?: string): void {
-    this.activeWebContentsId = webContentsId
+  onTabChanged(browserPageId: string, worktreeId?: string): void {
+    this.activePageId = browserPageId
     if (worktreeId) {
-      this.activeWebContentsPerWorktree.set(worktreeId, webContentsId)
+      this.activePagePerWorktree.set(worktreeId, browserPageId)
     }
     this.options.onTabsChanged?.(worktreeId)
   }
 
-  async onTabClosed(webContentsId: number): Promise<void> {
-    const browserPageId = this.resolveTabIdSafe(webContentsId)
-    const owningWorktreeId = browserPageId
-      ? this.browserManager.getWorktreeIdForTab(browserPageId)
-      : undefined
-    let nextWorktreeActiveWebContentsId: number | null = null
-    if (
-      owningWorktreeId &&
-      this.activeWebContentsPerWorktree.get(owningWorktreeId) === webContentsId
-    ) {
-      nextWorktreeActiveWebContentsId = this.selectFallbackActiveWebContents(
-        owningWorktreeId,
-        webContentsId
-      )
+  async onTabClosed(browserPageId: string): Promise<void> {
+    const owningWorktreeId = this.browserPages.getWorktreeIdForTab(browserPageId)
+    let nextWorktreeActivePageId: string | null = null
+    if (owningWorktreeId && this.activePagePerWorktree.get(owningWorktreeId) === browserPageId) {
+      nextWorktreeActivePageId = this.selectFallbackActivePage(owningWorktreeId, browserPageId)
     }
-    if (this.activeWebContentsId === webContentsId) {
-      this.activeWebContentsId = nextWorktreeActiveWebContentsId
+    if (this.activePageId === browserPageId) {
+      this.activePageId = nextWorktreeActivePageId
     }
-    if (browserPageId) {
-      const sessionName = `yiru-tab-${browserPageId}`
-      await this.destroySession(sessionName)
-      this.pendingInterceptRestore.delete(sessionName)
-    }
+    const sessionName = `yiru-tab-${browserPageId}`
+    await this.destroySession(sessionName)
+    this.pendingInterceptRestore.delete(sessionName)
     this.options.onTabsChanged?.(owningWorktreeId)
   }
 
-  async onProcessSwap(
-    browserPageId: string,
-    newWebContentsId: number,
-    previousWebContentsId?: number
-  ): Promise<void> {
-    // Why: Electron process swaps give same browserPageId but new webContentsId.
-    // Old proxy's webContents is destroyed, so destroy session and let next command recreate.
+  async onProcessSwap(browserPageId: string): Promise<void> {
+    // Why: the stable product page remains active while its opaque backend page
+    // changes. Only the CDP session needs replacement.
     const sessionName = `yiru-tab-${browserPageId}`
     const session = this.sessions.get(sessionName)
-    const oldWebContentsId = previousWebContentsId ?? session?.webContentsId
-    const owningWorktreeId = this.browserManager.getWorktreeIdForTab(browserPageId)
+    const owningWorktreeId = this.browserPages.getWorktreeIdForTab(browserPageId)
     // Why: save active intercept patterns before destroying so they can be restored
     // on the new session after the next successful init command.
     if (session && session.activeInterceptPatterns.length > 0) {
       this.pendingInterceptRestore.set(sessionName, [...session.activeInterceptPatterns])
     }
     await this.destroySession(sessionName)
-    if (oldWebContentsId != null && this.activeWebContentsId === oldWebContentsId) {
-      this.activeWebContentsId = newWebContentsId
-    }
-    if (
-      owningWorktreeId &&
-      oldWebContentsId != null &&
-      this.activeWebContentsPerWorktree.get(owningWorktreeId) === oldWebContentsId
-    ) {
-      this.activeWebContentsPerWorktree.set(owningWorktreeId, newWebContentsId)
-    }
     this.options.onTabsChanged?.(owningWorktreeId ?? undefined)
   }
 
   // ── Worktree-scoped tab queries ──
 
-  getRegisteredTabs(worktreeId?: string): Map<string, number> {
-    const all = this.browserManager.getWebContentsIdByTabId()
-    if (!worktreeId) {
-      return all
-    }
-
-    const filtered = new Map<string, number>()
-    for (const [tabId, wcId] of all) {
-      if (this.browserManager.getWorktreeIdForTab(tabId) === worktreeId) {
-        filtered.set(tabId, wcId)
+  getRegisteredTabs(worktreeId?: string): Map<string, string> {
+    const pages = new Map<string, string>()
+    for (const page of this.browserPages.getPages()) {
+      const browserPageId = page.identity.browserPageId
+      if (!worktreeId || this.browserPages.getWorktreeIdForTab(browserPageId) === worktreeId) {
+        pages.set(browserPageId, page.identity.backendPageId)
       }
     }
-    return filtered
+    return pages
+  }
+
+  getPage(browserPageId: string): BrowserPageHandle | null {
+    return this.browserPages.getPage(browserPageId)
+  }
+
+  getWorktreeIdForTab(browserPageId: string): string | undefined {
+    return this.browserPages.getWorktreeIdForTab(browserPageId)
+  }
+
+  getSessionProfileIdForTab(browserPageId: string): string | null {
+    return this.browserPages.getSessionProfileIdForTab(browserPageId)
+  }
+
+  async destroyAll(): Promise<void> {
+    const sessionNames = new Set([
+      ...this.sessions.keys(),
+      ...this.pendingSessionCreation.keys(),
+      ...this.pendingSessionDestruction.keys()
+    ])
+    await Promise.allSettled(
+      [...sessionNames].map((sessionName) => this.destroySession(sessionName))
+    )
+    this.activePageId = null
+    this.activePagePerWorktree.clear()
+    this.pendingInterceptRestore.clear()
   }
 
   // ── Tab management ──
@@ -686,30 +693,31 @@ export class AgentBrowserBridge {
     // consistent with what resolveActiveTab would pick for command routing.
     // Keep this read-only though: discovery commands must not mutate the
     // active-tab state that later bare commands rely on.
-    let activeWcId =
-      (worktreeId && this.activeWebContentsPerWorktree.get(worktreeId)) ?? this.activeWebContentsId
+    let activeBrowserPageId =
+      (worktreeId && this.activePagePerWorktree.get(worktreeId)) ?? this.activePageId
     const result: BrowserTabInfo[] = []
     let index = 0
-    let firstLiveWcId: number | null = null
-    for (const [tabId, wcId] of tabs) {
-      const wc = this.getWebContents(wcId)
-      if (!wc) {
-        this.browserManager.unregisterGuest(tabId)
+    let firstLivePageId: string | null = null
+    for (const [tabId] of tabs) {
+      const page = this.browserPages.getPage(tabId)
+      if (!page) {
+        this.browserPages.unregisterPage(tabId)
         continue
       }
-      if (firstLiveWcId === null) {
-        firstLiveWcId = wcId
+      const info = page.getInfo()
+      if (firstLivePageId === null) {
+        firstLivePageId = tabId
       }
-      const loadError = this.browserManager.getBrowserPageLoadError(tabId)
-      const certificateFailure = this.browserManager.getBrowserPageCertificateFailure(tabId)
+      const loadError = this.browserPages.getBrowserPageLoadError(tabId)
+      const certificateFailure = this.browserPages.getBrowserPageCertificateFailure(tabId)
       result.push({
         browserPageId: tabId,
         index: index++,
         // Why: failed WebContents report chrome-error://, which is neither
         // actionable nor the address the user asked to load.
-        url: loadError?.validatedUrl ?? wc.getURL() ?? '',
-        title: wc.getTitle() ?? '',
-        active: wcId === activeWcId,
+        url: loadError?.validatedUrl ?? info.url,
+        title: info.title,
+        active: tabId === activeBrowserPageId,
         loadError,
         certificateFailure
       })
@@ -718,8 +726,8 @@ export class AgentBrowserBridge {
     // tab as active in the listing without mutating bridge state. That keeps
     // `tab list` side-effect free while still showing users which tab a bare
     // command would select next.
-    if (activeWcId == null && firstLiveWcId !== null) {
-      activeWcId = firstLiveWcId
+    if (activeBrowserPageId == null && firstLivePageId !== null) {
+      activeBrowserPageId = firstLivePageId
       if (result.length > 0) {
         result[0].active = true
       }
@@ -739,7 +747,7 @@ export class AgentBrowserBridge {
       // Why: queue delay means the tab list can change between RPC arrival and
       // execution time. Recompute against live webContents here so we never
       // activate a tab index that disappeared while earlier commands were running.
-      const liveEntries = [...tabs.entries()].filter(([, wcId]) => this.getWebContents(wcId))
+      const liveEntries = [...tabs.entries()].filter(([tabId]) => this.browserPages.getPage(tabId))
       let switchedIndex = index ?? -1
       let resolvedPageId = browserPageId
       if (resolvedPageId) {
@@ -753,18 +761,18 @@ export class AgentBrowserBridge {
           `${targetLabel} out of range (0-${liveEntries.length - 1})`
         )
       }
-      const [tabId, wcId] = liveEntries[switchedIndex]
-      this.activeWebContentsId = wcId
+      const [tabId] = liveEntries[switchedIndex]
+      this.activePageId = tabId
       // Why: resolveActiveTab prefers the per-worktree map over the global when
       // worktreeId is provided. Without this update, subsequent commands would
       // still route to the previous tab despite tabSwitch reporting success.
-      const owningWorktreeId = worktreeId ?? this.browserManager.getWorktreeIdForTab(tabId)
+      const owningWorktreeId = worktreeId ?? this.browserPages.getWorktreeIdForTab(tabId)
       // Why: `tab switch --page <id>` may omit --worktree because the page id is
       // already a stable target. We still need to update the owning worktree's
       // active-tab slot so later worktree-scoped commands follow the tab that was
       // just activated instead of the previously active one.
       if (owningWorktreeId) {
-        this.activeWebContentsPerWorktree.set(owningWorktreeId, wcId)
+        this.activePagePerWorktree.set(owningWorktreeId, tabId)
       }
       this.options.onTabsChanged?.(owningWorktreeId ?? undefined)
       return { switched: switchedIndex, browserPageId: tabId }
@@ -910,9 +918,12 @@ export class AgentBrowserBridge {
     element: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['scrollintoview', element])
+      return (await this.execAgentBrowser(sessionName, [
+        'scrollintoview',
+        element
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -921,13 +932,13 @@ export class AgentBrowserBridge {
     selector?: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['get', what]
       if (selector) {
         args.push(selector)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -936,9 +947,13 @@ export class AgentBrowserBridge {
     selector: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['is', what, selector])
+      return (await this.execAgentBrowser(sessionName, [
+        'is',
+        what,
+        selector
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -948,18 +963,22 @@ export class AgentBrowserBridge {
     text: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     await assertClipboardTextWriteWithinLimitWithYield(text)
     return this.enqueueTargetedCommand(
       worktreeId,
       browserPageId,
       async (sessionName) => {
-        let result: unknown = { inserted: true }
+        let result: BrowserAgentCommandResult = { inserted: true }
         for (const chunk of iterateBrowserTextInsertionChunks(
           text,
           AGENT_BROWSER_TEXT_ARGUMENT_MAX_BYTES
         )) {
-          result = await this.execAgentBrowser(sessionName, ['keyboard', 'inserttext', chunk])
+          result = (await this.execAgentBrowser(sessionName, [
+            'keyboard',
+            'inserttext',
+            chunk
+          ])) as BrowserAgentCommandResult
         }
         return result
       },
@@ -974,19 +993,28 @@ export class AgentBrowserBridge {
     y: number,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['mouse', 'move', String(x), String(y)])
+      return (await this.execAgentBrowser(sessionName, [
+        'mouse',
+        'move',
+        String(x),
+        String(y)
+      ])) as BrowserAgentCommandResult
     })
   }
 
-  async mouseDown(button?: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async mouseDown(
+    button?: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['mouse', 'down']
       if (button) {
         args.push(button)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -998,13 +1026,13 @@ export class AgentBrowserBridge {
     browserPageId?: string,
     radius?: number,
     modifiers?: BrowserMouseModifier[]
-  ): Promise<unknown> {
+  ): Promise<BrowserMouseClickResult> {
     return this.enqueueTargetedCommand(
       worktreeId,
       browserPageId,
       async (_sessionName, target) => {
-        const wc = this.getWebContents(target.webContentsId)
-        if (!wc || wc.isDestroyed()) {
+        const page = this.browserPages.getPage(target.browserPageId)
+        if (!page) {
           throw new BrowserError(
             'browser_tab_not_found',
             `Browser page ${target.browserPageId} is no longer available`
@@ -1013,14 +1041,14 @@ export class AgentBrowserBridge {
         const cdpButton = normalizeCdpMouseButton(button)
         const buttons = cdpMouseButtonMask(cdpButton)
         const cdpModifiers = cdpMouseModifierMask(modifiers)
-        const lease = acquireElectronDebugger(wc)
+        const lease = page.acquireCdp()
         try {
-          wc.focus()
+          await page.focus()
           const point =
             cdpButton === 'left'
               ? // Why: DOM activation cannot carry Cmd/Ctrl/Alt/Shift, so modifier
                 // clicks use only the adjusted point and let CDP dispatch the event.
-                await resolveMobileTouchClickPoint(wc.debugger, x, y, radius, cdpModifiers === 0)
+                await resolveMobileTouchClickPoint(lease, x, y, radius, cdpModifiers === 0)
               : { x, y, adjusted: false, handled: false }
           // Why: mobile taps should land as one atomic input operation. Sending
           // move/down/up through separate CLI calls visibly hovers targets and can
@@ -1028,7 +1056,7 @@ export class AgentBrowserBridge {
           // Runtime may already activate DOM controls because mobile-emulated
           // BrowserViews can ignore CDP mouse clicks for regular page taps.
           if (!point.handled) {
-            await wc.debugger.sendCommand('Input.dispatchMouseEvent', {
+            await lease.sendCommand('Input.dispatchMouseEvent', {
               type: 'mousePressed',
               x: point.x,
               y: point.y,
@@ -1037,7 +1065,7 @@ export class AgentBrowserBridge {
               modifiers: cdpModifiers,
               clickCount: 1
             })
-            await wc.debugger.sendCommand('Input.dispatchMouseEvent', {
+            await lease.sendCommand('Input.dispatchMouseEvent', {
               type: 'mouseReleased',
               x: point.x,
               y: point.y,
@@ -1064,13 +1092,17 @@ export class AgentBrowserBridge {
     )
   }
 
-  async mouseUp(button?: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async mouseUp(
+    button?: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['mouse', 'up']
       if (button) {
         args.push(button)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -1079,13 +1111,13 @@ export class AgentBrowserBridge {
     dx?: number,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['mouse', 'wheel', String(dy)]
       if (dx != null) {
         args.push(String(dx))
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -1098,31 +1130,43 @@ export class AgentBrowserBridge {
     text?: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['find', locator, value, action]
       if (text) {
         args.push(text)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
   // ── Set commands ──
 
-  async setDevice(name: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async setDevice(
+    name: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['set', 'device', name])
+      return (await this.execAgentBrowser(sessionName, [
+        'set',
+        'device',
+        name
+      ])) as BrowserAgentCommandResult
     })
   }
 
-  async setOffline(state?: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async setOffline(
+    state?: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['set', 'offline']
       if (state) {
         args.push(state)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -1130,9 +1174,13 @@ export class AgentBrowserBridge {
     headersJson: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['set', 'headers', headersJson])
+      return (await this.execAgentBrowser(sessionName, [
+        'set',
+        'headers',
+        headersJson
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1141,9 +1189,14 @@ export class AgentBrowserBridge {
     pass: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['set', 'credentials', user, pass])
+      return (await this.execAgentBrowser(sessionName, [
+        'set',
+        'credentials',
+        user,
+        pass
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1152,7 +1205,7 @@ export class AgentBrowserBridge {
     reducedMotion?: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['set', 'media']
       if (colorScheme) {
@@ -1161,15 +1214,21 @@ export class AgentBrowserBridge {
       if (reducedMotion) {
         args.push(reducedMotion)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
   // ── Clipboard commands ──
 
-  async clipboardRead(worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async clipboardRead(
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['clipboard', 'read'])
+      return (await this.execAgentBrowser(sessionName, [
+        'clipboard',
+        'read'
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1177,30 +1236,44 @@ export class AgentBrowserBridge {
     text: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     await assertClipboardTextWriteWithinLimitWithYield(text, {
       maxBytes: AGENT_BROWSER_CLIPBOARD_WRITE_MAX_BYTES
     })
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['clipboard', 'write', text])
+      return (await this.execAgentBrowser(sessionName, [
+        'clipboard',
+        'write',
+        text
+      ])) as BrowserAgentCommandResult
     })
   }
 
   // ── Dialog commands ──
 
-  async dialogAccept(text?: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async dialogAccept(
+    text?: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       const args = ['dialog', 'accept']
       if (text) {
         args.push(text)
       }
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
-  async dialogDismiss(worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async dialogDismiss(
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['dialog', 'dismiss'])
+      return (await this.execAgentBrowser(sessionName, [
+        'dialog',
+        'dismiss'
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1210,9 +1283,14 @@ export class AgentBrowserBridge {
     key: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'local', 'get', key])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'local',
+        'get',
+        key
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1221,15 +1299,28 @@ export class AgentBrowserBridge {
     value: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'local', 'set', key, value])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'local',
+        'set',
+        key,
+        value
+      ])) as BrowserAgentCommandResult
     })
   }
 
-  async storageLocalClear(worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async storageLocalClear(
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'local', 'clear'])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'local',
+        'clear'
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1237,9 +1328,14 @@ export class AgentBrowserBridge {
     key: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'session', 'get', key])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'session',
+        'get',
+        key
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1248,15 +1344,28 @@ export class AgentBrowserBridge {
     value: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'session', 'set', key, value])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'session',
+        'set',
+        key,
+        value
+      ])) as BrowserAgentCommandResult
     })
   }
 
-  async storageSessionClear(worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async storageSessionClear(
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['storage', 'session', 'clear'])
+      return (await this.execAgentBrowser(sessionName, [
+        'storage',
+        'session',
+        'clear'
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1267,17 +1376,28 @@ export class AgentBrowserBridge {
     path: string,
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['download', selector, path])
+      return (await this.execAgentBrowser(sessionName, [
+        'download',
+        selector,
+        path
+      ])) as BrowserAgentCommandResult
     })
   }
 
   // ── Highlight command ──
 
-  async highlight(selector: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async highlight(
+    selector: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return await this.execAgentBrowser(sessionName, ['highlight', selector])
+      return (await this.execAgentBrowser(sessionName, [
+        'highlight',
+        selector
+      ])) as BrowserAgentCommandResult
     })
   }
 
@@ -1295,45 +1415,66 @@ export class AgentBrowserBridge {
 
   async reload(worktreeId?: string, browserPageId?: string): Promise<BrowserReloadResult> {
     // Why: reload can trigger a process swap in Electron (site-isolation), which
-    // destroys the session mid-command. Use the webContents directly for reload
-    // instead of going through agent-browser to avoid the session lifecycle issue.
+    // destroys the agent-browser session mid-command. Use the stable page handle
+    // instead of going through agent-browser to avoid that session lifecycle issue.
     // Routed through enqueueCommand so it serializes with other in-flight commands.
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (_sessionName, target) => {
-      const wc = this.getWebContents(target.webContentsId)
-      if (!wc) {
+      const page = this.browserPages.getPage(target.browserPageId)
+      if (!page) {
         throw new BrowserError('browser_no_tab', 'Tab is no longer available')
       }
-      wc.reload()
-      await new Promise<void>((resolve) => {
+      let cancelLoadWait = (): void => {}
+      const loadOutcome = new Promise<'loaded' | 'closed' | 'timeout'>((resolve) => {
         let settled = false
         let fallbackTimer: ReturnType<typeof setTimeout> | null = null
+        let unsubscribe = (): void => {}
 
-        const finish = (): void => {
+        const finish = (outcome: 'loaded' | 'closed' | 'timeout'): void => {
           if (settled) {
             return
           }
           settled = true
-          wc.removeListener('did-finish-load', onFinish)
-          wc.removeListener('did-fail-load', onFail)
+          unsubscribe()
           if (fallbackTimer) {
             clearTimeout(fallbackTimer)
             fallbackTimer = null
           }
-          resolve()
+          resolve(outcome)
         }
-        const onFinish = (): void => finish()
-        const onFail = (): void => finish()
-
-        wc.on('did-finish-load', onFinish)
-        wc.on('did-fail-load', onFail)
+        unsubscribe = page.subscribe((event) => {
+          if (event.type === 'load-finished' || event.type === 'load-failed') {
+            finish('loaded')
+          } else if (event.type === 'closed') {
+            finish('closed')
+          }
+        })
         // Why: successful reloads must clear the fallback timer; otherwise each
-        // reload retains the webContents and listeners until the 10s timeout fires.
-        fallbackTimer = setTimeout(finish, 10_000)
+        // reload retains the page handle and listeners until the 10s timeout fires.
+        fallbackTimer = setTimeout(() => finish('timeout'), 10_000)
         if (typeof fallbackTimer.unref === 'function') {
           fallbackTimer.unref()
         }
+        cancelLoadWait = () => finish('timeout')
       })
-      return { url: wc.getURL(), title: wc.getTitle() }
+      try {
+        await page.reload()
+      } catch (error) {
+        cancelLoadWait()
+        throw error
+      }
+      const outcome = await loadOutcome
+      const currentPage =
+        outcome === 'closed' || page.isClosed()
+          ? await this.waitForReplacementPage(target.browserPageId, page)
+          : page
+      if (!currentPage) {
+        throw new BrowserError(
+          'browser_tab_not_found',
+          `Browser page ${target.browserPageId} is no longer available`
+        )
+      }
+      const info = currentPage.getInfo()
+      return { url: info.url, title: info.title }
     })
   }
 
@@ -1365,7 +1506,7 @@ export class AgentBrowserBridge {
       async (sessionName, target) => {
         return this.captureFullPageScreenshotCommand(
           sessionName,
-          target.webContentsId,
+          target.browserPageId,
           500,
           format === 'jpeg' ? 'jpeg' : 'png'
         )
@@ -1395,7 +1536,7 @@ export class AgentBrowserBridge {
     return this.withSerializedScreenshotAccess(async () => {
       const session = this.sessions.get(sessionName)
       const restore = session
-        ? await this.browserManager.acquireAutomationVisibility(session.webContentsId)
+        ? await this.browserPages.acquireAutomationVisibility(session.browserPageId)
         : () => {}
       try {
         // Why: after acquiring the hidden paintability lease, the compositor
@@ -1413,25 +1554,25 @@ export class AgentBrowserBridge {
 
   private async captureFullPageScreenshotCommand(
     sessionName: string,
-    webContentsId: number,
+    browserPageId: string,
     settleMs: number,
     format: 'png' | 'jpeg'
   ): Promise<BrowserScreenshotResult> {
     return this.withSerializedScreenshotAccess(async () => {
       const session = this.sessions.get(sessionName)
       const restore = session
-        ? await this.browserManager.acquireAutomationVisibility(session.webContentsId)
+        ? await this.browserPages.acquireAutomationVisibility(session.browserPageId)
         : () => {}
       try {
         // Why: full-page capture still depends on the guest compositor producing
         // a fresh frame. Wait after the target webview is paintable so the direct
         // CDP capture sees the live page instead of a stale surface.
         await new Promise((r) => setTimeout(r, settleMs))
-        const wc = this.getWebContents(webContentsId)
-        if (!wc) {
+        const page = this.browserPages.getPage(browserPageId)
+        if (!page) {
           throw new BrowserError('browser_tab_not_found', 'Tab is no longer available')
         }
-        return await captureFullPageScreenshot(wc, format)
+        return await captureFullPageScreenshot(page, format)
       } catch (error) {
         throw new BrowserError('browser_error', (error as Error).message)
       } finally {
@@ -1634,15 +1775,15 @@ export class AgentBrowserBridge {
     // webviews. Use Electron's native webContents.printToPDF() which is reliable.
     // Routed through enqueueCommand so it serializes with other in-flight commands.
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (_sessionName, target) => {
-      const wc = this.getWebContents(target.webContentsId)
-      if (!wc) {
+      const page = this.browserPages.getPage(target.browserPageId)
+      if (!page) {
         throw new BrowserError('browser_no_tab', 'Tab is no longer available')
       }
-      const buffer = await wc.printToPDF({
+      const bytes = await page.printToPdf({
         printBackground: true,
         preferCSSPageSize: true
       })
-      return { data: buffer.toString('base64') }
+      return { data: Buffer.from(bytes).toString('base64') }
     })
   }
 
@@ -1720,29 +1861,28 @@ export class AgentBrowserBridge {
     browserPageId?: string
   ): Promise<BrowserViewportResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (_sessionName, target) => {
-      const wc = this.getWebContents(target.webContentsId)
-      if (!wc) {
+      const page = this.browserPages.getPage(target.browserPageId)
+      if (!page) {
         throw new BrowserError('browser_tab_not_found', 'Tab is no longer available')
       }
-      const dbg = wc.debugger
-      if (!dbg.isAttached()) {
-        throw new BrowserError('browser_error', 'Debugger not attached')
-      }
+      const cdp = page.acquireCdp()
 
       // Why: agent-browser only supports width/height/scale for `set viewport`;
       // it has no `mobile` flag. Yiru's CLI exposes `--mobile`, so apply the
       // emulation directly through CDP to keep the public CLI contract honest.
-      await dbg.sendCommand('Emulation.setDeviceMetricsOverride', {
-        width,
-        height,
-        deviceScaleFactor: scale,
-        mobile
-      })
-      // Why: BrowserView's compositor surface can keep the previous host size
-      // after metrics-only resize, which crops remote screencast clients.
-      await Promise.resolve(dbg.sendCommand('Emulation.setVisibleSize', { width, height })).catch(
-        () => {}
-      )
+      try {
+        await cdp.sendCommand('Emulation.setDeviceMetricsOverride', {
+          width,
+          height,
+          deviceScaleFactor: scale,
+          mobile
+        })
+        // Why: BrowserView's compositor surface can keep the previous host size
+        // after metrics-only resize, which crops remote screencast clients.
+        await cdp.sendCommand('Emulation.setVisibleSize', { width, height }).catch(() => {})
+      } finally {
+        cdp.release()
+      }
 
       return {
         width,
@@ -1815,11 +1955,12 @@ export class AgentBrowserBridge {
   async interceptList(
     worktreeId?: string,
     browserPageId?: string
-  ): Promise<{ requests: unknown[] }> {
+  ): Promise<BrowserInterceptListResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return (await this.execAgentBrowser(sessionName, ['network', 'requests'])) as {
-        requests: unknown[]
-      }
+      return (await this.execAgentBrowser(sessionName, [
+        'network',
+        'requests'
+      ])) as BrowserInterceptListResult
     })
   }
 
@@ -1890,12 +2031,16 @@ export class AgentBrowserBridge {
 
   // ── Generic passthrough ──
 
-  async exec(command: string, worktreeId?: string, browserPageId?: string): Promise<unknown> {
+  async exec(
+    command: string,
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserAgentCommandResult> {
     return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
       // Why: strip target/session flags from raw passthrough commands so a
       // caller cannot override Yiru's selected browser page or CDP proxy.
       const args = stripAgentBrowserTargetArgs(parseShellArgs(command.trim()))
-      return await this.execAgentBrowser(sessionName, args)
+      return (await this.execAgentBrowser(sessionName, args)) as BrowserAgentCommandResult
     })
   }
 
@@ -1934,7 +2079,7 @@ export class AgentBrowserBridge {
     const sessionName = `yiru-tab-${target.browserPageId}`
 
     if (options.ensureSession !== false) {
-      await this.ensureSession(sessionName, target.browserPageId, target.webContentsId)
+      await this.ensureSession(sessionName, target.browserPageId, target.backendPageId)
     }
 
     return new Promise<T>((resolve, reject) => {
@@ -1972,7 +2117,7 @@ export class AgentBrowserBridge {
 
     // Why: inactive browser panes are display:none in the renderer; the
     // automation lease makes only this target paintable without selecting it.
-    const restore = await this.browserManager.acquireAutomationVisibility(target.webContentsId)
+    const restore = await this.browserPages.acquireAutomationVisibility(target.browserPageId)
     try {
       const visibleTarget = await this.refreshTargetAfterAutomationVisibility(
         sessionName,
@@ -1993,15 +2138,8 @@ export class AgentBrowserBridge {
     options: EnqueueTargetedCommandOptions
   ): Promise<ResolvedBrowserCommandTarget> {
     const visibleTarget = this.resolveCommandTarget(worktreeId, target.browserPageId)
-    if (visibleTarget.webContentsId === target.webContentsId) {
+    if (visibleTarget.backendPageId === target.backendPageId) {
       return visibleTarget
-    }
-
-    if (this.activeWebContentsId === target.webContentsId) {
-      this.activeWebContentsId = visibleTarget.webContentsId
-    }
-    if (worktreeId && this.activeWebContentsPerWorktree.get(worktreeId) === target.webContentsId) {
-      this.activeWebContentsPerWorktree.set(worktreeId, visibleTarget.webContentsId)
     }
 
     // Why: making a parked webview paintable can re-register the same browser
@@ -2011,7 +2149,7 @@ export class AgentBrowserBridge {
     await this.restartSessionForTarget(
       sessionName,
       visibleTarget.browserPageId,
-      visibleTarget.webContentsId,
+      visibleTarget.backendPageId,
       { recreate: options.ensureSession !== false }
     )
 
@@ -2061,8 +2199,8 @@ export class AgentBrowserBridge {
     }
 
     const tabs = this.getRegisteredTabs(worktreeId)
-    const webContentsId = tabs.get(browserPageId)
-    if (webContentsId == null) {
+    const backendPageId = tabs.get(browserPageId)
+    if (backendPageId == null) {
       const scope = worktreeId ? ' in this worktree' : ''
       throw new BrowserError(
         'browser_tab_not_found',
@@ -2070,15 +2208,16 @@ export class AgentBrowserBridge {
       )
     }
 
-    if (!this.getWebContents(webContentsId)) {
-      this.browserManager.unregisterGuest(browserPageId)
+    const page = this.browserPages.getPage(browserPageId)
+    if (!page || page.identity.backendPageId !== backendPageId) {
+      this.browserPages.unregisterPage(browserPageId)
       throw new BrowserError(
         'browser_tab_not_found',
         `Browser page ${browserPageId} is no longer available`
       )
     }
 
-    return { browserPageId, webContentsId }
+    return { browserPageId, backendPageId }
   }
 
   private resolveActiveTab(worktreeId?: string): ResolvedBrowserCommandTarget {
@@ -2088,24 +2227,24 @@ export class AgentBrowserBridge {
       throw new BrowserError('browser_no_tab', 'No browser tab open in this worktree')
     }
 
-    // Why: prefer per-worktree active tab to prevent cross-worktree interference.
-    // Fall back to global activeWebContentsId for callers that don't pass worktreeId.
-    const preferredWcId =
-      (worktreeId && this.activeWebContentsPerWorktree.get(worktreeId)) ?? this.activeWebContentsId
+    // Why: prefer per-worktree active page to prevent cross-worktree interference.
+    // Fall back to the global stable page identity for unscoped callers.
+    const preferredPageId =
+      (worktreeId && this.activePagePerWorktree.get(worktreeId)) ?? this.activePageId
 
-    if (preferredWcId != null) {
-      for (const [tabId, wcId] of tabs) {
-        if (wcId === preferredWcId && this.getWebContents(wcId)) {
-          return { browserPageId: tabId, webContentsId: wcId }
+    if (preferredPageId != null) {
+      const backendPageId = tabs.get(preferredPageId)
+      const page = this.browserPages.getPage(preferredPageId)
+      if (backendPageId && page?.identity.backendPageId === backendPageId) {
+        return { browserPageId: preferredPageId, backendPageId }
+      }
+      if (backendPageId) {
+        this.browserPages.unregisterPage(preferredPageId)
+        if (this.activePageId === preferredPageId) {
+          this.activePageId = null
         }
-        if (wcId === preferredWcId) {
-          this.browserManager.unregisterGuest(tabId)
-          if (this.activeWebContentsId === wcId) {
-            this.activeWebContentsId = null
-          }
-          if (worktreeId && this.activeWebContentsPerWorktree.get(worktreeId) === wcId) {
-            this.activeWebContentsPerWorktree.delete(worktreeId)
-          }
+        if (worktreeId && this.activePagePerWorktree.get(worktreeId) === preferredPageId) {
+          this.activePagePerWorktree.delete(worktreeId)
         }
       }
     }
@@ -2114,15 +2253,16 @@ export class AgentBrowserBridge {
     // Skip those and pick the first live tab. Also activate it so tabList and
     // subsequent resolveActiveTab calls are consistent without requiring an
     // explicit tab switch after app startup.
-    for (const [tabId, wcId] of tabs) {
-      if (this.getWebContents(wcId)) {
-        this.activeWebContentsId = wcId
+    for (const [tabId, backendPageId] of tabs) {
+      const page = this.browserPages.getPage(tabId)
+      if (page?.identity.backendPageId === backendPageId) {
+        this.activePageId = tabId
         if (worktreeId) {
-          this.activeWebContentsPerWorktree.set(worktreeId, wcId)
+          this.activePagePerWorktree.set(worktreeId, tabId)
         }
-        return { browserPageId: tabId, webContentsId: wcId }
+        return { browserPageId: tabId, backendPageId }
       }
-      this.browserManager.unregisterGuest(tabId)
+      this.browserPages.unregisterPage(tabId)
     }
 
     throw new BrowserError(
@@ -2145,9 +2285,9 @@ export class AgentBrowserBridge {
     }
 
     const worktreesWithLiveTabs = new Set<string | undefined>()
-    for (const [tabId, wcId] of this.getRegisteredTabs(undefined)) {
-      if (this.getWebContents(wcId)) {
-        worktreesWithLiveTabs.add(this.browserManager.getWorktreeIdForTab(tabId))
+    for (const [tabId, backendPageId] of this.getRegisteredTabs(undefined)) {
+      if (this.browserPages.getPage(tabId)?.identity.backendPageId === backendPageId) {
+        worktreesWithLiveTabs.add(this.browserPages.getWorktreeIdForTab(tabId))
       }
     }
 
@@ -2168,14 +2308,19 @@ export class AgentBrowserBridge {
   private async ensureSession(
     sessionName: string,
     browserPageId: string,
-    webContentsId: number
+    backendPageId: string
   ): Promise<void> {
     const pendingDestruction = this.pendingSessionDestruction.get(sessionName)
     if (pendingDestruction) {
       await pendingDestruction
     }
 
-    if (this.sessions.has(sessionName)) {
+    const existingSession = this.sessions.get(sessionName)
+    if (existingSession) {
+      if (existingSession.backendPageId === backendPageId) {
+        return
+      }
+      await this.restartSessionForTarget(sessionName, browserPageId, backendPageId)
       return
     }
 
@@ -2189,8 +2334,8 @@ export class AgentBrowserBridge {
     }
 
     const createSession = async (): Promise<void> => {
-      const wc = this.getWebContents(webContentsId)
-      if (!wc) {
+      const page = this.browserPages.getPage(browserPageId)
+      if (!page || page.identity.backendPageId !== backendPageId) {
         // Why: the renderer can unregister/destroy a webview between target
         // resolution and session creation. Preserve the explicit page identity
         // so callers get the same error shape as a settled closed tab.
@@ -2206,7 +2351,7 @@ export class AgentBrowserBridge {
       // before we pass --cdp with the new port.
       await this.closeStaleAgentBrowserSession(sessionName)
 
-      const proxy = new CdpWsProxy(wc)
+      const proxy = new CdpWsProxy(page)
       const cdpEndpoint = await proxy.start()
 
       this.sessions.set(sessionName, {
@@ -2216,7 +2361,8 @@ export class AgentBrowserBridge {
         consecutiveTimeouts: 0,
         activeInterceptPatterns: [],
         activeCapture: false,
-        webContentsId,
+        backendPageId,
+        browserPageId,
         activeProcess: null
       })
     }
@@ -2233,7 +2379,7 @@ export class AgentBrowserBridge {
   private async restartSessionForTarget(
     sessionName: string,
     browserPageId: string,
-    webContentsId: number,
+    backendPageId: string,
     options: { recreate: boolean } = { recreate: true }
   ): Promise<void> {
     const pendingCreation = this.pendingSessionCreation.get(sessionName)
@@ -2275,7 +2421,7 @@ export class AgentBrowserBridge {
     }
 
     if (options.recreate) {
-      await this.ensureSession(sessionName, browserPageId, webContentsId)
+      await this.ensureSession(sessionName, browserPageId, backendPageId)
     }
   }
 
@@ -2373,10 +2519,12 @@ export class AgentBrowserBridge {
       throw this.createPageUnavailableError(sessionName)
     }
 
-    // Why: between enqueue time and execution time (queue delay), the webContents
-    // could be destroyed. Check here to give a clear error instead of letting the
-    // proxy fail with cryptic Electron debugger errors.
-    if (!this.getWebContents(session.webContentsId)) {
+    // Why: between enqueue time and execution time, the backend page may close or
+    // be replaced. Check the opaque instance identity before driving its proxy.
+    if (
+      this.browserPages.getPage(session.browserPageId)?.identity.backendPageId !==
+      session.backendPageId
+    ) {
       await this.destroySession(sessionName)
       throw this.createPageUnavailableError(sessionName)
     }
@@ -2386,13 +2534,13 @@ export class AgentBrowserBridge {
       commandArgs[0] === 'network' && (commandArgs[1] === 'route' || commandArgs[1] === 'unroute')
 
     // Why: --cdp is session-initialization only — first command needs it, subsequent don't.
-    // Pass as port number (not ws:// URL) so agent-browser hits the proxy's HTTP /json
-    // endpoint for target discovery. The proxy only exposes the webview, preventing
-    // agent-browser from picking the host renderer page.
+    // Pass the explicit IPv4 websocket endpoint. agent-browser resolves a numeric
+    // port through localhost, which may prefer ::1 while this private proxy is
+    // deliberately bound to 127.0.0.1; that miss silently launches a new Chrome.
+    // The proxy itself exposes only this page, so direct CDP cannot select the host renderer.
     const needsInit = !session.initialized
     if (needsInit) {
-      const port = session.proxy.getPort()
-      args.push('--cdp', String(port))
+      args.push('--cdp', session.cdpEndpoint)
     }
 
     // Why: exec passthrough can produce a large argv array; spreading it into
@@ -2410,7 +2558,7 @@ export class AgentBrowserBridge {
         sessionName,
         translated.error.message,
         translated.error.code,
-        session.webContentsId
+        session.backendPageId
       )
     }
 
@@ -2516,27 +2664,30 @@ export class AgentBrowserBridge {
     sessionName: string,
     message: string,
     fallbackCode: string,
-    webContentsId?: number
+    backendPageId?: string
   ): BrowserError {
     // Why: CDP "connection refused" can also mean a real proxy failure. Only
     // convert it to a closed-page error when bridge state confirms the target is gone.
     if (
       fallbackCode === 'browser_error' &&
       isTabClosedTransportError(message) &&
-      this.isSessionTargetClosed(sessionName, webContentsId)
+      this.isSessionTargetClosed(sessionName, backendPageId)
     ) {
       return this.createPageUnavailableError(sessionName)
     }
     return new BrowserError(fallbackCode, message)
   }
 
-  private isSessionTargetClosed(sessionName: string, webContentsId?: number): boolean {
+  private isSessionTargetClosed(sessionName: string, backendPageId?: string): boolean {
     const session = this.sessions.get(sessionName)
     if (!session) {
       return true
     }
-    const targetWebContentsId = webContentsId ?? session.webContentsId
-    return !this.getWebContents(targetWebContentsId)
+    const expectedBackendPageId = backendPageId ?? session.backendPageId
+    return (
+      this.browserPages.getPage(session.browserPageId)?.identity.backendPageId !==
+      expectedBackendPageId
+    )
   }
 
   private runAgentBrowserRaw(
@@ -2603,7 +2754,7 @@ export class AgentBrowserBridge {
                 if (parsed.error) {
                   const code = classifyErrorCode(parsed.error)
                   reject(
-                    this.createCommandError(sessionName, parsed.error, code, session?.webContentsId)
+                    this.createCommandError(sessionName, parsed.error, code, session?.backendPageId)
                   )
                   return
                 }
@@ -2613,7 +2764,7 @@ export class AgentBrowserBridge {
             }
             const message = stderr || error.message
             const code = classifyErrorCode(message)
-            reject(this.createCommandError(sessionName, message, code, session?.webContentsId))
+            reject(this.createCommandError(sessionName, message, code, session?.backendPageId))
             return
           }
 
@@ -2631,22 +2782,18 @@ export class AgentBrowserBridge {
     })
   }
 
-  private resolveTabIdSafe(webContentsId: number): string | null {
-    const tabs = this.browserManager.getWebContentsIdByTabId()
-    for (const [tabId, wcId] of tabs) {
-      if (wcId === webContentsId) {
-        return tabId
+  private async waitForReplacementPage(
+    browserPageId: string,
+    previousPage: BrowserPageHandle
+  ): Promise<BrowserPageHandle | null> {
+    const deadline = Date.now() + PAGE_REPLACEMENT_WAIT_TIMEOUT_MS
+    while (Date.now() < deadline) {
+      const page = this.browserPages.getPage(browserPageId)
+      if (page && page !== previousPage) {
+        return page
       }
+      await new Promise<void>((resolve) => setTimeout(resolve, PAGE_REPLACEMENT_POLL_MS))
     }
     return null
-  }
-
-  private getWebContents(webContentsId: number): Electron.WebContents | null {
-    try {
-      const { webContents } = require('electron')
-      return webContents.fromId(webContentsId) ?? null
-    } catch {
-      return null
-    }
   }
 }

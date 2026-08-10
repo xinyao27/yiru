@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import type {
   ComputerUsePermissionId,
@@ -126,7 +128,11 @@ export function ComputerUsePane(): React.JSX.Element {
     const operationId = ++permissionOperationSequence.current
     setLoading(true)
     try {
-      const result = await window.api.computerUsePermissions.getStatus()
+      const result = await callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissionsStatus,
+        {}
+      )
       if (operationId !== permissionOperationSequence.current) {
         return
       }
@@ -173,7 +179,11 @@ export function ComputerUsePane(): React.JSX.Element {
     useAppStore.getState().recordFeatureInteraction('computer-use-setup')
     setPendingId(id)
     try {
-      const result = await window.api.computerUsePermissions.openSetup({ id })
+      const result = await callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissions,
+        { id }
+      )
       if (!mountedRef.current) {
         return
       }
@@ -224,7 +234,11 @@ export function ComputerUsePane(): React.JSX.Element {
     const operationId = ++permissionOperationSequence.current
     setResetting(true)
     try {
-      const result = await window.api.computerUsePermissions.reset()
+      const result = await callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissionsReset,
+        {}
+      )
       if (operationId !== permissionOperationSequence.current) {
         return
       }

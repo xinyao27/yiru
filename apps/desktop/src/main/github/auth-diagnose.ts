@@ -1,4 +1,4 @@
-import type { GhAuthDiagnostic, GhAuthAccount } from '~shared/github-auth-types'
+import type { GhAuthAccount } from '~shared/github-auth-types'
 
 /**
  * gh CLI auth diagnostics.
@@ -13,9 +13,6 @@ import type { GhAuthDiagnostic, GhAuthAccount } from '~shared/github-auth-types'
  * Output is parsed from `gh auth status`, which prints free-form text but
  * uses stable field labels ("Token scopes:", "(GITHUB_TOKEN)", etc.).
  */
-import { ghExecFileAsync } from '../git/runner'
-
-const REQUIRED_SCOPES = ['repo'] as const
 
 /**
  * Parse `gh auth status` stderr/stdout. gh writes to stderr by default but
@@ -86,59 +83,4 @@ export function parseAuthStatus(text: string): GhAuthAccount[] {
     accounts.push(current)
   }
   return accounts
-}
-
-export async function diagnoseGhAuth(): Promise<GhAuthDiagnostic> {
-  let raw = ''
-  let ghAvailable = true
-  try {
-    // `gh auth status` exits non-zero when no host is logged in but still
-    // prints the same diagnostic text we want, so capture both streams.
-    const { stdout, stderr } = await ghExecFileAsync(['auth', 'status'])
-    raw = `${stdout}\n${stderr}`
-  } catch (err) {
-    const stderr =
-      err && typeof err === 'object' && 'stderr' in err
-        ? String((err as { stderr?: unknown }).stderr ?? '')
-        : ''
-    const stdout =
-      err && typeof err === 'object' && 'stdout' in err
-        ? String((err as { stdout?: unknown }).stdout ?? '')
-        : ''
-    raw = `${stdout}\n${stderr}`
-    if (!raw.trim()) {
-      const message = err instanceof Error ? err.message : String(err)
-      // Most likely cause: gh CLI not installed or not on PATH.
-      if (/ENOENT|not found|command not found/i.test(message)) {
-        ghAvailable = false
-      }
-      raw = message
-    }
-  }
-  const accounts = parseAuthStatus(raw)
-  const active = accounts.find((a) => a.active) ?? accounts[0] ?? null
-  const envTokenInProcess: 'GITHUB_TOKEN' | 'GH_TOKEN' | null = process.env.GH_TOKEN
-    ? 'GH_TOKEN'
-    : process.env.GITHUB_TOKEN
-      ? 'GITHUB_TOKEN'
-      : null
-  const missingScopes = active
-    ? REQUIRED_SCOPES.filter((s) => !active.scopes.includes(s))
-    : [...REQUIRED_SCOPES]
-  // Is there a non-env (keyring) account we could fall back to by unsetting
-  // the env var? Only meaningful if the active account is env-shadowed, and
-  // only if the keyring login is on the SAME host — otherwise unsetting the
-  // env var leaves the user with no credential for the host that was active.
-  const keyringFallback = active
-    ? (accounts.find((a) => a.source === 'keyring' && a.host === active.host) ?? null)
-    : null
-  return {
-    ghAvailable,
-    activeAccount: active,
-    accounts,
-    envTokenInProcess,
-    missingScopes,
-    requiredScopes: [...REQUIRED_SCOPES],
-    hasKeyringFallback: Boolean(keyringFallback && keyringFallback !== active)
-  }
 }

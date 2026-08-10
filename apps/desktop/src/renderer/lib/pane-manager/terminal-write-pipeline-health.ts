@@ -63,7 +63,7 @@ function certifyTerminalWritePipelineDead(terminal: object, expectedWatch?: Stal
     try {
       watch.onCertifiedDead?.()
     } catch {
-      // Why: discard can bottom out in a partial window.api surface; recovery
+      // Why: discard can bottom out in a partial rendererHostClient surface; recovery
       // notification must still run after cleanup fails.
     }
   }

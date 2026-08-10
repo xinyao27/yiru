@@ -1,14 +1,13 @@
 /* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { setDriverForPty } from '~renderer/lib/pane-manager/mobile-driver-state'
 import { setFitOverride } from '~renderer/lib/pane-manager/mobile-fit-overrides'
+import { callRuntimeOrpcByPath } from '~renderer/runtime/orpc-client'
 import {
   getRemoteRuntimeTerminalMultiplexer,
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
 } from '~renderer/runtime/remote-runtime-terminal-multiplexer'
-import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle,
@@ -249,14 +248,18 @@ export function createRemoteRuntimePtyTransport(
     } satisfies PtyConnectResult
   }
 
+  // Why: dispatches by contract path through the negotiated oRPC client
+  // instead of the runtime-environment transport adapter with a bare method
+  // string — the bare-string channel skips capability negotiation and always
+  // lands on the legacy dispatcher, which no longer serves domains retired
+  // from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
   async function callRuntime<TResult>(method: string, params?: unknown): Promise<TResult> {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: currentRuntimeEnvironmentId,
-      method,
+    return callRuntimeOrpcByPath<TResult>(
+      { kind: 'environment', environmentId: currentRuntimeEnvironmentId },
+      method.split('.'),
       params,
-      timeoutMs: 15_000
-    })
-    return unwrapRuntimeRpcResult(response as RuntimeRpcResponse<TResult>)
+      { timeoutMs: 15_000 }
+    )
   }
 
   async function closeRemoteTerminal(handleOverride?: string): Promise<void> {

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { app } from 'electron'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 const MAX_BROWSER_DOWNLOAD_COLLISION_ATTEMPTS = 1_000
 const WINDOWS_RESERVED_FILENAME_CHARS = new Set(['<', '>', ':', '"', '|', '?', '*'])
@@ -60,7 +60,8 @@ export class BrowserDownloadDestinationReservations {
 
   constructor(options: BrowserDownloadDestinationOptions = {}) {
     this.pathExists = options.pathExists ?? existsSync
-    this.downloadsPath = () => options.downloadsPath ?? app.getPath('downloads')
+    this.downloadsPath = () =>
+      options.downloadsPath ?? getRuntimeHostPathsProvider().downloadsPath()
     this.platform = options.platform ?? process.platform
   }
 

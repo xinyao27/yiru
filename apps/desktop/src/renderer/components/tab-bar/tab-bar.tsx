@@ -43,10 +43,8 @@ import type {
   Tab,
   TerminalTab,
   TuiAgent,
-  WorkspacePanelTabContentType,
   WorkspaceVisibleTabType
 } from '~shared/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import type { OpenFile } from '../editor/state'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'
@@ -59,6 +57,7 @@ import BrowserTab, { getBrowserTabLabel } from './browser-tab'
 import TabBarCreateEntry from './create-entry'
 import type { DropIndicator } from './drop-indicator'
 import EditorFileTab from './editor-file-tab'
+import { GitGraphTab } from './git-graph-tab'
 import { QuickLaunchAgentMenuItems } from './quick-launch-button'
 import { reconcileTabOrder } from './reconcile-order'
 import { ShellIcon } from './shell-icons'
@@ -72,7 +71,6 @@ import type { TabCreateEntryArgs } from './tab-create-entry-action'
 import { buildTabCreateMenuOptions, type TabCreateMenuOption } from './tab-create-menu-options'
 import { resolveWindowsShellLaunchTarget } from './windows-shell-launch'
 import { shouldShowWindowsShellMenu } from './windows-shell-menu-visibility'
-import { WorkspacePanelTab } from './workspace-panel-tab'
 import { WorkspaceNewTerminalMenuItem, WorkspaceTabCreateMenu } from './workspace-tab-create-menu'
 import { WorkspaceTabStripViewport } from './workspace-tab-strip-viewport'
 
@@ -127,12 +125,12 @@ type TabBarProps = {
   activeFileId?: string | null
   activeBrowserTabId?: string | null
   activeSimulatorTabId?: string | null
-  activeWorkspacePanelTabId?: string | null
+  activeGitGraphTabId?: string | null
   activeTabType?: WorkspaceVisibleTabType
   onActivateFile?: (fileId: string) => void
   onCloseFile?: (fileId: string) => void
   onActivateBrowserTab?: (tabId: string) => void
-  onActivateWorkspacePanelTab?: (tabId: string) => void
+  onActivateGitGraphTab?: (tabId: string) => void
   onCloseBrowserTab?: (tabId: string) => void
   onDuplicateBrowserTab?: (tabId: string) => void
   onCloseAllFiles?: () => void
@@ -172,11 +170,11 @@ type TabItem =
       data: Tab
     }
   | {
-      type: 'workspace-panel'
+      type: 'git-graph'
       id: string
       unifiedTabId: string
       isPinned: boolean
-      data: Tab & { contentType: WorkspacePanelTabContentType }
+      data: Tab & { contentType: 'git-graph' }
     }
 
 function getTabDragLabel(item: TabItem, generatedTitlesEnabled: boolean): string {
@@ -189,7 +187,7 @@ function getTabDragLabel(item: TabItem, generatedTitlesEnabled: boolean): string
   if (item.type === 'simulator') {
     return item.data.label || 'Mobile Emulator'
   }
-  if (item.type === 'workspace-panel') {
+  if (item.type === 'git-graph') {
     return item.data.label
   }
   return getEditorDisplayLabel(item.data)
@@ -262,12 +260,12 @@ function TabBarInner({
   activeFileId,
   activeBrowserTabId,
   activeSimulatorTabId,
-  activeWorkspacePanelTabId,
+  activeGitGraphTabId,
   activeTabType,
   onActivateFile,
   onCloseFile,
   onActivateBrowserTab,
-  onActivateWorkspacePanelTab,
+  onActivateGitGraphTab,
   onCloseBrowserTab,
   onDuplicateBrowserTab,
   onCloseAllFiles,
@@ -868,22 +866,19 @@ function TabBarInner({
         .map((t) => t.id),
     [unifiedTabs, resolvedGroupId]
   )
-  const workspacePanelTabs = useMemo(
+  const gitGraphTabs = useMemo(
     () =>
       (unifiedTabs ?? []).filter(
-        (tab): tab is Tab & { contentType: WorkspacePanelTabContentType } =>
-          tab.groupId === resolvedGroupId && isWorkspacePanelTabContentType(tab.contentType)
+        (tab): tab is Tab & { contentType: 'git-graph' } =>
+          tab.groupId === resolvedGroupId && tab.contentType === 'git-graph'
       ),
     [resolvedGroupId, unifiedTabs]
   )
-  const workspacePanelMap = useMemo(
-    () => new Map(workspacePanelTabs.map((tab) => [tab.id, tab])),
-    [workspacePanelTabs]
+  const gitGraphMap = useMemo(
+    () => new Map(gitGraphTabs.map((tab) => [tab.id, tab])),
+    [gitGraphTabs]
   )
-  const workspacePanelTabIds = useMemo(
-    () => workspacePanelTabs.map((tab) => tab.id),
-    [workspacePanelTabs]
-  )
+  const gitGraphTabIds = useMemo(() => gitGraphTabs.map((tab) => tab.id), [gitGraphTabs])
 
   // Build the unified ordered list, reconciling stored order with current items
   const orderedItems = useMemo(() => {
@@ -893,7 +888,7 @@ function TabBarInner({
       editorFileIds,
       browserTabIds,
       simulatorTabIds,
-      workspacePanelTabIds
+      gitGraphTabIds
     )
     const items: TabItem[] = []
     for (const id of ids) {
@@ -944,14 +939,14 @@ function TabBarInner({
         })
         continue
       }
-      const workspacePanel = workspacePanelMap.get(id)
-      if (workspacePanel) {
+      const gitGraph = gitGraphMap.get(id)
+      if (gitGraph) {
         items.push({
-          type: 'workspace-panel',
+          type: 'git-graph',
           id,
-          unifiedTabId: workspacePanel.id,
-          isPinned: workspacePanel.isPinned === true,
-          data: workspacePanel
+          unifiedTabId: gitGraph.id,
+          isPinned: gitGraph.isPinned === true,
+          data: gitGraph
         })
       }
     }
@@ -962,12 +957,12 @@ function TabBarInner({
     editorFileIds,
     browserTabIds,
     simulatorTabIds,
-    workspacePanelTabIds,
+    gitGraphTabIds,
     terminalMap,
     editorMap,
     browserMap,
     unifiedTabByVisibleId,
-    workspacePanelMap
+    gitGraphMap
   ])
 
   const sortableIds = useMemo(() => orderedItems.map((item) => item.id), [orderedItems])
@@ -998,8 +993,8 @@ function TabBarInner({
       if (item.type === 'simulator') {
         return activeTabType === 'simulator' && item.id === activeSimulatorTabId
       }
-      if (item.type === 'workspace-panel') {
-        return item.id === activeWorkspacePanelTabId
+      if (item.type === 'git-graph') {
+        return item.id === activeGitGraphTabId
       }
       return (
         (activeTabType === 'editor' || activeTabType === 'simulator') && activeFileId === item.id
@@ -1010,7 +1005,7 @@ function TabBarInner({
     activeBrowserTabId,
     activeFileId,
     activeSimulatorTabId,
-    activeWorkspacePanelTabId,
+    activeGitGraphTabId,
     activeTabId,
     activeTabType,
     orderedItems
@@ -1192,15 +1187,14 @@ function TabBarInner({
                 />
               )
             }
-            if (item.type === 'workspace-panel') {
+            if (item.type === 'git-graph') {
               return (
-                <WorkspacePanelTab
+                <GitGraphTab
                   key={item.id}
                   id={item.id}
-                  panel={item.data.contentType}
                   label={item.data.label}
-                  isActive={item.id === activeWorkspacePanelTabId}
-                  onActivate={() => onActivateWorkspacePanelTab?.(item.id)}
+                  isActive={item.id === activeGitGraphTabId}
+                  onActivate={() => onActivateGitGraphTab?.(item.id)}
                   onClose={() => onCloseFile?.(item.id)}
                   dragData={dragData}
                   dropIndicator={dropIndicatorByVisibleId.get(item.id) ?? null}

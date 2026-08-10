@@ -4,6 +4,7 @@ import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import type { RuntimeGitContext } from '~renderer/runtime/git-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { GitHistoryItem } from '~shared/git/history'
 
@@ -139,7 +140,7 @@ export function useGitGraphCommitWriteActions({
 
   const copyCommitSubject = useCallback(async (item: GitHistoryItem): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(item.subject)
+      await shellClient.ui.writeClipboardText(item.subject)
       toast.success(
         translate(
           'auto.components.workspace-panel.git-graph.CommitWriteActions.subjectCopied',

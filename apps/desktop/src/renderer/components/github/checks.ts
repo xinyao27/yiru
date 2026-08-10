@@ -46,7 +46,6 @@ export function syncPRChecksStatus(
   headSha?: string,
   prRepo?: GitHubOwnerRepo | null,
   settings?: AppState['settings'],
-  connectionId?: string | null,
   executionHostId?: string | null,
   hasRepoOwner = false
 ): Partial<AppState> | null {
@@ -60,7 +59,6 @@ export function syncPRChecksStatus(
     repoId,
     normalized,
     settings,
-    connectionId,
     executionHostId,
     hasRepoOwner
   )

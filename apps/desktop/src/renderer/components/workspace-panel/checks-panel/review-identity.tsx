@@ -93,27 +93,11 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
   const isFolder = repo ? isFolderRepo(repo) : false
   const prCacheKey =
     repo && branch
-      ? getGitHubPRCacheKey(
-          repo.path,
-          repo.id,
-          branch,
-          settings,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
+      ? getGitHubPRCacheKey(repo.path, repo.id, branch, settings, repo.executionHostId, true)
       : ''
   const hostedReviewCacheKey =
     repo && branch
-      ? getHostedReviewCacheKey(
-          repo.path,
-          branch,
-          settings,
-          repo.id,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
+      ? getHostedReviewCacheKey(repo.path, branch, settings, repo.id, repo.executionHostId, true)
       : ''
   const refreshContextKey = `${activeWorktreeId ?? ''}::${prCacheKey}::${branch}`
   if (refreshContextKey !== refreshContextKeyRef.current) {

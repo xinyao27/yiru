@@ -14,6 +14,7 @@ import {
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { MobileNetworkInterface } from './network-interface-selection'
 
@@ -142,7 +143,7 @@ export function MobilePairingSetupSection({
               variant="ghost"
               size="xs"
               type="button"
-              onClick={() => void window.api.shell.openUrl(TAILSCALE_DOWNLOAD_URL)}
+              onClick={() => void shellClient.shell.openUrl(TAILSCALE_DOWNLOAD_URL)}
               className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline-offset-2 hover:underline"
             >
               {translate(

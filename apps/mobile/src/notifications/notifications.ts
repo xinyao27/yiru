@@ -1,8 +1,10 @@
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { loadPushNotificationsEnabled } from '../storage/preferences'
-import type { RpcClient } from '../transport/rpc-client'
 import {
   createCatchUpWatermark,
   createSeenNotificationGuard,
@@ -27,11 +29,6 @@ type DismissNotificationEvent = {
   type: 'dismiss'
   notificationId: string
   notificationSeq?: number
-}
-
-type SubscribeResult = {
-  type: 'ready'
-  subscriptionId: string
 }
 
 type ScheduledNotificationState = {
@@ -283,15 +280,12 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
     if (disposed) {
       return
     }
-    const missed = await client
-      .sendRequest('notifications.getMissedSince', { lastSeenSeq: watermark.value() })
-      .then((response) => {
-        if (!response.ok) {
-          return []
-        }
-        const result = response.result as { notifications?: unknown[] } | undefined
-        return Array.isArray(result?.notifications) ? result.notifications : []
-      })
+    const missed = await callRuntimeOrpc(
+      client,
+      (runtime) => runtime.notifications.getMissedSince,
+      { lastSeenSeq: watermark.value() }
+    )
+      .then((result) => result.notifications)
       .catch(() => [])
     for (const raw of missed) {
       const event = raw as NotificationEvent | DismissNotificationEvent
@@ -318,43 +312,45 @@ export function subscribeToDesktopNotifications(client: RpcClient, hostId: strin
 
   function unsubscribeServer(id: string) {
     if (client.getState() === 'connected') {
-      client.sendRequest('notifications.unsubscribe', { subscriptionId: id }).catch(() => {})
+      callRuntimeOrpc(client, (runtime) => runtime.notifications.unsubscribe, {
+        subscriptionId: id
+      }).catch(() => {})
     }
   }
 
   let reconnectReadyCount = 0
-  const unsubscribeStream = client.subscribe('notifications.subscribe', {}, (data: unknown) => {
-    const event = data as
-      | NotificationEvent
-      | DismissNotificationEvent
-      | SubscribeResult
-      | { type: 'end' }
-    if (event.type === 'ready') {
-      subscriptionId = (event as SubscribeResult).subscriptionId
-      reconnectReadyCount += 1
-      if (disposed) {
-        unsubscribeServer(subscriptionId)
-        unsubscribeStream()
+  const unsubscribeStream = subscribeRuntimeOrpc(
+    client,
+    (runtime) => runtime.notifications.subscribe,
+    undefined,
+    (event) => {
+      if (event.type === 'ready') {
+        subscriptionId = event.subscriptionId
+        reconnectReadyCount += 1
+        if (disposed) {
+          unsubscribeServer(subscriptionId)
+          unsubscribeStream()
+          return
+        }
+        watermark.notifyReady(reconnectReadyCount)
         return
       }
-      watermark.notifyReady(reconnectReadyCount)
-      return
-    }
-    if (event.type === 'end') {
-      if (disposed) {
-        unsubscribeStream()
+      if (event.type === 'end') {
+        if (disposed) {
+          unsubscribeStream()
+        }
+        return
       }
-      return
+      if (disposed) {
+        return
+      }
+      if (event.type === 'notification') {
+        void deliverLive('notification', event)
+      } else if (event.type === 'dismiss') {
+        void deliverLive('dismiss', event)
+      }
     }
-    if (disposed) {
-      return
-    }
-    if (event.type === 'notification') {
-      void deliverLive('notification', event as NotificationEvent)
-    } else if (event.type === 'dismiss') {
-      void deliverLive('dismiss', event as DismissNotificationEvent)
-    }
-  })
+  )
 
   return () => {
     disposed = true

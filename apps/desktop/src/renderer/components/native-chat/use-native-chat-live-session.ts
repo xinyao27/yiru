@@ -79,7 +79,7 @@ const EMPTY_MESSAGES: readonly NativeChatMessage[] = []
  * Transport: IO goes through a per-owner session transport selected by
  * getNativeChatSessionTransport. A runtime-owned pane (Model B) reads/tails the
  * REMOTE runtime host via the runtime RPCs; local- and ssh-owned panes keep the
- * local IPC path. The transport preserves the NativeChatApi read/subscribe shape,
+ * local runtime path. The transport preserves the native-chat read/subscribe shape,
  * so everything below (merge, assembler, pagination) is unchanged.
  *
  * Teardown: the subscription is closed on unmount and whenever the owner, agent,

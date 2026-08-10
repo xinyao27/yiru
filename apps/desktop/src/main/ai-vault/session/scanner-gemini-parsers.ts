@@ -39,23 +39,6 @@ export async function parseGeminiSessionFile(
   return parseGeminiJsonSessionContent(file, await readFile(file.path, 'utf-8'), platform)
 }
 
-export async function parseGeminiSessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ResumableParseFinalizeOptions = {}
-): Promise<AiVaultSession | null> {
-  if (file.path.endsWith('.jsonl')) {
-    return parseGeminiJsonlSessionLines({
-      file,
-      lines: content.split(/\r?\n/),
-      platform,
-      options
-    })
-  }
-  return parseGeminiJsonSessionContent(file, content, platform, options)
-}
-
 function parseGeminiJsonSessionContent(
   file: FileWithMtime,
   content: string,

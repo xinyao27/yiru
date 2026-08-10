@@ -1,6 +1,7 @@
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
-import type { RpcClient } from '../transport/rpc-client'
 import { isMobileGitUnavailable } from './git-status'
 
 type RuntimeRepoSummary = {
@@ -60,30 +61,40 @@ export async function resolveMobileBranchCompareBaseRef(
   }
 
   const [worktreeResponse, repoResponse] = await Promise.all([
-    client.sendRequest('worktree.show', { worktree: `id:${worktreeId}` }).catch(() => null),
-    client.sendRequest('repo.list').catch(() => null)
+    callRuntimeOrpc(client, (runtime) => runtime.worktree.show, {
+      worktree: `id:${worktreeId}`
+    }).catch(() => null),
+    callRuntimeOrpc(client, (runtime) => runtime.repo.list, undefined).catch(() => null)
   ])
-  if (worktreeResponse?.ok) {
-    const worktreeBaseRef = readWorktreeSummary(worktreeResponse.result)?.baseRef?.trim() || null
+  if (worktreeResponse) {
+    const worktreeBaseRef = readWorktreeSummary(worktreeResponse)?.baseRef?.trim() || null
     if (worktreeBaseRef) {
       return worktreeBaseRef
     }
   }
 
-  if (repoResponse?.ok) {
-    const repo = readRepoSummaries(repoResponse.result).find((candidate) => candidate.id === repoId)
+  if (repoResponse) {
+    const repo = readRepoSummaries(repoResponse).find((candidate) => candidate.id === repoId)
     const repoBaseRef = repo?.worktreeBaseRef?.trim() || null
     if (repoBaseRef) {
       return repoBaseRef
     }
   }
 
-  const defaultResponse = await client.sendRequest('repo.baseRefDefault', { repo: `id:${repoId}` })
-  if (!defaultResponse.ok) {
-    if (isMobileGitUnavailable(defaultResponse.error?.code, defaultResponse.error?.message)) {
+  try {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.repo.baseRefDefault, {
+      repo: `id:${repoId}`
+    })
+    return readDefaultBaseRef(result)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined
+    if (
+      isRuntimeOrpcErrorCode(error, 'forbidden') ||
+      isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+      isMobileGitUnavailable(undefined, message)
+    ) {
       return null
     }
-    throw new Error(defaultResponse.error?.message || 'Unable to resolve branch base')
+    throw error
   }
-  return readDefaultBaseRef(defaultResponse.result)
 }

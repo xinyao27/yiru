@@ -5,8 +5,6 @@ import { useAppStore } from '~renderer/store'
 import { cancelPendingSimulatorPaneShutdown } from '../emulator-pane/simulator-pane-shutdown-scheduler'
 import { findReusableRightSplitGroupId } from './emulator-right-split-target'
 
-export const isMacOsHost = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac')
-
 type EnsureSimulatorTabOptions = {
   targetGroupId?: string
   placement?: 'activeGroup' | 'rightSplit'
@@ -104,22 +102,6 @@ export function ensureSimulatorTab(
     store.focusGroup(worktreeId, tab.groupId)
   }
   return tab.id
-}
-
-export function countSimulatorTabs(
-  worktreeId: string,
-  options: { excludingTabId?: string } = {}
-): number {
-  return (useAppStore.getState().unifiedTabsByWorktree[worktreeId] ?? []).filter(
-    (tab) => tab.contentType === 'simulator' && tab.id !== options.excludingTabId
-  ).length
-}
-
-export function shouldShutdownSimulatorForPaneUnmount(worktreeId: string, tabId?: string): boolean {
-  return shouldShutdownSimulatorForPaneUnmountFromTabs(
-    useAppStore.getState().unifiedTabsByWorktree[worktreeId] ?? [],
-    tabId
-  )
 }
 
 export { shouldShutdownSimulatorForPaneUnmountFromTabs }

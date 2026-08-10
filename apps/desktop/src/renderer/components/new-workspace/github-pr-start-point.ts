@@ -1,4 +1,6 @@
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import type { GitHubPrStartPoint, GlobalSettings } from '~shared/types'
 
 type PrStartPointSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
@@ -29,10 +31,10 @@ export async function resolveGitHubPrStartPointForRepo({
   }
   const result =
     target.kind === 'local'
-      ? await window.api.worktrees.resolvePrBase({ repoId, ...prFields })
-      : await callRuntimeRpc<GitHubPrStartPoint | { error: string }>(
+      ? await workspaceHostClient.worktrees.resolvePrBase({ repoId, ...prFields })
+      : await callRuntimeOrpc(
           target,
-          'worktree.resolvePrBase',
+          (client) => client.worktree.resolvePrBase,
           { repo: repoId, ...prFields },
           { timeoutMs: 30_000 }
         )

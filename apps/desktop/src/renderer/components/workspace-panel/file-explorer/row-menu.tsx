@@ -30,6 +30,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { openFileInBrowserTab } from '~renderer/lib/file-preview'
 import { detectLanguage } from '~renderer/lib/language-detect'
 import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import {
@@ -113,25 +114,17 @@ export function FileExplorerRowMenu({
   const copyPathShortcutLabel = useShortcutLabel('fileExplorer.copyPath')
   const copyRelativePathShortcutLabel = useShortcutLabel('fileExplorer.copyRelativePath')
   const findInFolderShortcutLabel = useShortcutLabel('sidebar.search.toggle')
-  const showDownload = shouldShowRemoteDownloadAction(node, connectionId, runtimeDownloadContext)
+  const showDownload = shouldShowRemoteDownloadAction(runtimeDownloadContext)
 
   const handleReveal = (): void => {
     const state = useAppStore.getState()
-    const activeWorktree = Object.values(state.worktreesByRepo)
-      .flat()
-      .find((worktree) => worktree.id === activeWorktreeId)
-    const activeRepo = activeWorktree
-      ? state.repos.find((repo) => repo.id === activeWorktree.repoId)
-      : null
-    if (
-      isLocalPathOpenBlocked(state.settings, {
-        connectionId: activeRepo?.connectionId ?? null
-      })
-    ) {
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a direct repo/worktree owner is never SSH.
+    if (isLocalPathOpenBlocked(state.settings, { connectionId: null })) {
       showLocalPathOpenBlockedToast()
       return
     }
-    window.api.shell.openPath(node.path)
+    shellClient.shell.openPath(node.path)
   }
 
   return (

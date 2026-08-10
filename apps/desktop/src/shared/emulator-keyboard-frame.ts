@@ -105,21 +105,6 @@ export function buildServeSimKeyboardFramesForKey(
     : buildKeyUsageFrames({ shift: false, usage: namedUsage }, modifiers)
 }
 
-export function buildServeSimKeyboardFramesForText(text: string): ServeSimKeyboardFrame[] | null {
-  const frames: ServeSimKeyboardFrame[] = []
-  for (const char of text) {
-    if (char === '\r') {
-      continue
-    }
-    const charFrames = buildServeSimKeyboardFramesForKey(char)
-    if (!charFrames) {
-      return null
-    }
-    frames.push(...charFrames)
-  }
-  return frames
-}
-
 export function encodeServeSimKeyboardFrame(key: ServeSimKeyboardFrame): Uint8Array<ArrayBuffer> {
   const json = new TextEncoder().encode(JSON.stringify(key))
   const frame = new Uint8Array(1 + json.length)

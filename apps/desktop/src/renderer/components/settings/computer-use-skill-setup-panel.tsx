@@ -14,6 +14,7 @@ import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
 } from '~renderer/lib/agent-skill-cli-prerequisite'
+import { readCliInstallStatus, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from './agent/skill-setup-panel'
@@ -68,10 +69,8 @@ export function ComputerUseSkillSetupPanel(): React.JSX.Element {
       preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
       getPrerequisiteStatus={() =>
         activeSkillRuntime.agentRuntime?.runtime === 'wsl'
-          ? window.api.cli.getWslInstallStatus(
-              getWslCliDistroRequest(activeSkillRuntime.agentRuntime)
-            )
-          : window.api.cli.getInstallStatus()
+          ? readWslCliInstallStatus(getWslCliDistroRequest(activeSkillRuntime.agentRuntime))
+          : readCliInstallStatus()
       }
       onBeforeOpenTerminal={async () => {
         useAppStore.getState().recordFeatureInteraction('computer-use-setup')

@@ -2,6 +2,7 @@ import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useRef } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import {
   nativeChatWorktreeNotReadyNotice,
@@ -77,7 +78,7 @@ export function useNativeChatComposerPaste({
       try {
         // Remote panes save the image on the remote host so the attached
         // path is readable by the remote agent, matching terminal image paste.
-        const tempPath = await window.api.ui.saveClipboardImageAsTempFile(
+        const tempPath = await shellClient.ui.saveClipboardImageAsTempFile(
           owner.kind === 'ssh' ? { connectionId: owner.connectionId } : undefined
         )
         return tempPath ? { status: 'saved', tempPath } : { status: 'empty' }
@@ -177,7 +178,7 @@ export function useNativeChatComposerPaste({
         attachClipboardImageTempFile(saved.tempPath)
         return
       }
-      const text = await window.api.ui
+      const text = await shellClient.ui
         .readClipboardText({ maxBytes: NATIVE_CHAT_CONTEXT_PASTE_MAX_BYTES })
         .catch(() => '')
       if (disabledRef.current) {

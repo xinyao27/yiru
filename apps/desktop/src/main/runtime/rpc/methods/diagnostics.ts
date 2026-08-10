@@ -1,13 +1,10 @@
-import { defineMethod, type RpcMethod } from '../core'
+import type { MemorySnapshot } from '~shared/types'
 
-export const DIAGNOSTICS_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'diagnostics.memory',
-    mobile: true,
-    params: null,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (_params, { runtime }) => {
-      return await runtime.getMemorySnapshot()
-    }
-  })
-]
+import type { RpcContext } from '../core'
+
+export async function handleDiagnosticsMemory(
+  _params: void,
+  { runtime }: RpcContext
+): Promise<MemorySnapshot> {
+  return await runtime.getMemorySnapshot()
+}

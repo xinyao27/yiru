@@ -100,12 +100,14 @@ export function getFileExplorerWatchRuntimeEnvironmentId(
 /**
  * Reconciles File Explorer state on filesystem events for the active worktree.
  *
- * Why: `useEditorExternalWatch` (invoked once from application-shell.tsx) owns the
- * `watchWorktree` / `unwatchWorktree` IPC lifecycle so editor reloads keep
- * firing even when the Explorer panel is unmounted (user switched to Source
- * Control, Checks, or Search). This hook just subscribes to the shared
- * `fs:changed` stream and filters to the active worktree for tree-cache
- * reconciliation.
+ * Why: this hook owns its own `subscribeRuntimeFileChanges` subscription for
+ * the active worktree and filters events for tree-cache reconciliation.
+ * `useEditorExternalWatch` (invoked once from application-shell.tsx) keeps
+ * editor reloads firing independently, even when the Explorer panel is
+ * unmounted (user switched to Source Control, Checks, or Search) — both
+ * hooks' subscriptions share one underlying `files.watch` stream per
+ * worktree via `sharedRuntimeFileWatches` (`renderer/runtime/file-
+ * client.ts`), so neither pays for a duplicate watcher.
  */
 export function useFileExplorerWatch({
   worktreePath,
@@ -315,9 +317,15 @@ export function useFileExplorerWatch({
 
     let disposed = false
     let unsubscribeListener: (() => void) | null = null
-    if (activeRuntimeEnvironmentId?.trim() && activeWorktreeId) {
-      // Why: remote runtime watch events do not enter the local Electron
-      // fs:changed bus, so the Explorer subscribes directly while it is mounted.
+    // Why: `files.watch` (contract) targets `{ kind: 'local' }` for a
+    // worktree with no runtime owner the same way it targets a remote
+    // environment for one that has one (`getActiveRuntimeTarget`), and shares
+    // the underlying subscription with `useEditorExternalWatch` via
+    // `sharedRuntimeFileWatches` — so the Explorer subscribes the same way
+    // for every target instead of falling back to the (now-retired) local
+    // legacy global filesystem IPC bus. Verified against a real local target by
+    // CDP-driven boot (slice 122).
+    if (activeWorktreeId) {
       void subscribeRuntimeFileChanges(
         {
           settings: { activeRuntimeEnvironmentId },
@@ -348,8 +356,6 @@ export function useFileExplorerWatch({
             error: err instanceof Error ? err.message : String(err)
           })
         })
-    } else {
-      unsubscribeListener = window.api.fs.onFsChanged(handleFsChanged)
     }
 
     return () => {
@@ -375,7 +381,7 @@ export function useFileExplorerWatch({
       // Why: replay every deferred payload through `processPayload` so the
       // tree cache reconciles to disk state after inline input or drag ends
       // (design §6.2). Editor-tab reloads are handled independently by
-      // `useEditorExternalWatch`, which listens to the same fs:changed
+      // `useEditorExternalWatch`, which listens to the same file-watch
       // stream at App-level and is not affected by Explorer deferral.
       if (processPayloadRef.current) {
         for (const payload of deferred) {

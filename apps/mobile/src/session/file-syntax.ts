@@ -1,6 +1,38 @@
-import { common, createLowlight } from 'lowlight'
+import HighlightJs from 'highlight.js/lib/core'
+import bash from 'highlight.js/lib/languages/bash'
+import c from 'highlight.js/lib/languages/c'
+import cmake from 'highlight.js/lib/languages/cmake'
+import cpp from 'highlight.js/lib/languages/cpp'
+import csharp from 'highlight.js/lib/languages/csharp'
+import css from 'highlight.js/lib/languages/css'
+import dockerfile from 'highlight.js/lib/languages/dockerfile'
+import go from 'highlight.js/lib/languages/go'
+import graphql from 'highlight.js/lib/languages/graphql'
+import ini from 'highlight.js/lib/languages/ini'
+import java from 'highlight.js/lib/languages/java'
+import javascript from 'highlight.js/lib/languages/javascript'
+import json from 'highlight.js/lib/languages/json'
+import kotlin from 'highlight.js/lib/languages/kotlin'
+import less from 'highlight.js/lib/languages/less'
+import lua from 'highlight.js/lib/languages/lua'
+import makefile from 'highlight.js/lib/languages/makefile'
+import markdown from 'highlight.js/lib/languages/markdown'
+import php from 'highlight.js/lib/languages/php'
+import plaintext from 'highlight.js/lib/languages/plaintext'
+import powershell from 'highlight.js/lib/languages/powershell'
+import python from 'highlight.js/lib/languages/python'
+import r from 'highlight.js/lib/languages/r'
+import ruby from 'highlight.js/lib/languages/ruby'
+import rust from 'highlight.js/lib/languages/rust'
+import scss from 'highlight.js/lib/languages/scss'
+import sql from 'highlight.js/lib/languages/sql'
+import swift from 'highlight.js/lib/languages/swift'
+import typescript from 'highlight.js/lib/languages/typescript'
+import xml from 'highlight.js/lib/languages/xml'
+import yaml from 'highlight.js/lib/languages/yaml'
 
 import { detectMobileFileLanguage } from './file-language'
+import { MobileSyntaxEmitter, type MobileSyntaxNode } from './file-syntax-emitter'
 
 export type MobileSyntaxTokenKind =
   | 'plain'
@@ -23,16 +55,39 @@ export type MobileHighlightedDiffLine<TLine> = TLine & {
   highlighted: boolean
 }
 
-type LowlightNode = {
-  type: string
-  value?: string
-  properties?: {
-    className?: unknown
-  }
-  children?: LowlightNode[]
-}
-
-const lowlight = createLowlight(common)
+const highlighter = HighlightJs.newInstance()
+highlighter.configure({ __emitter: MobileSyntaxEmitter, classPrefix: 'hljs-' })
+highlighter.registerLanguage('bash', bash)
+highlighter.registerLanguage('c', c)
+highlighter.registerLanguage('cmake', cmake)
+highlighter.registerLanguage('cpp', cpp)
+highlighter.registerLanguage('csharp', csharp)
+highlighter.registerLanguage('css', css)
+highlighter.registerLanguage('dockerfile', dockerfile)
+highlighter.registerLanguage('go', go)
+highlighter.registerLanguage('graphql', graphql)
+highlighter.registerLanguage('ini', ini)
+highlighter.registerLanguage('java', java)
+highlighter.registerLanguage('javascript', javascript)
+highlighter.registerLanguage('json', json)
+highlighter.registerLanguage('kotlin', kotlin)
+highlighter.registerLanguage('less', less)
+highlighter.registerLanguage('lua', lua)
+highlighter.registerLanguage('makefile', makefile)
+highlighter.registerLanguage('markdown', markdown)
+highlighter.registerLanguage('php', php)
+highlighter.registerLanguage('plaintext', plaintext)
+highlighter.registerLanguage('powershell', powershell)
+highlighter.registerLanguage('python', python)
+highlighter.registerLanguage('r', r)
+highlighter.registerLanguage('ruby', ruby)
+highlighter.registerLanguage('rust', rust)
+highlighter.registerLanguage('scss', scss)
+highlighter.registerLanguage('sql', sql)
+highlighter.registerLanguage('swift', swift)
+highlighter.registerLanguage('typescript', typescript)
+highlighter.registerLanguage('xml', xml)
+highlighter.registerLanguage('yaml', yaml)
 const MAX_FILE_HIGHLIGHT_CHARS = 48_000
 const MAX_FILE_HIGHLIGHT_SEGMENTS = 3_000
 const MAX_DIFF_HIGHLIGHT_CHARS = 24_000
@@ -55,7 +110,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 export function resolveMobileSyntaxLanguage(filePath: string, preferredLanguage?: string): string {
   const detected = detectMobileFileLanguage(filePath, preferredLanguage)
   const normalized = LANGUAGE_ALIASES[detected] ?? detected
-  return lowlight.registered(normalized) ? normalized : 'plaintext'
+  return highlighter.getLanguage(normalized) ? normalized : 'plaintext'
 }
 
 export function highlightMobileCode(
@@ -69,15 +124,23 @@ export function highlightMobileCode(
   }
 
   const normalizedLanguage = LANGUAGE_ALIASES[language] ?? language
-  if (!lowlight.registered(normalizedLanguage) || normalizedLanguage === 'plaintext') {
+  if (!highlighter.getLanguage(normalizedLanguage) || normalizedLanguage === 'plaintext') {
     return { segments: [{ text: code, kind: 'plain' }], highlighted: false }
   }
 
   const highlightLength = getHighlightBoundary(code, maxHighlightChars)
   const highlightedCode = code.slice(0, highlightLength)
   try {
-    const tree = lowlight.highlight(normalizedLanguage, highlightedCode) as LowlightNode
-    const segments = mergeAdjacentSegments(flattenLowlightNodes(tree.children ?? [], 'plain'))
+    const result = highlighter.highlight(highlightedCode, {
+      language: normalizedLanguage,
+      ignoreIllegals: true
+    })
+    if (!(result._emitter instanceof MobileSyntaxEmitter)) {
+      return { segments: [{ text: code, kind: 'plain' }], highlighted: false }
+    }
+    const segments = mergeAdjacentSegments(
+      flattenSyntaxNodes(result._emitter.root.children, 'plain')
+    )
     if (segments.length > maxHighlightSegments) {
       return { segments: [{ text: code, kind: 'plain' }], highlighted: false }
     }
@@ -147,8 +210,8 @@ function getHighlightBoundary(code: string, maxHighlightChars: number): number {
   return boundary > 0 ? boundary + 1 : maxHighlightChars
 }
 
-function flattenLowlightNodes(
-  nodes: LowlightNode[],
+function flattenSyntaxNodes(
+  nodes: MobileSyntaxNode[],
   inheritedKind: MobileSyntaxTokenKind
 ): MobileSyntaxSegment[] {
   const segments: MobileSyntaxSegment[] = []
@@ -161,7 +224,7 @@ function flattenLowlightNodes(
       continue
     }
     const kind = tokenKindForClasses(node.properties?.className) ?? inheritedKind
-    for (const segment of flattenLowlightNodes(node.children ?? [], kind)) {
+    for (const segment of flattenSyntaxNodes(node.children ?? [], kind)) {
       appendSegment(segments, segment)
     }
   }

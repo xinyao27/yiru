@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { isIntentionalAppRestartInProgress } from '~renderer/lib/updater-beforeunload'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 
@@ -60,14 +61,14 @@ export function useWindowCloseGuard(): WindowCloseGuard {
             if (results.some(Boolean)) {
               setWindowCloseDialogOpen(true)
             } else {
-              window.api.ui.confirmWindowClose()
+              shellClient.ui.confirmWindowClose()
             }
           }
         )
         return
       }
     }
-    window.api.ui.confirmWindowClose()
+    shellClient.ui.confirmWindowClose()
   }, [])
 
   const {
@@ -118,7 +119,7 @@ export function useWindowCloseGuard(): WindowCloseGuard {
   useEffect(() => {
     setWindowCloseRequestHandler(({ isQuitting }) => {
       if (isIntentionalAppRestartInProgress()) {
-        window.api.ui.confirmWindowClose()
+        shellClient.ui.confirmWindowClose()
         return
       }
 

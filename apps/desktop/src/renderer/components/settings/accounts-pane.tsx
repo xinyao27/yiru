@@ -32,6 +32,7 @@ import {
   selectCodexProviderAccount,
   watchProviderAccounts
 } from '~renderer/runtime/provider-accounts-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type {
   ClaudeRateLimitAccountsState,
@@ -438,7 +439,7 @@ export function AccountsPane({
 
   const refreshMiniMaxCredentialStatus = async (): Promise<void> => {
     try {
-      const status = await window.api.minimaxCredentials.getStatus()
+      const status = await rendererHostClient.minimaxCredentials.getStatus()
       setMiniMaxConfigured(status.configured)
     } catch (error) {
       console.error('Failed to load MiniMax credential status:', error)
@@ -454,7 +455,9 @@ export function AccountsPane({
     }
     setMiniMaxCredentialBusy(true)
     try {
-      const status = await window.api.minimaxCredentials.saveCookie(miniMaxCookieDraft.trim())
+      const status = await rendererHostClient.minimaxCredentials.saveCookie(
+        miniMaxCookieDraft.trim()
+      )
       if (!status.configured) {
         throw new Error(
           translate(
@@ -485,7 +488,7 @@ export function AccountsPane({
   const clearMiniMaxCookie = async (): Promise<void> => {
     setMiniMaxCredentialBusy(true)
     try {
-      const status = await window.api.minimaxCredentials.clearCookie()
+      const status = await rendererHostClient.minimaxCredentials.clearCookie()
       setMiniMaxConfigured(status.configured)
       setMiniMaxCookieDraft('')
       recordFeatureInteraction('usage-tracking')
@@ -809,7 +812,7 @@ export function AccountsPane({
                 size="xs"
                 onClick={() =>
                   void runClaudeAccountAction('adding', () =>
-                    window.api.claudeAccounts.add({
+                    rendererHostClient.claudeAccounts.add({
                       runtime: accountRuntime.runtime,
                       wslDistro: accountRuntime.wslDistro
                     })
@@ -836,7 +839,7 @@ export function AccountsPane({
                 <Button
                   variant="quiet"
                   size="xs"
-                  onClick={() => void window.api.claudeAccounts.cancelPendingLogin()}
+                  onClick={() => void rendererHostClient.claudeAccounts.cancelPendingLogin()}
                   className="gap-1.5"
                 >
                   <X className="size-3" />
@@ -986,7 +989,7 @@ export function AccountsPane({
                             void runClaudeAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                window.api.claudeAccounts.reauthenticate({
+                                rendererHostClient.claudeAccounts.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)
@@ -1121,7 +1124,7 @@ export function AccountsPane({
               size="xs"
               onClick={() =>
                 void runCodexAccountAction('adding', () =>
-                  window.api.codexAccounts.add({
+                  rendererHostClient.codexAccounts.add({
                     runtime: accountRuntime.runtime,
                     wslDistro: accountRuntime.wslDistro
                   })
@@ -1357,7 +1360,7 @@ export function AccountsPane({
                             void runCodexAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                window.api.codexAccounts.reauthenticate({
+                                rendererHostClient.codexAccounts.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)

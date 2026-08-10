@@ -810,72 +810,6 @@ export function readSourceControlAiModelChoiceForHost(
   )
 }
 
-export function selectSourceControlAiModelChoiceForHost(
-  choice: SourceControlAiModelChoice | undefined,
-  hostKey: string,
-  agentId: TuiAgent,
-  modelId: string
-): SourceControlAiModelChoice {
-  const hostSelectedModels = choice?.selectedModelByAgentByHost?.[hostKey] ?? {}
-  return {
-    ...choice,
-    selectedModelByAgent:
-      hostKey === LOCAL_COMMIT_MESSAGE_HOST_KEY
-        ? {
-            ...choice?.selectedModelByAgent,
-            [agentId]: modelId
-          }
-        : choice?.selectedModelByAgent,
-    selectedModelByAgentByHost: {
-      ...choice?.selectedModelByAgentByHost,
-      [hostKey]: {
-        ...hostSelectedModels,
-        [agentId]: modelId
-      }
-    }
-  }
-}
-
-export function clearSourceControlAiModelChoiceForHost(
-  choice: SourceControlAiModelChoice | undefined,
-  hostKey: string,
-  agentId: TuiAgent
-): SourceControlAiModelChoice | undefined {
-  if (!choice) {
-    return undefined
-  }
-  // Why: model choices are host-scoped; clearing one "Use global" selector
-  // must not erase a different SSH/runtime host's override.
-  const selectedModelByAgent = { ...choice.selectedModelByAgent }
-  if (hostKey === LOCAL_COMMIT_MESSAGE_HOST_KEY) {
-    delete selectedModelByAgent[agentId]
-  }
-
-  const selectedModelByAgentByHost = { ...choice.selectedModelByAgentByHost }
-  const hostModels = { ...selectedModelByAgentByHost[hostKey] }
-  delete hostModels[agentId]
-  if (Object.keys(hostModels).length > 0) {
-    selectedModelByAgentByHost[hostKey] = hostModels
-  } else {
-    delete selectedModelByAgentByHost[hostKey]
-  }
-
-  const nextChoice: SourceControlAiModelChoice = {}
-  if (Object.keys(selectedModelByAgent).length > 0) {
-    nextChoice.selectedModelByAgent = selectedModelByAgent
-  }
-  if (Object.keys(selectedModelByAgentByHost).length > 0) {
-    nextChoice.selectedModelByAgentByHost = selectedModelByAgentByHost
-  }
-  const hasModelSelection =
-    nextChoice.selectedModelByAgent !== undefined ||
-    nextChoice.selectedModelByAgentByHost !== undefined
-  if (hasModelSelection && Object.keys(choice.selectedThinkingByModel ?? {}).length > 0) {
-    nextChoice.selectedThinkingByModel = choice.selectedThinkingByModel
-  }
-  return hasModelSelection ? nextChoice : undefined
-}
-
 export function projectSourceControlAiToLegacyCommitMessageAi(
   sourceControlAi: SourceControlAiSettings,
   previousLegacy?: CommitMessageAiSettings | null
@@ -1026,40 +960,6 @@ function resolveInstructionsFromNormalized(
     return globalInstruction.trim()
   }
   return operation === 'commitMessage' ? (legacyCustomPrompt ?? '').trim() : ''
-}
-
-export function resolveSourceControlAiInstructions(args: {
-  settings: Pick<GlobalSettings, 'sourceControlAi' | 'commitMessageAi'>
-  repo?: Pick<Repo, 'sourceControlAi'> | null
-  operation: SourceControlAiOperation
-}): string {
-  const source = normalizeSourceControlAiSettings(
-    args.settings.sourceControlAi,
-    args.settings.commitMessageAi
-  )
-  const repoOverrides = normalizeRepoSourceControlAiOverrides(args.repo?.sourceControlAi)
-  return resolveInstructionsFromNormalized(
-    source,
-    repoOverrides,
-    args.operation,
-    args.settings.commitMessageAi?.customPrompt
-  )
-}
-
-export function hasConfiguredSourceControlAiInstructions(args: {
-  settings: Pick<GlobalSettings, 'sourceControlAi' | 'commitMessageAi'>
-  repo?: Pick<Repo, 'sourceControlAi'> | null
-  operation: SourceControlAiOperation
-}): boolean {
-  const repoOverrides = normalizeRepoSourceControlAiOverrides(args.repo?.sourceControlAi)
-  const repoInstruction = readRepoInstructionOverride(
-    repoOverrides?.instructionsByOperation,
-    args.operation
-  )
-  if (repoInstruction !== undefined) {
-    return true
-  }
-  return resolveSourceControlAiInstructions(args).length > 0
 }
 
 function resolvePrCreationDefaults(

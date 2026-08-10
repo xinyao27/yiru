@@ -3,6 +3,7 @@ import { buildNativeChatSubscriptionId } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { createNativeChatMerger, replaceList } from './merge'
 import { applyMobileNativeChatStreamFrame, type MobileNativeChatStreamFrame } from './stream-frame'
@@ -87,8 +88,9 @@ export function useMobileNativeChatSession(args: {
 
     setStatus('loading')
 
-    const unsubscribe = client.subscribe(
-      'nativeChat.subscribe',
+    const unsubscribe = subscribeRuntimeOrpc(
+      client,
+      (runtime) => runtime.nativeChat.subscribe,
       {
         agent,
         sessionId,
@@ -96,11 +98,11 @@ export function useMobileNativeChatSession(args: {
         subscriptionId: buildNativeChatSubscriptionId(agent, sessionId),
         ...(transcriptPath ? { transcriptPath } : {})
       },
-      (raw) => {
+      (event) => {
         if (cancelled) {
           return
         }
-        const frame = raw as MobileNativeChatStreamFrame
+        const frame = event as MobileNativeChatStreamFrame
         if (frame.type === 'replacement' || frame.type === 'snapshot') {
           // Why: replacement and reconnect snapshots are authoritative windows;
           // stale page limits/results must not constrain the fresh generation.
@@ -168,17 +170,13 @@ export function useMobileNativeChatSession(args: {
     setLoadingEarlier(true)
     void (async () => {
       try {
-        const response = await client.sendRequest('nativeChat.readSession', {
+        const result = (await callRuntimeOrpc(client, (runtime) => runtime.nativeChat.readSession, {
           agent,
           sessionId,
           limit: beforeOffset === null ? nextLimit : pageLimit,
           ...(beforeOffset === null ? {} : { beforeOffset }),
           ...(transcriptPath ? { transcriptPath } : {})
-        })
-        if (!response.ok) {
-          return
-        }
-        const result = response.result as ReadSessionResult
+        })) as ReadSessionResult
         if ('error' in result) {
           return
         }

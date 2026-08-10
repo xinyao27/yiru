@@ -5,10 +5,10 @@ export type SourceControlPanelView = 'changes' | 'review'
 
 export type SourceControlPanelViewSlice = {
   requestedSourceControlPanelView: SourceControlPanelView
-  sourceControlPanelViewByTab: Record<string, SourceControlPanelView>
+  sourceControlPanelViewByWorktree: Record<string, SourceControlPanelView>
   requestSourceControlPanelView: (view: SourceControlPanelView) => void
-  setSourceControlPanelView: (tabId: string, view: SourceControlPanelView) => void
-  clearSourceControlPanelView: (tabId: string) => void
+  setSourceControlPanelView: (worktreeId: string, view: SourceControlPanelView) => void
+  clearSourceControlPanelView: (worktreeId: string) => void
 }
 
 export const createSourceControlPanelViewSlice: StateCreator<
@@ -18,22 +18,33 @@ export const createSourceControlPanelViewSlice: StateCreator<
   SourceControlPanelViewSlice
 > = (set) => ({
   requestedSourceControlPanelView: 'changes',
-  sourceControlPanelViewByTab: {},
-  requestSourceControlPanelView: (view) => set({ requestedSourceControlPanelView: view }),
-  setSourceControlPanelView: (tabId, view) =>
+  sourceControlPanelViewByWorktree: {},
+  requestSourceControlPanelView: (view) =>
     set((state) => ({
-      sourceControlPanelViewByTab: {
-        ...state.sourceControlPanelViewByTab,
-        [tabId]: view
+      requestedSourceControlPanelView: view,
+      ...(state.activeWorktreeId
+        ? {
+            sourceControlPanelViewByWorktree: {
+              ...state.sourceControlPanelViewByWorktree,
+              [state.activeWorktreeId]: view
+            }
+          }
+        : {})
+    })),
+  setSourceControlPanelView: (worktreeId, view) =>
+    set((state) => ({
+      sourceControlPanelViewByWorktree: {
+        ...state.sourceControlPanelViewByWorktree,
+        [worktreeId]: view
       }
     })),
-  clearSourceControlPanelView: (tabId) =>
+  clearSourceControlPanelView: (worktreeId) =>
     set((state) => {
-      if (!(tabId in state.sourceControlPanelViewByTab)) {
+      if (!(worktreeId in state.sourceControlPanelViewByWorktree)) {
         return state
       }
-      const next = { ...state.sourceControlPanelViewByTab }
-      delete next[tabId]
-      return { sourceControlPanelViewByTab: next }
+      const next = { ...state.sourceControlPanelViewByWorktree }
+      delete next[worktreeId]
+      return { sourceControlPanelViewByWorktree: next }
     })
 })

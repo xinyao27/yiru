@@ -1,15 +1,8 @@
 /* eslint-disable max-lines -- Why: this file is the central main-window IPC wiring point; splitting it during the mobile release compatibility rebase would increase release risk. */
-import { randomUUID } from 'node:crypto'
-
-import { app, ipcMain } from 'electron'
+import { app, dialog, ipcMain, type OpenDialogOptions } from 'electron'
 import type { BrowserWindow } from 'electron'
-import type {
-  RuntimeMarkdownReadTabResult,
-  RuntimeMarkdownSaveTabResult
-} from '~shared/mobile-markdown-document'
 import { isNativeFileDropPayload, type NativeFileDropPayload } from '~shared/native-file-drop'
-import type { RuntimeMobileSessionTabMove } from '~shared/runtime-types'
-import type { CreateWorktreeResult, UpdateCheckOptions, WorktreeStartupLaunch } from '~shared/types'
+import type { UpdateCheckOptions } from '~shared/types'
 
 import { browserManager } from '../browser/manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
@@ -18,11 +11,13 @@ import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-se
 import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
 import { registerFridayHandlers } from '../friday/ipc'
 import type { FridayService } from '../friday/service'
+import { electronIpcRegistration } from '../ipc/electron-ipc-registration'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
 import { registerRepoHandlers } from '../project-groups/repos'
-import { registerDaemonManagementHandlers } from '../pty/management'
-import { getLocalPtyProvider, registerPtyHandlers } from '../pty/pty'
+import { registerPtyHandlers } from '../pty/pty'
+import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
+import { subscribeShellServicesConnectionLifecycle } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
@@ -34,16 +29,11 @@ import {
   setupAutoUpdater,
   dismissNudge
 } from '../updater'
-import { registerWorkspaceCleanupHandlers } from '../workspace-cleanup/workspace-cleanup'
 import {
   scheduleWorktreeBaseDirectoryWatcherSync,
   setWorktreeBaseDirectoryWatcherSyncContext
 } from '../worktree/base-directory-watcher'
-import { runWorktreeChangeInvalidators } from '../worktree/change-invalidators'
-import { registerWorktreeHandlers } from '../worktree/worktrees'
 import { getKnownWorktreeIdsForHistoryGc } from './history-gc-worktree-ids'
-import { requestMobileMarkdownFromRenderer } from './mobile-markdown-request-relay'
-import { requestTerminalTabCloseFromRenderer } from './terminal-tab-close-request-relay'
 
 const UPDATER_SETUP_FALLBACK_MS = 15_000
 
@@ -59,8 +49,6 @@ export function ensureAutoUpdaterConfigured(): void {
 
 let appReloadHandlerTokenCounter = 0
 let activeAppReloadHandlerToken: number | null = null
-let runtimeNotifierTokenCounter = 0
-let activeRuntimeNotifierToken: number | null = null
 
 export function attachMainWindowServices(
   mainWindow: BrowserWindow,
@@ -80,12 +68,20 @@ export function attachMainWindowServices(
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
-  registerRepoHandlers(mainWindow, store)
-  registerWorktreeHandlers(mainWindow, store, runtime)
-  // Why: repo/settings mutations resync watchers through this attached main-window context.
-  setWorktreeBaseDirectoryWatcherSyncContext(store, mainWindow)
-  scheduleWorktreeBaseDirectoryWatcherSync(store, mainWindow)
-  registerWorkspaceCleanupHandlers(store, { runtime, getLocalPtyProvider })
+  registerRepoHandlers(electronIpcRegistration, store, runtime, {
+    pickDirectory: async (pickerOptions) => {
+      const properties: NonNullable<OpenDialogOptions['properties']> = ['openDirectory']
+      if (pickerOptions?.multiple === true) {
+        properties.push('multiSelections')
+      }
+      const result = await dialog.showOpenDialog(mainWindow, {
+        properties
+      })
+      return result.canceled ? [] : result.filePaths
+    }
+  })
+  setWorktreeBaseDirectoryWatcherSyncContext(store)
+  scheduleWorktreeBaseDirectoryWatcherSync(store)
   registerPtyHandlers(
     mainWindow,
     runtime,
@@ -107,7 +103,6 @@ export function attachMainWindowServices(
   // registerPtyHandlers — keeps this wiring alongside the rest of the PTY IPC
   // and ensures the handlers are re-installed on macOS app re-activation when
   // the main window is recreated.
-  registerDaemonManagementHandlers()
   // Why: do not enumerate repo paths from background GC. `git worktree list`
   // can re-touch protected folders on macOS and trigger folder-access prompts.
   scheduleHistoryGc(async () => {
@@ -251,153 +246,20 @@ function registerRuntimeWindowLifecycle(
   mainWindow: BrowserWindow,
   runtime: YiruRuntimeService
 ): void {
-  const notifierToken = ++runtimeNotifierTokenCounter
-  activeRuntimeNotifierToken = notifierToken
+  const shellConnectionId = electronShellServicesConnectionId(mainWindow.webContents.id)
   runtime.attachWindow(mainWindow.id)
-  const send = (channel: string, ...args: unknown[]): void => {
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send(channel, ...args)
+  const unsubscribeShellConnectionLifecycle = subscribeShellServicesConnectionLifecycle((event) => {
+    if (event.shellConnectionId !== shellConnectionId) {
+      return
     }
-  }
-  runtime.setNotifier({
-    worktreesChanged: (repoId, renamed) => {
-      // Why: clear detected-worktree scan caches before renderer listeners
-      // handle this event, preventing stale TTL reads after mutations.
-      runWorktreeChangeInvalidators(repoId)
-      send('worktrees:changed', renamed ? { repoId, renamed } : { repoId })
-    },
-    worktreeBaseStatus: (event) => send('worktree:baseStatus', event),
-    worktreeRemoteBranchConflict: (event) => send('worktree:remoteBranchConflict', event),
-    reposChanged: () => send('repos:changed'),
-    activateWorktree: (
-      repoId,
-      worktreeId,
-      setup?: CreateWorktreeResult['setup'],
-      startup?: WorktreeStartupLaunch,
-      defaultTabs?: CreateWorktreeResult['defaultTabs']
-    ) => {
-      send('ui:activateWorktree', {
-        repoId,
-        worktreeId,
-        ...(setup ? { setup } : {}),
-        ...(startup ? { startup } : {}),
-        ...(defaultTabs ? { defaultTabs } : {})
-      })
-    },
-    createTerminal: (worktreeId, opts) =>
-      send('ui:createTerminal', {
-        worktreeId,
-        command: opts.command,
-        ...(opts.cwd ? { cwd: opts.cwd } : {}),
-        ...(opts.env ? { env: opts.env } : {}),
-        title: opts.title,
-        ...(opts.presentation ? { presentation: opts.presentation } : {})
-      }),
-    revealTerminalSession: (worktreeId, opts) =>
-      new Promise((resolve, reject) => {
-        const requestId = randomUUID()
-        const timer = setTimeout(() => {
-          ipcMain.removeListener('terminal:tabCreateReply', handler)
-          reject(new Error('Terminal reveal timed out'))
-        }, 10_000)
-        const handler = (
-          event: Electron.IpcMainEvent,
-          reply: { requestId: string; tabId?: string; title?: string; error?: string }
-        ): void => {
-          // Why: requestId is renderer-supplied; only the targeted main window
-          // may satisfy the reveal and provide the tab handle.
-          if (event.sender !== mainWindow.webContents || reply.requestId !== requestId) {
-            return
-          }
-          clearTimeout(timer)
-          ipcMain.removeListener('terminal:tabCreateReply', handler)
-          if (reply.error) {
-            reject(new Error(reply.error))
-            return
-          }
-          resolve({ tabId: reply.tabId!, title: reply.title })
-        }
-        ipcMain.on('terminal:tabCreateReply', handler)
-        send('ui:createTerminal', {
-          requestId,
-          worktreeId,
-          ptyId: opts.ptyId,
-          title: opts.title ?? undefined,
-          ...(opts.cwd ? { cwd: opts.cwd } : {}),
-          ...(opts.launchConfig ? { launchConfig: opts.launchConfig } : {}),
-          ...(opts.launchToken ? { launchToken: opts.launchToken } : {}),
-          ...(opts.launchAgent ? { launchAgent: opts.launchAgent } : {}),
-          ...(opts.viewMode ? { viewMode: opts.viewMode } : {}),
-          ...(opts.isFriday ? { isFriday: true } : {}),
-          activate: opts.activate !== false,
-          ...(opts.presentation ? { presentation: opts.presentation } : {}),
-          // Why: pre-minted tabId from main keeps the renderer's tab id aligned
-          // with the paneKey baked into the PTY env at spawn time, so hook
-          // events route to the right slot.
-          ...(opts.tabId !== undefined ? { tabId: opts.tabId } : {}),
-          ...(opts.leafId !== undefined ? { leafId: opts.leafId } : {}),
-          ...(opts.splitFromLeafId !== undefined ? { splitFromLeafId: opts.splitFromLeafId } : {}),
-          ...(opts.splitDirection !== undefined ? { splitDirection: opts.splitDirection } : {}),
-          ...(opts.splitTelemetrySource !== undefined
-            ? { splitTelemetrySource: opts.splitTelemetrySource }
-            : {})
-        })
-      }),
-    splitTerminal: (tabId, paneRuntimeId, opts) => {
-      send('ui:splitTerminal', {
-        tabId,
-        paneRuntimeId,
-        direction: opts.direction,
-        command: opts.command,
-        telemetrySource: opts.telemetrySource
-      })
-    },
-    renameTerminal: (tabId, title) => send('ui:renameTerminal', { tabId, title }),
-    focusTerminal: (tabId, worktreeId, leafId) =>
-      send('ui:focusTerminal', { tabId, worktreeId, leafId }),
-    focusEditorTab: (tabId, worktreeId) => send('ui:focusEditorTab', { tabId, worktreeId }),
-    closeSessionTab: (tabId, worktreeId) => send('ui:closeSessionTab', { tabId, worktreeId }),
-    moveSessionTab: (worktreeId: string, move: RuntimeMobileSessionTabMove) =>
-      send('ui:moveSessionTab', { worktreeId, ...move }),
-    openFile: (worktreeId, filePath, relativePath, runtimeEnvironmentId?) =>
-      send('ui:openFileFromMobile', {
-        worktreeId,
-        filePath,
-        relativePath,
-        runtimeEnvironmentId
-      }),
-    openDiff: (worktreeId, filePath, relativePath, staged, runtimeEnvironmentId?) =>
-      send('ui:openDiffFromMobile', {
-        worktreeId,
-        filePath,
-        relativePath,
-        staged,
-        runtimeEnvironmentId
-      }),
-    readMobileMarkdownTab: (worktreeId, tabId) =>
-      requestMobileMarkdownFromRenderer(mainWindow, {
-        operation: 'read',
-        worktreeId,
-        tabId
-      }) as Promise<RuntimeMarkdownReadTabResult>,
-    saveMobileMarkdownTab: (worktreeId, tabId, baseVersion, content) =>
-      requestMobileMarkdownFromRenderer(mainWindow, {
-        operation: 'save',
-        worktreeId,
-        tabId,
-        baseVersion,
-        content
-      }) as Promise<RuntimeMarkdownSaveTabResult>,
-    closeTerminal: (tabId, paneRuntimeId) => send('ui:closeTerminal', { tabId, paneRuntimeId }),
-    closeTerminalTab: (tabId) => requestTerminalTabCloseFromRenderer(mainWindow, tabId),
-    sleepWorktree: (worktreeId) => send('ui:sleepWorktree', { worktreeId }),
-    resumeSleepingAgents: (worktreeId) => send('ui:resumeSleepingAgents', { worktreeId }),
-    terminalFitOverrideChanged: (ptyId, mode, cols, rows) =>
-      send('runtime:terminalFitOverrideChanged', { ptyId, mode, cols, rows }),
-    terminalDriverChanged: (ptyId, driver) =>
-      send('runtime:terminalDriverChanged', { ptyId, driver }),
-    browserDriverChanged: (browserPageId, driver) =>
-      send('runtime:browserDriverChanged', { browserPageId, driver })
+    switch (event.type) {
+      case 'connected':
+        runtime.attachShellConnection(shellConnectionId)
+        break
+      case 'disconnected':
+        runtime.detachShellConnection(shellConnectionId)
+        break
+    }
   })
   // Why: the runtime must fail closed while the renderer graph is being torn
   // down or rebuilt, otherwise future CLI calls could act on stale terminal
@@ -406,14 +268,9 @@ function registerRuntimeWindowLifecycle(
     runtime.markRendererReloading(mainWindow.id)
   })
   mainWindow.on('closed', () => {
+    unsubscribeShellConnectionLifecycle()
     runtime.markGraphUnavailable(mainWindow.id)
-    if (activeRuntimeNotifierToken === notifierToken) {
-      // Why: the notifier closes over the BrowserWindow for mobile/CLI UI
-      // relays; clear it during the no-window gap so the runtime does not
-      // retain destroyed window graphs.
-      runtime.setNotifier(null)
-      activeRuntimeNotifierToken = null
-    }
+    runtime.detachShellConnection(shellConnectionId)
   })
 }
 

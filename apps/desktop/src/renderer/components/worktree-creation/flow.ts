@@ -16,6 +16,7 @@ import {
   type ActivateAndRevealResult,
   type WorktreeStartupPayload
 } from '~renderer/lib/worktree-activation'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -92,16 +93,12 @@ function revealPendingCreation(
   store.setSidebarOpen(true)
 }
 
-async function preflightAgentTrust(
-  request: WorktreeCreationRequest,
-  path: string,
-  connectionId?: string | null
-): Promise<void> {
+async function preflightAgentTrust(request: WorktreeCreationRequest, path: string): Promise<void> {
   // Why: trust-gated agents (cursor-agent, copilot) consume the bracketed paste
   // as menu input on first launch. Pre-write the trust artifact before any
   // terminal spawns. Best-effort — the worktree already exists, so a failure
   // here must not strand it.
-  if (!request.agent || !window.api.agentTrust?.markTrusted) {
+  if (!request.agent || !rendererHostClient.agentTrust?.markTrusted) {
     return
   }
   const preflight = TUI_AGENT_CONFIG[request.agent].preflightTrust
@@ -109,10 +106,9 @@ async function preflightAgentTrust(
     return
   }
   try {
-    await window.api.agentTrust.markTrusted({
+    await rendererHostClient.agentTrust.markTrusted({
       preset: preflight,
-      workspacePath: path,
-      ...(connectionId ? { connectionId } : {})
+      workspacePath: path
     })
   } catch {
     // Best-effort: continue with launch.
@@ -189,9 +185,7 @@ async function executeWorktreeCreation(
   const startupOpt = buildStartupOpt(request, backendSpawned)
 
   if (worktree.path) {
-    const repoConnectionId =
-      useAppStore.getState().repos.find((repo) => repo.id === worktree.repoId)?.connectionId ?? null
-    await preflightAgentTrust(request, worktree.path, repoConnectionId)
+    await preflightAgentTrust(request, worktree.path)
   }
 
   // `createWorktree` already inserted the real worktree row. Leaving for an app

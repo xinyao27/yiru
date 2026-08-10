@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   ClaudeUsageBreakdownRow,
@@ -45,7 +46,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
 
   setClaudeUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = (await window.api.claudeUsage.setEnabled({
+      const nextScanState = (await rendererHostClient.claudeUsage.setEnabled({
         enabled
       })) as ClaudeUsageScanState | undefined
       // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
@@ -93,7 +94,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   fetchClaudeUsage: async (opts) => {
     set({ claudeUsageSnapshotReady: false })
     try {
-      const scanState = (await window.api.claudeUsage.getScanState()) as
+      const scanState = (await rendererHostClient.claudeUsage.getScanState()) as
         | ClaudeUsageScanState
         | undefined
       if (!scanState) {
@@ -119,7 +120,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
       }
 
       const { claudeUsageScope, claudeUsageRange } = get()
-      const snapshot = (await window.api.claudeUsage.getSnapshot({
+      const snapshot = (await rendererHostClient.claudeUsage.getSnapshot({
         scope: claudeUsageScope,
         range: claudeUsageRange,
         limit: 10
@@ -149,11 +150,11 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
         })
       }
 
-      await window.api.claudeUsage.refresh({
+      await rendererHostClient.claudeUsage.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { claudeUsageScope: refreshedScope, claudeUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = (await window.api.claudeUsage.getSnapshot({
+      const refreshedSnapshot = (await rendererHostClient.claudeUsage.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

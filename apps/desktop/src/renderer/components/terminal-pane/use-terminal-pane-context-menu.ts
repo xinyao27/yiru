@@ -13,6 +13,7 @@ import type { ManagedPane, PaneManager } from '~renderer/lib/pane-manager/pane-m
 import { runQuickCommandInNewTab } from '~renderer/lib/run-quick-command-in-new-tab'
 import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { makePaneKey } from '~shared/stable-pane-id'
 import { isTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
@@ -162,7 +163,7 @@ export function useTerminalPaneContextMenu({
     }
     const selection = pane.terminal.getSelection()
     if (selection) {
-      await window.api.ui.writeClipboardText(selection)
+      await shellClient.ui.writeClipboardText(selection)
     }
     // Why: Radix returns focus to the menu trigger (the pane container) on
     // close, but xterm.js only accepts input when its own helper textarea is
@@ -178,7 +179,7 @@ export function useTerminalPaneContextMenu({
     }
     // Why: orchestration targets use YIRU_PANE_KEY, which survives renderer
     // remounts; the numeric PaneManager id is only a local runtime handle.
-    await window.api.ui.writeClipboardText(makePaneKey(tabId, pane.leafId))
+    await shellClient.ui.writeClipboardText(makePaneKey(tabId, pane.leafId))
     toast.success(
       translate(
         'auto.components.terminal.pane.use.terminal.pane.context.menu.a29b9faa01',
@@ -269,8 +270,7 @@ export function useTerminalPaneContextMenu({
       await copyTerminalHandleForPane({
         tabId,
         leafId: pane.leafId,
-        callRuntime: window.api.runtime.call,
-        writeClipboardText: window.api.ui.writeClipboardText
+        writeClipboardText: shellClient.ui.writeClipboardText
       })
       toast.success(
         translate(
@@ -303,8 +303,8 @@ export function useTerminalPaneContextMenu({
       worktreeId
     )
     const result = await pasteTerminalClipboard({
-      readClipboardText: window.api.ui.readClipboardText,
-      saveClipboardImageAsTempFile: window.api.ui.saveClipboardImageAsTempFile,
+      readClipboardText: shellClient.ui.readClipboardText,
+      saveClipboardImageAsTempFile: shellClient.ui.saveClipboardImageAsTempFile,
       connectionId,
       runtimeEnvironmentId,
       forceBracketedMultilineTextPaste,
@@ -535,7 +535,7 @@ export function useTerminalPaneContextMenu({
       }
       const selection = clickedPane.terminal.getSelection()
       if (selection) {
-        void window.api.ui.writeClipboardText(selection)
+        void shellClient.ui.writeClipboardText(selection)
         clickedPane.terminal.clearSelection()
       } else {
         void pasteResolvedPane('right-click')

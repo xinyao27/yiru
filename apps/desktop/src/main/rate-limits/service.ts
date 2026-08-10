@@ -107,7 +107,7 @@ const INACTIVE_FETCH_DEBOUNCE_MS = 60 * 1000 // 60 seconds — debounce fetch-on
 const DEFERRED_STARTUP_ACTIVE_REFRESH_MS = 1000
 
 // Why: inactive account arrays are derived from provider-specific caches on
-// demand in getState() and pushToRenderer().
+// demand in getState() and notifyStateListeners().
 type InternalRateLimitState = {
   claude: ProviderRateLimits | null
   codex: ProviderRateLimits | null
@@ -559,7 +559,7 @@ export class RateLimitService {
     for (const account of accounts) {
       this.inactiveClaudeFetching.add(account.id)
     }
-    this.pushToRenderer()
+    this.notifyStateListeners()
 
     try {
       for (const account of accounts) {
@@ -572,7 +572,7 @@ export class RateLimitService {
           if (!this.isCurrentInactiveClaudeAccount(account.id)) {
             this.inactiveClaudeCache.delete(account.id)
           }
-          this.pushToRenderer()
+          this.notifyStateListeners()
           continue
         }
         try {
@@ -590,7 +590,7 @@ export class RateLimitService {
             if (!this.isCurrentInactiveClaudeAccount(account.id)) {
               this.inactiveClaudeCache.delete(account.id)
             }
-            this.pushToRenderer()
+            this.notifyStateListeners()
             continue
           }
           const cached = this.inactiveClaudeCache.get(account.id) ?? null
@@ -607,7 +607,7 @@ export class RateLimitService {
           }
         }
         this.inactiveClaudeFetching.delete(account.id)
-        this.pushToRenderer()
+        this.notifyStateListeners()
       }
 
       if (!signal.aborted && fetchGeneration === this.inactiveClaudeAccountsGeneration) {
@@ -639,7 +639,7 @@ export class RateLimitService {
     for (const account of accounts) {
       this.inactiveCodexFetching.add(account.id)
     }
-    this.pushToRenderer()
+    this.notifyStateListeners()
 
     try {
       for (const account of accounts) {
@@ -652,7 +652,7 @@ export class RateLimitService {
           if (!this.isCurrentInactiveCodexAccount(account.id)) {
             this.inactiveCodexCache.delete(account.id)
           }
-          this.pushToRenderer()
+          this.notifyStateListeners()
           continue
         }
         try {
@@ -676,7 +676,7 @@ export class RateLimitService {
             if (!this.isCurrentInactiveCodexAccount(account.id)) {
               this.inactiveCodexCache.delete(account.id)
             }
-            this.pushToRenderer()
+            this.notifyStateListeners()
             continue
           }
           const cached = this.inactiveCodexCache.get(account.id) ?? null
@@ -692,7 +692,7 @@ export class RateLimitService {
           }
         }
         this.inactiveCodexFetching.delete(account.id)
-        this.pushToRenderer()
+        this.notifyStateListeners()
       }
 
       if (!signal.aborted && fetchGeneration === this.inactiveCodexAccountsGeneration) {
@@ -707,7 +707,7 @@ export class RateLimitService {
     this.inactiveClaudeAccountsGeneration += 1
     this.inactiveClaudeCache.delete(accountId)
     this.inactiveClaudeFetching.delete(accountId)
-    this.pushToRenderer()
+    this.notifyStateListeners()
   }
 
   private isCurrentInactiveClaudeAccount(accountId: string): boolean {
@@ -762,7 +762,7 @@ export class RateLimitService {
     // still in flight and discard their fresh results.
     this.inactiveCodexCache.delete(accountId)
     this.inactiveCodexFetching.delete(accountId)
-    this.pushToRenderer()
+    this.notifyStateListeners()
   }
 
   setPollingInterval(ms: number): void {
@@ -1972,10 +1972,10 @@ export class RateLimitService {
 
   private updateState(next: InternalRateLimitState): void {
     this.state = next
-    this.pushToRenderer()
+    this.notifyStateListeners()
   }
 
-  private pushToRenderer(): void {
+  private notifyStateListeners(): void {
     const state = this.getState()
     for (const listener of this.stateListeners) {
       try {
@@ -1984,9 +1984,5 @@ export class RateLimitService {
         // ignore — one bad listener must not break the others
       }
     }
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return
-    }
-    this.mainWindow.webContents.send('rateLimits:update', state)
   }
 }

@@ -57,10 +57,6 @@ export function subscribeBrowserOverlaySlotViewport(
   }
 }
 
-export function getBrowserPageViewportContainer(browserPageId: string): HTMLDivElement | null {
-  return browserPageViewports.get(browserPageId)?.container ?? null
-}
-
 export function ensureBrowserPageViewport(
   browserPageId: string,
   workspaceTabId: string

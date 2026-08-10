@@ -1,7 +1,7 @@
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 import { isFloatingWorkspaceWorktreeId } from './floating-workspace'
 import {
   buildMobileNewTabAgentOptions,
@@ -21,43 +21,26 @@ export async function loadMobileNewTabAgentOptions(args: {
   const { client, worktreeId } = args
   // Why: the floating workspace runs on the paired host, so there is no repo connection to resolve.
   const detectedAgentsRequest = isFloatingWorkspaceWorktreeId(worktreeId)
-    ? client.sendRequest('preflight.detectAgents')
+    ? callRuntimeOrpc(client, (runtime) => runtime.preflight.detectAgents, undefined)
     : loadWorkspaceDetectedAgents(client, worktreeId)
   const [settingsResponse, detectedResponse] = await Promise.all([
-    client.sendRequest('settings.get'),
+    callRuntimeOrpc(client, (runtime) => runtime.settings.get, undefined),
     detectedAgentsRequest
   ])
-  if (!settingsResponse.ok) {
-    throw new Error((settingsResponse as RpcFailure).error.message)
-  }
-  if (!detectedResponse.ok) {
-    throw new Error((detectedResponse as RpcFailure).error.message)
-  }
-  const settings = (
-    (settingsResponse as RpcSuccess).result as {
-      settings?: MobileNewTabAgentSettings
-    }
-  ).settings
-  return buildMobileNewTabAgentOptions(
-    settings,
-    (detectedResponse as RpcSuccess).result as unknown[]
-  )
+  const settings: MobileNewTabAgentSettings | undefined = settingsResponse.settings
+  return buildMobileNewTabAgentOptions(settings, detectedResponse)
 }
 
 async function loadWorkspaceDetectedAgents(client: RpcClient, worktreeId: string) {
-  const repoResponse = await client.sendRequest('repo.list')
-  if (!repoResponse.ok) {
-    throw new Error((repoResponse as RpcFailure).error.message)
-  }
+  const repoResponse = await callRuntimeOrpc(client, (runtime) => runtime.repo.list, undefined)
   const repoId = getRepoIdFromMobileWorktreeId(worktreeId)
-  const repos =
-    ((repoResponse as RpcSuccess).result as { repos?: RuntimeRepoSummary[] }).repos ?? []
+  const repos: RuntimeRepoSummary[] = repoResponse.repos
   const repo = repos.find((candidate) => candidate.id === repoId)
   if (!repo) {
     throw new Error('worktree_repo_not_found')
   }
   const connectionId = repo.connectionId?.trim() || null
   return connectionId
-    ? client.sendRequest('preflight.detectRemoteAgents', { connectionId })
-    : client.sendRequest('preflight.detectAgents')
+    ? callRuntimeOrpc(client, (runtime) => runtime.preflight.detectRemoteAgents, { connectionId })
+    : callRuntimeOrpc(client, (runtime) => runtime.preflight.detectAgents, undefined)
 }

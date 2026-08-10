@@ -1,3 +1,9 @@
+import {
+  ORCHESTRATION_FEDERATION_ACK_CONTRACT,
+  ORCHESTRATION_FEDERATION_IMPORT_CONTRACT,
+  ORCHESTRATION_FEDERATION_PULL_CONTRACT
+} from '@yiru/runtime-protocol/contract'
+
 import type { YiruRuntimeService } from '../yiru-runtime'
 import { OrchestrationError } from './orchestration-error'
 import {
@@ -11,15 +17,6 @@ const MESSAGE_TYPE_SET = new Set<MessageType>(MESSAGE_TYPES)
 
 function isMessageType(value: unknown): value is MessageType {
   return typeof value === 'string' && MESSAGE_TYPE_SET.has(value as MessageType)
-}
-
-type PulledRelayItem = {
-  dispatch_id: string
-  direction: 'to_home'
-  sequence: number
-  message_id: string
-  kind: string
-  payload: string
 }
 
 type RelayedMessage = {
@@ -53,16 +50,16 @@ export async function syncFederatedDispatch(
     )
   }
 
-  const pulled = (await runtime.callOrchestrationWorkerServer(
+  const pulled = await runtime.callOrchestrationWorkerServer(
     federated.environment_id,
-    'orchestration.federationPull',
+    ORCHESTRATION_FEDERATION_PULL_CONTRACT,
     {
       dispatchId,
       afterSequence: federated.to_home_imported_sequence,
       limit: 50
     },
     15_000
-  )) as { runtimeEpoch: string; items: PulledRelayItem[] }
+  )
   let cursor = federated.to_home_imported_sequence
   let imported = 0
   for (const item of pulled.items) {
@@ -98,7 +95,7 @@ export async function syncFederatedDispatch(
   if (cursor > 0) {
     await runtime.callOrchestrationWorkerServer(
       federated.environment_id,
-      'orchestration.federationAck',
+      ORCHESTRATION_FEDERATION_ACK_CONTRACT,
       { dispatchId, throughSequence: cursor },
       15_000,
       { orchestrationRequestId: `relay_ack_${dispatchId}_${cursor}` }
@@ -109,15 +106,22 @@ export async function syncFederatedDispatch(
       ? db.listPendingFederationRelay(dispatchId, 'to_worker')
       : []
   if (toWorker.length > 0) {
-    const delivered = (await runtime.callOrchestrationWorkerServer(
+    const delivered = await runtime.callOrchestrationWorkerServer(
       federated.environment_id,
-      'orchestration.federationImport',
-      { dispatchId, items: toWorker },
+      ORCHESTRATION_FEDERATION_IMPORT_CONTRACT,
+      {
+        dispatchId,
+        // Why: `listPendingFederationRelay(dispatchId, 'to_worker')` above
+        // already filtered on this direction — narrow the field the DB row
+        // type leaves as the wider `FederationRelayDirection` union so it
+        // matches the import contract's `z.literal('to_worker')` item shape.
+        items: toWorker.map((item) => ({ ...item, direction: 'to_worker' as const }))
+      },
       15_000,
       {
         orchestrationRequestId: `relay_import_${dispatchId}_${toWorker.at(-1)?.sequence ?? 0}`
       }
-    )) as { acknowledgedThrough: number }
+    )
     db.acknowledgeFederationRelay({
       dispatchId,
       direction: 'to_worker',

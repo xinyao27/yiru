@@ -2,8 +2,8 @@ import { createBotAuthorOverrideSet } from '@yiru/workbench-model/review'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
-import type { RpcSuccess } from '~/transport/types'
 
 // Fetches the desktop's manual bot-author overrides (GlobalSettings.prBotAuthorOverrides,
 // marked from the desktop Comments panel) so the mobile Humans/Bots comment filter
@@ -34,15 +34,11 @@ export function usePRBotAuthorOverrides(
       return
     }
     let stale = false
-    void client
-      .sendRequest('settings.get')
-      .then((response) => {
-        if (stale || !response.ok) {
+    void callRuntimeOrpc(client, (runtime) => runtime.settings.get, undefined)
+      .then((result) => {
+        if (stale) {
           return
         }
-        const result = (response as RpcSuccess).result as {
-          settings?: { prBotAuthorOverrides?: unknown }
-        } | null
         const overrides = result?.settings?.prBotAuthorOverrides
         setLogins(
           Array.isArray(overrides)

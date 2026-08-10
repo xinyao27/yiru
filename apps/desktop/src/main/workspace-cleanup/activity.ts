@@ -2,7 +2,7 @@ import { lstat, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-import type { Repo, Worktree } from '~shared/types'
+import type { Worktree } from '~shared/types'
 
 import { toWindowsWslPath } from '../wsl'
 
@@ -26,12 +26,11 @@ export function resolvePersistedWorkspaceCleanupActivityWorktree(worktree: Workt
 }
 
 export async function resolveWorkspaceCleanupActivityWorktree(
-  repo: Repo,
   worktree: Worktree,
   statPath: StatPath = statLocalPath,
   readTextFile: ReadTextFile = readLocalTextFile
 ): Promise<Worktree> {
-  const activityAt = await resolveWorkspaceCleanupActivityAt(repo, worktree, statPath, readTextFile)
+  const activityAt = await resolveWorkspaceCleanupActivityAt(worktree, statPath, readTextFile)
   if (activityAt <= worktree.lastActivityAt) {
     return worktree
   }
@@ -48,16 +47,13 @@ async function readLocalTextFile(targetPath: string): Promise<string> {
 }
 
 async function resolveWorkspaceCleanupActivityAt(
-  repo: Repo,
   worktree: Worktree,
   statPath: StatPath,
   readTextFile: ReadTextFile
 ): Promise<number> {
   const persistedActivityAt = getPersistedWorkspaceCleanupActivityAt(worktree)
-  if (repo.connectionId) {
-    return persistedActivityAt
-  }
-
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a repo's worktree filesystem is always locally stat-able.
   const filesystemActivityAt = await getNewestLocalWorktreeStatMtime(
     worktree.path,
     statPath,

@@ -2,6 +2,7 @@ import { MAX_PR_BOT_AUTHOR_OVERRIDES } from '@yiru/workbench-model/review'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { updateRendererPRBotAuthorOverride } from '~renderer/runtime/settings-client'
 import { useAppStore } from '~renderer/store'
 
 import { createBotAuthorOverrideSet, normalizePRCommentAuthorLogin } from './pr-comment-audience'
@@ -26,7 +27,7 @@ export function setPRBotAuthorOverride(author: string, isBot: boolean): void {
     .then(async () => {
       // Why: the authoritative store owns the read-modify-write so concurrent
       // desktop and paired-web clients cannot overwrite each other's updates.
-      const settings = await window.api.settings.updatePRBotAuthorOverride({
+      const settings = await updateRendererPRBotAuthorOverride({
         author: normalized,
         isBot
       })

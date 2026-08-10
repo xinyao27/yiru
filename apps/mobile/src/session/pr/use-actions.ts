@@ -26,10 +26,7 @@ export type PrActionsInput = {
   refetch: () => void | Promise<void>
 }
 
-function realMutations(
-  client: Pick<RpcClient, 'sendRequest'>,
-  worktreeId: string
-): PrActionMutations {
+function realMutations(client: Pick<RpcClient, 'orpc'>, worktreeId: string): PrActionMutations {
   return {
     mergePR: (args) => fetchMergePR(client, worktreeId, args),
     setPRAutoMerge: (args) => fetchSetPRAutoMerge(client, worktreeId, args),

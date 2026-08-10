@@ -28,6 +28,19 @@
       "certificateChallengeChanged": "The certificate request changed. Retry the page and review the new warning.",
       "certificateChallengeUnavailable": "This certificate request is no longer available. Retry the page to request a new one.",
       "certificateProceedFailed": "Yiru could not approve this certificate request. Retry the page and try again."
+    },
+    "cookieImport": {
+      "dialogTitle": "Import Cookies",
+      "cookieFiles": "Cookie Files",
+      "allFiles": "All Files"
+    },
+    "chrome": {
+      "notConfigured": "Chrome executable is not configured for this runtime host",
+      "notAvailable": "Chrome executable is not available: {{path}}",
+      "startFailed": "Could not start Chrome: {{reason}}",
+      "exitedWithDiagnostic": "Chrome exited before DevTools became ready: {{reason}}",
+      "exitedBeforeReady": "Chrome exited before DevTools became ready (exit {{exitCode}})",
+      "startTimeout": "Timed out waiting {{timeoutMs}}ms for Chrome DevTools"
     }
   },
   "settings": {
@@ -37,10 +50,7 @@
         "description": "Choose the language used by the Yiru interface.",
         "system": "System",
         "english": "English",
-        "chinese": "中文（简体）",
-        "korean": "한국어",
-        "japanese": "日本語",
-        "spanish": "Español"
+        "chinese": "中文（简体）"
       },
       "statusBar": {
         "claudeToggleDescription": "Show Claude token and cost usage for the active workspace.",
@@ -194,10 +204,15 @@
         "cb4d287238": "Host name",
         "3affe7de3a": "Paste a pairing URL from a runtime host that this browser can reach.",
         "e3bcd082ac": "Connect to Yiru",
-        "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access."
+        "runtimeHostName": "Runtime host",
+        "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
+        "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.",
+        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint."
       },
       "webPreloadApi": {
-        "aiVaultUnavailableForHost": "Agent Session History is not available for this execution host."
+        "aiVaultUnavailableForHost": "Agent Session History is not available for this execution host.",
+        "feedbackUnavailable": "Feedback is unavailable in the web client.",
+        "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
       },
       "web": {
         "preload": {
@@ -239,6 +254,12 @@
         "downloadIncomplete": "The host update did not finish downloading.",
         "reconnectTimeout": "The host did not reconnect on the updated version.",
         "runtimeChanged": "The paired host changed while updating. Check again before retrying."
+      },
+      "orpcCallbackStream": {
+        "streamFailed": "Runtime stream failed."
+      },
+      "webUiShellClient": {
+        "selectionClipboardUnavailable": "Selection clipboard is unavailable in the web client."
       }
     },
     "store": {
@@ -1053,8 +1074,6 @@
         "dabd819ca1": "Type to see all {{value0}} worktrees",
         "20af998bff": "{{value0}} items available{{value1}}",
         "bb72c08e63": "{{value0}} results found{{value1}}",
-        "34c8fbb46e": "SSH remote",
-        "63c2be1914": "SSH disconnected",
         "95be6587d3": "Create worktree \"{{value0}}\"",
         "worktreesHeader": "Worktrees",
         "recentWorktreesHeader": "Recent Worktrees",
@@ -1908,7 +1927,6 @@
             "bd19fd7a59": "Kill all sessions",
             "c9382662bb": "Restart daemon",
             "59f178fe11": "{{value0}}, daemon unreachable",
-            "21cacb16d1": "· remote",
             "73a3fd68a9": "Collapse repo",
             "b12e31dfcb": "Expand repo",
             "d659d71d2d": "Resume workspace {{value0}}",
@@ -1934,31 +1952,6 @@
             "c7e3b1a0d9f2": "Kill {{value0}} orphan terminal",
             "d8f4c2b1e0a3": "Kill {{value0}} orphan terminals",
             "e9a5d3c2b1f0": "Kill {{value0}}?"
-          },
-          "SshStatusSegment": {
-            "3ad70e0365": "Manage Remote Hosts…",
-            "6e8a9a4242": "Remote Hosts",
-            "d09ec41831": "Remote Hosts",
-            "fdc57e9970": "Remote host connection status",
-            "59b553e2aa": "Disconnect",
-            "63f36455cc": "Connect",
-            "bf07aee59e": "Disconnect failed",
-            "2c29e2de68": "Connection failed",
-            "bc5a3fd41a": "partial",
-            "3d0128b105": "connected",
-            "fd9a3c600e": "error",
-            "fbb3f9f05e": "conflict",
-            "95e4ff5b4b": "pushing",
-            "63a2b965f6": "pulling",
-            "remote_server": "Coworking Host",
-            "runtime_checking": "Checking",
-            "runtime_online": "Connected",
-            "runtime_unavailable": "Disconnected",
-            "runtime_connect_unavailable": "Remote host is not reachable",
-            "runtime_disconnect_failed": "Disconnect failed",
-            "runtime_reconnecting": "Reconnecting",
-            "runtime_last_close_reason": "Closed: {{value0}}",
-            "runtime_reconnect_attempt": "Attempt {{value0}}"
           },
           "StatusBar": {
             "9659e38343": "Ports",
@@ -2245,311 +2238,6 @@
             "requesting": "Waiting…",
             "useAsHost": "Use as host"
           }
-        }
-      },
-      "stats": {
-        "ClaudeUsageDailyChart": {
-          "2a6360c7cb": "Cache write",
-          "61c58f8976": "Cache read",
-          "7d2efeff5e": "Output",
-          "d7fb787e6b": "Input",
-          "a7902d3c1d": "tokens",
-          "059945f71d": "Input, output, cache read, and cache write totals by day.",
-          "c9f7cd30e9": "Daily usage"
-        },
-        "ClaudeUsagePane": {
-          "21ea00bfa8": "Cache",
-          "a8b7487ff7": "Output",
-          "faf3444859": "Input",
-          "0f03975d59": "Turns",
-          "1afc25eb06": "Model",
-          "c17bed0416": "Project",
-          "01476891c7": "Last active",
-          "abfc4a4943": "Cache reuse rate:",
-          "7e76c84153": "Recent sessions",
-          "32176e1d44": "turns",
-          "02a046792e": "sessions •",
-          "f97435845c": "Top project:",
-          "7dc9e5613b": "By project",
-          "c3fdbc5474": "Top model:",
-          "0f394c24e3": "By model",
-          "51ae85fa00": "Cache reuse rate is calculated as cache read tokens / (input tokens + cache read tokens).",
-          "b26d4ddb58": "Est. API-equivalent cost",
-          "0f3e696ca9": "Sessions / Turns",
-          "8cc23be4a3": "Zero-cache-read turns",
-          "1634c4f404": "Cache reuse rate",
-          "b786fb4a70": "Cache write",
-          "268cf0af51": "Cache read",
-          "2b8a2f14aa": "Output tokens",
-          "ea71fae8fc": "Input tokens",
-          "7dde9331fd": "No local Claude usage found yet for this scope.",
-          "424cd50412": "Enable Claude usage analytics",
-          "8d18bbb771": "Refresh",
-          "c5b9b344d0": "Refresh Claude usage",
-          "505be9aac4": "Range",
-          "f61cffb9c8": "Scope",
-          "dd29209b21": "Filters",
-          "e9bf9fce0e": "Claude usage options",
-          "6afacbee37": "Claude Usage Tracking",
-          "0cb1a36d7d": "Reads local Claude usage logs to show token, model, and session stats.",
-          "5ce4842c2c": "All local Claude usage",
-          "4f8368c272": "Yiru worktrees only",
-          "cfe2282ffa": "Unknown",
-          "7765a4c3e1": "n/a",
-          "2d41fd45c6": " • Last scan error: {{value0}}",
-          "rangeLast7Days": "Last 7 days",
-          "rangeLast30Days": "Last 30 days",
-          "rangeLast90Days": "Last 90 days",
-          "rangeAllTime": "All time"
-        },
-        "CodexUsageDailyChart": {
-          "1e6f62d7e3": "Reasoning",
-          "c646e1783c": "Cached input",
-          "7b596a88b2": "Output",
-          "99a91d3143": "Input",
-          "e4bdcf0071": "tokens",
-          "c756cda6a8": "Input, cached input, output, and reasoning totals by day.",
-          "609aa96e8b": "Daily usage"
-        },
-        "CodexUsagePane": {
-          "e0b988599d": "Total",
-          "bbd20344b8": "Output",
-          "3acc582214": "Input",
-          "bd0822ca47": "Events",
-          "c2478bcc3c": "Model",
-          "1a65900aea": "Project",
-          "0c36b100be": "Last active",
-          "0bd8655475": "Most recent local Codex sessions in this scope.",
-          "0cb0983c07": "Recent sessions",
-          "79a69522a5": "events",
-          "bf1bf2f674": "sessions •",
-          "829ee743f2": "Top project:",
-          "b98718aaab": "By project",
-          "95d2d89285": "Top model:",
-          "5a0d1d69cd": "By model",
-          "94ac1f1ee7": "Reasoning tokens are shown for visibility, but cost is calculated from uncached input, cached input, and output only.",
-          "1a18fbd56b": "Est. API-equivalent cost",
-          "907b31865f": "Sessions / Events",
-          "6e18146e9b": "Reasoning output",
-          "a9ac0f423a": "Cached input",
-          "5d8eba87bd": "Output tokens",
-          "e365eaa6fd": "Input tokens",
-          "4c865393b4": "No local Codex usage found yet for this scope.",
-          "f7c1affbd5": "Enable Codex usage analytics",
-          "3022cda443": "Refresh",
-          "ec4d270e2c": "Refresh Codex usage",
-          "89162e019b": "Range",
-          "6d68e8399a": "Scope",
-          "1af1a39b2f": "Filters",
-          "70b5b8581f": "Codex usage options",
-          "408210470c": "Codex Usage Tracking",
-          "13badcd8f2": "Reads local Codex usage logs to show token, model, and session stats.",
-          "4fe8820098": "All local Codex usage",
-          "201766b754": "Yiru worktrees only",
-          "bf6cf2d4dd": "Unknown",
-          "ae255c3dba": "n/a",
-          "247c93ca92": "• inferred pricing",
-          "8a6655f7a2": " • Last scan error: {{value0}}",
-          "rangeLast7Days": "Last 7 days",
-          "rangeLast30Days": "Last 30 days",
-          "rangeLast90Days": "Last 90 days",
-          "rangeAllTime": "All time"
-        },
-        "OpenCodeUsagePane": {
-          "349f7c3f5c": "Total",
-          "dfc4513657": "Output",
-          "0f2f266c9d": "Input",
-          "d416f5cf92": "Events",
-          "08c78441b7": "Model",
-          "a4738de041": "Project",
-          "d97bdf6e27": "Last active",
-          "81817a641a": "Most recent local OpenCode sessions in this scope.",
-          "4799177b1c": "Recent sessions",
-          "1e5d410df0": "events",
-          "bc0cb89901": "sessions •",
-          "048ffe4d65": "Top project:",
-          "0f0a1684bb": "By project",
-          "a15206a63a": "Top model:",
-          "040c044d39": "By model",
-          "e5bb23d85e": "Cost comes from the local OpenCode database when the assistant message recorded one.",
-          "15c34d4b08": "Recorded cost",
-          "7e9433469a": "Sessions / Events",
-          "5a65d68b77": "Reasoning output",
-          "603504ee3b": "Cached input",
-          "7aa4d8ce35": "Output tokens",
-          "d637a892ed": "Input tokens",
-          "bb6363e08c": "No local OpenCode usage found yet for this scope.",
-          "f04131b3be": "Enable OpenCode usage analytics",
-          "603cd138dc": "Refresh",
-          "bed558df0b": "Refresh OpenCode usage",
-          "b5ed5c9fd0": "Range",
-          "40d283c837": "Scope",
-          "01583b30aa": "Filters",
-          "230d6de108": "OpenCode usage options",
-          "bea80ceae0": "OpenCode Usage Tracking",
-          "b8b3522436": "Reads local OpenCode usage logs to show token, model, and session stats.",
-          "144a6050e9": "All local OpenCode usage",
-          "e04c58327c": "Yiru worktrees only",
-          "362231082f": "Unknown",
-          "8095a63426": "n/a",
-          "6cc7782458": " • Last scan error: {{value0}}",
-          "rangeLast7Days": "Last 7 days",
-          "rangeLast30Days": "Last 30 days",
-          "rangeLast90Days": "Last 90 days",
-          "rangeAllTime": "All time"
-        },
-        "ShareUsageButton": {
-          "7d6b25323d": "Share on X",
-          "b295c1c75d": "Copy image",
-          "bd82c76a70": "Copied",
-          "bce08eccb9": "Share usage",
-          "cecefa7c32": "Share"
-        },
-        "ShareUsageCard": {
-          "4a4c6c79a3": "sessions ·",
-          "66c83284cf": "Daily tokens",
-          "b760c0b622": "Top model",
-          "2d9eb39264": "Total tokens",
-          "beb6f24f37": "Est. cost",
-          "da62578d9d": "Usage",
-          "0eb31e79ee": "Yiru IDE",
-          "960324e9b8": "events",
-          "6adac63cfe": "turns"
-        },
-        "StatsPane": {
-          "42d3e0bdf7": "Usage analytics provider: {{value0}}",
-          "c79f073d4c": "Usage Analytics",
-          "a58aba506f": "PRs created",
-          "1c96f433e2": "Time agents worked",
-          "9dbec9e675": "Agents spawned",
-          "73ed07859c": "Start your first agent to begin tracking",
-          "1e696db2f6": "OpenCode",
-          "7d26110cea": "Codex",
-          "85457c02fe": "Claude",
-          "b2cf4310ce": "Overview",
-          "908c470587": "codex",
-          "eb6a066185": "claude",
-          "eee19cfade": "overview",
-          "grokUsageTab": "Grok"
-        },
-        "UsageOverviewPane": {
-          "22ed1b7669": "sessions",
-          "444585cb41": "with data",
-          "ecb0cd8a4c": "enabled -",
-          "33f7b043d2": "Providers",
-          "60002bb22f": "No provider-reported usage found yet. The overview will populate after the next supported agent session writes token logs.",
-          "70f36452d4": "Cache share",
-          "327603fe8b": "Active days",
-          "0eaf937335": "Est. cost",
-          "3887b94ce5": "Total tokens",
-          "2d13e57f72": "Enable OpenCode",
-          "2f1ee2878b": "Enable Codex",
-          "0ea0cae435": "Enable Claude",
-          "6c00c46815": "Enable a provider to scan local agent logs and build the combined token ledger.",
-          "49405ccc8d": "Start tracking tokens",
-          "ca6bc5fded": "Refresh",
-          "e06d1baf5c": "Refresh usage overview",
-          "c760c481c5": "Usage Overview",
-          "55c910f4f1": "- some model prices are unavailable",
-          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
-        },
-        "share": {
-          "card": {
-            "utils": {
-              "d864fc5f98": "output",
-              "5d66fdd7c2": "input",
-              "7080aeaebb": "Reasoning",
-              "4ee864629a": "Cached input",
-              "33d38e2177": "Output",
-              "c2d7b23d57": "Input",
-              "9d166247ee": "Cache write",
-              "cc28cb965e": "Cache read"
-            }
-          }
-        },
-        "stats": {
-          "search": {
-            "cb6a9f0334": "cache",
-            "eaf251e183": "tokens",
-            "6953af58e6": "opencode",
-            "b77826fca3": "codex",
-            "e9dc37d889": "claude",
-            "8efeae0b22": "tracking",
-            "5acbe1fdf2": "time",
-            "ef8bbf7739": "prs",
-            "ce8533f02e": "agents",
-            "0bba8ca244": "statistics",
-            "0e2a0b6431": "usage",
-            "372debfac0": "stats",
-            "26bb901fcd": "Yiru stats plus provider token analytics and Grok subscription usage.",
-            "cb2430ae6a": "Stats & Usage",
-            "f8a1b2c3d4": "grok",
-            "e7f0a1b2c3": "subscription",
-            "d6e9f0a1b2": "credits",
-            "a3b6c7d8e9": "grok usage",
-            "9f2a3b4c5d": "xai"
-          }
-        },
-        "usage": {
-          "overview": {
-            "model": {
-              "bc474051e5": "OpenCode",
-              "eb220d193b": "Codex",
-              "544d6d4c16": "Claude",
-              "other": "Other agents"
-            },
-            "sections": {
-              "9564a3b21b": "sessions -",
-              "32330a6e66": "{{value0}}: {{value1}} tokens",
-              "57d1448ef8": "Enable",
-              "f6df0d7d6d": "More",
-              "1dd166c920": "Less",
-              "52d9221dc0": "Recent token activity heatmap",
-              "c424eb3f8e": "Best:",
-              "f28ff1f852": "Recent combined provider-reported token activity.",
-              "69e2b50427": "Daily intensity",
-              "3a795542fa": "Combined token mix",
-              "e65084cb4b": "reasoning",
-              "3bc4a01b24": "Combined input, output, and cache tokens across enabled providers.",
-              "4ff104da47": "Token mix",
-              "0015facc1f": "Cache",
-              "7f270458af": "Output",
-              "9365b14a4e": "New input",
-              "3de9bf87fc": "No model yet",
-              "6762f6a682": "tokens",
-              "a7f937fb29": "{{value0}} sessions - {{value1}} {{value2}}",
-              "c8f3a2d1e0b4": "turns",
-              "d9a4b3e2f1c5": "events",
-              "usageLedger": "Token ledger"
-            }
-          }
-        },
-        "UsageBreakdownSection": {
-          "7765a4c3e1": "n/a",
-          "247c93ca92": "• inferred pricing"
-        },
-        "UsageSessionsTable": {
-          "1afc25eb06": "Turns",
-          "0f03975d59": "Events",
-          "21ea00bfa8": "Cache",
-          "e0b988599d": "Total",
-          "01476891c7": "Last active",
-          "c17bed0416": "Project",
-          "f6a2c8d019": "Model",
-          "faf3444859": "Input",
-          "a8b7487ff7": "Output",
-          "cfe2282ffa": "Unknown"
-        },
-        "GrokUsagePane": {
-          "g8h9i0j1k2": "Grok usage",
-          "b2d3e4f5c6": "Weekly subscription credits from Grok CLI OAuth (~/.grok/auth.json). Same source as the status bar.",
-          "c3e4f5a6b7": "Set up in Accounts",
-          "h9i0j1k2l3": " • {{value0}}",
-          "i0j1k2l3m4": "Refresh Grok usage",
-          "d4f5a6b7c8": "Refresh",
-          "e5a6b7c8d9": "Weekly credits used",
-          "f6b7c8d9e0": "Billing period reset",
-          "a7b8c9d0e1": "Grok account settings"
         }
       },
       "sparse": {
@@ -3127,7 +2815,6 @@
           "d3a9c4cea1": "Clear",
           "7679f0c268": "Projects",
           "f10ca29601": "Remove {{value0}} filter",
-          "2656053db4": "SSH",
           "83a820fa71": "Filter projects...",
           "5a273fbfce": "Add project...",
           "4815c70605": "No projects match",
@@ -3245,8 +2932,6 @@
           "01f45d3d8a": "sidebar",
           "93aebe4529": "Folder",
           "0d224eff10": "Primary worktree",
-          "ca74db7550": "Project on SSH host",
-          "021538e1d1": "SSH disconnected",
           "runtimeHostDisconnected": "Runtime host disconnected",
           "runtimeHostProject": "Project on runtime host",
           "automationCreated": "Created by automation",
@@ -3493,8 +3178,6 @@
             "create": {
               "state": {
                 "992cfbc44b": "Create new worktree for {{value0}}",
-                "3a70acd808": "Reconnect SSH target before creating workspaces for {{value0}}",
-                "6d022563a8": "Reconnect SSH target before creating workspaces",
                 "62e71f2d5d": "Create workspace for {{value0}}"
               }
             }
@@ -5834,7 +5517,6 @@
           "3119c012a5": "string"
         },
         "SettingsSidebar": {
-          "e0900f83e7": "SSH",
           "5c9669ff9c": "Projects",
           "dbceaa8840": "Search settings",
           "60f8a673a7": "Back to app",
@@ -9315,7 +8997,6 @@
         "RepoCombobox": {
           "b3e15f4525": "Add project",
           "b4a235e886": "Adding project",
-          "3639fd9da2": "SSH",
           "e7ed739236": "No projects/folders match your search.",
           "a0c48f5f29": "Search projects/folders...",
           "116812151a": "Adding project…"
@@ -9933,9 +9614,6 @@
           "FeatureWallModal": {
             "33dca8bbbe": "A short, workflow-by-workflow tour of Yiru.",
             "3567e147c8": "Get to know Yiru"
-          },
-          "FeatureWallPreview": {
-            "a666384798": "Also in this workflow"
           },
           "FeatureWallRail": {
             "69ea857689": "Completed",
@@ -11471,7 +11149,6 @@
           "244727e655": "Automation updated.",
           "77b81bc4ac": "Hermes automation created.",
           "08efc3ae12": "Hermes automation updated.",
-          "e431bb85d4": "Choose a workspace on the same host as this Hermes automation.",
           "32534e7c9c": "Choose an available workspace before saving.",
           "2360ffc956": "Choose an enabled agent before saving.",
           "6e91dab317": "Enter a valid advanced schedule before saving.",
@@ -11940,6 +11617,37 @@
           "other": "Other",
           "refreshAriaLabel": "Refresh local usage statistics",
           "refresh": "Refresh usage"
+        },
+        "projectUsage": {
+          "title": "By project",
+          "tokenSummary": "{{tokens}} · {{projects}} projects · {{sessions}} sessions",
+          "valueSummary": "{{value}} known API value · {{projects}} projects · {{tokens}}",
+          "filterLabel": "Filter projects",
+          "filterPlaceholder": "Filter projects",
+          "empty": "No project-attributed usage is available yet.",
+          "noResults": "No projects match this filter.",
+          "unpriced": "Projects containing usage without authoritative pricing show no combined API value.",
+          "projectDetail": "{{tokens}} · {{sessions}} sessions"
+        },
+        "metricControls": {
+          "metricLabel": "Statistic",
+          "rangeLabel": "Usage range",
+          "sevenDays": "7 days",
+          "thirtyDays": "30 days",
+          "ninetyDays": "90 days"
+        },
+        "provider": {
+          "claude": "Claude",
+          "codex": "Codex",
+          "openCode": "OpenCode"
+        },
+        "providerChart": {
+          "title": "Daily usage",
+          "tokenDescription": "Token volume by provider across the selected range.",
+          "valueDescription": "Known API-equivalent value by provider; unpriced usage is excluded.",
+          "ariaLabel": "{{metric}} by provider over {{days}} days",
+          "tokens": "Tokens",
+          "value": "API value"
         }
       },
       "workspace-panel": {
@@ -12083,6 +11791,23 @@
             "failed": "Git command failed",
             "subjectCopied": "Commit subject copied",
             "subjectCopyFailed": "Failed to copy commit subject"
+          }
+        }
+      },
+      "rate": {
+        "limit": {
+          "resume": {
+            "use": {
+              "rate": {
+                "limit": {
+                  "resume": {
+                    "dispatch": {
+                      "8ec3ff2193": "The agent pane did not accept the replayed prompt."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -12358,5 +12083,85 @@
     },
     "workspace": "Workspace",
     "workspaceIndicator": "{{agent}} will automatically continue at {{time}}"
+  },
+  "themeGradient": {
+    "section": {
+      "title": "Theme color",
+      "summary": "Workspace accent color and background wash"
+    },
+    "search": {
+      "paletteTitle": "Theme color",
+      "paletteDescription": "Pick an accent color and background wash for a workspace.",
+      "grainTitle": "Grain",
+      "grainDescription": "Film-grain texture layered over the workspace theme gradient."
+    },
+    "scope": {
+      "label": "Applies to",
+      "workspaceDescription": "Only this workspace uses this theme. Others fall back to the default.",
+      "defaultDescription": "Used by every workspace without a theme of its own.",
+      "workspace": "This workspace: {{value0}}",
+      "workspaceUnavailable": "This workspace",
+      "default": "All workspaces (default)",
+      "inheriting": "This workspace currently shows the default theme."
+    },
+    "pad": {
+      "label": "Theme color pad",
+      "clickToAdd": "Click to add a color"
+    },
+    "scheme": {
+      "system": "Follow system appearance",
+      "light": "Use light appearance",
+      "dark": "Use dark appearance"
+    },
+    "colors": {
+      "add": "Add color",
+      "remove": "Remove color",
+      "harmony": "Change color harmony"
+    },
+    "harmony": {
+      "floating": "Single color",
+      "complementary": "Complementary",
+      "singleAnalogous": "Analogous pair",
+      "splitComplementary": "Split complementary",
+      "analogous": "Analogous",
+      "triadic": "Triadic",
+      "label": "Color harmony"
+    },
+    "opacity": "Intensity",
+    "texture": "Grain",
+    "customColor": "Custom color",
+    "reset": "Clear theme",
+    "presets": {
+      "previous": "Previous palette row",
+      "apply": "Apply palette preset",
+      "applyNumbered": "Apply palette preset {{value0}} of {{value1}}",
+      "next": "Next palette row"
+    }
+  },
+  "runtimeHost": {
+    "appDataRequired": "APPDATA is required to resolve the Yiru runtime data path",
+    "fatal": "Runtime host failed",
+    "invalidPort": "Invalid runtime host port: {{port}}",
+    "mobileClient": "Mobile runtime client",
+    "mobilePairingQr": "Mobile pairing QR",
+    "optionValueRequired": "`{{option}}` requires a value",
+    "pairingAddressRequiresMobile": "`--pairing-address` requires `--mobile-pairing`",
+    "pairingUrl": "Pairing URL",
+    "procedureUnavailable": "Procedure is not mounted on this runtime host",
+    "ready": "Yiru runtime host ready",
+    "shutdownFailed": "Runtime host shutdown failed",
+    "unknownOption": "Unknown runtime host option: {{option}}",
+    "userDataPathRequired": "`--user-data-path` requires a path",
+    "webClient": "Runtime web client",
+    "pairedDeviceUnauthorized": "The paired device is no longer authorized",
+    "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
+    "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
+    "invalidBinaryStream": "The runtime host received an invalid binary stream"
+  },
+  "automations": {
+    "workspaceTerminalMissing": "Automation workspace was created, but no agent terminal started.",
+    "targetWorkspaceMissing": "The target workspace is no longer available.",
+    "agentBlocked": "Automation agent is blocked: {{reason}}.",
+    "agentIncomplete": "Automation agent did not report completion."
   }
 }

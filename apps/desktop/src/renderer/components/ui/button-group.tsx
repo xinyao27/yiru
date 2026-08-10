@@ -15,10 +15,15 @@ const buttonGroupVariants = cva(
           '[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none [&>[data-slot=tooltip-trigger]:not(:first-child)>button]:rounded-l-none [&>[data-slot=tooltip-trigger]:not(:first-child)>button]:border-l-0 [&>[data-slot=tooltip-trigger]:not(:last-child)>button]:rounded-r-none',
         vertical:
           'flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none'
+      },
+      presentation: {
+        default: '',
+        titlebar: 'h-full'
       }
     },
     defaultVariants: {
-      orientation: 'horizontal'
+      orientation: 'horizontal',
+      presentation: 'default'
     }
   }
 )
@@ -26,6 +31,7 @@ const buttonGroupVariants = cva(
 function ButtonGroup({
   className,
   orientation,
+  presentation,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof buttonGroupVariants>) {
   return (
@@ -33,7 +39,7 @@ function ButtonGroup({
       role="group"
       data-slot="button-group"
       data-orientation={orientation}
-      className={cn(buttonGroupVariants({ orientation }), className)}
+      className={cn(buttonGroupVariants({ orientation, presentation }), className)}
       {...props}
     />
   )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
 import { isFloatingWorkspaceWorktreeId } from '../floating-workspace'
@@ -29,15 +30,12 @@ export function useMobileNativeChatReadability(
       setState({ client, worktreeId, readable: false })
       return
     }
-    void client
-      .sendRequest('repo.list')
+    void callRuntimeOrpc(client, (runtime) => runtime.repo.list, undefined)
       .then((response) => {
         if (!active) {
           return
         }
-        const repos = response.ok
-          ? ((response.result as { repos?: RepoSummary[] }).repos ?? [])
-          : []
+        const repos: RepoSummary[] = response.repos
         const repoId = getRepoIdFromMobileWorktreeId(worktreeId)
         const repo = repos.find((candidate) => candidate.id === repoId)
         setState({

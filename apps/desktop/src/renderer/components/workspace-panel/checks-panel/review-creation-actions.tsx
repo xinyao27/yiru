@@ -1,8 +1,8 @@
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
+import { showWorkspaceSidebar } from '../show-sidebar'
 import type { useChecksPanelReviewMutationsState } from './review-mutations'
 
 export function useChecksPanelReviewCreation(context: useChecksPanelReviewMutationsState) {
@@ -118,8 +118,8 @@ export function useChecksPanelReviewCreation(context: useChecksPanelReviewMutati
       if (!repo || !branch) {
         return
       }
-      openWorkspacePanelTab({
-        panel: 'source-control',
+      showWorkspaceSidebar({
+        view: 'source-control',
         worktreeId: activeWorktreeId,
         sourceControlView: 'review'
       })

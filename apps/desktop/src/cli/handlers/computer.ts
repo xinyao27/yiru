@@ -1,10 +1,4 @@
-import type {
-  ComputerActionResult,
-  ComputerListAppsResult,
-  ComputerListWindowsResult,
-  ComputerProviderCapabilities,
-  ComputerSnapshotResult
-} from '~shared/runtime-types'
+import type { ComputerProviderCapabilities } from '~shared/runtime-types'
 
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
@@ -32,23 +26,16 @@ import {
 
 export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
   'computer capabilities': async ({ client, json }) => {
-    const result = await client.call<ComputerProviderCapabilities>('computer.capabilities', {})
+    const result = await client.call(client.rpc.computer.capabilities, {})
     printResult(result, json, formatComputerCapabilities)
   },
   'computer list-apps': async ({ client, json }) => {
-    const result = await client.call<ComputerListAppsResult>('computer.listApps', {})
+    const result = await client.call(client.rpc.computer.listApps, {})
     printResult(result, json, formatListApps)
   },
   'computer permissions': async ({ flags, client, json }) => {
     const id = getComputerPermissionSetupId(flags)
-    const result = await client.call<{
-      platform: NodeJS.Platform
-      helperAppPath: string | null
-      openedSettings: boolean
-      launchedHelper: boolean
-      permissions?: { id: string; status: string }[]
-      nextStep?: string | null
-    }>('computer.permissions', id ? { id } : {})
+    const result = await client.call(client.rpc.computer.permissions, id ? { id } : {})
     printResult(result, json, (value) => {
       if (value.platform !== 'darwin') {
         return 'Computer-use permission setup is only required on macOS.'
@@ -72,7 +59,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     })
   },
   'computer list-windows': async ({ flags, client, json }) => {
-    const result = await client.call<ComputerListWindowsResult>('computer.listWindows', {
+    const result = await client.call(client.rpc.computer.listWindows, {
       app: getRequiredStringFlag(flags, 'app')
     })
     printResult(result, json, formatListWindows)
@@ -80,7 +67,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
   'computer get-app-state': async ({ flags, client, cwd, json }) => {
     const observeFlags = getComputerObserveFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerSnapshotResult>('computer.getAppState', {
+    const result = await client.call(client.rpc.computer.getAppState, {
       ...target,
       ...observeFlags
     })
@@ -91,7 +78,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerClickActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.click', {
+    const result = await client.call(client.rpc.computer.click, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -105,7 +92,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerSecondaryActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.performSecondaryAction', {
+    const result = await client.call(client.rpc.computer.performSecondaryAction, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -119,7 +106,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerScrollActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.scroll', {
+    const result = await client.call(client.rpc.computer.scroll, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -133,7 +120,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerDragActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.drag', {
+    const result = await client.call(client.rpc.computer.drag, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -147,7 +134,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = await getComputerTextActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.typeText', {
+    const result = await client.call(client.rpc.computer.typeText, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -161,7 +148,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerKeyActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.pressKey', {
+    const result = await client.call(client.rpc.computer.pressKey, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -175,7 +162,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = getComputerHotkeyActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.hotkey', {
+    const result = await client.call(client.rpc.computer.hotkey, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -189,7 +176,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = await getComputerTextActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.pasteText', {
+    const result = await client.call(client.rpc.computer.pasteText, {
       ...target,
       ...actionParams,
       ...observeFlags
@@ -203,7 +190,7 @@ export const COMPUTER_HANDLERS: Record<string, CommandHandler> = {
     const observeFlags = getComputerActionObserveFlags(flags)
     const actionParams = await getComputerSetValueActionFlags(flags)
     const target = await getComputerCommandTarget(flags, cwd, client)
-    const result = await client.call<ComputerActionResult>('computer.setValue', {
+    const result = await client.call(client.rpc.computer.setValue, {
       ...target,
       ...actionParams,
       ...observeFlags

@@ -343,21 +343,6 @@ export async function createWorktreeSharedPaths(
   await materializeWorktreePaths(primaryPath, worktreePath, paths, 'share', options)
 }
 
-/** Create filesystem symlinks from the primary checkout into a freshly-created
- *  worktree for each configured path. Failures on individual paths are logged
- *  and skipped so a missing/stale entry never blocks worktree creation.
- *
- *  Each entry is interpreted relative to `primaryPath` and placed at the same
- *  relative location inside `worktreePath`. Nested paths (e.g.
- *  `apps/web/.env`) are supported — parent directories are created lazily. */
-export async function createWorktreeSymlinks(
-  primaryPath: string,
-  worktreePath: string,
-  paths: readonly string[]
-): Promise<void> {
-  await createWorktreeLinkedPaths(primaryPath, worktreePath, paths, { platform: 'linux' })
-}
-
 export async function removeWorktreeLinkedPaths(
   worktreePath: string,
   paths: readonly string[]
@@ -382,22 +367,3 @@ export async function removeWorktreeLinkedPaths(
 }
 
 export { findExistingWorktreeSymlinkPaths }
-
-/** Remove previously-created symlinks from a worktree before deletion.
- *
- *  Why: `git worktree remove` refuses to delete a worktree that has modified
- *  or untracked files. A symlink pointing at the primary's `node_modules`
- *  looks "untracked" to git, so users would hit "It has changed files. Use
- *  Force Delete" on every deletion once they've configured this feature.
- *  Unlink the known symlinks up front so the non-force path keeps working.
- *
- *  Safety: only removes entries that are actually symbolic links. A regular
- *  file or directory at the same path is left alone — we never want to clobber
- *  something the user created that happens to share a name with a configured
- *  entry. Missing entries (ENOENT) are silently ignored. */
-export async function removeWorktreeSymlinks(
-  worktreePath: string,
-  paths: readonly string[]
-): Promise<void> {
-  await removeWorktreeLinkedPaths(worktreePath, paths)
-}

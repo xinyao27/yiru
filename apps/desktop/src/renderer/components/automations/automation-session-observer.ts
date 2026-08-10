@@ -1,7 +1,8 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/terminal-pane/terminal-side-effect-facts-handler'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/remote-runtime-terminal-multiplexer'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
 import {
   getRemoteRuntimePtyEnvironmentId,
@@ -23,7 +24,7 @@ export async function observeExistingAutomationSession(args: {
 }): Promise<() => void> {
   const { ptyId, paneKey, runId, onData, onExit } = args
   // Why: for local PTYs main already parses OSC 9999 and routes it
-  // through the hook server (agentStatus:set → store); writing here too
+  // through the hook server (agent-status stream → store); writing here too
   // would race/duplicate that path. Remote-runtime bytes never transit local
   // main, and the kill switch restores the legacy write. The onAgentStatus
   // callback always fires — automation completion tracking stays here.
@@ -65,9 +66,9 @@ export async function observeExistingAutomationSession(args: {
         onSnapshot: () => {}
       }
     })
-    void callRuntimeRpc<{ wait: { exitCode?: number | null } }>(
+    void callRuntimeOrpc(
       runtimeTarget,
-      'terminal.wait',
+      (client) => client.terminal.wait,
       { terminal, for: 'exit' },
       { timeoutMs: 24 * 60 * 60 * 1000 }
     )

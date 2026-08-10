@@ -21,6 +21,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { getLocalFileManagerLabel } from '~renderer/lib/local-file-manager-label'
 import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 type SourceControlEntryContextMenuProps = {
@@ -75,7 +76,7 @@ export function SourceControlEntryMenuContent({
     if (!absolutePath) {
       return
     }
-    void window.api.ui.writeClipboardText(absolutePath)
+    void shellClient.ui.writeClipboardText(absolutePath)
   }, [absolutePath])
 
   const handleRevealInYiruExplorer = useCallback(() => {

@@ -24,7 +24,7 @@ import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { translate } from '~/i18n/translate'
 import { useHostClient } from '~/transport/client-context'
 import { loadHosts } from '~/transport/host-store'
-import type { RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 const accountScreenClassNames = {
   errorText: 'text-xs text-destructive',
@@ -81,16 +81,17 @@ export default function AccountsScreen() {
     if (!client || connState !== 'connected') {
       return
     }
-    const unsubscribe = client.subscribe('accounts.subscribe', null, (payload) => {
-      if (!payload || typeof payload !== 'object') {
-        return
+    const unsubscribe = subscribeRuntimeOrpc(
+      client,
+      (runtime) => runtime.accounts.subscribe,
+      undefined,
+      (event) => {
+        if ((event.type === 'ready' || event.type === 'snapshot') && event.snapshot) {
+          setSnapshot(event.snapshot)
+          setError(null)
+        }
       }
-      const evt = payload as { type?: string; snapshot?: AccountsSnapshot }
-      if ((evt.type === 'ready' || evt.type === 'snapshot') && evt.snapshot) {
-        setSnapshot(evt.snapshot)
-        setError(null)
-      }
-    })
+    )
     return unsubscribe
   }, [client, connState])
 
@@ -100,13 +101,8 @@ export default function AccountsScreen() {
     }
     setRefreshing(true)
     try {
-      const res = await client.sendRequest('accounts.list')
-      if (res.ok) {
-        setSnapshot((res as RpcSuccess).result as AccountsSnapshot)
-        setError(null)
-      } else {
-        setError(res.error.message)
-      }
+      setSnapshot(await callRuntimeOrpc(client, (runtime) => runtime.accounts.list, undefined))
+      setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -120,20 +116,14 @@ export default function AccountsScreen() {
         return
       }
       setBusyAccountId(accountId ?? `${provider}:default`)
-      const method = provider === 'claude' ? 'accounts.selectClaude' : 'accounts.selectCodex'
       try {
-        const res = await client.sendRequest(method, { accountId })
-        if (!res.ok) {
-          Alert.alert(
-            translate('mobile.accounts.switchError', 'Could not switch account'),
-            res.error.message
-          )
-        } else {
-          // Why: optimistic refresh — the streaming subscription will also
-          // emit, but a one-shot keeps the UI responsive even if the stream
-          // is temporarily disconnected.
-          await refresh()
-        }
+        await (provider === 'claude'
+          ? callRuntimeOrpc(client, (runtime) => runtime.accounts.selectClaude, { accountId })
+          : callRuntimeOrpc(client, (runtime) => runtime.accounts.selectCodex, { accountId }))
+        // Why: optimistic refresh — the streaming subscription will also
+        // emit, but a one-shot keeps the UI responsive even if the stream
+        // is temporarily disconnected.
+        await refresh()
       } catch (e) {
         Alert.alert(
           translate('mobile.accounts.switchError', 'Could not switch account'),

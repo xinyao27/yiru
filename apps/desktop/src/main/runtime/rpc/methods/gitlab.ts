@@ -1,249 +1,129 @@
-import { z } from 'zod'
-import {
-  OptionalFiniteNumber,
-  OptionalString,
-  requiredString
-} from '~shared/runtime-method-contracts/runtime-method-params'
+import type {
+  GitLabAddMrCommentInputSchema as AddMRComment,
+  GitLabAddMrInlineCommentInputSchema as AddMRInlineComment,
+  GitLabEmptyInputSchema as EmptyParams,
+  GitLabJobInputSchema as JobTrace,
+  GitLabJobInputSchema as RetryJob,
+  GitLabListMrsInputSchema as WorkItemsList,
+  GitLabMergeMrInputSchema as MergeMr,
+  GitLabMrForBranchInputSchema as MrForBranch,
+  GitLabMrInputSchema as Mr,
+  GitLabRateLimitInputSchema as GitLabRateLimit,
+  GitLabRepoSelectorInputSchema as RepoSelector,
+  GitLabResolveMrDiscussionInputSchema as ResolveMRDiscussion,
+  GitLabUpdateMrInputSchema as UpdateMr,
+  GitLabUpdateMrReviewersInputSchema as UpdateMrReviewers,
+  GitLabUpdateMrStateInputSchema as UpdateMrState,
+  GitLabWorkItemByPathInputSchema as WorkItemByPath,
+  GitLabWorkItemDetailsInputSchema as WorkItemDetails
+} from '@yiru/runtime-protocol/contract'
+import type { z } from 'zod'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-const RepoSelector = z.object({
-  repo: requiredString('Missing repo selector')
-})
+export const handleGitLabViewer = (_params: z.infer<typeof EmptyParams>, { runtime }: RpcContext) =>
+  runtime.getGitLabViewer()
 
-const EmptyParams = z.object({}).optional().default({})
-const GitLabRateLimit = z
-  .object({
-    force: z.boolean().optional(),
-    host: OptionalString
-  })
-  .optional()
-  .default({})
+export const handleGitLabProjectSlug = (
+  params: z.infer<typeof RepoSelector>,
+  { runtime }: RpcContext
+) => runtime.getGitLabRepoProjectSlug(params.repo)
 
-const GitLabProjectRef = z
-  .object({
-    host: requiredString('Missing GitLab host'),
-    path: requiredString('Missing GitLab project path')
-  })
-  .optional()
+export const handleGitLabMrForBranch = (
+  params: z.infer<typeof MrForBranch>,
+  { runtime }: RpcContext
+) => runtime.getGitLabRepoMRForBranch(params.repo, params.branch, params.linkedMRIid)
 
-const WorkItemsList = RepoSelector.extend({
-  state: z.enum(['opened', 'merged', 'closed', 'all']).optional(),
-  page: OptionalFiniteNumber,
-  perPage: OptionalFiniteNumber,
-  query: OptionalString
-})
+export const handleGitLabMr = (params: z.infer<typeof Mr>, { runtime }: RpcContext) =>
+  runtime.getGitLabRepoMR(params.repo, params.iid)
 
-const UpdateMrState = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  state: z.enum(['opened', 'closed']),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabListAssignableUsers = (
+  params: z.infer<typeof RepoSelector>,
+  { runtime }: RpcContext
+) => runtime.listGitLabRepoAssignableUsers(params.repo)
 
-const UpdateMr = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  updates: z.object({
-    title: z.string().optional(),
-    body: z.string().optional(),
-    addLabels: z.array(z.string()).optional(),
-    removeLabels: z.array(z.string()).optional()
-  }),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabListMRs = (
+  params: z.infer<typeof WorkItemsList>,
+  { runtime }: RpcContext
+) => runtime.listGitLabRepoMRs(params.repo, params.state, params.page, params.perPage, params.query)
 
-const UpdateMrReviewers = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  reviewerIds: z.array(z.number().int().nonnegative()),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabDiagnoseAuth = (
+  _params: z.infer<typeof EmptyParams>,
+  { runtime }: RpcContext
+) => runtime.diagnoseGitLabAuth()
 
-const MergeMr = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  method: z.enum(['merge', 'squash', 'rebase']).optional(),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabRateLimit = (
+  params: z.infer<typeof GitLabRateLimit>,
+  { runtime }: RpcContext
+) => runtime.getGitLabRateLimit(params)
 
-const AddMRComment = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  body: requiredString('Comment body is required'),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabListLabels = (
+  params: z.infer<typeof RepoSelector>,
+  { runtime }: RpcContext
+) => runtime.listGitLabRepoLabels(params.repo)
 
-const AddMRInlineComment = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  input: z.object({
-    body: requiredString('Comment body is required'),
-    path: requiredString('File path is required'),
-    oldPath: z.string().optional(),
-    line: z.number().int().positive(),
-    baseSha: requiredString('Base SHA is required'),
-    startSha: requiredString('Start SHA is required'),
-    headSha: requiredString('Head SHA is required')
-  }),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabAddMRComment = (
+  params: z.infer<typeof AddMRComment>,
+  { runtime }: RpcContext
+) => runtime.addGitLabRepoMRComment(params.repo, params.iid, params.body, params.projectRef)
 
-const ResolveMRDiscussion = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  discussionId: requiredString('Discussion id is required'),
-  resolved: z.boolean(),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabAddMRInlineComment = (
+  params: z.infer<typeof AddMRInlineComment>,
+  { runtime }: RpcContext
+) => runtime.addGitLabRepoMRInlineComment(params.repo, params.iid, params.input, params.projectRef)
 
-const JobTrace = RepoSelector.extend({
-  jobId: z.number().int().positive(),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabResolveMRDiscussion = (
+  params: z.infer<typeof ResolveMRDiscussion>,
+  { runtime }: RpcContext
+) =>
+  runtime.resolveGitLabRepoMRDiscussion(
+    params.repo,
+    params.iid,
+    params.discussionId,
+    params.resolved,
+    params.projectRef
+  )
 
-const RetryJob = RepoSelector.extend({
-  jobId: z.number().int().positive(),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabJobTrace = (params: z.infer<typeof JobTrace>, { runtime }: RpcContext) =>
+  runtime.getGitLabRepoJobTrace(params.repo, params.jobId, params.projectRef)
 
-const WorkItemDetails = RepoSelector.extend({
-  iid: z.number().int().positive(),
-  type: z.literal('mr'),
-  projectRef: GitLabProjectRef
-})
+export const handleGitLabRetryJob = (params: z.infer<typeof RetryJob>, { runtime }: RpcContext) =>
+  runtime.retryGitLabRepoJob(params.repo, params.jobId, params.projectRef)
 
-const WorkItemByPath = RepoSelector.extend({
-  host: requiredString('Missing GitLab host'),
-  path: requiredString('Missing GitLab project path'),
-  iid: z.number().int().positive(),
-  type: z.literal('mr')
-})
+export const handleGitLabMergeMR = (params: z.infer<typeof MergeMr>, { runtime }: RpcContext) =>
+  runtime.mergeGitLabRepoMR(params.repo, params.iid, params.method, params.projectRef)
 
-export const GITLAB_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'gitlab.listMRs',
-    mobile: true,
-    params: WorkItemsList,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.listGitLabRepoMRs(
-        params.repo,
-        params.state,
-        params.page,
-        params.perPage,
-        params.query
-      )
-  }),
-  defineMethod({
-    name: 'gitlab.diagnoseAuth',
-    params: EmptyParams,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (_params, { runtime }) => runtime.diagnoseGitLabAuth()
-  }),
-  defineMethod({
-    name: 'gitlab.rateLimit',
-    params: GitLabRateLimit,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.getGitLabRateLimit(params)
-  }),
-  defineMethod({
-    name: 'gitlab.listLabels',
-    params: RepoSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.listGitLabRepoLabels(params.repo)
-  }),
-  defineMethod({
-    name: 'gitlab.addMRComment',
-    mobile: true,
-    params: AddMRComment,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.addGitLabRepoMRComment(params.repo, params.iid, params.body, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.addMRInlineComment',
-    params: AddMRInlineComment,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.addGitLabRepoMRInlineComment(params.repo, params.iid, params.input, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.resolveMRDiscussion',
-    mobile: true,
-    params: ResolveMRDiscussion,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.resolveGitLabRepoMRDiscussion(
-        params.repo,
-        params.iid,
-        params.discussionId,
-        params.resolved,
-        params.projectRef
-      )
-  }),
-  defineMethod({
-    name: 'gitlab.jobTrace',
-    params: JobTrace,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.getGitLabRepoJobTrace(params.repo, params.jobId, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.retryJob',
-    params: RetryJob,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.retryGitLabRepoJob(params.repo, params.jobId, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.mergeMR',
-    mobile: true,
-    params: MergeMr,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.mergeGitLabRepoMR(params.repo, params.iid, params.method, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.updateMRState',
-    mobile: true,
-    params: UpdateMrState,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.updateGitLabRepoMRState(params.repo, params.iid, params.state, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.updateMR',
-    mobile: true,
-    params: UpdateMr,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.updateGitLabRepoMR(params.repo, params.iid, params.updates, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.updateMRReviewers',
-    params: UpdateMrReviewers,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.updateGitLabRepoMRReviewers(
-        params.repo,
-        params.iid,
-        params.reviewerIds,
-        params.projectRef
-      )
-  }),
-  defineMethod({
-    name: 'gitlab.workItemDetails',
-    mobile: true,
-    params: WorkItemDetails,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.getGitLabRepoWorkItemDetails(params.repo, params.iid, params.type, params.projectRef)
-  }),
-  defineMethod({
-    name: 'gitlab.workItemByPath',
-    mobile: true,
-    params: WorkItemByPath,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.getGitLabRepoWorkItemByPath(
-        params.repo,
-        { host: params.host, path: params.path },
-        params.iid,
-        params.type
-      )
-  })
-]
+export const handleGitLabUpdateMRState = (
+  params: z.infer<typeof UpdateMrState>,
+  { runtime }: RpcContext
+) => runtime.updateGitLabRepoMRState(params.repo, params.iid, params.state, params.projectRef)
+
+export const handleGitLabUpdateMR = (params: z.infer<typeof UpdateMr>, { runtime }: RpcContext) =>
+  runtime.updateGitLabRepoMR(params.repo, params.iid, params.updates, params.projectRef)
+
+export const handleGitLabUpdateMRReviewers = (
+  params: z.infer<typeof UpdateMrReviewers>,
+  { runtime }: RpcContext
+) =>
+  runtime.updateGitLabRepoMRReviewers(
+    params.repo,
+    params.iid,
+    params.reviewerIds,
+    params.projectRef
+  )
+
+export const handleGitLabWorkItemDetails = (
+  params: z.infer<typeof WorkItemDetails>,
+  { runtime }: RpcContext
+) => runtime.getGitLabRepoWorkItemDetails(params.repo, params.iid, params.type, params.projectRef)
+
+export const handleGitLabWorkItemByPath = (
+  params: z.infer<typeof WorkItemByPath>,
+  { runtime }: RpcContext
+) =>
+  runtime.getGitLabRepoWorkItemByPath(
+    params.repo,
+    { host: params.host, path: params.path },
+    params.iid,
+    params.type
+  )

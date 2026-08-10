@@ -4,6 +4,11 @@ import type {
   RuntimeOrchestrationEnvelope,
   RuntimeRpcResponse
 } from '@yiru/runtime-protocol/rpc-envelope'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '~shared/runtime-method-contract'
 
 export type OrchestrationWorkerServer = {
   environmentId: string
@@ -11,15 +16,25 @@ export type OrchestrationWorkerServer = {
   peerFingerprint: string
 }
 
+// Why: mirrors `callRuntimeEnvironment`'s own generic signature
+// (`environment-transport-routing.ts`) so a caller can pass a real
+// `RuntimeMethodContract` instead of a bare method string — the slice 79
+// oRPC-negotiation gate only fires for the contract-object branch. The bare
+// string branch stays for the leaves whose envelope (`orchestrationRequestId`)
+// has no oRPC carrier yet.
 export type OrchestrationEnvironmentTransport = {
   resolve(selector: string): OrchestrationWorkerServer
-  call(
+  call<TContract extends string | RuntimeMethodContract>(
     selector: string,
-    method: string,
-    params: unknown,
+    contract: TContract,
+    params: TContract extends RuntimeMethodContract ? RuntimeMethodParams<TContract> : unknown,
     timeoutMs?: number,
     envelope?: RuntimeOrchestrationEnvelope
-  ): Promise<RuntimeRpcResponse<unknown>>
+  ): Promise<
+    RuntimeRpcResponse<
+      TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown
+    >
+  >
 }
 
 export function fingerprintOrchestrationPeer(publicKeyB64: string): string {

@@ -93,7 +93,10 @@ import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '~renderer/lib/
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
 import { checkRuntimeHooks, type HookCheckResult } from '~renderer/runtime/hooks-client'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { resolveWorktreeCreateBaseBranch } from '~renderer/runtime/worktree-create-base'
 import { useAppStore } from '~renderer/store'
 import { getDefaultRepoHookSettings } from '~shared/constants'
@@ -719,7 +722,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       selectedRepo.id,
       CLIENT_PLATFORM
     )
-    return getAgentLaunchPlatformForRepo(selectedRepo, projectRuntime)
+    return getAgentLaunchPlatformForRepo(projectRuntime)
   }, [activeRepoId, projects, repos, selectedRepo, settings, worktreesByRepo])
   const selectedRepoStartupShell = resolveLocalWindowsAgentStartupShell({
     platform: selectedRepoAgentLaunchPlatform,
@@ -1215,18 +1218,12 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     }
     let cancelled = false
     const target = getActiveRuntimeTarget(selectedRepoSettings)
-    const slugRequest =
-      target.kind === 'environment'
-        ? callRuntimeRpc<{ owner: string; repo: string } | null>(
-            target,
-            'github.repoSlug',
-            { repo: repoId },
-            { timeoutMs: 30_000 }
-          )
-        : (window.api.gh.repoSlug({ repoPath: selectedRepoPath, repoId }) as Promise<{
-            owner: string
-            repo: string
-          } | null>)
+    const slugRequest = callRuntimeOrpc(
+      target,
+      (client) => client.github.repoSlug,
+      { repo: repoId },
+      { timeoutMs: 30_000 }
+    )
     void slugRequest
       .then((result) => {
         if (cancelled) {
@@ -1580,8 +1577,12 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     setLinkItemsLoading(true)
 
     const lookupRepoId = selectedRepo.id
-    void window.api.gh
-      .listWorkItems({ repoPath: selectedRepo.path, repoId: selectedRepo.id, limit: 100 })
+    void callRuntimeOrpc(
+      getActiveRuntimeTarget(selectedRepoSettings),
+      (client) => client.github.listWorkItems,
+      { repo: selectedRepo.id, limit: 100 },
+      { timeoutMs: 30_000 }
+    )
       .then((envelope) => {
         if (!cancelled) {
           // Why: IPC payload omits repoId; stamp it at the renderer boundary.
@@ -1607,7 +1608,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     return () => {
       cancelled = true
     }
-  }, [linkPopoverOpen, selectedRepo, selectedRepoIsGit])
+  }, [linkPopoverOpen, selectedRepo, selectedRepoIsGit, selectedRepoSettings])
 
   useEffect(() => {
     if (
@@ -2118,7 +2119,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
 
   const handleAddAttachment = useCallback(async (): Promise<void> => {
     try {
-      const selectedPath = await window.api.shell.pickAttachment()
+      const selectedPath = await shellClient.shell.pickAttachment()
       if (!selectedPath) {
         return
       }
@@ -2141,8 +2142,8 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       const folderPaths: string[] = []
       for (const filePath of paths) {
         try {
-          await window.api.fs.authorizeExternalPath({ targetPath: filePath })
-          const stat = await window.api.fs.stat({ filePath })
+          await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
+          const stat = await workspaceHostClient.fileHost.stat({ filePath })
           if (stat.isDirectory) {
             folderPaths.push(filePath)
           } else {
@@ -2180,7 +2181,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   useEffect(() => {
     const instanceId = instanceIdRef.current
     composerDropStack.push(instanceId)
-    const unsubscribe = window.api.ui.onFileDrop((data) => {
+    const unsubscribe = shellClient.ui.onFileDrop((data) => {
       if (data.target !== 'composer') {
         return
       }
@@ -2626,7 +2627,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       const target = getActiveRuntimeTarget(itemRepoSettings)
       const resolveMrBase =
         target.kind === 'local'
-          ? window.api.worktrees.resolveMrBase({
+          ? workspaceHostClient.worktrees.resolveMrBase({
               repoId: runRepo.id,
               mrIid: item.number,
               ...(item.branchName ? { sourceBranch: item.branchName } : {}),
@@ -2635,12 +2636,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
                 ? { isCrossRepository: item.isCrossRepository }
                 : {})
             })
-          : callRuntimeRpc<
-              | { baseBranch: string; compareBaseRef?: string; pushTarget?: GitPushTarget }
-              | { error: string }
-            >(
+          : callRuntimeOrpc(
               target,
-              'worktree.resolveMrBase',
+              (client) => client.worktree.resolveMrBase,
               {
                 repo: runRepo.id,
                 mrIid: item.number,

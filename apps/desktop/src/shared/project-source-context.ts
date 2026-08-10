@@ -2,8 +2,7 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId,
   normalizeExecutionHostId,
-  parseExecutionHostId,
-  toRuntimeExecutionHostId
+  parseExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
 import type { GlobalSettings, ProjectProviderIdentity, Repo } from './types'
@@ -145,12 +144,6 @@ export function buildWorkspaceRunContext(args: {
   }
 }
 
-export function getWorkspaceRunRuntimeSettings(
-  context: Pick<WorkspaceRunContext, 'hostId'> | null | undefined
-): Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> {
-  return getProjectSourceRuntimeSettings(context ? { hostId: context.hostId } : null)
-}
-
 function getRepoHostId(repo: Pick<Repo, 'connectionId' | 'executionHostId'>): ExecutionHostId {
   const explicit = normalizeExecutionHostId(repo.executionHostId)
   if (explicit) {
@@ -200,11 +193,4 @@ function projectSourceIdentityCachePart(
 
 function encodeCachePart(value: string): string {
   return encodeURIComponent(value)
-}
-
-export function runtimeHostIdFromEnvironmentId(
-  environmentId: string | null | undefined
-): ExecutionHostId {
-  const trimmed = normalizeNonEmptyString(environmentId)
-  return trimmed ? toRuntimeExecutionHostId(trimmed) : LOCAL_EXECUTION_HOST_ID
 }

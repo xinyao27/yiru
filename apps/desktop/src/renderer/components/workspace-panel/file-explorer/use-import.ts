@@ -4,6 +4,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './runtime-owner'
 
@@ -44,7 +45,7 @@ export function useFileExplorerImport({
   setSelectedPathRef.current = setSelectedPath
 
   useEffect(() => {
-    return window.api.ui.onFileDrop((data) => {
+    return shellClient.ui.onFileDrop((data) => {
       if (data.target !== 'file-explorer') {
         return
       }

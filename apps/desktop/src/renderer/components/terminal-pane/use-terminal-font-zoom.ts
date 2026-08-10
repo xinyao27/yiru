@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import { safeFit } from '~renderer/lib/pane-manager/pane-tree-ops'
 import { dispatchZoomLevelChanged } from '~renderer/lib/zoom-events'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { DEFAULT_TERMINAL_FONT_SIZE } from '~shared/terminal/fonts'
 
 import { getPaneOwnedActiveHelperTextarea } from './regular-terminal-focus-ownership'
@@ -29,7 +30,7 @@ export function useTerminalFontZoom({
     const MAX_FONT_SIZE = 32
     const FONT_SIZE_STEP = 1
 
-    return window.api.ui.onTerminalZoom((direction) => {
+    return shellClient.ui.onTerminalZoom((direction) => {
       const container = containerRef.current
       if (!container || !getPaneOwnedActiveHelperTextarea(container, document.activeElement)) {
         return

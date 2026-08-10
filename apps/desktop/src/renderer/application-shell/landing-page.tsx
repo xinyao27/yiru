@@ -11,11 +11,19 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import {
+  checkShellYiruStarred,
+  completeShellStarNag,
+  starYiruFromShell
+} from '~renderer/runtime/github-shell-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { isGitRepoKind } from '~shared/repo-kind'
 import type { Repo } from '~shared/types'
 
 import logo from '../../../resources/yiru-wordmark.png?url'
 import { cn } from '../lib/class-names'
+import { callRuntimeOrpc } from '../runtime/orpc-client'
+import { getActiveRuntimeTarget } from '../runtime/rpc-client'
 import { useAppStore } from '../store'
 import {
   dismissPreflightIssue,
@@ -39,7 +47,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
 
   useEffect(() => {
     let cancelled = false
-    void window.api.gh.checkYiruStarred().then((result) => {
+    void checkShellYiruStarred().then((result) => {
       if (cancelled) {
         return
       }
@@ -73,14 +81,14 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
       return
     }
     if (state === 'web-fallback') {
-      await window.api.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
+      await shellClient.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
       return
     }
     if (state !== 'not-starred') {
       return
     }
     setState('starred') // optimistic
-    const ok = await window.api.gh.starYiru('landing')
+    const ok = await starYiruFromShell('landing')
     if (!ok) {
       if (mountedRef.current) {
         setState('web-fallback')
@@ -90,7 +98,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
     // Why: starring from any entry point mutes the threshold-based nag.
     // Without this the background notification could still fire on the next
     // threshold crossing, which would feel like a bug to the user.
-    await window.api.starNag.complete()
+    await completeShellStarNag()
   }
 
   // Hide once the user has already starred and added a repo.
@@ -211,7 +219,7 @@ function PreflightBanner({
               variant="ghost"
               size="xs"
               className="text-primary focus-visible:bg-accent mt-1 h-auto border-0 p-0 underline-offset-4 hover:underline"
-              onClick={() => window.api.shell.openUrl(issue.fixUrl)}
+              onClick={() => shellClient.shell.openUrl(issue.fixUrl)}
             >
               {issue.fixLabel}
               <ExternalLink className="size-3" />
@@ -249,7 +257,11 @@ export default function Landing(): React.JSX.Element {
   useEffect(() => {
     let cancelled = false
     const refreshPreflight = (force = false): void => {
-      void window.api.preflight.check(force ? { force: true } : undefined).then((status) => {
+      void callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.preflight.check,
+        force ? { force: true } : {}
+      ).then((status) => {
         if (cancelled) {
           return
         }
@@ -289,7 +301,11 @@ export default function Landing(): React.JSX.Element {
     // Why: some users complete `gh auth login` without ever leaving the Yiru
     // window. Poll only while a warning is visible so the banner self-clears.
     const intervalId = window.setInterval(() => {
-      void window.api.preflight.check({ force: true }).then((status) => {
+      void callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.preflight.check,
+        { force: true }
+      ).then((status) => {
         if (cancelled) {
           return
         }

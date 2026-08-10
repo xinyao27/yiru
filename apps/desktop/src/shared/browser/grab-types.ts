@@ -210,11 +210,6 @@ export const GRAB_SAFE_ATTRIBUTE_NAMES = new Set([
   'method'
 ])
 
-/** Attribute names matching aria-* are always included. */
-export function isAriaAttribute(name: string): boolean {
-  return name.startsWith('aria-')
-}
-
 /**
  * Patterns in attribute values that indicate secrets — these values get
  * redacted. Why tighter patterns than broad words like 'code' or 'state':
@@ -236,24 +231,4 @@ export const GRAB_SECRET_PATTERNS = [
   'secret',
   'password',
   'passwd'
-]
-
-/** Computed style properties to extract — matches BrowserGrabComputedStyles keys. */
-export const GRAB_STYLE_PROPERTIES: readonly (keyof BrowserGrabComputedStyles)[] = [
-  'display',
-  'position',
-  'width',
-  'height',
-  'margin',
-  'padding',
-  'color',
-  'backgroundColor',
-  'border',
-  'borderRadius',
-  'fontFamily',
-  'fontSize',
-  'fontWeight',
-  'lineHeight',
-  'textAlign',
-  'zIndex'
 ]

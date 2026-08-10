@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { copyMarkdownReviewNotesForAgent } from '../markdown-review-note-copy'
 import type { MarkdownReviewNote } from '../markdown-review-notes'
@@ -74,7 +75,7 @@ async function copyReviewNotes(notes: MarkdownReviewNote[], content: string): Pr
     return await copyMarkdownReviewNotesForAgent({
       notes,
       content,
-      writeClipboardText: window.api.ui.writeClipboardText
+      writeClipboardText: shellClient.ui.writeClipboardText
     })
   } catch {
     return false

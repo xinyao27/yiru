@@ -8,7 +8,9 @@ import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
 import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import {
   subscribeToRuntimeTerminalData,
   toRemoteRuntimePtyId
@@ -18,7 +20,6 @@ import { useAppStore } from '~renderer/store'
 import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
 import { repoIsRemote } from '~shared/agent/launch-remote'
 import { createAgentStatusOscProcessor } from '~shared/agent/status-osc'
-import type { RuntimeTerminalCreate } from '~shared/runtime-types'
 import { makePaneKey } from '~shared/stable-pane-id'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import {
@@ -51,9 +52,9 @@ export async function launchAgentBackgroundSession(
     throw new Error('The target workspace is no longer available.')
   }
   const preflight = TUI_AGENT_CONFIG[agent].preflightTrust
-  if (preflight && worktree.path && window.api.agentTrust?.markTrusted) {
+  if (preflight && worktree.path && rendererHostClient.agentTrust?.markTrusted) {
     try {
-      await window.api.agentTrust.markTrusted({
+      await rendererHostClient.agentTrust.markTrusted({
         preset: preflight,
         workspacePath: worktree.path
       })
@@ -65,7 +66,7 @@ export async function launchAgentBackgroundSession(
   const agentArgs = resolveTuiAgentLaunchArgs(agent, store.settings?.agentDefaultArgs)
   const agentEnv = resolveTuiAgentLaunchEnv(agent, store.settings?.agentDefaultEnv)
   const launchPlatform = repo
-    ? getAgentLaunchPlatformForRepo(repo, getLocalProjectExecutionRuntimeContext(store, worktreeId))
+    ? getAgentLaunchPlatformForRepo(getLocalProjectExecutionRuntimeContext(store, worktreeId))
     : CLIENT_PLATFORM
   const isRemote = repo ? repoIsRemote(repo) : false
   const startupShell = resolveLocalWindowsAgentStartupShell({
@@ -171,9 +172,9 @@ export async function launchAgentBackgroundSession(
     if (runtimeTarget.kind === 'environment') {
       // Why: runtime environments execute on the server; using local pty.spawn
       // would silently run automation on the client for a remote workspace.
-      const created = await callRuntimeRpc<{ terminal: RuntimeTerminalCreate }>(
+      const created = await callRuntimeOrpc(
         runtimeTarget,
-        'terminal.create',
+        (client) => client.terminal.create,
         {
           worktree: toRuntimeWorktreeSelector(worktreeId),
           command: startupPlan.launchCommand,
@@ -207,7 +208,9 @@ export async function launchAgentBackgroundSession(
         launchConfig: startupPlan.launchConfig,
         launchToken,
         launchAgent: agent,
-        connectionId: repo?.connectionId ?? null,
+        // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+        // were removed (#63) — a background agent session's repo is never SSH.
+        connectionId: null,
         worktreeId,
         tabId: tab.id,
         leafId,
@@ -266,9 +269,9 @@ export async function launchAgentBackgroundSession(
         `desktop:background:${tab.id}`,
         handleData
       )
-      void callRuntimeRpc<{ wait: { exitCode?: number | null } }>(
+      void callRuntimeOrpc(
         runtimeTarget,
-        'terminal.wait',
+        (client) => client.terminal.wait,
         { terminal: runtimeTerminalHandle, for: 'exit' },
         { timeoutMs: 24 * 60 * 60 * 1000 }
       )

@@ -101,7 +101,3 @@ export function countTerminalGestureInputSequences(bytes: string): number | null
   }
   return sequenceCount
 }
-
-export function isTerminalGestureInput(bytes: string): boolean {
-  return countTerminalGestureInputSequences(bytes) != null
-}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MOBILE_AI_VAULT_CAPABILITY } from '~/agent-history/capability'
 import { supportsMobileQuickCommands } from '~/terminal/quick-commands'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 // Why: status.get answers with an unknown payload and only the capability list is
@@ -67,13 +68,12 @@ export function useMobileHostCapabilities(
     setQuickCommandsSupported(null)
     onCapabilitiesReset()
     let stale = false
-    void client
-      .sendRequest('status.get')
-      .then((response) => {
-        if (stale || !response.ok) {
+    void callRuntimeOrpc(client, (runtime) => runtime.status.get, undefined)
+      .then((status) => {
+        if (stale) {
           return
         }
-        const capabilities = readRuntimeCapabilities(response.result)
+        const capabilities = readRuntimeCapabilities(status)
         setBrowserScreencastSupported(capabilities.includes('browser.screencast.v1'))
         setAgentSessionHistorySupported(capabilities.includes(MOBILE_AI_VAULT_CAPABILITY))
         setQuickCommandsSupported(supportsMobileQuickCommands(capabilities))

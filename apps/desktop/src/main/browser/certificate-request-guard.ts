@@ -1,7 +1,7 @@
-import type { Session } from 'electron'
 import { toSecureCertificateEndpoint } from '~shared/browser/url'
 
 import { MAX_CERTIFICATE_GRANTS, type CertificateTrustGrant } from './certificate-challenge'
+import type { BrowserBeforeRequestDetails, BrowserSession } from './session'
 
 type CertificateIdentity = Pick<
   CertificateTrustGrant,
@@ -32,39 +32,42 @@ function certificateIdentitiesMatch(
 }
 
 export class BrowserCertificateRequestGuard {
+  private readonly dependencies: RequestGuardDependencies
   private readonly grantsByGuestId = new Map<number, CertificateTrustGrant>()
-  private readonly grantSessionByGuestId = new Map<number, Session>()
-  private readonly guardedSessions = new Set<Session>()
-  private readonly acceptedIdentityBySession = new Map<Session, Map<string, CertificateIdentity>>()
+  private readonly grantSessionByGuestId = new Map<number, object>()
+  private readonly guardedSessions = new Set<object>()
+  private readonly acceptedIdentityBySession = new Map<object, Map<string, CertificateIdentity>>()
 
-  constructor(private readonly dependencies: RequestGuardDependencies) {}
+  constructor(dependencies: RequestGuardDependencies) {
+    this.dependencies = dependencies
+  }
 
-  installSession(session: Session): void {
-    if (this.guardedSessions.has(session)) {
+  installSession(session: BrowserSession): void {
+    if (this.guardedSessions.has(session.identity)) {
       return
     }
     // Why: Chromium caches certificate continuations at session scope. This
     // request gate restores the narrower per-WebContents approval boundary.
-    session.webRequest.onBeforeRequest((details, callback) => {
-      callback(this.shouldBlockRequest(session, details) ? { cancel: true } : {})
-    })
-    this.guardedSessions.add(session)
+    session.setBeforeRequestHandler((details) => ({
+      cancel: this.shouldBlockRequest(session.identity, details)
+    }))
+    this.guardedSessions.add(session.identity)
   }
 
-  removeSession(session: Session): void {
-    if (!this.guardedSessions.delete(session)) {
+  removeSession(session: BrowserSession): void {
+    if (!this.guardedSessions.delete(session.identity)) {
       return
     }
-    session.webRequest.onBeforeRequest(null)
-    this.acceptedIdentityBySession.delete(session)
+    session.removeCertificateRequestHandler()
+    this.acceptedIdentityBySession.delete(session.identity)
     for (const [webContentsId, grantSession] of this.grantSessionByGuestId) {
-      if (grantSession === session) {
+      if (grantSession === session.identity) {
         this.revokeGuest(webContentsId)
       }
     }
   }
 
-  canOfferCertificate(session: Session, identity: CertificateIdentity): boolean {
+  canOfferCertificate(session: object, identity: CertificateIdentity): boolean {
     if (!this.guardedSessions.has(session)) {
       return false
     }
@@ -74,7 +77,7 @@ export class BrowserCertificateRequestGuard {
     return !accepted || certificateIdentitiesMatch(accepted, identity)
   }
 
-  grant(session: Session, grant: CertificateTrustGrant): boolean {
+  grant(session: object, grant: CertificateTrustGrant): boolean {
     if (!this.guardedSessions.has(session)) {
       return false
     }
@@ -105,7 +108,7 @@ export class BrowserCertificateRequestGuard {
   }
 
   shouldTrustCertificate(
-    session: Session,
+    session: object,
     webContentsId: number,
     identity: CertificateIdentity
   ): boolean {
@@ -141,10 +144,7 @@ export class BrowserCertificateRequestGuard {
     }
   }
 
-  private shouldBlockRequest(
-    session: Session,
-    details: Electron.OnBeforeRequestListenerDetails
-  ): boolean {
+  private shouldBlockRequest(session: object, details: BrowserBeforeRequestDetails): boolean {
     const secureEndpoint = toSecureCertificateEndpoint(details.url)
     if (!secureEndpoint) {
       return false
@@ -153,7 +153,7 @@ export class BrowserCertificateRequestGuard {
     if (!accepted) {
       return false
     }
-    const webContentsId = details.webContentsId ?? details.webContents?.id
+    const webContentsId = details.webContentsId
     const grant = webContentsId === undefined ? undefined : this.grantsByGuestId.get(webContentsId)
     if (
       webContentsId !== undefined &&

@@ -5,6 +5,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { WindowsMobileFirewallStatus } from '~shared/windows-mobile-firewall'
 
 import { Button } from '../ui/button'
@@ -34,7 +35,7 @@ export function WindowsFirewallNotice({
       return null
     }
     try {
-      const next = await window.api.mobile.getWindowsFirewallStatus(
+      const next = await rendererHostClient.mobile.getWindowsFirewallStatus(
         address ? { address } : undefined
       )
       if (mountedRef.current && inspectIdRef.current === inspectId) {
@@ -76,7 +77,7 @@ export function WindowsFirewallNotice({
   async function repair(): Promise<void> {
     setRepairing(true)
     try {
-      const result = await window.api.mobile.repairWindowsFirewall()
+      const result = await rendererHostClient.mobile.repairWindowsFirewall()
       if (!mountedRef.current) {
         return
       }
@@ -181,7 +182,7 @@ export function WindowsFirewallNotice({
               type="button"
               size="sm"
               variant="outline"
-              onClick={() => void window.api.mobile.openWindowsNetworkSettings()}
+              onClick={() => void rendererHostClient.mobile.openWindowsNetworkSettings()}
             >
               {translate(
                 'auto.components.mobile.WindowsFirewallNotice.open-settings',

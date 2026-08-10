@@ -47,12 +47,6 @@ export async function writeActiveClaudeKeychainCredentialsForRuntime(
   }
 }
 
-export async function deleteActiveClaudeKeychainCredentials(configDir?: string): Promise<void> {
-  for (const service of getActiveClaudeServices(configDir)) {
-    await deleteKeychainPassword(service, getKeychainUser())
-  }
-}
-
 export async function deleteActiveClaudeKeychainCredentialsStrict(
   configDir?: string
 ): Promise<void> {

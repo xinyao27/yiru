@@ -9,7 +9,8 @@ import {
   getSettingsForWorktreeRuntimeOwner,
   type WorktreeRuntimeOwnerState
 } from '~renderer/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import type { RuntimeTerminalListResult } from '~shared/runtime-types'
 import { isTerminalLeafId, makePaneKey } from '~shared/stable-pane-id'
@@ -144,9 +145,9 @@ export async function probeActiveAgentNoteTarget({
   if (!terminal) {
     return false
   }
-  const agentCheck = await callRuntimeRpc<{ isRunningAgent: boolean }>(
+  const agentCheck = await callRuntimeOrpc(
     runtimeTarget,
-    'terminal.isRunningAgent',
+    (client) => client.terminal.isRunningAgent,
     { terminal: terminal.handle },
     { timeoutMs: ACTIVE_AGENT_PROBE_RPC_TIMEOUT_MS }
   )
@@ -159,9 +160,9 @@ export async function findActiveRuntimeTerminal(
   noteTarget: ActiveTerminalNoteTarget,
   timeoutMs: number
 ): Promise<RuntimeTerminalListResult['terminals'][number] | null> {
-  const { terminals } = await callRuntimeRpc<RuntimeTerminalListResult>(
+  const { terminals } = await callRuntimeOrpc(
     runtimeTarget,
-    'terminal.list',
+    (client) => client.terminal.list,
     // Why: worktree ids can look like branch names or paths; keep the lookup unambiguous.
     { worktree: toRuntimeWorktreeSelector(worktreeId), limit: ACTIVE_AGENT_TERMINAL_LIST_LIMIT },
     { timeoutMs }

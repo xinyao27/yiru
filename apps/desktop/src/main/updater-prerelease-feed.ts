@@ -177,21 +177,6 @@ export type FetchNewerReleaseTagsResult = {
   lastGoodTag?: string
 }
 
-export async function fetchNewerReleaseTag(
-  currentVersion: string,
-  options: FetchNewerReleaseTagOptions = {}
-): Promise<string | null> {
-  return (await fetchNewerReleaseTags(currentVersion, 1, options))[0] ?? null
-}
-
-export async function fetchNewerReleaseTags(
-  currentVersion: string,
-  maxTags: number,
-  options: FetchNewerReleaseTagOptions = {}
-): Promise<string[]> {
-  return (await fetchNewerReleaseTagsWithReadiness(currentVersion, maxTags, options)).tags
-}
-
 export async function fetchNewerReleaseTagsWithReadiness(
   currentVersion: string,
   maxTags: number,

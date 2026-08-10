@@ -246,11 +246,4 @@ export function registerDeveloperPermissionHandlers(): void {
       return requestPermission(args.id)
     }
   )
-
-  ipcMain.handle(
-    'developerPermissions:openSettings',
-    async (_event, args: { id: DeveloperPermissionId }): Promise<void> => {
-      await openPrivacyPane(args.id)
-    }
-  )
 }

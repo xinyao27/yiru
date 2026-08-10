@@ -103,16 +103,6 @@ export function classifyTextControlPastePayloadOwnership(
   }
 }
 
-export function shouldClaimTextControlPastePayload(
-  text: string,
-  options: {
-    directMaxBytes?: number
-    maxBytes?: number
-  } = {}
-): boolean {
-  return classifyTextControlPastePayloadOwnership(text, options).action !== 'allow-native'
-}
-
 function measureRejectedTextControlPasteByteLength(text: string, maxBytes: number): number {
   if (maxBytes <= TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES) {
     return measureTextControlPasteByteLength(text, { stopAfterBytes: maxBytes }).byteLength

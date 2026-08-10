@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '~renderer/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 type MobilePairingQrSectionProps = {
   qrDataUrl: string | null
@@ -44,7 +45,7 @@ export function MobilePairingQrSection({
       return
     }
     try {
-      await window.api.ui.writeClipboardText(pairingUrl)
+      await shellClient.ui.writeClipboardText(pairingUrl)
       if (!pairingCodeButtonMountedRef.current) {
         return
       }

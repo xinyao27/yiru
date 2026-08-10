@@ -54,54 +54,6 @@ export function getMarkdownPreviewLinkTarget(
   return null
 }
 
-export function getMarkdownPreviewImageSrc(
-  rawSrc: string | undefined,
-  filePath: string
-): string | undefined {
-  if (!rawSrc) {
-    return rawSrc
-  }
-
-  const resolved = resolveMarkdownPreviewHref(rawSrc, filePath)
-  if (!resolved) {
-    return rawSrc
-  }
-
-  if (
-    resolved.protocol === 'http:' ||
-    resolved.protocol === 'https:' ||
-    resolved.protocol === 'file:'
-  ) {
-    return resolved.toString()
-  }
-
-  return rawSrc
-}
-
-export function getMarkdownPreviewImageOpenTarget(
-  rawSrc: string | undefined,
-  filePath: string
-): URL | null {
-  if (!rawSrc) {
-    return null
-  }
-
-  const resolved = resolveMarkdownPreviewHref(rawSrc, filePath)
-  if (!resolved) {
-    return null
-  }
-
-  if (
-    resolved.protocol === 'http:' ||
-    resolved.protocol === 'https:' ||
-    resolved.protocol === 'file:'
-  ) {
-    return resolved
-  }
-
-  return null
-}
-
 export function isMarkdownPreviewOpenModifier(
   event: Pick<MouseEvent, 'metaKey' | 'ctrlKey'>,
   isMac: boolean

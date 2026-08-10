@@ -26,16 +26,6 @@ function getUtf8ByteLengthForCodePoint(codePoint: number): number {
   return 4
 }
 
-export function assertTerminalInputWithinLimit(
-  text: string,
-  maxBytes = TERMINAL_INPUT_MAX_BYTES
-): string {
-  if (isTerminalInputTooLarge(text, maxBytes)) {
-    throw new Error(TERMINAL_INPUT_TOO_LARGE_ERROR)
-  }
-  return text
-}
-
 export function isTerminalInputTooLarge(
   text: string,
   maxBytes = TERMINAL_INPUT_MAX_BYTES
@@ -64,13 +54,6 @@ export function isTerminalInputTooLargeWithDeferredMeasurement(
     return isTerminalInputTooLargeWithYield(text, maxBytes)
   }
   return isTerminalInputTooLarge(text, maxBytes)
-}
-
-export function splitTerminalInputChunks(
-  text: string,
-  maxChunkBytes = TERMINAL_INPUT_CHUNK_MAX_BYTES
-): string[] {
-  return [...iterateTerminalInputChunks(text, maxChunkBytes)]
 }
 
 export function* iterateTerminalInputChunks(

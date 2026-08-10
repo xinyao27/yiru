@@ -1,6 +1,7 @@
 import { Editor } from '@pierre/diffs/edit'
 import { EditProvider } from '@pierre/diffs/react'
 import { useCallback } from 'react'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { DiffCodeViewAnnotation } from './annotations'
 
@@ -25,7 +26,7 @@ export function DiffCodeViewEditProvider({
         historyMaxEntries: DIFF_CODE_VIEW_HISTORY_MAX_ENTRIES,
         // Why: Pierre's docs call this out for Electron — the DOM clipboard is
         // unreliable in the renderer, so route through the main process.
-        clipboard: { readText: () => window.api.ui.readClipboardText() }
+        clipboard: { readText: () => shellClient.ui.readClipboardText() }
       }),
     []
   )

@@ -14,9 +14,7 @@ import {
   isMarkdownContentByteLengthOverLimit,
   MOBILE_MARKDOWN_EDIT_MAX_BYTES,
   type RuntimeMarkdownReadTabResult,
-  type RuntimeMarkdownSaveTabResult,
-  type RuntimeMobileMarkdownRequest,
-  type RuntimeMobileMarkdownResponse
+  type RuntimeMarkdownSaveTabResult
 } from '~shared/mobile-markdown-document'
 
 import { readRuntimeFileContent } from './file-client'
@@ -30,37 +28,12 @@ type FileContent = {
   isBinary: boolean
 }
 
-export function attachMobileMarkdownBridge(): () => void {
-  if (typeof window.api.ui.onMobileMarkdownRequest !== 'function') {
-    return () => {}
-  }
-  return window.api.ui.onMobileMarkdownRequest((request) => {
-    void handleMobileMarkdownRequest(request)
-  })
-}
-
-async function handleMobileMarkdownRequest(request: RuntimeMobileMarkdownRequest): Promise<void> {
-  try {
-    const result =
-      request.operation === 'read'
-        ? await readMobileMarkdownTab(request.worktreeId, request.tabId)
-        : await saveMobileMarkdownTab(
-            request.worktreeId,
-            request.tabId,
-            request.baseVersion,
-            request.content
-          )
-    respond({ id: request.id, ok: true, result })
-  } catch (error) {
-    respond({
-      id: request.id,
-      ok: false,
-      error: error instanceof Error ? error.message : String(error)
-    })
-  }
-}
-
-async function readMobileMarkdownTab(
+// Why: Phase 5 slice S4a — these two used to be reached only through
+// `ui.onMobileMarkdownRequest`'s IPC listener (attachMobileMarkdownBridge,
+// removed). They are now called directly by shell-services-handler.ts's
+// `mobileMarkdown.read`/`.save` procedures, so this module's public surface
+// is the two operations themselves rather than an IPC-mounting function.
+export async function readMobileMarkdownTab(
   worktreeId: string,
   tabId: string
 ): Promise<RuntimeMarkdownReadTabResult> {
@@ -81,7 +54,7 @@ async function readMobileMarkdownTab(
   }
 }
 
-async function saveMobileMarkdownTab(
+export async function saveMobileMarkdownTab(
   worktreeId: string,
   tabId: string,
   baseVersion: string,
@@ -305,8 +278,4 @@ async function waitForPositiveSave(file: OpenFile, content: string): Promise<voi
     cleanup()
     throw error
   }
-}
-
-function respond(response: RuntimeMobileMarkdownResponse): void {
-  window.api.ui.respondMobileMarkdownRequest(response)
 }

@@ -1,3 +1,5 @@
+import type { AutomationWorkspaceNameSnapshotInputSchema } from '@yiru/runtime-protocol/contract'
+import type { AutomationIdInput, AutomationRunsInput } from '@yiru/runtime-protocol/contract'
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 import {
@@ -16,7 +18,7 @@ import {
 } from '~shared/runtime-method-contracts/runtime-method-params'
 import { isTuiAgent } from '~shared/tui-agent/config'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
 const TuiAgent = requiredString('Missing provider').refine(isTuiAgent, {
   message: 'Unknown provider'
@@ -92,14 +94,6 @@ const WorkspaceRunContext = z
   .optional()
   .nullable()
 
-const AutomationId = z.object({
-  id: requiredString('Missing automation id')
-})
-
-const AutomationRuns = z.object({
-  automationId: OptionalString
-})
-
 const AutomationCreate = z.object({
   name: requiredString('Missing automation name'),
   prompt: requiredString('Missing automation prompt'),
@@ -146,53 +140,50 @@ const AutomationUpdate = z.object({
   updates: AutomationUpdateFields
 })
 
-export const AUTOMATION_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'automation.list',
-    params: null,
-    access: { scope: 'project', tier: 'read' },
-    handler: (_params, { runtime }) => ({ automations: runtime.listAutomations() })
-  }),
-  defineMethod({
-    name: 'automation.show',
-    params: AutomationId,
-    access: { scope: 'project', tier: 'read' },
-    handler: (params, { runtime }) => ({ automation: runtime.showAutomation(params.id) })
-  }),
-  defineMethod({
-    name: 'automation.create',
-    params: AutomationCreate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      automation: await runtime.createAutomation(params)
-    })
-  }),
-  defineMethod({
-    name: 'automation.update',
-    params: AutomationUpdate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      automation: await runtime.updateAutomation(params.id, params.updates)
-    })
-  }),
-  defineMethod({
-    name: 'automation.delete',
-    params: AutomationId,
-    access: { scope: 'host', tier: 'host' },
-    handler: (params, { runtime }) => runtime.deleteAutomation(params.id)
-  }),
-  defineMethod({
-    name: 'automation.runNow',
-    params: AutomationId,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({ run: await runtime.runAutomationNow(params.id) })
-  }),
-  defineMethod({
-    name: 'automation.runs',
-    params: AutomationRuns,
-    access: { scope: 'project', tier: 'read' },
-    handler: (params, { runtime }) => ({
-      runs: runtime.listAutomationRuns(params.automationId)
-    })
-  })
-]
+type AutomationCreateInput = z.infer<typeof AutomationCreate>
+type AutomationUpdateInput = z.infer<typeof AutomationUpdate>
+
+// Why: the contract leaf has no `.input()`, so oRPC infers `unknown` rather
+// than `void` — direct wiring checks the handler against that real shape
+// (same class of gap as Phase 6 D-stage 切片 61/65/67's void→unknown fixes).
+export function handleAutomationList(_params: unknown, { runtime }: RpcContext) {
+  return { automations: runtime.listAutomations() }
+}
+
+export function handleAutomationShow(params: AutomationIdInput, { runtime }: RpcContext) {
+  return { automation: runtime.showAutomation(params.id) }
+}
+
+export async function handleAutomationCreate(
+  params: AutomationCreateInput,
+  { runtime }: RpcContext
+) {
+  return { automation: await runtime.createAutomation(params) }
+}
+
+export async function handleAutomationUpdate(
+  params: AutomationUpdateInput,
+  { runtime }: RpcContext
+) {
+  return { automation: await runtime.updateAutomation(params.id, params.updates) }
+}
+
+export function handleAutomationDelete(params: AutomationIdInput, { runtime }: RpcContext) {
+  return runtime.deleteAutomation(params.id)
+}
+
+export async function handleAutomationRunNow(params: AutomationIdInput, { runtime }: RpcContext) {
+  return { run: await runtime.runAutomationNow(params.id) }
+}
+
+export function handleAutomationRuns(params: AutomationRunsInput, { runtime }: RpcContext) {
+  return { runs: runtime.listAutomationRuns(params.automationId) }
+}
+
+export function handleAutomationSnapshotWorkspaceName(
+  params: z.infer<typeof AutomationWorkspaceNameSnapshotInputSchema>,
+  { runtime }: RpcContext
+) {
+  const { workspaceId, displayName } = params
+  return { updatedRunCount: runtime.snapshotAutomationWorkspaceName(workspaceId, displayName) }
+}

@@ -90,10 +90,6 @@ export type CodexUsagePersistedFile = CodexUsageProcessedFile & {
   dailyAggregates: CodexUsageDailyAggregate[]
   /** Priority pricing metadata revision used when this file was scanned. */
   priorityFingerprint?: string
-  /** Event keys this file counted. Resumed/forked rollouts copy earlier
-   *  token_count records into new files; ownership keeps each record counted
-   *  by exactly one cached file across incremental scans. */
-  ownedEventKeys: string[]
   /** True when this file saw events already claimed by another file. When that
    *  owner disappears, only deferred files need reparse to reclaim — not the
    *  entire rollout corpus. */
@@ -103,6 +99,7 @@ export type CodexUsagePersistedFile = CodexUsageProcessedFile & {
 export type CodexUsagePersistedState = {
   schemaVersion: number
   worktreeFingerprint: string | null
+  ownershipGeneration: string | null
   processedFiles: CodexUsagePersistedFile[]
   sessions: CodexUsageSession[]
   dailyAggregates: CodexUsageDailyAggregate[]

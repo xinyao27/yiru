@@ -1,7 +1,7 @@
 import type { SourceControlRemoteOpKind } from '@yiru/workbench-model/review'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 import { markMobileRemoteOperationError } from './operation'
 import { recoverMobileRejectedPush } from './rejected-push-recovery'
 
@@ -12,7 +12,7 @@ export async function recoverMobileHostedReviewRejectedPush({
   operation,
   onStatusRefresh
 }: {
-  client: Pick<RpcClient, 'sendRequest'>
+  client: Pick<RpcClient, 'orpc'>
   worktreeId: string
   error: string
   operation: SourceControlRemoteOpKind
@@ -22,16 +22,10 @@ export async function recoverMobileHostedReviewRejectedPush({
   return await recoverMobileRejectedPush({
     actionId: 'create-pr',
     error: operationError,
-    sendGitRequest: async <T>(method: string, params?: Record<string, unknown>) => {
-      const response = await client.sendRequest(method, {
-        worktree: `id:${worktreeId}`,
-        ...params
-      })
-      if (!response.ok) {
-        throw new Error(response.error?.message || 'Source control action failed')
-      }
-      return (response as RpcSuccess).result as T
-    },
+    gitFetch: () =>
+      callRuntimeOrpc(client, (runtime) => runtime.git.fetch, {
+        worktree: `id:${worktreeId}`
+      }),
     loadStatus: async () => {
       await onStatusRefresh()
       return true

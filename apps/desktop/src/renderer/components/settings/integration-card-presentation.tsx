@@ -5,17 +5,6 @@ type IntegrationCardPresentation = 'default' | 'setup-guide'
 
 const IntegrationCardPresentationContext = createContext<IntegrationCardPresentation>('default')
 
-export function IntegrationCardPresentationProvider(props: {
-  value: IntegrationCardPresentation
-  children: React.ReactNode
-}): React.JSX.Element {
-  return (
-    <IntegrationCardPresentationContext.Provider value={props.value}>
-      {props.children}
-    </IntegrationCardPresentationContext.Provider>
-  )
-}
-
 export function useIntegrationCardPresentation(): IntegrationCardPresentation {
   return useContext(IntegrationCardPresentationContext)
 }
@@ -27,25 +16,6 @@ export function useIntegrationCardShellClass(className?: string): string {
       ? 'bg-transparent px-4 py-3'
       : 'border border-border bg-card px-4 py-3.5',
     className
-  )
-}
-
-export function IntegrationCardGroup(props: {
-  children: React.ReactNode
-  className?: string
-}): React.JSX.Element {
-  const presentation = useIntegrationCardPresentation()
-  return (
-    <div
-      className={cn(
-        presentation === 'setup-guide'
-          ? 'overflow-hidden border border-border/50 bg-card/30 divide-y divide-border/40'
-          : 'space-y-3',
-        props.className
-      )}
-    >
-      {props.children}
-    </div>
   )
 }
 

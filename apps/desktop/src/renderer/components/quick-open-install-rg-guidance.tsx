@@ -3,6 +3,7 @@ import type React from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 export type QuickOpenInstallRgGuidanceParts = {
   reason: string
@@ -77,8 +78,8 @@ export function QuickOpenInstallRgGuidance({
     // Why: use Electron's clipboard IPC instead of navigator.clipboard; the
     // latter often fails silently in the renderer due to focus/permission
     // quirks inside Radix dialogs. All other copy buttons in the app go
-    // through window.api.ui.writeClipboardText for consistency.
-    void window.api.ui
+    // through shellClient.ui.writeClipboardText for consistency.
+    void shellClient.ui
       .writeClipboardText(command)
       .then(() => {
         if (!isMountedRef.current) {

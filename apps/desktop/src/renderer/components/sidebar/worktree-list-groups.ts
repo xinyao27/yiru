@@ -453,17 +453,11 @@ export function getPRGroupKey(
   const branch = branchName(worktree.branch)
   const repoScopedCacheKey =
     repo && branch
-      ? getGitHubPRCacheKey(
-          repo.path,
-          repo.id,
-          branch,
-          settings,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
+      ? getGitHubPRCacheKey(repo.path, repo.id, branch, settings, repo.executionHostId, true)
       : ''
-  const canUseLegacyPRCache = repo !== undefined && !repo.connectionId && !repo.executionHostId
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const canUseLegacyPRCache = repo !== undefined && !repo.executionHostId
   const legacyRepoScopedCacheKey =
     canUseLegacyPRCache && branch ? getLegacyGitHubPRCacheKey(repo.path, repo.id, branch) : ''
   const legacyPathScopedCacheKey =

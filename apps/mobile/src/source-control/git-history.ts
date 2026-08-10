@@ -1,7 +1,7 @@
 import type { GitHistoryItem, GitHistoryResult } from '@yiru/workbench-model/review'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 export type MobileCommitRow = {
   id: string
@@ -57,16 +57,12 @@ export function mapMobileCommitRows(result: GitHistoryResult, nowMs: number): Mo
 }
 
 export async function fetchMobileGitHistory(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   limit = 50
 ): Promise<GitHistoryResult> {
-  const response = await client.sendRequest('git.history', {
+  return callRuntimeOrpc(client, (runtime) => runtime.git.history, {
     worktree: `id:${worktreeId}`,
     limit
   })
-  if (!response.ok) {
-    throw new Error(response.error?.message || 'Failed to load commit history')
-  }
-  return (response as RpcSuccess).result as GitHistoryResult
 }

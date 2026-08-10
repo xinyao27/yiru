@@ -97,9 +97,7 @@ import type {
   MobileDisplayMode,
   MobileNewTabAgentLoadState,
   MobileSessionTab,
-  SessionTabsResult,
   Terminal,
-  TerminalCreateResult,
   TerminalGestureInputBucket,
   TerminalGestureInputQueue
 } from '~/session/screen-state'
@@ -168,7 +166,6 @@ import {
   shouldShowMobileQuickCommandsAction,
   type MobileQuickCommandLaunch
 } from '~/terminal/quick-commands'
-import { isTerminalSendRpcAccepted } from '~/terminal/send-rpc-response'
 import { normalizeTerminalTextInput } from '~/terminal/text-input-normalization'
 import { useTerminalViewportRefit } from '~/terminal/viewport-refit'
 import type {
@@ -183,7 +180,8 @@ import {
 } from '~/transport/client-context-connection-metrics'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
-import type { ConnectionState, RpcFailure, RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
+import type { ConnectionState } from '~/transport/types'
 import { getRepoIdFromMobileWorktreeId } from '~/worktree/id'
 
 const BROWSER_STREAMING_UNAVAILABLE_MESSAGE = translate(
@@ -663,7 +661,7 @@ export default function SessionScreen(): React.JSX.Element {
         })
       }
       try {
-        const response = await client.sendRequest('terminal.setDisplayMode', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.terminal.setDisplayMode, {
           terminal: handle,
           mode: next,
           // Why: presence-lock take-floor signal — requesting 'auto' is the
@@ -676,17 +674,7 @@ export default function SessionScreen(): React.JSX.Element {
           // server's stored viewport is null and auto toggles no-op.
           ...(viewportRef.current && next === 'auto' ? { viewport: viewportRef.current } : {})
         })
-        if (!response.ok) {
-          restorePreviousMode()
-          return
-        }
-        const responseMode =
-          typeof response.result === 'object' && response.result !== null
-            ? Reflect.get(response.result, 'mode')
-            : undefined
-        if (responseMode === 'auto' || responseMode === 'phone' || responseMode === 'desktop') {
-          setTerminalModes((previous) => new Map(previous).set(handle, responseMode))
-        }
+        setTerminalModes((previous) => new Map(previous).set(handle, result.mode))
       } catch {
         restorePreviousMode()
       } finally {
@@ -711,74 +699,76 @@ export default function SessionScreen(): React.JSX.Element {
       const allowEmptyLoaded = opts.allowEmptyLoaded ?? true
 
       try {
-        const response = await client.sendRequest('terminal.list', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.terminal.list, {
           worktree: `id:${worktreeId}`
         })
-        if (response.ok) {
-          const result = (response as RpcSuccess).result as { terminals: Terminal[] }
 
-          if (result.terminals.length === 0 && !allowEmptyLoaded) {
-            return
-          }
-          // Why: protect against transient empty responses from the server
-          // during rapid tab switching or RPC timing. If we previously had
-          // terminals and the server now says 0, require a second consecutive
-          // empty to confirm. This prevents the UI from flashing empty during
-          // rapid interactions while still allowing genuine cleanup.
-          if (result.terminals.length === 0 && lastKnownTerminalCountRef.current > 0) {
-            lastKnownTerminalCountRef.current = 0
-            return
-          }
+        if (result.terminals.length === 0 && !allowEmptyLoaded) {
+          return
+        }
+        // Why: protect against transient empty responses from the server
+        // during rapid tab switching or RPC timing. If we previously had
+        // terminals and the server now says 0, require a second consecutive
+        // empty to confirm. This prevents the UI from flashing empty during
+        // rapid interactions while still allowing genuine cleanup.
+        if (result.terminals.length === 0 && lastKnownTerminalCountRef.current > 0) {
+          lastKnownTerminalCountRef.current = 0
+          return
+        }
 
-          const liveHandles = new Set(result.terminals.map((terminal) => terminal.handle))
-          // Why: terminal.list is the lifetime signal; session-tab snapshots can lag
-          // mobile-created tabs and must not erase a user's buffered-mode opt-out.
-          pruneTerminalHandlesFromLiveInput(liveHandles)
-          defaultTerminalHandlesToLiveInput([...liveHandles])
-          for (const handle of Array.from(terminalUnsubsRef.current.keys())) {
-            if (!liveHandles.has(handle)) {
-              unsubscribeTerminal(handle)
-              terminalRefs.current.delete(handle)
-              initializedHandlesRef.current.delete(handle)
-              clearTerminalLiveInputDefault(handle)
-              setTerminalKeyboardMetrics((prev) => {
-                if (!prev.has(handle)) {
-                  return prev
-                }
-                const next = new Map(prev)
-                next.delete(handle)
-                return next
-              })
-            }
+        const liveHandles = new Set(result.terminals.map((terminal) => terminal.handle))
+        // Why: terminal.list is the lifetime signal; session-tab snapshots can lag
+        // mobile-created tabs and must not erase a user's buffered-mode opt-out.
+        pruneTerminalHandlesFromLiveInput(liveHandles)
+        defaultTerminalHandlesToLiveInput([...liveHandles])
+        for (const handle of Array.from(terminalUnsubsRef.current.keys())) {
+          if (!liveHandles.has(handle)) {
+            unsubscribeTerminal(handle)
+            terminalRefs.current.delete(handle)
+            initializedHandlesRef.current.delete(handle)
+            clearTerminalLiveInputDefault(handle)
+            setTerminalKeyboardMetrics((prev) => {
+              if (!prev.has(handle)) {
+                return prev
+              }
+              const next = new Map(prev)
+              next.delete(handle)
+              return next
+            })
           }
-          lastKnownTerminalCountRef.current = result.terminals.length
-          // Why: defense-in-depth dedupe. If the server ever returns a list
-          // with the same handle twice (race during rename/split, or stale
-          // process tracking), React would throw 'two children with same
-          // key' on render. Keep the first occurrence — list order matters
-          // for the tab strip, and createParams puts new tabs at the end.
-          const seen = new Set<string>()
-          const deduped = result.terminals.filter((t) => {
+        }
+        lastKnownTerminalCountRef.current = result.terminals.length
+        // Why: defense-in-depth dedupe. If the server ever returns a list
+        // with the same handle twice (race during rename/split, or stale
+        // process tracking), React would throw 'two children with same
+        // key' on render. Keep the first occurrence — list order matters
+        // for the tab strip, and createParams puts new tabs at the end.
+        const seen = new Set<string>()
+        const deduped = result.terminals
+          .filter((t) => {
             if (seen.has(t.handle)) {
               return false
             }
             seen.add(t.handle)
             return true
           })
+          // Why: terminal.list summaries carry a nullable title and no active
+          // flag; the merge below owns theme, and the active handle is tracked
+          // separately, so normalize both into the record shape here.
+          .map((terminal) => ({ ...terminal, title: terminal.title ?? '', isActive: false }))
 
-          const mergedTerminals = mergeTerminalListWithKnownRecords(
-            deduped,
-            terminalsRef.current,
-            sessionTabsRef.current
-          )
-          setTerminals((prev) =>
-            terminalRecordsEqual(prev, mergedTerminals) ? prev : mergedTerminals
-          )
-          terminalsRef.current = mergedTerminals
+        const mergedTerminals = mergeTerminalListWithKnownRecords(
+          deduped,
+          terminalsRef.current,
+          sessionTabsRef.current
+        )
+        setTerminals((prev) =>
+          terminalRecordsEqual(prev, mergedTerminals) ? prev : mergedTerminals
+        )
+        terminalsRef.current = mergedTerminals
 
-          // Session tabs are the UI authority. terminal.list only refreshes
-          // per-handle metadata for existing ready terminal surfaces.
-        }
+        // Session tabs are the UI authority. terminal.list only refreshes
+        // per-handle metadata for existing ready terminal surfaces.
       } catch {
         // Failed to list terminals
       } finally {
@@ -890,14 +880,9 @@ export default function SessionScreen(): React.JSX.Element {
     fetchSessionTabsInFlightRef.current = true
     terminalDiagnosticsRef.current.tabsFetchStarted(worktreeId)
     try {
-      const response = await client.sendRequest('session.tabs.list', {
+      const result = await callRuntimeOrpc(client, (runtime) => runtime.session.tabs.list, {
         worktree: `id:${worktreeId}`
       })
-      if (!response.ok) {
-        terminalDiagnosticsRef.current.tabsFetchFailed((response as RpcFailure).error.code)
-        return
-      }
-      const result = (response as RpcSuccess).result as SessionTabsResult
       terminalDiagnosticsRef.current.tabsFetchSucceeded(result)
       applySessionTabs(result)
       // Focus a just-opened browser tab once it appears in the snapshot, via the
@@ -1144,8 +1129,8 @@ export default function SessionScreen(): React.JSX.Element {
       timers.push(setTimeout(fn, ms))
     }
     void (async () => {
-      const reportActivationOutcome = (response: RpcSuccess | null): void => {
-        if (!disposed && response && headlessActivationNeedsHostRenderer(response.result)) {
+      const reportActivationOutcome = (result: unknown): void => {
+        if (!disposed && result && headlessActivationNeedsHostRenderer(result)) {
           showToast(
             translate(
               'mobile.session.wakeAgents.openHost',
@@ -1158,12 +1143,11 @@ export default function SessionScreen(): React.JSX.Element {
       if (client && created !== '1' && !isFloatingWorkspaceRoute) {
         // Why: mobile needs host-owned tabs hydrated for this route, but should
         // not pull other paired clients, especially desktop, into this worktree.
-        void client
-          .sendRequest('worktree.activate', {
-            worktree: `id:${worktreeId}`,
-            notifyClients: false
-          })
-          .then((response) => reportActivationOutcome(response.ok ? response : null))
+        void callRuntimeOrpc(client, (runtime) => runtime.worktree.activate, {
+          worktree: `id:${worktreeId}`,
+          notifyClients: false
+        })
+          .then(reportActivationOutcome)
           .catch(() => null)
       }
       if (disposed) {
@@ -1185,13 +1169,12 @@ export default function SessionScreen(): React.JSX.Element {
             return
           }
           void (async () => {
-            const activationResponse = await client
-              .sendRequest('worktree.activate', {
-                worktree: `id:${worktreeId}`,
-                notifyClients: false
-              })
-              .catch(() => null)
-            reportActivationOutcome(activationResponse?.ok ? activationResponse : null)
+            const activationResult = await callRuntimeOrpc(
+              client,
+              (runtime) => runtime.worktree.activate,
+              { worktree: `id:${worktreeId}`, notifyClients: false }
+            ).catch(() => null)
+            reportActivationOutcome(activationResult)
             if (disposed) {
               return
             }
@@ -1222,18 +1205,15 @@ export default function SessionScreen(): React.JSX.Element {
     if (!client || connState !== 'connected') {
       return
     }
-    const unsubscribe = client.subscribe(
-      'session.tabs.subscribe',
+    const unsubscribe = subscribeRuntimeOrpc(
+      client,
+      (runtime) => runtime.session.tabs.subscribe,
       { worktree: `id:${worktreeId}` },
-      (payload) => {
-        const event = payload as { type?: string } & SessionTabsResult
+      (event) => {
         if (event.type === 'snapshot' || event.type === 'updated') {
           applySessionTabs(event)
-          const activeMarkdown = event.tabs.find(
-            (tab): tab is Extract<MobileSessionTab, { type: 'markdown' }> =>
-              tab.type === 'markdown' && tab.isActive
-          )
-          if (activeMarkdown?.isDirty) {
+          const activeMarkdown = event.tabs.find((tab) => tab.type === 'markdown' && tab.isActive)
+          if (activeMarkdown?.type === 'markdown' && activeMarkdown.isDirty) {
             markMarkdownTabStale(activeMarkdown.id)
           }
         }
@@ -1572,19 +1552,17 @@ export default function SessionScreen(): React.JSX.Element {
     if (!currentClient || !rawSendTarget || connStateRef.current !== 'connected') {
       return
     }
-    await currentClient
-      .sendRequest('terminal.send', {
-        terminal: rawSendTarget,
-        text: input.bytes,
-        enter: false,
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
-      })
-      .then(
-        () => undefined,
-        () => undefined
-      )
+    await callRuntimeOrpc(currentClient, (runtime) => runtime.terminal.send, {
+      terminal: rawSendTarget,
+      text: input.bytes,
+      enter: false,
+      ...(deviceTokenRef.current
+        ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
+        : {})
+    }).then(
+      () => undefined,
+      () => undefined
+    )
   }
   controlModeSenderRef.current = (bytes) => {
     void handleAccessoryKey({ bytes })
@@ -1613,16 +1591,17 @@ export default function SessionScreen(): React.JSX.Element {
       ) {
         return false
       }
-      return rpc
-        .sendRequest('terminal.send', {
-          terminal: handle,
-          text,
-          enter: false,
-          ...(deviceTokenRef.current
-            ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-            : {})
-        })
-        .then(isTerminalSendRpcAccepted, () => false)
+      return callRuntimeOrpc(rpc, (runtime) => runtime.terminal.send, {
+        terminal: handle,
+        text,
+        enter: false,
+        ...(deviceTokenRef.current
+          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
+          : {})
+      }).then(
+        (result) => result.send.accepted,
+        () => false
+      )
     },
     [showToast]
   )
@@ -1883,7 +1862,7 @@ export default function SessionScreen(): React.JSX.Element {
 
     terminalGestureInputInFlightRef.current.add(handle)
     try {
-      await rpc.sendRequest('terminal.send', {
+      await callRuntimeOrpc(rpc, (runtime) => runtime.terminal.send, {
         terminal: handle,
         text: queued.bytes,
         enter: false,
@@ -2006,7 +1985,7 @@ export default function SessionScreen(): React.JSX.Element {
     }
     getTerminalRef(target.handle)?.clear()
     try {
-      await client.sendRequest('terminal.clearBuffer', {
+      await callRuntimeOrpc(client, (runtime) => runtime.terminal.clearBuffer, {
         terminal: target.handle
       })
       showToast(translate('mobile.session.terminal.cleared', 'Terminal cleared'))
@@ -2311,136 +2290,118 @@ export default function SessionScreen(): React.JSX.Element {
       .slice(2, 10)}`
 
     try {
-      const response = await client.sendRequest('session.tabs.createTerminal', {
-        worktree: `id:${worktreeId}`,
-        afterTabId: activeSessionTabId ?? undefined,
-        clientMutationId,
-        ...(options?.startupCommand ? { command: options.startupCommand } : {}),
-        ...(options?.startupCommandDelivery
-          ? { startupCommandDelivery: options.startupCommandDelivery }
-          : {}),
-        ...(options?.agentPrompt ? { agentPrompt: options.agentPrompt } : {}),
-        ...(agent ? { agent } : {})
-      })
-      if (response.ok) {
-        const result = (response as RpcSuccess).result as TerminalCreateResult
-        const created = result.tab
-        // Why: unsubscribe the old active terminal so the server restores its
-        // desktop dims. Without this, the old terminal's mobile subscription
-        // stays alive and its restore timer is never set.
-        const prev = activeHandleRef.current
-        if (prev) {
-          unsubscribeTerminal(prev)
-          initializedHandlesRef.current.delete(prev)
+      const result = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.session.tabs.createTerminal,
+        {
+          worktree: `id:${worktreeId}`,
+          afterTabId: activeSessionTabId ?? undefined,
+          clientMutationId,
+          ...(options?.startupCommand ? { command: options.startupCommand } : {}),
+          ...(options?.startupCommandDelivery
+            ? { startupCommandDelivery: options.startupCommandDelivery }
+            : {}),
+          ...(options?.agentPrompt ? { agentPrompt: options.agentPrompt } : {}),
+          ...(agent ? { agent } : {})
         }
-        pendingActiveSessionTabIdRef.current = created.id
-        activeSessionTabTypeRef.current = 'terminal'
-        setActiveSessionTabId(created.id)
-        setSessionTabs((prev) => {
-          if (prev.some((tab) => tab.id === created.id)) {
-            return prev
-          }
-          return [...prev, { ...created, isActive: true }]
-        })
-        if (typeof created.terminal === 'string') {
-          const createdHandle = created.terminal
-          defaultTerminalHandlesToLiveInput([createdHandle])
-          // Why: session-tab snapshots can lag the create RPC. Without the
-          // handle marker, applySessionTabs snaps activeHandleRef back to the
-          // previous terminal, and the new pane's web-ready subscribe (gated
-          // on the active handle) is skipped — blank tab until a manual switch.
-          pendingActiveTerminalHandleRef.current = createdHandle
-          activeHandleRef.current = createdHandle
-          setActiveHandle(createdHandle)
-          setTerminals((prev) => {
-            const existing = prev.find((terminal) => terminal.handle === createdHandle)
-            const createdTerminal: Terminal = {
-              handle: createdHandle,
-              title:
-                created.title ||
-                existing?.title ||
-                translate('mobile.terminal.defaultTitle', 'Terminal'),
-              terminalTheme: created.terminalTheme ?? existing?.terminalTheme,
-              isActive: true
-            }
-            if (existing) {
-              const next = prev.map((terminal) =>
-                terminal.handle === createdHandle ? { ...terminal, ...createdTerminal } : terminal
-              )
-              terminalsRef.current = next
-              return terminalRecordsEqual(prev, next) ? prev : next
-            }
-            const next = [...prev, createdTerminal]
-            terminalsRef.current = next
-            return next
-          })
-          subscribeToTerminal(createdHandle)
-          if (options?.initialPrompt?.trim()) {
-            void client
-              .sendRequest('terminal.send', {
-                terminal: createdHandle,
-                text: options.initialPrompt,
-                enter: options.enter !== false,
-                ...(deviceTokenRef.current
-                  ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-                  : {})
-              })
-              .then((sendResponse) => {
-                if (!sendResponse.ok) {
-                  throw new Error(
-                    (sendResponse as RpcFailure).error.message ||
-                      translate('mobile.terminal.sendNotesFailed', 'Failed to send notes')
-                  )
-                }
-                const result = (sendResponse as RpcSuccess).result as {
-                  send?: { accepted?: boolean }
-                }
-                if (result.send?.accepted === false) {
-                  throw new Error(
-                    translate(
-                      'mobile.terminal.inputLocked',
-                      'Terminal input is locked by another client.'
-                    )
-                  )
-                }
-                triggerSuccess()
-                showToast(
-                  options.successToast ?? translate('mobile.terminal.notesSent', 'Notes sent')
-                )
-                options.onPromptSent?.()
-              })
-              .catch((err) => {
-                triggerError()
-                showToast(
-                  options.errorToast ??
-                    (err instanceof Error
-                      ? err.message
-                      : translate('mobile.terminal.sendNotesError', "Couldn't send notes")),
-                  1800
-                )
-              })
-          } else if (options?.successToast) {
-            triggerSuccess()
-            showToast(options.successToast)
-          }
-        } else {
-          // Why: a prior pending handle must not outlive a create that returned
-          // no terminal; web-ready subscribe gates on this ref as active.
-          pendingActiveTerminalHandleRef.current = null
-          activeHandleRef.current = null
-          setActiveHandle(null)
-        }
-        scheduleDelayedAction(() => void fetchSessionTabs(), 500)
-      } else {
-        const message =
-          options?.errorToast ??
-          translate('mobile.terminal.createFailed', 'Failed to create terminal')
-        setCreateError(message)
-        if (options?.errorToast) {
-          triggerError()
-          showToast(message, 1800)
-        }
+      )
+      const created = result.tab
+      // Why: unsubscribe the old active terminal so the server restores its
+      // desktop dims. Without this, the old terminal's mobile subscription
+      // stays alive and its restore timer is never set.
+      const prev = activeHandleRef.current
+      if (prev) {
+        unsubscribeTerminal(prev)
+        initializedHandlesRef.current.delete(prev)
       }
+      pendingActiveSessionTabIdRef.current = created.id
+      activeSessionTabTypeRef.current = 'terminal'
+      setActiveSessionTabId(created.id)
+      setSessionTabs((prev) => {
+        if (prev.some((tab) => tab.id === created.id)) {
+          return prev
+        }
+        return [...prev, { ...created, isActive: true }]
+      })
+      if (typeof created.terminal === 'string') {
+        const createdHandle = created.terminal
+        defaultTerminalHandlesToLiveInput([createdHandle])
+        // Why: session-tab snapshots can lag the create RPC. Without the
+        // handle marker, applySessionTabs snaps activeHandleRef back to the
+        // previous terminal, and the new pane's web-ready subscribe (gated
+        // on the active handle) is skipped — blank tab until a manual switch.
+        pendingActiveTerminalHandleRef.current = createdHandle
+        activeHandleRef.current = createdHandle
+        setActiveHandle(createdHandle)
+        setTerminals((prev) => {
+          const existing = prev.find((terminal) => terminal.handle === createdHandle)
+          const createdTerminal: Terminal = {
+            handle: createdHandle,
+            title:
+              created.title ||
+              existing?.title ||
+              translate('mobile.terminal.defaultTitle', 'Terminal'),
+            terminalTheme: created.terminalTheme ?? existing?.terminalTheme,
+            isActive: true
+          }
+          if (existing) {
+            const next = prev.map((terminal) =>
+              terminal.handle === createdHandle ? { ...terminal, ...createdTerminal } : terminal
+            )
+            terminalsRef.current = next
+            return terminalRecordsEqual(prev, next) ? prev : next
+          }
+          const next = [...prev, createdTerminal]
+          terminalsRef.current = next
+          return next
+        })
+        subscribeToTerminal(createdHandle)
+        if (options?.initialPrompt?.trim()) {
+          void callRuntimeOrpc(client, (runtime) => runtime.terminal.send, {
+            terminal: createdHandle,
+            text: options.initialPrompt,
+            enter: options.enter !== false,
+            ...(deviceTokenRef.current
+              ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
+              : {})
+          })
+            .then((result) => {
+              if (!result.send.accepted) {
+                throw new Error(
+                  translate(
+                    'mobile.terminal.inputLocked',
+                    'Terminal input is locked by another client.'
+                  )
+                )
+              }
+              triggerSuccess()
+              showToast(
+                options.successToast ?? translate('mobile.terminal.notesSent', 'Notes sent')
+              )
+              options.onPromptSent?.()
+            })
+            .catch((err) => {
+              triggerError()
+              showToast(
+                options.errorToast ??
+                  (err instanceof Error
+                    ? err.message
+                    : translate('mobile.terminal.sendNotesError', "Couldn't send notes")),
+                1800
+              )
+            })
+        } else if (options?.successToast) {
+          triggerSuccess()
+          showToast(options.successToast)
+        }
+      } else {
+        // Why: a prior pending handle must not outlive a create that returned
+        // no terminal; web-ready subscribe gates on this ref as active.
+        pendingActiveTerminalHandleRef.current = null
+        activeHandleRef.current = null
+        setActiveHandle(null)
+      }
+      scheduleDelayedAction(() => void fetchSessionTabs(), 500)
     } catch {
       const message =
         options?.errorToast ??
@@ -2501,13 +2462,15 @@ export default function SessionScreen(): React.JSX.Element {
       const worktree = `id:${worktreeId}`
       for (let attempt = 1; attempt <= 100; attempt += 1) {
         const relativePath = attempt === 1 ? 'untitled.md' : `untitled-${attempt}.md`
-        const createResponse = await client.sendRequest(
-          'files.createFile',
-          { worktree, relativePath },
-          { timeoutMs: 15_000 }
-        )
-        if (!createResponse.ok) {
-          const message = (createResponse as RpcFailure).error.message
+        try {
+          await callRuntimeOrpc(
+            client,
+            (runtime) => runtime.files.createFile,
+            { worktree, relativePath },
+            { timeoutMs: 15_000 }
+          )
+        } catch (createError) {
+          const message = createError instanceof Error ? createError.message : ''
           if (isFileExistsErrorMessage(message) && attempt < 100) {
             continue
           }
@@ -2516,14 +2479,12 @@ export default function SessionScreen(): React.JSX.Element {
           )
         }
 
-        const openResponse = await client.sendRequest(
-          'files.open',
+        await callRuntimeOrpc(
+          client,
+          (runtime) => runtime.files.open,
           { worktree, relativePath },
           { timeoutMs: 15_000 }
         )
-        if (!openResponse.ok) {
-          throw new Error((openResponse as RpcFailure).error.message)
-        }
         scheduleDelayedAction(() => void fetchSessionTabs(), 300)
         return
       }
@@ -2563,8 +2524,9 @@ export default function SessionScreen(): React.JSX.Element {
     setCreatingBrowser(true)
     setCreateError('')
     try {
-      const response = await client.sendRequest(
-        'browser.tabCreate',
+      const created = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.browser.tabCreate,
         {
           worktree: `id:${worktreeId}`,
           url,
@@ -2573,13 +2535,9 @@ export default function SessionScreen(): React.JSX.Element {
         },
         { timeoutMs: 30_000 }
       )
-      if (!response.ok) {
-        throw new Error((response as RpcFailure).error.message)
-      }
       // Focus the new browser tab once it syncs (fetchSessionTabs activates it
       // via the normal path). Refresh a few times since the desktop registers
       // the tab asynchronously.
-      const created = (response as RpcSuccess).result as { browserPageId?: string }
       if (created.browserPageId) {
         pendingBrowserFocusPageIdRef.current = created.browserPageId
       }
@@ -2605,7 +2563,7 @@ export default function SessionScreen(): React.JSX.Element {
 
   async function handleBrowserNavigationCommand(
     tab: Extract<MobileSessionTab, { type: 'browser' }>,
-    method: 'browser.back' | 'browser.forward' | 'browser.reload'
+    method: 'back' | 'forward' | 'reload'
   ) {
     if (!client || !tab.browserPageId) {
       showToast(
@@ -2615,17 +2573,15 @@ export default function SessionScreen(): React.JSX.Element {
       return
     }
     try {
-      const response = await client.sendRequest(
-        method,
+      await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.browser[method],
         {
           worktree: `id:${worktreeId}`,
           page: tab.browserPageId
         },
         { timeoutMs: 15_000 }
       )
-      if (!response.ok) {
-        throw new Error((response as RpcFailure).error.message)
-      }
       scheduleDelayedAction(() => void fetchSessionTabs(), 250)
     } catch (err) {
       const message =
@@ -2645,11 +2601,11 @@ export default function SessionScreen(): React.JSX.Element {
 
     try {
       const title = value.trim()
-      const response = await client.sendRequest('terminal.rename', {
+      await callRuntimeOrpc(client, (runtime) => runtime.terminal.rename, {
         terminal: target.handle,
         title
       })
-      if (response.ok) {
+      {
         setTerminals((prev) => {
           const next = prev.map((terminal) =>
             terminal.handle === target.handle
@@ -2684,10 +2640,10 @@ export default function SessionScreen(): React.JSX.Element {
     }
 
     try {
-      const response = await client.sendRequest('terminal.close', {
+      await callRuntimeOrpc(client, (runtime) => runtime.terminal.close, {
         terminal: target.handle
       })
-      if (response.ok) {
+      {
         unsubscribeTerminal(target.handle)
         terminalRefs.current.delete(target.handle)
         initializedHandlesRef.current.delete(target.handle)
@@ -2715,11 +2671,11 @@ export default function SessionScreen(): React.JSX.Element {
       return
     }
     try {
-      const response = await client.sendRequest('session.tabs.close', {
+      await callRuntimeOrpc(client, (runtime) => runtime.session.tabs.close, {
         worktree: `id:${worktreeId}`,
         tabId: tab.id
       })
-      if (response.ok) {
+      {
         if (tab.type === 'terminal' && typeof tab.terminal === 'string') {
           const terminalHandle = tab.terminal
           unsubscribeTerminal(terminalHandle)
@@ -2798,14 +2754,8 @@ export default function SessionScreen(): React.JSX.Element {
       leafId: activePendingTerminalTab.leafId,
       notifyClients: false
     })
-      .then((response) => {
-        if (!response.ok) {
-          if (pendingTerminalActivationAttemptRef.current === activationKey) {
-            pendingTerminalActivationAttemptRef.current = null
-          }
-          return
-        }
-        applySessionTabs((response as RpcSuccess).result as SessionTabsResult)
+      .then((result) => {
+        applySessionTabs(result)
         scheduleDelayedAction(() => void fetchSessionTabs(), 300)
         scheduleDelayedAction(() => void fetchSessionTabs(), 1200)
       })

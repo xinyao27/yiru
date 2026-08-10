@@ -15,7 +15,6 @@ import { createNestedRepoScanId } from './dialog-types'
 type ShowNestedRepoReview = (args: {
   scan: NestedRepoScanResult
   selectedPath: string
-  connectionId: string | null
   attemptId: string
   runtimeKind: NestedRepoTelemetryRuntimeKind
   inProgress: boolean
@@ -37,10 +36,9 @@ export function useAddRepoServerPathFlow({
   addRepoPath: (path: string, kind?: 'git' | 'folder') => Promise<Repo | null>
   closeModal: () => void
   fetchWorktrees: (repoId: string, options?: { requireAuthoritative?: boolean }) => Promise<unknown>
-  getNestedRepoRuntimeKind: (connectionId: string | null) => NestedRepoTelemetryRuntimeKind
+  getNestedRepoRuntimeKind: () => NestedRepoTelemetryRuntimeKind
   scanNestedRepos: (
     path: string,
-    connectionId?: string,
     controls?: { scanId?: string; onProgress?: (scan: NestedRepoScanResult) => void }
   ) => Promise<NestedRepoScanResult | null>
   setActiveNestedScanId: (scanId: string | null) => void
@@ -77,7 +75,7 @@ export function useAddRepoServerPathFlow({
       try {
         if (kind === 'git') {
           const attemptId = createNestedRepoTelemetryAttemptId()
-          const runtimeKind = getNestedRepoRuntimeKind(null)
+          const runtimeKind = getNestedRepoRuntimeKind()
           const supportsStreamingScan = runtimeKind !== 'runtime'
           const scanId = supportsStreamingScan ? createNestedRepoScanId() : null
           if (scanId) {
@@ -86,7 +84,6 @@ export function useAddRepoServerPathFlow({
           }
           const scan = await scanNestedRepos(
             path,
-            undefined,
             scanId
               ? {
                   scanId,
@@ -101,7 +98,6 @@ export function useAddRepoServerPathFlow({
                     showNestedRepoReview({
                       scan: progressScan,
                       selectedPath: path,
-                      connectionId: null,
                       attemptId,
                       runtimeKind,
                       inProgress: true,
@@ -129,7 +125,6 @@ export function useAddRepoServerPathFlow({
             showNestedRepoReview({
               scan,
               selectedPath: path,
-              connectionId: null,
               attemptId,
               runtimeKind,
               inProgress: false,

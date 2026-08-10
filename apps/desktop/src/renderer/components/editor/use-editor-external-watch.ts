@@ -1,6 +1,6 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: the editor external-watch hook co-locates
-   target diffing, fs:changed dispatch, tombstone coalescing, and rename
+   target diffing, file-watch dispatch, tombstone coalescing, and rename
    correlation so the end-to-end event-to-store mutation contract stays
    readable in one file. */
 import { useEffect, useRef } from 'react'
@@ -101,7 +101,6 @@ export type EditorExternalWatchTargetState = Pick<
   | 'rightSidebarTab'
   | 'rightSidebarExplorerView'
   | 'gitStatusHugeByWorktree'
-  | 'sshConnectionStates'
 >
 
 let cachedOpenFiles: AppState['openFiles'] | null = null
@@ -113,7 +112,6 @@ let cachedRightSidebarOpen: boolean | null = null
 let cachedRightSidebarTab: AppState['rightSidebarTab'] | null = null
 let cachedRightSidebarExplorerView: AppState['rightSidebarExplorerView'] | null = null
 let cachedGitStatusHugeByWorktree: AppState['gitStatusHugeByWorktree'] | null = null
-let cachedSshConnectionStates: AppState['sshConnectionStates'] | null = null
 let cachedWatchedTargetsSnapshot: WatchedTargetsSnapshot = { targets: [], targetsKey: '' }
 
 export function getWatchedTargetKey(target: WatchedTarget): string {
@@ -140,8 +138,7 @@ export function getEditorExternalWatchTargets(
     cachedRightSidebarOpen === state.rightSidebarOpen &&
     cachedRightSidebarTab === state.rightSidebarTab &&
     cachedRightSidebarExplorerView === state.rightSidebarExplorerView &&
-    cachedGitStatusHugeByWorktree === state.gitStatusHugeByWorktree &&
-    cachedSshConnectionStates === state.sshConnectionStates
+    cachedGitStatusHugeByWorktree === state.gitStatusHugeByWorktree
   ) {
     return cachedWatchedTargetsSnapshot
   }
@@ -168,13 +165,14 @@ export function getEditorExternalWatchTargets(
   const activeRepo = activeWorktree
     ? state.repos.find((repo) => repo.id === activeWorktree.repoId)
     : undefined
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — so the SSH-disconnected exclusion this used to gate on
+  // never fires; only the git/huge-status checks remain reachable.
   const sourceControlCanConsumeWatch =
     !!activeWorktreeId &&
     !!activeRepo &&
     isGitRepoKind(activeRepo) &&
-    !state.gitStatusHugeByWorktree[activeWorktreeId] &&
-    (!activeRepo.connectionId ||
-      state.sshConnectionStates.get(activeRepo.connectionId)?.status === 'connected')
+    !state.gitStatusHugeByWorktree[activeWorktreeId]
   const activeWorktreeNeedsSidebarWatch =
     activeWorktreeId !== null &&
     state.rightSidebarOpen &&
@@ -202,15 +200,17 @@ export function getEditorExternalWatchTargets(
     if (!wt) {
       continue
     }
-    const repo = state.repos.find((r) => r.id === wt.repoId)
     const owners = Array.from(targetOwnersByWorktreeId.get(id) ?? []).sort((a, b) =>
       (a ?? '').localeCompare(b ?? '')
     )
     for (const owner of owners) {
+      // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+      // were removed (#63) — so a direct repo/worktree watch target is never
+      // SSH-owned; connectionId here stays undefined.
       const target = {
         worktreeId: id,
         worktreePath: wt.path,
-        connectionId: repo?.connectionId ?? undefined,
+        connectionId: undefined,
         runtimeEnvironmentId: owner
       }
       nextTargets.push(target)
@@ -228,7 +228,6 @@ export function getEditorExternalWatchTargets(
   cachedRightSidebarTab = state.rightSidebarTab
   cachedRightSidebarExplorerView = state.rightSidebarExplorerView
   cachedGitStatusHugeByWorktree = state.gitStatusHugeByWorktree
-  cachedSshConnectionStates = state.sshConnectionStates
 
   if (targetsKey === cachedWatchedTargetsSnapshot.targetsKey) {
     return cachedWatchedTargetsSnapshot
@@ -240,7 +239,7 @@ export function getEditorExternalWatchTargets(
 
 // Why: macOS atomic writes (Claude Code Edit, vim :w, VSCode save) deliver a
 // delete event immediately followed by a create event for the same path. When
-// those two land in separate fs:changed payloads a few ms apart, the tab
+// those two land in separate file-watch payloads a few ms apart, the tab
 // flickers struck-through for one render before the follow-up create clears
 // it. Debouncing just the 'deleted' signal — keyed by absolute path — lets a
 // same-path create in the next payload cancel the tombstone before it ever
@@ -294,63 +293,50 @@ export function useEditorExternalWatch(): void {
 
     for (const target of removed) {
       const key = getWatchedTargetKey(target)
-      const remoteUnsubscribe = remoteWatchUnsubsRef.current.get(key)
-      if (remoteUnsubscribe) {
-        remoteUnsubscribe()
+      const unsubscribe = remoteWatchUnsubsRef.current.get(key)
+      if (unsubscribe) {
+        unsubscribe()
         remoteWatchUnsubsRef.current.delete(key)
-      } else {
-        void window.api.fs.unwatchWorktree({
-          worktreePath: target.worktreePath,
-          connectionId: target.connectionId
-        })
       }
     }
     for (const target of added) {
-      if (target.runtimeEnvironmentId) {
-        const key = getWatchedTargetKey(target)
-        let cancelled = false
-        const pendingUnsubscribe = (): void => {
-          cancelled = true
-        }
-        remoteWatchUnsubsRef.current.set(key, pendingUnsubscribe)
-        void subscribeRuntimeFileChanges(
-          {
-            settings: { activeRuntimeEnvironmentId: target.runtimeEnvironmentId },
-            worktreeId: target.worktreeId,
-            worktreePath: target.worktreePath,
-            connectionId: target.connectionId
-          },
-          (payload) => fsChangedHandlerRef.current?.(payload, target.runtimeEnvironmentId),
-          (err) => warnExternalWatchFailure(target, err)
-        )
-          .then((unsubscribe) => {
-            if (cancelled) {
-              unsubscribe()
-              return
-            }
-            if (remoteWatchUnsubsRef.current.get(key) === pendingUnsubscribe) {
-              remoteWatchUnsubsRef.current.set(key, unsubscribe)
-            } else {
-              unsubscribe()
-            }
-          })
-          .catch((err) => {
-            if (remoteWatchUnsubsRef.current.get(key) === pendingUnsubscribe) {
-              remoteWatchUnsubsRef.current.delete(key)
-            }
-            warnExternalWatchFailure(target, err)
-          })
-        continue
+      // Why: `files.watch` (contract) targets `{ kind: 'local' }` for a
+      // worktree with no runtime owner the same way it targets a remote
+      // environment for one that has one (`getActiveRuntimeTarget`) — one
+      // subscription path for every target, shared with `use-watch.ts`'s
+      // Explorer subscription via `sharedRuntimeFileWatches`. Verified
+      // against a real local target by CDP-driven boot (slice 122).
+      const key = getWatchedTargetKey(target)
+      let cancelled = false
+      const pendingUnsubscribe = (): void => {
+        cancelled = true
       }
-      void window.api.fs
-        .watchWorktree({
+      remoteWatchUnsubsRef.current.set(key, pendingUnsubscribe)
+      void subscribeRuntimeFileChanges(
+        {
+          settings: { activeRuntimeEnvironmentId: target.runtimeEnvironmentId },
+          worktreeId: target.worktreeId,
           worktreePath: target.worktreePath,
           connectionId: target.connectionId
+        },
+        (payload) => fsChangedHandlerRef.current?.(payload, target.runtimeEnvironmentId),
+        (err) => warnExternalWatchFailure(target, err)
+      )
+        .then((unsubscribe) => {
+          if (cancelled) {
+            unsubscribe()
+            return
+          }
+          if (remoteWatchUnsubsRef.current.get(key) === pendingUnsubscribe) {
+            remoteWatchUnsubsRef.current.set(key, unsubscribe)
+          } else {
+            unsubscribe()
+          }
         })
         .catch((err) => {
-          // Why: remote SSH providers can disappear while tabs still reference
-          // the worktree. Watching should degrade to a diagnostic, not an
-          // uncaught renderer promise that looks like the terminal froze.
+          if (remoteWatchUnsubsRef.current.get(key) === pendingUnsubscribe) {
+            remoteWatchUnsubsRef.current.delete(key)
+          }
           warnExternalWatchFailure(target, err)
         })
     }
@@ -360,7 +346,7 @@ export function useEditorExternalWatch(): void {
     // so that re-running on targetsKey changes doesn't tear down everything.
   }, [targetsKey])
 
-  // Why: the fs:changed subscription and the final unmount unwatch are
+  // Why: the file-watch subscription and the final unmount unwatch are
   // independent of which worktrees are currently watched. Keeping them in a
   // single always-mounted effect avoids re-subscribing on every targetsKey
   // change (which would otherwise miss events fired during re-subscription).
@@ -375,11 +361,13 @@ export function useEditorExternalWatch(): void {
             t.runtimeEnvironmentId === runtimeEnvironmentId
         )
     )
-    const unsubscribe = window.api.fs.onFsChanged((payload) => handleFsChanged(payload, null))
+    // Why: every target (local `{ kind: 'local' }` included) now subscribes
+    // through `subscribeRuntimeFileChanges` in the differential effect above,
+    // which already calls `fsChangedHandlerRef.current` per event — there is
+    // no longer a separate global file-watch broadcast to listen for here.
     fsChangedHandlerRef.current = handleFsChanged
 
     return () => {
-      unsubscribe()
       dispose()
       fsChangedHandlerRef.current = null
       // Why: final unmount must tear down every outstanding subscription.
@@ -387,15 +375,7 @@ export function useEditorExternalWatch(): void {
       // cleanup, so this is the only place that clears them.
       for (const target of targetsRef.current) {
         const key = getWatchedTargetKey(target)
-        const remoteUnsubscribe = remoteWatchUnsubs.get(key)
-        if (remoteUnsubscribe) {
-          remoteUnsubscribe()
-        } else {
-          void window.api.fs.unwatchWorktree({
-            worktreePath: target.worktreePath,
-            connectionId: target.connectionId
-          })
-        }
+        remoteWatchUnsubs.get(key)?.()
       }
       remoteWatchUnsubs.clear()
       targetsRef.current = []
@@ -410,7 +390,7 @@ export function useEditorExternalWatch(): void {
 }
 
 /**
- * Builds the fs:changed handler used by `useEditorExternalWatch`. Exported
+ * Builds the file-watch handler used by `useEditorExternalWatch`. Exported
  * so tests can drive the full event pipeline — including the debounced
  * tombstone coalescer — without mounting the hook. See
  * `EXTERNAL_MUTATION_DEBOUNCE_MS` for the macOS atomic-write rationale.

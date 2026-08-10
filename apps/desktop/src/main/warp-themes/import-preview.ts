@@ -1,16 +1,11 @@
 import { readFile, stat } from 'node:fs/promises'
 
-import type { WebContents } from 'electron'
 import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
 import { makeCustomTerminalThemeSelection } from '~shared/terminal/custom-themes'
 
 import type { Store } from '../persistence'
 import { filesFromAutoDirectories } from './auto-discovered-theme-files'
-import {
-  chooseManualWarpThemeFiles,
-  chooseManualWarpThemeFolderPath,
-  manualWarpThemeContentDiscriminator
-} from './manual-warp-theme-files'
+import { manualWarpThemeContentDiscriminator } from './content-discriminator'
 import { parseWarpThemeYamlWithTimeout } from './parser-runner'
 import {
   createPreviewOperationBudget,
@@ -29,10 +24,15 @@ type ThemeSourceResolution = {
   budget: PreviewOperationBudget
 }
 
+export type WarpThemeSourcePicker = {
+  chooseFiles: () => Promise<ThemeSourceSelection>
+  chooseFolder: () => Promise<string | null>
+}
+
 async function resolveThemeSource(
   source: WarpThemeImportSource,
-  webContents?: WebContents,
-  options: WarpThemePreviewOptions = {}
+  options: WarpThemePreviewOptions,
+  picker: WarpThemeSourcePicker | undefined
 ): Promise<ThemeSourceResolution> {
   switch (source.kind) {
     case 'auto': {
@@ -40,11 +40,11 @@ async function resolveThemeSource(
       return { selection: await filesFromAutoDirectories(budget), budget }
     }
     case 'chooseFile': {
-      const selection = await chooseManualWarpThemeFiles(webContents)
+      const selection = await picker!.chooseFiles()
       return { selection, budget: createPreviewOperationBudget(options) }
     }
     case 'chooseFolder': {
-      const folderPath = await chooseManualWarpThemeFolderPath(webContents)
+      const folderPath = await picker!.chooseFolder()
       const budget = createPreviewOperationBudget(options)
       return {
         selection: folderPath
@@ -59,8 +59,8 @@ async function resolveThemeSource(
 export async function previewWarpThemeImport(
   _store: Store,
   source: unknown = { kind: 'auto' },
-  webContents?: WebContents,
-  options: WarpThemePreviewOptions = {}
+  options: WarpThemePreviewOptions = {},
+  picker?: WarpThemeSourcePicker
 ): Promise<WarpThemeImportPreview> {
   const validatedSource = validateWarpThemeImportSource(source)
   if (!validatedSource) {
@@ -72,7 +72,17 @@ export async function previewWarpThemeImport(
     }
   }
 
-  const { selection, budget } = await resolveThemeSource(validatedSource, webContents, options)
+  if (validatedSource.kind !== 'auto' && !picker) {
+    return {
+      found: false,
+      canceled: true,
+      desktopOnly: true,
+      themes: [],
+      skippedFiles: []
+    }
+  }
+
+  const { selection, budget } = await resolveThemeSource(validatedSource, options, picker)
   if (selection.canceled) {
     return { found: false, canceled: true, themes: [], skippedFiles: [] }
   }

@@ -9,6 +9,7 @@ import {
   readInstalledAgentSkillDiscovery,
   writeInstalledAgentSkillDiscovery
 } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { discoverSkills } from '~renderer/runtime/skill-manage-client'
 import type {
   DiscoveredSkill,
   SkillDiscoveryResult,
@@ -87,8 +88,7 @@ function startInstalledAgentSkillDiscovery(
   const key = getSkillDiscoveryTargetKey(target)
   const generation = getInstalledAgentSkillDiscoveryGeneration()
   const normalizedTarget = normalizeSkillDiscoveryTarget(target)
-  const discovery = window.api.skills
-    .discover(normalizedTarget)
+  const discovery = discoverSkills(normalizedTarget)
     .then((result) => {
       writeInstalledAgentSkillDiscovery(key, result, generation)
       return result

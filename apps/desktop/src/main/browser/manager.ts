@@ -4,10 +4,10 @@ cleanup even after extracting the grab/session helpers. Keeping that ownership
 in one file avoids scattering the browser security boundary across modules. */
 import { randomUUID } from 'node:crypto'
 
-import { shell, webContents } from 'electron'
+import type { RuntimeBrowserGuestEvent } from '@yiru/runtime-protocol/contract'
+import { requestShellOpenExternal } from '~main/runtime/rpc/orpc/shell-services-reverse-link'
 import {
   type BrowserAnnotationViewportBridgeOptions,
-  BROWSER_ANNOTATION_VIEWPORT_BRIDGE_WORLD_ID,
   buildBrowserAnnotationViewportBridgeScript
 } from '~shared/browser/annotation-viewport-bridge'
 import type {
@@ -52,13 +52,22 @@ import { clampGrabPayload } from './grab-payload'
 import { captureSelectionScreenshot as captureGrabSelectionScreenshot } from './grab-screenshot'
 import { BrowserGrabSessionController } from './grab-session-controller'
 import {
-  resolveRendererWebContents,
   setupGrabShortcutForwarding,
   setupGuestContextMenu,
   setupGuestMouseWheelZoomForwarding,
   setupGuestShortcutForwarding
 } from './guest-ui'
+import {
+  createElectronBrowserPageHandle,
+  electronBrowserBackendPageId,
+  electronBrowserWebContentsId,
+  resolveElectronBrowserWebContents
+} from './page/electron-handle'
+import { evaluateBrowserPage, evaluateBrowserPageIsolated } from './page/evaluation'
+import type { BrowserPageCdpLease, BrowserPageHandle } from './page/handle'
+import { BrowserPageRegistry } from './page/registry'
 import { openPopupWithOriginBar, type PopupChildWindowOptions } from './popup-origin-bar-window'
+import type { BrowserDownloadItem, BrowserSession } from './session'
 import { cleanElectronUserAgent } from './session-ua'
 
 const AUTOMATION_VISIBILITY_ACQUIRE_TIMEOUT_MS = 2_000
@@ -152,8 +161,9 @@ export type BrowserGuestRegistration = {
   workspaceId?: string
   worktreeId?: string
   sessionProfileId?: string | null
-  webContentsId: number
-  rendererWebContentsId: number
+  backendPageId: string
+  rendererOwnerId: string
+  shellConnectionId: string
 }
 
 type PendingPermissionEvent = Omit<BrowserPermissionDeniedEvent, 'browserPageId'>
@@ -200,7 +210,7 @@ type ActiveDownload = {
   filename: string
   totalBytes: number | null
   mimeType: string | null
-  item: Electron.DownloadItem
+  item: BrowserDownloadItem
   savePath: string
   reservationKey: string | null
   receivedBytes: number
@@ -221,17 +231,32 @@ function safeOrigin(rawUrl: string): string {
 }
 
 export class BrowserManager {
+  private readonly pageRegistry: BrowserPageRegistry
+
+  constructor(pageRegistry = new BrowserPageRegistry()) {
+    this.pageRegistry = pageRegistry
+  }
+
+  // Why: guest events are pushed to the focused window's WebContents, which
+  // paired web/mobile clients do not have. The runtime installs a publisher
+  // here so the same payload also reaches `browser.guestEvents.subscribe`.
+  private publishGuestEvent: (event: RuntimeBrowserGuestEvent) => void = () => {}
   private settingsResolver:
     | (() => {
         keybindings?: KeybindingOverrides
         mobileEmulatorEnabled?: boolean
       })
     | null = null
+  setGuestEventPublisher(publish: (event: RuntimeBrowserGuestEvent) => void): void {
+    this.publishGuestEvent = publish
+  }
+
   private readonly webContentsIdByTabId = new Map<string, number>()
   // Why: reverse map enables O(1) guest→tab lookups instead of O(N) linear
   // scans on every mouse event, load failure, permission, and popup event.
   private readonly tabIdByWebContentsId = new Map<number, string>()
   private readonly popupOwnerContextByGuestId = new Map<number, PopupOwnerContext>()
+  private readonly shellConnectionIdByGuestId = new Map<number, string>()
   // Why: guest registration is keyed by browser page id, but renderer
   // visibility/focus state is keyed by browser workspace id. Screenshot prep
   // has to bridge that mismatch to activate the right tab before capture.
@@ -291,11 +316,11 @@ export class BrowserManager {
     this.certificateTrustController = controller
   }
 
-  installCertificateRequestGuard(session: Electron.Session): void {
+  installCertificateRequestGuard(session: BrowserSession): void {
     this.certificateTrustController?.installSessionRequestGuard(session)
   }
 
-  removeCertificateRequestGuard(session: Electron.Session): void {
+  removeCertificateRequestGuard(session: BrowserSession): void {
     this.certificateTrustController?.removeSessionRequestGuard(session)
   }
 
@@ -422,7 +447,9 @@ export class BrowserManager {
     if (!rendererWebContentsId) {
       return null
     }
-    const renderer = webContents.fromId(rendererWebContentsId)
+    const renderer = resolveElectronBrowserWebContents(
+      electronBrowserBackendPageId(rendererWebContentsId)
+    )
     if (!renderer || renderer.isDestroyed()) {
       return null
     }
@@ -643,11 +670,7 @@ export class BrowserManager {
     }
   }
 
-  async acquireAutomationVisibility(guestWebContentsId: number): Promise<() => void> {
-    const browserPageId = this.resolveBrowserTabIdForGuestWebContentsId(guestWebContentsId)
-    if (!browserPageId) {
-      return () => {}
-    }
+  async acquireAutomationVisibility(browserPageId: string): Promise<() => void> {
     const renderer = this.resolveRendererForBrowserTab(browserPageId)
     if (!renderer || renderer.isDestroyed()) {
       return () => {}
@@ -681,7 +704,8 @@ export class BrowserManager {
 
   attachGuestPolicies(
     guest: Electron.WebContents,
-    inheritedOwnerContext: PopupOwnerContext | null = null
+    inheritedOwnerContext: PopupOwnerContext | null = null,
+    shellConnectionId: string | null = null
   ): void {
     if (this.policyAttachedGuestIds.has(guest.id)) {
       return
@@ -689,6 +713,14 @@ export class BrowserManager {
     this.policyAttachedGuestIds.add(guest.id)
     if (inheritedOwnerContext) {
       this.popupOwnerContextByGuestId.set(guest.id, inheritedOwnerContext)
+      const inheritedShellConnectionId = this.shellConnectionIdByGuestId.get(
+        inheritedOwnerContext.rootGuestWebContentsId
+      )
+      if (inheritedShellConnectionId) {
+        this.shellConnectionIdByGuestId.set(guest.id, inheritedShellConnectionId)
+      }
+    } else if (shellConnectionId) {
+      this.shellConnectionIdByGuestId.set(guest.id, shellConnectionId)
     }
     // Why: OAuth child windows must retain normal link/window relationships;
     // only the primary embedded browser converts new-tab clicks to Yiru tabs.
@@ -841,11 +873,15 @@ export class BrowserManager {
       } else if (externalUrl) {
         // Why: a target=_blank click on a Kagi search result page produces a
         // popup URL that still contains the bearer token; redact before
-        // handing the URL to the OS default browser.
-        void shell.openExternal(redactKagiSessionToken(externalUrl))
-        this.forwardOrQueuePopupEvent(guest.id, {
-          origin: safeOrigin(externalUrl),
-          action: 'opened-external'
+        // handing the URL to the shell's default browser.
+        const shellConnectionId = this.shellConnectionIdByGuestId.get(guest.id)
+        void requestShellOpenExternal(shellConnectionId, {
+          url: redactKagiSessionToken(externalUrl)
+        }).then(({ opened }) => {
+          this.forwardOrQueuePopupEvent(guest.id, {
+            origin: safeOrigin(externalUrl),
+            action: opened ? 'opened-external' : 'blocked'
+          })
         })
       } else {
         // Why: popup attempts can carry auth redirects and one-time tokens.
@@ -1090,6 +1126,7 @@ export class BrowserManager {
       for (const [popupGuestId, owner] of this.popupOwnerContextByGuestId) {
         if (owner.rootGuestWebContentsId === guestWebContentsId) {
           this.popupOwnerContextByGuestId.delete(popupGuestId)
+          this.shellConnectionIdByGuestId.delete(popupGuestId)
         }
       }
     }
@@ -1098,6 +1135,7 @@ export class BrowserManager {
     this.clearedLoadErrorsByGuestId.delete(guestWebContentsId)
     this.pendingPermissionEventsByGuestId.delete(guestWebContentsId)
     this.pendingPopupEventsByGuestId.delete(guestWebContentsId)
+    this.shellConnectionIdByGuestId.delete(guestWebContentsId)
     this.cancelPendingDownloadsForGuest(guestWebContentsId)
   }
 
@@ -1107,8 +1145,9 @@ export class BrowserManager {
     workspaceId,
     worktreeId,
     sessionProfileId,
-    webContentsId,
-    rendererWebContentsId
+    backendPageId,
+    rendererOwnerId,
+    shellConnectionId
   }: BrowserGuestRegistration): Promise<boolean> {
     const browserTabId = browserPageId ?? legacyBrowserTabId
     if (!browserTabId) {
@@ -1126,8 +1165,20 @@ export class BrowserManager {
       this.contextMenuCleanupByTabId.delete(browserTabId)
     }
 
-    const guest = webContents.fromId(webContentsId)
+    const guest = resolveElectronBrowserWebContents(backendPageId)
     if (!guest || guest.isDestroyed()) {
+      return false
+    }
+    const webContentsId = guest.id
+    const rendererWebContentsId = Number(
+      shellConnectionId.startsWith('electron:')
+        ? shellConnectionId.slice('electron:'.length)
+        : Number.NaN
+    )
+    if (!Number.isInteger(rendererWebContentsId) || rendererWebContentsId <= 0) {
+      return false
+    }
+    if (this.shellConnectionIdByGuestId.get(webContentsId) !== shellConnectionId) {
       return false
     }
 
@@ -1174,6 +1225,22 @@ export class BrowserManager {
       guest.isDestroyed() ||
       this.guestRegistrationAttemptByTabId.get(browserTabId)?.token !== registrationToken
     ) {
+      clearRegistrationAttempt()
+      return false
+    }
+
+    try {
+      this.pageRegistry.register(
+        createElectronBrowserPageHandle({
+          browserPageId: browserTabId,
+          backendKind: 'electron-webview',
+          rendererOwnerId,
+          shellConnectionId,
+          webContents: guest
+        })
+      )
+      this.shellConnectionIdByGuestId.set(webContentsId, shellConnectionId)
+    } catch {
       clearRegistrationAttempt()
       return false
     }
@@ -1257,6 +1324,10 @@ export class BrowserManager {
       this.tabIdByWebContentsId.delete(wcId)
     }
     this.webContentsIdByTabId.delete(browserTabId)
+    this.pageRegistry.unregister(
+      browserTabId,
+      wcId === undefined ? undefined : electronBrowserBackendPageId(wcId)
+    )
     const registrationAttempt = this.guestRegistrationAttemptByTabId.get(browserTabId)
     if (!registrationAttempt || registrationAttempt.webContentsId === wcId) {
       this.guestRegistrationAttemptByTabId.delete(browserTabId)
@@ -1270,6 +1341,33 @@ export class BrowserManager {
     this.viewportOpsByTabId.delete(browserTabId)
     this.annotationViewportBridgeOpsByTabId.delete(browserTabId)
     return true
+  }
+
+  unregisterPage(browserPageId: string): void {
+    this.unregisterGuest(browserPageId)
+  }
+
+  unregisterRendererGuest(browserPageId: string, expectedBackendPageId: string): boolean {
+    const expectedWebContentsId = electronBrowserWebContentsId(expectedBackendPageId)
+    if (expectedWebContentsId === null) {
+      return false
+    }
+    return this.unregisterGuest(browserPageId, expectedWebContentsId)
+  }
+
+  cancelPendingRendererGuestRegistration(
+    browserPageId: string,
+    expectedBackendPageId: string,
+    shellConnectionId: string
+  ): boolean {
+    const expectedWebContentsId = electronBrowserWebContentsId(expectedBackendPageId)
+    if (
+      expectedWebContentsId === null ||
+      this.shellConnectionIdByGuestId.get(expectedWebContentsId) !== shellConnectionId
+    ) {
+      return false
+    }
+    return this.cancelPendingGuestRegistration(browserPageId, expectedWebContentsId)
   }
 
   cancelPendingGuestRegistration(browserTabId: string, webContentsId: number): boolean {
@@ -1290,14 +1388,16 @@ export class BrowserManager {
     browserPageId,
     worktreeId,
     sessionProfileId,
-    webContentsId
+    webContentsId,
+    shellConnectionId
   }: {
     browserPageId: string
     worktreeId?: string
     sessionProfileId?: string | null
     webContentsId: number
+    shellConnectionId?: string | null
   }): Promise<boolean> {
-    const guest = webContents.fromId(webContentsId)
+    const guest = resolveElectronBrowserWebContents(electronBrowserBackendPageId(webContentsId))
     if (!guest || guest.isDestroyed()) {
       return false
     }
@@ -1317,6 +1417,20 @@ export class BrowserManager {
     if (guest.isDestroyed()) {
       return false
     }
+    try {
+      this.pageRegistry.register(
+        createElectronBrowserPageHandle({
+          browserPageId,
+          backendKind: 'electron-offscreen',
+          rendererOwnerId: null,
+          shellConnectionId: shellConnectionId ?? null,
+          webContents: guest
+        })
+      )
+    } catch {
+      return false
+    }
+
     const previousWebContentsId = this.webContentsIdByTabId.get(browserPageId)
     if (previousWebContentsId !== undefined && previousWebContentsId !== webContentsId) {
       this.retireStaleGuestWebContents(previousWebContentsId)
@@ -1355,6 +1469,7 @@ export class BrowserManager {
     this.guestRegistrationAttemptByTabId.clear()
     this.tabIdByWebContentsId.clear()
     this.popupOwnerContextByGuestId.clear()
+    this.shellConnectionIdByGuestId.clear()
     this.worktreeIdByTabId.clear()
     this.sessionProfileIdByPageId.clear()
     this.pendingLoadFailuresByGuestId.clear()
@@ -1365,6 +1480,19 @@ export class BrowserManager {
     this.pendingDownloadIdsByGuestId.clear()
     this.mouseWheelZoomCleanupByTabId.clear()
     this.annotationViewportBridgeOpsByTabId.clear()
+    this.pageRegistry.clear()
+  }
+
+  getPage(browserPageId: string): BrowserPageHandle | null {
+    return this.pageRegistry.get(browserPageId)
+  }
+
+  getPageForWebContentsId(webContentsId: number): BrowserPageHandle | null {
+    return this.pageRegistry.getByBackendPageId(electronBrowserBackendPageId(webContentsId))
+  }
+
+  getPages(): BrowserPageHandle[] {
+    return this.pageRegistry.list()
   }
 
   getGuestWebContentsId(browserTabId: string): number | null {
@@ -1404,8 +1532,8 @@ export class BrowserManager {
       return null
     }
     if (!offscreen) {
-      const guest = webContents.fromId(webContentsId)
-      if (!guest || guest.isDestroyed() || guest.getType() !== 'webview') {
+      const page = this.pageRegistry.getByBackendPageId(electronBrowserBackendPageId(webContentsId))
+      if (!page || page.identity.backendKind !== 'electron-webview') {
         return null
       }
     }
@@ -1441,6 +1569,7 @@ export class BrowserManager {
       this.notifyBrowserGuestStateChanged(webContentsId)
       return
     }
+    this.publishGuestEvent({ type: 'certificateFailureChanged', browserPageId, failure })
     const renderer = this.resolveRendererForBrowserTab(browserPageId)
     renderer?.send('browser:certificate-failure-changed', { browserPageId, failure })
   }
@@ -1474,7 +1603,7 @@ export class BrowserManager {
     })
   }
 
-  handleGuestWillDownload(args: { guestWebContentsId: number; item: Electron.DownloadItem }): void {
+  handleGuestWillDownload(args: { guestWebContentsId: number; item: BrowserDownloadItem }): void {
     const { guestWebContentsId, item } = args
     const downloadId = randomUUID()
     const requestedFilename = (() => {
@@ -1502,7 +1631,7 @@ export class BrowserManager {
     })()
     const origin = (() => {
       try {
-        return safeOrigin(item.getURL())
+        return safeOrigin(item.getUrl())
       } catch {
         return 'unknown'
       }
@@ -1573,7 +1702,7 @@ export class BrowserManager {
       return
     }
 
-    const updatedHandler = (_event: Electron.Event, state: 'progressing' | 'interrupted'): void => {
+    const updatedHandler = (state: 'progressing' | 'interrupted'): void => {
       download.receivedBytes = this.getDownloadReceivedBytes(download.item)
       download.transientState = state
       this.sendDownloadProgress(download.browserTabId, {
@@ -1584,7 +1713,7 @@ export class BrowserManager {
         state
       })
     }
-    const doneHandler = (_event: Electron.Event, state: BrowserDownloadDoneState): void => {
+    const doneHandler = (state: BrowserDownloadDoneState): void => {
       const status: BrowserDownloadFinishedEvent['status'] =
         state === 'completed' ? 'completed' : state === 'cancelled' ? 'canceled' : 'failed'
       this.finishDownloadInternal(
@@ -1599,46 +1728,41 @@ export class BrowserManager {
     }
     download.cleanup = (): void => {
       try {
-        download.item.off('updated', updatedHandler)
-        download.item.off('done', doneHandler)
+        download.item.offUpdated(updatedHandler)
+        download.item.offDone(doneHandler)
       } catch {
         // Why: completed DownloadItems can already be finalized when cleanup
         // runs. Cleanup must stay best-effort so UI teardown never crashes main.
       }
     }
-    item.on('updated', updatedHandler)
-    item.once('done', doneHandler)
+    item.onUpdated(updatedHandler)
+    item.onceDone(doneHandler)
 
     if (browserTabId) {
       this.sendDownloadStarted(downloadId)
     }
   }
 
-  cancelDownload(args: { downloadId: string; senderWebContentsId: number }): boolean {
+  cancelDownload(args: { downloadId: string; shellConnectionId: string }): boolean {
     const download = this.downloadsById.get(args.downloadId)
-    if (!download || download.rendererWebContentsId !== args.senderWebContentsId) {
+    const pageShellConnectionId = download?.browserTabId
+      ? this.pageRegistry.get(download.browserTabId)?.identity.shellConnectionId
+      : null
+    if (!download || pageShellConnectionId !== args.shellConnectionId) {
       return false
     }
     this.cancelDownloadInternal(args.downloadId, 'Canceled.')
     return true
   }
 
-  // Why: guest browser surfaces are intentionally isolated from Yiru's preload
-  // bridge, so renderer code cannot directly call Electron WebContents APIs on
-  // them. Main owns the devtools escape hatch and only after tab→guest lookup.
+  // Why: guest browser surfaces are isolated from Yiru's preload bridge, so
+  // the registered page handle owns the optional backend devtools escape hatch.
   async openDevTools(browserTabId: string): Promise<boolean> {
-    const webContentsId = this.webContentsIdByTabId.get(browserTabId)
-    if (!webContentsId) {
+    const page = this.pageRegistry.get(browserTabId)
+    if (!page?.openDevTools) {
       return false
     }
-    const guest = webContents.fromId(webContentsId)
-    if (!guest || guest.isDestroyed()) {
-      // Why: stale guest discovery must clear every per-tab registry entry,
-      // not just the forward/reverse WebContents maps.
-      this.unregisterGuest(browserTabId)
-      return false
-    }
-    guest.openDevTools({ mode: 'detach' })
+    page.openDevTools()
     return true
   }
 
@@ -1695,26 +1819,14 @@ export class BrowserManager {
     browserTabId: string,
     options: BrowserAnnotationViewportBridgeOptions
   ): Promise<boolean> {
-    const webContentsId = this.webContentsIdByTabId.get(browserTabId)
-    if (!webContentsId) {
+    const page = this.pageRegistry.get(browserTabId)
+    if (!page) {
       return false
     }
-    const guest = webContents.fromId(webContentsId)
-    if (!guest || guest.isDestroyed()) {
-      // Why: stale guest discovery must clear every per-tab registry entry,
-      // not just the forward/reverse WebContents maps.
-      this.unregisterGuest(browserTabId)
-      return false
-    }
-
     try {
       // Why: the scroll bridge runs outside the page world so page monkey
       // patches cannot read the per-tab token or tamper with bridge state.
-      await guest.executeJavaScriptInIsolatedWorld(
-        BROWSER_ANNOTATION_VIEWPORT_BRIDGE_WORLD_ID,
-        [{ code: buildBrowserAnnotationViewportBridgeScript(options) }],
-        false
-      )
+      await evaluateBrowserPageIsolated(page, buildBrowserAnnotationViewportBridgeScript(options))
       return true
     } catch {
       return false
@@ -1725,22 +1837,13 @@ export class BrowserManager {
     browserTabId: string,
     override: BrowserViewportOverride | null
   ): Promise<boolean> {
-    const webContentsId = this.webContentsIdByTabId.get(browserTabId)
-    if (!webContentsId) {
+    const page = this.pageRegistry.get(browserTabId)
+    if (!page) {
       return false
     }
-    const guest = webContents.fromId(webContentsId)
-    if (!guest || guest.isDestroyed()) {
-      // Why: stale guest discovery must clear every per-tab registry entry,
-      // not just the forward/reverse WebContents maps.
-      this.unregisterGuest(browserTabId)
-      return false
-    }
-
+    let dbg: BrowserPageCdpLease
     try {
-      if (!guest.debugger.isAttached()) {
-        guest.debugger.attach('1.3')
-      }
+      dbg = page.acquireCdp()
     } catch (err) {
       // Why: DevTools being open on the guest causes attach to throw with
       // "Another debugger is already attached". Silently returning false made
@@ -1748,13 +1851,12 @@ export class BrowserManager {
       // context (tab + webContents ids) to correlate with user reports.
       console.warn('[browser-manager] setViewportOverride: failed to attach debugger', {
         browserTabId,
-        webContentsId,
+        backendPageId: page.identity.backendPageId,
         error: err instanceof Error ? err.message : String(err)
       })
       return false
     }
 
-    const dbg = guest.debugger
     try {
       if (override) {
         await dbg.sendCommand('Emulation.setDeviceMetricsOverride', {
@@ -1768,7 +1870,7 @@ export class BrowserManager {
           maxTouchPoints: override.mobile ? 5 : 0
         })
         if (override.mobile) {
-          const chromeMajor = extractChromeMajor(cleanElectronUserAgent(guest.getUserAgent()))
+          const chromeMajor = extractChromeMajor(cleanElectronUserAgent(page.getUserAgent()))
           // Why: pass userAgentMetadata alongside the mobile UA string so
           // sec-ch-ua-mobile / sec-ch-ua-platform client hints match. Without
           // it, session-level desktop client-hints leak through and create a
@@ -1799,7 +1901,7 @@ export class BrowserManager {
           // Cloudflare/Turnstile don't flag the session. Passing the cleaned
           // real UA keeps sec-ch-ua consistent with the override.
           await dbg.sendCommand('Emulation.setUserAgentOverride', {
-            userAgent: cleanElectronUserAgent(guest.getUserAgent())
+            userAgent: cleanElectronUserAgent(page.getUserAgent())
           })
         }
       } else {
@@ -1814,6 +1916,8 @@ export class BrowserManager {
       return true
     } catch {
       return false
+    } finally {
+      dbg.release()
     }
   }
 
@@ -1821,30 +1925,13 @@ export class BrowserManager {
   // Browser Context Grab — main-owned operations
   // ---------------------------------------------------------------------------
 
-  /**
-   * Validates that a caller (identified by sender webContentsId) owns the
-   * given browserTabId. Returns the guest WebContents or null.
-   */
-  getAuthorizedGuest(
-    browserTabId: string,
-    senderWebContentsId: number
-  ): Electron.WebContents | null {
-    const registeredRenderer = this.rendererWebContentsIdByTabId.get(browserTabId)
-    if (registeredRenderer == null || registeredRenderer !== senderWebContentsId) {
+  /** Validates that an opaque shell connection owns the registered page. */
+  getAuthorizedPage(browserTabId: string, shellConnectionId: string): BrowserPageHandle | null {
+    const page = this.pageRegistry.get(browserTabId)
+    if (!page || page.identity.shellConnectionId !== shellConnectionId) {
       return null
     }
-    const guestId = this.webContentsIdByTabId.get(browserTabId)
-    if (guestId == null) {
-      return null
-    }
-    const guest = webContents.fromId(guestId)
-    if (!guest || guest.isDestroyed()) {
-      // Why: stale guest discovery must clear every per-tab registry entry,
-      // not just the forward/reverse WebContents maps.
-      this.unregisterGuest(browserTabId)
-      return null
-    }
-    return guest
+    return page
   }
 
   /** Returns true if a grab operation is currently active for this tab. */
@@ -1859,7 +1946,7 @@ export class BrowserManager {
   async setGrabMode(
     browserTabId: string,
     enabled: boolean,
-    guest: Electron.WebContents
+    page: BrowserPageHandle
   ): Promise<boolean> {
     if (!enabled) {
       this.cancelGrabOp(browserTabId, 'user')
@@ -1870,7 +1957,7 @@ export class BrowserManager {
     // adding a visible delay between "click Grab" and "overlay appears".
     // The runtime is idempotent — re-injection on the same page is safe.
     try {
-      await guest.executeJavaScript(buildGuestOverlayScript('arm'))
+      await evaluateBrowserPage(page, buildGuestOverlayScript('arm'))
       return true
     } catch {
       return false
@@ -1894,9 +1981,9 @@ export class BrowserManager {
   awaitGrabSelection(
     browserTabId: string,
     opId: string,
-    guest: Electron.WebContents
+    page: BrowserPageHandle
   ): Promise<BrowserGrabResult> {
-    return this.grabSessionController.awaitGrabSelection(browserTabId, opId, guest)
+    return this.grabSessionController.awaitGrabSelection(browserTabId, opId, page)
   }
 
   /**
@@ -1913,9 +2000,9 @@ export class BrowserManager {
   async captureSelectionScreenshot(
     _browserTabId: string,
     rect: BrowserGrabRect,
-    guest: Electron.WebContents
+    page: BrowserPageHandle
   ): Promise<BrowserGrabScreenshot | null> {
-    return captureGrabSelectionScreenshot(rect, guest)
+    return captureGrabSelectionScreenshot(rect, page)
   }
 
   /**
@@ -1925,10 +2012,10 @@ export class BrowserManager {
    */
   async extractHoverPayload(
     _browserTabId: string,
-    guest: Electron.WebContents
+    page: BrowserPageHandle
   ): Promise<BrowserGrabPayload | null> {
     try {
-      const rawPayload = await guest.executeJavaScript(buildGuestOverlayScript('extractHover'))
+      const rawPayload = await evaluateBrowserPage(page, buildGuestOverlayScript('extractHover'))
       if (!rawPayload || typeof rawPayload !== 'object') {
         return null
       }
@@ -1968,8 +2055,7 @@ export class BrowserManager {
       setupGrabShortcutForwarding({
         browserTabId,
         guest,
-        resolveRenderer: (tabId) =>
-          resolveRendererWebContents(this.rendererWebContentsIdByTabId, tabId),
+        resolveRenderer: (tabId) => this.resolveRendererForBrowserTab(tabId),
         hasActiveGrabOp: (tabId) => this.hasActiveGrabOp(tabId),
         getKeybindings: () => this.settingsResolver?.().keybindings
       })
@@ -1993,8 +2079,7 @@ export class BrowserManager {
       setupGuestShortcutForwarding({
         browserTabId,
         guest,
-        resolveRenderer: (tabId) =>
-          resolveRendererWebContents(this.rendererWebContentsIdByTabId, tabId),
+        resolveRenderer: (tabId) => this.resolveRendererForBrowserTab(tabId),
         shouldForwardDictationShortcut: () => this.shouldForwardDictationShortcut?.() ?? false,
         isMobileEmulatorEnabled: () => this.settingsResolver?.().mobileEmulatorEnabled !== false,
         getKeybindings: () => this.settingsResolver?.().keybindings
@@ -2014,8 +2099,7 @@ export class BrowserManager {
       setupGuestMouseWheelZoomForwarding({
         browserTabId,
         guest,
-        resolveRenderer: (tabId) =>
-          resolveRendererWebContents(this.rendererWebContentsIdByTabId, tabId)
+        resolveRenderer: (tabId) => this.resolveRendererForBrowserTab(tabId)
       })
     )
   }
@@ -2064,6 +2148,7 @@ export class BrowserManager {
   }
 
   private sendPermissionDenied(browserTabId: string, event: PendingPermissionEvent): void {
+    this.publishGuestEvent({ type: 'permissionDenied', browserPageId: browserTabId, ...event })
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
       return
@@ -2100,6 +2185,7 @@ export class BrowserManager {
   }
 
   private sendPopupEvent(browserTabId: string, event: PendingPopupEvent): void {
+    this.publishGuestEvent({ type: 'popup', browserPageId: browserTabId, ...event })
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
       return
@@ -2163,6 +2249,17 @@ export class BrowserManager {
     if (download.startedSent) {
       return
     }
+    this.publishGuestEvent({
+      type: 'downloadRequested',
+      browserPageId: download.browserTabId,
+      downloadId: download.downloadId,
+      origin: download.origin,
+      filename: download.filename,
+      totalBytes: download.totalBytes,
+      mimeType: download.mimeType,
+      savePath: download.savePath,
+      status: 'downloading'
+    })
     const renderer = this.resolveRendererForBrowserTab(download.browserTabId)
     if (!renderer) {
       return
@@ -2187,6 +2284,7 @@ export class BrowserManager {
     if (!browserTabId) {
       return
     }
+    this.publishGuestEvent({ type: 'downloadProgress', ...payload })
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
       return
@@ -2201,6 +2299,7 @@ export class BrowserManager {
     if (!browserTabId) {
       return
     }
+    this.publishGuestEvent({ type: 'downloadFinished', ...payload })
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
       return
@@ -2290,7 +2389,7 @@ export class BrowserManager {
     }
   }
 
-  private getDownloadReceivedBytes(item: Electron.DownloadItem): number {
+  private getDownloadReceivedBytes(item: BrowserDownloadItem): number {
     try {
       return Math.max(0, item.getReceivedBytes())
     } catch {
@@ -2311,6 +2410,11 @@ export class BrowserManager {
     browserTabId: string,
     loadError: { code: number; description: string; validatedUrl: string }
   ): void {
+    this.publishGuestEvent({
+      type: 'guestLoadFailed',
+      browserPageId: browserTabId,
+      loadError: { ...loadError, validatedUrl: redactKagiSessionToken(loadError.validatedUrl) }
+    })
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
       return
@@ -2339,6 +2443,11 @@ export class BrowserManager {
     }
     // Why: only the renderer owns Yiru's worktree/tab model. Main forwards a
     // validated URL instead of letting arbitrary guest content mutate it.
+    this.publishGuestEvent({
+      type: 'openLinkInYiruTab',
+      browserPageId: browserTabId,
+      url: normalizedUrl
+    })
     renderer.send('browser:open-link-in-yiru-tab', {
       browserPageId: browserTabId,
       url: normalizedUrl
@@ -2353,7 +2462,8 @@ export const browserCertificateTrustController = new BrowserCertificateTrustCont
     browserManager.getManagedBrowserGuestContext(webContentsId),
   resolveWebContentsIdForPage: (browserPageId) =>
     browserManager.getGuestWebContentsId(browserPageId),
-  resolveWebContents: (webContentsId) => webContents.fromId(webContentsId) ?? null,
+  resolveWebContents: (webContentsId) =>
+    resolveElectronBrowserWebContents(electronBrowserBackendPageId(webContentsId)),
   onFailureChanged: (webContentsId, failure, navigationUrl) =>
     browserManager.notifyCertificateFailureChanged(webContentsId, failure, navigationUrl)
 })

@@ -1,4 +1,4 @@
-import type { GitHistoryItem, GitHistoryItemRef } from '~shared/git/history'
+import type { GitHistoryItem } from '~shared/git/history'
 
 export type GitGraphBranchOption = {
   refId: string
@@ -96,20 +96,4 @@ export function filterGitGraphItemsByBranches(
   }
   const ancestorIds = computeGitGraphAncestorIds(items, selectedRefIds)
   return items.filter((item) => ancestorIds.has(item.id))
-}
-
-export function refBadgeSortKey(ref: GitHistoryItemRef): number {
-  if (ref.category === 'head') {
-    return 0
-  }
-  if (ref.category === 'branches') {
-    return 1
-  }
-  if (ref.category === 'remote branches') {
-    return 2
-  }
-  if (ref.category === 'tags') {
-    return 3
-  }
-  return 4
 }

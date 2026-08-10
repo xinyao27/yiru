@@ -1,6 +1,5 @@
-import { callRuntimeRpc, RuntimeRpcCallError } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~renderer/runtime/orpc-client'
 import type { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
-import type { RuntimeTerminalAgentStatus } from '~shared/runtime-types'
 
 export const ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS = 15000
 
@@ -22,9 +21,9 @@ export async function getTerminalAgentSendReadiness(
   options: { allowLegacyFallback: boolean }
 ): Promise<TerminalAgentSendReadinessResult> {
   try {
-    const { agentStatus } = await callRuntimeRpc<{ agentStatus: RuntimeTerminalAgentStatus }>(
+    const { agentStatus } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.agentStatus',
+      (client) => client.terminal.agentStatus,
       { terminal: terminalHandle },
       { timeoutMs: ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS }
     )
@@ -36,7 +35,7 @@ export async function getTerminalAgentSendReadiness(
     }
     return { status: 'sendable', supportsGuardedSend: true }
   } catch (error) {
-    if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
+    if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
       if (!options.allowLegacyFallback) {
         // Why: selected-target sends are immediate; without terminal.agentStatus
         // an older remote runtime cannot rule out permission/action prompts.
@@ -61,9 +60,9 @@ async function getLegacyTerminalAgentSendStatus(
   terminalHandle: string
 ): Promise<TerminalAgentSendReadiness> {
   try {
-    const { isRunningAgent } = await callRuntimeRpc<{ isRunningAgent: boolean }>(
+    const { isRunningAgent } = await callRuntimeOrpc(
       runtimeTarget,
-      'terminal.isRunningAgent',
+      (client) => client.terminal.isRunningAgent,
       { terminal: terminalHandle },
       { timeoutMs: ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS }
     )

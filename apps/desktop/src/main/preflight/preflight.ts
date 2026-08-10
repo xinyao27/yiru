@@ -1,4 +1,3 @@
-import { ipcMain } from 'electron'
 import type { PathSource, ShellHydrationFailureReason } from '~shared/types'
 
 import { getAzureDevOpsAuthStatus } from '../azure-devops/client'
@@ -249,31 +248,4 @@ export async function runPreflightCheck(
   }
 
   return result
-}
-
-export function registerPreflightHandlers(): void {
-  ipcMain.handle(
-    'preflight:check',
-    async (
-      _event,
-      args?: PreflightRuntimeContext & { force?: boolean }
-    ): Promise<PreflightStatus> => {
-      return runPreflightCheck(args?.force, args)
-    }
-  )
-
-  ipcMain.handle('preflight:detectAgents', async (_event, args?: PreflightRuntimeContext) =>
-    detectInstalledAgentsWithShellPathHydration(args)
-  )
-
-  ipcMain.handle('preflight:refreshAgents', async (_event, args?: PreflightRuntimeContext) => {
-    return refreshShellPathAndDetectAgents(args)
-  })
-
-  ipcMain.handle(
-    'preflight:detectRemoteAgents',
-    async (_event, args: { connectionId: string }): Promise<string[]> => {
-      return detectRemoteAgents(args)
-    }
-  )
 }

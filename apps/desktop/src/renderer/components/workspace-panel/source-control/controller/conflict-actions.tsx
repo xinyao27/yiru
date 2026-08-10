@@ -1,14 +1,15 @@
 import { shouldForcePushWithLeaseForUpstream } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
 } from '~renderer/i18n/hosted-review-localized-copy'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '~renderer/runtime/git-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { GitConflictOperation } from '~shared/types'
 
@@ -179,8 +180,8 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
         resolveSupportedHostedReviewCopyProvider(result.provider)
       )
       if (openChecks) {
-        openWorkspacePanelTab({
-          panel: 'source-control',
+        showWorkspaceSidebar({
+          view: 'source-control',
           worktreeId,
           sourceControlView: 'review'
         })
@@ -250,7 +251,7 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
                 'Open on {{value0}}',
                 { value0: copy.providerName }
               ),
-              onClick: () => window.api.shell.openUrl(result.url)
+              onClick: () => shellClient.shell.openUrl(result.url)
             }
           }
         )

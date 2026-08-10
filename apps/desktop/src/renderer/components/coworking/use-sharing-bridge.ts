@@ -1,4 +1,8 @@
 import { useEffect } from 'react'
+import {
+  coworkingSharingClient,
+  subscribeCoworkingSharingSnapshots
+} from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 
 export function useCoworkingSharingBridge(): void {
@@ -6,14 +10,9 @@ export function useCoworkingSharingBridge(): void {
   const resetCoworkingSharing = useAppStore((state) => state.resetCoworkingSharing)
 
   useEffect(() => {
-    const api = window.api?.coworkingSharing
-    if (!api) {
-      return
-    }
-
     let disposed = false
     let receivedEvent = false
-    const unsubscribe = api.onChanged((snapshot) => {
+    const unsubscribe = subscribeCoworkingSharingSnapshots((snapshot) => {
       if (disposed) {
         return
       }
@@ -21,7 +20,7 @@ export function useCoworkingSharingBridge(): void {
       applySnapshot(snapshot)
     })
 
-    void api
+    void coworkingSharingClient
       .getSnapshot()
       .then((snapshot) => {
         // Why: an event can overtake the initial invoke over IPC; never let the

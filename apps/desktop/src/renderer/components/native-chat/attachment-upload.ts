@@ -1,13 +1,13 @@
+import { toast } from 'sonner'
 // SSH-aware resolution for composer attachments (STA-1465). The composer's
 // attach surfaces (file drop, file picker, image paste) receive client-local
 // paths, but an SSH worktree's agent runs on the remote host — local paths must
 // be uploaded first, exactly like terminal drops (docs/terminal-drop-ssh.md).
-
-import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import type { AppState } from '~renderer/store/types'
 
 import { reportTerminalDropUploadSkipsAndFailures } from '../terminal-pane/drop/upload-report'
@@ -87,11 +87,12 @@ export async function uploadNativeChatAttachmentPaths(
     )
   )
   try {
-    const { resolvedPaths, skipped, failed } = await window.api.fs.resolveDroppedPathsForAgent({
-      paths,
-      worktreePath: owner.worktreePath,
-      connectionId: owner.connectionId
-    })
+    const { resolvedPaths, skipped, failed } =
+      await workspaceHostClient.fileHost.resolveDroppedPathsForAgent({
+        paths,
+        worktreePath: owner.worktreePath,
+        connectionId: owner.connectionId
+      })
     reportTerminalDropUploadSkipsAndFailures(skipped, failed)
     return resolvedPaths
   } catch (err) {

@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   YiruProfileSummary,
@@ -35,7 +36,7 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
   fetchYiruProfiles: async () => {
     set({ yiruProfilesLoading: true })
     try {
-      const state = await window.api.yiruProfiles.list()
+      const state = await rendererHostClient.yiruProfiles.list()
       set({
         activeYiruProfileId: state.activeProfileId,
         yiruProfiles: state.profiles,
@@ -50,7 +51,7 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
 
   createLocalYiruProfile: async (name) => {
     try {
-      const state = await window.api.yiruProfiles.createLocal({ name })
+      const state = await rendererHostClient.yiruProfiles.createLocal({ name })
       set({
         activeYiruProfileId: state.activeProfileId,
         yiruProfiles: state.profiles
@@ -74,7 +75,7 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
     }
     set({ yiruProfileSwitching: true })
     try {
-      const result = await window.api.yiruProfiles.switchProfile({ profileId })
+      const result = await rendererHostClient.yiruProfiles.switchProfile({ profileId })
       if (result?.status !== 'relaunching') {
         // Why: only a relaunch may keep the switcher locked; a stale
         // "already-active" answer would otherwise disable it forever.
@@ -96,7 +97,7 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
 
   transferYiruProfileProject: async (args) => {
     try {
-      const result = await window.api.yiruProfiles.transferProject(args)
+      const result = await rendererHostClient.yiruProfiles.transferProject(args)
       if (result.status === 'duplicate-target') {
         publishRendererCommandResult({
           type: 'yiru-profile',

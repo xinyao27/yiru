@@ -1,276 +1,171 @@
 import path from 'node:path'
 
-import { z } from 'zod'
+import type {
+  EmulatorAttachInput,
+  EmulatorButtonInput,
+  EmulatorExecInput,
+  EmulatorGestureInput,
+  EmulatorInstallInput,
+  EmulatorKillInput,
+  EmulatorLaunchInput,
+  EmulatorLogcatInput,
+  EmulatorPermissionsInput,
+  EmulatorRotateInput,
+  EmulatorShutdownInput,
+  EmulatorTapInput,
+  EmulatorTargetInput,
+  EmulatorTypeInput,
+  EmulatorWorktreeInput,
+  RuntimeEmulatorAxNode,
+  RuntimeEmulatorExecResult,
+  RuntimeEmulatorListResult,
+  RuntimeEmulatorLogcatEntry
+} from '@yiru/runtime-protocol/contract'
 
-import { defineMethod, type RpcMethod } from '../core'
+import { InvalidArgumentError, type RpcContext } from '../core'
 
-// Minimal schemas for emulator commands (loose for initial testing; can be tightened like browser-schemas).
-const WorktreeParam = z.object({ worktree: z.string().optional() }).partial()
+export async function handleEmulatorList(
+  params: EmulatorWorktreeInput,
+  { emulatorCommands }: RpcContext
+): Promise<RuntimeEmulatorListResult> {
+  // Why: `emulatorList` is typed `Promise<unknown>` in the runtime service —
+  // it fans out to per-backend (iOS/Android) helper listings that predate a
+  // shared result type. Narrowing to the contract's real output here, not
+  // casting the contract itself away.
+  return (await emulatorCommands.emulatorList(params)) as RuntimeEmulatorListResult
+}
 
-const TapParams = z.object({
-  x: z.number().min(0).max(1),
-  y: z.number().min(0).max(1),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorAttach(
+  params: EmulatorAttachInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorAttach(params)
+}
 
-const GesturePoint = z.object({
-  edge: z.number().int().min(0).max(4).optional(),
-  type: z.enum(['begin', 'move', 'end']),
-  x: z.number().min(0).max(1),
-  y: z.number().min(0).max(1)
-})
+export async function handleEmulatorTap(
+  params: EmulatorTapInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorTap(params)
+}
 
-const GestureParams = z.object({
-  points: z.array(GesturePoint).min(2).max(64),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorGesture(
+  params: EmulatorGestureInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorGesture(params)
+}
 
-const TypeParams = z.object({
-  text: z.string(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorType(
+  params: EmulatorTypeInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorType(params)
+}
 
-const ButtonParams = z.object({
-  name: z.string(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorButton(
+  params: EmulatorButtonInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorButton(params)
+}
 
-const RotateOrientation = z.enum([
-  'portrait',
-  'portrait_upside_down',
-  'landscape_left',
-  'landscape_right'
-])
+export async function handleEmulatorRotate(
+  params: EmulatorRotateInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorRotate(params)
+}
 
-const RotateParams = z.object({
-  orientation: RotateOrientation,
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorExec(
+  params: EmulatorExecInput,
+  { emulatorCommands }: RpcContext
+): Promise<RuntimeEmulatorExecResult> {
+  // Why: same `unknown`-typed backend fan-out as `emulatorList` above.
+  return (await emulatorCommands.emulatorExec(params)) as RuntimeEmulatorExecResult
+}
 
-const ExecParams = z.object({
-  command: z.string(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorKill(
+  params: EmulatorKillInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorKill(params)
+}
 
-const InstallParams = z.object({
-  path: z.string().refine((value) => path.isAbsolute(value), {
-    message: 'path must be absolute'
-  }),
-  reinstall: z.boolean().optional(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorShutdown(
+  params: EmulatorShutdownInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorShutdown(params)
+}
 
-const LaunchParams = z.object({
-  package: z.string(),
-  activity: z.string().optional(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorListSimulators(
+  params: EmulatorWorktreeInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorListSimulators(params)
+}
 
-const PermissionsParams = z
-  .object({
-    op: z.enum(['grant', 'revoke', 'reset']),
-    package: z.string().optional(),
-    permission: z.string().optional(),
-    device: z.string().optional(),
-    emulator: z.string().optional(),
-    worktree: z.string().optional()
-  })
-  .superRefine((value, ctx) => {
-    if (value.op === 'reset') {
-      if (value.package) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['package'],
-          message: 'package is not allowed for reset'
-        })
-      }
-      if (value.permission) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['permission'],
-          message: 'permission is not allowed for reset'
-        })
-      }
-      return
-    }
-    if (!value.package) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['package'],
-        message: 'package is required for grant/revoke'
-      })
-    }
-    if (!value.permission) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['permission'],
-        message: 'permission is required for grant/revoke'
-      })
-    }
-  })
+export async function handleEmulatorAvailability(
+  params: EmulatorWorktreeInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorAvailability(params)
+}
 
-const AxParams = z.object({
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorListDevices(
+  params: EmulatorWorktreeInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorListDevices(params)
+}
 
-const LogcatParams = z.object({
-  lines: z.number().int().positive().optional(),
-  filters: z.array(z.string()).optional(),
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorInstall(
+  params: EmulatorInstallInput,
+  { emulatorCommands }: RpcContext
+) {
+  // Why: the shared schema accepts either host convention for remote clients;
+  // the executing host remains authoritative for whether this path is absolute.
+  if (!path.isAbsolute(params.path)) {
+    throw new InvalidArgumentError('path must be absolute')
+  }
+  return emulatorCommands.emulatorInstall(params)
+}
 
-const AttachParams = z.object({
-  device: z.string().optional(),
-  worktree: z.string().optional(),
-  focus: z.boolean().optional()
-})
+export async function handleEmulatorLaunch(
+  params: EmulatorLaunchInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorLaunch(params)
+}
 
-const KillParams = z.object({
-  device: z.string().optional(),
-  emulator: z.string().optional(),
-  worktree: z.string().optional()
-})
+export async function handleEmulatorPermissions(
+  params: EmulatorPermissionsInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorPermissions(params)
+}
 
-const ShutdownParams = KillParams.extend({
-  managedOnly: z.boolean().optional()
-})
+export async function handleEmulatorAx(
+  params: EmulatorTargetInput,
+  { emulatorCommands }: RpcContext
+): Promise<RuntimeEmulatorAxNode> {
+  // Why: `EmulatorBackend.accessibilityTree` is `Promise<unknown>` — only the
+  // Android backend implements it (iOS advertises the capability as false).
+  return (await emulatorCommands.emulatorAx(params)) as RuntimeEmulatorAxNode
+}
 
-const ListParams = WorktreeParam
+export async function handleEmulatorLogcat(
+  params: EmulatorLogcatInput,
+  { emulatorCommands }: RpcContext
+): Promise<RuntimeEmulatorLogcatEntry[]> {
+  // Why: `EmulatorBackend.logcat` is `Promise<unknown>` for the same reason.
+  return (await emulatorCommands.emulatorLogcat(params)) as RuntimeEmulatorLogcatEntry[]
+}
 
-export const EMULATOR_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'emulator.list',
-    params: ListParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorList(params)
-  }),
-  defineMethod({
-    name: 'emulator.attach',
-    params: AttachParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAttach(params)
-  }),
-  defineMethod({
-    name: 'emulator.tap',
-    params: TapParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorTap(params)
-  }),
-  defineMethod({
-    name: 'emulator.gesture',
-    params: GestureParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorGesture(params)
-  }),
-  defineMethod({
-    name: 'emulator.type',
-    params: TypeParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorType(params)
-  }),
-  defineMethod({
-    name: 'emulator.button',
-    params: ButtonParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorButton(params)
-  }),
-  defineMethod({
-    name: 'emulator.rotate',
-    params: RotateParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorRotate(params)
-  }),
-  defineMethod({
-    name: 'emulator.exec',
-    params: ExecParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorExec(params)
-  }),
-  defineMethod({
-    name: 'emulator.kill',
-    params: KillParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorKill(params)
-  }),
-  defineMethod({
-    name: 'emulator.shutdown',
-    params: ShutdownParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorShutdown(params)
-  }),
-  defineMethod({
-    name: 'emulator.listSimulators',
-    params: z.object({ worktree: z.string().optional() }).partial(),
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListSimulators(params)
-  }),
-  defineMethod({
-    name: 'emulator.availability',
-    params: z.object({ worktree: z.string().optional() }).partial(),
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAvailability(params)
-  }),
-  defineMethod({
-    name: 'emulator.listDevices',
-    params: z.object({ worktree: z.string().optional() }).partial(),
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListDevices(params)
-  }),
-  defineMethod({
-    name: 'emulator.install',
-    params: InstallParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorInstall(params)
-  }),
-  defineMethod({
-    name: 'emulator.launch',
-    params: LaunchParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLaunch(params)
-  }),
-  defineMethod({
-    name: 'emulator.permissions',
-    params: PermissionsParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorPermissions(params)
-  }),
-  defineMethod({
-    name: 'emulator.ax',
-    params: AxParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAx(params)
-  }),
-  defineMethod({
-    name: 'emulator.logcat',
-    params: LogcatParams,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLogcat(params)
-  }),
-  defineMethod({
-    name: 'emulator.unregisterActive',
-    params: z.object({ worktree: z.string().optional() }).partial(),
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { emulatorCommands }) =>
-      emulatorCommands.emulatorUnregisterActive(params)
-  })
-]
+export async function handleEmulatorUnregisterActive(
+  params: EmulatorWorktreeInput,
+  { emulatorCommands }: RpcContext
+) {
+  return emulatorCommands.emulatorUnregisterActive(params)
+}

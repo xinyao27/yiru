@@ -4,8 +4,7 @@ import { join } from 'node:path'
 timeout teardown must stay co-located so dictation lifecycle state cannot drift. */
 import { Worker } from 'node:worker_threads'
 
-import { app } from 'electron'
-
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { getCatalogModel } from './model-catalog'
 import type { ModelManager } from './model-manager'
 import { readOpenAiSpeechApiKey } from './openai-api-key-store'
@@ -484,8 +483,13 @@ export class SttService {
   }
 
   private getWorkerPath(): string {
-    if (app.isPackaged) {
-      return join(process.resourcesPath, 'app.asar', 'out', 'main', 'stt-worker.js')
+    const pathsProvider = getRuntimeHostPathsProvider()
+    if (pathsProvider.isPackaged()) {
+      const resourcesPath = pathsProvider.resourcesPath()
+      if (!resourcesPath) {
+        throw new Error('Packaged speech resources path is unavailable')
+      }
+      return join(resourcesPath, 'app.asar', 'out', 'main', 'stt-worker.js')
     }
     return join(__dirname, 'stt-worker.js')
   }
@@ -566,12 +570,17 @@ export class SttService {
         ? 'sherpa-onnx-win-x64'
         : `sherpa-onnx-${process.platform}-${process.arch}`
 
-    if (app.isPackaged) {
-      const resourcesNodeModule = join(process.resourcesPath, 'node_modules', nativePkg)
+    const pathsProvider = getRuntimeHostPathsProvider()
+    if (pathsProvider.isPackaged()) {
+      const resourcesPath = pathsProvider.resourcesPath()
+      if (!resourcesPath) {
+        throw new Error('Packaged speech resources path is unavailable')
+      }
+      const resourcesNodeModule = join(resourcesPath, 'node_modules', nativePkg)
       if (existsSync(resourcesNodeModule)) {
         return resourcesNodeModule
       }
-      return join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', nativePkg)
+      return join(resourcesPath, 'app.asar.unpacked', 'node_modules', nativePkg)
     }
 
     const resolved = require.resolve(nativePkg)

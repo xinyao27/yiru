@@ -14,7 +14,7 @@ import {
 } from '~renderer/components/ui/select'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import type { GlobalSettings } from '~shared/types'
 
 import { SettingsRow, SettingsSwitchRow } from '../form-controls'
@@ -137,9 +137,9 @@ export function MobileEmulatorSettingsPane({
   const refreshAvailability = useCallback(async (): Promise<void> => {
     setRefreshing(true)
     try {
-      const result = (await callRuntimeRpc(
+      const result = (await callRuntimeOrpc(
         { kind: 'local' },
-        'emulator.availability',
+        (client) => client.emulator.availability,
         {}
       )) as EmulatorAvailability
       setAvailability(result)

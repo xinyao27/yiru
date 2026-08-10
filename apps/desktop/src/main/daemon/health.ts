@@ -178,10 +178,6 @@ export function checkDaemonHealth(socketPath: string, tokenPath: string): Promis
   })
 }
 
-export async function healthCheckDaemon(socketPath: string, tokenPath: string): Promise<boolean> {
-  return (await checkDaemonHealth(socketPath, tokenPath)) === 'healthy'
-}
-
 function isSystemResolverHealth(value: unknown): value is SystemResolverHealth {
   return value === 'healthy' || value === 'unhealthy' || value === 'unknown'
 }

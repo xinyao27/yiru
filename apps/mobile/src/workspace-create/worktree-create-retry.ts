@@ -1,11 +1,14 @@
+import type { WorktreeCreateInput } from '@yiru/runtime-protocol/contract'
 import {
   CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
   getClientWorktreeCreateCandidate,
   isRetryableWorktreeCreateConflict
 } from '@yiru/workbench-model/review'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { isRpcDeliveryUnknown } from '~/transport/rpc-delivery-ambiguity'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { WORKTREE_CREATE_TIMEOUT_MS } from './timeout'
 
 // Why: server-side collision checks (branch already exists locally / on a remote
@@ -23,7 +26,7 @@ export type WorktreeCreateResult = { worktreeId: string; name: string } | { erro
 export async function createWorktreeWithNameRetry(args: {
   client: RpcClient
   baseName: string
-  buildParams: (name: string) => Record<string, unknown>
+  buildParams: (name: string) => WorktreeCreateInput
   maxAttempts?: number
 }): Promise<WorktreeCreateResult> {
   const { client, baseName, buildParams } = args
@@ -31,14 +34,20 @@ export async function createWorktreeWithNameRetry(args: {
   let lastError: string | null = null
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const candidateName = getClientWorktreeCreateCandidate(baseName, attempt)
-    const response = await client.sendRequest('worktree.create', buildParams(candidateName), {
-      timeoutMs: WORKTREE_CREATE_TIMEOUT_MS
-    })
-    if (response.ok) {
-      const result = (response as RpcSuccess).result as { worktree: { id: string } }
+    try {
+      const result = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.worktree.create,
+        buildParams(candidateName),
+        { timeoutMs: WORKTREE_CREATE_TIMEOUT_MS }
+      )
       return { worktreeId: result.worktree.id, name: candidateName }
+    } catch (error) {
+      if (isRpcDeliveryUnknown(error)) {
+        throw error
+      }
+      lastError = error instanceof Error ? error.message : String(error)
     }
-    lastError = response.error.message
     if (!isRetryableWorktreeCreateConflict(lastError ?? '')) {
       break
     }

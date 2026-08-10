@@ -3,8 +3,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { app } from 'electron'
-
 import {
   YIRU_PI_AGENT_STATUS_EXTENSION_FILE,
   getPiAgentStatusExtensionSource
@@ -17,6 +15,7 @@ export { YIRU_OMP_PREFILL_ENV_VAR, YIRU_PI_PREFILL_ENV_VAR } from './prefill-ext
 import type { PiAgentKind } from '~shared/pi-agent-kind'
 
 import { safeRemoveOverlay } from '../pty/overlay-mirror'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { migrateLegacyOmpOverlayState } from './legacy-omp-overlay-migration'
 import { YIRU_PI_EXTENSION_FILE, getPiTitlebarExtensionSource } from './titlebar-extension-source'
 
@@ -66,7 +65,7 @@ function withYiruManagedExtensionMarker(source: string): string {
 
 export class PiTitlebarExtensionService {
   private getOverlayRoot(kind: PiAgentKind): string {
-    return join(app.getPath('userData'), OVERLAY_ROOT_DIR_NAME[kind])
+    return join(getRuntimeHostPathsProvider().userDataPath(), OVERLAY_ROOT_DIR_NAME[kind])
   }
 
   private getSourceOverlayDir(sourceAgentDir: string, kind: PiAgentKind): string {
@@ -114,7 +113,10 @@ export class PiTitlebarExtensionService {
   }
 
   private writeOmpFallbackStatusExtension(source: string): string | undefined {
-    const fallbackDir = join(app.getPath('userData'), OMP_MANAGED_STATUS_EXTENSION_DIR)
+    const fallbackDir = join(
+      getRuntimeHostPathsProvider().userDataPath(),
+      OMP_MANAGED_STATUS_EXTENSION_DIR
+    )
     try {
       mkdirSync(fallbackDir, { recursive: true })
     } catch {

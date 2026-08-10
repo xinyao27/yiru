@@ -22,12 +22,16 @@ import { filterSetupScriptPromptDismissalsToValidRepos } from '~renderer/compone
 import { translate } from '~renderer/i18n/i18n'
 import { syncRuntimeGitForkDefaultBranch } from '~renderer/runtime/git-client'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { callRuntimeOrpc, createRuntimeOrpcClient } from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import {
   assertRuntimeEnvironmentCapability,
-  callRuntimeRpc,
   getActiveRuntimeTarget
 } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
+import { setRuntimeUIState } from '~renderer/runtime/ui-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import {
   FOLDER_WORKSPACE_PATH_STATUS_TTL_MS,
@@ -43,10 +47,6 @@ import {
 } from '~shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '~shared/repo-badge-color'
 import { isGitRepoKind } from '~shared/repo-kind'
-import {
-  REPO_ADD_CONTRACT,
-  REPO_LIST_CONTRACT
-} from '~shared/runtime-method-contracts/workspace-contracts'
 import type {
   GlobalSettings,
   Project,
@@ -278,16 +278,18 @@ async function warnIfProjectKnownInAnotherProfile(
   repo: Repo,
   activeYiruProfileId: string | null
 ): Promise<void> {
-  const findProjectProfiles = window.api.yiruProfiles?.findProjectProfiles
+  const findProjectProfiles = rendererHostClient.yiruProfiles?.findProjectProfiles
   // Why: without a loaded active profile ID the scan cannot exclude the
   // current profile and would false-positive on the project just added.
   if (!findProjectProfiles || !activeYiruProfileId) {
     return
   }
   try {
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a repo's profile-presence scan is always local.
     const result = await findProjectProfiles({
       path: repo.path,
-      connectionId: repo.connectionId ?? null,
+      connectionId: null,
       executionHostId: getRepoExecutionHostId(repo),
       excludeProfileId: activeYiruProfileId
     })
@@ -318,12 +320,14 @@ function scheduleSafeAutoForkSync(get: () => AppState, repos: readonly Repo[]): 
     ) {
       continue
     }
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a repo's safe-auto fork sync is always local.
     const promise = syncRuntimeGitForkDefaultBranch(
       {
         settings: settingsForRepoOwner(get(), repo.id),
         worktreeId: repo.id,
         worktreePath: repo.path,
-        connectionId: repo.connectionId ?? undefined
+        connectionId: undefined
       },
       repo.upstream
     )
@@ -348,9 +352,8 @@ function repoWithFetchedOwner(repo: Repo, target: ReturnType<typeof getActiveRun
   if (target.kind === 'environment') {
     return { ...repo, executionHostId: getRuntimeTargetHostId(target) }
   }
-  if (repo.connectionId) {
-    return { ...repo, executionHostId: getRepoExecutionHostId(repo) }
-  }
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
   return repo.executionHostId ? repo : { ...repo, executionHostId: LOCAL_EXECUTION_HOST_ID }
 }
 
@@ -389,7 +392,7 @@ async function fetchProjectHostSetupCompatibility(
   try {
     if (target.kind === 'local') {
       const projectsApi = (
-        window.api as typeof window.api & {
+        rendererHostClient as typeof rendererHostClient & {
           projects?: {
             list?: () => Promise<Project[]>
             listHostSetups?: () => Promise<ProjectHostSetup[]>
@@ -406,10 +409,10 @@ async function fetchProjectHostSetupCompatibility(
     }
     await assertProjectHostSetupRuntimeCapability(target)
     const [projectResponse, setupResponse] = await Promise.all([
-      callRuntimeRpc<{ projects: Project[] }>(target, 'project.list', undefined, {
+      callRuntimeOrpc(target, (client) => client.project.list, undefined, {
         timeoutMs: 15_000
       }),
-      callRuntimeRpc<{ setups: ProjectHostSetup[] }>(target, 'projectHostSetup.list', undefined, {
+      callRuntimeOrpc(target, (client) => client.projectHostSetup.list, undefined, {
         timeoutMs: 15_000
       })
     ])
@@ -908,9 +911,9 @@ async function fetchRepoCatalogForTarget(
 ): Promise<FetchedRepoCatalog> {
   const fetchedRepos =
     target.kind === 'local'
-      ? await window.api.repos.list()
+      ? await workspaceHostClient.repos.list()
       : (
-          await callRuntimeRpc(target, REPO_LIST_CONTRACT, undefined, {
+          await callRuntimeOrpc(target, (client) => client.repo.list, undefined, {
             timeoutMs: 15_000,
             reuseRecentCompatibilityFailure: true
           })
@@ -984,18 +987,53 @@ function clearRestoredFolderWorkspaceSessionOwners(
 async function fetchProjectGroupCatalogForTarget(
   target: ReturnType<typeof getActiveRuntimeTarget>
 ): Promise<FetchedProjectGroupCatalog> {
-  const fetchedGroups =
-    target.kind === 'local'
-      ? await window.api.projectGroups.list()
-      : (
-          await callRuntimeRpc<{ groups: ProjectGroup[] }>(target, 'projectGroup.list', undefined, {
-            timeoutMs: 15_000,
-            reuseRecentCompatibilityFailure: true
-          })
-        ).groups
+  const fetchedGroups = (
+    await callRuntimeOrpc(target, (client) => client.projectGroup.list, undefined, {
+      timeoutMs: 15_000,
+      reuseRecentCompatibilityFailure: true
+    })
+  ).groups
   return {
     projectGroups: fetchedGroups.map((group) => projectGroupWithFetchedOwner(group, target)),
     hostId: getRuntimeTargetHostId(target)
+  }
+}
+
+// Why: nested-scan progress is per-scanId, not host-wide (see
+// `projectGroup.events.subscribe`'s contract comment) — the caller passes
+// its own scanId and callback, this just owns the stream's lifecycle.
+async function subscribeToNestedRepoScanProgress(
+  target: ReturnType<typeof getActiveRuntimeTarget>,
+  scanId: string,
+  onProgress: (scan: NestedRepoScanResult) => void
+): Promise<() => void> {
+  const abort = new AbortController()
+  try {
+    const connection = await createRuntimeOrpcClient(target, {
+      timeoutMs: 15_000,
+      signal: abort.signal
+    })
+    const stream = await connection.client.projectGroup.events.subscribe(undefined, {
+      signal: abort.signal
+    })
+    void (async () => {
+      try {
+        for await (const event of stream) {
+          if (event.type === 'nestedRepoScanProgress' && event.scanId === scanId) {
+            onProgress(normalizeNestedRepoScanResult(event.scan))
+          }
+        }
+      } catch {
+        // Why: the scan RPC call resolves/rejects on its own — a dropped
+        // progress stream just means fewer ticks, not a failed scan.
+      } finally {
+        connection.close()
+      }
+    })()
+    return () => abort.abort()
+  } catch (err) {
+    console.error('Failed to subscribe to nested repo scan progress:', err)
+    return () => {}
   }
 }
 
@@ -1026,17 +1064,12 @@ async function fetchProjectGroupsForTarget(
 async function fetchFolderWorkspaceCatalogForTarget(
   target: ReturnType<typeof getActiveRuntimeTarget>
 ): Promise<FetchedFolderWorkspaceCatalog> {
-  const fetchedFolderWorkspaces =
-    target.kind === 'local'
-      ? await window.api.folderWorkspaces.list()
-      : (
-          await callRuntimeRpc<{ folderWorkspaces: FolderWorkspace[] }>(
-            target,
-            'folderWorkspace.list',
-            undefined,
-            { timeoutMs: 15_000, reuseRecentCompatibilityFailure: true }
-          )
-        ).folderWorkspaces
+  const fetchedFolderWorkspaces = (
+    await callRuntimeOrpc(target, (client) => client.folderWorkspace.list, undefined, {
+      timeoutMs: 15_000,
+      reuseRecentCompatibilityFailure: true
+    })
+  ).folderWorkspaces
   return {
     folderWorkspaces: fetchedFolderWorkspaces,
     hostId: getRuntimeTargetHostId(target)
@@ -1079,7 +1112,7 @@ async function fetchFolderWorkspacesForTarget(
 
 async function listRuntimeEnvironmentsForAllHostLoad(): Promise<{ id: string }[]> {
   try {
-    return (await window.api.runtimeEnvironments.list()) ?? []
+    return (await runtimeEnvironmentsClient.list()) ?? []
   } catch (err) {
     console.warn('Failed to list runtime environments for all-host load:', err)
     return []
@@ -1095,7 +1128,9 @@ function settingsForRepoOwner(
   if (!repo) {
     return state.settings
   }
-  if (!repo.executionHostId && !repo.connectionId) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (!repo.executionHostId) {
     return state.settings
   }
   const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
@@ -1167,9 +1202,9 @@ async function fetchRuntimeAddProjectPathStatus(args: {
     15_000
   )
   try {
-    const { status } = await callRuntimeRpc<{ status: FolderWorkspacePathStatus }>(
+    const { status } = await callRuntimeOrpc(
       args.target,
-      'folderWorkspace.getPathStatus',
+      (client) => client.folderWorkspace.getPathStatus,
       { scope: 'path', path: args.path },
       { timeoutMs: 15_000 }
     )
@@ -1260,7 +1295,6 @@ export type RepoSlice = {
   registerNonGitFolder: (path: string, options?: AddRepoPathRouteOptions) => Promise<Repo | null>
   scanNestedRepos: (
     path: string,
-    connectionId?: string,
     controls?: NestedRepoScanControls
   ) => Promise<NestedRepoScanResult | null>
   cancelNestedRepoScan: (scanId: string) => Promise<boolean>
@@ -1268,7 +1302,6 @@ export type RepoSlice = {
     parentPath: string
     groupName: string
     projectPaths: string[]
-    connectionId?: string
     scanId?: string
     mode: 'group' | 'separate'
   }) => Promise<ProjectGroupImportResult | null>
@@ -1706,17 +1739,11 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       const target = getActiveRuntimeTarget(
         getFolderWorkspacePathStatusRouteSettings(options, get().settings)
       )
-      const status =
-        target.kind === 'local'
-          ? await window.api.folderWorkspaces.getPathStatus(request)
-          : (
-              await callRuntimeRpc<{ status: FolderWorkspacePathStatus }>(
-                target,
-                'folderWorkspace.getPathStatus',
-                request,
-                { timeoutMs: 15_000 }
-              )
-            ).status
+      const status = (
+        await callRuntimeOrpc(target, (client) => client.folderWorkspace.getPathStatus, request, {
+          timeoutMs: 15_000
+        })
+      ).status
       set((state) => ({
         folderWorkspacePathStatuses:
           requestSnapshot !== null &&
@@ -1734,40 +1761,25 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     }
   },
 
-  scanNestedRepos: async (path, connectionId, controls) => {
+  scanNestedRepos: async (path, controls) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      if (target.kind === 'local') {
-        const unsubscribe =
-          controls?.scanId && controls.onProgress
-            ? window.api.projectGroups.onNestedScanProgress(({ scanId, scan }) => {
-                if (scanId === controls.scanId) {
-                  controls.onProgress?.(normalizeNestedRepoScanResult(scan))
-                }
-              })
-            : undefined
-        try {
-          return normalizeNestedRepoScanResult(
-            await window.api.projectGroups.scanNested({
-              path,
-              connectionId,
-              scanId: controls?.scanId
-            })
+      const unsubscribe =
+        controls?.scanId && controls.onProgress
+          ? await subscribeToNestedRepoScanProgress(target, controls.scanId, controls.onProgress)
+          : undefined
+      try {
+        return normalizeNestedRepoScanResult(
+          await callRuntimeOrpc(
+            target,
+            (client) => client.projectGroup.scanNested,
+            { path, scanId: controls?.scanId },
+            { timeoutMs: 20_000 }
           )
-        } finally {
-          unsubscribe?.()
-        }
-      }
-      return normalizeNestedRepoScanResult(
-        await callRuntimeRpc<NestedRepoScanResult>(
-          target,
-          'projectGroup.scanNested',
-          { path },
-          // Why: older runtime hosts cannot stream or cancel scans, so the
-          // renderer must retain a bounded failure path for large folders.
-          { timeoutMs: 20_000 }
         )
-      )
+      } finally {
+        unsubscribe?.()
+      }
     } catch (err) {
       console.error('Failed to scan nested repos:', err)
       return null
@@ -1777,10 +1789,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   cancelNestedRepoScan: async (scanId) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      if (target.kind !== 'local') {
-        return false
-      }
-      return await window.api.projectGroups.cancelNestedScan({ scanId })
+      return (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectGroup.cancelNestedScan,
+          { scanId },
+          { timeoutMs: 15_000 }
+        )
+      ).cancelled
     } catch (err) {
       console.error('Failed to cancel nested repo scan:', err)
       return false
@@ -1790,21 +1806,18 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   importNestedRepos: async (args) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      const result =
-        target.kind === 'local'
-          ? await window.api.projectGroups.importNested(args)
-          : await callRuntimeRpc<ProjectGroupImportResult>(
-              target,
-              'projectGroup.importNested',
-              {
-                parentPath: args.parentPath,
-                groupName: args.groupName,
-                projectPaths: args.projectPaths,
-                scanId: args.scanId,
-                mode: args.mode
-              },
-              { timeoutMs: 60_000 }
-            )
+      const result = await callRuntimeOrpc(
+        target,
+        (client) => client.projectGroup.importNested,
+        {
+          parentPath: args.parentPath,
+          groupName: args.groupName,
+          projectPaths: args.projectPaths,
+          scanId: args.scanId,
+          mode: args.mode
+        },
+        { timeoutMs: 60_000 }
+      )
       await get().fetchProjectGroups()
       await get().fetchFolderWorkspaces()
       await get().fetchRepos()
@@ -1823,20 +1836,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   createProjectGroup: async (name) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      const group =
-        target.kind === 'local'
-          ? await window.api.projectGroups.create({
-              name,
-              createdFrom: 'manual'
-            })
-          : (
-              await callRuntimeRpc<{ group: ProjectGroup }>(
-                target,
-                'projectGroup.create',
-                { name, createdFrom: 'manual' },
-                { timeoutMs: 15_000 }
-              )
-            ).group
+      const group = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectGroup.create,
+          { name, createdFrom: 'manual' },
+          { timeoutMs: 15_000 }
+        )
+      ).group
       const ownedGroup = projectGroupWithFetchedOwner(group, target)
       set((s) => ({
         projectGroups: [...s.projectGroups, ownedGroup],
@@ -1854,17 +1861,11 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       const target = getActiveRuntimeTarget(
         getFolderWorkspacePathStatusRouteSettings(options, get().settings)
       )
-      const workspace =
-        target.kind === 'local'
-          ? await window.api.folderWorkspaces.create(args)
-          : (
-              await callRuntimeRpc<{ folderWorkspace: FolderWorkspace }>(
-                target,
-                'folderWorkspace.create',
-                args,
-                { timeoutMs: 15_000 }
-              )
-            ).folderWorkspace
+      const workspace = (
+        await callRuntimeOrpc(target, (client) => client.folderWorkspace.create, args, {
+          timeoutMs: 15_000
+        })
+      ).folderWorkspace
       set((s) => ({
         folderWorkspaces: [workspace, ...s.folderWorkspaces],
         folderWorkspacePathStatuses: {}
@@ -1880,17 +1881,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   updateFolderWorkspace: async (folderWorkspaceId, updates) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      const updated =
-        target.kind === 'local'
-          ? await window.api.folderWorkspaces.update({ folderWorkspaceId, updates })
-          : (
-              await callRuntimeRpc<{ folderWorkspace: FolderWorkspace | null }>(
-                target,
-                'folderWorkspace.update',
-                { folderWorkspaceId, updates },
-                { timeoutMs: 15_000 }
-              )
-            ).folderWorkspace
+      const updated = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.folderWorkspace.update,
+          { folderWorkspaceId, updates },
+          { timeoutMs: 15_000 }
+        )
+      ).folderWorkspace
       if (!updated) {
         return false
       }
@@ -1910,17 +1908,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   deleteFolderWorkspace: async (folderWorkspaceId) => {
     try {
       const target = getActiveRuntimeTarget(get().settings)
-      const deleted =
-        target.kind === 'local'
-          ? await window.api.folderWorkspaces.delete({ folderWorkspaceId })
-          : (
-              await callRuntimeRpc<{ deleted: boolean }>(
-                target,
-                'folderWorkspace.delete',
-                { folderWorkspaceId },
-                { timeoutMs: 15_000 }
-              )
-            ).deleted
+      const deleted = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.folderWorkspace.delete,
+          { folderWorkspaceId },
+          { timeoutMs: 15_000 }
+        )
+      ).deleted
       if (!deleted) {
         return false
       }
@@ -1944,17 +1939,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       // Why: project groups are focused-host-scoped by design — fetch/create/update/
       // delete all route by the focused host, and the list is replaced (not merged).
       const target = getActiveRuntimeTarget(get().settings)
-      const updated =
-        target.kind === 'local'
-          ? await window.api.projectGroups.update({ groupId, updates })
-          : (
-              await callRuntimeRpc<{ group: ProjectGroup | null }>(
-                target,
-                'projectGroup.update',
-                { groupId, updates },
-                { timeoutMs: 15_000 }
-              )
-            ).group
+      const updated = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectGroup.update,
+          { groupId, updates },
+          { timeoutMs: 15_000 }
+        )
+      ).group
       if (!updated) {
         return false
       }
@@ -1974,17 +1966,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     try {
       // Why: project groups are focused-host-scoped by design (see updateProjectGroup).
       const target = getActiveRuntimeTarget(get().settings)
-      const deleted =
-        target.kind === 'local'
-          ? await window.api.projectGroups.delete({ groupId })
-          : (
-              await callRuntimeRpc<{ deleted: boolean }>(
-                target,
-                'projectGroup.delete',
-                { groupId },
-                { timeoutMs: 15_000 }
-              )
-            ).deleted
+      const deleted = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectGroup.delete,
+          { groupId },
+          { timeoutMs: 15_000 }
+        )
+      ).deleted
       if (!deleted) {
         return false
       }
@@ -2081,21 +2070,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         return false
       }
       const target = getActiveRuntimeTarget(settingsForRepoOwner(get(), projectId))
-      const moved =
-        target.kind === 'local'
-          ? await window.api.projectGroups.moveProject({
-              projectId,
-              groupId,
-              order
-            })
-          : (
-              await callRuntimeRpc<{ repo: Repo | null }>(
-                target,
-                'projectGroup.moveProject',
-                { repo: projectId, groupId, order },
-                { timeoutMs: 15_000 }
-              )
-            ).repo
+      const moved = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectGroup.moveProject,
+          { repo: projectId, groupId, order },
+          { timeoutMs: 15_000 }
+        )
+      ).repo
       if (!moved) {
         return false
       }
@@ -2128,14 +2110,19 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       let repo: Repo
       try {
         if (target.kind === 'local') {
-          const result = await window.api.repos.add({ path, kind })
+          const result = await workspaceHostClient.repos.add({ path, kind })
           if ('error' in result) {
             throw new Error(result.error)
           }
           repo = result.repo
         } else {
           repo = (
-            await callRuntimeRpc(target, REPO_ADD_CONTRACT, { path, kind }, { timeoutMs: 15_000 })
+            await callRuntimeOrpc(
+              target,
+              (client) => client.repo.add,
+              { path, kind },
+              { timeoutMs: 15_000 }
+            )
           ).repo
         }
       } catch (err) {
@@ -2218,17 +2205,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     try {
       const target = getProjectSetupRuntimeTarget(args.hostId)
       await assertProjectHostSetupMutationRuntimeCapabilities(target)
-      const result =
-        target.kind === 'local'
-          ? await window.api.projects.setupExistingFolder(args)
-          : (
-              await callRuntimeRpc<{ result: ProjectHostSetupResult }>(
-                target,
-                'projectHostSetup.setupExistingFolder',
-                args,
-                { timeoutMs: 15_000 }
-              )
-            ).result
+      const result = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.projectHostSetup.setupExistingFolder,
+          args,
+          { timeoutMs: 15_000 }
+        )
+      ).result
       const repo = repoWithFetchedOwner(result.repo, target)
       const repoHostId = getRepoExecutionHostId(repo)
       const setup = setupWithFetchedOwner(result.setup, target)
@@ -2271,17 +2255,11 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     try {
       const target = getProjectSetupRuntimeTarget(args.hostId)
       await assertProjectHostSetupMutationRuntimeCapabilities(target)
-      const result =
-        target.kind === 'local'
-          ? await window.api.projects.createHostSetup(args)
-          : (
-              await callRuntimeRpc<{ result: ProjectHostSetupCreateResult }>(
-                target,
-                'projectHostSetup.create',
-                args,
-                { timeoutMs: 15_000 }
-              )
-            ).result
+      const result = (
+        await callRuntimeOrpc(target, (client) => client.projectHostSetup.create, args, {
+          timeoutMs: 15_000
+        })
+      ).result
       const setup = setupWithFetchedOwner(result.setup, target)
       set((s) => ({
         projects: s.projects.some((entry) => entry.id === result.project.id)
@@ -2307,17 +2285,11 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         ? getProjectSetupRuntimeTarget(currentSetup.hostId)
         : { kind: 'local' as const }
       await assertProjectHostSetupMutationRuntimeCapabilities(target)
-      const result =
-        target.kind === 'local'
-          ? await window.api.projects.updateHostSetup(args)
-          : (
-              await callRuntimeRpc<{ result: ProjectHostSetupUpdateResult }>(
-                target,
-                'projectHostSetup.update',
-                args,
-                { timeoutMs: 15_000 }
-              )
-            ).result
+      const result = (
+        await callRuntimeOrpc(target, (client) => client.projectHostSetup.update, args, {
+          timeoutMs: 15_000
+        })
+      ).result
       const setup = setupWithFetchedOwner(result.setup, target)
       const repo = result.repo ? repoWithFetchedOwner(result.repo, target) : undefined
       const repoHostId = repo ? getRepoExecutionHostId(repo) : null
@@ -2352,17 +2324,11 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         ? getProjectSetupRuntimeTarget(currentSetup.hostId)
         : { kind: 'local' as const }
       await assertProjectHostSetupMutationRuntimeCapabilities(target)
-      const result =
-        target.kind === 'local'
-          ? await window.api.projects.deleteHostSetup(args)
-          : (
-              await callRuntimeRpc<{ result: ProjectHostSetupDeleteResult }>(
-                target,
-                'projectHostSetup.delete',
-                args,
-                { timeoutMs: 15_000 }
-              )
-            ).result
+      const result = (
+        await callRuntimeOrpc(target, (client) => client.projectHostSetup.delete, args, {
+          timeoutMs: 15_000
+        })
+      ).result
       const repo = result.repo ? repoWithFetchedOwner(result.repo, target) : undefined
       const repoHostId = repo ? getRepoExecutionHostId(repo) : null
       set((s) => {
@@ -2401,14 +2367,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       await assertProjectHostSetupMutationRuntimeCapabilities(target)
       const repo =
         target.kind === 'local'
-          ? await window.api.repos.clone({
+          ? await workspaceHostClient.repos.clone({
               url: args.url,
               destination: args.destination
             })
           : (
-              await callRuntimeRpc<{ repo: Repo }>(
+              await callRuntimeOrpc(
                 target,
-                'repo.clone',
+                (client) => client.repo.clone,
                 {
                   url: args.url,
                   destination: args.destination
@@ -2440,7 +2406,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       publishRendererCommandResult({ type: 'repository-add-route-required' })
       return null
     }
-    const path = await window.api.repos.pickFolder()
+    const path = await workspaceHostClient.repos.pickFolder()
     if (!path) {
       return null
     }
@@ -2486,9 +2452,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       )
       await (target.kind === 'local'
         ? idExistsOnOtherHost
-          ? window.api.repos.removeForHost({ repoId: projectId, hostId: ownerHostId })
-          : window.api.repos.remove({ repoId: projectId })
-        : callRuntimeRpc(target, 'repo.rm', { repo: projectId }, { timeoutMs: 15_000 }))
+          ? workspaceHostClient.repos.removeForHost({ repoId: projectId, hostId: ownerHostId })
+          : workspaceHostClient.repos.remove({ repoId: projectId })
+        : callRuntimeOrpc(
+            target,
+            (client) => client.repo.rm,
+            { repo: projectId },
+            { timeoutMs: 15_000 }
+          ))
 
       get().clearYiruHookTrustForRepo(projectId)
       const repoPath = get().repos.find((repo) =>
@@ -2502,9 +2473,9 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       if (target.kind === 'environment') {
         await Promise.allSettled(
           worktreeIds.map((worktreeId) =>
-            callRuntimeRpc(
+            callRuntimeOrpc(
               target,
-              'terminal.stop',
+              (client) => client.terminal.stop,
               { worktree: toRuntimeWorktreeSelector(worktreeId) },
               { timeoutMs: 15_000 }
             )
@@ -2649,17 +2620,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
   updateProject: async (projectId, updates) => {
     try {
       const target = getProjectUpdateRuntimeTarget(get(), projectId)
-      const updatedProject =
-        target.kind === 'local'
-          ? await window.api.projects.update({ projectId, updates })
-          : (
-              await callRuntimeRpc<{ project: Project }>(
-                target,
-                'project.update',
-                { projectId, updates },
-                { timeoutMs: 15_000 }
-              )
-            ).project
+      const updatedProject = (
+        await callRuntimeOrpc(
+          target,
+          (client) => client.project.update,
+          { projectId, updates },
+          { timeoutMs: 15_000 }
+        )
+      ).project
       if (!updatedProject) {
         return false
       }
@@ -2697,9 +2665,10 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     // Why: an explicit hostId is authoritative — treat it as an explicit host so
     // routing goes to that host's target (local IPC or its runtime RPC) rather
     // than the currently-focused runtime, which is the same-id/self-pair case.
-    const ownerHasExplicitHost = Boolean(
-      options?.hostId || ownerRepo.executionHostId?.trim() || ownerRepo.connectionId?.trim()
-    )
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — only options.hostId/executionHostId can still
+    // make a repo non-local.
+    const ownerHasExplicitHost = Boolean(options?.hostId || ownerRepo.executionHostId?.trim())
     const explicitOwnerHostId = getRepoExecutionHostId(ownerRepo)
     const ownerTarget = ownerHasExplicitHost
       ? getProjectSetupRuntimeTarget(explicitOwnerHostId)
@@ -2714,11 +2683,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         const target = ownerTarget
         const updatedRepo =
           target.kind === 'local'
-            ? await window.api.repos.update({ repoId: projectId, updates: sanitizedUpdates })
+            ? await workspaceHostClient.repos.update({
+                repoId: projectId,
+                updates: sanitizedUpdates
+              })
             : (
-                await callRuntimeRpc<{ repo: Repo }>(
+                await callRuntimeOrpc(
                   target,
-                  'repo.update',
+                  (client) => client.repo.update,
                   { repo: projectId, updates: sanitizedUpdates },
                   { timeoutMs: 15_000 }
                 )
@@ -2841,13 +2813,13 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
                 ? ({ kind: 'environment', environmentId: parsed.environmentId } as const)
                 : ({ kind: 'local' } as const)
             return target.kind === 'local'
-              ? window.api.repos.reorderForHost({
+              ? workspaceHostClient.repos.reorderForHost({
                   hostId: group.hostId,
                   orderedIds: group.orderedIds
                 })
-              : callRuntimeRpc<{ status: 'applied' | 'rejected' }>(
+              : callRuntimeOrpc(
                   target,
-                  'repo.reorder',
+                  (client) => client.repo.reorder,
                   { orderedIds: group.orderedIds },
                   { timeoutMs: 15_000 }
                 )
@@ -2855,7 +2827,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         ),
         // Why: servers can only persist their local permutations. The desktop
         // profile owns the cross-host relationships needed after a cold load.
-        window.api.ui.set({ manualRepoOrder })
+        setRuntimeUIState(get().settings, { manualRepoOrder })
       ])
       if (results.some((result) => result.status === 'rejected')) {
         await get().fetchReposForAllHosts()

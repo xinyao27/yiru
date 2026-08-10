@@ -51,11 +51,13 @@ export default function SourceControlWorkspacePanel({
   view: controlledView,
   onViewChange
 }: SourceControlWorkspacePanelProps): React.JSX.Element {
+  const activeWorktreeId = useAppStore((state) => state.activeWorktreeId)
   const storedView = useAppStore((state) =>
-    workspacePanelTabId ? state.sourceControlPanelViewByTab[workspacePanelTabId] : undefined
+    activeWorktreeId ? state.sourceControlPanelViewByWorktree[activeWorktreeId] : undefined
   )
   const setStoredView = useAppStore((state) => state.setSourceControlPanelView)
-  const view = controlledView ?? storedView ?? 'changes'
+  const requestedView = useAppStore((state) => state.requestedSourceControlPanelView)
+  const view = controlledView ?? storedView ?? requestedView
   const { changeLineCounts, reviewDetails } = useSourceControlTabDetails(source)
   useAutoOpenAllDiffs({ source, isVisible, workspacePanelTabId })
   // Why: Base UI unmounts an inactive panel, so every Changes/Review switch tore
@@ -77,14 +79,14 @@ export default function SourceControlWorkspacePanel({
       onViewChange(value)
       return
     }
-    if (workspacePanelTabId) {
-      setStoredView(workspacePanelTabId, value)
+    if (activeWorktreeId) {
+      setStoredView(activeWorktreeId, value)
     }
   }
 
   return (
     <Tabs value={view} onValueChange={handleViewChange} className="h-full min-h-0 gap-0">
-      <div className="border-border shrink-0 border-b p-2">
+      <div className="shrink-0 p-2">
         <TabsList
           aria-label={translate(
             'auto.components.workspace.panel.source.control.workspace.panel.views',
@@ -158,7 +160,6 @@ function useSourceControlTabDetails(source: RightSidebarPanelSource): {
           branch,
           settings,
           activeRepo.id,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )
@@ -170,7 +171,6 @@ function useSourceControlTabDetails(source: RightSidebarPanelSource): {
           activeRepo.id,
           branch,
           settings,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )

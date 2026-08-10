@@ -21,6 +21,7 @@ import {
 } from '~renderer/components/ui/tooltip'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
@@ -250,8 +251,8 @@ function CoworkingAvailabilityStatusSegmentContent({
     setRetrying(true)
     try {
       await (needsFirewallRepair
-        ? window.api.coworkingSharing.repairWindowsFirewall()
-        : window.api.coworkingSharing.retryAvailability())
+        ? coworkingSharingClient.repairWindowsFirewall()
+        : coworkingSharingClient.retryAvailability())
     } catch {
       // Why: keep host-sensitive Electron errors out of the UI; the sanitized
       // diagnostic remains visible as the recovery feedback.

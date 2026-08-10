@@ -1,6 +1,5 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
-import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-import { z } from 'zod'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { ProjectExecutionRuntimeResolution } from './project-execution-runtime'
 
@@ -166,62 +165,6 @@ export type SkillDiscoveryTarget = {
   executionHostId?: ExecutionHostId | null
   projectRuntime?: ProjectExecutionRuntimeResolution
 }
-
-const ResolvedProjectRuntimeSchema = z.object({
-  status: z.literal('resolved'),
-  runtime: z.discriminatedUnion('kind', [
-    z.object({
-      kind: z.literal('local-host'),
-      hostPlatform: z.string(),
-      projectId: z.string(),
-      reason: z.literal('non-windows'),
-      cacheKey: z.string()
-    }),
-    z.object({
-      kind: z.literal('windows-host'),
-      hostPlatform: z.literal('win32'),
-      projectId: z.string(),
-      reason: z.enum(['project-override', 'global-default', 'migration-fallback']),
-      cacheKey: z.string()
-    }),
-    z.object({
-      kind: z.literal('wsl'),
-      hostPlatform: z.literal('wsl'),
-      projectId: z.string(),
-      distro: z.string(),
-      reason: z.enum(['project-override', 'global-default']),
-      cacheKey: z.string()
-    })
-  ])
-})
-
-const RepairProjectRuntimeSchema = z.object({
-  status: z.literal('repair-required'),
-  repair: z.object({
-    projectId: z.string(),
-    preferredRuntime: z.object({ kind: z.literal('wsl'), distro: z.string().nullable() }),
-    reason: z.enum(['wsl-unavailable', 'wsl-distro-required', 'wsl-distro-missing']),
-    source: z.enum(['project-override', 'global-default']),
-    cacheKey: z.string()
-  })
-})
-
-const ExecutionHostIdSchema = z
-  .string()
-  .refine((value) => parseExecutionHostId(value) !== null)
-  .transform((value) => value as ExecutionHostId)
-
-/** Both desktop IPC and runtime RPC parse the complete discovery target here. */
-export const SkillDiscoveryTargetSchema: z.ZodType<SkillDiscoveryTarget> = z.object({
-  runtime: z.enum(['host', 'wsl']).optional(),
-  wslDistro: z.string().nullable().optional(),
-  cwd: z.string().nullable().optional(),
-  worktreeId: z.string().nullable().optional(),
-  executionHostId: ExecutionHostIdSchema.nullable().optional(),
-  projectRuntime: z
-    .discriminatedUnion('status', [ResolvedProjectRuntimeSchema, RepairProjectRuntimeSchema])
-    .optional()
-})
 
 export type SkillFrontmatterSummary = {
   name: string | null

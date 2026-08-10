@@ -2,9 +2,10 @@ import { Copy, Check } from '@phosphor-icons/react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import React, { useCallback, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import MermaidBlock from '../mermaid-block'
@@ -166,7 +167,7 @@ export function RichMarkdownCodeBlock({
   node,
   updateAttributes
 }: NodeViewProps): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   const language = (node.attrs.language as string) || ''
   const [copied, setCopied] = useState(false)
   const copiedResetTimerRef = useRef<number | null>(null)
@@ -208,7 +209,7 @@ export function RichMarkdownCodeBlock({
     (e: React.MouseEvent) => {
       e.stopPropagation()
       const text = node.textContent
-      void window.api.ui
+      void shellClient.ui
         .writeClipboardText(text)
         .then(() => {
           if (!isMountedRef.current) {

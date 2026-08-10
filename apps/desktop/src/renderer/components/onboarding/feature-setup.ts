@@ -12,6 +12,11 @@ import {
   ORCHESTRATION_SETUP_DISMISSED_STORAGE_KEY,
   notifyOrchestrationSetupStateChanged
 } from '~renderer/lib/orchestration-setup-state'
+import { installCliCommand, readCliInstallStatus } from '~renderer/runtime/cli-install-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { useAppStore } from '~renderer/store'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import type {
   ComputerUsePermissionSetupResult,
@@ -153,12 +158,22 @@ export function onboardingFeatureSetupRunTelemetry(
 
 export function createOnboardingFeatureSetupDeps(): OnboardingFeatureSetupDeps {
   return {
-    getCliStatus: () => window.api.cli.getInstallStatus(),
+    getCliStatus: () => readCliInstallStatus(),
     showCliRegistrationPrompt: showYiruCliRegistrationPromptToast,
-    installCli: () => window.api.cli.install(),
-    writeClipboardText: (text) => window.api.ui.writeClipboardText(text),
-    getComputerUsePermissionStatus: () => window.api.computerUsePermissions.getStatus(),
-    openComputerUsePermissionSetup: () => window.api.computerUsePermissions.openSetup(),
+    installCli: () => installCliCommand(),
+    writeClipboardText: (text) => shellClient.ui.writeClipboardText(text),
+    getComputerUsePermissionStatus: () =>
+      callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissionsStatus,
+        {}
+      ),
+    openComputerUsePermissionSetup: () =>
+      callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissions,
+        {}
+      ),
     setStorageItem: (key, value) => localStorage.setItem(key, value),
     removeStorageItem: (key) => localStorage.removeItem(key),
     notifyOrchestrationStateChanged: notifyOrchestrationSetupStateChanged

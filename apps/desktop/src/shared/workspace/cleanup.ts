@@ -77,12 +77,6 @@ export type WorkspaceCleanupScanArgs = {
   scanId?: string
 }
 
-export type WorkspaceCleanupLocalProcessArgs = {
-  worktreeId: string
-  connectionId?: string | null
-  worktreePath?: string
-}
-
 export type WorkspaceCleanupScanError = {
   repoId: string
   repoName: string
@@ -100,14 +94,6 @@ export type WorkspaceCleanupScanProgress = WorkspaceCleanupScanResult & {
   scannedWorktreeCount: number
   totalWorktreeCount: number
   candidateMode?: 'append' | 'snapshot'
-}
-
-export type WorkspaceCleanupLocalProcessResult = {
-  hasKillableProcesses: boolean | null
-}
-
-export type WorkspaceCleanupDismissArgs = {
-  dismissals: WorkspaceCleanupDismissal[]
 }
 
 export const WORKSPACE_CLEANUP_HARD_BLOCKERS: ReadonlySet<WorkspaceCleanupBlocker> = new Set([

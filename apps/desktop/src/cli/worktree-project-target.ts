@@ -59,7 +59,7 @@ export async function resolveProjectCreateTarget(
   if (!projectHostSetupId && !projectId && !hostId) {
     return undefined
   }
-  const result = await client.call<{ setups: ProjectHostSetup[] }>('projectHostSetup.list')
+  const result = await client.call(client.rpc.projectHostSetup.list, undefined)
   const setup = result.result.setups.find((candidate) => {
     if (candidate.setupState !== 'ready') {
       return false

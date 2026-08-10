@@ -46,7 +46,6 @@ export type StatusLoadInFlight = {
   promise: Promise<boolean>
 }
 
-export type GitRequestError = Error & { code?: string }
 export type GitCommitResult = { success: boolean; error?: string }
 
 export type MobileGitStatusEntryView = MobileGitStatusEntry & {

@@ -24,7 +24,7 @@ export type FileSearchPanelModel = {
     loading: boolean
     rows: ReturnType<typeof buildSearchRows>
     onToggleCollapsedFile: (filePath: string) => void
-    onMatchClick: (fileResult: SearchFileResult, match: SearchMatch) => void
+    onMatchClick: (fileResult: SearchFileResult, match: SearchMatch, preview: boolean) => void
   }
   focusQueryInput: () => void
 }
@@ -220,7 +220,7 @@ export function useFileSearchPanel(
   )
 
   const handleMatchClick = useCallback(
-    (fileResult: SearchFileResult, match: SearchMatch) => {
+    (fileResult: SearchFileResult, match: SearchMatch, preview: boolean) => {
       if (!activeWorktreeId) {
         return
       }
@@ -229,6 +229,7 @@ export function useFileSearchPanel(
         fileResult,
         match,
         openFile,
+        preview,
         workspacePanelTabId,
         setPendingEditorReveal,
         revealRafRef,

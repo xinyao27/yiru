@@ -9,10 +9,23 @@ import type { CodexUsageStore } from '../codex/usage/store'
 import type { OpenCodeUsageStore } from '../opencode/usage/store'
 import { buildSupplementalAgentUsage } from './agent-usage'
 import type { StatsCollector } from './collector'
-import { fetchCursorUsageForStats } from './cursor-usage'
 import { refreshModelsDevPricing } from './models-dev-pricing'
 
 const STATS_AI_VAULT_SESSION_LIMIT = Number.MAX_SAFE_INTEGER
+const STATS_SUPPLEMENTAL_AGENTS = [
+  'hermes',
+  'pi',
+  'omp',
+  'gemini',
+  'antigravity',
+  'rovo',
+  'copilot',
+  'grok',
+  'openclaw',
+  'devin',
+  'droid',
+  'kimi'
+] as const satisfies readonly AiVaultAgent[]
 const TOKEN_UNAVAILABLE_AGENTS = [
   'antigravity',
   'cursor',
@@ -131,7 +144,9 @@ async function scanSupplementalUsage(
   force: boolean
 ): Promise<RuntimeStatsSupplementalUsage> {
   const scopePaths = usageStores.getUsageScopePaths?.() ?? []
-  const cursorUsage = await (usageStores.getCursorUsage?.(force) ?? fetchCursorUsageForStats(force))
+  const cursorUsage = usageStores.getCursorUsage
+    ? await usageStores.getCursorUsage(force)
+    : { dailyTokens: [], modelUsage: [] }
   const agentUsage =
     scopePaths.length === 0
       ? { dailyTokens: [], modelUsage: [] }
@@ -147,6 +162,7 @@ async function scanScopedAgentUsage(
     const result = await listAiVaultSessions({
       limit: STATS_AI_VAULT_SESSION_LIMIT,
       limitPerAgent: STATS_AI_VAULT_SESSION_LIMIT,
+      agents: STATS_SUPPLEMENTAL_AGENTS,
       scopePaths,
       force
     })

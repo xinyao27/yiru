@@ -17,7 +17,6 @@ import type { FeatureWallTourDepthSummary } from '~shared/feature-wall-tour-dept
 import {
   DEFAULT_FEATURE_WALL_WORKFLOW_ID,
   FEATURE_WALL_WORKFLOWS,
-  getFeatureWallMediaTile,
   type FeatureWallWorkflow,
   type FeatureWallWorkflowId
 } from '~shared/feature-wall-workflows'
@@ -26,7 +25,6 @@ import type { FeatureWallOpenSourceTelemetry } from '~shared/telemetry-events'
 import { getWorkbenchSteps, type WorkbenchStepId } from '~shared/workbench-steps'
 
 import { getFeatureWallActiveStepCopy } from './active-step-copy'
-import { toFeatureWallAssetUrl, useFeatureWallAssetBaseUrl } from './assets'
 import { FeatureWallContinueButton } from './continue-button'
 import { usePrefersReducedMotion } from './modal-helpers'
 import { FeatureWallTourPanel } from './tour-panel'
@@ -50,6 +48,21 @@ type FeatureWallTourSurfaceProps = {
   onTourDepthSummaryChange?: (summary: FeatureWallTourDepthSummary) => void
 }
 
+function trackFeatureWallWorkflowSelection(
+  workflow: FeatureWallWorkflow,
+  source: FeatureWallOpenSourceTelemetry
+): void {
+  track('feature_wall_group_selected', { group_id: workflow.id, source })
+  track('feature_wall_feature_selected', {
+    group_id: workflow.id,
+    tile_id: workflow.telemetryTileId,
+    source
+  })
+  // Why: keep the legacy hover/focus event firing for analytics continuity
+  // until dashboards are migrated to feature_selected.
+  track('feature_wall_tile_focused', { tile_id: workflow.telemetryTileId })
+}
+
 export function FeatureWallTourSurface({
   isOpen,
   source,
@@ -67,7 +80,6 @@ export function FeatureWallTourSurface({
   const settings = useAppStore((s) => s.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const activeSkillRuntime = useActiveProjectSkillRuntime()
-  const assetBaseUrl = useFeatureWallAssetBaseUrl(isOpen)
   const prefersReducedMotion = usePrefersReducedMotion()
   const reactId = useId()
   const previewPanelId = `${reactId}-feature-wall-preview-panel`
@@ -85,7 +97,6 @@ export function FeatureWallTourSurface({
     [selectedId]
   )
   const selected = FEATURE_WALL_WORKFLOWS[selectedIndex]
-  const selectedPresentation = selected
   const agentsSteps = useMemo(() => getAgentsSteps(), [])
   const workbenchSteps = useMemo(() => getWorkbenchSteps(), [])
   const reviewSteps = useMemo(() => getReviewSteps(), [])
@@ -153,9 +164,6 @@ export function FeatureWallTourSurface({
     selected.id === 'review'
       ? (reviewSteps.find((s) => s.id === reviewStepId) ?? reviewSteps[0] ?? null)
       : null
-  const primaryTile = getFeatureWallMediaTile(selected.primaryTileId)
-  const posterUrl = primaryTile ? toFeatureWallAssetUrl(assetBaseUrl, primaryTile.posterPath) : null
-  const gifUrl = primaryTile ? toFeatureWallAssetUrl(assetBaseUrl, primaryTile.gifPath) : null
   const activeStepCopy = getFeatureWallActiveStepCopy(
     agentsActiveStep,
     workbenchActiveStep,
@@ -165,21 +173,7 @@ export function FeatureWallTourSurface({
   useEffect(() => {
     if (isOpen) {
       markWorkflowVisitedRef.current(DEFAULT_FEATURE_WALL_WORKFLOW_ID)
-      track('feature_wall_group_selected', {
-        group_id: DEFAULT_FEATURE_WALL_WORKFLOW_ID,
-        source
-      })
-      const defaultTile = getFeatureWallMediaTile(FEATURE_WALL_WORKFLOWS[0].primaryTileId)
-      if (defaultTile) {
-        track('feature_wall_feature_selected', {
-          group_id: DEFAULT_FEATURE_WALL_WORKFLOW_ID,
-          tile_id: defaultTile.id,
-          source
-        })
-        // Keep the legacy hover/focus event firing too for analytics
-        // continuity until dashboards are migrated to feature_selected.
-        track('feature_wall_tile_focused', { tile_id: defaultTile.id })
-      }
+      trackFeatureWallWorkflowSelection(FEATURE_WALL_WORKFLOWS[0], source)
     }
   }, [isOpen, source])
 
@@ -203,16 +197,7 @@ export function FeatureWallTourSurface({
         markReviewStepVisited(nextStepId)
         setReviewStepId(nextStepId)
       }
-      track('feature_wall_group_selected', { group_id: workflow.id, source })
-      const tile = getFeatureWallMediaTile(workflow.primaryTileId)
-      if (tile) {
-        track('feature_wall_feature_selected', {
-          group_id: workflow.id,
-          tile_id: tile.id,
-          source
-        })
-        track('feature_wall_tile_focused', { tile_id: tile.id })
-      }
+      trackFeatureWallWorkflowSelection(workflow, source)
     },
     [
       agentsSteps,
@@ -362,9 +347,8 @@ export function FeatureWallTourSurface({
     return null
   }
 
-  const showGif = !prefersReducedMotion && gifUrl !== null
   const previewTitleId = `${reactId}-feature-wall-preview-${selected.id}`
-  const description = activeStepCopy?.description ?? selectedPresentation.lede
+  const description = activeStepCopy?.description ?? selected.lede
   const continueButton = (
     <FeatureWallContinueButton
       label={continueLabel}
@@ -398,9 +382,6 @@ export function FeatureWallTourSurface({
       reviewSteps={reviewSteps}
       reviewActiveStep={reviewActiveStep}
       onSelectReviewStep={handleSelectReviewStep}
-      posterUrl={posterUrl}
-      gifUrl={gifUrl}
-      showGif={showGif}
       prefersReducedMotion={prefersReducedMotion}
       source={source}
       orchestrationSkill={orchestrationSkill}

@@ -268,23 +268,6 @@ function isNonInteractiveCodexSubcommand(tokens: string[]): boolean {
   return CODEX_NON_INTERACTIVE_SUBCOMMANDS.has(normalizedSubcommand)
 }
 
-export function shouldUseRendererBackedCodexTerminal(command: string | undefined): boolean {
-  if (!command) {
-    return false
-  }
-
-  const tokens = stripShellLaunchPrefix(
-    tokenizeLeadingShellWords(command.trim(), 32).filter((token) => token.length > 0)
-  )
-
-  const executable = tokens[0] ? commandBasename(tokens[0]) : ''
-  if (!isCodexExecutable(executable)) {
-    return false
-  }
-
-  return !isNonInteractiveCodexSubcommand(tokens)
-}
-
 export function shouldUseRendererBackedInteractiveTerminal(command: string | undefined): boolean {
   if (!command) {
     return false

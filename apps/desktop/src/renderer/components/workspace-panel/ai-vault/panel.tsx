@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { AgentSessionContinuationDialog } from '~renderer/components/agent-session-continuation/dialog'
 import { CoworkingAgentsPane } from '~renderer/components/coworking/agents-pane'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   useActiveRepo,
@@ -239,7 +240,7 @@ function LocalAiVaultPanel(): React.JSX.Element {
   )
 
   const copyText = useCallback(async (text: string, label: string): Promise<void> => {
-    await window.api.ui.writeClipboardText(text)
+    await shellClient.ui.writeClipboardText(text)
     toast.success(
       translate('auto.components.right.sidebar.AiVaultPanel.valueCopied', '{{value0}} copied', {
         value0: label
@@ -369,10 +370,10 @@ function LocalAiVaultPanel(): React.JSX.Element {
           )
         }
         onOpenLog={(session) => void openAiVaultSessionLogInYiru(session)}
-        onRevealLog={(session) => void window.api.shell.openPath(session.filePath)}
+        onRevealLog={(session) => void shellClient.shell.openPath(session.filePath)}
         onOpenCwd={(session) => {
           if (session.cwd) {
-            void window.api.shell.openPath(session.cwd)
+            void shellClient.shell.openPath(session.cwd)
           }
         }}
       />

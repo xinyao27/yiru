@@ -74,10 +74,6 @@ export const FRIDAY_WORKTREE_ID = 'friday'
 // data URL while still rejecting arbitrary renderer-provided data URLs.
 export const YIRU_BROWSER_BLANK_URL = 'data:text/html,'
 
-// Why: Electron's invoke error path preserves message text, not arbitrary
-// custom Error fields. Keep this stable token shared across main/renderer.
-export const SSH_TERMINATE_RECONNECT_REQUIRED = 'SSH_TERMINATE_RECONNECT_REQUIRED'
-
 export const BROWSER_FAMILY_LABELS: Record<string, string> = {
   chrome: 'Google Chrome',
   chromium: 'Chromium',

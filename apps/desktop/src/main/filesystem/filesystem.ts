@@ -1,6 +1,5 @@
-import type { ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdir, readFile, writeFile, stat, lstat, open, rename, rm } from 'node:fs/promises'
+import { readFile, writeFile, stat, lstat, open, rename, rm } from 'node:fs/promises'
 import type { FileHandle } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 
@@ -11,7 +10,6 @@ import {
   splitWorktreeId
 } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
-import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { getCommitMessageModelDiscoveryHostKey } from '~shared/commit-message/host-key'
 import { validateGitForkSyncExpectedUpstream } from '~shared/git/fork-sync'
 import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
@@ -27,16 +25,7 @@ import type {
   GitRevertResult
 } from '~shared/git/write-op-results'
 import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
-import {
-  buildRgArgs,
-  createAccumulator,
-  DEFAULT_SEARCH_MAX_RESULTS,
-  finalize,
-  ingestRgJsonLine,
-  SEARCH_TIMEOUT_MS
-} from '~shared/text-search'
 import type {
-  DirEntry,
   GitBranchCompareResult,
   GitCommitCompareResult,
   GitConflictOperation,
@@ -48,15 +37,11 @@ import type {
   GitPushTarget,
   GitUpstreamStatus,
   GitStatusResult,
-  MarkdownDocument,
-  SearchOptions,
-  SearchResult,
   Repo,
   TuiAgent
 } from '~shared/types'
 
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
-import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { createBranchFromCommit } from '../git/branch-create'
 import { checkIgnoredPaths } from '../git/check-ignored-paths'
 import { checkoutCommit } from '../git/checkout-commit'
@@ -75,7 +60,7 @@ import { gitFastForward, gitFetch, gitPull, gitPullRebaseFromBase, gitPush } fro
 import { getRemoteCommitUrl, getRemoteFileUrl } from '../git/repo'
 import { resetToCommit } from '../git/reset-to-commit'
 import { revertCommit } from '../git/revert'
-import { gitExecFileAsync, wslAwareSpawn } from '../git/runner'
+import { gitExecFileAsync } from '../git/runner'
 import {
   getStatus,
   getSubmoduleStatus,
@@ -99,6 +84,7 @@ import {
 } from '../git/status'
 import { addTag } from '../git/tag'
 import { getUpstreamStatus } from '../git/upstream'
+import type { MainIpcRegistration } from '../ipc-registration'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import type { Store } from '../persistence'
 import type { LocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
@@ -122,7 +108,6 @@ import {
   type GeneratePullRequestFieldsResult
 } from '../text-generation/commit-message-text-generation'
 import { getPullRequestDraftContext } from '../text-generation/pull-request-context'
-import { parseWslPath, toWindowsWslPath } from '../wsl'
 import { tryDeleteWslUncPath } from '../wsl-unc-delete'
 import {
   resolveAuthorizedPath,
@@ -132,14 +117,10 @@ import {
   authorizeExternalPath
 } from './auth'
 import { registerDownloadedFolderSessionHandlers } from './downloaded-folder-sessions'
-import { listQuickOpenFiles } from './list-files'
-import { registerLocalLogTailHandlers } from './local-log-tail'
+import { initializeLocalLogTailAuthorization } from './local-log-tail'
 import { getLocalGitOptionsForRegisteredWorktree } from './local-worktree-runtime-options'
-import { listMarkdownDocuments } from './markdown-documents'
 import { registerFilesystemMutationHandlers } from './mutations'
-import { buildReadDirErrorBreadcrumb, type ReadDirThrowSite } from './readdir-error-diagnostics'
-import { checkRgAvailable } from './rg-availability'
-import { searchWithGitGrep } from './search-git'
+import type { NativePathServices } from './native-path-services'
 import { createSenderScopedRequestCancellations } from './sender-scoped-request-cancellation'
 
 // Why: Monaco has large-file optimizations like VS Code; blocking at 5MB makes
@@ -416,30 +397,12 @@ async function isBinaryFilePrefix(filePath: string): Promise<boolean> {
   }
 }
 
-async function isDirectoryEntry(
-  dirPath: string,
-  entry: { name: string; isDirectory(): boolean; isSymbolicLink(): boolean },
-  _resolveEntryPath: (entryPath: string) => Promise<string>
-): Promise<boolean> {
-  // Why: following a symlink just to decorate readDir can touch macOS
-  // TCC-protected app containers. Treat links as file-like until the user
-  // explicitly opens them.
-  void _resolveEntryPath
-  if (entry.isSymbolicLink()) {
-    void dirPath
-    return false
-  }
-  if (entry.isDirectory()) {
-    return true
-  }
-  return false
-}
-
 export function registerFilesystemHandlers(
+  ipcMain: MainIpcRegistration,
   store: Store,
-  commitMessageAgentEnv?: CommitMessageAgentEnvironmentResolvers
+  commitMessageAgentEnv: CommitMessageAgentEnvironmentResolvers | undefined,
+  nativePathServices: NativePathServices
 ): void {
-  const activeTextSearches = new Map<string, ChildProcess>()
   const downloadSessions = new Map<string, DownloadSession>()
 
   async function closeDownloadSession(
@@ -468,47 +431,8 @@ export function registerFilesystemHandlers(
   }
 
   // ─── Filesystem ─────────────────────────────────────────
-  ipcMain.handle('fs:readDir', async (_event, args: { dirPath: string }): Promise<DirEntry[]> => {
-    // Why: a thrown fs:readDir reaches the renderer as the opaque "Error
-    // invoking remote method 'fs:readDir'" (Windows WSL/UNC realpath/readdir
-    // failures). Record which throw site fired plus a
-    // redacted path shape so these are diagnosable without the raw path.
-    let throwSite: ReadDirThrowSite = 'authorize'
-    try {
-      throwSite = 'authorize'
-      const dirPath = await resolveAuthorizedPath(args.dirPath, store)
-      throwSite = 'readdir'
-      const entries = await readdir(dirPath, { withFileTypes: true })
-      const mapped = await Promise.all(
-        entries.map(async (entry) => ({
-          name: entry.name,
-          isDirectory: await isDirectoryEntry(dirPath, entry, (entryPath) =>
-            resolveAuthorizedPath(entryPath, store)
-          ),
-          isSymlink: entry.isSymbolicLink()
-        }))
-      )
-      return mapped.sort((a, b) => {
-        if (a.isDirectory !== b.isDirectory) {
-          return a.isDirectory ? -1 : 1
-        }
-        return a.name.localeCompare(b.name)
-      })
-    } catch (error: unknown) {
-      recordCrashBreadcrumb(
-        'fs_readdir_error',
-        buildReadDirErrorBreadcrumb({
-          dirPath: args.dirPath,
-          throwSite,
-          error
-        })
-      )
-      throw error
-    }
-  })
-
   ipcMain.handle(
-    'fs:readFile',
+    'file-host:readFile',
     async (
       _event,
       args: { filePath: string; connectionId?: string; includeLocalLogMetadata?: boolean }
@@ -561,10 +485,10 @@ export function registerFilesystemHandlers(
     }
   )
 
-  registerDownloadedFolderSessionHandlers()
+  registerDownloadedFolderSessionHandlers(ipcMain, nativePathServices)
 
   ipcMain.handle(
-    'fs:saveDownloadedFile',
+    'file-host:saveDownloadedFile',
     async (
       event,
       args: { suggestedName?: string; content?: string; encoding?: 'utf8' | 'base64' }
@@ -577,15 +501,13 @@ export function registerFilesystemHandlers(
       }
       const content = args.content
       const encoding = args?.encoding === 'base64' ? 'base64' : 'utf8'
-      const parentWindow = BrowserWindow.fromWebContents(event.sender) ?? undefined
-      const dialogResult = parentWindow
-        ? await dialog.showSaveDialog(parentWindow, { defaultPath: suggestedName })
-        : await dialog.showSaveDialog({ defaultPath: suggestedName })
-      if (dialogResult.canceled || !dialogResult.filePath) {
+      const destinationPath = await nativePathServices.chooseDownloadFile(
+        event.sender.id,
+        suggestedName
+      )
+      if (!destinationPath) {
         return { canceled: true }
       }
-
-      const destinationPath = dialogResult.filePath
       const { existed } = await inspectDownloadDestination(destinationPath)
       const tempPath = createSiblingTransferPath(destinationPath, 'download')
       let promoted = false
@@ -603,7 +525,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:startDownloadedFile',
+    'file-host:startDownloadedFile',
     async (
       event,
       args: { suggestedName?: string }
@@ -618,15 +540,13 @@ export function registerFilesystemHandlers(
       const suggestedName = sanitizeLocalDownloadFilename(
         validateRequiredString(args?.suggestedName, 'suggestedName')
       )
-      const parentWindow = BrowserWindow.fromWebContents(event.sender) ?? undefined
-      const dialogResult = parentWindow
-        ? await dialog.showSaveDialog(parentWindow, { defaultPath: suggestedName })
-        : await dialog.showSaveDialog({ defaultPath: suggestedName })
-      if (dialogResult.canceled || !dialogResult.filePath) {
+      const destinationPath = await nativePathServices.chooseDownloadFile(
+        event.sender.id,
+        suggestedName
+      )
+      if (!destinationPath) {
         return { canceled: true }
       }
-
-      const destinationPath = dialogResult.filePath
       const { existed } = await inspectDownloadDestination(destinationPath)
       const tempPath = createSiblingTransferPath(destinationPath, 'download')
       const transferId = randomUUID()
@@ -657,7 +577,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:appendDownloadedFileChunk',
+    'file-host:appendDownloadedFileChunk',
     async (
       _event,
       args: { transferId?: string; contentBase64?: string }
@@ -674,7 +594,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:finishDownloadedFile',
+    'file-host:finishDownloadedFile',
     async (
       _event,
       args: { transferId?: string }
@@ -702,7 +622,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:cancelDownloadedFile',
+    'file-host:cancelDownloadedFile',
     async (_event, args: { transferId?: string }): Promise<{ ok: true }> => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       await closeDownloadSession(transferId, true)
@@ -711,18 +631,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:listMarkdownDocuments',
-    async (
-      _event,
-      args: { rootPath: string; connectionId?: string }
-    ): Promise<MarkdownDocument[]> => {
-      const rootPath = await resolveRegisteredWorktreePath(args.rootPath, store)
-      return listMarkdownDocuments(rootPath)
-    }
-  )
-
-  ipcMain.handle(
-    'fs:writeFile',
+    'file-host:writeFile',
     async (
       _event,
       args: { filePath: string; content: string; connectionId?: string }
@@ -745,7 +654,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:deletePath',
+    'file-host:deletePath',
     async (
       _event,
       args: { targetPath: string; connectionId?: string; recursive?: boolean }
@@ -770,7 +679,7 @@ export function registerFilesystemHandlers(
       // UI-initiated delete. Swallowing ENOENT keeps the action idempotent
       // from the user's perspective (design §7.1).
       try {
-        await shell.trashItem(targetPath)
+        await nativePathServices.trashPath(targetPath)
       } catch (error) {
         if (isENOENT(error)) {
           return
@@ -780,14 +689,17 @@ export function registerFilesystemHandlers(
     }
   )
 
-  registerFilesystemMutationHandlers(store)
-
-  ipcMain.handle('fs:authorizeExternalPath', (_event, args: { targetPath: string }): void => {
-    authorizeExternalPath(args.targetPath)
-  })
+  registerFilesystemMutationHandlers(ipcMain, store)
 
   ipcMain.handle(
-    'fs:stat',
+    'file-host:authorizeExternalPath',
+    (_event, args: { targetPath: string }): void => {
+      authorizeExternalPath(args.targetPath)
+    }
+  )
+
+  ipcMain.handle(
+    'file-host:stat',
     async (
       _event,
       args: { filePath: string; connectionId?: string }
@@ -803,7 +715,7 @@ export function registerFilesystemHandlers(
   )
 
   ipcMain.handle(
-    'fs:pathExists',
+    'file-host:pathExists',
     async (_event, args: { filePath: string; connectionId?: string }): Promise<boolean> => {
       try {
         const filePath = await resolveAuthorizedPath(args.filePath, store)
@@ -817,154 +729,6 @@ export function registerFilesystemHandlers(
       }
     }
   )
-
-  // ─── Search ────────────────────────────────────────────
-  ipcMain.handle(
-    'fs:search',
-    async (event, args: SearchOptions & { connectionId?: string }): Promise<SearchResult> => {
-      const rootPath = await resolveAuthorizedPath(args.rootPath, store)
-      const localGitOptions = getLocalGitOptionsForRegisteredWorktree(
-        store,
-        args.rootPath,
-        rootPath
-      )
-      const maxResults = Math.max(
-        1,
-        Math.min(args.maxResults ?? DEFAULT_SEARCH_MAX_RESULTS, DEFAULT_SEARCH_MAX_RESULTS)
-      )
-      const searchKey = `${event.sender.id}:${rootPath}`
-
-      // Why: checking rg availability upfront avoids a race condition where
-      // spawn('rg') emits 'close' before 'error' on some platforms, causing
-      // the handler to resolve with empty results before the git-grep
-      // fallback can run. The result is cached after the first check.
-      const rgAvailable = await checkRgAvailable(rootPath, localGitOptions.wslDistro)
-      if (!rgAvailable) {
-        return searchWithGitGrep(rootPath, args, maxResults, localGitOptions)
-      }
-
-      return new Promise((resolvePromise) => {
-        const rgArgs = buildRgArgs(args.query, rootPath, args)
-
-        // Why: search requests are fired on each query/options change. If the
-        // previous ripgrep process keeps running, it can continue streaming and
-        // parsing thousands of matches on the Electron main thread after the UI
-        // no longer cares about that result, which is exactly the freeze users
-        // experience in large repos.
-        activeTextSearches.get(searchKey)?.kill()
-
-        const acc = createAccumulator()
-        let stdoutBuffer = ''
-        let resolved = false
-        let child: ChildProcess | null = null
-        let killTimeout: ReturnType<typeof setTimeout>
-
-        // Why: WSL-routed rg emits Linux-native paths. UNC repos carry their
-        // distro in the path; Windows-path repos carry it in project runtime.
-        const wslDistroForOutput = parseWslPath(rootPath)?.distro ?? localGitOptions.wslDistro
-        const transformAbsPath = wslDistroForOutput
-          ? (p: string): string => (p.startsWith('/') ? toWindowsWslPath(p, wslDistroForOutput) : p)
-          : undefined
-
-        const resolveOnce = (): void => {
-          if (resolved) {
-            return
-          }
-          resolved = true
-          if (activeTextSearches.get(searchKey) === child) {
-            activeTextSearches.delete(searchKey)
-          }
-          clearTimeout(killTimeout)
-          // Why: child.kill() is advisory. If rg ignores it, detach our
-          // closures so repeated local searches do not retain old scans.
-          child?.stdout?.off('data', handleStdoutData)
-          child?.stderr?.off('data', handleStderrData)
-          child?.off('error', handleError)
-          child?.off('close', handleClose)
-          resolvePromise(finalize(acc))
-        }
-
-        const processLine = (line: string): void => {
-          const verdict = ingestRgJsonLine(line, rootPath, acc, maxResults, transformAbsPath)
-          if (verdict === 'stop') {
-            child?.kill()
-          }
-        }
-
-        const nextChild = wslAwareSpawn('rg', rgArgs, {
-          cwd: rootPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
-          stdio: ['ignore', 'pipe', 'pipe']
-        })
-        child = nextChild
-        activeTextSearches.set(searchKey, nextChild)
-
-        const handleStdoutData = (chunk: string): void => {
-          stdoutBuffer += chunk
-          const lines = stdoutBuffer.split('\n')
-          stdoutBuffer = lines.pop() ?? ''
-          for (const line of lines) {
-            processLine(line)
-          }
-        }
-        const handleStderrData = (): void => {
-          // Drain stderr so rg cannot block on a full pipe.
-        }
-        const handleError = (): void => {
-          resolveOnce()
-        }
-        const handleClose = (): void => {
-          if (stdoutBuffer) {
-            processLine(stdoutBuffer)
-          }
-          resolveOnce()
-        }
-
-        nextChild.stdout!.setEncoding('utf-8')
-        nextChild.stdout!.on('data', handleStdoutData)
-        nextChild.stderr!.on('data', handleStderrData)
-        nextChild.once('error', handleError)
-        nextChild.once('close', handleClose)
-
-        // Why: if the timeout fires, the child is killed and results are partial.
-        // We must mark them as truncated so the UI can indicate incomplete results.
-        killTimeout = setTimeout(() => {
-          acc.truncated = true
-          child?.kill()
-          resolveOnce()
-        }, SEARCH_TIMEOUT_MS)
-      })
-    }
-  )
-
-  // ─── List all files (for quick-open) ─────────────────────
-  // Why #7721: keyed by renderer-generated token so a workspace switch can
-  // abort the previous workspace's full-tree scan so superseded scans cannot
-  // starve interactive fs.readDir/fs.stat calls.
-  const listFilesCancellations = createSenderScopedRequestCancellations()
-  ipcMain.handle(
-    'fs:listFiles',
-    async (
-      event,
-      args: {
-        rootPath: string
-        connectionId?: string
-        excludePaths?: string[]
-        requestToken?: string
-      }
-    ): Promise<string[]> => {
-      const controller = listFilesCancellations.begin(event, args.requestToken)
-      try {
-        return await listQuickOpenFiles(args.rootPath, store, args.excludePaths, controller?.signal)
-      } finally {
-        listFilesCancellations.finish(event, args.requestToken, controller)
-      }
-    }
-  )
-
-  ipcMain.handle('fs:cancelListFiles', (event, args: { requestToken: string }): void => {
-    listFilesCancellations.cancel(event, args.requestToken)
-  })
 
   // ─── Git operations ─────────────────────────────────────
   const gitStatusCancellations = createSenderScopedRequestCancellations()
@@ -1978,5 +1742,5 @@ export function registerFilesystemHandlers(
     }
   )
 
-  registerLocalLogTailHandlers(store)
+  initializeLocalLogTailAuthorization(store)
 }

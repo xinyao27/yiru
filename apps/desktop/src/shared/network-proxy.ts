@@ -115,16 +115,3 @@ export function buildConfiguredProxyEnv(
   env.no_proxy = noProxy
   return env
 }
-
-export function redactProxyUrl(value: string): string {
-  const parsed = normalizeProxyUrl(value)
-  if (!parsed.ok || !parsed.value) {
-    return parsed.value
-  }
-  const url = new URL(parsed.value)
-  if (url.username || url.password) {
-    url.username = '***'
-    url.password = url.password ? '***' : ''
-  }
-  return formatProxyUrl(url)
-}

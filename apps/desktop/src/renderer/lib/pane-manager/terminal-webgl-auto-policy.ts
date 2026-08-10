@@ -1,3 +1,4 @@
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 export type TerminalWebglAutoDecision = {
   allowWebgl: boolean
   reason:
@@ -32,7 +33,7 @@ export function isLinuxRendererHost(
 
 function readRendererDisplayServer(): 'wayland' | 'x11' | null {
   try {
-    return window.api.platform.get().displayServer
+    return rendererHostClient.platform.get().displayServer
   } catch {
     return null
   }

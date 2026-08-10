@@ -72,14 +72,6 @@ export function resolveDefaultSmartMode(input: SmartModeAvailabilityInput): Smar
   return available.includes('smart') ? 'smart' : (available[0] ?? 'text')
 }
 
-export function normalizeSmartMode(
-  mode: SmartNameMode,
-  input: SmartModeAvailabilityInput
-): SmartNameMode {
-  const available = resolveAvailableSmartModes(input)
-  return available.includes(mode) ? mode : resolveDefaultSmartMode(input)
-}
-
 export type MrStateFilterOption = { id: MrStateFilter; label: string }
 
 export const MR_STATE_FILTER_OPTIONS: readonly MrStateFilterOption[] = [
@@ -88,5 +80,3 @@ export const MR_STATE_FILTER_OPTIONS: readonly MrStateFilterOption[] = [
   { id: 'closed', label: translate('mobile.newWorkspace.source.state.closed', 'Closed') },
   { id: 'all', label: translate('mobile.newWorkspace.source.state.all', 'All') }
 ]
-
-export const DEFAULT_MR_STATE_FILTER: MrStateFilter = 'opened'

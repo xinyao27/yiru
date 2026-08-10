@@ -1,15 +1,3 @@
-import type {
-  BrowserBackResult,
-  BrowserEvalResult,
-  BrowserGotoResult,
-  BrowserPdfResult,
-  BrowserReloadResult,
-  BrowserScreenshotResult,
-  BrowserScrollResult,
-  BrowserSnapshotResult,
-  BrowserWaitResult
-} from '~shared/runtime-types'
-
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,
@@ -29,13 +17,13 @@ const DEFAULT_BROWSER_WAIT_RPC_TIMEOUT_MS = 60_000
 export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
   snapshot: async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserSnapshotResult>('browser.snapshot', target)
+    const result = await client.call(client.rpc.browser.snapshot, target)
     printResult(result, json, formatSnapshot)
   },
   screenshot: async ({ flags, client, cwd, json }) => {
     const format = getOptionalStringFlag(flags, 'format')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserScreenshotResult>('browser.screenshot', {
+    const result = await client.call(client.rpc.browser.screenshot, {
       format: format === 'jpeg' ? 'jpeg' : undefined,
       ...target
     })
@@ -45,8 +33,8 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
     const url = getRequiredStringFlag(flags, 'url')
     const target = await getBrowserCommandTarget(flags, cwd, client)
     // Why: navigation waits for network idle which can exceed the default 15s RPC timeout
-    const result = await client.call<BrowserGotoResult>(
-      'browser.goto',
+    const result = await client.call(
+      client.rpc.browser.goto,
       { url, ...target },
       { timeoutMs: 60_000 }
     )
@@ -54,19 +42,19 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
   },
   back: async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserBackResult>('browser.back', target)
+    const result = await client.call(client.rpc.browser.back, target)
     printResult(result, json, (v) => `Back to ${v.url} — ${v.title}`)
   },
   reload: async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserReloadResult>('browser.reload', target, {
+    const result = await client.call(client.rpc.browser.reload, target, {
       timeoutMs: 60_000
     })
     printResult(result, json, (v) => `Reloaded ${v.url} — ${v.title}`)
   },
   forward: async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<unknown>('browser.forward', target)
+    const result = await client.call(client.rpc.browser.forward, target)
     printResult(result, json, (v) => {
       const url = (v as { url?: string } | null | undefined)?.url
       return url ? `Navigated forward to ${url}` : 'Navigated forward'
@@ -75,7 +63,7 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
   eval: async ({ flags, client, cwd, json }) => {
     const expression = getRequiredStringFlag(flags, 'expression')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserEvalResult>('browser.eval', { expression, ...target })
+    const result = await client.call(client.rpc.browser.eval, { expression, ...target })
     printResult(result, json, (v) => v.result)
   },
   scroll: async ({ flags, client, cwd, json }) => {
@@ -85,7 +73,7 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
     }
     const amount = getOptionalPositiveIntegerFlag(flags, 'amount')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserScrollResult>('browser.scroll', {
+    const result = await client.call(client.rpc.browser.scroll, {
       direction,
       amount,
       ...target
@@ -101,8 +89,8 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
     const fn = getOptionalStringFlag(flags, 'fn')
     const state = getOptionalStringFlag(flags, 'state')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserWaitResult>(
-      'browser.wait',
+    const result = await client.call(
+      client.rpc.browser.wait,
       {
         selector,
         timeout,
@@ -121,13 +109,13 @@ export const BROWSER_NAV_HANDLERS: Record<string, CommandHandler> = {
   },
   pdf: async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserPdfResult>('browser.pdf', target)
+    const result = await client.call(client.rpc.browser.pdf, target)
     printResult(result, json, (v) => `PDF exported (${v.data.length} bytes base64)`)
   },
   'full-screenshot': async ({ flags, client, cwd, json }) => {
     const format = getOptionalStringFlag(flags, 'format') === 'jpeg' ? 'jpeg' : 'png'
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserScreenshotResult>('browser.fullScreenshot', {
+    const result = await client.call(client.rpc.browser.fullScreenshot, {
       format,
       ...target
     })

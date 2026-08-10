@@ -8,11 +8,11 @@ import { homedir } from 'node:os'
 import { dirname, join, resolve, sep } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-import { app } from 'electron'
 import { MANAGED_HOOK_TIMEOUT_SECONDS } from '~main/agent-hooks/installer-utils'
 import type { Store } from '~main/persistence'
 import type { RateLimitService } from '~main/rate-limits/service'
 import { resolveCodexCommand } from '~main/runtime/cli-command'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { getSpawnArgsForWindows } from '~main/win32-utils'
 import { toWindowsWslPath } from '~main/wsl'
 import { buildEncodedWslBashCommand } from '~main/wsl-bash-command'
@@ -758,7 +758,7 @@ export class CodexAccountService {
   }
 
   private getManagedAccountsRoot(): string {
-    const root = join(app.getPath('userData'), 'codex-accounts')
+    const root = join(getRuntimeHostPathsProvider().userDataPath(), 'codex-accounts')
     mkdirSync(root, { recursive: true })
     return root
   }

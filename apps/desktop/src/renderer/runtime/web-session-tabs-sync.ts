@@ -41,6 +41,7 @@ import type {
 import type { OpenFile } from '../components/editor/state'
 import type { AppState } from '../store'
 import { useAppStore } from '../store'
+import { callRuntimeOrpc, createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './terminal-stream'
 import {
@@ -79,10 +80,6 @@ type SessionTabsStreamEvent =
   | (RuntimeMobileSessionTabsResult & { type: 'snapshot' | 'updated' })
   | { type: 'snapshots'; snapshots: RuntimeMobileSessionTabsResult[] }
   | { type: 'end' }
-
-type SessionTabsListAllResult = {
-  snapshots: RuntimeMobileSessionTabsResult[]
-}
 
 type SnapshotFreshness = {
   publicationEpoch: string
@@ -149,14 +146,6 @@ export type WebSessionTabsSyncState = Pick<
   | 'unreadTerminalTabs'
   | 'sortEpoch'
 >
-
-function isSessionTabsListAllResult(value: unknown): value is SessionTabsListAllResult {
-  return (
-    Boolean(value) &&
-    typeof value === 'object' &&
-    Array.isArray((value as { snapshots?: unknown }).snapshots)
-  )
-}
 
 function sessionTabsFreshnessKey(environmentId: string, worktreeId: string): string {
   return `${environmentId}:${worktreeId}`
@@ -2513,16 +2502,12 @@ async function refreshRequestedWebSessionTabs(
   request: WebSessionTabsRefreshRequest
 ): Promise<void> {
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: request.environmentId,
-      method: 'session.tabs.list',
-      params: { worktree: toRuntimeWorktreeSelector(request.worktreeId) },
-      timeoutMs: 15_000
-    })
-    if (response.ok === false) {
-      throw new Error(response.error.message)
-    }
-    const snapshot = response.result as RuntimeMobileSessionTabsResult
+    const snapshot = await callRuntimeOrpc(
+      { kind: 'environment', environmentId: request.environmentId },
+      (client) => client.session.tabs.list,
+      { worktree: toRuntimeWorktreeSelector(request.worktreeId) },
+      { timeoutMs: 15_000 }
+    )
     applyWebSessionTabsStorePatch((state) =>
       applyFreshWebSessionTabsSnapshot(state, snapshot, request.environmentId)
     )
@@ -2554,6 +2539,126 @@ async function createAndRefreshWebSessionTerminal(args: {
   }
   await requestWebSessionTabsRefresh(args)
   return true
+}
+
+// Why: `session.tabs.subscribeAll` is called by BOTH the web browser client
+// and Electron's desktop-as-remote-client path. On web, `window.api.
+// runtimeEnvironments.subscribe` sends the raw `{id, method, params}` legacy
+// envelope with no capability negotiation, so a host that has retired this
+// method from its legacy dispatcher (Phase 6 D-stage) would answer
+// `method_not_found` — go through the negotiated oRPC client instead. On
+// Electron the same preload member is routed by main to the target host's
+// legacy dispatcher via its own (already capability-aware) shared-control
+// connection, so that path is left exactly as it was.
+function subscribeAllWebSessionTabs(
+  environmentId: string,
+  isDisposed: () => boolean,
+  registerUnsubscribe: (unsubscribe: () => void) => void
+): void {
+  if (isWebRuntimeClient()) {
+    const controller = new AbortController()
+    registerUnsubscribe(() => controller.abort())
+    void (async () => {
+      let connection: Awaited<ReturnType<typeof createRuntimeOrpcClient>> | null = null
+      try {
+        connection = await createRuntimeOrpcClient(
+          { kind: 'environment', environmentId },
+          { signal: controller.signal }
+        )
+        const stream = await connection.client.session.tabs.subscribeAll(undefined, {
+          signal: controller.signal
+        })
+        for await (const event of stream) {
+          if (isDisposed() || controller.signal.aborted) {
+            return
+          }
+          if (event.type === 'snapshots') {
+            applyWebSessionTabsStorePatch((state) =>
+              applyFreshWebSessionTabsSnapshots(state, event.snapshots, environmentId)
+            )
+          } else if (event.type === 'updated') {
+            applyWebSessionTabsStorePatch((state) =>
+              applyFreshWebSessionTabsSnapshot(state, event, environmentId)
+            )
+          }
+        }
+      } catch (error) {
+        if (!isDisposed() && !controller.signal.aborted) {
+          console.warn(
+            '[web-session-tabs-sync] global subscription error:',
+            error instanceof Error ? error.message : String(error)
+          )
+        }
+      } finally {
+        connection?.close()
+      }
+    })()
+    return
+  }
+
+  void window.api.runtimeEnvironments
+    .subscribe(
+      {
+        selector: environmentId,
+        method: 'session.tabs.subscribeAll',
+        params: {},
+        timeoutMs: 15_000
+      },
+      {
+        onResponse: (response: RuntimeRpcResponse<unknown>) => {
+          if (isDisposed()) {
+            return
+          }
+          if (response.ok === false) {
+            console.warn(
+              '[web-session-tabs-sync] global subscription failed:',
+              response.error.message
+            )
+            return
+          }
+          const event = response.result as SessionTabsStreamEvent
+          const replayed = isRuntimeSubscriptionReplayResponse(response)
+          if (event.type === 'snapshots') {
+            if (replayed) {
+              for (const snapshot of event.snapshots) {
+                acceptReplayedWebSessionTabsSnapshot(environmentId, snapshot.worktree)
+              }
+            }
+            applyWebSessionTabsStorePatch((state) =>
+              applyFreshWebSessionTabsSnapshots(state, event.snapshots, environmentId)
+            )
+            return
+          }
+          if (event.type !== 'snapshot' && event.type !== 'updated') {
+            return
+          }
+          if (replayed) {
+            acceptReplayedWebSessionTabsSnapshot(environmentId, event.worktree)
+          }
+          applyWebSessionTabsStorePatch((state) =>
+            applyFreshWebSessionTabsSnapshot(state, event, environmentId)
+          )
+        },
+        onError: (error) => {
+          console.warn('[web-session-tabs-sync] global subscription error:', error.message)
+        }
+      }
+    )
+    .then((handle) => {
+      if (isDisposed()) {
+        handle.unsubscribe()
+        return
+      }
+      registerUnsubscribe(handle.unsubscribe)
+    })
+    .catch((error) => {
+      if (!isDisposed()) {
+        console.warn(
+          '[web-session-tabs-sync] failed to subscribe globally:',
+          error instanceof Error ? error.message : String(error)
+        )
+      }
+    })
 }
 
 export function useWebSessionTabsSync(): void {
@@ -2593,24 +2698,14 @@ export function useWebSessionTabsSync(): void {
       ) {
         continue
       }
-      void window.api.runtimeEnvironments
-        .call({
-          selector: environmentId,
-          method: 'session.tabs.listAll',
-          params: {},
-          timeoutMs: 15_000
-        })
-        .then((response: RuntimeRpcResponse<unknown>) => {
+      void callRuntimeOrpc(
+        { kind: 'environment', environmentId },
+        (client) => client.session.tabs.listAll,
+        undefined,
+        { timeoutMs: 15_000 }
+      )
+        .then((result) => {
           if (disposed) {
-            return
-          }
-          if (response.ok === false) {
-            console.warn('[web-session-tabs-sync] initial listAll failed:', response.error.message)
-            return
-          }
-          const result = response.result
-          if (!isSessionTabsListAllResult(result)) {
-            console.warn('[web-session-tabs-sync] initial listAll returned an invalid payload')
             return
           }
           applyWebSessionTabsStorePatch((state) =>
@@ -2626,69 +2721,11 @@ export function useWebSessionTabsSync(): void {
           }
         })
 
-      void window.api.runtimeEnvironments
-        .subscribe(
-          {
-            selector: environmentId,
-            method: 'session.tabs.subscribeAll',
-            params: {},
-            timeoutMs: 15_000
-          },
-          {
-            onResponse: (response: RuntimeRpcResponse<unknown>) => {
-              if (disposed) {
-                return
-              }
-              if (response.ok === false) {
-                console.warn(
-                  '[web-session-tabs-sync] global subscription failed:',
-                  response.error.message
-                )
-                return
-              }
-              const event = response.result as SessionTabsStreamEvent
-              const replayed = isRuntimeSubscriptionReplayResponse(response)
-              if (event.type === 'snapshots') {
-                if (replayed) {
-                  for (const snapshot of event.snapshots) {
-                    acceptReplayedWebSessionTabsSnapshot(environmentId, snapshot.worktree)
-                  }
-                }
-                applyWebSessionTabsStorePatch((state) =>
-                  applyFreshWebSessionTabsSnapshots(state, event.snapshots, environmentId)
-                )
-                return
-              }
-              if (event.type !== 'snapshot' && event.type !== 'updated') {
-                return
-              }
-              if (replayed) {
-                acceptReplayedWebSessionTabsSnapshot(environmentId, event.worktree)
-              }
-              applyWebSessionTabsStorePatch((state) =>
-                applyFreshWebSessionTabsSnapshot(state, event, environmentId)
-              )
-            },
-            onError: (error) => {
-              console.warn('[web-session-tabs-sync] global subscription error:', error.message)
-            }
-          }
-        )
-        .then((handle) => {
-          if (disposed) {
-            handle.unsubscribe()
-            return
-          }
-          unsubscribes.push(handle.unsubscribe)
-        })
-        .catch((error) => {
-          if (!disposed) {
-            console.warn(
-              '[web-session-tabs-sync] failed to subscribe globally:',
-              error instanceof Error ? error.message : String(error)
-            )
-          }
-        })
+      subscribeAllWebSessionTabs(
+        environmentId,
+        () => disposed,
+        (unsubscribe) => unsubscribes.push(unsubscribe)
+      )
     }
 
     return () => {
@@ -2719,103 +2756,150 @@ export function useWebSessionTabsSync(): void {
     }
 
     let disposed = false
-    let requestedInitialTerminal = false
-    let requestedRespawnAfterWake = false
-    let unsubscribe: (() => void) | null = null
-    void window.api.runtimeEnvironments
-      .subscribe(
-        {
-          selector: environmentId,
-          method: 'session.tabs.subscribe',
-          params: { worktree: toRuntimeWorktreeSelector(activeWorktreeId) },
-          timeoutMs: 15_000
-        },
-        {
-          onResponse: (response: RuntimeRpcResponse<unknown>) => {
-            if (disposed) {
-              return
-            }
-            if (response.ok === false) {
-              console.warn('[web-session-tabs-sync] subscription failed:', response.error.message)
-              return
-            }
-            const event = response.result as SessionTabsStreamEvent
-            if (event.type !== 'snapshot' && event.type !== 'updated') {
-              return
-            }
-            if (isRuntimeSubscriptionReplayResponse(response)) {
-              acceptReplayedWebSessionTabsSnapshot(environmentId, event.worktree)
-            }
-            const fresh = shouldApplyWebSessionTabsSnapshot(event, environmentId)
-            const syncState = useAppStore.getState()
-            const localWorktreeTabs = syncState.tabsByWorktree[activeWorktreeId] ?? []
-            const localTerminalCount = localWorktreeTabs.length
-            const hasLiveLocalPty = localWorktreeTabs.some(
-              (tab) => (syncState.ptyIdsByTabId[tab.id] ?? []).length > 0
-            )
-            const shouldBootstrapInitialTerminal = shouldBootstrapInitialWebRuntimeTerminal({
-              event,
-              activeWorktreeId,
-              requestedInitialTerminal,
-              snapshotIsFresh: fresh,
-              localTerminalCount
-            })
-            const shouldRespawnAfterWake = shouldRespawnWebRuntimeTerminalAfterWake({
-              event,
-              activeWorktreeId,
-              requestedRespawnAfterWake,
-              snapshotIsFresh: fresh,
-              localTerminalCount,
-              hasLiveLocalPty,
-              skipWakeRespawn: shouldSkipWebRuntimeWakeTerminalRespawn(activeWorktreeId)
-            })
-            if (fresh) {
-              applyWebSessionTabsStorePatch((state) =>
-                applyWebSessionTabsSnapshot(state, event, environmentId)
-              )
-            }
-            if (!disposed && shouldBootstrapInitialTerminal) {
-              requestedInitialTerminal = true
-              void createAndRefreshWebSessionTerminal({
-                worktreeId: activeWorktreeId,
-                environmentId
-              })
-            } else if (
-              !disposed &&
-              shouldRespawnAfterWake &&
-              beginWebRuntimeWakeTerminalRespawn(activeWorktreeId)
-            ) {
-              requestedRespawnAfterWake = true
-              // Why: wake recovery must recreate the terminal without changing
-              // selected worktree to avoid re-triggering activation churn.
-              void createAndRefreshWebSessionTerminal({
-                worktreeId: activeWorktreeId,
-                environmentId
-              }).finally(() => {
-                endWebRuntimeWakeTerminalRespawn(activeWorktreeId)
-              })
-            }
-          },
-          onError: (error) => {
-            console.warn('[web-session-tabs-sync] subscription error:', error.message)
-          }
-        }
+    const isDisposed = (): boolean => disposed
+    const requestState = { initial: false, respawnAfterWake: false }
+    const handleSessionTabsEvent = (event: SessionTabsStreamEvent, replayed: boolean): void => {
+      if (event.type !== 'snapshot' && event.type !== 'updated') {
+        return
+      }
+      if (replayed) {
+        acceptReplayedWebSessionTabsSnapshot(environmentId, event.worktree)
+      }
+      const fresh = shouldApplyWebSessionTabsSnapshot(event, environmentId)
+      const syncState = useAppStore.getState()
+      const localWorktreeTabs = syncState.tabsByWorktree[activeWorktreeId] ?? []
+      const localTerminalCount = localWorktreeTabs.length
+      const hasLiveLocalPty = localWorktreeTabs.some(
+        (tab) => (syncState.ptyIdsByTabId[tab.id] ?? []).length > 0
       )
-      .then((handle) => {
-        if (disposed) {
-          handle.unsubscribe()
-          return
-        }
-        unsubscribe = handle.unsubscribe
+      const shouldBootstrapInitialTerminal = shouldBootstrapInitialWebRuntimeTerminal({
+        event,
+        activeWorktreeId,
+        requestedInitialTerminal: requestState.initial,
+        snapshotIsFresh: fresh,
+        localTerminalCount
       })
-      .catch((error) => {
-        if (!disposed) {
-          console.warn(
-            '[web-session-tabs-sync] failed to subscribe:',
-            error instanceof Error ? error.message : String(error)
+      const shouldRespawnAfterWake = shouldRespawnWebRuntimeTerminalAfterWake({
+        event,
+        activeWorktreeId,
+        requestedRespawnAfterWake: requestState.respawnAfterWake,
+        snapshotIsFresh: fresh,
+        localTerminalCount,
+        hasLiveLocalPty,
+        skipWakeRespawn: shouldSkipWebRuntimeWakeTerminalRespawn(activeWorktreeId)
+      })
+      if (fresh) {
+        applyWebSessionTabsStorePatch((state) =>
+          applyWebSessionTabsSnapshot(state, event, environmentId)
+        )
+      }
+      if (!isDisposed() && shouldBootstrapInitialTerminal) {
+        requestState.initial = true
+        void createAndRefreshWebSessionTerminal({
+          worktreeId: activeWorktreeId,
+          environmentId
+        })
+      } else if (
+        !isDisposed() &&
+        shouldRespawnAfterWake &&
+        beginWebRuntimeWakeTerminalRespawn(activeWorktreeId)
+      ) {
+        requestState.respawnAfterWake = true
+        // Why: wake recovery must recreate the terminal without changing
+        // selected worktree to avoid re-triggering activation churn.
+        void createAndRefreshWebSessionTerminal({
+          worktreeId: activeWorktreeId,
+          environmentId
+        }).finally(() => {
+          endWebRuntimeWakeTerminalRespawn(activeWorktreeId)
+        })
+      }
+    }
+
+    let unsubscribe: (() => void) | null = null
+    // Why: `session.tabs.subscribe` runs on both the web browser client and
+    // Electron's desktop-as-remote-client path. On web the bare
+    // `window.api.runtimeEnvironments.subscribe` string channel skips
+    // capability negotiation and always lands on the legacy dispatcher, which
+    // no longer serves this method once its domain retires from it (Phase 6
+    // D-stage) — dispatch through the negotiated oRPC client instead.
+    // Electron's own routing for the same preload member is already
+    // capability-aware, so that path is left untouched.
+    if (isWebRuntimeClient()) {
+      const controller = new AbortController()
+      unsubscribe = () => controller.abort()
+      void (async () => {
+        let connection: Awaited<ReturnType<typeof createRuntimeOrpcClient>> | null = null
+        try {
+          connection = await createRuntimeOrpcClient(
+            { kind: 'environment', environmentId },
+            { signal: controller.signal }
           )
+          const stream = await connection.client.session.tabs.subscribe(
+            { worktree: toRuntimeWorktreeSelector(activeWorktreeId) },
+            { signal: controller.signal }
+          )
+          for await (const event of stream) {
+            if (isDisposed() || controller.signal.aborted) {
+              return
+            }
+            handleSessionTabsEvent(event, false)
+          }
+        } catch (error) {
+          if (!isDisposed() && !controller.signal.aborted) {
+            console.warn(
+              '[web-session-tabs-sync] subscription error:',
+              error instanceof Error ? error.message : String(error)
+            )
+          }
+        } finally {
+          connection?.close()
         }
-      })
+      })()
+    } else {
+      void window.api.runtimeEnvironments
+        .subscribe(
+          {
+            selector: environmentId,
+            method: 'session.tabs.subscribe',
+            params: { worktree: toRuntimeWorktreeSelector(activeWorktreeId) },
+            timeoutMs: 15_000
+          },
+          {
+            onResponse: (response: RuntimeRpcResponse<unknown>) => {
+              if (isDisposed()) {
+                return
+              }
+              if (response.ok === false) {
+                console.warn('[web-session-tabs-sync] subscription failed:', response.error.message)
+                return
+              }
+              handleSessionTabsEvent(
+                response.result as SessionTabsStreamEvent,
+                isRuntimeSubscriptionReplayResponse(response)
+              )
+            },
+            onError: (error) => {
+              console.warn('[web-session-tabs-sync] subscription error:', error.message)
+            }
+          }
+        )
+        .then((handle) => {
+          if (isDisposed()) {
+            handle.unsubscribe()
+            return
+          }
+          unsubscribe = handle.unsubscribe
+        })
+        .catch((error) => {
+          if (!isDisposed()) {
+            console.warn(
+              '[web-session-tabs-sync] failed to subscribe:',
+              error instanceof Error ? error.message : String(error)
+            )
+          }
+        })
+    }
 
     return () => {
       disposed = true

@@ -65,6 +65,20 @@ export type RemoteRuntimeSharedSubscription = {
   sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => boolean
 }
 
+export type SharedControlOrpcTunnelCallbacks = {
+  onText: (frame: string) => void
+  onBinary: (frame: Uint8Array<ArrayBufferLike>) => void
+  onSideChannelBinary: (requestId: string, frame: Uint8Array<ArrayBufferLike>) => void
+  onClose: (error: Error) => void
+  formatCloseError?: (error: Error) => Error
+}
+
+export type RemoteRuntimeOrpcTunnel = {
+  sendText: (frame: string) => boolean
+  sendBinary: (frame: Uint8Array<ArrayBufferLike>) => boolean
+  close: () => void
+}
+
 export type RemoteRuntimeSharedConnectionDiagnostics = {
   state: SharedControlConnectionState | 'reconnecting'
   pendingRequestCount: number

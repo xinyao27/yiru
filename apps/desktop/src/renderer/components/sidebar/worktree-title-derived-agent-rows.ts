@@ -143,7 +143,7 @@ function buildTitleDerivedAgentRow(args: {
     entry,
     tab: args.tab,
     agentType,
-    rowSource: 'live',
+    rowSource: 'title',
     state: rowState,
     startedAt: 0
   }

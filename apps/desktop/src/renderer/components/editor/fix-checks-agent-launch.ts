@@ -125,12 +125,11 @@ export async function startFixChecksAgent(args: StartFixChecksAgentArgs): Promis
       )
       return false
     }
-    const targetConnectionId = getConnectionId(targetWorktreeId) ?? repo?.connectionId ?? null
-    const agent = await pickExistingWorktreeAgent(
-      targetWorktreeId,
-      savedAgentId,
-      repo?.connectionId
-    )
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+    // removed (#63) — getConnectionId already resolves to null for any found
+    // repo, so a fallback read of repo.connectionId can never differ.
+    const targetConnectionId = getConnectionId(targetWorktreeId) ?? null
+    const agent = await pickExistingWorktreeAgent(targetWorktreeId, savedAgentId, null)
     if (!agent) {
       return false
     }

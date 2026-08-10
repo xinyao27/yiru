@@ -25,7 +25,6 @@ import { useAppStore } from '~renderer/store'
 import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
 import { resolveUnifiedTabLabel } from '~shared/tab-title-resolution'
 import type { BrowserTab as BrowserTabState, Tab, TabGroup, TerminalTab } from '~shared/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import { requestEditorFileClose } from '../editor/autosave'
 import { openTabBarEntry, type TabCreateEntryArgs } from '../tab-bar/tab-create-entry-action'
@@ -281,10 +280,7 @@ export function useTabGroupWorkspaceModel({
         destroyWorkspaceWebviews(browserState.browserPagesByWorkspace, item.entityId)
         closeBrowserTab(item.entityId)
         closeUnifiedTab(item.id)
-      } else if (
-        item.contentType === 'simulator' ||
-        isWorkspacePanelTabContentType(item.contentType)
-      ) {
+      } else if (item.contentType === 'simulator' || item.contentType === 'git-graph') {
         closeUnifiedTab(item.id)
       } else {
         const canCloseTab = closeEditorIfUnreferenced(item.entityId, item.id)
@@ -347,10 +343,7 @@ export function useTabGroupWorkspaceModel({
           closeUnifiedTab(item.id)
         } else if (item.contentType === 'terminal') {
           closeTab(item.entityId)
-        } else if (
-          item.contentType === 'simulator' ||
-          isWorkspacePanelTabContentType(item.contentType)
-        ) {
+        } else if (item.contentType === 'simulator' || item.contentType === 'git-graph') {
           closeUnifiedTab(item.id)
         } else {
           const canCloseTab = closeEditorIfUnreferenced(item.entityId, item.id)
@@ -474,21 +467,17 @@ export function useTabGroupWorkspaceModel({
     [activateTab, focusGroup, groupId, groupTabs, setActiveBrowserTab, setActiveTabType, worktreeId]
   )
 
-  const activateWorkspacePanel = useCallback(
+  const activateGitGraph = useCallback(
     (tabId: string) => {
       const item = groupTabs.find(
-        (candidate) =>
-          candidate.id === tabId && isWorkspacePanelTabContentType(candidate.contentType)
+        (candidate) => candidate.id === tabId && candidate.contentType === 'git-graph'
       )
-      if (!item || !isWorkspacePanelTabContentType(item.contentType)) {
+      if (!item) {
         return
       }
       focusGroup(worktreeId, groupId)
       activateTab(item.id)
       setActiveTabType('editor')
-      const state = useAppStore.getState()
-      state.setRightSidebarTab(item.contentType)
-      state.setRightSidebarOpen(true)
     },
     [activateTab, focusGroup, groupId, groupTabs, setActiveTabType, worktreeId]
   )
@@ -617,7 +606,7 @@ export function useTabGroupWorkspaceModel({
       activateBrowser,
       activateEditor,
       activateTerminal,
-      activateWorkspacePanel,
+      activateGitGraph,
       closeAllEditorTabsInGroup,
       closeGroup,
       closeItem,

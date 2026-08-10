@@ -8,6 +8,7 @@ import { formatDiffComment } from '~renderer/components/editor/diff-comments-for
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { DiffComment, GitStatusEntry } from '~shared/types'
 
 import { useCopyFeedbackState } from './copy-feedback-state'
@@ -85,7 +86,7 @@ export function DiffCommentsInlineList({
   const handleCopyOne = useCallback(
     async (c: DiffComment): Promise<void> => {
       try {
-        await window.api.ui.writeClipboardText(formatDiffComment(c))
+        await shellClient.ui.writeClipboardText(formatDiffComment(c))
         showCopiedId(c.id)
       } catch {
         // Why: swallow — clipboard write can fail when the window isn't focused.

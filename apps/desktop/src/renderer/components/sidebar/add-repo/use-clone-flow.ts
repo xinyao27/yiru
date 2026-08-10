@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateA
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import type { AddRepoExistingWorkspaceSource } from '~shared/telemetry-events'
 import type { Repo } from '~shared/types'
@@ -14,14 +16,12 @@ import { upsertAddedRepoWithProjectHostSetup } from './store-upsert'
 export function useAddRepoCloneFlow({
   step,
   activeRuntimeEnvironmentId,
-  sshTargetId,
   workspaceDir,
   fetchWorktrees,
   onGitRepoReady
 }: {
   step: AddRepoDialogStep
   activeRuntimeEnvironmentId: string | null | undefined
-  sshTargetId?: string | null
   workspaceDir: string | null | undefined
   fetchWorktrees: (repoId: string, options?: { requireAuthoritative?: boolean }) => Promise<unknown>
   onGitRepoReady: (repoId: string, source: AddRepoExistingWorkspaceSource) => Promise<void>
@@ -45,7 +45,7 @@ export function useAddRepoCloneFlow({
   const [cloneProgress, setCloneProgress] = useState<{ phase: string; percent: number } | null>(
     null
   )
-  const hostToken = `${activeRuntimeEnvironmentId?.trim() ?? ''}:${sshTargetId?.trim() ?? ''}`
+  const hostToken = activeRuntimeEnvironmentId?.trim() ?? ''
   const hostTokenRef = useRef(hostToken)
   hostTokenRef.current = hostToken
   // Why: monotonic ID so stale clone callbacks can detect they were superseded.
@@ -58,14 +58,13 @@ export function useAddRepoCloneFlow({
     if (!isCloning) {
       return
     }
-    return window.api.repos.onCloneProgress(setCloneProgress)
+    return workspaceHostClient.repos.onCloneProgress(setCloneProgress)
   }, [isCloning])
 
   const cloneDestinationAutoFill = getCloneDestinationAutoFill({
     step,
     cloneDestination,
     activeRuntimeEnvironmentId,
-    sshTargetId,
     workspaceDir,
     cloneStepAutoFilled: cloneStepAutoFilledRef.current
   })
@@ -88,9 +87,9 @@ export function useAddRepoCloneFlow({
   }, [])
 
   const handlePickDestination = useCallback(async (): Promise<void> => {
-    if (activeRuntimeEnvironmentId?.trim() || sshTargetId?.trim()) {
+    if (activeRuntimeEnvironmentId?.trim()) {
       // Why: the native folder picker returns a client-local path. Runtime
-      // and SSH clone destinations must be typed as paths on that host.
+      // clone destinations must be typed as paths on that host.
       toast.error(
         translate(
           'auto.components.sidebar.useAddRepoCloneFlow.0dc4d1b657',
@@ -100,12 +99,12 @@ export function useAddRepoCloneFlow({
       return
     }
     const gen = cloneGenRef.current
-    const dir = await window.api.repos.pickDirectory()
+    const dir = await workspaceHostClient.repos.pickDirectory()
     if (dir && gen === cloneGenRef.current) {
       setCloneDestination(dir)
       setCloneError(null)
     }
-  }, [activeRuntimeEnvironmentId, sshTargetId])
+  }, [activeRuntimeEnvironmentId])
 
   const handleClone = useCallback(async (): Promise<void> => {
     const trimmedUrl = cloneUrl.trim()
@@ -124,17 +123,12 @@ export function useAddRepoCloneFlow({
             ...useAppStore.getState().settings,
             activeRuntimeEnvironmentId: null
           })
-      const repo = sshTargetId?.trim()
-        ? await window.api.repos.cloneRemote({
-            connectionId: sshTargetId.trim(),
-            url: trimmedUrl,
-            destination: cloneDestination.trim()
-          })
-        : target.kind === 'environment'
+      const repo =
+        target.kind === 'environment'
           ? (
-              await callRuntimeRpc<{ repo: Repo }>(
+              await callRuntimeOrpc(
                 target,
-                'repo.clone',
+                (client) => client.repo.clone,
                 {
                   url: trimmedUrl,
                   destination: cloneDestination.trim()
@@ -142,7 +136,7 @@ export function useAddRepoCloneFlow({
                 { timeoutMs: 10 * 60_000 }
               )
             ).repo
-          : ((await window.api.repos.clone({
+          : ((await workspaceHostClient.repos.clone({
               url: trimmedUrl,
               destination: cloneDestination.trim()
             })) as Repo)
@@ -172,14 +166,7 @@ export function useAddRepoCloneFlow({
         setIsCloning(false)
       }
     }
-  }, [
-    activeRuntimeEnvironmentId,
-    cloneUrl,
-    cloneDestination,
-    fetchWorktrees,
-    onGitRepoReady,
-    sshTargetId
-  ])
+  }, [activeRuntimeEnvironmentId, cloneUrl, cloneDestination, fetchWorktrees, onGitRepoReady])
 
   return {
     cloneUrl,

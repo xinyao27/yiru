@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 
 import type { WebSocket } from 'ws'
 import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
+import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '~shared/runtime-orpc-socket'
 
 import type { DeviceEntry, DeviceRegistry } from '../device-registry'
 import type { E2EEKeypair } from '../e2ee-keypair'
@@ -28,11 +29,14 @@ export type AuthenticatedMobileSocket = {
   ws: WebSocket
   connectionId: string
   device: E2EEAuthenticatedDevice
+  sendText: (plaintext: string) => boolean
+  sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
 }
 
 type MobileSocketWiringOptions = {
   deviceRegistry: DeviceRegistry
   e2eeKeypair: E2EEKeypair
+  getRuntimeId: () => string
   onText: (
     socket: AuthenticatedMobileSocket,
     plaintext: string,
@@ -54,6 +58,7 @@ function toAuthenticatedDevice(device: DeviceEntry): E2EEAuthenticatedDevice {
 export class MobileSocketWiring {
   private readonly deviceRegistry: DeviceRegistry
   private readonly e2eeKeypair: E2EEKeypair
+  private readonly getRuntimeId: () => string
   private readonly onText: MobileSocketWiringOptions['onText']
   private readonly onBinary: MobileSocketWiringOptions['onBinary']
   private readonly onClose: MobileSocketWiringOptions['onClose']
@@ -65,6 +70,7 @@ export class MobileSocketWiring {
   constructor(options: MobileSocketWiringOptions) {
     this.deviceRegistry = options.deviceRegistry
     this.e2eeKeypair = options.e2eeKeypair
+    this.getRuntimeId = options.getRuntimeId
     this.onText = options.onText
     this.onBinary = options.onBinary
     this.onClose = options.onClose
@@ -109,6 +115,8 @@ export class MobileSocketWiring {
       this.connectionIds.set(ws, connectionId)
       channel = new E2EEChannel(ws, {
         serverSecretKey: this.e2eeKeypair.secretKey,
+        authenticatedCapabilities: [RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY],
+        authenticatedRuntimeId: this.getRuntimeId(),
         resolveAuthenticatedDevice: (token) => {
           const device = this.deviceRegistry.validateToken(token)
           if (!device) {
@@ -120,7 +128,14 @@ export class MobileSocketWiring {
           if (!this.canAdmitDeviceConnection(device)) {
             throw new Error('coworking_grant_connection_quota_exceeded')
           }
-          const socket = { ws, connectionId, device }
+          const socket = {
+            ws,
+            connectionId,
+            device,
+            sendText: (plaintext: string) => channel?.sendText(plaintext) ?? false,
+            sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) =>
+              channel?.sendBinary(plaintext) ?? false
+          }
           this.authenticatedSockets.set(ws, socket)
           transport.setClientId(ws, device.deviceToken)
           this.deviceRegistry.updateLastSeen(device.deviceId)

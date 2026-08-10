@@ -32,10 +32,10 @@ import {
 } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-import { app } from 'electron'
 import type { Store } from '~main/persistence'
 import { WSL_CODEX_RUNTIME_HOME_SEGMENTS } from '~main/pty/codex-home-wsl-env'
 import { readShellStartupEnvVar } from '~main/pty/shell-startup-env'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { getDefaultWslDistro, getWslHome } from '~main/wsl'
 import type { CodexManagedAccount } from '~shared/types'
 
@@ -1365,7 +1365,7 @@ export class CodexRuntimeHomeService {
   }
 
   private getRuntimeMetadataDir(): string {
-    const metadataDir = join(app.getPath('userData'), 'codex-runtime-home')
+    const metadataDir = join(getRuntimeHostPathsProvider().userDataPath(), 'codex-runtime-home')
     mkdirSync(metadataDir, { recursive: true })
     return metadataDir
   }
@@ -1383,7 +1383,7 @@ export class CodexRuntimeHomeService {
   }
 
   private getManagedAccountsRoot(): string {
-    return join(app.getPath('userData'), 'codex-accounts')
+    return join(getRuntimeHostPathsProvider().userDataPath(), 'codex-accounts')
   }
 
   private repointLegacyActiveHomePointer(activeHomePath: string, runtimeHomePath: string): void {

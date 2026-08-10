@@ -8,11 +8,6 @@ import { createRichMarkdownEditorCodec } from './rich-markdown/source-transport'
 const roundTripCache = new Map<string, string | null>()
 const MAX_CACHE_ENTRIES = 20
 
-export function canRoundTripRichMarkdown(content: string): boolean {
-  const output = getRichMarkdownRoundTripOutput(content)
-  return output !== null && normalizeMarkdown(content) === normalizeMarkdown(output)
-}
-
 export function getRichMarkdownRoundTripOutput(content: string): string | null {
   const cached = roundTripCache.get(content)
   if (cached !== undefined) {
@@ -59,8 +54,4 @@ export function getRichMarkdownRoundTripOutput(content: string): string | null {
   }
 
   return output
-}
-
-function normalizeMarkdown(content: string): string {
-  return content.replace(/\r\n/g, '\n').trimEnd()
 }

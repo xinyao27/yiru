@@ -14,6 +14,7 @@ import {
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
+import { snapshotAutomationWorkspaceNameForTarget } from '~renderer/components/automations/automation-host-client'
 import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
 import { forgetAgentHibernationTabOutput } from '~renderer/components/terminal-pane/agent/hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '~renderer/components/terminal-pane/agent/startup-delivery-guards'
@@ -29,31 +30,20 @@ import {
   scheduleAfterInputQuiet
 } from '~renderer/lib/input-quiet-scheduler'
 import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
-import {
-  callRuntimeRpc,
-  getActiveRuntimeTarget,
-  isRuntimeScopeForbiddenError,
-  RuntimeRpcCallError
-} from '~renderer/runtime/rpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { disposeRemovedWorktreeParkedTerminalWatchers } from '~renderer/runtime/terminal-parked-watcher-registry'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { folderWorkspaceToWorktree } from '~shared/folder-workspace-worktree'
-import {
-  WORKTREE_CREATE_CONTRACT,
-  WORKTREE_LIST_CONTRACT,
-  WORKTREE_REMOVE_CONTRACT,
-  WORKTREE_SET_CONTRACT
-} from '~shared/runtime-method-contracts/workspace-contracts'
 import type {
   DetectedWorktreeListResult,
   TerminalLayoutSnapshot,
   TerminalPaneLayoutNode,
   LocalBaseRefRefreshResult,
-  ForceDeleteWorktreeBranchResult,
   FolderWorkspace,
-  GitHubPrStartPoint,
   Worktree,
   WorkspaceVisibleTabType,
   GitPushTarget,
@@ -550,7 +540,7 @@ function toLegacyDetectedWorktreeResult(
 }
 
 function isRuntimeMethodNotFoundError(error: unknown): boolean {
-  return error instanceof RuntimeRpcCallError && error.code === 'method_not_found'
+  return isRuntimeOrpcErrorCode(error, 'method_not_found')
 }
 
 // Why: a mobile-scope web pairing is denied worktree/repo RPCs, which would
@@ -558,7 +548,7 @@ function isRuntimeMethodNotFoundError(error: unknown): boolean {
 // deduped, actionable toast (stable id) instead of spamming per-repo, steering
 // the user to re-pair via the full-access browser link.
 function notifyRuntimeScopeForbiddenIfNeeded(error: unknown): boolean {
-  if (!isRuntimeScopeForbiddenError(error)) {
+  if (!isRuntimeOrpcErrorCode(error, 'forbidden')) {
     return false
   }
   publishRendererCommandResult({ type: 'worktree-runtime-scope-forbidden' })
@@ -776,7 +766,9 @@ function settingsForKnownRepoOwner(
   settings: AppState['settings'],
   repo: { connectionId?: string | null; executionHostId?: ExecutionHostId | null }
 ) {
-  if (!repo.executionHostId && !repo.connectionId) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (!repo.executionHostId) {
     return settings
   }
   const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
@@ -834,8 +826,8 @@ async function listDetectedWorktreesForRepo(
 ): Promise<DetectedWorktreeListResult> {
   const target = getActiveRuntimeTarget(settings)
   if (target.kind === 'local') {
-    const worktreesApi = window.api.worktrees as typeof window.api.worktrees & {
-      listDetected?: typeof window.api.worktrees.listDetected
+    const worktreesApi = workspaceHostClient.worktrees as typeof workspaceHostClient.worktrees & {
+      listDetected?: typeof workspaceHostClient.worktrees.listDetected
     }
     if (typeof worktreesApi.listDetected === 'function') {
       return worktreesApi.listDetected({ repoId })
@@ -844,9 +836,9 @@ async function listDetectedWorktreesForRepo(
     return toLegacyDetectedWorktreeResult(repoId, { worktrees: legacyWorktrees })
   }
   try {
-    return await callRuntimeRpc<DetectedWorktreeListResult>(
+    return await callRuntimeOrpc(
       target,
-      'worktree.detectedList',
+      (client) => client.worktree.detectedList,
       { repo: repoId },
       {
         timeoutMs: 15_000,
@@ -857,9 +849,9 @@ async function listDetectedWorktreesForRepo(
     if (!isRuntimeMethodNotFoundError(error)) {
       throw error
     }
-    const legacy = await callRuntimeRpc(
+    const legacy = await callRuntimeOrpc(
       target,
-      WORKTREE_LIST_CONTRACT,
+      (client) => client.worktree.list,
       { repo: repoId, limit: REMOTE_WORKTREE_LIST_PARITY_LIMIT },
       {
         timeoutMs: 15_000,
@@ -950,13 +942,10 @@ async function listWorktreeLineageForRuntime(
           workspaceLineageByChildKey: {}
         }
   if (target.kind === 'local') {
-    return normalizeLineageResponse(await window.api.worktrees.listLineage())
+    return normalizeLineageResponse(await workspaceHostClient.worktrees.listLineage())
   }
   return normalizeLineageResponse(
-    await callRuntimeRpc<{
-      lineage: Record<string, WorktreeLineage>
-      workspaceLineage?: Record<string, WorkspaceLineage>
-    }>(target, 'worktree.lineageList', undefined, {
+    await callRuntimeOrpc(target, (client) => client.worktree.lineageList, undefined, {
       timeoutMs: 15_000,
       reuseRecentCompatibilityFailure: options.reuseRecentCompatibilityFailure
     })
@@ -1004,15 +993,13 @@ async function setWorktreeLineageForRuntime(
   args: { parentWorktreeId?: string; noParent?: boolean }
 ): Promise<WorktreeLineageUpdateResult> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind === 'local') {
-    return {
-      target,
-      lineage: await window.api.worktrees.updateLineage({ worktreeId, ...args })
-    }
-  }
-  const result = await callRuntimeRpc(
+  // Why: the local IPC handler for `worktrees:updateLineage` already delegates
+  // to `runtime.updateManagedWorktreeMeta` — the exact method `worktree.set`
+  // calls on the environment path — so routing local through the same oRPC
+  // call is not a behavior change, just one fewer preload channel.
+  const result = await callRuntimeOrpc(
     target,
-    WORKTREE_SET_CONTRACT,
+    (client) => client.worktree.set,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...(args.parentWorktreeId
@@ -1210,12 +1197,12 @@ async function persistWorktreeMeta(
 ): Promise<void> {
   const target = getActiveRuntimeTarget(settings)
   if (target.kind === 'local') {
-    await window.api.worktrees.updateMeta({ worktreeId, updates })
+    await workspaceHostClient.worktrees.updateMeta({ worktreeId, updates })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    WORKTREE_SET_CONTRACT,
+    (client) => client.worktree.set,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...encodePushTargetClearForRuntimeRpc(updates)
@@ -1233,10 +1220,10 @@ async function resolveGitHubReviewPushTarget(
     const target = getActiveRuntimeTarget(settings)
     const result =
       target.kind === 'local'
-        ? await window.api.worktrees.resolvePrBase({ repoId, prNumber })
-        : await callRuntimeRpc<GitHubPrStartPoint | { error: string }>(
+        ? await workspaceHostClient.worktrees.resolvePrBase({ repoId, prNumber })
+        : await callRuntimeOrpc(
             target,
-            'worktree.resolvePrBase',
+            (client) => client.worktree.resolvePrBase,
             { repo: repoId, prNumber },
             { timeoutMs: 30_000 }
           )
@@ -1263,13 +1250,13 @@ async function resolveGitLabReviewPushTarget(
     const target = getActiveRuntimeTarget(settings)
     const result =
       target.kind === 'local'
-        ? await window.api.worktrees.resolveMrBase({ repoId, mrIid })
-        : await callRuntimeRpc<
-            | { baseBranch: string; compareBaseRef?: string; pushTarget?: GitPushTarget }
-            | {
-                error: string
-              }
-          >(target, 'worktree.resolveMrBase', { repo: repoId, mrIid }, { timeoutMs: 30_000 })
+        ? await workspaceHostClient.worktrees.resolveMrBase({ repoId, mrIid })
+        : await callRuntimeOrpc(
+            target,
+            (client) => client.worktree.resolveMrBase,
+            { repo: repoId, mrIid },
+            { timeoutMs: 30_000 }
+          )
     if ('error' in result) {
       console.warn(`Failed to resolve push target for MR !${mrIid}: ${result.error}`)
       return undefined
@@ -1635,6 +1622,11 @@ const WORKTREE_ID_KEYED_MAP_KEYS = [
   'pendingReconnectTabByWorktree',
   'rightSidebarTabByWorktree',
   'rightSidebarExplorerViewByWorktree',
+  'sourceControlPanelViewByWorktree',
+  'gitGraphByWorktree',
+  'gitGraphIncludeRemoteBranchesByWorktree',
+  'gitGraphSelectedRefIdsByWorktree',
+  'gitGraphColumnWidthsByWorktree',
   'unifiedTabsByWorktree',
   'groupsByWorktree',
   'layoutByWorktree',
@@ -2103,6 +2095,13 @@ function buildWorktreePurgeState(s: AppState, worktreeIds: string[]): Partial<Ap
     pendingReconnectTabByWorktree: omitByWorktree(s.pendingReconnectTabByWorktree),
     rightSidebarTabByWorktree: pruneRightSidebarTabByWorktree(),
     rightSidebarExplorerViewByWorktree: omitByWorktree(s.rightSidebarExplorerViewByWorktree ?? {}),
+    sourceControlPanelViewByWorktree: omitByWorktree(s.sourceControlPanelViewByWorktree),
+    gitGraphByWorktree: omitByWorktree(s.gitGraphByWorktree),
+    gitGraphIncludeRemoteBranchesByWorktree: omitByWorktree(
+      s.gitGraphIncludeRemoteBranchesByWorktree
+    ),
+    gitGraphSelectedRefIdsByWorktree: omitByWorktree(s.gitGraphSelectedRefIdsByWorktree),
+    gitGraphColumnWidthsByWorktree: omitByWorktree(s.gitGraphColumnWidthsByWorktree),
     // Split-tab / unified tab state
     unifiedTabsByWorktree: omitByWorktree(s.unifiedTabsByWorktree),
     groupsByWorktree: omitByWorktree(s.groupsByWorktree),
@@ -2851,15 +2850,15 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     try {
       const target = getActiveRuntimeTarget(settingsForRepoOwner(get(), repoId))
       if (target.kind === 'local') {
-        await window.api.worktrees.prefetchCreateBase({
+        await workspaceHostClient.worktrees.prefetchCreateBase({
           repoId,
           ...(baseBranch ? { baseBranch } : {})
         })
         return
       }
-      await callRuntimeRpc(
+      await callRuntimeOrpc(
         target,
-        'worktree.prefetchCreateBase',
+        (client) => client.worktree.prefetchCreateBase,
         { repo: repoId, ...(baseBranch ? { baseBranch } : {}) },
         { timeoutMs: 30_000 }
       )
@@ -2942,10 +2941,10 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           const target = getActiveRuntimeTarget(settingsForRepoOwner(get(), repoId))
           const result =
             target.kind === 'local'
-              ? await window.api.worktrees.create(createArgs)
-              : await callRuntimeRpc(
+              ? await workspaceHostClient.worktrees.create(createArgs)
+              : await callRuntimeOrpc(
                   target,
-                  WORKTREE_CREATE_CONTRACT,
+                  (client) => client.worktree.create,
                   {
                     repo: repoId,
                     name: candidateName,
@@ -3117,7 +3116,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       return { ok: false, error: WORKTREE_REMOVAL_AMBIGUOUS_ERROR }
     }
     const hostId = removalOwner.hostId ?? undefined
-    const forgetLocalOnly = options?.mode === 'forget-local'
     set((s) => ({
       deleteStateByWorktreeId: {
         ...s.deleteStateByWorktreeId,
@@ -3132,16 +3130,13 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     }))
 
     try {
-      // Why: forget-local touches no remote, so there is no archive hook to run
-      // and no need to prompt for hook trust.
-      const skipArchive = forgetLocalOnly
-        ? true
-        : (await ensureHooksConfirmed(
-            get(),
-            getRepoIdFromWorktreeId(worktreeId),
-            'archive',
-            hostId
-          )) === 'skip'
+      const skipArchive =
+        (await ensureHooksConfirmed(
+          get(),
+          getRepoIdFromWorktreeId(worktreeId),
+          'archive',
+          hostId
+        )) === 'skip'
 
       const worktreeBeforeRemoval = get()
         .allWorktrees()
@@ -3156,28 +3151,23 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       ) {
         throw new Error(WORKTREE_REMOVAL_AMBIGUOUS_ERROR)
       }
-      // Why: forget-local always clears Yiru's own records via the local IPC
-      // handler regardless of the workspace's execution host — the whole point
-      // is that the remote (SSH relay / runtime) is gone or unreachable.
       const target = getActiveRuntimeTarget(
         hostId
           ? settingsForExecutionHostOwner(get().settings, hostId)
           : settingsForWorktreeOwner(get(), worktreeId)
       )
-      const removalResult = await (forgetLocalOnly
-        ? window.api.worktrees.forgetLocal({ worktreeId, hostId })
-        : target.kind === 'local'
-          ? window.api.worktrees.remove({ worktreeId, hostId, force, skipArchive })
-          : callRuntimeRpc(
-              target,
-              WORKTREE_REMOVE_CONTRACT,
-              {
-                worktree: toRuntimeWorktreeSelector(worktreeId),
-                force,
-                runHooks: !skipArchive
-              },
-              { timeoutMs: 60_000 }
-            ))
+      const removalResult = await (target.kind === 'local'
+        ? workspaceHostClient.worktrees.remove({ worktreeId, hostId, force, skipArchive })
+        : callRuntimeOrpc(
+            target,
+            (client) => client.worktree.rm,
+            {
+              worktree: toRuntimeWorktreeSelector(worktreeId),
+              force,
+              runHooks: !skipArchive
+            },
+            { timeoutMs: 60_000 }
+          ))
 
       // Why: invalidate stale probes as soon as deletion is authoritative, so
       // an old toast cannot mutate a same-path replacement during UI teardown.
@@ -3186,7 +3176,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       const worktreeDisplayName = worktreeBeforeRemoval?.displayName?.trim()
       if (worktreeDisplayName) {
         try {
-          await window.api.automations?.snapshotWorkspaceName?.({
+          await snapshotAutomationWorkspaceNameForTarget(target, {
             workspaceId: worktreeId,
             displayName: worktreeDisplayName
           })
@@ -3595,14 +3585,14 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     try {
       const target = getActiveRuntimeTarget(settingsForWorktreeOwner(get(), worktreeId))
       const result = await (target.kind === 'local'
-        ? window.api.worktrees.forceDeletePreservedBranch({
+        ? workspaceHostClient.worktrees.forceDeletePreservedBranch({
             worktreeId,
             branchName,
             expectedHead
           })
-        : callRuntimeRpc<ForceDeleteWorktreeBranchResult>(
+        : callRuntimeOrpc(
             target,
-            'worktree.forceDeleteBranch',
+            (client) => client.worktree.forceDeleteBranch,
             { worktree: toRuntimeWorktreeSelector(worktreeId), branchName, expectedHead },
             { timeoutMs: 15_000 }
           ))
@@ -3622,6 +3612,16 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       })
       return { ok: false as const, error }
     }
+  },
+
+  getWorktreeBranchRenameFailureOutput: async (worktreeId) => {
+    const target = getActiveRuntimeTarget(settingsForWorktreeOwner(get(), worktreeId))
+    return callRuntimeOrpc(
+      target,
+      (client) => client.worktree.branchRenameFailureOutput,
+      { worktree: toRuntimeWorktreeSelector(worktreeId) },
+      { timeoutMs: 15_000 }
+    )
   },
 
   clearWorktreeDeleteState: (worktreeId) => {
@@ -3742,7 +3742,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
               reviewBranch,
               s.settings,
               reviewRepo.id,
-              reviewRepo.connectionId,
               reviewRepo.executionHostId,
               true
             )
@@ -3754,7 +3753,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
               reviewRepo.id,
               reviewBranch,
               s.settings,
-              reviewRepo.connectionId,
               reviewRepo.executionHostId,
               true
             )
@@ -4332,6 +4330,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       // must switch with the worktree instead of leaking the previous one.
       const restoredRightSidebarExplorerView =
         s.rightSidebarExplorerViewByWorktree?.[worktreeId] ?? 'files'
+      const restoredRightSidebarTab = s.rightSidebarTabByWorktree?.[worktreeId] ?? 'explorer'
       const restoredFileId = s.activeFileIdByWorktree[worktreeId] ?? null
       const restoredBrowserTabId = s.activeBrowserTabIdByWorktree[worktreeId] ?? null
       const restoredTabType = s.activeTabTypeByWorktree[worktreeId] ?? 'terminal'
@@ -4524,6 +4523,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         s.activeFileId !== activeFileId ||
         s.activeBrowserTabId !== activeBrowserTabId ||
         s.activeTabType !== activeTabType ||
+        s.rightSidebarTab !== restoredRightSidebarTab ||
         s.rightSidebarExplorerView !== restoredRightSidebarExplorerView ||
         s.activeTabId !== activeTabId ||
         nextActiveTabTypeByWorktree !== s.activeTabTypeByWorktree ||
@@ -4545,6 +4545,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         activeBrowserTabId,
         activeTabType,
         activeTabTypeByWorktree: nextActiveTabTypeByWorktree,
+        rightSidebarTab: restoredRightSidebarTab,
         rightSidebarExplorerView: restoredRightSidebarExplorerView,
         activeTabId,
         everActivatedWorktreeIds: nextEverActivated,
@@ -4651,6 +4652,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     const reconciledActiveTabId =
       get().reconcileWorktreeTabModel(workspaceKey).activeRenderableTabId
     set((s) => {
+      const restoredRightSidebarTab = s.rightSidebarTabByWorktree?.[workspaceKey] ?? 'explorer'
+      const restoredRightSidebarExplorerView =
+        s.rightSidebarExplorerViewByWorktree?.[workspaceKey] ?? 'files'
       const restoredFileId = s.activeFileIdByWorktree[workspaceKey] ?? null
       const restoredBrowserTabId = s.activeBrowserTabIdByWorktree[workspaceKey] ?? null
       const restoredTabType = s.activeTabTypeByWorktree[workspaceKey] ?? 'terminal'
@@ -4732,6 +4736,8 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           s.activeTabTypeByWorktree[workspaceKey] === activeTabType
             ? s.activeTabTypeByWorktree
             : { ...s.activeTabTypeByWorktree, [workspaceKey]: activeTabType },
+        rightSidebarTab: restoredRightSidebarTab,
+        rightSidebarExplorerView: restoredRightSidebarExplorerView,
         activeTabId,
         everActivatedWorktreeIds: nextEverActivated,
         folderWorkspaces: workspace.isUnread

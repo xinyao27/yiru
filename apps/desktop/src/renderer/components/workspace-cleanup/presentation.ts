@@ -97,8 +97,7 @@ function getCachedHostedReview(
     repo.path,
     getBranchDisplayName(worktree?.branch ?? candidate.branch),
     state.settings,
-    repo.id,
-    repo.connectionId
+    repo.id
   )
   return state.hostedReviewCache[cacheKey]?.data ?? null
 }

@@ -205,10 +205,3 @@ export function classifyWorktreeBaseChange(
     ? classifyGitCommonEvent(target, event)
     : classifyBaseEvent(target, event)
 }
-
-export function matchingWorktreeBaseRepoIds(
-  target: WorktreeBaseWatchTarget,
-  event: WorktreeBaseWatcherEvent
-): string[] {
-  return classifyWorktreeBaseChange(target, event).structureRepoIds
-}

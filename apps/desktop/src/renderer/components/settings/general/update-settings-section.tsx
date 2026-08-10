@@ -10,6 +10,7 @@ import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
 } from '~renderer/lib/update-check-click-options'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { SettingsSubsectionHeader } from '../form-controls'
@@ -47,7 +48,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
 
   useEffect(() => {
     let cancelled = false
-    void window.api.updater.getVersion().then((version) => {
+    void rendererHostClient.updater.getVersion().then((version) => {
       if (!cancelled) {
         setAppVersion(version)
       }
@@ -62,7 +63,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
     // deferred timer in the main process), so rejection here is only possible
     // if the IPC channel itself breaks. Log defensively; the user will notice
     // the app didn't restart and can retry.
-    void window.api.updater.quitAndInstall().catch(console.error)
+    void rendererHostClient.updater.quitAndInstall().catch(console.error)
   }
 
   return (
@@ -97,7 +98,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
             size="sm"
             // Why: modifier-click channels are power-user update affordances, not
             // persistent settings toggles.
-            onClick={(event) => window.api.updater.check(getUpdateCheckClickOptions(event))}
+            onClick={(event) => rendererHostClient.updater.check(getUpdateCheckClickOptions(event))}
             title={updateCheckHint}
             disabled={updateStatus.state === 'checking' || updateStatus.state === 'downloading'}
             className="gap-2"
@@ -118,7 +119,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
               variant="default"
               size="sm"
               onClick={() => {
-                void window.api.updater.download().catch((error) => {
+                void rendererHostClient.updater.download().catch((error) => {
                   toast.error(
                     translate(
                       'auto.components.settings.GeneralUpdateSettingsSection.02dc082e70',

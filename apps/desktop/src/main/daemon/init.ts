@@ -11,8 +11,7 @@ module-level spawner/adapter singletons must stay co-located so a future
 change cannot leave them drifting out of sync. */
 import { join } from 'node:path'
 
-import { app } from 'electron'
-
+import { agentHookServer } from '../agent-hooks/server'
 import {
   confirmSeededClaudeLivePtys,
   hasSeededUnconfirmedClaudePtys
@@ -24,6 +23,7 @@ import {
   unbindLocalProviderListeners,
   rebindLocalProviderListeners
 } from '../pty/pty'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/diagnostics'
 import { DaemonClient } from './client'
 import { DegradedDaemonPtyProvider } from './degraded-daemon-pty-provider'
@@ -89,6 +89,7 @@ let spawner: DaemonSpawner | null = null
 type DaemonProvider = DaemonPtyRouter | DaemonPtyAdapter | DegradedDaemonPtyProvider
 
 let adapter: DaemonProvider | null = null
+let runtimeHostOptions: DaemonRuntimeHostOptions = {}
 // Why: coalesce concurrent restartDaemon() calls so two clicks (or a UI
 // click racing an internal caller) can't both enter the 7-step sequence —
 // the second entry would read the already-disposed current adapter and
@@ -96,23 +97,26 @@ let adapter: DaemonProvider | null = null
 let restartInFlight: Promise<RestartDaemonResult> | null = null
 
 function getRuntimeDir(): string {
-  const dir = join(app.getPath('userData'), 'daemon')
+  const dir = join(getRuntimeHostPathsProvider().userDataPath(), 'daemon')
   mkdirSync(dir, { recursive: true })
   return dir
 }
 
 function getHistoryDir(): string {
-  const dir = join(app.getPath('userData'), 'terminal-history')
+  const dir = join(getRuntimeHostPathsProvider().userDataPath(), 'terminal-history')
   mkdirSync(dir, { recursive: true })
   return dir
 }
 
 function getDaemonEntryPath(): string {
-  const appPath = app.getAppPath()
+  const pathsProvider = getRuntimeHostPathsProvider()
+  const appPath = pathsProvider.appPath()
   // Why: electron-builder unpacks daemon-entry.js so child_process.fork() can
   // execute it from disk. In packaged apps app.getAppPath() points at
   // app.asar, so redirect to the unpacked sibling before joining the script.
-  const basePath = app.isPackaged ? appPath.replace('app.asar', 'app.asar.unpacked') : appPath
+  const basePath = pathsProvider.isPackaged()
+    ? appPath.replace('app.asar', 'app.asar.unpacked')
+    : appPath
   const directEntryPath = join(basePath, 'daemon-entry.js')
   if (existsSync(directEntryPath)) {
     return directEntryPath
@@ -224,7 +228,14 @@ async function shouldPreserveDaemonWithLiveSessions(
   return true
 }
 
-function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
+export type DaemonRuntimeHostOptions = {
+  agentHookHost?: { endpointDir: string; env: string }
+}
+
+function createOutOfProcessLauncher(
+  runtimeDir: string,
+  options: DaemonRuntimeHostOptions
+): DaemonLauncher {
   return async (socketPath, tokenPath) => {
     const entryPath = getDaemonEntryPath()
     const health = await checkDaemonHealth(socketPath, tokenPath)
@@ -248,9 +259,15 @@ function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
         // worktree; in packaged apps it happens when the stable
         // /Applications/Yiru.app path is replaced during update.
         const identity = await getDaemonLaunchIdentity(runtimeDir, socketPath, tokenPath, entryPath)
+        const pathsProvider = getRuntimeHostPathsProvider()
         const stalePackagedBundle =
-          app.isPackaged &&
-          (await isDaemonStaleForCurrentBundle(runtimeDir, socketPath, tokenPath, app.getVersion()))
+          pathsProvider.isPackaged() &&
+          (await isDaemonStaleForCurrentBundle(
+            runtimeDir,
+            socketPath,
+            tokenPath,
+            pathsProvider.version()
+          ))
         if (identity === 'mismatch' || stalePackagedBundle) {
           // Why: replacing a healthy daemon kills its child PTYs; defer code
           // freshness until no live terminal sessions would be lost.
@@ -321,7 +338,7 @@ function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
     // before respawn so the new daemon does not race the stale process.
     await killStaleDaemon(runtimeDir, socketPath, tokenPath)
 
-    const userDataPath = app.getPath('userData')
+    const userDataPath = getRuntimeHostPathsProvider().userDataPath()
     // Why: on win32 packaged, fork from a copy of the Electron runtime staged
     // in userData so the daemon's image + loaded modules escape the install dir
     // the NSIS updater deletes and force-closes. Staged here (not at app start)
@@ -358,7 +375,13 @@ function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
           ELECTRON_RUN_AS_NODE: '1',
           // Why: the detached daemon is plain Node and cannot call Electron's
           // app.getPath(), but shell-ready rcfiles must live outside swept tmp.
-          YIRU_USER_DATA_PATH: userDataPath
+          YIRU_USER_DATA_PATH: userDataPath,
+          ...(options.agentHookHost
+            ? {
+                YIRU_DAEMON_AGENT_HOOK_ENDPOINT_DIR: options.agentHookHost.endpointDir,
+                YIRU_DAEMON_AGENT_HOOK_ENV: options.agentHookHost.env
+              }
+            : {})
         }
       }
     )
@@ -452,7 +475,7 @@ function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
                     ? selfReported
                     : null),
                 entryPath,
-                appVersion: app.getVersion()
+                appVersion: getRuntimeHostPathsProvider().version()
               }),
               { mode: 0o600 }
             )
@@ -498,13 +521,33 @@ function createOutOfProcessLauncher(runtimeDir: string): DaemonLauncher {
   }
 }
 
-export async function initDaemonPtyProvider(signal?: AbortSignal): Promise<void> {
+function ingestDaemonAgentHook(envelope: Parameters<typeof agentHookServer.ingestRemote>[0]): void {
+  agentHookServer.ingestRemote(envelope, null)
+}
+
+async function syncDaemonAgentHookHost(
+  adapter: DaemonPtyAdapter,
+  config?: { endpointDir: string; env: string }
+): Promise<void> {
+  try {
+    agentHookServer.setForwardedPtyEnv(await adapter.initializeAgentHookHost(config))
+  } catch (error) {
+    agentHookServer.setForwardedPtyEnv({})
+    console.warn('[daemon] Agent hook host unavailable:', error)
+  }
+}
+
+export async function initDaemonPtyProvider(
+  signal?: AbortSignal,
+  options: DaemonRuntimeHostOptions = {}
+): Promise<void> {
+  runtimeHostOptions = options
   logDaemonMilestone('daemon-init-start')
   const runtimeDir = getRuntimeDir()
 
   const newSpawner = new DaemonSpawner({
     runtimeDir,
-    launcher: createOutOfProcessLauncher(runtimeDir)
+    launcher: createOutOfProcessLauncher(runtimeDir, options)
   })
 
   // Why: assign spawner/adapter only after both succeed. If ensureRunning()
@@ -527,6 +570,7 @@ export async function initDaemonPtyProvider(signal?: AbortSignal): Promise<void>
     socketPath: info.socketPath,
     tokenPath: info.tokenPath,
     historyPath: getHistoryDir(),
+    onAgentHook: ingestDaemonAgentHook,
     // Why: when the daemon process dies (e.g. killed by a signal, OOM, or
     // cascading from a force-quit of child processes), the adapter's
     // ensureConnected() detects the dead socket and calls this to fork a
@@ -537,6 +581,7 @@ export async function initDaemonPtyProvider(signal?: AbortSignal): Promise<void>
       await newSpawner.ensureRunning()
     }
   })
+  await syncDaemonAgentHookHost(newAdapter, options.agentHookHost)
 
   const legacyAdapters = await createLegacyDaemonAdapters(runtimeDir)
   const routedAdapter =
@@ -721,12 +766,14 @@ async function runRestartDaemon(): Promise<RestartDaemonResult> {
     socketPath: info.socketPath,
     tokenPath: info.tokenPath,
     historyPath: getHistoryDir(),
+    onAgentHook: ingestDaemonAgentHook,
     respawn: async () => {
       console.warn('[daemon] Daemon process died — respawning')
       currentSpawner.resetHandle()
       await currentSpawner.ensureRunning()
     }
   })
+  await syncDaemonAgentHookHost(newCurrent, runtimeHostOptions.agentHookHost)
 
   // Re-wrap in router if there were legacy adapters at startup; otherwise
   // point straight at the new adapter. Legacy instances are preserved by

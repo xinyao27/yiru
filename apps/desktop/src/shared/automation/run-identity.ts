@@ -9,7 +9,3 @@ export function getAutomationLegacyRepoId(automation: Pick<Automation, 'projectI
 export function getAutomationRunRepoId(automation: AutomationRunIdentityFields): string {
   return automation.runContext?.repoId ?? getAutomationLegacyRepoId(automation)
 }
-
-export function getAutomationRunProjectId(automation: AutomationRunIdentityFields): string {
-  return automation.runContext?.projectId ?? getAutomationLegacyRepoId(automation)
-}

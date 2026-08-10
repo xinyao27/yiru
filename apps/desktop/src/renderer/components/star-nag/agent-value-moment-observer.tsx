@@ -1,5 +1,6 @@
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef } from 'react'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 
 // Why: leave a short quiet window after agents finish so the prompt does not
@@ -10,7 +11,9 @@ const ACTIVE_AGENT_STATES = new Set(['working', 'waiting', 'blocked'])
 const NON_TYPING_MODIFIER_KEYS = new Set(['Alt', 'Control', 'Meta', 'Shift'])
 
 type AgentStatusSnapshot = Record<string, AgentStatusEntry>
-type AgentValueMomentPreparation = Awaited<ReturnType<typeof window.api.starNag.agentValueMoment>>
+type AgentValueMomentPreparation = Awaited<
+  ReturnType<typeof rendererHostClient.starNag.agentValueMoment>
+>
 
 function hasMeaningfulPrompt(entry: AgentStatusEntry): boolean {
   if (entry.prompt.trim()) {
@@ -80,7 +83,7 @@ export function StarNagAgentValueMomentObserver(): null {
       }
       void (async () => {
         if (!preparationRef.current) {
-          preparationRef.current = await window.api.starNag.agentValueMoment()
+          preparationRef.current = await rendererHostClient.starNag.agentValueMoment()
           if (preparationRef.current.status !== 'ready') {
             pendingRef.current = false
             requestedRef.current = true
@@ -97,7 +100,7 @@ export function StarNagAgentValueMomentObserver(): null {
         }
         pendingRef.current = false
         requestedRef.current = true
-        await window.api.starNag.showAgentValueMoment()
+        await rendererHostClient.starNag.showAgentValueMoment()
       })()
     }, CHECK_DELAY_MS)
   }, [])

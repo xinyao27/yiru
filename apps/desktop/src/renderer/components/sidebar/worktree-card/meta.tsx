@@ -5,6 +5,7 @@ import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-me
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '~renderer/components/ui/hover-card'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import CommentMarkdown from '../comment-markdown'
 import { WORKTREE_NATIVE_CONTEXT_MENU_ATTR } from '../worktree-context-menu/opening-policy'
@@ -162,7 +163,7 @@ export function WorktreeCardDetailsHover({
     try {
       // Why: Electron clipboard IPC remains reliable from nested hover/dropdown
       // overlays where browser clipboard activation can be lost.
-      await window.api.ui.writeClipboardText(url)
+      await shellClient.ui.writeClipboardText(url)
       toast.success(
         translate('auto.components.sidebar.WorktreeCardMeta.copyLinkSuccess', '{{value0}} copied', {
           value0: label

@@ -5,7 +5,8 @@ import {
   localPreflightContextKey,
   type LocalPreflightContext
 } from '~renderer/lib/local-preflight-context'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 
 import type { AppState } from '../types'
 
@@ -77,10 +78,12 @@ export const createPreflightSlice: StateCreator<AppState, [], [], PreflightSlice
       preflightStatusError: null
     })
 
-    const request = (
-      runtimeTarget.kind === 'environment'
-        ? callRuntimeRpc<PreflightStatus>(runtimeTarget, 'preflight.check', force ? { force } : {})
-        : window.api.preflight.check(preflightArgs)
+    // Why: one path for both targets now that the contract carries the WSL /
+    // project-runtime context the preload channel used to own.
+    const request = callRuntimeOrpc(
+      runtimeTarget,
+      (client) => client.preflight.check,
+      preflightArgs ?? (force ? { force } : {})
     )
       .then((status) => {
         if (requestId !== latestPreflightRequestId) {

@@ -1,10 +1,10 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
 import type { GlobalSettings } from '~shared/types'
 
@@ -13,6 +13,7 @@ import {
   createRuntimeRpcAbortError
 } from './abortable-runtime-environment-call'
 import { ensureRuntimeEnvironmentCompatible } from './environment-compatibility'
+import type { RuntimeClientTarget } from './orpc-client'
 import { unwrapRuntimeRpcResult } from './rpc-response'
 
 export {
@@ -28,8 +29,7 @@ export {
   RuntimeRpcCallError,
   unwrapRuntimeRpcResult
 } from './rpc-response'
-
-export type RuntimeClientTarget = { kind: 'local' } | { kind: 'environment'; environmentId: string }
+export type { RuntimeClientTarget } from './orpc-client'
 
 export function getActiveRuntimeTarget(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
@@ -52,8 +52,15 @@ export function settingsForRuntimeOwner(
   return ownerId ? { activeRuntimeEnvironmentId: ownerId } : settings
 }
 
+// Why: the only caller (orpc-legacy-client.ts) reaches this exclusively for
+// environment targets whose oRPC negotiation fell back to the legacy JSON-RPC
+// envelope. A local target never needs a legacy fallback — the local peer
+// always speaks oRPC over its pooled MessagePort (orpc-client.ts) — so this
+// dispatcher no longer carries a 'local' branch at all.
+type EnvironmentRuntimeClientTarget = Extract<RuntimeClientTarget, { kind: 'environment' }>
+
 export async function callRuntimeRpc<TResult>(
-  target: RuntimeClientTarget,
+  target: EnvironmentRuntimeClientTarget,
   contract: string,
   params?: unknown,
   options?: {
@@ -64,7 +71,7 @@ export async function callRuntimeRpc<TResult>(
   }
 ): Promise<TResult>
 export async function callRuntimeRpc<TContract extends RuntimeMethodContract>(
-  target: RuntimeClientTarget,
+  target: EnvironmentRuntimeClientTarget,
   contract: TContract,
   params: RuntimeMethodParams<TContract>,
   options?: {
@@ -75,7 +82,7 @@ export async function callRuntimeRpc<TContract extends RuntimeMethodContract>(
   }
 ): Promise<RuntimeMethodResult<TContract>>
 export async function callRuntimeRpc<TResult>(
-  target: RuntimeClientTarget,
+  target: EnvironmentRuntimeClientTarget,
   contract: string | RuntimeMethodContract,
   params?: unknown,
   options: {
@@ -86,7 +93,7 @@ export async function callRuntimeRpc<TResult>(
   } = {}
 ): Promise<TResult> {
   const method = typeof contract === 'string' ? contract : contract.name
-  if (target.kind === 'environment' && method !== STATUS_GET_CONTRACT.name) {
+  if (method !== STATUS_GET_CONTRACT.name) {
     await ensureRuntimeEnvironmentCompatible(target.environmentId, options)
   }
   if (options.signal?.aborted) {
@@ -95,22 +102,19 @@ export async function callRuntimeRpc<TResult>(
   const nextParams = options.suppressFeatureInteraction
     ? withBrowserPaneUiRuntimeRpcSource(params)
     : params
-  const response =
-    target.kind === 'local'
-      ? await window.api.runtime.call({ method, params: nextParams })
-      : options.signal
-        ? await callAbortableRuntimeEnvironment(
-            target.environmentId,
-            method,
-            nextParams,
-            options.timeoutMs,
-            options.signal
-          )
-        : await window.api.runtimeEnvironments.call({
-            selector: target.environmentId,
-            method,
-            params: nextParams,
-            timeoutMs: options.timeoutMs
-          })
+  const response = options.signal
+    ? await callAbortableRuntimeEnvironment(
+        target.environmentId,
+        method,
+        nextParams,
+        options.timeoutMs,
+        options.signal
+      )
+    : await window.api.runtimeEnvironments.call({
+        selector: target.environmentId,
+        method,
+        params: nextParams,
+        timeoutMs: options.timeoutMs
+      })
   return unwrapRuntimeRpcResult<TResult>(response as RuntimeRpcResponse<TResult>)
 }

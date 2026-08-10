@@ -1,10 +1,10 @@
-/* oxlint-disable max-lines -- Why: one-shot and streaming remote clients share the
- * same E2EE handshake and response validation state; keep them together until
- * the terminal transport is fully migrated and a stable shared connection
- * abstraction emerges. */
+/* oxlint-disable max-lines -- Why: one-shot and the remaining legacy subscription
+ * callers still share E2EE handshake and response state; split them only when
+ * those callers move to the dedicated oRPC peer introduced for multiplex. */
 import { randomUUID } from 'node:crypto'
 
 import { createWsOutboundBackpressureQueue } from '@yiru/mobile-relay-protocol/outbound-backpressure'
+import { RUNTIME_ORPC_REQUEST_ID_HEADER } from '@yiru/runtime-protocol/orpc-peer-frame'
 import {
   isKeepaliveFrame,
   RuntimeRpcEnvelopeSchema,
@@ -29,10 +29,12 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '../runtime-method-contract'
+import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '../runtime-orpc-socket'
 // Re-export so existing value importers of `RemoteRuntimeClientError` are
 // unaffected; the class lives in a ws-free module so type-only consumers
 // (and mobile's typecheck) don't compile this file's Node-only deps.
 import { RemoteRuntimeClientError } from './client-error'
+import { DedicatedRemoteRuntimeOrpcPeer } from './dedicated-orpc-peer'
 import {
   startRemoteRuntimeSocketLiveness,
   type RemoteRuntimeSocketLivenessMonitor,
@@ -392,6 +394,62 @@ export async function sendRemoteRuntimeRequest<TResult>(
   })
 }
 
+function hasAuthenticatedCapability(value: unknown, capability: string): boolean {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const capabilities = (value as { capabilities?: unknown }).capabilities
+  return Array.isArray(capabilities) && capabilities.includes(capability)
+}
+
+function authenticatedRuntimeId(value: unknown): string | null {
+  if (typeof value !== 'object' || value === null) {
+    return null
+  }
+  const runtimeId = (value as { runtimeId?: unknown }).runtimeId
+  return typeof runtimeId === 'string' && runtimeId.length > 0 ? runtimeId : null
+}
+
+function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Symbol.asyncIterator in value &&
+    typeof value[Symbol.asyncIterator] === 'function'
+  )
+}
+
+function invalidDedicatedOrpcFrame(): RemoteRuntimeClientError {
+  return new RemoteRuntimeClientError(
+    'invalid_runtime_response',
+    'Runtime host returned an invalid dedicated oRPC frame.'
+  )
+}
+
+function dedicatedOrpcError(error: unknown): RemoteRuntimeClientError {
+  if (error instanceof RemoteRuntimeClientError) {
+    return error
+  }
+  if (isOrpcError(error)) {
+    return new RemoteRuntimeClientError(error.code, error.message)
+  }
+  return new RemoteRuntimeClientError(
+    'remote_runtime_unavailable',
+    error instanceof Error ? error.message : 'Dedicated runtime stream failed.'
+  )
+}
+
+function isOrpcError(error: unknown): error is { code: string; message: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'string' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  )
+}
+
 export async function subscribeRemoteRuntimeRequest<TResult>(
   pairing: PairingOffer,
   method: string,
@@ -409,6 +467,17 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     let settled = false
     let ws: WebSocket | null = null
     let liveness: RemoteRuntimeSocketLivenessMonitor | null = null
+    let dedicatedOrpcPeer: DedicatedRemoteRuntimeOrpcPeer | null = null
+    let isSocketClosed = false
+    let didNotifyClose = false
+    const streamAbort = new AbortController()
+
+    const notifyClose = (): void => {
+      if (!didNotifyClose) {
+        didNotifyClose = true
+        callbacks.onClose?.()
+      }
+    }
 
     const cleanupSocketListeners = (): WebSocket | null => {
       liveness?.stop()
@@ -435,6 +504,8 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     }
 
     const closeSocketAfterCleanup = (): void => {
+      streamAbort.abort()
+      dedicatedOrpcPeer?.close()
       const socket = cleanupSocketListeners()
       try {
         socket?.close()
@@ -453,6 +524,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     }, timeoutMs)
 
     const close = (): void => {
+      streamAbort.abort()
       try {
         ws?.close()
       } catch {
@@ -494,6 +566,14 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       return true
     }
 
+    const sendOrpcText = (frame: string): boolean => {
+      if (state !== 'ready' || !ws || ws.readyState !== WebSocket.OPEN) {
+        return false
+      }
+      ws.send(encrypt(frame, sharedKey))
+      return true
+    }
+
     const succeed = (): void => {
       if (settled) {
         return
@@ -516,7 +596,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       // terminal for this socket. Closing here releases the WebSocket listeners
       // and lets the IPC subscription registry drop its retained callbacks.
       closeSocketAfterCleanup()
-      callbacks.onClose?.()
+      notifyClose()
     }
 
     try {
@@ -546,6 +626,9 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     }
 
     function onClose(code: number, reason: Buffer): void {
+      isSocketClosed = true
+      streamAbort.abort()
+      dedicatedOrpcPeer?.close()
       clearTimeout(timeout)
       cleanupSocketListeners()
       if (!settled) {
@@ -558,7 +641,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         )
         return
       }
-      callbacks.onClose?.()
+      notifyClose()
     }
 
     function onMessage(data: WebSocket.RawData, isBinary: boolean): void {
@@ -590,6 +673,12 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         return
       }
 
+      if (dedicatedOrpcPeer) {
+        if (!dedicatedOrpcPeer.receiveText(plaintext)) {
+          fail(invalidDedicatedOrpcFrame())
+        }
+        return
+      }
       handleRpcFrame(plaintext)
     }
 
@@ -690,7 +779,36 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         fail(new RemoteRuntimeClientError(code, 'Runtime host rejected the pairing token.'))
         return
       }
+      if (
+        method === 'terminal.multiplex' &&
+        !hasAuthenticatedCapability(authenticated, RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY)
+      ) {
+        fail(
+          new RemoteRuntimeClientError(
+            'binary_terminal_stream_unsupported',
+            'Runtime host does not support the dedicated inbound binary terminal stream.'
+          )
+        )
+        return
+      }
       state = 'ready'
+      if (method === 'terminal.multiplex') {
+        const runtimeId = authenticatedRuntimeId(authenticated)
+        if (!runtimeId) {
+          fail(
+            new RemoteRuntimeClientError(
+              'invalid_runtime_response',
+              'Runtime host did not identify the authenticated runtime.'
+            )
+          )
+          return
+        }
+        dedicatedOrpcPeer = new DedicatedRemoteRuntimeOrpcPeer(sendOrpcText, sendBinary, (frame) =>
+          callbacks.onBinary?.(frame)
+        )
+        void startDedicatedOrpcSubscription(runtimeId)
+        return
+      }
       ws?.send(
         encrypt(
           JSON.stringify({
@@ -703,6 +821,57 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         )
       )
       succeed()
+    }
+
+    async function startDedicatedOrpcSubscription(runtimeId: string): Promise<void> {
+      const peer = dedicatedOrpcPeer
+      if (!peer) {
+        fail(invalidDedicatedOrpcFrame())
+        return
+      }
+      try {
+        const { RPCLink } = await import('@orpc/client/websocket')
+        const link = new RPCLink<Record<never, never>>({
+          websocket: peer,
+          headers: { [RUNTIME_ORPC_REQUEST_ID_HEADER]: requestId }
+        })
+        const output = await link.call(method.split('.'), params, {
+          context: {},
+          signal: streamAbort.signal
+        })
+        if (!isAsyncIterable(output)) {
+          fail(invalidDedicatedOrpcFrame())
+          return
+        }
+        succeed()
+        void consumeDedicatedOrpcSubscription(output, runtimeId)
+      } catch (error) {
+        if (!streamAbort.signal.aborted && !isSocketClosed) {
+          fail(dedicatedOrpcError(error))
+        }
+      }
+    }
+
+    async function consumeDedicatedOrpcSubscription(
+      output: AsyncIterable<unknown>,
+      runtimeId: string
+    ): Promise<void> {
+      try {
+        for await (const result of output) {
+          callbacks.onResponse({
+            id: requestId,
+            ok: true,
+            result: result as TResult,
+            _meta: { runtimeId }
+          })
+        }
+        closeSocketAfterCleanup()
+        notifyClose()
+      } catch (error) {
+        if (!streamAbort.signal.aborted && !isSocketClosed) {
+          fail(dedicatedOrpcError(error))
+        }
+      }
     }
 
     function handleRpcFrame(plaintext: string): void {
@@ -753,6 +922,12 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
             'Runtime host returned an undecryptable binary frame.'
           )
         )
+        return
+      }
+      if (dedicatedOrpcPeer) {
+        if (!dedicatedOrpcPeer.receiveBinary(plaintext)) {
+          fail(invalidDedicatedOrpcFrame())
+        }
         return
       }
       callbacks.onBinary?.(plaintext)

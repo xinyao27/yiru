@@ -1,4 +1,3 @@
-import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
 import type React from 'react'
 import { getPaletteHostBadge } from '~renderer/components/cmd-j/palette-host-badge'
 import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
@@ -26,7 +25,6 @@ type WorktreeRowProps = Pick<
   | 'ptyIdsByTabId'
   | 'runtimePaneTitlesByTabId'
   | 'activeWorktreeId'
-  | 'sshConnectionStates'
 > &
   Pick<PaletteHostOptionsResult, 'repoMap' | 'hostOptions'> &
   Pick<WorktreeSearchResult, 'liveAgentStatusByWorktreeId'> & {
@@ -44,7 +42,6 @@ export function WorktreeRow({
   runtimePaneTitlesByTabId,
   liveAgentStatusByWorktreeId,
   activeWorktreeId,
-  sshConnectionStates,
   onSelect
 }: WorktreeRowProps): React.JSX.Element {
   const worktree = entry.worktree
@@ -60,11 +57,6 @@ export function WorktreeRow({
   )
   const statusLabel = getWorktreeStatusLabel(status)
   const isCurrentWorktree = activeWorktreeId === worktree.id
-  const sshConnectionId = repo?.connectionId || null
-  const sshStatus = sshConnectionId
-    ? (sshConnectionStates.get(sshConnectionId)?.status ?? 'disconnected')
-    : null
-  const isSshDisconnected = sshStatus != null && sshStatus !== 'connected'
   const hostBadge = getPaletteHostBadge(repo, hostOptions)
 
   return (
@@ -93,25 +85,6 @@ export function WorktreeRow({
         <div className="flex items-center justify-between gap-2.5">
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-2">
-              {sshConnectionId && (
-                <span
-                  aria-label={
-                    isSshDisconnected
-                      ? translate(
-                          'auto.components.WorktreeJumpPalette.63c2be1914',
-                          'SSH disconnected'
-                        )
-                      : translate('auto.components.WorktreeJumpPalette.34c8fbb46e', 'SSH remote')
-                  }
-                  className="inline-flex shrink-0 items-center"
-                >
-                  {isSshDisconnected ? (
-                    <ServerOff className="size-3.5 text-red-400" aria-hidden="true" />
-                  ) : (
-                    <Server className="text-muted-foreground size-3.5" aria-hidden="true" />
-                  )}
-                </span>
-              )}
               <span className="text-foreground truncate text-[14px] font-semibold">
                 {entry.match.displayNameRange ? (
                   <HighlightedText

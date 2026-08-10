@@ -2,6 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import {
+  getMobilePairingQR,
+  listMobileNetworkInterfaces,
+  listPairedMobileDevices,
+  revokePairedMobileDevice
+} from '~renderer/runtime/mobile-pairing-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import {
@@ -40,6 +47,9 @@ export default function MobilePage(): React.JSX.Element {
   const mountedRef = useMountedRef()
   const stageRef = useRef<FlowStage | null>(null)
   const deviceCountAtPairStartRef = useRef<number | null>(null)
+  const activeRuntimeEnvironmentId = useAppStore(
+    (s) => s.settings?.activeRuntimeEnvironmentId ?? null
+  )
   const closeMobilePage = useAppStore((s) => s.closeMobilePage)
   const installQrUrl = useMobileInstallQr(stage, platform)
   const { copyInstallUrl, openInstallUrl } = useMobileInstallActions(platform)
@@ -76,7 +86,7 @@ export default function MobilePage(): React.JSX.Element {
 
   const loadDevices = useCallback(async (): Promise<PairedDevice[]> => {
     try {
-      const result = await window.api.mobile.listDevices()
+      const result = await listPairedMobileDevices({ activeRuntimeEnvironmentId })
       if (mountedRef.current) {
         setDevices(result.devices)
         if (
@@ -96,7 +106,7 @@ export default function MobilePage(): React.JSX.Element {
       console.error('mobile.listDevices failed', err)
       return []
     }
-  }, [mountedRef, showPairedDevices])
+  }, [activeRuntimeEnvironmentId, mountedRef, showPairedDevices])
 
   // Why: pick the initial stage based on whether any devices are already
   // paired so returning users don't see the marketing intro every time.
@@ -134,7 +144,7 @@ export default function MobilePage(): React.JSX.Element {
         return
       }
       try {
-        await window.api.mobile.revokeDevice({ deviceId })
+        await revokePairedMobileDevice({ deviceId }, { activeRuntimeEnvironmentId })
         const remaining = await loadDevices()
         if (mountedRef.current) {
           toast.success(translate('auto.components.mobile.MobilePage.255372e6e8', 'Device revoked'))
@@ -154,7 +164,7 @@ export default function MobilePage(): React.JSX.Element {
         }
       }
     },
-    [loadDevices, mountedRef, showStage]
+    [activeRuntimeEnvironmentId, loadDevices, mountedRef, showStage]
   )
 
   const generatePairing = useCallback(
@@ -168,10 +178,13 @@ export default function MobilePage(): React.JSX.Element {
       }
       try {
         const address = addressOverride ?? selectedAddress
-        const result = await window.api.mobile.getPairingQR({
-          ...(address ? { address } : {}),
-          ...(rotate ? { rotate: true } : {})
-        })
+        const result = await getMobilePairingQR(
+          {
+            ...(address ? { address } : {}),
+            ...(rotate ? { rotate: true } : {})
+          },
+          { activeRuntimeEnvironmentId }
+        )
         if (requestId !== pairingRequestIdRef.current) {
           return
         }
@@ -211,7 +224,7 @@ export default function MobilePage(): React.JSX.Element {
         }
       }
     },
-    [mountedRef, selectedAddress]
+    [activeRuntimeEnvironmentId, mountedRef, selectedAddress]
   )
 
   const loadNetworkInterfaces = useCallback(async () => {
@@ -219,7 +232,7 @@ export default function MobilePage(): React.JSX.Element {
       setRefreshingNetworkInterfaces(true)
     }
     try {
-      const result = await window.api.mobile.listNetworkInterfaces()
+      const result = await listMobileNetworkInterfaces({ activeRuntimeEnvironmentId })
       if (mountedRef.current) {
         setNetworkInterfaces(result.interfaces)
       }
@@ -253,7 +266,7 @@ export default function MobilePage(): React.JSX.Element {
         setRefreshingNetworkInterfaces(false)
       }
     }
-  }, [selectedAddress, generatePairing, mountedRef, addressIsManual])
+  }, [activeRuntimeEnvironmentId, selectedAddress, generatePairing, mountedRef, addressIsManual])
 
   useEffect(() => {
     if (stage !== 'flow') {
@@ -281,7 +294,7 @@ export default function MobilePage(): React.JSX.Element {
       return
     }
     try {
-      await window.api.ui.writeClipboardText(pairingUrl)
+      await shellClient.ui.writeClipboardText(pairingUrl)
       if (mountedRef.current) {
         toast.success(
           translate('auto.components.mobile.MobilePage.3c1f7168bb', 'Pairing code copied')

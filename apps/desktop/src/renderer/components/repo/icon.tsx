@@ -27,12 +27,6 @@ import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import { cn } from '~renderer/lib/class-names'
 
-export type RepoLucideIconOption = {
-  name: string
-  label: string
-  icon: PhosphorIcon
-}
-
 export const getRepoLucideIconOptions = createLocalizedCatalog(() => [
   {
     name: 'Folder',

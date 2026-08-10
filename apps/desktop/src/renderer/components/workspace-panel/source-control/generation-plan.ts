@@ -84,9 +84,3 @@ export function planSourceControlTextGeneration(
       'This checks Yiru’s planner only. It does not invoke the CLI, prove PATH or binary availability, or reproduce main-process Windows .cmd resolution.'
   }
 }
-
-export function planSourceControlCommitMessageGeneration(
-  params: ResolvedSourceControlAiGenerationParams
-): SourceControlGenerationPlanResult {
-  return planSourceControlTextGeneration('commitMessage', params)
-}

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/u
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 const EMOJI_OPTIONS = ['🚀', '✨', '💻', '🧠', '📦', '🔧', '🎨', '🌐', '📊', '🔒', '⚡', '✅']
 
@@ -35,7 +36,7 @@ export function RepositoryIconTabs({
 
   const handleUploadImage = async () => {
     try {
-      const result = await window.api.shell.pickRepoIconImage()
+      const result = await shellClient.shell.pickRepoIconImage()
       if (!result || !mountedRef.current) {
         return
       }

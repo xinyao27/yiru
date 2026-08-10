@@ -32,6 +32,8 @@ import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
 } from '~renderer/lib/update-check-click-options'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import logo from '../../../../resources/yiru-wordmark.png?url'
@@ -44,7 +46,7 @@ const DOCS_URL = 'https://yiru.ai/docs'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
 
 function openExternalUrl(url: string): void {
-  void window.api.shell.openUrl(url)
+  void shellClient.shell.openUrl(url)
 }
 
 function ExternalMenuItem({
@@ -116,7 +118,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
     toast.info(
       translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Yiru…')
     )
-    void window.api.app.restart().catch((error) => {
+    void rendererHostClient.app.restart().catch((error) => {
       if (mountedRef.current) {
         setIsRestartingYiru(false)
         toast.error(
@@ -148,7 +150,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
   const handleCheckForUpdates = (): void => {
     const modifiers = updateCheckModifiersRef.current
     updateCheckModifiersRef.current = NO_UPDATE_CHECK_MODIFIERS
-    void window.api.updater.check(getUpdateCheckClickOptions(modifiers))
+    void rendererHostClient.updater.check(getUpdateCheckClickOptions(modifiers))
   }
 
   const openMilestones = (): void => {

@@ -17,12 +17,12 @@ import { useGitGraphView } from './use-git-graph-view'
 // use-git-graph-view.ts for the state/selectors this composes.
 export function GitGraphView({
   worktreeId,
-  workspacePanelTabId
+  tabId
 }: {
   worktreeId: string
-  workspacePanelTabId: string
+  tabId: string
 }): React.JSX.Element {
-  const view = useGitGraphView({ worktreeId, workspacePanelTabId })
+  const view = useGitGraphView({ worktreeId, tabId })
 
   // Why: computed once here so the identical gap reaches both
   // buildGitGraphLayout (bakes it into vertex/edge pixel positions) and
@@ -81,7 +81,7 @@ export function GitGraphView({
           <GitGraphUncommittedRow
             graphColumnWidth={graphColumnWidth}
             columnWidths={view.columnWidths}
-            onOpen={view.onCloseGraph}
+            onOpen={view.onOpenUncommittedChanges}
           />
         )}
         {view.isLoading && view.items.length === 0 ? (

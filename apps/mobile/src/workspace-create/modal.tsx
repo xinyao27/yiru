@@ -14,10 +14,10 @@ import { SelectionDrawer, type SelectionDrawerOption } from '~/components/select
 import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '~/components/uniwind-icons'
 import { translate } from '~/i18n/translate'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcResponse } from '../transport/types'
 import { repoColor } from '../workspace/repo-color'
 import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-repo'
 import {
@@ -279,24 +279,21 @@ function NewWorkspaceModalContent({
       setLoading(true)
     }
 
-    void client
-      .sendRequest('repo.list')
-      .then((repoResponse) => {
+    void callRuntimeOrpc(client, (runtime) => runtime.repo.list, undefined)
+      .then((result) => {
         if (stale) {
           return
         }
-        if (repoResponse.ok) {
-          const nextRepos = readWorkspaceRepoList(repoResponse.result)
-          setRepos(nextRepos)
-          if (hostId) {
-            setCachedRepos(hostId, nextRepos)
-          }
-          setSelectedRepo((current) => {
-            // Why: the optimistic cache can include repos removed before the
-            // fresh repo.list returns; never create against a stale repo id.
-            return refreshMobileNewWorkspaceDialogSelectedRepo(nextRepos, current)
-          })
+        const nextRepos = readWorkspaceRepoList(result)
+        setRepos(nextRepos)
+        if (hostId) {
+          setCachedRepos(hostId, nextRepos)
         }
+        setSelectedRepo((current) => {
+          // Why: the optimistic cache can include repos removed before the
+          // fresh repo.list returns; never create against a stale repo id.
+          return refreshMobileNewWorkspaceDialogSelectedRepo(nextRepos, current)
+        })
       })
       .catch(() => {
         if (!stale) {
@@ -310,30 +307,26 @@ function NewWorkspaceModalContent({
       })
 
     void (async () => {
-      const okResult = (entry: PromiseSettledResult<RpcResponse>): unknown => {
-        if (entry.status !== 'fulfilled' || !entry.value.ok) {
-          return undefined
-        }
-        return entry.value.result
-      }
+      const settledResult = (entry: PromiseSettledResult<unknown>): unknown =>
+        entry.status === 'fulfilled' ? entry.value : undefined
       const [settingsRes, uiRes, preflightRes] = await Promise.allSettled([
-        client.sendRequest('settings.get'),
-        client.sendRequest('ui.get'),
-        client.sendRequest('preflight.check')
+        callRuntimeOrpc(client, (runtime) => runtime.settings.get, undefined),
+        callRuntimeOrpc(client, (runtime) => runtime.ui.get, undefined),
+        callRuntimeOrpc(client, (runtime) => runtime.preflight.check, {})
       ])
       if (stale) {
         return
       }
 
-      const settingsResult = okResult(settingsRes)
+      const settingsResult = settledResult(settingsRes)
       if (settingsResult !== undefined) {
         setRuntimeSettings(readWorkspaceRuntimeSettings(settingsResult))
       }
-      const uiResult = okResult(uiRes)
+      const uiResult = settledResult(uiRes)
       if (uiResult !== undefined) {
         setTrustedYiruHooks(readTrustedYiruHooks(uiResult))
       }
-      setGitLabAvailable(readGlabInstalled(okResult(preflightRes)))
+      setGitLabAvailable(readGlabInstalled(settledResult(preflightRes)))
     })()
     return () => {
       stale = true
@@ -347,13 +340,17 @@ function NewWorkspaceModalContent({
     let stale = false
     void (async () => {
       try {
-        const response = await client.sendRequest('preflight.detectAgents')
+        const result = await callRuntimeOrpc(
+          client,
+          (runtime) => runtime.preflight.detectAgents,
+          undefined
+        )
         if (stale) {
           return
         }
         setDetectedAgentIdsState({
           connectionId: null,
-          ids: new Set(response.ok ? readDetectedAgentIds(response.result) : [])
+          ids: new Set(readDetectedAgentIds(result))
         })
       } catch {
         if (!stale) {
@@ -373,26 +370,24 @@ function NewWorkspaceModalContent({
     let stale = false
     void (async () => {
       try {
-        const response = await client.sendRequest('repo.hooks', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.repo.hooks, {
           repo: `id:${selectedRepo.id}`
         })
         if (stale) {
           return
         }
-        if (response.ok) {
-          const hooks = readRepoHooks(response.result)
-          setSetupHookDetails({
-            repoId: selectedRepo.id,
-            command: hooks.setupCommand,
-            source: hooks.source,
-            trust: hooks.setupTrust,
-            runPolicy: hooks.setupRunPolicy
-          })
-          setSetupDecisionChoice(null)
-          setRunSetup(hooks.setupRunPolicy !== 'skip-by-default')
-          if (hooks.setupCommand && hooks.setupRunPolicy === 'ask') {
-            setShowAdvanced(true)
-          }
+        const hooks = readRepoHooks(result)
+        setSetupHookDetails({
+          repoId: selectedRepo.id,
+          command: hooks.setupCommand,
+          source: hooks.source,
+          trust: hooks.setupTrust,
+          runPolicy: hooks.setupRunPolicy
+        })
+        setSetupDecisionChoice(null)
+        setRunSetup(hooks.setupRunPolicy !== 'skip-by-default')
+        if (hooks.setupCommand && hooks.setupRunPolicy === 'ask') {
+          setShowAdvanced(true)
         }
       } catch {
         if (!stale) {
@@ -423,12 +418,10 @@ function NewWorkspaceModalContent({
     try {
       let latestRuntimeSettings = runtimeSettings
       try {
-        const settingsResponse = await client.sendRequest('settings.get')
-        if (settingsResponse.ok) {
-          const settings = readWorkspaceRuntimeSettings(settingsResponse.result)
-          latestRuntimeSettings = settings
-          setRuntimeSettings(settings)
-        }
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.settings.get, undefined)
+        const settings = readWorkspaceRuntimeSettings(result)
+        latestRuntimeSettings = settings
+        setRuntimeSettings(settings)
       } catch {
         // Best-effort refresh; the runtime validates the same setting before spawning.
       }

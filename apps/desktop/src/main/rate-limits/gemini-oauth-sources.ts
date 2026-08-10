@@ -2,7 +2,7 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-import { net } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 
 import { extractOAuthClientCredentials } from './gemini-cli-oauth-extractor'
 
@@ -96,7 +96,7 @@ export async function refreshAccessToken(
   clientId: string,
   clientSecret: string
 ): Promise<RefreshTokenResult> {
-  const res = await net.fetch(GOOGLE_TOKEN_URL, {
+  const res = await fetchHttp(GOOGLE_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -125,7 +125,7 @@ export async function refreshAccessToken(
 }
 
 export async function loadProjectId(accessToken: string): Promise<string> {
-  const res = await net.fetch(LOAD_CODE_ASSIST_URL, {
+  const res = await fetchHttp(LOAD_CODE_ASSIST_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -1,4 +1,4 @@
-import { Globe, SquaresFour, Terminal as TerminalIcon } from '@phosphor-icons/react'
+import { GitBranch, Globe, Terminal as TerminalIcon } from '@phosphor-icons/react'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
 
@@ -14,8 +14,8 @@ function LeadingIcon({ drag }: { drag: TabDragItemData }): React.JSX.Element {
     const FileIcon = getFileTypeIcon(drag.iconPath ?? drag.label)
     return <FileIcon className="h-3.5 w-3.5 shrink-0" />
   }
-  if (drag.tabType === 'workspace-panel') {
-    return <SquaresFour className="h-3.5 w-3.5 shrink-0" />
+  if (drag.tabType === 'git-graph') {
+    return <GitBranch className="h-3.5 w-3.5 shrink-0" />
   }
   if (drag.agent) {
     return <AgentIcon agent={drag.agent} size={14} />

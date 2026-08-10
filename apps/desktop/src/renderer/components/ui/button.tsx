@@ -23,6 +23,9 @@ const buttonVariants = cva(
         // Why: titlebar chrome shares the row seams, so controls only draw vertical separators.
         'outline-transparent':
           'border border-y-0 border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
+        // Why: segmented titlebar actions rest quietly and use the primary color only for current state.
+        'titlebar-segment':
+          'border border-y-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground aria-[current=page]:text-primary dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
@@ -36,6 +39,10 @@ const buttonVariants = cva(
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-transparent focus-visible:bg-accent focus-visible:text-foreground disabled:opacity-35 dark:hover:bg-accent',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
+        // Why: color-picking controls use their geometry as data, so this variant
+        // owns the exact compact chrome sanctioned for that single domain.
+        'color-field': 'border-0 p-0 transition-[background-color] duration-200',
+        'color-swatch': 'border-0 p-0 transition-transform hover:scale-105 active:scale-95',
         // Why: actions revealed over an accent row need contrast from the row
         // surface while remaining transparent at rest.
         'row-action':
@@ -84,6 +91,9 @@ const buttonVariants = cva(
         icon: 'size-9',
         'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         'icon-toolbar': "size-7 [&_svg:not([class*='size-'])]:size-3.5",
+        'icon-palette-control': "size-[30px] p-0 [&_svg:not([class*='size-'])]:size-[18px]",
+        'icon-palette-page': "size-7 [&_svg:not([class*='size-'])]:size-[18px]",
+        'icon-palette-swatch': 'size-[26px] p-0',
         'icon-status-bar': "h-full w-5 [&_svg:not([class*='size-'])]:size-3",
         'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
@@ -93,11 +103,17 @@ const buttonVariants = cva(
         'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-4",
         'icon-titlebar-wide': "h-full w-9 [&_svg:not([class*='size-'])]:size-4"
+      },
+      seam: {
+        default: '',
+        // Why: adjacent titlebar regions let the following control own their one shared seam.
+        'merge-next': 'border-r-0'
       }
     },
     defaultVariants: {
       variant: 'default',
-      size: 'default'
+      size: 'default',
+      seam: 'default'
     }
   }
 )
@@ -108,7 +124,10 @@ const Button = React.forwardRef<
   // className a plain string so it stays compatible with the cva call below.
   Omit<ButtonPrimitive.Props, 'className'> &
     VariantProps<typeof buttonVariants> & { className?: string }
->(function Button({ className, variant = 'default', size = 'default', ...props }, ref) {
+>(function Button(
+  { className, seam = 'default', variant = 'default', size = 'default', ...props },
+  ref
+) {
   // Base UI Button supports `render` natively, replacing the Slot/asChild idiom.
   return (
     <ButtonPrimitive
@@ -116,7 +135,7 @@ const Button = React.forwardRef<
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, seam, className }))}
       {...props}
     />
   )

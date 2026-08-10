@@ -1,5 +1,3 @@
-import type { BrowserWindow } from 'electron'
-
 import type { Store } from '../persistence'
 import {
   collectLocalWorktreeBaseChanges,
@@ -19,7 +17,6 @@ import {
 import { notifyWorktreeGitStatusMetadataChanged, notifyWorktreesChanged } from './remote'
 
 type ActiveWatch = WorktreeBaseWatchTarget & {
-  mainWindow: BrowserWindow
   subscription: { unsubscribe: () => Promise<void> }
   notifyTimer: ReturnType<typeof setTimeout> | null
   pendingStructureRepoIds: Set<string>
@@ -33,7 +30,7 @@ const WATCH_DEBOUNCE_MS = 250
 const activeWatches = new Map<string, ActiveWatch>()
 let syncGeneration = 0
 let scheduledSync: ReturnType<typeof setTimeout> | null = null
-let latestSyncContext: { mainWindow: BrowserWindow; store: Store } | null = null
+let latestSyncStore: Store | null = null
 
 function clearPendingRepoIds(watch: ActiveWatch): void {
   watch.pendingStructureRepoIds.clear()
@@ -44,7 +41,7 @@ function clearPendingRepoIds(watch: ActiveWatch): void {
 type PendingNotificationInput = Partial<Omit<WorktreeBaseCollectedChanges, 'overflow'>>
 
 function scheduleNotification(watch: ActiveWatch, changes: PendingNotificationInput): void {
-  if (watch.disposed || watch.mainWindow.isDestroyed()) {
+  if (watch.disposed) {
     clearPendingRepoIds(watch)
     return
   }
@@ -62,7 +59,7 @@ function scheduleNotification(watch: ActiveWatch, changes: PendingNotificationIn
   }
   watch.notifyTimer = setTimeout(() => {
     watch.notifyTimer = null
-    if (watch.disposed || watch.mainWindow.isDestroyed()) {
+    if (watch.disposed) {
       clearPendingRepoIds(watch)
       return
     }
@@ -80,10 +77,10 @@ function scheduleNotification(watch: ActiveWatch, changes: PendingNotificationIn
     const emitHeadIdentities = pendingStructure.length === 0
     clearPendingRepoIds(watch)
     for (const repoId of pendingStructure) {
-      notifyWorktreesChanged(watch.mainWindow, repoId)
+      notifyWorktreesChanged(repoId)
     }
     for (const repoId of sourceControlRepoIds) {
-      notifyWorktreeGitStatusMetadataChanged(watch.mainWindow, repoId)
+      notifyWorktreeGitStatusMetadataChanged(repoId)
     }
     // Only re-read head identities for true head triggers: an index rewrite
     // cannot move HEAD, so status-only bursts skip the linked-worktree scan.
@@ -108,7 +105,7 @@ function handleLocalWatchEvents(
   error: Error | null,
   events: { type: 'create' | 'update' | 'delete'; path: string }[]
 ): void {
-  if (watch.disposed || watch.mainWindow.isDestroyed()) {
+  if (watch.disposed) {
     return
   }
   if (error) {
@@ -124,12 +121,10 @@ function handleLocalWatchEvents(
 
 function createActiveWatch(
   target: WorktreeBaseWatchTarget,
-  mainWindow: BrowserWindow,
   subscription: ActiveWatch['subscription']
 ): ActiveWatch {
   return {
     ...target,
-    mainWindow,
     subscription,
     notifyTimer: null,
     pendingStructureRepoIds: new Set(),
@@ -140,10 +135,7 @@ function createActiveWatch(
   }
 }
 
-async function subscribeTarget(
-  target: WorktreeBaseWatchTarget,
-  mainWindow: BrowserWindow
-): Promise<ActiveWatch> {
+async function subscribeTarget(target: WorktreeBaseWatchTarget): Promise<ActiveWatch> {
   let activeWatch: ActiveWatch | null = null
   // Why: a recursive native watcher here forced fseventsd to deliver every
   // event under the whole workspace root (all worktrees) / whole common .git
@@ -160,7 +152,7 @@ async function subscribeTarget(
       handleLocalWatchEvents(currentWatch, null, events)
     }
   )
-  activeWatch = createActiveWatch(target, mainWindow, subscription)
+  activeWatch = createActiveWatch(target, subscription)
   if (supportsHeadIdentityRefresh(activeWatch)) {
     // Baseline eagerly so the first status-only signal — possibly hours after
     // subscribe — diffs against subscribe-time heads instead of silently
@@ -170,19 +162,14 @@ async function subscribeTarget(
   return activeWatch
 }
 
-async function replaceWatch(
-  target: WorktreeBaseWatchTarget,
-  mainWindow: BrowserWindow,
-  generation: number
-): Promise<void> {
+async function replaceWatch(target: WorktreeBaseWatchTarget, generation: number): Promise<void> {
   const previous = activeWatches.get(target.key)
   if (previous) {
     previous.repos = target.repos
-    previous.mainWindow = mainWindow
     return
   }
   try {
-    const activeWatch = await subscribeTarget(target, mainWindow)
+    const activeWatch = await subscribeTarget(target)
     if (generation !== syncGeneration) {
       activeWatch.disposed = true
       await activeWatch.subscription.unsubscribe().catch((error) => {
@@ -212,10 +199,7 @@ async function removeWatch(key: string): Promise<void> {
   })
 }
 
-export async function syncWorktreeBaseDirectoryWatchers(
-  store: Store,
-  mainWindow: BrowserWindow
-): Promise<void> {
+export async function syncWorktreeBaseDirectoryWatchers(store: Store): Promise<void> {
   const generation = ++syncGeneration
   const targets = await buildWorktreeBaseDirectoryWatchTargets(store)
   if (generation !== syncGeneration) {
@@ -236,55 +220,37 @@ export async function syncWorktreeBaseDirectoryWatchers(
     if (generation !== syncGeneration) {
       return
     }
-    await replaceWatch(target, mainWindow, generation)
+    await replaceWatch(target, generation)
     if (generation !== syncGeneration) {
       return
     }
   }
 }
 
-export function setWorktreeBaseDirectoryWatcherSyncContext(
-  store: Store,
-  mainWindow: BrowserWindow
-): void {
-  latestSyncContext = { store, mainWindow }
-  // Why: older integration tests use lean BrowserWindow stubs; real windows still
-  // clear this context on close so stale watcher syncs cannot target dead chrome.
-  if (typeof mainWindow.once === 'function') {
-    mainWindow.once('closed', () => {
-      if (latestSyncContext?.mainWindow === mainWindow) {
-        latestSyncContext = null
-      }
-    })
-  }
+export function setWorktreeBaseDirectoryWatcherSyncContext(store: Store): void {
+  latestSyncStore = store
 }
 
-export function scheduleWorktreeBaseDirectoryWatcherSync(
-  store: Store,
-  mainWindow: BrowserWindow
-): void {
+export function scheduleWorktreeBaseDirectoryWatcherSync(store: Store): void {
   if (scheduledSync) {
     clearTimeout(scheduledSync)
   }
   scheduledSync = setTimeout(() => {
     scheduledSync = null
-    if (mainWindow.isDestroyed()) {
-      return
-    }
-    void syncWorktreeBaseDirectoryWatchers(store, mainWindow)
+    void syncWorktreeBaseDirectoryWatchers(store)
   }, 100)
 }
 
 export function scheduleCurrentWorktreeBaseDirectoryWatcherSync(): void {
-  if (!latestSyncContext || latestSyncContext.mainWindow.isDestroyed()) {
+  if (!latestSyncStore) {
     return
   }
-  scheduleWorktreeBaseDirectoryWatcherSync(latestSyncContext.store, latestSyncContext.mainWindow)
+  scheduleWorktreeBaseDirectoryWatcherSync(latestSyncStore)
 }
 
 export async function disposeWorktreeBaseDirectoryWatchers(): Promise<void> {
   syncGeneration++
-  latestSyncContext = null
+  latestSyncStore = null
   if (scheduledSync) {
     clearTimeout(scheduledSync)
     scheduledSync = null

@@ -13,6 +13,7 @@ import {
   DialogTitle
 } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 
 export function CoworkingControlRequestDialog(): React.JSX.Element | null {
@@ -36,7 +37,10 @@ export function CoworkingControlRequestDialog(): React.JSX.Element | null {
       }
       setDecidingRequestId(request.requestId)
       try {
-        await window.api.coworkingSharing.decideControl({ requestId: request.requestId, decision })
+        await coworkingSharingClient.decideControl({
+          requestId: request.requestId,
+          decision
+        })
         removeRequest(request.requestId)
       } catch {
         toast.error(

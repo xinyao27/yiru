@@ -1,7 +1,6 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ContributionHeatmap } from '~renderer/components/contribution-heatmap/heatmap'
 import type {
   ContributionDisplayMetric,
@@ -14,15 +13,18 @@ import {
 } from '~renderer/components/contribution-heatmap/preference'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
-import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import { translate } from '~renderer/i18n/i18n'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { useAppStore } from '~renderer/store'
 
 import { loadHomeDataSnapshot, saveHomeDataSnapshot } from './cache'
 import { chartActivationLabel } from './chart-activation'
 import { ContributionCharts } from './charts'
-import { ModelUsageChart } from './model-usage-chart'
+import { MetricControls } from './metric-controls'
+import { UsageBreakdowns } from './project-usage'
+import { ProviderUsageChart } from './provider-usage-chart'
 import { useUsageValue } from './usage-value'
+import { useUsageRangePreference } from './use-usage-range'
 
 type MetricDisclosureProps = {
   hasTokens: boolean
@@ -39,25 +41,28 @@ type SummaryMetricProps = {
 }
 
 export default function HomePage(): React.JSX.Element {
-  useTranslation()
+  useUiLocale()
   const liveStats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const [initialCachedSnapshot] = useState(loadHomeDataSnapshot)
+  const [usageRange, setUsageRange] = useUsageRangePreference()
   const cachedSnapshotRef = useRef(initialCachedSnapshot)
   const cachedSnapshot = cachedSnapshotRef.current
   const [metric, setMetric] = useState<ContributionDisplayMetric>(loadContributionMetric)
-  const liveUsageValue = useUsageValue()
+  const liveUsageValue = useUsageValue(usageRange)
   const stats = liveStats ?? cachedSnapshot?.stats ?? null
+  const cachedUsage = cachedSnapshot?.usage.range === usageRange ? cachedSnapshot.usage : null
   const usageValue = useMemo(
     () =>
-      liveUsageValue.isReady || cachedSnapshot === null
+      liveUsageValue.isReady || cachedUsage === null
         ? liveUsageValue
         : {
-            ...cachedSnapshot.usage,
+            ...cachedUsage,
+            dailyByProvider: [],
             isReady: false,
             isScanning: liveUsageValue.isScanning
           },
-    [cachedSnapshot, liveUsageValue]
+    [cachedUsage, liveUsageValue]
   )
 
   useEffect(() => {
@@ -152,26 +157,12 @@ export default function HomePage(): React.JSX.Element {
               </h2>
               <p className="text-muted-foreground mt-1 text-xs">{metricDescription(metric)}</p>
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-3">
-              <ToggleGroup
-                variant="outline"
-                size="sm"
-                value={[metric === 'activity' ? 'activity' : 'tokens']}
-                onValueChange={(values) => {
-                  const nextMetric = values[0]
-                  if (nextMetric === 'activity' || nextMetric === 'tokens') {
-                    selectMetric(nextMetric)
-                  }
-                }}
-              >
-                <ToggleGroupItem value="activity">
-                  {translate('auto.components.home.page.activity', 'Activity')}
-                </ToggleGroupItem>
-                <ToggleGroupItem value="tokens">
-                  {translate('auto.components.home.page.tokens', 'Tokens')}
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
+            <MetricControls
+              metric={metric}
+              range={usageRange}
+              onMetricChange={selectMetric}
+              onRangeChange={setUsageRange}
+            />
           </CardHeader>
 
           <CardContent>
@@ -198,16 +189,26 @@ export default function HomePage(): React.JSX.Element {
           </CardContent>
         </Card>
 
-        <ContributionCharts
-          points={points}
-          metric={metric}
-          onMetricChange={selectTokenValueMetric}
-        />
+        {metric === 'activity' ? (
+          <ContributionCharts
+            points={points}
+            metric={metric}
+            onMetricChange={selectTokenValueMetric}
+          />
+        ) : (
+          <ProviderUsageChart
+            daily={usageValue.dailyByProvider}
+            isScanning={usageValue.isScanning}
+            metric={metric}
+            range={usageRange}
+            onMetricChange={selectTokenValueMetric}
+          />
+        )}
 
         {metric === 'activity' ? null : (
-          <ModelUsageChart
+          <UsageBreakdowns
             metric={metric}
-            models={usageValue.models}
+            usage={usageValue}
             onMetricChange={selectTokenValueMetric}
           />
         )}

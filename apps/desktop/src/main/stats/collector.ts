@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 
-import { app } from 'electron'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import type { StatsSummary } from '~shared/types'
 
 import { addEventToDailyActivity, buildDailyActivity } from './daily-activity'
@@ -18,19 +18,19 @@ const MAX_COUNTED_PRS = 2_000
 // (a few per session) and not latency-sensitive for the UI.
 const DEBOUNCE_MS = 5_000
 
-// Why: same timing constraint as persistence.ts — the path must be captured
-// after configureDevUserDataPath() but before app.setName('Yiru'). See the
-// comment block in persistence.ts:20-28 for the full explanation.
+// Why: same timing constraint as persistence.ts — the Electron composition
+// root installs a provider before app.setName changes its userData path, while
+// the standalone host installs its provider before constructing this service.
 let _statsFile: string | null = null
 
 export function initStatsPath(): void {
-  _statsFile = join(app.getPath('userData'), 'yiru-stats.json')
+  _statsFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-stats.json')
 }
 
 function getStatsFile(): string {
   if (!_statsFile) {
     // Safety fallback — should not be hit in normal startup.
-    _statsFile = join(app.getPath('userData'), 'yiru-stats.json')
+    _statsFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-stats.json')
   }
   return _statsFile
 }

@@ -1,23 +1,22 @@
-import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
-
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 export async function resolveMobileNativeChatWorktreePath(args: {
-  client: RpcClient
+  client: Pick<RpcClient, 'orpc'>
   worktreeId: string
   pathText: string
   terminal: string | null
 }): Promise<string | null> {
   try {
-    const response = await args.client.sendRequest('files.resolveTerminalPath', {
-      worktree: `id:${args.worktreeId}`,
-      pathText: args.pathText,
-      ...(args.terminal ? { terminal: args.terminal } : {})
-    })
-    if (!response.ok) {
-      return null
-    }
-    const resolved = response.result as RuntimeTerminalPathResolution
+    const resolved = await callRuntimeOrpc(
+      args.client,
+      (runtime) => runtime.files.resolveTerminalPath,
+      {
+        worktree: `id:${args.worktreeId}`,
+        pathText: args.pathText,
+        ...(args.terminal ? { terminal: args.terminal } : {})
+      }
+    )
     if (!resolved.exists || resolved.isDirectory) {
       return null
     }
@@ -32,7 +31,7 @@ export async function resolveMobileNativeChatWorktreePath(args: {
 }
 
 export async function openMobileNativeChatFile(args: {
-  client: RpcClient
+  client: Pick<RpcClient, 'orpc'>
   worktreeId: string
   pathText: string
   terminal: string | null
@@ -40,7 +39,7 @@ export async function openMobileNativeChatFile(args: {
   const relativePath = await resolveMobileNativeChatWorktreePath(args)
   if (relativePath) {
     try {
-      await args.client.sendRequest('files.open', {
+      await callRuntimeOrpc(args.client, (runtime) => runtime.files.open, {
         worktree: `id:${args.worktreeId}`,
         relativePath
       })

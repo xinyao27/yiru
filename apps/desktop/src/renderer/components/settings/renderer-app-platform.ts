@@ -1,6 +1,7 @@
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 export function getRendererAppPlatform(): NodeJS.Platform {
   const preloadPlatform =
-    typeof window === 'undefined' ? undefined : window.api?.platform?.get?.()?.platform
+    typeof window === 'undefined' ? undefined : rendererHostClient?.platform?.get?.()?.platform
   if (preloadPlatform) {
     return preloadPlatform
   }

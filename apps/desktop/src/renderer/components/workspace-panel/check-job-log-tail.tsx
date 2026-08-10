@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 const LOG_EXCERPT_ERROR_LINE_PATTERN =
   /(?:##\[error\]|::error::|::error\b|\berror:|FAILED|exit code|ENOENT|EACCES|panic:|AssertionError)/i
@@ -59,7 +60,7 @@ function CopyButton({
   const handleCopy = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      void window.api.ui.writeClipboardText(text).then(() => {
+      void shellClient.ui.writeClipboardText(text).then(() => {
         if (!isMountedRef.current) {
           return
         }

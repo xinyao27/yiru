@@ -1,5 +1,5 @@
 import type { Popover as BasePopover } from '@base-ui/react/popover'
-import { GitMerge, HardDrives as Server } from '@phosphor-icons/react'
+import { GitMerge } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
@@ -96,7 +96,6 @@ function WorktreeParentPickerRow({
               <span className="truncate lowercase">{repo.displayName}</span>
             </span>
           ) : null}
-          {repo?.connectionId ? <Server className="size-3 shrink-0" /> : null}
           <GitMerge className="size-3 shrink-0" />
           <span className="truncate">{branch}</span>
         </div>

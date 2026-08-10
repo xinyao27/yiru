@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   findKeybindingConflicts,
@@ -87,8 +88,8 @@ export function ShortcutsPane(): React.JSX.Element {
   // is recording, so the captured chord lands in the editor instead of firing.
   // One source of truth here avoids races between per-row recorder effects.
   useEffect(() => {
-    window.api.ui.setShortcutRecorderFocused(recordingActionId !== null)
-    return () => window.api.ui.setShortcutRecorderFocused(false)
+    shellClient.ui.setShortcutRecorderFocused(recordingActionId !== null)
+    return () => shellClient.ui.setShortcutRecorderFocused(false)
   }, [recordingActionId])
 
   const groups = useMemo(() => groupDefinitions(disabledTuiAgents), [disabledTuiAgents])

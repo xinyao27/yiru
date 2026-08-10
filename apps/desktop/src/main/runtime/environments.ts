@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import { app, ipcMain } from 'electron'
+import { ipcMain } from 'electron'
 import type { RemoteRuntimeSubscription } from '~shared/remote-runtime/client'
 import {
   listEnvironments,
@@ -24,6 +24,7 @@ import {
   resetSharedControlSupport,
   subscribeRuntimeEnvironment
 } from './environment-transport-routing'
+import { getRuntimeHostPathsProvider } from './host/paths-provider'
 
 const RUNTIME_ENVIRONMENT_HANDLER_CHANNELS = [
   'runtimeEnvironments:list',
@@ -44,7 +45,7 @@ type RetainedRemoteRuntimeSubscription = RemoteRuntimeSubscription & {
 const remoteRuntimeSubscriptions = new Map<string, RetainedRemoteRuntimeSubscription>()
 
 function getUserDataPath(): string {
-  return app.getPath('userData')
+  return getRuntimeHostPathsProvider().userDataPath()
 }
 
 function closeSubscriptionsForEnvironment(environmentId: string): void {

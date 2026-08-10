@@ -1,7 +1,7 @@
 import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
 
 import type { RpcClient } from '../transport/rpc-client'
-import { isTerminalSendRpcAccepted } from './send-rpc-response'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 
 type TerminalSubscriptionRegistry = {
   has: (handle: string) => boolean
@@ -9,7 +9,7 @@ type TerminalSubscriptionRegistry = {
 
 type MobileTerminalQueryReplyOptions = {
   bytes: string
-  client: Pick<RpcClient, 'sendRequest'> | null
+  client: RpcClient | null
   clientId: string | null
   connected: boolean
   handle: string
@@ -40,13 +40,14 @@ export function sendMobileTerminalQueryReply({
     return Promise.resolve(false)
   }
 
-  return client
-    .sendRequest('terminal.send', {
-      terminal: handle,
-      text: bytes,
-      enter: false,
-      inputKind: 'query-reply',
-      ...(clientId ? { client: { id: clientId, type: 'mobile' as const } } : {})
-    })
-    .then(isTerminalSendRpcAccepted, () => false)
+  return callRuntimeOrpc(client, (runtime) => runtime.terminal.send, {
+    terminal: handle,
+    text: bytes,
+    enter: false,
+    inputKind: 'query-reply',
+    ...(clientId ? { client: { id: clientId, type: 'mobile' as const } } : {})
+  }).then(
+    (result) => result.send.accepted,
+    () => false
+  )
 }

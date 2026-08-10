@@ -13,6 +13,7 @@ import { Input } from '~renderer/components/ui/input'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { getRelativePathInsideRoot } from '~renderer/lib/path'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 type UntitledFileRenameDialogProps = {
   open: boolean
@@ -78,7 +79,7 @@ export function UntitledFileRenameDialog({
   }
 
   const handleBrowse = useCallback(async () => {
-    const picked = await window.api.shell.pickDirectory({ defaultPath: dir || worktreePath })
+    const picked = await shellClient.shell.pickDirectory({ defaultPath: dir || worktreePath })
     if (!picked) {
       return
     }

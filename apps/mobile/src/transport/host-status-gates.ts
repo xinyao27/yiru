@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react'
 
 import type { DesktopStatus } from '../transport/host-rpc-types'
 import type { RpcClient } from './rpc-client'
-import type { ConnectionState, RpcSuccess } from './types'
+import { callRuntimeOrpc } from './runtime-orpc-client'
+import type { ConnectionState } from './types'
 
 export type HostStatusGates = {
   // Undefined means status.get has not produced an authoritative answer yet;
@@ -20,6 +21,13 @@ type LoadedHostStatusGates = HostStatusGates & {
   hostId: string | undefined
   client: RpcClient
 }
+
+// Why: a host that predates `rpc.orpc.v1` can't parse the oRPC-framed call
+// at all, so the oRPC status.get below would otherwise hang forever with no
+// error and no compat verdict. Bound it, then fall back to the bare-envelope
+// probe every host has always answered (rpc-client-status-probe.ts) so the
+// "update Yiru on the host" screen still renders instead of a silent stall.
+const ORPC_STATUS_PROBE_TIMEOUT_MS = 4_000
 
 export function deriveHostStatusGates(
   status: DesktopStatus & { capabilities?: string[] }
@@ -55,12 +63,28 @@ export function useHostStatusGates(args: {
     const requestClient = client
     void (async () => {
       try {
-        const response = await requestClient.sendRequest('status.get')
-        if (cancelled || !response.ok) {
-          return
+        let status: DesktopStatus & { capabilities?: string[] }
+        try {
+          status = await callRuntimeOrpc(
+            requestClient,
+            (runtime) => runtime.status.get,
+            undefined,
+            {
+              timeoutMs: ORPC_STATUS_PROBE_TIMEOUT_MS
+            }
+          )
+        } catch {
+          const fallback = await requestClient.probeStatusForProtocolCompat()
+          if (cancelled) {
+            return
+          }
+          if (!fallback) {
+            throw new Error('status.get unavailable over oRPC and bare envelope')
+          }
+          status = fallback
         }
-        const status = (response as RpcSuccess).result as DesktopStatus & {
-          capabilities?: string[]
+        if (cancelled) {
+          return
         }
         const gates = deriveHostStatusGates(status)
         setLoaded({

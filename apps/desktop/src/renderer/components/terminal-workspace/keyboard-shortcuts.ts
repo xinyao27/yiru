@@ -14,7 +14,6 @@ import { useAppStore } from '~renderer/store'
 import { keybindingMatchesAction, type KeybindingActionId } from '~shared/keybindings'
 import type { TuiAgent } from '~shared/types'
 import { matchesRecentTabSwitcherChord } from '~shared/window-shortcut-policy'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from '../editor/autosave'
 import {
@@ -175,7 +174,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
           if (
             state.activeTabType === 'editor' &&
             state.activeFileId &&
-            (!activeUnifiedTab || !isWorkspacePanelTabContentType(activeUnifiedTab.contentType))
+            (!activeUnifiedTab || activeUnifiedTab.contentType !== 'git-graph')
           ) {
             e.preventDefault()
             notifyTerminalCapture('editor.save')
@@ -225,7 +224,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
         const activeUnifiedTab = state.activeWorktreeId
           ? state.getActiveTab(state.activeWorktreeId)
           : null
-        if (activeUnifiedTab && isWorkspacePanelTabContentType(activeUnifiedTab.contentType)) {
+        if (activeUnifiedTab && activeUnifiedTab.contentType === 'git-graph') {
           state.closeUnifiedTab(activeUnifiedTab.id)
         } else if (state.activeTabType === 'editor' && state.activeFileId) {
           handleCloseFile(state.activeFileId)

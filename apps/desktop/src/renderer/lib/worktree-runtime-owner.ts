@@ -161,7 +161,9 @@ export function getRuntimeEnvironmentIdForWorktree(
   }
   const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(worktreeId)
   const repo = findRepoRecord(state.repos, repoId)
-  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim() || repo?.connectionId?.trim())
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim())
   if (repo && hasExplicitOwner) {
     const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
     return parsed?.kind === 'runtime' ? parsed.environmentId : null
@@ -255,7 +257,9 @@ export function getExecutionHostIdForWorktree(
   }
   const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(worktreeId)
   const repo = findRepoRecord(state.repos, repoId)
-  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim() || repo?.connectionId?.trim())
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim())
   if (repo && hasExplicitOwner) {
     return getRepoExecutionHostId(repo)
   }

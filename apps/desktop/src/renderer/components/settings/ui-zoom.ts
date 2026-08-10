@@ -1,3 +1,4 @@
+import { shellClient } from '~renderer/runtime/shell-client'
 const isMac = navigator.userAgent.includes('Mac')
 
 /**
@@ -7,10 +8,10 @@ const isMac = navigator.userAgent.includes('Mac')
  */
 export function applyUIZoom(level: number): void {
   const zoomFactor = Math.pow(1.2, level)
-  window.api.ui.setZoomLevel(level)
+  shellClient.ui.setZoomLevel(level)
   document.documentElement.style.setProperty('--ui-zoom-factor', String(zoomFactor))
   if (isMac) {
-    window.api.ui.syncTrafficLights(zoomFactor)
+    shellClient.ui.syncTrafficLights(zoomFactor)
   }
 }
 
@@ -19,10 +20,10 @@ export function applyUIZoom(level: number): void {
  * Call on startup after the main process has restored the zoom.
  */
 export function syncZoomCSSVar(): void {
-  const level = window.api.ui.getZoomLevel()
+  const level = shellClient.ui.getZoomLevel()
   const zoomFactor = Math.pow(1.2, level)
   document.documentElement.style.setProperty('--ui-zoom-factor', String(zoomFactor))
   if (isMac) {
-    window.api.ui.syncTrafficLights(zoomFactor)
+    shellClient.ui.syncTrafficLights(zoomFactor)
   }
 }

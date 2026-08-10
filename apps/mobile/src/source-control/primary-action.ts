@@ -7,11 +7,10 @@ import {
 import type { MobileGitBranchCompareResult } from './branch-compare'
 import type { MobileGitStatusResult } from './git-status'
 import { getMobileSourceControlRemoteOperation } from './operation'
+import type { MobileGitStep } from './use-git-requests'
 
 type MobileSourceControlPrimaryActionDecision = SourceControlCommitAreaPrimaryActionDecision
 type MobileSourceControlPrimaryActionKind = SourceControlCommitAreaPrimaryActionKind
-
-type GitStep = { method: string; params?: Record<string, unknown> }
 
 export type MobileSourceControlPrimaryAction = {
   kind: MobileSourceControlPrimaryActionKind
@@ -27,7 +26,7 @@ export type MobileSourceControlPrimaryAction = {
 export type MobileSourceControlPrimaryActionHandlers = {
   commit: () => Promise<boolean>
   stageAll: () => Promise<void>
-  runActionSheetGitSequence: (actionId: string, steps: GitStep[]) => Promise<void>
+  runActionSheetGitSequence: (actionId: string, steps: MobileGitStep[]) => Promise<void>
   runActionSheetGitSync: () => Promise<void>
 }
 
@@ -207,19 +206,19 @@ async function runMobilePrimaryAction(
       const params = decision.requiresForceWithLease ? { forceWithLease: true } : undefined
       await handlers.runActionSheetGitSequence(
         decision.requiresForceWithLease ? 'force-push' : 'push',
-        [{ method: 'git.push', params }]
+        [{ kind: 'push', input: params }]
       )
       return
     }
     case 'pull':
-      await handlers.runActionSheetGitSequence('pull', [{ method: 'git.pull' }])
+      await handlers.runActionSheetGitSequence('pull', [{ kind: 'pull' }])
       return
     case 'sync':
       await handlers.runActionSheetGitSync()
       return
     case 'publish':
       await handlers.runActionSheetGitSequence('publish', [
-        { method: 'git.push', params: { publish: true } }
+        { kind: 'push', input: { publish: true } }
       ])
       return
   }

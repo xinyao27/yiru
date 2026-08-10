@@ -9,7 +9,7 @@ import type {
 
 import { mobileRepoSelectorFromWorktreeId } from '~/source-control/pr-create'
 import type { RpcClient } from '~/transport/rpc-client'
-import type { RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import {
   readAssignableUsers,
@@ -53,37 +53,32 @@ const METHODS_ACCEPTING_PR_REPO = new Set<string>([
 // does not), so headSha is forwarded just to that read. Check runs are commit-keyed.
 const METHODS_ACCEPTING_HEAD_SHA = new Set<string>(['github.prChecks'])
 
-export function buildGithubPrParams(
+export function buildGithubPrParams<TParams extends object>(
   method: string,
   worktreeId: string,
-  params: Record<string, unknown>,
+  params: TParams,
   options?: { prRepo?: GitHubPrRepoSlug | null; headSha?: string | null }
-): Record<string, unknown> {
-  const built: Record<string, unknown> = {
+) {
+  const prRepo = options?.prRepo && METHODS_ACCEPTING_PR_REPO.has(method) ? options.prRepo : null
+  const headSha =
+    options?.headSha && METHODS_ACCEPTING_HEAD_SHA.has(method) ? options.headSha : null
+  return {
     repo: mobileRepoSelectorFromWorktreeId(worktreeId),
-    ...params
+    ...params,
+    ...(prRepo && !('prRepo' in params)
+      ? { prRepo: { owner: prRepo.owner, repo: prRepo.repo } }
+      : {}),
+    ...(headSha && !('headSha' in params) ? { headSha } : {})
   }
-  if (options?.prRepo && METHODS_ACCEPTING_PR_REPO.has(method) && !('prRepo' in built)) {
-    built.prRepo = { owner: options.prRepo.owner, repo: options.prRepo.repo }
-  }
-  if (options?.headSha && METHODS_ACCEPTING_HEAD_SHA.has(method) && !('headSha' in built)) {
-    built.headSha = options.headSha
-  }
-  return built
 }
 
-async function sendGithubPrRead<T>(
-  client: Pick<RpcClient, 'sendRequest'>,
+async function readGithubPrRequest<TOutput, TResult>(
   method: string,
-  params: Record<string, unknown>,
-  parse: (value: unknown) => T
-): Promise<GitHubPrReadOutcome<T>> {
+  request: () => Promise<TOutput>,
+  parse: (value: TOutput) => TResult
+): Promise<GitHubPrReadOutcome<TResult>> {
   try {
-    const response = await client.sendRequest(method, params)
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || `Request failed: ${method}` }
-    }
-    return { ok: true, result: parse((response as RpcSuccess).result) }
+    return { ok: true, result: parse(await request()) }
   } catch (err) {
     // Why: a transport drop or a parser throw must not escape as an unhandled
     // rejection — normalize to the `{ ok:false, error }` contract callers expect.
@@ -95,13 +90,17 @@ async function sendGithubPrRead<T>(
 // to decide whether the dedicated PR-view icon is available — independent of
 // whether the branch has an open PR.
 export async function fetchGithubRepoSlug(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<GitHubPrReadOutcome<GitHubPrRepoSlug | null>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.repoSlug',
-    buildGithubPrParams('github.repoSlug', worktreeId, {}),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.repoSlug,
+        buildGithubPrParams('github.repoSlug', worktreeId, {})
+      ),
     (value) => {
       if (!value || typeof value !== 'object') {
         return null
@@ -115,74 +114,86 @@ export async function fetchGithubRepoSlug(
 }
 
 export async function fetchHostedReviewForBranch(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { branch: string; linkedGitHubPR?: number | null }
 ): Promise<GitHubPrReadOutcome<HostedReviewInfo | null>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'hostedReview.forBranch',
-    {
-      repo: mobileRepoSelectorFromWorktreeId(worktreeId),
-      branch: args.branch,
-      linkedGitHubPR: args.linkedGitHubPR ?? null
-    },
+    () =>
+      callRuntimeOrpc(client, (runtime) => runtime.hostedReview.forBranch, {
+        repo: mobileRepoSelectorFromWorktreeId(worktreeId),
+        branch: args.branch,
+        linkedGitHubPR: args.linkedGitHubPR ?? null
+      }),
     readForBranch
   )
 }
 
 export async function fetchPRForBranch(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { branch: string; linkedPRNumber?: number | null }
 ): Promise<GitHubPrReadOutcome<PRInfo | null>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.prForBranch',
-    buildGithubPrParams('github.prForBranch', worktreeId, {
-      branch: args.branch,
-      linkedPRNumber: args.linkedPRNumber ?? null
-    }),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.prForBranch,
+        buildGithubPrParams('github.prForBranch', worktreeId, {
+          branch: args.branch,
+          linkedPRNumber: args.linkedPRNumber ?? null
+        })
+      ),
     readPRForBranch
   )
 }
 
 export async function fetchWorkItemDetails(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number }
 ): Promise<GitHubPrReadOutcome<GitHubWorkItemDetails | null>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.workItemDetails',
-    buildGithubPrParams('github.workItemDetails', worktreeId, {
-      number: args.prNumber,
-      type: 'pr'
-    }),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.workItemDetails,
+        buildGithubPrParams('github.workItemDetails', worktreeId, {
+          number: args.prNumber,
+          type: 'pr' as const
+        })
+      ),
     readWorkItemDetails
   )
 }
 
 export async function fetchPRChecks(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; headSha?: string | null; prRepo?: GitHubPrRepoSlug | null }
 ): Promise<GitHubPrReadOutcome<PRCheckDetail[]>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.prChecks',
-    buildGithubPrParams(
-      'github.prChecks',
-      worktreeId,
-      { prNumber: args.prNumber },
-      { prRepo: args.prRepo, headSha: args.headSha }
-    ),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.prChecks,
+        buildGithubPrParams(
+          'github.prChecks',
+          worktreeId,
+          { prNumber: args.prNumber },
+          { prRepo: args.prRepo, headSha: args.headSha }
+        )
+      ),
     readPRChecks
   )
 }
 
 export async function fetchPRCheckDetails(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: {
     checkRunId?: number
@@ -192,35 +203,38 @@ export async function fetchPRCheckDetails(
     prRepo?: GitHubPrRepoSlug | null
   }
 ): Promise<GitHubPrReadOutcome<PRCheckRunDetails | null>> {
-  const params: Record<string, unknown> = {}
-  if (args.checkRunId !== undefined) {
-    params.checkRunId = args.checkRunId
+  const params = {
+    ...(args.checkRunId !== undefined ? { checkRunId: args.checkRunId } : {}),
+    ...(args.workflowRunId !== undefined ? { workflowRunId: args.workflowRunId } : {}),
+    ...(args.checkName !== undefined ? { checkName: args.checkName } : {}),
+    ...(args.url !== undefined ? { url: args.url } : {})
   }
-  if (args.workflowRunId !== undefined) {
-    params.workflowRunId = args.workflowRunId
-  }
-  if (args.checkName !== undefined) {
-    params.checkName = args.checkName
-  }
-  if (args.url !== undefined) {
-    params.url = args.url
-  }
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.prCheckDetails',
-    buildGithubPrParams('github.prCheckDetails', worktreeId, params, { prRepo: args.prRepo }),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.prCheckDetails,
+        buildGithubPrParams('github.prCheckDetails', worktreeId, params, {
+          prRepo: args.prRepo
+        })
+      ),
     readPRCheckDetails
   )
 }
 
 export async function fetchAssignableUsers(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<GitHubPrReadOutcome<GitHubAssignableUser[]>> {
-  return sendGithubPrRead(
-    client,
+  return readGithubPrRequest(
     'github.listAssignableUsers',
-    buildGithubPrParams('github.listAssignableUsers', worktreeId, {}),
+    () =>
+      callRuntimeOrpc(
+        client,
+        (runtime) => runtime.github.listAssignableUsers,
+        buildGithubPrParams('github.listAssignableUsers', worktreeId, {})
+      ),
     readAssignableUsers
   )
 }

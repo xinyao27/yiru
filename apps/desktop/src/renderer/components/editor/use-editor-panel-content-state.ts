@@ -16,6 +16,7 @@ import {
   getRuntimeGitScope
 } from '~renderer/runtime/git-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { getDiskBaselineSignature } from './diff-content-signature'
@@ -161,7 +162,7 @@ export function useEditorPanelContentState({
           }
           // Why: restored external-file tabs need their main-process path grant
           // refreshed because that authorization is only held in memory.
-          await window.api.fs.authorizeExternalPath({ targetPath: filePath })
+          await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
         }
         const readScope = getRuntimeFileReadScope(readSettings, connectionId)
         const key = inFlightReadKey(readScope, filePath)

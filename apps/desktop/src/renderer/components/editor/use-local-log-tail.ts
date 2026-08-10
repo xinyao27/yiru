@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
-import type { LocalLogTailChangedPayload } from '~shared/local-log-tail-types'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import { LocalLogTailDecoder } from './local-log-tail-decoder'
+import { readRuntimeLogTailRange, watchRuntimeLogTail } from './local-log-tail-runtime'
 import type { FileContent } from './panel-content-types'
 
 type TailSession = {
@@ -14,6 +16,7 @@ type TailSession = {
   reading: boolean
   pendingRead: boolean
   limited: boolean
+  stop: () => void
   startPromise: Promise<void>
 }
 
@@ -51,11 +54,9 @@ function stopTailSession(session: TailSession): void {
     return
   }
   session.closed = true
-  // Why: start IPC can still be resolving when a tab closes. Stop only after
-  // start settles so a late-created main-process watcher cannot escape cleanup.
-  void session.startPromise
-    .then(() => window.api.fs.stopLocalLogTail({ subscriptionId: session.subscriptionId }))
-    .catch(() => {})
+  // Why: the watch stream can still be negotiating when a tab closes. Stop
+  // only after it settles so a late-ready stream cannot escape cleanup.
+  void session.startPromise.then(() => session.stop()).catch(() => {})
 }
 
 export function useLocalLogTail({
@@ -69,9 +70,12 @@ export function useLocalLogTail({
   openFilesRef.current = openFiles
   const reloadContentRef = useRef(reloadContent)
   reloadContentRef.current = reloadContent
-  const hasLocalLiveTailFile = openFiles.some(
-    (file) => file.readOnly === true && file.liveTail === true
-  )
+  // Why: a session's file has no runtime environment of its own (isLocalLiveLog
+  // requires runtimeEnvironmentId === null) — route by the globally active
+  // target instead, same as every other host-scoped file-client call.
+  const settings = useAppStore((s) => s.settings)
+  const targetRef = useRef(getActiveRuntimeTarget(settings))
+  targetRef.current = getActiveRuntimeTarget(settings)
 
   const restartFromSnapshot = useCallback((session: TailSession): void => {
     const file = openFilesRef.current.find((candidate) => candidate.id === session.fileId)
@@ -98,7 +102,7 @@ export function useLocalLogTail({
         do {
           session.pendingRead = false
           for (;;) {
-            const result = await window.api.fs.readLocalLogTail({
+            const result = await readRuntimeLogTailRange(targetRef.current, {
               filePath: session.filePath,
               fromByteOffset: session.decoder.nextByteOffset,
               expectedIdentity: session.decoder.expectedIdentity
@@ -114,11 +118,7 @@ export function useLocalLogTail({
             }
             if (decoded.kind === 'limit') {
               session.limited = true
-              void session.startPromise
-                .then(() =>
-                  window.api.fs.stopLocalLogTail({ subscriptionId: session.subscriptionId })
-                )
-                .catch(() => {})
+              void session.startPromise.then(() => session.stop()).catch(() => {})
               console.warn('[ai-vault] stopped live tail at the editor file-size limit')
               return
             }
@@ -152,28 +152,6 @@ export function useLocalLogTail({
   )
 
   useEffect(() => {
-    if (!hasLocalLiveTailFile) {
-      return
-    }
-    const unsubscribe = window.api.fs.onLocalLogTailChanged(
-      ({ subscriptionId, eventType }: LocalLogTailChangedPayload) => {
-        const session = Array.from(sessionsRef.current.values()).find(
-          (candidate) => candidate.subscriptionId === subscriptionId
-        )
-        if (!session) {
-          return
-        }
-        if (eventType === 'rename') {
-          restartFromSnapshot(session)
-          return
-        }
-        void drain(session)
-      }
-    )
-    return unsubscribe
-  }, [drain, hasLocalLiveTailFile, restartFromSnapshot])
-
-  useEffect(() => {
     const liveFileIds = new Set<string>()
     for (const file of openFiles) {
       const content = fileContents[file.id]
@@ -196,6 +174,7 @@ export function useLocalLogTail({
         reading: false,
         pendingRead: false,
         limited: false,
+        stop: () => {},
         startPromise: Promise.resolve()
       }
       sessionsRef.current.set(file.id, session)
@@ -212,10 +191,23 @@ export function useLocalLogTail({
         })
       }
 
-      session.startPromise = window.api.fs.startLocalLogTail({
-        filePath: file.filePath,
-        subscriptionId
-      })
+      const watch = watchRuntimeLogTail(
+        targetRef.current,
+        file.filePath,
+        subscriptionId,
+        (eventType) => {
+          if (session.closed) {
+            return
+          }
+          if (eventType === 'rename') {
+            restartFromSnapshot(session)
+            return
+          }
+          void drain(session)
+        }
+      )
+      session.stop = watch.stop
+      session.startPromise = watch.ready
       void session.startPromise
         .then(() => {
           if (session.closed) {
@@ -237,7 +229,7 @@ export function useLocalLogTail({
         sessionsRef.current.delete(fileId)
       }
     }
-  }, [drain, fileContents, openFiles, setFileContents])
+  }, [drain, fileContents, openFiles, restartFromSnapshot, setFileContents])
 
   useEffect(
     () => () => {

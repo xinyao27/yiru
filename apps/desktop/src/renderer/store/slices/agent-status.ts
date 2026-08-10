@@ -30,6 +30,12 @@ import {
 } from '~renderer/lib/agent-row-primary-text'
 import { isExplicitAgentStatusFresh } from '~renderer/lib/agent-status'
 import {
+  dropAgentStatusesByTabPrefixOnHost,
+  dropAgentStatusOnHost,
+  retireAgentPaneAuthorityOnHost,
+  transferAgentPaneAuthorityOnHost
+} from '~renderer/runtime/agent-status-client'
+import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '~shared/agent/status-identity'
@@ -1226,7 +1232,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         queueMicrotask(() => freshness.schedule())
       }
       if (typeof window !== 'undefined') {
-        window.api?.agentStatus?.retirePaneAuthority?.(ownerPaneKey)
+        retireAgentPaneAuthorityOnHost(ownerPaneKey)
       }
     },
 
@@ -1284,7 +1290,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         retentionSuppressedPaneKeys: movePaneKeyedRecord(s.retentionSuppressedPaneKeys, from, to)
       }))
       if (typeof window !== 'undefined') {
-        window.api?.agentStatus?.transferPaneAuthority?.({
+        transferAgentPaneAuthorityOnHost({
           fromPaneKey: from,
           toPaneKey: to,
           ...(transfer.ptyId ? { ptyId: transfer.ptyId } : {})
@@ -2288,6 +2294,19 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         // guard used in setAgentStatus.
         const needsSuppressorWrite = hasLive && !(paneKey in s.retentionSuppressedPaneKeys)
 
+        // Why: when no tab in this renderer owns the pane, deleting the entry
+        // is not enough. Such rows only exist because the sidebar keeps
+        // worktree-attributed statuses whose tab never arrived (or was
+        // reconciled away), and the agent behind them can still be alive in a
+        // pane we no longer track — its next hook ping re-adds the row within
+        // seconds, so the dismiss X reads as dead. Retire the paneKey the way
+        // dropAgentStatusByTabPrefix retires a closed tab's panes; setAgentStatus
+        // then refuses late pings for it. paneKeys embed tab+leaf uuids that
+        // never recur, so this cannot block a pane the user can still reach.
+        const needsRetirementWrite =
+          findAgentPaneWorktreeId(s, paneKey) === null &&
+          !(paneKey in s.recentlyRetiredAgentStatusPaneKeys)
+
         return {
           agentStatusByPaneKey: nextLive,
           agentLaunchConfigByPaneKey: nextLaunchConfigs,
@@ -2295,6 +2314,14 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           migrationUnsupportedByPtyId: migrationUnsupported.next,
           ...(nextAck !== s.acknowledgedAgentsByPaneKey
             ? { acknowledgedAgentsByPaneKey: nextAck }
+            : {}),
+          ...(needsRetirementWrite
+            ? {
+                recentlyRetiredAgentStatusPaneKeys: boundRecentlyRetiredAgentStatusPaneKeys(
+                  s.recentlyRetiredAgentStatusPaneKeys,
+                  [paneKey]
+                )
+              }
             : {}),
           ...(needsSuppressorWrite
             ? {
@@ -2326,7 +2353,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
       // on-disk last-status file evicts this paneKey on the next debounced
       // write. Without this, the main process would re-hydrate the dismissed
       // entry on the next launch and the row would re-appear. Fire-and-forget.
-      window.api?.agentStatus?.drop?.(paneKey)
+      dropAgentStatusOnHost(paneKey)
     },
 
     dropAgentStatusByTabPrefix: (tabIdPrefix, opts) => {
@@ -2467,7 +2494,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         queueMicrotask(() => freshness.schedule())
       }
       if (typeof window !== 'undefined') {
-        window.api?.agentStatus?.dropByTabPrefix?.(tabIdPrefix)
+        dropAgentStatusesByTabPrefixOnHost(tabIdPrefix)
       }
     },
 
@@ -2973,7 +3000,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
     dismissRetainedAgentsByWorktree: (worktreeId) => {
       // Why: collect inside set so we capture the exact paneKeys removed
       // (worktree filter is applied here). After the synchronous set()
-      // returns, fan out a window.api.agentStatus.drop per removed key so
+      // returns, fan out one host-side agent-status drop per removed key so
       // the main-process hook cache (and on-disk last-status file) eviction
       // matches the renderer's removal. Without this, the on-disk cache
       // would resurrect the dismissed rows on the next launch.
@@ -3021,7 +3048,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
       })
       if (typeof window !== 'undefined') {
         for (const paneKey of dismissedPaneKeys) {
-          window.api?.agentStatus?.drop?.(paneKey)
+          dropAgentStatusOnHost(paneKey)
         }
       }
     },

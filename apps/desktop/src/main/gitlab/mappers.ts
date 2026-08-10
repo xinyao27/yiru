@@ -1,17 +1,4 @@
-import {
-  mapGitLabPipelineJobStatusToCheckStatus,
-  mapGitLabPipelineJobStatusToConclusion
-} from '~shared/gitlab-pipeline-checks'
 import type { CheckStatus, GitLabWorkItem, MRInfo, MRState } from '~shared/types'
-
-// ── Pipeline job mapping (GitLab REST `/pipelines/:id/jobs`) ────────
-// Why: GitLab pipeline jobs roughly map to GitHub check-runs, but use a
-// single `status` field that combines lifecycle + outcome. We split it
-// into PRCheckDetail's status + conclusion shape so the renderer can
-// share a row with the GitHub side.
-
-export const mapPipelineJobStatusToCheckStatus = mapGitLabPipelineJobStatusToCheckStatus
-export const mapPipelineJobStatusToConclusion = mapGitLabPipelineJobStatusToConclusion
 
 // ── MR state mapping ────────────────────────────────────────────────
 // Why: glab returns the API state directly. Apply the draft flag (or a

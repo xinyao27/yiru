@@ -126,10 +126,6 @@ export function canRedo(doc: MarkupDocument): boolean {
   return doc.future.length > 0
 }
 
-export function isEmptyDocument(doc: MarkupDocument): boolean {
-  return doc.shapes.length === 0
-}
-
 // ─── Geometry helpers (shared by live overlay + compositor) ─────────────────
 
 export type NormalizedRect = { x: number; y: number; width: number; height: number }

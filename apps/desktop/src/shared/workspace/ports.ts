@@ -45,15 +45,6 @@ export type WorkspacePort =
       kind: 'external'
     })
 
-export type WorkspacePortScanRequest = {
-  repoId?: string
-}
-
-export type WorkspacePortAdvertisedUrlChangedEvent = {
-  worktreeId: string
-  port: number
-}
-
 export type WorkspacePortKillRequest = {
   repoId?: string
   pid: number

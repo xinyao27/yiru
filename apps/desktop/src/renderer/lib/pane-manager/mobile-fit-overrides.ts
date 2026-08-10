@@ -66,32 +66,8 @@ export function setFitOverride(ptyId: string, mode: FitHoldMode, cols: number, r
   })
 }
 
-export function getPaneIdsForPty(ptyId: string): number[] {
-  const result: number[] = []
-  for (const [key, boundPtyId] of ptyIdByFitBindingKey) {
-    if (boundPtyId === ptyId) {
-      const paneId = Number(key.split(':').pop())
-      if (!Number.isNaN(paneId)) {
-        result.push(paneId)
-      }
-    }
-  }
-  return result
-}
-
 export function getFitOverrideForPty(ptyId: string): FitOverride | null {
   return overridesByPtyId.get(ptyId) ?? null
-}
-
-export function getFitOverrideForPane(paneId: number, tabId?: string): FitOverride | null {
-  if (tabId) {
-    const ptyId = ptyIdByFitBindingKey.get(fitBindingKey(tabId, paneId))
-    if (!ptyId) {
-      return null
-    }
-    return overridesByPtyId.get(ptyId) ?? null
-  }
-  return null
 }
 
 export function bindPanePtyId(paneId: number, ptyId: string | null, tabId?: string): void {
@@ -102,12 +78,6 @@ export function bindPanePtyId(paneId: number, ptyId: string | null, tabId?: stri
     } else {
       ptyIdByFitBindingKey.delete(key)
     }
-  }
-}
-
-export function unbindPane(paneId: number, tabId?: string): void {
-  if (tabId) {
-    ptyIdByFitBindingKey.delete(fitBindingKey(tabId, paneId))
   }
 }
 
@@ -150,10 +120,6 @@ export function hydrateOverrides(
       priorRows: prior.rows
     })
   }
-}
-
-export function getAllOverrides(): Map<string, FitOverride> {
-  return new Map(overridesByPtyId)
 }
 
 export function getMobileFitOverridePtyIds(): string[] {

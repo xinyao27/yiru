@@ -3,19 +3,17 @@ import { useCallback } from 'react'
 import type { RpcClient } from '../transport/rpc-client'
 import { resolveMobileBranchCompareBaseRef } from './branch-base-ref'
 import type { RunMobileSourceControlWorkflow } from './operation'
-
-type GitStep = { method: string; params?: Record<string, unknown> }
-type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
+import type { MobileGitRequests, MobileGitStep } from './use-git-requests'
 
 type Params = {
   client: RpcClient | null
   worktreeId: string
-  sendGitRequest: SendGitRequest
+  gitRequests: MobileGitRequests
   runGitWorkflow: RunMobileSourceControlWorkflow
-  runGitSequence: (actionId: string, steps: GitStep[]) => Promise<boolean>
+  runGitSequence: (actionId: string, steps: MobileGitStep[]) => Promise<boolean>
   runGitSync: (actionId: string) => Promise<boolean>
   commit: () => Promise<boolean>
-  runCommitSequence: (actionId: string, afterCommit: GitStep[]) => Promise<boolean>
+  runCommitSequence: (actionId: string, afterCommit: MobileGitStep[]) => Promise<boolean>
   runCommitSyncSequence: () => Promise<boolean>
   setShowActionSheet: (next: boolean) => void
 }
@@ -26,7 +24,7 @@ export function useMobileSourceControlActionSheetRunners(params: Params) {
   const {
     client,
     worktreeId,
-    sendGitRequest,
+    gitRequests,
     runGitWorkflow,
     runGitSequence,
     runGitSync,
@@ -42,7 +40,7 @@ export function useMobileSourceControlActionSheetRunners(params: Params) {
   }, [commit, setShowActionSheet])
 
   const runActionSheetCommitSequence = useCallback(
-    async (actionId: string, afterCommit: GitStep[]) => {
+    async (actionId: string, afterCommit: MobileGitStep[]) => {
       await runCommitSequence(actionId, afterCommit)
       setShowActionSheet(false)
     },
@@ -55,7 +53,7 @@ export function useMobileSourceControlActionSheetRunners(params: Params) {
   }, [runCommitSyncSequence, setShowActionSheet])
 
   const runActionSheetGitSequence = useCallback(
-    async (actionId: string, steps: GitStep[]) => {
+    async (actionId: string, steps: MobileGitStep[]) => {
       await runGitSequence(actionId, steps)
       setShowActionSheet(false)
     },
@@ -76,10 +74,10 @@ export function useMobileSourceControlActionSheetRunners(params: Params) {
       if (!baseRef) {
         throw new Error('No base branch to rebase onto')
       }
-      await sendGitRequest<unknown>('git.rebaseFromBase', { baseRef })
+      await gitRequests.rebaseFromBase(baseRef)
     })
     setShowActionSheet(false)
-  }, [client, runGitWorkflow, sendGitRequest, setShowActionSheet, worktreeId])
+  }, [client, gitRequests, runGitWorkflow, setShowActionSheet, worktreeId])
 
   return {
     runActionSheetCommit,

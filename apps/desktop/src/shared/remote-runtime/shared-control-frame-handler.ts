@@ -22,6 +22,7 @@ export function handleSharedControlTextFrame(args: {
   setState: (state: SharedControlConnectionState) => void
   handleSocketClosed: (error: RemoteRuntimeClientError) => void
   sendEncrypted: (payload: unknown) => boolean
+  handleOrpcText: (frame: string) => void
   markReady: () => void
   replaySubscriptions: () => void
 }): void {
@@ -52,6 +53,11 @@ export function handleSharedControlTextFrame(args: {
 
   if (parsed.type === 'error') {
     args.handleSocketClosed(parsed.error)
+    return
+  }
+
+  if (parsed.type === 'orpc') {
+    args.handleOrpcText(parsed.frame)
     return
   }
 

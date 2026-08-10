@@ -55,7 +55,6 @@ export function useChecksPanelReviewContext(context: useChecksPanelReviewIdentit
           repo.id,
           prChecksCacheSuffix(prNumber, pr?.prRepo),
           settings,
-          repo.connectionId,
           repo.executionHostId,
           true
         )
@@ -67,7 +66,6 @@ export function useChecksPanelReviewContext(context: useChecksPanelReviewIdentit
           repo.id,
           prCommentsCacheSuffix(prNumber, pr?.prRepo),
           settings,
-          repo.connectionId,
           repo.executionHostId,
           true
         )

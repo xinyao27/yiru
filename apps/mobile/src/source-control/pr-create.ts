@@ -6,15 +6,11 @@ import {
   mobileRepoSelectorFromWorktreeId,
   resolveMobileHostedReviewPrefill,
   shouldPushBeforeMobileHostedReviewCreate,
-  type MobileHostedReviewCreateInput,
   type MobileHostedReviewCreateOutcome,
-  type MobileHostedReviewEligibilityInput,
   type MobileHostedReviewPrefill
 } from './hosted-review-service'
 
-export type MobilePrEligibilityInput = MobileHostedReviewEligibilityInput
 export type MobilePrPrefill = MobileHostedReviewPrefill
-export type MobilePrCreateInput = MobileHostedReviewCreateInput
 export type MobilePrCreateOutcome = MobileHostedReviewCreateOutcome
 
 export {

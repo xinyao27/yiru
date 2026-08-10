@@ -1,3 +1,4 @@
+import type { OrchestrationWorkerStartResult } from '@yiru/runtime-protocol/contract'
 import type { OrchestrationDb } from '~main/runtime/orchestration/db'
 
 import { isUnknownWorkerStartOutcome, type WorkerSetupReceipt } from './topology'
@@ -10,7 +11,7 @@ export function failWorkerStartWithReceipt(args: {
   failedStage: string
   error: unknown
   setup: WorkerSetupReceipt
-}): unknown {
+}): OrchestrationWorkerStartResult {
   const reason = args.error instanceof Error ? args.error.message : String(args.error)
   const unknown = isUnknownWorkerStartOutcome(args.error, args.failedStage)
   const worker = unknown
@@ -25,8 +26,8 @@ export function failWorkerStartWithReceipt(args: {
     failedStage: args.failedStage,
     lastError: reason,
     setup: args.setup,
-    effects: JSON.parse(worker.effects) as unknown[],
-    residualResources: JSON.parse(worker.residual_resources) as unknown[],
+    effects: JSON.parse(worker.effects),
+    residualResources: JSON.parse(worker.residual_resources),
     ...(unknown
       ? {
           nextCommands: [

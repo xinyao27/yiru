@@ -1,4 +1,14 @@
 import type { StateCreator } from 'zustand'
+import {
+  consumeCodexRateLimitResetCredit,
+  fetchInactiveClaudeRateLimitAccounts,
+  fetchInactiveCodexRateLimitAccounts,
+  fetchRateLimitSnapshot,
+  refreshClaudeRateLimitTarget,
+  refreshCodexRateLimitTarget,
+  refreshGrokRateLimitSnapshot,
+  refreshRateLimitSnapshot
+} from '~renderer/runtime/rate-limits-client'
 import type {
   CursorRateLimitRefreshContext,
   RateLimitRuntimeTarget,
@@ -41,7 +51,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   fetchRateLimits: async () => {
     try {
-      const state = await window.api.rateLimits.get()
+      const state = await fetchRateLimitSnapshot()
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to fetch rate limits:', error)
@@ -50,7 +60,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   refreshRateLimits: async (cursorContext) => {
     try {
-      const state = await window.api.rateLimits.refresh(cursorContext)
+      const state = await refreshRateLimitSnapshot(cursorContext)
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to refresh rate limits:', error)
@@ -59,7 +69,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   refreshGrokRateLimits: async () => {
     try {
-      const state = await window.api.rateLimits.refreshGrok()
+      const state = await refreshGrokRateLimitSnapshot()
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to refresh Grok usage:', error)
@@ -89,7 +99,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
       }
     })
     try {
-      const state = await window.api.rateLimits.refreshClaudeForTarget(target)
+      const state = await refreshClaudeRateLimitTarget(target)
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to refresh Claude usage for runtime:', error)
@@ -119,7 +129,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
       }
     })
     try {
-      const state = await window.api.rateLimits.refreshCodexForTarget(target)
+      const state = await refreshCodexRateLimitTarget(target)
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to refresh Codex usage for runtime:', error)
@@ -128,7 +138,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   consumeCodexRateLimitResetCredit: async () => {
     try {
-      const result = await window.api.rateLimits.consumeCodexResetCredit()
+      const result = await consumeCodexRateLimitResetCredit()
       set({ rateLimits: result.state })
     } catch (error) {
       console.error('Failed to consume Codex rate-limit reset:', error)
@@ -138,7 +148,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   fetchInactiveClaudeAccountUsage: async () => {
     try {
-      await window.api.rateLimits.fetchInactiveClaudeAccounts()
+      await fetchInactiveClaudeRateLimitAccounts()
     } catch (error) {
       console.error('Failed to fetch inactive Claude account usage:', error)
     }
@@ -146,7 +156,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
 
   fetchInactiveCodexAccountUsage: async () => {
     try {
-      await window.api.rateLimits.fetchInactiveCodexAccounts()
+      await fetchInactiveCodexRateLimitAccounts()
     } catch (error) {
       console.error('Failed to fetch inactive Codex account usage:', error)
     }

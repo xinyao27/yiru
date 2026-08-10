@@ -1,5 +1,5 @@
+import type { TerminalManagementSession } from '@yiru/runtime-protocol/contract'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-import type { PtyManagementSession } from '~preload/api-types'
 
 export function shortCwd(cwd: string): string {
   if (!cwd) {
@@ -22,7 +22,7 @@ export function formatWorkspace(session: { cwd: string | null; sessionId: string
   return 'unknown'
 }
 
-export function formatState(session: PtyManagementSession): string {
+export function formatState(session: TerminalManagementSession): string {
   if (!session.isAlive) {
     return 'exited'
   }

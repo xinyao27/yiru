@@ -124,14 +124,6 @@ export function flushActiveSink(): void {
   }
 }
 
-/** Get the current parent context, or `undefined` if we are at the top of
- *  the trace tree. Renderer-IPC entry points capture this, embed it in
- *  span-event attributes (so cross-process spans can be visually linked
- *  later in v2), and start a new trace. */
-export function getActiveSpanContext(): SpanContext | undefined {
-  return contextStorage.getStore()
-}
-
 /**
  * Start a span and run `fn` inside its context. The returned promise
  * resolves to `fn`'s return value; `fn`'s thrown errors propagate after

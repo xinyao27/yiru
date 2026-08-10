@@ -1,4 +1,5 @@
 import { WORKSPACE_CREATE_STARTUP_AGENT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import type { WorktreeCreateInput } from '@yiru/runtime-protocol/contract'
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { getWorkspaceSourceName } from '@yiru/workbench-model/workspace'
 import type {
@@ -28,8 +29,6 @@ export type WorkspaceCreateReviewItem =
       provider: 'gitlab'
       source: { type: 'mr'; repoId: string; number: number; title: string; url: string }
     }
-
-export type WorkspaceCreateParams = Record<string, unknown>
 
 export function buildMobileWorkspaceAgentLaunchFields(args: {
   agentId: TuiAgent | undefined
@@ -68,7 +67,7 @@ export function buildReviewWorkspaceCreateParams(args: {
   sparseCheckout?: WorkspaceCreateSparseCheckout
   hostedStartPoint?: WorkspaceCreateHostedStartPoint
   nameIsAutoManaged?: boolean
-}): WorkspaceCreateParams {
+}): WorktreeCreateInput {
   const {
     item,
     setupDecision,

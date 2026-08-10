@@ -12,6 +12,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import { isFloatingWorkspacePanelVisible } from '~renderer/lib/floating-workspace-terminal-actions'
 import { detectLanguage } from '~renderer/lib/language-detect'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
@@ -140,7 +141,7 @@ export function KeybindingsFileActions(): React.JSX.Element {
         )
         return
       }
-      const result = await window.api.shell.openInExternalEditor(filePath, command)
+      const result = await shellClient.shell.openInExternalEditor(filePath, command)
       if (!result.ok) {
         toast.error(openFailureMessage(result.reason))
       }

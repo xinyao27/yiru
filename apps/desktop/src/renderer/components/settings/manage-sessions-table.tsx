@@ -4,7 +4,7 @@ import {
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
-import type { PtyManagementSession } from '~preload/api-types'
+import type { TerminalManagementSession } from '@yiru/runtime-protocol/contract'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'
 
 type ManageSessionsTableProps = {
-  sessions: PtyManagementSession[]
+  sessions: TerminalManagementSession[]
   hasLoadedOnce: boolean
   sessionCount: number
   isBusy: boolean
@@ -25,7 +25,7 @@ type ManageSessionsTableProps = {
   onKillAll: () => void
   onRestartDaemon: () => void
   onNavigate: (tabId: string) => void
-  onRequestKill: (session: PtyManagementSession) => void
+  onRequestKill: (session: TerminalManagementSession) => void
 }
 
 export function ManageSessionsTable({

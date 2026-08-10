@@ -21,20 +21,16 @@ export const EMPTY_GIT_GRAPH_STATE: GitGraphState = { status: 'idle' }
 
 export type GitGraphSlice = {
   gitGraphByWorktree: Record<string, GitGraphState>
-  gitGraphOpenByPanelTab: Record<string, boolean>
   gitGraphIncludeRemoteBranchesByWorktree: Record<string, boolean>
   // Why: null means "show all" (no branch filter applied yet) — distinct from an
   // empty array, which would mute every commit.
   gitGraphSelectedRefIdsByWorktree: Record<string, string[] | null>
-  gitGraphColumnWidthsByPanelTab: Record<string, GitGraphColumnWidths>
-  toggleGitGraphOpen: (panelTabId: string) => void
-  setGitGraphOpen: (panelTabId: string, open: boolean) => void
-  clearGitGraphOpen: (panelTabId: string) => void
+  gitGraphColumnWidthsByWorktree: Record<string, GitGraphColumnWidths>
   refreshGitGraph: (worktreeId: string) => Promise<void>
   loadMoreGitGraph: (worktreeId: string) => Promise<void>
   setGitGraphIncludeRemoteBranches: (worktreeId: string, include: boolean) => void
   setGitGraphSelectedRefIds: (worktreeId: string, refIds: string[] | null) => void
-  setGitGraphColumnWidths: (panelTabId: string, widths: GitGraphColumnWidths) => void
+  setGitGraphColumnWidths: (worktreeId: string, widths: GitGraphColumnWidths) => void
 }
 
 // Why: request sequencing lives outside zustand state (like the former
@@ -60,30 +56,9 @@ function dedupeGitHistoryItems(
 
 export const createGitGraphSlice: StateCreator<AppState, [], [], GitGraphSlice> = (set, get) => ({
   gitGraphByWorktree: {},
-  gitGraphOpenByPanelTab: {},
   gitGraphIncludeRemoteBranchesByWorktree: {},
   gitGraphSelectedRefIdsByWorktree: {},
-  gitGraphColumnWidthsByPanelTab: {},
-  toggleGitGraphOpen: (panelTabId) =>
-    set((state) => ({
-      gitGraphOpenByPanelTab: {
-        ...state.gitGraphOpenByPanelTab,
-        [panelTabId]: !state.gitGraphOpenByPanelTab[panelTabId]
-      }
-    })),
-  setGitGraphOpen: (panelTabId, open) =>
-    set((state) => ({
-      gitGraphOpenByPanelTab: { ...state.gitGraphOpenByPanelTab, [panelTabId]: open }
-    })),
-  clearGitGraphOpen: (panelTabId) =>
-    set((state) => {
-      if (!(panelTabId in state.gitGraphOpenByPanelTab)) {
-        return state
-      }
-      const next = { ...state.gitGraphOpenByPanelTab }
-      delete next[panelTabId]
-      return { gitGraphOpenByPanelTab: next }
-    }),
+  gitGraphColumnWidthsByWorktree: {},
   setGitGraphIncludeRemoteBranches: (worktreeId, include) => {
     set((state) => ({
       gitGraphIncludeRemoteBranchesByWorktree: {
@@ -100,11 +75,11 @@ export const createGitGraphSlice: StateCreator<AppState, [], [], GitGraphSlice> 
         [worktreeId]: refIds
       }
     })),
-  setGitGraphColumnWidths: (panelTabId, widths) =>
+  setGitGraphColumnWidths: (worktreeId, widths) =>
     set((state) => ({
-      gitGraphColumnWidthsByPanelTab: {
-        ...state.gitGraphColumnWidthsByPanelTab,
-        [panelTabId]: widths
+      gitGraphColumnWidthsByWorktree: {
+        ...state.gitGraphColumnWidthsByWorktree,
+        [worktreeId]: widths
       }
     })),
   refreshGitGraph: async (worktreeId) => {

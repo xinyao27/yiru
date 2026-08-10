@@ -29,10 +29,8 @@ import {
   type DirEntry
 } from './remote-file-browser-helpers'
 
-type RemoteFileBrowserProps = (
-  | { targetId: string; runtimeEnvironmentId?: never }
-  | { runtimeEnvironmentId: string; targetId?: never }
-) & {
+type RemoteFileBrowserProps = {
+  runtimeEnvironmentId: string
   initialPath?: string
   onSelect: (path: string) => void
   onCancel: () => void
@@ -131,10 +129,7 @@ export function RemoteFileBrowser({
       if (cached) {
         return cached
       }
-      const result = await browseRuntimeServerDirectory(
-        requireRuntimeEnvironmentId(runtimeEnvironmentId),
-        dirPath
-      )
+      const result = await browseRuntimeServerDirectory(runtimeEnvironmentId, dirPath)
       listingCacheRef.current.set(result.resolvedPath, result)
       // Also cache under the requested dirPath when it differs from the
       // server-resolved canonical path (e.g. `~`, `~/foo`, or a relative
@@ -824,11 +819,4 @@ export function RemoteFileBrowser({
 function committedPrefix(raw: string): string {
   const i = raw.lastIndexOf('/')
   return i === -1 ? '' : raw.slice(0, i + 1)
-}
-
-function requireRuntimeEnvironmentId(runtimeEnvironmentId: string | undefined): string {
-  if (!runtimeEnvironmentId) {
-    throw new Error('Runtime environment is required')
-  }
-  return runtimeEnvironmentId
 }

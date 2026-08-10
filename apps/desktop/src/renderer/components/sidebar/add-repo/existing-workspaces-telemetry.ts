@@ -56,20 +56,6 @@ export function buildAddRepoExistingWorkspacesTelemetry(
   }
 }
 
-export function buildAddRepoExistingWorkspacesDetectedEvent(
-  source: AddRepoExistingWorkspaceSource,
-  worktrees: readonly Worktree[]
-): ExistingWorkspacesDetectedProps | null {
-  const sortedWorktrees = [...worktrees].sort((a, b) => {
-    if (a.lastActivityAt !== b.lastActivityAt) {
-      return b.lastActivityAt - a.lastActivityAt
-    }
-    return a.displayName.localeCompare(b.displayName)
-  })
-  const payload = buildAddRepoExistingWorkspacesTelemetry(source, sortedWorktrees)
-  return payload && shouldTrackAddRepoExistingWorkspacesDetected(payload) ? payload : null
-}
-
 export function shouldTrackAddRepoExistingWorkspacesDetected(
   payload: ExistingWorkspacesDetectedProps | null
 ): boolean {

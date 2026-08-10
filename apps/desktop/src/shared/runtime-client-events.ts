@@ -1,13 +1,18 @@
 import type {
   CreateWorktreeResult,
   WorktreeDefaultTabsLaunch,
+  WorktreeHeadIdentity,
   WorktreeSetupLaunch,
   WorktreeStartupLaunch
 } from './types'
 
 export type RuntimeClientEvent =
   | { type: 'reposChanged' }
-  | { type: 'worktreesChanged'; repoId: string }
+  | {
+      type: 'worktreesChanged'
+      repoId: string
+      renamed?: { oldWorktreeId: string; newWorktreeId: string }
+    }
   | {
       type: 'activateWorktree'
       repoId: string
@@ -16,6 +21,7 @@ export type RuntimeClientEvent =
       startup?: WorktreeStartupLaunch
       defaultTabs?: WorktreeDefaultTabsLaunch
     }
+  | { type: 'worktreeHeadIdentitiesChanged'; repoId: string; identities: WorktreeHeadIdentity[] }
 
 export type RuntimeClientEventStreamMessage =
   | ({ type: 'ready'; subscriptionId: string } & {

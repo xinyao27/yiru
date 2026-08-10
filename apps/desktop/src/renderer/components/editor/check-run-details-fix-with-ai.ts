@@ -145,9 +145,10 @@ export function useCheckRunDetailsFixWithAI(args: {
       details: args.details
     })
   }, [args.check, args.details, args.worktreeId, canFixWithAI])
-  const connectionId = args.worktreeId
-    ? (getConnectionId(args.worktreeId) ?? repo?.connectionId ?? null)
-    : null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — getConnectionId already resolves to null for any found
+  // repo, so a fallback read of repo.connectionId can never differ.
+  const connectionId = args.worktreeId ? (getConnectionId(args.worktreeId) ?? null) : null
   const launchPlatform = resolveSourceControlLaunchPlatform({
     connectionId,
     worktreePath: worktree?.path ?? null

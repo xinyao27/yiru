@@ -1,6 +1,7 @@
 import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { SettingsSwitchRow } from '../form-controls'
@@ -37,7 +38,7 @@ export function MobileSettingsPane(): React.JSX.Element {
             variant="ghost"
             size="xs"
             type="button"
-            onClick={() => void window.api.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
+            onClick={() => void shellClient.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
             className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
           >
             {translate('auto.components.settings.MobileSettingsPane.testFlight', 'TestFlight')}
@@ -47,7 +48,7 @@ export function MobileSettingsPane(): React.JSX.Element {
             variant="ghost"
             size="xs"
             type="button"
-            onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
+            onClick={() => void shellClient.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
             className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
           >
             {translate('auto.components.settings.MobileSettingsPane.androidApk', 'Android APK')}

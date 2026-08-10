@@ -9,6 +9,7 @@ type WorkspacePaneFrameProps = {
   stripId: string
   tabBar: React.ReactNode
   trailingActions?: React.ReactNode
+  trailingActionsConnected?: boolean
   reserveCollapsedSidebarHeaderSpace?: boolean
   reserveWindowControlsSpace?: boolean
   rootClassName?: string
@@ -27,6 +28,7 @@ export function WorkspacePaneFrame({
   stripId,
   tabBar,
   trailingActions,
+  trailingActionsConnected = false,
   reserveCollapsedSidebarHeaderSpace = false,
   reserveWindowControlsSpace = false,
   rootClassName,
@@ -74,7 +76,12 @@ export function WorkspacePaneFrame({
             {tabBar}
           </div>
           {trailingActions ? (
-            <div className="ml-1.5 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
+            <div
+              className={cn(
+                'flex shrink-0 items-center [-webkit-app-region:no-drag]',
+                trailingActionsConnected ? 'gap-0' : 'ml-1.5 gap-0.5'
+              )}
+            >
               {trailingActions}
             </div>
           ) : null}

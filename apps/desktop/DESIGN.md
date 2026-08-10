@@ -54,6 +54,21 @@ family.
   transparency, shadow, gradient, glow, or a black/white alpha wash.
 - Never hardcode a color in feature TSX or add a general-purpose token for one component.
 
+#### Workspace theme gradient
+
+The one sanctioned exception to grayscale-first, opaque surfaces: a user may give a workspace an
+accent color and a background gradient in Settings → Appearance → Theme color. It is off until the
+user picks a color, and it stays inside these bounds:
+
+- The picked color enters the system only through `--brand`, so every `primary`/`ring` role keeps
+  deriving from one hue. Features never read the gradient.
+- Only `sidebar` thins out, through `--app-theme-surface-alpha`, and it is the one place the wash
+  is visible. Every other surface stays opaque and takes a small hue tint (`--app-theme-tint`), so
+  dialogs, menus, and editors read as themed instead of see-through over content.
+- Grain and gradient are background layers on the app root only. No feature adds its own.
+- The picker itself renders a color field and round color handles because it *is* the color; that
+  license does not extend past `components/theme-gradient/`.
+
 ### Typography
 
 Use the platform system UI stack and the closed renderer scale:

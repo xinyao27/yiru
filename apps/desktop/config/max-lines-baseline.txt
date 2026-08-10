@@ -12,15 +12,12 @@ inline apps/desktop/src/main/attribution/terminal-attribution.ts
 inline apps/desktop/src/main/automations/external-manager.ts
 inline apps/desktop/src/main/automations/hermes-cron-output.ts
 inline apps/desktop/src/main/browser/agent-browser-bridge.ts
-inline apps/desktop/src/main/browser/browser.ts
 inline apps/desktop/src/main/browser/cdp-ws-proxy.ts
 inline apps/desktop/src/main/browser/cookie-import.ts
 inline apps/desktop/src/main/browser/grab-guest-script.ts
 inline apps/desktop/src/main/browser/guest-ui.ts
 inline apps/desktop/src/main/browser/manager.ts
 inline apps/desktop/src/main/browser/screencast-stream.ts
-inline apps/desktop/src/main/browser/session-registry.ts
-inline apps/desktop/src/main/browser/snapshot-engine.ts
 inline apps/desktop/src/main/channel-multiplexer/multiplexer.ts
 inline apps/desktop/src/main/claude/accounts/runtime-auth-service.ts
 inline apps/desktop/src/main/claude/accounts/service.ts
@@ -47,16 +44,13 @@ inline apps/desktop/src/main/daemon/shell-ready.ts
 inline apps/desktop/src/main/filesystem/auth.ts
 inline apps/desktop/src/main/filesystem/filesystem.ts
 inline apps/desktop/src/main/filesystem/mutations.ts
-inline apps/desktop/src/main/filesystem/watcher.ts
 inline apps/desktop/src/main/git/repo.ts
 inline apps/desktop/src/main/git/runner.ts
 inline apps/desktop/src/main/git/status.ts
 inline apps/desktop/src/main/git/worktree.ts
 inline apps/desktop/src/main/github/client.ts
-inline apps/desktop/src/main/github/github.ts
 inline apps/desktop/src/main/github/pr-refresh-coordinator.ts
 inline apps/desktop/src/main/gitlab/client.ts
-inline apps/desktop/src/main/gitlab/gitlab.ts
 inline apps/desktop/src/main/gitlab/work-item-details.ts
 inline apps/desktop/src/main/hermes/hook-service.ts
 inline apps/desktop/src/main/index.ts
@@ -82,8 +76,6 @@ inline apps/desktop/src/main/rate-limits/service.ts
 inline apps/desktop/src/main/runtime/orchestration/coordinator.ts
 inline apps/desktop/src/main/runtime/orchestration/db.ts
 inline apps/desktop/src/main/runtime/rpc.ts
-inline apps/desktop/src/main/runtime/rpc/methods/files.ts
-inline apps/desktop/src/main/runtime/rpc/methods/git.ts
 inline apps/desktop/src/main/runtime/rpc/methods/terminal.ts
 inline apps/desktop/src/main/runtime/yiru-runtime-browser.ts
 inline apps/desktop/src/main/runtime/yiru-runtime-files.ts
@@ -98,7 +90,6 @@ inline apps/desktop/src/main/window/attach-main-window-services.ts
 inline apps/desktop/src/main/window/create-main-window.ts
 inline apps/desktop/src/main/workspace-space-analysis.ts
 inline apps/desktop/src/main/worktree/remote.ts
-inline apps/desktop/src/main/worktree/worktrees.ts
 inline apps/desktop/src/preload/api-types.ts
 inline apps/desktop/src/preload/index.ts
 inline apps/desktop/src/relay/agent-hook-server.ts
@@ -138,7 +129,6 @@ inline apps/desktop/src/renderer/components/sidebar/remote-file-browser.tsx
 inline apps/desktop/src/renderer/components/sidebar/worktree-card.tsx
 inline apps/desktop/src/renderer/components/sidebar/worktree-list-groups.ts
 inline apps/desktop/src/renderer/components/sidebar/worktree-list.tsx
-inline apps/desktop/src/renderer/components/stats/usage-overview-model.ts
 inline apps/desktop/src/renderer/components/status-bar/resource-usage-status-segment.tsx
 inline apps/desktop/src/renderer/components/status-bar/status-bar.tsx
 inline apps/desktop/src/renderer/components/status-bar/workspace-space-manager-panel.tsx

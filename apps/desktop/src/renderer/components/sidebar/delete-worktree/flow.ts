@@ -3,8 +3,8 @@ import {
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
+import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { translate } from '~renderer/i18n/i18n'
-import { openWorkspacePanelTab } from '~renderer/lib/open-workspace-panel-tab'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { useAppStore } from '~renderer/store'
 import { getWorktreeMapFromState } from '~renderer/store/selectors'
@@ -34,7 +34,7 @@ type WorktreeDeleteWithToastOptions = {
 // blocking work is visible.
 function viewWorktreeDiff(worktreeId: string): void {
   activateAndRevealWorktree(worktreeId)
-  openWorkspacePanelTab({ panel: 'source-control', worktreeId })
+  showWorkspaceSidebar({ view: 'source-control', worktreeId })
 }
 
 function isStrictDescendantPath(parentPath: string, childPath: string): boolean {

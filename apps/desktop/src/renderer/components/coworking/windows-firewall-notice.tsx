@@ -5,6 +5,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import type { CoworkingWindowsFirewallStatus } from '~shared/coworking/windows-firewall-contract'
 import { COWORKING_INGRESS_PORT } from '~shared/coworking/wire-contract'
 
@@ -15,7 +16,7 @@ export function CoworkingWindowsFirewallNotice(): React.JSX.Element {
 
   const inspect = useCallback(async (): Promise<void> => {
     try {
-      const next = await window.api.coworkingSharing.getWindowsFirewallStatus()
+      const next = await coworkingSharingClient.getWindowsFirewallStatus()
       if (mountedRef.current) {
         setStatus(next)
       }
@@ -35,7 +36,7 @@ export function CoworkingWindowsFirewallNotice(): React.JSX.Element {
   async function repair(): Promise<void> {
     setRepairing(true)
     try {
-      const result = await window.api.coworkingSharing.repairWindowsFirewall()
+      const result = await coworkingSharingClient.repairWindowsFirewall()
       if (!mountedRef.current) {
         return
       }

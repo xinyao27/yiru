@@ -16,6 +16,7 @@ import {
   markTerminalPinnedViewport,
   syncTerminalScrollIntentFromViewport
 } from '~renderer/lib/pane-manager/terminal-scroll-intent'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   keybindingMatchesAction,
@@ -438,7 +439,7 @@ export function useTerminalKeyboardShortcuts({
         }
         e.preventDefault()
         e.stopImmediatePropagation()
-        void window.api.ui.writeClipboardText(selection).catch(() => {
+        void shellClient.ui.writeClipboardText(selection).catch(() => {
           /* ignore clipboard write failures */
         })
         return

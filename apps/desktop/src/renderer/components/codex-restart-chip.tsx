@@ -25,24 +25,6 @@ export function collectStalePtyIdsForTabs({
   )
 }
 
-export function collectStaleWorktreePtyIds({
-  tabsByWorktree,
-  ptyIdsByTabId,
-  codexRestartNoticeByPtyId,
-  worktreeId
-}: {
-  tabsByWorktree: Record<string, { id: string }[]>
-  ptyIdsByTabId: Record<string, string[]>
-  codexRestartNoticeByPtyId: Record<string, unknown>
-  worktreeId: string
-}): string[] {
-  return collectStalePtyIdsForTabs({
-    tabs: tabsByWorktree[worktreeId] ?? EMPTY_TABS,
-    ptyIdsByTabId,
-    codexRestartNoticeByPtyId
-  })
-}
-
 function isInsideHiddenTree(element: HTMLElement): boolean {
   return element.closest('[aria-hidden="true"], [hidden], [inert]') !== null
 }

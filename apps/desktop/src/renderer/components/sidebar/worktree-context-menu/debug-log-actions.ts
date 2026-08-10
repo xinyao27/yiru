@@ -94,10 +94,12 @@ export function useDebugLogMenuActions(args: {
   menuOpen: boolean
 }) {
   const { menuOpen } = args
-  const { repo, worktree } = args.state
+  const { worktree } = args.state
   const settings = useAppStore((store) => store.settings)
   const openFile = useAppStore((store) => store.openFile)
-  const connectionId = repo?.connectionId ?? undefined
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — debug logs for a direct worktree are always local.
+  const connectionId = undefined
   const [hasDebugLogs, setHasDebugLogs] = useState(false)
 
   // Why: log presence lives on the worktree's host, so it can only be known

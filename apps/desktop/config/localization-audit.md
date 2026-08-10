@@ -99,8 +99,8 @@ The final gate should combine three checks:
 1. Scanner coverage: no unclassified localizable candidates remain.
 2. Catalog coverage: every supported locale has the same keys as English, with
    matching interpolation variables.
-3. Runtime coverage: pseudo-localization and real locale smoke tests show no
-   obvious English leftovers or layout clipping in core screens.
+3. Runtime coverage: English and Simplified Chinese smoke tests show no obvious
+   untranslated copy or layout clipping in core screens.
 
 Subagent or human review should verify ambiguous exclusions, but the scanner is
 the coverage source of truth.

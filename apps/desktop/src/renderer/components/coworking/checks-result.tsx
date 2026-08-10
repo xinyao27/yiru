@@ -7,6 +7,7 @@ import {
 } from '~renderer/components/workspace-panel/check-status-presentation'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   CoworkingChecksReadResult,
   CoworkingChecksReview
@@ -164,5 +165,5 @@ function reviewStateLabel(state: CoworkingChecksReview['state']): string {
 
 function openOwnerUrl(url: string): void {
   // Why: the requester parser limits owner URLs to HTTP(S); bypass local worktree URL routing.
-  void window.api.shell.openUrl(url)
+  void shellClient.shell.openUrl(url)
 }

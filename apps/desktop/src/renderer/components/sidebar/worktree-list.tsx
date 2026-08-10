@@ -73,6 +73,7 @@ import { tabHasLivePty } from '~renderer/lib/tab-has-live-pty'
 import { track } from '~renderer/lib/telemetry'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { getWorktreeIdsWithLiveAgent } from '~renderer/lib/worktree-activity-state'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import {
   getAllWorktreesFromState,
@@ -1417,7 +1418,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
   }, [coworkingOwnerControlGrants])
   const revokeCoworkingControlGrant = useCallback((grantId: string): void => {
     setCoworkingRevokingGrantIds((current) => new Set(current).add(grantId))
-    void window.api.coworkingSharing.revokeControl({ grantId }).catch(() => {
+    void coworkingSharingClient.revokeControl({ grantId }).catch(() => {
       setCoworkingRevokingGrantIds((current) => {
         const next = new Set(current)
         next.delete(grantId)
@@ -1433,7 +1434,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
   }, [])
   const makeCoworkingProjectPrivate = useCallback((projectId: string) => {
     setCoworkingProjectVisibilityPending((current) => new Set(current).add(projectId))
-    void window.api.coworkingSharing
+    void coworkingSharingClient
       .setProjectVisibility({ projectId, visibility: 'private' })
       .catch(() => {
         toast.error(
@@ -1941,7 +1942,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
       allRepoIds
         .map((repoId) => {
           const repo = repoMap.get(repoId)
-          return `${repoId}:${repo?.path ?? ''}:${repo?.projectGroupId ?? ''}:${repo?.connectionId ?? ''}`
+          return `${repoId}:${repo?.path ?? ''}:${repo?.projectGroupId ?? ''}`
         })
         .join('\0'),
     [allRepoIds, repoMap]
@@ -4027,10 +4028,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
             const createState = row.repo
               ? getRepoHeaderCreateState({
                   repo: row.repo,
-                  label: row.label,
-                  sshStatus: row.repo.connectionId
-                    ? (sshConnectionStates.get(row.repo.connectionId)?.status ?? null)
-                    : null
+                  label: row.label
                 })
               : null
             const projectGroupPathStatus =
@@ -5616,8 +5614,9 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
       return repos
     }
     return repos.filter((repo) => {
-      const hostId =
-        repo.connectionId || repo.executionHostId ? getRepoExecutionHostId(repo) : defaultHostId
+      // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+      // were removed (#63) — only executionHostId can still make a repo non-local.
+      const hostId = repo.executionHostId ? getRepoExecutionHostId(repo) : defaultHostId
       return visibleHostIdSet.has(hostId)
     })
   }, [defaultHostId, repos, visibleHostIdSet])

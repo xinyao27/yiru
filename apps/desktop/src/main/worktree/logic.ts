@@ -2,7 +2,6 @@ import { resolve, relative, isAbsolute, posix, sep, win32 } from 'node:path'
 
 import { isWindowsAbsolutePathLike, resolveRuntimePath } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 import type { GlobalSettings, YiruWorkspaceLayout, Repo } from '~shared/types'
 
 import { getWslHome, parseWslPath } from '../wsl'
@@ -118,26 +117,6 @@ export function computeWorkspaceRoot(repoPath: string, settings: { workspaceDir:
   return resolveWorkspaceDirForRepo(repoPath, settings.workspaceDir)
 }
 
-export function computeRemoteWorktreePath(
-  sanitizedName: string,
-  repoPath: string,
-  settings: WorktreePathSettings,
-  options: { useConfiguredAbsolutePath?: boolean } = {}
-): string {
-  if (
-    options.useConfiguredAbsolutePath ||
-    isWorkspaceDirRelativeToRepo(repoPath, settings.workspaceDir)
-  ) {
-    return computeWorktreePath(sanitizedName, repoPath, settings)
-  }
-  // Why: absolute global workspaceDir values belong to the desktop machine.
-  // Qualify SSH sibling paths by repository so common branch names do not
-  // collide across repositories on the same execution host.
-  const pathOps = getRuntimePathOps(repoPath, repoPath)
-  const repoName = pathOps.basename(repoPath).replace(/\.git$/, '')
-  return pathOps.join(repoPath, '..', `${repoName}-${sanitizedName}`)
-}
-
 export function getWorktreePathSettings(
   repo: WorktreeBasePathRepo,
   settings: WorktreePathSettings
@@ -156,10 +135,6 @@ export function getWorktreeCreationLayout(
     path: getEffectiveWorktreeBasePath(repo, settings),
     nestWorkspaces: settings.nestWorkspaces
   }
-}
-
-export function hasRepoWorktreeBasePath(repo: Pick<Repo, 'worktreeBasePath'>): boolean {
-  return getRepoWorktreeBasePath(repo) !== undefined
 }
 
 function getRuntimePathOps(
@@ -215,17 +190,6 @@ export function shouldSetDisplayName(
 }
 
 /**
- * Parse a composite worktreeId ("repoId::worktreePath") into its parts.
- */
-export function parseWorktreeId(worktreeId: string): { repoId: string; worktreePath: string } {
-  const parsed = splitWorktreeId(worktreeId)
-  if (!parsed) {
-    throw new Error(`Invalid worktreeId: ${worktreeId}`)
-  }
-  return parsed
-}
-
-/**
  * Check whether a git error indicates the worktree is no longer tracked by git.
  * This happens when a worktree's internal git tracking is removed (e.g. via
  * `git worktree prune`) but the directory still exists on disk.
@@ -236,23 +200,6 @@ export function isOrphanedWorktreeError(error: unknown): boolean {
   }
   const msg = (error as { stderr?: string }).stderr || error.message
   return /is not a working tree/.test(msg)
-}
-
-export function isWindowsLongPathWorktreeRemovalError(
-  error: unknown,
-  platform: NodeJS.Platform = process.platform
-): boolean {
-  if (platform !== 'win32' || typeof error !== 'object' || error === null) {
-    return false
-  }
-  const errorWithDetails = error as { message?: unknown; stderr?: unknown; stdout?: unknown }
-  const details = [errorWithDetails.stderr, errorWithDetails.stdout, errorWithDetails.message]
-    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-    .join('\n')
-
-  // Why: Git for Windows has reported this failure through both stderr and the
-  // thrown message, with wording that varies between "filename" and "path".
-  return /(?:file ?name|path).{0,40}too long|too long.{0,40}(?:file ?name|path)/i.test(details)
 }
 
 export function isOrphanCompatiblePreflightError(error: unknown): boolean {

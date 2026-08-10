@@ -3,6 +3,8 @@ import { useCallback } from 'react'
 import { showBlockedNotificationFallbackToast } from '~renderer/components/terminal-pane/blocked-notification-fallback'
 import { playDesktopNotificationSound } from '~renderer/components/terminal-pane/desktop-notification-sound'
 import { resolveCommittedTitleAgentType } from '~renderer/lib/pane-agent-evidence'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
 import { buildAgentNotificationId } from '~shared/agent/notification-id'
@@ -212,19 +214,19 @@ export function dispatchTerminalNotification(
         })
       : null
 
-  void window.api.notifications
-    .dispatch({
-      source: event.source,
-      ...(notificationId ? { notificationId } : {}),
-      worktreeId,
-      paneKey: event.paneKey,
-      repoLabel: repo?.displayName,
-      worktreeLabel: worktree?.displayName || worktree?.branch || worktreeId,
-      hasMultipleActiveRepos: countReposNeedingNotificationDisambiguation(state) > 1,
-      terminalTitle: event.terminalTitle,
-      isActiveWorktree: state.activeWorktreeId === worktreeId,
-      ...agentSnapshot
-    })
+  const target = getActiveRuntimeTarget(state.settings)
+  void callRuntimeOrpc(target, (client) => client.notifications.report, {
+    source: event.source,
+    ...(notificationId ? { notificationId } : {}),
+    worktreeId,
+    paneKey: event.paneKey,
+    repoLabel: repo?.displayName,
+    worktreeLabel: worktree?.displayName || worktree?.branch || worktreeId,
+    hasMultipleActiveRepos: countReposNeedingNotificationDisambiguation(state) > 1,
+    terminalTitle: event.terminalTitle,
+    isActiveWorktree: state.activeWorktreeId === worktreeId,
+    ...agentSnapshot
+  })
     .then((result) => {
       if (result.delivered) {
         void playDesktopNotificationSound(customSoundId, customSoundVolume)

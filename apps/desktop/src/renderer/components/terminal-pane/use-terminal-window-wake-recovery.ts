@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
 import { recoverVisibleTerminalWindowWake } from './terminal-visibility-resume'
@@ -105,8 +107,8 @@ export function useTerminalWindowWakeRecovery({
     // wake clears the WebGL glyph atlas (clearGlyphAtlases=true via
     // onSystemResumed) — the latch-clearing recovery — unlike plain refocus.
     const unsubscribeSystemResumed =
-      typeof window.api?.ui?.onSystemResumed === 'function'
-        ? window.api.ui.onSystemResumed(onSystemResumed)
+      typeof rendererHostClient?.ui?.onSystemResumed === 'function'
+        ? shellClient.ui.onSystemResumed(onSystemResumed)
         : null
     return () => {
       cancelScheduledWakeRecovery()

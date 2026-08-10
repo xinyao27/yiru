@@ -18,6 +18,7 @@ import {
   ORCHESTRATION_SETUP_DISMISSED_STORAGE_KEY,
   notifyOrchestrationSetupStateChanged
 } from '~renderer/lib/orchestration-setup-state'
+import { installCliCommand } from '~renderer/runtime/cli-install-client'
 import { useAppStore } from '~renderer/store'
 import { getDefaultVoiceSettings } from '~shared/constants'
 import type { FeatureTip } from '~shared/feature-tips'
@@ -29,14 +30,14 @@ import { CmdJPaletteTipDialog } from './cmd-j-palette-tip-dialog'
 import { FeatureTipActions } from './feature-tip-actions'
 import { installCliFromFeatureTip } from './feature-tip-cli-install-action'
 import { getFeatureTipForModal } from './feature-tip-modal-state'
+
+import './feature-tips.css'
 import {
   getYiruCliFeatureTipTelemetrySource,
   trackCmdJPaletteFeatureTipAcknowledged,
   trackYiruCliFeatureTipSetupClicked,
   trackYiruCliFeatureTipSetupResult
 } from './feature-tip-telemetry'
-
-import './feature-tips.css'
 
 const WAVEFORM_BAR_HEIGHTS = [30, 60, 90, 70, 100, 50, 80, 35, 65]
 
@@ -193,7 +194,7 @@ export default function FeatureTipsModal(): JSX.Element | null {
         trackYiruCliFeatureTipSetupClicked(telemetrySource)
         setPrimaryBusy(true)
         try {
-          const result = await installCliFromFeatureTip(() => window.api.cli.install())
+          const result = await installCliFromFeatureTip(() => installCliCommand())
           if (result.kind === 'installed') {
             trackYiruCliFeatureTipSetupResult(telemetrySource, 'installed')
             if (!canApplySetupResult()) {

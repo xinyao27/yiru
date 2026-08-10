@@ -38,32 +38,6 @@ export function getDefaultCreateProjectParent(homeDir: string): string {
   return joinCreateProjectPath(joinCreateProjectPath(trimmedHomeDir, 'yiru'), 'projects')
 }
 
-export function getCreateProjectDefaultParentAutoFill({
-  step,
-  createParent,
-  activeRuntimeEnvironmentId,
-  defaultParent,
-  createStepAutoFilled
-}: {
-  step: string
-  createParent: string
-  activeRuntimeEnvironmentId: string | null | undefined
-  defaultParent?: string
-  createStepAutoFilled: boolean
-}): { parent: string } | null {
-  if (step !== 'create' || createStepAutoFilled || createParent) {
-    return null
-  }
-  if (activeRuntimeEnvironmentId?.trim()) {
-    return null
-  }
-  const parent = defaultParent ?? ''
-  if (!parent) {
-    return null
-  }
-  return { parent }
-}
-
 export function formatCreateProjectParentSummary({
   parent,
   defaultParent,

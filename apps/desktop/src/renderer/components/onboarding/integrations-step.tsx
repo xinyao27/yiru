@@ -8,6 +8,7 @@ import { IntegrationStatusPill } from '~renderer/components/integration-status-p
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { OnboardingInlineCommandTerminal } from './inline-command-terminal'
@@ -86,7 +87,7 @@ export function GitHubRow(props: { compact?: boolean } = {}): React.JSX.Element 
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.api.shell.openUrl('https://cli.github.com')}
+              onClick={() => shellClient.shell.openUrl('https://cli.github.com')}
             >
               <ExternalLink className="size-3.5" />
               {translate('auto.components.onboarding.IntegrationsStep.bd5d976fb2', 'Install gh')}

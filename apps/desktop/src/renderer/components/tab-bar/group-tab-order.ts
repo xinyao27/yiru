@@ -1,11 +1,10 @@
 import type { AppState } from '~renderer/store/types'
 import type { Tab, TabGroup } from '~shared/types'
-import { isWorkspacePanelTabContentType } from '~shared/workspace/panel-tab'
 
 import { reconcileTabOrder } from './reconcile-order'
 
 export type VisibleTabRef = {
-  type: 'terminal' | 'editor' | 'browser' | 'simulator' | 'workspace-panel'
+  type: 'terminal' | 'editor' | 'browser' | 'simulator' | 'git-graph'
   id: string
   tabId?: string
 }
@@ -56,7 +55,7 @@ export function getGroupVisibleTabOrder(
   editorEntityIds: ReadonlySet<string>,
   browserEntityIds: ReadonlySet<string>,
   simulatorTabIds: ReadonlySet<string> = new Set(),
-  workspacePanelTabIds?: ReadonlySet<string>
+  gitGraphTabIds?: ReadonlySet<string>
 ): VisibleTabRef[] {
   const tabsById = new Map(groupTabs.map((t) => [t.id, t]))
   const result: VisibleTabRef[] = []
@@ -91,11 +90,8 @@ export function getGroupVisibleTabOrder(
       }
       seenSimulators.add(tab.id)
       result.push({ type: 'simulator', id: tab.id, tabId: tab.id })
-    } else if (
-      workspacePanelTabIds?.has(tab.id) &&
-      isWorkspacePanelTabContentType(tab.contentType)
-    ) {
-      result.push({ type: 'workspace-panel', id: tab.id, tabId: tab.id })
+    } else if (gitGraphTabIds?.has(tab.id) && tab.contentType === 'git-graph') {
+      result.push({ type: 'git-graph', id: tab.id, tabId: tab.id })
     } else {
       if (!editorEntityIds.has(tab.entityId) || seenEditors.has(tab.id)) {
         continue
@@ -145,8 +141,8 @@ export function getActiveTabNavOrder(
     (state.unifiedTabsByWorktree[worktreeId] ?? [])
       .filter((tab) => tab.contentType === 'simulator')
       .map((tab) => tab.id)
-  const workspacePanelIds = (state.unifiedTabsByWorktree[worktreeId] ?? [])
-    .filter((tab) => isWorkspacePanelTabContentType(tab.contentType))
+  const gitGraphIds = (state.unifiedTabsByWorktree[worktreeId] ?? [])
+    .filter((tab) => tab.contentType === 'git-graph')
     .map((tab) => tab.id)
 
   const activeGroupId = state.activeGroupIdByWorktree[worktreeId]
@@ -165,7 +161,7 @@ export function getActiveTabNavOrder(
       new Set(editorIds),
       new Set(browserIds),
       new Set(simulatorIds),
-      new Set(workspacePanelIds)
+      new Set(gitGraphIds)
     )
   }
 
@@ -176,13 +172,13 @@ export function getActiveTabNavOrder(
     editorIds,
     browserIds,
     simulatorIds,
-    workspacePanelIds
+    gitGraphIds
   )
   const terminalIdSet = new Set(terminalIds)
   const editorIdSet = new Set(editorIds)
   const browserIdSet = new Set(browserIds)
   const simulatorIdSet = new Set(simulatorIds)
-  const workspacePanelIdSet = new Set(workspacePanelIds)
+  const gitGraphIdSet = new Set(gitGraphIds)
   const result: VisibleTabRef[] = []
   for (const id of visibleIds) {
     if (terminalIdSet.has(id)) {
@@ -193,8 +189,8 @@ export function getActiveTabNavOrder(
       result.push({ type: 'browser', id })
     } else if (simulatorIdSet.has(id)) {
       result.push({ type: 'simulator', id })
-    } else if (workspacePanelIdSet.has(id)) {
-      result.push({ type: 'workspace-panel', id, tabId: id })
+    } else if (gitGraphIdSet.has(id)) {
+      result.push({ type: 'git-graph', id, tabId: id })
     }
   }
   return result

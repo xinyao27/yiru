@@ -3,6 +3,7 @@ import {
   YIRU_PERSIST_SESSION_STORAGE_EXPRESSION
 } from '~shared/browser/session-storage-persistence'
 
+import { unregisterBrowserGuest } from './browser-client'
 import { clearLiveBrowserUrl } from './browser-live-url'
 import { removeBrowserPageViewport } from './browser-page-viewport'
 
@@ -253,7 +254,7 @@ export function destroyPersistentWebview(browserTabId: string): void {
       if (expectedWebContentsId === null) {
         return
       }
-      return window.api.browser.unregisterGuest({
+      return unregisterBrowserGuest({
         browserPageId: browserTabId,
         expectedWebContentsId
       })

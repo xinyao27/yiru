@@ -1,5 +1,4 @@
 import type { GitStatusEntry } from '@yiru/workbench-model/review'
-import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
 import type { RuntimeFileOpenResult } from '~shared/runtime-types'
 
 import type { CommandHandler, HandlerContext } from '../dispatch'
@@ -71,7 +70,7 @@ async function openFileEdit(
   worktree: string,
   path: string
 ): Promise<FileOpenRecord> {
-  const result = await ctx.client.call<RuntimeFileOpenResult>('files.open', {
+  const result = await ctx.client.call(ctx.client.rpc.files.open, {
     worktree,
     relativePath: path
   })
@@ -90,7 +89,7 @@ async function openFileDiff(
   path: string,
   staged: boolean
 ): Promise<FileOpenRecord> {
-  const result = await ctx.client.call<RuntimeFileOpenResult>('files.openDiff', {
+  const result = await ctx.client.call(ctx.client.rpc.files.openDiff, {
     worktree,
     relativePath: path,
     staged
@@ -135,7 +134,7 @@ export const FILE_HANDLERS: Record<string, CommandHandler> = {
   'file open': async (ctx) => {
     const relativePath = getRequiredStringFlag(ctx.flags, 'path')
     const worktree = await getFileWorktreeSelector(ctx)
-    const result = await ctx.client.call<RuntimeFileOpenResult>('files.open', {
+    const result = await ctx.client.call(ctx.client.rpc.files.open, {
       worktree,
       relativePath
     })
@@ -145,7 +144,7 @@ export const FILE_HANDLERS: Record<string, CommandHandler> = {
     const relativePath = getRequiredStringFlag(ctx.flags, 'path')
     const staged = ctx.flags.get('staged') === true
     const worktree = await getFileWorktreeSelector(ctx)
-    const result = await ctx.client.call<RuntimeFileOpenResult>('files.openDiff', {
+    const result = await ctx.client.call(ctx.client.rpc.files.openDiff, {
       worktree,
       relativePath,
       staged
@@ -155,7 +154,7 @@ export const FILE_HANDLERS: Record<string, CommandHandler> = {
   'file open-changed': async (ctx) => {
     const mode = getOpenChangedMode(ctx.flags)
     const worktree = await getFileWorktreeSelector(ctx)
-    const status = await ctx.client.call(GIT_STATUS_CONTRACT, { worktree })
+    const status = await ctx.client.call(ctx.client.rpc.git.status, { worktree })
     const opened: FileOpenRecord[] = []
     const skipped: FileOpenRecord[] = []
     const openedEditPaths = new Set<string>()

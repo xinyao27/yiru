@@ -1,7 +1,4 @@
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'electron'
@@ -19,12 +16,9 @@ import {
   isMarkdownDocumentName,
   markdownDocumentFromFilePath
 } from '../filesystem/markdown-documents'
-import { isGitBashAvailable } from '../git-bash'
 import type { Store } from '../persistence'
-import { isPwshAvailable } from '../pwsh'
 import { getDevInstanceIdentity } from '../startup/dev-instance-identity'
 import { destroySystemTray } from '../tray/system-tray'
-import { isWslAvailable, listWslDistros } from '../wsl'
 
 const KEYBOARD_INPUT_SOURCE_TIMEOUT_MS = 500
 const MAC_HITOOLBOX_DOMAIN = 'com.apple.HIToolbox'
@@ -87,35 +81,6 @@ async function pickFloatingWorkspaceDirectory(
   // Workspace markdown creation, unlike arbitrary typed settings text.
   await grantFloatingWorkspaceDirectory(store, selectedDir)
   return selectedDir
-}
-
-function getFeatureWallAssetBaseUrl(): string {
-  const assetDir = app.isPackaged
-    ? path.join(process.resourcesPath, 'onboarding', 'feature-wall')
-    : resolveDevFeatureWallAssetDir()
-
-  if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
-    const vitePath = assetDir.split(path.sep).join('/')
-    const absoluteVitePath = vitePath.startsWith('/') ? vitePath : `/${vitePath}`
-    // Why: the dev renderer is served from http://localhost, where Chromium
-    // blocks file:// image loads. Vite's /@fs route serves the same local media.
-    return new URL(`/@fs${absoluteVitePath}/`, process.env.ELECTRON_RENDERER_URL).toString()
-  }
-
-  return `${pathToFileURL(assetDir).toString()}/`
-}
-
-function resolveDevFeatureWallAssetDir(): string {
-  const relativeDir = path.join('resources', 'onboarding', 'feature-wall')
-  const candidates = [
-    path.join(app.getAppPath(), relativeDir),
-    path.resolve(app.getAppPath(), '..', '..', relativeDir),
-    path.join(process.cwd(), relativeDir)
-  ]
-
-  // Why: compiled development launches can resolve app.getAppPath() under
-  // out/main even though resources still live at the repository root.
-  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]
 }
 
 function readCommandStdout(
@@ -257,8 +222,6 @@ async function readKeyboardInputSourceId(): Promise<string | null> {
 }
 
 export function registerAppHandlers(store: Store, options: RegisterAppHandlersOptions = {}): void {
-  ipcMain.handle('app:getFeatureWallAssetBaseUrl', (): string => getFeatureWallAssetBaseUrl())
-
   ipcMain.handle('app:getIdentity', (): AppIdentity => {
     const identity = getDevInstanceIdentity(is.dev)
     return {
@@ -271,11 +234,6 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       dockBadgeLabel: identity.dockBadgeLabel
     }
   })
-
-  ipcMain.handle('wsl:isAvailable', (): boolean => isWslAvailable())
-  ipcMain.handle('wsl:listDistros', (): string[] => listWslDistros())
-  ipcMain.handle('pwsh:isAvailable', (): boolean => isPwshAvailable())
-  ipcMain.handle('gitBash:isAvailable', (): boolean => isGitBashAvailable())
 
   // Why: ABC, Polish Pro, US Extended, ABC Extended, and every CJK Roman
   // IME all report a US-QWERTY base layer to navigator.keyboard.getLayoutMap()

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 
 import type { EmulatorDeviceVisualOrientation } from './emulator-device-frame-layout'
 import type { EmulatorGesturePoint } from './emulator-screen-gesture'
@@ -12,21 +12,31 @@ export function useEmulatorPaneControls(worktreeId: string, onRotateSettled?: ()
 
   const sendTap = useCallback(
     async (x: number, y: number) => {
-      await callRuntimeRpc({ kind: 'local' }, 'emulator.tap', { x, y, worktree: worktreeId })
+      await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.tap, {
+        x,
+        y,
+        worktree: worktreeId
+      })
     },
     [worktreeId]
   )
 
   const sendButton = useCallback(
     async (name: string) => {
-      await callRuntimeRpc({ kind: 'local' }, 'emulator.button', { name, worktree: worktreeId })
+      await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.button, {
+        name,
+        worktree: worktreeId
+      })
     },
     [worktreeId]
   )
 
   const sendGesture = useCallback(
     async (points: EmulatorGesturePoint[]) => {
-      await callRuntimeRpc({ kind: 'local' }, 'emulator.gesture', { points, worktree: worktreeId })
+      await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.gesture, {
+        points,
+        worktree: worktreeId
+      })
     },
     [worktreeId]
   )
@@ -34,7 +44,7 @@ export function useEmulatorPaneControls(worktreeId: string, onRotateSettled?: ()
   const sendRotate = useCallback(async () => {
     const orientation = nextRotateOrientationRef.current
     const epoch = visualOrientationEpochRef.current
-    await callRuntimeRpc({ kind: 'local' }, 'emulator.rotate', {
+    await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.rotate, {
       orientation,
       worktree: worktreeId
     })

@@ -12,6 +12,7 @@ import type { StatsSlice } from '../components/stats/state'
 import type { MemorySlice } from '../components/status-bar/memory-state'
 import type { PaneForegroundAgentSlice } from '../components/terminal-pane/pane-foreground-agent-state'
 import type { PinnedTabCloseConfirmSlice } from '../components/terminal-pane/pinned-tab-close-confirm-state'
+import type { ThemeGradientSlice } from '../components/theme-gradient/state'
 import type { WorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
 import type { CommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
 import type { GitGraphSlice } from '../components/workspace-panel/git-graph/state'
@@ -57,6 +58,7 @@ declare module './types' {
       StatsSlice,
       MemorySlice,
       WorkspaceSpaceSlice,
+      ThemeGradientSlice,
       ClaudeUsageSlice,
       CodexUsageSlice,
       OpenCodeUsageSlice,

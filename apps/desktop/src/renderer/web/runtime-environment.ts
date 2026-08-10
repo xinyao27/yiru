@@ -12,6 +12,7 @@ export type StoredWebRuntimeEnvironment = Omit<PublicKnownRuntimeEnvironment, 'e
     endpoint: string
     deviceToken: string
     publicKeyB64: string
+    scope?: WebPairingOffer['scope']
   }[]
 }
 
@@ -62,7 +63,8 @@ export function createStoredWebRuntimeEnvironment(args: {
         label: translate('auto.web.web.runtime.environment.07f788de83', 'WebSocket'),
         endpoint: args.offer.endpoint,
         deviceToken: args.offer.deviceToken,
-        publicKeyB64: args.offer.publicKeyB64
+        publicKeyB64: args.offer.publicKeyB64,
+        ...(args.offer.scope ? { scope: args.offer.scope } : {})
       }
     ]
   }
@@ -94,7 +96,8 @@ export function getPreferredWebPairingOffer(
     v: 2,
     endpoint: endpoint.endpoint,
     deviceToken: endpoint.deviceToken,
-    publicKeyB64: endpoint.publicKeyB64
+    publicKeyB64: endpoint.publicKeyB64,
+    ...(endpoint.scope ? { scope: endpoint.scope } : {})
   }
 }
 

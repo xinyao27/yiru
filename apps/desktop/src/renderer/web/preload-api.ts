@@ -1,17 +1,17 @@
+import { ORPCError } from '@orpc/client'
+import type {
+  ContractRouterClient,
+  RuntimeBrowserGuestEvent,
+  runtimeContract
+} from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
-import { buildNativeChatUnsubscribe } from '@yiru/workbench-model/agent'
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
-import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
 import {
   applyPRBotAuthorOverride,
   normalizePRBotAuthorOverrides
 } from '@yiru/workbench-model/review'
-import {
-  assertClipboardTextWriteWithinLimitWithYield,
-  assertClipboardTextWithinLimitWithYield,
-  type ReadClipboardTextOptions
-} from '@yiru/workbench-model/ui'
 import {
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostScope,
@@ -22,45 +22,16 @@ import {
 /* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
    replacement for Electron preload, so the compatibility surface is necessarily
    centralized at this boundary. */
-import type {
-  PreloadApi,
-  PreflightStatus,
-  RefreshAgentsResult,
-  NativeChatApi,
-  NativeChatReadSessionResult,
-  NativeChatAppendedMessages
-} from '~preload/api-types'
+import type { PreloadApi } from '~preload/api-types'
 import { getDefaultCreateProjectParent } from '~renderer/components/sidebar/create-project-defaults'
 import { translate } from '~renderer/i18n/i18n'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
 import {
-  CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
-  CLIPBOARD_IMAGE_MAX_PIXELS,
-  CLIPBOARD_IMAGE_MAX_SOURCE_BYTES,
-  CLIPBOARD_IMAGE_TOO_LARGE_ERROR,
-  assertClipboardImageByteLengthWithinLimit,
-  assertClipboardImageDimensionsWithinLimit
-} from '~shared/clipboard-image'
-import type {
-  ComputerUsePermissionSetupResult,
-  ComputerUsePermissionStatusResult
-} from '~shared/computer-use-permissions-types'
-import {
   getDefaultOnboardingState,
   getDefaultSettings,
-  getDefaultUIState,
   getDefaultWorkspaceSession,
-  normalizeAgentActivityDisplayMode,
-  normalizeWorkspacePanelTitlebarPinnedIds,
-  normalizeWorktreeCardProperties,
   ONBOARDING_FLOW_VERSION
 } from '~shared/constants'
-import { normalizeContextualTourIds, type ContextualTourId } from '~shared/contextual-tours'
-import {
-  normalizeFeatureInteractions,
-  type FeatureInteractionId,
-  type FeatureInteractionState
-} from '~shared/feature-interactions'
 import {
   findKeybindingConflicts,
   formatKeybindingList,
@@ -74,37 +45,7 @@ import {
   type KeybindingPlatform
 } from '~shared/keybindings'
 import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '~shared/pty-delivery-diagnostics'
-import type { RateLimitState } from '~shared/rate-limit-types'
-import type {
-  RuntimeMethodContract,
-  RuntimeMethodParams,
-  RuntimeMethodResult
-} from '~shared/runtime-method-contract'
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
-import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
-import {
-  REPO_ADD_CONTRACT,
-  REPO_LIST_CONTRACT,
-  REPO_SEARCH_REFS_CONTRACT,
-  WORKTREE_CREATE_CONTRACT,
-  WORKTREE_LIST_CONTRACT,
-  WORKTREE_REMOVE_CONTRACT,
-  WORKTREE_SET_CONTRACT
-} from '~shared/runtime-method-contracts/workspace-contracts'
-import { RuntimeRpcCallQueuePool } from '~shared/runtime-rpc-call-queue'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '~shared/runtime-types'
-import type {
-  SkillFreshnessInventory,
-  SkillUpdateRun,
-  SkillUpdateStartResult
-} from '~shared/skill-freshness'
-import type {
-  SkillDirectoryListing,
-  SkillDiscoveryResult,
-  SkillFileReadResult
-} from '~shared/skills'
-import { normalizeStatusBarUsageMode } from '~shared/status-bar-usage-mode'
 import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
 import {
@@ -114,28 +55,24 @@ import {
 import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
 import type {
   DetectedWorktreeListResult,
-  DirEntry,
-  ForceDeleteWorktreeBranchResult,
   GlobalSettings,
-  MemorySnapshot,
   OnboardingState,
-  PersistedUIState,
-  Repo,
-  SearchResult,
-  StatsSummary,
   Worktree,
-  WorktreeLineage,
-  WorkspaceLineage,
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '~shared/types'
 import { normalizeUiLanguage } from '~shared/ui-language'
-import { normalizeUsagePercentageDisplay } from '~shared/usage-percentage-display'
 import { createDefaultLocalYiruProfile, DEFAULT_LOCAL_YIRU_PROFILE_ID } from '~shared/yiru-profiles'
 
-import { callAbortableRuntimeEnvironment } from '../runtime/abortable-runtime-environment-call'
+import { readWebUIState } from '../runtime/web-ui-state'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
+import {
+  isLegacyBackgroundRuntimeMethod,
+  type WebRuntimeOrpcClientContext
+} from './legacy-orpc-link'
+import { WebRuntimeCallQueuePool, type WebRuntimeCallPriority } from './runtime-call-queue'
 import { WebRuntimeClient } from './runtime-client'
+import { createRuntimeStreamFanOut } from './runtime-client-events'
 import {
   clearStoredWebRuntimeEnvironment,
   getPreferredWebPairingOffer,
@@ -147,7 +84,6 @@ import {
 import { sanitizeWebRuntimeWorkspaceSession } from './workspace-session'
 
 const SETTINGS_STORAGE_KEY = 'yiru.web.settings.v1'
-const UI_STORAGE_KEY = 'yiru.web.ui.v1'
 const SESSION_STORAGE_KEY = 'yiru.web.workspaceSession.v1'
 const ONBOARDING_STORAGE_KEY = 'yiru.web.onboarding.v1'
 const GITHUB_CACHE_STORAGE_KEY = 'yiru.web.githubCache.v1'
@@ -155,242 +91,83 @@ const KEYBINDINGS_STORAGE_KEY = 'yiru.web.keybindings.v1'
 // Why: browser-paired clients need desktop parity for large dev sessions; the
 // runtime's no-limit default remains capped for lower-level RPC callers.
 const WEB_RUNTIME_WORKTREE_LIST_LIMIT = 10_000
-const MAX_CLIPBOARD_IMAGE_BASE64_CHARS = CLIPBOARD_IMAGE_MAX_BASE64_CHARS
-export const MAX_CLIPBOARD_IMAGE_SOURCE_BYTES = CLIPBOARD_IMAGE_MAX_SOURCE_BYTES
-export const MAX_CLIPBOARD_IMAGE_PIXELS = CLIPBOARD_IMAGE_MAX_PIXELS
-export const CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS = 512 * 1024
-export const CLIPBOARD_IMAGE_SINGLE_FRAME_FALLBACK_BASE64_CHARS = 256 * 1024
-const CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS = 30_000
 
 let activeEnvironment: StoredWebRuntimeEnvironment | null = readStoredWebRuntimeEnvironment()
 let activeClient: WebRuntimeClient | null = null
 let activeClientEnvironmentId: string | null = null
-let cachedWorktrees: { loadedAt: number; worktrees: Worktree[] } | null = null
-let cachedDetectedWorktrees: { loadedAt: number; worktrees: Worktree[] } | null = null
-const runtimeCallQueuePool = new RuntimeRpcCallQueuePool()
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : ''
-      const commaIndex = result.indexOf(',')
-      resolve(commaIndex === -1 ? result : result.slice(commaIndex + 1))
+// One host-event stream shared by every `on*` adapter that needs it. Resolves
+// lazily so it stays dormant until a runtime is actually paired.
+const resolveFanOutClient = async (): Promise<WebRuntimeOrpcClient | null> => {
+  const environment = requireActiveEnvironmentOrNull()
+  return environment ? await getClientForEnvironment(environment).getOrpcClient() : null
+}
+
+const runtimeClientEvents = createRuntimeStreamFanOut({
+  resolveClient: resolveFanOutClient,
+  open: (client, signal) => client.runtime.clientEvents.subscribe(undefined, { signal })
+})
+
+const runtimeBrowserGuestEvents = createRuntimeStreamFanOut({
+  resolveClient: resolveFanOutClient,
+  open: (client, signal) => client.browser.guestEvents.subscribe(undefined, { signal })
+})
+
+// Narrows the shared guest-event feed to one event kind, so each preload `on*`
+// keeps its original single-payload callback signature.
+function onBrowserGuestEvent<TType extends RuntimeBrowserGuestEvent['type']>(
+  type: TType,
+  callback: (event: Extract<RuntimeBrowserGuestEvent, { type: TType }>) => void
+): () => void {
+  return runtimeBrowserGuestEvents.subscribe((event) => {
+    if (event.type === type) {
+      callback(event as Extract<RuntimeBrowserGuestEvent, { type: TType }>)
     }
-    reader.onerror = () => reject(reader.error ?? new Error('Failed to read clipboard image'))
-    reader.readAsDataURL(blob)
   })
 }
+let cachedDetectedWorktrees: { loadedAt: number; worktrees: Worktree[] } | null = null
+const runtimeCallQueuePool = new WebRuntimeCallQueuePool()
 
-function assertClipboardImageBlobWithinLimit(blob: Blob): void {
-  assertClipboardImageByteLengthWithinLimit(blob.size)
-}
-
-async function convertImageBlobToPng(blob: Blob): Promise<Blob> {
-  assertClipboardImageBlobWithinLimit(blob)
-  const bitmap = await createImageBitmap(blob)
-  try {
-    assertClipboardImageDimensionsWithinLimit(bitmap)
-    const canvas = document.createElement('canvas')
-    canvas.width = bitmap.width
-    canvas.height = bitmap.height
-    const context = canvas.getContext('2d')
-    if (!context || canvas.width <= 0 || canvas.height <= 0) {
-      throw new Error('Clipboard image could not be decoded')
-    }
-    context.drawImage(bitmap, 0, 0)
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((png) => {
-        if (!png) {
-          reject(new Error('Clipboard image could not be encoded as PNG'))
-          return
-        }
-        try {
-          assertClipboardImageBlobWithinLimit(png)
-        } catch (error) {
-          reject(error)
-          return
-        }
-        resolve(png)
-      }, 'image/png')
-    })
-  } finally {
-    bitmap.close()
-  }
-}
-
-async function readClipboardImagePngBase64(): Promise<string | null> {
-  const clipboard = navigator.clipboard as
-    | (Clipboard & { read?: () => Promise<ClipboardItem[]> })
-    | undefined
-  if (!clipboard?.read) {
-    return null
-  }
-  const items = await clipboard.read()
-  for (const item of items) {
-    const imageType = item.types.find((type) => type.startsWith('image/'))
-    if (!imageType) {
-      continue
-    }
-    const blob = await item.getType(imageType)
-    assertClipboardImageBlobWithinLimit(blob)
-    const pngBlob = imageType === 'image/png' ? blob : await convertImageBlobToPng(blob)
-    return blobToBase64(pngBlob)
-  }
-  return null
+type WebRuntimeOrpcClient = ContractRouterClient<typeof runtimeContract>
+type WebRuntimeProcedure<TResult> = (
+  client: WebRuntimeOrpcClient,
+  options: { signal: AbortSignal }
+) => Promise<TResult>
+type SelectedWebRuntimeProcedure<TInput, TResult> = (
+  input: TInput,
+  options?: { signal?: AbortSignal }
+) => Promise<TResult>
+type WebRuntimeProcedureOptions = {
+  environment?: StoredWebRuntimeEnvironment
+  priority?: WebRuntimeCallPriority
+  signal?: AbortSignal
+  timeoutMs?: number
 }
 
 function invalidateRuntimeWorktreeCaches(): void {
-  cachedWorktrees = null
   cachedDetectedWorktrees = null
 }
 
 type WebSettingsApi = NonNullable<PreloadApi['settings']>
 type WebKeybindingsApi = NonNullable<PreloadApi['keybindings']>
 type WebGitHubApi = NonNullable<PreloadApi['gh']>
-type WebGitHubResult<K extends keyof WebGitHubApi> = Awaited<ReturnType<WebGitHubApi[K]>>
-type WebGitHubRouteKey =
-  | 'repoSlug'
-  | 'repoUpstream'
-  | 'prForBranch'
-  | 'workItem'
-  | 'workItemByOwnerRepo'
-  | 'workItemDetails'
-  | 'prFileContents'
-  | 'listWorkItems'
-  | 'prChecks'
-  | 'prCheckDetails'
-  | 'rerunPRChecks'
-  | 'prComments'
-  | 'resolveReviewThread'
-  | 'setPRFileViewed'
-  | 'updatePRTitle'
-  | 'mergePR'
-  | 'setPRAutoMerge'
-  | 'updatePRState'
-  | 'requestPRReviewers'
-  | 'removePRReviewers'
-  | 'addPRComment'
-  | 'addPRReviewCommentReply'
-  | 'addPRReviewComment'
-  | 'listLabels'
-  | 'listAssignableUsers'
-  | 'rateLimit'
-type WebGitHubRuntimeMethod =
-  | 'github.repoSlug'
-  | 'github.repoUpstream'
-  | 'github.prForBranch'
-  | 'github.workItem'
-  | 'github.workItemByOwnerRepo'
-  | 'github.workItemDetails'
-  | 'github.prFileContents'
-  | 'github.listWorkItems'
-  | 'github.prChecks'
-  | 'github.prCheckDetails'
-  | 'github.rerunPRChecks'
-  | 'github.prComments'
-  | 'github.resolveReviewThread'
-  | 'github.setPRFileViewed'
-  | 'github.updatePRTitle'
-  | 'github.mergePR'
-  | 'github.setPRAutoMerge'
-  | 'github.updatePRState'
-  | 'github.requestPRReviewers'
-  | 'github.removePRReviewers'
-  | 'github.addPRComment'
-  | 'github.addPRReviewCommentReply'
-  | 'github.addPRReviewComment'
-  | 'github.listLabels'
-  | 'github.listAssignableUsers'
-  | 'github.rateLimit'
-type WebGitLabApi = NonNullable<PreloadApi['gl']>
-type WebGitLabResult<K extends keyof WebGitLabApi> = Awaited<ReturnType<WebGitLabApi[K]>>
-type WebGitLabRouteKey =
-  | 'diagnoseAuth'
-  | 'rateLimit'
-  | 'listMRs'
-  | 'listLabels'
-  | 'workItemDetails'
-  | 'closeMR'
-  | 'reopenMR'
-  | 'mergeMR'
-  | 'updateMR'
-  | 'updateMRReviewers'
-  | 'addMRComment'
-  | 'addMRInlineComment'
-  | 'resolveMRDiscussion'
-  | 'jobTrace'
-  | 'retryJob'
-  | 'workItemByPath'
-type WebGitLabRuntimeMethod =
-  | 'gitlab.diagnoseAuth'
-  | 'gitlab.rateLimit'
-  | 'gitlab.listMRs'
-  | 'gitlab.listLabels'
-  | 'gitlab.workItemDetails'
-  | 'gitlab.updateMRState'
-  | 'gitlab.mergeMR'
-  | 'gitlab.updateMR'
-  | 'gitlab.updateMRReviewers'
-  | 'gitlab.addMRComment'
-  | 'gitlab.addMRInlineComment'
-  | 'gitlab.resolveMRDiscussion'
-  | 'gitlab.jobTrace'
-  | 'gitlab.retryJob'
-  | 'gitlab.workItemByPath'
+type WebRuntimeProcedureSelector = (client: WebRuntimeOrpcClient) => unknown
 type WebKeybindingDocument = {
   version: 1
   keybindings: KeybindingOverrides
   platforms: Partial<Record<KeybindingPlatform, KeybindingOverrides>>
 }
 
-export const GITHUB_WEB_RPC_METHODS = {
-  repoSlug: 'github.repoSlug',
-  repoUpstream: 'github.repoUpstream',
-  prForBranch: 'github.prForBranch',
-  workItem: 'github.workItem',
-  workItemByOwnerRepo: 'github.workItemByOwnerRepo',
-  workItemDetails: 'github.workItemDetails',
-  prFileContents: 'github.prFileContents',
-  listWorkItems: 'github.listWorkItems',
-  prChecks: 'github.prChecks',
-  prCheckDetails: 'github.prCheckDetails',
-  rerunPRChecks: 'github.rerunPRChecks',
-  prComments: 'github.prComments',
-  resolveReviewThread: 'github.resolveReviewThread',
-  setPRFileViewed: 'github.setPRFileViewed',
-  updatePRTitle: 'github.updatePRTitle',
-  mergePR: 'github.mergePR',
-  setPRAutoMerge: 'github.setPRAutoMerge',
-  updatePRState: 'github.updatePRState',
-  requestPRReviewers: 'github.requestPRReviewers',
-  removePRReviewers: 'github.removePRReviewers',
-  addPRComment: 'github.addPRComment',
-  addPRReviewCommentReply: 'github.addPRReviewCommentReply',
-  addPRReviewComment: 'github.addPRReviewComment',
-  listLabels: 'github.listLabels',
-  listAssignableUsers: 'github.listAssignableUsers',
-  rateLimit: 'github.rateLimit'
-} as const satisfies Record<WebGitHubRouteKey, WebGitHubRuntimeMethod>
+const GIT_PATH_MUTATION_SELECTORS = {
+  stage: (client: WebRuntimeOrpcClient) => client.git.stage,
+  unstage: (client: WebRuntimeOrpcClient) => client.git.unstage,
+  discard: (client: WebRuntimeOrpcClient) => client.git.discard
+} satisfies Record<string, WebRuntimeProcedureSelector>
 
-export const GITLAB_WEB_RPC_METHODS = {
-  diagnoseAuth: 'gitlab.diagnoseAuth',
-  rateLimit: 'gitlab.rateLimit',
-  listMRs: 'gitlab.listMRs',
-  listLabels: 'gitlab.listLabels',
-  workItemDetails: 'gitlab.workItemDetails',
-  closeMR: 'gitlab.updateMRState',
-  reopenMR: 'gitlab.updateMRState',
-  mergeMR: 'gitlab.mergeMR',
-  updateMR: 'gitlab.updateMR',
-  updateMRReviewers: 'gitlab.updateMRReviewers',
-  addMRComment: 'gitlab.addMRComment',
-  addMRInlineComment: 'gitlab.addMRInlineComment',
-  resolveMRDiscussion: 'gitlab.resolveMRDiscussion',
-  jobTrace: 'gitlab.jobTrace',
-  retryJob: 'gitlab.retryJob',
-  workItemByPath: 'gitlab.workItemByPath'
-} as const satisfies Record<WebGitLabRouteKey, WebGitLabRuntimeMethod>
+const GIT_PATHS_MUTATION_SELECTORS = {
+  stage: (client: WebRuntimeOrpcClient) => client.git.bulkStage,
+  unstage: (client: WebRuntimeOrpcClient) => client.git.bulkUnstage
+} satisfies Record<string, WebRuntimeProcedureSelector>
 
 const WEB_KEYBINDING_PLATFORMS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const webKeybindingListeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
@@ -416,7 +193,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
           devRepoRoot: null,
           dockBadgeLabel: null
         }),
-      getFeatureWallAssetBaseUrl: () => Promise.resolve('/'),
       relaunch: () => Promise.resolve(window.location.reload()),
       restart: () => Promise.resolve(window.location.reload()),
       reload: () => Promise.resolve(window.location.reload()),
@@ -493,12 +269,26 @@ function createWebPreloadApi(): Partial<PreloadApi> {
         writeJson(SETTINGS_STORAGE_KEY, next)
         return syncRuntimeBackedSettings(sanitizedUpdates, next)
       },
-      updatePRBotAuthorOverride: (args) => updateRuntimePRBotAuthorOverride(args),
-      listFonts: () => Promise.resolve([]),
-      onChanged: () => noopUnsubscribe
+      updatePRBotAuthorOverride: (args) => updateRuntimePRBotAuthorOverride(args)
     } satisfies Partial<WebSettingsApi> as unknown as WebSettingsApi,
     keybindings: createWebKeybindingsApi(),
-    ui: createWebUiApi(),
+    // Why: `feedback.submit` posts to a PostHog-backed pipeline from the main
+    // process (net module has no CORS restrictions there); a paired web
+    // client has no equivalent shell to proxy through. Without this entry
+    // the member fell through to the generic fallback proxy, which resolves
+    // `undefined` — the dialog's `result.ok` read then threw instead of
+    // showing this message.
+    feedback: {
+      submit: () =>
+        Promise.resolve({
+          ok: false,
+          status: null,
+          error: translate(
+            'auto.web.webPreloadApi.feedbackUnavailable',
+            'Feedback is unavailable in the web client.'
+          )
+        })
+    },
     crashReports: {
       getLatestPending: () => Promise.resolve(null),
       getLatestReport: () => Promise.resolve(null),
@@ -515,6 +305,22 @@ function createWebPreloadApi(): Partial<PreloadApi> {
         Promise.resolve({
           ok: false,
           error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
+        })
+    },
+    // Why: `export.htmlToPdf` opens a hidden Electron `BrowserWindow`,
+    // prints to PDF with `webContents.printToPDF`, and shows a native save
+    // dialog — every step needs the desktop shell. Without this entry the
+    // member fell through to the generic fallback proxy, which resolves
+    // `undefined` — the editor's `result.success` read then threw instead of
+    // showing this message.
+    export: {
+      htmlToPdf: () =>
+        Promise.resolve({
+          success: false,
+          error: translate(
+            'auto.web.webPreloadApi.exportHtmlToPdfUnavailable',
+            'Exporting to PDF is unavailable in the web client.'
+          )
         })
     },
     diagnostics: {
@@ -583,82 +389,37 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       }
     },
     runtime: createRuntimeApi(),
-    nativeChat: createNativeChatApi(),
+    // Why: not a stub awaiting migration — `revealFridayChat` needs a renderer
+    // notifier to surface the session as a tab in the local floating
+    // workspace, which a paired web client cannot provide on the runtime host.
     friday: {
       getOrCreate: () => Promise.reject(new Error('Friday is available on desktop.')),
       restart: () => Promise.reject(new Error('Friday is available on desktop.'))
     },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
-    repos: createReposApi(),
-    worktrees: createWorktreesApi(),
-    fs: createFileApi(),
+    repoHost: createRepoHostAdapter(),
+    fileHost: createFileHostApi(),
     git: createGitApi(),
     browser: createBrowserApi(),
     emulator: createEmulatorApi(),
     gh: createGitHubApi(),
-    gl: createGitLabApi(),
-    hostedReview: createRuntimeNamespaceApi('hostedReview'),
-    hooks: createHooksApi(),
-    stats: {
-      getSummary: async () =>
-        callRuntimeResult<StatsSummary>('stats.summary').catch(() => ({
-          totalAgentsSpawned: 0,
-          totalPRsCreated: 0,
-          totalAgentTimeMs: 0,
-          firstEventAt: null
-        }))
-    },
-    memory: {
-      getSnapshot: () => Promise.resolve(createEmptyMemorySnapshot())
-    },
     aiVault: createAiVaultApi(),
-    preflight: createPreflightApi(),
     notifications: createNotificationsApi(),
-    rateLimits: createRateLimitsApi(),
     minimaxCredentials: createMiniMaxCredentialsApi(),
-    grokAccounts: createGrokAccountsApi(),
     codexAccounts: createAccountsApi(),
     claudeAccounts: createAccountsApi(),
-    cli: createCliApi(),
-    agentHooks: createAgentHooksApi(),
     developerPermissions: createDeveloperPermissionsApi(),
-    computerUsePermissions: createComputerUsePermissionsApi(),
     updater: createUpdaterApi(),
-    shell: createShellApi(),
-    skills: createSkillsApi(),
     pty: createPtyApi(),
-    wsl: {
-      isAvailable: () => callRuntimeResult<boolean>('host.wsl.isAvailable').catch(() => false),
-      listDistros: () => callRuntimeResult<string[]>('host.wsl.listDistros').catch(() => [])
-    },
-    pwsh: {
-      isAvailable: () => callRuntimeResult<boolean>('host.pwsh.isAvailable').catch(() => false)
-    },
-    gitBash: {
-      isAvailable: () => callRuntimeResult<boolean>('host.gitBash.isAvailable').catch(() => false)
-    },
-    agentStatus: {
-      onSet: () => noopUnsubscribe,
-      onClear: () => noopUnsubscribe,
-      getSnapshot: () => Promise.resolve([]),
-      inferInterrupt: () => Promise.resolve(false),
-      onMigrationUnsupported: () => noopUnsubscribe,
-      onMigrationUnsupportedClear: () => noopUnsubscribe,
-      getMigrationUnsupportedSnapshot: () => Promise.resolve([]),
-      drop: () => {},
-      dropByTabPrefix: () => {},
-      retirePaneAuthority: () => {},
-      transferPaneAuthority: () => {}
-    },
+    // Why: shell-only — inspecting/repairing the Windows Defender Firewall is
+    // an OS-level operation on the machine running the Electron shell, which
+    // a browser tab has no equivalent of. listNetworkInterfaces/getPairingQR/
+    // listDevices/revokeDevice/isWebSocketReady moved to the `mobile.*` oRPC
+    // contract, which this web client already reaches via the typed client.
     mobile: {
-      listNetworkInterfaces: () => Promise.resolve({ interfaces: [] }),
-      getPairingQR: () => Promise.resolve({ available: false }),
       getWindowsFirewallStatus: () => Promise.resolve({ supported: false }),
       repairWindowsFirewall: () => Promise.resolve({ ok: false, reason: 'unsupported' }),
-      openWindowsNetworkSettings: () => Promise.resolve(false),
-      listDevices: () => Promise.resolve({ devices: [] }),
-      revokeDevice: () => Promise.resolve({ revoked: false }),
-      isWebSocketReady: () => Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null })
+      openWindowsNetworkSettings: () => Promise.resolve(false)
     },
     telemetryTrack: () => Promise.resolve(),
     telemetrySetOptIn: () => Promise.resolve(),
@@ -969,168 +730,17 @@ function createWebKeybindingsApi(): WebKeybindingsApi {
   }
 }
 
-// Why: the desktop reads native-chat transcripts over IPC; the web client has
-// no IPC, so route readSession/subscribe through the runtime RPC (the same
-// methods the mobile app uses). Without this, window.api.nativeChat was
-// undefined on web and the chat view showed no messages.
-function createNativeChatApi(): NativeChatApi {
-  return {
-    readSession: (agent, sessionId, limit, transcriptPath) =>
-      callRuntimeResult<NativeChatReadSessionResult>('nativeChat.readSession', {
-        agent,
-        sessionId,
-        limit,
-        transcriptPath
-      }),
-    subscribe: (args, onFrame) => {
-      // No paired runtime yet: nothing to subscribe to, and
-      // requireActiveEnvironment() would throw. Return a no-op teardown so the
-      // chat view mounts cleanly until a runtime is paired (only the not-paired
-      // case is swallowed — real subscribe errors still surface via .catch).
-      const environment = requireActiveEnvironmentOrNull()
-      if (!environment) {
-        onFrame({
-          type: 'snapshot',
-          messages: [],
-          hasMore: false,
-          error: translate(
-            'components.native-chat.state.pairHost',
-            'Pair a host to view agent chat history.'
-          )
-        })
-        return () => {}
-      }
-      let handle: { unsubscribe: () => void } | null = null
-      let cancelled = false
-      let receivedInitial = false
-      void getClientForEnvironment(environment)
-        .subscribe(
-          'nativeChat.subscribe',
-          {
-            agent: args.agent,
-            sessionId: args.sessionId,
-            subscriptionId: args.subscriptionId,
-            transcriptPath: args.transcriptPath,
-            limit: args.limit
-          },
-          {
-            onResponse: (response) => {
-              if (cancelled) {
-                return
-              }
-              if (!response.ok) {
-                if (!receivedInitial) {
-                  receivedInitial = true
-                  onFrame({
-                    type: 'snapshot',
-                    messages: [],
-                    hasMore: false,
-                    error: response.error.message
-                  })
-                }
-                return
-              }
-              const result = response.result as {
-                type?: string
-                messages?: NativeChatAppendedMessages
-                hasMore?: boolean
-                error?: string
-              }
-              if (
-                (result?.type === 'appended' ||
-                  result?.type === 'snapshot' ||
-                  result?.type === 'replacement') &&
-                Array.isArray(result.messages)
-              ) {
-                if (!receivedInitial) {
-                  receivedInitial = true
-                  onFrame({
-                    type: 'snapshot',
-                    messages: result.messages,
-                    hasMore: result.hasMore ?? result.messages.length >= (args.limit ?? 300),
-                    ...(result.error ? { error: result.error } : {})
-                  })
-                } else if (result.type === 'snapshot') {
-                  onFrame({
-                    type: 'snapshot',
-                    messages: result.messages,
-                    hasMore: result.hasMore ?? false,
-                    ...(result.error ? { error: result.error } : {})
-                  })
-                } else {
-                  onFrame(
-                    result.type === 'replacement'
-                      ? {
-                          type: 'replacement',
-                          messages: result.messages,
-                          hasMore: result.hasMore ?? false
-                        }
-                      : { type: 'appended', messages: result.messages }
-                  )
-                }
-              } else if (!receivedInitial) {
-                // Why: an ok response whose payload shape we don't recognize would
-                // otherwise never flip receivedInitial, stranding the view on
-                // 'loading'. Settle it with an empty snapshot (carrying any error
-                // the runtime sent) so the UI resolves.
-                receivedInitial = true
-                onFrame({
-                  type: 'snapshot',
-                  messages: [],
-                  hasMore: false,
-                  ...(result?.error ? { error: result.error } : {})
-                })
-              }
-            }
-          },
-          {
-            // Why: send nativeChat.unsubscribe on teardown so the server reaps
-            // the transcript fs-watcher on view-toggle, not just on socket close
-            // (the watcher-leak fix). Echo the pane-specific token so two panes
-            // watching one session cannot tear down each other's watcher.
-            buildUnsubscribe: () =>
-              buildNativeChatUnsubscribe(args.agent, args.sessionId, args.subscriptionId)
-          }
-        )
-        .then((h) => {
-          if (cancelled) {
-            h.unsubscribe()
-          } else {
-            handle = h
-          }
-        })
-        .catch((err: unknown) => {
-          if (!cancelled && !receivedInitial) {
-            receivedInitial = true
-            onFrame({
-              type: 'snapshot',
-              messages: [],
-              hasMore: false,
-              error: err instanceof Error ? err.message : String(err)
-            })
-          }
-        })
-      return () => {
-        cancelled = true
-        handle?.unsubscribe()
-      }
-    }
-  }
-}
-
+// Why: the web client keeps readSession on its compatibility adapter because
+// it has no local MessagePort. Live tailing uses the typed runtime client from
+// the native-chat feature directly.
 function createRuntimeApi(): NonNullable<Partial<PreloadApi>['runtime']> {
   return {
     syncWindowGraph: async (_graph: RuntimeSyncWindowGraph) => getRemoteRuntimeStatus(),
-    getStatus: () => getRemoteRuntimeStatus(),
-    call: ({ method, params }) => callRuntimeEnvelope(method, params),
     getTerminalFitOverrides: () => Promise.resolve([]),
     getTerminalDrivers: () => Promise.resolve([]),
     getBrowserDrivers: () => Promise.resolve([]),
     restoreTerminalFit: () => Promise.resolve({ restored: false }),
-    reclaimBrowserForDesktop: () => Promise.resolve({ reclaimed: false }),
-    onTerminalFitOverrideChanged: () => noopUnsubscribe,
-    onTerminalDriverChanged: () => noopUnsubscribe,
-    onBrowserDriverChanged: () => noopUnsubscribe
+    reclaimBrowserForDesktop: () => Promise.resolve({ reclaimed: false })
   }
 }
 
@@ -1156,16 +766,53 @@ function createRuntimeEnvironmentsApi(): NonNullable<Partial<PreloadApi>['runtim
       }
       return { disconnected: redactStoredWebRuntimeEnvironment(environment) }
     },
-    getStatus: ({ selector, timeoutMs }) =>
-      callEnvironmentEnvelope(selector, STATUS_GET_CONTRACT, undefined, timeoutMs),
-    call: ({ selector, method, params, timeoutMs }) =>
-      callEnvironmentEnvelope(selector, method, params, timeoutMs),
+    getStatus: ({ selector, timeoutMs }) => getEnvironmentStatusEnvelope(selector, timeoutMs),
+    call: ({ selector, method, params, timeoutMs }) => {
+      const environment = resolveEnvironment(selector)
+      if (method === STATUS_GET_CONTRACT.name) {
+        return getEnvironmentStatusEnvelope(environment.id, timeoutMs)
+      }
+      return callLegacyEnvironmentEnvelope(environment, method, params, timeoutMs)
+    },
     subscribe: async ({ selector, method, params, timeoutMs }, callbacks) => {
       const environment = resolveEnvironment(selector)
       const client = getClientForEnvironment(environment)
       return client.subscribe(method, params, callbacks, { timeoutMs })
+    },
+    callOrpcProcedure: async ({ selector, path, input, timeoutMs }, options) => {
+      const environment = resolveEnvironment(selector)
+      const client = await getClientForEnvironment(environment).getOrpcClient(
+        timeoutMs,
+        options?.signal
+      )
+      return resolveOrpcClientProcedure(client, path)(input, {
+        signal: options?.signal,
+        context: { onBinary: options?.onBinary }
+      })
     }
   }
+}
+
+// Why: `WebRuntimeOrpcClient` is a `ContractRouterClient` proxy — each property
+// access returns a nested proxy down to the callable leaf, mirroring how
+// `orpc-legacy-client.ts` walks `runtimeContract` by the same path array. This
+// lets one preload member dispatch any contract procedure without a
+// per-domain switch.
+function resolveOrpcClientProcedure(
+  client: WebRuntimeOrpcClient,
+  path: readonly string[]
+): (
+  input: unknown,
+  options?: { signal?: AbortSignal; context?: WebRuntimeOrpcClientContext }
+) => Promise<unknown> {
+  let node: unknown = client
+  for (const segment of path) {
+    node = (node as Record<string, unknown>)[segment]
+  }
+  return node as (
+    input: unknown,
+    options?: { signal?: AbortSignal; context?: WebRuntimeOrpcClientContext }
+  ) => Promise<unknown>
 }
 
 function createAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault']> {
@@ -1181,12 +828,17 @@ function createAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault']> {
       }
       // Why: the browser client has no local filesystem; every history scan
       // runs on the paired server and must be stamped as that runtime host.
-      return callRuntimeResult(AI_VAULT_LIST_SESSIONS_CONTRACT, {
-        limit: args?.limit,
-        force: args?.force,
-        scopePaths: args?.scopePaths ? [...args.scopePaths] : undefined,
-        executionHostId
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.aiVault.listSessions(
+          {
+            limit: args?.limit,
+            force: args?.force,
+            scopePaths: args?.scopePaths ? [...args.scopePaths] : undefined,
+            executionHostId
+          },
+          options
+        )
+      )
     },
     // Why: the runtime RPC surface only exposes aiVault.listSessions; subagent
     // transcript listing has no server-side method yet, so the browser client
@@ -1214,280 +866,48 @@ function webAiVaultUnavailableResult(executionHostId: ExecutionHostId): AiVaultL
   }
 }
 
-function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
+function createRepoHostAdapter(): PreloadApi['repoHost'] {
   return {
-    list: async () => (await callRuntimeResult(REPO_LIST_CONTRACT, undefined)).repos,
-    listForExecutionHost: async (args) => ({
-      authoritative: false,
-      executionHostId: args.executionHostId,
-      reason: 'unavailable'
-    }),
-    add: async ({ path, kind }) => {
-      invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult(REPO_ADD_CONTRACT, { path, kind })
-    },
-    remove: async ({ repoId }) => {
-      await callRuntimeResult('repo.rm', { repo: repoId })
-      invalidateRuntimeWorktreeCaches()
-    },
-    // Why: host-scoped forget targets a disconnected/removed SSH host owned by
-    // the desktop app. A paired web client talks to a single Yiru runtime and
-    // has no ghost-host state to reconcile.
-    removeForHost: () => {
-      throw new Error('Forgetting a host is unavailable in paired web clients.')
-    },
-    reorder: async ({ orderedIds }) => callRuntimeResult('repo.reorder', { orderedIds }),
-    // Why: this path persists desktop-owned local or SSH rows. Paired web
-    // clients own only their single runtime, which uses repo.reorder directly.
-    reorderForHost: async () => {
-      throw new Error('Host-scoped project reordering is unavailable in paired web clients.')
-    },
-    update: async ({ repoId, updates }) =>
-      (await callRuntimeResult<{ repo: Repo }>('repo.update', { repo: repoId, updates })).repo,
+    // Why: browser clients have no native filesystem picker. These outcomes
+    // preserve cancellation semantics without pretending the runtime picked a path.
     pickFolder: () => Promise.resolve(null),
     pickFolders: () => Promise.resolve([]),
     pickDirectory: () => Promise.resolve(null),
-    clone: async ({ url, destination }) => {
-      invalidateRuntimeWorktreeCaches()
-      return (
-        await callRuntimeResult<{ repo: Repo }>('repo.clone', { url, destination }, 10 * 60_000)
-      ).repo
+    removeForHost: () => {
+      throw new Error(
+        translate('auto.web.web.preload.api.31bfe8ae1a', 'Unavailable in the web client.')
+      )
     },
-    cloneRemote: async () => {
-      // Why: SSH relay cloning is owned by the desktop main process; paired web
-      // clients must not pretend they can run that local IPC path directly.
-      throw new Error('SSH clone is unavailable in paired web clients.')
+    reorderForHost: async () => {
+      throw new Error(
+        translate('auto.web.web.preload.api.31bfe8ae1a', 'Unavailable in the web client.')
+      )
     },
-    createRemote: async () => {
-      // Why: SSH relay project creation is owned by the desktop main process;
-      // paired web clients cannot create folders through local SSH IPC.
-      throw new Error('Creating projects on SSH hosts is unavailable in paired web clients.')
-    },
+    // Why: repo.clone has no cancellation procedure, so a browser adapter
+    // cannot cancel a clone already executing on its paired runtime.
     cloneAbort: () => Promise.resolve(),
-    addRemote: async ({ remotePath, displayName, kind }) => {
-      invalidateRuntimeWorktreeCaches()
-      const result = await callRuntimeResult(REPO_ADD_CONTRACT, {
-        path: remotePath,
-        kind
-      })
-      return displayName
-        ? {
-            repo: await createReposApi().update({
-              repoId: result.repo.id,
-              updates: { displayName }
-            })
-          }
-        : result
-    },
-    create: async ({ parentPath, name, kind }) => {
-      invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult('repo.create', { parentPath, name, kind })
-    },
-    isGitAvailable: async () =>
-      (await callRuntimeResult<{ available: boolean }>('repo.gitAvailable')).available,
     getDefaultCreateProjectParent: async () => {
-      const result = await callRuntimeResult<{ resolvedPath: string }>('files.browseServerDir', {
-        path: '~'
-      })
+      const result = await callRuntimeProcedure((client, options) =>
+        client.files.browseServerDir({ path: '~' }, options)
+      )
       return getDefaultCreateProjectParent(result.resolvedPath)
-    },
-    onCloneProgress: () => noopUnsubscribe,
-    getGitUsername: () => Promise.resolve(''),
-    getBaseRefDefault: async ({ repoId }) =>
-      callRuntimeResult('repo.baseRefDefault', { repo: repoId }),
-    searchBaseRefs: async ({ repoId, query, limit }) =>
-      (
-        await callRuntimeResult(REPO_SEARCH_REFS_CONTRACT, {
-          repo: repoId,
-          query,
-          limit
-        })
-      ).refs,
-    searchBaseRefDetails: async ({ repoId, query, limit }) => {
-      const result = await callRuntimeResult(REPO_SEARCH_REFS_CONTRACT, {
-        repo: repoId,
-        query,
-        limit
-      })
-      return result.refDetails ?? result.refs.map(legacyBaseRefSearchResult)
-    },
-    onChanged: () => noopUnsubscribe
+    }
   }
 }
 
-function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
+function createFileHostApi(): NonNullable<Partial<PreloadApi>['fileHost']> {
   return {
-    list: async ({ repoId }) =>
-      (
-        await callRuntimeResult(WORKTREE_LIST_CONTRACT, {
-          repo: repoId,
-          limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT
-        })
-      ).worktrees,
-    listDetected: async ({ repoId }) => callRuntimeDetectedWorktrees(repoId),
-    listDetectedForHost: async (args) => ({
-      providerRequestId: args.providerRequestId,
-      executionHostId: args.executionHostId,
-      status: 'rejected'
-    }),
-    cancelListDetected: () => Promise.resolve(),
-    listLineageForHost: async (args) => ({
-      authoritative: false,
-      executionHostId: args.executionHostId,
-      reason: 'unavailable'
-    }),
-    listAll: () => listAllRuntimeWorktrees(),
-    create: async (args) => {
-      invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult(WORKTREE_CREATE_CONTRACT, {
-        repo: args.repoId,
-        name: args.name,
-        baseBranch: args.baseBranch,
-        compareBaseRef: args.compareBaseRef,
-        branchNameOverride: args.branchNameOverride,
-        linkedPR: args.linkedPR,
-        linkedGitLabMR: args.linkedGitLabMR,
-        linkedBitbucketPR: args.linkedBitbucketPR,
-        linkedAzureDevOpsPR: args.linkedAzureDevOpsPR,
-        linkedGiteaPR: args.linkedGiteaPR,
-        displayName: args.displayName,
-        sparseCheckout: args.sparseCheckout,
-        pushTarget: args.pushTarget,
-        setupDecision: args.setupDecision,
-        createdWithAgent: args.createdWithAgent,
-        ...(args.startup
-          ? {
-              startupCommand: args.startup.command,
-              ...(args.startup.env ? { startupEnv: args.startup.env } : {}),
-              ...(args.startup.launchConfig
-                ? { startupLaunchConfig: args.startup.launchConfig }
-                : {}),
-              ...(args.startup.startupCommandDelivery
-                ? { startupCommandDelivery: args.startup.startupCommandDelivery }
-                : {}),
-              activate: true
-            }
-          : {}),
-        parentWorkspace: args.parentWorkspace,
-        workspaceStatus: args.workspaceStatus,
-        manualOrder: args.manualOrder,
-        automationProvenanceRequest: args.automationProvenanceRequest
-      })
-    },
-    // Why: the runtime create path emits no two-phase progress, so the web
-    // client's creation panel simply falls back to an indeterminate spinner.
-    onCreateProgress: () => noopUnsubscribe,
-    prefetchCreateBase: async ({ repoId, baseBranch }) => {
-      await callRuntimeResult('worktree.prefetchCreateBase', {
-        repo: repoId,
-        baseBranch
-      })
-    },
-    resolvePrBase: async ({ repoId, prNumber, headRefName, baseRefName, isCrossRepository }) =>
-      callRuntimeResult('worktree.resolvePrBase', {
-        repo: repoId,
-        prNumber,
-        headRefName,
-        baseRefName,
-        isCrossRepository
-      }),
-    resolveMrBase: async ({ repoId, mrIid, sourceBranch, targetBranch, isCrossRepository }) =>
-      callRuntimeResult('worktree.resolveMrBase', {
-        repo: repoId,
-        mrIid,
-        sourceBranch,
-        targetBranch,
-        isCrossRepository
-      }),
-    remove: async ({ worktreeId, force, skipArchive }) => {
-      invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult(WORKTREE_REMOVE_CONTRACT, {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
-        force,
-        runHooks: skipArchive !== true
-      })
-    },
-    // Why: forget-locally clears a workspace pinned to a disconnected/removed
-    // SSH host on the desktop app; a paired web client has no such ghost state.
-    forgetLocal: () => {
-      throw new Error('Forgetting a workspace is unavailable in paired web clients.')
-    },
-    forceDeletePreservedBranch: ({ worktreeId, branchName, expectedHead }) =>
-      callRuntimeResult<ForceDeleteWorktreeBranchResult>('worktree.forceDeleteBranch', {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
-        branchName,
-        expectedHead
-      }),
-    updateMeta: async ({ worktreeId, updates }) => {
-      const rpcUpdates =
-        Object.prototype.hasOwnProperty.call(updates, 'pushTarget') &&
-        updates.pushTarget === undefined
-          ? { ...updates, pushTarget: null }
-          : updates
-      return (
-        await callRuntimeResult(WORKTREE_SET_CONTRACT, {
-          worktree: toRuntimeWorktreeSelector(worktreeId),
-          ...rpcUpdates
-        })
-      ).worktree
-    },
-    listLineage: async () =>
-      await callRuntimeResult<{
-        lineage: Record<string, WorktreeLineage>
-        workspaceLineage?: Record<string, WorkspaceLineage>
-      }>('worktree.lineageList'),
-    updateLineage: async ({ worktreeId, parentWorktreeId, noParent }) => {
-      invalidateRuntimeWorktreeCaches()
-      const result = await callRuntimeResult(WORKTREE_SET_CONTRACT, {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
-        parentWorktree: parentWorktreeId,
-        noParent
-      })
-      return result.worktree.lineage ?? null
-    },
-    persistSortOrder: async ({ orderedIds }) => {
-      await callRuntimeResult('worktree.persistSortOrder', { orderedIds })
-    },
-    // Why: the capture lives in desktop main memory and is not exposed over
-    // pairing; the dialog falls back to the persisted excerpt on web clients.
-    getBranchRenameFailureOutput: async () => null,
-    onChanged: () => noopUnsubscribe,
-    onGitStatusMetadataChanged: () => noopUnsubscribe,
-    onHeadIdentitiesChanged: () => noopUnsubscribe,
-    onBaseStatus: () => noopUnsubscribe,
-    onRemoteBranchConflict: () => noopUnsubscribe
-  }
-}
-
-function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
-  return {
-    readDir: async ({ dirPath }) => {
-      const file = await resolveRuntimeFilePath(dirPath)
-      return callRuntimeResult<DirEntry[]>('files.readDir', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath
-      })
-    },
     readFile: async ({ filePath }) => {
       const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeResult('files.readPreview', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath
-      })
-    },
-    readLocalLogTail: async () => {
-      throw new Error('Local log tailing is unavailable in paired web clients.')
-    },
-    startLocalLogTail: async () => {
-      throw new Error('Local log tailing is unavailable in paired web clients.')
-    },
-    stopLocalLogTail: async () => {},
-    onLocalLogTailChanged: () => noopUnsubscribe,
-    downloadFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    downloadFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
+      return callRuntimeProcedure((client, options) =>
+        client.files.readPreview(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath
+          },
+          options
+        )
+      )
     },
     saveDownloadedFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
@@ -1519,75 +939,109 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
     cancelDownloadedFolder: async () => {
       throw new Error('Remote folder download is unavailable in paired web clients.')
     },
-    listMarkdownDocuments: async ({ rootPath }) => {
-      const file = await resolveRuntimeFilePath(rootPath)
-      return callRuntimeResult('files.listMarkdownDocuments', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id)
-      })
-    },
     writeFile: async ({ filePath, content }) => {
       const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeResult('files.write', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath,
-        content
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.write(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath,
+            content
+          },
+          options
+        )
+      )
     },
     createFile: async ({ filePath }) => {
       const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeResult('files.createFile', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.createFile(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath
+          },
+          options
+        )
+      )
     },
     createDir: async ({ dirPath }) => {
       const file = await resolveRuntimeFilePath(dirPath)
-      await callRuntimeResult('files.createDir', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.createDir(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath
+          },
+          options
+        )
+      )
     },
     rename: async ({ oldPath, newPath }) => {
       const oldFile = await resolveRuntimeFilePath(oldPath)
       const newFile = await resolveRuntimeFilePath(newPath)
-      await callRuntimeResult('files.rename', {
-        worktree: toRuntimeWorktreeSelector(oldFile.worktree.id),
-        oldRelativePath: oldFile.relativePath,
-        newRelativePath: newFile.relativePath
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.rename(
+          {
+            worktree: toRuntimeWorktreeSelector(oldFile.worktree.id),
+            oldRelativePath: oldFile.relativePath,
+            newRelativePath: newFile.relativePath
+          },
+          options
+        )
+      )
     },
     copy: async ({ sourcePath, destinationPath }) => {
       const source = await resolveRuntimeFilePath(sourcePath)
       const destination = await resolveRuntimeFilePath(destinationPath)
-      await callRuntimeResult('files.copy', {
-        worktree: toRuntimeWorktreeSelector(source.worktree.id),
-        sourceRelativePath: source.relativePath,
-        destinationRelativePath: destination.relativePath
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.copy(
+          {
+            worktree: toRuntimeWorktreeSelector(source.worktree.id),
+            sourceRelativePath: source.relativePath,
+            destinationRelativePath: destination.relativePath
+          },
+          options
+        )
+      )
     },
     deletePath: async ({ targetPath, recursive }) => {
       const file = await resolveRuntimeFilePath(targetPath)
-      await callRuntimeResult('files.delete', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath,
-        recursive
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.files.delete(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath,
+            recursive
+          },
+          options
+        )
+      )
     },
     authorizeExternalPath: () => Promise.resolve(),
     stat: async ({ filePath }) => {
       const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeResult('files.stat', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        relativePath: file.relativePath
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.files.stat(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            relativePath: file.relativePath
+          },
+          options
+        )
+      )
     },
     pathExists: async ({ filePath }) => {
       try {
         const file = await resolveRuntimeFilePath(filePath)
-        await callRuntimeResult('files.stat', {
-          worktree: toRuntimeWorktreeSelector(file.worktree.id),
-          relativePath: file.relativePath
-        })
+        await callRuntimeProcedure((client, options) =>
+          client.files.stat(
+            {
+              worktree: toRuntimeWorktreeSelector(file.worktree.id),
+              relativePath: file.relativePath
+            },
+            options
+          )
+        )
         return true
       } catch (error) {
         if (isMissingPathError(error)) {
@@ -1596,40 +1050,8 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
         throw error
       }
     },
-    listFiles: async ({ rootPath, excludePaths }) => {
-      const file = await resolveRuntimeFilePath(rootPath)
-      const result = await callRuntimeResult<{ files: { relativePath: string }[] }>(
-        'files.listAll',
-        {
-          worktree: toRuntimeWorktreeSelector(file.worktree.id),
-          excludePaths
-        }
-      )
-      return result.files.map((entry) => entry.relativePath)
-    },
-    cancelListFiles: async () => {
-      // Why: the paired-web path lists files over runtime RPC with its own
-      // request timeout; there is no host-side scan to abort from here.
-    },
-    search: async (args) => {
-      const file = await resolveRuntimeFilePath(args.rootPath)
-      return callRuntimeResult<SearchResult>('files.search', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        query: args.query,
-        caseSensitive: args.caseSensitive,
-        wholeWord: args.wholeWord,
-        useRegex: args.useRegex,
-        includePattern: args.includePattern,
-        excludePattern: args.excludePattern,
-        maxResults: args.maxResults
-      })
-    },
-    importExternalPaths: async () => ({ results: [] }),
     stageExternalPathsForRuntimeUpload: async () => ({ sources: [] }),
-    resolveDroppedPathsForAgent: async () => ({ resolvedPaths: [], skipped: [], failed: [] }),
-    watchWorktree: () => Promise.resolve(),
-    unwatchWorktree: () => Promise.resolve(),
-    onFsChanged: () => noopUnsubscribe
+    resolveDroppedPathsForAgent: async () => ({ resolvedPaths: [], skipped: [], failed: [] })
   }
 }
 
@@ -1639,25 +1061,16 @@ const webGitStatusAbortControllers = new Map<string, AbortController>()
 
 async function callAbortableRuntimeStatus(
   requestToken: string,
-  params: RuntimeMethodParams<typeof GIT_STATUS_CONTRACT>
-): Promise<RuntimeMethodResult<typeof GIT_STATUS_CONTRACT>> {
-  const environment = requireActiveEnvironment()
+  params: Parameters<WebRuntimeOrpcClient['git']['status']>[0]
+): Promise<Awaited<ReturnType<WebRuntimeOrpcClient['git']['status']>>> {
   webGitStatusAbortControllers.get(requestToken)?.abort()
   const controller = new AbortController()
   webGitStatusAbortControllers.set(requestToken, controller)
   try {
-    const response = await callAbortableRuntimeEnvironment(
-      environment.id,
-      GIT_STATUS_CONTRACT,
-      params,
-      undefined,
-      controller.signal
-    )
-    updateEnvironmentFromResponse(environment, response)
-    if (!response.ok) {
-      throw new Error(response.error.message)
-    }
-    return response.result
+    return await callRuntimeProcedure((client, options) => client.git.status(params, options), {
+      priority: 'background',
+      signal: controller.signal
+    })
   } finally {
     if (webGitStatusAbortControllers.get(requestToken) === controller) {
       webGitStatusAbortControllers.delete(requestToken)
@@ -1682,10 +1095,12 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
         reuseLineStats
       }
       // Why: without a token there's nothing to cancel, so stay on the pooled
-      // call transport. With one, route through the subscription bridge so
-      // cancelStatus can close the request context and abort the remote scan.
+      // call transport. With one, retain its AbortController so cancelStatus
+      // can cancel the typed request and its remote execution context.
       if (!requestToken) {
-        return callRuntimeResult(GIT_STATUS_CONTRACT, params)
+        return callRuntimeProcedure((client, options) => client.git.status(params, options), {
+          priority: 'background'
+        })
       }
       return callAbortableRuntimeStatus(requestToken, params)
     },
@@ -1694,18 +1109,28 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
     },
     submoduleStatus: async ({ worktreePath, submodulePath, area }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.submoduleStatus', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        submodulePath,
-        area
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.submoduleStatus(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            submodulePath,
+            area
+          },
+          options
+        )
+      )
     },
     checkIgnored: async ({ worktreePath, paths }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.checkIgnored', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        paths
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.checkIgnored(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            paths
+          },
+          options
+        )
+      )
     },
     // Why: the "add huge folder to .gitignore" flow is a local-desktop helper;
     // in the web runtime there's no offer, so return no candidates / no-op.
@@ -1713,212 +1138,353 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
     appendGitignore: async () => false,
     history: async ({ worktreePath, limit, baseRef }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.history', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        limit,
-        baseRef
-      })
+      return callRuntimeProcedure(
+        (client, options) =>
+          client.git.history(
+            {
+              worktree: toRuntimeWorktreeSelector(worktree.id),
+              limit,
+              baseRef
+            },
+            options
+          ),
+        { priority: 'background' }
+      )
     },
     conflictOperation: async ({ worktreePath }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.conflictOperation', {
-        worktree: toRuntimeWorktreeSelector(worktree.id)
-      })
+      return callRuntimeProcedure(
+        (client, options) =>
+          client.git.conflictOperation(
+            {
+              worktree: toRuntimeWorktreeSelector(worktree.id)
+            },
+            options
+          ),
+        { priority: 'background' }
+      )
     },
     abortMerge: async ({ worktreePath }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.abortMerge', {
-        worktree: toRuntimeWorktreeSelector(worktree.id)
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.abortMerge(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id)
+          },
+          options
+        )
+      )
     },
     abortRebase: async ({ worktreePath }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.abortRebase', {
-        worktree: toRuntimeWorktreeSelector(worktree.id)
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.abortRebase(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id)
+          },
+          options
+        )
+      )
     },
     abortRevert: async ({ worktreePath }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.abortRevert', {
-        worktree: toRuntimeWorktreeSelector(worktree.id)
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.abortRevert(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id)
+          },
+          options
+        )
+      )
     },
     addTag: async ({ worktreePath, name, commit, message, force }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.addTag', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        name,
-        commit,
-        message,
-        force
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.addTag(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            name,
+            commit,
+            message,
+            force
+          },
+          options
+        )
+      )
     },
     createBranch: async ({ worktreePath, name, commit, checkout }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.createBranch', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        name,
-        commit,
-        checkout
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.createBranch(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            name,
+            commit,
+            checkout
+          },
+          options
+        )
+      )
     },
     checkoutCommit: async ({ worktreePath, commit }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.checkoutCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.checkoutCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit
+          },
+          options
+        )
+      )
     },
     cherryPick: async ({ worktreePath, commit, mainline }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.cherryPick', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit,
-        mainline
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.cherryPick(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit,
+            mainline
+          },
+          options
+        )
+      )
     },
     revertCommit: async ({ worktreePath, commit, mainline }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.revertCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit,
-        mainline
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.revertCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit,
+            mainline
+          },
+          options
+        )
+      )
     },
     dropCommit: async ({ worktreePath, commit }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.dropCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.dropCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit
+          },
+          options
+        )
+      )
     },
     mergeCommit: async ({ worktreePath, commit, noFf, squash, message }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.mergeCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit,
-        noFf,
-        squash,
-        message
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.mergeCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit,
+            noFf,
+            squash,
+            message
+          },
+          options
+        )
+      )
     },
     rebaseOntoCommit: async ({ worktreePath, commit }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.rebaseOntoCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.rebaseOntoCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit
+          },
+          options
+        )
+      )
     },
     resetToCommit: async ({ worktreePath, commit, mode }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.resetToCommit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commit,
-        mode
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.resetToCommit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commit,
+            mode
+          },
+          options
+        )
+      )
     },
     diff: async ({ worktreePath, filePath, staged, compareAgainstHead }) => {
       const file = await resolveRuntimeFilePath(filePath, worktreePath)
-      return callRuntimeResult('git.diff', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        filePath: file.relativePath,
-        staged,
-        compareAgainstHead
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.diff(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            filePath: file.relativePath,
+            staged,
+            compareAgainstHead
+          },
+          options
+        )
+      )
     },
     branchCompare: async ({ worktreePath, baseRef }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.branchCompare', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        baseRef
-      })
+      return callRuntimeProcedure(
+        (client, options) =>
+          client.git.branchCompare(
+            {
+              worktree: toRuntimeWorktreeSelector(worktree.id),
+              baseRef
+            },
+            options
+          ),
+        { priority: 'background' }
+      )
     },
     commitCompare: async ({ worktreePath, commitId }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.commitCompare', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        commitId
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.commitCompare(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            commitId
+          },
+          options
+        )
+      )
     },
     upstreamStatus: async ({ worktreePath, pushTarget }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.upstreamStatus', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        pushTarget
-      })
+      return callRuntimeProcedure(
+        (client, options) =>
+          client.git.upstreamStatus(
+            {
+              worktree: toRuntimeWorktreeSelector(worktree.id),
+              pushTarget
+            },
+            options
+          ),
+        { priority: 'background' }
+      )
     },
     fetch: async ({ worktreePath, pushTarget }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.fetch', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        pushTarget
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.fetch(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            pushTarget
+          },
+          options
+        )
+      )
     },
     syncFork: async ({ worktreePath, expectedUpstream }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult(
-        'git.forkSync',
-        {
-          worktree: toRuntimeWorktreeSelector(worktree.id),
-          expectedUpstream
-        },
-        60_000
+      return callRuntimeProcedure(
+        (client, options) =>
+          client.git.forkSync(
+            {
+              worktree: toRuntimeWorktreeSelector(worktree.id),
+              expectedUpstream
+            },
+            options
+          ),
+        { timeoutMs: 60_000 }
       )
     },
     push: async ({ worktreePath, publish, pushTarget }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.push', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        publish,
-        pushTarget
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.push(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            publish,
+            pushTarget
+          },
+          options
+        )
+      )
     },
     pull: async ({ worktreePath, pushTarget }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.pull', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        pushTarget
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.pull(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            pushTarget
+          },
+          options
+        )
+      )
     },
     fastForward: async ({ worktreePath, pushTarget }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.fastForward', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        pushTarget
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.fastForward(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            pushTarget
+          },
+          options
+        )
+      )
     },
     rebaseFromBase: async ({ worktreePath, baseRef }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      await callRuntimeResult('git.rebaseFromBase', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        baseRef
-      })
+      await callRuntimeProcedure((client, options) =>
+        client.git.rebaseFromBase(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            baseRef
+          },
+          options
+        )
+      )
     },
     branchDiff: async ({ worktreePath, filePath, compare, oldPath }) => {
       const file = await resolveRuntimeFilePath(filePath, worktreePath)
-      return callRuntimeResult('git.branchDiff', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        filePath: file.relativePath,
-        compare,
-        oldPath
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.branchDiff(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            filePath: file.relativePath,
+            compare,
+            oldPath
+          },
+          options
+        )
+      )
     },
     commitDiff: async ({ worktreePath, filePath, commitOid, parentOid, oldPath }) => {
       const file = await resolveRuntimeFilePath(filePath, worktreePath)
-      return callRuntimeResult('git.commitDiff', {
-        worktree: toRuntimeWorktreeSelector(file.worktree.id),
-        filePath: file.relativePath,
-        commitOid,
-        parentOid,
-        oldPath
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.commitDiff(
+          {
+            worktree: toRuntimeWorktreeSelector(file.worktree.id),
+            filePath: file.relativePath,
+            commitOid,
+            parentOid,
+            oldPath
+          },
+          options
+        )
+      )
     },
     commit: async ({ worktreePath, message }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.commit', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        message
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.commit(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            message
+          },
+          options
+        )
+      )
     },
     generateCommitMessage: async () => ({
       success: false,
@@ -1943,127 +1509,77 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
       )
     }),
     cancelGeneratePullRequestFields: () => Promise.resolve(),
-    stage: async ({ worktreePath, filePath }) => mutateGitPath('git.stage', worktreePath, filePath),
+    stage: async ({ worktreePath, filePath }) => mutateGitPath('stage', worktreePath, filePath),
     bulkStage: async ({ worktreePath, filePaths }) =>
-      mutateGitPaths('git.bulkStage', worktreePath, filePaths),
-    unstage: async ({ worktreePath, filePath }) =>
-      mutateGitPath('git.unstage', worktreePath, filePath),
+      mutateGitPaths('stage', worktreePath, filePaths),
+    unstage: async ({ worktreePath, filePath }) => mutateGitPath('unstage', worktreePath, filePath),
     bulkUnstage: async ({ worktreePath, filePaths }) =>
-      mutateGitPaths('git.bulkUnstage', worktreePath, filePaths),
-    discard: async ({ worktreePath, filePath }) =>
-      mutateGitPath('git.discard', worktreePath, filePath),
+      mutateGitPaths('unstage', worktreePath, filePaths),
+    discard: async ({ worktreePath, filePath }) => mutateGitPath('discard', worktreePath, filePath),
     bulkDiscard: async ({ worktreePath, filePaths }) => {
       for (const filePath of filePaths) {
-        await mutateGitPath('git.discard', worktreePath, filePath)
+        await mutateGitPath('discard', worktreePath, filePath)
       }
     },
     remoteFileUrl: async ({ worktreePath, relativePath, line }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.remoteFileUrl', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        relativePath,
-        line
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.remoteFileUrl(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            relativePath,
+            line
+          },
+          options
+        )
+      )
     },
     remoteCommitUrl: async ({ worktreePath, sha }) => {
       const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-      return callRuntimeResult('git.remoteCommitUrl', {
-        worktree: toRuntimeWorktreeSelector(worktree.id),
-        sha
-      })
+      return callRuntimeProcedure((client, options) =>
+        client.git.remoteCommitUrl(
+          {
+            worktree: toRuntimeWorktreeSelector(worktree.id),
+            sha
+          },
+          options
+        )
+      )
     }
   }
 }
 
 function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
   return {
-    registerGuest: () => Promise.resolve(false),
-    unregisterGuest: () => Promise.resolve(),
-    openDevTools: () => Promise.resolve(false),
-    setViewportOverride: () => Promise.resolve(false),
-    setAnnotationViewportBridge: () => Promise.resolve(false),
-    onGuestLoadFailed: () => noopUnsubscribe,
-    onCertificateFailureChanged: () => noopUnsubscribe,
-    proceedCertificate: () => Promise.resolve({ ok: false, reason: 'missing' }),
-    onPermissionDenied: () => noopUnsubscribe,
-    onPopup: () => noopUnsubscribe,
-    onDownloadRequested: () => noopUnsubscribe,
-    onDownloadProgress: () => noopUnsubscribe,
-    onDownloadFinished: () => noopUnsubscribe,
+    onGuestLoadFailed: (callback) => onBrowserGuestEvent('guestLoadFailed', callback),
+    onCertificateFailureChanged: (callback) =>
+      onBrowserGuestEvent('certificateFailureChanged', callback),
+    onPermissionDenied: (callback) => onBrowserGuestEvent('permissionDenied', callback),
+    onPopup: (callback) => onBrowserGuestEvent('popup', callback),
+    onDownloadRequested: (callback) => onBrowserGuestEvent('downloadRequested', callback),
+    onDownloadProgress: (callback) => onBrowserGuestEvent('downloadProgress', callback),
+    onDownloadFinished: (callback) => onBrowserGuestEvent('downloadFinished', callback),
     onContextMenuRequested: () => noopUnsubscribe,
     onContextMenuDismissed: () => noopUnsubscribe,
-    onNavigationUpdate: () => noopUnsubscribe,
+    onNavigationUpdate: (callback) => onBrowserGuestEvent('navigationUpdate', callback),
     onActivateView: () => noopUnsubscribe,
     onPaneFocus: () => noopUnsubscribe,
-    onOpenLinkInYiruTab: () => noopUnsubscribe,
-    cancelDownload: () => Promise.resolve(false),
-    setGrabMode: () =>
-      Promise.resolve({
-        ok: false,
-        error: translate(
-          'auto.web.web.preload.api.31bea294d5',
-          'Grab mode is unavailable in the web client.'
-        )
-      }),
-    awaitGrabSelection: () =>
-      Promise.resolve({
-        ok: false,
-        error: translate(
-          'auto.web.web.preload.api.31bea294d5',
-          'Grab mode is unavailable in the web client.'
-        )
-      }),
-    cancelGrab: () => Promise.resolve(false),
-    captureSelectionScreenshot: () =>
-      Promise.resolve({
-        ok: false,
-        error: translate(
-          'auto.web.web.preload.api.8dfcb7a351',
-          'Selection screenshots are unavailable in the web client.'
-        )
-      }),
-    extractHoverPayload: () =>
-      Promise.resolve({
-        ok: false,
-        error: translate(
-          'auto.web.web.preload.api.275a776357',
-          'Hover extraction is unavailable in the web client.'
-        )
-      }),
+    onOpenLinkInYiruTab: (callback) => onBrowserGuestEvent('openLinkInYiruTab', callback),
     onGrabModeToggle: () => noopUnsubscribe,
     onGrabActionShortcut: () => noopUnsubscribe,
-    sessionListProfiles: () => Promise.resolve([]),
-    sessionCreateProfile: () => Promise.resolve(null),
-    sessionDeleteProfile: () => Promise.resolve(false),
     sessionImportCookies: () =>
       Promise.resolve({
         ok: false,
-        summary: null,
-        error: translate(
+        reason: translate(
           'auto.web.web.preload.api.67ec964791',
           'Cookie import is unavailable in the web client.'
         )
-      }),
-    sessionResolvePartition: () => Promise.resolve(null),
-    sessionDetectBrowsers: () => Promise.resolve([]),
-    sessionImportFromBrowser: () =>
-      Promise.resolve({
-        ok: false,
-        summary: null,
-        error: translate(
-          'auto.web.web.preload.api.67ec964791',
-          'Cookie import is unavailable in the web client.'
-        )
-      }),
-    sessionClearDefaultCookies: () => Promise.resolve(false),
-    notifyActiveTabChanged: () => Promise.resolve(false)
+      })
   } as unknown as NonNullable<Partial<PreloadApi>['browser']>
 }
 
 function createEmulatorApi(): NonNullable<Partial<PreloadApi>['emulator']> {
   return {
-    onPaneFocus: () => noopUnsubscribe,
-    onAutoAttach: () => noopUnsubscribe,
     startFrameStream: () => Promise.reject(new Error('Mobile emulator is unavailable on web.')),
     stopFrameStream: () => Promise.resolve(),
     onFrameStreamFrame: () => noopUnsubscribe,
@@ -2072,619 +1588,37 @@ function createEmulatorApi(): NonNullable<Partial<PreloadApi>['emulator']> {
 }
 
 function createGitHubApi(): WebGitHubApi {
-  const route = <Result>(method: WebGitHubRuntimeMethod, args?: unknown): Promise<Result> =>
-    callRuntimeResult<Result>(method, mapRepoPathArg(args))
   const githubApi = {
     viewer: () => Promise.resolve(null),
-    repoSlug: (args) => route<WebGitHubResult<'repoSlug'>>(GITHUB_WEB_RPC_METHODS.repoSlug, args),
-    repoUpstream: (args) =>
-      route<WebGitHubResult<'repoUpstream'>>(GITHUB_WEB_RPC_METHODS.repoUpstream, args),
-    prForBranch: (args) =>
-      route<WebGitHubResult<'prForBranch'>>(GITHUB_WEB_RPC_METHODS.prForBranch, args),
-    refreshPRNow: async ({ candidate }) => {
-      const acceptMergedFallbackPR =
-        candidate.linkedPRNumber == null &&
-        candidate.fallbackPRNumber != null &&
-        candidate.fallbackPRSource != null
-      const pr = await route<WebGitHubResult<'prForBranch'>>(GITHUB_WEB_RPC_METHODS.prForBranch, {
-        repoPath: candidate.repoPath,
-        repoId: candidate.repoId,
-        branch: candidate.branch,
-        linkedPRNumber: candidate.linkedPRNumber ?? null,
-        fallbackPRNumber: candidate.fallbackPRNumber ?? null,
-        currentHeadOid: candidate.currentHeadOid ?? null,
-        ...(acceptMergedFallbackPR ? { acceptMergedFallbackPR: true } : {})
-      })
-      return pr
-        ? { kind: 'found', pr, fetchedAt: Date.now() }
-        : { kind: 'no-pr', fetchedAt: Date.now() }
-    },
     enqueuePRRefresh: () => Promise.resolve(false),
     reportVisiblePRRefreshCandidates: () => Promise.resolve(false),
-    onPRRefreshEvent: () => noopUnsubscribe,
-    workItem: (args) => route<WebGitHubResult<'workItem'>>(GITHUB_WEB_RPC_METHODS.workItem, args),
-    workItemByOwnerRepo: ({ repo: ownerRepo, ...args }) =>
-      route<WebGitHubResult<'workItemByOwnerRepo'>>(GITHUB_WEB_RPC_METHODS.workItemByOwnerRepo, {
-        ...args,
-        ownerRepo
-      }),
-    workItemDetails: (args) =>
-      route<WebGitHubResult<'workItemDetails'>>(GITHUB_WEB_RPC_METHODS.workItemDetails, args),
-    notifyWorkItemMutated: () => Promise.resolve(false),
-    prFileContents: (args) =>
-      route<WebGitHubResult<'prFileContents'>>(GITHUB_WEB_RPC_METHODS.prFileContents, args),
-    listWorkItems: (args) =>
-      route<WebGitHubResult<'listWorkItems'>>(GITHUB_WEB_RPC_METHODS.listWorkItems, args),
-    prChecks: (args) => route<WebGitHubResult<'prChecks'>>(GITHUB_WEB_RPC_METHODS.prChecks, args),
-    prCheckDetails: (args) =>
-      route<WebGitHubResult<'prCheckDetails'>>(GITHUB_WEB_RPC_METHODS.prCheckDetails, args),
-    rerunPRChecks: (args) =>
-      route<WebGitHubResult<'rerunPRChecks'>>(GITHUB_WEB_RPC_METHODS.rerunPRChecks, args),
-    prComments: (args) =>
-      route<WebGitHubResult<'prComments'>>(GITHUB_WEB_RPC_METHODS.prComments, args),
-    resolveReviewThread: (args) =>
-      route<WebGitHubResult<'resolveReviewThread'>>(
-        GITHUB_WEB_RPC_METHODS.resolveReviewThread,
-        args
-      ),
-    setPRFileViewed: (args) =>
-      route<WebGitHubResult<'setPRFileViewed'>>(GITHUB_WEB_RPC_METHODS.setPRFileViewed, args),
-    updatePRTitle: (args) =>
-      route<WebGitHubResult<'updatePRTitle'>>(GITHUB_WEB_RPC_METHODS.updatePRTitle, args),
-    mergePR: (args) => route<WebGitHubResult<'mergePR'>>(GITHUB_WEB_RPC_METHODS.mergePR, args),
-    setPRAutoMerge: (args) =>
-      route<WebGitHubResult<'setPRAutoMerge'>>(GITHUB_WEB_RPC_METHODS.setPRAutoMerge, args),
-    updatePRState: (args) =>
-      route<WebGitHubResult<'updatePRState'>>(GITHUB_WEB_RPC_METHODS.updatePRState, args),
-    requestPRReviewers: (args) =>
-      route<WebGitHubResult<'requestPRReviewers'>>(GITHUB_WEB_RPC_METHODS.requestPRReviewers, args),
-    removePRReviewers: (args) =>
-      route<WebGitHubResult<'removePRReviewers'>>(GITHUB_WEB_RPC_METHODS.removePRReviewers, args),
-    addPRComment: (args) =>
-      route<WebGitHubResult<'addPRComment'>>(GITHUB_WEB_RPC_METHODS.addPRComment, args),
-    addPRReviewCommentReply: (args) =>
-      route<WebGitHubResult<'addPRReviewCommentReply'>>(
-        GITHUB_WEB_RPC_METHODS.addPRReviewCommentReply,
-        args
-      ),
-    addPRReviewComment: (args) =>
-      route<WebGitHubResult<'addPRReviewComment'>>(GITHUB_WEB_RPC_METHODS.addPRReviewComment, args),
-    listLabels: (args) =>
-      route<WebGitHubResult<'listLabels'>>(GITHUB_WEB_RPC_METHODS.listLabels, args),
-    listAssignableUsers: (args) =>
-      route<WebGitHubResult<'listAssignableUsers'>>(
-        GITHUB_WEB_RPC_METHODS.listAssignableUsers,
-        args
-      ),
-    onWorkItemMutated: () => noopUnsubscribe,
     checkYiruStarred: () => Promise.resolve(null),
-    starYiru: () => Promise.resolve(false),
-    rateLimit: (args) =>
-      route<WebGitHubResult<'rateLimit'>>(GITHUB_WEB_RPC_METHODS.rateLimit, args),
-    diagnoseAuth: () =>
-      Promise.resolve({
-        ok: false,
-        message: translate('auto.web.web.preload.api.31bfe8ae1a', 'Unavailable in the web client.')
-      } as never)
+    starYiru: () => Promise.resolve(false)
   } satisfies WebGitHubApi
 
   return githubApi
-}
-
-function createGitLabApi(): WebGitLabApi {
-  const route = <Result>(method: WebGitLabRuntimeMethod, args?: unknown): Promise<Result> =>
-    callRuntimeResult<Result>(method, mapRepoPathArg(args))
-
-  const gitLabApi = {
-    viewer: () => Promise.resolve(null),
-    diagnoseAuth: () => route<WebGitLabResult<'diagnoseAuth'>>(GITLAB_WEB_RPC_METHODS.diagnoseAuth),
-    rateLimit: (args) =>
-      route<WebGitLabResult<'rateLimit'>>(GITLAB_WEB_RPC_METHODS.rateLimit, args),
-    projectSlug: () => Promise.resolve(null),
-    mrForBranch: () => Promise.resolve(null),
-    mr: () => Promise.resolve(null),
-    listMRs: (args) => route<WebGitLabResult<'listMRs'>>(GITLAB_WEB_RPC_METHODS.listMRs, args),
-    listLabels: (args) =>
-      route<WebGitLabResult<'listLabels'>>(GITLAB_WEB_RPC_METHODS.listLabels, args),
-    listAssignableUsers: () => Promise.resolve([]),
-    workItemDetails: (args) =>
-      route<WebGitLabResult<'workItemDetails'>>(GITLAB_WEB_RPC_METHODS.workItemDetails, args),
-    closeMR: (args) =>
-      route<WebGitLabResult<'closeMR'>>(GITLAB_WEB_RPC_METHODS.closeMR, {
-        ...args,
-        state: 'closed'
-      }),
-    reopenMR: (args) =>
-      route<WebGitLabResult<'reopenMR'>>(GITLAB_WEB_RPC_METHODS.reopenMR, {
-        ...args,
-        state: 'opened'
-      }),
-    mergeMR: (args) => route<WebGitLabResult<'mergeMR'>>(GITLAB_WEB_RPC_METHODS.mergeMR, args),
-    updateMR: (args) => route<WebGitLabResult<'updateMR'>>(GITLAB_WEB_RPC_METHODS.updateMR, args),
-    updateMRReviewers: (args) =>
-      route<WebGitLabResult<'updateMRReviewers'>>(GITLAB_WEB_RPC_METHODS.updateMRReviewers, args),
-    addMRComment: (args) =>
-      route<WebGitLabResult<'addMRComment'>>(GITLAB_WEB_RPC_METHODS.addMRComment, args),
-    addMRInlineComment: (args) =>
-      route<WebGitLabResult<'addMRInlineComment'>>(GITLAB_WEB_RPC_METHODS.addMRInlineComment, args),
-    resolveMRDiscussion: (args) =>
-      route<WebGitLabResult<'resolveMRDiscussion'>>(
-        GITLAB_WEB_RPC_METHODS.resolveMRDiscussion,
-        args
-      ),
-    jobTrace: (args) => route<WebGitLabResult<'jobTrace'>>(GITLAB_WEB_RPC_METHODS.jobTrace, args),
-    retryJob: (args) => route<WebGitLabResult<'retryJob'>>(GITLAB_WEB_RPC_METHODS.retryJob, args),
-    workItemByPath: (args) =>
-      route<WebGitLabResult<'workItemByPath'>>(GITLAB_WEB_RPC_METHODS.workItemByPath, args)
-  } satisfies WebGitLabApi
-
-  return gitLabApi
-}
-
-function createRuntimeNamespaceApi(prefix: string): never {
-  return createFallbackProxy([prefix], (path, args) => {
-    const method = `${prefix}.${path.at(-1) ?? ''}`
-    return callRuntimeResult(method, mapRuntimeNamespaceArg(prefix, args[0]))
-  }) as never
-}
-
-function createHooksApi(): NonNullable<Partial<PreloadApi>['hooks']> {
-  return {
-    check: async ({ repoId }) => callRuntimeResult('repo.hooksCheck', { repo: repoId }),
-    inspectSetupScriptImports: async ({ repoId }) =>
-      callRuntimeResult('repo.setupScriptImports', { repo: repoId })
-  }
-}
-
-function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
-  let zoomLevel = readLocalWebUIState().uiZoomLevel
-  return {
-    get: async () => {
-      try {
-        const result = await callRuntimeResult<{ ui: PersistedUIState }>(
-          'ui.get',
-          undefined,
-          15_000
-        )
-        const local = readLocalWebUIState()
-        const next = {
-          ...mergeWebUIState(local, result.ui),
-          featureInteractions: mergeFeatureInteractionState(
-            local.featureInteractions,
-            result.ui.featureInteractions
-          ),
-          contextualToursSeenIds: mergeContextualTourSeenIds(
-            local.contextualToursSeenIds,
-            result.ui.contextualToursSeenIds
-          )
-        }
-        writeJson(UI_STORAGE_KEY, next)
-        zoomLevel = next.uiZoomLevel
-        return next
-      } catch {
-        return readLocalWebUIState()
-      }
-    },
-    set: async (updates) => {
-      const next = mergeWebUIState(readLocalWebUIState(), updates)
-      writeJson(UI_STORAGE_KEY, next)
-      zoomLevel = next.uiZoomLevel
-      try {
-        await callRuntimeResult('ui.set', updates, 15_000)
-      } catch {
-        // Why: unpaired/offline web clients still need local UI persistence.
-      }
-    },
-    recordFeatureInteraction: async (id: FeatureInteractionId) => {
-      const current = readLocalWebUIState()
-      const featureInteractions = normalizeFeatureInteractions(current.featureInteractions)
-      const existing = featureInteractions[id]
-      const optimistic = mergeWebUIState(current, {
-        featureInteractions: {
-          ...featureInteractions,
-          [id]: {
-            firstInteractedAt: existing?.firstInteractedAt ?? Date.now(),
-            interactionCount: (existing?.interactionCount ?? 0) + 1
-          }
-        }
-      })
-      writeJson(UI_STORAGE_KEY, optimistic)
-      try {
-        const result = await callRuntimeResult<{ ui: PersistedUIState }>(
-          'ui.recordFeatureInteraction',
-          id,
-          15_000
-        )
-        const local = readLocalWebUIState()
-        const next = {
-          ...mergeWebUIState(local, result.ui),
-          featureInteractions: mergeFeatureInteractionState(
-            local.featureInteractions,
-            result.ui.featureInteractions
-          ),
-          contextualToursSeenIds: mergeContextualTourSeenIds(
-            local.contextualToursSeenIds,
-            result.ui.contextualToursSeenIds
-          )
-        }
-        writeJson(UI_STORAGE_KEY, next)
-        zoomLevel = next.uiZoomLevel
-        return next
-      } catch {
-        return optimistic
-      }
-    },
-    readClipboardText: async (options?: ReadClipboardTextOptions) =>
-      assertClipboardTextWithinLimitWithYield(
-        await (navigator.clipboard?.readText?.() ?? ''),
-        options
-      ),
-    readSelectionClipboardText: () =>
-      Promise.reject(new Error('Selection clipboard is unavailable in the web client')),
-    saveClipboardImageAsTempFile: async (args?: {
-      connectionId?: string | null
-      runtimeEnvironmentId?: string | null
-    }) => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return null
-      }
-      const contentBase64 = await readClipboardImagePngBase64()
-      if (!contentBase64) {
-        return null
-      }
-      return saveClipboardImageAsTempFileInRuntime(contentBase64, args)
-    },
-    writeClipboardText: async (text) => {
-      await assertClipboardTextWriteWithinLimitWithYield(text)
-      await (navigator.clipboard?.writeText?.(text) ?? Promise.resolve())
-    },
-    writeSelectionClipboardText: () =>
-      Promise.reject(new Error('Selection clipboard is unavailable in the web client')),
-    writeClipboardImage: () => Promise.resolve(),
-    writeClipboardFile: () => Promise.resolve({ ok: false, reason: 'unsupported-platform' }),
-    performNativePaste: () => {
-      document.execCommand?.('paste')
-    },
-    onExportPdfRequested: () => noopUnsubscribe,
-    onAppMenuPaste: () => noopUnsubscribe,
-    onEditableContextPaste: () => noopUnsubscribe,
-    getZoomLevel: () => zoomLevel,
-    setZoomLevel: (level) => {
-      zoomLevel = level
-    },
-    isMaximized: () => Promise.resolve(false),
-    onOpenSettings: () => noopUnsubscribe,
-    // Why: the web client has no native tray/menu bar, so there is never a
-    // queued open-settings intent to consume.
-    consumePendingOpenSettings: () => Promise.resolve(false),
-    onOpenSetupGuide: () => noopUnsubscribe,
-    onOpenFeatureTour: () => noopUnsubscribe,
-    onOpenCrashReport: () => noopUnsubscribe,
-    // No desktop main process to push state changes; the web client re-reads
-    // via ui.get on interaction instead.
-    onStateChanged: () => noopUnsubscribe,
-    onToggleLeftSidebar: () => noopUnsubscribe,
-    onToggleRightSidebar: () => noopUnsubscribe,
-    onToggleWorktreePalette: () => noopUnsubscribe,
-    onToggleFloatingTerminal: () => noopUnsubscribe,
-    onToggleAssistant: () => noopUnsubscribe,
-    onTerminalShortcutCaptured: () => noopUnsubscribe,
-    onOpenQuickOpen: () => noopUnsubscribe,
-    onToggleQuickCommandsMenu: () => noopUnsubscribe,
-    onOpenNewWorkspace: () => noopUnsubscribe,
-    onDeleteCurrentWorkspace: () => noopUnsubscribe,
-    onJumpToWorktreeIndex: () => noopUnsubscribe,
-    onJumpToTabIndex: () => noopUnsubscribe,
-    onWorktreeHistoryNavigate: () => noopUnsubscribe,
-    onNewBrowserTab: () => noopUnsubscribe,
-    onNewMarkdownTab: () => noopUnsubscribe,
-    onNewSimulatorTab: () => noopUnsubscribe,
-    onRequestTabCreate: () => noopUnsubscribe,
-    replyTabCreate: () => {},
-    onRequestTabSetProfile: () => noopUnsubscribe,
-    replyTabSetProfile: () => {},
-    onRequestTabClose: () => noopUnsubscribe,
-    replyTabClose: () => {},
-    onNewTerminalTab: () => noopUnsubscribe,
-    onFocusBrowserAddressBar: () => noopUnsubscribe,
-    onFindInBrowserPage: () => noopUnsubscribe,
-    onReloadBrowserPage: () => noopUnsubscribe,
-    onBrowserHistoryNavigate: () => noopUnsubscribe,
-    onZoomBrowserPage: () => noopUnsubscribe,
-    onHardReloadBrowserPage: () => noopUnsubscribe,
-    onCloseActiveTab: () => noopUnsubscribe,
-    onSwitchTab: () => noopUnsubscribe,
-    onSwitchTabAcrossAllTypes: () => noopUnsubscribe,
-    onSwitchRecentTab: () => noopUnsubscribe,
-    onSwitchTerminalTab: () => noopUnsubscribe,
-    onCtrlTabKeyDown: () => noopUnsubscribe,
-    onCtrlTabKeyUp: () => noopUnsubscribe,
-    onToggleStatusBar: () => noopUnsubscribe,
-    onDictationKeyDown: () => noopUnsubscribe,
-    onActivateWorktree: () => noopUnsubscribe,
-    onCreateTerminal: () => noopUnsubscribe,
-    onRequestTerminalCreate: () => noopUnsubscribe,
-    onRequestTerminalTabMount: () => noopUnsubscribe,
-    replyTerminalCreate: () => {},
-    onSplitTerminal: () => noopUnsubscribe,
-    onRenameTerminal: () => noopUnsubscribe,
-    onFocusTerminal: () => noopUnsubscribe,
-    onFocusEditorTab: () => noopUnsubscribe,
-    onCloseSessionTab: () => noopUnsubscribe,
-    onMoveSessionTab: () => noopUnsubscribe,
-    onOpenFileFromMobile: () => noopUnsubscribe,
-    onOpenDiffFromMobile: () => noopUnsubscribe,
-    onMobileMarkdownRequest: () => noopUnsubscribe,
-    respondMobileMarkdownRequest: () => {},
-    onCloseTerminal: () => noopUnsubscribe,
-    onTerminalTabCloseRequest: () => noopUnsubscribe,
-    respondTerminalTabClose: () => {},
-    onSleepWorktree: () => noopUnsubscribe,
-    // Why: paired web is a full renderer that wakes on activation; mobile wake is
-    // desktop-host-scoped, so the web client never receives this signal.
-    onResumeSleepingAgents: () => noopUnsubscribe,
-    onTerminalZoom: () => noopUnsubscribe,
-    // Why: a paired web client has no OS sleep signal; occlusion-driven
-    // visibilitychange already covers its wake recovery.
-    onSystemResumed: () => noopUnsubscribe,
-    onFileDrop: () => noopUnsubscribe,
-    syncTrafficLights: () => {},
-    setMarkdownEditorFocused: () => {},
-    setTerminalInputFocused: () => {},
-    setFloatingTerminalInputFocused: () => {},
-    setShortcutRecorderFocused: () => {},
-    onRichMarkdownContextCommand: () => noopUnsubscribe,
-    onFullscreenChanged: () => noopUnsubscribe,
-    minimize: () => {},
-    maximize: () => {},
-    onMaximizeChanged: () => noopUnsubscribe,
-    requestClose: () => {},
-    popupMenu: () => {},
-    onWindowCloseRequested: () => noopUnsubscribe,
-    confirmWindowClose: () => {}
-  }
-}
-
-function createPreflightApi(): NonNullable<Partial<PreloadApi>['preflight']> {
-  const fallbackStatus: PreflightStatus = {
-    git: { installed: false },
-    gh: { installed: false, authenticated: false },
-    glab: { installed: false, authenticated: false },
-    bitbucket: { configured: false, authenticated: false, account: null },
-    azureDevOps: {
-      configured: false,
-      authenticated: false,
-      account: null,
-      baseUrl: null,
-      tokenConfigured: false
-    },
-    gitea: {
-      configured: false,
-      authenticated: false,
-      account: null,
-      baseUrl: null,
-      tokenConfigured: false
-    }
-  }
-  const fallbackRefreshAgents: RefreshAgentsResult = {
-    agents: [],
-    addedPathSegments: [],
-    shellHydrationOk: false,
-    pathSource: 'sync_seed_only',
-    pathFailureReason: 'spawn_error'
-  }
-  return {
-    check: async (args) => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return fallbackStatus
-      }
-      return callRuntimeResult<PreflightStatus>('preflight.check', args)
-    },
-    detectAgents: async () => {
-      if (!requireActiveEnvironmentOrNull()) {
-        return []
-      }
-      return callRuntimeResult<string[]>('preflight.detectAgents').catch(() => [])
-    },
-    refreshAgents: () =>
-      requireActiveEnvironmentOrNull()
-        ? callRuntimeResult('preflight.refreshAgents')
-            .then((result) => result as RefreshAgentsResult)
-            .catch(() => fallbackRefreshAgents)
-        : Promise.resolve(fallbackRefreshAgents),
-    detectRemoteAgents: async (args) =>
-      requireActiveEnvironmentOrNull()
-        ? callRuntimeResult<string[]>('preflight.detectRemoteAgents', args).catch(() => [])
-        : []
-  }
-}
-
-function createCliApi(): NonNullable<Partial<PreloadApi>['cli']> {
-  const status = {
-    platform: getBrowserPlatform(),
-    commandName: 'yiru',
-    commandPath: null,
-    pathDirectory: null,
-    pathConfigured: false,
-    launcherPath: null,
-    installMethod: null,
-    supported: false,
-    state: 'unsupported',
-    currentTarget: null,
-    unsupportedReason: 'launch_mode_unavailable',
-    detail: 'CLI registration is managed by the runtime host, not in the web browser.'
-  } as const
-  return {
-    getInstallStatus: () => Promise.resolve(status),
-    install: () => Promise.resolve(status),
-    remove: () => Promise.resolve(status),
-    getWslInstallStatus: (_args?: { distro?: string | null }) => Promise.resolve(status),
-    installWsl: (_args?: { distro?: string | null }) => Promise.resolve(status),
-    removeWsl: (_args?: { distro?: string | null }) => Promise.resolve(status)
-  } as NonNullable<Partial<PreloadApi>['cli']>
-}
-
-function createAgentHooksApi(): NonNullable<Partial<PreloadApi>['agentHooks']> {
-  const status = (
-    agent:
-      | 'claude'
-      | 'openclaude'
-      | 'codex'
-      | 'gemini'
-      | 'antigravity'
-      | 'amp'
-      | 'cursor'
-      | 'droid'
-      | 'command-code'
-      | 'grok'
-      | 'copilot'
-      | 'hermes'
-      | 'devin'
-  ) =>
-    Promise.resolve({
-      agent,
-      state: 'not_installed',
-      configPath: '',
-      managedHooksPresent: false,
-      detail: 'Agent hook status is only available on the runtime host.'
-    } as const)
-  return {
-    claudeStatus: () => status('claude'),
-    openClaudeStatus: () => status('openclaude'),
-    codexStatus: () => status('codex'),
-    geminiStatus: () => status('gemini'),
-    antigravityStatus: () => status('antigravity'),
-    ampStatus: () => status('amp'),
-    cursorStatus: () => status('cursor'),
-    droidStatus: () => status('droid'),
-    commandCodeStatus: () => status('command-code'),
-    grokStatus: () => status('grok'),
-    copilotStatus: () => status('copilot'),
-    hermesStatus: () => status('hermes'),
-    devinStatus: () => status('devin')
-  }
 }
 
 function createDeveloperPermissionsApi(): NonNullable<Partial<PreloadApi>['developerPermissions']> {
   return {
     getStatus: () => Promise.resolve([]),
     request: ({ id }) =>
-      Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false } as const),
-    openSettings: () => Promise.resolve()
-  }
-}
-
-function createComputerUsePermissionsApi(): NonNullable<
-  Partial<PreloadApi>['computerUsePermissions']
-> {
-  return {
-    getStatus: () =>
-      callRuntimeResult<ComputerUsePermissionStatusResult>(
-        'computer.permissionsStatus',
-        {},
-        15_000
-      ),
-    openSetup: (args) =>
-      callRuntimeResult<ComputerUsePermissionSetupResult>(
-        'computer.permissions',
-        args ?? {},
-        15_000
-      ).catch(() => ({
-        platform: getBrowserPlatform(),
-        helperAppPath: null,
-        openedSettings: false,
-        launchedHelper: false,
-        nextStep: 'Computer-use permissions are managed on the runtime host.'
-      })),
-    reset: () =>
-      Promise.resolve({
-        platform: getBrowserPlatform(),
-        helperAppPath: null,
-        helperUnavailableReason: 'web_client',
-        bundleId: null,
-        permissions: []
-      })
-  }
-}
-
-function createSkillsApi(): NonNullable<Partial<PreloadApi>['skills']> {
-  return {
-    discover: (target) =>
-      callRuntimeResult<SkillDiscoveryResult>('skills.discover', target, 15_000),
-    // Why: browser clients have no local skill homes, and remote-host
-    // freshness stays disabled until its update rail has equivalent coverage.
-    freshnessInventory: (): Promise<SkillFreshnessInventory> =>
-      Promise.resolve({
-        schemaVersion: 1,
-        installations: [],
-        eligibleUpdateNames: [],
-        scannedAt: Date.now()
-      }),
-    startUpdateRun: (): Promise<SkillUpdateStartResult> =>
-      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
-    // Why: the manage rail spawns a CLI against a local skill home, which a
-    // browser client does not have.
-    startInstallRun: (): Promise<SkillUpdateStartResult> =>
-      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
-    startRemoveRun: (): Promise<SkillUpdateStartResult> =>
-      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
-    // Why: the runtime's file channel resolves paths inside a worktree, while a
-    // skill home sits outside every checkout — there is nothing to route to.
-    listSkillFiles: (): Promise<SkillDirectoryListing> =>
-      Promise.resolve({ ok: false, reason: 'unsupported-host' }),
-    readSkillDirFile: (): Promise<SkillFileReadResult> =>
-      Promise.resolve({ ok: false, reason: 'unsupported-host' }),
-    cancelUpdateRun: () => Promise.resolve(),
-    acknowledgeUpdateRun: () => Promise.resolve(),
-    getUpdateRun: (): Promise<SkillUpdateRun> => Promise.resolve({ state: 'idle' }),
-    onUpdateRun: () => () => undefined
+      Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false } as const)
   }
 }
 
 function createNotificationsApi(): NonNullable<Partial<PreloadApi>['notifications']> {
   return {
-    dispatch: () => Promise.resolve({ delivered: false, reason: 'not-supported' }),
-    dismiss: () => Promise.resolve({ dismissed: 0 }),
+    // Why: browsers cannot reach Electron's native notification centre. The
+    // reverse shell adapter keeps this degradation structured until a browser
+    // Notifications API implementation owns permission and delivery semantics.
+    displayNative: () => Promise.resolve({ delivered: false, reason: 'not-supported' }),
+    dismissNative: () => Promise.resolve({ dismissed: 0 }),
     openSystemSettings: () => Promise.resolve(),
     getPermissionStatus: () =>
       Promise.resolve({ supported: false, platform: getBrowserPlatform(), requested: false }),
     probeDelivery: () => Promise.resolve({ state: 'unsupported' as const, authoritative: false }),
     playSound: () => Promise.resolve({ played: false, reason: 'missing-path' })
-  }
-}
-
-function createRateLimitsApi(): NonNullable<Partial<PreloadApi>['rateLimits']> {
-  const empty: RateLimitState = {
-    claude: null,
-    codex: null,
-    cursor: null,
-    gemini: null,
-    opencodeGo: null,
-    kimi: null,
-    antigravity: null,
-    minimax: null,
-    grok: null,
-    minimaxCookieConfigured: false,
-    grokAuthConfigured: false,
-    claudeTarget: { runtime: 'host', wslDistro: null },
-    codexTarget: { runtime: 'host', wslDistro: null },
-    inactiveClaudeAccounts: [],
-    inactiveCodexAccounts: []
-  }
-  return {
-    get: () => Promise.resolve(empty),
-    refresh: () => Promise.resolve(empty),
-    refreshCodexForTarget: () => Promise.resolve(empty),
-    // Why: web clients do not own local Codex auth, so reset-credit
-    // redemption remains desktop-only and reports the safe no-credit outcome.
-    consumeCodexResetCredit: () => Promise.resolve({ outcome: 'noCredit', state: empty }),
-    refreshClaudeForTarget: () => Promise.resolve(empty),
-    setPollingInterval: () => Promise.resolve(),
-    fetchInactiveClaudeAccounts: () => Promise.resolve(),
-    fetchInactiveCodexAccounts: () => Promise.resolve(),
-    refreshMiniMax: () => Promise.resolve(empty),
-    refreshGrok: () => Promise.resolve(empty),
-    onUpdate: () => noopUnsubscribe
   }
 }
 
@@ -2698,19 +1632,9 @@ function createMiniMaxCredentialsApi(): NonNullable<Partial<PreloadApi>['minimax
   }
 }
 
-function createGrokAccountsApi(): NonNullable<Partial<PreloadApi>['grokAccounts']> {
-  const unsigned = {
-    signedIn: false,
-    email: null,
-    teamId: null,
-    tokenFresh: false,
-    error: null
-  }
-  return {
-    getStatus: () => Promise.resolve(unsigned)
-  }
-}
-
+// Why: select/remove aren't stubbed here — they moved to the runtime contract
+// (`accounts.selectClaude`/`selectCodex`, `removeClaude`/`removeCodex`) and web
+// calls them through provider-accounts-client.ts, never through window.api.
 function createAccountsApi(): never {
   const empty = {
     accounts: [],
@@ -2721,9 +1645,7 @@ function createAccountsApi(): never {
     list: () => Promise.resolve(empty),
     add: () => Promise.resolve(empty),
     cancelPendingLogin: () => Promise.resolve(false),
-    reauthenticate: () => Promise.resolve(empty),
-    remove: () => Promise.resolve(empty),
-    select: () => Promise.resolve(empty)
+    reauthenticate: () => Promise.resolve(empty)
   } as never
 }
 
@@ -2737,34 +1659,6 @@ function createUpdaterApi(): NonNullable<Partial<PreloadApi>['updater']> {
     dismissNudge: () => Promise.resolve(),
     onStatus: () => noopUnsubscribe,
     onClearDismissal: () => noopUnsubscribe
-  }
-}
-
-function createShellApi(): NonNullable<Partial<PreloadApi>['shell']> {
-  const openResult = { ok: true } as const
-  return {
-    openPath: (path) =>
-      Promise.resolve(window.open(path, '_blank', 'noopener,noreferrer') as never),
-    openInFileManager: () => Promise.resolve(openResult),
-    openInExternalEditor: () => Promise.resolve(openResult),
-    openUrl: (url) => Promise.resolve(window.open(url, '_blank', 'noopener,noreferrer') as never),
-    openFilePath: () => Promise.resolve(false),
-    openFileUri: (uri) =>
-      Promise.resolve(window.open(uri, '_blank', 'noopener,noreferrer') as never),
-    pathExists: async (path) => {
-      try {
-        await resolveRuntimeFilePath(path)
-        return true
-      } catch {
-        return false
-      }
-    },
-    pickAttachment: () => Promise.resolve(null),
-    pickImage: () => Promise.resolve(null),
-    pickRepoIconImage: () => Promise.resolve(null),
-    pickAudio: () => Promise.resolve(null),
-    pickDirectory: () => Promise.resolve(null),
-    copyFile: () => Promise.resolve()
   }
 }
 
@@ -2844,172 +1738,104 @@ function createPtyApi(): NonNullable<Partial<PreloadApi>['pty']> {
     onReplay: () => noopUnsubscribe,
     onModelRestoreNeeded: () => noopUnsubscribe,
     onExit: () => noopUnsubscribe,
-    onSerializeBufferRequest: () => noopUnsubscribe,
     onClearBufferRequest: () => noopUnsubscribe,
-    sendSerializedBuffer: () => {},
     declarePendingPaneSerializer: () => Promise.resolve(0),
     settlePaneSerializer: () => Promise.resolve(),
     clearPendingPaneSerializer: () => Promise.resolve(),
-    reportRendererSerializerReady: () => Promise.resolve(),
-    management: {
-      listSessions: () => Promise.resolve({ sessions: [], degraded: false }),
-      killAll: () => Promise.resolve({ killedCount: 0, remainingCount: 0, killedSessionIds: [] }),
-      killOne: () => Promise.resolve({ success: false }),
-      restart: () => Promise.resolve({ success: false })
-    }
+    reportRendererSerializerReady: () => Promise.resolve()
   }
 }
 
-async function callRuntimeEnvelope<TResult = unknown>(
-  contract: string,
-  params?: unknown,
-  timeoutMs?: number
-): Promise<RuntimeRpcResponse<TResult>>
-async function callRuntimeEnvelope<TContract extends RuntimeMethodContract>(
-  contract: TContract,
-  params: RuntimeMethodParams<TContract>,
-  timeoutMs?: number
-): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
-async function callRuntimeEnvelope<TResult = unknown>(
-  contract: string | RuntimeMethodContract,
+async function callLegacyEnvironmentEnvelope<TResult = unknown>(
+  environment: StoredWebRuntimeEnvironment,
+  method: string,
   params?: unknown,
   timeoutMs?: number
 ): Promise<RuntimeRpcResponse<TResult>> {
-  const method = typeof contract === 'string' ? contract : contract.name
-  const environment = requireActiveEnvironment()
-  const response = await runtimeCallQueuePool.enqueue(environment.id, method, () =>
+  const priority = isLegacyBackgroundRuntimeMethod(method) ? 'background' : 'foreground'
+  const response = await runtimeCallQueuePool.enqueue(environment.id, priority, () =>
     getClientForEnvironment(environment).call(method, params, { timeoutMs })
   )
   updateEnvironmentFromResponse(environment, response)
   return response as RuntimeRpcResponse<TResult>
 }
 
-async function callEnvironmentEnvelope<TResult = unknown>(
-  selector: string,
-  contract: string,
-  params?: unknown,
-  timeoutMs?: number
-): Promise<RuntimeRpcResponse<TResult>>
-async function callEnvironmentEnvelope<TContract extends RuntimeMethodContract>(
-  selector: string,
-  contract: TContract,
-  params: RuntimeMethodParams<TContract>,
-  timeoutMs?: number
-): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
-async function callEnvironmentEnvelope<TResult = unknown>(
-  selector: string,
-  contract: string | RuntimeMethodContract,
-  params?: unknown,
-  timeoutMs?: number
-): Promise<RuntimeRpcResponse<TResult>> {
-  const method = typeof contract === 'string' ? contract : contract.name
-  const environment = resolveEnvironment(selector)
-  const response = await runtimeCallQueuePool.enqueue(environment.id, method, () =>
-    getClientForEnvironment(environment).call(method, params, { timeoutMs })
-  )
-  updateEnvironmentFromResponse(environment, response)
-  return response as RuntimeRpcResponse<TResult>
-}
-
-async function callRuntimeResult<TResult>(
-  contract: string,
-  params?: unknown,
-  timeoutMs?: number
-): Promise<TResult>
-async function callRuntimeResult<TContract extends RuntimeMethodContract>(
-  contract: TContract,
-  params: RuntimeMethodParams<TContract>,
-  timeoutMs?: number
-): Promise<RuntimeMethodResult<TContract>>
-async function callRuntimeResult<TResult>(
-  contract: string | RuntimeMethodContract,
-  params?: unknown,
-  timeoutMs?: number
+async function callRuntimeProcedure<TResult>(
+  procedure: WebRuntimeProcedure<TResult>,
+  options: WebRuntimeProcedureOptions = {}
 ): Promise<TResult> {
-  const response = await callRuntimeEnvelope<TResult>(
-    typeof contract === 'string' ? contract : contract.name,
-    params,
-    timeoutMs
+  const environment = options.environment ?? requireActiveEnvironment()
+  const timeoutMs = options.timeoutMs ?? 30_000
+  return runtimeCallQueuePool.enqueue(
+    environment.id,
+    options.priority ?? 'foreground',
+    async () => {
+      const timeoutSignal = AbortSignal.timeout(timeoutMs)
+      const signal = options.signal
+        ? AbortSignal.any([options.signal, timeoutSignal])
+        : timeoutSignal
+      const client = await getClientForEnvironment(environment).getOrpcClient(timeoutMs, signal)
+      return procedure(client, { signal })
+    }
   )
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  return response.result as TResult
 }
 
-async function saveClipboardImageAsTempFileInRuntime(
-  contentBase64: string,
-  args?: { connectionId?: string | null; runtimeEnvironmentId?: string | null }
-): Promise<string> {
-  if (contentBase64.length > MAX_CLIPBOARD_IMAGE_BASE64_CHARS) {
-    throw new Error(CLIPBOARD_IMAGE_TOO_LARGE_ERROR)
-  }
-  const connectionId = args?.connectionId ?? null
-  const startResponse = await callRuntimeEnvelope<{ uploadId: string }>(
-    'clipboard.startImageUpload',
-    { expectedBase64Length: contentBase64.length, connectionId },
-    CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS
+function callSelectedRuntimeProcedure<TInput, TResult>(
+  selector: (client: WebRuntimeOrpcClient) => SelectedWebRuntimeProcedure<TInput, TResult>,
+  input: TInput,
+  options?: WebRuntimeProcedureOptions
+): Promise<TResult> {
+  return callRuntimeProcedure(
+    (client, callOptions) => selector(client)(input, callOptions),
+    options
   )
-  if (!startResponse.ok) {
-    if (
-      startResponse.error.code === 'method_not_found' &&
-      contentBase64.length <= CLIPBOARD_IMAGE_SINGLE_FRAME_FALLBACK_BASE64_CHARS
-    ) {
-      return callRuntimeResult<string>(
-        'clipboard.saveImageAsTempFile',
-        { contentBase64, connectionId },
-        CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS
-      )
-    }
-    throw new Error(startResponse.error.message)
-  }
+}
 
-  const { uploadId } = startResponse.result
+async function getEnvironmentStatusEnvelope(
+  selector: string,
+  timeoutMs = 15_000
+): Promise<RuntimeRpcResponse<RuntimeStatus>> {
+  const environment = resolveEnvironment(selector)
+  const id = `web-orpc-${crypto.randomUUID()}`
   try {
-    for (
-      let offset = 0;
-      offset < contentBase64.length;
-      offset += CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS
-    ) {
-      await callRuntimeResult(
-        'clipboard.appendImageUploadChunk',
-        {
-          uploadId,
-          offset,
-          contentBase64: contentBase64.slice(
-            offset,
-            offset + CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS
-          )
-        },
-        CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS
-      )
-    }
-    return await callRuntimeResult<string>(
-      'clipboard.commitImageUpload',
-      { uploadId },
-      CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS
+    const result = await callRuntimeProcedure(
+      (client, options) => client.status.get(undefined, options),
+      { environment, timeoutMs }
     )
+    activeEnvironment = updateStoredEnvironmentRuntimeId(environment, result.runtimeId)
+    return { id, ok: true, result, _meta: { runtimeId: result.runtimeId } }
   } catch (error) {
-    // Why: once chunked paste has created server-side state, failed append or
-    // commit must not wait for TTL cleanup before releasing the bounded slot.
-    await callRuntimeResult(
-      'clipboard.abortImageUpload',
-      { uploadId },
-      CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS
-    ).catch(() => {})
-    throw error
+    return {
+      id,
+      ok: false,
+      error: {
+        code: error instanceof ORPCError ? error.code : 'internal_error',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof ORPCError && error.data !== undefined ? { data: error.data } : {})
+      },
+      _meta: { runtimeId: environment.runtimeId }
+    }
   }
 }
 
 async function getRemoteRuntimeStatus(): Promise<RuntimeStatus> {
-  return callRuntimeResult(STATUS_GET_CONTRACT, undefined, 15_000)
+  return callRuntimeProcedure((client, options) => client.status.get(undefined, options), {
+    timeoutMs: 15_000
+  })
 }
 
 function getClientForEnvironment(environment: StoredWebRuntimeEnvironment): WebRuntimeClient {
   if (!activeClient || activeClientEnvironmentId !== environment.id) {
     activeClient?.close()
-    activeClient = new WebRuntimeClient(getPreferredWebPairingOffer(environment))
+    activeClient = new WebRuntimeClient(getPreferredWebPairingOffer(environment), (runtimeId) => {
+      activeEnvironment = updateStoredEnvironmentRuntimeId(environment, runtimeId)
+    })
     activeClientEnvironmentId = environment.id
+    // Why: the host-event stream is bound to one runtime connection. Swapping
+    // environments must reopen it against the new host, or listeners keep
+    // waiting on a stream that belongs to the previous pairing.
+    runtimeClientEvents.reset()
+    runtimeBrowserGuestEvents.reset()
   }
   return activeClient
 }
@@ -3018,6 +1844,8 @@ function closeActiveRuntimeClients(): void {
   activeClient?.close()
   activeClient = null
   activeClientEnvironmentId = null
+  runtimeClientEvents.reset()
+  runtimeBrowserGuestEvents.reset()
   invalidateRuntimeWorktreeCaches()
 }
 
@@ -3132,10 +1960,9 @@ async function getRuntimeBackedStoredSettings(): Promise<GlobalSettings> {
     return local
   }
   try {
-    const result = await callRuntimeResult<{ settings: Partial<GlobalSettings> }>(
-      'settings.get',
-      undefined,
-      15_000
+    const result = await callRuntimeProcedure(
+      (client, options) => client.settings.get(undefined, options),
+      { timeoutMs: 15_000 }
     )
     const runtimeSettings: Partial<GlobalSettings> = {}
     if (typeof result.settings.minimaxGroupId === 'string') {
@@ -3181,10 +2008,9 @@ async function syncRuntimeBackedSettings(
     return localNext
   }
   try {
-    const result = await callRuntimeResult<{ settings: Partial<GlobalSettings> }>(
-      'settings.update',
-      runtimeUpdates,
-      15_000
+    const result = await callRuntimeProcedure(
+      (client, options) => client.settings.update(runtimeUpdates, options),
+      { timeoutMs: 15_000 }
     )
     const next = mergeSettings(localNext, result.settings)
     writeJson(SETTINGS_STORAGE_KEY, next)
@@ -3203,10 +2029,9 @@ async function updateRuntimePRBotAuthorOverride(args: {
   if (requireActiveEnvironmentOrNull()) {
     // Why: a paired client must not report a successful mark that the
     // authoritative runtime failed to persist and will later overwrite.
-    const result = await callRuntimeResult<{ settings: Partial<GlobalSettings> }>(
-      'settings.updatePRBotAuthorOverride',
-      args,
-      15_000
+    const result = await callRuntimeProcedure(
+      (client, options) => client.settings.updatePRBotAuthorOverride(args, options),
+      { timeoutMs: 15_000 }
     )
     const next = mergeSettings(local, {
       prBotAuthorOverrides: normalizePRBotAuthorOverrides(result.settings.prBotAuthorOverrides)
@@ -3265,7 +2090,7 @@ function getStoredWorkspaceSession(hostId?: string | null): WorkspaceSessionStat
   if (!requireActiveEnvironmentOrNull()) {
     return localSession
   }
-  const ui = readLocalWebUIState()
+  const ui = readWebUIState()
   // Why: paired web clients mirror host session-tabs after startup. Replaying
   // browser-local terminal handles first creates stale remote PTYs and errors.
   return sanitizeWebRuntimeWorkspaceSession({
@@ -3287,94 +2112,6 @@ function closeWebOnboarding(base: OnboardingState): OnboardingState {
       dismissed: true
     }
   }
-}
-
-function readLocalWebUIState(): PersistedUIState {
-  const defaults = getDefaultUIState()
-  const stored = readJson<Partial<PersistedUIState>>(UI_STORAGE_KEY, {})
-  const storedSettings = getStoredSettings()
-  const base = defaults
-  if (typeof stored.rightSidebarOpen === 'boolean') {
-    return mergeWebUIState(base, stored)
-  }
-  return mergeWebUIState(base, {
-    ...stored,
-    // Why: web fallback lacks main-process normalization, so migrate the
-    // retired setting only when the local UI preference is still absent.
-    rightSidebarOpen: storedSettings.rightSidebarOpenByDefault
-  })
-}
-
-function mergeWebUIState(
-  base: PersistedUIState,
-  updates: Partial<PersistedUIState>
-): PersistedUIState {
-  const {
-    featureInteractionTelemetryBuckets: _reserved,
-    _worktreeCardModeDefaulted: _retiredCardModeMarker,
-    ...safeUpdates
-  } = updates as Partial<PersistedUIState> & {
-    featureInteractionTelemetryBuckets?: unknown
-    _worktreeCardModeDefaulted?: unknown
-  }
-  void _reserved
-  void _retiredCardModeMarker
-  return {
-    ...base,
-    ...safeUpdates,
-    worktreeCardProperties: normalizeWorktreeCardProperties(
-      safeUpdates.worktreeCardProperties ?? base.worktreeCardProperties
-    ),
-    workspacePanelTitlebarPinnedIds: normalizeWorkspacePanelTitlebarPinnedIds(
-      safeUpdates.workspacePanelTitlebarPinnedIds ?? base.workspacePanelTitlebarPinnedIds
-    ),
-    agentActivityDisplayMode: normalizeAgentActivityDisplayMode(
-      safeUpdates.agentActivityDisplayMode ?? base.agentActivityDisplayMode
-    ),
-    usagePercentageDisplay: normalizeUsagePercentageDisplay(
-      safeUpdates.usagePercentageDisplay ?? base.usagePercentageDisplay
-    ),
-    statusBarUsageMode: normalizeStatusBarUsageMode(
-      safeUpdates.statusBarUsageMode ?? base.statusBarUsageMode
-    )
-  }
-}
-
-function mergeFeatureInteractionState(
-  current: PersistedUIState['featureInteractions'],
-  incoming: PersistedUIState['featureInteractions']
-): FeatureInteractionState {
-  const currentNormalized = normalizeFeatureInteractions(current)
-  const incomingNormalized = normalizeFeatureInteractions(incoming)
-  const merged: FeatureInteractionState = { ...currentNormalized }
-  for (const [id, incomingRecord] of Object.entries(incomingNormalized)) {
-    const featureId = id as FeatureInteractionId
-    const currentRecord = currentNormalized[featureId]
-    merged[featureId] = currentRecord
-      ? {
-          firstInteractedAt: Math.min(
-            currentRecord.firstInteractedAt,
-            incomingRecord.firstInteractedAt
-          ),
-          interactionCount: Math.max(
-            currentRecord.interactionCount,
-            incomingRecord.interactionCount
-          )
-        }
-      : incomingRecord
-  }
-  return merged
-}
-
-function mergeContextualTourSeenIds(
-  current: PersistedUIState['contextualToursSeenIds'],
-  incoming: PersistedUIState['contextualToursSeenIds']
-): ContextualTourId[] {
-  const merged = new Set<ContextualTourId>(normalizeContextualTourIds(current))
-  for (const id of normalizeContextualTourIds(incoming)) {
-    merged.add(id)
-  }
-  return [...merged]
 }
 
 function mergeSettings(
@@ -3415,23 +2152,14 @@ function mergeSettings(
   }
 }
 
-async function listAllRuntimeWorktrees(): Promise<Worktree[]> {
-  if (cachedWorktrees && Date.now() - cachedWorktrees.loadedAt < 5_000) {
-    return cachedWorktrees.worktrees
-  }
-  const result = await callRuntimeResult(WORKTREE_LIST_CONTRACT, {
-    limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT
-  })
-  cachedWorktrees = { loadedAt: Date.now(), worktrees: result.worktrees }
-  return result.worktrees
-}
-
 async function listAllRuntimeDetectedWorktrees(): Promise<Worktree[]> {
   if (cachedDetectedWorktrees && Date.now() - cachedDetectedWorktrees.loadedAt < 5_000) {
     return cachedDetectedWorktrees.worktrees
   }
 
-  const repos = (await callRuntimeResult(REPO_LIST_CONTRACT, undefined)).repos
+  const repos = (
+    await callRuntimeProcedure((client, options) => client.repo.list(undefined, options))
+  ).repos
   const detectedLists = await Promise.all(
     repos.map((repo) => callRuntimeDetectedWorktrees(repo.id))
   )
@@ -3441,22 +2169,21 @@ async function listAllRuntimeDetectedWorktrees(): Promise<Worktree[]> {
 }
 
 async function callRuntimeDetectedWorktrees(repoId: string): Promise<DetectedWorktreeListResult> {
-  const response = await callRuntimeEnvelope<DetectedWorktreeListResult>(
-    'worktree.detectedList',
-    { repo: repoId },
-    15_000
-  )
-  if (response.ok) {
-    return response.result
-  }
-  if (response.error.code !== 'method_not_found') {
-    throw new Error(response.error.message)
+  try {
+    return await callRuntimeProcedure(
+      (client, options) => client.worktree.detectedList({ repo: repoId }, options),
+      { timeoutMs: 15_000 }
+    )
+  } catch (error) {
+    if (!(error instanceof ORPCError) || error.code !== 'method_not_found') {
+      throw error
+    }
   }
 
-  const legacy = await callRuntimeResult(
-    WORKTREE_LIST_CONTRACT,
-    { repo: repoId, limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT },
-    15_000
+  const legacy = await callRuntimeProcedure(
+    (client, options) =>
+      client.worktree.list({ repo: repoId, limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT }, options),
+    { timeoutMs: 15_000 }
   )
   return toLegacyDetectedWorktreeResult(repoId, legacy.worktrees)
 }
@@ -3517,65 +2244,27 @@ async function resolveRuntimeFilePath(
 }
 
 async function mutateGitPath(
-  method: string,
+  mutation: keyof typeof GIT_PATH_MUTATION_SELECTORS,
   worktreePath: string,
   filePath: string
 ): Promise<void> {
   const file = await resolveRuntimeFilePath(filePath, worktreePath)
-  await callRuntimeResult(method, {
+  await callSelectedRuntimeProcedure(GIT_PATH_MUTATION_SELECTORS[mutation], {
     worktree: toRuntimeWorktreeSelector(file.worktree.id),
     filePath: file.relativePath
   })
 }
 
 async function mutateGitPaths(
-  method: string,
+  mutation: keyof typeof GIT_PATHS_MUTATION_SELECTORS,
   worktreePath: string,
   filePaths: string[]
 ): Promise<void> {
   const worktree = await resolveRuntimeWorktreeByPath(worktreePath)
-  await callRuntimeResult(method, { worktree: toRuntimeWorktreeSelector(worktree.id), filePaths })
-}
-
-function mapRepoPathArg(args: unknown): unknown {
-  if (!args || typeof args !== 'object' || !('repoPath' in args)) {
-    return args
-  }
-  const record = args as Record<string, unknown>
-  const repoId = typeof record.repoId === 'string' && record.repoId.trim() ? record.repoId : null
-  return {
-    ...record,
-    // Why: runtime repo selectors accept loose path/name forms, but duplicate
-    // checked-out repos can make those ambiguous. The renderer already passes
-    // Yiru's repo id on task calls, so prefer the explicit selector.
-    repo: repoId ? `id:${repoId}` : record.repoPath
-  }
-}
-
-function mapRuntimeNamespaceArg(prefix: string, args: unknown): unknown {
-  if (prefix !== 'hostedReview') {
-    return args
-  }
-  return mapRepoPathArg(args)
-}
-
-function createEmptyMemorySnapshot(): MemorySnapshot {
-  const emptyUsage = { cpu: 0, memory: 0 }
-  return {
-    app: { ...emptyUsage, main: emptyUsage, renderer: emptyUsage, other: emptyUsage, history: [] },
-    worktrees: [],
-    host: {
-      totalMemory: 0,
-      freeMemory: 0,
-      usedMemory: 0,
-      memoryUsagePercent: 0,
-      cpuCoreCount: navigator.hardwareConcurrency || 1,
-      loadAverage1m: 0
-    },
-    totalCpu: 0,
-    totalMemory: 0,
-    collectedAt: Date.now()
-  }
+  await callSelectedRuntimeProcedure(GIT_PATHS_MUTATION_SELECTORS[mutation], {
+    worktree: toRuntimeWorktreeSelector(worktree.id),
+    filePaths
+  })
 }
 
 function getBrowserPlatform(): NodeJS.Platform {

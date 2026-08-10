@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { track } from '~renderer/lib/telemetry'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import {
   buildNestedRepoScanTelemetry,
   createNestedRepoTelemetryAttemptId,
@@ -16,7 +17,6 @@ import { createNestedRepoScanId } from './dialog-types'
 type ShowNestedRepoReview = (args: {
   scan: NestedRepoScanResult
   selectedPath: string
-  connectionId: string | null
   attemptId: string
   runtimeKind: NestedRepoTelemetryRuntimeKind
   inProgress: boolean
@@ -52,7 +52,6 @@ export function useAddRepoLocalFolderFlow({
   fetchWorktrees: (repoId: string, options?: { requireAuthoritative?: boolean }) => Promise<unknown>
   scanNestedRepos: (
     path: string,
-    connectionId?: string,
     controls?: { scanId?: string; onProgress?: (scan: NestedRepoScanResult) => void }
   ) => Promise<NestedRepoScanResult | null>
   setActiveNestedScanId: (scanId: string | null) => void
@@ -101,7 +100,7 @@ export function useAddRepoLocalFolderFlow({
         const scanId = createNestedRepoScanId()
         setActiveNestedScanId(scanId)
         setNestedScanInProgress(true)
-        const scan = await scanNestedRepos(path, undefined, {
+        const scan = await scanNestedRepos(path, {
           scanId,
           onProgress: (progressScan) => {
             if (
@@ -115,7 +114,6 @@ export function useAddRepoLocalFolderFlow({
             showNestedRepoReview({
               scan: progressScan,
               selectedPath: path,
-              connectionId: null,
               attemptId,
               runtimeKind: 'local',
               inProgress: true,
@@ -145,7 +143,6 @@ export function useAddRepoLocalFolderFlow({
           showNestedRepoReview({
             scan,
             selectedPath: path,
-            connectionId: null,
             attemptId,
             runtimeKind: 'local',
             inProgress: false,
@@ -283,7 +280,7 @@ export function useAddRepoLocalFolderFlow({
     setIsAdding(true)
     setAddProjectBusyLabel('Choose a folder...')
     try {
-      const paths = await window.api.repos.pickFolders()
+      const paths = await workspaceHostClient.repos.pickFolders()
       if (paths.length === 0 || gen !== localAddGenRef.current) {
         return
       }

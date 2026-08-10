@@ -16,6 +16,9 @@ import { Button as UiButton } from '~renderer/components/ui/button'
 import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { updateRendererSettings } from '~renderer/runtime/settings-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { ChangelogData } from '~shared/types'
 
 import { Button } from '../components/ui/button'
@@ -87,7 +90,7 @@ function CompactCardContent({
             variant="ghost"
             size="xs"
             className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mt-0.5 h-auto border-0 p-0 underline"
-            onClick={() => void window.api.shell.openUrl(action.url)}
+            onClick={() => void shellClient.shell.openUrl(action.url)}
           >
             {action.label}
           </UiButton>
@@ -212,7 +215,7 @@ export function UpdateCard() {
   // auto-restart the app — the user expects to click "Restart" in Settings.
   useEffect(() => {
     if (status.state === 'downloaded' && hasStartedDownload.current) {
-      void window.api.updater.quitAndInstall().catch((error) => {
+      void rendererHostClient.updater.quitAndInstall().catch((error) => {
         setInstallError(String((error as Error)?.message ?? error))
       })
     }
@@ -311,7 +314,7 @@ export function UpdateCard() {
     if (!reassuranceSeen) {
       markReassuranceSeen()
     }
-    void window.api.updater.download()
+    void rendererHostClient.updater.download()
   }
 
   // Why: the 'error' variant has no version field, so dismiss needs an
@@ -330,7 +333,7 @@ export function UpdateCard() {
   }
 
   const handleInstallRetry = () => {
-    void window.api.updater.quitAndInstall().catch((error) => {
+    void rendererHostClient.updater.quitAndInstall().catch((error) => {
       setInstallError(String((error as Error)?.message ?? error))
     })
   }
@@ -338,9 +341,8 @@ export function UpdateCard() {
   const handleEnableHttp1Compatibility = () => {
     setCompatibilityRelaunching(true)
     setCompatibilitySetupError(null)
-    void window.api.settings
-      .set({ electronHttp1CompatibilityMode: true })
-      .then(() => window.api.app.relaunch())
+    void updateRendererSettings({ electronHttp1CompatibilityMode: true })
+      .then(() => rendererHostClient.app.relaunch())
       .catch((error) => {
         const message = String((error as Error)?.message ?? error)
         console.error('[updates] failed to enable HTTP/1.1 compatibility:', error)
@@ -386,7 +388,7 @@ export function UpdateCard() {
               : {
                   label: translate('auto.components.UpdateCard.6b0085010d', 'Re-check'),
                   onClick: () => {
-                    void window.api.updater.check({ includePrerelease: false })
+                    void rendererHostClient.updater.check({ includePrerelease: false })
                   }
                 }
           }
@@ -713,7 +715,7 @@ function RichCardContent({
               variant="ghost"
               size="xs"
               className="text-muted-foreground/70 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline h-auto border-0 p-0 underline"
-              onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
+              onClick={() => void shellClient.shell.openUrl(release.releaseNotesUrl)}
             >
               +{releasesBehind - 1}{' '}
               {translate('auto.components.UpdateCard.ccd8b0a793', 'more since your last update')}
@@ -726,7 +728,7 @@ function RichCardContent({
         variant="ghost"
         size="xs"
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
-        onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
+        onClick={() => void shellClient.shell.openUrl(release.releaseNotesUrl)}
       >
         {translate('auto.components.UpdateCard.aad383aecc', 'Read the full release notes')}
       </UiButton>
@@ -781,7 +783,7 @@ function SimpleCardContent({
       <UiButton
         variant="ghost"
         size="xs"
-        onClick={() => void window.api.shell.openUrl(releaseUrl)}
+        onClick={() => void shellClient.shell.openUrl(releaseUrl)}
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline underline-offset-2"
       >
         {translate('auto.components.UpdateCard.44324ef542', 'Release notes')}
@@ -879,7 +881,7 @@ function DownloadingContent({
         size="xs"
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
         onClick={() =>
-          void window.api.shell.openUrl(
+          void shellClient.shell.openUrl(
             release ? release.releaseNotesUrl : releaseUrlForVersion(version)
           )
         }
@@ -988,7 +990,7 @@ function ErrorCardContent({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => void window.api.shell.openUrl(releaseUrl)}
+          onClick={() => void shellClient.shell.openUrl(releaseUrl)}
           className={primaryAction ? 'flex-1' : 'w-full'}
         >
           {translate('auto.components.UpdateCard.47126bcf57', 'Download Manually')}

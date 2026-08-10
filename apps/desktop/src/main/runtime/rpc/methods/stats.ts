@@ -1,19 +1,10 @@
-import { z } from 'zod'
+import type { StatsSummaryInput, StatsSummaryResult } from '@yiru/runtime-protocol/stats'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-const StatsSummaryParams = z.object({
-  refreshUsage: z.boolean().optional()
-})
-
-export const STATS_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'stats.summary',
-    mobile: true,
-    params: StatsSummaryParams,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (params, { runtime }) => {
-      return (await runtime.getStatsSummary(params.refreshUsage === true)) ?? {}
-    }
-  })
-]
+export async function handleStatsSummary(
+  params: StatsSummaryInput,
+  { runtime }: RpcContext
+): Promise<StatsSummaryResult> {
+  return (await runtime.getStatsSummary(params.refreshUsage === true)) ?? {}
+}

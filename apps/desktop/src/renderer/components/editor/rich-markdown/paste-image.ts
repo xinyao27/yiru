@@ -1,7 +1,9 @@
 import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
 import { getConnectionId } from '~renderer/lib/connection-context'
+import { saveLocalClipboardImageAsTempFile } from '~renderer/runtime/clipboard-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { insertRichMarkdownImageFromPath } from './image-insert'
@@ -76,5 +78,7 @@ async function saveClipboardImageForMarkdownPaste(
   // temp save through SSH would put the source file on the wrong machine.
   const connectionId = hasRuntimeOwner ? undefined : (getConnectionId(worktreeId) ?? undefined)
 
-  return window.api.ui.saveClipboardImageAsTempFile({ connectionId })
+  return hasRuntimeOwner
+    ? shellClient.ui.saveClipboardImageAsTempFile()
+    : saveLocalClipboardImageAsTempFile(connectionId)
 }

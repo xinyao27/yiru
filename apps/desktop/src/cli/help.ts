@@ -197,7 +197,7 @@ Browser Automation:
 Common Commands:
   yiru open [directory] [--json]
   yiru .
-  yiru serve [--port <port>] [--mobile-pairing [--pairing-address <host>]] [--json]
+  yiru serve [--port <port>] [--mobile-pairing [--pairing-address <host>]] [--electron] [--json]
   yiru status [--json]
   yiru diagnostics memory [--json]
   yiru agent-context [--json]

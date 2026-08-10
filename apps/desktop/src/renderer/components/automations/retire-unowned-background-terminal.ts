@@ -1,4 +1,4 @@
-import { callRuntimeRpc, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 import { isTerminalTabPresent } from '~renderer/store/slices/terminal-tab-retirement'
 
@@ -26,7 +26,7 @@ export async function retireProvider(args: {
 }): Promise<void> {
   try {
     if (args.runtimeTarget.kind === 'environment' && args.runtimeTerminalHandle) {
-      await callRuntimeRpc(args.runtimeTarget, 'terminal.close', {
+      await callRuntimeOrpc(args.runtimeTarget, (client) => client.terminal.close, {
         terminal: args.runtimeTerminalHandle
       })
     } else if (args.runtimeTarget.kind === 'local') {

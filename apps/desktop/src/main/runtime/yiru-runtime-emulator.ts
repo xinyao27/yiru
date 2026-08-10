@@ -1,4 +1,4 @@
-import type { BrowserWindow } from 'electron'
+import type { RuntimeEmulatorEvent } from '@yiru/runtime-protocol/contract'
 import type { GlobalSettings } from '~shared/types'
 
 import { setConfiguredAndroidSdkPath } from '../emulator/android/sdk-host-discovery'
@@ -21,14 +21,25 @@ type EmulatorHostSettings = Pick<
 export type RuntimeEmulatorCommandHost = {
   getEmulatorBridge(): EmulatorBridge | null
   resolveWorktreeSelector(selector: string): Promise<{ id: string }>
-  getAuthoritativeWindow(): BrowserWindow
   getSettings(): EmulatorHostSettings
+  // Why: paired clients have no authoritative window; republish so
+  // `emulator.events` subscribers see the same session hand-off the shell does.
+  emitEmulatorEvent(event: RuntimeEmulatorEvent): void
 }
 
 type EmulatorTargetParams = { device?: string; emulator?: string; worktree?: string }
 
 export class RuntimeEmulatorCommands {
-  constructor(private readonly host: RuntimeEmulatorCommandHost) {}
+  private readonly host: RuntimeEmulatorCommandHost
+  private installPathResolver: ((path: string) => Promise<string>) | null = null
+
+  constructor(host: RuntimeEmulatorCommandHost) {
+    this.host = host
+  }
+
+  configureInstallPathResolver(resolver: (path: string) => Promise<string>): void {
+    this.installPathResolver = resolver
+  }
 
   private requireEmulatorBridge(): EmulatorBridge {
     const bridge = this.host.getEmulatorBridge()
@@ -163,7 +174,8 @@ export class RuntimeEmulatorCommands {
         this.notifyRendererEmulatorPaneFocus(worktreeId)
       }
     }
-    // Default: no auto steal (mirror browser tab create/switch). --focus sends emulator:pane-focus only when requested.
+    // Default: no auto steal (mirror browser tab create/switch). --focus emits
+    // paneFocus only when requested.
     return { attached: true, info }
   }
 
@@ -208,10 +220,13 @@ export class RuntimeEmulatorCommands {
     params: EmulatorTargetParams & { path: string; reinstall?: boolean }
   ): Promise<{ ok: true }> {
     const worktreeId = await this.resolveWorktreeId(params.worktree)
+    const installPath = this.installPathResolver
+      ? await this.installPathResolver(params.path)
+      : params.path
     await this.requireEmulatorBridge().runCapability(
       'install',
       { device: params.device ?? params.emulator, worktreeId },
-      (backend, device) => backend.installApp!(device, params.path, { reinstall: params.reinstall })
+      (backend, device) => backend.installApp!(device, installPath, { reinstall: params.reinstall })
     )
     return RuntimeEmulatorCommands.OK
   }
@@ -292,22 +307,13 @@ export class RuntimeEmulatorCommands {
     return { ok: true, deviceUdid: shutdownUdid }
   }
 
-  // Window may not exist during shutdown, so sends are best-effort.
-  private sendToRenderer(channel: string, payload: unknown): void {
-    try {
-      this.host.getAuthoritativeWindow().webContents.send(channel, payload)
-    } catch {
-      // Window may not exist during shutdown
-    }
-  }
-
   // Why: mirror browser:pane-focus — scoped per worktree, no cross-worktree yank unless user is already there.
   private notifyRendererEmulatorPaneFocus(worktreeId: string): void {
-    this.sendToRenderer('emulator:pane-focus', { worktreeId })
+    this.host.emitEmulatorEvent({ type: 'paneFocus', worktreeId })
   }
 
   private notifyRendererEmulatorAutoAttach(worktreeId: string, info: EmulatorSessionInfo): void {
-    this.sendToRenderer('ui:emulatorAutoAttach', { worktreeId, info })
+    this.host.emitEmulatorEvent({ type: 'autoAttach', worktreeId, info })
   }
 
   // Raw for extensibility.

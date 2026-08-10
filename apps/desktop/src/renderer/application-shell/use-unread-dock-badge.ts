@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { getUnreadBadgeCount } from './unread-badge-count'
 
 function setUnreadDockBadgeCountBestEffort(count: number): void {
-  void window.api.app.setUnreadDockBadgeCount(count).catch(() => {
+  void rendererHostClient.app.setUnreadDockBadgeCount(count).catch(() => {
     // Dock sync is best-effort chrome; stale badge state should not affect app use.
   })
 }

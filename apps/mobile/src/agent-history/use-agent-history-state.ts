@@ -1,13 +1,8 @@
-import type {
-  AiVaultListResult,
-  AiVaultScanIssue,
-  AiVaultScope,
-  AiVaultSession
-} from '@yiru/workbench-model/agent'
+import type { AiVaultScanIssue, AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useHostClient, useForceReconnect } from '../transport/client-context'
-import type { RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 import type { Worktree } from '../workspace/list-types'
 import { MOBILE_AI_VAULT_CAPABILITY } from './capability'
 import { deriveMobileAiVaultScopePaths } from './scope-paths'
@@ -24,8 +19,6 @@ export type AgentHistoryScreenState =
   | { kind: 'unsupported' }
   | { kind: 'error'; message: string }
   | { kind: 'ready'; sessions: AiVaultSession[]; issues: AiVaultScanIssue[] }
-
-type StatusWithCapabilities = { capabilities?: string[] }
 
 export type MobileAgentHistoryStateParams = {
   hostId: string
@@ -89,14 +82,10 @@ export function useMobileAgentHistoryState(params: MobileAgentHistoryStateParams
       try {
         // Gate on the capability so older hosts lacking the method are detected
         // and we never call a missing RPC.
-        const statusResponse = await client.sendRequest('status.get')
+        const status = await callRuntimeOrpc(client, (runtime) => runtime.status.get, undefined)
         if (!isCurrent()) {
           return
         }
-        if (!statusResponse.ok) {
-          throw new Error(statusResponse.error?.message || 'Unable to reach host')
-        }
-        const status = (statusResponse as RpcSuccess).result as StatusWithCapabilities
         setHostStatusResult(status)
         if (!status.capabilities?.includes(MOBILE_AI_VAULT_CAPABILITY)) {
           setScreenState({ kind: 'unsupported' })
@@ -115,7 +104,7 @@ export function useMobileAgentHistoryState(params: MobileAgentHistoryStateParams
         }
 
         const scopePaths = deriveMobileAiVaultScopePaths(options.scope, activeWorktree, worktrees)
-        const response = await client.sendRequest('aiVault.listSessions', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.aiVault.listSessions, {
           limit: MOBILE_AI_VAULT_SESSION_LIMIT,
           force: options.force,
           scopePaths
@@ -123,10 +112,6 @@ export function useMobileAgentHistoryState(params: MobileAgentHistoryStateParams
         if (!isCurrent()) {
           return
         }
-        if (!response.ok) {
-          throw new Error(response.error?.message || 'Unable to load agent sessions')
-        }
-        const result = (response as RpcSuccess).result as AiVaultListResult
         setScreenState({ kind: 'ready', sessions: result.sessions, issues: result.issues })
       } catch (err) {
         if (!isCurrent()) {

@@ -89,19 +89,6 @@ function parseGitConflictBlocks(content: string): ParsedConflictBlock[] {
   return blocks
 }
 
-export function hasGitConflictMarkers(content: string): boolean {
-  let found = false
-  forEachLine(content, (lineStart, lineEnd) => {
-    found =
-      lineStartsWith(content, lineStart, lineEnd, '<<<<<<<') ||
-      lineStartsWith(content, lineStart, lineEnd, '|||||||') ||
-      lineEquals(content, lineStart, lineEnd, '=======') ||
-      lineStartsWith(content, lineStart, lineEnd, '>>>>>>>')
-    return found ? false : undefined
-  })
-  return found
-}
-
 function forEachLine(
   content: string,
   visit: (lineStart: number, lineEnd: number, lineNumber: number) => boolean | void

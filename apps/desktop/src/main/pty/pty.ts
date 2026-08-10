@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import { statSync } from 'node:fs'
 /* eslint-disable max-lines -- Why: PTY IPC is intentionally centralized in one
 main-process module so spawn-time environment scoping, lifecycle cleanup,
@@ -110,6 +109,7 @@ import {
 import { LocalPtyProvider } from '../providers/local-pty-provider'
 import type { IPtyProvider, PtySpawnOptions, PtySpawnResult } from '../providers/types'
 import { isPwshAvailable } from '../pwsh'
+import { requestShellPtySerializeBuffer } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import {
   clearNativeWindowsConptyPty,
   isNativeWindowsLocalPtySpawn,
@@ -135,7 +135,21 @@ import {
   shouldDropHiddenRendererPtyData,
   unmarkHiddenRendererPty
 } from './hidden-delivery-gate'
+import {
+  forgetPtyPaneKey,
+  getPaneKeyOwner,
+  getPtyIdForPaneKey,
+  getPtyPaneKeyBinding,
+  rememberPtyPaneKey
+} from './pane-key-registry'
 import { PtyProducerFlowController } from './producer-flow-control'
+import {
+  clearProviderPtyState,
+  getLocalPtyProvider,
+  installProviderStateCleanup,
+  killAllPty,
+  setLocalPtyProvider
+} from './provider-registry'
 import { RendererTerminalSerializerReadiness } from './renderer-terminal-serializer-readiness'
 import { readShellStartupEnvVar } from './shell-startup-env'
 import { createPtySpawnTiming } from './spawn-timing'
@@ -153,15 +167,9 @@ import { addYiruWslInteropEnv } from './wsl-yiru-env'
 // ─── Provider Registry ──────────────────────────────────────────────
 // Routes PTY operations by connectionId. null = local provider.
 
-let localProvider: IPtyProvider = new LocalPtyProvider()
 type FreshLocalFallbackProvider = IPtyProvider & {
   routesFreshSpawnsToLocalProvider?: true
 }
-// Why: no transport registers a connection-scoped PTY provider any more, so
-// this stays empty and every connectionId-bearing route fails closed. Kept as
-// the single seam a future remote PTY transport plugs back into, instead of
-// spreading `connectionId ? throw : local` across every call site.
-const sshProviders = new Map<string, IPtyProvider>()
 // Why: the relay reported a vanished remote PTY by message, and both the
 // expired-session marker and the identity-mismatch marker still arrive that
 // way from persisted errors, so the predicates outlive the SSH transport.
@@ -207,13 +215,6 @@ const KEEP_HISTORY_STOP_POLL_MS = 100
 // spawn-time paneKey so clearProviderPtyState can clear that cache on PTY
 // teardown — the renderer knows the paneKey but the PTY lifecycle does not
 // without this mapping.
-const ptyPaneKey = new Map<string, string>()
-// Why: reverse of ptyPaneKey — callers that receive a paneKey from outside the
-// PTY lifecycle (e.g. the agent-hook server routing a cursor-agent status event
-// back into the pane's data stream) need to find the ptyId for that paneKey.
-// Kept in lock-step with ptyPaneKey via the same spawn and teardown sites.
-const paneKeyPtyId = new Map<string, string>()
-
 const AGENT_HOOK_RUNTIME_ENV_KEYS = [
   'YIRU_AGENT_HOOK_PORT',
   'YIRU_AGENT_HOOK_TOKEN',
@@ -225,9 +226,8 @@ const AGENT_HOOK_RUNTIME_ENV_KEYS = [
   'YIRU_CLAUDE_AGENT_STATUS_SETTINGS'
 ] as const
 
-export function getPtyIdForPaneKey(paneKey: string): string | undefined {
-  return paneKeyPtyId.get(paneKey)
-}
+export { clearProviderPtyState, getLocalPtyProvider, getPtyIdForPaneKey, killAllPty }
+export { setLocalPtyProvider }
 
 // Why: consumers (currently the cursor-agent synthesized-spinner loop in
 // main/index.ts) need to tear down paneKey-scoped state when a PTY exits so
@@ -300,8 +300,7 @@ function rememberPaneKeyForPty(ptyId: string, paneKey: unknown): string | null {
   if (!isValidPaneKey(normalizedPaneKey)) {
     return null
   }
-  ptyPaneKey.set(ptyId, normalizedPaneKey)
-  paneKeyPtyId.set(normalizedPaneKey, ptyId)
+  rememberPtyPaneKey(ptyId, normalizedPaneKey)
   return normalizedPaneKey
 }
 
@@ -331,7 +330,7 @@ function declarePendingPaneSerializer(paneKey: string, sender: WebContents | und
     pendingPtyIdBySerializerGeneration.delete(replaced.gen)
   }
   pendingByPaneKey.set(paneKey, { gen, ownerWebContentsId: sender?.id ?? null })
-  const existingPtyId = paneKeyPtyId.get(paneKey)
+  const existingPtyId = getPtyIdForPaneKey(paneKey)
   if (existingPtyId) {
     pendingPtyIdBySerializerGeneration.set(gen, existingPtyId)
   }
@@ -400,28 +399,27 @@ export function hasPendingRendererSerializerForPaneKey(paneKey: string): boolean
 
 function getProvider(connectionId: string | null | undefined): IPtyProvider {
   if (!connectionId) {
-    return localProvider
+    return getLocalPtyProvider()
   }
-  const provider = sshProviders.get(connectionId)
-  if (!provider) {
-    throw new Error(`No PTY provider for connection "${connectionId}"`)
-  }
-  return provider
+  // Why: no transport registers a connection-scoped PTY provider (SSH removal,
+  // #63), so every connectionId-bearing route fails closed.
+  throw new Error(`No PTY provider for connection "${connectionId}"`)
 }
 
 function getProviderForPty(ptyId: string): IPtyProvider {
   const connectionId = ptyOwnership.get(ptyId)
   if (connectionId === undefined) {
-    return localProvider
+    return getLocalPtyProvider()
   }
   return getProvider(connectionId)
 }
 
 function hasPtyProviderForInspection(ptyId: string): boolean {
-  // Why: process inspection is background polling; disconnected SSH hosts should
-  // read as idle instead of surfacing repeated IPC errors.
+  // Why: process inspection is background polling; no transport registers a
+  // connection-scoped PTY provider (SSH removal, #63), so any owned
+  // connectionId reads as idle instead of surfacing repeated IPC errors.
   const connectionId = ptyOwnership.get(ptyId)
-  return connectionId == null || sshProviders.has(connectionId)
+  return connectionId == null
 }
 
 function getAppPtyId(connectionId: string | null | undefined, ptyId: string): string {
@@ -531,7 +529,7 @@ function getProviderForStartupTerminalColorReply(ptyId: string): IPtyProvider | 
   if (parsedSshId) {
     return getProvider(parsedSshId.connectionId)
   }
-  return localProvider
+  return getLocalPtyProvider()
 }
 
 function normalizeNodePtySpawnError(err: unknown): Error {
@@ -1181,24 +1179,6 @@ function beginPtySpawnForWorktree(
   return () => finishes.toReversed().forEach((finish) => finish())
 }
 
-/** Get the installed PTY provider for runtime services.
- *
- * Returns the installed PTY provider — after `setLocalPtyProvider()` runs
- * during daemon init this may be the routed adapter (specifically either
- * `DaemonPtyAdapter` or its `DaemonPtyRouter` wrapper). Callers needing
- * `LocalPtyProvider`-specific methods (`killOrphanedPtys`,
- * `advanceGeneration`, `getPtyProcess`) must type-narrow or import the
- * concrete class directly. */
-export function getLocalPtyProvider(): IPtyProvider {
-  return localProvider
-}
-
-/** Replace the local PTY provider with a daemon-backed one.
- *  Call before registerPtyHandlers so the IPC layer routes through the daemon. */
-export function setLocalPtyProvider(provider: IPtyProvider): void {
-  localProvider = provider
-}
-
 /** Get all PTY IDs owned by a given connectionId (for reconnection reattach). */
 export function getPtyIdsForConnection(connectionId: string): string[] {
   const ids: string[] = []
@@ -1231,7 +1211,7 @@ export function clearPtyOwnershipForConnection(connectionId: string): void {
 
 // ─── Provider-scoped PTY state cleanup ──────────────────────────────
 
-export function clearProviderPtyState(id: string): void {
+function clearPtyModuleState(id: string): void {
   // Why: OpenCode and Pi both allocate PTY-scoped runtime state outside the
   // node-pty process table. Centralizing provider cleanup avoids drift where a
   // new teardown path forgets to remove one provider's overlay/hook state.
@@ -1257,8 +1237,9 @@ export function clearProviderPtyState(id: string): void {
   providerSnapshotRequiredPtys.delete(id)
   // Why: the Phase-5 ConPTY DA1 spawn record must not leak onto a reused id.
   clearNativeWindowsConptyPty(id)
-  const paneKey = ptyPaneKey.get(id)
-  const stillOwnsPaneKey = paneKey ? paneKeyPtyId.get(paneKey) === id : false
+  const paneKeyBinding = getPtyPaneKeyBinding(id)
+  const paneKey = paneKeyBinding?.paneKey
+  const stillOwnsPaneKey = paneKeyBinding?.isOwner ?? false
   // Why: drop the memory-collector registration so a dead PTY does not keep
   // trying to resolve its (now-dead) pid on every snapshot. Safe no-op for
   // PTYs that were never registered (SSH-owned).
@@ -1274,7 +1255,7 @@ export function clearProviderPtyState(id: string): void {
       // Why: when this PTY never rebuilt ptyPaneKey after restart, alias
       // ownership is our only proof. Once a newer PTY owns the same stable
       // paneKey, alias teardown must not erase that newer status.
-      const stablePaneOwner = paneKeyPtyId.get(stablePaneKey)
+      const stablePaneOwner = getPaneKeyOwner(stablePaneKey)
       if (stablePaneOwner && stablePaneOwner !== id) {
         return false
       }
@@ -1285,19 +1266,19 @@ export function clearProviderPtyState(id: string): void {
   // otherwise accumulate entries for dead panes over the process lifetime.
   // Use the spawn-time paneKey mapping since the server has no other way to
   // correlate a ptyId back to its paneKey.
-  if (paneKey) {
+  if (paneKeyBinding) {
+    const boundPaneKey = paneKeyBinding.paneKey
     if (stillOwnsPaneKey) {
-      agentHookServer.clearPaneState(paneKey)
-      paneKeyPtyId.delete(paneKey)
+      agentHookServer.clearPaneState(boundPaneKey)
     }
-    ptyPaneKey.delete(id)
+    forgetPtyPaneKey(id, paneKeyBinding)
     if (stillOwnsPaneKey) {
       // Why: notify registered consumers AFTER we've dropped the paneKey↔ptyId
       // entries so a listener that re-reads the map sees the post-teardown
       // state. Wrap each call so one throwing listener cannot block the rest.
       for (const listener of paneKeyTeardownListeners) {
         try {
-          listener(paneKey)
+          listener(boundPaneKey)
         } catch (err) {
           console.error('[pty] paneKey teardown listener threw', err)
         }
@@ -1305,6 +1286,8 @@ export function clearProviderPtyState(id: string): void {
     }
   }
 }
+
+installProviderStateCleanup(clearPtyModuleState)
 
 export function deletePtyOwnership(id: string): void {
   ptyOwnership.delete(id)
@@ -1617,15 +1600,15 @@ export function registerPtyHandlers(
   ipcMain.removeAllListeners('pty:ackColdRestore')
   ipcMain.removeAllListeners('pty:ackData')
   ipcMain.removeAllListeners('pty:deliveryResyncResponse')
-  ipcMain.removeAllListeners('pty:serializeBuffer:response')
 
   // Configure the local provider with app-specific hooks.
   // Why: only LocalPtyProvider has the configure() method — daemon-backed
   // providers handle subprocess spawning internally and don't need main-process
   // hook injection. The hooks (buildSpawnEnv, onSpawned, etc.) only make sense
   // when the PTY lives in the Electron main process.
-  if (localProvider instanceof LocalPtyProvider) {
-    localProvider.configure({
+  const configuredProvider = getLocalPtyProvider()
+  if (configuredProvider instanceof LocalPtyProvider) {
+    configuredProvider.configure({
       isHistoryEnabled: () => getSettings?.()?.terminalScopeHistoryByWorktree ?? true,
       getWindowsShell: () => getSettings?.()?.terminalWindowsShell,
       getWindowsPowerShellImplementation: () =>
@@ -2676,7 +2659,7 @@ export function registerPtyHandlers(
     // restore from the model snapshot (same seq-guard path as hidden drops)
     // in case any view — eager buffer included — was receiving bytes.
     localBackgroundStreamUnsub =
-      localProvider.onBackgroundStreamEvent?.((payload) => {
+      getLocalPtyProvider().onBackgroundStreamEvent?.((payload) => {
         if (payload.kind === 'backgroundMarker') {
           runtime?.setPtyTransientFactDelegation(
             payload.id,
@@ -2700,9 +2683,10 @@ export function registerPtyHandlers(
 
     // Why: LocalPtyProvider reports exit through its configured cleanup hook;
     // daemon adapters report it only through the provider event below.
-    const isLocalProvider = localProvider instanceof LocalPtyProvider
+    const provider = getLocalPtyProvider()
+    const isLocalProvider = provider instanceof LocalPtyProvider
 
-    localDataUnsub = localProvider.onData((payload) => {
+    localDataUnsub = provider.onData((payload) => {
       // Why: capture authority before synchronous ingestion so the model and
       // startup shim cannot both answer if gate/subscriber state later changes.
       const queryReplyOwner =
@@ -2826,7 +2810,7 @@ export function registerPtyHandlers(
         schedulePendingDataFlush(PTY_BATCH_INTERVAL_MS)
       }
     })
-    localExitUnsub = localProvider.onExit((payload) => {
+    localExitUnsub = provider.onExit((payload) => {
       if (consumeSyntheticKillExit(payload.id)) {
         return
       }
@@ -2843,11 +2827,13 @@ export function registerPtyHandlers(
   bindProviderListeners()
   rebindProviderListeners = bindProviderListeners
 
-  // Why: a persistent ipcMain listener with a request-ID dispatch table
-  // (instead of one listener per call) so concurrent serialize requests do
-  // not stack listeners and trip Node's MaxListeners=10 warning. Many
-  // sleeping PTYs waking at once (e.g. on relaunch) routinely fan out 10+
-  // concurrent calls.
+  // Why: Phase 5 step 4, `pty` group A — the reverse-contract call
+  // (`requestShellPtySerializeBuffer`) replaces the former hand-rolled
+  // request-ID dispatch table entirely: oRPC's message-port link already
+  // correlates concurrent calls without stacking `ipcMain.once` listeners, so
+  // the MaxListeners=10 risk this used to guard against (many sleeping PTYs
+  // waking at once) no longer applies. The 750ms timeout and the
+  // `mainWindow.isDestroyed()` → `null` degrade are preserved exactly.
   type SerializeResult = {
     data: string
     cols: number
@@ -2855,94 +2841,16 @@ export function registerPtyHandlers(
     seq?: number
     lastTitle?: string
   } | null
-  const pendingSerializeRequests = new Map<
-    string,
-    { resolve: (result: SerializeResult) => void; timeout: NodeJS.Timeout }
-  >()
 
-  function settleSerializeRequest(requestId: string, result: SerializeResult): void {
-    const pending = pendingSerializeRequests.get(requestId)
-    if (!pending) {
-      return
-    }
-    clearTimeout(pending.timeout)
-    pendingSerializeRequests.delete(requestId)
-    pending.resolve(result)
-  }
-
-  ipcMain.on(
-    'pty:serializeBuffer:response',
-    (
-      _event,
-      args: {
-        requestId?: string
-        snapshot?: {
-          data?: unknown
-          cols?: unknown
-          rows?: unknown
-          seq?: unknown
-          lastTitle?: unknown
-        } | null
-      }
-    ) => {
-      if (typeof args?.requestId !== 'string') {
-        return
-      }
-      const snapshot = args.snapshot
-      if (
-        snapshot &&
-        typeof snapshot.data === 'string' &&
-        typeof snapshot.cols === 'number' &&
-        typeof snapshot.rows === 'number'
-      ) {
-        const result: {
-          data: string
-          cols: number
-          rows: number
-          seq?: number
-          lastTitle?: string
-        } = {
-          data: snapshot.data,
-          cols: snapshot.cols,
-          rows: snapshot.rows
-        }
-        if (typeof snapshot.seq === 'number' && Number.isFinite(snapshot.seq)) {
-          result.seq = snapshot.seq
-        }
-        if (typeof snapshot.lastTitle === 'string' && snapshot.lastTitle.length > 0) {
-          result.lastTitle = snapshot.lastTitle
-        }
-        settleSerializeRequest(args.requestId, result)
-      } else {
-        settleSerializeRequest(args.requestId, null)
-      }
-    }
-  )
-
-  function requestSerializedBuffer(
+  async function requestSerializedBuffer(
     ptyId: string,
     opts?: { scrollbackRows?: number; altScreenForcesZeroRows?: boolean }
   ): Promise<SerializeResult> {
     if (mainWindow.isDestroyed()) {
-      return Promise.resolve(null)
+      return null
     }
-
-    const requestId = randomUUID()
-    return new Promise<SerializeResult>((resolve) => {
-      const timeout = setTimeout(() => {
-        settleSerializeRequest(requestId, null)
-      }, 750)
-      pendingSerializeRequests.set(requestId, { resolve, timeout })
-      const payload: {
-        requestId: string
-        ptyId: string
-        opts?: { scrollbackRows?: number; altScreenForcesZeroRows?: boolean }
-      } = { requestId, ptyId }
-      if (opts) {
-        payload.opts = opts
-      }
-      mainWindow.webContents.send('pty:serializeBuffer:request', payload)
-    })
+    const result = await requestShellPtySerializeBuffer(mainWindow.webContents.id, { ptyId, opts })
+    return result.ok ? result.snapshot : null
   }
 
   // Why: a reload (did-finish-load) or renderer crash replaces the process
@@ -2972,8 +2880,9 @@ export function registerPtyHandlers(
   // process and can become orphaned on page reload. Daemon-backed sessions
   // survive renderer restarts by design — orphan cleanup would kill them.
   clearDidFinishLoadHandler()
-  if (localProvider instanceof LocalPtyProvider) {
-    const lp = localProvider
+  const rendererProvider = getLocalPtyProvider()
+  if (rendererProvider instanceof LocalPtyProvider) {
+    const lp = rendererProvider
     didFinishLoadHandler = () => {
       // Why: always advance so the load generation stays monotonic, but skip the
       // sweep (and its per-PTY cleanup) on the crash/freeze-recovery reload — it
@@ -3608,11 +3517,9 @@ export function registerPtyHandlers(
       }
     },
     listProcesses: async () => {
-      const providerSessions = await Promise.all([
-        localProvider.listProcesses(),
-        ...Array.from(sshProviders.values(), (provider) => provider.listProcesses())
-      ])
-      return providerSessions.flat()
+      // Why: no transport registers a connection-scoped PTY provider (SSH
+      // removal, #63), so the local provider is the only source left.
+      return getLocalPtyProvider().listProcesses()
     },
     serializeBuffer: (ptyId, opts) => {
       // Why: mobile xterm must start from the desktop xterm's exact screen
@@ -5152,7 +5059,9 @@ export function registerPtyHandlers(
     const ownedConnectionId = ptyOwnership.get(args.id)
     const parsedSshId = ownedConnectionId === undefined ? parseAppSshPtyId(args.id) : null
     const connectionId = ownedConnectionId ?? parsedSshId?.connectionId
-    const provider = connectionId ? sshProviders.get(connectionId) : tryGetProviderForPty(args.id)
+    // Why: no transport registers a connection-scoped PTY provider (SSH
+    // removal, #63), so an owned connectionId never resolves a provider here.
+    const provider = connectionId ? undefined : tryGetProviderForPty(args.id)
     if (!provider && connectionId) {
       // Why: detached SSH PTYs intentionally keep ownership after their
       // provider is unregistered; hydrated app-scoped ids can also arrive
@@ -5192,16 +5101,14 @@ export function registerPtyHandlers(
   ipcMain.handle(
     'pty:listSessions',
     async (): Promise<{ id: string; cwd: string; title: string }[]> => {
-      const providerSessions = await Promise.all([
-        Promise.resolve({
+      // Why: no transport registers a connection-scoped PTY provider (SSH
+      // removal, #63), so the local provider is the only source left.
+      const providerSessions = [
+        {
           connectionId: null as string | null,
-          sessions: await localProvider.listProcesses()
-        }),
-        ...Array.from(sshProviders.entries(), async ([connectionId, provider]) => ({
-          connectionId,
-          sessions: await provider.listProcesses().catch(() => [])
-        }))
-      ])
+          sessions: await getLocalPtyProvider().listProcesses()
+        }
+      ]
       const deduped = new Map<string, { id: string; cwd: string; title: string }>()
       for (const { connectionId, sessions } of providerSessions) {
         for (const session of sessions) {
@@ -5253,9 +5160,9 @@ export function registerPtyHandlers(
   ipcMain.handle('pty:hasPty', async (_event, args: { id: string }): Promise<boolean | null> => {
     const ownedConnectionId = ptyOwnership.get(args.id)
     const parsedSshId = ownedConnectionId === undefined ? parseAppSshPtyId(args.id) : null
-    const provider = parsedSshId
-      ? sshProviders.get(parsedSshId.connectionId)
-      : tryGetProviderForPty(args.id)
+    // Why: no transport registers a connection-scoped PTY provider (SSH
+    // removal, #63), so a parsed SSH-style id never resolves a provider here.
+    const provider = parsedSshId ? undefined : tryGetProviderForPty(args.id)
     if (!provider?.hasPty) {
       return null
     }
@@ -5435,8 +5342,3 @@ export function registerHeadlessPtyRuntime(
 /**
  * Kill in-process local PTYs. Daemon-backed PTYs are preserved by daemon disconnect.
  */
-export function killAllPty(): void {
-  if (localProvider instanceof LocalPtyProvider) {
-    localProvider.killAll()
-  }
-}

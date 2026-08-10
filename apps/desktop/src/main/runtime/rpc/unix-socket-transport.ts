@@ -25,11 +25,25 @@ type MessageHandler = (
   context?: RpcMessageContext
 ) => void
 
+export type UnixSocketProtocolConnection = {
+  signal: AbortSignal
+  send: (frame: string) => boolean
+  close: () => void
+  startKeepalive: (frame: string) => () => void
+}
+
+export type UnixSocketProtocolHandler = {
+  open: (rawFrame: string, connection: UnixSocketProtocolConnection) => boolean
+  message: (rawFrame: string, connection: UnixSocketProtocolConnection) => void
+  close: (connection: UnixSocketProtocolConnection) => void
+}
+
 export class UnixSocketTransport implements RpcTransport {
   private readonly endpoint: string
   private readonly kind: 'unix' | 'named-pipe'
   private server: Server | null = null
   private messageHandler: MessageHandler | null = null
+  private protocolHandler: UnixSocketProtocolHandler | null = null
   private readonly activeSockets = new Set<Socket>()
 
   constructor({ endpoint, kind }: UnixSocketTransportOptions) {
@@ -39,6 +53,10 @@ export class UnixSocketTransport implements RpcTransport {
 
   onMessage(handler: MessageHandler): void {
     this.messageHandler = handler
+  }
+
+  onProtocol(handler: UnixSocketProtocolHandler): void {
+    this.protocolHandler = handler
   }
 
   async start(): Promise<void> {
@@ -100,6 +118,7 @@ export class UnixSocketTransport implements RpcTransport {
     this.activeSockets.add(socket)
     let buffer = ''
     let oversized = false
+    let protocol: 'pending' | 'legacy' | 'orpc' = 'pending'
     // Why: each in-flight dispatch registers its own AbortController here so
     // `socket.on('close')` can abort them all at once. Keeping the set scoped
     // to the connection (rather than a single shared controller) means
@@ -107,6 +126,33 @@ export class UnixSocketTransport implements RpcTransport {
     // on the same socket — future-proofing for a persistent CLI socket that
     // multiplexes sequential requests.
     const inflight = new Set<() => void>()
+    const connectionAbort = new AbortController()
+    const keepaliveTimers = new Set<NodeJS.Timeout>()
+    const connection: UnixSocketProtocolConnection = {
+      signal: connectionAbort.signal,
+      send: (frame) => {
+        if (socket.destroyed || !socket.writable) {
+          return false
+        }
+        socket.write(`${frame}\n`)
+        return true
+      },
+      close: () => socket.end(),
+      startKeepalive: (frame) => {
+        const timer = setInterval(() => {
+          if (!connection.send(frame)) {
+            clearInterval(timer)
+            keepaliveTimers.delete(timer)
+          }
+        }, DEFAULT_KEEPALIVE_INTERVAL_MS)
+        timer.unref()
+        keepaliveTimers.add(timer)
+        return () => {
+          clearInterval(timer)
+          keepaliveTimers.delete(timer)
+        }
+      }
+    }
 
     socket.setEncoding('utf8')
     socket.setNoDelay(true)
@@ -117,10 +163,18 @@ export class UnixSocketTransport implements RpcTransport {
       socket.destroy()
     })
     socket.once('close', () => {
+      connectionAbort.abort()
       for (const cleanup of inflight) {
         cleanup()
       }
       inflight.clear()
+      for (const timer of keepaliveTimers) {
+        clearInterval(timer)
+      }
+      keepaliveTimers.clear()
+      if (protocol === 'orpc') {
+        this.protocolHandler?.close(connection)
+      }
       this.activeSockets.delete(socket)
     })
     socket.on('data', (chunk: string) => {
@@ -133,7 +187,11 @@ export class UnixSocketTransport implements RpcTransport {
       // unbounded buffer and stall the app.
       if (Buffer.byteLength(buffer, 'utf8') > MAX_RUNTIME_RPC_MESSAGE_BYTES) {
         oversized = true
-        this.messageHandler?.('', (response) => {
+        if (protocol === 'orpc' || !this.messageHandler) {
+          socket.destroy()
+          return
+        }
+        this.messageHandler('', (response) => {
           socket.write(`${response}\n`)
           socket.end()
         })
@@ -144,7 +202,24 @@ export class UnixSocketTransport implements RpcTransport {
         const rawMessage = buffer.slice(0, newlineIndex).trim()
         buffer = buffer.slice(newlineIndex + 1)
         if (rawMessage) {
-          this.dispatchMessage(socket, rawMessage, inflight)
+          if (protocol === 'orpc') {
+            this.protocolHandler?.message(rawMessage, connection)
+          } else if (
+            protocol === 'pending' &&
+            this.protocolHandler?.open(rawMessage, connection) === true
+          ) {
+            protocol = 'orpc'
+          } else {
+            // Why: a protocol-only host has no legacy dispatcher. Close an
+            // unrecognized first frame immediately so it cannot occupy one of
+            // the transport's bounded connection slots until the idle timeout.
+            if (!this.messageHandler) {
+              socket.end()
+              return
+            }
+            protocol = 'legacy'
+            this.dispatchMessage(socket, rawMessage, inflight)
+          }
         }
         newlineIndex = buffer.indexOf('\n')
       }

@@ -37,13 +37,11 @@ import { TerminalShortcutSettings } from '~/terminal/shortcut-settings'
 import { useAllHostClients } from '~/transport/all-host-clients'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { HostProfile } from '~/transport/types'
 
-// Why: sendRequest resolves with the raw RpcResponse envelope and never throws
-// on {ok:false}, so the ms payload must be read out of `result` — reading it off
-// the envelope always yields undefined and silently falls back to the default.
-function autoRestoreFitMsFromResult(result: unknown): number | null | undefined {
-  return (result as { ms?: number | null } | null)?.ms
+function autoRestoreFitMsFromResult(result: { ms?: number | null }): number | null | undefined {
+  return result.ms
 }
 
 function HostFitRow({
@@ -139,18 +137,16 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
       if (!client) {
         continue
       }
-      void client
-        .sendRequest('terminal.getAutoRestoreFit')
-        .then((resp) => {
+      void callRuntimeOrpc(client, (runtime) => runtime.terminal.getAutoRestoreFit, {})
+        .then((result) => {
           if (cancelled) {
             return
           }
-          // Why: a rejected read must fall back to the default the same way a
-          // transport rejection does — {ok:false} never reaches the catch below.
-          const value = resp.ok ? autoRestoreFitMsFromResult(resp.result) : null
           // Why: reconnect/status ticks can replay the same value; preserving
           // object identity avoids rerendering every settings row again.
-          setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, host.id, value))
+          setHostMs((prev) =>
+            setTerminalAutoRestoreFitMsForHost(prev, host.id, autoRestoreFitMsFromResult(result))
+          )
         })
         .catch(() => {
           if (!cancelled) {
@@ -175,13 +171,15 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
     const previousMs = hostMs[hostId]
     setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, opt.ms))
     try {
-      const resp = await client.sendRequest('terminal.setAutoRestoreFit', { ms: opt.ms })
-      if (resp.ok) {
-        setHostMs((prev) =>
-          setTerminalAutoRestoreFitMsForHost(prev, hostId, autoRestoreFitMsFromResult(resp.result))
-        )
-        return
-      }
+      const result = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.terminal.setAutoRestoreFit,
+        { ms: opt.ms }
+      )
+      setHostMs((prev) =>
+        setTerminalAutoRestoreFitMsForHost(prev, hostId, autoRestoreFitMsFromResult(result))
+      )
+      return
     } catch {
       // fall through to the re-read below
     }
@@ -189,13 +187,13 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
     // authoritative value; if that fails too, restore what was on screen rather
     // than leaving the optimistic value the host never accepted.
     try {
-      const resp = await client.sendRequest('terminal.getAutoRestoreFit')
+      const result = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.terminal.getAutoRestoreFit,
+        {}
+      )
       setHostMs((prev) =>
-        setTerminalAutoRestoreFitMsForHost(
-          prev,
-          hostId,
-          resp.ok ? autoRestoreFitMsFromResult(resp.result) : previousMs
-        )
+        setTerminalAutoRestoreFitMsForHost(prev, hostId, autoRestoreFitMsFromResult(result))
       )
     } catch {
       setHostMs((prev) => setTerminalAutoRestoreFitMsForHost(prev, hostId, previousMs))

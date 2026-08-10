@@ -12,6 +12,10 @@ import {
   setGitHubHostedReviewAutoMerge,
   updateGitHubHostedReviewState
 } from './hosted-review-github-actions'
+import {
+  mergeGitLabHostedReview,
+  updateGitLabHostedReviewState
+} from './hosted-review-gitlab-actions'
 
 export type HostedReviewActionInfo = Pick<
   HostedReviewInfo,
@@ -68,9 +72,8 @@ export function useHostedReviewActions({
       setActionError(null)
       try {
         const result = isGitLab
-          ? await window.api.gl.mergeMR({
-              repoPath: repo.path,
-              repoId: repo.id,
+          ? await mergeGitLabHostedReview({
+              repo,
               iid: review.number,
               method
             })
@@ -159,17 +162,11 @@ export function useHostedReviewActions({
       setActionError(null)
       try {
         const result = isGitLab
-          ? isClosing
-            ? await window.api.gl.closeMR({
-                repoPath: repo.path,
-                repoId: repo.id,
-                iid: review.number
-              })
-            : await window.api.gl.reopenMR({
-                repoPath: repo.path,
-                repoId: repo.id,
-                iid: review.number
-              })
+          ? await updateGitLabHostedReviewState({
+              repo,
+              iid: review.number,
+              nextState: isClosing ? 'closed' : 'opened'
+            })
           : await updateGitHubHostedReviewState({
               repo,
               prNumber: review.number,

@@ -86,11 +86,6 @@ export const AGENT_HOOK_NOTIFICATION_METHOD = 'agent.hook' as const
  *  design doc for the race that ruled out push-on-`setWrite`. */
 export const AGENT_HOOK_REQUEST_REPLAY_METHOD = 'agent_hook.requestReplay' as const
 
-/** JSON-RPC request method Yiru issues at session-ready to ship the
- *  OpenCode/Pi plugin source files to the relay so it can materialize the
- *  overlay dirs on the remote. */
-export const AGENT_HOOK_INSTALL_PLUGINS_METHOD = 'agent_hook.installPlugins' as const
-
 /** Feature-flag env var. Read once at process start by Yiru and the relay.
  *  Remote agent hooks ship as the default SSH behavior; set "0" to opt out. */
 export const YIRU_FEATURE_REMOTE_AGENT_HOOKS_ENV = 'YIRU_FEATURE_REMOTE_AGENT_HOOKS' as const

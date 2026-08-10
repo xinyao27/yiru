@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { triggerError, triggerSelection, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import {
@@ -36,10 +37,6 @@ export type MobileDiffComments = {
   clearDeliveredDiffComments: (delivered: readonly DiffComment[]) => Promise<void>
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
 // Owns the worktree review notes shown on mobile diff previews: the host-persisted
 // comment list, the optimistic-write busy flag, and the pending "send to agent"
 // hand-off. Clearing on route change stays with the screen so a transient
@@ -64,17 +61,10 @@ export function useMobileDiffComments(deps: MobileDiffCommentsDeps): MobileDiffC
     if (!client || connState !== 'connected' || !worktreeId || isFloatingWorkspaceRoute) {
       return
     }
-    const response = await client.sendRequest('worktree.show', {
+    const response = await callRuntimeOrpc(client, (runtime) => runtime.worktree.show, {
       worktree: `id:${worktreeId}`
     })
-    if (!response.ok) {
-      return
-    }
-    // Why: worktree.show answers with an unknown payload; normalizeMobileDiffComments
-    // validates each note itself, so only the two nesting levels need narrowing here.
-    const worktree = isRecord(response.result) ? response.result.worktree : undefined
-    const rawComments = isRecord(worktree) ? worktree.diffComments : undefined
-    setDiffComments(normalizeMobileDiffComments(rawComments, worktreeId))
+    setDiffComments(normalizeMobileDiffComments(response.worktree.diffComments, worktreeId))
   }, [client, connState, isFloatingWorkspaceRoute, worktreeId])
 
   const persistDiffComments = useCallback(
@@ -82,13 +72,10 @@ export function useMobileDiffComments(deps: MobileDiffCommentsDeps): MobileDiffC
       if (!client || connState !== 'connected') {
         throw new Error('Waiting for desktop...')
       }
-      const response = await client.sendRequest('worktree.set', {
+      await callRuntimeOrpc(client, (runtime) => runtime.worktree.set, {
         worktree: `id:${worktreeId}`,
-        diffComments: comments
+        diffComments: [...comments]
       })
-      if (!response.ok) {
-        throw new Error(response.error.message || 'Failed to save review notes')
-      }
     },
     [client, connState, worktreeId]
   )

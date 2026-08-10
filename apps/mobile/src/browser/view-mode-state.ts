@@ -34,10 +34,6 @@ export function saveMobileBrowserViewMode(
   }
 }
 
-export function clearMobileBrowserViewModeState(): void {
-  browserViewModeByPageKey.clear()
-}
-
 function makeBrowserViewModePageKey(
   worktreeId: string,
   browserPageId: string | null

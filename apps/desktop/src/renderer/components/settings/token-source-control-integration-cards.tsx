@@ -4,6 +4,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { usePreflightCardStatuses } from './source-control/preflight-card-status'
@@ -100,7 +101,7 @@ export function BitbucketIntegrationCard(): React.JSX.Element {
               variant="outline"
               size="sm"
               onClick={() =>
-                window.api.shell.openUrl(
+                shellClient.shell.openUrl(
                   'https://support.atlassian.com/bitbucket-cloud/docs/using-api-tokens/'
                 )
               }
@@ -227,7 +228,7 @@ export function AzureDevOpsIntegrationCard(): React.JSX.Element {
               variant="outline"
               size="sm"
               onClick={() =>
-                window.api.shell.openUrl(
+                shellClient.shell.openUrl(
                   status === 'not-configured'
                     ? 'https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate'
                     : 'https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/get-pull-requests'
@@ -346,7 +347,7 @@ export function GiteaIntegrationCard(): React.JSX.Element {
               variant="outline"
               size="sm"
               onClick={() =>
-                window.api.shell.openUrl('https://docs.gitea.com/next/development/api-usage')
+                shellClient.shell.openUrl('https://docs.gitea.com/next/development/api-usage')
               }
             >
               <ExternalLink className="mr-1.5 size-3.5" />

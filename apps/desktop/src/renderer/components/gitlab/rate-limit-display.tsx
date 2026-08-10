@@ -7,9 +7,10 @@ import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
-import type { GetGitLabRateLimitResult, GitLabRateLimitSnapshot } from '~shared/types'
+import type { GitLabRateLimitSnapshot } from '~shared/types'
 
 const REFRESH_INTERVAL_MS = 60_000
 
@@ -59,15 +60,12 @@ export function useGitLabRateLimitSnapshot(options?: { autoRefresh?: boolean }):
       try {
         const target = getActiveRuntimeTarget(settings)
         const params = force ? { force: true } : undefined
-        const res =
-          target.kind === 'environment'
-            ? await callRuntimeRpc<GetGitLabRateLimitResult>(
-                target,
-                'gitlab.rateLimit',
-                params ?? {},
-                { timeoutMs: 30_000 }
-              )
-            : ((await window.api.gl.rateLimit(params)) as GetGitLabRateLimitResult | undefined)
+        const res = await callRuntimeOrpc(
+          target,
+          (client) => client.gitlab.rateLimit,
+          params ?? {},
+          { timeoutMs: 30_000 }
+        )
         if (token !== latestToken.current) {
           return
         }

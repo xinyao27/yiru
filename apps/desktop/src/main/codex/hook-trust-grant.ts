@@ -80,10 +80,6 @@ const diagnostics: CodexTrustGrantDiagnostics = {
 }
 const transientRetryAfterByHost = new Map<string, number>()
 
-export function getCodexTrustGrantDiagnostics(): CodexTrustGrantDiagnostics {
-  return { ...diagnostics }
-}
-
 type CodexTrustGrantTelemetry = (event: {
   outcome: 'granted' | 'fallback' | 'verify_failed'
   hostKind: 'native' | 'wsl'
@@ -94,10 +90,6 @@ type CodexTrustGrantTelemetry = (event: {
 // (and therefore the telemetry client) cannot load; the Electron main process
 // injects the tracker at startup instead of a static import.
 let telemetry: CodexTrustGrantTelemetry = () => {}
-
-export function setCodexTrustGrantTelemetry(tracker: CodexTrustGrantTelemetry): void {
-  telemetry = tracker
-}
 
 function emitTelemetry(event: Parameters<CodexTrustGrantTelemetry>[0]): void {
   try {

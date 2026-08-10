@@ -16,9 +16,9 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:pat
 import { promisify } from 'node:util'
 
 /* eslint-disable max-lines -- Why: this file centralizes cross-platform CLI install state, launcher resolution, and PATH registration so the public shell command stays consistent across packaged and development builds. */
-import { app } from 'electron'
 import type { CliInstallMethod, CliInstallStatus } from '~shared/cli-install-types'
 
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { buildAppImageCliWrapper } from './appimage-cli-wrapper'
 
 const execFileAsync = promisify(execFile)
@@ -77,12 +77,14 @@ export class CliInstaller {
   }
 
   constructor(options: CliInstallerOptions = {}) {
+    const pathsProvider = getRuntimeHostPathsProvider()
     this.platform = options.platform ?? process.platform
-    this.isPackaged = options.isPackaged ?? app.isPackaged
-    this.userDataPath = options.userDataPath ?? app.getPath('userData')
-    this.resourcesPath = options.resourcesPath ?? process.resourcesPath
-    this.execPathValue = options.execPath ?? process.execPath
-    this.appPathValue = options.appPath ?? app.getAppPath()
+    this.isPackaged = options.isPackaged ?? pathsProvider.isPackaged()
+    this.userDataPath = options.userDataPath ?? pathsProvider.userDataPath()
+    this.resourcesPath =
+      options.resourcesPath ?? pathsProvider.resourcesPath() ?? pathsProvider.appPath()
+    this.execPathValue = options.execPath ?? pathsProvider.executablePath()
+    this.appPathValue = options.appPath ?? pathsProvider.appPath()
     this.homePath = options.homePath ?? homedir()
     this.localAppDataPath =
       options.localAppDataPath ??

@@ -6,6 +6,7 @@ import {
 import type { MouseEvent, ReactElement, ReactNode } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 /** `px-3 py-1.5 text-xs` on the row below: 6 + 16 + 6. Pierre sizes unrendered
  *  rows from this, so it has to track the class list. */
@@ -51,7 +52,7 @@ export function DiffSectionHeader({
             event.stopPropagation()
             // Why: stop both mouse-down and click on the path affordance so
             // the parent section-toggle row cannot consume the interaction.
-            void window.api.ui.writeClipboardText(path).catch((error) => {
+            void shellClient.ui.writeClipboardText(path).catch((error) => {
               console.error('Failed to copy diff path:', error)
             })
           }}
@@ -61,7 +62,7 @@ export function DiffSectionHeader({
             }
             event.preventDefault()
             event.stopPropagation()
-            void window.api.ui.writeClipboardText(path).catch((error) => {
+            void shellClient.ui.writeClipboardText(path).catch((error) => {
               console.error('Failed to copy diff path:', error)
             })
           }}

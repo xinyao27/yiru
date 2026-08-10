@@ -41,6 +41,7 @@ import {
   getRuntimeGitDiff
 } from '~renderer/runtime/git-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
@@ -1225,7 +1226,7 @@ export default function CombinedDiffViewer({
       return
     }
     try {
-      await window.api.ui.writeClipboardText(diffCommentsPrompt)
+      await shellClient.ui.writeClipboardText(diffCommentsPrompt)
       if (!notesCopyMountedRef.current) {
         return
       }

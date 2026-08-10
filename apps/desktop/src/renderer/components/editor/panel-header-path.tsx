@@ -14,6 +14,7 @@ import { Input } from '~renderer/components/ui/input'
 import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../tab-bar/sortable-tab'
 import { getEditorHeaderCopyState } from './header'
@@ -158,7 +159,7 @@ export function EditorPanelHeaderPath({
           <>
             <ContextMenuItem
               onClick={() => {
-                void window.api.ui.writeClipboardText(activeFile.filePath)
+                void shellClient.ui.writeClipboardText(activeFile.filePath)
               }}
             >
               <Copy className="mr-1.5 h-3.5 w-3.5" />
@@ -166,7 +167,7 @@ export function EditorPanelHeaderPath({
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => {
-                void window.api.ui.writeClipboardText(activeFile.relativePath)
+                void shellClient.ui.writeClipboardText(activeFile.relativePath)
               }}
             >
               <Copy className="mr-1.5 h-3.5 w-3.5" />

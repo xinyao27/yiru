@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
+import { mkdir, readFile, readdir, realpath, rm, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { isAbsolute, join, resolve } from 'node:path'
 
@@ -14,6 +14,23 @@ import {
   RUNTIME_PROTOCOL_VERSION,
   type RuntimeCapability
 } from '@yiru/runtime-protocol/capabilities'
+import type {
+  RuntimeBrowserGuestEvent,
+  RuntimeDriverEvent,
+  RuntimeHostProgressEvent,
+  RuntimeAgentStatusEvent,
+  RuntimeEmulatorEvent,
+  RuntimeGitHubEvent,
+  RuntimeNestedRepoScanProgressEvent,
+  RuntimeRepoHooksCheckResult,
+  RuntimeSettingsChangedEvent,
+  RuntimeSkillUpdateRunEvent,
+  RuntimeSpeechEvent,
+  RuntimeSpeechOpenAiKeyStatus,
+  RuntimeUIChangedEvent,
+  RuntimeWorkspacePortAdvertisedUrlChangedEvent,
+  RuntimeWorktreeStateEvent
+} from '@yiru/runtime-protocol/contract'
 import type {
   RuntimeWorktreeAgentRow,
   RuntimeSpeechModelSummary,
@@ -44,7 +61,8 @@ import type {
   CreateHostedReviewResult,
   HostedReviewCreationEligibility,
   HostedReviewCreationEligibilityArgs,
-  HostedReviewInfo
+  HostedReviewInfo,
+  PRRefreshOutcome
 } from '@yiru/workbench-model/review'
 import {
   applyTerminalQuickCommandMutation,
@@ -67,7 +85,8 @@ import {
   splitWorktreeId,
   splitWorktreeIdForFilesystem
 } from '@yiru/workbench-model/workspace'
-import { BrowserWindow, ipcMain } from 'electron'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
+import type { RuntimeWindowTarget } from '~main/runtime/host/renderer-target'
 /* eslint-disable max-lines -- Why: YiruRuntimeService still coordinates terminal output analysis, mobile session projections, worktree lifecycle, and automation. Terminal session state now lives behind TerminalSessionAuthority; later tickets split the remaining workflows before enforcing max-lines. */
 /* eslint-disable unicorn/no-useless-spread -- Why: waiter sets and handle keys are cloned intentionally before mutation so resolution and rejection can safely remove entries while iterating. */
 /* eslint-disable no-control-regex -- Why: terminal normalization must strip ANSI and OSC control sequences from PTY output before returning bounded text to agents. */
@@ -149,10 +168,25 @@ import {
   getProjectHostSetupForRepo,
   getProjectHostSetupWorktreeMeta
 } from '~shared/project-host-setup-projection'
-import type { RateLimitState } from '~shared/rate-limit-types'
+import type {
+  RateLimitBannerReport,
+  RateLimitHit,
+  RateLimitResumeSchedule
+} from '~shared/rate-limit-resume/types'
+import type {
+  CodexRateLimitResetResult,
+  CursorRateLimitRefreshContext,
+  RateLimitRuntimeTarget,
+  RateLimitState
+} from '~shared/rate-limit-types'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { RuntimeClientEvent } from '~shared/runtime-client-events'
 import { toRuntimeActivateWorktreeEvent } from '~shared/runtime-client-events'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '~shared/runtime-method-contract'
 import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import type {
   RuntimeRepoSearchRefs,
@@ -198,7 +232,6 @@ import type {
   RuntimeMobileSessionTabsRemovedResult,
   RuntimeMobileSessionTabsResult,
   RuntimeMobileSessionTabsSnapshot,
-  RuntimeBrowserDriverState,
   RuntimeTerminalDriverState,
   RuntimeSyncWindowGraph,
   RuntimeWorktreeListResult,
@@ -217,6 +250,7 @@ import { inspectSetupScriptImportCandidates } from '~shared/setup/script-imports
 import type { VoiceSettings } from '~shared/speech-types'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
 import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 import {
   isTerminalInputTooLargeWithYield,
@@ -276,6 +310,7 @@ import type {
   WorktreeLineageWarning,
   WorktreeMeta,
   WorktreeBaseStatusEvent,
+  WorktreeHeadIdentity,
   WorktreeRemoteBranchConflictEvent,
   WorktreeStartupLaunch,
   NestedRepoScanResult,
@@ -303,7 +338,17 @@ import type {
   ListWorkItemsResult,
   MRListState
 } from '~shared/types'
-import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '~shared/types'
+import type {
+  ClaudeRateLimitAccountsState,
+  CodexRateLimitAccountsState,
+  GhosttyImportPreview
+} from '~shared/types'
+import type {
+  WorkspaceCleanupDismissal,
+  WorkspaceCleanupScanArgs,
+  WorkspaceCleanupScanProgress,
+  WorkspaceCleanupScanResult
+} from '~shared/workspace/cleanup'
 import type {
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
@@ -317,6 +362,10 @@ import {
   worktreeWorkspaceKey
 } from '~shared/workspace/scope'
 import { closeTerminalTabInWorkspaceSession } from '~shared/workspace/session-terminal-tab-close'
+import type {
+  WorkspaceSpaceAnalyzeResult,
+  WorkspaceSpaceScanProgress
+} from '~shared/workspace/space-types'
 import { DEFAULT_WORKSPACE_STATUS_ID } from '~shared/workspace/statuses'
 import { resolveWorktreeAddBaseRef } from '~shared/workspace/worktree-base-ref'
 import {
@@ -326,6 +375,7 @@ import {
 } from '~shared/workspace/worktree-ownership'
 import { assertWorktreeUnlockedForRemoval } from '~shared/workspace/worktree-removal'
 
+import { readBranchRenameFailureOutputForDisplay } from '../agent-hooks/branch-rename-failure-output'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   markCodexProjectTrusted,
@@ -340,19 +390,15 @@ import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-confi
 import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'
+import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
 import type { ClaudeAccountService } from '../claude/accounts/service'
+import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
 import type { CodexAccountService } from '../codex/accounts/service'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
 import type { EmulatorBridge } from '../emulator/bridge'
-import { isENOENT } from '../filesystem/auth'
-import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
-import {
-  closeLocalWatcherForWorktreePath,
-  forgetLocalWatcherRemovalSnapshot,
-  restoreLocalWatcherAfterFailedRemoval
-} from '../filesystem/watcher'
+import { invalidateAuthorizedRootsCache, isENOENT, resolveAuthorizedPath } from '../filesystem/auth'
 import { acquireWatcherRemovalGate } from '../filesystem/watcher-removal-gate'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
 import {
@@ -390,6 +436,7 @@ import type { AddWorktreeOptions, AddWorktreeResult } from '../git/worktree'
 import { hasWorktreeBaseCommitRef } from '../git/worktree-base-ref-probe'
 import {
   getPRForBranch,
+  getPRForBranchOutcome,
   getRepoSlug,
   getRepoUpstream,
   getWorkItem,
@@ -423,12 +470,17 @@ import { getWorkItemDetails, getPRFileContents } from '../github/work-item-detai
 import {
   closeMR as closeGitLabMR,
   diagnoseAuth as diagnoseGitLabAuthClient,
+  getAuthenticatedViewer as getGitLabViewerClient,
   getJobTrace as getGitLabJobTrace,
+  getMergeRequest as getGitLabMR,
+  getMergeRequestForBranch as getGitLabMRForBranch,
   getProjectRefForRemote as getGitLabProjectRefForRemote,
+  getProjectSlug as getGitLabProjectSlug,
   getRateLimit as getGitLabRateLimit,
   getWorkItemByProjectRef as getGitLabWorkItemByProjectRef,
   addMRInlineComment as addGitLabMRInlineComment,
   addMRComment as addGitLabMRComment,
+  listAssignableUsers as listGitLabAssignableUsers,
   listLabels as listGitLabLabels,
   listMergeRequests as listGitLabMergeRequests,
   mergeMR as mergeGitLabMR,
@@ -463,7 +515,8 @@ import {
   removeStaleLocalWorktreeRegistrationAfterFilesystemRemoval,
   recoverLocalWindowsWorktreeRemoval
 } from '../local-worktree-removal-recovery'
-import { collectMemorySnapshot } from '../memory/collector'
+import { collectMemorySnapshot, type RuntimeHostProcessMetricsProvider } from '../memory/collector'
+import { NotificationCooldownTracker } from '../notifications/notification-cooldown-tracker'
 import type { Store } from '../persistence'
 import { advertisedUrlWatcher } from '../ports/advertised-url-watcher'
 import {
@@ -484,6 +537,13 @@ import {
 } from '../project-groups/nested-repo-import'
 import { createNestedRepoImportTargetResolver } from '../project-groups/nested-repo-import-target'
 import {
+  beginTrackedNestedRepoScan,
+  cancelTrackedNestedRepoScan,
+  endTrackedNestedRepoScan,
+  getCompletedNestedRepoScan,
+  rememberCompletedNestedRepoScan
+} from '../project-groups/nested-repo-scan-registry'
+import {
   getLocalProjectGitExecOptions,
   getLocalProjectWorktreeGitOptions,
   getLocalProjectWorktreeGitOptionsForRuntime,
@@ -492,6 +552,7 @@ import {
 } from '../project-runtime-git-options'
 import type { PtyProviderBufferSnapshot } from '../providers/types'
 import type { IPtyProvider, PtyProcessInfo, PtyTransientFact } from '../providers/types'
+import type { RateLimitResumeService } from '../rate-limit-resume/service'
 import type { RateLimitService } from '../rate-limits/service'
 import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identity-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
@@ -505,6 +566,11 @@ import {
 import { normalizeSparseDirectories } from '../sparse-checkout-directories'
 import { getCatalogModel, isLocalSpeechModel, SPEECH_MODEL_CATALOG } from '../speech/model-catalog'
 import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../speech/model-deletion'
+import {
+  clearOpenAiSpeechApiKey,
+  hasOpenAiSpeechApiKey,
+  saveOpenAiSpeechApiKey
+} from '../speech/openai-api-key-store'
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
@@ -512,10 +578,16 @@ import { buildStatsSummary, type StatsUsageStores } from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
+  clearWorkspaceCleanupDismissals as clearWorkspaceCleanupDismissalsInStore,
+  dismissWorkspaceCleanupCandidates as dismissWorkspaceCleanupCandidatesInStore,
+  scanWorkspaceCleanup as runWorkspaceCleanupScan
+} from '../workspace-cleanup/workspace-cleanup'
+import {
   findWorkspaceOpenWorktree,
   resolveWorkspaceOpenDirectoryPath,
   WorkspacePathOpenError
 } from '../workspace-path-opening'
+import { cancelInFlightWorkspaceSpaceScan, startOrJoinWorkspaceSpaceScan } from '../workspace-space'
 import { resolveWorktreeCreateBase } from '../worktree-create-base'
 import { prefetchWorktreeCreateBase } from '../worktree-create-base-prefetch'
 import {
@@ -608,6 +680,16 @@ import {
 } from './orchestration/setup-completion-signal'
 import { selectExactWorkerProviderSession } from './orchestration/worker-provider-session'
 import { joinWorktreeRelativePath } from './relative-paths'
+import type { ShellServicesConnectionId } from './rpc/orpc/shell-services-identity'
+import {
+  dispatchShellUICommand,
+  readMobileMarkdownViaShell,
+  requestShellTerminalCloseTab,
+  requestShellTerminalCreate,
+  requestShellTerminalMount,
+  requestShellTerminalReveal,
+  saveMobileMarkdownViaShell
+} from './rpc/orpc/shell-services-reverse-link'
 import { MOBILE_SUBSCRIBE_SCROLLBACK_ROWS } from './scrollback-limits'
 import {
   isNativeWindowsConptyPty,
@@ -626,7 +708,7 @@ import {
   registerTerminalViewAttributesApplier
 } from './terminal-view-attribute-store'
 import { killAllProcessesForWorktree } from './worktree-teardown'
-import { RuntimeBrowserCommands } from './yiru-runtime-browser'
+import type { RuntimeBrowserCommandHost, RuntimeBrowserCommands } from './yiru-runtime-browser'
 import { RuntimeEmulatorCommands, setEmulatorBridge } from './yiru-runtime-emulator'
 import { RuntimeFileCommands } from './yiru-runtime-files'
 import { RuntimeGitCommands } from './yiru-runtime-git'
@@ -703,8 +785,10 @@ type RuntimeStore = {
   createAutomation?: Store['createAutomation']
   updateAutomation?: Store['updateAutomation']
   deleteAutomation?: Store['deleteAutomation']
+  snapshotAutomationRunWorkspaceDisplayName?: Store['snapshotAutomationRunWorkspaceDisplayName']
   getSparsePresets?: Store['getSparsePresets']
   saveSparsePreset?: Store['saveSparsePreset']
+  removeSparsePreset?: Store['removeSparsePreset']
   getSettings(): {
     workspaceDir: string
     nestWorkspaces: boolean
@@ -734,6 +818,7 @@ type RuntimeStore = {
     terminalMainSideEffectAuthority?: GlobalSettings['terminalMainSideEffectAuthority']
     terminalHiddenDeliveryGate?: GlobalSettings['terminalHiddenDeliveryGate']
     terminalModelQueryAuthority?: GlobalSettings['terminalModelQueryAuthority']
+    notifications?: GlobalSettings['notifications']
   }
   // The runtime never reads the return value; it reads persisted settings on
   // the next access.
@@ -1174,109 +1259,6 @@ function resolveTerminalPresentation(opts: {
     return 'focused'
   }
   return undefined
-}
-
-type RuntimeNotifier = {
-  worktreesChanged(repoId: string, renamed?: { oldWorktreeId: string; newWorktreeId: string }): void
-  worktreeBaseStatus?(event: WorktreeBaseStatusEvent): void
-  worktreeRemoteBranchConflict?(event: WorktreeRemoteBranchConflictEvent): void
-  reposChanged(): void
-  activateWorktree(
-    repoId: string,
-    worktreeId: string,
-    setup?: CreateWorktreeResult['setup'],
-    startup?: WorktreeStartupLaunch,
-    defaultTabs?: CreateWorktreeResult['defaultTabs']
-  ): void
-  createTerminal(
-    worktreeId: string,
-    opts: {
-      command?: string
-      cwd?: string
-      env?: Record<string, string>
-      title?: string
-      presentation?: RuntimeTerminalPresentation
-    }
-  ): void
-  revealTerminalSession?(
-    worktreeId: string,
-    opts: {
-      ptyId: string
-      title?: string | null
-      cwd?: string
-      launchConfig?: SleepingAgentLaunchConfig
-      launchToken?: string
-      launchAgent?: TuiAgent
-      viewMode?: 'terminal' | 'chat'
-      isFriday?: boolean
-      activate?: boolean
-      presentation?: RuntimeTerminalPresentation
-      tabId?: string
-      leafId?: string
-      splitFromLeafId?: string
-      splitDirection?: 'horizontal' | 'vertical'
-      splitTelemetrySource?: TerminalPaneSplitSource
-    }
-  ):
-    | Promise<{ tabId: string; title?: string | null }>
-    | { tabId: string; title?: string | null }
-    | void
-  splitTerminal(
-    tabId: string,
-    paneRuntimeId: number,
-    opts: {
-      direction: 'horizontal' | 'vertical'
-      command?: string
-      telemetrySource?: TerminalPaneSplitSource
-    }
-  ): void
-  renameTerminal(tabId: string, title: string | null): void
-  focusTerminal(tabId: string, worktreeId: string, leafId?: string | null): void
-  focusEditorTab?(tabId: string, worktreeId: string): void
-  closeSessionTab?(tabId: string, worktreeId: string): void
-  moveSessionTab?(worktreeId: string, move: RuntimeMobileSessionTabMove): void
-  openFile?(
-    worktreeId: string,
-    filePath: string,
-    relativePath: string,
-    runtimeEnvironmentId?: string | null
-  ): void
-  openDiff?(
-    worktreeId: string,
-    filePath: string,
-    relativePath: string,
-    staged: boolean,
-    runtimeEnvironmentId?: string | null
-  ): void
-  readMobileMarkdownTab?(worktreeId: string, tabId: string): Promise<RuntimeMarkdownReadTabResult>
-  saveMobileMarkdownTab?(
-    worktreeId: string,
-    tabId: string,
-    baseVersion: string,
-    content: string
-  ): Promise<RuntimeMarkdownSaveTabResult>
-  closeTerminal(tabId: string, paneRuntimeId?: number): void
-  closeTerminalTab?(tabId: string): Promise<void>
-  sleepWorktree(worktreeId: string): void
-  // Why: a phone opening a worktree wakes its slept agents by asking the host
-  // renderer to run its own navigation-free wake (experimental agent sleep);
-  // the runtime has no in-memory sleeping records or wake authority. Optional to
-  // match the many renderer-backed notifier methods only the real bridge wires.
-  resumeSleepingAgents?(worktreeId: string): void
-  terminalFitOverrideChanged(
-    ptyId: string,
-    mode: 'mobile-fit' | 'remote-desktop-fit' | 'desktop-fit',
-    cols: number,
-    rows: number
-  ): void
-  // Why: presence-based lock signal — desktop renderer mounts the lock
-  // banner when `driver.kind === 'mobile'` and unmounts otherwise. The
-  // structured payload (vs a `locked: boolean`) carries the active mobile
-  // actor's clientId so the renderer can disambiguate multi-phone scenarios
-  // and so a future write coordinator can use the same signal as scheduling
-  // input. See docs/mobile-presence-lock.md.
-  terminalDriverChanged(ptyId: string, driver: DriverState): void
-  browserDriverChanged?(browserPageId: string, driver: RuntimeBrowserDriverState): void
 }
 
 type TerminalHandleRecord = {
@@ -1911,6 +1893,16 @@ async function hasLocalWorktreeBaseRef(
   )
 }
 
+function createUnavailableBrowserCommands(): RuntimeBrowserCommands {
+  const unavailable = (): never => {
+    throw new Error('browser_unavailable')
+  }
+  return new Proxy<Record<string, never>>(
+    {},
+    { get: () => unavailable }
+  ) as unknown as RuntimeBrowserCommands
+}
+
 export class YiruRuntimeService {
   private readonly runtimeId = randomUUID()
   private readonly startedAt = Date.now()
@@ -1953,16 +1945,38 @@ export class YiruRuntimeService {
       this.notifyMobileSessionTabsChangedNow(worktreeId)
     )
   private ptyController: RuntimePtyController | null = null
-  private notifier: RuntimeNotifier | null = null
+  private shellConnectionId: ShellServicesConnectionId | null = null
   private clientEventListeners = new Set<(event: RuntimeClientEvent) => void>()
+  private browserGuestEventListeners = new Set<(event: RuntimeBrowserGuestEvent) => void>()
+  private driverEventListeners = new Set<(event: RuntimeDriverEvent) => void>()
+  private hostProgressEventListeners = new Set<(event: RuntimeHostProgressEvent) => void>()
+  private worktreeStateEventListeners = new Set<(event: RuntimeWorktreeStateEvent) => void>()
+  private githubEventListeners = new Set<(event: RuntimeGitHubEvent) => void>()
+  private settingsEventListeners = new Set<(event: RuntimeSettingsChangedEvent) => void>()
+  private workspacePortEventListeners = new Set<
+    (event: RuntimeWorkspacePortAdvertisedUrlChangedEvent) => void
+  >()
+  private uiEventListeners = new Set<(event: RuntimeUIChangedEvent) => void>()
+  private agentStatusEventListeners = new Set<(event: RuntimeAgentStatusEvent) => void>()
+  private speechEventListeners = new Set<(event: RuntimeSpeechEvent) => void>()
+  private skillUpdateRunEventListeners = new Set<(event: RuntimeSkillUpdateRunEvent) => void>()
+  private emulatorEventListeners = new Set<(event: RuntimeEmulatorEvent) => void>()
+  private nestedRepoScanEventListeners = new Set<
+    (event: RuntimeNestedRepoScanProgressEvent) => void
+  >()
+  private workspaceCleanupScanEventListeners = new Set<
+    (event: WorkspaceCleanupScanProgress) => void
+  >()
+  private workspaceSpaceScanEventListeners = new Set<(event: WorkspaceSpaceScanProgress) => void>()
   private forkBackfillStarted = false
   private agentBrowserBridge: AgentBrowserBridge | null = null
-  private offscreenBrowserBackend: BrowserBackend | null = null
+  private browserBackend: BrowserBackend | null = null
   private emulatorBridge: EmulatorBridge | null = null
   private resolvedWorktreeCache: ResolvedWorktreeCache | null = null
   private resolvedWorktreeInFlight: ResolvedWorktreeInFlight | null = null
   private resolvedWorktreeGeneration = 0
   private cloneInFlightByPath = new Map<string, Promise<void>>()
+  private activeRepoClone: ReturnType<typeof gitSpawn> | null = null
   // Why: two simultaneous `yiru .` requests must share the second request's
   // post-registration lookup instead of racing duplicate repo records into disk.
   private workspacePathOpenTail: Promise<void> = Promise.resolve()
@@ -2078,7 +2092,16 @@ export class YiruRuntimeService {
   private readonly getAgentStatusSnapshotFn: (() => AgentStatusIpcPayload[]) | null
   private readonly buildAgentHookPtyEnv: (() => Record<string, string>) | null
   private readonly getDesktopWindowStatusFn: () => RuntimeDesktopWindowStatus
+  private readonly getWindowByIdFn: (windowId: number) => RuntimeWindowTarget | null
+  private readonly getHostProcessMetricsFn: RuntimeHostProcessMetricsProvider | undefined
+  private readonly browserCommandsValue: RuntimeBrowserCommands
+  private readonly disabledCapabilities: ReadonlySet<RuntimeCapability>
+  private readonly previewGhosttyImportForClientFn: (() => Promise<GhosttyImportPreview>) | null
+  private readonly previewWarpThemeImportForClientFn:
+    | ((source: WarpThemeImportSource) => Promise<WarpThemeImportPreview>)
+    | null
   private accountServices: RuntimeAccountServices | null = null
+  private rateLimitResumeService: RateLimitResumeService | null = null
   private commitMessageAgentEnv: CommitMessageAgentEnvironmentResolvers | null = null
   private automationService: AutomationService | null = null
   private readonly claudeAgentTeams = new ClaudeAgentTeamsService()
@@ -2092,6 +2115,11 @@ export class YiruRuntimeService {
     finalTexts: string[]
     errors: string[]
   } | null = null
+  // Why: `ModelManager.setProgressCallback` accepts multiple concurrent
+  // listeners, but this relay only needs to exist once for the runtime's
+  // lifetime — it forwards every download's progress (local or mobile-
+  // triggered, the manager is a shared singleton) to `speech.events.subscribe`.
+  private speechDownloadProgressRelayRegistered = false
 
   constructor(
     store: RuntimeStore | null = null,
@@ -2113,6 +2141,19 @@ export class YiruRuntimeService {
       ) => Promise<readonly string[]>
       buildAgentHookPtyEnv?: () => Record<string, string>
       getDesktopWindowStatus?: () => RuntimeDesktopWindowStatus
+      getWindowById?: (windowId: number) => RuntimeWindowTarget | null
+      getHostProcessMetrics?: RuntimeHostProcessMetricsProvider
+      createBrowserCommands?: (host: RuntimeBrowserCommandHost) => RuntimeBrowserCommands
+      disabledCapabilities?: readonly RuntimeCapability[]
+      // Why: Ghostty/Warp import preview need the full local `Store` (this
+      // runtime's own `getSettings()` projection omits most of the settings
+      // fields they diff against) plus, for Warp's `chooseFile`/`chooseFolder`
+      // sources, an Electron dialog — both are shell-owned capabilities the
+      // headless-safe runtime cannot reach on its own.
+      previewGhosttyImportForClient?: () => Promise<GhosttyImportPreview>
+      previewWarpThemeImportForClient?: (
+        source: WarpThemeImportSource
+      ) => Promise<WarpThemeImportPreview>
       statsUsageStores?: StatsUsageStores
       orchestrationEnvironmentTransport?: OrchestrationEnvironmentTransport
     }
@@ -2122,12 +2163,15 @@ export class YiruRuntimeService {
       rejectHandle: (handle) => this.rejectWaitersForHandle(handle, 'terminal_handle_stale'),
       rejectAllHandles: () => this.rejectAllWaiters('terminal_handle_stale'),
       notifyRemoteViewPresence: (ptyId) => this.notifyRemoteTerminalViewPresenceChanged(ptyId),
-      notifyDriverChanged: (ptyId, driver) => this.notifier?.terminalDriverChanged(ptyId, driver),
+      notifyDriverChanged: (ptyId, driver) => {
+        this.emitDriverEvent({ type: 'terminalDriverChanged', ptyId, driver })
+      },
       getPtySize: (ptyId) => this.getTerminalSize(ptyId),
       resizePty: (ptyId, cols, rows) => this.ptyController?.resize?.(ptyId, cols, rows) ?? true,
       resizeHeadlessTerminal: (ptyId, cols, rows) => this.resizeHeadlessTerminal(ptyId, cols, rows),
-      notifyFitOverride: (ptyId, mode, cols, rows) =>
-        this.notifier?.terminalFitOverrideChanged(ptyId, mode, cols, rows)
+      notifyFitOverride: (ptyId, mode, cols, rows) => {
+        this.emitDriverEvent({ type: 'terminalFitOverrideChanged', ptyId, mode, cols, rows })
+      }
     })
     if (stats) {
       this.stats = stats
@@ -2155,6 +2199,14 @@ export class YiruRuntimeService {
     this.onTerminalAgentStatus = deps?.onTerminalAgentStatus ?? null
     this.buildAgentHookPtyEnv = deps?.buildAgentHookPtyEnv ?? null
     this.getDesktopWindowStatusFn = deps?.getDesktopWindowStatus ?? (() => 'openable')
+    this.getWindowByIdFn = deps?.getWindowById ?? (() => null)
+    this.getHostProcessMetricsFn = deps?.getHostProcessMetrics
+    this.disabledCapabilities = new Set(deps?.disabledCapabilities)
+    this.browserCommandsValue =
+      deps?.createBrowserCommands?.(this.createBrowserCommandHost()) ??
+      createUnavailableBrowserCommands()
+    this.previewGhosttyImportForClientFn = deps?.previewGhosttyImportForClient ?? null
+    this.previewWarpThemeImportForClientFn = deps?.previewWarpThemeImportForClient ?? null
     this.onTerminalSideEffects = deps?.onTerminalSideEffects ?? null
     // Why: the ConPTY spawn mark can land after daemon stream data already
     // created this PTY's emulator; the mark retrofits the DA1 override here
@@ -2211,7 +2263,7 @@ export class YiruRuntimeService {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
-    return collectMemorySnapshot(this.store)
+    return collectMemorySnapshot(this.store, this.getHostProcessMetricsFn)
   }
 
   getUIState(): PersistedUIState {
@@ -2341,6 +2393,20 @@ export class YiruRuntimeService {
       { notifyListeners: true }
     )
     return this.getClientSettings()
+  }
+
+  previewGhosttyImportForClient(): Promise<GhosttyImportPreview> {
+    if (!this.previewGhosttyImportForClientFn) {
+      return Promise.resolve({ found: false, diff: {}, unsupportedKeys: [] })
+    }
+    return this.previewGhosttyImportForClientFn()
+  }
+
+  previewWarpThemeImportForClient(source: WarpThemeImportSource): Promise<WarpThemeImportPreview> {
+    if (!this.previewWarpThemeImportForClientFn) {
+      return Promise.resolve({ found: false, themes: [], skippedFiles: [] })
+    }
+    return this.previewWarpThemeImportForClientFn(source)
   }
 
   listAutomations(): Automation[] {
@@ -2473,6 +2539,13 @@ export class YiruRuntimeService {
     return { removed: true, id }
   }
 
+  snapshotAutomationWorkspaceName(workspaceId: string, displayName: string): number {
+    if (!this.store?.snapshotAutomationRunWorkspaceDisplayName) {
+      throw new Error('runtime_unavailable')
+    }
+    return this.store.snapshotAutomationRunWorkspaceDisplayName(workspaceId, displayName)
+  }
+
   async runAutomationNow(id: string): Promise<AutomationRun> {
     if (!this.automationService) {
       throw new Error('runtime_unavailable')
@@ -2537,8 +2610,7 @@ export class YiruRuntimeService {
   // to inject an in-memory DB without touching the filesystem.
   getOrchestrationDb(): OrchestrationDb {
     if (!this._orchestrationDb) {
-      const { app } = require('electron')
-      const dbPath = join(app.getPath('userData'), 'orchestration.db')
+      const dbPath = join(getRuntimeHostPathsProvider().userDataPath(), 'orchestration.db')
       this._orchestrationDb = new OrchestrationDb(dbPath)
     }
     return this._orchestrationDb
@@ -2566,19 +2638,20 @@ export class YiruRuntimeService {
     return this.orchestrationEnvironmentTransport.resolve(selector)
   }
 
-  async callOrchestrationWorkerServer(
+  async callOrchestrationWorkerServer<TContract extends string | RuntimeMethodContract>(
     selector: string,
-    method: string,
-    params: unknown,
+    contract: TContract,
+    params: TContract extends RuntimeMethodContract ? RuntimeMethodParams<TContract> : unknown,
     timeoutMs?: number,
     envelope?: RuntimeOrchestrationEnvelope
-  ): Promise<unknown> {
+  ): Promise<TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown> {
     if (!this.orchestrationEnvironmentTransport) {
       throw new OrchestrationError(
         'server_required',
         'Coworking orchestration is unavailable in this runtime host.'
       )
     }
+    const method = typeof contract === 'string' ? contract : contract.name
     if (isOrchestrationMutation(method, params)) {
       const statusResponse = await this.orchestrationEnvironmentTransport.call(
         selector,
@@ -2604,7 +2677,7 @@ export class YiruRuntimeService {
     }
     const response = await this.orchestrationEnvironmentTransport.call(
       selector,
-      method,
+      contract,
       params,
       timeoutMs,
       method.startsWith('orchestration.')
@@ -2692,28 +2765,33 @@ export class YiruRuntimeService {
 
   getStatus(): RuntimeStatus {
     // Why: browser panes need a backend that can create and stream a page. A
-    // desktop renderer provides one via <webview>; a headless serve provides one
-    // via the offscreen backend. Either way the same browser.screencast.v1 path
+    // desktop renderer provides one via <webview>; a headless host provides one
+    // via its configured backend. Either way the same browser.screencast.v1 path
     // works, so advertise it when either is present. browser.headless.v1
     // additionally tells clients this host owns browser pages with no renderer,
     // so they must not fall back to a local desktop browser tab.
     const hasRenderer = Boolean(this.getAvailableAuthoritativeWindow())
-    const hasOffscreen = !hasRenderer && Boolean(this.offscreenBrowserBackend)
-    const canBrowse = hasRenderer || hasOffscreen
+    const hasHeadlessBrowser = !hasRenderer && Boolean(this.browserBackend)
+    const canBrowse = hasRenderer || hasHeadlessBrowser
     const capabilities: RuntimeCapability[] = RUNTIME_CAPABILITIES.filter(
-      (capability) => capability !== 'browser.screencast.v1' || canBrowse
+      (capability) =>
+        !this.disabledCapabilities.has(capability) &&
+        (capability !== 'browser.screencast.v1' || canBrowse)
     )
-    if (hasOffscreen) {
+    if (hasHeadlessBrowser && !this.disabledCapabilities.has(BROWSER_HEADLESS_RUNTIME_CAPABILITY)) {
       capabilities.push(BROWSER_HEADLESS_RUNTIME_CAPABILITY)
     }
-    if (hasRenderer) {
+    if (
+      hasRenderer &&
+      !this.disabledCapabilities.has(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)
+    ) {
       // Why: opening VS Code is a desktop-host side effect unavailable to headless serve.
       capabilities.push(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)
     }
     // Why: certificate proceed is owned by the browser-hosting process for both
     // desktop webviews and offscreen pages. Advertise whenever either backend
     // can host a page so remote clients can surface Proceed Anyway (Unsafe).
-    if (canBrowse) {
+    if (canBrowse && !this.disabledCapabilities.has(BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY)) {
       capabilities.push(BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY)
     }
     const graph = this.terminalSessions.getGraphState()
@@ -2752,14 +2830,26 @@ export class YiruRuntimeService {
     this.ptyController = controller
   }
 
-  setNotifier(notifier: RuntimeNotifier | null): void {
-    this.notifier = notifier
+  attachShellConnection(shellConnectionId: ShellServicesConnectionId): void {
+    this.shellConnectionId = shellConnectionId
+    this.rateLimitResumeService?.setShellConnectionId(shellConnectionId)
     // Why: run the one-shot fork-upstream backfill once a renderer is attached,
     // so existing forks self-correct on launch and the result can be broadcast.
-    if (notifier && !this.forkBackfillStarted) {
+    if (!this.forkBackfillStarted) {
       this.forkBackfillStarted = true
       void this.backfillForkUpstreams()
     }
+  }
+
+  detachShellConnection(shellConnectionId: ShellServicesConnectionId): void {
+    if (this.shellConnectionId === shellConnectionId) {
+      this.shellConnectionId = null
+    }
+    this.rateLimitResumeService?.clearShellConnectionId(shellConnectionId)
+  }
+
+  private dispatchShellCommand(input: Parameters<typeof dispatchShellUICommand>[1]): boolean {
+    return dispatchShellUICommand(this.shellConnectionId ?? undefined, input)
   }
 
   onClientEvent(listener: (event: RuntimeClientEvent) => void): () => void {
@@ -2775,22 +2865,247 @@ export class YiruRuntimeService {
     }
   }
 
+  onEmulatorEvent(listener: (event: RuntimeEmulatorEvent) => void): () => void {
+    this.emulatorEventListeners.add(listener)
+    return () => {
+      this.emulatorEventListeners.delete(listener)
+    }
+  }
+
+  emitEmulatorEvent(event: RuntimeEmulatorEvent): void {
+    for (const listener of this.emulatorEventListeners) {
+      listener(event)
+    }
+  }
+
+  onAgentStatusEvent(listener: (event: RuntimeAgentStatusEvent) => void): () => void {
+    this.agentStatusEventListeners.add(listener)
+    return () => {
+      this.agentStatusEventListeners.delete(listener)
+    }
+  }
+
+  emitAgentStatusEvent(event: RuntimeAgentStatusEvent): void {
+    for (const listener of this.agentStatusEventListeners) {
+      listener(event)
+    }
+  }
+
+  onSpeechEvent(listener: (event: RuntimeSpeechEvent) => void): () => void {
+    this.speechEventListeners.add(listener)
+    return () => {
+      this.speechEventListeners.delete(listener)
+    }
+  }
+
+  emitSpeechEvent(event: RuntimeSpeechEvent): void {
+    for (const listener of this.speechEventListeners) {
+      listener(event)
+    }
+  }
+
+  onSkillUpdateRunEvent(listener: (event: RuntimeSkillUpdateRunEvent) => void): () => void {
+    this.skillUpdateRunEventListeners.add(listener)
+    return () => {
+      this.skillUpdateRunEventListeners.delete(listener)
+    }
+  }
+
+  emitSkillUpdateRunEvent(event: RuntimeSkillUpdateRunEvent): void {
+    for (const listener of this.skillUpdateRunEventListeners) {
+      listener(event)
+    }
+  }
+
+  onSettingsChangedEvent(listener: (event: RuntimeSettingsChangedEvent) => void): () => void {
+    this.settingsEventListeners.add(listener)
+    return () => {
+      this.settingsEventListeners.delete(listener)
+    }
+  }
+
+  emitSettingsChangedEvent(event: RuntimeSettingsChangedEvent): void {
+    for (const listener of this.settingsEventListeners) {
+      listener(event)
+    }
+  }
+
+  onWorkspacePortAdvertisedUrlChangedEvent(
+    listener: (event: RuntimeWorkspacePortAdvertisedUrlChangedEvent) => void
+  ): () => void {
+    this.workspacePortEventListeners.add(listener)
+    return () => {
+      this.workspacePortEventListeners.delete(listener)
+    }
+  }
+
+  emitWorkspacePortAdvertisedUrlChangedEvent(
+    event: RuntimeWorkspacePortAdvertisedUrlChangedEvent
+  ): void {
+    for (const listener of this.workspacePortEventListeners) {
+      listener(event)
+    }
+  }
+
+  onUIChangedEvent(listener: (event: RuntimeUIChangedEvent) => void): () => void {
+    this.uiEventListeners.add(listener)
+    return () => {
+      this.uiEventListeners.delete(listener)
+    }
+  }
+
+  emitUIChangedEvent(event: RuntimeUIChangedEvent): void {
+    for (const listener of this.uiEventListeners) {
+      listener(event)
+    }
+  }
+
+  onGitHubEvent(listener: (event: RuntimeGitHubEvent) => void): () => void {
+    this.githubEventListeners.add(listener)
+    return () => {
+      this.githubEventListeners.delete(listener)
+    }
+  }
+
+  emitGitHubEvent(event: RuntimeGitHubEvent): void {
+    for (const listener of this.githubEventListeners) {
+      listener(event)
+    }
+  }
+
+  onWorktreeStateEvent(listener: (event: RuntimeWorktreeStateEvent) => void): () => void {
+    this.worktreeStateEventListeners.add(listener)
+    return () => {
+      this.worktreeStateEventListeners.delete(listener)
+    }
+  }
+
+  emitWorktreeStateEvent(event: RuntimeWorktreeStateEvent): void {
+    for (const listener of this.worktreeStateEventListeners) {
+      listener(event)
+    }
+  }
+
+  onHostProgressEvent(listener: (event: RuntimeHostProgressEvent) => void): () => void {
+    this.hostProgressEventListeners.add(listener)
+    return () => {
+      this.hostProgressEventListeners.delete(listener)
+    }
+  }
+
+  emitHostProgressEvent(event: RuntimeHostProgressEvent): void {
+    for (const listener of this.hostProgressEventListeners) {
+      listener(event)
+    }
+  }
+
+  onNestedRepoScanProgressEvent(
+    listener: (event: RuntimeNestedRepoScanProgressEvent) => void
+  ): () => void {
+    this.nestedRepoScanEventListeners.add(listener)
+    return () => {
+      this.nestedRepoScanEventListeners.delete(listener)
+    }
+  }
+
+  private emitNestedRepoScanProgressEvent(event: RuntimeNestedRepoScanProgressEvent): void {
+    for (const listener of this.nestedRepoScanEventListeners) {
+      listener(event)
+    }
+  }
+
+  onWorkspaceCleanupScanProgressEvent(
+    listener: (event: WorkspaceCleanupScanProgress) => void
+  ): () => void {
+    this.workspaceCleanupScanEventListeners.add(listener)
+    return () => {
+      this.workspaceCleanupScanEventListeners.delete(listener)
+    }
+  }
+
+  private emitWorkspaceCleanupScanProgressEvent(event: WorkspaceCleanupScanProgress): void {
+    for (const listener of this.workspaceCleanupScanEventListeners) {
+      listener(event)
+    }
+  }
+
+  onWorkspaceSpaceScanProgressEvent(
+    listener: (event: WorkspaceSpaceScanProgress) => void
+  ): () => void {
+    this.workspaceSpaceScanEventListeners.add(listener)
+    return () => {
+      this.workspaceSpaceScanEventListeners.delete(listener)
+    }
+  }
+
+  private emitWorkspaceSpaceScanProgressEvent(event: WorkspaceSpaceScanProgress): void {
+    for (const listener of this.workspaceSpaceScanEventListeners) {
+      listener(event)
+    }
+  }
+
+  onDriverEvent(listener: (event: RuntimeDriverEvent) => void): () => void {
+    this.driverEventListeners.add(listener)
+    return () => {
+      this.driverEventListeners.delete(listener)
+    }
+  }
+
+  // Why: driver ownership is pushed to the shell over IPC. Paired clients hold
+  // no WebContents, so the same transition is republished for the runtime
+  // subscription to fan out.
+  private emitDriverEvent(event: RuntimeDriverEvent): void {
+    for (const listener of this.driverEventListeners) {
+      listener(event)
+    }
+  }
+
+  onBrowserGuestEvent(listener: (event: RuntimeBrowserGuestEvent) => void): () => void {
+    this.browserGuestEventListeners.add(listener)
+    return () => {
+      this.browserGuestEventListeners.delete(listener)
+    }
+  }
+
+  // Why: the browser manager already pushes these to the focused window's
+  // WebContents. Paired web/mobile clients have no WebContents, so the same
+  // payload is republished here for the runtime subscription to fan out.
+  emitBrowserGuestEvent(event: RuntimeBrowserGuestEvent): void {
+    for (const listener of this.browserGuestEventListeners) {
+      listener(event)
+    }
+  }
+
   private notifyWorktreesChanged(repoId: string): void {
-    this.notifier?.worktreesChanged(repoId)
     this.emitClientEvent({ type: 'worktreesChanged', repoId })
   }
 
   private notifyReposChanged(): void {
-    this.notifier?.reposChanged()
     this.emitClientEvent({ type: 'reposChanged' })
   }
 
-  // Why: renderer-initiated meta updates intentionally skip the renderer
-  // notifier (the renderer already applied them optimistically), but remote
+  // Why: renderer-initiated meta updates intentionally skip a shell command
+  // (the renderer already applied them optimistically), but remote
   // clients hold no optimistic copy and need the invalidation event.
   notifyWorktreesChangedForRemoteClients(repoId: string): void {
     this.invalidateResolvedWorktreeCache()
     this.emitClientEvent({ type: 'worktreesChanged', repoId })
+  }
+
+  notifyReposChangedForRemoteClients(): void {
+    this.emitClientEvent({ type: 'reposChanged' })
+  }
+
+  // Why: the base-directory watcher's metadata-file head diff has no
+  // BrowserWindow to push through once decoupled from shell lifetime — it
+  // reaches this via the injected publisher in worktree/head-identity-events.ts
+  // (same shape as notifyWorktreesChangedForRemoteClients), so paired web/mobile
+  // clients see external head moves the same way the desktop IPC push does.
+  notifyWorktreeHeadIdentitiesChangedForRemoteClients(
+    repoId: string,
+    identities: WorktreeHeadIdentity[]
+  ): void {
+    this.emitClientEvent({ type: 'worktreeHeadIdentitiesChanged', repoId, identities })
   }
 
   private notifyActivateWorktree(
@@ -2800,7 +3115,14 @@ export class YiruRuntimeService {
     startup?: WorktreeStartupLaunch,
     defaultTabs?: CreateWorktreeResult['defaultTabs']
   ): void {
-    this.notifier?.activateWorktree(repoId, worktreeId, setup, startup, defaultTabs)
+    this.dispatchShellCommand({
+      type: 'activateWorktree',
+      repoId,
+      worktreeId,
+      ...(setup ? { setup } : {}),
+      ...(startup ? { startup } : {}),
+      ...(defaultTabs ? { defaultTabs } : {})
+    })
     this.emitClientEvent(
       toRuntimeActivateWorktreeEvent(repoId, worktreeId, setup, startup, defaultTabs)
     )
@@ -2814,12 +3136,12 @@ export class YiruRuntimeService {
     return this.agentBrowserBridge
   }
 
-  setOffscreenBrowserBackend(backend: BrowserBackend | null): void {
-    this.offscreenBrowserBackend = backend
+  setBrowserBackend(backend: BrowserBackend | null): void {
+    this.browserBackend = backend
   }
 
-  getOffscreenBrowserBackend(): BrowserBackend | null {
-    return this.offscreenBrowserBackend
+  getBrowserBackend(): BrowserBackend | null {
+    return this.browserBackend
   }
 
   setEmulatorBridge(bridge: EmulatorBridge | null): void {
@@ -3139,7 +3461,7 @@ export class YiruRuntimeService {
     worktreeId: string,
     existing: RuntimeMobileSessionTabsSnapshot
   ): void {
-    if (!this.offscreenBrowserBackend) {
+    if (!this.browserBackend) {
       return
     }
     const liveBrowserTabs = this.buildHeadlessMobileSessionBrowserTabs(worktreeId)
@@ -3608,7 +3930,7 @@ export class YiruRuntimeService {
   private buildHeadlessMobileSessionBrowserTabs(
     worktreeId: string
   ): RuntimeMobileSessionBrowserTab[] {
-    if (!this.offscreenBrowserBackend || !this.agentBrowserBridge?.tabList) {
+    if (!this.browserBackend || !this.agentBrowserBridge?.tabList) {
       return []
     }
     return this.agentBrowserBridge.tabList(worktreeId).tabs.map((tab) => {
@@ -4077,7 +4399,7 @@ export class YiruRuntimeService {
         publicTab?.type === 'terminal' &&
         publicTab.status !== 'ready' &&
         (opts.notifyClients === false ||
-          !this.notifier?.focusTerminal ||
+          !this.shellConnectionId ||
           this.shouldMaterializeHeadlessMobileSessionTab(snapshot!, tab))
       if (shouldMaterializePendingTerminal) {
         const sessionId = tab.ptyId ?? tab.parentLayout?.ptyIdsByLeafId?.[tab.leafId] ?? undefined
@@ -4142,7 +4464,7 @@ export class YiruRuntimeService {
         this.activateMobileSessionTabForRemoteClient(worktreeId, snapshot!, targetTab)
         return this.getMobileSessionTabsForWorktree(worktreeId)
       }
-      if (!this.notifier?.focusTerminal) {
+      if (!this.shellConnectionId) {
         if (
           !targetTab.isActive &&
           this.shouldPersistHeadlessMobileSessionActivation(snapshot!, targetTab)
@@ -4151,7 +4473,12 @@ export class YiruRuntimeService {
         }
         return this.getMobileSessionTabsForWorktree(worktreeId)
       }
-      this.notifier?.focusTerminal(targetTab.parentTabId, worktreeId, targetTab.leafId)
+      this.dispatchShellCommand({
+        type: 'focusTerminal',
+        tabId: targetTab.parentTabId,
+        worktreeId,
+        leafId: targetTab.leafId
+      })
     } else if (tab.type === 'browser') {
       if (opts.notifyClients === false) {
         this.activateMobileSessionTabForRemoteClient(worktreeId, snapshot!, tab)
@@ -4159,13 +4486,13 @@ export class YiruRuntimeService {
       }
       // Why: browser mobile tabs are renderer-owned unified tabs; focusing the
       // session tab keeps desktop tab order/group state authoritative.
-      this.notifier?.focusEditorTab?.(tab.id, worktreeId)
+      this.dispatchShellCommand({ type: 'focusEditorTab', tabId: tab.id, worktreeId })
     } else {
       if (opts.notifyClients === false) {
         this.activateMobileSessionTabForRemoteClient(worktreeId, snapshot!, tab)
         return this.getMobileSessionTabsForWorktree(worktreeId)
       }
-      this.notifier?.focusEditorTab?.(tab.id, worktreeId)
+      this.dispatchShellCommand({ type: 'focusEditorTab', tabId: tab.id, worktreeId })
     }
     return this.getMobileSessionTabsForWorktree(worktreeId)
   }
@@ -4349,21 +4676,25 @@ export class YiruRuntimeService {
         this.store?.flushOrThrow?.()
         return { closed: true }
       }
-      if (closingWholeParent && this.notifier?.closeTerminalTab) {
+      if (closingWholeParent && this.shellConnectionId) {
         // Why: whole-tab close is a lifecycle transaction. The renderer reply
         // arrives only after canonical retirement and a forced session flush.
-        await this.notifier.closeTerminalTab(tab.parentTabId)
-        return { closed: true }
+        const result = await requestShellTerminalCloseTab(this.shellConnectionId, {
+          tabId: tab.parentTabId
+        })
+        if (result.ok) {
+          return { closed: true }
+        }
       }
-      // Why: notifier implementations without the acknowledged relay may expose
-      // only raw pane close. Runtime-owned parents still need de-persist + kill.
+      // Why: an unavailable acknowledged reverse call can still leave a
+      // runtime-owned parent that needs de-persist + kill.
       if (closingWholeParent && this.isRuntimeOwnedHeadlessMobileTab(worktreeId, tab)) {
         this.closeHeadlessMobileTerminalTab(worktreeId, snapshot!, tab)
         this.notifyRendererOfHeadlessTerminalClose(tab.parentTabId)
         this.store?.flushOrThrow?.()
         return { closed: true }
       }
-      if (!this.notifier?.closeTerminal) {
+      if (!this.shellConnectionId) {
         this.closeHeadlessMobileTerminalTab(worktreeId, snapshot!, tab)
         this.store?.flushOrThrow?.()
         return { closed: true }
@@ -4373,21 +4704,21 @@ export class YiruRuntimeService {
         if (pty) {
           this.ptyController?.kill(pty.ptyId)
         } else {
-          this.notifier?.closeTerminal(tab.parentTabId)
+          this.dispatchShellCommand({ type: 'closeTerminal', tabId: tab.parentTabId })
         }
       } else {
         // Why: paired web tab bars represent a split terminal with one local
         // parent tab id. Closing that parent should close the desktop tab, not
         // just whichever leaf happened to be first in the session snapshot.
-        this.notifier?.closeTerminal(tab.parentTabId)
+        this.dispatchShellCommand({ type: 'closeTerminal', tabId: tab.parentTabId })
       }
-    } else if (tab.type === 'browser' && this.offscreenBrowserBackend) {
+    } else if (tab.type === 'browser' && this.browserBackend) {
       // Why: headless browser tabs are offscreen WebContents with no renderer to
       // route closeSessionTab to. Close the page directly and drop it from the
       // snapshot so paired clients stop showing it.
       await this.closeHeadlessMobileBrowserTab(worktreeId, snapshot!, tab)
     } else {
-      this.notifier?.closeSessionTab?.(tab.id, worktreeId)
+      this.dispatchShellCommand({ type: 'closeSessionTab', tabId: tab.id, worktreeId })
     }
     return { closed: true }
   }
@@ -4396,7 +4727,7 @@ export class YiruRuntimeService {
     // Why: this relay is advisory after main owns teardown; renderer failure must
     // not prevent the authoritative session flush or turn the close into failure.
     try {
-      this.notifier?.closeTerminal(parentTabId)
+      this.dispatchShellCommand({ type: 'closeTerminal', tabId: parentTabId })
     } catch (error) {
       console.warn('[runtime] failed to notify renderer after headless terminal close', {
         parentTabId,
@@ -4411,7 +4742,7 @@ export class YiruRuntimeService {
     tab: RuntimeMobileSessionBrowserTab
   ): Promise<void> {
     if (tab.browserPageId) {
-      await this.offscreenBrowserBackend?.closeTab(tab.browserPageId).catch(() => {})
+      await this.browserBackend?.closeTab(tab.browserPageId).catch(() => {})
     }
     const nextTabs = snapshot.tabs.filter((candidate) => candidate.id !== tab.id)
     const active = nextTabs.find((candidate) => candidate.isActive) ?? nextTabs[0] ?? null
@@ -4437,7 +4768,7 @@ export class YiruRuntimeService {
     browserPageId: string,
     targetGroupId?: string
   ): void {
-    if (!this.offscreenBrowserBackend || !worktreeId) {
+    if (!this.browserBackend || !worktreeId) {
       return
     }
     // Hydrate first so the freshly created browser tab is present in the snapshot.
@@ -4562,7 +4893,7 @@ export class YiruRuntimeService {
     if (!snapshot) {
       throw new Error('tab_not_found')
     }
-    if (!this.notifier?.moveSessionTab) {
+    if (!this.shellConnectionId) {
       return this.moveHeadlessMobileSessionTab(worktreeId, snapshot, move)
     }
     const hostTabId = this.resolveMobileSessionHostTabId(snapshot, move.tabId)
@@ -4582,14 +4913,18 @@ export class YiruRuntimeService {
       if (!tabOrder.includes(hostTabId)) {
         throw new Error('invalid_tab_order')
       }
-      this.notifier.moveSessionTab(worktreeId, {
+      this.dispatchShellCommand({
+        type: 'moveSessionTab',
+        worktreeId,
         ...move,
         tabId: hostTabId,
         tabOrder
       })
       return { moved: true }
     }
-    this.notifier.moveSessionTab(worktreeId, {
+    this.dispatchShellCommand({
+      type: 'moveSessionTab',
+      worktreeId,
       ...move,
       tabId: hostTabId
     })
@@ -5099,10 +5434,18 @@ export class YiruRuntimeService {
     tabId: string
   ): Promise<RuntimeMarkdownReadTabResult> {
     const worktreeId = await this.resolveMobileMarkdownWorktreeId(worktreeSelector, tabId)
-    if (!this.notifier?.readMobileMarkdownTab) {
+    if (!this.shellConnectionId) {
       throw new Error('renderer_unavailable')
     }
-    return await this.notifier.readMobileMarkdownTab(worktreeId, tabId)
+    const result = await readMobileMarkdownViaShell(this.shellConnectionId, {
+      worktreeId,
+      tabId
+    })
+    if (!result.ok) {
+      throw new Error('renderer_unavailable')
+    }
+    const { ok: _ok, ...output } = result
+    return output
   }
 
   async saveMobileMarkdownTab(
@@ -5112,10 +5455,20 @@ export class YiruRuntimeService {
     content: string
   ): Promise<RuntimeMarkdownSaveTabResult> {
     const worktreeId = await this.resolveMobileMarkdownWorktreeId(worktreeSelector, tabId)
-    if (!this.notifier?.saveMobileMarkdownTab) {
+    if (!this.shellConnectionId) {
       throw new Error('renderer_unavailable')
     }
-    return await this.notifier.saveMobileMarkdownTab(worktreeId, tabId, baseVersion, content)
+    const result = await saveMobileMarkdownViaShell(this.shellConnectionId, {
+      worktreeId,
+      tabId,
+      baseVersion,
+      content
+    })
+    if (!result.ok) {
+      throw new Error('renderer_unavailable')
+    }
+    const { ok: _ok, ...output } = result
+    return output
   }
 
   readonly fileCommands = new RuntimeFileCommands({
@@ -5129,41 +5482,41 @@ export class YiruRuntimeService {
       this.hasRecentTerminalOutputPath(terminalHandle, pathText, absolutePath),
     resolveRuntimeGitTarget: (selector) => this.resolveRuntimeGitTarget(selector),
     openFile: (worktreeId, filePath, relativePath, runtimeEnvironmentId) => {
-      if (!this.notifier?.openFile) {
+      if (
+        !this.dispatchShellCommand({
+          type: 'openFile',
+          worktreeId,
+          filePath,
+          relativePath,
+          runtimeEnvironmentId
+        })
+      ) {
         throw new Error('renderer_unavailable')
       }
-      this.notifier.openFile(worktreeId, filePath, relativePath, runtimeEnvironmentId)
     },
     openDiff: (worktreeId, filePath, relativePath, staged, runtimeEnvironmentId) => {
-      if (!this.notifier?.openDiff) {
+      if (
+        !this.dispatchShellCommand({
+          type: 'openDiff',
+          worktreeId,
+          filePath,
+          relativePath,
+          staged,
+          runtimeEnvironmentId
+        })
+      ) {
         throw new Error('renderer_unavailable')
       }
-      this.notifier.openDiff(worktreeId, filePath, relativePath, staged, runtimeEnvironmentId)
     }
   })
 
   closeFileWatchersForRemoval = async (worktreePath: string): Promise<void> => {
-    const results = await Promise.allSettled([
-      closeLocalWatcherForWorktreePath(worktreePath),
-      this.fileCommands.closeFileExplorerWatchersForPath(worktreePath)
-    ])
-    const failure = results.find((result): result is PromiseRejectedResult => {
-      return result.status === 'rejected'
-    })
-    if (failure) {
-      // Why: restoration must start only after every bounded teardown settles;
-      // otherwise a late close can stale a just-restored logical subscription.
-      throw failure.reason
-    }
+    await this.fileCommands.closeFileExplorerWatchersForPath(worktreePath)
   }
   restoreFileWatchersAfterFailedRemoval = async (worktreePath: string): Promise<void> => {
-    await Promise.all([
-      restoreLocalWatcherAfterFailedRemoval(worktreePath),
-      this.fileCommands.restoreFileExplorerWatchersAfterFailedRemoval(worktreePath)
-    ])
+    await this.fileCommands.restoreFileExplorerWatchersAfterFailedRemoval(worktreePath)
   }
   forgetFileWatchersAfterRemoval = (worktreePath: string): void => {
-    forgetLocalWatcherRemovalSnapshot(worktreePath)
     this.fileCommands.forgetFileExplorerWatchersAfterRemoval(worktreePath)
   }
   acquireFileWatcherRemoval = async (
@@ -5552,7 +5905,7 @@ export class YiruRuntimeService {
       titleTrackerEntry.applyingChunk = false
       try {
         // Why: per-chunk cross-channel contract order is status → titles →
-        // bell — the chunk's agentStatus:set events must reach the renderer
+        // bell — the chunk's agent-status events must reach the renderer
         // before its pty:sideEffect batch.
         retainedAgentStatusChanged = this.emitTerminalAgentStatusEvents(ptyId, agentStatusChunk)
       } finally {
@@ -7323,6 +7676,17 @@ export class YiruRuntimeService {
   }
 
   readonly mobileNotifications = new MobileNotificationChannel()
+  // Why: notifications.report's job1 (throttle/dedup) moved here from the
+  // legacy notifications:dispatch ipcMain closure — Phase 5 slice S3. Two
+  // independent trackers because the desktop-notification cooldown and the
+  // mobile-push cooldown key/reserve independently (a suppressed desktop
+  // notification must not block the mobile push, and vice versa).
+  readonly desktopNotificationCooldown = new NotificationCooldownTracker()
+  readonly mobileNotificationCooldown = new NotificationCooldownTracker()
+
+  getNotificationSettings(): GlobalSettings['notifications'] | undefined {
+    return this.store?.getSettings ? this.store.getSettings().notifications : undefined
+  }
 
   // ─── Account Services (mobile RPC bridge) ─────────────────────
 
@@ -7359,6 +7723,7 @@ export class YiruRuntimeService {
         provider: manifest.provider === 'openai' ? 'openai' : 'local',
         sizeBytes: manifest.sizeBytes ?? null,
         recommended: manifest.recommended === true,
+        streaming: manifest.streaming === true,
         status: state?.status ?? 'not-downloaded',
         progress: state?.progress ?? null
       }
@@ -7372,7 +7737,8 @@ export class YiruRuntimeService {
   }
 
   // Fire-and-forget model download; the ModelManager writes progress into its
-  // per-model state, which mobile reads back via listMobileSpeechModels polling.
+  // per-model state, which mobile can read back via listMobileSpeechModels
+  // polling, or a `speech.events.subscribe` client can receive as push events.
   async downloadMobileSpeechModel(modelId: string): Promise<{ started: true }> {
     if (!this.store) {
       throw new Error('voice_dictation_unavailable')
@@ -7381,14 +7747,44 @@ export class YiruRuntimeService {
     if (!manifest || !isLocalSpeechModel(manifest)) {
       throw new Error('voice_model_not_downloadable')
     }
+    this.ensureSpeechDownloadProgressRelay()
     // Why: do not await — downloads run for tens of seconds; the call returns
     // immediately and mobile polls for progress/ready.
     void getSpeechModelManager(this.store)
       .downloadModel(modelId)
       .catch((err) => {
         console.error('[runtime] mobile speech model download failed', { modelId, err })
+        this.emitSpeechEvent({
+          type: 'downloadFailed',
+          modelId,
+          error: err instanceof Error ? err.message : String(err)
+        })
       })
     return { started: true }
+  }
+
+  getSpeechOpenAiKeyStatus(): RuntimeSpeechOpenAiKeyStatus {
+    return { configured: hasOpenAiSpeechApiKey() }
+  }
+
+  saveSpeechOpenAiKey(apiKey: string): RuntimeSpeechOpenAiKeyStatus {
+    saveOpenAiSpeechApiKey(apiKey)
+    return { configured: true }
+  }
+
+  clearSpeechOpenAiKey(): RuntimeSpeechOpenAiKeyStatus {
+    clearOpenAiSpeechApiKey()
+    return { configured: false }
+  }
+
+  private ensureSpeechDownloadProgressRelay(): void {
+    if (this.speechDownloadProgressRelayRegistered || !this.store) {
+      return
+    }
+    this.speechDownloadProgressRelayRegistered = true
+    getSpeechModelManager(this.store).setProgressCallback((id, progress) => {
+      this.emitSpeechEvent({ type: 'downloadProgress', modelId: id, progress })
+    })
   }
 
   async deleteMobileSpeechModel(modelId: string): Promise<RuntimeSpeechSetupState> {
@@ -7496,16 +7892,32 @@ export class YiruRuntimeService {
           if (!session || session.id !== params.dictationId) {
             return
           }
-          if (event.type === 'partial') {
+          if (event.type === 'ready') {
+            this.emitSpeechEvent({ type: 'dictationReady', dictationId: session.id })
+          } else if (event.type === 'partial') {
             session.partialText = event.text ?? ''
+            this.emitSpeechEvent({
+              type: 'dictationPartialTranscript',
+              dictationId: session.id,
+              text: session.partialText
+            })
           } else if (event.type === 'final') {
             const text = event.text?.trim()
             if (text) {
               session.finalTexts.push(text)
               session.partialText = ''
+              this.emitSpeechEvent({
+                type: 'dictationFinalTranscript',
+                dictationId: session.id,
+                text
+              })
             }
+          } else if (event.type === 'stopped') {
+            this.emitSpeechEvent({ type: 'dictationStopped', dictationId: session.id })
           } else if (event.type === 'error') {
-            session.errors.push(event.error ?? 'Speech worker error')
+            const error = event.error ?? 'Speech worker error'
+            session.errors.push(error)
+            this.emitSpeechEvent({ type: 'dictationError', dictationId: session.id, error })
           }
         },
         undefined,
@@ -7688,12 +8100,29 @@ export class YiruRuntimeService {
     ])
   }
 
-  selectClaudeAccount(accountId: string | null): Promise<ClaudeRateLimitAccountsState> {
-    return this.requireAccountServices().claudeAccounts.selectAccount(accountId)
+  // Why: `target.runtime` is omitted by older/mobile callers; treat a missing
+  // runtime as "let the service infer it" instead of defaulting to host,
+  // mirroring the ipcMain `claudeAccounts:select` handler this replaces.
+  selectClaudeAccount(
+    accountId: string | null,
+    target?: ClaudeAccountSelectionTarget
+  ): Promise<ClaudeRateLimitAccountsState> {
+    const { claudeAccounts } = this.requireAccountServices()
+    if (!target?.runtime) {
+      return claudeAccounts.selectAccount(accountId)
+    }
+    return claudeAccounts.selectAccountForTarget(accountId, target)
   }
 
-  selectCodexAccount(accountId: string | null): Promise<CodexRateLimitAccountsState> {
-    return this.requireAccountServices().codexAccounts.selectAccount(accountId)
+  selectCodexAccount(
+    accountId: string | null,
+    target?: CodexAccountSelectionTarget
+  ): Promise<CodexRateLimitAccountsState> {
+    const { codexAccounts } = this.requireAccountServices()
+    if (!target?.runtime) {
+      return codexAccounts.selectAccount(accountId)
+    }
+    return codexAccounts.selectAccountForTarget(accountId, target)
   }
 
   removeClaudeAccount(accountId: string): Promise<ClaudeRateLimitAccountsState> {
@@ -7706,8 +8135,8 @@ export class YiruRuntimeService {
 
   // Why: rate-limit polling fires every 5 minutes and on account switch.
   // Mobile clients subscribe to receive a fresh AccountsSnapshot whenever
-  // RateLimitService pushes new usage data, mirroring the existing
-  // `rateLimits:update` IPC channel desktop already uses.
+  // RateLimitService pushes new usage data. Desktop, mobile, and web consume
+  // the same `accounts.subscribe` stream.
   onAccountsChanged(listener: (snapshot: AccountsSnapshot) => void): () => void {
     const services = this.requireAccountServices()
     return services.rateLimits.onStateChange((rateLimits) => {
@@ -7717,6 +8146,93 @@ export class YiruRuntimeService {
         rateLimits
       })
     })
+  }
+
+  // Why: thin passthroughs let the `accounts.*` contract force the same
+  // RateLimitService fetches without duplicating its fetch/dedupe/backoff logic.
+  refreshRateLimits(cursorContext?: CursorRateLimitRefreshContext | null): Promise<RateLimitState> {
+    return this.requireAccountServices().rateLimits.refresh(cursorContext ?? undefined)
+  }
+
+  refreshCodexRateLimitsForTarget(target: RateLimitRuntimeTarget): Promise<RateLimitState> {
+    return this.requireAccountServices().rateLimits.refreshCodexForTarget(target)
+  }
+
+  refreshClaudeRateLimitsForTarget(target: RateLimitRuntimeTarget): Promise<RateLimitState> {
+    return this.requireAccountServices().rateLimits.refreshClaudeForTarget(target)
+  }
+
+  consumeCodexRateLimitResetCredit(): Promise<CodexRateLimitResetResult> {
+    return this.requireAccountServices().rateLimits.consumeCodexRateLimitResetCredit()
+  }
+
+  fetchInactiveClaudeRateLimitAccounts(): Promise<void> {
+    return this.requireAccountServices().rateLimits.fetchInactiveClaudeAccountsOnOpen()
+  }
+
+  fetchInactiveCodexRateLimitAccounts(): Promise<void> {
+    return this.requireAccountServices().rateLimits.fetchInactiveCodexAccountsOnOpen()
+  }
+
+  refreshGrokRateLimits(): Promise<RateLimitState> {
+    return this.requireAccountServices().rateLimits.refreshGrok()
+  }
+
+  // Why: thin passthroughs for the `rateLimitResume.*` oRPC contract —
+  // report/list/schedule/cancel/runNow read or mutate RateLimitResumeService's
+  // Store-backed schedules directly. runNow is async now: `sendDispatch`
+  // reverse-calls the shell (shellServices.rateLimitResume.dispatch, Phase 5
+  // slice S5) instead of `webContents.send`. rendererReady/markFired/
+  // markFailed/markStale stay off the runtime entirely — they are this same
+  // process's shell reporting the outcome of a dispatch it was just handed,
+  // not an independently callable host capability (see
+  // RateLimitResumeService.sendDispatch).
+  setRateLimitResumeService(service: RateLimitResumeService): void {
+    this.rateLimitResumeService = service
+    service.setShellConnectionId(this.shellConnectionId)
+  }
+
+  private requireRateLimitResumeService(): RateLimitResumeService {
+    if (!this.rateLimitResumeService) {
+      throw new Error('Rate-limit resume service is not configured on this runtime')
+    }
+    return this.rateLimitResumeService
+  }
+
+  reportRateLimitBanner(report: RateLimitBannerReport): RateLimitHit {
+    return this.requireRateLimitResumeService().reportBanner(report)
+  }
+
+  listRateLimitResumes(): RateLimitResumeSchedule[] {
+    return this.requireRateLimitResumeService().list()
+  }
+
+  scheduleRateLimitResume(hit: RateLimitHit): RateLimitResumeSchedule {
+    return this.requireRateLimitResumeService().schedule(hit)
+  }
+
+  cancelRateLimitResume(id: string): RateLimitResumeSchedule {
+    return this.requireRateLimitResumeService().cancel(id)
+  }
+
+  runRateLimitResumeNow(id: string): Promise<RateLimitResumeSchedule> {
+    return this.requireRateLimitResumeService().runNow(id)
+  }
+
+  markRateLimitResumeFired(id: string): RateLimitResumeSchedule {
+    return this.requireRateLimitResumeService().markFired(id)
+  }
+
+  markRateLimitResumeFailed(id: string, reason: string): RateLimitResumeSchedule {
+    return this.requireRateLimitResumeService().markFailed(id, reason)
+  }
+
+  markRateLimitResumeStale(id: string): RateLimitResumeSchedule {
+    return this.requireRateLimitResumeService().markStale(id)
+  }
+
+  setRateLimitResumeRendererReady(shellConnectionId: ShellServicesConnectionId): boolean {
+    return this.requireRateLimitResumeService().setRendererReady(shellConnectionId)
   }
 
   // ─── Mobile Fit Override Management ─────────────────────────
@@ -11241,11 +11757,85 @@ export class YiruRuntimeService {
     return { deleted }
   }
 
-  async scanNestedRepos(path: string): Promise<NestedRepoScanResult> {
+  async scanNestedRepos(
+    path: string,
+    requestOptions?: { scanId?: string; options?: unknown }
+  ): Promise<NestedRepoScanResult> {
     if (!isAbsolute(path)) {
       throw new Error('Project path must be an absolute path')
     }
-    return scanNestedRepos({ path, options: { timeoutMs: 15_000 } })
+    const scanId = requestOptions?.scanId
+    const controller = beginTrackedNestedRepoScan(scanId)
+    try {
+      const scan = await scanNestedRepos({
+        path,
+        options: requestOptions?.options ?? { timeoutMs: 15_000 },
+        signal: controller?.signal,
+        onProgress: scanId
+          ? (progress) =>
+              this.emitNestedRepoScanProgressEvent({
+                type: 'nestedRepoScanProgress',
+                scanId,
+                scan: progress
+              })
+          : undefined
+      })
+      rememberCompletedNestedRepoScan(scanId, scan)
+      return scan
+    } finally {
+      endTrackedNestedRepoScan(scanId, controller)
+    }
+  }
+
+  async scanWorkspaceCleanup(args: WorkspaceCleanupScanArgs): Promise<WorkspaceCleanupScanResult> {
+    if (!this.store) {
+      throw new Error('runtime_unavailable')
+    }
+    return runWorkspaceCleanupScan(this.store, args, {
+      onProgress: args.scanId
+        ? (progress) => this.emitWorkspaceCleanupScanProgressEvent(progress)
+        : undefined
+    })
+  }
+
+  dismissWorkspaceCleanupCandidates(
+    dismissals: readonly WorkspaceCleanupDismissal[]
+  ): Record<string, WorkspaceCleanupDismissal> {
+    const store = this.store
+    if (!store?.getUI || !store.updateUI) {
+      throw new Error('runtime_unavailable')
+    }
+    // Why: bind rather than pass the bare method — `Store#getUI`/`#updateUI`
+    // read `this.state`, so a detached reference called without `store` as
+    // its receiver would throw.
+    const getUI = store.getUI.bind(store)
+    const updateUI = store.updateUI.bind(store)
+    return dismissWorkspaceCleanupCandidatesInStore(getUI, updateUI, dismissals)
+  }
+
+  clearWorkspaceCleanupDismissals(): Record<string, WorkspaceCleanupDismissal> {
+    const store = this.store
+    if (!store?.updateUI) {
+      throw new Error('runtime_unavailable')
+    }
+    return clearWorkspaceCleanupDismissalsInStore(store.updateUI.bind(store))
+  }
+
+  analyzeWorkspaceSpace(): Promise<WorkspaceSpaceAnalyzeResult> {
+    if (!this.store) {
+      throw new Error('runtime_unavailable')
+    }
+    return startOrJoinWorkspaceSpaceScan(this.store, (progress) =>
+      this.emitWorkspaceSpaceScanProgressEvent(progress)
+    )
+  }
+
+  cancelWorkspaceSpaceScan(): boolean {
+    return cancelInFlightWorkspaceSpaceScan()
+  }
+
+  cancelNestedRepoScan(scanId: string): { cancelled: boolean } {
+    return { cancelled: cancelTrackedNestedRepoScan(scanId) }
   }
 
   async browseServerDir(pathValue: string): Promise<{ resolvedPath: string; entries: DirEntry[] }> {
@@ -11284,6 +11874,7 @@ export class YiruRuntimeService {
     parentPath: string
     groupName: string
     projectPaths: string[]
+    scanId?: string
     mode: ProjectGroupImportMode
   }): Promise<ProjectGroupImportResult> {
     if (!this.store?.createProjectGroup || !this.store?.moveProjectToGroup) {
@@ -11292,7 +11883,11 @@ export class YiruRuntimeService {
     if (!isAbsolute(args.parentPath)) {
       throw new Error('Project path must be an absolute path')
     }
-    const scan = await scanNestedRepos({ path: args.parentPath, options: { timeoutMs: 15_000 } })
+    // Why: reuse the caller's scanNested result instead of rescanning when
+    // it matches, matching the preload `importNested` member this replaces.
+    const scan =
+      getCompletedNestedRepoScan({ scanId: args.scanId, parentPath: args.parentPath }) ??
+      (await scanNestedRepos({ path: args.parentPath, options: { timeoutMs: 15_000 } }))
     const selection = resolveNestedRepoSelection({ scan, projectPaths: args.projectPaths })
     const groupResolver = createNestedProjectGroupResolver({
       parentPath: args.parentPath,
@@ -11344,15 +11939,18 @@ export class YiruRuntimeService {
           results.push({ path: repoPath, projectId: existing.id, status: 'already-known' })
           continue
         }
+        const detected = await detectRepoIconAndUpstream({ repoPath: importRepoPath, kind: 'git' })
         const repo: Repo = {
           id: randomUUID(),
           path: importRepoPath,
           displayName: getRepoName(importRepoPath),
           badgeColor: DEFAULT_REPO_BADGE_COLOR,
+          ...detected,
           addedAt: Date.now(),
           kind: 'git',
           externalWorktreeVisibility: 'hide',
           externalWorktreeVisibilityLegacy: false,
+          projectHostSetupMethod: 'imported-existing-folder',
           ...(group
             ? {
                 projectGroupId: group.id,
@@ -11361,6 +11959,7 @@ export class YiruRuntimeService {
             : {})
         }
         this.store.addRepo(repo)
+        await prepareLocalWorktreeRootForRepo(this.store, repo)
         importedProjectIdsByRepoPath.set(normalizedImportRepoPath, repo.id)
         results.push({ path: repoPath, projectId: repo.id, status: 'imported' })
       } catch (error) {
@@ -11416,7 +12015,7 @@ export class YiruRuntimeService {
     const existing = args.id
       ? this.store.getSparsePresets(repo.id).find((preset) => preset.id === args.id)
       : undefined
-    return this.store.saveSparsePreset({
+    const saved = this.store.saveSparsePreset({
       id: existing?.id ?? randomUUID(),
       repoId: repo.id,
       name,
@@ -11424,6 +12023,15 @@ export class YiruRuntimeService {
       createdAt: existing?.createdAt ?? now,
       updatedAt: now
     })
+    return saved
+  }
+
+  async removeSparsePreset(repoSelector: string, presetId: string): Promise<void> {
+    if (!this.store?.removeSparsePreset) {
+      throw new Error('runtime_unavailable')
+    }
+    const repo = await this.resolveRepoSelector(repoSelector)
+    this.store.removeSparsePreset(repo.id, presetId)
   }
 
   async openWorkspacePath(
@@ -11774,6 +12382,11 @@ export class YiruRuntimeService {
     }
   }
 
+  abortRepoClone(): void {
+    this.activeRepoClone?.kill()
+    this.activeRepoClone = null
+  }
+
   private async cloneRepoAfterPathLock(
     trimmedUrl: string,
     trimmedDestination: string,
@@ -11817,10 +12430,22 @@ export class YiruRuntimeService {
         })
         return
       }
+      this.activeRepoClone = proc
       let stderrTail = ''
       let settled = false
       proc.stderr?.on('data', (chunk: Buffer) => {
-        stderrTail = (stderrTail + chunk.toString()).slice(-4096)
+        const text = chunk.toString()
+        stderrTail = (stderrTail + text).slice(-4096)
+        for (const line of text.split(/[\r\n]+/)) {
+          const match = line.match(/^([\w\s]+):\s+(\d+)%/)
+          if (match) {
+            this.emitHostProgressEvent({
+              type: 'repoCloneProgress',
+              phase: match[1].trim(),
+              percent: Number.parseInt(match[2], 10)
+            })
+          }
+        }
       })
       const finishClone = async (
         code: number | null,
@@ -11831,6 +12456,9 @@ export class YiruRuntimeService {
           return
         }
         settled = true
+        if (this.activeRepoClone === proc) {
+          this.activeRepoClone = null
+        }
         const cloneSucceeded = !error && code === 0 && !signal
         if (!cloneSucceeded) {
           await cleanupClaimedCloneTarget(clonePath, claimedTarget)
@@ -12018,12 +12646,13 @@ export class YiruRuntimeService {
   async searchRepoRefs(
     repoSelector: string,
     query: string,
-    limit = DEFAULT_REPO_SEARCH_REFS_LIMIT
+    limit = DEFAULT_REPO_SEARCH_REFS_LIMIT,
+    hostId?: ExecutionHostId
   ): Promise<RuntimeRepoSearchRefs> {
     if (!Number.isInteger(limit) || limit <= 0) {
       throw new Error('invalid_limit')
     }
-    const repo = await this.resolveRepoSelector(repoSelector)
+    const repo = await this.resolveRepoSelector(repoSelector, hostId)
     if (isFolderRepo(repo)) {
       return {
         refs: [],
@@ -12039,9 +12668,10 @@ export class YiruRuntimeService {
   }
 
   async getRepoBaseRefDefault(
-    repoSelector: string
+    repoSelector: string,
+    hostId?: ExecutionHostId
   ): Promise<{ defaultBaseRef: string | null; remoteCount: number }> {
-    const repo = await this.resolveRepoSelector(repoSelector)
+    const repo = await this.resolveRepoSelector(repoSelector, hostId)
     if (isFolderRepo(repo)) {
       return { defaultBaseRef: null, remoteCount: 0 }
     }
@@ -12249,6 +12879,25 @@ export class YiruRuntimeService {
     acceptMergedFallbackPR?: boolean,
     currentHeadOid?: string | null
   ): Promise<Awaited<ReturnType<typeof getPRForBranch>>> {
+    const outcome = await this.getRepoPRForBranchOutcome(
+      repoSelector,
+      branch,
+      linkedPRNumber,
+      fallbackPRNumber,
+      acceptMergedFallbackPR,
+      currentHeadOid
+    )
+    return outcome.kind === 'found' ? outcome.pr : null
+  }
+
+  async getRepoPRForBranchOutcome(
+    repoSelector: string,
+    branch: string,
+    linkedPRNumber?: number | null,
+    fallbackPRNumber?: number | null,
+    acceptMergedFallbackPR?: boolean,
+    currentHeadOid?: string | null
+  ): Promise<PRRefreshOutcome> {
     const repo = await this.resolveRepoSelector(repoSelector)
     const options: GitHubPRBranchLookupOptions = this.getHostedReviewExecutionOptions(repo) ?? {}
     const lookupOptions = { ...options }
@@ -12260,7 +12909,7 @@ export class YiruRuntimeService {
     }
     const lookupOptionArgs: [] | [GitHubPRBranchLookupOptions] =
       Object.keys(lookupOptions).length > 0 ? [lookupOptions] : []
-    return getPRForBranch(
+    return getPRForBranchOutcome(
       repo.path,
       branch,
       linkedPRNumber ?? null,
@@ -12621,6 +13270,51 @@ export class YiruRuntimeService {
     )
   }
 
+  async getGitLabViewer(): Promise<Awaited<ReturnType<typeof getGitLabViewerClient>>> {
+    return getGitLabViewerClient()
+  }
+
+  async getGitLabRepoProjectSlug(
+    repoSelector: string
+  ): Promise<Awaited<ReturnType<typeof getGitLabProjectSlug>>> {
+    const repo = await this.resolveRepoSelector(repoSelector)
+    const options = this.getHostedReviewExecutionOptions(repo)
+    return options
+      ? getGitLabProjectSlug(repo.path, null, options)
+      : getGitLabProjectSlug(repo.path, null)
+  }
+
+  async getGitLabRepoMRForBranch(
+    repoSelector: string,
+    branch: string,
+    linkedMRIid?: number | null
+  ): Promise<Awaited<ReturnType<typeof getGitLabMRForBranch>>> {
+    const repo = await this.resolveRepoSelector(repoSelector)
+    const options = this.getHostedReviewExecutionOptions(repo)
+    return getGitLabMRForBranch(repo.path, branch, linkedMRIid ?? null, null, options ?? {})
+  }
+
+  async getGitLabRepoMR(
+    repoSelector: string,
+    iid: number
+  ): Promise<Awaited<ReturnType<typeof getGitLabMR>>> {
+    const repo = await this.resolveRepoSelector(repoSelector)
+    const options = this.getHostedReviewExecutionOptions(repo)
+    return options ? getGitLabMR(repo.path, iid, null, options) : getGitLabMR(repo.path, iid, null)
+  }
+
+  async listGitLabRepoAssignableUsers(
+    repoSelector: string
+  ): Promise<Awaited<ReturnType<typeof listGitLabAssignableUsers>>> {
+    const repo = await this.resolveRepoSelector(repoSelector)
+    return listGitLabAssignableUsers(
+      repo.path,
+      repo.forgeRemotePreference,
+      null,
+      ...this.getLocalGitExecutionOptionArgs(repo)
+    )
+  }
+
   async getRepoPRChecks(
     repoSelector: string,
     prNumber: number,
@@ -12950,7 +13644,7 @@ export class YiruRuntimeService {
       hasHooksFile: hasFile,
       hooks,
       setupRunPolicy,
-      source: hasFile ? 'yiru.yaml' : hooks ? 'legacy' : null,
+      source: hasFile ? ('yiru.yaml' as const) : hooks ? ('legacy' as const) : null,
       setupTrust: this.getSharedSetupHookTrustPayload(
         repo,
         getDefaultTabCommandTrustContent(sharedHooks)
@@ -12958,15 +13652,28 @@ export class YiruRuntimeService {
     }
   }
 
-  async checkRepoHooks(repoSelector: string) {
-    const repo = await this.resolveRepoSelector(repoSelector)
+  async checkRepoHooks(
+    repoSelector: string,
+    hostId?: ExecutionHostId
+  ): Promise<RuntimeRepoHooksCheckResult> {
+    let repo: Repo
+    try {
+      repo = await this.resolveRepoSelector(repoSelector, hostId)
+    } catch {
+      // Why: callers treat inspection failures as "skip", which keeps hook
+      // execution fail closed — an unresolved or ambiguous selector must be
+      // reported as status: 'error', not silently look like a confirmed
+      // hook-free repo (which would look identical with hasHooks: false alone).
+      return { status: 'error', hasHooks: false, hooks: null, mayNeedUpdate: false }
+    }
     if (isFolderRepo(repo)) {
-      return { hasHooks: false, hooks: null, mayNeedUpdate: false }
+      return { status: 'ok', hasHooks: false, hooks: null, mayNeedUpdate: false }
     }
 
     const has = hasHooksFile(repo.path)
     const hooks = has ? loadHooks(repo.path) : null
     return {
+      status: 'ok',
       hasHooks: has,
       hooks,
       mayNeedUpdate: has && !hooks && hasUnrecognizedYiruYamlKeys(repo.path)
@@ -13166,10 +13873,9 @@ export class YiruRuntimeService {
 
   async sleepManagedWorktree(worktreeSelector: string): Promise<{ worktreeId: string }> {
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
-    // Why: sleep is renderer-initiated on desktop (it tears down tab state
-    // before killing PTYs). The notifier tells the renderer to run its own
-    // sleep flow so all cleanup happens in the correct order.
-    this.notifier?.sleepWorktree(worktree.id)
+    // Why: sleep is renderer-owned (it tears down tab state before killing
+    // PTYs), so the runtime asks its attached shell to run the ordered flow.
+    this.dispatchShellCommand({ type: 'sleepWorktree', worktreeId: worktree.id })
     return { worktreeId: worktree.id }
   }
 
@@ -13219,8 +13925,12 @@ export class YiruRuntimeService {
       // unaffected. Headless serve has no renderer to wake anything, so report
       // that explicitly instead of letting mobile assume the agents resumed.
       if (opts.clientKind === 'mobile') {
-        if (this.getAvailableAuthoritativeWindow()) {
-          this.notifier?.resumeSleepingAgents?.(worktree.id)
+        if (
+          this.dispatchShellCommand({
+            type: 'resumeSleepingAgents',
+            worktreeId: worktree.id
+          })
+        ) {
           sleepingAgentWake = 'requested'
         } else if (
           // Why: sleeping records are partitioned by execution host; reading
@@ -15039,7 +15749,11 @@ export class YiruRuntimeService {
   }
 
   emitWorktreeBaseStatus(event: WorktreeBaseStatusEvent): void {
-    this.notifier?.worktreeBaseStatus?.(event)
+    this.emitWorktreeStateEvent({ type: 'baseStatus', ...event })
+  }
+
+  emitWorktreeRemoteBranchConflict(event: WorktreeRemoteBranchConflictEvent): void {
+    this.emitWorktreeStateEvent({ type: 'remoteBranchConflict', ...event })
   }
 
   async reconcileWorktreeBaseStatus(args: {
@@ -15058,7 +15772,7 @@ export class YiruRuntimeService {
       if (!stillCurrent()) {
         return
       }
-      this.notifier?.worktreeBaseStatus?.({
+      this.emitWorktreeBaseStatus({
         repoId: args.repoId,
         worktreeId: args.worktreeId,
         base: args.base.base,
@@ -15110,7 +15824,7 @@ export class YiruRuntimeService {
           { cwd: args.repoPath }
         )
         if (stillCurrent()) {
-          this.notifier?.worktreeRemoteBranchConflict?.({
+          this.emitWorktreeRemoteBranchConflict({
             repoId: args.repoId,
             worktreeId: args.worktreeId,
             remote: publishRemote,
@@ -15328,13 +16042,18 @@ export class YiruRuntimeService {
     return await this.showManagedWorktree(`id:${worktree.id}`)
   }
 
-  persistManagedWorktreeSortOrder(orderedIds: string[]): { updated: number } {
+  persistManagedWorktreeSortOrder(
+    orderedIds: string[],
+    options: { notifyClients?: boolean } = {}
+  ): { updated: number } {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
     const updated = persistExistingWorktreeSortOrder(this.store, orderedIds)
-    this.invalidateResolvedWorktreeCache()
-    this.notifyReposChanged()
+    if (options.notifyClients !== false) {
+      this.invalidateResolvedWorktreeCache()
+      this.notifyReposChanged()
+    }
     return { updated }
   }
 
@@ -15642,11 +16361,11 @@ export class YiruRuntimeService {
   // outlive a worktree unless explicitly closed — removing a worktree without
   // closing its open panes leaks the windows for the life of the serve process.
   private closeHeadlessBrowserPagesForWorktree(worktreeId: string): void {
-    if (!this.offscreenBrowserBackend || !this.agentBrowserBridge?.tabList) {
+    if (!this.browserBackend || !this.agentBrowserBridge?.tabList) {
       return
     }
     for (const tab of this.agentBrowserBridge.tabList(worktreeId).tabs) {
-      void this.offscreenBrowserBackend.closeTab(tab.browserPageId).catch(() => {})
+      void this.browserBackend.closeTab(tab.browserPageId).catch(() => {})
     }
   }
 
@@ -15737,6 +16456,15 @@ export class YiruRuntimeService {
 
     this.preservedBranchCleanupByWorktreeId.delete(removalTarget.id)
     return { deleted: true }
+  }
+
+  // Why: the failure output lives in main-memory module state keyed by the
+  // canonical worktree id (see main/agent-hooks/branch-rename-failure-output.ts),
+  // not on the store — resolve the selector first so callers can use any
+  // selector form, not just a raw id.
+  async getBranchRenameFailureOutputForWorktree(worktreeSelector: string): Promise<string | null> {
+    const worktree = await this.resolveWorktreeSelector(worktreeSelector)
+    return readBranchRenameFailureOutputForDisplay(worktree.id)
   }
 
   async removeManagedWorktree(
@@ -16166,20 +16894,24 @@ export class YiruRuntimeService {
       this.touchMobileSessionSnapshotsForPty(pty.pty.ptyId)
       // Why: without a renderer the rename only lived on the live pty and was
       // lost on restart. Persist customTitle so a headless rebuild keeps it.
-      if (!this.notifier?.renameTerminal && pty.pty.tabId) {
-        this.persistHeadlessTerminalTitle(pty.pty.worktreeId, pty.pty.tabId, title)
-      }
       for (const leaf of this.terminalSessions.listGraphLeaves()) {
         if (leaf.ptyId === pty.pty.ptyId) {
-          this.notifier?.renameTerminal(leaf.tabId, title)
+          if (!this.dispatchShellCommand({ type: 'renameTerminal', tabId: leaf.tabId, title })) {
+            this.persistHeadlessTerminalTitle(pty.pty.worktreeId, leaf.tabId, title)
+          }
           return { handle, tabId: leaf.tabId, title }
+        }
+      }
+      if (pty.pty.tabId) {
+        if (!this.dispatchShellCommand({ type: 'renameTerminal', tabId: pty.pty.tabId, title })) {
+          this.persistHeadlessTerminalTitle(pty.pty.worktreeId, pty.pty.tabId, title)
         }
       }
       return { handle, tabId: pty.pty.tabId ?? pty.record.tabId, title }
     }
     this.assertGraphReady()
     const { leaf } = this.getLiveLeafForHandle(handle)
-    this.notifier?.renameTerminal(leaf.tabId, title)
+    this.dispatchShellCommand({ type: 'renameTerminal', tabId: leaf.tabId, title })
     return { handle, tabId: leaf.tabId, title }
   }
 
@@ -16431,13 +17163,14 @@ export class YiruRuntimeService {
       }
       let surface: RuntimeTerminalCreate['surface'] = 'background'
       let warning: string | undefined
-      if (presentation !== 'background' && this.notifier?.revealTerminalSession) {
+      if (presentation !== 'background' && this.shellConnectionId) {
         try {
           // Why: after the PTY is spawned, renderer tab adoption is best-effort;
           // failing here must not strand a live process without returning a handle.
           // Pass the pre-minted tabId so the renderer adopts under the same id
           // already baked into the PTY env — keeps paneKey hook attribution intact.
-          await this.notifier.revealTerminalSession(workspace.id, {
+          const revealResult = await requestShellTerminalReveal(this.shellConnectionId, {
+            worktreeId: workspace.id,
             ptyId: result.id,
             title: launchOpts.title ?? null,
             ...(cwd !== workspace.path ? { cwd } : {}),
@@ -16450,6 +17183,9 @@ export class YiruRuntimeService {
             tabId,
             leafId
           })
+          if (!revealResult.ok) {
+            throw new Error('renderer_unavailable')
+          }
           surface = 'visible'
         } catch (err) {
           console.warn(`[terminal-create] failed to create inactive tab for ${result.id}:`, err)
@@ -16471,7 +17207,11 @@ export class YiruRuntimeService {
     }
 
     this.assertGraphReady()
-    const win = rendererWindow ?? this.getAuthoritativeWindow()
+    // Why: renderer-owned terminal creation needs an active reverse-link shell;
+    // headless runtime callers use the PTY-owned branch above instead.
+    if (!this.shellConnectionId) {
+      throw new Error('No renderer window available')
+    }
     // Why: mirrors browserTabCreate — when no worktree is specified, pass
     // undefined so the renderer uses its current active worktree.
     const workspace = worktreeSelector
@@ -16484,51 +17224,29 @@ export class YiruRuntimeService {
     const cwd = workspace
       ? this.resolveWorkspaceTerminalStartupCwd(workspace, launchOpts.cwd)
       : launchOpts.cwd
-    const requestId = randomUUID()
 
     // Why: terminal creation is a renderer-side Zustand store operation (like
-    // browser tab creation). The main process sends a request, the renderer
-    // creates the tab and replies with the tabId so we can resolve the handle.
+    // browser tab creation). The main process asks the renderer to create the
+    // tab and return the tabId so we can resolve the handle.
     await launchOpts.beforeSpawn?.()
-    const reply = await new Promise<{ tabId: string; title: string }>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        ipcMain.removeListener('terminal:tabCreateReply', handler)
-        reject(new Error('Terminal creation timed out'))
-      }, 10_000)
-
-      const handler = (
-        event: Electron.IpcMainEvent,
-        r: { requestId: string; tabId?: string; title?: string; error?: string }
-      ): void => {
-        if (event.sender !== win.webContents || r.requestId !== requestId) {
-          return
-        }
-        clearTimeout(timer)
-        ipcMain.removeListener('terminal:tabCreateReply', handler)
-        if (r.error) {
-          reject(new Error(r.error))
-        } else {
-          resolve({ tabId: r.tabId!, title: r.title ?? launchOpts.title ?? '' })
-        }
-      }
-      ipcMain.on('terminal:tabCreateReply', handler)
-      win.webContents.send('terminal:requestTabCreate', {
-        requestId,
-        worktreeId,
-        command: launchOpts.command,
-        cwd,
-        ...(launchOpts.env ? { env: launchOpts.env } : {}),
-        ...(launchOpts.envToDelete ? { envToDelete: launchOpts.envToDelete } : {}),
-        ...(launchOpts.launchConfig ? { launchConfig: launchOpts.launchConfig } : {}),
-        ...(launchOpts.launchToken ? { launchToken: launchOpts.launchToken } : {}),
-        ...(launchOpts.launchAgent ? { launchAgent: launchOpts.launchAgent } : {}),
-        ...(launchOpts.viewMode ? { viewMode: launchOpts.viewMode } : {}),
-        startupCommandDelivery: launchOpts.startupCommandDelivery,
-        title: launchOpts.title,
-        activate: presentation === 'focused',
-        ...(presentation ? { presentation } : {})
-      })
+    const reply = await requestShellTerminalCreate(this.shellConnectionId, {
+      worktreeId,
+      command: launchOpts.command,
+      cwd,
+      ...(launchOpts.env ? { env: launchOpts.env } : {}),
+      ...(launchOpts.envToDelete ? { envToDelete: launchOpts.envToDelete } : {}),
+      ...(launchOpts.launchConfig ? { launchConfig: launchOpts.launchConfig } : {}),
+      ...(launchOpts.launchToken ? { launchToken: launchOpts.launchToken } : {}),
+      ...(launchOpts.launchAgent ? { launchAgent: launchOpts.launchAgent } : {}),
+      ...(launchOpts.viewMode ? { viewMode: launchOpts.viewMode } : {}),
+      startupCommandDelivery: launchOpts.startupCommandDelivery,
+      title: launchOpts.title,
+      activate: presentation === 'focused',
+      ...(presentation ? { presentation } : {})
     })
+    if (!reply.ok) {
+      throw new Error('renderer_unavailable')
+    }
 
     // Why: the renderer created the tab immediately, but the graph sync that
     // publishing the authority graph may not have arrived yet. Wait for the leaf to
@@ -16683,8 +17401,8 @@ export class YiruRuntimeService {
     }
     const startupCommand = await this.resolveMobileSessionTerminalCommand(workspace, opts)
 
-    const win = this.getAvailableAuthoritativeWindow()
-    if (!win) {
+    // Why: without a paired shell, mobile terminal creation remains host-owned.
+    if (!this.shellConnectionId) {
       return await this.createHeadlessMobileSessionTerminal(
         worktreeId,
         opts.activate !== false,
@@ -16702,41 +17420,13 @@ export class YiruRuntimeService {
         }
       )
     }
-    const requestId = randomUUID()
-    const reply = await new Promise<{ tabId: string; title: string }>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        ipcMain.removeListener('terminal:tabCreateReply', handler)
-        opts.signal?.removeEventListener('abort', onAbort)
-        reject(new Error('Terminal creation timed out'))
-      }, 10_000)
-      // Why: a dead client connection cancels the wait; the renderer tab (and
-      // its shell) stays alive for the host and mirrors on reconnect (#7718).
-      const onAbort = (): void => {
-        clearTimeout(timer)
-        ipcMain.removeListener('terminal:tabCreateReply', handler)
-        reject(new Error('client_disconnected'))
-      }
-
-      const handler = (
-        event: Electron.IpcMainEvent,
-        r: { requestId: string; tabId?: string; title?: string; error?: string }
-      ): void => {
-        if (event.sender !== win.webContents || r.requestId !== requestId) {
-          return
-        }
-        clearTimeout(timer)
-        ipcMain.removeListener('terminal:tabCreateReply', handler)
-        opts.signal?.removeEventListener('abort', onAbort)
-        if (r.error) {
-          reject(new Error(r.error))
-        } else {
-          resolve({ tabId: r.tabId!, title: r.title ?? '' })
-        }
-      }
-      opts.signal?.addEventListener('abort', onAbort, { once: true })
-      ipcMain.on('terminal:tabCreateReply', handler)
-      win.webContents.send('terminal:requestTabCreate', {
-        requestId,
+    // Why: a dead client connection cancels the wait immediately; the
+    // renderer tab (and its shell) stays alive for the host and mirrors on
+    // reconnect (#7718) — requestShellTerminalCreate normalizes an abort of
+    // this signal to the `client_disconnected` message below.
+    const reply = await requestShellTerminalCreate(
+      this.shellConnectionId,
+      {
         worktreeId,
         afterTabId: afterDesktopTabId,
         targetGroupId: opts.targetGroupId,
@@ -16750,11 +17440,21 @@ export class YiruRuntimeService {
         startupCommandDelivery: startupCommand.startupCommandDelivery,
         source: 'runtime-session',
         activate: opts.activate
-      })
-    })
+      },
+      { signal: opts.signal }
+    )
+
+    if (!reply.ok) {
+      throw new Error('renderer_unavailable')
+    }
 
     if (opts.activate !== false) {
-      this.notifier?.focusTerminal(reply.tabId, worktreeId, null)
+      this.dispatchShellCommand({
+        type: 'focusTerminal',
+        tabId: reply.tabId,
+        worktreeId,
+        leafId: null
+      })
     }
     // Why: register the wait before the renderer's PTY spawn arrives so that
     // spawn (registerPty) can publish the pty-backed surface main-side even if
@@ -16842,7 +17542,7 @@ export class YiruRuntimeService {
       // spawn/handle failure). Roll the half-created tab back via the renderer
       // close path so it can't linger as a ghost in mobile snapshots, then
       // surface the failure to the caller.
-      this.notifier?.closeTerminal(reply.tabId)
+      this.dispatchShellCommand({ type: 'closeTerminal', tabId: reply.tabId })
       throw error
     } finally {
       this.pendingMobileTerminalCreatesByKey.delete(pendingCreateKey)
@@ -17313,7 +18013,10 @@ export class YiruRuntimeService {
 
   // Why: never-mounted tabs have no attached PTY or mobile snapshot; synthetic
   // handles need the ptyId so the renderer can mount the exact owning tab.
-  requestRendererTerminalTabMount(handle: string): boolean {
+  async requestRendererTerminalTabMount(
+    handle: string,
+    shellConnectionId: string | undefined
+  ): Promise<boolean> {
     const record = this.terminalSessions.getTerminalHandle(handle)
     if (!record?.worktreeId) {
       return false
@@ -17323,18 +18026,12 @@ export class YiruRuntimeService {
     if (!tabId && !ptyId) {
       return false
     }
-    try {
-      this.getAuthoritativeWindow().webContents.send('terminal:requestTabMount', {
-        worktreeId: record.worktreeId,
-        ...(tabId ? { tabId } : {}),
-        ...(ptyId ? { ptyId } : {})
-      })
-      return true
-    } catch {
-      // No authoritative window (shutdown/headless): the subscribe keeps its
-      // existing empty-snapshot fallback.
-      return false
-    }
+    const result = await requestShellTerminalMount(shellConnectionId, {
+      worktreeId: record.worktreeId,
+      ...(tabId ? { tabId } : {}),
+      ...(ptyId ? { ptyId } : {})
+    })
+    return result.ok && result.accepted
   }
 
   getRendererTerminalSerializerGeneration(ptyId: string): number {
@@ -17420,26 +18117,34 @@ export class YiruRuntimeService {
         throw new Error('terminal_exited')
       }
       const parsedPaneKey = parsePaneKey(pty.pty.paneKey ?? '')
-      const revealed = await this.notifier?.revealTerminalSession?.(pty.pty.worktreeId, {
-        ptyId: pty.pty.ptyId,
-        title: getLatestPtyTitle(pty.pty),
-        ...(pty.pty.launchConfig
-          ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
-          : {}),
-        ...(pty.pty.launchToken ? { launchToken: pty.pty.launchToken } : {}),
-        ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
-        ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
-        ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {})
-      })
+      const revealed = this.shellConnectionId
+        ? await requestShellTerminalReveal(this.shellConnectionId, {
+            worktreeId: pty.pty.worktreeId,
+            ptyId: pty.pty.ptyId,
+            title: getLatestPtyTitle(pty.pty),
+            ...(pty.pty.launchConfig
+              ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
+              : {}),
+            ...(pty.pty.launchToken ? { launchToken: pty.pty.launchToken } : {}),
+            ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
+            ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
+            ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {})
+          })
+        : null
       return {
         handle,
-        tabId: revealed?.tabId ?? pty.pty.tabId ?? pty.record.tabId,
+        tabId: revealed?.ok ? revealed.tabId : (pty.pty.tabId ?? pty.record.tabId),
         worktreeId: pty.pty.worktreeId
       }
     }
     this.assertGraphReady()
     const { leaf } = this.getLiveLeafForHandle(handle)
-    this.notifier?.focusTerminal(leaf.tabId, leaf.worktreeId, leaf.leafId)
+    this.dispatchShellCommand({
+      type: 'focusTerminal',
+      tabId: leaf.tabId,
+      worktreeId: leaf.worktreeId,
+      leafId: leaf.leafId
+    })
     return { handle, tabId: leaf.tabId, worktreeId: leaf.worktreeId }
   }
 
@@ -17451,13 +18156,14 @@ export class YiruRuntimeService {
     if (!pty.pty.connected) {
       throw new Error('terminal_exited')
     }
-    if (!this.notifier?.revealTerminalSession) {
+    if (!this.shellConnectionId) {
       throw new Error('runtime_unavailable')
     }
     const parsedPaneKey = parsePaneKey(pty.pty.paneKey ?? '')
     // Why: the assistant keeps a synthetic PTY owner, but its visible surface
     // is an ordinary terminal/chat tab in the local floating workspace.
-    const revealed = await this.notifier.revealTerminalSession(FLOATING_TERMINAL_WORKTREE_ID, {
+    const revealed = await requestShellTerminalReveal(this.shellConnectionId, {
+      worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
       ptyId: pty.pty.ptyId,
       // Why: agent OSC titles change during startup; the app-owned tab should
       // keep its stable product identity rather than becoming "Claude Code".
@@ -17474,7 +18180,10 @@ export class YiruRuntimeService {
       activate: false,
       presentation: 'background'
     })
-    return revealed?.tabId ?? pty.pty.tabId ?? pty.record.tabId
+    if (!revealed.ok) {
+      throw new Error('runtime_unavailable')
+    }
+    return revealed.tabId ?? pty.pty.tabId ?? pty.record.tabId
   }
 
   async closeTerminal(handle: string): Promise<RuntimeTerminalClose> {
@@ -17495,11 +18204,15 @@ export class YiruRuntimeService {
     // Sending an additional IPC close would race with the exit handler and
     // incorrectly close the entire tab (the pane count drops to 1 before the
     // IPC arrives, triggering the single-pane fallback path).
-    // We only send the notifier close when the PTY wasn't killed (e.g. PTY not
+    // We only send the shell close when the PTY wasn't killed (e.g. PTY not
     // yet spawned) or when this is the only pane in the tab.
     const siblingCount = this.countLeavesInTab(leaf.tabId)
     if (!ptyKilled || siblingCount <= 1) {
-      this.notifier?.closeTerminal(leaf.tabId, leaf.paneRuntimeId)
+      this.dispatchShellCommand({
+        type: 'closeTerminal',
+        tabId: leaf.tabId,
+        paneRuntimeId: leaf.paneRuntimeId
+      })
     }
     return { handle, tabId: leaf.tabId, ptyKilled }
   }
@@ -17551,11 +18264,18 @@ export class YiruRuntimeService {
       }
     }
 
-    this.notifier?.splitTerminal(leaf.tabId, leaf.paneRuntimeId, {
-      direction,
-      command: opts.command,
-      telemetrySource: opts.telemetrySource
-    })
+    if (
+      !this.dispatchShellCommand({
+        type: 'splitTerminal',
+        tabId: leaf.tabId,
+        paneRuntimeId: leaf.paneRuntimeId,
+        direction,
+        command: opts.command,
+        telemetrySource: opts.telemetrySource
+      })
+    ) {
+      throw new Error('renderer_unavailable')
+    }
 
     const newHandle = await this.waitForNewLeafInTab(leaf.tabId, leafKeysBefore)
     return { handle: newHandle, tabId: leaf.tabId, paneRuntimeId: leaf.paneRuntimeId }
@@ -17610,7 +18330,11 @@ export class YiruRuntimeService {
     }
 
     try {
-      await this.notifier?.revealTerminalSession?.(workspace.id, {
+      if (!this.shellConnectionId) {
+        throw new Error('renderer_unavailable')
+      }
+      const revealResult = await requestShellTerminalReveal(this.shellConnectionId, {
+        worktreeId: workspace.id,
         ptyId: result.id,
         title: null,
         activate: opts.activate !== false,
@@ -17620,6 +18344,9 @@ export class YiruRuntimeService {
         splitDirection: direction,
         splitTelemetrySource: opts.telemetrySource
       })
+      if (!revealResult.ok) {
+        throw new Error('renderer_unavailable')
+      }
     } catch (error) {
       this.ptyController.kill?.(result.id)
       throw error
@@ -18120,8 +18847,10 @@ export class YiruRuntimeService {
       const worktreeId = explicitWorktreeId ?? selector.slice(3)
       candidates = worktrees.filter((worktree) => worktree.id === worktreeId)
     } else if (selector.startsWith('path:')) {
+      const selectorPath = selector.slice(5)
+      const canonicalSelectorPath = await realpath(selectorPath).catch(() => selectorPath)
       candidates = worktrees.filter((worktree) =>
-        runtimePathsEqual(worktree.path, selector.slice(5))
+        runtimePathsEqual(worktree.path, canonicalSelectorPath)
       )
       if (candidates.length > 1) {
         // Why: registering another worktree from the same Git repo makes git
@@ -18909,9 +19638,12 @@ export class YiruRuntimeService {
    *  (from a folder rename) as a deletion. Same channel = guaranteed ordering. */
   notifyWorktreeFolderRenamed(repoId: string, oldWorktreeId: string, newWorktreeId: string): void {
     this.invalidateResolvedWorktreeCache()
-    this.notifier?.worktreesChanged(repoId, { oldWorktreeId, newWorktreeId })
     // Mirror notifyBranchRenamed so in-process onClientEvent listeners also see the rename.
-    this.emitClientEvent({ type: 'worktreesChanged', repoId })
+    this.emitClientEvent({
+      type: 'worktreesChanged',
+      repoId,
+      renamed: { oldWorktreeId, newWorktreeId }
+    })
   }
 
   notifyFolderWorkspaceChanged(): void {
@@ -19459,7 +20191,7 @@ export class YiruRuntimeService {
     // must keep them rather than prune them as "not in the renderer graph".
     if (tab.type === 'browser') {
       return (
-        Boolean(this.offscreenBrowserBackend) &&
+        Boolean(this.browserBackend) &&
         this.isHeadlessMobileSessionPublication(snapshot.publicationEpoch)
       )
     }
@@ -19523,7 +20255,7 @@ export class YiruRuntimeService {
       this.notifyMobileSessionTabSnapshots()
       return
     }
-    if (this.offscreenBrowserBackend) {
+    if (this.browserBackend) {
       const reconciled = this.hydrateHeadlessMobileSessionTabsFromWorkspaceSession(worktreeId)
       // Why: hydrate already reconciles an existing snapshot in place; only
       // reconcile here when it didn't (fresh build or an early-returned hydrate).
@@ -21057,29 +21789,38 @@ export class YiruRuntimeService {
 
   // ── Browser automation ──
 
-  readonly browserCommands = new RuntimeBrowserCommands({
-    getAgentBrowserBridge: () => this.agentBrowserBridge,
-    resolveWorktreeSelector: (selector) => this.resolveWorktreeSelector(selector),
-    getAuthoritativeWindow: () => this.getAuthoritativeWindow(),
-    getAvailableAuthoritativeWindow: () => this.getAvailableAuthoritativeWindow(),
-    getOffscreenBrowserBackend: () => this.offscreenBrowserBackend,
-    // Why: a hand-listed wrapper previously dropped targetGroupId, so preserve
-    // the browser module's full activation interface at the composition seam.
-    markHeadlessBrowserSessionTabActive: this.markHeadlessBrowserSessionTabActive.bind(this),
-    registerSubscriptionCleanup: (subscriptionId, cleanup, connectionId) =>
-      this.registerSubscriptionCleanup(subscriptionId, cleanup, connectionId),
-    cleanupSubscription: (subscriptionId) => this.cleanupSubscription(subscriptionId),
-    notifyBrowserDriverChanged: (browserPageId, driver) =>
-      this.notifier?.browserDriverChanged?.(browserPageId, driver)
-  })
+  get browserCommands(): RuntimeBrowserCommands {
+    return this.browserCommandsValue
+  }
+
+  private createBrowserCommandHost(): RuntimeBrowserCommandHost {
+    return {
+      emitBrowserGuestEvent: (event) => this.emitBrowserGuestEvent(event),
+      getAgentBrowserBridge: () => this.agentBrowserBridge,
+      resolveWorktreeSelector: (selector) => this.resolveWorktreeSelector(selector),
+      resolveBrowserFilePath: (path) => resolveAuthorizedPath(path, this.requireStore()),
+      getAuthoritativeWindow: () => this.getAuthoritativeWindow(),
+      getAvailableAuthoritativeWindow: () => this.getAvailableAuthoritativeWindow(),
+      getBrowserBackend: () => this.browserBackend,
+      // Why: a hand-listed wrapper previously dropped targetGroupId, so preserve
+      // the browser module's full activation interface at the composition seam.
+      markHeadlessBrowserSessionTabActive: this.markHeadlessBrowserSessionTabActive.bind(this),
+      registerSubscriptionCleanup: (subscriptionId, cleanup, connectionId) =>
+        this.registerSubscriptionCleanup(subscriptionId, cleanup, connectionId),
+      cleanupSubscription: (subscriptionId) => this.cleanupSubscription(subscriptionId),
+      notifyBrowserDriverChanged: (browserPageId, driver) => {
+        this.emitDriverEvent({ type: 'browserDriverChanged', browserPageId, driver })
+      }
+    }
+  }
 
   readonly emulatorCommands = new RuntimeEmulatorCommands({
+    emitEmulatorEvent: (event) => this.emitEmulatorEvent(event),
     getEmulatorBridge: () => this.emulatorBridge,
     resolveWorktreeSelector: (selector) => this.resolveWorktreeSelector(selector),
-    getAuthoritativeWindow: () => this.getAuthoritativeWindow(),
     getSettings: () => this.requireStore().getSettings()
   })
-  private getAuthoritativeWindow(): BrowserWindow {
+  private getAuthoritativeWindow(): RuntimeWindowTarget {
     const win = this.getAvailableAuthoritativeWindow()
     if (!win || win.isDestroyed()) {
       throw new Error('No renderer window available')
@@ -21087,15 +21828,12 @@ export class YiruRuntimeService {
     return win
   }
 
-  private getAvailableAuthoritativeWindow(): BrowserWindow | null {
+  private getAvailableAuthoritativeWindow(): RuntimeWindowTarget | null {
     const windowId = this.terminalSessions.getAuthoritativeWindowId()
     if (windowId === null) {
       return null
     }
-    if (!BrowserWindow?.fromId) {
-      return null
-    }
-    const win = BrowserWindow.fromId(windowId)
+    const win = this.getWindowByIdFn(windowId)
     return win && !win.isDestroyed() ? win : null
   }
 }

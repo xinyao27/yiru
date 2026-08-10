@@ -18,10 +18,6 @@ const desktopRoot = resolve(__dirname, '..')
 const electronUpdaterVersion = require(
   join(desktopRoot, 'node_modules', 'electron-updater', 'package.json')
 ).version
-const featureWallResources = {
-  from: 'resources/onboarding/feature-wall',
-  to: 'onboarding/feature-wall'
-}
 // Why: freshness detection needs immutable identity metadata from this exact
 // app build, but never needs the skill package bytes or a runtime network read.
 const skillFreshnessResources = {
@@ -36,6 +32,12 @@ const relayExtraResource = {
   from: 'out/relay',
   to: 'relay'
 }
+// Why: the runtime host must be executable by a system Node binary, whose
+// module loader cannot read Electron's app.asar archive.
+const runtimeHostExtraResource = {
+  from: 'out/runtime-host',
+  to: 'runtime-host'
+}
 // Why: the main bundle, packaged CLI, SSH paths, and speech worker all execute
 // from package directories where pnpm's symlink farm is absent. Copy the exact
 // runtime dependency closure to Resources/node_modules so bare require() calls
@@ -44,6 +46,7 @@ const packagedRuntimeNodeModuleResources = createPackagedRuntimeNodeModuleResour
 
 const commonExtraResources = [
   relayExtraResource,
+  runtimeHostExtraResource,
   ...packagedRuntimeNodeModuleResources,
   skillFreshnessResources
 ]
@@ -92,10 +95,8 @@ module.exports = {
     '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,CHANGELOG.md,README.md}',
     '!{.env,.env.*,.npmrc,pnpm-lock.yaml}',
     '!tsconfig.json',
-    // Why: feature-wall media is copied via extraResources so runtime can read
-    // it from process.resourcesPath; exclude the source copy from app.asar.
-    '!resources/onboarding/feature-wall/**',
     '!resources/skills/**',
+    '!out/runtime-host/**',
     // Why: the working Windows shim ships beside yiru.exe via extraResources;
     // an unpacked source copy has no adjacent launcher and cannot run.
     '!resources/win32{,/**/*}'
@@ -218,8 +219,7 @@ module.exports = {
       {
         from: 'native/computer-use-windows/runtime.ps1',
         to: 'computer-use-windows/runtime.ps1'
-      },
-      featureWallResources
+      }
     ]
   },
   nsis: {
@@ -282,8 +282,7 @@ module.exports = {
       {
         from: 'native/computer-use-macos/.build/release/Yiru Computer Use.app',
         to: 'Yiru Computer Use.app'
-      },
-      featureWallResources
+      }
     ],
     // Why: the notification-status helper must execute from Contents/MacOS —
     // on macOS 26 UNUserNotificationCenter aborts (bundleProxyForCurrentProcess
@@ -337,8 +336,7 @@ module.exports = {
       {
         from: 'native/computer-use-linux/runtime.py',
         to: 'computer-use-linux/runtime.py'
-      },
-      featureWallResources
+      }
     ],
     target: ['AppImage', 'deb'],
     maintainer: 'xinyao27',

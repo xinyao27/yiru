@@ -25,18 +25,6 @@ export type EmulatorKeyboardPasteResult =
       status: 'cancelled'
     }
 
-type EmulatorKeyboardPastePlan =
-  | {
-      byteLength: number
-      chunks: ServeSimKeyboardFrame[][]
-      status: 'accepted'
-    }
-  | {
-      byteLength: number
-      reason: 'empty' | 'too-large' | 'unsupported-text'
-      status: 'rejected'
-    }
-
 type EmulatorKeyboardPasteValidation =
   | {
       byteLength: number
@@ -55,25 +43,6 @@ export type PasteTextIntoEmulatorKeyboardOptions = {
   maxFramesPerChunk?: number
   sendKeyboardFrames: (frames: ServeSimKeyboardFrame[]) => boolean
   text: string
-}
-
-export function getEmulatorKeyboardPasteByteLength(text: string): number {
-  return measureClipboardTextByteLength(text).byteLength
-}
-
-export function buildEmulatorKeyboardPastePlan(
-  text: string,
-  options: {
-    maxBytes?: number
-    maxFramesPerChunk?: number
-  } = {}
-): EmulatorKeyboardPastePlan {
-  const validation = validateEmulatorKeyboardPasteText(text, options.maxBytes)
-  if (validation.status === 'rejected') {
-    return validation
-  }
-  const chunks = [...iterateEmulatorKeyboardPasteChunks(text, options.maxFramesPerChunk)]
-  return { byteLength: validation.byteLength, chunks, status: 'accepted' }
 }
 
 function validateEmulatorKeyboardPasteText(

@@ -1,5 +1,6 @@
 import type { CommandHandler } from '../dispatch'
 import { formatLogcat } from '../emulator-logcat-format'
+import { parseEmulatorOrientation } from '../emulator-orientation'
 import { parseEmulatorPermissionRequest } from '../emulator-permissions-args'
 import {
   getOptionalPositiveIntegerFlag,
@@ -116,12 +117,12 @@ function parseEmulatorGesturePoints(raw: string): EmulatorGesturePoint[] {
 export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator list': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.list', { worktree: target.worktree })
+    const res = await client.call(client.rpc.emulator.list, { worktree: target.worktree })
     printResult(res, json, (v) => JSON.stringify(v, null, 2))
   },
   'emulator devices': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.listDevices', { worktree: target.worktree })
+    const res = await client.call(client.rpc.emulator.listDevices, { worktree: target.worktree })
     printResult(res, json, formatEmulatorDevices)
   },
   'emulator attach': async ({ flags, client, cwd, json }) => {
@@ -131,7 +132,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
     // Why: attach may cold-boot or recycle a wedged simulator (shutdown + boot +
     // helper restart), which can legitimately exceed the 60s default budget.
     const res = await client.call(
-      'emulator.attach',
+      client.rpc.emulator.attach,
       { device, worktree: target.worktree, focus },
       { timeoutMs: 180_000 }
     )
@@ -149,7 +150,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
     const y = getRequiredFiniteNumber(flags, 'y')
     assertNormalizedCoordinate(x, 'x')
     assertNormalizedCoordinate(y, 'y')
-    const res = await client.call('emulator.tap', {
+    const res = await client.call(client.rpc.emulator.tap, {
       x,
       y,
       device: target.device,
@@ -161,7 +162,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator type': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const text = getRequiredStringFlag(flags, 'text')
-    const res = await client.call('emulator.type', {
+    const res = await client.call(client.rpc.emulator.type, {
       text,
       device: target.device,
       emulator: target.emulator,
@@ -172,7 +173,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator gesture': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const points = parseEmulatorGesturePoints(getRequiredStringFlag(flags, 'points'))
-    const res = await client.call('emulator.gesture', {
+    const res = await client.call(client.rpc.emulator.gesture, {
       points,
       device: target.device,
       emulator: target.emulator,
@@ -183,7 +184,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator button': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const name = getRequiredStringFlag(flags, 'name')
-    const res = await client.call('emulator.button', {
+    const res = await client.call(client.rpc.emulator.button, {
       name,
       device: target.device,
       emulator: target.emulator,
@@ -193,8 +194,8 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator rotate': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const orientation = getRequiredStringFlag(flags, 'orientation')
-    const res = await client.call('emulator.rotate', {
+    const orientation = parseEmulatorOrientation(getRequiredStringFlag(flags, 'orientation'))
+    const res = await client.call(client.rpc.emulator.rotate, {
       orientation,
       device: target.device,
       emulator: target.emulator,
@@ -205,7 +206,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator exec': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const command = getRequiredStringFlag(flags, 'command')
-    const res = await client.call('emulator.exec', {
+    const res = await client.call(client.rpc.emulator.exec, {
       command,
       device: target.device,
       emulator: target.emulator,
@@ -215,7 +216,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator kill': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.kill', {
+    const res = await client.call(client.rpc.emulator.kill, {
       device: target.device,
       emulator: target.emulator,
       worktree: target.worktree
@@ -227,7 +228,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator shutdown': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.shutdown', {
+    const res = await client.call(client.rpc.emulator.shutdown, {
       device: target.device,
       emulator: target.emulator,
       worktree: target.worktree
@@ -240,7 +241,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator install': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const apkPath = resolveRepoPathArgument(getRequiredStringFlag(flags, 'path'), cwd)
-    const res = await client.call('emulator.install', {
+    const res = await client.call(client.rpc.emulator.install, {
       path: apkPath,
       reinstall: flags.get('reinstall') === true,
       device: target.device,
@@ -252,7 +253,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator launch': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const packageName = getRequiredStringFlag(flags, 'package')
-    const res = await client.call('emulator.launch', {
+    const res = await client.call(client.rpc.emulator.launch, {
       package: packageName,
       activity: getOptionalStringFlag(flags, 'activity'),
       device: target.device,
@@ -264,7 +265,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   'emulator permissions': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
     const request = parseEmulatorPermissionRequest(flags)
-    const res = await client.call('emulator.permissions', {
+    const res = await client.call(client.rpc.emulator.permissions, {
       op: request.op,
       package: request.packageName,
       permission: request.permission,
@@ -278,7 +279,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator ax': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.ax', {
+    const res = await client.call(client.rpc.emulator.ax, {
       device: target.device,
       emulator: target.emulator,
       worktree: target.worktree
@@ -287,7 +288,7 @@ export const EMULATOR_HANDLERS: Record<string, CommandHandler> = {
   },
   'emulator logcat': async ({ flags, client, cwd, json }) => {
     const target = await getEmulatorCommandTarget(flags, cwd, client)
-    const res = await client.call('emulator.logcat', {
+    const res = await client.call(client.rpc.emulator.logcat, {
       lines: getOptionalPositiveIntegerFlag(flags, 'lines'),
       device: target.device,
       emulator: target.emulator,

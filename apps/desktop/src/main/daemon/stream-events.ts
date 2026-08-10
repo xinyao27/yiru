@@ -1,3 +1,4 @@
+import type { AgentHookRelayEnvelope } from '~shared/agent/hook-relay'
 // ─── Events (Daemon → Client, on stream socket) ────────────────────
 import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
 
@@ -69,6 +70,14 @@ export type TransientFactEvent = {
   payload: DaemonTransientFact
 }
 
+// Why: agent hooks are low-volume control facts hosted by the daemon. They
+// share its authenticated client stream but never enter the PTY byte batcher.
+export type AgentHookEvent = {
+  type: 'event'
+  event: 'agentHook'
+  payload: AgentHookRelayEnvelope
+}
+
 export type DaemonEvent =
   | DataEvent
   | ExitEvent
@@ -76,3 +85,4 @@ export type DaemonEvent =
   | SessionBackgroundMarkerEvent
   | DataGapEvent
   | TransientFactEvent
+  | AgentHookEvent

@@ -3,6 +3,7 @@ import { Terminal } from '@xterm/xterm'
 import type React from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { selectCoworkingCanControl } from '~renderer/components/coworking/selectors'
 
 // Why: this file owns its own xterm.js instance (mirroring the pane-manager
 // one instead of reusing it) and renders `.xterm-container`, so it needs
@@ -10,10 +11,13 @@ import { toast } from 'sonner'
 // Coworking workspace is its own lazy() chunk that never imports terminal-pane.tsx.
 import '@xterm/xterm/css/xterm.css'
 import '~renderer/components/terminal-pane/terminal.css'
-import { selectCoworkingCanControl } from '~renderer/components/coworking/selectors'
 import { useSystemPrefersDark } from '~renderer/components/terminal-pane/use-system-prefers-dark'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import {
+  coworkingSharingClient,
+  subscribeCoworkingRequester
+} from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import type { CoworkingRequesterSubscriptionEvent } from '~shared/coworking/ipc-contract'
 import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
@@ -175,9 +179,7 @@ export function CoworkingTerminalPane({
   useCoworkingTerminalFocusRequest(terminalRef, focusRequested && canMutateTerminal, onFocusHandled)
 
   useEffect(() => {
-    const api = window.api.coworkingSharing
     let disposed = false
-    let started = false
     const subscriptionId = crypto.randomUUID()
     lastSequenceRef.current = -1
     terminalRef.current?.reset()
@@ -206,40 +208,29 @@ export function CoworkingTerminalPane({
         settlement.error(event.code)
       }
     }
-    const unsubscribeEvents = api.onSubscriptionEvent((event) => {
-      if (disposed) {
-        return
-      }
-      if (event.subscriptionId === subscriptionId) {
-        dispatch(event)
-      }
-    })
-    void api
-      .startSubscription({
+    const unsubscribe = subscribeCoworkingRequester(
+      {
         subscriptionId,
         desktopRef: route.desktopRef,
         connectionEpoch: route.connectionEpoch,
         method: 'terminal.subscribe',
         params: { sessionRef: route.sessionRef, scrollbackRows: 10_000 }
-      })
-      .then(() => {
-        started = true
-        if (disposed) {
-          void api.stopSubscription({ subscriptionId })
+      },
+      (event) => {
+        if (!disposed && event.subscriptionId === subscriptionId) {
+          dispatch(event)
         }
-      })
-      .catch((error) => {
+      },
+      (error) => {
         if (!disposed) {
           settlement.error(getCoworkingRequesterTransportErrorCode(error))
         }
-      })
+      }
+    )
 
     return () => {
       disposed = true
-      unsubscribeEvents()
-      if (started) {
-        void api.stopSubscription({ subscriptionId })
-      }
+      unsubscribe()
     }
   }, [
     onClosed,
@@ -309,7 +300,7 @@ async function invokeTerminalMutation(
     mutation.method === 'terminal.input'
       ? { sessionRef: route.sessionRef, data: mutation.data }
       : { sessionRef: route.sessionRef, cols: mutation.cols, rows: mutation.rows }
-  ;(await window.api.coworkingSharing.invoke({
+  ;(await coworkingSharingClient.invoke({
     desktopRef: route.desktopRef,
     connectionEpoch: route.connectionEpoch,
     method: mutation.method,

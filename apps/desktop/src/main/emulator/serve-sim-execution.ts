@@ -11,8 +11,7 @@ import {
 import { platform, tmpdir } from 'node:os'
 import { delimiter, dirname, join } from 'node:path'
 
-import { app } from 'electron'
-
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { EmulatorError } from './errors'
 import { materializeServeSimRuntime } from './serve-sim-runtime-materializer'
 
@@ -77,11 +76,12 @@ function resolveMaterializedServeSimPackageDir(bundledPackageDir: string): strin
   if (materializedServeSimPackageDir !== undefined) {
     return materializedServeSimPackageDir
   }
+  const pathsProvider = getRuntimeHostPathsProvider()
   materializedServeSimPackageDir = materializeServeSimRuntime({
     bundledPackageDir,
     bundledNodeModulesDir: join(dirname(bundledPackageDir), 'node_modules'),
-    targetRootDir: join(app.getPath('userData'), 'serve-sim-runtime'),
-    version: app.getVersion()
+    targetRootDir: join(pathsProvider.userDataPath(), 'serve-sim-runtime'),
+    version: pathsProvider.version()
   })
   if (materializedServeSimPackageDir === null) {
     console.warn(
@@ -93,11 +93,12 @@ function resolveMaterializedServeSimPackageDir(bundledPackageDir: string): strin
 }
 
 export function resolveServeSimExecutable(): ServeSimExecutable {
+  const pathsProvider = getRuntimeHostPathsProvider()
   const bundledResourcesPath =
-    process.resourcesPath ??
+    pathsProvider.resourcesPath() ??
     (process.platform === 'darwin'
-      ? join(app.getPath('exe'), '..', '..', 'Resources')
-      : join(app.getPath('exe'), '..', 'resources'))
+      ? join(pathsProvider.executablePath(), '..', '..', 'Resources')
+      : join(pathsProvider.executablePath(), '..', 'resources'))
   const bundled = join(bundledResourcesPath, 'serve-sim', 'dist', 'serve-sim.js')
   if (existsSync(bundled)) {
     if (process.platform === 'darwin') {
@@ -119,7 +120,7 @@ export function resolveServeSimExecutable(): ServeSimExecutable {
   }
 
   const nodeModulesEntry = join(
-    app.getAppPath(),
+    pathsProvider.appPath(),
     'node_modules',
     'serve-sim',
     'dist',

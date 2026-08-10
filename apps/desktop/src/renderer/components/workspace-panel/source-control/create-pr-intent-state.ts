@@ -1,12 +1,3 @@
-import {
-  resolveCreateReviewIntentEligibility,
-  type CreateReviewIntentEligibility,
-  type CreateReviewIntentKind
-} from '@yiru/workbench-model/review'
-
-// Why: renderer APIs keep PR terminology for compatibility, while shared logic
-// uses provider-neutral review terminology for PR/MR hosts.
-export type CreatePrIntentKind = CreateReviewIntentKind
-export type CreatePrIntentEligibility = CreateReviewIntentEligibility
+import { resolveCreateReviewIntentEligibility } from '@yiru/workbench-model/review'
 
 export const resolveCreatePrIntentEligibility = resolveCreateReviewIntentEligibility

@@ -6,6 +6,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import type { CoworkingHostDeviceView } from '~shared/coworking/host-access-contract'
 
 export function CoworkingSettingsPane(): React.JSX.Element {
@@ -19,7 +20,7 @@ export function CoworkingSettingsPane(): React.JSX.Element {
       setIsLoading(true)
     }
     try {
-      const result = await window.api.coworkingSharing.listHostDevices()
+      const result = await coworkingSharingClient.listHostDevices()
       if (mountedRef.current) {
         setDevices(result.devices)
       }
@@ -48,7 +49,7 @@ export function CoworkingSettingsPane(): React.JSX.Element {
   const revoke = async (deviceId: string): Promise<void> => {
     setRevokingDeviceId(deviceId)
     try {
-      const result = await window.api.coworkingSharing.revokeHostDevice({ deviceId })
+      const result = await coworkingSharingClient.revokeHostDevice({ deviceId })
       if (!result.revoked) {
         toast.info(
           translate(

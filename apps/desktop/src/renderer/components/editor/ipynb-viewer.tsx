@@ -59,7 +59,8 @@ import {
 } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { getConnectionId } from '~renderer/lib/connection-context'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 
 import CodeExcerpt from './code-excerpt'
@@ -847,15 +848,26 @@ export default function IpynbViewer({
     setRunningCellIndex(index)
     try {
       await onSave(latestContent)
-      const result = await window.api.notebook.runPythonCell({
+      const preamble = latestNotebook.cells
+        .slice(0, index)
+        .filter((previousCell) => previousCell.kind === 'code')
+        .map((previousCell) => previousCell.source)
+        .join('\n\n')
+      // Why: a worktree owned by a paired runtime environment has no Python
+      // interpreter reachable from this Electron process — run the cell where
+      // the notebook file actually lives instead of defaulting to local. The
+      // dropped `connectionId` (formerly sent only on the local branch) only
+      // ever fails the call closed with "local files only" — Repo.connectionId
+      // is dead since remote hosts were removed (#63); resolveAuthorizedPath's
+      // own host-path check now does the equivalent rejection.
+      const environmentId = getRuntimeEnvironmentIdForWorktree(useAppStore.getState(), worktreeId)
+      const target = environmentId
+        ? ({ kind: 'environment', environmentId } as const)
+        : ({ kind: 'local' } as const)
+      const result = await callRuntimeOrpc(target, (client) => client.notebook.runPythonCell, {
         filePath,
         code: cell.source,
-        preamble: latestNotebook.cells
-          .slice(0, index)
-          .filter((previousCell) => previousCell.kind === 'code')
-          .map((previousCell) => previousCell.source)
-          .join('\n\n'),
-        connectionId: getConnectionId(worktreeId) ?? undefined
+        preamble
       })
       applyContent(updateIpynbCellOutputs(latestContent, index, result))
     } catch (error) {

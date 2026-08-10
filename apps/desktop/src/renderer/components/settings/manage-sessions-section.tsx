@@ -1,9 +1,13 @@
+import type { TerminalManagementSession } from '@yiru/runtime-protocol/contract'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import type { PtyManagementSession } from '~preload/api-types'
 import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import {
+  killRuntimeDaemonSession,
+  listRuntimeDaemonSessions
+} from '~renderer/runtime/daemon-sessions-client'
 import { useAppStore } from '~renderer/store'
 
 import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-actions'
@@ -15,12 +19,14 @@ import { getManageSessionsSearchEntries } from './terminal/search'
 type ConfirmKind = 'killOne'
 
 export function ManageSessionsSection(): React.JSX.Element {
-  const [sessions, setSessions] = useState<PtyManagementSession[]>([])
+  const [sessions, setSessions] = useState<TerminalManagementSession[]>([])
   const [isRefreshing, setIsRefreshing] = useState(true)
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
-  const [pendingKillSession, setPendingKillSession] = useState<PtyManagementSession | null>(null)
+  const [pendingKillSession, setPendingKillSession] = useState<TerminalManagementSession | null>(
+    null
+  )
   const [busyKind, setBusyKind] = useState<ConfirmKind | null>(null)
-  const optimisticRollback = useRef<PtyManagementSession[] | null>(null)
+  const optimisticRollback = useRef<TerminalManagementSession[] | null>(null)
   const isMounted = useRef(true)
   const mutationInFlight = useRef(false)
 
@@ -69,10 +75,10 @@ export function ManageSessionsSection(): React.JSX.Element {
     }
   }, [])
 
-  const refresh = useCallback(async (): Promise<PtyManagementSession[]> => {
+  const refresh = useCallback(async (): Promise<TerminalManagementSession[]> => {
     setIsRefreshing(true)
     try {
-      const result = await window.api.pty.management.listSessions()
+      const result = await listRuntimeDaemonSessions()
       if (!isMounted.current || mutationInFlight.current) {
         return result.sessions
       }
@@ -128,13 +134,11 @@ export function ManageSessionsSection(): React.JSX.Element {
   })
 
   const handleKillOne = useCallback(
-    async (session: PtyManagementSession) => {
+    async (session: TerminalManagementSession) => {
       setBusyKind('killOne')
       mutationInFlight.current = true
       try {
-        const { success } = await window.api.pty.management.killOne({
-          sessionId: session.sessionId
-        })
+        const { success } = await killRuntimeDaemonSession(session.sessionId)
         if (success) {
           toast.success(
             translate(

@@ -1,4 +1,4 @@
-import type { Session } from 'electron'
+import type { BrowserSession } from './session'
 
 // Why: Electron's default UA includes "Electron/X.X.X" and the app name
 // (e.g. "yiru/1.2.3"), which Cloudflare Turnstile and other bot detectors
@@ -19,7 +19,7 @@ export function cleanElectronUserAgent(ua: string): string {
 // reveal the real version, creating a mismatch that Google's anti-fraud
 // detection flags as CookieMismatch on accounts.google.com. Override Client
 // Hints on outgoing requests to match the source browser's UA.
-export function setupClientHintsOverride(sess: Session, ua: string): void {
+export function setupClientHintsOverride(sess: BrowserSession, ua: string): void {
   const chromeMatch = ua.match(/Chrome\/([\d.]+)/)
   if (!chromeMatch) {
     return
@@ -40,7 +40,7 @@ export function setupClientHintsOverride(sess: Session, ua: string): void {
   const secChUa = `"${brand}";v="${brandMajor}", "Chromium";v="${majorVersion}", "Not/A)Brand";v="24"`
   const secChUaFull = `"${brand}";v="${brandFullVersion}", "Chromium";v="${fullChromeVersion}", "Not/A)Brand";v="24.0.0.0"`
 
-  sess.webRequest.onBeforeSendHeaders({ urls: ['https://*/*'] }, (details, callback) => {
+  sess.setBeforeSendHeadersHandler((details) => {
     const headers = details.requestHeaders
     for (const key of Object.keys(headers)) {
       const lower = key.toLowerCase()
@@ -50,6 +50,6 @@ export function setupClientHintsOverride(sess: Session, ua: string): void {
         headers[key] = secChUaFull
       }
     }
-    callback({ requestHeaders: headers })
+    return headers
   })
 }

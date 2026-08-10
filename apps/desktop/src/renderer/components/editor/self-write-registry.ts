@@ -1,7 +1,7 @@
 import { normalizeAbsolutePathForComparison } from '../workspace-panel/file-explorer/paths'
 
 // Why: the editor's own save path writes to disk, which fans out as an
-// fs:changed event back to useEditorExternalWatch a few ms later. Treating
+// file-watch event back to useEditorExternalWatch a few ms later. Treating
 // our own write as an "external" change schedules a setContent reload that
 // resets the TipTap selection to the end of the document mid-typing — and,
 // because the RichMarkdownEditor guards (lastCommittedMarkdownRef + current

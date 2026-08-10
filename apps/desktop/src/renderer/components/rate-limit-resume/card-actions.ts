@@ -1,7 +1,11 @@
+import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
 // Side-effecting handlers behind the notice card's buttons, kept out of the
 // component so it only decides layout and wiring.
-
-import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
+import {
+  cancelRuntimeRateLimitResume,
+  runRuntimeRateLimitResumeNow,
+  scheduleRuntimeRateLimitResume
+} from '~renderer/runtime/rate-limit-resume-client'
 import { useAppStore } from '~renderer/store'
 import type { RateLimitHit, RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
 
@@ -22,7 +26,7 @@ export async function retryRateLimitedPromptNow(hit: RateLimitHit): Promise<void
 
 export async function scheduleRateLimitResume(hit: RateLimitHit): Promise<void> {
   try {
-    const schedule = await window.api.rateLimitResume.schedule(hit)
+    const schedule = await scheduleRuntimeRateLimitResume(hit)
     useAppStore.getState().applyRateLimitResume(schedule)
   } catch (error) {
     console.error('Failed to schedule a rate-limit resume:', error)
@@ -31,7 +35,7 @@ export async function scheduleRateLimitResume(hit: RateLimitHit): Promise<void> 
 
 export async function cancelRateLimitResume(schedule: RateLimitResumeSchedule): Promise<void> {
   try {
-    const cancelled = await window.api.rateLimitResume.cancel({ id: schedule.id })
+    const cancelled = await cancelRuntimeRateLimitResume(schedule.id)
     useAppStore.getState().applyRateLimitResume(cancelled)
   } catch (error) {
     console.error('Failed to cancel a rate-limit resume:', error)
@@ -41,7 +45,7 @@ export async function cancelRateLimitResume(schedule: RateLimitResumeSchedule): 
 /** Ask main to dispatch now; the replay itself runs through the dispatch hook. */
 export async function runRateLimitResumeNow(schedule: RateLimitResumeSchedule): Promise<void> {
   try {
-    await window.api.rateLimitResume.runNow({ id: schedule.id })
+    await runRuntimeRateLimitResumeNow(schedule.id)
   } catch (error) {
     console.error('Failed to run a rate-limit resume now:', error)
   }

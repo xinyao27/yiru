@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import { selectWorktreePaletteCacheInputs } from '~renderer/components/cmd-j/worktree-palette-cache-inputs'
 import { useSettingsNavigationMetadata } from '~renderer/components/settings/use-navigation-metadata'
+import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { useAppStore } from '~renderer/store'
 import { useAllWorktrees } from '~renderer/store/selectors'
 
@@ -17,8 +17,8 @@ const PALETTE_STATUS_INPUTS_LINGER_MS = 300
 // against plain data rather than the live store.
 export function usePaletteStoreState() {
   // Why: subscribe this palette to language changes; translated memo contents
-  // recompute on the rerender without using i18n.language as a fake dependency.
-  useTranslation()
+  // recompute on the rerender without threading locale state through every caller.
+  useUiLocale()
   const visible = useAppStore((s) => s.activeModal === 'worktree-palette')
   const closeModal = useAppStore((s) => s.closeModal)
   const openModal = useAppStore((s) => s.openModal)
@@ -95,7 +95,6 @@ export function usePaletteStoreState() {
   const sleepingAgentSessionsByPaneKey = useAppStore((s) => s.sleepingAgentSessionsByPaneKey)
   const settings = useAppStore((s) => s.settings)
   const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
-  const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
   const hideDefaultBranchWorkspace = useAppStore((s) => s.hideDefaultBranchWorkspace)
@@ -155,7 +154,6 @@ export function usePaletteStoreState() {
     sleepingAgentSessionsByPaneKey,
     settings,
     sshTargetLabels,
-    sshConnectionStates,
     runtimeEnvironments,
     runtimeStatusByEnvironmentId,
     hideDefaultBranchWorkspace,

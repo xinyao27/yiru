@@ -144,24 +144,11 @@ export function mergeSnapshotAndSessions(
   const index = buildResourceSessionBindingIndex(ctx)
   const boundPtyIds = index.boundPtyIds
 
-  function isRepoRemote(repoId: string): boolean {
-    // Why: missing entry === we don't know about this repo (typically the
-    // unattributed bucket or a session whose repo metadata never made it
-    // into the renderer). Treat unknown as not-remote so a missing-data
-    // edge case can never spuriously flip the chip on. The chip should
-    // only fire when we have positive evidence the repo is SSH-backed.
-    return ctx.repoConnectionIdById.get(repoId) != null
-  }
-
   function isRuntimeScopedRepo(repoId: string): boolean {
     return ctx.repoRuntimeScopedById.get(repoId) === true
   }
 
-  function ensureRepo(
-    repoId: string,
-    repoName: string,
-    initiallyHasRemoteChildren = false
-  ): UnifiedProjectGroup {
+  function ensureRepo(repoId: string, repoName: string): UnifiedProjectGroup {
     const existing = repos.get(repoId)
     if (existing) {
       return existing
@@ -171,7 +158,6 @@ export function mergeSnapshotAndSessions(
       repoName,
       cpu: null,
       memory: null,
-      hasRemoteChildren: initiallyHasRemoteChildren || isRepoRemote(repoId),
       worktrees: []
     }
     repos.set(repoId, next)
@@ -218,7 +204,6 @@ export function mergeSnapshotAndSessions(
         memory: wt.memory,
         history: wt.history,
         hasLocalSamples: true,
-        isRemote: isRepoRemote(wt.repoId),
         sessions,
         browsers: []
       })
@@ -260,11 +245,7 @@ export function mergeSnapshotAndSessions(
       continue
     }
 
-    const repoIsRemote = isRepoRemote(finalRepoId)
-    const repo = ensureRepo(finalRepoId, finalRepoName, repoIsRemote)
-    if (repoIsRemote) {
-      repo.hasRemoteChildren = true
-    }
+    const repo = ensureRepo(finalRepoId, finalRepoName)
 
     let row = findWorktreeRow(repo, finalWorktreeId)
     if (!row) {
@@ -277,7 +258,6 @@ export function mergeSnapshotAndSessions(
         memory: null,
         history: [],
         hasLocalSamples: false,
-        isRemote: repoIsRemote,
         sessions: [],
         browsers: []
       }
@@ -316,7 +296,6 @@ export function mergeSnapshotAndSessions(
         memory: null,
         history: [],
         hasLocalSamples: false,
-        isRemote: isRepoRemote(worktree.repoId),
         sessions: [],
         browsers: []
       }
@@ -325,10 +304,8 @@ export function mergeSnapshotAndSessions(
     row.browsers = browsers
   }
 
-  // ── Step 4: per-repo aggregates. Remote children are identified by the
-  //   repo's connectionId, not by missing data — `!hasLocalSamples` would
-  //   mislabel warm-reattached local PTYs. The aggregate still skips rows
-  //   we can't sample (worktree.cpu === null) so the numbers stay honest.
+  // ── Step 4: per-repo aggregates. Skips rows we can't sample
+  //   (worktree.cpu === null) so the numbers stay honest.
   for (const repo of repos.values()) {
     let cpuSum = 0
     let memSum = 0

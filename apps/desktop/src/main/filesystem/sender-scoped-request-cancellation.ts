@@ -1,16 +1,16 @@
-import type { IpcMainInvokeEvent } from 'electron'
+import type { MainIpcInvokeEvent } from '../ipc-registration'
 
 export type SenderScopedRequestCancellations = {
   /** Registers a cancellable request; aborts any previous request that reused the token. */
-  begin: (event: IpcMainInvokeEvent, requestToken: string | undefined) => AbortController | null
+  begin: (event: MainIpcInvokeEvent, requestToken: string | undefined) => AbortController | null
   /** Removes the registration once the request settles (no-op if it was replaced). */
   finish: (
-    event: IpcMainInvokeEvent,
+    event: MainIpcInvokeEvent,
     requestToken: string | undefined,
     controller: AbortController | null
   ) => void
   /** Best-effort abort from the issuing webContents; a settled request is gone. */
-  cancel: (event: IpcMainInvokeEvent, requestToken: string) => void
+  cancel: (event: MainIpcInvokeEvent, requestToken: string) => void
 }
 
 /**
@@ -21,7 +21,7 @@ export type SenderScopedRequestCancellations = {
  */
 export function createSenderScopedRequestCancellations(): SenderScopedRequestCancellations {
   const controllers = new Map<string, AbortController>()
-  const keyFor = (event: IpcMainInvokeEvent, requestToken: string): string =>
+  const keyFor = (event: MainIpcInvokeEvent, requestToken: string): string =>
     `${event.sender.id}\0${requestToken}`
   return {
     begin: (event, requestToken) => {

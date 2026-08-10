@@ -4,6 +4,7 @@
 import type { WebSocket } from 'ws'
 import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
 
+import { createE2EEAuthenticatedFrame } from './e2ee-authenticated-frame'
 import {
   E2EEChannelAuthentication,
   freezeAuthenticatedRpcPrincipal,
@@ -32,6 +33,8 @@ const MAX_CONSECUTIVE_DECRYPT_FAILURES = 5
 type E2EEChannelCommonOptions = {
   serverSecretKey: Uint8Array
   onError: (code: number, reason: string) => void
+  authenticatedCapabilities?: readonly string[]
+  authenticatedRuntimeId?: string
   transportContext?: DesktopMobileE2EEV2Context
   requireV2?: boolean
 }
@@ -49,6 +52,8 @@ export class E2EEChannel {
   private readonly ws: WebSocket
   private readonly serverSecretKey: Uint8Array
   private readonly authentication: E2EEChannelAuthentication
+  private readonly authenticatedCapabilities: readonly string[]
+  private readonly authenticatedRuntimeId: string | undefined
   private readonly outbound: E2EEChannelOutbound
   private readonly onError: (code: number, reason: string) => void
   private readonly transportContext: DesktopMobileE2EEV2Context
@@ -79,6 +84,8 @@ export class E2EEChannel {
     this.ws = ws
     this.serverSecretKey = options.serverSecretKey
     this.authentication = new E2EEChannelAuthentication(options)
+    this.authenticatedCapabilities = options.authenticatedCapabilities ?? []
+    this.authenticatedRuntimeId = options.authenticatedRuntimeId
     this.onError = options.onError
     this.transportContext = options.transportContext ?? { transport: 'direct' }
     this.requireV2 = options.requireV2 ?? false
@@ -283,13 +290,11 @@ export class E2EEChannel {
       return
     }
     this.sendEncryptedControl(
-      this.v2Session
-        ? {
-            type: 'e2ee_authenticated',
-            v: 2,
-            transcriptHashB64: this.v2Session.transcriptHashB64
-          }
-        : { type: 'e2ee_authenticated' }
+      createE2EEAuthenticatedFrame({
+        capabilities: this.authenticatedCapabilities,
+        runtimeId: this.authenticatedRuntimeId,
+        transcriptHashB64: this.v2Session?.transcriptHashB64
+      })
     )
   }
 

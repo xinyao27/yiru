@@ -24,7 +24,7 @@ import { FirstLaunchBanner } from './first-launch-banner'
 export function TelemetryFirstLaunchSurface(): React.JSX.Element | null {
   const settings = useAppStore((s) => s.settings)
   // Main's `telemetry:setOptIn` / `telemetry:acknowledgeBanner` handlers
-  // intentionally do NOT broadcast `settings:changed`, so the notice
+  // intentionally do NOT publish a runtime settings invalidation, so the notice
   // must call `fetchSettings()` itself after its IPC writes to keep the
   // renderer store (and PrivacyPane) from rendering stale telemetry
   // state. See privacy-pane.tsx for the identical pattern.

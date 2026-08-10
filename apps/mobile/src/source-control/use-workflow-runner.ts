@@ -10,10 +10,8 @@ import {
 import { recoverMobileRejectedPush } from './rejected-push-recovery'
 import type { LoadStatusOptions } from './screen-state'
 
-type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
-
 type Params = {
-  sendGitRequest: SendGitRequest
+  gitFetch: () => Promise<unknown>
   loadStatus: (options?: LoadStatusOptions) => Promise<boolean>
   mountedRef: MutableRefObject<boolean>
   busyActionRef: MutableRefObject<string | null>
@@ -25,7 +23,7 @@ type Params = {
 }
 
 export function useMobileSourceControlWorkflowRunner({
-  sendGitRequest,
+  gitFetch,
   loadStatus,
   mountedRef,
   busyActionRef,
@@ -67,7 +65,7 @@ export function useMobileSourceControlWorkflowRunner({
         }
         triggerError()
         setActionError(error instanceof Error ? error.message : 'Source control action failed')
-        await recoverMobileRejectedPush({ actionId, error, sendGitRequest, loadStatus })
+        await recoverMobileRejectedPush({ actionId, error, gitFetch, loadStatus })
         return false
       } finally {
         if (busyActionRef.current === actionId) {
@@ -80,11 +78,11 @@ export function useMobileSourceControlWorkflowRunner({
     },
     [
       busyActionRef,
+      gitFetch,
       loadStatus,
       mountedRef,
       onHostedReviewRefresh,
       recordCommitFailure,
-      sendGitRequest,
       setActionError,
       setBusyAction,
       setCommitMessage

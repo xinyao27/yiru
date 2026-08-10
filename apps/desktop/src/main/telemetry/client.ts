@@ -29,7 +29,6 @@
 import { randomUUID } from 'node:crypto'
 import { arch as osArch, platform as osPlatform, release as osRelease } from 'node:os'
 
-import { app } from 'electron'
 import { PostHog } from 'posthog-node'
 import type {
   CommonProps,
@@ -40,6 +39,7 @@ import type {
 } from '~shared/telemetry-events'
 
 import type { Store } from '../persistence'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { sendSupportReport, type SupportReportSubmitResult } from '../support-report/client'
 import { consumeBurstToken, resetBurstCapsForSession } from './burst-cap'
 import { getCohortAtEmit } from './cohort-classifier'
@@ -95,7 +95,7 @@ function buildCommonProps(installId: string, sid: string, channel: 'stable' | 'r
   // schema cap is the authoritative check — truncating pre-validator would
   // silently mask an unexpected-long-string case we want to see as a drop.
   return {
-    app_version: app.getVersion(),
+    app_version: getRuntimeHostPathsProvider().version(),
     platform: osPlatform(),
     arch: osArch(),
     os_release: osRelease(),

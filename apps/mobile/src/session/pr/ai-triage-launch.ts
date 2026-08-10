@@ -1,4 +1,5 @@
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import {
   readMobileReviewCreatedTerminal,
@@ -11,29 +12,23 @@ import {
 // fresh agent terminal in the worktree. There is no higher-level agent-composer RPC
 // on mobile, so this createTerminal+send pair is the launch mechanism.
 export async function createTerminalAndSendPrompt(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: RpcClient,
   worktreeId: string,
   prompt: string
 ): Promise<void> {
-  const created = await client.sendRequest('session.tabs.createTerminal', {
+  const created = await callRuntimeOrpc(client, (runtime) => runtime.session.tabs.createTerminal, {
     worktree: `id:${worktreeId}`
   })
-  if (!created.ok) {
-    throw new Error(created.error?.message || 'Failed to create terminal')
-  }
-  const terminalTab = readMobileReviewCreatedTerminal(created.result)
+  const terminalTab = readMobileReviewCreatedTerminal(created)
   if (!terminalTab) {
     throw new Error('Created terminal response was invalid')
   }
-  const sent = await client.sendRequest('terminal.send', {
+  const sent = await callRuntimeOrpc(client, (runtime) => runtime.terminal.send, {
     terminal: terminalTab.terminal,
     text: prompt,
     enter: true
   })
-  if (!sent.ok) {
-    throw new Error(sent.error?.message || 'Failed to send prompt')
-  }
-  if (!readMobileReviewTerminalSendAccepted(sent.result)) {
+  if (!readMobileReviewTerminalSendAccepted(sent)) {
     throw new Error('Terminal input is locked')
   }
 }

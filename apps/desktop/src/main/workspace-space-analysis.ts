@@ -32,6 +32,11 @@ import type { Store } from './persistence'
 import { createFolderWorktree, listRepoWorktrees } from './repo-worktrees'
 import { mergeWorktree } from './worktree/logic'
 
+// Why: the runtime service facade (`RuntimeStore`) only exposes a subset of
+// `Store` — narrowing to what the scan actually reads lets it pass that
+// facade directly instead of the concrete class.
+type WorkspaceSpaceStore = Pick<Store, 'getRepos' | 'getWorktreeMeta'>
+
 const WORKTREE_SCAN_CONCURRENCY = 3
 const LOCAL_WORKTREE_SCAN_CONCURRENCY = 1
 const LOCAL_FS_CONCURRENCY = 48
@@ -552,7 +557,11 @@ async function listWorktreesForSpaceScan(
   }
 }
 
-function mergeForSpaceScan(repo: Repo, gitWorktree: GitWorktreeInfo, store: Store): Worktree {
+function mergeForSpaceScan(
+  repo: Repo,
+  gitWorktree: GitWorktreeInfo,
+  store: WorkspaceSpaceStore
+): Worktree {
   const worktreeId = `${repo.id}::${gitWorktree.path}`
   return mergeWorktree(repo.id, gitWorktree, store.getWorktreeMeta(worktreeId), repo.displayName)
 }
@@ -569,7 +578,7 @@ function reportProgress(
 async function scanRepo(
   repo: Repo,
   scannedAt: number,
-  store: Store,
+  store: WorkspaceSpaceStore,
   limiters: WorkspaceSpaceScanLimiters,
   progress: WorkspaceSpaceProgressState,
   options: WorkspaceSpaceAnalyzeOptions
@@ -666,7 +675,7 @@ async function scanRepo(
 }
 
 export async function analyzeWorkspaceSpace(
-  store: Store,
+  store: WorkspaceSpaceStore,
   options: WorkspaceSpaceAnalyzeOptions = {}
 ): Promise<WorkspaceSpaceAnalysis> {
   throwIfAborted(options.signal)

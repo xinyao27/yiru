@@ -24,13 +24,14 @@ export class OrchestrationMutationExecutor {
   async run(
     request: RpcRequest,
     params: unknown,
-    invoke: (mutation?: DurableMutationInvocation) => Promise<unknown> | unknown
+    invoke: (mutation?: DurableMutationInvocation) => Promise<unknown> | unknown,
+    options?: { callerFingerprint?: string }
   ): Promise<unknown> {
     const requestId = request.orchestrationRequestId
     if (!requestId || !isOrchestrationMutation(request.method, params)) {
       return await invoke()
     }
-    const callerFingerprint = authenticatedCallerFingerprint(request)
+    const callerFingerprint = options?.callerFingerprint ?? authenticatedCallerFingerprint(request)
     const payloadHash = createHash('sha256')
       .update(JSON.stringify(canonicalize({ method: request.method, params })))
       .digest('hex')
@@ -104,12 +105,33 @@ export class OrchestrationMutationExecutor {
   }
 }
 
+const orchestrationMutationExecutors = new WeakMap<
+  YiruRuntimeService,
+  OrchestrationMutationExecutor
+>()
+
+export function orchestrationMutationExecutorFor(
+  runtime: YiruRuntimeService
+): OrchestrationMutationExecutor {
+  const existing = orchestrationMutationExecutors.get(runtime)
+  if (existing) {
+    return existing
+  }
+  const created = new OrchestrationMutationExecutor(runtime)
+  orchestrationMutationExecutors.set(runtime, created)
+  return created
+}
+
 export function authenticatedCallerFingerprint(request: RpcRequest): string {
   const callerToken =
     request.authToken ||
     (request as RpcRequest & { deviceToken?: string }).deviceToken ||
     'authenticated_transport'
-  return createHash('sha256').update(callerToken).digest('hex')
+  return authenticatedTokenFingerprint(callerToken)
+}
+
+export function authenticatedTokenFingerprint(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
 }
 
 function canonicalize(value: unknown): unknown {

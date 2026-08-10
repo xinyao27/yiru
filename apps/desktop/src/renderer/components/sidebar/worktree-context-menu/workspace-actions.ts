@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { getWorkspaceStatus } from '../workspace-status'
@@ -22,7 +24,7 @@ export function useWorkspaceMenuActions(args: {
   const [coworkingVisibilityPending, setCoworkingVisibilityPending] = useState(false)
 
   const handleCopyPath = useCallback(() => {
-    window.api.ui.writeClipboardText(worktree.path)
+    shellClient.ui.writeClipboardText(worktree.path)
   }, [worktree.path])
 
   const handleToggleRead = useCallback(() => {
@@ -42,7 +44,7 @@ export function useWorkspaceMenuActions(args: {
       return
     }
     setCoworkingVisibilityPending(true)
-    void window.api.coworkingSharing
+    void coworkingSharingClient
       .setWorktreeVisibility({ worktreeId: worktree.id, visibility: 'private' })
       .catch(() => {
         toast.error(

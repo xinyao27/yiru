@@ -1,3 +1,4 @@
+import type { RuntimeSpeechModelSummary } from '@yiru/runtime-protocol/contract'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
@@ -47,6 +48,7 @@ import {
 } from '~renderer/lib/windows-terminal-capabilities'
 import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { listInstalledFontFamilies } from '~renderer/runtime/settings-import-client'
 import { useAppStore } from '~renderer/store'
 import { getProjectHostSetupProjectionFromState } from '~renderer/store/selectors'
 import { getRepoHostIdentity } from '~renderer/store/slices/repo-host-identity'
@@ -59,7 +61,6 @@ import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
 } from '~shared/source-control/ai-types'
-import type { SpeechModelState } from '~shared/speech-types'
 import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '~shared/types'
 
 import { ScrollArea } from '../ui/scroll-area'
@@ -225,7 +226,7 @@ function getSkillNavInstallStatus(skill: {
 
 function hasReadyVoiceModel(
   settings: GlobalSettings,
-  modelStates: readonly SpeechModelState[]
+  modelStates: readonly RuntimeSpeechModelSummary[]
 ): boolean {
   const voiceSettings = settings.voice ?? getDefaultVoiceSettings()
   if (
@@ -471,8 +472,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       return
     }
 
-    installedFontsLoadPromiseRef.current = window.api.settings
-      .listFonts()
+    installedFontsLoadPromiseRef.current = listInstalledFontFamilies()
       .then((fonts) => {
         if (!settingsMountedRef.current) {
           return
@@ -1163,7 +1163,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       return {
         ...section,
         badgeColor: repo?.badgeColor,
-        isRemote: !!repo?.connectionId,
         repoIcon: repo?.repoIcon,
         upstream: repo?.upstream
       }

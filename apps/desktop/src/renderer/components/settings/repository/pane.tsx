@@ -7,6 +7,7 @@ import { Label } from '~renderer/components/ui/label'
 import { Separator } from '~renderer/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { getRepoKindLabel, isFolderRepo } from '~shared/repo-kind'
 import type { YiruHooks, Project, ProjectUpdateArgs, Repo, RepoHookSettings } from '~shared/types'
@@ -137,7 +138,7 @@ export function RepositoryPane({
   const handleCopyTemplate = async () => {
     // Why: the missing-`yiru.yaml` state is a migration aid, so copying the shared-template
     // snippet should be one click rather than forcing users to reconstruct the expected shape.
-    await window.api.ui.writeClipboardText(`scripts:
+    await shellClient.ui.writeClipboardText(`scripts:
   setup: |
     pnpm worktree:setup
   archive: |
@@ -356,8 +357,10 @@ export function RepositoryPane({
         updateRepo={updateSelectedRepo}
       />
     ) : null,
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+    // removed (#63) — symlinks are always local now, so the SSH exclusion
+    // that used to gate this section never fires.
     !isFolder &&
-    !repo.connectionId &&
     (forceFullPaneForRepoMatch || matchesSettingsSearch(searchQuery, symlinkEntries)) ? (
       <WorktreeSymlinksSection key="symlinks" repo={repo} updateRepo={updateSelectedRepo} />
     ) : null,
