@@ -3,8 +3,8 @@ import type {
   FileWorktreeInput,
   RuntimeFileWatchEvent
 } from '@yiru/runtime-protocol/contract'
+import type { RpcContext } from '~main/runtime/rpc/core'
 
-import type { RpcContext } from '../../core'
 import { runFileWatchStream } from '../file-watch-stream-lifecycle'
 
 let filesWatchSubscriptionSeq = 0

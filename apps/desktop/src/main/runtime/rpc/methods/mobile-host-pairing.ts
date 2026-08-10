@@ -7,8 +7,8 @@ import type {
   RuntimeMobileRevokeDeviceResult,
   RuntimeMobileWebSocketReadyResult
 } from '@yiru/runtime-protocol/contract'
+import { getMobileHostPairingBridge } from '~main/runtime/mobile-host-pairing-bridge'
 
-import { getMobileHostPairingBridge } from '../../mobile-host-pairing-bridge'
 import { RuntimeRpcHandlerError } from '../core'
 
 // Why: `mobile.hostPairing.*` handlers run in-process with only `RpcContext`

@@ -16042,13 +16042,18 @@ export class YiruRuntimeService {
     return await this.showManagedWorktree(`id:${worktree.id}`)
   }
 
-  persistManagedWorktreeSortOrder(orderedIds: string[]): { updated: number } {
+  persistManagedWorktreeSortOrder(
+    orderedIds: string[],
+    options: { notifyClients?: boolean } = {}
+  ): { updated: number } {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
     const updated = persistExistingWorktreeSortOrder(this.store, orderedIds)
-    this.invalidateResolvedWorktreeCache()
-    this.notifyReposChanged()
+    if (options.notifyClients !== false) {
+      this.invalidateResolvedWorktreeCache()
+      this.notifyReposChanged()
+    }
     return { updated }
   }
 

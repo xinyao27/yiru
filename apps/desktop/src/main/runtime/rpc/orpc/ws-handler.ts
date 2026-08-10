@@ -7,9 +7,9 @@ import {
   encodeRuntimeOrpcTextFrame
 } from '@yiru/runtime-protocol/orpc-peer-frame'
 import { translateMain } from '~main/i18n/main-i18n'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { AuthenticatedMobileSocket } from '../mobile-socket-wiring'
 import { authenticatedTokenFingerprint } from '../orchestration-mutation-executor'
 import {

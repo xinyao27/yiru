@@ -24,7 +24,7 @@ type CachedAiVaultList = {
   expiresAt: number
 }
 
-type CachedAiVaultListArgs = AiVaultListArgs & Pick<AiVaultScanOptions, 'limitPerAgent'>
+type CachedAiVaultListArgs = AiVaultListArgs & Pick<AiVaultScanOptions, 'agents' | 'limitPerAgent'>
 
 let cachedList: CachedAiVaultList | null = null
 let inflightList: Promise<AiVaultListResult> | null = null
@@ -36,6 +36,7 @@ export async function listAiVaultSessions(
   const key = JSON.stringify({
     limit: args?.limit ?? 'default',
     limitPerAgent: args?.limitPerAgent ?? 'default',
+    agents: args?.agents ?? 'all',
     scopePaths: args?.scopePaths ?? []
   })
   const now = Date.now()
@@ -54,6 +55,7 @@ export async function listAiVaultSessions(
     scanAiVaultSessions({
       limit: args?.limit,
       limitPerAgent: args?.limitPerAgent,
+      agents: args?.agents,
       scopePaths: args?.scopePaths,
       additionalCodexSessionsDirs,
       wslHomeDirs: await getAiVaultWslHomeDirs(),

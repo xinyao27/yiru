@@ -1,12 +1,11 @@
 import { mkdirSync, rmdirSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { agentHookServer } from '~main/agent-hooks/server'
+import { startDaemon, type DaemonHandle } from '~main/daemon/main'
+import { createPtySubprocess } from '~main/daemon/pty-subprocess'
+import { getDaemonSocketPath, getDaemonTokenPath } from '~main/daemon/spawner'
 import { getEndpointFileName } from '~shared/agent/hook-listener'
-
-import { agentHookServer } from '../../agent-hooks/server'
-import { startDaemon, type DaemonHandle } from '../../daemon/main'
-import { createPtySubprocess } from '../../daemon/pty-subprocess'
-import { getDaemonSocketPath, getDaemonTokenPath } from '../../daemon/spawner'
 
 export type NodeRuntimeHostDaemon = {
   agentHookEndpointFile: string

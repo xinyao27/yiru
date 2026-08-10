@@ -4,8 +4,7 @@ import type {
   FileTreePathInput,
   FileWorktreeInput
 } from '@yiru/runtime-protocol/contract'
-
-import type { RpcContext } from '../../core'
+import type { RpcContext } from '~main/runtime/rpc/core'
 
 export async function handleFilesSearch(params: FileSearchInput, { fileCommands }: RpcContext) {
   return fileCommands.searchRuntimeFiles(params.worktree, {

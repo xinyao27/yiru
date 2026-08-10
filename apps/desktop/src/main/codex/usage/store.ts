@@ -18,23 +18,19 @@ import type {
   CodexUsageSummary
 } from '~shared/codex-usage-types'
 
-import { migrateCodexUsageEventKey } from './event-key'
+import { decodeCodexUsagePersistedState, encodeCodexUsagePersistedState } from './persistence'
 import { priceCodexAggregateUsage } from './pricing'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'
-import type {
-  CodexUsageDailyAggregate,
-  CodexUsagePersistedFile,
-  CodexUsagePersistedState,
-  CodexUsageSession
-} from './types'
+import type { CodexUsagePersistedState } from './types'
 
 // Why: v8 aligns raw token normalization with CodexBar and recomputes totals
 // from input + cache-read + output. Older rows may retain duplicate wire totals.
-const SCHEMA_VERSION = 8
+const SCHEMA_VERSION = 9
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
 let _codexUsageFile: string | null = null
+let _codexUsageOwnershipFile: string | null = null
 
 type AutomationUsageLookupInput = {
   worktreeId: string | null
@@ -51,6 +47,7 @@ function getDefaultState(): CodexUsagePersistedState {
   return {
     schemaVersion: SCHEMA_VERSION,
     worktreeFingerprint: null,
+    ownershipGeneration: null,
     processedFiles: [],
     sessions: [],
     dailyAggregates: [],
@@ -64,9 +61,6 @@ function getDefaultState(): CodexUsagePersistedState {
 }
 
 export function normalizePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
-  if (state.schemaVersion === 5 || state.schemaVersion === 6) {
-    return migratePersistedState(state)
-  }
   if (state.schemaVersion !== SCHEMA_VERSION) {
     // Why: schema changes affect dedupe, attribution, or request-level pricing.
     // Reusing an older cache would silently serve wrong analytics until a
@@ -95,80 +89,16 @@ export function normalizePersistedState(state: CodexUsagePersistedState): CodexU
   }
 }
 
-function migratePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
-  const migratedFiles = state.processedFiles.flatMap((file) => {
-    const migrated = migratePersistedFile(file, state.schemaVersion)
-    return migrated ? [migrated] : []
-  })
-  return {
-    ...state,
-    schemaVersion: SCHEMA_VERSION,
-    processedFiles: migratedFiles,
-    sessions: state.sessions.map(normalizeSession),
-    dailyAggregates: state.dailyAggregates.map(normalizeDailyAggregate),
-    scanState: {
-      ...state.scanState,
-      enabled: true
-    }
-  }
-}
-
-function migratePersistedFile(
-  file: CodexUsagePersistedFile,
-  schemaVersion: number
-): CodexUsagePersistedFile | null {
-  if (schemaVersion === 5) {
-    return {
-      ...file,
-      sessions: file.sessions.map(normalizeSession),
-      dailyAggregates: file.dailyAggregates.map(normalizeDailyAggregate)
-    }
-  }
-  const ownedEventKeys: string[] = []
-  for (const eventKey of file.ownedEventKeys) {
-    const migrated = migrateCodexUsageEventKey(eventKey, schemaVersion)
-    if (!migrated) {
-      return null
-    }
-    ownedEventKeys.push(migrated)
-  }
-  return {
-    ...file,
-    sessions: file.sessions.map(normalizeSession),
-    dailyAggregates: file.dailyAggregates.map(normalizeDailyAggregate),
-    ownedEventKeys
-  }
-}
-
-function normalizeSession(session: CodexUsageSession): CodexUsageSession {
-  return {
-    ...session,
-    locationModelBreakdown: session.locationModelBreakdown ?? []
-  }
-}
-
-function normalizeDailyAggregate(aggregate: CodexUsageDailyAggregate): CodexUsageDailyAggregate {
-  if (
-    (typeof aggregate.estimatedCostUsd === 'number' || aggregate.estimatedCostUsd === null) &&
-    typeof aggregate.unpricedTokens === 'number'
-  ) {
-    return aggregate
-  }
-  const estimatedCostUsd = priceCodexAggregateUsage(
-    aggregate.model,
-    aggregate.inputTokens,
-    aggregate.cachedInputTokens,
-    aggregate.outputTokens
-  )
-  return {
-    ...aggregate,
-    estimatedCostUsd,
-    unpricedTokens: estimatedCostUsd === null ? aggregate.totalTokens : 0
-  }
-}
-
 export function initCodexUsagePath(): void {
   _codexUsageFile = join(app.getPath('userData'), 'yiru-codex-usage.json')
+  _codexUsageOwnershipFile = join(app.getPath('userData'), 'yiru-codex-usage-ownership.sqlite')
+}
+
+function getCodexUsageOwnershipFile(): string {
+  if (!_codexUsageOwnershipFile) {
+    _codexUsageOwnershipFile = join(app.getPath('userData'), 'yiru-codex-usage-ownership.sqlite')
+  }
+  return _codexUsageOwnershipFile
 }
 
 function getCodexUsageFile(): string {
@@ -234,11 +164,15 @@ function getWorktreeFingerprint(worktreesByRepo: Map<string, UsageWorktreeRef[]>
 export class CodexUsageStore {
   private state: CodexUsagePersistedState
   private readonly store: Store
+  private shouldCompactPersistedState = false
   private scanPromise: Promise<void> | null = null
 
   constructor(store: Store) {
     this.store = store
     this.state = this.load()
+    if (this.shouldCompactPersistedState) {
+      this.writeToDisk()
+    }
   }
 
   private load(): CodexUsagePersistedState {
@@ -247,7 +181,8 @@ export class CodexUsageStore {
       if (!existsSync(usageFile)) {
         return getDefaultState()
       }
-      const parsed = JSON.parse(readFileSync(usageFile, 'utf-8')) as CodexUsagePersistedState
+      const parsed = decodeCodexUsagePersistedState(readFileSync(usageFile, 'utf-8'))
+      this.shouldCompactPersistedState = parsed.schemaVersion !== SCHEMA_VERSION
       return normalizePersistedState({
         ...getDefaultState(),
         ...parsed,
@@ -269,7 +204,7 @@ export class CodexUsageStore {
       mkdirSync(dir, { recursive: true })
     }
     const tmpFile = `${usageFile}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-    writeFileSync(tmpFile, JSON.stringify(this.state), 'utf-8')
+    writeFileSync(tmpFile, encodeCodexUsagePersistedState(this.state), 'utf-8')
     renameSync(tmpFile, usageFile)
   }
 
@@ -332,13 +267,17 @@ export class CodexUsageStore {
         const repos = this.store.getRepos()
         const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
         const worktreeFingerprint = getWorktreeFingerprint(worktreesByRepo)
+        const canReuseProcessedFiles = this.state.worktreeFingerprint === worktreeFingerprint
         const result = await scanCodexUsageFiles(
           createWorktreeRefs(repos, worktreesByRepo),
-          this.state.worktreeFingerprint === worktreeFingerprint ? this.state.processedFiles : []
+          canReuseProcessedFiles ? this.state.processedFiles : [],
+          canReuseProcessedFiles ? this.state.ownershipGeneration : null,
+          getCodexUsageOwnershipFile()
         )
         this.state.processedFiles = result.processedFiles
         this.state.sessions = result.sessions
         this.state.dailyAggregates = result.dailyAggregates
+        this.state.ownershipGeneration = result.ownershipGeneration
         this.state.worktreeFingerprint = worktreeFingerprint
         this.state.scanState.lastScanCompletedAt = Date.now()
         this.state.scanState.lastScanError = null

@@ -12,6 +12,7 @@ import { getCodexAccountHomeSessionDirectories } from '../account-home-discovery
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../session-bridge'
 import { buildCodexUsageEventKey } from './event-key'
+import { CodexUsageOwnershipIndex } from './ownership-index'
 import { priceCodexUsage } from './pricing'
 import { loadCodexPrioritySnapshot, type CodexPrioritySnapshot } from './priority'
 import type {
@@ -545,7 +546,8 @@ function findContainingWorktree(
 
 export async function attributeCodexUsageEvent(
   event: CodexUsageParsedEvent,
-  worktrees: (CodexUsageWorktreeRef & { canonicalPath: string })[]
+  worktrees: (CodexUsageWorktreeRef & { canonicalPath: string })[],
+  worktreeByCwd?: Map<string, CodexUsageWorktreeRef | null>
 ): Promise<CodexUsageAttributedEvent | null> {
   const day = localDayFromTimestamp(event.timestamp)
   if (!day) {
@@ -558,7 +560,11 @@ export async function attributeCodexUsageEvent(
   let projectLabel = getDefaultProjectLabel(event.cwd)
 
   if (event.cwd) {
-    const worktree = findContainingWorktree(event.cwd, worktrees)
+    let worktree = worktreeByCwd?.get(event.cwd)
+    if (worktree === undefined) {
+      worktree = findContainingWorktree(event.cwd, worktrees)
+      worktreeByCwd?.set(event.cwd, worktree)
+    }
     if (worktree) {
       repoId = worktree.repoId
       worktreeId = worktree.worktreeId
@@ -1056,6 +1062,7 @@ export async function parseCodexUsageFile(
     skipInitialBytes?: number
     claimEventKey?: (eventKey: string) => boolean
     prioritySnapshot?: CodexPrioritySnapshot
+    worktreeByCwd?: Map<string, CodexUsageWorktreeRef | null>
   } = {}
 ): Promise<CodexUsagePersistedFile> {
   const prioritySnapshot = options.prioritySnapshot ?? loadCodexPrioritySnapshot()
@@ -1080,7 +1087,6 @@ export async function parseCodexUsageFile(
     totalOnlyBaselinePending: (options.skipInitialBytes ?? 0) > 0
   }
 
-  const ownedEventKeys = new Set<string>()
   let hasDeferredClaims = false
   for await (const line of lines) {
     const parsed = parseCodexUsageRecord(line, context)
@@ -1094,8 +1100,7 @@ export async function parseCodexUsageFile(
       hasDeferredClaims = true
       continue
     }
-    ownedEventKeys.add(parsed.eventKey)
-    const attributed = await attributeCodexUsageEvent(parsed, worktrees)
+    const attributed = await attributeCodexUsageEvent(parsed, worktrees, options.worktreeByCwd)
     if (attributed) {
       events.push(attributed)
     }
@@ -1104,7 +1109,6 @@ export async function parseCodexUsageFile(
   return {
     ...processedFile,
     ...aggregateCodexUsage(events, prioritySnapshot),
-    ownedEventKeys: [...ownedEventKeys],
     hasDeferredClaims,
     priorityFingerprint: prioritySnapshot.fingerprint
   }
@@ -1112,29 +1116,80 @@ export async function parseCodexUsageFile(
 
 export async function scanCodexUsageFiles(
   worktrees: CodexUsageWorktreeRef[],
-  previousProcessedFiles: CodexUsagePersistedFile[]
+  previousProcessedFiles: CodexUsagePersistedFile[],
+  previousOwnershipGeneration: string | null,
+  ownershipDatabasePath: string
 ): Promise<{
   processedFiles: CodexUsagePersistedFile[]
   sessions: CodexUsageSession[]
   dailyAggregates: CodexUsageDailyAggregate[]
+  ownershipGeneration: string
 }> {
   const prioritySnapshot = loadCodexPrioritySnapshot()
   const files = await listCodexSessionFiles()
-  const previousByPath = new Map(previousProcessedFiles.map((file) => [file.path, file]))
   const worktreesWithCanonicalPaths = await buildWorktreesWithCanonicalPaths(worktrees)
   const legacySourceSkipBytesByPath = getLegacySourceSkipBytesByPath(files)
+  const ownershipIndex = new CodexUsageOwnershipIndex(ownershipDatabasePath)
+  const canReuseOwnership =
+    previousOwnershipGeneration !== null &&
+    ownershipIndex.getGeneration() === previousOwnershipGeneration
+  const reusablePreviousFiles = canReuseOwnership ? previousProcessedFiles : []
+  const previousByPath = new Map(reusablePreviousFiles.map((file) => [file.path, file]))
+
+  ownershipIndex.begin(!canReuseOwnership)
+  try {
+    return await scanCodexUsageFilesWithIndex({
+      files,
+      legacySourceSkipBytesByPath,
+      ownershipIndex,
+      previousByPath,
+      previousProcessedFiles: reusablePreviousFiles,
+      prioritySnapshot,
+      worktreesWithCanonicalPaths
+    })
+  } catch (error) {
+    ownershipIndex.rollback()
+    throw error
+  } finally {
+    ownershipIndex.close()
+  }
+}
+
+async function scanCodexUsageFilesWithIndex(args: {
+  files: string[]
+  legacySourceSkipBytesByPath: Map<string, number>
+  ownershipIndex: CodexUsageOwnershipIndex
+  previousByPath: Map<string, CodexUsagePersistedFile>
+  previousProcessedFiles: CodexUsagePersistedFile[]
+  prioritySnapshot: CodexPrioritySnapshot
+  worktreesWithCanonicalPaths: (CodexUsageWorktreeRef & { canonicalPath: string })[]
+}): Promise<{
+  processedFiles: CodexUsagePersistedFile[]
+  sessions: CodexUsageSession[]
+  dailyAggregates: CodexUsageDailyAggregate[]
+  ownershipGeneration: string
+}> {
+  const {
+    files,
+    legacySourceSkipBytesByPath,
+    ownershipIndex,
+    previousByPath,
+    previousProcessedFiles,
+    prioritySnapshot,
+    worktreesWithCanonicalPaths
+  } = args
 
   const currentPaths = new Set(files)
   // Why: when a rollout that owned event keys is deleted, remaining forks still
   // contain those records but their caches record them as unowned. Only files
   // that previously deferred claims can reclaim, so invalidate those — not the
   // entire rollout corpus.
-  const lostOwnerPath = previousProcessedFiles.some(
-    (file) =>
-      !currentPaths.has(file.path) &&
-      Array.isArray(file.ownedEventKeys) &&
-      file.ownedEventKeys.length > 0
-  )
+  let lostOwnerPath = false
+  for (const file of previousProcessedFiles) {
+    if (!currentPaths.has(file.path)) {
+      lostOwnerPath ||= ownershipIndex.removeFile(file.path)
+    }
+  }
 
   const reusedByPath = new Map<string, CodexUsagePersistedFile>()
   const pathsToParse: string[] = []
@@ -1150,7 +1205,6 @@ export async function scanCodexUsageFiles(
       previous &&
       previous.mtimeMs === fileInfo.mtimeMs &&
       previous.size === fileInfo.size &&
-      Array.isArray(previous.ownedEventKeys) &&
       typeof previous.hasDeferredClaims === 'boolean' &&
       previous.priorityFingerprint === prioritySnapshot.fingerprint
     if (canReuse) {
@@ -1163,35 +1217,15 @@ export async function scanCodexUsageFiles(
     }
   }
 
-  // Why: resuming or forking a Codex session copies the parent rollout's
-  // token_count records into a new file, so per-file parsing re-counts the
-  // whole copied history once per descendant (#8006). Cross-file ownership
-  // counts each record for exactly one file; cached files keep the claims
-  // they persisted, and new files claim in sorted-path order so rescans stay
-  // deterministic.
-  const eventOwnerByKey = new Map<string, string>()
-  for (const [filePath, previous] of reusedByPath) {
-    for (const eventKey of previous.ownedEventKeys) {
-      // First cached claim wins so conflicting projections stay deterministic.
-      if (!eventOwnerByKey.has(eventKey)) {
-        eventOwnerByKey.set(eventKey, filePath)
-      }
-    }
-  }
-
   const parsedByPath = new Map<string, CodexUsagePersistedFile>()
+  const worktreeByCwd = new Map<string, CodexUsageWorktreeRef | null>()
   for (const [index, filePath] of pathsToParse.entries()) {
+    const ownershipFileId = ownershipIndex.prepareFile(filePath)
     const processed = await parseCodexUsageFile(filePath, worktreesWithCanonicalPaths, {
       skipInitialBytes: legacySourceSkipBytesByPath.get(filePath) ?? 0,
-      claimEventKey: (eventKey) => {
-        const owner = eventOwnerByKey.get(eventKey)
-        if (owner !== undefined && owner !== filePath) {
-          return false
-        }
-        eventOwnerByKey.set(eventKey, filePath)
-        return true
-      },
-      prioritySnapshot
+      claimEventKey: (eventKey) => ownershipIndex.claimEvent(ownershipFileId, eventKey),
+      prioritySnapshot,
+      worktreeByCwd
     })
     parsedByPath.set(filePath, processed)
 
@@ -1216,6 +1250,7 @@ export async function scanCodexUsageFiles(
     mergeDailyAggregates(dailyByKey, processed.dailyAggregates)
   }
 
+  const ownershipGeneration = ownershipIndex.commit()
   return {
     processedFiles,
     sessions: finalizeSessions(sessionsById),
@@ -1223,7 +1258,8 @@ export async function scanCodexUsageFiles(
       left.day === right.day
         ? left.projectLabel.localeCompare(right.projectLabel)
         : left.day.localeCompare(right.day)
-    )
+    ),
+    ownershipGeneration
   }
 }
 

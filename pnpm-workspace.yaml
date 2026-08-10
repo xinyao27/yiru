@@ -202,6 +202,7 @@ catalogs:
     expo-status-bar: 57.0.1
     expo-thinking-orbs: 0.1.0
     expo-widgets: 57.0.6
+    highlight.js: 11.11.1
     lowlight: 3.3.0
     react: 19.2.3
     react-dom: 19.2.3

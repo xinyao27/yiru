@@ -488,9 +488,9 @@ catalogs:
     expo-widgets:
       specifier: 57.0.6
       version: 57.0.6
-    lowlight:
-      specifier: 3.3.0
-      version: 3.3.0
+    highlight.js:
+      specifier: 11.11.1
+      version: 11.11.1
     phosphor-react-native:
       specifier: 3.0.6
       version: 3.0.6
@@ -1137,12 +1137,12 @@ importers:
       expo-widgets:
         specifier: catalog:mobile
         version: 57.0.6(9206458341e229b68f663dfdd12f7145)
+      highlight.js:
+        specifier: catalog:mobile
+        version: 11.11.1
       katex:
         specifier: 'catalog:'
         version: 0.18.0
-      lowlight:
-        specifier: catalog:mobile
-        version: 3.3.0
       phosphor-react-native:
         specifier: catalog:mobile
         version: 3.0.6(react-native-svg@15.15.4(react-native@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.17)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3)

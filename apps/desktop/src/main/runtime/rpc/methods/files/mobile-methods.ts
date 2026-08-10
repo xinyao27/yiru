@@ -10,10 +10,10 @@ import type {
   FileTreePathInput,
   FileWorktreeInput
 } from '@yiru/runtime-protocol/contract'
+import { callerClassOf } from '~main/runtime/rpc/access'
+import { InvalidArgumentError, type RpcContext } from '~main/runtime/rpc/core'
 import { getCoworkingResourceQuota } from '~shared/coworking/resource-limits'
 
-import { callerClassOf } from '../../access'
-import { InvalidArgumentError, type RpcContext } from '../../core'
 import { assertOutOfTreeFileAccess } from '../files-out-of-tree-guard'
 
 export async function handleFilesList(params: FileWorktreeInput, { fileCommands }: RpcContext) {

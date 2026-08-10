@@ -119,6 +119,14 @@ export function createStableLogicalRpcClient(
     getGeneration: () => generation
   }
 
+  // Why: the oRPC client is a function Proxy whose `name` is another Proxy.
+  // React's development prop profiler enumerates client objects and cannot
+  // stringify that shape, so keep the transport handle callable but internal.
+  Object.defineProperty(logical, 'orpc', {
+    enumerable: false,
+    get: () => activeSession.orpc
+  })
+
   return logical
 
   function bindActiveState(session: RpcClient, sessionGeneration: number): void {

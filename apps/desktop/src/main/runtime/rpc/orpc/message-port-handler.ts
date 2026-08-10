@@ -3,12 +3,12 @@ import { randomUUID } from 'node:crypto'
 import { RPCHandler } from '@orpc/server/message-port'
 import { BrowserWindow, ipcMain } from 'electron'
 import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import {
   parseRuntimeOrpcConnectPortRequest,
   RUNTIME_ORPC_CONNECT_PORT_CHANNEL
 } from '~shared/runtime-orpc-message-port'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import { authenticatedTokenFingerprint } from '../orchestration-mutation-executor'
 import { createRuntimeOrpcContext } from './bridge'
 import { connectRuntimeEnvironmentOrpcMessagePort } from './environment-message-port'

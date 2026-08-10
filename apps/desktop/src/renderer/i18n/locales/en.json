@@ -11617,6 +11617,37 @@
           "other": "Other",
           "refreshAriaLabel": "Refresh local usage statistics",
           "refresh": "Refresh usage"
+        },
+        "projectUsage": {
+          "title": "By project",
+          "tokenSummary": "{{tokens}} · {{projects}} projects · {{sessions}} sessions",
+          "valueSummary": "{{value}} known API value · {{projects}} projects · {{tokens}}",
+          "filterLabel": "Filter projects",
+          "filterPlaceholder": "Filter projects",
+          "empty": "No project-attributed usage is available yet.",
+          "noResults": "No projects match this filter.",
+          "unpriced": "Projects containing usage without authoritative pricing show no combined API value.",
+          "projectDetail": "{{tokens}} · {{sessions}} sessions"
+        },
+        "metricControls": {
+          "metricLabel": "Statistic",
+          "rangeLabel": "Usage range",
+          "sevenDays": "7 days",
+          "thirtyDays": "30 days",
+          "ninetyDays": "90 days"
+        },
+        "provider": {
+          "claude": "Claude",
+          "codex": "Codex",
+          "openCode": "OpenCode"
+        },
+        "providerChart": {
+          "title": "Daily usage",
+          "tokenDescription": "Token volume by provider across the selected range.",
+          "valueDescription": "Known API-equivalent value by provider; unpriced usage is excluded.",
+          "ariaLabel": "{{metric}} by provider over {{days}} days",
+          "tokens": "Tokens",
+          "value": "API value"
         }
       },
       "workspace-panel": {

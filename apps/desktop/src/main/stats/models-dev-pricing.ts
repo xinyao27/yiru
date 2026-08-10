@@ -193,7 +193,7 @@ function modelCandidates(modelID: string): string[] {
     }
     const versioned = candidate.replace(/-v\d+:\d+$/, '')
     append(versioned)
-    if (candidate.startsWith('claude-')) {
+    if (candidate.startsWith('claude-') && !candidate.includes('@')) {
       append(`${candidate}@default`)
     }
     index++

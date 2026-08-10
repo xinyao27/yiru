@@ -1,6 +1,8 @@
 import { encodeRuntimeOrpcSideChannelBinaryFrame } from '@yiru/runtime-protocol/orpc-peer-frame'
 import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
 import type { MessagePortMain } from 'electron'
+import { connectRemoteRuntimeSharedControlOrpcTunnel } from '~main/runtime/environment-request-connections'
+import { supportsRuntimeOrpcTunnel } from '~main/runtime/environment-shared-control'
 import { resolveEnvironment } from '~shared/runtime-environment-store'
 import { getPreferredPairingOffer } from '~shared/runtime-environments'
 import {
@@ -8,9 +10,6 @@ import {
   RUNTIME_ORPC_PORT_READY_MESSAGE,
   type RuntimeOrpcConnectTarget
 } from '~shared/runtime-orpc-message-port'
-
-import { connectRemoteRuntimeSharedControlOrpcTunnel } from '../../environment-request-connections'
-import { supportsRuntimeOrpcTunnel } from '../../environment-shared-control'
 
 const DEFAULT_RUNTIME_ORPC_CONNECT_TIMEOUT_MS = 15_000
 

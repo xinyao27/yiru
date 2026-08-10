@@ -1,6 +1,11 @@
 import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench-model/ui'
 import { buildContributionCalendar } from '@yiru/workbench-model/ui'
-import { useMemo } from 'react'
+import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  useMemo,
+  useState
+} from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
@@ -17,6 +22,7 @@ const INTENSITY_CLASS: Record<ContributionCalendarDay['intensity'], string> = {
   4: 'border-border bg-foreground/80'
 }
 const INTENSITY_LEVELS = [0, 1, 2, 3, 4] as const
+const CELL_STEP_PX = 14
 
 type ContributionHeatmapProps = {
   points: readonly ContributionPoint[]
@@ -24,12 +30,6 @@ type ContributionHeatmapProps = {
   activationLabel?: string
   anchorDate?: Date
   onActivate?: () => void
-}
-
-type ContributionCellProps = {
-  day: ContributionCalendarDay
-  hasGridSemantics: boolean
-  metric: ContributionDisplayMetric
 }
 
 export function ContributionHeatmap({
@@ -46,6 +46,15 @@ export function ContributionHeatmap({
     [anchorDate, points]
   )
   const days = calendar.weeks.flatMap((week) => week.days)
+  const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null)
+  const activeDay = activeDayIndex === null ? null : (days[activeDayIndex] ?? null)
+  const activeTriggerStyle: CSSProperties =
+    activeDayIndex === null
+      ? { visibility: 'hidden' }
+      : {
+          left: Math.floor(activeDayIndex / 7) * CELL_STEP_PX,
+          top: (activeDayIndex % 7) * CELL_STEP_PX
+        }
   const weekdayLabels = [
     { day: 'sunday', label: '' },
     {
@@ -64,9 +73,27 @@ export function ContributionHeatmap({
     },
     { day: 'saturday', label: '' }
   ]
-  const cells = days.map((day) => (
-    <ContributionCell key={day.day} day={day} hasGridSemantics={!isInteractive} metric={metric} />
+  const cells = days.map((day, index) => (
+    <span
+      key={day.day}
+      data-contribution-index={index}
+      className={cn(
+        'size-2.5 border',
+        day.isFuture ? 'border-transparent bg-transparent' : INTENSITY_CLASS[day.intensity]
+      )}
+      role={isInteractive ? undefined : 'gridcell'}
+      aria-label={isInteractive || day.isFuture ? undefined : formatCellLabel(day, metric)}
+    />
   ))
+  const handlePointerMove = (event: ReactPointerEvent<HTMLElement>): void => {
+    const nextIndex = contributionIndexFromTarget(event.target)
+    if (nextIndex !== null && !days[nextIndex]?.isFuture) {
+      setActiveDayIndex(nextIndex)
+    } else {
+      setActiveDayIndex(null)
+    }
+  }
+  const clearActiveDay = (): void => setActiveDayIndex(null)
 
   return (
     <div className="mx-auto w-max min-w-[610px]">
@@ -89,25 +116,47 @@ export function ContributionHeatmap({
             <span key={entry.day}>{entry.label}</span>
           ))}
         </div>
-        {activationLabel !== undefined && onActivate !== undefined ? (
-          <Button
-            variant="chart"
-            size="chart"
-            className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
-            aria-label={activationLabel}
-            onClick={onActivate}
-          >
-            {cells}
-          </Button>
-        ) : (
-          <div
-            className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
-            role="grid"
-            aria-label={formatGridLabel(metric)}
-          >
-            {cells}
+        <Tooltip open={activeDay !== null}>
+          <div className="relative">
+            {activationLabel !== undefined && onActivate !== undefined ? (
+              <Button
+                variant="chart"
+                size="chart"
+                className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
+                aria-label={activationLabel}
+                onClick={onActivate}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={clearActiveDay}
+              >
+                {cells}
+              </Button>
+            ) : (
+              <div
+                className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
+                role="grid"
+                aria-label={formatGridLabel(metric)}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={clearActiveDay}
+              >
+                {cells}
+              </div>
+            )}
+            <TooltipTrigger
+              render={
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute size-2.5"
+                  style={activeTriggerStyle}
+                />
+              }
+            />
           </div>
-        )}
+          {activeDay ? (
+            <TooltipContent side="top" sideOffset={4}>
+              {formatCellLabel(activeDay, metric)}
+            </TooltipContent>
+          ) : null}
+        </Tooltip>
       </div>
 
       <div className="text-muted-foreground mt-3 flex items-center justify-center gap-2 text-[11px]">
@@ -123,32 +172,16 @@ export function ContributionHeatmap({
   )
 }
 
-function ContributionCell({
-  day,
-  hasGridSemantics,
-  metric
-}: ContributionCellProps): React.JSX.Element {
-  const cell = (
-    <span
-      className={cn(
-        'size-2.5 border',
-        day.isFuture ? 'border-transparent bg-transparent' : INTENSITY_CLASS[day.intensity]
-      )}
-      role={hasGridSemantics ? 'gridcell' : undefined}
-      aria-label={!hasGridSemantics || day.isFuture ? undefined : formatCellLabel(day, metric)}
-    />
-  )
-  if (day.isFuture) {
-    return cell
+function contributionIndexFromTarget(target: EventTarget): number | null {
+  if (!(target instanceof HTMLElement)) {
+    return null
   }
-  return (
-    <Tooltip>
-      <TooltipTrigger render={cell} />
-      <TooltipContent side="top" sideOffset={4}>
-        {formatCellLabel(day, metric)}
-      </TooltipContent>
-    </Tooltip>
-  )
+  const value = target.closest<HTMLElement>('[data-contribution-index]')?.dataset.contributionIndex
+  if (value === undefined) {
+    return null
+  }
+  const index = Number(value)
+  return Number.isSafeInteger(index) ? index : null
 }
 
 function formatGridLabel(metric: ContributionDisplayMetric): string {

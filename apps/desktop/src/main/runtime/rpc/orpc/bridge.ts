@@ -3,12 +3,12 @@ import { randomUUID } from 'node:crypto'
 import { ORPCError } from '@orpc/server'
 import { encodeRuntimeOrpcSideChannelBinaryFrame } from '@yiru/runtime-protocol/orpc-peer-frame'
 import { emulatorProbe, emulatorProbeError } from '~main/emulator/probe'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import {
   withBrowserPaneUiRuntimeRpcSource,
   YIRU_RUNTIME_RPC_BROWSER_UI_SOURCE
 } from '~shared/runtime-rpc-feature-interaction-source'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import { adjudicateRedirectedProjectAccess } from '../access-adjudication'
 import {
   InvalidArgumentError,

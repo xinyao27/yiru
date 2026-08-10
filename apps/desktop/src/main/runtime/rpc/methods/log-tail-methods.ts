@@ -5,9 +5,9 @@ import type {
   FileLogTailWatchInput,
   RuntimeLogTailWatchEvent
 } from '@yiru/runtime-protocol/contract'
+import { readLocalLogTailRange } from '~main/ai-vault/local-log-tail-reader'
+import { resolveAuthorizedLogTailPath } from '~main/filesystem/local-log-tail'
 
-import { readLocalLogTailRange } from '../../../ai-vault/local-log-tail-reader'
-import { resolveAuthorizedLogTailPath } from '../../../filesystem/local-log-tail'
 import type { RpcContext } from '../core'
 import { bindSubscriptionAbort } from './subscription-abort'
 

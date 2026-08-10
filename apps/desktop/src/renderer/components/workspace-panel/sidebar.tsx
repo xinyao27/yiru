@@ -43,6 +43,9 @@ function WorkspaceSidebarInner(): React.JSX.Element | null {
     const isCurrentDestination =
       view === effectiveView && (view !== 'explorer' || explorerView === 'files')
     if (isCurrentDestination) {
+      if (!isOpen) {
+        setOpen(true)
+      }
       return
     }
     if (view === 'explorer') {

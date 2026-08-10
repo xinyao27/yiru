@@ -65,7 +65,10 @@ export async function scanAiVaultSessions(
     const issues: AiVaultScanIssue[] = []
     const parseStats = createSessionParseStats()
     const antigravityWorkspaceResolver = createAntigravityWorkspaceResolver(readOptionalTextFile)
-    const discoveries = await discoverAiVaultSessionSources({ options, limitPerAgent, issues })
+    const enabledAgents = options.agents ? new Set(options.agents) : null
+    const discoveries = (
+      await discoverAiVaultSessionSources({ options, limitPerAgent, issues })
+    ).filter((discovery) => enabledAgents?.has(discovery.agent) ?? true)
 
     const candidates = dedupeCodexRolloutFileAliases(
       discoveries

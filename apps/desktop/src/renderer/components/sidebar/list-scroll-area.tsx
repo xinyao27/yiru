@@ -50,14 +50,17 @@ type LegendListScrollAreaProps = Omit<
   children?: React.ReactNode
   contentContainerClassName?: string
   contentContainerStyle?: LegendListStyle
+  contentInset?: unknown
   contentOffset?: { x: number; y: number }
   horizontal?: boolean
   maintainVisibleContentPosition?: { minIndexForVisible: number }
   onLayout?: (event: { nativeEvent: { layout: LayoutRectangle } }) => void
+  onMomentumScrollEnd?: unknown
   onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   refreshControl?: React.ReactNode
   ref?: React.Ref<LegendListScrollAreaHandle>
   scrollEventThrottle?: number
+  ScrollComponent?: unknown
   style?: LegendListStyle
 }
 
@@ -77,14 +80,17 @@ export function LegendListScrollArea({
   className,
   contentContainerClassName,
   contentContainerStyle,
+  contentInset: _contentInset,
   contentOffset,
   horizontal: _horizontal,
   maintainVisibleContentPosition,
   onLayout,
+  onMomentumScrollEnd: _onMomentumScrollEnd,
   onScroll,
   refreshControl,
   ref: forwardedRef,
   scrollEventThrottle: _scrollEventThrottle,
+  ScrollComponent: _ScrollComponent,
   showHorizontalScrollBar,
   style,
   ...viewportProps

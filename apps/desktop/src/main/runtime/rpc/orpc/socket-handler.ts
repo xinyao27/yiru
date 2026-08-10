@@ -1,11 +1,11 @@
 import { ORPCError } from '@orpc/server'
 import { RPCHandler } from '@orpc/server/websocket'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import {
   encodeRuntimeOrpcSocketFrame,
   RUNTIME_ORPC_SOCKET_PROTOCOL
 } from '~shared/runtime-orpc-socket'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RpcContext } from '../core'
 import { authenticatedTokenFingerprint } from '../orchestration-mutation-executor'
 import type {

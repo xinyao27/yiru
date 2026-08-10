@@ -99,10 +99,12 @@ export async function handleWorktreeSet(
   }
 }
 
-export const handleWorktreePersistSortOrder = ((params, { runtime }) =>
-  runtime.persistManagedWorktreeSortOrder(params.orderedIds)) satisfies RpcHandler<
-  z.infer<typeof WorktreeSortOrder>
->
+export const handleWorktreePersistSortOrder = ((params, { runtime, shellConnectionId }) =>
+  runtime.persistManagedWorktreeSortOrder(params.orderedIds, {
+    // Why: the desktop already applied its computed order. Echoing a repo
+    // invalidation back to that same shell makes it persist the order again.
+    notifyClients: shellConnectionId === undefined
+  })) satisfies RpcHandler<z.infer<typeof WorktreeSortOrder>>
 
 export const handleWorktreeResolvePrBase = ((params, { runtime }) =>
   runtime.resolveManagedPrBase({

@@ -11581,6 +11581,37 @@
           "other": "其他",
           "refreshAriaLabel": "刷新本地用量统计",
           "refresh": "刷新用量"
+        },
+        "projectUsage": {
+          "title": "按项目",
+          "tokenSummary": "{{tokens}} · {{projects}} 个项目 · {{sessions}} 个会话",
+          "valueSummary": "{{value}} 已知 API 价值 · {{projects}} 个项目 · {{tokens}}",
+          "filterLabel": "筛选项目",
+          "filterPlaceholder": "筛选项目",
+          "empty": "暂时没有可归属到项目的用量。",
+          "noResults": "没有符合筛选条件的项目。",
+          "unpriced": "包含无权威定价用量的项目不显示合计 API 价值。",
+          "projectDetail": "{{tokens}} · {{sessions}} 个会话"
+        },
+        "metricControls": {
+          "metricLabel": "统计指标",
+          "rangeLabel": "用量范围",
+          "sevenDays": "7 天",
+          "thirtyDays": "30 天",
+          "ninetyDays": "90 天"
+        },
+        "provider": {
+          "claude": "Claude",
+          "codex": "Codex",
+          "openCode": "OpenCode"
+        },
+        "providerChart": {
+          "title": "每日用量",
+          "tokenDescription": "所选时间范围内按供应方拆分的 Token 用量。",
+          "valueDescription": "按供应方拆分的已知 API 等价价值；不包含未定价用量。",
+          "ariaLabel": "{{days}} 天内按供应方统计的{{metric}}",
+          "tokens": "Token",
+          "value": "API 价值"
         }
       },
       "workspace-panel": {

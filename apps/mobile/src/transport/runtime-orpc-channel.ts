@@ -36,14 +36,19 @@ export class MobileRuntimeOrpcChannel {
 
   postMessage(message: unknown): void {
     if (this.isClosed) {
-      throw new Error('The encrypted mobile oRPC channel is closed')
+      // Why: RPCLink can emit cancellation frames after its port close event.
+      // A closed MessagePort drops those frames; throwing here creates an
+      // unrelated unhandled rejection after the original call already failed.
+      return
     }
     const sent =
       typeof message === 'string'
         ? this.sendText(encodeRuntimeOrpcTextFrame(message))
         : this.sendBinary(encodeRuntimeOrpcBinaryFrame(messageBytes(message)))
     if (!sent) {
-      throw new Error('The encrypted mobile oRPC channel is not writable')
+      // Why: closing the port rejects every in-flight RPC through RPCLink's
+      // normal delivery path and avoids orphaned cancellation-frame errors.
+      this.close()
     }
   }
 

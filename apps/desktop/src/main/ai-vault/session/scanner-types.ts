@@ -7,6 +7,7 @@ import type {
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type AiVaultScanOptions = {
+  agents?: readonly AiVaultAgent[]
   claudeProjectsDir?: string
   codexSessionsDir?: string
   additionalCodexSessionsDirs?: readonly string[]

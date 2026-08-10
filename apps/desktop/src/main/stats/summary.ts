@@ -12,6 +12,20 @@ import type { StatsCollector } from './collector'
 import { refreshModelsDevPricing } from './models-dev-pricing'
 
 const STATS_AI_VAULT_SESSION_LIMIT = Number.MAX_SAFE_INTEGER
+const STATS_SUPPLEMENTAL_AGENTS = [
+  'hermes',
+  'pi',
+  'omp',
+  'gemini',
+  'antigravity',
+  'rovo',
+  'copilot',
+  'grok',
+  'openclaw',
+  'devin',
+  'droid',
+  'kimi'
+] as const satisfies readonly AiVaultAgent[]
 const TOKEN_UNAVAILABLE_AGENTS = [
   'antigravity',
   'cursor',
@@ -148,6 +162,7 @@ async function scanScopedAgentUsage(
     const result = await listAiVaultSessions({
       limit: STATS_AI_VAULT_SESSION_LIMIT,
       limitPerAgent: STATS_AI_VAULT_SESSION_LIMIT,
+      agents: STATS_SUPPLEMENTAL_AGENTS,
       scopePaths,
       force
     })

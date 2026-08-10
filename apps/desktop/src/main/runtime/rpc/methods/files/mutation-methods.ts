@@ -8,8 +8,7 @@ import type {
   FileWriteBase64Input,
   FileWriteInput
 } from '@yiru/runtime-protocol/contract'
-
-import type { RpcContext } from '../../core'
+import type { RpcContext } from '~main/runtime/rpc/core'
 
 export async function handleFilesWrite(params: FileWriteInput, { fileCommands }: RpcContext) {
   return fileCommands.writeFileExplorerFile(params.worktree, params.relativePath, params.content)

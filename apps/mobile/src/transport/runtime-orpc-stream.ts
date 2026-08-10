@@ -20,7 +20,10 @@ export function createRuntimeOrpcEventStream(
   run: (stream: RuntimeOrpcEventStream) => Promise<void>
 ): RuntimeOrpcEventStream {
   const stream = new BufferedRuntimeOrpcStream()
-  void run(stream).then(stream.finish, stream.fail)
+  void run(stream).then(
+    () => stream.finish(),
+    (error: unknown) => stream.fail(error)
+  )
   return stream
 }
 

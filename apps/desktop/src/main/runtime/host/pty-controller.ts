@@ -1,8 +1,8 @@
+import { mintPtySessionId } from '~main/daemon/pty-session-id'
+import type { Store } from '~main/persistence'
+import type { IPtyProvider, PtySpawnOptions } from '~main/providers/types'
 import { makePaneKey } from '~shared/stable-pane-id'
 
-import { mintPtySessionId } from '../../daemon/pty-session-id'
-import type { Store } from '../../persistence'
-import type { IPtyProvider, PtySpawnOptions } from '../../providers/types'
 import type { YiruRuntimeService } from '../yiru-runtime'
 
 export type NodeRuntimeHostPtyController = {
