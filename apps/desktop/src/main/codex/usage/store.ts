@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store owns Codex analytics persistence, scan policy, and renderer query semantics. Keeping them together prevents the Codex range/scope rules from drifting away from the scanner’s event model. */
-import { app } from 'electron'
 import type { Store } from '~main/persistence'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
 import type { AutomationRunUsage } from '~shared/automations-types'
 import type {
@@ -90,20 +90,26 @@ export function normalizePersistedState(state: CodexUsagePersistedState): CodexU
 }
 
 export function initCodexUsagePath(): void {
-  _codexUsageFile = join(app.getPath('userData'), 'yiru-codex-usage.json')
-  _codexUsageOwnershipFile = join(app.getPath('userData'), 'yiru-codex-usage-ownership.sqlite')
+  _codexUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-codex-usage.json')
+  _codexUsageOwnershipFile = join(
+    getRuntimeHostPathsProvider().userDataPath(),
+    'yiru-codex-usage-ownership.sqlite'
+  )
 }
 
 function getCodexUsageOwnershipFile(): string {
   if (!_codexUsageOwnershipFile) {
-    _codexUsageOwnershipFile = join(app.getPath('userData'), 'yiru-codex-usage-ownership.sqlite')
+    _codexUsageOwnershipFile = join(
+      getRuntimeHostPathsProvider().userDataPath(),
+      'yiru-codex-usage-ownership.sqlite'
+    )
   }
   return _codexUsageOwnershipFile
 }
 
 function getCodexUsageFile(): string {
   if (!_codexUsageFile) {
-    _codexUsageFile = join(app.getPath('userData'), 'yiru-codex-usage.json')
+    _codexUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-codex-usage.json')
   }
   return _codexUsageFile
 }

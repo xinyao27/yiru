@@ -1,5 +1,7 @@
 import type { AgentStatusState, AgentType, AiVaultAgent } from '@yiru/workbench-model/agent'
 
+import type { StatsUsageRange } from './stats-usage-range'
+
 export type RuntimeStatsDailyActivity = {
   day: string
   agentStarts: number
@@ -21,6 +23,28 @@ export type RuntimeStatsModelUsage = {
   label: string
   tokens: number
   valueUsd: number | null
+}
+
+export type RuntimeStatsUsageProvider = 'claude' | 'codex' | 'open-code'
+
+export type RuntimeStatsProviderUsage = {
+  provider: RuntimeStatsUsageProvider
+  tokens: number
+  valueUsd: number | null
+}
+
+export type RuntimeStatsDailyProviderUsage = {
+  day: string
+  providers: RuntimeStatsProviderUsage[]
+}
+
+export type RuntimeStatsProjectUsage = {
+  key: string
+  label: string
+  sessions: number
+  tokens: number
+  valueUsd: number | null
+  providers: RuntimeStatsProviderUsage[]
 }
 
 export type RuntimeStatsSupplementalDailyUsage = RuntimeStatsDailyTokens & {
@@ -51,6 +75,14 @@ export type RuntimeStatsSummary = {
   tokenUnavailableAgents?: AiVaultAgent[]
   dailyValues?: RuntimeStatsDailyValue[]
   modelUsage?: RuntimeStatsModelUsage[]
+  // Why: clients render provider and project breakdowns from this snapshot, and
+  // only the host can attribute usage to a provider store or a worktree path.
+  dailyProviderUsage?: RuntimeStatsDailyProviderUsage[]
+  projectUsage?: RuntimeStatsProjectUsage[]
+  // Why: a host that predates ranged reads ignores the requested range, so the
+  // answer echoes what it actually measured instead of letting a client label
+  // all-time usage as a bounded window.
+  usageRange?: StatsUsageRange
   // Why: desktop keeps provider stores live for fast refreshes, while this
   // snapshot carries token-only agents that do not have a dedicated store.
   supplementalUsage?: RuntimeStatsSupplementalUsage

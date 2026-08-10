@@ -574,7 +574,11 @@ import {
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
-import { buildStatsSummary, type StatsUsageStores } from '../stats/summary'
+import {
+  buildStatsSummary,
+  type StatsSummaryOptions,
+  type StatsUsageStores
+} from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -2253,9 +2257,9 @@ export class YiruRuntimeService {
     }
   }
 
-  async getStatsSummary(refreshUsage = false): Promise<StatsSummary | null> {
+  async getStatsSummary(options: StatsSummaryOptions = {}): Promise<StatsSummary | null> {
     return this.stats
-      ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined, refreshUsage)
+      ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined, options)
       : null
   }
 

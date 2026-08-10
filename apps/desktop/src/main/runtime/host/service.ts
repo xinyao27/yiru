@@ -18,6 +18,8 @@ import { AgentBrowserBridge } from '~main/browser/agent-browser-bridge'
 import { ChromeBrowserBackend } from '~main/browser/chrome/backend'
 import { BrowserPageCatalog } from '~main/browser/page/catalog'
 import { browserSessionRegistry } from '~main/browser/session-registry'
+import { ClaudeUsageStore } from '~main/claude/usage/store'
+import { CodexUsageStore } from '~main/codex/usage/store'
 import {
   createCoworkingOwnerComposition,
   type CoworkingOwnerComposition
@@ -28,11 +30,13 @@ import type { DaemonPtyAdapter } from '~main/daemon/pty-adapter'
 import { EmulatorBridge } from '~main/emulator/bridge'
 import { resolveAuthorizedPath } from '~main/filesystem/auth'
 import { previewGhosttyImport } from '~main/ghostty/import-preview'
+import { OpenCodeUsageStore } from '~main/opencode/usage/store'
 import { initDataPath, Store } from '~main/persistence'
 import type { RateLimitResumeUsageState } from '~main/rate-limit-resume/reset-resolution'
 import { RateLimitResumeService } from '~main/rate-limit-resume/service'
 import { configureOpenAiSpeechStorage } from '~main/speech/openai-api-key-store'
 import { StatsCollector, initStatsPath } from '~main/stats/collector'
+import { getUsageScopePaths } from '~main/stats/usage-scope'
 import { previewWarpThemeImport } from '~main/warp-themes/import-preview'
 
 import { setGitHubEventPublisher } from '../github-events'
@@ -111,7 +115,16 @@ export function createNodeRuntimeHostService(
     createBrowserCommands: (host) =>
       new NodeRuntimeBrowserCommands(host, createNodeRuntimeBrowserShellAdapter(host)),
     previewGhosttyImportForClient: () => previewGhosttyImport(store),
-    previewWarpThemeImportForClient: (source) => previewWarpThemeImport(store, source)
+    previewWarpThemeImportForClient: (source) => previewWarpThemeImport(store, source),
+    // Why: a relay or `serve` host answers mobile's stats reads on its own, so it
+    // owns the same attributed-usage stores the windowed app wires. Cursor's
+    // metered spend stays desktop-only — that probe needs Electron's net stack.
+    statsUsageStores: {
+      claude: new ClaudeUsageStore(store),
+      codex: new CodexUsageStore(store),
+      openCode: new OpenCodeUsageStore(store),
+      getUsageScopePaths: () => getUsageScopePaths(store)
+    }
   })
   const accountServices = attachNodeRuntimeHostAccountServices(runtime, store)
   const disposeEventSources = attachNodeRuntimeHostEventSources(runtime, store)

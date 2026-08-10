@@ -1,30 +1,32 @@
-import type { ClaudeUsageBreakdownRow, ClaudeUsageDailyPoint } from '~shared/claude-usage-types'
-import type { CodexUsageBreakdownRow, CodexUsageDailyPoint } from '~shared/codex-usage-types'
 import type {
-  OpenCodeUsageBreakdownRow,
-  OpenCodeUsageDailyPoint
-} from '~shared/opencode-usage-types'
+  RuntimeStatsDailyProviderUsage,
+  RuntimeStatsProjectUsage,
+  RuntimeStatsProviderUsage,
+  RuntimeStatsUsageProvider
+} from '@yiru/runtime-protocol/mobile-runtime-types'
 
-export type UsageProvider = 'claude' | 'codex' | 'open-code'
+import type { ClaudeUsageBreakdownRow, ClaudeUsageDailyPoint } from '../claude-usage-types'
+import type { CodexUsageBreakdownRow, CodexUsageDailyPoint } from '../codex-usage-types'
+import type { OpenCodeUsageBreakdownRow, OpenCodeUsageDailyPoint } from '../opencode-usage-types'
 
-export type ProviderUsageValue = {
-  provider: UsageProvider
-  tokens: number
-  valueUsd: number | null
-}
+export type UsageProvider = RuntimeStatsUsageProvider
+export type ProviderUsageValue = RuntimeStatsProviderUsage
+export type DailyProviderUsage = RuntimeStatsDailyProviderUsage
+export type ProjectUsageValue = RuntimeStatsProjectUsage
 
-export type ProjectUsageValue = {
-  key: string
-  label: string
-  sessions: number
-  tokens: number
-  valueUsd: number | null
-  providers: ProviderUsageValue[]
-}
-
-export type DailyProviderUsage = {
-  day: string
-  providers: ProviderUsageValue[]
+export type UsageBreakdownInput = {
+  claude: {
+    daily: ClaudeUsageDailyPoint[]
+    projectBreakdown: ClaudeUsageBreakdownRow[]
+  }
+  codex: {
+    daily: CodexUsageDailyPoint[]
+    projectBreakdown: CodexUsageBreakdownRow[]
+  }
+  openCode: {
+    daily: OpenCodeUsageDailyPoint[]
+    projectBreakdown: OpenCodeUsageBreakdownRow[]
+  }
 }
 
 type ProjectUsageInput = {
@@ -42,32 +44,25 @@ type ProjectUsageAccumulator = Omit<ProjectUsageValue, 'providers' | 'valueUsd'>
   unpricedTokens: number
 }
 
-type UsageAggregationInput = {
-  claudeProjects: ClaudeUsageBreakdownRow[]
-  claudeDaily: ClaudeUsageDailyPoint[]
-  codexProjects: CodexUsageBreakdownRow[]
-  codexDaily: CodexUsageDailyPoint[]
-  openCodeProjects: OpenCodeUsageBreakdownRow[]
-  openCodeDaily: OpenCodeUsageDailyPoint[]
+type DailyProviderInput = {
+  day: string
+  tokens: number
+  estimatedCostUsd: number | null
 }
 
-export function buildProjectUsage(input: UsageAggregationInput): ProjectUsageValue[] {
+export function buildProjectUsage(input: UsageBreakdownInput): ProjectUsageValue[] {
   return mergeProjectUsage([
-    ...input.claudeProjects.map(
+    ...input.claude.projectBreakdown.map(
       (project): ProjectUsageInput => ({
         key: project.key,
         label: project.label,
         provider: 'claude',
         sessions: project.sessions,
-        tokens:
-          project.inputTokens +
-          project.outputTokens +
-          project.cacheReadTokens +
-          project.cacheWriteTokens,
+        tokens: claudeTokens(project),
         valueUsd: project.estimatedCostUsd
       })
     ),
-    ...input.codexProjects.map(
+    ...input.codex.projectBreakdown.map(
       (project): ProjectUsageInput => ({
         key: project.key,
         label: project.label,
@@ -77,7 +72,7 @@ export function buildProjectUsage(input: UsageAggregationInput): ProjectUsageVal
         valueUsd: project.estimatedCostUsd
       })
     ),
-    ...input.openCodeProjects.map(
+    ...input.openCode.projectBreakdown.map(
       (project): ProjectUsageInput => ({
         key: project.key,
         label: project.label,
@@ -90,42 +85,57 @@ export function buildProjectUsage(input: UsageAggregationInput): ProjectUsageVal
   ])
 }
 
-export function buildDailyProviderUsage(input: UsageAggregationInput): DailyProviderUsage[] {
+export function buildDailyProviderUsage(input: UsageBreakdownInput): DailyProviderUsage[] {
   const byDay = new Map<string, ProviderUsageValue[]>()
   addDailyProviderUsage(
     byDay,
     'claude',
-    input.claudeDaily.map((point) => ({
+    input.claude.daily.map((point) => ({
       day: point.day,
-      tokens:
-        point.inputTokens + point.outputTokens + point.cacheReadTokens + point.cacheWriteTokens,
+      tokens: claudeTokens(point),
       estimatedCostUsd: point.estimatedCostUsd
     }))
   )
-  addDailyProviderUsage(byDay, 'codex', input.codexDaily)
-  addDailyProviderUsage(byDay, 'open-code', input.openCodeDaily)
+  addDailyProviderUsage(
+    byDay,
+    'codex',
+    input.codex.daily.map((point) => ({
+      day: point.day,
+      tokens: point.totalTokens,
+      estimatedCostUsd: point.estimatedCostUsd
+    }))
+  )
+  addDailyProviderUsage(
+    byDay,
+    'open-code',
+    input.openCode.daily.map((point) => ({
+      day: point.day,
+      tokens: point.totalTokens,
+      estimatedCostUsd: point.estimatedCostUsd
+    }))
+  )
   return [...byDay.entries()]
     .map(([day, providers]) => ({ day, providers }))
     .sort((left, right) => left.day.localeCompare(right.day))
 }
 
+function claudeTokens(
+  usage: Pick<
+    ClaudeUsageDailyPoint,
+    'inputTokens' | 'outputTokens' | 'cacheReadTokens' | 'cacheWriteTokens'
+  >
+): number {
+  return usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens
+}
+
 function addDailyProviderUsage(
   target: Map<string, ProviderUsageValue[]>,
   provider: UsageProvider,
-  points: {
-    day: string
-    totalTokens?: number
-    tokens?: number
-    estimatedCostUsd: number | null
-  }[]
+  points: DailyProviderInput[]
 ): void {
   for (const point of points) {
     const providers = target.get(point.day) ?? []
-    providers.push({
-      provider,
-      tokens: point.tokens ?? point.totalTokens ?? 0,
-      valueUsd: point.estimatedCostUsd
-    })
+    providers.push({ provider, tokens: point.tokens, valueUsd: point.estimatedCostUsd })
     target.set(point.day, providers)
   }
 }

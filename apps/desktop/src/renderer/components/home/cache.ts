@@ -1,8 +1,8 @@
+import { isStatsUsageBoundedRange } from '@yiru/runtime-protocol/stats-usage-range'
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
+import type { ProjectUsageValue, UsageProvider } from '~shared/stats/usage-breakdown'
 import type { StatsSummary } from '~shared/types'
 
-import type { ProjectUsageValue, UsageProvider } from './usage-aggregation'
-import { isUsageRange } from './usage-range'
 import type { ModelUsageValue, UsageValue } from './usage-value'
 
 const HOME_DATA_CACHE_KEY = 'yiru.home.data-cache.v1'
@@ -116,7 +116,7 @@ function parseUsageValue(value: unknown): HomeCachedUsageValue | null {
     !isRecord(value) ||
     typeof value.hasUnpricedUsage !== 'boolean' ||
     typeof value.hasValue !== 'boolean' ||
-    !isUsageRange(value.range)
+    !isStatsUsageBoundedRange(value.range)
   ) {
     return null
   }

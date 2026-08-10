@@ -25,6 +25,7 @@ await build({
         'orpc-peer-frame': resolve(import.meta.dirname, 'src/runtime-orpc-peer-frame.ts'),
         'rpc-envelope': resolve(import.meta.dirname, 'src/runtime-rpc-envelope.ts'),
         stats: resolve(import.meta.dirname, 'src/stats.ts'),
+        'stats-usage-range': resolve(import.meta.dirname, 'src/stats-usage-range.ts'),
         status: resolve(import.meta.dirname, 'src/status.ts'),
         'subscription-replay': resolve(import.meta.dirname, 'src/runtime-subscription-replay.ts'),
         'tailscale-endpoint': resolve(import.meta.dirname, 'src/remote-runtime-tailscale-hint.ts'),

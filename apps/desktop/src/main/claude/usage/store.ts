@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store is the single main-process owner for Claude usage persistence, scan gating, and query semantics. Keeping those policy decisions together avoids split-brain range/scope logic across multiple files. */
-import { app } from 'electron'
 import type { Store } from '~main/persistence'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
 import type { AutomationRunUsage } from '~shared/automations-types'
 import type {
@@ -28,8 +28,9 @@ const SCHEMA_VERSION = 7
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
-// Why: capture the path after configureDevUserDataPath() but before app.setName()
-// mutates Electron's derived userData location, matching the persistence/store pattern.
+// Why: capture the path once the host has installed its paths provider, matching
+// the persistence/collector pattern — Electron's derived userData location still
+// moves under app.setName(), and headless hosts have no Electron at all.
 let _claudeUsageFile: string | null = null
 
 type AutomationUsageLookupInput = {
@@ -77,12 +78,12 @@ function getDefaultState(): ClaudeUsagePersistedState {
 }
 
 export function initClaudeUsagePath(): void {
-  _claudeUsageFile = join(app.getPath('userData'), 'yiru-claude-usage.json')
+  _claudeUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-claude-usage.json')
 }
 
 function getClaudeUsageFile(): string {
   if (!_claudeUsageFile) {
-    _claudeUsageFile = join(app.getPath('userData'), 'yiru-claude-usage.json')
+    _claudeUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-claude-usage.json')
   }
   return _claudeUsageFile
 }

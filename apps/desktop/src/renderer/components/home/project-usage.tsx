@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import type { ProjectUsageValue, ProviderUsageValue } from '~shared/stats/usage-breakdown'
 
 import { ModelUsageChart } from './model-usage-chart'
 import { providerClassName, providerLabel } from './provider-presentation'
-import type { ProjectUsageValue, ProviderUsageValue } from './usage-aggregation'
 import type { UsageValue } from './usage-value'
 
 type UsageBreakdownsProps = {

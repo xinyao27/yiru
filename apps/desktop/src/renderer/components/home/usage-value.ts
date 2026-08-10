@@ -1,20 +1,22 @@
 import type { RuntimeStatsSupplementalUsage } from '@yiru/runtime-protocol/mobile-runtime-types'
+import {
+  dayIsInStatsUsageRange,
+  type StatsUsageBoundedRange
+} from '@yiru/runtime-protocol/stats-usage-range'
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '~renderer/store'
-import {
-  buildUsageValueSnapshot,
-  type UsageValueModel,
-  type UsageValueSupplementalInput
-} from '~shared/stats/usage-value'
-
 import {
   buildDailyProviderUsage,
   buildProjectUsage,
   type DailyProviderUsage,
   type ProjectUsageValue
-} from './usage-aggregation'
-import { dayIsInUsageRange, type UsageRange } from './usage-range'
+} from '~shared/stats/usage-breakdown'
+import {
+  buildUsageValueSnapshot,
+  type UsageValueModel,
+  type UsageValueSupplementalInput
+} from '~shared/stats/usage-value'
 
 export type ModelUsageValue = UsageValueModel
 
@@ -28,11 +30,11 @@ export type UsageValue = {
   isScanning: boolean
   models: ModelUsageValue[]
   projects: ProjectUsageValue[]
-  range: UsageRange
+  range: StatsUsageBoundedRange
   meteredValueUsd?: number | null
 }
 
-export function useUsageValue(range: UsageRange): UsageValue {
+export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
   const claudeScanState = useAppStore((state) => state.claudeUsageScanState)
   const claudeRange = useAppStore((state) => state.claudeUsageRange)
   const claudeSnapshotReady = useAppStore((state) => state.claudeUsageSnapshotReady)
@@ -97,12 +99,9 @@ export function useUsageValue(range: UsageRange): UsageValue {
     openCodeSnapshotReady
   const aggregationInput = useMemo(
     () => ({
-      claudeProjects,
-      claudeDaily,
-      codexProjects,
-      codexDaily,
-      openCodeProjects,
-      openCodeDaily
+      claude: { daily: claudeDaily, projectBreakdown: claudeProjects },
+      codex: { daily: codexDaily, projectBreakdown: codexProjects },
+      openCode: { daily: openCodeDaily, projectBreakdown: openCodeProjects }
     }),
     [claudeDaily, claudeProjects, codexDaily, codexProjects, openCodeDaily, openCodeProjects]
   )
@@ -134,7 +133,12 @@ export function useUsageValue(range: UsageRange): UsageValue {
       models: isReady ? usage.models : [],
       projects: isReady ? projects : [],
       range,
-      ...(usage.meteredValueUsd === undefined ? {} : { meteredValueUsd: usage.meteredValueUsd })
+      // Why: metered spend is an all-time plan deduction the host reports on its
+      // own, so it is read straight from the summary rather than from the ranged
+      // aggregate that deliberately excludes undated supplemental totals.
+      ...(supplementalUsage?.meteredValueUsd === undefined
+        ? {}
+        : { meteredValueUsd: supplementalUsage.meteredValueUsd })
     }),
     [
       claudeScanState?.isScanning,
@@ -144,6 +148,7 @@ export function useUsageValue(range: UsageRange): UsageValue {
       openCodeScanState?.isScanning,
       projects,
       range,
+      supplementalUsage?.meteredValueUsd,
       usage
     ]
   )
@@ -151,11 +156,11 @@ export function useUsageValue(range: UsageRange): UsageValue {
 
 function mapSupplementalUsage(
   usage: RuntimeStatsSupplementalUsage,
-  range: UsageRange
+  range: StatsUsageBoundedRange
 ): UsageValueSupplementalInput {
   return {
     daily: usage.dailyTokens
-      .filter((point) => dayIsInUsageRange(point.day, range))
+      .filter((point) => dayIsInStatsUsageRange(point.day, range))
       .map((point) => ({
         day: point.day,
         tokens: point.tokens,
@@ -168,7 +173,7 @@ function mapSupplementalUsage(
   }
 }
 
-async function prepareUsageSnapshots(range: UsageRange): Promise<void> {
+async function prepareUsageSnapshots(range: StatsUsageBoundedRange): Promise<void> {
   await Promise.all([
     prepareClaudeUsage(range),
     prepareCodexUsage(range),
@@ -176,7 +181,7 @@ async function prepareUsageSnapshots(range: UsageRange): Promise<void> {
   ])
 }
 
-async function prepareClaudeUsage(range: UsageRange): Promise<void> {
+async function prepareClaudeUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
   if (state.claudeUsageScope !== 'yiru') {
     await state.setClaudeUsageScope('yiru')
@@ -193,7 +198,7 @@ async function prepareClaudeUsage(range: UsageRange): Promise<void> {
   await useAppStore.getState().fetchClaudeUsage()
 }
 
-async function prepareCodexUsage(range: UsageRange): Promise<void> {
+async function prepareCodexUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
   if (state.codexUsageScope !== 'yiru') {
     await state.setCodexUsageScope('yiru')
@@ -210,7 +215,7 @@ async function prepareCodexUsage(range: UsageRange): Promise<void> {
   await useAppStore.getState().fetchCodexUsage()
 }
 
-async function prepareOpenCodeUsage(range: UsageRange): Promise<void> {
+async function prepareOpenCodeUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
   if (state.openCodeUsageScope !== 'yiru') {
     await state.setOpenCodeUsageScope('yiru')

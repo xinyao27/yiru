@@ -1,6 +1,5 @@
 import { translate } from '~renderer/i18n/i18n'
-
-import type { UsageProvider } from './usage-aggregation'
+import type { UsageProvider } from '~shared/stats/usage-breakdown'
 
 export function providerLabel(provider: UsageProvider): string {
   switch (provider) {

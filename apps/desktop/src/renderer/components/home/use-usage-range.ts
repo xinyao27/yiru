@@ -1,14 +1,16 @@
+import {
+  isStatsUsageBoundedRange,
+  type StatsUsageBoundedRange
+} from '@yiru/runtime-protocol/stats-usage-range'
 import { useState } from 'react'
-
-import { isUsageRange, type UsageRange } from './usage-range'
 
 const USAGE_RANGE_STORAGE_KEY = 'yiru.home.usage-range.v1'
 
-type UsageRangePreference = [UsageRange, (range: UsageRange) => void]
+type UsageRangePreference = [StatsUsageBoundedRange, (range: StatsUsageBoundedRange) => void]
 
 export function useUsageRangePreference(): UsageRangePreference {
-  const [range, setRange] = useState<UsageRange>(loadUsageRange)
-  const selectRange = (nextRange: UsageRange): void => {
+  const [range, setRange] = useState<StatsUsageBoundedRange>(loadUsageRange)
+  const selectRange = (nextRange: StatsUsageBoundedRange): void => {
     setRange(nextRange)
     try {
       window.localStorage.setItem(USAGE_RANGE_STORAGE_KEY, nextRange)
@@ -19,10 +21,10 @@ export function useUsageRangePreference(): UsageRangePreference {
   return [range, selectRange]
 }
 
-function loadUsageRange(): UsageRange {
+function loadUsageRange(): StatsUsageBoundedRange {
   try {
     const stored = window.localStorage.getItem(USAGE_RANGE_STORAGE_KEY)
-    return isUsageRange(stored) ? stored : '30d'
+    return isStatsUsageBoundedRange(stored) ? stored : '30d'
   } catch {
     return '30d'
   }

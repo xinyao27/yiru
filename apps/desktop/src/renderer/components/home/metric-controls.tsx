@@ -1,14 +1,13 @@
+import type { StatsUsageBoundedRange } from '@yiru/runtime-protocol/stats-usage-range'
 import type { ContributionDisplayMetric } from '~renderer/components/contribution-heatmap/metric'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import { translate } from '~renderer/i18n/i18n'
 
-import type { UsageRange } from './usage-range'
-
 type MetricControlsProps = {
   metric: ContributionDisplayMetric
-  range: UsageRange
+  range: StatsUsageBoundedRange
   onMetricChange: (metric: ContributionDisplayMetric) => void
-  onRangeChange: (range: UsageRange) => void
+  onRangeChange: (range: StatsUsageBoundedRange) => void
 }
 
 export function MetricControls({

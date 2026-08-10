@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, join } from 'node:path'
 
 /* eslint-disable max-lines -- Why: this store owns OpenCode analytics persistence, scan policy, and renderer query semantics. Keeping range/scope queries next to scan persistence prevents UI totals from drifting from the SQLite projection. */
-import { app } from 'electron'
 import type { Store } from '~main/persistence'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
 import type {
   OpenCodeUsageBreakdownKind,
@@ -66,12 +66,18 @@ export function normalizePersistedState(
 }
 
 export function initOpenCodeUsagePath(): void {
-  _openCodeUsageFile = join(app.getPath('userData'), 'yiru-opencode-usage.json')
+  _openCodeUsageFile = join(
+    getRuntimeHostPathsProvider().userDataPath(),
+    'yiru-opencode-usage.json'
+  )
 }
 
 function getOpenCodeUsageFile(): string {
   if (!_openCodeUsageFile) {
-    _openCodeUsageFile = join(app.getPath('userData'), 'yiru-opencode-usage.json')
+    _openCodeUsageFile = join(
+      getRuntimeHostPathsProvider().userDataPath(),
+      'yiru-opencode-usage.json'
+    )
   }
   return _openCodeUsageFile
 }

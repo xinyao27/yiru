@@ -6,5 +6,10 @@ export async function handleStatsSummary(
   params: StatsSummaryInput,
   { runtime }: RpcContext
 ): Promise<StatsSummaryResult> {
-  return (await runtime.getStatsSummary(params.refreshUsage === true)) ?? {}
+  return (
+    (await runtime.getStatsSummary({
+      refreshUsage: params.refreshUsage === true,
+      ...(params.range === undefined ? {} : { range: params.range })
+    })) ?? {}
+  )
 }

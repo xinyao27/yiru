@@ -69,6 +69,15 @@
       "require": "./dist/stats.js",
       "default": "./dist/stats.js"
     },
+    "./stats-usage-range": {
+      "types": "./src/stats-usage-range.ts",
+      "react-native": "./src/stats-usage-range.ts",
+      "browser": "./src/stats-usage-range.ts",
+      "development": "./src/stats-usage-range.ts",
+      "import": "./dist/esm/stats-usage-range.mjs",
+      "require": "./dist/stats-usage-range.js",
+      "default": "./dist/stats-usage-range.js"
+    },
     "./status": {
       "types": "./src/status.ts",
       "react-native": "./src/status.ts",

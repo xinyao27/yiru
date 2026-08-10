@@ -1,5 +1,10 @@
 import type { RuntimeStatsSupplementalUsage } from '@yiru/runtime-protocol/mobile-runtime-types'
+import {
+  dayIsInStatsUsageRange,
+  type StatsUsageRange
+} from '@yiru/runtime-protocol/stats-usage-range'
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
+import { buildDailyProviderUsage, buildProjectUsage } from '~shared/stats/usage-breakdown'
 import { buildUsageValueSnapshot } from '~shared/stats/usage-value'
 import type { StatsSummary } from '~shared/types'
 
@@ -43,26 +48,34 @@ export type StatsUsageStores = {
 
 type UsageStats = Pick<
   StatsSummary,
+  | 'dailyProviderUsage'
   | 'dailyTokens'
   | 'dailyUnpricedTokens'
   | 'dailyValues'
   | 'modelUsage'
+  | 'projectUsage'
   | 'tokenDataAvailable'
   | 'tokenUnavailableAgents'
   | 'supplementalUsage'
+  | 'usageRange'
   | 'usageValueAvailable'
   | 'hasUnpricedUsage'
 >
 
+export type StatsSummaryOptions = {
+  refreshUsage?: boolean
+  range?: StatsUsageRange
+}
+
 export async function buildStatsSummary(
   stats: StatsCollector,
   usageStores?: StatsUsageStores,
-  refreshUsage = false
+  { range = 'all', refreshUsage = false }: StatsSummaryOptions = {}
 ): Promise<StatsSummary> {
   const activitySummary = stats.getSummary()
   if (usageStores) {
     try {
-      const usageStats = await buildUsageStats(usageStores, refreshUsage)
+      const usageStats = await buildUsageStats(usageStores, range, refreshUsage)
       refreshUsageInBackground(usageStores, refreshUsage)
       return {
         ...activitySummary,
@@ -81,7 +94,10 @@ export async function buildStatsSummary(
       ...activitySummary,
       dailyTokens: aggregateDailyTokens(result.sessions),
       tokenDataAvailable: true,
-      tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS]
+      tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS],
+      // Why: the session-scan fallback has no ranged index, so it reports the
+      // all-time window it actually measured instead of the requested range.
+      usageRange: 'all'
     }
   } catch (error) {
     console.error('[stats] Failed to scan token activity:', error)
@@ -89,31 +105,42 @@ export async function buildStatsSummary(
       ...activitySummary,
       dailyTokens: [],
       tokenDataAvailable: false,
-      tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS]
+      tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS],
+      usageRange: 'all'
     }
   }
 }
 
 async function buildUsageStats(
   usageStores: StatsUsageStores,
+  range: StatsUsageRange,
   forceSupplementalScan: boolean
 ): Promise<UsageStats> {
   const supplementalUsage = await scanSupplementalUsage(usageStores, forceSupplementalScan)
+  await enableUsageScans(usageStores)
+  const snapshots = {
+    claude: usageStores.claude.getSnapshot('yiru', range),
+    codex: usageStores.codex.getSnapshot('yiru', range),
+    openCode: usageStores.openCode.getSnapshot('yiru', range)
+  }
   const usage = buildUsageValueSnapshot({
-    claude: usageStores.claude.getSnapshot('yiru', 'all'),
-    codex: usageStores.codex.getSnapshot('yiru', 'all'),
-    openCode: usageStores.openCode.getSnapshot('yiru', 'all'),
+    ...snapshots,
     supplemental: {
-      daily: supplementalUsage.dailyTokens.map((point) => ({
-        day: point.day,
-        tokens: point.tokens,
-        valueUsd: point.valueUsd,
-        unpricedTokens: point.unpricedTokens
-      })),
-      models: supplementalUsage.modelUsage
+      daily: supplementalUsage.dailyTokens
+        .filter((point) => dayIsInStatsUsageRange(point.day, range))
+        .map((point) => ({
+          day: point.day,
+          tokens: point.tokens,
+          valueUsd: point.valueUsd,
+          unpricedTokens: point.unpricedTokens
+        })),
+      // Why: supplemental model totals carry no day attribution, so a bounded
+      // range would mix all-time model usage into a windowed total.
+      models: range === 'all' ? supplementalUsage.modelUsage : []
     }
   })
   return {
+    dailyProviderUsage: buildDailyProviderUsage(snapshots),
     dailyTokens: usage.daily.map((point) => ({ day: point.day, tokens: point.tokens })),
     dailyUnpricedTokens: usage.daily.flatMap((point) =>
       point.unpricedTokens > 0 ? [{ day: point.day, tokens: point.unpricedTokens }] : []
@@ -122,12 +149,25 @@ async function buildUsageStats(
       point.valueUsd === null ? [] : [{ day: point.day, valueUsd: point.valueUsd }]
     ),
     modelUsage: usage.models,
+    projectUsage: buildProjectUsage(snapshots),
     tokenDataAvailable: true,
     tokenUnavailableAgents: tokenUnavailableAgents(supplementalUsage),
     supplementalUsage,
+    usageRange: range,
     usageValueAvailable: usage.hasValue,
     hasUnpricedUsage: usage.hasUnpricedUsage
   }
+}
+
+// Why: a headless host has no Home page to activate provider scanning, so asking
+// for usage is what turns it on — the same activation the desktop renderer does
+// when the Home page opens.
+async function enableUsageScans(usageStores: StatsUsageStores): Promise<void> {
+  await Promise.all([
+    usageStores.claude.getScanState().enabled ? null : usageStores.claude.setEnabled(true),
+    usageStores.codex.getScanState().enabled ? null : usageStores.codex.setEnabled(true),
+    usageStores.openCode.getScanState().enabled ? null : usageStores.openCode.setEnabled(true)
+  ])
 }
 
 function tokenUnavailableAgents(supplementalUsage: RuntimeStatsSupplementalUsage): AiVaultAgent[] {

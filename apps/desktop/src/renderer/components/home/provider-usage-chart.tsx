@@ -1,3 +1,7 @@
+import {
+  type StatsUsageBoundedRange,
+  statsUsageRangeDays
+} from '@yiru/runtime-protocol/stats-usage-range'
 import { localCalendarDayKey } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
@@ -14,10 +18,13 @@ import { Button } from '~renderer/components/ui/button'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import type {
+  DailyProviderUsage,
+  ProviderUsageValue,
+  UsageProvider
+} from '~shared/stats/usage-breakdown'
 
 import { providerClassName, providerLabel } from './provider-presentation'
-import type { DailyProviderUsage, ProviderUsageValue, UsageProvider } from './usage-aggregation'
-import { type UsageRange, usageRangeDays } from './usage-range'
 
 const PROVIDERS: UsageProvider[] = ['claude', 'codex', 'open-code']
 
@@ -25,7 +32,7 @@ type ProviderUsageChartProps = {
   daily: DailyProviderUsage[]
   isScanning: boolean
   metric: TokenValueMetric
-  range: UsageRange
+  range: StatsUsageBoundedRange
   onMetricChange: (metric: TokenValueMetric) => void
 }
 
@@ -114,7 +121,7 @@ function StackedUsageCanvas({
 }: {
   metric: TokenValueMetric
   points: ProviderTrendPoint[]
-  range: UsageRange
+  range: StatsUsageBoundedRange
   onActivate: () => void
 }): React.JSX.Element {
   const { ref, size } = useChartDimensions<HTMLElement>()
@@ -145,7 +152,7 @@ function StackedUsageCanvas({
         '{{metric}} by provider over {{days}} days',
         {
           metric: metricLabel(metric),
-          days: usageRangeDays(range).toLocaleString()
+          days: statsUsageRangeDays(range).toLocaleString()
         }
       )}
       onClick={onActivate}
@@ -219,14 +226,14 @@ function TrendLabels({ points }: { points: ProviderTrendPoint[] }): React.JSX.El
 
 function buildProviderTrend(
   daily: DailyProviderUsage[],
-  range: UsageRange,
+  range: StatsUsageBoundedRange,
   now = new Date()
 ): ProviderTrendPoint[] {
   const byDay = new Map(daily.map((point) => [point.day, point.providers]))
   const anchor = new Date(now)
   anchor.setHours(0, 0, 0, 0)
   const points: ProviderTrendPoint[] = []
-  for (let offset = usageRangeDays(range) - 1; offset >= 0; offset--) {
+  for (let offset = statsUsageRangeDays(range) - 1; offset >= 0; offset--) {
     const date = new Date(anchor)
     date.setDate(date.getDate() - offset)
     const day = localCalendarDayKey(date)
