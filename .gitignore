@@ -20,6 +20,7 @@ node_modules/
 
 # Build output
 dist/
+.prerender/
 dist-electron/
 out/
 build/

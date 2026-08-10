@@ -17,8 +17,16 @@ function getSnapshot(): Theme {
   return document.documentElement.classList.contains('light') ? 'light' : 'dark'
 }
 
+// Why: prerendering has no document, and dark is the base declaration in
+// index.css, so the build-time answer has to be dark to match the markup a
+// visitor first receives. The store re-reads the real class straight after
+// hydration, which corrects a light-mode visitor without a mismatch.
+function getServerSnapshot(): Theme {
+  return 'dark'
+}
+
 export function useTheme(): { theme: Theme; toggle: () => void } {
-  const theme = useSyncExternalStore(subscribe, getSnapshot)
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   const toggle = useCallback(() => {
     const next: Theme = getSnapshot() === 'light' ? 'dark' : 'light'
     document.documentElement.classList.toggle('light', next === 'light')
