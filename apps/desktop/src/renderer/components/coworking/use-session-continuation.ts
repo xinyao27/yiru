@@ -6,6 +6,7 @@ import {
   selectCoworkingCanControl
 } from '~renderer/components/coworking/selectors'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
@@ -134,7 +135,7 @@ export function useCoworkingSessionContinuation(
     continuationRef.current = 'pending'
     setPhase('continuing')
     try {
-      const value = await window.api.coworkingSharing.invoke({
+      const value = await coworkingSharingClient.invoke({
         desktopRef: route.desktopRef,
         connectionEpoch: route.connectionEpoch,
         method: 'session.continue',

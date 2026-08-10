@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 
 import { getActiveMarkdownExportPayload } from './markdown-export-extract'
 
@@ -23,7 +24,7 @@ export async function exportActiveMarkdownToPdf(options: {
       return
     }
 
-    const result = await window.api.export.htmlToPdf({
+    const result = await rendererHostClient.export.htmlToPdf({
       html: payload.html,
       title: payload.title
     })

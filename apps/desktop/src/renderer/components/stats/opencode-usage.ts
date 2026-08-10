@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   OpenCodeUsageBreakdownRow,
@@ -45,7 +46,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
   setOpenCodeUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = (await window.api.openCodeUsage.setEnabled({
+      const nextScanState = (await rendererHostClient.openCodeUsage.setEnabled({
         enabled
       })) as OpenCodeUsageScanState | undefined
       // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
@@ -90,7 +91,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   fetchOpenCodeUsage: async (opts) => {
     set({ openCodeUsageSnapshotReady: false })
     try {
-      const scanState = (await window.api.openCodeUsage.getScanState()) as
+      const scanState = (await rendererHostClient.openCodeUsage.getScanState()) as
         | OpenCodeUsageScanState
         | undefined
       if (!scanState) {
@@ -116,7 +117,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
       }
 
       const { openCodeUsageScope, openCodeUsageRange } = get()
-      const snapshot = (await window.api.openCodeUsage.getSnapshot({
+      const snapshot = (await rendererHostClient.openCodeUsage.getSnapshot({
         scope: openCodeUsageScope,
         range: openCodeUsageRange,
         limit: 10
@@ -146,11 +147,11 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
         })
       }
 
-      await window.api.openCodeUsage.refresh({
+      await rendererHostClient.openCodeUsage.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { openCodeUsageScope: refreshedScope, openCodeUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = (await window.api.openCodeUsage.getSnapshot({
+      const refreshedSnapshot = (await rendererHostClient.openCodeUsage.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

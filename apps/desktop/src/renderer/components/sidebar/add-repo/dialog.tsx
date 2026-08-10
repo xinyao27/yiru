@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { useCompleteGitRepoAdd } from '../use-complete-git-repo-add'
@@ -40,7 +41,6 @@ const AddRepoDialog = React.memo(function AddRepoDialog() {
     nestedScan,
     nestedSelectedPaths,
     nestedGroupName,
-    nestedConnectionId,
     nestedAttemptId,
     nestedRuntimeKind,
     nestedScanInProgress,
@@ -169,7 +169,6 @@ const AddRepoDialog = React.memo(function AddRepoDialog() {
     nestedScan,
     nestedSelectedPaths,
     nestedRuntimeKind,
-    nestedConnectionId,
     nestedGroupName,
     nestedImportScanId,
     activeRuntimeEnvironmentId: selectedRuntimeEnvironmentId,
@@ -183,7 +182,7 @@ const AddRepoDialog = React.memo(function AddRepoDialog() {
   const resetState = useCallback(() => {
     // Why: kill the git clone process if one is running, so backing out
     // or closing the dialog doesn't leave a clone running on disk.
-    void window.api.repos.cloneAbort()
+    void workspaceHostClient.repos.cloneAbort()
     resetLocalFolderFlow()
     setStep('add')
     setIsAdding(false)

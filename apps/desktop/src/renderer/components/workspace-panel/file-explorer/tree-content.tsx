@@ -137,7 +137,10 @@ function FileExplorerTreeContent({
                   statusColor={nodeStatus ? STATUS_COLORS[nodeStatus] : null}
                   isIgnored={isIgnored}
                   deleteShortcutLabel={deletion.deleteShortcutLabel}
-                  connectionId={owner.activeRepo?.connectionId ?? null}
+                  // Why: Repo.connectionId is dead — nothing sets it since
+                  // remote hosts were removed (#63) — a direct repo/worktree
+                  // owner is never SSH.
+                  connectionId={null}
                   runtimeDownloadContext={owner.runtimeDownloadContext}
                   canCollapseFolderSubtree={!view.hasNameFilter}
                   targetDir={node.isDirectory ? node.path : rowParentDir}

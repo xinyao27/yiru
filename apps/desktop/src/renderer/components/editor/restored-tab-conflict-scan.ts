@@ -13,6 +13,7 @@ import type { OpenFile } from '~renderer/components/editor/state'
 import { getConnectionIdForFile } from '~renderer/lib/connection-context'
 import { readRuntimeFileContent } from '~renderer/runtime/file-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import type { AppState } from '~renderer/store'
 
 import { canAutoSaveOpenFile } from './autosave'
@@ -51,7 +52,7 @@ export function attachRestoredTabConflictScan(store: AppStoreApi): () => void {
 
   // Why: distinguishes "file was deleted while the app was closed" (a
   // definitive not-found) from a transport still coming up. Only local/SSH
-  // paths can be probed — for runtime-owned files window.api.fs would stat
+  // paths can be probed — for runtime-owned files the runtime client uses files.stat
   // the client-local path and misreport a remote file as gone.
   const probeFileMissing = async (file: OpenFile): Promise<boolean> => {
     const settings = settingsForRuntimeOwner(store.getState().settings, file.runtimeEnvironmentId)
@@ -59,7 +60,7 @@ export function attachRestoredTabConflictScan(store: AppStoreApi): () => void {
       return false
     }
     try {
-      const exists = await globalThis.window?.api?.fs?.pathExists?.({
+      const exists = await workspaceHostClient.fileHost.pathExists({
         filePath: file.filePath,
         connectionId: getConnectionIdForFile(file.worktreeId, file.filePath) ?? undefined
       })

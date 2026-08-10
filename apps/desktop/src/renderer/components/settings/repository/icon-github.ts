@@ -1,5 +1,6 @@
 import { githubAvatarIcon, type RepoIcon } from '@yiru/workbench-model/workspace'
-import { callRuntimeRpc, type getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import type { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { GitHubRepositoryIdentity, Repo } from '~shared/types'
 
 type RuntimeTarget = ReturnType<typeof getActiveRuntimeTarget>
@@ -12,41 +13,45 @@ export type RepositoryGitHubAvatarResolution = {
   upstream: GitHubRepositoryIdentity | null
 }
 
+// Why: `runtime:` hosts are the only non-local execution host (SSH was removed
+// from the product), so one runtime call serves both — no local/environment
+// fork is needed.
 function resolveRepositoryIdentityLive(
   runtimeTarget: RuntimeTarget,
   repo: Repo,
-  method: 'github.repoUpstream' | 'github.repoSlug',
-  localCall: (args: {
-    repoPath: string
-    repoId: string
-  }) => Promise<GitHubRepositoryIdentity | null>
+  method: 'github.repoUpstream' | 'github.repoSlug'
 ): Promise<GitHubRepositoryIdentity | null> {
-  return runtimeTarget.kind === 'environment'
-    ? callRuntimeRpc<GitHubRepositoryIdentity | null>(
+  return method === 'github.repoUpstream'
+    ? callRuntimeOrpc(
         runtimeTarget,
-        method,
+        (client) => client.github.repoUpstream,
         { repo: repo.id },
-        { timeoutMs: 30_000 }
+        {
+          timeoutMs: 30_000
+        }
       )
-    : localCall({ repoPath: repo.path, repoId: repo.id })
+    : callRuntimeOrpc(
+        runtimeTarget,
+        (client) => client.github.repoSlug,
+        { repo: repo.id },
+        {
+          timeoutMs: 30_000
+        }
+      )
 }
 
 export function resolveRepositoryUpstreamLive(
   runtimeTarget: RuntimeTarget,
   repo: Repo
 ): Promise<GitHubRepositoryIdentity | null> {
-  return resolveRepositoryIdentityLive(runtimeTarget, repo, 'github.repoUpstream', (args) =>
-    window.api.gh.repoUpstream(args)
-  )
+  return resolveRepositoryIdentityLive(runtimeTarget, repo, 'github.repoUpstream')
 }
 
 function resolveRepositorySlugLive(
   runtimeTarget: RuntimeTarget,
   repo: Repo
 ): Promise<GitHubRepositoryIdentity | null> {
-  return resolveRepositoryIdentityLive(runtimeTarget, repo, 'github.repoSlug', (args) =>
-    window.api.gh.repoSlug(args)
-  )
+  return resolveRepositoryIdentityLive(runtimeTarget, repo, 'github.repoSlug')
 }
 
 export async function resolveRepositoryGitHubAvatar(

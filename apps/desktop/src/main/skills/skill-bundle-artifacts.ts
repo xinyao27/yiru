@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
-import { app } from 'electron'
 import { z, type ZodType } from 'zod'
 import type {
   SkillBundleManifest,
@@ -9,6 +8,8 @@ import type {
   SkillReleaseMapping,
   SkillSnapshotRegistry
 } from '~shared/skill-freshness'
+
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 export type SkillBundleArtifacts = {
   manifest: SkillBundleManifest
@@ -87,7 +88,7 @@ const artifactsByResourceRoot = new Map<string, Promise<SkillBundleArtifacts>>()
 // Why: the artifacts ship with the binary and never change within a run, while
 // focus-triggered rescans would otherwise re-read and re-parse them every time.
 export function loadSkillBundleArtifacts(
-  resourceRoot = app.isPackaged ? process.resourcesPath : resolve(process.cwd(), 'resources')
+  resourceRoot = resolveSkillBundleResourceRoot()
 ): Promise<SkillBundleArtifacts> {
   const cached = artifactsByResourceRoot.get(resourceRoot)
   if (cached) {
@@ -99,6 +100,13 @@ export function loadSkillBundleArtifacts(
     artifactsByResourceRoot.delete(resourceRoot)
   })
   return loading
+}
+
+function resolveSkillBundleResourceRoot(): string {
+  const pathsProvider = getRuntimeHostPathsProvider()
+  return pathsProvider.isPackaged()
+    ? (pathsProvider.resourcesPath() ?? resolve(pathsProvider.appPath(), 'resources'))
+    : resolve(pathsProvider.appPath(), 'resources')
 }
 
 async function readSkillBundleArtifacts(resourceRoot: string): Promise<SkillBundleArtifacts> {

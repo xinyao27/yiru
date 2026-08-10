@@ -1,8 +1,3 @@
-import {
-  MOBILE_DEVELOPMENT_PAIRING_METHOD,
-  type MobileDevelopmentPairingResult
-} from '~shared/mobile-development-pairing/contract'
-
 import type { CommandSpec } from '../args'
 import { GLOBAL_FLAGS } from '../args'
 import type { CommandHandler } from '../dispatch'
@@ -26,13 +21,10 @@ export const MOBILE_COMMAND_SPECS: CommandSpec[] = [
 
 export const MOBILE_HANDLERS: Record<string, CommandHandler> = {
   'mobile development-pairing': async ({ client, flags, json }) => {
-    const result = await client.call<MobileDevelopmentPairingResult>(
-      MOBILE_DEVELOPMENT_PAIRING_METHOD,
-      {
-        address: getRequiredStringFlag(flags, 'address'),
-        deviceName: getRequiredStringFlag(flags, 'device-name')
-      }
-    )
+    const result = await client.call(client.rpc.mobile.developmentPairing, {
+      address: getRequiredStringFlag(flags, 'address'),
+      deviceName: getRequiredStringFlag(flags, 'device-name')
+    })
     printResult(result, json, (value) => value.pairingUrl)
   }
 }

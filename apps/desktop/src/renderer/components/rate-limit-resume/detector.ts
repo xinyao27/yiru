@@ -1,13 +1,13 @@
+import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
 // Watches every live agent pane's output for a provider limit banner and
 // reports it to main, which resolves the reset time.
 //
 // Why the renderer and not main: pane bytes reach main through four different
 // providers (local, WSL, SSH, relay) but converge on one dispatcher here, so a
 // single sidecar covers every host and every agent.
-
-import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
 import { useEffect } from 'react'
 import { subscribeToPtyData } from '~renderer/components/terminal-pane/pty/data-sidecar-subscriptions'
+import { reportRateLimitBanner } from '~renderer/runtime/rate-limit-resume-client'
 import { useAppStore } from '~renderer/store'
 import {
   createRateLimitBannerScanner,
@@ -65,7 +65,7 @@ export function collectRateLimitPaneTargets(
 
 async function reportBanner(target: PaneTarget, bannerLines: string[]): Promise<void> {
   try {
-    const hit = await window.api.rateLimitResume.report({
+    const hit = await reportRateLimitBanner({
       agent: target.agent,
       ptyId: target.ptyId,
       tabId: target.tabId,

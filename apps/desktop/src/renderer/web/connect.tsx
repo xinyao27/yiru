@@ -3,13 +3,12 @@ import {
   HardDrives as Server,
   Trash as Trash2
 } from '@phosphor-icons/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { Label } from '~renderer/components/ui/label'
 import { translate } from '~renderer/i18n/i18n'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 
 import { parseWebPairingInput } from './pairing'
 import { WebRuntimeClient } from './runtime-client'
@@ -31,17 +30,24 @@ export default function WebConnect({
   onConnected
 }: WebConnectProps): React.JSX.Element {
   const existingEnvironment = readStoredWebRuntimeEnvironment()
-  const [name, setName] = useState(existingEnvironment?.name ?? 'Runtime host')
+  const [name, setName] = useState(
+    existingEnvironment?.name ?? translate('auto.web.WebConnect.runtimeHostName', 'Runtime host')
+  )
   const [pairingCode, setPairingCode] = useState(initialPairingInput ?? '')
   const [error, setError] = useState<string | null>(null)
   const [connecting, setConnecting] = useState(false)
   const parsedOffer = useMemo(() => parseWebPairingInput(pairingCode), [pairingCode])
   const autoConnectAttempted = useRef(false)
 
-  const connect = async (): Promise<void> => {
+  const connect = useCallback(async (): Promise<void> => {
     setError(null)
     if (!parsedOffer) {
-      setError('Enter a valid Yiru pairing URL or pairing code.')
+      setError(
+        translate(
+          'auto.web.WebConnect.invalidPairingInput',
+          'Enter a valid Yiru pairing URL or pairing code.'
+        )
+      )
       return
     }
     if (parsedOffer.scope === 'mobile') {
@@ -55,23 +61,25 @@ export default function WebConnect({
     }
     if (isMixedContentWebSocket(parsedOffer.endpoint)) {
       setError(
-        'This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.'
+        translate(
+          'auto.web.WebConnect.mixedContentRejected',
+          'This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.'
+        )
       )
       return
     }
     setConnecting(true)
     const environment = createStoredWebRuntimeEnvironment({ name, offer: parsedOffer })
-    const client = new WebRuntimeClient(parsedOffer)
+    // Why: this pre-app probe runs before installWebPreloadApi, so it is an
+    // authenticated runtime client but not yet a renderer shell.
+    const client = new WebRuntimeClient(parsedOffer, undefined, { enableShellServices: false })
     try {
-      const response = await client.call(STATUS_GET_CONTRACT, undefined, {
-        timeoutMs: 15_000
-      })
-      if (!response.ok) {
-        throw new Error(response.error.message)
-      }
+      const signal = AbortSignal.timeout(15_000)
+      const orpcClient = await client.getOrpcClient(15_000, signal)
+      const status = await orpcClient.status.get(undefined, { signal })
       // Why: older pairing offers may not carry scope metadata. The host
       // stamps it onto status.get so those links still fail before app entry.
-      if (response.result.deviceScope === 'mobile') {
+      if (status.deviceScope === 'mobile') {
         setError(
           translate(
             'auto.web.WebConnect.mobileScopeRejected',
@@ -82,7 +90,7 @@ export default function WebConnect({
       }
       saveStoredWebRuntimeEnvironment({
         ...environment,
-        runtimeId: response._meta.runtimeId,
+        runtimeId: status.runtimeId,
         lastUsedAt: Date.now()
       })
       onConnected()
@@ -92,7 +100,7 @@ export default function WebConnect({
       client.close()
       setConnecting(false)
     }
-  }
+  }, [name, onConnected, parsedOffer])
 
   // Why: a deep-linked offer that reaches this screen either has mobile scope
   // or unknown legacy scope; run the same connect path to reject/probe it.
@@ -102,9 +110,7 @@ export default function WebConnect({
     }
     autoConnectAttempted.current = true
     void connect()
-    // Why: run once for the deep-linked offer; connect() reads current refs/state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPairingInput, parsedOffer])
+  }, [connect, initialPairingInput, parsedOffer])
 
   const clear = (): void => {
     clearStoredWebRuntimeEnvironment()

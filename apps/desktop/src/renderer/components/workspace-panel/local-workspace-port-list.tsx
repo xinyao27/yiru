@@ -27,6 +27,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getPortOpenBrowserTooltipLabel } from '~renderer/lib/workspace-port-actions'
 import { addressForPort } from '~renderer/lib/workspace-port-urls'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { WorkspacePort } from '~shared/workspace/ports'
 
 const MENU_CONTENT_CLASS =
@@ -112,7 +113,7 @@ function LocalWorkspacePortRow({
   onOpenInBrowser: (port: WorkspacePort, event?: React.MouseEvent<HTMLButtonElement>) => void
 }): React.JSX.Element {
   const handleCopy = useCallback(() => {
-    void window.api.ui.writeClipboardText(addressForPort(port))
+    void shellClient.ui.writeClipboardText(addressForPort(port))
   }, [port])
   const handleOpenBrowser = useCallback(
     (event?: React.MouseEvent<HTMLButtonElement>) => void onOpenInBrowser(port, event),
@@ -249,7 +250,7 @@ function LocalWorkspacePortRow({
         </ContextMenuItem>
         <ContextMenuItem
           className={MENU_ITEM_CLASS}
-          onClick={() => void window.api.ui.writeClipboardText(JSON.stringify(port, null, 2))}
+          onClick={() => void shellClient.ui.writeClipboardText(JSON.stringify(port, null, 2))}
         >
           <Copy size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.bdac206faf', 'Copy Details')}

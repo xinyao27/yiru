@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 /**
  * Per-message copy affordance for the native chat. Copies the message's text to
@@ -31,7 +32,7 @@ export function NativeChatCopyButton({
 
   const handleCopy = useCallback(async () => {
     try {
-      await window.api.ui.writeClipboardText(text)
+      await shellClient.ui.writeClipboardText(text)
       setCopied(true)
       if (resetTimerRef.current !== null) {
         window.clearTimeout(resetTimerRef.current)

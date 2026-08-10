@@ -95,7 +95,6 @@ export function usePaletteStoreState() {
   const sleepingAgentSessionsByPaneKey = useAppStore((s) => s.sleepingAgentSessionsByPaneKey)
   const settings = useAppStore((s) => s.settings)
   const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
-  const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
   const hideDefaultBranchWorkspace = useAppStore((s) => s.hideDefaultBranchWorkspace)
@@ -155,7 +154,6 @@ export function usePaletteStoreState() {
     sleepingAgentSessionsByPaneKey,
     settings,
     sshTargetLabels,
-    sshConnectionStates,
     runtimeEnvironments,
     runtimeStatusByEnvironmentId,
     hideDefaultBranchWorkspace,

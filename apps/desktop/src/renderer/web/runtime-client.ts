@@ -1,3 +1,4 @@
+import { RUNTIME_ORPC_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 /* eslint-disable max-lines -- Why: this browser runtime client owns the E2EE
    WebSocket state machine, JSON-RPC request routing, streaming callbacks, and
    binary frame forwarding as one transport boundary. */
@@ -9,7 +10,6 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 
 import {
   decrypt,
@@ -21,7 +21,18 @@ import {
   publicKeyFromBase64,
   publicKeyToBase64
 } from './e2ee'
+import {
+  createLegacyRuntimeHeartbeatRequest,
+  createLegacyRuntimeOrpcClient,
+  LEGACY_RUNTIME_STREAM_METHODS
+} from './legacy-orpc-link'
+import {
+  createWebRuntimeOrpcConnection,
+  type WebRuntimeOrpcClient,
+  type WebRuntimeOrpcConnection
+} from './orpc-channel'
 import type { WebPairingOffer } from './pairing'
+import { WebShellServicesChannel } from './shell-services-channel'
 
 type WebRuntimeConnectionState =
   | 'disconnected'
@@ -35,6 +46,7 @@ type PendingRequest = {
   resolve: (response: RuntimeRpcResponse<unknown>) => void
   reject: (error: Error) => void
   timeout: number
+  removeAbortListener: () => void
 }
 
 type SubscriptionCallbacks = {
@@ -69,11 +81,15 @@ export type SubscribeOptions = {
   buildUnsubscribe?: (params: unknown) => { method: string; params: unknown } | null
 }
 
+type WebRuntimeClientOptions = {
+  enableShellServices?: boolean
+}
+
 const REQUEST_TIMEOUT_MS = 30_000
 const CONNECT_TIMEOUT_MS = 12_000
 const HANDSHAKE_TIMEOUT_MS = 10_000
 const RECONNECT_DELAYS_MS = [500, 1000, 2000, 4000, 8000, 15_000]
-const SHARED_CONNECTION_SUBSCRIPTION_METHODS = new Set(['files.watch'])
+const SHARED_CONNECTION_SUBSCRIPTION_METHODS = new Set([LEGACY_RUNTIME_STREAM_METHODS.filesWatch])
 // Why: the browser WebSocket API hides protocol pings/pongs, so a half-open
 // connection (mobile NAT idle timeout, server crash, wifi→cellular handoff)
 // leaves readyState===OPEN with no onclose/onerror — the UI silently freezes on
@@ -113,8 +129,17 @@ export class WebRuntimeClient {
   private readonly childClients = new Set<WebRuntimeClient>()
   private readonly waiters: { resolve: () => void; reject: (error: Error) => void }[] = []
   private readonly serverPublicKey: Uint8Array
+  private orpcConnection: WebRuntimeOrpcConnection | null = null
+  private legacyOrpcClient: WebRuntimeOrpcClient | null = null
+  private orpcClientPromise: Promise<WebRuntimeOrpcClient> | null = null
+  private orpcTransport: 'unknown' | 'legacy' | 'peer' = 'unknown'
+  private shellServicesChannel: WebShellServicesChannel | null = null
 
-  constructor(private readonly pairing: WebPairingOffer) {
+  constructor(
+    private readonly pairing: WebPairingOffer,
+    private readonly onRuntimeId: (runtimeId: string) => void = () => {},
+    private readonly options: WebRuntimeClientOptions = {}
+  ) {
     this.serverPublicKey = publicKeyFromBase64(pairing.publicKeyB64)
     this.openConnection()
   }
@@ -122,34 +147,79 @@ export class WebRuntimeClient {
   call<TContract extends RuntimeMethodContract>(
     contract: TContract,
     params: RuntimeMethodParams<TContract>,
-    options?: { timeoutMs?: number }
+    options?: { signal?: AbortSignal; timeoutMs?: number }
   ): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
   call(
     contract: string,
     params?: unknown,
-    options?: { timeoutMs?: number }
+    options?: { signal?: AbortSignal; timeoutMs?: number }
   ): Promise<RuntimeRpcResponse<unknown>>
   async call(
     contract: string | RuntimeMethodContract,
     params?: unknown,
-    options?: { timeoutMs?: number }
+    options?: { signal?: AbortSignal; timeoutMs?: number }
   ): Promise<RuntimeRpcResponse<unknown>> {
     const method = typeof contract === 'string' ? contract : contract.name
-    await this.waitForConnected(options?.timeoutMs)
+    await this.waitForConnected(options?.timeoutMs, options?.signal)
     return new Promise((resolve, reject) => {
       const id = this.nextId()
       const timeoutMs = options?.timeoutMs ?? REQUEST_TIMEOUT_MS
       const timeout = window.setTimeout(() => {
         this.pending.delete(id)
+        removeAbortListener()
         reject(new Error(`Request timed out: ${method}`))
       }, timeoutMs)
-      this.pending.set(id, { method, resolve, reject, timeout })
+      const abort = (): void => {
+        this.pending.delete(id)
+        window.clearTimeout(timeout)
+        removeAbortListener()
+        reject(abortError(options?.signal))
+      }
+      const removeAbortListener = (): void => options?.signal?.removeEventListener('abort', abort)
+      if (options?.signal?.aborted) {
+        window.clearTimeout(timeout)
+        reject(abortError(options.signal))
+        return
+      }
+      options?.signal?.addEventListener('abort', abort, { once: true })
+      this.pending.set(id, { method, resolve, reject, timeout, removeAbortListener })
       if (!this.sendEncrypted({ id, deviceToken: this.pairing.deviceToken, method, params })) {
         this.pending.delete(id)
         window.clearTimeout(timeout)
+        removeAbortListener()
         reject(new Error('Runtime host is not connected.'))
       }
     })
+  }
+
+  async getOrpcClient(
+    timeoutMs = REQUEST_TIMEOUT_MS,
+    signal?: AbortSignal
+  ): Promise<WebRuntimeOrpcClient> {
+    await this.waitForConnected(timeoutMs, signal)
+    if (this.orpcTransport === 'peer') {
+      return this.getPeerOrpcClient()
+    }
+    if (this.orpcTransport === 'legacy') {
+      return this.getLegacyOrpcClient()
+    }
+    if (!this.orpcClientPromise) {
+      // Why: a runtime-scoped pairing is issued by the pure Node host, whose
+      // WebSocket surface is oRPC-only. Probing it with the legacy JSON envelope
+      // is an invalid frame, so authenticate its identity with typed status.get.
+      this.orpcClientPromise =
+        this.pairing.scope === 'runtime'
+          ? this.connectRuntimeOrpcClient(timeoutMs, signal)
+          : this.negotiateOrpcClient(timeoutMs, signal)
+    }
+    const pendingClient = this.orpcClientPromise
+    try {
+      return await pendingClient
+    } finally {
+      if (this.orpcClientPromise === pendingClient) {
+        this.orpcClientPromise = null
+      }
+    }
   }
 
   async subscribe(
@@ -164,7 +234,7 @@ export class WebRuntimeClient {
       // server's WebSocket connection cap in large browser sessions.
       return this.subscribeSharedFileWatch(params, callbacks, options)
     }
-    const client = new WebRuntimeClient(this.pairing)
+    const client = new WebRuntimeClient(this.pairing, this.onRuntimeId)
     this.childClients.add(client)
     const closeChild = (notifySubscriptions = false): void => {
       this.childClients.delete(client)
@@ -229,7 +299,7 @@ export class WebRuntimeClient {
       }
       unwatchStarted = true
       const attempt = this.call(
-        'files.unwatch',
+        LEGACY_RUNTIME_STREAM_METHODS.filesUnwatch,
         { subscriptionId: remoteSubscriptionId! },
         { timeoutMs: 5_000 }
       )
@@ -331,7 +401,7 @@ export class WebRuntimeClient {
       }
     }
     handle = await this.subscribeOnCurrentConnection(
-      'files.watch',
+      LEGACY_RUNTIME_STREAM_METHODS.filesWatch,
       params,
       wrappedCallbacks,
       options
@@ -401,6 +471,8 @@ export class WebRuntimeClient {
     this.childClients.clear()
     this.fileWatchTeardownRetries.clear()
     this.clearTimers()
+    this.closeOrpcConnection()
+    this.closeShellServicesChannel()
     this.rejectAllPending('Runtime host connection closed.')
     this.rejectAllWaiters(new Error('Runtime host connection closed.'))
     if (shouldNotifySubscriptions) {
@@ -519,13 +591,12 @@ export class WebRuntimeClient {
         if (control.type === 'e2ee_authenticated') {
           this.clearHandshakeTimer()
           this.reconnectAttempt = 0
+          if (this.options.enableShellServices !== false) {
+            this.openShellServicesChannel()
+          }
           this.setState('connected')
         } else if (control.type === 'e2ee_error' || control.error?.code === 'unauthorized') {
-          this.intentionallyClosed = true
-          this.setState('auth-failed')
-          this.rejectAllPending('Unauthorized. Pair this web client again.')
-          this.notifySubscriptionsError('unauthorized', 'Unauthorized. Pair this web client again.')
-          this.ws?.close()
+          this.handleAuthorizationFailure()
         }
       } catch {
         // Ignore malformed handshake payloads; the server will close on timeout.
@@ -549,6 +620,12 @@ export class WebRuntimeClient {
       if (!plaintext) {
         return
       }
+      if (this.shellServicesChannel?.receiveBinary(plaintext)) {
+        return
+      }
+      if (this.orpcConnection?.channel.receiveBinary(plaintext)) {
+        return
+      }
       for (const subscription of this.subscriptions.values()) {
         subscription.callbacks.onBinary?.(plaintext)
       }
@@ -557,6 +634,12 @@ export class WebRuntimeClient {
 
     const plaintext = decrypt(raw, this.sharedKey)
     if (plaintext === null) {
+      return
+    }
+    if (this.shellServicesChannel?.receiveText(plaintext)) {
+      return
+    }
+    if (this.orpcConnection?.channel.receiveText(plaintext)) {
       return
     }
 
@@ -573,11 +656,7 @@ export class WebRuntimeClient {
       return
     }
     if (isRuntimeFailureResponse(response) && response.error.code === 'unauthorized') {
-      this.intentionallyClosed = true
-      this.setState('auth-failed')
-      this.rejectAllPending('Unauthorized. Pair this web client again.')
-      this.notifySubscriptionsError('unauthorized', 'Unauthorized. Pair this web client again.')
-      this.ws?.close()
+      this.handleAuthorizationFailure()
       return
     }
 
@@ -603,15 +682,21 @@ export class WebRuntimeClient {
     }
     this.pending.delete(response.id)
     window.clearTimeout(pending.timeout)
+    pending.removeAbortListener()
+    this.recordRuntimeId(response as RuntimeRpcResponse<unknown>)
     pending.resolve(response as RuntimeRpcResponse<unknown>)
   }
 
   private sendEncrypted(message: unknown): boolean {
+    return this.sendEncryptedText(JSON.stringify(message))
+  }
+
+  private sendEncryptedText(plaintext: string): boolean {
     const ws = this.ws
     if (!ws || ws.readyState !== WebSocket.OPEN || !this.sharedKey) {
       return false
     }
-    ws.send(encrypt(JSON.stringify(message), this.sharedKey))
+    ws.send(encrypt(plaintext, this.sharedKey))
     return true
   }
 
@@ -624,7 +709,7 @@ export class WebRuntimeClient {
     return true
   }
 
-  private waitForConnected(timeoutMs = REQUEST_TIMEOUT_MS): Promise<void> {
+  private waitForConnected(timeoutMs = REQUEST_TIMEOUT_MS, signal?: AbortSignal): Promise<void> {
     if (this.state === 'connected') {
       return Promise.resolve()
     }
@@ -634,12 +719,24 @@ export class WebRuntimeClient {
     if (this.intentionallyClosed) {
       return Promise.reject(new Error('Runtime host connection closed.'))
     }
+    if (signal?.aborted) {
+      return Promise.reject(abortError(signal))
+    }
     return new Promise((resolve, reject) => {
-      const timeout = window.setTimeout(() => {
-        const index = this.waiters.findIndex((waiter) => waiter.resolve === resolve)
+      const removeWaiter = (): void => {
+        const index = this.waiters.indexOf(waiter)
         if (index !== -1) {
           this.waiters.splice(index, 1)
         }
+      }
+      const abort = (): void => {
+        removeWaiter()
+        window.clearTimeout(timeout)
+        reject(abortError(signal))
+      }
+      const timeout = window.setTimeout(() => {
+        removeWaiter()
+        signal?.removeEventListener('abort', abort)
         reject(
           new Error(
             withRemoteRuntimeTailscaleHint(
@@ -649,16 +746,20 @@ export class WebRuntimeClient {
           )
         )
       }, timeoutMs)
-      this.waiters.push({
+      const waiter = {
         resolve: () => {
           window.clearTimeout(timeout)
+          signal?.removeEventListener('abort', abort)
           resolve()
         },
         reject: (error) => {
           window.clearTimeout(timeout)
+          signal?.removeEventListener('abort', abort)
           reject(error)
         }
-      })
+      }
+      signal?.addEventListener('abort', abort, { once: true })
+      this.waiters.push(waiter)
     })
   }
 
@@ -668,6 +769,11 @@ export class WebRuntimeClient {
     }
     this.ws = null
     this.sharedKey = null
+    this.closeOrpcConnection()
+    this.closeShellServicesChannel()
+    this.legacyOrpcClient = null
+    this.orpcClientPromise = null
+    this.orpcTransport = 'unknown'
     this.clearConnectTimer()
     this.clearHandshakeTimer()
     this.clearHeartbeatTimer()
@@ -694,6 +800,38 @@ export class WebRuntimeClient {
     }, delay)
   }
 
+  private closeOrpcConnection(): void {
+    this.orpcConnection?.channel.close()
+    this.orpcConnection = null
+  }
+
+  private openShellServicesChannel(): void {
+    this.closeShellServicesChannel()
+    const channel = new WebShellServicesChannel(
+      (plaintext) => this.sendEncryptedText(plaintext),
+      (bytes) => this.sendEncryptedBinary(bytes),
+      () => this.ws?.close()
+    )
+    this.shellServicesChannel = channel
+    if (!channel.connect()) {
+      this.closeShellServicesChannel()
+      this.ws?.close()
+    }
+  }
+
+  private closeShellServicesChannel(): void {
+    this.shellServicesChannel?.close()
+    this.shellServicesChannel = null
+  }
+
+  private handleAuthorizationFailure(): void {
+    this.intentionallyClosed = true
+    this.setState('auth-failed')
+    this.rejectAllPending('Unauthorized. Pair this web client again.')
+    this.notifySubscriptionsError('unauthorized', 'Unauthorized. Pair this web client again.')
+    this.ws?.close()
+  }
+
   private setState(next: WebRuntimeConnectionState): void {
     this.state = next
     if (next === 'connected') {
@@ -717,6 +855,7 @@ export class WebRuntimeClient {
     for (const [id, pending] of this.pending) {
       this.pending.delete(id)
       window.clearTimeout(pending.timeout)
+      pending.removeAbortListener()
       pending.reject(error)
     }
   }
@@ -854,21 +993,103 @@ export class WebRuntimeClient {
       return
     }
     if (this.heartbeatProbeSentAt === null && now - this.lastInboundFrameAt >= HEARTBEAT_IDLE_MS) {
-      // Why: a fire-and-forget liveness probe. The reply (or any other frame)
-      // resets lastInboundFrameAt and clears heartbeatProbeSentAt; the id is
-      // intentionally unmatched in handleSocketMessage so it adds no pending
-      // request or timeout. If sending fails the socket isn't OPEN — skip.
-      if (
-        this.sendEncrypted({
-          id: `web-heartbeat-${this.nextId()}`,
-          deviceToken: this.pairing.deviceToken,
-          method: STATUS_GET_CONTRACT.name
-        })
-      ) {
-        this.heartbeatProbeSentAt = now
-      }
+      this.sendHeartbeatProbe(now)
     }
   }
+
+  private sendHeartbeatProbe(now: number): void {
+    if (this.pairing.scope === 'runtime' || this.orpcTransport === 'peer') {
+      this.heartbeatProbeSentAt = now
+      void this.getPeerOrpcClient()
+        .status.get(undefined, { signal: AbortSignal.timeout(HEARTBEAT_PROBE_GRACE_MS) })
+        .then((status) => this.publishRuntimeId(status.runtimeId))
+        .catch(() => {})
+      return
+    }
+    // Why: legacy hosts still need the envelope probe. Its unmatched id keeps
+    // the heartbeat fire-and-forget; any inbound reply clears the probe clock.
+    if (
+      this.sendEncrypted(
+        createLegacyRuntimeHeartbeatRequest(
+          `web-heartbeat-${this.nextId()}`,
+          this.pairing.deviceToken
+        )
+      )
+    ) {
+      this.heartbeatProbeSentAt = now
+    }
+  }
+
+  private getLegacyOrpcClient(): WebRuntimeOrpcClient {
+    if (!this.legacyOrpcClient) {
+      this.legacyOrpcClient = createLegacyRuntimeOrpcClient((method, input, options) =>
+        this.call(method, input, options)
+      )
+    }
+    return this.legacyOrpcClient
+  }
+
+  private getPeerOrpcClient(): WebRuntimeOrpcClient {
+    if (!this.orpcConnection) {
+      this.orpcConnection = createWebRuntimeOrpcConnection(
+        (plaintext) => this.sendEncryptedText(plaintext),
+        (bytes) => this.sendEncryptedBinary(bytes),
+        () => this.handleAuthorizationFailure()
+      )
+    }
+    return this.orpcConnection.client
+  }
+
+  private async negotiateOrpcClient(
+    timeoutMs: number,
+    signal?: AbortSignal
+  ): Promise<WebRuntimeOrpcClient> {
+    const negotiationSignal = signal ?? AbortSignal.timeout(timeoutMs)
+    const status = await this.getLegacyOrpcClient().status.get(undefined, {
+      signal: negotiationSignal
+    })
+    this.publishRuntimeId(status.runtimeId)
+    if (status.capabilities?.includes(RUNTIME_ORPC_RUNTIME_CAPABILITY)) {
+      this.orpcTransport = 'peer'
+      return this.getPeerOrpcClient()
+    }
+    this.orpcTransport = 'legacy'
+    return this.getLegacyOrpcClient()
+  }
+
+  private async connectRuntimeOrpcClient(
+    timeoutMs: number,
+    signal?: AbortSignal
+  ): Promise<WebRuntimeOrpcClient> {
+    const client = this.getPeerOrpcClient()
+    const status = await client.status.get(undefined, {
+      signal: signal ?? AbortSignal.timeout(timeoutMs)
+    })
+    this.publishRuntimeId(status.runtimeId)
+    this.orpcTransport = 'peer'
+    return client
+  }
+
+  private recordRuntimeId(response: RuntimeRpcResponse<unknown>): void {
+    const runtimeId = response._meta?.runtimeId
+    if (runtimeId) {
+      this.publishRuntimeId(runtimeId)
+    }
+  }
+
+  private publishRuntimeId(runtimeId: string): void {
+    try {
+      this.onRuntimeId(runtimeId)
+    } catch (error) {
+      console.warn('Failed to persist the web runtime identity:', error)
+    }
+  }
+}
+
+function abortError(signal: AbortSignal | undefined): Error {
+  return signal?.reason instanceof Error
+    ? signal.reason
+    : new DOMException('The operation was aborted', 'AbortError')
 }
 
 function isRuntimeFailureResponse(

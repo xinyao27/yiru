@@ -7,6 +7,7 @@ import {
   type PasteTerminalTextDetail
 } from '~renderer/constants/terminal'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import { handleTerminalFileDrop } from './drop/handler'
@@ -293,7 +294,7 @@ export function useTerminalPaneGlobalEffects({
     if (!isActive && !isVisible) {
       return
     }
-    return window.api.ui.onFileDrop((data) => {
+    return shellClient.ui.onFileDrop((data) => {
       if (data.target !== 'terminal') {
         return
       }

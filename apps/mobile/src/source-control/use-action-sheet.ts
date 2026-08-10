@@ -43,19 +43,16 @@ export function useMobileSourceControlActionSheet(
         prAvailable: upstreamKnown,
         handlers: {
           commit: () => void runActionSheetCommit(),
-          commitPush: () =>
-            void runActionSheetCommitSequence('commit-push', [{ method: 'git.push' }]),
+          commitPush: () => void runActionSheetCommitSequence('commit-push', [{ kind: 'push' }]),
           commitSync: () => void runActionSheetCommitSync(),
-          push: () => void runActionSheetGitSequence('push', [{ method: 'git.push' }]),
-          pull: () => void runActionSheetGitSequence('pull', [{ method: 'git.pull' }]),
+          push: () => void runActionSheetGitSequence('push', [{ kind: 'push' }]),
+          pull: () => void runActionSheetGitSequence('pull', [{ kind: 'pull' }]),
           sync: () => void runActionSheetGitSync(),
-          fetch: () => void runActionSheetGitSequence('fetch', [{ method: 'git.fetch' }]),
+          fetch: () => void runActionSheetGitSequence('fetch', [{ kind: 'fetch' }]),
           publish: () =>
-            void runActionSheetGitSequence('publish', [
-              { method: 'git.push', params: { publish: true } }
-            ]),
+            void runActionSheetGitSequence('publish', [{ kind: 'push', input: { publish: true } }]),
           fastForward: () =>
-            void runActionSheetGitSequence('fast-forward', [{ method: 'git.fastForward' }]),
+            void runActionSheetGitSequence('fast-forward', [{ kind: 'fastForward' }]),
           rebase: () => void runActionSheetRebase(),
           createPr: () => void createPr(false),
           pushAndCreatePr: () => void createPr(true),

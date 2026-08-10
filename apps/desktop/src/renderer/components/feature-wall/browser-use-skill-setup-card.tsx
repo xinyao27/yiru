@@ -16,6 +16,7 @@ import {
   ensureYiruCliAvailableForAgentSkillTerminal
 } from '~renderer/lib/agent-skill-cli-prerequisite'
 import { BROWSER_USE_ENABLED_STORAGE_KEY } from '~renderer/lib/browser-use-setup-state'
+import { readCliInstallStatus, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
@@ -67,10 +68,8 @@ export function BrowserUseSkillSetupCard(props: {
       preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
       getPrerequisiteStatus={() =>
         activeSkillRuntime.agentRuntime?.runtime === 'wsl'
-          ? window.api.cli.getWslInstallStatus(
-              getWslCliDistroRequest(activeSkillRuntime.agentRuntime)
-            )
-          : window.api.cli.getInstallStatus()
+          ? readWslCliInstallStatus(getWslCliDistroRequest(activeSkillRuntime.agentRuntime))
+          : readCliInstallStatus()
       }
       onBeforeOpenTerminal={handleBeforeOpenTerminal}
       showRecheckWhenInstalled={false}

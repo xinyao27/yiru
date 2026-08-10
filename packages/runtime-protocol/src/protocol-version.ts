@@ -19,9 +19,33 @@ import { REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY } from './runtime-capability-
 // this client build requires a newer host. Exact app-version equality is
 // never required; these numbers define the supported compatibility window.
 
-export const RUNTIME_PROTOCOL_VERSION = 3
+// Why: bumped to 4 by Phase 6 D-stage (docs/runtime-orpc-migration.md), which
+// removed 353 methods from the legacy JSON-RPC dispatcher — they remain
+// available over oRPC, but a client that falls back to bare string-method
+// dispatch no longer finds them, which is exactly the "removed an RPC method
+// clients use" trigger above.
+//
+// `MIN_COMPATIBLE_RUNTIME_SERVER_VERSION` is raised to 4: mobile's oRPC
+// capability probe and bare-string fallback (`callLegacyRuntimeOrpc`, the
+// `'legacy'` transport mode) were deleted outright rather than kept as a
+// permanent shim, so mobile now requires an oRPC-capable host unconditionally.
+// A host below protocol 4 predates the guarantee that every mobile-reachable
+// procedure is oRPC-served, so it must be refused with an explicit
+// "update Yiru on the host" message (`describeRuntimeCompatBlock`) instead of
+// failing calls one by one with no clear cause. This is the one genuinely
+// irreversible step in that migration: once a build that refuses older hosts
+// reaches users, rolling the number back does not undo the connections it
+// already rejected.
+// `MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION` stays at 2 on purpose: raising it
+// would reject old *clients* reaching new hosts, and unlocks no deletion — the
+// dispatcher's legacy fallback (`main/runtime/rpc/legacy-dispatch-fallback.ts`)
+// is permanently needed for desktop-internal bare-string callers
+// (`getCleanupRequest()`'s cleanup companions in
+// `shared/remote-runtime/shared-control-protocol.ts`, and terminal.multiplex's
+// renderer transport), so raising this floor would be pure downside.
+export const RUNTIME_PROTOCOL_VERSION = 4
 export const MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION = 2
-export const MIN_COMPATIBLE_RUNTIME_SERVER_VERSION = 2
+export const MIN_COMPATIBLE_RUNTIME_SERVER_VERSION = 4
 
 export const PROJECT_HOST_SETUP_RUNTIME_CAPABILITY = 'project-host-setup.v1' as const
 export const PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY = 'project-source-context.v1' as const
@@ -57,6 +81,7 @@ export const TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY =
 // Why: older hosts lack the targeted settings RPCs and strip agentPrompt from
 // terminal creation, so mobile must hide Quick Commands unless both are present.
 export const TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY = 'terminal.quick-commands.v1' as const
+export const RUNTIME_ORPC_RUNTIME_CAPABILITY = 'rpc.orpc.v1' as const
 
 export const RUNTIME_CAPABILITIES = [
   'runtime.status.compat.v1',
@@ -77,12 +102,8 @@ export const RUNTIME_CAPABILITIES = [
   AI_VAULT_RUNTIME_CAPABILITY,
   TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY,
   TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY,
+  RUNTIME_ORPC_RUNTIME_CAPABILITY,
   REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY
 ] as const
 
 export type RuntimeCapability = (typeof RUNTIME_CAPABILITIES)[number] | (string & {})
-
-// COMPAT(mobileProtocolAliases): added 2026-05-15 for mobile builds that
-// still read desktop/mobile names; remove once mobile reads runtime names.
-export const DESKTOP_PROTOCOL_VERSION = RUNTIME_PROTOCOL_VERSION
-export const MIN_COMPATIBLE_MOBILE_VERSION = MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION

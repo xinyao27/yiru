@@ -48,7 +48,3 @@ export function clearSentMobileDiffComments(comments: readonly DiffComment[]): D
 export function getUnsentMobileDiffComments(comments: readonly DiffComment[]): DiffComment[] {
   return comments.filter((comment) => comment.sentAt === undefined)
 }
-
-export function countUnsentMobileDiffComments(comments: readonly DiffComment[]): number {
-  return getUnsentMobileDiffComments(comments).length
-}

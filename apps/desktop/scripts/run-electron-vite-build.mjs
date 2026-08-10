@@ -5,6 +5,7 @@ import path from 'node:path'
 import { appendBuildOldSpaceOption } from './node-old-space-limit.mjs'
 
 const require = createRequire(import.meta.url)
+const appRoot = path.join(import.meta.dirname, '..')
 const electronVitePackageJson = require.resolve('electron-vite/package.json')
 const electronViteCli = path.join(path.dirname(electronVitePackageJson), 'bin', 'electron-vite.js')
 
@@ -13,6 +14,9 @@ const electronViteCli = path.join(path.dirname(electronVitePackageJson), 'bin', 
 const nodeOptions = appendBuildOldSpaceOption(process.env.NODE_OPTIONS)
 
 const child = spawn(process.execPath, [electronViteCli, 'build', ...process.argv.slice(2)], {
+  // Why: electron.vite.config.ts resolves source entries relative to cwd, while
+  // this wrapper is also a documented repository-root verification entry.
+  cwd: appRoot,
   stdio: 'inherit',
   env: {
     ...process.env,

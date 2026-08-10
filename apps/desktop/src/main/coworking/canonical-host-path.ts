@@ -9,7 +9,6 @@ import {
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { IFilesystemProvider } from '../providers/types'
 import { toWindowsWslPath } from '../wsl'
 import type { CoworkingWorktreeRootComparison } from './worktree-incarnation'
 import { CoworkingWorktreeIncarnationHostError } from './worktree-incarnation'
@@ -199,23 +198,6 @@ export async function isCoworkingLocalDirectory(directory: string): Promise<bool
       return false
     }
     if (!isDefinitiveCoworkingFilesystemFailure(error)) {
-      throw new CoworkingWorktreeIncarnationHostError('host-unavailable', { cause: error })
-    }
-    return false
-  }
-}
-
-export async function isCoworkingRemoteDirectory(
-  filesystem: IFilesystemProvider,
-  directory: string
-): Promise<boolean> {
-  try {
-    return (await filesystem.stat(directory)).type === 'directory'
-  } catch (error) {
-    if (
-      !isMissingCoworkingFilesystemError(error) &&
-      !isDefinitiveCoworkingFilesystemFailure(error)
-    ) {
       throw new CoworkingWorktreeIncarnationHostError('host-unavailable', { cause: error })
     }
     return false

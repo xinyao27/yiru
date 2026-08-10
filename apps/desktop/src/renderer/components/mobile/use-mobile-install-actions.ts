@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { getMobileReleaseLink, type MobilePlatform } from './release-link'
 
@@ -12,12 +13,12 @@ export function useMobileInstallActions(platform: MobilePlatform): {
   const mountedRef = useMountedRef()
 
   const openInstallUrl = useCallback((): void => {
-    void window.api.shell.openUrl(getMobileReleaseLink(platform).url)
+    void shellClient.shell.openUrl(getMobileReleaseLink(platform).url)
   }, [platform])
 
   const copyInstallUrl = useCallback(async (): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(getMobileReleaseLink(platform).url)
+      await shellClient.ui.writeClipboardText(getMobileReleaseLink(platform).url)
       if (mountedRef.current) {
         toast.success(
           translate('auto.components.mobile.MobilePage.fad833de8d', 'Install link copied')

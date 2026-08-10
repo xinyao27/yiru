@@ -8,6 +8,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'
+import { fetchGrokAccountStatus } from '~renderer/runtime/provider-accounts-client'
 import { useAppStore } from '~renderer/store'
 import type { GrokAccountStatus } from '~shared/rate-limit-types'
 
@@ -17,6 +18,7 @@ import { SearchableSetting } from './searchable-setting'
 const GROK_CLI_DOCS_URL = 'https://docs.x.ai/build/overview'
 
 export function GrokAccountsSection(): React.JSX.Element {
+  const settings = useAppStore((s) => s.settings)
   const refreshGrokRateLimits = useAppStore((s) => s.refreshGrokRateLimits)
   const grokUsage = useAppStore((s) => s.rateLimits.grok)
   const [status, setStatus] = useState<GrokAccountStatus | null>(null)
@@ -25,7 +27,7 @@ export function GrokAccountsSection(): React.JSX.Element {
 
   const loadStatus = useCallback(async (): Promise<void> => {
     try {
-      const next = await window.api.grokAccounts.getStatus()
+      const next = await fetchGrokAccountStatus(settings)
       setStatus(next)
     } catch (error) {
       console.error('Failed to load Grok account status:', error)
@@ -39,7 +41,7 @@ export function GrokAccountsSection(): React.JSX.Element {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [settings])
 
   // Why: after a background usage fetch, sign-in state may change — reload status then.
   useEffect(() => {

@@ -35,23 +35,6 @@ export function mobileNativeChatEmptyState(
   }
 }
 
-/** Derive the list data from the raw transcript: fold tool turns into the
- *  assistant turn, optionally append a synthetic streaming bubble, then the
- *  route-owned optimistic "queued" messages at the tail. Returns the
- *  intermediate `folded`/`streaming` so the caller can memoize on them. */
-export function buildMobileNativeChatData({
-  messages,
-  streamingText,
-  pending
-}: {
-  messages: NativeChatMessage[]
-  streamingText?: string
-  pending: { id: string; text: string }[]
-}): { folded: NativeChatMessage[]; streaming: string | null; data: NativeChatMessage[] } {
-  const folded = foldMobileNativeChatMessages(messages)
-  return buildMobileNativeChatTransientData({ folded, streamingText, pending })
-}
-
 export function foldMobileNativeChatMessages(messages: NativeChatMessage[]): NativeChatMessage[] {
   return foldToolMessages(stripNoiseMessages(messages))
 }

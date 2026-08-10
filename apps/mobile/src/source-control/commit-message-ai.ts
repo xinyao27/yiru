@@ -1,5 +1,5 @@
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 // Mirrors the host GenerateCommitMessageResult (src/main/text-generation/
 // commit-message-text-generation.ts) — a single resolved result, not a stream.
@@ -11,16 +11,20 @@ export type MobileGenerateCommitMessageResult =
 // UI can switch on. RPC transport failures and malformed payloads collapse to
 // { success:false } so the caller never has to special-case them.
 export async function requestMobileCommitMessage(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<MobileGenerateCommitMessageResult> {
-  const response = await client.sendRequest('git.generateCommitMessage', {
-    worktree: `id:${worktreeId}`
-  })
-  if (!response.ok) {
-    return { success: false, error: response.error?.message || 'Failed to generate commit message' }
+  let result: MobileGenerateCommitMessageResult
+  try {
+    result = await callRuntimeOrpc(client, (runtime) => runtime.git.generateCommitMessage, {
+      worktree: `id:${worktreeId}`
+    })
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to generate commit message'
+    }
   }
-  const result = (response as RpcSuccess).result as MobileGenerateCommitMessageResult | undefined
   if (!result || typeof result !== 'object') {
     return { success: false, error: 'Failed to generate commit message' }
   }
@@ -41,8 +45,10 @@ export async function requestMobileCommitMessage(
 }
 
 export async function cancelMobileCommitMessage(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<void> {
-  await client.sendRequest('git.cancelGenerateCommitMessage', { worktree: `id:${worktreeId}` })
+  await callRuntimeOrpc(client, (runtime) => runtime.git.cancelGenerateCommitMessage, {
+    worktree: `id:${worktreeId}`
+  })
 }

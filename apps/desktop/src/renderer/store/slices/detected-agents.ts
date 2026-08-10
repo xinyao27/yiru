@@ -3,7 +3,8 @@ import {
   getLocalAgentPreflightContext,
   localPreflightContextKey
 } from '~renderer/lib/local-preflight-context'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '~shared/types'
 
 import type { AppState } from '../types'
@@ -82,8 +83,11 @@ export const createDetectedAgentsSlice: StateCreator<AppState, [], [], DetectedA
       isDetectingAgents: true
     })
     const requestGeneration = localDetectionGeneration
-    const pending = window.api.preflight
-      .detectAgents(context)
+    const pending = callRuntimeOrpc(
+      getActiveRuntimeTarget(get().settings),
+      (client) => client.preflight.detectAgents,
+      context ?? {}
+    )
       .then((ids) => {
         const typed = ids as TuiAgent[]
         if (requestGeneration === localDetectionGeneration) {
@@ -120,8 +124,11 @@ export const createDetectedAgentsSlice: StateCreator<AppState, [], [], DetectedA
       isRefreshingAgents: true
     })
     const requestGeneration = localDetectionGeneration
-    const pending = window.api.preflight
-      .refreshAgents(context)
+    const pending = callRuntimeOrpc(
+      getActiveRuntimeTarget(get().settings),
+      (client) => client.preflight.refreshAgents,
+      context ?? {}
+    )
       .then((result) => {
         const typed = result.agents as TuiAgent[]
         if (requestGeneration === localDetectionGeneration) {
@@ -193,8 +200,11 @@ export const createDetectedAgentsSlice: StateCreator<AppState, [], [], DetectedA
       isDetectingRemoteAgents: { ...s.isDetectingRemoteAgents, [connectionId]: true }
     }))
 
-    const pending = window.api.preflight
-      .detectRemoteAgents({ connectionId })
+    const pending = callRuntimeOrpc(
+      getActiveRuntimeTarget(get().settings),
+      (client) => client.preflight.detectRemoteAgents,
+      { connectionId }
+    )
       .then((ids) => {
         const typed = ids as TuiAgent[]
         set((s) => ({
@@ -253,9 +263,10 @@ export const createDetectedAgentsSlice: StateCreator<AppState, [], [], DetectedA
       isDetectingRuntimeAgents: { ...s.isDetectingRuntimeAgents, [environmentId]: true }
     }))
 
-    const pending = callRuntimeRpc<TuiAgent[]>(
+    const pending = callRuntimeOrpc(
       { kind: 'environment', environmentId },
-      'preflight.detectAgents'
+      (client) => client.preflight.detectAgents,
+      undefined
     )
       .then((ids) => {
         const typed = ids as TuiAgent[]

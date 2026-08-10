@@ -2,6 +2,7 @@ import {
   resolveCoworkingWorkspaceRoute,
   selectCoworkingCanControl
 } from '~renderer/components/coworking/selectors'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import type { CoworkingRequesterTransportErrorCode } from '~shared/coworking/ipc-contract'
 
@@ -76,7 +77,7 @@ async function invokeRequester(
   params: Record<string, unknown>
 ): Promise<unknown> {
   try {
-    return await window.api.coworkingSharing.invoke({
+    return await coworkingSharingClient.invoke({
       desktopRef: route.desktopRef,
       connectionEpoch: route.connectionEpoch,
       method,

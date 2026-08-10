@@ -3,7 +3,6 @@ import {
   type AiVaultAgent,
   type AiVaultSession
 } from '@yiru/workbench-model/agent'
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
 
 import type { CommandHandler } from '../dispatch'
 import {
@@ -61,7 +60,7 @@ async function listSessions(context: Parameters<CommandHandler>[0], query?: stri
   // Why: filtering happens client-side, so the runtime scan must not stop at a
   // smaller page before matching sessions have been considered.
   const scanLimit = agent || query ? Math.max(limit ?? 1_000, 1_000) : limit
-  const response = await client.call(AI_VAULT_LIST_SESSIONS_CONTRACT, {
+  const response = await client.call(client.rpc.aiVault.listSessions, {
     force: flags.get('force') === true,
     ...(scanLimit === undefined ? {} : { limit: scanLimit })
   })

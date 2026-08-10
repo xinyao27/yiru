@@ -5,10 +5,10 @@ import { ActivityIndicator, FlatList, Text, View, type ListRenderItem } from 're
 import { MobileGlassHeader } from '~/components/glass/header'
 import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
-import type { RpcSuccess } from '../transport/types'
 import {
   beginDirectoryLoad,
   createDirectoryLoadRevisions,
@@ -18,11 +18,7 @@ import {
 } from './directory-load-revisions'
 import { MobileFileExplorerRow } from './file-explorer-row'
 import { fileExplorerStyles as styles } from './file-explorer-styles'
-import {
-  directoryCacheFromFileList,
-  isMobileMethodUnavailableError,
-  type LegacyFilesListResult
-} from './file-list-fallback'
+import { directoryCacheFromFileList, isMobileMethodUnavailableError } from './file-list-fallback'
 import { navigateToMobileFilePreview } from './file-preview-navigation'
 import {
   flattenDirectoryCache,
@@ -102,50 +98,43 @@ export function MobileFileExplorerPanel(props: {
       }))
 
       try {
-        const response = await client.sendRequest('files.readDir', {
-          worktree: `id:${worktreeId}`,
-          relativePath
-        })
-        if (!response.ok) {
+        let entries: MobileDirEntry[]
+        try {
+          entries = await callRuntimeOrpc(client, (runtime) => runtime.files.readDir, {
+            worktree: `id:${worktreeId}`,
+            relativePath
+          })
+        } catch (error) {
+          const message = error instanceof Error ? error.message : undefined
           // Why: desktops that predate the files.readDir mobile allowlist
           // entry still serve the capped files.list; fall back so the Files
           // tab keeps working until the desktop updates.
-          if (
-            rootLoad &&
-            isMobileMethodUnavailableError(response.error?.code, response.error?.message)
-          ) {
-            const legacy = await client.sendRequest('files.list', {
-              worktree: `id:${worktreeId}`
-            })
-            if (legacy.ok) {
-              if (
-                !isCurrentDirectoryLoad(
-                  directoryLoadRevisionsRef.current,
-                  scopeRef.current,
-                  loadToken
-                )
-              ) {
-                return
-              }
-              const legacyResult = (legacy as RpcSuccess).result as LegacyFilesListResult
-              setDirectoryCache(directoryCacheFromFileList(legacyResult.files))
-              // Why: the capped list silently omits files past the cap — keep
-              // the legacy explorer's "Showing first 5000" note.
-              setLegacyListTruncated(legacyResult.truncated)
-              return
-            }
-            throw new Error(
-              legacy.error?.message || response.error?.message || 'Unable to load files'
-            )
+          const isUnavailable =
+            isRuntimeOrpcErrorCode(error, 'forbidden') ||
+            isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+            isMobileMethodUnavailableError(undefined, message)
+          if (!rootLoad || !isUnavailable) {
+            throw error
           }
-          throw new Error(response.error?.message || 'Unable to load files')
+          const legacyResult = await callRuntimeOrpc(client, (runtime) => runtime.files.list, {
+            worktree: `id:${worktreeId}`
+          })
+          if (
+            !isCurrentDirectoryLoad(directoryLoadRevisionsRef.current, scopeRef.current, loadToken)
+          ) {
+            return
+          }
+          setDirectoryCache(directoryCacheFromFileList(legacyResult.files))
+          // Why: the capped list silently omits files past the cap — keep
+          // the legacy explorer's "Showing first 5000" note.
+          setLegacyListTruncated(legacyResult.truncated)
+          return
         }
         if (
           !isCurrentDirectoryLoad(directoryLoadRevisionsRef.current, scopeRef.current, loadToken)
         ) {
           return
         }
-        const entries = (response as RpcSuccess).result as MobileDirEntry[]
         if (rootLoad) {
           setLegacyListTruncated(false)
         }

@@ -3,6 +3,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
 import { downloadRuntimeFolder } from '~renderer/runtime/folder-download'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { TreeNode } from './types'
 
@@ -23,14 +24,11 @@ export function shouldShowViewFileAction(node: TreeNode): boolean {
 }
 
 export function shouldShowRemoteDownloadAction(
-  node: TreeNode,
-  connectionId?: string | null,
   runtimeDownloadContext?: RuntimeFileOperationArgs | null
 ): boolean {
   // Why: download depends on Electron's native save dialog.
   return (
-    Boolean(connectionId || runtimeDownloadContext) &&
-    (!node.isDirectory || Boolean(runtimeDownloadContext)) &&
+    Boolean(runtimeDownloadContext) &&
     (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }
@@ -50,23 +48,12 @@ export function shouldShowCopyFileAction(
 
 export async function downloadRemoteEntry(
   node: TreeNode,
-  connectionIdOrRuntimeContext: string | RuntimeFileOperationArgs
+  runtimeContext: RuntimeFileOperationArgs
 ): Promise<void> {
   try {
-    const result =
-      typeof connectionIdOrRuntimeContext === 'string'
-        ? node.isDirectory
-          ? await window.api.fs.downloadFolder({
-              dirPath: node.path,
-              connectionId: connectionIdOrRuntimeContext
-            })
-          : await window.api.fs.downloadFile({
-              filePath: node.path,
-              connectionId: connectionIdOrRuntimeContext
-            })
-        : node.isDirectory
-          ? await downloadRuntimeFolder(connectionIdOrRuntimeContext, node.path, node.name)
-          : await downloadRuntimeFile(connectionIdOrRuntimeContext, node.path, node.name)
+    const result = node.isDirectory
+      ? await downloadRuntimeFolder(runtimeContext, node.path, node.name)
+      : await downloadRuntimeFile(runtimeContext, node.path, node.name)
     if (result.canceled) {
       return
     }
@@ -80,7 +67,7 @@ export async function downloadRemoteEntry(
         action: {
           label: translate('auto.components.right.sidebar.FileExplorerRow.1a3df04ae1', 'Open'),
           onClick: () => {
-            void window.api.shell.openPath(result.destinationPath)
+            void shellClient.shell.openPath(result.destinationPath)
           }
         }
       }
@@ -99,18 +86,13 @@ export async function downloadRemoteEntry(
   }
 }
 
-export async function copyFileToOsClipboard(
-  node: TreeNode,
-  connectionId?: string | null
-): Promise<void> {
+export async function copyFileToOsClipboard(node: TreeNode): Promise<void> {
   const failureMessage = translate(
     'auto.components.right.sidebar.FileExplorerRow.b234ab25b4',
     'Could not copy the file to the clipboard'
   )
   try {
-    const result = await window.api.ui.writeClipboardFile(
-      connectionId ? { filePath: node.path, connectionId } : node.path
-    )
+    const result = await shellClient.ui.writeClipboardFile(node.path)
     if (!result.ok) {
       toast.error(failureMessage)
     }

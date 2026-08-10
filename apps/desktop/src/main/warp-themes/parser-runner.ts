@@ -1,7 +1,8 @@
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Worker } from 'node:worker_threads'
 
-import { app } from 'electron'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 
 import type { ParsedWarpThemeResult, ParseWarpThemeOptions } from './parser'
 
@@ -12,8 +13,14 @@ type ParseWarpThemeTimeoutOptions = {
 }
 
 function getParserWorkerPath(): string {
-  if (app.isPackaged) {
-    return join(process.resourcesPath, 'app.asar', 'out', 'main', 'warp-theme-parser-worker.js')
+  const nodeHostWorkerPath = join(__dirname, 'warp-theme-parser-worker.cjs')
+  if (existsSync(nodeHostWorkerPath)) {
+    return nodeHostWorkerPath
+  }
+  const paths = getRuntimeHostPathsProvider()
+  const resourcesPath = paths.resourcesPath()
+  if (paths.isPackaged() && resourcesPath) {
+    return join(resourcesPath, 'app.asar', 'out', 'main', 'warp-theme-parser-worker.js')
   }
   return join(__dirname, 'warp-theme-parser-worker.js')
 }

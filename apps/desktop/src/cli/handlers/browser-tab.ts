@@ -1,10 +1,3 @@
-import type {
-  BrowserTabCurrentResult,
-  BrowserTabListResult,
-  BrowserTabShowResult,
-  BrowserTabSwitchResult
-} from '~shared/runtime-types'
-
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalNonNegativeIntegerFlag,
@@ -18,7 +11,7 @@ import { getBrowserCommandTarget, getBrowserWorktreeSelector } from '../selector
 export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
   'tab list': async ({ flags, client, cwd, json }) => {
     const worktree = await getBrowserWorktreeSelector(flags, cwd, client)
-    const result = await client.call<BrowserTabListResult>('browser.tabList', { worktree })
+    const result = await client.call(client.rpc.browser.tabList, { worktree })
     const showProfile = flags.has('show-profile')
     printResult(result, json, (value) =>
       showProfile ? formatTabListWithProfiles(value, true) : formatTabList(value)
@@ -26,12 +19,15 @@ export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
   },
   'tab show': async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserTabShowResult>('browser.tabShow', target)
+    const result = await client.call(client.rpc.browser.tabShow, {
+      ...target,
+      page: getRequiredStringFlag(flags, 'page')
+    })
     printResult(result, json, formatTabShow)
   },
   'tab current': async ({ flags, client, cwd, json }) => {
     const worktree = await getBrowserWorktreeSelector(flags, cwd, client)
-    const result = await client.call<BrowserTabCurrentResult>('browser.tabCurrent', { worktree })
+    const result = await client.call(client.rpc.browser.tabCurrent, { worktree })
     printResult(result, json, formatTabShow)
   },
   'tab switch': async ({ flags, client, cwd, json }) => {
@@ -49,7 +45,7 @@ export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
     // already on the targeted worktree, otherwise it pre-stages silently.
     // Spread conditionally so the RPC payload stays shape-identical to the
     // pre-flag form when --focus is absent.
-    const result = await client.call<BrowserTabSwitchResult>('browser.tabSwitch', {
+    const result = await client.call(client.rpc.browser.tabSwitch, {
       index,
       page,
       ...(flags.has('focus') ? { focus: true } : {}),
@@ -61,8 +57,8 @@ export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
     const url = getOptionalStringFlag(flags, 'url')
     const profileId = getOptionalStringFlag(flags, 'profile')
     const worktree = await getBrowserWorktreeSelector(flags, cwd, client)
-    const result = await client.call<{ browserPageId: string }>(
-      'browser.tabCreate',
+    const result = await client.call(
+      client.rpc.browser.tabCreate,
       { url, worktree, profileId },
       { timeoutMs: 60_000 }
     )
@@ -71,7 +67,7 @@ export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
   'tab close': async ({ flags, client, cwd, json }) => {
     const index = getOptionalNonNegativeIntegerFlag(flags, 'index')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<{ closed: boolean }>('browser.tabClose', {
+    const result = await client.call(client.rpc.browser.tabClose, {
       index,
       ...target
     })
@@ -80,7 +76,7 @@ export const BROWSER_TAB_HANDLERS: Record<string, CommandHandler> = {
   exec: async ({ flags, client, cwd, json }) => {
     const command = getRequiredStringFlag(flags, 'command')
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<unknown>('browser.exec', { command, ...target })
+    const result = await client.call(client.rpc.browser.exec, { command, ...target })
     printResult(result, json, (v) => JSON.stringify(v, null, 2))
   }
 }

@@ -160,7 +160,6 @@ function useSourceControlTabDetails(source: RightSidebarPanelSource): {
           branch,
           settings,
           activeRepo.id,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )
@@ -172,7 +171,6 @@ function useSourceControlTabDetails(source: RightSidebarPanelSource): {
           activeRepo.id,
           branch,
           settings,
-          activeRepo.connectionId,
           activeRepo.executionHostId,
           true
         )

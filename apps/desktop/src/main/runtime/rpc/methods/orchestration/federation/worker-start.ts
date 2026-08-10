@@ -4,6 +4,12 @@ import {
   ORCHESTRATION_FEDERATION_CONTROL_MAIL_RUNTIME_CAPABILITY,
   ORCHESTRATION_FEDERATION_RUNTIME_CAPABILITY
 } from '@yiru/runtime-protocol/capabilities'
+import {
+  ORCHESTRATION_FEDERATION_ATTACH_START_CONTRACT,
+  type OrchestrationWorkerStartInput,
+  type OrchestrationWorkerStartResult,
+  type RuntimeJsonValue
+} from '@yiru/runtime-protocol/contract'
 import type { OrchestrationDb } from '~main/runtime/orchestration/db'
 import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
@@ -11,10 +17,8 @@ import { orchestrationMigrationData } from '~shared/orchestration-rpc-contract'
 import type { RuntimeStatus } from '~shared/runtime-types'
 import { isTuiAgent } from '~shared/tui-agent/config'
 
-import type { WorkerStartInput } from '../worker/start-schema'
-
 export async function startFederatedWorker(args: {
-  params: WorkerStartInput
+  params: OrchestrationWorkerStartInput
   runtime: YiruRuntimeService
   db: OrchestrationDb
   runId: string
@@ -25,7 +29,7 @@ export async function startFederatedWorker(args: {
     method: string
     payloadHash: string
   }
-}): Promise<unknown> {
+}): Promise<OrchestrationWorkerStartResult> {
   const { params, runtime, db, task, runId, orchestrationMutation } = args
   if (!orchestrationMutation) {
     throw new OrchestrationError(
@@ -103,7 +107,7 @@ export async function startFederatedWorker(args: {
   try {
     const remote = (await runtime.callOrchestrationWorkerServer(
       server.environmentId,
-      'orchestration.federationAttachStart',
+      ORCHESTRATION_FEDERATION_ATTACH_START_CONTRACT,
       {
         dispatchId: started.dispatch.id,
         taskId: task.id,
@@ -221,13 +225,16 @@ type RemoteStartReceipt = {
   worktreeId?: string
   terminalHandle?: string
   setup?: { state: string }
-  effects?: unknown[]
-  residualResources?: unknown[]
+  effects?: RuntimeJsonValue[]
+  residualResources?: RuntimeJsonValue[]
   failedStage?: string
   lastError?: string
 }
 
-function validateRemoteWorkerStart(params: WorkerStartInput, createsWorktree: boolean): void {
+function validateRemoteWorkerStart(
+  params: OrchestrationWorkerStartInput,
+  createsWorktree: boolean
+): void {
   if (createsWorktree && (!params.name || !params.repo)) {
     throw new OrchestrationError(
       'invalid_argument',
@@ -274,7 +281,7 @@ function federatedUnknownReceipt(
   worker: { dispatch_id: string; state: string; stage: string; last_error: string | null },
   taskId: string,
   serverName: string
-): unknown {
+): OrchestrationWorkerStartResult {
   return {
     taskId,
     dispatchId: worker.dispatch_id,

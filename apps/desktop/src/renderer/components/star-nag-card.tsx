@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { useAppStore } from '../store'
 import { Button } from './ui/button'
@@ -35,7 +37,7 @@ export function StarNagCard(): React.JSX.Element | null {
   const updateCardVisible = updateStatus.state !== 'idle' && updateStatus.state !== 'not-available'
 
   useEffect(() => {
-    const unsubscribeShow = window.api.starNag.onShow((payload) => {
+    const unsubscribeShow = rendererHostClient.starNag.onShow((payload) => {
       if (payload?.surface && payload.surface !== 'card') {
         setBusy(false)
         setVisible(false)
@@ -44,7 +46,7 @@ export function StarNagCard(): React.JSX.Element | null {
       setMode(payload?.mode === 'web' ? 'web' : 'gh')
       setVisible(true)
     })
-    const unsubscribeHide = window.api.starNag.onHide(() => {
+    const unsubscribeHide = rendererHostClient.starNag.onHide(() => {
       setBusy(false)
       setVisible(false)
     })
@@ -62,7 +64,7 @@ export function StarNagCard(): React.JSX.Element | null {
     // Why: fire-and-forget. If persisting the dismissal fails the worst case
     // is we re-fire the same threshold on next launch — not worth blocking
     // the close animation on.
-    void window.api.starNag.dismiss()
+    void rendererHostClient.starNag.dismiss()
   }, [busy])
 
   const handleLater = (): void => {
@@ -70,7 +72,7 @@ export function StarNagCard(): React.JSX.Element | null {
       return
     }
     setVisible(false)
-    void window.api.starNag.later()
+    void rendererHostClient.starNag.later()
   }
 
   useEffect(() => {
@@ -99,8 +101,8 @@ export function StarNagCard(): React.JSX.Element | null {
     }
     const openGithubFallback = async (): Promise<boolean> => {
       try {
-        await window.api.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
-        await window.api.starNag.openWeb()
+        await shellClient.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
+        await rendererHostClient.starNag.openWeb()
         if (mountedRef.current) {
           setVisible(false)
         }
@@ -125,7 +127,7 @@ export function StarNagCard(): React.JSX.Element | null {
     setBusy(true)
     let ok = false
     try {
-      ok = await window.api.starNag.starYiru()
+      ok = await rendererHostClient.starNag.starYiru()
     } catch {
       ok = false
     }

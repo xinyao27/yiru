@@ -13,14 +13,14 @@ import { X } from '@phosphor-icons/react'
 // Three actions, two semantics:
 //   - "Got it" and the ✕ in the corner → silent acknowledge. Both persist
 //     `optedIn: true`, fire no opt-in event, route through
-//     `window.api.telemetryAcknowledgeBanner()` to a dedicated main-side
+//     `rendererHostClient.telemetryAcknowledgeBanner()` to a dedicated main-side
 //     channel so no `via` derivation can tag this path. Two surfaces for
 //     the same action because the ✕ alone is easy to miss; "Got it" is
 //     the discoverable primary, ✕ is the keyboard/notification-style
 //     escape. Either way the user sees the notice, chooses not to
 //     intervene, and is opted in silently.
 //   - "Turn off" → explicit opt-out. Routes through
-//     `window.api.telemetrySetOptIn(false)`; main derives
+//     `rendererHostClient.telemetrySetOptIn(false)`; main derives
 //     `via = 'first_launch_banner'` from the pre-mutation state
 //     (existedBeforeTelemetryRelease=true, optedIn=null, incoming=false)
 //     and fires `telemetry_opted_out { via: 'first_launch_banner' }`
@@ -37,6 +37,7 @@ import { useState } from 'react'
 import { Button as UiButton } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { Button } from '../components/ui/button'
 import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../lib/telemetry'
@@ -67,8 +68,8 @@ export function FirstLaunchBanner({
     }
     setInFlight(true)
     // Main's `telemetry:acknowledgeBanner` handler persists `optedIn: true`
-    // without an opt-in event and intentionally does NOT broadcast
-    // `settings:changed` (see src/main/telemetry/telemetry.ts). Without an
+    // without an opt-in event and intentionally does NOT publish a runtime
+    // settings invalidation (see src/main/telemetry/telemetry.ts). Without an
     // explicit `fetchSettings()` refresh, the renderer store would retain
     // `optedIn: null` and PrivacyPane would keep rendering its pending-
     // banner helper text until the next full relaunch. Mirror
@@ -150,7 +151,7 @@ export function FirstLaunchBanner({
             size="xs"
             type="button"
             className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
-            onClick={() => void window.api.shell.openUrl(PRIVACY_URL)}
+            onClick={() => void shellClient.shell.openUrl(PRIVACY_URL)}
           >
             {translate('auto.components.FirstLaunchBanner.d1deebb050', 'Privacy policy')}
           </UiButton>

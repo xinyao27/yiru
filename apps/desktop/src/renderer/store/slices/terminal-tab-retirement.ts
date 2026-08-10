@@ -17,7 +17,6 @@ export type TerminalTabRetirementState = WorktreeRuntimeOwnerState &
     | 'ptyIdsByTabId'
     | 'terminalLayoutsByTabId'
     | 'lastKnownRelayPtyIdByTabId'
-    | 'deferredSshSessionIdsByTabId'
     | 'pendingReconnectPtyIdByTabId'
   >
 
@@ -72,7 +71,6 @@ function collectPtyIdsForTab(
     appendPtyId(ids, ptyId)
   }
   appendPtyId(ids, state.lastKnownRelayPtyIdByTabId[tabId])
-  appendPtyId(ids, state.deferredSshSessionIdsByTabId[tabId])
   appendPtyId(ids, state.pendingReconnectPtyIdByTabId[tabId])
   return [...ids]
 }

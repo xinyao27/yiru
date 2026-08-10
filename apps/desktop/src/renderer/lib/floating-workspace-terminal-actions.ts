@@ -5,6 +5,7 @@ import {
   type TabCycleType,
   type TypeCyclableTab
 } from '~renderer/components/terminal/tab-type-cycle'
+import { notifyActiveBrowserPage } from '~renderer/runtime/browser-client'
 import type { AppState } from '~renderer/store/types'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { keybindingMatchesAction, type KeybindingOverrides } from '~shared/keybindings'
@@ -140,8 +141,8 @@ function activateFloatingWorkspaceCyclableTab(
 
   if (next.type === 'browser') {
     const workspace = getFloatingWorkspaceBrowserTab(store, next.id)
-    if (workspace?.activePageId && typeof window !== 'undefined' && window.api?.browser) {
-      void window.api.browser.notifyActiveTabChanged({ browserPageId: workspace.activePageId })
+    if (workspace?.activePageId) {
+      void notifyActiveBrowserPage(workspace.activePageId)
     }
   }
 }

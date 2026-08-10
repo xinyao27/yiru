@@ -172,10 +172,6 @@ export function parseMarkdownDocLink(rawTarget: string): ParsedMarkdownDocLink |
   }
 }
 
-export function getMarkdownDocLinkTarget(rawTarget: string): string | null {
-  return parseMarkdownDocLink(rawTarget)?.target ?? null
-}
-
 export function formatMarkdownDocLinkBody(target: string, alias?: string | null): string {
   return alias ? `${target}|${alias}` : target
 }

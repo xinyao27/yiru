@@ -9,6 +9,7 @@ import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { useActiveWorktree } from '~renderer/store/selectors'
 import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
@@ -321,7 +322,7 @@ export function ChecksList({
                                 )}
                                 onClick={(event) => {
                                   event.stopPropagation()
-                                  window.api.shell.openUrl(openUrl)
+                                  shellClient.shell.openUrl(openUrl)
                                 }}
                               >
                                 <ExternalLink className="size-3" />

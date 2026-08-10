@@ -1,6 +1,13 @@
+import type {
+  GitBulkPathsInput,
+  GitPushInput,
+  GitTargetedRemoteInput
+} from '@yiru/runtime-protocol/contract'
+
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { readMobileGitStatusResult } from '../session/diff/review-rpc'
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
 import type { MobileGitStatusResult } from './git-status'
 
 export type MobileHostedReviewStatusReadResult =
@@ -8,14 +15,20 @@ export type MobileHostedReviewStatusReadResult =
   | { ok: false; error: string }
 
 export async function readMobileHostedReviewGitStatus(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<MobileHostedReviewStatusReadResult> {
-  const response = await client.sendRequest('git.status', { worktree: `id:${worktreeId}` })
-  if (!response.ok) {
-    return { ok: false, error: response.error?.message || 'Unable to refresh source control' }
+  try {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.git.status, {
+      worktree: `id:${worktreeId}`
+    })
+    return { ok: true, status: readMobileGitStatusResult(result) }
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : 'Unable to refresh source control'
+    }
   }
-  return { ok: true, status: readMobileGitStatusResult((response as RpcSuccess).result) }
 }
 
 export function mobileHostedReviewBranchStillMatches(
@@ -26,16 +39,27 @@ export function mobileHostedReviewBranchStillMatches(
   return Boolean(branch && (branch === inputBranch || branch === `refs/heads/${inputBranch}`))
 }
 
+export type MobileHostedReviewGitMutation =
+  | { kind: 'push'; input: GitPushInput }
+  | { kind: 'fastForward'; input: GitTargetedRemoteInput }
+  | { kind: 'bulkStage'; input: GitBulkPathsInput }
+
 export async function sendMobileHostedReviewGitMutation(
-  client: Pick<RpcClient, 'sendRequest'>,
-  method: string,
-  params: Record<string, unknown>,
+  client: Pick<RpcClient, 'orpc'>,
+  mutation: MobileHostedReviewGitMutation,
   fallback: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const response = await client.sendRequest(method, params)
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || fallback }
+    switch (mutation.kind) {
+      case 'push':
+        await callRuntimeOrpc(client, (runtime) => runtime.git.push, mutation.input)
+        break
+      case 'fastForward':
+        await callRuntimeOrpc(client, (runtime) => runtime.git.fastForward, mutation.input)
+        break
+      case 'bulkStage':
+        await callRuntimeOrpc(client, (runtime) => runtime.git.bulkStage, mutation.input)
+        break
     }
     return { ok: true }
   } catch (err) {
@@ -44,19 +68,15 @@ export async function sendMobileHostedReviewGitMutation(
 }
 
 export async function commitMobileHostedReviewStagedChanges(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   message: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const response = await client.sendRequest('git.commit', {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.git.commit, {
       worktree: `id:${worktreeId}`,
       message
     })
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || 'Commit failed' }
-    }
-    const result = (response as RpcSuccess).result as { success?: boolean; error?: string }
     if (result?.success !== true) {
       return { ok: false, error: result?.error || 'Commit failed' }
     }

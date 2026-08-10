@@ -6,6 +6,8 @@ import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
@@ -66,7 +68,7 @@ function getUsableForkBase(
 
 async function copyForkContext(prompt: string, pane: ManagedPane): Promise<boolean> {
   try {
-    await window.api.ui.writeClipboardText(prompt)
+    await shellClient.ui.writeClipboardText(prompt)
     toast.message(
       translate(
         'auto.components.terminal.pane.terminal.agent.session.fork.c00421d320',
@@ -90,7 +92,6 @@ async function copyForkContext(prompt: string, pane: ManagedPane): Promise<boole
 }
 
 function getForkAgentLaunchPlatform(args: {
-  repo: { connectionId?: string | null } | null | undefined
   worktreePath?: string | null
   projectRuntime?: ProjectExecutionRuntimeResolution
 }): NodeJS.Platform | undefined {
@@ -100,7 +101,9 @@ function getForkAgentLaunchPlatform(args: {
   if (args.projectRuntime?.status === 'resolved' && args.projectRuntime.runtime.kind === 'wsl') {
     return 'linux'
   }
-  if (args.repo?.connectionId || (args.worktreePath && isWslUncPath(args.worktreePath))) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only the WSL UNC-path check below can still make this local.
+  if (args.worktreePath && isWslUncPath(args.worktreePath)) {
     return 'linux'
   }
   return undefined
@@ -109,18 +112,16 @@ function getForkAgentLaunchPlatform(args: {
 async function preflightForkAgentTrust(args: {
   agent: TuiAgent
   workspacePath?: string | null
-  connectionId?: string | null
 }): Promise<void> {
-  const { agent, workspacePath, connectionId } = args
+  const { agent, workspacePath } = args
   const preflight = TUI_AGENT_CONFIG[agent].preflightTrust
-  if (!preflight || !workspacePath || !window.api.agentTrust?.markTrusted) {
+  if (!preflight || !workspacePath || !rendererHostClient.agentTrust?.markTrusted) {
     return
   }
   try {
-    await window.api.agentTrust.markTrusted({
+    await rendererHostClient.agentTrust.markTrusted({
       preset: preflight,
-      workspacePath,
-      ...(connectionId ? { connectionId } : {})
+      workspacePath
     })
   } catch {
     // Best-effort: if the trust artifact cannot be written, keep the existing launch path.
@@ -190,7 +191,7 @@ export async function copyAgentSessionContextFromPane(pane: ManagedPane): Promis
     return false
   }
   try {
-    await window.api.ui.writeClipboardText(transcript)
+    await shellClient.ui.writeClipboardText(transcript)
     toast.message(
       translate(
         'auto.components.terminal.pane.terminal.agent.session.fork.373a3103e7',
@@ -271,11 +272,9 @@ export async function startAgentSessionFork(fork: PreparedAgentSessionFork): Pro
   }
   await preflightForkAgentTrust({
     agent: fork.agent,
-    workspacePath: created.worktree.path,
-    connectionId: sourceRepo?.connectionId
+    workspacePath: created.worktree.path
   })
   const launchPlatform = getForkAgentLaunchPlatform({
-    repo: sourceRepo,
     worktreePath: created.worktree.path,
     projectRuntime: sourceProjectRuntime
   })

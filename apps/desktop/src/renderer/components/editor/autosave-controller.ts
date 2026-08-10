@@ -10,6 +10,7 @@ import {
 import { persistWorkspaceSessionByHostSync } from '~renderer/components/editor/workspace-session-host-persistence'
 import { getConnectionIdForFile } from '~renderer/lib/connection-context'
 import { writeRuntimeFile } from '~renderer/runtime/file-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import type { AppState } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
@@ -114,7 +115,7 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
         const worktree = liveFile.worktreeId
           ? findWorktreeById(state.worktreesByRepo ?? {}, liveFile.worktreeId)
           : null
-        // Why: stamp before the write so the fs:changed event that our own
+        // Why: stamp before the write so the file-watch event that our own
         // write produces is ignored by useEditorExternalWatch instead of
         // round-tripping back into a setContent that jumps the cursor to the
         // end (and, under round-trip drift, can drop keystrokes typed in the
@@ -352,7 +353,7 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
         // Why: runtime-owned worktree slices persist under their host
         // partition, mirroring the debounced writer's split.
         persistWorkspaceSessionByHostSync(
-          window.api.session,
+          rendererHostClient.session,
           buildWorkspaceSessionPayload(state),
           state
         )

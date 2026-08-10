@@ -1,5 +1,14 @@
 import { useSyncExternalStore } from 'react'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import {
+  acknowledgeSkillManageUpdateRun,
+  cancelSkillManageUpdateRun,
+  getSkillManageUpdateRun,
+  startSkillManageInstallRun,
+  startSkillManageRemoveRun,
+  startSkillManageUpdateRun,
+  subscribeSkillManageUpdateRun
+} from '~renderer/runtime/skill-manage-client'
 import type {
   SkillManageOperation,
   SkillManageScope,
@@ -88,8 +97,8 @@ function ensureSubscribed(): void {
     return
   }
   subscribed = true
-  window.api.skills.onUpdateRun(setRun)
-  void window.api.skills.getUpdateRun().then((current) => {
+  subscribeSkillManageUpdateRun(setRun)
+  void getSkillManageUpdateRun().then((current) => {
     // Don't clobber a live push that landed while this promise was in flight.
     if (run.state === 'idle') {
       setRun(current)
@@ -126,7 +135,7 @@ export function useSkillRunForOperation(operation: SkillManageOperation): SkillU
 export async function startSkillUpdateRun(names: readonly string[]): Promise<void> {
   ensureSubscribed()
   try {
-    await window.api.skills.startUpdateRun([...names])
+    await startSkillManageUpdateRun([...names])
   } catch (error) {
     console.error('Failed to start skill update run', error)
   }
@@ -141,7 +150,7 @@ export async function startSkillInstallRun(request: {
 }): Promise<SkillUpdateStartResult | null> {
   ensureSubscribed()
   try {
-    return await window.api.skills.startInstallRun(request)
+    return await startSkillManageInstallRun(request)
   } catch (error) {
     console.error('Failed to start skill install run', error)
     return null
@@ -154,7 +163,7 @@ export async function startSkillRemoveRun(request: {
 }): Promise<SkillUpdateStartResult | null> {
   ensureSubscribed()
   try {
-    return await window.api.skills.startRemoveRun(request)
+    return await startSkillManageRemoveRun(request)
   } catch (error) {
     console.error('Failed to start skill remove run', error)
     return null
@@ -163,7 +172,7 @@ export async function startSkillRemoveRun(request: {
 
 export async function cancelSkillUpdateRun(): Promise<void> {
   try {
-    await window.api.skills.cancelUpdateRun()
+    await cancelSkillManageUpdateRun()
   } catch (error) {
     console.error('Failed to cancel skill update run', error)
   }
@@ -171,7 +180,7 @@ export async function cancelSkillUpdateRun(): Promise<void> {
 
 export async function acknowledgeSkillUpdateRun(): Promise<void> {
   try {
-    await window.api.skills.acknowledgeUpdateRun()
+    await acknowledgeSkillManageUpdateRun()
   } catch (error) {
     console.error('Failed to acknowledge skill update run', error)
   }

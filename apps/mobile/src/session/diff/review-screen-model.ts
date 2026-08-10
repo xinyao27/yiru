@@ -106,13 +106,6 @@ export function nextReviewIndexAfterMarkReviewed({
   return filter === 'unreviewed' && targetIndex > currentIndex ? targetIndex - 1 : targetIndex
 }
 
-export function mobileReviewScopeLabel(item: MobileDiffReviewQueueItem): string {
-  if (item.scope === 'branch') {
-    return 'Branch'
-  }
-  return item.scope === 'staged' ? 'Staged' : 'Unstaged'
-}
-
 export function mobileReviewCountLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`
 }

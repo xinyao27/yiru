@@ -14,6 +14,7 @@ import { resolveWindowsShellStartupFamily } from '@yiru/workbench-model/platform
 
 import type { MobileAiVaultResumeTargetStatus } from '../agent-history/resume-target'
 import type { RpcClient } from '../transport/rpc-client'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 import {
   readMobileReviewCreatedTerminal,
   readMobileReviewTerminalSendAccepted,
@@ -151,12 +152,13 @@ function normalizeMobileAiVaultResumeCommandOverrides(
 export const RESUME_RPC_TIMEOUT_MS = 30_000
 
 export async function resumeAiVaultSessionInTerminal(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: RpcClient,
   worktreeId: string,
   launch: MobileAiVaultResumeLaunch & { clientMutationId?: string }
 ): Promise<MobileReviewTerminalTab> {
-  const created = await client.sendRequest(
-    'session.tabs.createTerminal',
+  const created = await callRuntimeOrpc(
+    client,
+    (runtime) => runtime.session.tabs.createTerminal,
     {
       worktree: `id:${worktreeId}`,
       ...(launch.env ? { env: launch.env } : {}),
@@ -167,15 +169,13 @@ export async function resumeAiVaultSessionInTerminal(
     },
     { timeoutMs: RESUME_RPC_TIMEOUT_MS }
   )
-  if (!created.ok) {
-    throw new Error(created.error?.message || 'Failed to create terminal')
-  }
-  const terminalTab = readMobileReviewCreatedTerminal(created.result)
+  const terminalTab = readMobileReviewCreatedTerminal(created)
   if (!terminalTab) {
     throw new Error('Created terminal response was invalid')
   }
-  const sent = await client.sendRequest(
-    'terminal.send',
+  const sent = await callRuntimeOrpc(
+    client,
+    (runtime) => runtime.terminal.send,
     {
       terminal: terminalTab.terminal,
       text: launch.command,
@@ -183,10 +183,7 @@ export async function resumeAiVaultSessionInTerminal(
     },
     { timeoutMs: RESUME_RPC_TIMEOUT_MS }
   )
-  if (!sent.ok) {
-    throw new Error(sent.error?.message || 'Failed to send resume command')
-  }
-  if (!readMobileReviewTerminalSendAccepted(sent.result)) {
+  if (!readMobileReviewTerminalSendAccepted(sent)) {
     throw new Error('Terminal input is locked')
   }
   return terminalTab

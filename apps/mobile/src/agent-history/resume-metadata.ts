@@ -3,6 +3,7 @@ import {
   type MobileAiVaultResumeSettings
 } from '../session/ai-vault-resume-launch'
 import type { RpcClient } from '../transport/rpc-client'
+import { callRuntimeOrpc } from '../transport/runtime-orpc-client'
 import type { Worktree } from '../workspace/list-types'
 import type {
   MobileAiVaultResumeFolderWorkspace,
@@ -10,7 +11,7 @@ import type {
   MobileAiVaultResumeRepo
 } from './resume-target'
 
-export async function loadMobileResumeMetadata(client: Pick<RpcClient, 'sendRequest'>): Promise<{
+export async function loadMobileResumeMetadata(client: RpcClient): Promise<{
   repos: MobileAiVaultResumeRepo[]
   folderWorkspaces: MobileAiVaultResumeFolderWorkspace[]
   projectGroups: MobileAiVaultResumeProjectGroup[]
@@ -28,46 +29,33 @@ export async function loadMobileResumeMetadata(client: Pick<RpcClient, 'sendRequ
     settingsResponse,
     worktreeResponse
   ] = await Promise.all([
-    client.sendRequest('repo.list', undefined, { timeoutMs: RESUME_RPC_TIMEOUT_MS }),
-    client
-      .sendRequest('folderWorkspace.list', undefined, { timeoutMs: RESUME_RPC_TIMEOUT_MS })
-      .catch(() => null),
-    client
-      .sendRequest('projectGroup.list', undefined, { timeoutMs: RESUME_RPC_TIMEOUT_MS })
-      .catch(() => null),
-    client
-      .sendRequest('settings.get', undefined, { timeoutMs: RESUME_RPC_TIMEOUT_MS })
-      .catch(() => null),
-    client
-      .sendRequest('worktree.ps', { limit: 10000 }, { timeoutMs: RESUME_RPC_TIMEOUT_MS })
-      .catch(() => null)
+    callRuntimeOrpc(client, (runtime) => runtime.repo.list, undefined, {
+      timeoutMs: RESUME_RPC_TIMEOUT_MS
+    }),
+    callRuntimeOrpc(client, (runtime) => runtime.folderWorkspace.list, undefined, {
+      timeoutMs: RESUME_RPC_TIMEOUT_MS
+    }).catch(() => null),
+    callRuntimeOrpc(client, (runtime) => runtime.projectGroup.list, undefined, {
+      timeoutMs: RESUME_RPC_TIMEOUT_MS
+    }).catch(() => null),
+    callRuntimeOrpc(client, (runtime) => runtime.settings.get, undefined, {
+      timeoutMs: RESUME_RPC_TIMEOUT_MS
+    }).catch(() => null),
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.worktree.ps,
+      { limit: 10000 },
+      {
+        timeoutMs: RESUME_RPC_TIMEOUT_MS
+      }
+    ).catch(() => null)
   ])
-  if (!repoResponse.ok) {
-    throw new Error(repoResponse.error?.message || 'Unable to load workspace metadata.')
-  }
-  const repoResult = repoResponse.result as { repos?: MobileAiVaultResumeRepo[] }
-  const folderWorkspaceResult =
-    folderWorkspaceResponse?.ok === true
-      ? (folderWorkspaceResponse.result as {
-          folderWorkspaces?: MobileAiVaultResumeFolderWorkspace[]
-        })
-      : null
-  const projectGroupResult =
-    projectGroupResponse?.ok === true
-      ? (projectGroupResponse.result as { groups?: MobileAiVaultResumeProjectGroup[] })
-      : null
-  const settingsResult =
-    settingsResponse?.ok === true
-      ? (settingsResponse.result as { settings?: MobileAiVaultResumeSettings })
-      : null
-  const worktreeResult =
-    worktreeResponse?.ok === true ? (worktreeResponse.result as { worktrees?: Worktree[] }) : null
   return {
-    repos: repoResult.repos ?? [],
-    folderWorkspaces: folderWorkspaceResult?.folderWorkspaces ?? [],
-    projectGroups: projectGroupResult?.groups ?? [],
-    settings: settingsResult?.settings ?? null,
-    worktrees: worktreeResult?.worktrees ?? null
+    repos: repoResponse.repos,
+    folderWorkspaces: folderWorkspaceResponse?.folderWorkspaces ?? [],
+    projectGroups: projectGroupResponse?.groups ?? [],
+    settings: settingsResponse?.settings ?? null,
+    worktrees: worktreeResponse?.worktrees ?? null
   }
 }
 

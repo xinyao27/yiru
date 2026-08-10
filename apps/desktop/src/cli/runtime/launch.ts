@@ -1,4 +1,5 @@
 import { spawn as spawnProcess, type SpawnOptions } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { getMacAppBundlePath } from './mac-app-update-bundle'
@@ -13,6 +14,17 @@ import {
   superviseForegroundServe
 } from './serve-update-supervisor'
 import { RuntimeClientError } from './types'
+
+type ServeRuntimeOptions = {
+  json?: boolean
+  port?: string | null
+  pairingAddress?: string | null
+  mobilePairing?: boolean
+}
+
+type ServeYiruOptions = ServeRuntimeOptions & {
+  electron?: boolean
+}
 
 export function launchYiruApp(): void {
   const overrideCommand = process.env.YIRU_OPEN_COMMAND
@@ -68,14 +80,46 @@ function spawnDetached(command: string, args: string[], options: SpawnOptions): 
   child.unref()
 }
 
-export function serveYiruApp(
-  args: {
-    json?: boolean
-    port?: string | null
-    pairingAddress?: string | null
-    mobilePairing?: boolean
-  } = {}
-): Promise<number> {
+export function serveYiruApp(args: ServeYiruOptions = {}): Promise<number> {
+  return args.electron ? serveYiruElectronApp(args) : serveYiruNodeHost(args)
+}
+
+function serveYiruNodeHost(args: ServeRuntimeOptions): Promise<number> {
+  const executable = process.execPath
+  const childArgs = [resolveRuntimeHostEntry()]
+  if (args.json) {
+    childArgs.push('--json')
+  }
+  if (args.port) {
+    childArgs.push('--port', args.port)
+  }
+  if (args.pairingAddress) {
+    childArgs.push('--pairing-address', args.pairingAddress)
+  }
+  if (args.mobilePairing) {
+    childArgs.push('--mobile-pairing')
+  }
+  const spawnOptions: SpawnOptions = {
+    cwd: resolveAppRoot(),
+    // Why: the host uses this channel only to notice parent loss and exit;
+    // control-plane RPC stays on the authenticated Unix/WebSocket transports.
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+    env: process.env
+  }
+  const child = spawnProcess(executable, childArgs, spawnOptions)
+  return superviseForegroundServe({
+    executable,
+    childArgs,
+    spawnOptions,
+    spawnChild: spawnProcess,
+    child,
+    // Why: the portable host deliberately excludes Electron's updater domain.
+    handoffPath: null,
+    expectedHandoff: null
+  })
+}
+
+function serveYiruElectronApp(args: ServeRuntimeOptions): Promise<number> {
   const executable = resolveForegroundYiruExecutable()
   const childArgs = [...getExecutableAppArgs(), '--serve']
   if (args.json) {
@@ -129,6 +173,14 @@ export function serveYiruApp(
     handoffPath,
     expectedHandoff: null
   })
+}
+
+function resolveRuntimeHostEntry(): string {
+  const appRoot = resolveAppRoot()
+  const developmentEntry = resolve(appRoot, 'out', 'runtime-host', 'yiru-runtime-host.cjs')
+  return existsSync(developmentEntry)
+    ? developmentEntry
+    : resolve(appRoot, '..', 'runtime-host', 'yiru-runtime-host.cjs')
 }
 
 function getExecutableAppArgs(): string[] {

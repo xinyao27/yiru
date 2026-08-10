@@ -21,12 +21,6 @@ function globalSkillLockPath(args: SkillUpdateRegistrationArgs): string {
     : join(args.homeDir ?? homedir(), '.agents', '.skill-lock.json')
 }
 
-export async function readGloballyUpdatableSkillNames(
-  args: SkillUpdateRegistrationArgs = {}
-): Promise<ReadonlySet<string>> {
-  return new Set((await readGloballyUpdatableSkillLocks(args)).keys())
-}
-
 /**
  * Each updatable skill's recorded `skillFolderHash`, keyed by name.
  *

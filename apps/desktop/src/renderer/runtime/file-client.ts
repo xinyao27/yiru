@@ -1,4 +1,3 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
 import { basename, joinPath, normalizeRelativePath } from '~renderer/lib/path'
 import type {
@@ -23,12 +22,13 @@ import {
   getRuntimeFileSearchRejectedField
 } from './file-search-bounds'
 import {
-  callRuntimeRpc,
-  getActiveRuntimeTarget,
-  RuntimeRpcCallError,
-  unwrapRuntimeRpcResult
-} from './rpc-client'
-import { toRuntimeWorktreeSelector } from './worktree-selector'
+  callRuntimeOrpc,
+  createRuntimeOrpcClient,
+  isRuntimeOrpcErrorCode,
+  type RuntimeClientTarget
+} from './orpc-client'
+import { getActiveRuntimeTarget } from './rpc-client'
+import { toRuntimeWorktreePathSelector, toRuntimeWorktreeSelector } from './worktree-selector'
 
 export type RuntimeReadableFileContent = {
   content: string
@@ -116,7 +116,7 @@ type RuntimeFileWatchListener = {
 }
 
 type SharedRuntimeFileWatch = {
-  target: { kind: 'environment'; environmentId: string }
+  target: RuntimeClientTarget
   worktreeId: string
   listeners: Set<RuntimeFileWatchListener>
   start: Promise<void>
@@ -129,11 +129,12 @@ type SharedRuntimeFileWatch = {
 const sharedRuntimeFileWatches = new Map<string, SharedRuntimeFileWatch>()
 
 function getSharedRuntimeFileWatchKey(
-  environmentId: string,
+  target: RuntimeClientTarget,
   worktreeId: string,
   worktreePath: string
 ): string {
-  return `${environmentId}\0${worktreeId}\0${worktreePath}`
+  const targetKey = target.kind === 'environment' ? target.environmentId : 'local'
+  return `${targetKey}\0${worktreeId}\0${worktreePath}`
 }
 
 export function getRuntimeFileReadScope(
@@ -153,22 +154,26 @@ export async function readRuntimeFileContent({
   includeLocalLogMetadata
 }: RuntimeFileReadArgs): Promise<RuntimeReadableFileContent> {
   const target = getActiveRuntimeTarget(settings)
-  if (target.kind !== 'environment') {
-    return window.api.fs.readFile({ filePath, connectionId, includeLocalLogMetadata })
-  }
   if (!worktreeId) {
-    return window.api.fs.readFile({ filePath, connectionId, includeLocalLogMetadata })
+    return window.api.fileHost.readFile({ filePath, connectionId, includeLocalLogMetadata })
   }
   if (!canReadRelativeRuntimeFile(relativePath)) {
+    // Why: a local target's filesystem is always reachable through the preload
+    // fallback, even for a path outside the active worktree. Only a genuine
+    // remote/environment target has no other way to reach an out-of-worktree
+    // path, since files.* addresses files as (worktree, worktree-relative path).
+    if (target.kind !== 'environment') {
+      return window.api.fileHost.readFile({ filePath, connectionId, includeLocalLogMetadata })
+    }
     throw new Error('Remote file is outside the owning runtime worktree')
   }
 
   const worktree = toRuntimeWorktreeSelector(worktreeId)
   let result: RuntimeFileReadResult
   try {
-    result = await callRuntimeRpc<RuntimeFileReadResult>(
+    result = await callRuntimeOrpc(
       target,
-      'files.read',
+      (client) => client.files.read,
       { worktree, relativePath },
       { timeoutMs: 15_000 }
     )
@@ -176,10 +181,14 @@ export async function readRuntimeFileContent({
     // Why: files.read rejects binary paths with the typed 'binary_file' error; fall
     // back to the base64 preview RPC so PDFs/images render like local/SSH paths.
     // Match the exact typed error so an unrelated failure can't spoof the fallback.
-    if (err instanceof RuntimeRpcCallError && err.message === 'binary_file') {
-      return callRuntimeRpc<RuntimeFilePreviewResult>(
+    if (
+      isRuntimeOrpcErrorCode(err, 'runtime_error') &&
+      err instanceof Error &&
+      err.message === 'binary_file'
+    ) {
+      return callRuntimeOrpc(
         target,
-        'files.readPreview',
+        (client) => client.files.readPreview,
         { worktree, relativePath },
         { timeoutMs: 15_000 }
       )
@@ -203,11 +212,11 @@ export async function readRuntimeFilePreview(
     if (hasRemoteRuntimeOwner(context)) {
       throw new Error('Remote file is outside the owning runtime worktree')
     }
-    return window.api.fs.readFile({ filePath, connectionId: context.connectionId })
+    return window.api.fileHost.readFile({ filePath, connectionId: context.connectionId })
   }
-  return callRuntimeRpc<RuntimeFilePreviewResult>(
+  return callRuntimeOrpc(
     remoteArgs.target,
-    'files.readPreview',
+    (client) => client.files.readPreview,
     { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
     { timeoutMs: 15_000 }
   )
@@ -223,11 +232,8 @@ export async function downloadRuntimeFile(
     if (hasRemoteRuntimeOwner(context)) {
       throw new Error('Remote file is outside the owning runtime worktree')
     }
-    if (context.connectionId) {
-      return window.api.fs.downloadFile({ filePath, connectionId: context.connectionId })
-    }
     const result = await readRuntimeFilePreview(context, filePath)
-    return window.api.fs.saveDownloadedFile({
+    return window.api.fileHost.saveDownloadedFile({
       suggestedName,
       content: result.content,
       encoding: result.isBinary ? 'base64' : 'utf8'
@@ -238,7 +244,7 @@ export async function downloadRuntimeFile(
     return downloadRemoteFileViaPreview(remoteArgs, suggestedName)
   }
 
-  const download = await window.api.fs.startDownloadedFile({ suggestedName })
+  const download = await window.api.fileHost.startDownloadedFile({ suggestedName })
   if (download.canceled) {
     return download
   }
@@ -249,7 +255,7 @@ export async function downloadRuntimeFile(
     for (;;) {
       const chunk = await readRemoteDownloadChunk(remoteArgs, offset)
       if (chunk.bytesRead > 0) {
-        await window.api.fs.appendDownloadedFileChunk({
+        await window.api.fileHost.appendDownloadedFileChunk({
           transferId: download.transferId,
           contentBase64: chunk.contentBase64
         })
@@ -262,12 +268,16 @@ export async function downloadRuntimeFile(
         throw new Error('Remote download stalled before reaching EOF')
       }
     }
-    const result = await window.api.fs.finishDownloadedFile({ transferId: download.transferId })
+    const result = await window.api.fileHost.finishDownloadedFile({
+      transferId: download.transferId
+    })
     finished = true
     return result
   } finally {
     if (!finished) {
-      await window.api.fs.cancelDownloadedFile({ transferId: download.transferId }).catch(() => {})
+      await window.api.fileHost
+        .cancelDownloadedFile({ transferId: download.transferId })
+        .catch(() => {})
     }
   }
 }
@@ -305,9 +315,9 @@ async function remoteChunkedDownloadAvailable(
   remoteArgs: RemoteFileDownloadArgs
 ): Promise<boolean> {
   try {
-    await callRuntimeRpc<RuntimeFileReadChunkResult>(
+    await callRuntimeOrpc(
       remoteArgs.target,
-      'files.readChunk',
+      (client) => client.files.readChunk,
       {
         worktree: remoteArgs.worktreeSelector,
         relativePath: remoteArgs.relativePath,
@@ -320,7 +330,7 @@ async function remoteChunkedDownloadAvailable(
   } catch (error) {
     // Why: compatible older runtime hosts may lack chunked downloads while
     // still supporting preview-sized file reads that can complete the request.
-    if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
+    if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
       return false
     }
     throw error
@@ -331,9 +341,9 @@ async function readRemoteDownloadChunk(
   remoteArgs: RemoteFileDownloadArgs,
   offset: number
 ): Promise<RuntimeFileReadChunkResult> {
-  return callRuntimeRpc<RuntimeFileReadChunkResult>(
+  return callRuntimeOrpc(
     remoteArgs.target,
-    'files.readChunk',
+    (client) => client.files.readChunk,
     {
       worktree: remoteArgs.worktreeSelector,
       relativePath: remoteArgs.relativePath,
@@ -349,9 +359,9 @@ async function downloadRemoteFileViaPreview(
   suggestedName: string
 ): Promise<RuntimeFileDownloadResult> {
   try {
-    const result = await callRuntimeRpc<RuntimeFilePreviewResult>(
+    const result = await callRuntimeOrpc(
       remoteArgs.target,
-      'files.readPreview',
+      (client) => client.files.readPreview,
       { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
       { timeoutMs: 15_000 }
     )
@@ -360,7 +370,7 @@ async function downloadRemoteFileViaPreview(
     if (result.isBinary && !result.content && !result.isImage && !result.mimeType) {
       throw new Error(REMOTE_DOWNLOAD_UPDATE_REQUIRED_MESSAGE)
     }
-    return window.api.fs.saveDownloadedFile({
+    return window.api.fileHost.saveDownloadedFile({
       suggestedName,
       content: result.content,
       encoding: result.isBinary ? 'base64' : 'utf8'
@@ -374,12 +384,10 @@ async function downloadRemoteFileViaPreview(
 }
 
 function isUnsupportedRemotePreviewDownload(error: unknown): boolean {
-  if (!(error instanceof RuntimeRpcCallError)) {
-    return false
-  }
   return (
-    error.code === 'method_not_found' ||
-    (error.code === 'runtime_error' &&
+    isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+    (isRuntimeOrpcErrorCode(error, 'runtime_error') &&
+      error instanceof Error &&
       (error.message === 'file_too_large' || error.message === 'binary_file'))
   )
 }
@@ -391,11 +399,11 @@ export async function readRuntimeDirectory(
   const remoteArgs = getRemoteFileArgs(context, dirPath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    return window.api.fs.readDir({ dirPath })
+    throw new Error('Directory is outside an owning runtime worktree')
   }
-  return callRuntimeRpc<DirEntry[]>(
+  return callRuntimeOrpc(
     remoteArgs.target,
-    'files.readDir',
+    (client) => client.files.readDir,
     { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
     { timeoutMs: 15_000 }
   )
@@ -409,12 +417,12 @@ export async function writeRuntimeFile(
   const remoteArgs = getRemoteFileArgs(context, filePath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    await window.api.fs.writeFile({ filePath, content, connectionId: context.connectionId })
+    await window.api.fileHost.writeFile({ filePath, content, connectionId: context.connectionId })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     remoteArgs.target,
-    'files.write',
+    (client) => client.files.write,
     { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath, content },
     { timeoutMs: 15_000 }
   )
@@ -429,16 +437,18 @@ export async function createRuntimePath(
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
     await (kind === 'directory'
-      ? window.api.fs.createDir({ dirPath: path, connectionId: context.connectionId })
-      : window.api.fs.createFile({ filePath: path, connectionId: context.connectionId }))
+      ? window.api.fileHost.createDir({ dirPath: path, connectionId: context.connectionId })
+      : window.api.fileHost.createFile({ filePath: path, connectionId: context.connectionId }))
     return
   }
-  await callRuntimeRpc(
-    remoteArgs.target,
-    kind === 'directory' ? 'files.createDir' : 'files.createFile',
-    { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
-    { timeoutMs: 15_000 }
-  )
+  const input = { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath }
+  await (kind === 'directory'
+    ? callRuntimeOrpc(remoteArgs.target, (client) => client.files.createDir, input, {
+        timeoutMs: 15_000
+      })
+    : callRuntimeOrpc(remoteArgs.target, (client) => client.files.createFile, input, {
+        timeoutMs: 15_000
+      }))
 }
 
 export async function renameRuntimePath(
@@ -450,12 +460,12 @@ export async function renameRuntimePath(
   const newRelativePath = getRelativePathInsideWorktree(context.worktreePath, newPath)
   if (!oldRemoteArgs || newRelativePath === null) {
     assertLocalFilesystemFallbackAllowed(context)
-    await window.api.fs.rename({ oldPath, newPath, connectionId: context.connectionId })
+    await window.api.fileHost.rename({ oldPath, newPath, connectionId: context.connectionId })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     oldRemoteArgs.target,
-    'files.rename',
+    (client) => client.files.rename,
     {
       worktree: oldRemoteArgs.worktreeSelector,
       oldRelativePath: oldRemoteArgs.relativePath,
@@ -474,16 +484,16 @@ export async function copyRuntimePath(
   const destinationArgs = getRemoteFileArgs(context, destinationPath)
   if (!sourceArgs || !destinationArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    await window.api.fs.copy({
+    await window.api.fileHost.copy({
       sourcePath,
       destinationPath,
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     sourceArgs.target,
-    'files.copy',
+    (client) => client.files.copy,
     {
       worktree: sourceArgs.worktreeSelector,
       sourceRelativePath: sourceArgs.relativePath,
@@ -501,16 +511,16 @@ export async function deleteRuntimePath(
   const remoteArgs = getRemoteFileArgs(context, targetPath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    await window.api.fs.deletePath({
+    await window.api.fileHost.deletePath({
       targetPath,
       connectionId: context.connectionId,
       recursive
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     remoteArgs.target,
-    'files.delete',
+    (client) => client.files.delete,
     { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath, recursive },
     { timeoutMs: 15_000 }
   )
@@ -522,18 +532,15 @@ export async function deleteRuntimeRelativePath(
   recursive?: boolean
 ): Promise<boolean> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (
-    target.kind !== 'environment' ||
-    !context.worktreeId ||
-    !canReadRelativeRuntimeFile(relativePath)
-  ) {
+  const worktreeSelector = getRuntimeFileWorktreeSelector(context)
+  if (!worktreeSelector || !canReadRelativeRuntimeFile(relativePath)) {
     return false
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'files.delete',
+    (client) => client.files.delete,
     {
-      worktree: toRuntimeWorktreeSelector(context.worktreeId),
+      worktree: worktreeSelector,
       relativePath: normalizeRelativePath(relativePath),
       recursive
     },
@@ -546,16 +553,11 @@ export async function importExternalPathsToRuntime(
   context: RuntimeFileOperationArgs,
   sourcePaths: string[],
   destinationDir: string,
-  options?: { ensureDestinationDir?: boolean }
+  _options?: { ensureDestinationDir?: boolean }
 ): Promise<{ results: RuntimeImportResult[] }> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId || !context.worktreePath) {
-    return window.api.fs.importExternalPaths({
-      sourcePaths,
-      destDir: destinationDir,
-      connectionId: context.connectionId,
-      ensureDir: options?.ensureDestinationDir
-    })
+  if (!context.worktreePath) {
+    throw new Error('Import destination requires an owning runtime worktree')
   }
 
   const destinationArgs = getRemoteFileArgs(context, destinationDir)
@@ -563,7 +565,7 @@ export async function importExternalPathsToRuntime(
     throw new Error('Destination is outside the active runtime worktree')
   }
 
-  const staged = await window.api.fs.stageExternalPathsForRuntimeUpload({ sourcePaths })
+  const staged = await window.api.fileHost.stageExternalPathsForRuntimeUpload({ sourcePaths })
   const results: RuntimeImportResult[] = []
   const reservedNames = new Set<string>()
 
@@ -587,11 +589,11 @@ export async function importExternalPathsToRuntime(
       for (const entry of source.entries) {
         const entryRelativePath = joinRuntimeRelativePath(destRelativePath, entry.relativePath)
         if (entry.kind === 'directory') {
-          await callRuntimeRpc(
+          await callRuntimeOrpc(
             target,
-            'files.createDirNoClobber',
+            (client) => client.files.createDirNoClobber,
             {
-              worktree: toRuntimeWorktreeSelector(context.worktreeId),
+              worktree: destinationArgs.worktreeSelector,
               relativePath: entryRelativePath
             },
             { timeoutMs: 15_000 }
@@ -603,7 +605,7 @@ export async function importExternalPathsToRuntime(
         }
         await uploadRuntimeFileWithoutClobber(
           target,
-          context.worktreeId,
+          destinationArgs.worktreeSelector,
           entryRelativePath,
           entry.contentBase64
         )
@@ -620,11 +622,11 @@ export async function importExternalPathsToRuntime(
       if (createdDirectoryImportRoot) {
         // Why: match local directory imports by removing the no-clobber root
         // Yiru created when a nested runtime upload fails halfway through.
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'files.delete',
+          (client) => client.files.delete,
           {
-            worktree: toRuntimeWorktreeSelector(context.worktreeId),
+            worktree: destinationArgs.worktreeSelector,
             relativePath: createdDirectoryImportRoot,
             recursive: true
           },
@@ -643,30 +645,30 @@ export async function importExternalPathsToRuntime(
 }
 
 async function uploadRuntimeFileWithoutClobber(
-  target: { kind: 'environment'; environmentId: string },
-  worktreeId: string,
+  target: RuntimeClientTarget,
+  worktreeSelector: string,
   relativePath: string,
   contentBase64: string
 ): Promise<void> {
   const tempRelativePath = makeRuntimeUploadTempPath(relativePath)
   try {
-    await writeRuntimeBase64File(target, worktreeId, tempRelativePath, contentBase64)
-    await callRuntimeRpc(
+    await writeRuntimeBase64File(target, worktreeSelector, tempRelativePath, contentBase64)
+    await callRuntimeOrpc(
       target,
-      'files.commitUpload',
+      (client) => client.files.commitUpload,
       {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
+        worktree: worktreeSelector,
         tempRelativePath,
         finalRelativePath: relativePath
       },
       { timeoutMs: 30_000 }
     )
   } finally {
-    await callRuntimeRpc(
+    await callRuntimeOrpc(
       target,
-      'files.delete',
+      (client) => client.files.delete,
       {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
+        worktree: worktreeSelector,
         relativePath: tempRelativePath,
         recursive: false
       },
@@ -676,27 +678,27 @@ async function uploadRuntimeFileWithoutClobber(
 }
 
 async function writeRuntimeBase64File(
-  target: { kind: 'environment'; environmentId: string },
-  worktreeId: string,
+  target: RuntimeClientTarget,
+  worktreeSelector: string,
   relativePath: string,
   contentBase64: string
 ): Promise<void> {
   if (contentBase64.length <= REMOTE_UPLOAD_BASE64_CHUNK_CHARS) {
-    await callRuntimeRpc(
+    await callRuntimeOrpc(
       target,
-      'files.writeBase64',
-      { worktree: toRuntimeWorktreeSelector(worktreeId), relativePath, contentBase64 },
+      (client) => client.files.writeBase64,
+      { worktree: worktreeSelector, relativePath, contentBase64 },
       { timeoutMs: 30_000 }
     )
     return
   }
 
   for (let offset = 0; offset < contentBase64.length; offset += REMOTE_UPLOAD_BASE64_CHUNK_CHARS) {
-    await callRuntimeRpc(
+    await callRuntimeOrpc(
       target,
-      'files.writeBase64Chunk',
+      (client) => client.files.writeBase64Chunk,
       {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
+        worktree: worktreeSelector,
         relativePath,
         contentBase64: contentBase64.slice(offset, offset + REMOTE_UPLOAD_BASE64_CHUNK_CHARS),
         append: offset > 0
@@ -733,9 +735,9 @@ async function ensureRuntimeDirectory(
     if (await runtimePathExists(context, absolutePath)) {
       continue
     }
-    await callRuntimeRpc(
+    await callRuntimeOrpc(
       destinationArgs.target,
-      'files.createDir',
+      (client) => client.files.createDir,
       { worktree: destinationArgs.worktreeSelector, relativePath: current },
       { timeoutMs: 15_000 }
     )
@@ -750,17 +752,15 @@ export async function searchRuntimeFiles(
     return createEmptyRuntimeFileSearchResult()
   }
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId) {
-    return window.api.fs.search({
-      ...options,
-      connectionId: context.connectionId
-    })
+  const worktreeSelector = getRuntimeFileWorktreeSelector(context)
+  if (!worktreeSelector) {
+    throw new Error('File search requires an owning runtime worktree')
   }
   const { rootPath: _rootPath, ...runtimeOptions } = options
-  return callRuntimeRpc<SearchResult>(
+  return callRuntimeOrpc(
     target,
-    'files.search',
-    { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...runtimeOptions },
+    (client) => client.files.search,
+    { worktree: worktreeSelector, ...runtimeOptions },
     { timeoutMs: 15_000 }
   )
 }
@@ -770,19 +770,15 @@ export async function listRuntimeFiles(
   args: { rootPath: string; excludePaths?: string[]; requestToken?: string }
 ): Promise<string[]> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId) {
-    return window.api.fs.listFiles({
-      rootPath: args.rootPath,
-      connectionId: context.connectionId,
-      excludePaths: args.excludePaths,
-      requestToken: args.requestToken
-    })
+  const worktreeSelector = getRuntimeFileWorktreeSelector(context)
+  if (!worktreeSelector) {
+    throw new Error('File listing requires an owning runtime worktree')
   }
-  return callRuntimeRpc<string[]>(
+  return callRuntimeOrpc(
     target,
-    'files.listAll',
+    (client) => client.files.listAll,
     {
-      worktree: toRuntimeWorktreeSelector(context.worktreeId),
+      worktree: worktreeSelector,
       excludePaths: args.excludePaths
     },
     { timeoutMs: 15_000 }
@@ -795,33 +791,27 @@ export async function listRuntimeFiles(
  * abandoned scan keeps loading the relay and starves fs.readDir/fs.stat.
  */
 export function cancelRuntimeFileList(
-  context: RuntimeFileOperationArgs,
-  requestToken: string
+  _context: RuntimeFileOperationArgs,
+  _requestToken: string
 ): void {
-  const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId) {
-    void window.api.fs.cancelListFiles({ requestToken }).catch(() => {
-      /* cancellation is advisory; the request path has its own timeouts */
-    })
-  }
-  // Environment runtimes bound files.listAll with their own RPC timeout.
+  // Why: any runtime target (local or environment) routes files.listAll
+  // through callRuntimeOrpc without a cancellation token, so it is bounded by
+  // its own RPC timeout instead.
 }
 
 export async function listRuntimeMarkdownDocuments(
   context: RuntimeFileOperationArgs,
-  rootPath: string
+  _rootPath: string
 ): Promise<MarkdownDocument[]> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId) {
-    return window.api.fs.listMarkdownDocuments({
-      rootPath,
-      connectionId: context.connectionId
-    })
+  const worktreeSelector = getRuntimeFileWorktreeSelector(context)
+  if (!worktreeSelector) {
+    throw new Error('Markdown listing requires an owning runtime worktree')
   }
-  return callRuntimeRpc<MarkdownDocument[]>(
+  return callRuntimeOrpc(
     target,
-    'files.listMarkdownDocuments',
-    { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
+    (client) => client.files.listMarkdownDocuments,
+    { worktree: worktreeSelector },
     { timeoutMs: 15_000 }
   )
 }
@@ -833,14 +823,14 @@ export async function statRuntimePath(
   const remoteArgs = getRemoteFileArgs(context, absolutePath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    return window.api.fs.stat({
+    return window.api.fileHost.stat({
       filePath: absolutePath,
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<{ size: number; isDirectory: boolean; mtime: number }>(
+  return callRuntimeOrpc(
     remoteArgs.target,
-    'files.stat',
+    (client) => client.files.stat,
     { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
     { timeoutMs: 15_000 }
   )
@@ -852,16 +842,12 @@ export async function subscribeRuntimeFileChanges(
   onError?: (error: Error) => void
 ): Promise<() => void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId || !context.worktreePath) {
-    return window.api.fs.onFsChanged(onPayload)
+  if (!context.worktreeId || !context.worktreePath) {
+    throw new Error('A runtime file watch requires an owning worktree')
   }
 
   const listener: RuntimeFileWatchListener = { onPayload, onError }
-  const key = getSharedRuntimeFileWatchKey(
-    target.environmentId,
-    context.worktreeId,
-    context.worktreePath
-  )
+  const key = getSharedRuntimeFileWatchKey(target, context.worktreeId, context.worktreePath)
   let shared = sharedRuntimeFileWatches.get(key)
   if (!shared) {
     shared = createSharedRuntimeFileWatch(key, target, context.worktreeId, context.worktreePath)
@@ -889,7 +875,7 @@ export async function subscribeRuntimeFileChanges(
 
 function createSharedRuntimeFileWatch(
   key: string,
-  target: { kind: 'environment'; environmentId: string },
+  target: RuntimeClientTarget,
   worktreeId: string,
   worktreePath: string
 ): SharedRuntimeFileWatch {
@@ -905,89 +891,100 @@ function createSharedRuntimeFileWatch(
   }
   // Why: editor reloads and the Explorer can watch the same remote worktree.
   // Keep one runtime WebSocket/server watcher and fan out events in renderer.
-  shared.start = window.api.runtimeEnvironments
-    .subscribe(
-      {
-        selector: target.environmentId,
-        method: 'files.watch',
-        params: { worktree: toRuntimeWorktreeSelector(worktreeId) },
-        timeoutMs: 15_000
-      },
-      {
-        onResponse: (response) => {
-          handleSharedRuntimeFileWatchResponse(key, shared, worktreePath, response)
-        },
-        onError: (error) => {
-          failSharedRuntimeFileWatch(key, shared, new Error(error.message))
-        },
-        onClose: () => {
-          if (sharedRuntimeFileWatches.get(key) === shared) {
-            sharedRuntimeFileWatches.delete(key)
-          }
-          shared.closed = true
-          shared.unsubscribe = null
-        }
-      }
-    )
-    .then((subscription) => {
-      shared.unsubscribe = subscription.unsubscribe
-      if (shared.closed || sharedRuntimeFileWatches.get(key) !== shared) {
-        subscription.unsubscribe()
-        shared.unsubscribe = null
-        if (!shared.keepStreamUntilReady) {
-          unwatchSharedRuntimeFileWatch(shared)
-        }
-      }
-    })
-    .catch((err) => {
-      failSharedRuntimeFileWatch(key, shared, err instanceof Error ? err : new Error(String(err)))
-      throw err
-    })
+  shared.start = startSharedRuntimeFileWatch(key, shared, worktreePath).catch((err) => {
+    failSharedRuntimeFileWatch(key, shared, err instanceof Error ? err : new Error(String(err)))
+    throw err
+  })
   return shared
 }
 
-function handleSharedRuntimeFileWatchResponse(
+async function startSharedRuntimeFileWatch(
+  key: string,
+  shared: SharedRuntimeFileWatch,
+  worktreePath: string
+): Promise<void> {
+  const abort = new AbortController()
+  const connection = await createRuntimeOrpcClient(shared.target, {
+    timeoutMs: 15_000,
+    signal: abort.signal
+  })
+  try {
+    const stream = await connection.client.files.watch(
+      { worktree: toRuntimeWorktreeSelector(shared.worktreeId) },
+      { signal: abort.signal }
+    )
+    shared.unsubscribe = () => {
+      abort.abort()
+      connection.close()
+    }
+    if (shared.closed || sharedRuntimeFileWatches.get(key) !== shared) {
+      shared.unsubscribe()
+      shared.unsubscribe = null
+      if (!shared.keepStreamUntilReady) {
+        unwatchSharedRuntimeFileWatch(shared)
+      }
+      return
+    }
+    void consumeSharedRuntimeFileWatch(key, shared, worktreePath, stream).finally(() => {
+      connection.close()
+      if (sharedRuntimeFileWatches.get(key) === shared && !shared.closed) {
+        sharedRuntimeFileWatches.delete(key)
+        shared.closed = true
+        shared.unsubscribe = null
+      }
+    })
+  } catch (error) {
+    connection.close()
+    throw error
+  }
+}
+
+async function consumeSharedRuntimeFileWatch(
   key: string,
   shared: SharedRuntimeFileWatch,
   worktreePath: string,
-  response: unknown
-): void {
+  stream: AsyncIterator<RuntimeFileWatchEvent> & AsyncIterable<RuntimeFileWatchEvent>
+): Promise<void> {
   try {
-    const event = unwrapRuntimeRpcResult<RuntimeFileWatchEvent>(
-      response as RuntimeRpcResponse<RuntimeFileWatchEvent>
-    )
-    if (event.type === 'starting' || event.type === 'ready') {
-      shared.remoteSubscriptionId = event.subscriptionId
-      if (shared.closed) {
-        shared.unsubscribe?.()
-        shared.unsubscribe = null
-        if (!shared.keepStreamUntilReady) {
-          unwatchSharedRuntimeFileWatch(shared)
+    for await (const event of stream) {
+      if (event.type === 'starting' || event.type === 'ready') {
+        shared.remoteSubscriptionId = event.subscriptionId
+        if (shared.closed) {
+          shared.unsubscribe?.()
+          shared.unsubscribe = null
+          if (!shared.keepStreamUntilReady) {
+            unwatchSharedRuntimeFileWatch(shared)
+          }
         }
+      } else if (event.type === 'changed') {
+        for (const listener of Array.from(shared.listeners)) {
+          listener.onPayload({ worktreePath, events: event.events })
+        }
+      } else if (event.type === 'error') {
+        // Why: error listeners may synchronously retry. Evict the terminal watch
+        // before callbacks run so the retry cannot join a stream awaiting `end`.
+        failSharedRuntimeFileWatch(key, shared, new Error(event.message))
+      } else if (event.type === 'end') {
+        // Why: evict and release the transport before a later listener starts.
+        if (sharedRuntimeFileWatches.get(key) === shared) {
+          sharedRuntimeFileWatches.delete(key)
+        }
+        shared.closed = true
+        const unsubscribe = shared.unsubscribe
+        shared.unsubscribe = null
+        shared.remoteSubscriptionId = null
+        shared.listeners.clear()
+        unsubscribe?.()
       }
-    } else if (event.type === 'changed') {
-      for (const listener of Array.from(shared.listeners)) {
-        listener.onPayload({ worktreePath, events: event.events })
-      }
-    } else if (event.type === 'error') {
-      // Why: error listeners may synchronously retry. Evict the terminal watch
-      // before callbacks run so the retry cannot join a stream awaiting `end`.
-      failSharedRuntimeFileWatch(key, shared, new Error(event.message))
-    } else if (event.type === 'end') {
-      // Why: shared-control completes without onClose; evict and release its
-      // transport handle so later listeners start cleanly without retained state.
-      if (sharedRuntimeFileWatches.get(key) === shared) {
-        sharedRuntimeFileWatches.delete(key)
-      }
-      shared.closed = true
-      const unsubscribe = shared.unsubscribe
-      shared.unsubscribe = null
-      shared.remoteSubscriptionId = null
-      shared.listeners.clear()
-      unsubscribe?.()
     }
-  } catch (err) {
-    failSharedRuntimeFileWatch(key, shared, err instanceof Error ? err : new Error(String(err)))
+  } catch (error) {
+    if (!shared.closed) {
+      failSharedRuntimeFileWatch(
+        key,
+        shared,
+        error instanceof Error ? error : new Error(String(error))
+      )
+    }
   }
 }
 
@@ -1037,9 +1034,9 @@ function unwatchSharedRuntimeFileWatch(shared: SharedRuntimeFileWatch): void {
   if (!shared.remoteSubscriptionId) {
     return
   }
-  void callRuntimeRpc(
+  void callRuntimeOrpc(
     shared.target,
-    'files.unwatch',
+    (client) => client.files.unwatch,
     { subscriptionId: shared.remoteSubscriptionId },
     { timeoutMs: 5_000 }
   ).catch(() => {})
@@ -1052,16 +1049,16 @@ export async function runtimePathExists(
   const remoteArgs = getRemoteFileArgs(context, absolutePath)
   if (!remoteArgs) {
     assertLocalFilesystemFallbackAllowed(context)
-    return window.api.fs.pathExists({
+    return window.api.fileHost.pathExists({
       filePath: absolutePath,
       connectionId: context.connectionId
     })
   }
 
   try {
-    await callRuntimeRpc(
+    await callRuntimeOrpc(
       remoteArgs.target,
-      'files.stat',
+      (client) => client.files.stat,
       { worktree: remoteArgs.worktreeSelector, relativePath: remoteArgs.relativePath },
       { timeoutMs: 15_000 }
     )
@@ -1098,13 +1095,13 @@ function getRemoteFileArgs(
   context: RuntimeFileOperationArgs,
   absolutePath: string
 ): {
-  target: ReturnType<typeof getActiveRuntimeTarget> & { kind: 'environment' }
-  worktreeId: string
+  target: RuntimeClientTarget
   worktreeSelector: string
   relativePath: string
 } | null {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind !== 'environment' || !context.worktreeId) {
+  const worktreeSelector = getRuntimeFileWorktreeSelector(context)
+  if (!worktreeSelector) {
     return null
   }
   const relativePath = getRelativePathInsideWorktree(context.worktreePath, absolutePath)
@@ -1113,16 +1110,23 @@ function getRemoteFileArgs(
   }
   return {
     target,
-    worktreeId: context.worktreeId,
-    worktreeSelector: toRuntimeWorktreeSelector(context.worktreeId),
+    worktreeSelector,
     relativePath
   }
 }
 
 function hasRemoteRuntimeOwner(context: RuntimeFileOperationArgs): boolean {
   return (
-    getActiveRuntimeTarget(context.settings).kind === 'environment' && Boolean(context.worktreeId)
+    getActiveRuntimeTarget(context.settings).kind === 'environment' &&
+    Boolean(getRuntimeFileWorktreeSelector(context))
   )
+}
+
+function getRuntimeFileWorktreeSelector(context: RuntimeFileOperationArgs): string | null {
+  if (context.worktreeId) {
+    return toRuntimeWorktreeSelector(context.worktreeId)
+  }
+  return context.worktreePath ? toRuntimeWorktreePathSelector(context.worktreePath) : null
 }
 
 function assertLocalFilesystemFallbackAllowed(context: RuntimeFileOperationArgs): void {

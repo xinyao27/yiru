@@ -1,7 +1,6 @@
 import { resolve as resolvePath } from 'node:path'
 
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
-import { WORKTREE_LIST_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
 import type { ComputerAppQuery, RuntimeWorktreeRecord } from '~shared/runtime-types'
 
 import { getOptionalStringFlag, getRequiredStringFlag } from './flags'
@@ -35,7 +34,7 @@ export async function resolveCurrentWorktreeSelector(
   client: RuntimeClient
 ): Promise<string> {
   const currentPath = resolvePath(cwd)
-  const worktrees = await client.call(WORKTREE_LIST_CONTRACT, {
+  const worktrees = await client.call(client.rpc.worktree.list, {
     limit: 10_000
   })
   let enclosingWorktree: RuntimeWorktreeRecord | undefined
@@ -134,7 +133,7 @@ export async function getTerminalHandle(
     return explicit
   }
   const worktree = await getBrowserWorktreeSelector(flags, cwd, client)
-  const response = await client.call<{ handle: string }>('terminal.resolveActive', { worktree })
+  const response = await client.call(client.rpc.terminal.resolveActive, { worktree })
   return response.result.handle
 }
 

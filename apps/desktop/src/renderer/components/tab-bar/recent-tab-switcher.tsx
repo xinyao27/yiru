@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom'
 import { getShortcutPlatform } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   isRecentTabSwitcherCommitRelease,
@@ -111,10 +112,10 @@ export default function RecentTabSwitcher(): React.JSX.Element | null {
   }, [setSwitcherState])
 
   useEffect(() => {
-    const unsubscribeKeyDown = window.api.ui.onCtrlTabKeyDown(({ shiftKey }) => {
+    const unsubscribeKeyDown = shellClient.ui.onCtrlTabKeyDown(({ shiftKey }) => {
       openOrAdvance(shiftKey ? -1 : 1)
     })
-    const unsubscribeKeyUp = window.api.ui.onCtrlTabKeyUp(commit)
+    const unsubscribeKeyUp = shellClient.ui.onCtrlTabKeyUp(commit)
     return () => {
       unsubscribeKeyDown()
       unsubscribeKeyUp()

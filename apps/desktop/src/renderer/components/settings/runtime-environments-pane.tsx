@@ -30,6 +30,7 @@ import {
   getUpdateCheckHint
 } from '~renderer/lib/update-check-click-options'
 import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { useAppStore } from '~renderer/store'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import type { RuntimeStatus } from '~shared/runtime-types'
@@ -282,7 +283,7 @@ export function RuntimeEnvironmentsPane({
       setIsLoading(true)
     }
     try {
-      const nextEnvironments = await window.api.runtimeEnvironments.list()
+      const nextEnvironments = await runtimeEnvironmentsClient.list()
       // Why: drop store status for hosts no longer saved so stale hosts don't
       // linger in the sidebar registry.
       useAppStore.getState().setRuntimeEnvironments(nextEnvironments)
@@ -304,7 +305,7 @@ export function RuntimeEnvironmentsPane({
       await Promise.allSettled(
         nextEnvironments.map(async (environment) => {
           try {
-            const response = await window.api.runtimeEnvironments.getStatus({
+            const response = await runtimeEnvironmentsClient.getStatus({
               selector: environment.id,
               timeoutMs: 10_000
             })
@@ -408,7 +409,7 @@ export function RuntimeEnvironmentsPane({
           return true
         }
       }
-      await window.api.runtimeEnvironments.remove({ selector: environment.id })
+      await runtimeEnvironmentsClient.remove({ selector: environment.id })
       await loadEnvironments()
       if (mountedRef.current) {
         toast.success(
@@ -454,7 +455,7 @@ export function RuntimeEnvironmentsPane({
           return false
         }
       }
-      await window.api.runtimeEnvironments.disconnect({ selector: environment.id })
+      await runtimeEnvironmentsClient.disconnect({ selector: environment.id })
       // Why: disconnect is non-destructive; keep the saved host but show the
       // user that this live client is no longer attached to it.
       useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
@@ -500,7 +501,7 @@ export function RuntimeEnvironmentsPane({
     setConnectingId(environment.id)
     setSwitchError(null)
     try {
-      const response = await window.api.runtimeEnvironments.getStatus({
+      const response = await runtimeEnvironmentsClient.getStatus({
         selector: environment.id,
         timeoutMs: 15_000
       })

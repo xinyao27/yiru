@@ -1,34 +1,32 @@
-import { assertRpcClipboardTextWriteWithinLimit } from '../clipboard-text-validation'
-import { defineMethod, type RpcMethod } from '../core'
-import { Fill, KeyboardInsert, Type } from './browser-schemas'
+import type {
+  BrowserFillInput,
+  BrowserKeyboardInsertInput,
+  BrowserTypeInput
+} from '@yiru/runtime-protocol/contract'
 
-export const BROWSER_TEXT_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'browser.fill',
-    params: Fill,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => {
-      await assertRpcClipboardTextWriteWithinLimit(params.value)
-      return browserCommands.browserFill(params)
-    }
-  }),
-  defineMethod({
-    name: 'browser.type',
-    params: Type,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => {
-      await assertRpcClipboardTextWriteWithinLimit(params.input)
-      return browserCommands.browserType(params)
-    }
-  }),
-  defineMethod({
-    name: 'browser.keyboardInsertText',
-    mobile: true,
-    params: KeyboardInsert,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => {
-      await assertRpcClipboardTextWriteWithinLimit(params.text)
-      return browserCommands.browserKeyboardInsertText(params)
-    }
-  })
-]
+import { assertRpcClipboardTextWriteWithinLimit } from '../clipboard-text-validation'
+import type { RpcContext } from '../core'
+
+export const handleBrowserFill = async (
+  params: BrowserFillInput,
+  { browserCommands }: RpcContext
+) => {
+  await assertRpcClipboardTextWriteWithinLimit(params.value)
+  return browserCommands.browserFill(params)
+}
+
+export const handleBrowserType = async (
+  params: BrowserTypeInput,
+  { browserCommands }: RpcContext
+) => {
+  await assertRpcClipboardTextWriteWithinLimit(params.input)
+  return browserCommands.browserType(params)
+}
+
+export const handleBrowserKeyboardInsertText = async (
+  params: BrowserKeyboardInsertInput,
+  { browserCommands }: RpcContext
+) => {
+  await assertRpcClipboardTextWriteWithinLimit(params.text)
+  return browserCommands.browserKeyboardInsertText(params)
+}

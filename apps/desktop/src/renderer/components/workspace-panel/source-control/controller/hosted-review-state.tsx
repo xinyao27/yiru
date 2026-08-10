@@ -184,8 +184,9 @@ export function useSourceControlHostedReviewState(scope: SourceControlStatusRefr
     linkedAzureDevOpsPR,
     linkedGiteaPR
   })
-  const isHostedReviewStateLoading =
-    !activeRepo?.connectionId && hasHostedReviewLink && hostedReviewEntry === undefined
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — the SSH exclusion this used to gate on never fires.
+  const isHostedReviewStateLoading = hasHostedReviewLink && hostedReviewEntry === undefined
   const hasResolvableReviewPushTargetLink = hasResolvableHostedReviewPushTargetLink({
     linkedGitHubPR,
     fallbackGitHubPR: fallbackGitHubPRNumber,

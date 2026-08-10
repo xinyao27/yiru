@@ -1,14 +1,10 @@
 /* eslint-disable max-lines */
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
 import type {
   RuntimeMobileSessionCreateTerminalResult,
-  RuntimeMobileSessionTabMove,
-  RuntimeMobileSessionTabMoveResult,
-  RuntimeTerminalClose,
-  RuntimeTerminalSplit
+  RuntimeMobileSessionTabMove
 } from '~shared/runtime-types'
 import type { TerminalPaneLayoutNode, TuiAgent } from '~shared/types'
 
@@ -16,7 +12,7 @@ import { deliverLaunchPromptToAgentTab } from '../lib/agent-launch-prompt-delive
 import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
 import { useAppStore } from '../store'
 import type { AppState } from '../store/types'
-import { unwrapRuntimeRpcResult } from './rpc-client'
+import { callRuntimeOrpc } from './orpc-client'
 import { parseRemoteRuntimePtyId } from './terminal-stream'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
 import {
@@ -269,16 +265,15 @@ export async function activateWebRuntimeSessionWorktree(args: {
   }
 
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'worktree.activate',
-      params: {
+    await callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.worktree.activate,
+      {
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         notifyClients: args.notifyDesktop !== false
       },
-      timeoutMs: 15_000
-    })
-    unwrapRuntimeRpcResult(response as RuntimeRpcResponse<unknown>)
+      { timeoutMs: 15_000 }
+    )
     return true
   } catch (error) {
     console.warn(
@@ -374,7 +369,11 @@ export async function moveWebRuntimeSessionTab(
             // Why: paired web groups can contain local-only tabs alongside
             // host-mirrored tabs. The host reorder API only accepts host tab
             // ids, so local ids must be omitted from the mirrored order.
-            tabOrder: reorderedHostTabOrder
+            // `reorderedHostTabOrder` is only null when `args.kind` is not
+            // 'reorder' (see its ternary above), which cannot be true in this
+            // branch — the direct contract call surfaced the gap between the
+            // two ternaries that the untyped legacy envelope call papered over.
+            tabOrder: reorderedHostTabOrder ?? []
           }
         : args.kind === 'split'
           ? {
@@ -389,13 +388,12 @@ export async function moveWebRuntimeSessionTab(
               // indexes must be counted in the filtered host-backed order.
               index: targetHostIndex
             }
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'session.tabs.move',
-      params: move,
-      timeoutMs: 15_000
-    })
-    unwrapRuntimeRpcResult(response as RuntimeRpcResponse<RuntimeMobileSessionTabMoveResult>)
+    await callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.session.tabs.move,
+      move,
+      { timeoutMs: 15_000 }
+    )
     return true
   } catch (error) {
     console.warn(
@@ -457,16 +455,19 @@ async function callWebRuntimeSessionTabMethod(
       await requestWebSessionTabsRefresh({ environmentId, worktreeId: args.worktreeId })
       return true
     }
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method,
-      params: {
+    // Why: only the activate case reaches here — the close case above already
+    // returned. Written as `client.session.tabs.activate` (not resolved from
+    // `method`) so the negotiated dispatch keeps a statically known contract
+    // path.
+    await callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.session.tabs.activate,
+      {
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         tabId: hostTabId
       },
-      timeoutMs: 15_000
-    })
-    unwrapRuntimeRpcResult(response as RuntimeRpcResponse<unknown>)
+      { timeoutMs: 15_000 }
+    )
     return true
   } catch (error) {
     console.warn(
@@ -500,27 +501,23 @@ export function splitWebRuntimeTerminal(
     direction,
     pendingMirrorSuppressionId
   )
-  void window.api.runtimeEnvironments
-    .call({
-      selector: environmentId,
-      method: 'terminal.split',
-      params: {
-        terminal: remote.handle,
-        direction,
-        telemetrySource
-      },
-      timeoutMs: 15_000
-    })
-    .then((response) => {
-      unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ split: RuntimeTerminalSplit }>)
-    })
-    .catch((error) => {
-      releasePendingMirrorSuppression()
-      console.warn(
-        '[web-runtime-session] failed to split terminal:',
-        error instanceof Error ? error.message : String(error)
-      )
-    })
+  // Why: dispatches by contract path through the negotiated oRPC client
+  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // string — the bare-string channel skips capability negotiation and
+  // always lands on the legacy dispatcher, which no longer serves domains
+  // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
+  void callRuntimeOrpc(
+    { kind: 'environment', environmentId },
+    (client) => client.terminal.split,
+    { terminal: remote.handle, direction, telemetrySource },
+    { timeoutMs: 15_000 }
+  ).catch((error) => {
+    releasePendingMirrorSuppression()
+    console.warn(
+      '[web-runtime-session] failed to split terminal:',
+      error instanceof Error ? error.message : String(error)
+    )
+  })
   return true
 }
 
@@ -612,24 +609,22 @@ export function closeWebRuntimeTerminal(ptyId: string | null | undefined): boole
   // Why: host-session mirror panes are detached locally in the browser, but
   // the host owns the real pane graph. Close the host terminal first so later
   // session snapshots cannot resurrect the locally removed pane.
-  void window.api.runtimeEnvironments
-    .call({
-      selector: environmentId,
-      method: 'terminal.close',
-      params: {
-        terminal: remote.handle
-      },
-      timeoutMs: 15_000
-    })
-    .then((response) => {
-      unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ close: RuntimeTerminalClose }>)
-    })
-    .catch((error) => {
-      console.warn(
-        '[web-runtime-session] failed to close terminal pane:',
-        error instanceof Error ? error.message : String(error)
-      )
-    })
+  // Why: dispatches by contract path through the negotiated oRPC client
+  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // string — the bare-string channel skips capability negotiation and
+  // always lands on the legacy dispatcher, which no longer serves domains
+  // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
+  void callRuntimeOrpc(
+    { kind: 'environment', environmentId },
+    (client) => client.terminal.close,
+    { terminal: remote.handle },
+    { timeoutMs: 15_000 }
+  ).catch((error) => {
+    console.warn(
+      '[web-runtime-session] failed to close terminal pane:',
+      error instanceof Error ? error.message : String(error)
+    )
+  })
   return true
 }
 
@@ -653,19 +648,18 @@ export async function updateWebRuntimePaneLayout(args: {
     ? toHostSessionTabId(args.tabId)
     : args.tabId
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'session.tabs.updatePaneLayout',
-      params: {
+    await callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.session.tabs.updatePaneLayout,
+      {
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         tabId: hostTabId,
         root: args.root,
         expandedLeafId: args.expandedLeafId,
         ...(args.titlesByLeafId ? { titlesByLeafId: args.titlesByLeafId } : {})
       },
-      timeoutMs: 15_000
-    })
-    unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ updated: true }>)
+      { timeoutMs: 15_000 }
+    )
     return true
   } catch (error) {
     console.warn(
@@ -700,21 +694,18 @@ export function setWebRuntimeTabProps(args: {
           worktreeId: args.worktreeId,
           tabId: args.tabId
         }) ?? (isWebTerminalSurfaceTabId(args.tabId) ? toHostSessionTabId(args.tabId) : args.tabId)
-      return window.api.runtimeEnvironments.call({
-        selector: environmentId,
-        method: 'session.tabs.setTabProps',
-        params: {
+      return callRuntimeOrpc(
+        { kind: 'environment', environmentId },
+        (client) => client.session.tabs.setTabProps,
+        {
           worktree: toRuntimeWorktreeSelector(args.worktreeId),
           tabId: hostTabId,
           ...(args.color !== undefined ? { color: args.color } : {}),
           ...(args.isPinned !== undefined ? { isPinned: args.isPinned } : {}),
           ...(args.viewMode !== undefined ? { viewMode: args.viewMode } : {})
         },
-        timeoutMs: 15_000
-      })
-    })
-    .then((response) => {
-      unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ updated: true }>)
+        { timeoutMs: 15_000 }
+      )
     })
     .catch((error) => {
       console.warn(
@@ -737,21 +728,21 @@ export function clearWebRuntimeTerminalBuffer(ptyId: string | null | undefined):
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
   }
-  void window.api.runtimeEnvironments
-    .call({
-      selector: environmentId,
-      method: 'terminal.clearBuffer',
-      params: { terminal: remote.handle },
-      timeoutMs: 15_000
-    })
-    .then((response) => {
-      unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ clear: unknown }>)
-    })
-    .catch((error) => {
-      console.warn(
-        '[web-runtime-session] failed to clear terminal buffer:',
-        error instanceof Error ? error.message : String(error)
-      )
-    })
+  // Why: dispatches by contract path through the negotiated oRPC client
+  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // string — the bare-string channel skips capability negotiation and
+  // always lands on the legacy dispatcher, which no longer serves domains
+  // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
+  void callRuntimeOrpc(
+    { kind: 'environment', environmentId },
+    (client) => client.terminal.clearBuffer,
+    { terminal: remote.handle },
+    { timeoutMs: 15_000 }
+  ).catch((error) => {
+    console.warn(
+      '[web-runtime-session] failed to clear terminal buffer:',
+      error instanceof Error ? error.message : String(error)
+    )
+  })
   return true
 }

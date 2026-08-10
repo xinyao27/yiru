@@ -44,6 +44,7 @@
     "@expo/material-symbols": "catalog:mobile",
     "@expo/ui": "catalog:mobile",
     "@noble/hashes": "catalog:mobile",
+    "@orpc/client": "catalog:",
     "@react-native-async-storage/async-storage": "catalog:mobile",
     "@react-navigation/native": "catalog:mobile",
     "@shikijs/core": "catalog:mobile",

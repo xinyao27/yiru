@@ -4,6 +4,7 @@ import { Keyboard } from 'react-native'
 
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import {
   buildMarkdownDiskFallbackDoc,
@@ -12,34 +13,6 @@ import {
 import type { DirtyMarkdownDraft, MarkdownDocState, MobileSessionTab } from './screen-state'
 
 type MarkdownTab = Extract<MobileSessionTab, { type: 'markdown' }>
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function readString(value: unknown): string | undefined {
-  return typeof value === 'string' ? value : undefined
-}
-
-// Why: markdown.readTab / markdown.saveTab answer with unknown payloads. Read the
-// editor document defensively so a host on an older protocol degrades to an empty
-// read-only doc instead of rendering `undefined`.
-function readMarkdownDocument(result: unknown): {
-  content: string
-  version: string
-  isDirty: boolean
-  editable: boolean
-  readOnlyReason: string | undefined
-} {
-  const record: Record<string, unknown> = isRecord(result) ? result : {}
-  return {
-    content: readString(record.content) ?? '',
-    version: readString(record.version) ?? '',
-    isDirty: record.isDirty === true,
-    editable: record.editable === true,
-    readOnlyReason: readString(record.readOnlyReason)
-  }
-}
 
 export type MobileMarkdownDocsDeps = {
   client: RpcClient | null
@@ -85,12 +58,11 @@ export function useMobileMarkdownDocs(deps: MobileMarkdownDocsDeps): MobileMarkd
       }
       setMarkdownDocs((prev) => new Map(prev).set(tab.id, { status: 'loading' }))
       try {
-        const response = await client.sendRequest('markdown.readTab', {
-          worktree: `id:${worktreeId}`,
-          tabId: tab.id
-        })
-        if (response.ok) {
-          const result = readMarkdownDocument(response.result)
+        try {
+          const result = await callRuntimeOrpc(client, (runtime) => runtime.markdown.readTab, {
+            worktree: `id:${worktreeId}`,
+            tabId: tab.id
+          })
           setMarkdownDocs((prev) =>
             new Map(prev).set(tab.id, {
               status: 'ready',
@@ -104,28 +76,25 @@ export function useMobileMarkdownDocs(deps: MobileMarkdownDocsDeps): MobileMarkd
             })
           )
           return
-        }
-        if (!shouldReadMarkdownFromDiskAfterReadTabFailure(response)) {
-          throw new Error(response.error.message)
+        } catch (error) {
+          if (!shouldReadMarkdownFromDiskAfterReadTabFailure(error)) {
+            throw error
+          }
         }
         // Why: a headless host (no desktop renderer) can't serve the live editor
         // document and fails markdown.readTab with renderer_unavailable. Fall back
         // to the on-disk file so markdown still renders read-only, matching how
         // other file types load via files.read.
-        const fallback = await client.sendRequest('files.read', {
+        const fileResult = await callRuntimeOrpc(client, (runtime) => runtime.files.read, {
           worktree: `id:${worktreeId}`,
           relativePath: tab.relativePath
         })
-        if (!fallback.ok) {
-          throw new Error('Unable to read markdown')
-        }
-        const fileResult: Record<string, unknown> = isRecord(fallback.result) ? fallback.result : {}
         setMarkdownDocs((prev) =>
           new Map(prev).set(
             tab.id,
             buildMarkdownDiskFallbackDoc({
-              content: readString(fileResult.content) ?? '',
-              truncated: fileResult.truncated === true,
+              content: fileResult.content,
+              truncated: fileResult.truncated,
               tabIsDirty: tab.isDirty
             })
           )
@@ -230,16 +199,12 @@ export function useMobileMarkdownDocs(deps: MobileMarkdownDocsDeps): MobileMarkd
         return new Map(prev).set(tab.id, { ...existing, saving: true, saveError: undefined })
       })
       try {
-        const response = await client.sendRequest('markdown.saveTab', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.markdown.saveTab, {
           worktree: `id:${worktreeId}`,
           tabId: tab.id,
           baseVersion: current.baseVersion,
           content: current.localContent
         })
-        if (!response.ok) {
-          throw new Error(response.error.message)
-        }
-        const result = readMarkdownDocument(response.result)
         if (markdownSaveSeqRef.current.get(tab.id) !== saveSeq) {
           return
         }

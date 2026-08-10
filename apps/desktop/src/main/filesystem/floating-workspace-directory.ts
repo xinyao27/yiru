@@ -2,10 +2,10 @@ import { constants as fsConstants } from 'node:fs'
 import { access, mkdir, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
-import { app } from 'electron'
 import type { GlobalSettings, FloatingTerminalCwdRequest } from '~shared/types'
 
 import type { Store } from '../persistence'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { authorizeExternalPath } from './auth'
 
 const FLOATING_WORKSPACE_DIRNAME = 'floating-workspace'
@@ -24,7 +24,7 @@ function expandHomePath(input: string, home: string): string {
 }
 
 function resolveFloatingWorkspaceInput(input: string): string {
-  const home = app.getPath('home')
+  const home = getRuntimeHostPathsProvider().homePath()
   const expanded = expandHomePath(input, home)
   return path.isAbsolute(expanded) ? path.resolve(expanded) : path.resolve(home, expanded)
 }
@@ -70,7 +70,7 @@ function isTrustedFloatingWorkspaceDirectory(
 }
 
 export async function ensureDefaultFloatingWorkspacePath(): Promise<string> {
-  const cwd = path.join(app.getPath('userData'), FLOATING_WORKSPACE_DIRNAME)
+  const cwd = path.join(getRuntimeHostPathsProvider().userDataPath(), FLOATING_WORKSPACE_DIRNAME)
   await mkdir(cwd, { recursive: true })
   // Why: the default floating workspace lives outside repo roots by design;
   // authorize only this app-owned directory instead of widening access to ~.

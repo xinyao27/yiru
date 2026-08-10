@@ -252,14 +252,6 @@ export function setSourceControlActionDefault(
   }
 }
 
-export function setSourceControlActionAgentDefault(
-  defaults: SourceControlAiActionDefaults | null | undefined,
-  actionId: SourceControlActionId,
-  agentId: TuiAgent | CustomAgentId | null
-): SourceControlAiActionDefaults {
-  return setSourceControlActionDefault(defaults, actionId, { agentId })
-}
-
 export function renderSourceControlActionCommandTemplate(
   template: string,
   variables: Record<string, string | null | undefined>

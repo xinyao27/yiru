@@ -1,6 +1,6 @@
 import type { DirEntry } from '~shared/types'
 
-import { callRuntimeRpc } from './rpc-client'
+import { callRuntimeOrpc } from './orpc-client'
 
 export type RuntimeServerDirectoryListing = {
   resolvedPath: string
@@ -11,9 +11,9 @@ export async function browseRuntimeServerDirectory(
   environmentId: string,
   path: string
 ): Promise<RuntimeServerDirectoryListing> {
-  return callRuntimeRpc<RuntimeServerDirectoryListing>(
+  return callRuntimeOrpc(
     { kind: 'environment', environmentId },
-    'files.browseServerDir',
+    (client) => client.files.browseServerDir,
     { path },
     { timeoutMs: 15_000 }
   )

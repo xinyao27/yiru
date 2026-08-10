@@ -98,10 +98,7 @@ export function useFileExplorerRowActions({
   const handleAddFolderAsProject = useCallback(
     (node: TreeNode) => {
       if (activeRepo && canShowAddAsProjectAction(node, activeRepo)) {
-        openModal(
-          'confirm-add-project-from-folder',
-          buildAddProjectFromFolderModalData(node, activeRepo)
-        )
+        openModal('confirm-add-project-from-folder', buildAddProjectFromFolderModalData(node))
       }
     },
     [openModal, activeRepo]

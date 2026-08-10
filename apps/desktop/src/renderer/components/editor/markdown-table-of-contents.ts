@@ -14,50 +14,8 @@ export type MarkdownTocItem = {
   title: string
 }
 
-const htmlEntitiesForToc = new Map([
-  ['amp', '&'],
-  ['apos', "'"],
-  ['gt', '>'],
-  ['lt', '<'],
-  ['nbsp', ' '],
-  ['quot', '"']
-])
-
 function isMarkdownTocLevel(value: number): value is MarkdownTocLevel {
   return value >= 1 && value <= 5
-}
-
-// Scoped local fork of the tiny entities@6.0.1 surface Yiru used here.
-// Why: TOC labels only need common/numeric entity decoding before inline
-// Markdown stripping, not the full entity database.
-function decodeTocHtmlEntities(text: string): string {
-  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (match, entity: string) => {
-    const normalized = entity.toLowerCase()
-    if (normalized.startsWith('#x')) {
-      const codePoint = Number.parseInt(normalized.slice(2), 16)
-      return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
-        ? String.fromCodePoint(codePoint)
-        : match
-    }
-    if (normalized.startsWith('#')) {
-      const codePoint = Number.parseInt(normalized.slice(1), 10)
-      return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
-        ? String.fromCodePoint(codePoint)
-        : match
-    }
-    return htmlEntitiesForToc.get(normalized) ?? match
-  })
-}
-
-export function stripInlineMarkdownForToc(text: string): string {
-  const stripped = decodeTocHtmlEntities(text)
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/\[\[[^|\]]+\|([^\]]+)\]\]/g, '$1')
-    .replace(/\[\[([^\]]+)\]\]/g, '$1')
-    .replace(/<[^>]+>/g, '')
-    .replace(/[*_`~]/g, '')
-  return foldMarkdownTocWhitespace(stripped)
 }
 
 // Why: headings can come from large pasted markdown; TOC labels only need

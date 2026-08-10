@@ -1,15 +1,10 @@
-import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import React from 'react'
-import type { PRState, CheckStatus, GitConflictOperation, TerminalTab } from '~shared/types'
+import type { CheckStatus, GitConflictOperation, TerminalTab } from '~shared/types'
 
 // ── Pure helper functions ────────────────────────────────────────────
 
 export function branchDisplayName(branch: string): string {
   return branch.replace(/^refs\/heads\//, '')
-}
-
-export function prStateLabel(state: PRState): string {
-  return state.charAt(0).toUpperCase() + state.slice(1)
 }
 
 export function checksLabel(status: CheckStatus): string {
@@ -36,7 +31,6 @@ export const CONFLICT_OPERATION_LABELS: Record<Exclude<GitConflictOperation, 'un
 
 export const EMPTY_TABS: TerminalTab[] = []
 export const EMPTY_BROWSER_TABS: { id: string }[] = []
-export const EMPTY_AGENT_ENTRIES: AgentStatusEntry[] = []
 
 export function PullRequestIcon({ className }: { className?: string }): React.JSX.Element {
   return (

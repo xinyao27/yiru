@@ -60,6 +60,11 @@ import {
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
 } from '~renderer/lib/floating-workspace-terminal-actions'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
+import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { getRuntimeUIState, setRuntimeUIState } from '~renderer/runtime/ui-client'
 import {
   canGoBackWorktreeHistory,
   canGoForwardWorktreeHistory
@@ -202,7 +207,7 @@ const shortcutPlatform = getRendererAppPlatform()
 const isMac = shortcutPlatform === 'darwin'
 const isWebClient = isPairedWebClientWindow()
 const rendererOsRelease =
-  typeof window === 'undefined' ? '' : window.api?.platform?.get?.().osRelease
+  typeof window === 'undefined' ? '' : rendererHostClient?.platform?.get?.().osRelease
 // Why: Electron exposes native sidebar material on macOS and supported Windows
 // builds. Paired web clients and other platforms keep the opaque surface.
 const hasNativeSidebarMaterial =
@@ -229,7 +234,7 @@ const WINDOW_CONTROL_BUTTON_CLASS_NAME =
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
-    return (await window.api.runtimeEnvironments.list()).map((environment) =>
+    return (await runtimeEnvironmentsClient.list()).map((environment) =>
       toRuntimeExecutionHostId(environment.id)
     )
   } catch (err) {
@@ -271,12 +276,12 @@ function WindowControls(): React.JSX.Element {
     // restored to a maximized state at startup would render the wrong icon
     // until the user first clicks the button. Seed from main on mount.
     let cancelled = false
-    void window.api.ui.isMaximized().then((value) => {
+    void shellClient.ui.isMaximized().then((value) => {
       if (!cancelled) {
         setMaximized(value)
       }
     })
-    const unsubscribe = window.api.ui.onMaximizeChanged(setMaximized)
+    const unsubscribe = shellClient.ui.onMaximizeChanged(setMaximized)
     return () => {
       cancelled = true
       unsubscribe()
@@ -293,7 +298,7 @@ function WindowControls(): React.JSX.Element {
         size="icon-sm"
         className={WINDOW_CONTROL_BUTTON_CLASS_NAME}
         aria-label={translate('auto.App.bbb7f90669', 'Minimize')}
-        onClick={() => window.api.ui.minimize()}
+        onClick={() => shellClient.ui.minimize()}
       >
         <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
           <path d="M0 5h10v1H0z" fill="currentColor" />
@@ -309,7 +314,7 @@ function WindowControls(): React.JSX.Element {
             ? translate('auto.App.66f0a552e5', 'Restore')
             : translate('auto.App.c9d6f98459', 'Maximize')
         }
-        onClick={() => window.api.ui.maximize()}
+        onClick={() => shellClient.ui.maximize()}
       >
         {maximized ? (
           // Restore icon (two overlapping squares)
@@ -336,7 +341,7 @@ function WindowControls(): React.JSX.Element {
         // sends 'window:close-requested' back to the renderer and keeps the
         // terminal-running confirmation guard active. window.close() is
         // unreliable in sandboxed renderers.
-        onClick={() => window.api.ui.requestClose()}
+        onClick={() => shellClient.ui.requestClose()}
       >
         <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
           <path d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4z" fill="currentColor" />
@@ -832,8 +837,7 @@ function App(): React.JSX.Element {
     }
 
     let cancelled = false
-    void window.api.cli
-      .getInstallStatus()
+    void readCliInstallStatus()
       .then((status) => {
         if (cancelled) {
           return
@@ -965,14 +969,16 @@ function App(): React.JSX.Element {
         )
         keybindingsPromise.catch(() => {})
         const onboardingPromise = timeRendererStartupStep('onboarding-get', () =>
-          window.api.onboarding.get()
+          rendererHostClient.onboarding.get()
         )
         onboardingPromise.catch(() => {})
         // Why: hydrate persisted UI immediately after ui.get() so first paint
         // reflects saved view settings before the catalog scans below. ui.get()
         // is awaited (not overlapped) because the hydrate must land before the
         // local-first catalog/session steps run.
-        const persistedUI = await timeRendererStartupStep('ui-get', () => window.api.ui.get())
+        const persistedUI = await timeRendererStartupStep('ui-get', () =>
+          getRuntimeUIState(useAppStore.getState().settings)
+        )
         uiHydrated = timeRendererStartupSyncStep('hydrate-persisted-ui', () =>
           hydratePersistedUIAfterStartupRead({
             persistedUI,
@@ -1005,7 +1011,7 @@ function App(): React.JSX.Element {
         // without waiting on network reachability. Unreadable partitions skip.
         const sessionRead = await timeRendererStartupStep('session-get', () =>
           fetchWorkspaceSessionWithRuntimeHostOwners(
-            window.api.session,
+            rendererHostClient.session,
             useAppStore.getState().repos,
             startupRuntimeHostIds
           )
@@ -1049,7 +1055,7 @@ function App(): React.JSX.Element {
           // first paint, but restored terminals still need those services ready
           // before they mount and spawn/reconnect PTYs.
           await timeRendererStartupStep('first-window-services-await', () =>
-            window.api.app.awaitFirstWindowStartupServices()
+            rendererHostClient.app.awaitFirstWindowStartupServices()
           )
           reconnectStarted = true
           await timeRendererStartupStep('reconnect-terminals', () =>
@@ -1125,7 +1131,7 @@ function App(): React.JSX.Element {
             action: {
               label: translate('auto.App.caea5b51b9', 'Restart now'),
               onClick: () => {
-                void window.api.app.relaunch()
+                void rendererHostClient.app.relaunch()
               }
             }
           })
@@ -1136,7 +1142,7 @@ function App(): React.JSX.Element {
           // on-disk file we failed to load.
           if (!reconnectStarted) {
             try {
-              await window.api.app.awaitFirstWindowStartupServices()
+              await rendererHostClient.app.awaitFirstWindowStartupServices()
               await actions.reconnectPersistedTerminals(abortController.signal)
             } catch (reconnectErr) {
               console.error(
@@ -1262,7 +1268,7 @@ function App(): React.JSX.Element {
         // Why: route each runtime host's worktree-scoped slice to its own
         // partition; the returned promise is the local write so the
         // remote-workspace upload chain below keeps its ordering.
-        void patchWorkspaceSessionByHost(window.api.session, patch, state)
+        void patchWorkspaceSessionByHost(rendererHostClient.session, patch, state)
       }
     })
   }, [])
@@ -1302,7 +1308,7 @@ function App(): React.JSX.Element {
       // gating flags and would miss those updates.
       const freshState = useAppStore.getState()
       persistWorkspaceSessionByHostSync(
-        window.api.session,
+        rendererHostClient.session,
         buildWorkspaceSessionPayload(freshState),
         freshState
       )
@@ -1335,7 +1341,7 @@ function App(): React.JSX.Element {
   // never closed (#5144). dispatchWindowCloseRequest delegates to Terminal's
   // handler when present, else confirms the close directly.
   useEffect(() => {
-    return window.api.ui.onWindowCloseRequested(dispatchWindowCloseRequest)
+    return shellClient.ui.onWindowCloseRequested(dispatchWindowCloseRequest)
   }, [])
 
   // Why there is no periodic scrollback save: PR #461 added a 3-minute
@@ -1356,7 +1362,7 @@ function App(): React.JSX.Element {
     }
 
     const timer = window.setTimeout(() => {
-      void window.api.ui.set({
+      void setRuntimeUIState(useAppStore.getState().settings, {
         sidebarWidth,
         rightSidebarOpen,
         rightSidebarTab,
@@ -2054,7 +2060,7 @@ function App(): React.JSX.Element {
                       size="icon-xs"
                       className={cn('mr-2', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                       aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
-                      onClick={() => window.api.ui.popupMenu()}
+                      onClick={() => shellClient.ui.popupMenu()}
                     >
                       <MoreHorizontal className="size-3.5" />
                     </Button>

@@ -180,22 +180,6 @@ export async function parseMessageGraphSessionFile(
   return parseMessageGraphSessionLines({ agent, file, lines, platform })
 }
 
-export async function parseMessageGraphSessionContent(
-  agent: MessageGraphAgent,
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseMessageGraphSessionLines({
-    agent,
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
-}
-
 function consumeMessageGraphRecordLine(accumulator: SessionAccumulator, line: string): void {
   const record = parseJsonObject(line)
   if (!record) {

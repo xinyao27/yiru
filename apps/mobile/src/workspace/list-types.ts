@@ -38,7 +38,7 @@ export type Worktree = {
   hasAttachedPty: boolean
   preview: string
   unread: boolean
-  lastOutputAt?: number
+  lastOutputAt?: number | null
   isPinned: boolean
   isActive?: boolean
   linkedPR: { number: number; state: string } | null

@@ -1,4 +1,4 @@
-import type { WebContents } from 'electron'
+import { requestShellAutomationDispatch } from '~main/runtime/rpc/orpc/shell-services-reverse-link'
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
@@ -15,6 +15,7 @@ import {
 import type { ClaudeUsageStore } from '../claude/usage/store'
 import type { CodexUsageStore } from '../codex/usage/store'
 import type { Store } from '../persistence'
+import type { RuntimeRendererTarget } from '../runtime/host/renderer-target'
 import { clearAutomationDispatchTokens, createAutomationDispatchToken } from './dispatch-tokens'
 import type { HeadlessAutomationDispatcher } from './headless-dispatch'
 import { runAutomationPrecheck } from './precheck-runner'
@@ -27,7 +28,7 @@ export class AutomationService {
   private readonly store: Store
   private readonly tickMs: number
   private timer: ReturnType<typeof setInterval> | null = null
-  private webContents: WebContents | null = null
+  private webContents: RuntimeRendererTarget | null = null
   private rendererReady = false
   private evaluating = false
   private readonly claudeUsage: ClaudeUsageStore | null
@@ -53,7 +54,7 @@ export class AutomationService {
     this.headlessDispatcher = opts.headlessDispatcher ?? null
   }
 
-  setWebContents(webContents: WebContents | null): void {
+  setWebContents(webContents: RuntimeRendererTarget | null): void {
     this.webContents = webContents
     this.rendererReady = false
   }
@@ -232,19 +233,32 @@ export class AutomationService {
         error: 'No Yiru window was available to launch the automation.'
       })
     }
-    const updated = this.store.updateAutomationRun({
+    const dispatchToken = createAutomationDispatchToken(automation.id, run.id)
+    const payload: AutomationDispatchRequest = { automation, run, dispatchToken }
+    // Why: attempt the reverse call before committing 'dispatching' — unlike
+    // the old `webContents.send`, this round trip can genuinely fail (shell
+    // reloaded mid-connect, reverse link never established), and there is no
+    // point in leaving a run stuck at 'dispatching' with nothing that will
+    // ever pick it up.
+    const result = await requestShellAutomationDispatch(webContents.id, payload)
+    if (!result.ok) {
+      clearAutomationDispatchTokens(automation.id, run.id)
+      if (this.headlessDispatcher) {
+        return await this.requestHeadlessDispatch(automation, run, target)
+      }
+      return this.store.updateAutomationRun({
+        runId: run.id,
+        status: 'skipped_unavailable',
+        workspaceId: automation.workspaceId,
+        error: 'No Yiru window was available to launch the automation.'
+      })
+    }
+    return this.store.updateAutomationRun({
       runId: run.id,
       status: 'dispatching',
       workspaceId: automation.workspaceId,
       error: null
     })
-    const payload: AutomationDispatchRequest = {
-      automation,
-      run: updated,
-      dispatchToken: createAutomationDispatchToken(automation.id, updated.id)
-    }
-    webContents.send('automations:dispatchRequested', payload)
-    return updated
   }
 
   private async requestHeadlessDispatch(

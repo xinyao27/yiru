@@ -1,3 +1,7 @@
+import {
+  GitGenerateCommitMessageInputSchema,
+  GitGeneratePullRequestFieldsInputSchema
+} from '@yiru/runtime-protocol/contract'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import {
   getRepoIdFromWorktreeId,
@@ -23,7 +27,6 @@ import type {
   GitResetToCommitResult,
   GitRevertResult
 } from '~shared/git/write-op-results'
-import { GIT_STATUS_CONTRACT } from '~shared/runtime-method-contracts/source-control-contracts'
 import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
 import type {
   GitBranchCompareResult,
@@ -39,7 +42,8 @@ import type {
   GlobalSettings
 } from '~shared/types'
 
-import { callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'
+import { callRuntimeOrpc } from './orpc-client'
+import { getActiveRuntimeTarget } from './rpc-client'
 import { toRuntimeWorktreeSelector } from './worktree-selector'
 
 export type RuntimeGenerateCommitMessageResult =
@@ -162,7 +166,7 @@ export async function getRuntimeGitStatus(
     ? { bypassEffectiveUpstreamNegativeCache: true }
     : {}
   const lineStatsReuseArgs = options?.reuseLineStats ? { reuseLineStats: true } : {}
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return callLocalGitStatus(
       {
         worktreePath: resolveLocalWorktreePath(context),
@@ -174,9 +178,9 @@ export async function getRuntimeGitStatus(
       options?.signal
     )
   }
-  return callRuntimeRpc(
+  return callRuntimeOrpc(
     target,
-    GIT_STATUS_CONTRACT,
+    (client) => client.git.status,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...includeIgnoredArgs,
@@ -238,7 +242,7 @@ export async function getRuntimeGitSubmoduleStatus(
   area: GitStagingArea = 'unstaged'
 ): Promise<GitStatusResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.submoduleStatus({
       worktreePath: resolveLocalWorktreePath(context),
       submodulePath,
@@ -246,9 +250,9 @@ export async function getRuntimeGitSubmoduleStatus(
       area
     })
   }
-  return callRuntimeRpc<GitStatusResult>(
+  return callRuntimeOrpc(
     target,
-    'git.submoduleStatus',
+    (client) => client.git.submoduleStatus,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       submodulePath,
@@ -266,16 +270,16 @@ export async function getRuntimeGitIgnoredPaths(
   if (paths.length === 0) {
     return []
   }
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.checkIgnored({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       paths
     })
   }
-  return callRuntimeRpc<string[]>(
+  return callRuntimeOrpc(
     target,
-    'git.checkIgnored',
+    (client) => client.git.checkIgnored,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), paths },
     { timeoutMs: 15_000 }
   )
@@ -286,16 +290,16 @@ export async function getRuntimeGitHistory(
   options: GitHistoryOptions = {}
 ): Promise<GitHistoryResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.history({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...options
     })
   }
-  return callRuntimeRpc<GitHistoryResult>(
+  return callRuntimeOrpc(
     target,
-    'git.history',
+    (client) => client.git.history,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...options },
     { timeoutMs: 15_000 }
   )
@@ -305,15 +309,15 @@ export async function getRuntimeGitConflictOperation(
   context: RuntimeGitContext
 ): Promise<GitConflictOperation> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.conflictOperation({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitConflictOperation>(
+  return callRuntimeOrpc(
     target,
-    'git.conflictOperation',
+    (client) => client.git.conflictOperation,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 15_000 }
   )
@@ -321,16 +325,16 @@ export async function getRuntimeGitConflictOperation(
 
 export async function abortRuntimeGitMerge(context: RuntimeGitContext): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.abortMerge({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.abortMerge',
+    (client) => client.git.abortMerge,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 30_000 }
   )
@@ -338,16 +342,16 @@ export async function abortRuntimeGitMerge(context: RuntimeGitContext): Promise<
 
 export async function abortRuntimeGitRebase(context: RuntimeGitContext): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.abortRebase({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.abortRebase',
+    (client) => client.git.abortRebase,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 30_000 }
   )
@@ -355,16 +359,16 @@ export async function abortRuntimeGitRebase(context: RuntimeGitContext): Promise
 
 export async function abortRuntimeGitRevert(context: RuntimeGitContext): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.abortRevert({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.abortRevert',
+    (client) => client.git.abortRevert,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 30_000 }
   )
@@ -375,16 +379,16 @@ export async function addRuntimeGitTag(
   args: { name: string; commit: string; message?: string; force?: boolean }
 ): Promise<GitAddTagResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.addTag({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitAddTagResult>
   }
-  return callRuntimeRpc<GitAddTagResult>(
+  return callRuntimeOrpc(
     target,
-    'git.addTag',
+    (client) => client.git.addTag,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 30_000 }
   )
@@ -395,16 +399,16 @@ export async function createRuntimeGitBranchFromCommit(
   args: { name: string; commit: string; checkout?: boolean }
 ): Promise<GitCreateBranchResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.createBranch({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitCreateBranchResult>
   }
-  return callRuntimeRpc<GitCreateBranchResult>(
+  return callRuntimeOrpc(
     target,
-    'git.createBranch',
+    (client) => client.git.createBranch,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 30_000 }
   )
@@ -415,16 +419,16 @@ export async function checkoutRuntimeGitCommit(
   commit: string
 ): Promise<GitCheckoutCommitResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.checkoutCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       commit
     }) as Promise<GitCheckoutCommitResult>
   }
-  return callRuntimeRpc<GitCheckoutCommitResult>(
+  return callRuntimeOrpc(
     target,
-    'git.checkoutCommit',
+    (client) => client.git.checkoutCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), commit },
     { timeoutMs: 30_000 }
   )
@@ -435,16 +439,16 @@ export async function cherryPickRuntimeGitCommit(
   args: { commit: string; mainline?: number }
 ): Promise<GitCherryPickResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.cherryPick({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitCherryPickResult>
   }
-  return callRuntimeRpc<GitCherryPickResult>(
+  return callRuntimeOrpc(
     target,
-    'git.cherryPick',
+    (client) => client.git.cherryPick,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 60_000 }
   )
@@ -455,16 +459,16 @@ export async function revertRuntimeGitCommit(
   args: { commit: string; mainline?: number }
 ): Promise<GitRevertResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.revertCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitRevertResult>
   }
-  return callRuntimeRpc<GitRevertResult>(
+  return callRuntimeOrpc(
     target,
-    'git.revertCommit',
+    (client) => client.git.revertCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 60_000 }
   )
@@ -475,16 +479,16 @@ export async function dropRuntimeGitCommit(
   commit: string
 ): Promise<GitDropCommitResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.dropCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       commit
     }) as Promise<GitDropCommitResult>
   }
-  return callRuntimeRpc<GitDropCommitResult>(
+  return callRuntimeOrpc(
     target,
-    'git.dropCommit',
+    (client) => client.git.dropCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), commit },
     { timeoutMs: 60_000 }
   )
@@ -495,16 +499,16 @@ export async function mergeRuntimeGitCommit(
   args: { commit: string; noFf?: boolean; squash?: boolean; message?: string }
 ): Promise<GitMergeCommitResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.mergeCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitMergeCommitResult>
   }
-  return callRuntimeRpc<GitMergeCommitResult>(
+  return callRuntimeOrpc(
     target,
-    'git.mergeCommit',
+    (client) => client.git.mergeCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 60_000 }
   )
@@ -515,16 +519,16 @@ export async function rebaseRuntimeGitOntoCommit(
   commit: string
 ): Promise<GitRebaseOntoCommitResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.rebaseOntoCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       commit
     }) as Promise<GitRebaseOntoCommitResult>
   }
-  return callRuntimeRpc<GitRebaseOntoCommitResult>(
+  return callRuntimeOrpc(
     target,
-    'git.rebaseOntoCommit',
+    (client) => client.git.rebaseOntoCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), commit },
     { timeoutMs: 60_000 }
   )
@@ -535,16 +539,16 @@ export async function resetRuntimeGitToCommit(
   args: { commit: string; mode: 'soft' | 'mixed' | 'hard' }
 ): Promise<GitResetToCommitResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.resetToCommit({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...args
     }) as Promise<GitResetToCommitResult>
   }
-  return callRuntimeRpc<GitResetToCommitResult>(
+  return callRuntimeOrpc(
     target,
-    'git.resetToCommit',
+    (client) => client.git.resetToCommit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 30_000 }
   )
@@ -555,7 +559,7 @@ export async function getRuntimeGitDiff(
   args: { filePath: string; staged: boolean; compareAgainstHead?: boolean }
 ): Promise<GitDiffResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.diff({
       worktreePath: resolveLocalWorktreePath(context),
       filePath: args.filePath,
@@ -564,9 +568,9 @@ export async function getRuntimeGitDiff(
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitDiffResult>(
+  return callRuntimeOrpc(
     target,
-    'git.diff',
+    (client) => client.git.diff,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 15_000 }
   )
@@ -577,16 +581,16 @@ export async function getRuntimeGitBranchCompare(
   baseRef: string
 ): Promise<GitBranchCompareResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.branchCompare({
       worktreePath: resolveLocalWorktreePath(context),
       baseRef,
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitBranchCompareResult>(
+  return callRuntimeOrpc(
     target,
-    'git.branchCompare',
+    (client) => client.git.branchCompare,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), baseRef },
     { timeoutMs: 15_000 }
   )
@@ -597,16 +601,16 @@ export async function getRuntimeGitCommitCompare(
   commitId: string
 ): Promise<GitCommitCompareResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.commitCompare({
       worktreePath: resolveLocalWorktreePath(context),
       commitId,
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitCommitCompareResult>(
+  return callRuntimeOrpc(
     target,
-    'git.commitCompare',
+    (client) => client.git.commitCompare,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), commitId },
     { timeoutMs: 15_000 }
   )
@@ -617,16 +621,16 @@ export async function getRuntimeGitUpstreamStatus(
   pushTarget?: GitPushTarget
 ): Promise<GitUpstreamStatus> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.upstreamStatus({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       ...(pushTarget ? { pushTarget } : {})
     })
   }
-  return callRuntimeRpc<GitUpstreamStatus>(
+  return callRuntimeOrpc(
     target,
-    'git.upstreamStatus',
+    (client) => client.git.upstreamStatus,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...(pushTarget ? { pushTarget } : {})
@@ -640,7 +644,7 @@ export async function fetchRuntimeGit(
   pushTarget?: GitPushTarget
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.fetch({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
@@ -648,9 +652,9 @@ export async function fetchRuntimeGit(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.fetch',
+    (client) => client.git.fetch,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...(pushTarget ? { pushTarget } : {})
@@ -664,16 +668,16 @@ export async function syncRuntimeGitForkDefaultBranch(
   expectedUpstream: GitForkSyncExpectedUpstream
 ): Promise<GitForkSyncResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.syncFork({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
       expectedUpstream
     })
   }
-  return callRuntimeRpc<GitForkSyncResult>(
+  return callRuntimeOrpc(
     target,
-    'git.forkSync',
+    (client) => client.git.forkSync,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       expectedUpstream
@@ -687,7 +691,7 @@ export async function pullRuntimeGit(
   pushTarget?: GitPushTarget
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.pull({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
@@ -695,9 +699,9 @@ export async function pullRuntimeGit(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.pull',
+    (client) => client.git.pull,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...(pushTarget ? { pushTarget } : {})
@@ -711,7 +715,7 @@ export async function fastForwardRuntimeGit(
   pushTarget?: GitPushTarget
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.fastForward({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
@@ -719,9 +723,9 @@ export async function fastForwardRuntimeGit(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.fastForward',
+    (client) => client.git.fastForward,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...(pushTarget ? { pushTarget } : {})
@@ -735,7 +739,7 @@ export async function rebaseRuntimeGitFromBase(
   baseRef: string
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.rebaseFromBase({
       worktreePath: resolveLocalWorktreePath(context),
       baseRef,
@@ -743,9 +747,9 @@ export async function rebaseRuntimeGitFromBase(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.rebaseFromBase',
+    (client) => client.git.rebaseFromBase,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), baseRef },
     { timeoutMs: 30_000 }
   )
@@ -756,7 +760,7 @@ export async function pushRuntimeGit(
   args: { publish?: boolean; pushTarget?: GitPushTarget; forceWithLease?: boolean } = {}
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.push({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId,
@@ -766,9 +770,9 @@ export async function pushRuntimeGit(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.push',
+    (client) => client.git.push,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...(args.publish !== undefined ? { publish: args.publish } : {}),
@@ -788,7 +792,7 @@ export async function getRuntimeGitBranchDiff(
   }
 ): Promise<GitDiffResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.branchDiff({
       worktreePath: resolveLocalWorktreePath(context),
       compare: args.compare,
@@ -797,9 +801,9 @@ export async function getRuntimeGitBranchDiff(
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitDiffResult>(
+  return callRuntimeOrpc(
     target,
-    'git.branchDiff',
+    (client) => client.git.branchDiff,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 15_000 }
   )
@@ -815,7 +819,7 @@ export async function getRuntimeGitCommitDiff(
   }
 ): Promise<GitDiffResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.commitDiff({
       worktreePath: resolveLocalWorktreePath(context),
       commitOid: args.commitOid,
@@ -825,9 +829,9 @@ export async function getRuntimeGitCommitDiff(
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<GitDiffResult>(
+  return callRuntimeOrpc(
     target,
-    'git.commitDiff',
+    (client) => client.git.commitDiff,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), ...args },
     { timeoutMs: 15_000 }
   )
@@ -838,16 +842,16 @@ export async function commitRuntimeGit(
   message: string
 ): Promise<{ success: boolean; error?: string }> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.commit({
       worktreePath: resolveLocalWorktreePath(context),
       message,
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<{ success: boolean; error?: string }>(
+  return callRuntimeOrpc(
     target,
-    'git.commit',
+    (client) => client.git.commit,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), message },
     { timeoutMs: 30_000 }
   )
@@ -858,7 +862,7 @@ export async function generateRuntimeCommitMessage(
   overrides?: RuntimeGenerateCommitMessageOverrides
 ): Promise<RuntimeGenerateCommitMessageResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.generateCommitMessage({
       worktreePath: resolveLocalWorktreePath(context),
       repoId: context.worktreeId ? getRepoIdFromWorktreeId(context.worktreeId) : undefined,
@@ -870,20 +874,18 @@ export async function generateRuntimeCommitMessage(
       ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
     }) as Promise<RuntimeGenerateCommitMessageResult>
   }
-  return callRuntimeRpc<RuntimeGenerateCommitMessageResult>(
-    target,
-    'git.generateCommitMessage',
-    {
-      worktree: toRuntimeWorktreeSelector(context.worktreeId),
-      ...getRuntimeCommitMessageSettings(context.settings, context.connectionId),
-      ...(overrides?.sourceControlAiResolvedParams
-        ? { sourceControlAiResolvedParams: overrides.sourceControlAiResolvedParams }
-        : {}),
-      ...(overrides?.sourceControlAi ? { sourceControlAi: overrides.sourceControlAi } : {}),
-      ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
-    },
-    { timeoutMs: 75_000 }
-  )
+  const input = GitGenerateCommitMessageInputSchema.parse({
+    worktree: toRuntimeWorktreeSelector(context.worktreeId),
+    ...getRuntimeCommitMessageSettings(context.settings, context.connectionId),
+    ...(overrides?.sourceControlAiResolvedParams
+      ? { sourceControlAiResolvedParams: overrides.sourceControlAiResolvedParams }
+      : {}),
+    ...(overrides?.sourceControlAi ? { sourceControlAi: overrides.sourceControlAi } : {}),
+    ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
+  })
+  return callRuntimeOrpc(target, (client) => client.git.generateCommitMessage, input, {
+    timeoutMs: 75_000
+  })
 }
 
 export async function discoverRuntimeCommitMessageModels(
@@ -891,16 +893,16 @@ export async function discoverRuntimeCommitMessageModels(
   agentId: string
 ): Promise<RuntimeDiscoverCommitMessageModelsResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.discoverCommitMessageModels({
       agentId,
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     }) as Promise<RuntimeDiscoverCommitMessageModelsResult>
   }
-  return callRuntimeRpc<RuntimeDiscoverCommitMessageModelsResult>(
+  return callRuntimeOrpc(
     target,
-    'git.discoverCommitMessageModels',
+    (client) => client.git.discoverCommitMessageModels,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       agentId,
@@ -916,16 +918,16 @@ export async function cancelRuntimeGenerateCommitMessage(
   context: RuntimeGitContext
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.cancelGenerateCommitMessage({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.cancelGenerateCommitMessage',
+    (client) => client.git.cancelGenerateCommitMessage,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 5_000 }
   )
@@ -937,7 +939,7 @@ export async function generateRuntimePullRequestFields(
   overrides?: RuntimeGeneratePullRequestFieldsOverrides
 ): Promise<RuntimeGeneratePullRequestFieldsResult> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.generatePullRequestFields({
       worktreePath: resolveLocalWorktreePath(context),
       repoId: context.worktreeId ? getRepoIdFromWorktreeId(context.worktreeId) : undefined,
@@ -950,37 +952,35 @@ export async function generateRuntimePullRequestFields(
       ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
     }) as Promise<RuntimeGeneratePullRequestFieldsResult>
   }
-  return callRuntimeRpc<RuntimeGeneratePullRequestFieldsResult>(
-    target,
-    'git.generatePullRequestFields',
-    {
-      worktree: toRuntimeWorktreeSelector(context.worktreeId),
-      ...input,
-      ...getRuntimeCommitMessageSettings(context.settings, context.connectionId),
-      ...(overrides?.sourceControlAiResolvedParams
-        ? { sourceControlAiResolvedParams: overrides.sourceControlAiResolvedParams }
-        : {}),
-      ...(overrides?.sourceControlAi ? { sourceControlAi: overrides.sourceControlAi } : {}),
-      ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
-    },
-    { timeoutMs: 75_000 }
-  )
+  const request = GitGeneratePullRequestFieldsInputSchema.parse({
+    worktree: toRuntimeWorktreeSelector(context.worktreeId),
+    ...input,
+    ...getRuntimeCommitMessageSettings(context.settings, context.connectionId),
+    ...(overrides?.sourceControlAiResolvedParams
+      ? { sourceControlAiResolvedParams: overrides.sourceControlAiResolvedParams }
+      : {}),
+    ...(overrides?.sourceControlAi ? { sourceControlAi: overrides.sourceControlAi } : {}),
+    ...(overrides?.agentCmdOverrides ? { agentCmdOverrides: overrides.agentCmdOverrides } : {})
+  })
+  return callRuntimeOrpc(target, (client) => client.git.generatePullRequestFields, request, {
+    timeoutMs: 75_000
+  })
 }
 
 export async function cancelRuntimeGeneratePullRequestFields(
   context: RuntimeGitContext
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.cancelGeneratePullRequestFields({
       worktreePath: resolveLocalWorktreePath(context),
       connectionId: context.connectionId
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.cancelGeneratePullRequestFields',
+    (client) => client.git.cancelGeneratePullRequestFields,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
     { timeoutMs: 5_000 }
   )
@@ -991,7 +991,7 @@ export async function stageRuntimeGitPath(
   filePath: string
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.stage({
       worktreePath: resolveLocalWorktreePath(context),
       filePath,
@@ -999,9 +999,9 @@ export async function stageRuntimeGitPath(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.stage',
+    (client) => client.git.stage,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePath },
     { timeoutMs: 15_000 }
   )
@@ -1012,7 +1012,7 @@ export async function bulkStageRuntimeGitPaths(
   filePaths: string[]
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.bulkStage({
       worktreePath: resolveLocalWorktreePath(context),
       filePaths,
@@ -1020,9 +1020,9 @@ export async function bulkStageRuntimeGitPaths(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.bulkStage',
+    (client) => client.git.bulkStage,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePaths },
     { timeoutMs: 15_000 }
   )
@@ -1033,7 +1033,7 @@ export async function unstageRuntimeGitPath(
   filePath: string
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.unstage({
       worktreePath: resolveLocalWorktreePath(context),
       filePath,
@@ -1041,9 +1041,9 @@ export async function unstageRuntimeGitPath(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.unstage',
+    (client) => client.git.unstage,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePath },
     { timeoutMs: 15_000 }
   )
@@ -1054,7 +1054,7 @@ export async function bulkUnstageRuntimeGitPaths(
   filePaths: string[]
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.bulkUnstage({
       worktreePath: resolveLocalWorktreePath(context),
       filePaths,
@@ -1062,9 +1062,9 @@ export async function bulkUnstageRuntimeGitPaths(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.bulkUnstage',
+    (client) => client.git.bulkUnstage,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePaths },
     { timeoutMs: 15_000 }
   )
@@ -1075,7 +1075,7 @@ export async function bulkDiscardRuntimeGitPaths(
   filePaths: string[]
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.bulkDiscard({
       worktreePath: resolveLocalWorktreePath(context),
       filePaths,
@@ -1083,9 +1083,9 @@ export async function bulkDiscardRuntimeGitPaths(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.bulkDiscard',
+    (client) => client.git.bulkDiscard,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePaths },
     { timeoutMs: 15_000 }
   )
@@ -1096,7 +1096,7 @@ export async function discardRuntimeGitPath(
   filePath: string
 ): Promise<void> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     await window.api.git.discard({
       worktreePath: resolveLocalWorktreePath(context),
       filePath,
@@ -1104,9 +1104,9 @@ export async function discardRuntimeGitPath(
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    'git.discard',
+    (client) => client.git.discard,
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), filePath },
     { timeoutMs: 15_000 }
   )
@@ -1117,7 +1117,7 @@ export async function getRuntimeGitRemoteFileUrl(
   args: { relativePath: string; line: number }
 ): Promise<string | null> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.remoteFileUrl({
       worktreePath: resolveLocalWorktreePath(context),
       relativePath: args.relativePath,
@@ -1125,9 +1125,9 @@ export async function getRuntimeGitRemoteFileUrl(
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<string | null>(
+  return callRuntimeOrpc(
     target,
-    'git.remoteFileUrl',
+    (client) => client.git.remoteFileUrl,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       relativePath: args.relativePath,
@@ -1142,16 +1142,16 @@ export async function getRuntimeGitRemoteCommitUrl(
   args: { sha: string }
 ): Promise<string | null> {
   const target = getActiveRuntimeTarget(context.settings)
-  if (target.kind === 'local' || !context.worktreeId) {
+  if (!context.worktreeId) {
     return window.api.git.remoteCommitUrl({
       worktreePath: resolveLocalWorktreePath(context),
       sha: args.sha,
       connectionId: context.connectionId
     })
   }
-  return callRuntimeRpc<string | null>(
+  return callRuntimeOrpc(
     target,
-    'git.remoteCommitUrl',
+    (client) => client.git.remoteCommitUrl,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       sha: args.sha

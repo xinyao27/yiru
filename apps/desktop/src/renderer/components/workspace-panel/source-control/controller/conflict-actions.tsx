@@ -9,6 +9,7 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '~renderer/runtime/git-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { GitConflictOperation } from '~shared/types'
 
@@ -250,7 +251,7 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
                 'Open on {{value0}}',
                 { value0: copy.providerName }
               ),
-              onClick: () => window.api.shell.openUrl(result.url)
+              onClick: () => shellClient.shell.openUrl(result.url)
             }
           }
         )

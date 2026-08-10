@@ -917,10 +917,6 @@ export async function getDefaultRemote(
   }
 }
 
-export async function searchBaseRefs(path: string, query: string, limit = 25): Promise<string[]> {
-  return (await searchBaseRefDetails(path, query, limit)).map((entry) => entry.refName)
-}
-
 export async function searchBaseRefDetails(
   path: string,
   query: string,
@@ -980,21 +976,6 @@ async function listRemoteNames(path: string, options: LocalGitExecOptions = {}):
   } catch {
     return []
   }
-}
-
-/**
- * Parse `git for-each-ref --format=%(refname)%00%(refname:short)` stdout
- * into a deduped list of short refs, filtering out `<remote>/HEAD`
- * pseudo-refs, honoring a limit.
- *
- * Why: shared between the local `searchBaseRefs` and the SSH branch in
- * `src/main/project-groups/repos.ts` so both return identical, correctly-filtered
- * results. The same bug class (wrong filter ordering, HEAD leaking into
- * results, duplicate short refs) that motivated this helper originally
- * lived in a single location; two copies double the regression surface.
- */
-export function parseAndFilterSearchRefs(stdout: string, limit: number): string[] {
-  return parseAndFilterSearchRefDetails(stdout, limit).map((entry) => entry.refName)
 }
 
 export function parseAndFilterSearchRefDetails(

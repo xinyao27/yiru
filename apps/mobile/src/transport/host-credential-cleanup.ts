@@ -200,10 +200,6 @@ export async function loadPendingHostCredentialCleanup(): Promise<PendingHostCre
   return loadPendingCleanupState()
 }
 
-export async function loadPendingHostCredentialCleanupIds(): Promise<string[]> {
-  return (await loadPendingCleanupState()).ids
-}
-
 export function subscribePendingHostCredentialCleanup(listener: () => void): () => void {
   pendingListeners.add(listener)
   return () => pendingListeners.delete(listener)

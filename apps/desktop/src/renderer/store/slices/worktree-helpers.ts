@@ -178,11 +178,7 @@ export type WorktreeSlice = {
   removeWorktree: (
     worktreeId: string,
     force?: boolean,
-    // 'forget-local' drops the workspace from Yiru only (no remote Git/FS work)
-    // for workspaces pinned to a removed/disconnected SSH host. Reuses the same
-    // renderer-side teardown/purge as a normal remove.
     options?: {
-      mode?: 'remove' | 'forget-local'
       suppressPreservedBranchToast?: boolean
     }
   ) => Promise<({ ok: true } & RemoveWorktreeResult) | { ok: false; error: string }>
@@ -193,6 +189,9 @@ export type WorktreeSlice = {
     branchName: string,
     expectedHead: string
   ) => Promise<({ ok: true } & ForceDeleteWorktreeBranchResult) | { ok: false; error: string }>
+  /** Full CLI output of the last branch auto-rename generation failure, held
+   *  in main memory only on whichever host owns the worktree. */
+  getWorktreeBranchRenameFailureOutput: (worktreeId: string) => Promise<string | null>
   clearWorktreeDeleteState: (worktreeId: string) => void
   updateWorktreeMeta: (
     worktreeId: string,

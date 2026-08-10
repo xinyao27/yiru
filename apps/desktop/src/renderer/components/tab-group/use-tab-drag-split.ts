@@ -114,23 +114,6 @@ export function canDropTabIntoPaneBody({
   return true
 }
 
-export function canDropTabForPaneColumnSplit(args: {
-  activeDrag: TabDragItemData | null
-  groupsByWorktree: Record<string, TabGroup[]>
-  targetGroupId: string
-  worktreeId: string
-}): boolean {
-  if (!args.activeDrag || args.activeDrag.groupId !== args.targetGroupId) {
-    return false
-  }
-  return canDropTabIntoPaneBody({
-    activeDrag: args.activeDrag,
-    groupsByWorktree: args.groupsByWorktree,
-    overGroupId: args.targetGroupId,
-    worktreeId: args.worktreeId
-  })
-}
-
 export function isTabDragData(value: unknown): value is TabDragItemData {
   return Boolean(value) && typeof value === 'object' && (value as TabDragItemData).kind === 'tab'
 }

@@ -1,4 +1,5 @@
 import type { IDisposable } from '@xterm/xterm'
+import { getRendererKeyboardInputSourceId } from '~renderer/runtime/keyboard-input-source-client'
 
 export type MacNativeTextInputSourceFeatures = Readonly<{
   forwardAsciiPunctuation: boolean
@@ -59,28 +60,7 @@ const VIETNAMESE_INPUT_SOURCE_TERMS = ['telex', 'unikey', 'vietnam', 'vni'] as c
 const KEYBOARD_ACTIVITY_REFRESH_COOLDOWN_MS = 1000
 
 function defaultKeyboardInputSourceReader(): KeyboardInputSourceReader {
-  return async () => {
-    const api = (
-      globalThis as {
-        window?: {
-          api?: {
-            app?: {
-              getKeyboardInputSourceId?: () => Promise<string | null>
-            }
-          }
-        }
-      }
-    ).window?.api
-    const reader = api?.app?.getKeyboardInputSourceId
-    if (!reader) {
-      return null
-    }
-    try {
-      return await reader()
-    } catch {
-      return null
-    }
-  }
+  return getRendererKeyboardInputSourceId
 }
 
 export function getMacNativeTextInputSourceFeatures(

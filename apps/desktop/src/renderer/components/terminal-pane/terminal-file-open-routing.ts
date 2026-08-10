@@ -9,6 +9,8 @@ import {
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { resolveKnownWorktreeRootPathLink } from './terminal-worktree-path-link'
@@ -118,7 +120,7 @@ export function openDetectedFilePath(
     try {
       // Why: remote paths don't need local auth — the relay/runtime is the security boundary.
       if (canOpenWithSystemDefault) {
-        await window.api.fs.authorizeExternalPath({ targetPath: filePath })
+        await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
       }
       statResult = await statRuntimePath(fileContext, filePath)
     } catch {
@@ -132,7 +134,7 @@ export function openDetectedFilePath(
     if (openWithSystemDefault && canOpenWithSystemDefault) {
       // Why: Shift+Cmd/Ctrl mirrors URL links by escaping Yiru and honoring the
       // user's OS file associations without adding editor-specific settings.
-      const openedWithSystemDefault = await window.api.shell.openFilePath(filePath)
+      const openedWithSystemDefault = await shellClient.shell.openFilePath(filePath)
       if (openedWithSystemDefault || statResult.isDirectory) {
         return
       }
@@ -140,7 +142,7 @@ export function openDetectedFilePath(
 
     if (statResult.isDirectory) {
       if (canOpenWithSystemDefault) {
-        await window.api.shell.openFilePath(filePath)
+        await shellClient.shell.openFilePath(filePath)
       }
       return
     }

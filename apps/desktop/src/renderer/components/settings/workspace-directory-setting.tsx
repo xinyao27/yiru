@@ -3,6 +3,7 @@ import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useId, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { isImeCompositionKeyDown } from '~renderer/lib/ime-composition-keyboard-event'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import {
   getEffectiveHostSetting,
   getHostSettingOverride,
@@ -128,7 +129,7 @@ export function WorkspaceDirectorySetting({
 
   const handleBrowse = async (): Promise<void> => {
     try {
-      const path = await window.api.repos.pickFolder()
+      const path = await workspaceHostClient.repos.pickFolder()
       if (path) {
         setDraft(path)
         writeValue(path)

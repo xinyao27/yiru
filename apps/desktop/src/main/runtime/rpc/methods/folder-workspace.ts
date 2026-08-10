@@ -1,111 +1,42 @@
-import { z } from 'zod'
-import {
-  OptionalFiniteNumber,
-  OptionalString,
-  requiredString
-} from '~shared/runtime-method-contracts/runtime-method-params'
-import { isTuiAgent } from '~shared/tui-agent/config'
+import type {
+  FolderWorkspaceCreateInput,
+  FolderWorkspacePathStatusInput,
+  FolderWorkspaceSelectorInput,
+  FolderWorkspaceUpdateInput,
+  RuntimeFolderWorkspaceDeleteResult,
+  RuntimeFolderWorkspaceListResult,
+  RuntimeFolderWorkspacePathStatusResult,
+  RuntimeFolderWorkspaceResult,
+  RuntimeNullableFolderWorkspaceResult
+} from '@yiru/runtime-protocol/contract'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext, RpcHandler } from '../core'
 
-const FolderWorkspaceLinkedReview = z
-  .object({
-    provider: z.enum(['github', 'gitlab']),
-    type: z.enum(['pr', 'mr']),
-    number: z.number().finite(),
-    title: requiredString('Missing linked review title'),
-    url: requiredString('Missing linked review URL'),
-    repoId: OptionalString
-  })
-  .nullable()
+// Why: the contract leaf has no `.input()`, so oRPC infers `unknown` rather
+// than `void` — direct wiring checks the handler against that real shape,
+// unlike the legacy registry's erased `RpcMethod['handler']` (same class of
+// gap as settings/ui's void→unknown fix, Phase 6 D-stage 切片 61).
+export function handleFolderWorkspaceList(
+  _params: unknown,
+  { runtime }: RpcContext
+): RuntimeFolderWorkspaceListResult {
+  return { folderWorkspaces: runtime.listFolderWorkspaces() }
+}
 
-const FolderWorkspaceCreate = z.object({
-  projectGroupId: requiredString('Missing project group id'),
-  name: OptionalString,
-  folderPath: OptionalString.nullable().optional(),
-  connectionId: OptionalString.nullable().optional(),
-  linkedReview: FolderWorkspaceLinkedReview.optional(),
-  createdWithAgent: z.string().refine(isTuiAgent).optional(),
-  pendingFirstAgentMessageRename: z.boolean().optional()
-})
+export const handleFolderWorkspaceCreate = (async (params, { runtime }) => ({
+  folderWorkspace: await runtime.createFolderWorkspace(params)
+})) satisfies RpcHandler<FolderWorkspaceCreateInput, RuntimeFolderWorkspaceResult>
 
-const FolderWorkspaceUpdate = z.object({
-  folderWorkspaceId: requiredString('Missing folder workspace id'),
-  updates: z.object({
-    name: OptionalString,
-    folderPath: OptionalString,
-    linkedReview: FolderWorkspaceLinkedReview.optional(),
-    comment: z.string().optional(),
-    isArchived: z.boolean().optional(),
-    isUnread: z.boolean().optional(),
-    isPinned: z.boolean().optional(),
-    sortOrder: OptionalFiniteNumber,
-    manualOrder: OptionalFiniteNumber,
-    workspaceStatus: OptionalString,
-    createdWithAgent: z.string().refine(isTuiAgent).optional(),
-    pendingFirstAgentMessageRename: z.boolean().optional(),
-    firstAgentMessageRenameError: z.string().nullable().optional(),
-    lastActivityAt: OptionalFiniteNumber
-  })
-})
+export const handleFolderWorkspaceUpdate = (async (params, { runtime }) => ({
+  folderWorkspace: await runtime.updateFolderWorkspace(params.folderWorkspaceId, params.updates)
+})) satisfies RpcHandler<FolderWorkspaceUpdateInput, RuntimeNullableFolderWorkspaceResult>
 
-const FolderWorkspaceSelector = z.object({
-  folderWorkspaceId: requiredString('Missing folder workspace id')
-})
+export const handleFolderWorkspaceDelete = (async (params, { runtime }) =>
+  runtime.deleteFolderWorkspace(params.folderWorkspaceId)) satisfies RpcHandler<
+  FolderWorkspaceSelectorInput,
+  RuntimeFolderWorkspaceDeleteResult
+>
 
-const FolderWorkspacePathStatus = z.discriminatedUnion('scope', [
-  z.object({
-    scope: z.literal('folder-workspace'),
-    folderWorkspaceId: requiredString('Missing folder workspace id')
-  }),
-  z.object({
-    scope: z.literal('project-group'),
-    projectGroupId: requiredString('Missing project group id')
-  }),
-  z.object({
-    scope: z.literal('path'),
-    path: requiredString('Missing folder path')
-  })
-])
-
-export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'folderWorkspace.list',
-    mobile: true,
-    params: null,
-    access: { scope: 'project', tier: 'read' },
-    handler: (_params, { runtime }) => ({
-      folderWorkspaces: runtime.listFolderWorkspaces()
-    })
-  }),
-  defineMethod({
-    name: 'folderWorkspace.create',
-    params: FolderWorkspaceCreate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      folderWorkspace: await runtime.createFolderWorkspace(params)
-    })
-  }),
-  defineMethod({
-    name: 'folderWorkspace.update',
-    params: FolderWorkspaceUpdate,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      folderWorkspace: await runtime.updateFolderWorkspace(params.folderWorkspaceId, params.updates)
-    })
-  }),
-  defineMethod({
-    name: 'folderWorkspace.delete',
-    params: FolderWorkspaceSelector,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) => runtime.deleteFolderWorkspace(params.folderWorkspaceId)
-  }),
-  defineMethod({
-    name: 'folderWorkspace.getPathStatus',
-    params: FolderWorkspacePathStatus,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { runtime }) => ({
-      status: await runtime.getFolderWorkspacePathStatus(params)
-    })
-  })
-]
+export const handleFolderWorkspaceGetPathStatus = (async (params, { runtime }) => ({
+  status: await runtime.getFolderWorkspacePathStatus(params)
+})) satisfies RpcHandler<FolderWorkspacePathStatusInput, RuntimeFolderWorkspacePathStatusResult>

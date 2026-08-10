@@ -1,6 +1,7 @@
 import type { GitHubPRMergeMethod } from '@yiru/workbench-model/review'
 
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { buildGithubPrParams, type GitHubPrRepoSlug } from './github-rpc'
 
@@ -14,19 +15,14 @@ export type GitHubPrMutationOutcome = { ok: true } | { ok: false; error: string 
 // Sends a request whose host result is a bare boolean (not the `{ ok }` envelope),
 // normalizing a transport throw into a failure so the raw-boolean callers below
 // never see an unhandled rejection.
-type RawResult = { ok: true; result: unknown } | { ok: false; error: string }
+type RawResult<TResult> = { ok: true; result: TResult } | { ok: false; error: string }
 
-async function sendRaw(
-  client: Pick<RpcClient, 'sendRequest'>,
+async function readRawResult<TResult>(
   method: string,
-  params: Record<string, unknown>
-): Promise<RawResult> {
+  request: () => Promise<TResult>
+): Promise<RawResult<TResult>> {
   try {
-    const response = await client.sendRequest(method, params)
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || `Request failed: ${method}` }
-    }
-    return { ok: true, result: response.result }
+    return { ok: true, result: await request() }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : `Request failed: ${method}` }
   }
@@ -51,25 +47,15 @@ function extractMutationError(error: unknown, method: string): string {
 // `response.ok === false` (timeout/connection) is also a failure. Both collapse
 // into one outcome the action hook classifies via classifyPrSidebarFailure.
 async function sendGithubPrMutation(
-  client: Pick<RpcClient, 'sendRequest'>,
   method: string,
-  params: Record<string, unknown>
+  request: () => Promise<{ ok: true } | { ok: false; error: string }>
 ): Promise<GitHubPrMutationOutcome> {
   try {
-    const response = await client.sendRequest(method, params)
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || `Request failed: ${method}` }
+    const result = await request()
+    if (result.ok) {
+      return { ok: true }
     }
-    const result = response.result
-    if (result && typeof result === 'object' && 'ok' in result) {
-      const r = result as { ok: boolean; error?: unknown }
-      if (r.ok === true) {
-        return { ok: true }
-      }
-      return { ok: false, error: extractMutationError(r.error, method) }
-    }
-    // No structured status (host returned void/undefined) — treat as success.
-    return { ok: true }
+    return { ok: false, error: extractMutationError(result.error, method) }
   } catch (err) {
     // Why: a transport drop must not escape as an unhandled rejection — normalize
     // to the `{ ok:false, error }` outcome the action engine routes on.
@@ -78,18 +64,20 @@ async function sendGithubPrMutation(
 }
 
 export async function fetchMergePR(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; method?: GitHubPRMergeMethod; prRepo?: GitHubPrRepoSlug | null }
 ): Promise<GitHubPrMutationOutcome> {
-  const params: Record<string, unknown> = { prNumber: args.prNumber }
-  if (args.method) {
-    params.method = args.method
+  const params = {
+    prNumber: args.prNumber,
+    ...(args.method ? { method: args.method } : {})
   }
-  return sendGithubPrMutation(
-    client,
-    'github.mergePR',
-    buildGithubPrParams('github.mergePR', worktreeId, params, { prRepo: args.prRepo })
+  return sendGithubPrMutation('github.mergePR', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.mergePR,
+      buildGithubPrParams('github.mergePR', worktreeId, params, { prRepo: args.prRepo })
+    )
   )
 }
 
@@ -97,21 +85,24 @@ export async function fetchMergePR(
 // which sendGithubPrMutation reads via its "no structured status" success branch
 // only when not boolean — so handle the boolean explicitly like resolveReviewThread.
 export async function fetchUpdatePRTitle(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; title: string; prRepo?: GitHubPrRepoSlug | null }
 ): Promise<GitHubPrMutationOutcome> {
-  const params: Record<string, unknown> = { prNumber: args.prNumber, title: args.title }
+  const params = {
+    prNumber: args.prNumber,
+    title: args.title,
+    ...(args.prRepo ? { prRepo: { owner: args.prRepo.owner, repo: args.prRepo.repo } } : {})
+  }
   // updatePRTitle accepts prRepo for fork PRs, but it is not in the centralized
   // METHODS_ACCEPTING_PR_REPO read allow-list — pass it explicitly so it reaches the
   // host schema (which declares it optional/nullable).
-  if (args.prRepo) {
-    params.prRepo = { owner: args.prRepo.owner, repo: args.prRepo.repo }
-  }
-  const response = await sendRaw(
-    client,
-    'github.updatePRTitle',
-    buildGithubPrParams('github.updatePRTitle', worktreeId, params)
+  const response = await readRawResult('github.updatePRTitle', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.updatePRTitle,
+      buildGithubPrParams('github.updatePRTitle', worktreeId, params)
+    )
   )
   if (!response.ok) {
     return { ok: false, error: response.error || 'Request failed: github.updatePRTitle' }
@@ -125,7 +116,7 @@ export async function fetchUpdatePRTitle(
 }
 
 export async function fetchSetPRAutoMerge(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: {
     prNumber: number
@@ -134,62 +125,73 @@ export async function fetchSetPRAutoMerge(
     prRepo?: GitHubPrRepoSlug | null
   }
 ): Promise<GitHubPrMutationOutcome> {
-  const params: Record<string, unknown> = { prNumber: args.prNumber, enabled: args.enabled }
-  if (args.method) {
-    params.method = args.method
+  const params = {
+    prNumber: args.prNumber,
+    enabled: args.enabled,
+    ...(args.method ? { method: args.method } : {})
   }
-  return sendGithubPrMutation(
-    client,
-    'github.setPRAutoMerge',
-    buildGithubPrParams('github.setPRAutoMerge', worktreeId, params, { prRepo: args.prRepo })
+  return sendGithubPrMutation('github.setPRAutoMerge', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.setPRAutoMerge,
+      buildGithubPrParams('github.setPRAutoMerge', worktreeId, params, {
+        prRepo: args.prRepo
+      })
+    )
   )
 }
 
 export async function fetchUpdatePRState(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; state: 'open' | 'closed' }
 ): Promise<GitHubPrMutationOutcome> {
   // updatePRState does NOT accept prRepo (KTD3) — buildGithubPrParams omits it.
-  return sendGithubPrMutation(
-    client,
-    'github.updatePRState',
-    buildGithubPrParams('github.updatePRState', worktreeId, {
-      prNumber: args.prNumber,
-      updates: { state: args.state }
-    })
+  return sendGithubPrMutation('github.updatePRState', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.updatePRState,
+      buildGithubPrParams('github.updatePRState', worktreeId, {
+        prNumber: args.prNumber,
+        updates: { state: args.state }
+      })
+    )
   )
 }
 
 export async function fetchRequestPRReviewers(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; reviewers: string[] }
 ): Promise<GitHubPrMutationOutcome> {
   // requestPRReviewers does NOT accept prRepo (KTD3).
-  return sendGithubPrMutation(
-    client,
-    'github.requestPRReviewers',
-    buildGithubPrParams('github.requestPRReviewers', worktreeId, {
-      prNumber: args.prNumber,
-      reviewers: args.reviewers
-    })
+  return sendGithubPrMutation('github.requestPRReviewers', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.requestPRReviewers,
+      buildGithubPrParams('github.requestPRReviewers', worktreeId, {
+        prNumber: args.prNumber,
+        reviewers: args.reviewers
+      })
+    )
   )
 }
 
 export async function fetchRemovePRReviewers(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; reviewers: string[] }
 ): Promise<GitHubPrMutationOutcome> {
   // removePRReviewers does NOT accept prRepo (KTD3).
-  return sendGithubPrMutation(
-    client,
-    'github.removePRReviewers',
-    buildGithubPrParams('github.removePRReviewers', worktreeId, {
-      prNumber: args.prNumber,
-      reviewers: args.reviewers
-    })
+  return sendGithubPrMutation('github.removePRReviewers', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.removePRReviewers,
+      buildGithubPrParams('github.removePRReviewers', worktreeId, {
+        prNumber: args.prNumber,
+        reviewers: args.reviewers
+      })
+    )
   )
 }
 
@@ -197,7 +199,7 @@ export async function fetchRemovePRReviewers(
 // (`{ ok, comment } | { ok:false, error }`), which sendGithubPrMutation reads via
 // its `ok in result` branch. We refetch afterward, so the returned comment is unused.
 export async function fetchAddPRReviewCommentReply(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: {
     prNumber: number
@@ -209,50 +211,44 @@ export async function fetchAddPRReviewCommentReply(
     prRepo?: GitHubPrRepoSlug | null
   }
 ): Promise<GitHubPrMutationOutcome> {
-  const params: Record<string, unknown> = {
+  const params = {
     prNumber: args.prNumber,
     commentId: args.commentId,
-    body: args.body
-  }
-  if (args.threadId) {
-    params.threadId = args.threadId
-  }
-  if (args.path) {
-    params.path = args.path
-  }
-  if (typeof args.line === 'number') {
-    params.line = args.line
+    body: args.body,
+    ...(args.threadId ? { threadId: args.threadId } : {}),
+    ...(args.path ? { path: args.path } : {}),
+    ...(typeof args.line === 'number' ? { line: args.line } : {}),
+    ...(args.prRepo ? { prRepo: { owner: args.prRepo.owner, repo: args.prRepo.repo } } : {})
   }
   // addPRReviewCommentReply accepts prRepo for fork PRs, but it is not in the
   // centralized METHODS_ACCEPTING_PR_REPO allow-list (read-focused) — pass it
   // explicitly so it reaches the host schema, which declares it optional.
-  if (args.prRepo) {
-    params.prRepo = { owner: args.prRepo.owner, repo: args.prRepo.repo }
-  }
-  return sendGithubPrMutation(
-    client,
-    'github.addPRReviewCommentReply',
-    buildGithubPrParams('github.addPRReviewCommentReply', worktreeId, params)
+  return sendGithubPrMutation('github.addPRReviewCommentReply', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.addPRReviewCommentReply,
+      buildGithubPrParams('github.addPRReviewCommentReply', worktreeId, params)
+    )
   )
 }
 
 // Add a root conversation comment to the PR. Host returns GitHubCommentResult.
 export async function fetchAddPRComment(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; body: string; prRepo?: GitHubPrRepoSlug | null }
 ): Promise<GitHubPrMutationOutcome> {
-  const params: Record<string, unknown> = {
+  const params = {
     number: args.prNumber,
-    body: args.body
+    body: args.body,
+    ...(args.prRepo ? { prRepo: { owner: args.prRepo.owner, repo: args.prRepo.repo } } : {})
   }
-  if (args.prRepo) {
-    params.prRepo = { owner: args.prRepo.owner, repo: args.prRepo.repo }
-  }
-  return sendGithubPrMutation(
-    client,
-    'github.addPRComment',
-    buildGithubPrParams('github.addPRComment', worktreeId, params)
+  return sendGithubPrMutation('github.addPRComment', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.addPRComment,
+      buildGithubPrParams('github.addPRComment', worktreeId, params)
+    )
   )
 }
 
@@ -260,17 +256,19 @@ export async function fetchAddPRComment(
 // the matching GraphQL mutation). Unlike the comment mutations, the host returns a
 // bare boolean, so a falsy result is a failure rather than the "no status" success.
 export async function fetchResolveReviewThread(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { threadId: string; resolve: boolean }
 ): Promise<GitHubPrMutationOutcome> {
-  const response = await sendRaw(
-    client,
-    'github.resolveReviewThread',
-    buildGithubPrParams('github.resolveReviewThread', worktreeId, {
-      threadId: args.threadId,
-      resolve: args.resolve
-    })
+  const response = await readRawResult('github.resolveReviewThread', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.resolveReviewThread,
+      buildGithubPrParams('github.resolveReviewThread', worktreeId, {
+        threadId: args.threadId,
+        resolve: args.resolve
+      })
+    )
   )
   if (!response.ok) {
     return {
@@ -287,21 +285,21 @@ export async function fetchResolveReviewThread(
 }
 
 export async function fetchRerunPRChecks(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: { prNumber: number; headSha?: string | null; failedOnly?: boolean }
 ): Promise<GitHubPrMutationOutcome> {
   // rerunPRChecks does NOT accept prRepo (KTD3); headSha is a plain param here.
-  const params: Record<string, unknown> = { prNumber: args.prNumber }
-  if (args.failedOnly !== undefined) {
-    params.failedOnly = args.failedOnly
+  const params = {
+    prNumber: args.prNumber,
+    ...(args.failedOnly !== undefined ? { failedOnly: args.failedOnly } : {}),
+    ...(args.headSha ? { headSha: args.headSha } : {})
   }
-  if (args.headSha) {
-    params.headSha = args.headSha
-  }
-  return sendGithubPrMutation(
-    client,
-    'github.rerunPRChecks',
-    buildGithubPrParams('github.rerunPRChecks', worktreeId, params)
+  return sendGithubPrMutation('github.rerunPRChecks', () =>
+    callRuntimeOrpc(
+      client,
+      (runtime) => runtime.github.rerunPRChecks,
+      buildGithubPrParams('github.rerunPRChecks', worktreeId, params)
+    )
   )
 }

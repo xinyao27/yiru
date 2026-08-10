@@ -18,7 +18,7 @@ type RowState = Pick<
   | 'openingPath'
   | 'openingBranchPath'
   | 'openFile'
-  | 'runGitAction'
+  | 'runGitStep'
   | 'setDiscardTarget'
 >
 
@@ -28,7 +28,7 @@ export function makeRenderFileRow(
   MobileGitStatusEntryView,
   MobileSourceControlSection<MobileGitStatusEntryView>
 > {
-  const { busyAction, openingPath, openingBranchPath, openFile, runGitAction, setDiscardTarget } =
+  const { busyAction, openingPath, openingBranchPath, openFile, runGitStep, setDiscardTarget } =
     state
   return function FileRow({ item }) {
     const rowBusy =
@@ -85,7 +85,7 @@ export function makeRenderFileRow(
             icon="minus"
             onPress={(event) => {
               event.stopPropagation()
-              void runGitAction(item.unstageActionId, 'git.unstage', { filePath: item.path })
+              void runGitStep(item.unstageActionId, { kind: 'unstage', filePath: item.path })
             }}
             size="small"
           />
@@ -98,7 +98,7 @@ export function makeRenderFileRow(
                 icon="plus"
                 onPress={(event) => {
                   event.stopPropagation()
-                  void runGitAction(item.stageActionId, 'git.stage', { filePath: item.path })
+                  void runGitStep(item.stageActionId, { kind: 'stage', filePath: item.path })
                 }}
                 size="small"
               />

@@ -35,8 +35,9 @@ export type CoworkingHostDeviceEntry = DeviceEntryBase & {
 }
 
 export type MobileDeviceEntry = DeviceEntryBase & { scope: 'mobile' }
+export type RuntimeDeviceEntry = DeviceEntryBase & { scope: 'runtime' }
 
-export type DeviceEntry = MobileDeviceEntry | CoworkingHostDeviceEntry
+export type DeviceEntry = MobileDeviceEntry | RuntimeDeviceEntry | CoworkingHostDeviceEntry
 
 type StoredDeviceEntry = DeviceEntryBase & {
   scope?: unknown
@@ -138,9 +139,24 @@ export class DeviceRegistry {
     return entry
   }
 
+  addRuntimeDevice(name: string): RuntimeDeviceEntry {
+    const entry: RuntimeDeviceEntry = {
+      deviceId: randomUUID(),
+      name,
+      token: randomBytes(24).toString('hex'),
+      scope: 'runtime',
+      pairedAt: Date.now(),
+      lastSeenAt: 0
+    }
+    // Why: runtime web credentials live only for the host process. The secure
+    // pairing file is their sole handoff, and shutdown explicitly revokes them.
+    this.devices.push(entry)
+    return entry
+  }
+
   // Why: coalesce repeated QR-regenerate clicks onto a single pending token.
   // Each call to addDevice() produces a valid auth credential; without
-  // coalescing, every renderer call to mobile:getPairingQR (e.g. the new
+  // coalescing, every renderer call to `mobile.getPairingQR` (e.g. the new
   // copy-button flow that encourages regeneration) leaves an orphaned token
   // forever. Returns an existing never-scanned entry if present; otherwise
   // mints a new one and drops any stale pending entries.
@@ -290,6 +306,11 @@ export class DeviceRegistry {
   }
 
   private save(): void {
-    writeSecureJsonFile(this.registryPath, this.devices)
+    // Why: runtime credentials are process-bound and must not survive a crash
+    // or restart; mobile devices and Coworking grants remain durable.
+    writeSecureJsonFile(
+      this.registryPath,
+      this.devices.filter((device) => device.scope !== 'runtime')
+    )
   }
 }

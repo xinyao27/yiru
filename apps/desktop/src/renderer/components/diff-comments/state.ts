@@ -4,11 +4,12 @@ so every write follows the same queue and rollback invariants. */
 import type { StateCreator } from 'zustand'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
 import type { AppState } from '~renderer/store/types'
-import { WORKTREE_SET_CONTRACT } from '~shared/runtime-method-contracts/workspace-contracts'
 import type { DiffComment, Worktree } from '~shared/types'
 
 export type DiffCommentsSlice = {
@@ -103,15 +104,15 @@ async function persist(
 ): Promise<void> {
   const target = getActiveRuntimeTarget(settings)
   if (target.kind === 'local') {
-    await window.api.worktrees.updateMeta({
+    await workspaceHostClient.worktrees.updateMeta({
       worktreeId,
       updates: { diffComments }
     })
     return
   }
-  await callRuntimeRpc(
+  await callRuntimeOrpc(
     target,
-    WORKTREE_SET_CONTRACT,
+    (client) => client.worktree.set,
     { worktree: toRuntimeWorktreeSelector(worktreeId), diffComments },
     { timeoutMs: 15_000 }
   )

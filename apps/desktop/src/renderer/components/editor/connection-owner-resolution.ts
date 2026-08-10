@@ -64,7 +64,10 @@ export function getConnectionIdFromState(
   const worktree = getIndexedWorktreeMap(state.worktreesByRepo).get(worktreeId)
   const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(worktreeId)
   const repo = getIndexedRepoMap(state.repos).get(repoId)
-  return repo ? (repo.connectionId ?? null) : undefined
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — so a direct repo/worktree owner is never remote; only the
+  // folder-workspace branch above can still resolve a live connection id.
+  return repo ? null : undefined
 }
 
 export function getConnectionIdForFileFromState(
@@ -84,18 +87,14 @@ export function getConnectionIdForFileFromState(
     state,
     parsedWorkspaceKey.folderWorkspaceId
   )
-  const matchingRepos = candidateRepos
+  const longestMatchingPathLength = candidateRepos
     .filter((repo) => isPathInsideOrEqual(repo.path, filePath))
-    .map((repo) => ({ repo, normalizedPath: normalizeRuntimePathForComparison(repo.path) }))
-    .sort((left, right) => right.normalizedPath.length - left.normalizedPath.length)
-  const longestPathLength = matchingRepos[0]?.normalizedPath.length
-  if (!longestPathLength) {
-    return undefined
-  }
-  const connectionIds = new Set(
-    matchingRepos
-      .filter((candidate) => candidate.normalizedPath.length === longestPathLength)
-      .map(({ repo }) => repo.connectionId ?? null)
-  )
-  return connectionIds.size === 1 ? ([...connectionIds][0] ?? null) : undefined
+    .reduce(
+      (longest, repo) => Math.max(longest, normalizeRuntimePathForComparison(repo.path).length),
+      0
+    )
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — every matching repo already resolves to a local (null)
+  // connection, so the only remaining question is whether one matched at all.
+  return longestMatchingPathLength ? null : undefined
 }

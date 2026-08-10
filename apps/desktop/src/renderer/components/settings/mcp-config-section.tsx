@@ -18,6 +18,7 @@ import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { joinPath } from '~renderer/lib/path'
 import { getRuntimeEnvironmentIdForRepo } from '~renderer/lib/repo-runtime-owner'
 import { writeRuntimeFile, type RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   canInspectLocalMcpConfigRoot,
@@ -147,7 +148,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
         return
       }
 
-      if (isLocalRepo && !(await window.api.shell.pathExists(targetRootPath))) {
+      if (isLocalRepo && !(await shellClient.shell.pathExists(targetRootPath))) {
         if (mountedRef.current) {
           setConfigs(missingInspections)
           setInspectionUnavailableMessage('This workspace path is not available on disk.')

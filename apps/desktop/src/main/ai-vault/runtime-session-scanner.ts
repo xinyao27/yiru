@@ -1,3 +1,4 @@
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '@yiru/runtime-protocol/ai-vault'
 import {
   AI_VAULT_AGENTS,
   AI_VAULT_SCOPE_PATHS_MAX_COUNT,
@@ -8,7 +9,6 @@ import {
 import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 import { listEnvironments } from '~shared/runtime-environment-store'
-import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '~shared/runtime-method-contracts/ai-vault-contracts'
 
 import { callRuntimeEnvironment } from '../runtime/environment-transport-routing'
 

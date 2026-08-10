@@ -1,4 +1,6 @@
-import type { RpcClient } from '../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { updateHomeStatsByHost } from './stats-state'
 import { parseRuntimeStatsSummary } from './stats-summary'
 
@@ -8,11 +10,13 @@ export async function refreshHomeStatsForHost(
   isDisposed: () => boolean = () => false
 ): Promise<void> {
   try {
-    const response = await client.sendRequest('stats.summary', { refreshUsage: true })
-    if (isDisposed() || !response.ok) {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.stats.summary, {
+      refreshUsage: true
+    })
+    if (isDisposed()) {
       return
     }
-    const summary = parseRuntimeStatsSummary(response.result)
+    const summary = parseRuntimeStatsSummary(result)
     if (!summary) {
       return
     }

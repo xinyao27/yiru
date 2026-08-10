@@ -1,4 +1,16 @@
-import type { NotificationDispatchRequest } from '~shared/types'
+import type { NotificationDispatchRequest, NotificationSettings } from '~shared/types'
+
+export type NotificationSoundId = NotificationSettings['customSoundId']
+
+// Why: shared by the runtime's job1 (decides whether the native Notification
+// should embed the OS default sound) and the preload's playSound path (which
+// only ever plays a *custom* sound file) — colocated with buildNotificationOptions
+// since both are pure settings→presentation decisions, not Electron calls.
+export function getEffectiveNotificationSoundId(
+  settings: NotificationSettings
+): NotificationSoundId {
+  return settings.customSoundId ?? (settings.customSoundPath ? 'custom' : 'system')
+}
 
 const NOTIFICATION_AGENT_LABEL_MAX_LENGTH = 40
 const NOTIFICATION_TITLE_CONTEXT_MAX_LENGTH = 80

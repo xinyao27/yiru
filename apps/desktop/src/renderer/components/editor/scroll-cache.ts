@@ -34,10 +34,6 @@ export function setWithLRU<K, V>(
 // every scroll event even though no component renders from scroll position).
 export const scrollTopCache = new Map<string, number>()
 
-// Why: Same rationale as scrollTopCache — module-scoped avoids Zustand
-// re-renders on every cursor move.
-export const cursorPositionCache = new Map<string, { lineNumber: number; column: number }>()
-
 // Why: Diff editors need more than a numeric scroll offset to restore the same
 // working context. Monaco's diff view state also carries cursor/selection state
 // for both sides plus diff model state, which matches VS Code's restore path

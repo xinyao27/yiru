@@ -184,7 +184,10 @@ export function useSourceControlAi({
     activeWorktreeId,
     activeGroupId,
     activeSourceControlLaunchPlatform,
-    sourceRepoConnectionId: activeRepo?.connectionId,
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — getConnectionId already resolves to null for any
+    // found repo, so this fallback can never differ.
+    sourceRepoConnectionId: undefined,
     worktreePath,
     commitMessage,
     commitError,

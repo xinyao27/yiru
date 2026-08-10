@@ -25,7 +25,6 @@ import { basename } from 'node:path'
 import { promisify } from 'node:util'
 
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-import { app } from 'electron'
 import { ORPHAN_WORKTREE_ID } from '~shared/constants'
 import {
   getProcessOutputFields,
@@ -44,13 +43,25 @@ import { listRegisteredPtys } from './pty-registry'
 
 export type MemorySnapshotStore = Pick<Store, 'getRepo' | 'getWorktreeMeta'>
 
+export type RuntimeHostProcessMetric = {
+  pid: number
+  type?: string
+  cpu?: { percentCPUUsage?: number }
+  memory?: { workingSetSize?: number }
+}
+
+export type RuntimeHostProcessMetricsProvider = () => readonly RuntimeHostProcessMetric[]
+
 // ─── Module state ───────────────────────────────────────────────────
 
 let inflight: Promise<MemorySnapshot> | null = null
 
 // ─── Public API ─────────────────────────────────────────────────────
 
-export async function collectMemorySnapshot(store: MemorySnapshotStore): Promise<MemorySnapshot> {
+export async function collectMemorySnapshot(
+  store: MemorySnapshotStore,
+  getHostProcessMetrics: RuntimeHostProcessMetricsProvider = getNodeHostProcessMetrics
+): Promise<MemorySnapshot> {
   // Why: coalescing relies on the persistence store being a process-wide
   // singleton at runtime. Concurrent callers all hand in the same instance,
   // so it is safe to return the existing in-flight promise (which was
@@ -58,7 +69,7 @@ export async function collectMemorySnapshot(store: MemorySnapshotStore): Promise
   if (inflight) {
     return inflight
   }
-  inflight = runSnapshot(store)
+  inflight = runSnapshot(store, getHostProcessMetrics)
     .catch((err) => {
       console.warn('[memory] snapshot failed; returning empty', err)
       return emptySnapshot()
@@ -320,7 +331,7 @@ function collectSubtree(index: ProcIndex, root: number): number[] {
 type AppBucketsRaw = Omit<AppMemory, 'history'>
 
 function electronMetricMemoryBytes(
-  proc: ReturnType<typeof app.getAppMetrics>[number],
+  proc: RuntimeHostProcessMetric,
   processIndex: ProcIndex
 ): number {
   const hostMemory = processIndex.byPid.get(proc.pid)?.memory
@@ -333,12 +344,15 @@ function electronMetricMemoryBytes(
   return clampNumber(proc.memory?.workingSetSize) * 1024
 }
 
-function bucketElectronMetrics(processIndex: ProcIndex): AppBucketsRaw {
+function bucketHostProcessMetrics(
+  processIndex: ProcIndex,
+  metrics: readonly RuntimeHostProcessMetric[]
+): AppBucketsRaw {
   const main = { cpu: 0, memory: 0 }
   const renderer = { cpu: 0, memory: 0 }
   const other = { cpu: 0, memory: 0 }
 
-  for (const proc of app.getAppMetrics()) {
+  for (const proc of metrics) {
     const cpu = clampNumber(proc.cpu?.percentCPUUsage)
     const memoryBytes = electronMetricMemoryBytes(proc, processIndex)
 
@@ -412,9 +426,23 @@ function makeEmptyBucket(
 
 // ─── Main collection path ───────────────────────────────────────────
 
-async function runSnapshot(store: MemorySnapshotStore): Promise<MemorySnapshot> {
+function getNodeHostProcessMetrics(): readonly RuntimeHostProcessMetric[] {
+  return [
+    {
+      pid: process.pid,
+      type: 'browser',
+      cpu: { percentCPUUsage: 0 },
+      memory: { workingSetSize: process.memoryUsage().rss / 1024 }
+    }
+  ]
+}
+
+async function runSnapshot(
+  store: MemorySnapshotStore,
+  getHostProcessMetrics: RuntimeHostProcessMetricsProvider
+): Promise<MemorySnapshot> {
   const processIndex = await enumerateProcesses()
-  const appBuckets = bucketElectronMetrics(processIndex)
+  const appBuckets = bucketHostProcessMetrics(processIndex, getHostProcessMetrics())
   const ptys = listRegisteredPtys()
 
   // Why: when two PTYs share an ancestor in the process tree (e.g. a

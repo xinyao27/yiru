@@ -575,11 +575,6 @@ function mergeHermesOutputAndSessionRunRefs(
   ]
 }
 
-export async function readHermesCronOutputRuns(jobId: string): Promise<unknown[]> {
-  return (await readHermesCronOutputRunsPage(jobId, { page: 1, pageSize: Number.MAX_SAFE_INTEGER }))
-    .runs
-}
-
 async function readHermesCronOutputRunRefs(jobId: string): Promise<HermesMergedRunRef[]> {
   const outputRuns = await readHermesOutputFileRunRefs(jobId)
   return mergeHermesOutputAndSessionRunRefs(outputRuns, readHermesSessionDbRunRefs(jobId)).sort(

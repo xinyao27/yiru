@@ -12,13 +12,12 @@ import {
 } from './operation'
 import { recoverMobileRejectedPush } from './rejected-push-recovery'
 import type { LoadStatusOptions } from './screen-state'
+import { runMobileGitStep, type MobileGitRequests, type MobileGitStep } from './use-git-requests'
 
-type GitStep = { method: string; params?: Record<string, unknown> }
-type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
 type Params = {
   commitMessage: string
   stagedEntries: MobileCommitFailureRecovery['stagedEntries']
-  sendGitRequest: SendGitRequest
+  gitRequests: MobileGitRequests
   sendCommitRequest: (message: string) => Promise<unknown>
   runGitSyncSteps: () => Promise<MobileSourceControlWorkflowResult>
   runGitWorkflow: RunMobileSourceControlWorkflow
@@ -38,7 +37,7 @@ export function useMobileSourceControlCommitRunners(params: Params) {
   const {
     commitMessage,
     stagedEntries,
-    sendGitRequest,
+    gitRequests,
     sendCommitRequest,
     runGitSyncSteps,
     runGitWorkflow,
@@ -123,7 +122,7 @@ export function useMobileSourceControlCommitRunners(params: Params) {
           const recovered = await recoverMobileRejectedPush({
             actionId,
             error: err,
-            sendGitRequest,
+            gitFetch: gitRequests.fetch,
             loadStatus
           })
           if (!recovered) {
@@ -148,12 +147,12 @@ export function useMobileSourceControlCommitRunners(params: Params) {
     [
       busyActionRef,
       commitMessage,
+      gitRequests,
       loadStatus,
       mountedRef,
       onHostedReviewRefresh,
       recordCommitFailure,
       sendCommitRequest,
-      sendGitRequest,
       setActionError,
       setBusyAction,
       setCommitMessage,
@@ -162,14 +161,14 @@ export function useMobileSourceControlCommitRunners(params: Params) {
   )
 
   const runCommitSequence = useCallback(
-    async (actionId: string, afterCommit: GitStep[]) => {
+    async (actionId: string, afterCommit: MobileGitStep[]) => {
       return await runCommitFollowUps(actionId, async () => {
         for (const step of afterCommit) {
-          await sendGitRequest<unknown>(step.method, step.params)
+          await runMobileGitStep(gitRequests, step)
         }
       })
     },
-    [runCommitFollowUps, sendGitRequest]
+    [gitRequests, runCommitFollowUps]
   )
 
   const runCommitSyncSequence = useCallback(async () => {

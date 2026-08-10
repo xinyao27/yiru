@@ -1,9 +1,5 @@
 import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-import {
-  clearHostSettingOverride,
-  getHostSettingOverride,
-  setHostSettingOverride
-} from '~shared/host-setting-overrides'
+import { getHostSettingOverride, setHostSettingOverride } from '~shared/host-setting-overrides'
 import type { GlobalSettings, HostSettingOverrides } from '~shared/types'
 
 type OverridesSlice = Pick<GlobalSettings, 'hostSettingOverrides'>
@@ -26,14 +22,6 @@ export function applyHostRename(
   nextLabel: string
 ): OverridesMap {
   return setHostSettingOverride(settings, hostId, 'displayLabel', nextLabel)
-}
-
-/** Computes the next `hostSettingOverrides` after resetting a host's label. */
-export function clearHostRename(
-  settings: OverridesSlice | null | undefined,
-  hostId: ExecutionHostId
-): OverridesMap {
-  return clearHostSettingOverride(settings, hostId, 'displayLabel')
 }
 
 export type HostRemovalTarget = { kind: 'runtime'; environmentId: string } | null

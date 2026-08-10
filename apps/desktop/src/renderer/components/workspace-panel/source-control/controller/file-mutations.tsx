@@ -278,5 +278,3 @@ export function useSourceControlFileMutations(scope: SourceControlHistoryControl
     confirmPendingDiscard
   }
 }
-
-export type SourceControlFileMutationsController = ReturnType<typeof useSourceControlFileMutations>

@@ -544,18 +544,6 @@ export function WorktreeRow({
           disabled={!isNavigable}
         >
           <span className="truncate text-xs font-medium">{rowLabel}</span>
-          {/* Why: chip is gated on the repo's SSH connectionId, not on
-              missing data. Warm-reattached local PTYs used to land here
-              with hasLocalSamples=false even though they're plainly
-              local. */}
-          {worktree.isRemote && (
-            <span className="text-muted-foreground/70 shrink-0 text-[9px] tracking-wide uppercase">
-              {translate(
-                'auto.components.status.bar.ResourceUsageStatusSegment.21cacb16d1',
-                '· remote'
-              )}
-            </span>
-          )}
         </Button>
         <div className="flex shrink-0 items-center gap-2 pr-3">
           <div className="relative">
@@ -734,14 +722,6 @@ function ResourceTree({
                   <span className="text-muted-foreground truncate text-[11px] font-semibold tracking-wide uppercase">
                     {group.repoName}
                   </span>
-                  {group.hasRemoteChildren && (
-                    <span className="text-muted-foreground/70 shrink-0 text-[9px] tracking-wide uppercase">
-                      {translate(
-                        'auto.components.status.bar.ResourceUsageStatusSegment.21cacb16d1',
-                        '· remote'
-                      )}
-                    </span>
-                  )}
                 </span>
                 <div className="flex shrink-0 items-center gap-2">
                   <MetricPair cpu={group.cpu} memory={group.memory} />
@@ -929,19 +909,6 @@ export function ResourceUsageStatusSegment({
     return map
   }, [repos])
 
-  // Why: drives the `· remote` chip predicate. A repo with a non-null
-  // connectionId is SSH-backed and its PTYs run on a remote host; that's
-  // the only honest signal for "remote." Building the map from the
-  // canonical store list avoids re-deriving remoteness from a missing
-  // memory sample.
-  const repoConnectionIdById = useMemo(() => {
-    const map = new Map<string, string | null>()
-    for (const repo of repos) {
-      map.set(repo.id, repo.connectionId ?? null)
-    }
-    return map
-  }, [repos])
-
   // Why: runtime-hosted repos never have local daemon samples or killable
   // local sessions; this map drives their per-row exclusion in the merge.
   const repoRuntimeScopedById = useMemo(() => {
@@ -989,7 +956,6 @@ export function ResourceUsageStatusSegment({
             runtimePaneTitlesByTabId,
             workspaceSessionReady,
             repoDisplayNameById,
-            repoConnectionIdById,
             repoRuntimeScopedById,
             browserTabsByWorktree,
             worktreeById
@@ -1005,7 +971,6 @@ export function ResourceUsageStatusSegment({
       runtimePaneTitlesByTabId,
       workspaceSessionReady,
       repoDisplayNameById,
-      repoConnectionIdById,
       repoRuntimeScopedById,
       browserTabsByWorktree,
       worktreeById

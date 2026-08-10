@@ -73,6 +73,16 @@ import {
   WORKSPACE_FILE_PATH_MIME
 } from '~renderer/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import {
+  cancelBrowserDownload,
+  captureBrowserGrabSelection,
+  extractBrowserGrabHover,
+  openBrowserDevTools,
+  proceedBrowserCertificate,
+  registerBrowserGuest,
+  setBrowserAnnotationViewport,
+  setBrowserViewportOverride
+} from '~renderer/runtime/browser-client'
 import { rememberLiveBrowserUrl } from '~renderer/runtime/browser-live-url'
 import {
   applyBrowserPageViewportLayout,
@@ -82,6 +92,7 @@ import {
   subscribeBrowserOverlaySlotViewport,
   syncBrowserPageChromeInset
 } from '~renderer/runtime/browser-page-viewport'
+import { browserShellEventsClient } from '~renderer/runtime/browser-shell-events-client'
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeWebviewDetach,
@@ -93,11 +104,15 @@ import {
   statRuntimePath,
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
+import { subscribeRuntimeOrpcStream } from '~renderer/runtime/orpc-callback-stream'
 import {
-  callRuntimeRpc,
-  RuntimeRpcCallError,
+  callRuntimeOrpc,
+  isRuntimeOrpcErrorCode,
   type RuntimeClientTarget
-} from '~renderer/runtime/rpc-client'
+} from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { useAppStore } from '~renderer/store'
 import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '~shared/browser/annotation-viewport-bridge'
@@ -133,17 +148,8 @@ import {
 } from '~shared/browser/viewport-presets'
 import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '~shared/constants'
 import { keybindingMatchesAction } from '~shared/keybindings'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
-import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
+import type { BrowserTabInfo } from '~shared/runtime-types'
 import type {
-  BrowserBackResult,
-  BrowserGotoResult,
-  BrowserReloadResult,
-  BrowserScreencastResult,
-  BrowserTabInfo
-} from '~shared/runtime-types'
-import type {
-  BrowserCertificateProceedResult,
   BrowserLoadError,
   BrowserPage as BrowserPageState,
   BrowserWorkspace as BrowserWorkspaceState
@@ -301,6 +307,8 @@ type RemoteBrowserViewportSize = {
   width: number
   height: number
 }
+
+type RemoteBrowserNavigation = 'goto' | 'back' | 'forward' | 'reload'
 
 function getBrowserPageRuntimeEnvironmentId(
   page: BrowserPageState,
@@ -536,8 +544,11 @@ function browserPageExists(tabId: string): boolean {
 }
 
 function isRemoteBrowserPageMissingError(error: unknown): boolean {
-  if (error instanceof RuntimeRpcCallError) {
-    return isRemoteBrowserPageMissingCode(error.code)
+  if (
+    isRuntimeOrpcErrorCode(error, 'browser_tab_not_found') ||
+    isRuntimeOrpcErrorCode(error, 'browser_no_tab')
+  ) {
+    return true
   }
   if (!error || typeof error !== 'object' || !('code' in error)) {
     return false
@@ -833,7 +844,7 @@ export default function BrowserPane({
     if (!activeBrowserPageId) {
       return
     }
-    await window.api.runtime.reclaimBrowserForDesktop(activeBrowserPageId)
+    await rendererHostClient.runtime.reclaimBrowserForDesktop(activeBrowserPageId)
   }, [activeBrowserPageId])
 
   if (activeBrowserRuntimeEnvironmentId) {
@@ -1083,9 +1094,9 @@ function RemoteBrowserPagePane({
       if (!target || !size) {
         return
       }
-      await callRuntimeRpc(
+      await callRuntimeOrpc(
         target,
-        'browser.viewport',
+        (client) => client.browser.viewport,
         {
           worktree: runtimeWorktree,
           page: pageId,
@@ -1099,9 +1110,9 @@ function RemoteBrowserPagePane({
       try {
         // Why: the streamed bitmap can include the host compositor surface,
         // while CDP input wants the guest page's CSS viewport coordinates.
-        const viewport = await callRuntimeRpc(
+        const viewport = await callRuntimeOrpc(
           target,
-          'browser.eval',
+          (client) => client.browser.eval,
           {
             worktree: runtimeWorktree,
             page: pageId,
@@ -1323,9 +1334,9 @@ function RemoteBrowserPagePane({
       }
       // Why: remote browser tabs outlive React components on the daemon. Close
       // only when the local page is gone or its owning runtime environment is.
-      void callRuntimeRpc(
+      void callRuntimeOrpc(
         { kind: 'environment', environmentId: removedHandle.environmentId },
-        'browser.tabClose',
+        (client) => client.browser.tabClose,
         { worktree: runtimeWorktree, page: removedHandle.remotePageId },
         { timeoutMs: 15_000, suppressFeatureInteraction: true }
       ).catch(() => {})
@@ -1434,16 +1445,16 @@ function RemoteBrowserPagePane({
         const currentUrl = currentBrowserTabUrlRef.current
         const initialUrl =
           currentUrl === YIRU_BROWSER_BLANK_URL ? 'about:blank' : currentUrl || 'about:blank'
-        const created = await callRuntimeRpc<{ browserPageId: string }>(
+        const created = await callRuntimeOrpc(
           target,
-          'browser.tabCreate',
+          (client) => client.browser.tabCreate,
           { browserPageId: browserTab.id, worktree: runtimeWorktree, url: initialUrl },
           { timeoutMs: 30_000, suppressFeatureInteraction: true }
         )
         if (!isCurrentRemoteOperationToken(token)) {
-          void callRuntimeRpc(
+          void callRuntimeOrpc(
             target,
-            'browser.tabClose',
+            (client) => client.browser.tabClose,
             { worktree: runtimeWorktree, page: created.browserPageId },
             { timeoutMs: 15_000, suppressFeatureInteraction: true }
           ).catch(() => {})
@@ -1500,9 +1511,9 @@ function RemoteBrowserPagePane({
       if (!isCurrentRemoteOperationToken(token) || !token.remotePageId) {
         return null
       }
-      const shown = await callRuntimeRpc<{ tab: BrowserTabInfo }>(
+      const shown = await callRuntimeOrpc(
         { kind: 'environment', environmentId: token.environmentId },
-        'browser.tabShow',
+        (client) => client.browser.tabShow,
         { worktree: runtimeWorktree, page: token.remotePageId },
         { timeoutMs: 15_000, suppressFeatureInteraction: true }
       )
@@ -1640,7 +1651,7 @@ function RemoteBrowserPagePane({
       if (!operationToken || !isCurrentRemoteOperationToken(operationToken)) {
         return null
       }
-      const status = await callRuntimeRpc(target, STATUS_GET_CONTRACT, undefined, {
+      const status = await callRuntimeOrpc(target, (client) => client.status.get, undefined, {
         timeoutMs: 15_000
       })
       if (!status.capabilities?.includes('browser.screencast.v1')) {
@@ -1661,23 +1672,20 @@ function RemoteBrowserPagePane({
       streamGenerationRef.current = token.generation
       activeStreamTokenRef.current = token
       try {
-        const subscription = await window.api.runtimeEnvironments.subscribe(
+        const subscription = await subscribeRuntimeOrpcStream(
+          target,
+          (client) => client.browser.screencast.subscribe,
           {
-            selector: target.environmentId,
-            method: 'browser.screencast',
-            params: withBrowserPaneUiRuntimeRpcSource({
-              worktree: runtimeWorktree,
-              page: pageId,
-              format: 'jpeg',
-              quality: 70,
-              maxWidth: 3840,
-              maxHeight: 2160,
-              viewportWidth: viewportSize?.width,
-              viewportHeight: viewportSize?.height,
-              deviceScaleFactor: getRemoteBrowserDeviceScaleFactor(),
-              everyNthFrame: 2
-            }),
-            timeoutMs: 15_000
+            worktree: runtimeWorktree,
+            page: pageId,
+            format: 'jpeg',
+            quality: 70,
+            maxWidth: 3840,
+            maxHeight: 2160,
+            viewportWidth: viewportSize?.width,
+            viewportHeight: viewportSize?.height,
+            deviceScaleFactor: getRemoteBrowserDeviceScaleFactor(),
+            everyNthFrame: 2
           },
           {
             onResponse: (response) => {
@@ -1693,7 +1701,7 @@ function RemoteBrowserPagePane({
                 handleRemoteStreamClosed(token, false)
                 return
               }
-              const event = response.result as BrowserScreencastResult
+              const event = response.result
               if (event.type === 'ready') {
                 applyRemoteTabInfo(event.tab)
                 void syncRemoteViewport(event.browserPageId).catch(() => {})
@@ -1720,7 +1728,8 @@ function RemoteBrowserPagePane({
             onClose: () => {
               handleRemoteStreamClosed(token, true)
             }
-          }
+          },
+          { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
         return { token, unsubscribe: subscription.unsubscribe }
       } catch (error) {
@@ -1895,7 +1904,7 @@ function RemoteBrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onFocusBrowserAddressBar(() => {
+    return shellClient.ui.onFocusBrowserAddressBar(() => {
       addressBarInputRef.current?.focus()
       addressBarInputRef.current?.select()
     })
@@ -1928,10 +1937,7 @@ function RemoteBrowserPagePane({
   }, [browserTab.id, isActive])
 
   const runRemoteNavigation = useCallback(
-    async (
-      method: 'browser.goto' | 'browser.back' | 'browser.forward' | 'browser.reload',
-      url?: string
-    ) => {
+    async (action: RemoteBrowserNavigation, url?: string) => {
       const target = runtimeTarget()
       if (!target) {
         return
@@ -1952,13 +1958,21 @@ function RemoteBrowserPagePane({
       setRemoteError(null)
       onUpdatePageState(browserTab.id, { loading: true, loadError: null })
       try {
-        const params =
-          method === 'browser.goto'
-            ? { worktree: runtimeWorktree, page: pageId, url: url ?? 'about:blank' }
-            : { worktree: runtimeWorktree, page: pageId }
-        const result = await callRuntimeRpc<
-          BrowserGotoResult | BrowserBackResult | BrowserReloadResult
-        >(target, method, params, { timeoutMs: 30_000, suppressFeatureInteraction: true })
+        const params = { worktree: runtimeWorktree, page: pageId }
+        const options = { timeoutMs: 30_000, suppressFeatureInteraction: true }
+        const result =
+          action === 'goto'
+            ? await callRuntimeOrpc(
+                target,
+                (client) => client.browser.goto,
+                { ...params, url: url ?? 'about:blank' },
+                options
+              )
+            : action === 'back'
+              ? await callRuntimeOrpc(target, (client) => client.browser.back, params, options)
+              : action === 'forward'
+                ? await callRuntimeOrpc(target, (client) => client.browser.forward, params, options)
+                : await callRuntimeOrpc(target, (client) => client.browser.reload, params, options)
         if (isCurrentRemoteOperationToken(pageToken)) {
           applyRemoteTabInfo(result)
         }
@@ -2004,7 +2018,7 @@ function RemoteBrowserPagePane({
 
   const navigateToUrl = useCallback(
     (url: string): void => {
-      void runRemoteNavigation('browser.goto', url)
+      void runRemoteNavigation('goto', url)
     },
     [runRemoteNavigation]
   )
@@ -2018,17 +2032,17 @@ function RemoteBrowserPagePane({
     }
     const shortcutPlatform = getShortcutPlatform()
     const handleKeyDown = (e: KeyboardEvent): void => {
-      const method = keybindingMatchesAction('browser.back', e, shortcutPlatform, keybindings)
-        ? 'browser.back'
+      const action = keybindingMatchesAction('browser.back', e, shortcutPlatform, keybindings)
+        ? 'back'
         : keybindingMatchesAction('browser.forward', e, shortcutPlatform, keybindings)
-          ? 'browser.forward'
+          ? 'forward'
           : null
-      if (method === null) {
+      if (action === null) {
         return
       }
       e.preventDefault()
       e.stopPropagation()
-      void runRemoteNavigation(method)
+      void runRemoteNavigation(action)
     }
     window.addEventListener('keydown', handleKeyDown, true)
     return () => window.removeEventListener('keydown', handleKeyDown, true)
@@ -2081,15 +2095,15 @@ function RemoteBrowserPagePane({
       }
       try {
         const params = { worktree: runtimeWorktree, page: pageId }
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'browser.mouseMove',
+          (client) => client.browser.mouseMove,
           { ...params, x: point.x, y: point.y },
           { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'browser.mouseDown',
+          (client) => client.browser.mouseDown,
           { ...params, button },
           { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
@@ -2128,15 +2142,15 @@ function RemoteBrowserPagePane({
       }
       try {
         const params = { worktree: runtimeWorktree, page: pageId }
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'browser.mouseMove',
+          (client) => client.browser.mouseMove,
           { ...params, x: point.x, y: point.y },
           { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'browser.mouseUp',
+          (client) => client.browser.mouseUp,
           { ...params, button },
           { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
@@ -2180,9 +2194,9 @@ function RemoteBrowserPagePane({
         return
       }
       try {
-        const result = await callRuntimeRpc(
+        const result = await callRuntimeOrpc(
           target,
-          'browser.eval',
+          (client) => client.browser.eval,
           {
             worktree: runtimeWorktree,
             page: pageId,
@@ -2237,9 +2251,9 @@ function RemoteBrowserPagePane({
         return
       }
       try {
-        await callRuntimeRpc(
+        await callRuntimeOrpc(
           target,
-          'browser.keypress',
+          (client) => client.browser.keypress,
           { ...params, key },
           { timeoutMs: 15_000, suppressFeatureInteraction: true }
         )
@@ -2283,15 +2297,15 @@ function RemoteBrowserPagePane({
           return
         }
         try {
-          await callRuntimeRpc(
+          await callRuntimeOrpc(
             target,
-            'browser.mouseMove',
+            (client) => client.browser.mouseMove,
             { ...params, x: point.x, y: point.y },
             { timeoutMs: 15_000, suppressFeatureInteraction: true }
           )
-          await callRuntimeRpc(
+          await callRuntimeOrpc(
             target,
-            'browser.mouseWheel',
+            (client) => client.browser.mouseWheel,
             {
               ...params,
               dx,
@@ -2472,7 +2486,7 @@ function RemoteBrowserPagePane({
                   onClick={() => {
                     const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
-                      void window.api.shell.openUrl(targetUrl)
+                      void shellClient.shell.openUrl(targetUrl)
                     }
                     setContextMenu(null)
                   }}
@@ -2488,7 +2502,7 @@ function RemoteBrowserPagePane({
                   role="menuitem"
                   className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
+                    void shellClient.ui.writeClipboardText(contextMenu.linkUrl ?? '')
                     setContextMenu(null)
                   }}
                 >
@@ -2508,7 +2522,7 @@ function RemoteBrowserPagePane({
                   role="menuitem"
                   className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.selectionText)
+                    void shellClient.ui.writeClipboardText(contextMenu.selectionText)
                     setContextMenu(null)
                   }}
                 >
@@ -2523,7 +2537,7 @@ function RemoteBrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void runRemoteNavigation('browser.back')
+                void runRemoteNavigation('back')
                 setContextMenu(null)
               }}
             >
@@ -2535,7 +2549,7 @@ function RemoteBrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void runRemoteNavigation('browser.forward')
+                void runRemoteNavigation('forward')
                 setContextMenu(null)
               }}
             >
@@ -2547,7 +2561,7 @@ function RemoteBrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void runRemoteNavigation('browser.reload')
+                void runRemoteNavigation('reload')
                 setContextMenu(null)
               }}
             >
@@ -2562,7 +2576,7 @@ function RemoteBrowserPagePane({
               onClick={() => {
                 const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
                 if (targetUrl) {
-                  void window.api.shell.openUrl(targetUrl)
+                  void shellClient.shell.openUrl(targetUrl)
                 }
                 setContextMenu(null)
               }}
@@ -2578,7 +2592,7 @@ function RemoteBrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                void shellClient.ui.writeClipboardText(contextMenu.pageUrl)
                 setContextMenu(null)
               }}
             >
@@ -2595,7 +2609,7 @@ function RemoteBrowserPagePane({
           size="icon"
           variant="ghost"
           className="h-7 w-7"
-          onClick={() => void runRemoteNavigation('browser.back')}
+          onClick={() => void runRemoteNavigation('back')}
         >
           <ArrowLeft className="size-4" />
         </Button>
@@ -2603,7 +2617,7 @@ function RemoteBrowserPagePane({
           size="icon"
           variant="ghost"
           className="h-7 w-7"
-          onClick={() => void runRemoteNavigation('browser.forward')}
+          onClick={() => void runRemoteNavigation('forward')}
         >
           <ArrowRight className="size-4" />
         </Button>
@@ -2611,7 +2625,7 @@ function RemoteBrowserPagePane({
           size="icon"
           variant="ghost"
           className="h-7 w-7"
-          onClick={() => void runRemoteNavigation('browser.reload')}
+          onClick={() => void runRemoteNavigation('reload')}
         >
           {busy || browserTab.loading ? (
             <LoadingIndicator className="size-4" />
@@ -2722,10 +2736,10 @@ function RemoteBrowserPagePane({
             externalUrl={remoteFailureExternalUrl}
             currentUrl={toDisplayUrl(remoteFailureUrl)}
             httpsRecoveryUrl={toHttpsRecoveryUrl(remoteFailureUrl)}
-            onRetry={() => void runRemoteNavigation('browser.reload')}
-            onTryHttps={(url) => void runRemoteNavigation('browser.goto', url)}
-            onCopy={(url) => void window.api.ui.writeClipboardText(url)}
-            onOpenExternal={(url) => void window.api.shell.openUrl(url)}
+            onRetry={() => void runRemoteNavigation('reload')}
+            onTryHttps={(url) => void runRemoteNavigation('goto', url)}
+            onCopy={(url) => void shellClient.ui.writeClipboardText(url)}
+            onOpenExternal={(url) => void shellClient.shell.openUrl(url)}
             certificateFailure={certificateFailure}
             expectedBrowserPageId={
               remotePageHandle?.environmentId === activeRuntimeEnvironmentId
@@ -2741,9 +2755,9 @@ function RemoteBrowserPagePane({
               ) {
                 return { ok: false, reason: 'missing' }
               }
-              return callRuntimeRpc<BrowserCertificateProceedResult>(
+              return callRuntimeOrpc(
                 target,
-                'browser.certificate.proceed',
+                (client) => client.browser.certificate.proceed,
                 {
                   worktree: runtimeWorktree,
                   page: remotePageHandle.remotePageId,
@@ -3109,7 +3123,7 @@ function BrowserPagePane({
     }
     if (!grab.contextMenu) {
       const text = formatGrabPayloadAsText(grab.payload)
-      void window.api.ui.writeClipboardText(text)
+      void shellClient.ui.writeClipboardText(text)
       recordFeatureInteraction('browser-grab')
       showGrabToast('Copied', 'success', grab.payload)
     }
@@ -3194,7 +3208,7 @@ function BrowserPagePane({
   }, [browserTab.id])
 
   useEffect(() => {
-    return window.api.browser.onPermissionDenied((event) => {
+    return browserShellEventsClient.onPermissionDenied((event) => {
       if (event.browserPageId !== browserTab.id) {
         return
       }
@@ -3203,7 +3217,7 @@ function BrowserPagePane({
   }, [browserTab.id])
 
   useEffect(() => {
-    return window.api.browser.onPopup((event) => {
+    return browserShellEventsClient.onPopup((event) => {
       if (event.browserPageId !== browserTab.id) {
         return
       }
@@ -3212,7 +3226,7 @@ function BrowserPagePane({
   }, [browserTab.id])
 
   useEffect(() => {
-    return window.api.browser.onContextMenuRequested((event) => {
+    return browserShellEventsClient.onContextMenuRequested((event) => {
       if (event.browserPageId !== browserTab.id) {
         return
       }
@@ -3223,7 +3237,7 @@ function BrowserPagePane({
       // window.screenX/Y gives the window origin in the same screen
       // coordinate system that screen.getCursorScreenPoint() uses. Dividing
       // by the zoom factor converts screen points to CSS pixels.
-      const zoomFactor = Math.pow(1.2, window.api.ui.getZoomLevel())
+      const zoomFactor = Math.pow(1.2, shellClient.ui.getZoomLevel())
       const x = Math.round((event.screenX - window.screenX) / zoomFactor)
       const y = Math.round((event.screenY - window.screenY) / zoomFactor)
       console.debug(
@@ -3247,7 +3261,7 @@ function BrowserPagePane({
   }, [browserTab.id])
 
   useEffect(() => {
-    return window.api.browser.onContextMenuDismissed((event) => {
+    return browserShellEventsClient.onContextMenuDismissed((event) => {
       if (event.browserPageId !== browserTab.id) {
         return
       }
@@ -3308,7 +3322,7 @@ function BrowserPagePane({
   }, [contextMenu])
 
   useEffect(() => {
-    return window.api.browser.onDownloadRequested((event) => {
+    return browserShellEventsClient.onDownloadRequested((event) => {
       if (event.browserPageId !== browserTab.id) {
         return
       }
@@ -3342,7 +3356,7 @@ function BrowserPagePane({
   }, [browserTab.id])
 
   useEffect(() => {
-    return window.api.browser.onDownloadProgress((event: BrowserDownloadProgressEvent) => {
+    return browserShellEventsClient.onDownloadProgress((event: BrowserDownloadProgressEvent) => {
       setDownloadStates((current) =>
         current.map((download) =>
           download.downloadId === event.downloadId
@@ -3359,7 +3373,7 @@ function BrowserPagePane({
   }, [])
 
   useEffect(() => {
-    return window.api.browser.onDownloadFinished((event: BrowserDownloadFinishedEvent) => {
+    return browserShellEventsClient.onDownloadFinished((event: BrowserDownloadFinishedEvent) => {
       if (event.browserPageId && event.browserPageId !== browserTab.id) {
         return
       }
@@ -3444,7 +3458,7 @@ function BrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onFocusBrowserAddressBar(() => {
+    return shellClient.ui.onFocusBrowserAddressBar(() => {
       focusAddressBarNow()
     })
   }, [focusAddressBarNow, isActive])
@@ -3542,7 +3556,7 @@ function BrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onFindInBrowserPage(() => {
+    return shellClient.ui.onFindInBrowserPage(() => {
       setFindOpen(true)
     })
   }, [isActive])
@@ -3581,7 +3595,7 @@ function BrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onBrowserHistoryNavigate((direction) => {
+    return shellClient.ui.onBrowserHistoryNavigate((direction) => {
       navigateBrowserHistoryRef.current(direction)
     })
   }, [isActive])
@@ -3637,7 +3651,7 @@ function BrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onReloadBrowserPage(() => {
+    return shellClient.ui.onReloadBrowserPage(() => {
       webviewRef.current?.reload()
     })
   }, [isActive])
@@ -3656,7 +3670,7 @@ function BrowserPagePane({
         showBrowserZoomFeedback(nextLevel)
       }
     }
-    const removeGuestListener = window.api.ui.onZoomBrowserPage(applyActivePageZoom)
+    const removeGuestListener = shellClient.ui.onZoomBrowserPage(applyActivePageZoom)
     const removeLocalListener = addBrowserPageZoomEventListener((detail) => {
       if (detail.browserPageId !== browserTabIdRef.current) {
         return
@@ -3673,7 +3687,7 @@ function BrowserPagePane({
     if (!isActive) {
       return
     }
-    return window.api.ui.onHardReloadBrowserPage(() => {
+    return shellClient.ui.onHardReloadBrowserPage(() => {
       webviewRef.current?.reloadIgnoringCache()
     })
   }, [isActive])
@@ -3721,18 +3735,16 @@ function BrowserPagePane({
       rectViewport: annotation.payload.target.rectViewport
     }))
     const enabled = isActiveRef.current && (pendingAnnotationPayload !== null || markers.length > 0)
-    void window.api.browser
-      .setAnnotationViewportBridge({
-        browserPageId: browserTab.id,
-        emitViewport: pendingAnnotationPayload !== null,
-        enabled,
-        markers,
-        token: annotationViewportBridgeTokenRef.current
-      })
-      .catch(() => {
-        // The viewport bridge is visual-only; stale markers are less bad than
-        // breaking the browser pane on a navigated or destroyed guest.
-      })
+    void setBrowserAnnotationViewport({
+      browserPageId: browserTab.id,
+      emitViewport: pendingAnnotationPayload !== null,
+      enabled,
+      markers,
+      token: annotationViewportBridgeTokenRef.current
+    }).catch(() => {
+      // The viewport bridge is visual-only; stale markers are less bad than
+      // breaking the browser pane on a navigated or destroyed guest.
+    })
   }, [browserTab.id])
 
   // Why: this effect manages the full lifecycle of the webview DOM element —
@@ -3825,14 +3837,13 @@ function BrowserPagePane({
       if (registrationInFlight?.webContentsId === webContentsId) {
         return registrationInFlight.promise
       }
-      const promise = window.api.browser
-        .registerGuest({
-          browserPageId: browserTab.id,
-          workspaceId,
-          worktreeId,
-          sessionProfileId,
-          webContentsId
-        })
+      const promise = registerBrowserGuest({
+        browserPageId: browserTab.id,
+        workspaceId,
+        worktreeId,
+        sessionProfileId,
+        webContentsId
+      })
         .then((registered) => {
           if (registered) {
             registeredWebContentsIds.set(browserTab.id, webContentsId)
@@ -3983,10 +3994,10 @@ function BrowserPagePane({
       // Emulation.setDeviceMetricsOverride can persist across same-origin navigations
       // within the same renderer. Sending null ensures CDP matches the store state
       // instead of showing a stale emulated viewport after the user picks "Default".
-      void window.api.browser.setViewportOverride({
-        browserPageId: browserTab.id,
-        override: preset ? browserViewportPresetToOverride(preset) : null
-      })
+      void setBrowserViewportOverride(
+        browserTab.id,
+        preset ? browserViewportPresetToOverride(preset) : null
+      )
     }
 
     const handleDidStartLoading = (): void => {
@@ -4490,7 +4501,7 @@ function BrowserPagePane({
   // would not use it for native copy, so grab mode still toggles from web
   // content without stealing real copy from inputs or selections.
   useEffect(() => {
-    return window.api.browser.onGrabModeToggle((tabId) => {
+    return browserShellEventsClient.onGrabModeToggle((tabId) => {
       if (tabId === browserTab.id) {
         startGrabIntent('copy')
       }
@@ -4513,13 +4524,13 @@ function BrowserPagePane({
       const copyFromPayload = (payload: BrowserGrabPayload): void => {
         if (key === 'c') {
           const text = formatGrabPayloadAsText(payload)
-          void window.api.ui.writeClipboardText(text)
+          void shellClient.ui.writeClipboardText(text)
           recordFeatureInteraction('browser-grab')
           showGrabToast('Copied', 'success', payload)
         } else {
           const dataUrl = payload.screenshot?.dataUrl
           if (dataUrl?.startsWith('data:image/png;base64,')) {
-            void window.api.ui.writeClipboardImage(dataUrl)
+            void shellClient.ui.writeClipboardImage(dataUrl)
             recordFeatureInteraction('browser-grab')
             showGrabToast('Screenshotted', 'success', payload)
           } else {
@@ -4547,7 +4558,7 @@ function BrowserPagePane({
       } else {
         // armed/awaiting — extract hovered element via IPC without clicking
         void (async () => {
-          const result = await window.api.browser.extractHoverPayload({
+          const result = await extractBrowserGrabHover({
             browserPageId: browserTabIdRef.current
           })
           if (!result.ok) {
@@ -4558,7 +4569,7 @@ function BrowserPagePane({
 
           if (key === 's') {
             try {
-              const ssResult = await window.api.browser.captureSelectionScreenshot({
+              const ssResult = await captureBrowserGrabSelection({
                 browserPageId: browserTabIdRef.current,
                 rect: payload.target.rectViewport
               })
@@ -4605,7 +4616,7 @@ function BrowserPagePane({
     if (grab.state === 'idle' || grab.state === 'error') {
       return
     }
-    return window.api.browser.onGrabActionShortcut(({ browserPageId, key }) => {
+    return browserShellEventsClient.onGrabActionShortcut(({ browserPageId, key }) => {
       if (browserPageId !== browserTab.id) {
         return
       }
@@ -4626,7 +4637,7 @@ function BrowserPagePane({
       return
     }
     const text = formatGrabPayloadAsText(payload)
-    void window.api.ui.writeClipboardText(text)
+    void shellClient.ui.writeClipboardText(text)
     recordFeatureInteraction('browser-grab')
     showGrabToast('Copied', 'success', payload)
     grab.rearm()
@@ -4642,7 +4653,7 @@ function BrowserPagePane({
     if (!dataUrl?.startsWith('data:image/png;base64,')) {
       return
     }
-    void window.api.ui.writeClipboardImage(dataUrl)
+    void shellClient.ui.writeClipboardImage(dataUrl)
     recordFeatureInteraction('browser-grab')
     showGrabToast('Screenshotted', 'success', payload)
     grab.rearm()
@@ -4691,7 +4702,7 @@ function BrowserPagePane({
     if (!browserAnnotationsPrompt) {
       return
     }
-    void window.api.ui.writeClipboardText(browserAnnotationsPrompt)
+    void shellClient.ui.writeClipboardText(browserAnnotationsPrompt)
     recordFeatureInteraction('browser-annotations')
     clearTimeout(annotationCopyTimerRef.current)
     setBrowserAnnotationsCopied(true)
@@ -4860,7 +4871,7 @@ function BrowserPagePane({
               connectionId: undefined
             }
             if (!isRemoteRuntimeFileOperation(fileContext, notebookPath)) {
-              await window.api.fs.authorizeExternalPath({ targetPath: notebookPath })
+              await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: notebookPath })
             }
             const stat = await statRuntimePath(fileContext, notebookPath)
             if (stat.isDirectory) {
@@ -5036,7 +5047,7 @@ function BrowserPagePane({
       )
       return
     }
-    const opened = await window.api.shell.openFilePath(download.savePath)
+    const opened = await shellClient.shell.openFilePath(download.savePath)
     if (!opened) {
       setResourceNotice(
         translate(
@@ -5057,7 +5068,7 @@ function BrowserPagePane({
       )
       return
     }
-    const result = await window.api.shell.openInFileManager(download.savePath)
+    const result = await shellClient.shell.openInFileManager(download.savePath)
     if (!result.ok) {
       setResourceNotice(
         translate(
@@ -5132,7 +5143,7 @@ function BrowserPagePane({
                   onClick={() => {
                     const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
-                      void window.api.shell.openUrl(targetUrl)
+                      void shellClient.shell.openUrl(targetUrl)
                     }
                     setContextMenu(null)
                   }}
@@ -5148,7 +5159,7 @@ function BrowserPagePane({
                   role="menuitem"
                   className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
+                    void shellClient.ui.writeClipboardText(contextMenu.linkUrl ?? '')
                     setContextMenu(null)
                   }}
                 >
@@ -5168,7 +5179,7 @@ function BrowserPagePane({
                   role="menuitem"
                   className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.selectionText)
+                    void shellClient.ui.writeClipboardText(contextMenu.selectionText)
                     setContextMenu(null)
                   }}
                 >
@@ -5224,7 +5235,7 @@ function BrowserPagePane({
               onClick={() => {
                 const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
                 if (targetUrl) {
-                  void window.api.shell.openUrl(targetUrl)
+                  void shellClient.shell.openUrl(targetUrl)
                 }
                 setContextMenu(null)
               }}
@@ -5240,7 +5251,7 @@ function BrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                void shellClient.ui.writeClipboardText(contextMenu.pageUrl)
                 setContextMenu(null)
               }}
             >
@@ -5253,7 +5264,7 @@ function BrowserPagePane({
               role="menuitem"
               className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
               onClick={() => {
-                void window.api.browser.openDevTools({ browserPageId: browserTab.id })
+                void openBrowserDevTools(browserTab.id)
                 setContextMenu(null)
               }}
             >
@@ -5411,7 +5422,7 @@ function BrowserPagePane({
             size="icon"
             variant="ghost"
             className="h-7 w-7"
-            onClick={() => void window.api.browser.openDevTools({ browserPageId: browserTab.id })}
+            onClick={() => void openBrowserDevTools(browserTab.id)}
             title={translate(
               'auto.components.browser.pane.BrowserPane.ec75d0c412',
               'Open browser devtools'
@@ -5428,7 +5439,7 @@ function BrowserPagePane({
               if (!externalUrl) {
                 return
               }
-              void window.api.shell.openUrl(externalUrl)
+              void shellClient.shell.openUrl(externalUrl)
             }}
             title={translate(
               'auto.components.browser.pane.BrowserPane.0f41bf80c7',
@@ -5513,9 +5524,7 @@ function BrowserPagePane({
                         variant="ghost"
                         className="h-6 shrink-0"
                         onClick={() => {
-                          void window.api.browser.cancelDownload({
-                            downloadId: download.downloadId
-                          })
+                          void cancelBrowserDownload(download.downloadId)
                         }}
                       >
                         {translate('auto.components.browser.pane.BrowserPane.fa6ea61de3', 'Cancel')}
@@ -5783,7 +5792,7 @@ function BrowserPagePane({
                   }}
                   onTryHttps={navigateToUrl}
                   onCopy={(url) => {
-                    void window.api.ui.writeClipboardText(url)
+                    void shellClient.ui.writeClipboardText(url)
                     setResourceNotice(
                       translate(
                         'browser.loadFailure.addressCopied',
@@ -5791,11 +5800,11 @@ function BrowserPagePane({
                       )
                     )
                   }}
-                  onOpenExternal={(url) => void window.api.shell.openUrl(url)}
+                  onOpenExternal={(url) => void shellClient.shell.openUrl(url)}
                   certificateFailure={certificateFailure}
                   expectedBrowserPageId={browserTab.id}
                   onProceedCertificate={(challengeId) =>
-                    window.api.browser.proceedCertificate({
+                    proceedBrowserCertificate({
                       browserPageId: browserTab.id,
                       challengeId
                     })
@@ -6113,7 +6122,7 @@ function BrowserPagePane({
                             onClick={() => {
                               const dataUrl = grabToast.payload?.screenshot?.dataUrl
                               if (dataUrl?.startsWith('data:image/png;base64,')) {
-                                void window.api.ui.writeClipboardImage(dataUrl)
+                                void shellClient.ui.writeClipboardImage(dataUrl)
                                 setGrabToast((prev) =>
                                   prev
                                     ? {

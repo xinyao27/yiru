@@ -1,54 +1,23 @@
+import {
+  MOBILE_NATIVE_CHAT_DEFAULT_WINDOW,
+  MOBILE_NATIVE_CHAT_MAX_WINDOW,
+  type NativeChatSessionInput,
+  type NativeChatUnsubscribeInput,
+  type RuntimeNativeChatSubscriptionEvent
+} from '@yiru/runtime-protocol/contract'
 import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
-import type { AgentType } from '@yiru/workbench-model/agent'
-import { z } from 'zod'
 import {
   readNativeChatTranscriptTail,
   subscribeNativeChatTranscript
 } from '~main/native-chat/transcript-watch'
 
-import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
+import type { RpcContext } from '../core'
+import { bindSubscriptionAbort } from './subscription-abort'
 
 // Why: native chat renders an agent's own transcript (Claude/Codex JSONL). The
 // desktop reaches the readers via Electron IPC; mobile/web clients reach the
 // same pure readers through these runtime RPC methods so the native chat view
 // works over the paired connection, not just in the desktop renderer.
-
-const NativeChatSession = z.object({
-  agent: z
-    .unknown()
-    .transform((v) => (typeof v === 'string' ? v : ''))
-    .pipe(z.string().min(1, 'Missing agent'))
-    .transform((v) => v as AgentType),
-  sessionId: z
-    .unknown()
-    .transform((v) => (typeof v === 'string' ? v : ''))
-    .pipe(z.string().min(1, 'Missing session id')),
-  // How many of the most-recent messages to return. Clients start small for a
-  // fast first paint and raise it to page older history in as the user scrolls.
-  // Clamp (don't reject) a limit past the max window so a client paging beyond it
-  // gets the capped tail and pagination stops cleanly — a hard `.max` rejection
-  // would fail the read and stall "load earlier" at the boundary.
-  limit: z
-    .number()
-    .int()
-    .positive()
-    .transform((value) => Math.min(value, MOBILE_NATIVE_CHAT_MAX_WINDOW))
-    .optional(),
-  // Optional client-supplied cleanup token. When present, the subscribe handler
-  // keys the fs-watcher cleanup under it so registration and unsubscribe derive
-  // from the SAME token (back-compat: falls back to `agent:sessionId` when absent,
-  // which is exactly what existing mobile clients rely on).
-  subscriptionId: z.string().min(1).optional(),
-  // Authoritative transcript path from the agent hook (providerSession), used to
-  // locate the file directly when the session id no longer names it (recent
-  // Claude Code). Optional for back-compat with older clients.
-  transcriptPath: z.string().min(1).optional(),
-  beforeOffset: z.number().int().nonnegative().optional()
-})
-
-const NativeChatUnsubscribe = z.object({
-  subscriptionId: z.string().min(1).optional()
-})
 
 // Why: a long agent session can hold thousands of turns (with full tool I/O).
 // Shipping all of them over the paired connection and rendering them at once
@@ -57,8 +26,6 @@ const NativeChatUnsubscribe = z.object({
 // is unaffected (it reads locally with a virtualized list).
 // Small first page for a fast initial paint; the client raises `limit` to load
 // older history as the user scrolls back.
-const MOBILE_NATIVE_CHAT_DEFAULT_WINDOW = 40
-const MOBILE_NATIVE_CHAT_MAX_WINDOW = 2000
 // Why: a single tool result (a big file read, a long diff) can be hundreds of KB.
 // The mobile view only previews block bodies, so truncate them on the wire to
 // keep the payload small; the marker tells the user content was clipped.
@@ -178,121 +145,142 @@ function windowForClient(
   return clientKind === 'mobile' ? windowed.map(sanitizeMessage) : windowed
 }
 
-export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
-  defineMethod({
-    name: 'nativeChat.readSession',
-    mobile: true,
-    params: NativeChatSession,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (params, { clientKind }) => {
-      const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
-      const result = await readNativeChatTranscriptTail({
-        agent: params.agent,
-        sessionId: params.sessionId,
-        transcriptPath: params.transcriptPath,
-        limit,
-        beforeOffset: params.beforeOffset
-      })
-      return 'messages' in result
-        ? {
-            messages: windowForClient(result.messages, clientKind, limit),
-            hasMore: result.hasMore,
-            beforeOffset: result.beforeOffset
-          }
-        : result
-    }
-  }),
-  defineStreamingMethod({
-    name: 'nativeChat.subscribe',
-    mobile: true,
-    params: NativeChatSession,
-    access: { scope: 'host', tier: 'read' },
-    handler: async (params, { runtime, connectionId, clientKind }, emit) => {
-      let closed = false
-      let unsubscribe = (): void => {}
-      // Why: the first drain is a bounded tail snapshot; later drains emit only
-      // appended turns. This avoids parsing or shipping full long transcripts.
-      // Clients merge by message id, so the initial windowed batch doubles as the
-      // snapshot. Keyed by the client-supplied subscriptionId when present so
-      // registration and unsubscribe derive from the same token; otherwise by
-      // agent:sessionId, which is exactly the token existing mobile clients send to
-      // unsubscribe (no wire break).
-      const cleanupToken = params.subscriptionId ?? `${params.agent}:${params.sessionId}`
-      const subscriptionId = `nativeChat:${connectionId ?? 'local'}:${cleanupToken}`
-      const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
-      runtime.registerSubscriptionCleanup(
-        subscriptionId,
-        () => {
-          closed = true
-          unsubscribe()
-          emit({ type: 'end' })
-        },
-        connectionId
-      )
+export async function handleNativeChatReadSession(
+  params: NativeChatSessionInput,
+  { clientKind }: RpcContext
+) {
+  const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
+  const result = await readNativeChatTranscriptTail({
+    agent: params.agent,
+    sessionId: params.sessionId,
+    transcriptPath: params.transcriptPath,
+    limit,
+    beforeOffset: params.beforeOffset
+  })
+  return 'messages' in result
+    ? {
+        messages: windowForClient(result.messages, clientKind, limit),
+        hasMore: result.hasMore,
+        beforeOffset: result.beforeOffset
+      }
+    : result
+}
+
+export function handleNativeChatUnsubscribe(
+  params: NativeChatUnsubscribeInput,
+  { runtime, connectionId }: RpcContext
+) {
+  const connection = connectionId ?? 'local'
+  if (params.subscriptionId) {
+    runtime.cleanupSubscription(`nativeChat:${connection}:${params.subscriptionId}`)
+    return { unsubscribed: true as const }
+  }
+  runtime.cleanupSubscriptionsByPrefix(`nativeChat:${connection}:`)
+  return { unsubscribed: true as const }
+}
+
+// Why: Phase 6 D-stage — plain function with the emit-based streaming shape
+// (`RuntimeOrpcStreamHandler`), called directly from orpc/router-direct.ts via
+// `wireRuntimeStream` instead of through a `defineStreamingMethod` legacy
+// registration (same split as settings-events.ts/ui-events.ts).
+export async function handleNativeChatSubscribe(
+  params: NativeChatSessionInput,
+  { runtime, connectionId, clientKind, signal }: RpcContext,
+  emit: (event: RuntimeNativeChatSubscriptionEvent) => void
+): Promise<void> {
+  let closed = false
+  let unsubscribe = (): void => {}
+  let removeAbortListener = (): void => {}
+  let resolveSubscription = (): void => {}
+  const subscriptionClosed = new Promise<void>((resolve) => {
+    resolveSubscription = resolve
+  })
+  // Why: the first drain is a bounded tail snapshot; later drains emit only
+  // appended turns. This avoids parsing or shipping full long transcripts.
+  // Clients merge by message id, so the initial windowed batch doubles as the
+  // snapshot. Keyed by the client-supplied subscriptionId when present so
+  // registration and unsubscribe derive from the same token; otherwise by
+  // agent:sessionId, which is exactly the token existing mobile clients send to
+  // unsubscribe (no wire break).
+  const cleanupToken = params.subscriptionId ?? `${params.agent}:${params.sessionId}`
+  const subscriptionId = `nativeChat:${connectionId ?? 'local'}:${cleanupToken}`
+  const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
+  runtime.registerSubscriptionCleanup(
+    subscriptionId,
+    () => {
       if (closed) {
         return
       }
-      const subscription = await subscribeNativeChatTranscript({
-        agent: params.agent,
-        sessionId: params.sessionId,
-        transcriptPath: params.transcriptPath,
-        initialLimit: limit,
-        onInitialSnapshot: (messages, hasMore, beforeOffset, error) => {
-          if (closed) {
-            return
-          }
-          // Forward an initial-drain error so a watching client's first frame carries it
-          // instead of stranding the view at 'loading' when the read keeps throwing.
-          emit({
-            type: 'snapshot',
-            messages: windowForClient(messages, clientKind, limit),
-            hasMore,
-            beforeOffset,
-            ...(error ? { error } : {})
-          })
-        },
-        onReplace: (messages, hasMore, beforeOffset) => {
-          if (closed) {
-            return
-          }
-          emit({
-            type: 'replacement',
-            messages: windowForClient(messages, clientKind, limit),
-            hasMore,
-            beforeOffset
-          })
-        },
-        onAppend: (messages) => {
-          if (closed) {
-            return
-          }
-          emit({ type: 'appended', messages: sanitizeAppendForClient(messages, clientKind) })
-        }
-      })
-      // The connection may have closed while the file was being resolved.
+      closed = true
+      removeAbortListener()
+      unsubscribe()
+      emit({ type: 'end' })
+      resolveSubscription()
+    },
+    connectionId
+  )
+  removeAbortListener = bindSubscriptionAbort(runtime, subscriptionId, signal)
+  if (closed) {
+    return
+  }
+  const pendingSubscription = subscribeNativeChatTranscript({
+    agent: params.agent,
+    sessionId: params.sessionId,
+    transcriptPath: params.transcriptPath,
+    initialLimit: limit,
+    onInitialSnapshot: (messages, hasMore, beforeOffset, error) => {
       if (closed) {
-        subscription.unsubscribe()
         return
       }
-      if (!subscription.watching) {
-        emit({ type: 'snapshot', messages: [], hasMore: false, error: 'Transcript unavailable' })
+      // Forward an initial-drain error so a watching client's first frame carries it
+      // instead of stranding the view at 'loading' when the read keeps throwing.
+      emit({
+        type: 'snapshot',
+        messages: windowForClient(messages, clientKind, limit),
+        hasMore,
+        beforeOffset,
+        ...(error ? { error } : {})
+      })
+    },
+    onReplace: (messages, hasMore, beforeOffset) => {
+      if (closed) {
+        return
       }
-      unsubscribe = subscription.unsubscribe
-    }
-  }),
-  defineMethod({
-    name: 'nativeChat.unsubscribe',
-    mobile: true,
-    params: NativeChatUnsubscribe,
-    access: { scope: 'worktree', tier: 'read' },
-    handler: async (params, { runtime, connectionId }) => {
-      const connection = connectionId ?? 'local'
-      if (params.subscriptionId) {
-        runtime.cleanupSubscription(`nativeChat:${connection}:${params.subscriptionId}`)
-        return { unsubscribed: true }
+      emit({
+        type: 'replacement',
+        messages: windowForClient(messages, clientKind, limit),
+        hasMore,
+        beforeOffset
+      })
+    },
+    onAppend: (messages) => {
+      if (closed) {
+        return
       }
-      runtime.cleanupSubscriptionsByPrefix(`nativeChat:${connection}:`)
-      return { unsubscribed: true }
+      emit({ type: 'appended', messages: sanitizeAppendForClient(messages, clientKind) })
     }
   })
-]
+  const subscription = await Promise.race([
+    pendingSubscription,
+    subscriptionClosed.then(() => null)
+  ]).catch((error: unknown) => {
+    runtime.cleanupSubscription(subscriptionId)
+    throw error
+  })
+  if (!subscription) {
+    // Why: transcript discovery cannot be synchronously cancelled. If it
+    // finishes after iterator cancellation, dispose the late watcher alone.
+    void pendingSubscription.then((created) => created.unsubscribe()).catch(() => {})
+    return
+  }
+  // The connection may have closed while the file was being resolved.
+  if (closed) {
+    subscription.unsubscribe()
+    return
+  }
+  if (!subscription.watching) {
+    emit({ type: 'snapshot', messages: [], hasMore: false, error: 'Transcript unavailable' })
+  }
+  unsubscribe = subscription.unsubscribe
+  await subscriptionClosed
+}

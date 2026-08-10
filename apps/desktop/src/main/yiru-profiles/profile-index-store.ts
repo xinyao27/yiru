@@ -82,10 +82,6 @@ function readProfileIndexResult(indexPath: string): ProfileIndexReadResult | nul
   return backup
 }
 
-export function readProfileIndex(indexPath: string): YiruProfileIndex | null {
-  return readProfileIndexResult(indexPath)?.index ?? null
-}
-
 export function writeProfileIndex(indexPath: string, index: YiruProfileIndex): void {
   mkdirSync(dirname(indexPath), { recursive: true })
   // Why: only a still-parseable current index may refresh the backup;
@@ -233,10 +229,6 @@ export function ensureActiveYiruProfile(
     dataFile: getYiruProfileDataFile(activeProfile.id, userDataPath),
     profileDirectory
   }
-}
-
-export function isDefaultLocalYiruProfileId(profileId: string): boolean {
-  return profileId === DEFAULT_LOCAL_YIRU_PROFILE_ID
 }
 
 export function getYiruProfileListState(

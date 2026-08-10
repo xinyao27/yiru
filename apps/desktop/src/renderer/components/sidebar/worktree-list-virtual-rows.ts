@@ -88,8 +88,3 @@ export function getStickyHeaderIndexes(rows: readonly StickySectionRow[]): numbe
   })
   return indexes
 }
-
-// Why: the pinned host card is h-8 (32px) inside a pt-1 (4px) wrapper; the
-// group tier pins one pixel up to sit flush beneath it. Keep in sync with
-// HostSectionHeader's layout.
-export type StickyHeaderRowMetric = { index: number; start: number }

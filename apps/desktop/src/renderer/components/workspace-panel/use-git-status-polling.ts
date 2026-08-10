@@ -66,7 +66,9 @@ export function useGitStatusPolling(options: { enabled?: boolean } = {}): void {
   const activeRepoId = activeWorktree?.repoId ?? null
   const activeRepo = useRepoById(activeRepoId)
   const activeRepoSupportsGit = activeRepo ? isGitRepoKind(activeRepo) : false
-  const activeConnectionId = activeRepo?.connectionId ?? null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — the active repo's connection is always null.
+  const activeConnectionId = null
   const isConnectionReady = useCallback(
     (connectionId: string | null | undefined): boolean =>
       !connectionId || sshConnectionStates.get(connectionId)?.status === 'connected',

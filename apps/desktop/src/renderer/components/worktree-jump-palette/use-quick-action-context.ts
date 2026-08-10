@@ -9,6 +9,7 @@ import {
   getComposerEligibleRepos,
   resolveComposerGitRepoId
 } from '~renderer/components/worktree-jump-palette/new-workspace-composer-repo'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 
@@ -126,7 +127,7 @@ export function useQuickActionContext(input: QuickActionContextInput) {
     }
     coworkingVisibilityUpdateInFlightRef.current = true
     try {
-      await window.api.coworkingSharing.setWorktreeVisibility({
+      await coworkingSharingClient.setWorktreeVisibility({
         worktreeId: ownerWorktree.worktreeId,
         visibility: 'private'
       })

@@ -57,6 +57,9 @@ import {
   notifyOrchestrationSetupStateChanged
 } from '~renderer/lib/orchestration-setup-state'
 import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
+import { notifyActiveBrowserPage } from '~renderer/runtime/browser-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
@@ -83,6 +86,7 @@ export { FloatingTerminalToggleButton } from './toggle-button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { OPEN_MAXIMIZED_INTENT_TTL_MS } from '~renderer/lib/floating-terminal'
+import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 
 import {
   anchorFloatingTerminalPanelBounds,
@@ -138,7 +142,7 @@ function isFloatingTerminalDragTarget(target: EventTarget): boolean {
 }
 
 function setFloatingTerminalInputFocusedInMain(focused: boolean): void {
-  const setInputFocused = window.api.ui.setFloatingTerminalInputFocused
+  const setInputFocused = shellClient.ui.setFloatingTerminalInputFocused
   // Why: dev reloads can pair a new renderer with an older preload; losing this
   // shortcut mirror should not take down the whole React tree.
   if (typeof setInputFocused !== 'function') {
@@ -543,7 +547,7 @@ export function FloatingTerminalPanel({
 
   useEffect(() => {
     let cancelled = false
-    void window.api.app
+    void rendererHostClient.app
       .getFloatingTerminalCwd({
         path: floatingTerminalCwd
       })
@@ -559,7 +563,7 @@ export function FloatingTerminalPanel({
 
   useEffect(() => {
     let cancelled = false
-    void window.api.app.getFloatingMarkdownDirectory().then((nextMarkdownCwd) => {
+    void rendererHostClient.app.getFloatingMarkdownDirectory().then((nextMarkdownCwd) => {
       if (!cancelled) {
         setMarkdownCwd(nextMarkdownCwd)
       }
@@ -595,7 +599,7 @@ export function FloatingTerminalPanel({
       return
     }
     try {
-      const status = await window.api.cli.getInstallStatus()
+      const status = await readCliInstallStatus()
       if (mountedRef.current) {
         setShowOrchestrationSetup(!isYiruCliAvailableOnPath(status))
       }
@@ -638,8 +642,8 @@ export function FloatingTerminalPanel({
           .browserTabsByWorktree[FLOATING_TERMINAL_WORKTREE_ID]?.find(
             (tab) => tab.id === item.entityId
           )
-        if (workspace?.activePageId && window.api?.browser) {
-          void window.api.browser.notifyActiveTabChanged({ browserPageId: workspace.activePageId })
+        if (workspace?.activePageId) {
+          void notifyActiveBrowserPage(workspace.activePageId)
         }
       }
     },
@@ -701,7 +705,7 @@ export function FloatingTerminalPanel({
   const openFloatingMarkdownTab = useCallback(() => {
     void (async () => {
       try {
-        const document = await window.api.app.pickFloatingMarkdownDocument()
+        const document = await rendererHostClient.app.pickFloatingMarkdownDocument()
         if (!document) {
           return
         }

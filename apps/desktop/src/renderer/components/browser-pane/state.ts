@@ -17,10 +17,17 @@ import {
   getRuntimeEnvironmentIdForWorktree
 } from '~renderer/lib/worktree-runtime-owner'
 import {
-  callRuntimeRpc,
-  getActiveRuntimeTarget,
-  type RuntimeClientTarget
-} from '~renderer/runtime/rpc-client'
+  clearLocalDefaultBrowserCookies,
+  createLocalBrowserProfile,
+  deleteLocalBrowserProfile,
+  detectLocalBrowserProfiles,
+  importLocalBrowserCookieFile,
+  importLocalBrowserProfile,
+  listLocalBrowserProfiles,
+  notifyActiveBrowserPage
+} from '~renderer/runtime/browser-client'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { createWebSessionBrowserTabCommand } from '~renderer/runtime/web-session-commands'
 import { requestWebSessionTabsRefresh } from '~renderer/runtime/web-session-tabs-refresh-requests'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
@@ -31,14 +38,6 @@ import type { AppState } from '~renderer/store/types'
 import { GRAB_BUDGET, type BrowserPageAnnotation } from '~shared/browser/grab-types'
 import { redactKagiSessionToken } from '~shared/browser/url'
 import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '~shared/constants'
-import type {
-  BrowserDetectProfilesResult,
-  BrowserProfileClearDefaultCookiesResult,
-  BrowserProfileCreateResult,
-  BrowserProfileDeleteResult,
-  BrowserProfileImportFromBrowserResult,
-  BrowserProfileListResult
-} from '~shared/runtime-types'
 import type {
   BrowserCookieImportResult,
   BrowserCookieImportSummary,
@@ -326,9 +325,9 @@ function closeRemoteBrowserPageInOwningEnvironment(
     return
   }
   const target: RuntimeClientTarget = { kind: 'environment', environmentId: handle.environmentId }
-  const close = callRuntimeRpc(
+  const close = callRuntimeOrpc(
     target,
-    'browser.tabClose',
+    (client) => client.browser.tabClose,
     { worktree: toRuntimeWorktreeSelector(worktreeId), page: handle.remotePageId },
     { timeoutMs: 15_000 }
   )
@@ -987,20 +986,11 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     })
 
-    // Why: notify the CDP bridge which guest webContents is now active so
-    // subsequent agent commands (snapshot, click, etc.) target the correct tab.
-    // registerGuest uses page IDs (not workspace IDs), so we resolve the active
-    // page within the workspace to find the correct browserPageId.
+    // Why: notify the browser runtime which registered page is active so
+    // subsequent agent commands target the correct backend-neutral handle.
     const workspace = findWorkspace(get().browserTabsByWorktree, tabId)
-    if (
-      workspace?.activePageId &&
-      !isRuntimeEnvironmentActive(get()) &&
-      typeof window !== 'undefined' &&
-      window.api?.browser
-    ) {
-      window.api.browser
-        .notifyActiveTabChanged({ browserPageId: workspace.activePageId })
-        .catch(() => {})
+    if (workspace?.activePageId && !isRuntimeEnvironmentActive(get())) {
+      notifyActiveBrowserPage(workspace.activePageId).catch(() => {})
     }
 
     const item = Object.values(get().unifiedTabsByWorktree)
@@ -1237,14 +1227,10 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     })
 
-    // Why: switching the active page within a workspace changes which guest
-    // webContents the CDP bridge should target for agent commands.
-    if (
-      !isRuntimeEnvironmentActive(get()) &&
-      typeof window !== 'undefined' &&
-      window.api?.browser
-    ) {
-      window.api.browser.notifyActiveTabChanged({ browserPageId: pageId }).catch(() => {})
+    // Why: switching the active page changes which registered handle the
+    // browser command bridge targets.
+    if (!isRuntimeEnvironmentActive(get())) {
+      notifyActiveBrowserPage(pageId).catch(() => {})
     }
 
     const workspace = findWorkspace(get().browserTabsByWorktree, workspaceId)
@@ -1313,15 +1299,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     })
 
-    // Why: notify the CDP bridge which guest webContents is now active so
-    // subsequent agent commands target the correct page. Mirrors the
-    // notifyActiveTabChanged calls in setActiveBrowserTab/setActiveBrowserPage.
-    if (
-      !isRuntimeEnvironmentActive(get()) &&
-      typeof window !== 'undefined' &&
-      window.api?.browser
-    ) {
-      window.api.browser.notifyActiveTabChanged({ browserPageId }).catch(() => {})
+    // Why: keep agent commands on the current backend-neutral page handle.
+    if (!isRuntimeEnvironmentActive(get())) {
+      notifyActiveBrowserPage(browserPageId).catch(() => {})
     }
 
     // Why: keep the unified-tab strip's active entry in sync within the
@@ -1851,9 +1831,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
   fetchBrowserSessionProfiles: async () => {
     if (isRuntimeEnvironmentActive(get())) {
       try {
-        const result = await callRuntimeRpc<BrowserProfileListResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileList',
+          (client) => client.browser.profileList,
           undefined,
           { timeoutMs: 15_000 }
         )
@@ -1864,8 +1844,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       return
     }
     try {
-      const profiles = (await window.api.browser.sessionListProfiles()) as BrowserSessionProfile[]
-      set((s) => profileListByHostUpdate(s, profiles))
+      const result = await listLocalBrowserProfiles()
+      set((s) => profileListByHostUpdate(s, result.profiles))
     } catch {
       /* best-effort — stale profile list is preferable to a crash */
     }
@@ -1874,9 +1854,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
   createBrowserSessionProfile: async (scope, label) => {
     if (isRuntimeEnvironmentActive(get())) {
       try {
-        const result = await callRuntimeRpc<BrowserProfileCreateResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileCreate',
+          (client) => client.browser.profileCreate,
           { scope, label },
           { timeoutMs: 15_000 }
         )
@@ -1892,10 +1872,7 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     }
     try {
-      const profile = (await window.api.browser.sessionCreateProfile({
-        scope,
-        label
-      })) as BrowserSessionProfile | null
+      const { profile } = await createLocalBrowserProfile(scope, label)
       if (profile) {
         set((s) => ({
           ...profileListByHostUpdate(s, [...s.browserSessionProfiles, profile])
@@ -1910,9 +1887,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
   deleteBrowserSessionProfile: async (profileId) => {
     if (isRuntimeEnvironmentActive(get())) {
       try {
-        const result = await callRuntimeRpc<BrowserProfileDeleteResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileDelete',
+          (client) => client.browser.profileDelete,
           { profileId },
           { timeoutMs: 15_000 }
         )
@@ -1939,8 +1916,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     }
     try {
-      const ok = await window.api.browser.sessionDeleteProfile({ profileId })
-      if (ok) {
+      const { deleted } = await deleteLocalBrowserProfile(profileId)
+      if (deleted) {
         set((s) => ({
           ...profileListByHostUpdate(
             s,
@@ -1957,7 +1934,7 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
             : {})
         }))
       }
-      return ok
+      return deleted
     } catch {
       return false
     }
@@ -1985,9 +1962,7 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     })
     try {
-      const result = (await window.api.browser.sessionImportCookies({
-        profileId
-      })) as BrowserCookieImportResult
+      const result = await importLocalBrowserCookieFile(profileId)
       if (result.ok) {
         get().recordFeatureInteraction?.('cookie-import')
         set({
@@ -2036,9 +2011,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
   fetchDetectedBrowsers: async () => {
     if (isRuntimeEnvironmentActive(get())) {
       try {
-        const result = await callRuntimeRpc<BrowserDetectProfilesResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileDetectBrowsers',
+          (client) => client.browser.profileDetectBrowsers,
           undefined,
           { timeoutMs: 15_000 }
         )
@@ -2052,13 +2027,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       return
     }
     try {
-      const browsers = (await window.api.browser.sessionDetectBrowsers()) as {
-        family: string
-        label: string
-        profiles: { name: string; directory: string }[]
-        selectedProfile: string
-      }[]
-      set({ detectedBrowsers: browsers, detectedBrowsersLoaded: true })
+      const result = await detectLocalBrowserProfiles()
+      set({ detectedBrowsers: result.browsers, detectedBrowsersLoaded: true })
     } catch {
       /* best-effort — empty list is acceptable fallback */
       set({ detectedBrowsersLoaded: true })
@@ -2076,9 +2046,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
         }
       })
       try {
-        const result = await callRuntimeRpc<BrowserProfileImportFromBrowserResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileImportFromBrowser',
+          (client) => client.browser.profileImportFromBrowser,
           { profileId, browserFamily, browserProfile },
           { timeoutMs: 30_000 }
         )
@@ -2127,11 +2097,11 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     })
     try {
-      const result = (await window.api.browser.sessionImportFromBrowser({
+      const result = await importLocalBrowserProfile({
         profileId,
         browserFamily,
         browserProfile
-      })) as BrowserCookieImportResult
+      })
       if (result.ok) {
         get().recordFeatureInteraction?.('cookie-import')
         set({
@@ -2173,9 +2143,9 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
   clearDefaultSessionCookies: async () => {
     if (isRuntimeEnvironmentActive(get())) {
       try {
-        const result = await callRuntimeRpc<BrowserProfileClearDefaultCookiesResult>(
+        const result = await callRuntimeOrpc(
           getActiveRuntimeTarget(get().settings),
-          'browser.profileClearDefaultCookies',
+          (client) => client.browser.profileClearDefaultCookies,
           undefined,
           { timeoutMs: 15_000 }
         )
@@ -2188,12 +2158,12 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       }
     }
     try {
-      const ok = await window.api.browser.sessionClearDefaultCookies()
-      if (ok) {
+      const { cleared } = await clearLocalDefaultBrowserCookies()
+      if (cleared) {
         get().recordFeatureInteraction?.('cookie-import')
         await get().fetchBrowserSessionProfiles()
       }
-      return ok
+      return cleared
     } catch {
       return false
     }

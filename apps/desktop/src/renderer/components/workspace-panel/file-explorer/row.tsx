@@ -135,15 +135,13 @@ export function FileExplorerRow({
       onMoveDrop
     })
   const handleDownload = useCallback(() => {
-    // Why: paired runtimes own their SSH connection and must service its paths.
-    const downloadTarget = runtimeDownloadContext || connectionId
-    if (downloadTarget) {
-      void downloadRemoteEntry(node, downloadTarget)
+    if (runtimeDownloadContext) {
+      void downloadRemoteEntry(node, runtimeDownloadContext)
     }
-  }, [connectionId, node, runtimeDownloadContext])
+  }, [node, runtimeDownloadContext])
   const handleCopyFile = useCallback(() => {
-    void copyFileToOsClipboard(node, connectionId)
-  }, [connectionId, node])
+    void copyFileToOsClipboard(node)
+  }, [node])
 
   const menuTriggerRef = useRef<HTMLDivElement | null>(null)
   const onContextMenuSelectRef = useRef(onContextMenuSelect)

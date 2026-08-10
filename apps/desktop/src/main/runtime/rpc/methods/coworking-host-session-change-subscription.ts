@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
+import type { RuntimeCoworkingSessionChangedEvent } from '@yiru/runtime-protocol/contract'
 import type { CoworkingTerminalSessionBindings } from '~main/coworking/terminal-session-bindings'
 import { CoworkingPairedRuntimeSessionChangedEventSchema } from '~shared/coworking/paired-runtime-session-contract'
 
@@ -15,7 +16,7 @@ export async function runCoworkingHostSessionChangesSubscription(
   context: RpcContext,
   worktree: SessionChangeWorktree,
   sessionBindings: CoworkingTerminalSessionBindings,
-  emit: (result: unknown) => void
+  emit: (result: RuntimeCoworkingSessionChangedEvent) => void
 ): Promise<void> {
   const signal = context.signal ?? new AbortController().signal
   await new Promise<void>((resolve) => {

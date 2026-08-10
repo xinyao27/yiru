@@ -2,7 +2,7 @@
 privileged bridge for context menus, grab-mode shortcuts, and app-shortcut
 forwarding from webContents guests. Splitting this rebase-only integration
 would make the security boundary harder to audit. */
-import { screen, webContents } from 'electron'
+import { screen } from 'electron'
 import type { BrowserPageZoomDirection } from '~shared/browser/page-zoom'
 import {
   normalizeBrowserNavigationUrl,
@@ -624,19 +624,4 @@ export function setupGuestMouseWheelZoomForwarding(args: {
       // Why: best-effort — guest may already be destroyed during teardown.
     }
   }
-}
-
-export function resolveRendererWebContents(
-  rendererWebContentsIdByTabId: ReadonlyMap<string, number>,
-  browserTabId: string
-): Electron.WebContents | null {
-  const rendererWcId = rendererWebContentsIdByTabId.get(browserTabId)
-  if (!rendererWcId) {
-    return null
-  }
-  const renderer = webContents.fromId(rendererWcId)
-  if (!renderer || renderer.isDestroyed()) {
-    return null
-  }
-  return renderer
 }

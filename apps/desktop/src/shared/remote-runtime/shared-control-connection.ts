@@ -8,6 +8,7 @@ import { REMOTE_RUNTIME_CANCEL_REQUEST_METHOD } from './request-cancellation'
 import { remoteRuntimeUnavailableError } from './request-frames'
 import { handleSharedControlTextFrame } from './shared-control-frame-handler'
 import { openSharedControlSocket } from './shared-control-open'
+import { SharedControlOrpcBridge } from './shared-control-orpc-bridge'
 import { sendSharedControlEncrypted } from './shared-control-protocol'
 import { isSharedControlReady, waitForSharedControlReadyWithTimeout } from './shared-control-ready'
 import { scheduleSharedControlReconnectOrFinish } from './shared-control-reconnect'
@@ -47,6 +48,7 @@ export class RemoteRuntimeSharedControlConnection {
   private everReady = false
   private routeGeneration = 0
   private readonly sender: RemoteRuntimeSharedControlSender
+  readonly orpc: SharedControlOrpcBridge
   readonly existingRoute: RemoteRuntimeExistingRouteAccess
 
   constructor(
@@ -65,6 +67,11 @@ export class RemoteRuntimeSharedControlConnection {
       pendingRequests: this.pendingRequests,
       subscriptions: this.subscriptions,
       sendEncrypted: (payload) => this.sendEncrypted(payload)
+    })
+    this.orpc = new SharedControlOrpcBridge({
+      ensureReady: (timeoutMs) => this.ensureReadyWithTimeout(timeoutMs),
+      getTransportState: () => ({ state: this.state, ws: this.ws, sharedKey: this.sharedKey }),
+      handleSocketClosed: (error) => this.handleSocketClosed(error)
     })
     this.existingRoute = new RemoteRuntimeExistingRouteAccess({
       deviceToken: pairing.deviceToken,
@@ -173,6 +180,7 @@ export class RemoteRuntimeSharedControlConnection {
         this.handleSocketClosed(error)
       },
       onTextFrame: (frame) => this.handleTextFrame(frame),
+      onBinaryFrame: (frame) => this.orpc.handleEncryptedBinary(frame),
       liveness: {
         options: this.options.liveness,
         onDead: (error) => this.handleSocketClosed(error)
@@ -202,6 +210,7 @@ export class RemoteRuntimeSharedControlConnection {
       setState: (state) => void (this.state = state),
       handleSocketClosed: (error) => this.handleSocketClosed(error),
       sendEncrypted: (payload) => this.sendEncrypted(payload),
+      handleOrpcText: (frame) => this.orpc.handleText(frame),
       markReady: () => {
         this.lastConnectedAt = Date.now()
         this.scheduleReconnectAttemptReset()
@@ -260,6 +269,7 @@ export class RemoteRuntimeSharedControlConnection {
     const ws = this.ws
     // Why: borrowed requests are bound to one physical route and cannot cross a reconnect.
     this.routeGeneration += 1
+    this.orpc.closeAll(error ?? remoteRuntimeUnavailableError())
     closeSharedControlSocket({
       environmentId: this.options.environmentId,
       state: this.state,

@@ -1,4 +1,4 @@
-import { isTerminalLeafId, parsePaneKey, type TerminalLeafId } from '~shared/stable-pane-id'
+import { isTerminalLeafId, type TerminalLeafId } from '~shared/stable-pane-id'
 
 import type { ManagedPane } from './types'
 
@@ -21,18 +21,6 @@ export type PaneKeyResolution =
 export type PaneKeyResolutionManager = {
   getNumericIdForLeaf(leafId: string): number | null
   getPanes(): Pick<ManagedPane, 'id' | 'leafId'>[]
-}
-
-export function resolvePaneKeyForManager(
-  tabId: string,
-  paneKey: string,
-  manager: PaneKeyResolutionManager | null
-): PaneKeyResolution {
-  const parsed = parsePaneKey(paneKey)
-  if (!parsed || parsed.tabId !== tabId) {
-    return { status: 'unresolved', paneKey, leafId: parsed?.leafId ?? null, reason: 'invalid' }
-  }
-  return resolveLeafIdForManager(tabId, parsed.leafId, manager, paneKey)
 }
 
 export function resolveLeafIdForManager(

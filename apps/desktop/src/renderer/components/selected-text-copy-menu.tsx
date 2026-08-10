@@ -3,6 +3,7 @@ import React from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 type SelectedTextCopyMenuProps = {
   children: React.ReactNode
@@ -96,7 +97,7 @@ export function SelectedTextCopyMenu({
     if (!menu) {
       return
     }
-    void window.api.ui.writeClipboardText(menu.text)
+    void shellClient.ui.writeClipboardText(menu.text)
     setMenu(null)
   }, [menu])
 

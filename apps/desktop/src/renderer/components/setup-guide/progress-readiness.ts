@@ -44,27 +44,6 @@ export function getSetupScriptProbeSignature(
   })
 }
 
-export function markSetupScriptProbePending(
-  current: SetupScriptProbeState,
-  signature: string | null
-): SetupScriptProbeState {
-  if (current.signature === signature) {
-    return current
-  }
-  return { signature, ready: false, hasSetupScript: false }
-}
-
-export function settleSetupScriptProbe(
-  current: SetupScriptProbeState,
-  signature: string,
-  hasSetupScript: boolean
-): SetupScriptProbeState {
-  if (current.signature !== signature) {
-    return current
-  }
-  return { signature, ready: true, hasSetupScript }
-}
-
 export function getCurrentSetupScriptProbeState(
   current: SetupScriptProbeState,
   signature: string | null

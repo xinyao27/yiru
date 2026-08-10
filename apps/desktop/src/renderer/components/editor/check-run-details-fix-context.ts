@@ -58,7 +58,6 @@ export function resolveHostedReviewForCheckRunDetailsFix(
     repo.id,
     branch,
     settings,
-    repo.connectionId,
     repo.executionHostId,
     true
   )
@@ -67,7 +66,6 @@ export function resolveHostedReviewForCheckRunDetailsFix(
     branch,
     settings,
     repo.id,
-    repo.connectionId,
     repo.executionHostId,
     true
   )

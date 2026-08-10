@@ -55,10 +55,13 @@ import {
   localPreflightContextKey
 } from '~renderer/lib/local-preflight-context'
 import { getRepoOwnerRoutedSettings } from '~renderer/lib/repo-runtime-owner'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails
 } from '~renderer/runtime/repo-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   buildProjectSourceContextFromRepo,
@@ -1264,7 +1267,7 @@ export default function SmartWorkspaceNameField({
                             type="button"
                             variant="quiet"
                             size="icon-xs"
-                            onClick={() => void window.api.shell.openUrl(selectedSource.url!)}
+                            onClick={() => void shellClient.shell.openUrl(selectedSource.url!)}
                             className="size-6 shrink-0"
                             aria-label={translate(
                               'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',
@@ -1615,7 +1618,11 @@ async function getRepoSlugCached(
     return cache.get(cacheKey) ?? null
   }
   try {
-    const slug = await window.api.gh.repoSlug({ repoPath: repo.path, repoId: repo.id })
+    const slug = await callRuntimeOrpc(
+      getActiveRuntimeTarget(useAppStore.getState().settings),
+      (client) => client.github.repoSlug,
+      { repo: repo.id }
+    )
     cache.set(cacheKey, slug)
     return slug
   } catch {

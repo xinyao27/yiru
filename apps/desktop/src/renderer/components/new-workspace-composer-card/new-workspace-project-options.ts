@@ -9,7 +9,6 @@ import {
 } from './new-workspace-duplicate-project-details'
 
 export const NEW_WORKSPACE_PROJECT_GROUP_OPTION_PREFIX = 'project-group:'
-export const NEW_WORKSPACE_FOLDER_SOURCE_OPTION_PREFIX = 'folder-source:'
 
 export type NewWorkspaceProjectOption =
   | {
@@ -139,16 +138,6 @@ function getProjectGroupOptionId(projectGroupId: string): string {
   return `${NEW_WORKSPACE_PROJECT_GROUP_OPTION_PREFIX}${projectGroupId}`
 }
 
-function getFolderSourceOptionId(repoId: string): string {
-  return `${NEW_WORKSPACE_FOLDER_SOURCE_OPTION_PREFIX}${repoId}`
-}
-
-export function getRepoIdFromNewWorkspaceFolderSourceOptionId(optionId: string): string | null {
-  return optionId.startsWith(NEW_WORKSPACE_FOLDER_SOURCE_OPTION_PREFIX)
-    ? optionId.slice(NEW_WORKSPACE_FOLDER_SOURCE_OPTION_PREFIX.length)
-    : null
-}
-
 export function getProjectGroupIdFromNewWorkspaceOptionId(optionId: string): string | null {
   return optionId.startsWith(NEW_WORKSPACE_PROJECT_GROUP_OPTION_PREFIX)
     ? optionId.slice(NEW_WORKSPACE_PROJECT_GROUP_OPTION_PREFIX.length)
@@ -157,21 +146,6 @@ export function getProjectGroupIdFromNewWorkspaceOptionId(optionId: string): str
 
 function getProjectGroupDetail(group: ProjectGroup): string {
   return group.parentPath?.trim() || 'Repo group'
-}
-
-export function buildNewWorkspaceFolderSourceOptions(
-  repos: readonly Repo[]
-): NewWorkspaceProjectOption[] {
-  return repos
-    .map((repo) => ({
-      kind: 'project' as const,
-      id: getFolderSourceOptionId(repo.id),
-      projectId: repo.id,
-      displayName: repo.displayName,
-      badgeColor: repo.badgeColor,
-      detail: repo.path
-    }))
-    .sort((a, b) => a.displayName.localeCompare(b.displayName) || a.detail.localeCompare(b.detail))
 }
 
 export function buildNewWorkspaceCreateTargetOptions({

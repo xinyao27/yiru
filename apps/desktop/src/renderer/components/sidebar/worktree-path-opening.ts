@@ -2,8 +2,9 @@ import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-pro
 import { toast } from 'sonner'
 import { getExternalEditorOpenCapability } from '~renderer/components/sidebar/external-editor-open-capability'
 import { translate } from '~renderer/i18n/i18n'
-import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '~renderer/runtime/rpc-client'
-import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '~shared/runtime-method-contracts/external-editor-contracts'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { runtimeEnvironmentSupportsCapability } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   ShellOpenExternalEditorResult,
   ShellOpenPathFailureReason
@@ -203,14 +204,14 @@ export async function openWorktreePath(args: {
   try {
     result =
       args.target === 'file-manager'
-        ? await window.api.shell.openInFileManager(args.worktreePath)
+        ? await shellClient.shell.openInFileManager(args.worktreePath)
         : runtimeEnvironmentId && connectionId
-          ? await callRuntimeRpc(
+          ? await callRuntimeOrpc(
               { kind: 'environment', environmentId: runtimeEnvironmentId },
-              EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT,
+              (client) => client.externalEditor.openRemoteSsh,
               { path: args.worktreePath, command: args.command, connectionId }
             )
-          : await window.api.shell.openInExternalEditor({
+          : await shellClient.shell.openInExternalEditor({
               path: args.worktreePath,
               command: args.command,
               connectionId

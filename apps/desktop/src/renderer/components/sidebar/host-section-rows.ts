@@ -46,7 +46,9 @@ function getRepoHostId(
 ): ExecutionHostId {
   // Why: explicit executionHostId must win over the focused/default host, or
   // runtime-owned repos group under whichever host happens to be focused.
-  if (repo?.connectionId || repo?.executionHostId) {
+  // Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (repo?.executionHostId) {
     return getRepoExecutionHostId(repo)
   }
   return defaultHostId

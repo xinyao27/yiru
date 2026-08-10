@@ -1,5 +1,5 @@
 import { Warning as AlertTriangle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {
@@ -51,8 +51,10 @@ export function SkillInstallDialog({
 }: SkillInstallDialogProps): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
   // Why: the scope becomes a spawn cwd, so only checkouts on this machine can
-  // host a project-scoped install.
-  const localRepos = useMemo(() => repos.filter((repo) => !repo.connectionId), [repos])
+  // host a project-scoped install. Repo.connectionId used to exclude SSH
+  // repos here, but it's dead — nothing sets it since remote hosts were
+  // removed (#63) — every repo now qualifies.
+  const localRepos = repos
   const [source, setSource] = useState(request.source)
   const [skillName, setSkillName] = useState(request.skillName)
   const [scopeValue, setScopeValue] = useState(GLOBAL_SCOPE_VALUE)

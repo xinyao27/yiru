@@ -48,20 +48,6 @@ export type WindowShortcutAction =
 
 type WindowShortcutResolveOptions = KeybindingMatchOptions
 
-function platformPrimaryModifier(
-  input: Pick<WindowShortcutInput, 'meta' | 'control'>,
-  platform: NodeJS.Platform
-): boolean {
-  return platform === 'darwin' ? Boolean(input.meta) : Boolean(input.control)
-}
-
-export function isWindowShortcutModifierChord(
-  input: Pick<WindowShortcutInput, 'meta' | 'control' | 'alt'>,
-  platform: NodeJS.Platform
-): boolean {
-  return platformPrimaryModifier(input, platform) && !input.alt
-}
-
 export function matchesRecentTabSwitcherChord(
   input: WindowShortcutInput,
   platform: NodeJS.Platform,

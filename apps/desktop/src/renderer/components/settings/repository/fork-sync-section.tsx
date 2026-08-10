@@ -131,7 +131,9 @@ export function RepositoryForkSyncSection({
           settings: getRepoOwnerRoutedSettings(settings, repo),
           worktreeId: repo.id,
           worktreePath: repo.path,
-          connectionId: repo.connectionId ?? undefined
+          // Why: Repo.connectionId is dead — nothing sets it since remote
+          // hosts were removed (#63) — a repo's fork sync is always local.
+          connectionId: undefined
         },
         upstream
       )

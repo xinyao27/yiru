@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { previewWarpThemeImportOnActiveHost } from '~renderer/runtime/settings-import-client'
 import {
   MAX_TERMINAL_CUSTOM_THEMES,
   normalizeTerminalCustomThemes,
@@ -51,7 +52,7 @@ export function useWarpThemeImport(
     setLoading(true)
     setApplyError(null)
     try {
-      const result = await window.api.settings.previewWarpThemeImport(source)
+      const result = await previewWarpThemeImportOnActiveHost(source)
       // Why: a dismissed native picker keeps whatever preview was already
       // showing instead of wiping it with an empty result.
       if (mountedRef.current && !result.canceled) {

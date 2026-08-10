@@ -277,42 +277,16 @@ export function buildTerminalSessionData(
     .filter(([, tabs]) => tabs.some(hasReconnectableSession))
     .map(([worktreeId]) => worktreeId)
 
-  const worktreeById = new Map(
-    Object.values(snapshot.worktreesByRepo)
-      .flat()
-      .map((worktree) => [worktree.id, worktree])
-  )
-  const repoById = new Map(snapshot.repos.map((repo) => [repo.id, repo]))
-
-  // Why: the renderer already has tab.ptyId for every terminal tab and knows
-  // which worktrees are SSH-backed via repo.connectionId. Deriving the map
-  // here avoids a sync IPC round-trip during beforeunload, which is fragile
-  // (can be dropped by Chromium under shutdown time pressure).
-  // Why: this builder runs from the session-write debounce and beforeunload.
-  // Pre-index repo/worktree identity once so large workspaces don't rescan all
-  // repos/worktrees for every terminal tab while the renderer is trying to quit.
-  const remoteSessionIdsByTabId: Record<string, string> = {}
-  for (const [worktreeId, tabs] of Object.entries(tabsByWorktree)) {
-    const worktree = worktreeById.get(worktreeId)
-    const repo = worktree ? repoById.get(worktree.repoId) : null
-    if (!repo?.connectionId) {
-      continue
-    }
-    for (const tab of tabs) {
-      if (!hasReconnectableSession(tab)) {
-        continue
-      }
-      const sessionId = tab.ptyId || lastKnown[tab.id]
-      if (sessionId) {
-        remoteSessionIdsByTabId[tab.id] = sessionId
-      }
-    }
-  }
-
+  // Why: this builder used to derive remote session ids from tab.ptyId plus
+  // worktree ownership via repo.connectionId, but Repo.connectionId is dead —
+  // nothing sets it since remote hosts were removed (#63) — so that lookup
+  // could never resolve a worktree as SSH-backed. The main process still
+  // populates remoteSessionIdsByTabId from live PTY connection ids
+  // (yiru-runtime.ts), so the field itself stays; the renderer just no longer
+  // has a contribution to add here.
   return {
     activeWorktreeIdsOnShutdown,
-    remoteSessionIdsByTabId:
-      Object.keys(remoteSessionIdsByTabId).length > 0 ? remoteSessionIdsByTabId : undefined
+    remoteSessionIdsByTabId: undefined
   }
 }
 

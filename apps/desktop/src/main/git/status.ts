@@ -626,44 +626,6 @@ function getEffectiveUpstreamStatusCacheKey(
   return [worktreePath, options.wslDistro ?? 'host', branchName, upstreamName ?? ''].join('\0')
 }
 
-export function clearEffectiveUpstreamNegativeStatusCache(identity: {
-  worktreePath: string
-  branchName: string
-  upstreamName?: string
-  options?: GitRuntimeOptions
-}): void {
-  const cacheKey = getEffectiveUpstreamStatusCacheKey(
-    identity.worktreePath,
-    identity.branchName,
-    identity.upstreamName,
-    identity.options
-  )
-  retireEffectiveUpstreamStatusProbe(cacheKey)
-  effectiveUpstreamStatusCache.delete(cacheKey)
-  effectiveUpstreamStatusInFlight.delete(cacheKey)
-  resolvedUpstreamNameCache.delete(cacheKey)
-  effectiveUpstreamStatusWriteGeneration.set(
-    cacheKey,
-    (effectiveUpstreamStatusWriteGeneration.get(cacheKey) ?? 0) + 1
-  )
-}
-
-function retireEffectiveUpstreamStatusProbe(cacheKey: string): void {
-  const retiredProbe = effectiveUpstreamStatusInFlight.get(cacheKey)
-  if (!retiredProbe) {
-    return
-  }
-  retiredEffectiveUpstreamStatusInFlight.set(cacheKey, retiredProbe)
-  void retiredProbe
-    .finally(() => {
-      if (retiredEffectiveUpstreamStatusInFlight.get(cacheKey) === retiredProbe) {
-        retiredEffectiveUpstreamStatusInFlight.delete(cacheKey)
-        trimEffectiveUpstreamStatusGeneration()
-      }
-    })
-    .catch(() => undefined)
-}
-
 function hasPendingEffectiveUpstreamStatusProbe(cacheKey: string): boolean {
   return (
     effectiveUpstreamStatusInFlight.has(cacheKey) ||

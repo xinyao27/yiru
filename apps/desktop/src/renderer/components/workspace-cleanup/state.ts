@@ -8,6 +8,11 @@ import {
   classifyTitleActivity,
   isExplicitAgentStatusFresh
 } from '~renderer/lib/pane-agent-evidence'
+import {
+  clearWorkspaceCleanupDismissals as clearRuntimeWorkspaceCleanupDismissals,
+  dismissWorkspaceCleanupCandidates as dismissRuntimeWorkspaceCleanupCandidates,
+  scanWorkspaceCleanup as scanRuntimeWorkspaceCleanup
+} from '~renderer/runtime/workspace-cleanup-client'
 import type { AppState } from '~renderer/store/types'
 import { mapWithConcurrency } from '~shared/map-with-concurrency'
 import {
@@ -150,7 +155,7 @@ export const createWorkspaceCleanupSlice: StateCreator<AppState, [], [], Workspa
 
   scanWorkspaceCleanup: async (args) => {
     if (args?.worktreeId !== undefined) {
-      const scan = await window.api.workspaceCleanup.scan(args)
+      const scan = await scanRuntimeWorkspaceCleanup(args)
       const enriched = await enrichWorkspaceCleanupCandidates(scan.candidates, get(), {
         applyDismissals: false
       })
@@ -190,7 +195,7 @@ export const createWorkspaceCleanupSlice: StateCreator<AppState, [], [], Workspa
     workspaceCleanupEnrichmentCache = { scanToken, entries: new Map() }
     workspaceCleanupProgressCandidateIndex = null
     const promise = (async () => {
-      const scan = await window.api.workspaceCleanup.scan(scanArgs, (progress) => {
+      const scan = await scanRuntimeWorkspaceCleanup(scanArgs, (progress) => {
         enqueueWorkspaceCleanupProgress(progress, scanToken, get, set)
       })
       const enriched = await enrichWorkspaceCleanupCandidatesForScan(
@@ -276,7 +281,7 @@ export const createWorkspaceCleanupSlice: StateCreator<AppState, [], [], Workspa
       }
     })
 
-    await window.api.workspaceCleanup.dismiss({ dismissals })
+    await dismissRuntimeWorkspaceCleanupCandidates(dismissals)
   },
 
   resetWorkspaceCleanupDismissals: async () => {
@@ -294,7 +299,7 @@ export const createWorkspaceCleanupSlice: StateCreator<AppState, [], [], Workspa
           }
         : state.workspaceCleanupScan
     }))
-    await window.api.workspaceCleanup.clearDismissals()
+    await clearRuntimeWorkspaceCleanupDismissals()
   },
 
   removeWorkspaceCleanupCandidates: async (worktreeIds, options) => {
@@ -810,7 +815,7 @@ async function preflightWorkspaceCleanupCandidate(
   | { ok: true; candidate: WorkspaceCleanupCandidate }
   | { ok: false; failure: WorkspaceCleanupFailure }
 > {
-  const scan = await window.api.workspaceCleanup.scan({ worktreeId })
+  const scan = await scanRuntimeWorkspaceCleanup({ worktreeId })
   const [candidate] = await enrichWorkspaceCleanupCandidates(scan.candidates, getState(), {
     applyDismissals: false
   })

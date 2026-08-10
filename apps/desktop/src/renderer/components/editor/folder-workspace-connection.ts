@@ -24,20 +24,14 @@ function getFolderScopeCandidateRepos(args: {
       !(typeof repo.projectGroupId === 'string' && groupIds.has(repo.projectGroupId)) &&
       isPathInsideOrEqual(args.folderPath, repo.path)
   )
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a real scope connectionId (still settable on
+  // ProjectGroup/FolderWorkspace by other clients) can never match a repo, so
+  // path-matched repos only ever join the scope when it has no connection.
   if (args.connectionId) {
-    return [
-      ...groupRepos,
-      ...pathRepos.filter((repo) => (repo.connectionId ?? null) === args.connectionId)
-    ]
+    return groupRepos
   }
-  if (groupRepos.length === 0) {
-    return pathRepos
-  }
-  const groupConnectionIds = new Set(groupRepos.map((repo) => repo.connectionId ?? null))
-  return [
-    ...groupRepos,
-    ...pathRepos.filter((repo) => groupConnectionIds.has(repo.connectionId ?? null))
-  ]
+  return [...groupRepos, ...pathRepos]
 }
 
 export function getFolderWorkspaceCandidateRepos(
@@ -70,36 +64,13 @@ export function getFolderWorkspaceConnectionId(
     workspace.connectionId ??
     state.projectGroups.find((entry) => entry.id === workspace.projectGroupId)?.connectionId ??
     null
+  if (!scopeConnectionId) {
+    return null
+  }
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a scope-level connection (still settable on
+  // ProjectGroup/FolderWorkspace by other clients) is only authoritative when
+  // no repo is bound to this scope, since every repo is implicitly local.
   const candidateRepos = getFolderWorkspaceCandidateRepos(state, folderWorkspaceId)
-  let hasLocalRepo = false
-  const connectionIds = new Set<string>()
-  for (const repo of candidateRepos) {
-    if (repo.connectionId) {
-      connectionIds.add(repo.connectionId)
-    } else {
-      hasLocalRepo = true
-    }
-  }
-  if (scopeConnectionId) {
-    const hasDifferentSshConnection = [...connectionIds].some(
-      (connectionId) => connectionId !== scopeConnectionId
-    )
-    if (hasLocalRepo || hasDifferentSshConnection) {
-      return undefined
-    }
-    return scopeConnectionId
-  }
-  if (candidateRepos.length === 0) {
-    return null
-  }
-  if (hasLocalRepo && connectionIds.size > 0) {
-    return undefined
-  }
-  if (connectionIds.size === 0) {
-    return null
-  }
-  if (connectionIds.size === 1) {
-    return [...connectionIds][0]
-  }
-  return undefined
+  return candidateRepos.length === 0 ? scopeConnectionId : undefined
 }

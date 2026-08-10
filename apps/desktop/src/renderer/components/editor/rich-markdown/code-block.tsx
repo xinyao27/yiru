@@ -5,6 +5,7 @@ import React, { useCallback, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { useUiLocale } from '~renderer/i18n/use-ui-locale'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import MermaidBlock from '../mermaid-block'
@@ -208,7 +209,7 @@ export function RichMarkdownCodeBlock({
     (e: React.MouseEvent) => {
       e.stopPropagation()
       const text = node.textContent
-      void window.api.ui
+      void shellClient.ui
         .writeClipboardText(text)
         .then(() => {
           if (!isMountedRef.current) {

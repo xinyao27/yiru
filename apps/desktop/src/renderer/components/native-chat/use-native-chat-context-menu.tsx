@@ -29,6 +29,7 @@ import {
   ContextMenuShortcut
 } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { isMacPlatform, nativeChatToggleShortcutLabel } from './shortcut'
 
@@ -142,7 +143,7 @@ export function useNativeChatContextMenu({
       <ContextMenuContent className="w-56" finalFocus={false}>
         <ContextMenuItem
           disabled={state.selectedText.trim().length === 0}
-          onClick={() => void window.api.ui.writeClipboardText(state.selectedText)}
+          onClick={() => void shellClient.ui.writeClipboardText(state.selectedText)}
         >
           <Copy />
           {translate('auto.components.nativeChat.contextMenu.copy', 'Copy')}

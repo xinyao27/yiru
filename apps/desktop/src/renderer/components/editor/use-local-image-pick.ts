@@ -1,6 +1,7 @@
 import type { Editor } from '@tiptap/react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { insertRichMarkdownImageFromPath } from './rich-markdown/image-insert'
 import { extractIpcErrorMessage } from './rich-markdown/ipc-error-message'
@@ -22,7 +23,7 @@ export function useLocalImagePick(
     const insertPos = editor.state.selection.from
     const targetDom = editor.view.dom
     try {
-      const srcPath = await window.api.shell.pickImage()
+      const srcPath = await shellClient.shell.pickImage()
       if (!srcPath) {
         return
       }

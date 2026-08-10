@@ -1,11 +1,11 @@
 export const LOCAL_LOG_TAIL_CHUNK_BYTES = 256 * 1024
 
-export type LocalLogTailReadArgs = {
-  filePath: string
-  fromByteOffset: number
-  expectedIdentity?: string
-}
-
+// Why: structurally identical to the runtime contract's FileLogTailReadInput/
+// RuntimeLogTailReadResult (packages/runtime-protocol/src/contract/file-
+// input.ts, file-result.ts) — files.readLogTail/watchLogTail are the only
+// callers left (main/runtime/rpc/methods/log-tail-methods.ts), so this stays
+// the shared shape between the reader and the editor's decoder without
+// importing the contract package into main/ai-vault.
 export type LocalLogTailReadResult = {
   contentBase64: string
   nextByteOffset: number
@@ -13,14 +13,4 @@ export type LocalLogTailReadResult = {
   fileIdentity: string
   hasMore: boolean
   reset: boolean
-}
-
-export type LocalLogTailWatchArgs = {
-  filePath: string
-  subscriptionId: string
-}
-
-export type LocalLogTailChangedPayload = {
-  subscriptionId: string
-  eventType: 'change' | 'rename'
 }

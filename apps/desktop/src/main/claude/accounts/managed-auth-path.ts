@@ -1,13 +1,13 @@
 import { existsSync, lstatSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 
-import { app } from 'electron'
 import { writeFileAtomically } from '~main/codex/accounts/fs-utils'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 
 const MANAGED_AUTH_MARKER = '.yiru-managed-claude-auth'
 
 export function getClaudeManagedAccountsRoot(): string {
-  return join(app.getPath('userData'), 'claude-accounts')
+  return join(getRuntimeHostPathsProvider().userDataPath(), 'claude-accounts')
 }
 
 export function resolveOwnedClaudeManagedAuthPath(

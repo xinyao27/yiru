@@ -64,27 +64,6 @@ export function agentDisplayLabel(row: RuntimeWorktreeAgentRow, now: number): st
   return agentStateLabel(agentDotState(row, now))
 }
 
-// Short agent identity label by type (Claude/Codex/Gemini/…), used when no
-// identity icon is available on mobile. Falls back to the first two letters.
-export function agentIdentityLabel(agentType: string | null): string {
-  if (!agentType) {
-    return ''
-  }
-  const normalized = agentType.toLowerCase()
-  const known: Record<string, string> = {
-    claude: 'CL',
-    codex: 'CX',
-    gemini: 'GM',
-    cursor: 'CR',
-    copilot: 'CP',
-    amp: 'AM',
-    aider: 'AI',
-    opencode: 'OC',
-    'mimo-code': 'MC'
-  }
-  return known[normalized] ?? normalized.slice(0, 2).toUpperCase()
-}
-
 // Relative time, matching desktop formatTimeAgo thresholds (just now / Xm / Xh / Xd).
 export function formatTimeAgo(ts: number, now: number): string {
   const delta = now - ts

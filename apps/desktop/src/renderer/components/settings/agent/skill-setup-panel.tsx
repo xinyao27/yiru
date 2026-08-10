@@ -11,10 +11,12 @@ import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { isYiruCliAvailableOnPath } from '~renderer/lib/agent-skill-cli-prerequisite'
 import { cn } from '~renderer/lib/class-names'
+import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 type AgentSkillSetupPanelVariant = 'card' | 'inline'
-type SkillPrerequisiteStatus = Awaited<ReturnType<typeof window.api.cli.getInstallStatus>>
+type SkillPrerequisiteStatus = Awaited<ReturnType<typeof readCliInstallStatus>>
 
 type AgentSkillSetupPanelProps = {
   title: string
@@ -96,7 +98,7 @@ export function AgentSkillSetupPanel({
   )
   const mountedRef = useMountedRef()
   const readPrerequisiteStatus = useCallback(
-    () => (getPrerequisiteStatus ?? window.api.cli.getInstallStatus)(),
+    () => (getPrerequisiteStatus ?? readCliInstallStatus)(),
     [getPrerequisiteStatus]
   )
   const activeCommand = installed ? (installedCommand ?? command) : command
@@ -150,7 +152,7 @@ export function AgentSkillSetupPanel({
 
   const copyActiveCommand = async (): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(openTerminalCommand)
+      await shellClient.ui.writeClipboardText(openTerminalCommand)
       toast.success(
         translate('auto.components.settings.AgentSkillSetupPanel.copiedCommand', 'Copied command.')
       )

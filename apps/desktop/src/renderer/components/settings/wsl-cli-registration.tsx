@@ -5,6 +5,11 @@ import { Switch } from '~renderer/components/ui/switch'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { useWindowsTerminalCapabilities } from '~renderer/lib/windows-terminal-capabilities'
+import {
+  installWslCliCommand,
+  readWslCliInstallStatus,
+  removeWslCliCommand
+} from '~renderer/runtime/cli-install-client'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 
 import { Button } from '../ui/button'
@@ -37,7 +42,7 @@ export function WslCliRegistration({
   const refreshStatus = useCallback(async (): Promise<void> => {
     setLoading(true)
     try {
-      const next = await window.api.cli.getWslInstallStatus()
+      const next = await readWslCliInstallStatus()
       if (mountedRef.current) {
         setStatus(next)
       }
@@ -76,7 +81,7 @@ export function WslCliRegistration({
   const handleInstall = async (): Promise<void> => {
     setBusyAction('install')
     try {
-      const next = await window.api.cli.installWsl()
+      const next = await installWslCliCommand()
       if (!mountedRef.current) {
         return
       }
@@ -111,7 +116,7 @@ export function WslCliRegistration({
   const handleRemove = async (): Promise<void> => {
     setBusyAction('remove')
     try {
-      const next = await window.api.cli.removeWsl()
+      const next = await removeWslCliCommand()
       if (!mountedRef.current) {
         return
       }

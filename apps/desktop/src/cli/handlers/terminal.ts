@@ -1,16 +1,3 @@
-import type {
-  RuntimeTerminalClose,
-  RuntimeTerminalCreate,
-  RuntimeTerminalFocus,
-  RuntimeTerminalListResult,
-  RuntimeTerminalRead,
-  RuntimeTerminalRename,
-  RuntimeTerminalSend,
-  RuntimeTerminalShow,
-  RuntimeTerminalSplit,
-  RuntimeTerminalWait
-} from '~shared/runtime-types'
-
 import { shouldUseRendererBackedInteractiveTerminal } from '../codex-command-classification'
 import type { CommandHandler } from '../dispatch'
 import {
@@ -45,7 +32,7 @@ import {
 const DEFAULT_TERMINAL_WAIT_RPC_TIMEOUT_MS = 5 * 60 * 1000
 
 const terminalFocusHandler: CommandHandler = async ({ flags, client, cwd, json }) => {
-  const result = await client.call<{ focus: RuntimeTerminalFocus }>('terminal.focus', {
+  const result = await client.call(client.rpc.terminal.focus, {
     terminal: await getTerminalHandle(flags, cwd, client)
   })
   printResult(result, json, formatTerminalFocus)
@@ -53,14 +40,14 @@ const terminalFocusHandler: CommandHandler = async ({ flags, client, cwd, json }
 
 export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
   'terminal list': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<RuntimeTerminalListResult>('terminal.list', {
+    const result = await client.call(client.rpc.terminal.list, {
       worktree: await getOptionalWorktreeSelector(flags, 'worktree', cwd, client),
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')
     })
     printResult(result, json, formatTerminalList)
   },
   'terminal show': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ terminal: RuntimeTerminalShow }>('terminal.show', {
+    const result = await client.call(client.rpc.terminal.show, {
       terminal: await getTerminalHandle(flags, cwd, client)
     })
     printResult(result, json, formatTerminalShow)
@@ -74,7 +61,7 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
     if (cursorFlag !== undefined && cursor === undefined) {
       throw new RuntimeClientError('invalid_argument', '--cursor must be a non-negative integer')
     }
-    const result = await client.call<{ terminal: RuntimeTerminalRead }>('terminal.read', {
+    const result = await client.call(client.rpc.terminal.read, {
       terminal: await getTerminalHandle(flags, cwd, client),
       ...(cursor !== undefined ? { cursor } : {}),
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')
@@ -82,7 +69,7 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatTerminalRead)
   },
   'terminal send': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ send: RuntimeTerminalSend }>('terminal.send', {
+    const result = await client.call(client.rpc.terminal.send, {
       terminal: await getTerminalHandle(flags, cwd, client),
       text: getOptionalStringFlag(flags, 'text'),
       enter: flags.get('enter') === true,
@@ -93,11 +80,15 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
   },
   'terminal wait': async ({ flags, client, cwd, json }) => {
     const timeoutMs = getOptionalPositiveIntegerFlag(flags, 'timeout-ms')
-    const result = await client.call<{ wait: RuntimeTerminalWait }>(
-      'terminal.wait',
+    const waitFor = getRequiredStringFlag(flags, 'for')
+    if (waitFor !== 'exit' && waitFor !== 'tui-idle') {
+      throw new RuntimeClientError('invalid_argument', '--for must be exit or tui-idle')
+    }
+    const result = await client.call(
+      client.rpc.terminal.wait,
       {
         terminal: await getTerminalHandle(flags, cwd, client),
-        for: getRequiredStringFlag(flags, 'for'),
+        for: waitFor,
         timeoutMs
       },
       {
@@ -112,13 +103,13 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
     }
   },
   'terminal stop': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ stopped: number }>('terminal.stop', {
+    const result = await client.call(client.rpc.terminal.stop, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client)
     })
     printResult(result, json, (value) => `Stopped ${value.stopped} terminals.`)
   },
   'terminal rename': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ rename: RuntimeTerminalRename }>('terminal.rename', {
+    const result = await client.call(client.rpc.terminal.rename, {
       terminal: await getTerminalHandle(flags, cwd, client),
       title: getOptionalStringFlag(flags, 'title') ?? null
     })
@@ -128,7 +119,7 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
     const command = getOptionalStringFlag(flags, 'command')
     const useRendererBackedInteractiveTerminal = shouldUseRendererBackedInteractiveTerminal(command)
     const focus = flags.get('focus') === true
-    const result = await client.call<{ terminal: RuntimeTerminalCreate }>('terminal.create', {
+    const result = await client.call(client.rpc.terminal.create, {
       worktree: await getBrowserWorktreeSelector(flags, cwd, client),
       command,
       title: getOptionalStringFlag(flags, 'title'),
@@ -144,10 +135,11 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
   // `focus` resolves to this canonical path via CommandSpec.aliases before dispatch.
   'terminal switch': terminalFocusHandler,
   'terminal close': async ({ flags, client, cwd, json }) => {
-    const method = flags.get('tab') === true ? 'terminal.closeTab' : 'terminal.close'
-    const result = await client.call<{ close: RuntimeTerminalClose }>(method, {
-      terminal: await getTerminalHandle(flags, cwd, client)
-    })
+    const input = { terminal: await getTerminalHandle(flags, cwd, client) }
+    const result =
+      flags.get('tab') === true
+        ? await client.call(client.rpc.terminal.closeTab, input)
+        : await client.call(client.rpc.terminal.close, input)
     printResult(result, json, formatTerminalClose)
   },
   'terminal split': async ({ flags, client, cwd, json }) => {
@@ -159,7 +151,7 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
     ) {
       throw new RuntimeClientError('invalid_argument', '--direction must be horizontal or vertical')
     }
-    const result = await client.call<{ split: RuntimeTerminalSplit }>('terminal.split', {
+    const result = await client.call(client.rpc.terminal.split, {
       terminal: await getTerminalHandle(flags, cwd, client),
       direction: directionFlag,
       command: getOptionalStringFlag(flags, 'command')

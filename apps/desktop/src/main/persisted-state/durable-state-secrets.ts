@@ -1,12 +1,14 @@
-import { safeStorage } from 'electron'
 import type { PersistedState } from '~shared/types'
 
+import { getRuntimeHostSecureStorageProvider } from '../runtime/host/secure-storage-provider'
+
 function encrypt(plaintext: string): string {
-  if (!plaintext || !safeStorage.isEncryptionAvailable()) {
+  const secureStorage = getRuntimeHostSecureStorageProvider()
+  if (!plaintext || !secureStorage?.isEncryptionAvailable()) {
     return plaintext
   }
   try {
-    return safeStorage.encryptString(plaintext).toString('base64')
+    return secureStorage.encryptString(plaintext).toString('base64')
   } catch (error) {
     console.error('[persistence] Encryption failed:', error)
     return plaintext
@@ -14,11 +16,12 @@ function encrypt(plaintext: string): string {
 }
 
 function decrypt(ciphertext: string): string {
-  if (!ciphertext || !safeStorage.isEncryptionAvailable()) {
+  const secureStorage = getRuntimeHostSecureStorageProvider()
+  if (!ciphertext || !secureStorage?.isEncryptionAvailable()) {
     return ciphertext
   }
   try {
-    return safeStorage.decryptString(Buffer.from(ciphertext, 'base64'))
+    return secureStorage.decryptString(Buffer.from(ciphertext, 'base64'))
   } catch {
     // Why: pre-encryption plaintext and keychain resets must remain readable;
     // returning the raw value preserves the user's existing secret.

@@ -1,10 +1,9 @@
 import { findTransport } from '~shared/runtime-bootstrap'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult, RuntimeStatus } from '~shared/runtime-types'
 
 import { tryReadMetadata } from './metadata'
-import { sendRequest } from './transport'
-import { RuntimeRpcFailureError, type RuntimeRpcSuccess } from './types'
+import { sendOrpcRequest } from './transport'
+import type { RuntimeRpcSuccess } from './types'
 
 export async function getCliStatus(
   userDataPath: string
@@ -32,10 +31,12 @@ export async function getCliStatus(
   }
 
   try {
-    const response = await sendRequest(metadata, STATUS_GET_CONTRACT, undefined, 1000)
-    if (response.ok === false) {
-      throw new RuntimeRpcFailureError(response)
-    }
+    const response = await sendOrpcRequest<RuntimeStatus>(
+      metadata,
+      ['status', 'get'],
+      undefined,
+      1000
+    )
     const graphState = response.result.graphStatus
     const desktopWindowStatus = resolveDesktopWindowStatus(response.result)
     return buildCliStatusResponse({

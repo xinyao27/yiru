@@ -1,5 +1,6 @@
 import { applyPRBotAuthorOverride } from '@yiru/workbench-model/review'
-import { BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import { ipcMain, nativeTheme } from 'electron'
+import { publishSettingsChangedEvent } from '~main/runtime/settings-events'
 import { normalizeAppIconId } from '~shared/app-icon'
 import { normalizeLoaderStyle } from '~shared/loader-style'
 import { normalizeProxyBypassRules, normalizeProxyUrl } from '~shared/network-proxy'
@@ -14,14 +15,11 @@ import type { AgentAwakeService } from '../agent-awake-service'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { applyAppIcon } from '../app-icon'
 import { sanitizeFloatingWorkspaceDirectorySetting } from '../filesystem/floating-workspace-directory'
-import { previewGhosttyImport } from '../ghostty/import-preview'
 import { setMainUiLanguage } from '../i18n/main-i18n'
 import { rebuildAppMenu } from '../menu/register-app-menu'
 import { applyElectronProxySettings } from '../network/proxy-settings'
 import type { Store } from '../persistence'
-import { listSystemFontFamilies } from '../system-fonts'
 import { track } from '../telemetry/client'
-import { previewWarpThemeImport } from '../warp-themes/import-preview'
 import { prepareLocalWorktreeRootsForRepos } from '../worktree-root-preparation'
 import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/base-directory-watcher'
 
@@ -55,13 +53,10 @@ export function registerSettingsHandlers(
   agentAwakeService?: AgentAwakeService
 ): void {
   store.onSettingsChanged((updates, _settings, originWebContentsId) => {
-    for (const window of BrowserWindow.getAllWindows()) {
-      const isOrigin =
-        originWebContentsId !== undefined && window.webContents.id === originWebContentsId
-      if (!window.isDestroyed() && !isOrigin) {
-        window.webContents.send('settings:changed', updates)
-      }
-    }
+    // Why: all clients subscribe through the runtime event bus. The payload is
+    // an invalidation; desktop re-reads its full shell-owned settings document.
+    publishSettingsChangedEvent({ type: 'changed', updates })
+    void originWebContentsId
   })
 
   ipcMain.handle('settings:get', () => {
@@ -206,19 +201,6 @@ export function registerSettingsHandlers(
     }
 
     return result
-  })
-
-  ipcMain.handle('settings:listFonts', () => {
-    return listSystemFontFamilies()
-  })
-
-  ipcMain.handle('settings:previewGhosttyImport', () => {
-    return previewGhosttyImport(store)
-  })
-
-  ipcMain.handle('settings:previewWarpThemeImport', (event, args?: unknown) => {
-    const source = args === undefined ? { kind: 'auto' } : args
-    return previewWarpThemeImport(store, source, event.sender)
   })
 
   ipcMain.handle('cache:getGitHub', () => {

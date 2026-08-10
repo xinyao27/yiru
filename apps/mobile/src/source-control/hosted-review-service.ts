@@ -1,16 +1,15 @@
+import type { HostedReviewCreateInput } from '@yiru/runtime-protocol/contract'
 import type {
   HostedReviewCreationBlockedReason,
   HostedReviewCreationEligibility,
   HostedReviewCreationNextAction,
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
-import {
-  interpretSourceControlHostedReviewCreateResult,
-  type CreateHostedReviewResult
-} from '@yiru/workbench-model/review'
+import { interpretSourceControlHostedReviewCreateResult } from '@yiru/workbench-model/review'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { hostedReviewCopy } from './hosted-review-copy'
 import { linkMobileHostedReview } from './pr-link'
 
@@ -34,28 +33,28 @@ export type MobileHostedReviewEligibilityInput = {
 }
 
 export async function fetchMobileHostedReviewEligibility(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   input: MobileHostedReviewEligibilityInput
 ): Promise<HostedReviewCreationEligibility | null> {
-  const response = await client.sendRequest('hostedReview.getCreationEligibility', {
-    repo: mobileRepoSelectorFromWorktreeId(worktreeId),
-    worktree: `id:${worktreeId}`,
-    branch: input.branch,
-    base: input.base ?? null,
-    ...(input.hasUncommittedChanges !== undefined
-      ? { hasUncommittedChanges: input.hasUncommittedChanges }
-      : {}),
-    ...(input.hasUpstream !== undefined ? { hasUpstream: input.hasUpstream } : {}),
-    ...(input.ahead !== undefined ? { ahead: input.ahead } : {}),
-    ...(input.behind !== undefined ? { behind: input.behind } : {}),
-    linkedGitHubPR: input.linkedGitHubPR ?? null,
-    linkedGitLabMR: input.linkedGitLabMR ?? null
-  })
-  if (!response.ok) {
+  try {
+    return await callRuntimeOrpc(client, (runtime) => runtime.hostedReview.getCreationEligibility, {
+      repo: mobileRepoSelectorFromWorktreeId(worktreeId),
+      worktree: `id:${worktreeId}`,
+      branch: input.branch,
+      base: input.base ?? null,
+      ...(input.hasUncommittedChanges !== undefined
+        ? { hasUncommittedChanges: input.hasUncommittedChanges }
+        : {}),
+      ...(input.hasUpstream !== undefined ? { hasUpstream: input.hasUpstream } : {}),
+      ...(input.ahead !== undefined ? { ahead: input.ahead } : {}),
+      ...(input.behind !== undefined ? { behind: input.behind } : {}),
+      linkedGitHubPR: input.linkedGitHubPR ?? null,
+      linkedGitLabMR: input.linkedGitLabMR ?? null
+    })
+  } catch {
     return null
   }
-  return (response as RpcSuccess).result as HostedReviewCreationEligibility
 }
 
 export type MobileHostedReviewPrefill = {
@@ -72,7 +71,7 @@ export type MobileHostedReviewPrefill = {
 // service desktop uses. If eligibility is unavailable, return a blocked prefill
 // instead of inventing a provider/base locally.
 export async function resolveMobileHostedReviewPrefill(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   args: {
     branch: string | undefined
@@ -139,7 +138,7 @@ export type MobileHostedReviewCreateInput = {
 export function buildMobileHostedReviewCreateParams(
   worktreeId: string,
   input: MobileHostedReviewCreateInput
-): Record<string, unknown> {
+): HostedReviewCreateInput {
   return {
     repo: mobileRepoSelectorFromWorktreeId(worktreeId),
     worktree: `id:${worktreeId}`,
@@ -158,14 +157,11 @@ export type MobileHostedReviewCreateOutcome =
   | { ok: false; error: string }
 
 async function pushMobileBranchBeforeCreate(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const response = await client.sendRequest('git.push', { worktree: `id:${worktreeId}` })
-    if (!response.ok) {
-      return { ok: false, error: 'Push failed. Resolve the push error, then try again.' }
-    }
+    await callRuntimeOrpc(client, (runtime) => runtime.git.push, { worktree: `id:${worktreeId}` })
     return { ok: true }
   } catch {
     return { ok: false, error: 'Push failed. Resolve the push error, then try again.' }
@@ -185,7 +181,7 @@ function formatMobileHostedReviewCreateError(
 }
 
 async function finishMobileHostedReviewCreateSuccess(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   input: MobileHostedReviewCreateInput,
   result: { number: number; url: string },
@@ -207,7 +203,7 @@ async function finishMobileHostedReviewCreateSuccess(
 }
 
 export async function createMobileHostedReview(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   input: MobileHostedReviewCreateInput
 ): Promise<MobileHostedReviewCreateOutcome> {
@@ -220,14 +216,11 @@ export async function createMobileHostedReview(
       }
       pushed = true
     }
-    const response = await client.sendRequest(
-      'hostedReview.create',
+    const result = await callRuntimeOrpc(
+      client,
+      (runtime) => runtime.hostedReview.create,
       buildMobileHostedReviewCreateParams(worktreeId, input)
     )
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || 'Failed to create pull request' }
-    }
-    const result = (response as RpcSuccess).result as CreateHostedReviewResult
     const outcome = interpretSourceControlHostedReviewCreateResult(result)
     if (outcome.kind === 'created') {
       return finishMobileHostedReviewCreateSuccess(client, worktreeId, input, outcome)

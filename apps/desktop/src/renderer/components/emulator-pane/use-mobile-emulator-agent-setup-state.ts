@@ -11,6 +11,7 @@ import {
   ensureYiruCliAvailableForAgentSkillTerminal,
   isYiruCliAvailableOnPath
 } from '~renderer/lib/agent-skill-cli-prerequisite'
+import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 
 import { getMobileEmulatorCliPathNeedsAttention } from './mobile-emulator-agent-setup-cli-state'
@@ -78,7 +79,7 @@ export function useMobileEmulatorAgentSetupState(enabled = true): {
   const refreshCliStatus = useCallback(async (): Promise<void> => {
     setCliLoading(true)
     try {
-      const status = await window.api.cli.getInstallStatus()
+      const status = await readCliInstallStatus()
       if (mountedRef.current) {
         setCliInstallStatus(status)
       }
@@ -137,7 +138,7 @@ export function useMobileEmulatorAgentSetupState(enabled = true): {
     setSetupRechecking(true)
     try {
       const [cliStatus, skillInstalled] = await Promise.all([
-        window.api.cli.getInstallStatus(),
+        readCliInstallStatus(),
         refreshCliSkill()
       ])
       if (mountedRef.current) {

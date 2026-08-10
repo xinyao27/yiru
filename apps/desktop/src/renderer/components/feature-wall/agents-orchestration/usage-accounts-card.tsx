@@ -8,6 +8,7 @@ import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '~shared/types'
 
@@ -106,7 +107,7 @@ export function UsageAccountsCard(props: {
     void fetchRateLimits()
     void (async () => {
       try {
-        const next = await window.api.claudeAccounts.list()
+        const next = await rendererHostClient.claudeAccounts.list()
         if (!stale) {
           setClaudeAccounts(next)
         }
@@ -116,7 +117,7 @@ export function UsageAccountsCard(props: {
     })()
     void (async () => {
       try {
-        const next = await window.api.codexAccounts.list()
+        const next = await rendererHostClient.codexAccounts.list()
         if (!stale) {
           setCodexAccounts(next)
         }
@@ -144,7 +145,7 @@ export function UsageAccountsCard(props: {
     }
     setClaudeAction('adding')
     try {
-      const next = await window.api.claudeAccounts.add()
+      const next = await rendererHostClient.claudeAccounts.add()
       if (mountedRef.current) {
         setClaudeAccounts(next)
       }
@@ -185,7 +186,7 @@ export function UsageAccountsCard(props: {
     }
     setCodexAction('adding')
     try {
-      const next = await window.api.codexAccounts.add()
+      const next = await rendererHostClient.codexAccounts.add()
       if (mountedRef.current) {
         setCodexAccounts(next)
       }

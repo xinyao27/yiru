@@ -14,7 +14,7 @@ import { randomUUID } from 'node:crypto'
 // request-driven replay) for the rationale.
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { homedir } from 'node:os'
-import { basename, dirname, join } from 'node:path'
+import { join } from 'node:path'
 
 import {
   clearAllListenerCaches,
@@ -63,26 +63,6 @@ const MAX_CACHED_PANES = 256
 
 function defaultEndpointDir(): string {
   return join(homedir(), RELAY_HOOKS_DIR_NAME, RELAY_HOOKS_SUBDIR)
-}
-
-function isWindowsNamedPipePath(sockPath: string): boolean {
-  return /^\\\\[.?]\\pipe\\/i.test(sockPath)
-}
-
-function windowsNamedPipeEndpointName(sockPath: string): string {
-  return (
-    sockPath
-      .replace(/^\\\\[.?]\\pipe\\/i, '')
-      .split(/[\\/]/)
-      .findLast(Boolean) ?? 'relay'
-  )
-}
-
-export function endpointDirForRelaySocket(sockPath: string): string {
-  if (isWindowsNamedPipePath(sockPath)) {
-    return join(defaultEndpointDir(), windowsNamedPipeEndpointName(sockPath))
-  }
-  return join(dirname(sockPath), RELAY_HOOKS_SUBDIR, basename(sockPath))
 }
 
 export type RelayHookServerOptions = {

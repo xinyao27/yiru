@@ -77,7 +77,7 @@ function hasUnresolvedConflicts(status: MobileGitStatusResult | null): boolean {
 }
 
 async function resolvePrefillFromStatus(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   branch: string,
   title: string,
@@ -91,7 +91,7 @@ async function resolvePrefillFromStatus(
 }
 
 async function ensureLocalChangesCommitted(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   input: PrepareInput,
   currentStatus: MobileGitStatusResult | null
@@ -116,8 +116,10 @@ async function ensureLocalChangesCommitted(
     input.onProgress?.('staging')
     const staged = await sendMobileHostedReviewGitMutation(
       client,
-      'git.bulkStage',
-      { worktree: `id:${worktreeId}`, filePaths: stagePaths },
+      {
+        kind: 'bulkStage',
+        input: { worktree: `id:${worktreeId}`, filePaths: stagePaths }
+      },
       'Failed to stage changes'
     )
     if (!staged.ok) {
@@ -195,7 +197,7 @@ async function ensureLocalChangesCommitted(
 }
 
 export async function prepareMobileHostedReviewCreateIntent(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   input: PrepareInput
 ): Promise<MobileHostedReviewCreateIntentOutcome> {

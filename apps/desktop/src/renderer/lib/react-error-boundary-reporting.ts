@@ -1,4 +1,5 @@
 import type React from 'react'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { CrashReportRecord, ReactErrorBoundaryReportArgs } from '~shared/crash-reporting'
 
 type RendererErrorContext = Pick<
@@ -127,7 +128,7 @@ export async function reportReactErrorBoundaryCrash(
   }
 
   try {
-    const result = await window.api?.crashReports?.recordRendererError?.(args)
+    const result = await rendererHostClient?.crashReports?.recordRendererError?.(args)
     if (result && !result.ok) {
       console.warn('[react-error-boundary] Failed to record renderer crash:', result.error)
       return

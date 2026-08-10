@@ -7,7 +7,6 @@ import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'node:child
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { app } from 'electron'
 import {
   WSL_HOOK_RELAY_BUNDLE_NAME,
   WSL_HOOK_RELAY_DIR,
@@ -20,6 +19,7 @@ import {
 
 import type { MultiplexerTransport } from '../channel-multiplexer/multiplexer'
 import { addYiruWslInteropEnv } from '../pty/wsl-yiru-env'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import {
   decodeWslText,
   MAX_STARTUP_BUFFER_BYTES,
@@ -38,17 +38,15 @@ export function resolveWslHookRelayBundle(): WslHookRelayBundle | null {
   if (process.env.YIRU_RELAY_PATH) {
     candidates.push(join(process.env.YIRU_RELAY_PATH, 'wsl'))
   }
-  if (process.resourcesPath) {
-    candidates.push(join(process.resourcesPath, 'relay', 'wsl'))
-    candidates.push(join(process.resourcesPath, 'app.asar.unpacked', 'out', 'relay', 'wsl'))
+  const pathsProvider = getRuntimeHostPathsProvider()
+  const resourcesPath = pathsProvider.resourcesPath()
+  if (resourcesPath) {
+    candidates.push(join(resourcesPath, 'relay', 'wsl'))
+    candidates.push(join(resourcesPath, 'app.asar.unpacked', 'out', 'relay', 'wsl'))
   }
-  try {
-    const appPath = app.getAppPath()
-    candidates.push(join(appPath, 'resources', 'relay', 'wsl'))
-    candidates.push(join(appPath, 'out', 'relay', 'wsl'))
-  } catch {
-    // app not ready in some test contexts — env/resources candidates suffice.
-  }
+  const appPath = pathsProvider.appPath()
+  candidates.push(join(appPath, 'resources', 'relay', 'wsl'))
+  candidates.push(join(appPath, 'out', 'relay', 'wsl'))
   for (const dir of candidates) {
     const jsPath = join(dir, WSL_HOOK_RELAY_BUNDLE_NAME)
     const versionPath = join(dir, WSL_HOOK_RELAY_VERSION_FILE)

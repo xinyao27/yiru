@@ -193,7 +193,6 @@ export function getWorkspaceDecisionDetails(
     branch,
     inputs.settings,
     worktree.repoId,
-    repo?.connectionId,
     repo?.executionHostId,
     repo !== undefined
   )

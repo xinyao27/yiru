@@ -1,5 +1,4 @@
-import { callRuntimeRpc, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 
 import type { WindowsTerminalCapabilities } from './windows-terminal-capabilities'
 
@@ -23,43 +22,21 @@ export async function readWindowsTerminalCapabilities(
     }
   }
 
-  if (target.kind === 'local') {
-    const [wslAvailable, wslDistros, pwshAvailable, gitBashAvailable, hostPlatform] =
-      await Promise.all([
-        window.api.wsl.isAvailable().catch(() => false),
-        window.api.wsl.listDistros().catch(() => []),
-        window.api.pwsh.isAvailable().catch(() => false),
-        window.api.gitBash.isAvailable().catch(() => false),
-        window.api.runtime
-          .getStatus()
-          .then((status) => status.hostPlatform ?? null)
-          .catch(() => null)
-      ])
-    return {
-      wslAvailable,
-      wslDistros,
-      pwshAvailable,
-      gitBashAvailable,
-      hostPlatform,
-      isLoading: false
-    }
-  }
-
   const [wslAvailable, wslDistros, pwshAvailable, gitBashAvailable, hostPlatform] =
     await Promise.all([
-      callRuntimeRpc<boolean>(target, 'host.wsl.isAvailable', undefined, {
+      callRuntimeOrpc(target, (client) => client.host.wsl.isAvailable, undefined, {
         timeoutMs: 15_000
       }).catch(() => false),
-      callRuntimeRpc<string[]>(target, 'host.wsl.listDistros', undefined, {
+      callRuntimeOrpc(target, (client) => client.host.wsl.listDistros, undefined, {
         timeoutMs: 15_000
       }).catch(() => []),
-      callRuntimeRpc<boolean>(target, 'host.pwsh.isAvailable', undefined, {
+      callRuntimeOrpc(target, (client) => client.host.pwsh.isAvailable, undefined, {
         timeoutMs: 15_000
       }).catch(() => false),
-      callRuntimeRpc<boolean>(target, 'host.gitBash.isAvailable', undefined, {
+      callRuntimeOrpc(target, (client) => client.host.gitBash.isAvailable, undefined, {
         timeoutMs: 15_000
       }).catch(() => false),
-      callRuntimeRpc(target, STATUS_GET_CONTRACT, undefined, { timeoutMs: 15_000 })
+      callRuntimeOrpc(target, (client) => client.status.get, undefined, { timeoutMs: 15_000 })
         .then((status) => status.hostPlatform ?? null)
         .catch(() => null)
     ])

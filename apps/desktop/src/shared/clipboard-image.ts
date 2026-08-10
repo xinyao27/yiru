@@ -1,9 +1,17 @@
-export const CLIPBOARD_IMAGE_MAX_BASE64_CHARS = 24 * 1024 * 1024
+import {
+  CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
+  CLIPBOARD_IMAGE_TOO_LARGE_ERROR
+} from '@yiru/runtime-protocol/clipboard'
+
+export {
+  CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
+  CLIPBOARD_IMAGE_TOO_LARGE_ERROR
+} from '@yiru/runtime-protocol/clipboard'
+
 export const CLIPBOARD_IMAGE_MAX_SOURCE_BYTES = Math.floor(
   (CLIPBOARD_IMAGE_MAX_BASE64_CHARS / 4) * 3
 )
 export const CLIPBOARD_IMAGE_MAX_PIXELS = 32 * 1024 * 1024
-export const CLIPBOARD_IMAGE_TOO_LARGE_ERROR = 'Clipboard image is too large'
 
 export type ClipboardImageDimensions = {
   height: number

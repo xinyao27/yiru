@@ -43,9 +43,3 @@ export const COWORKING_MAX_STREAM_QUEUED_BYTES =
 export const COWORKING_MAX_LIVE_SESSIONS_PER_WORKTREE = 5_000
 // Why: an SSH-backed first page may need to discover and inspect a complete frozen inventory.
 export const COWORKING_SESSION_PAGE_REQUEST_TIMEOUT_MS = 5 * 60_000
-
-// Why: coding-agent JSONL routinely exceeds the preview limit, but remote
-// inventory must still have a fixed ceiling independent of host file size.
-export const COWORKING_SESSION_INVENTORY_STREAM_PROFILE = 'session-inventory'
-export const COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES = 128 * 1024 * 1024
-export const COWORKING_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES = 16 * 1024 * 1024

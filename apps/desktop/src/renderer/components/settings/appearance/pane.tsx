@@ -232,6 +232,25 @@ export function AppearancePane({
         </AppearanceSection>
       ) : null}
 
+      {themeColorMatches ? (
+        <AppearanceSection
+          id="theme-color"
+          icon={<Palette aria-hidden="true" />}
+          title={themeColorTitle}
+          summary={themeColorSummary}
+          open={isSectionOpen('theme-color')}
+          onToggle={() => toggleSection('theme-color')}
+        >
+          <AppearanceThemeColorSection
+            themeMode={settings.theme}
+            onThemeModeChange={(theme) => {
+              updateSettings({ theme })
+              applyTheme(theme)
+            }}
+          />
+        </AppearanceSection>
+      ) : null}
+
       {/* Why: Code & Markdown is intentionally omitted. Yiru has no Appearance-level
           code/markdown settings — the code editor reuses the terminal font and
           there is no markdown-style or line-number setting — so a fourth row would
@@ -256,25 +275,6 @@ export function AppearancePane({
             ghostty={ghostty}
             warpThemes={warpThemes}
             forceVisiblePrimary={terminalLabelMatches}
-          />
-        </AppearanceSection>
-      ) : null}
-
-      {themeColorMatches ? (
-        <AppearanceSection
-          id="theme-color"
-          icon={<Palette aria-hidden="true" />}
-          title={themeColorTitle}
-          summary={themeColorSummary}
-          open={isSectionOpen('theme-color')}
-          onToggle={() => toggleSection('theme-color')}
-        >
-          <AppearanceThemeColorSection
-            themeMode={settings.theme}
-            onThemeModeChange={(theme) => {
-              updateSettings({ theme })
-              applyTheme(theme)
-            }}
           />
         </AppearanceSection>
       ) : null}

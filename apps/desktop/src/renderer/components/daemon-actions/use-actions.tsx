@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { restartRuntimeDaemon } from '~renderer/runtime/daemon-sessions-client'
 
 import { Button } from '../ui/button'
 import {
@@ -144,7 +145,7 @@ export function useDaemonActions(callbacks?: DaemonActionCallbacks): DaemonActio
   const runRestart = useCallback(async () => {
     setBusyKind('restart')
     try {
-      const { success } = await window.api.pty.management.restart()
+      const { success } = await restartRuntimeDaemon()
       if (success) {
         toast.success(
           translate('auto.components.shared.useDaemonActions.0e9da1b98e', 'Daemon restarted.')

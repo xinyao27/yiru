@@ -32,6 +32,12 @@ const relayExtraResource = {
   from: 'out/relay',
   to: 'relay'
 }
+// Why: the runtime host must be executable by a system Node binary, whose
+// module loader cannot read Electron's app.asar archive.
+const runtimeHostExtraResource = {
+  from: 'out/runtime-host',
+  to: 'runtime-host'
+}
 // Why: the main bundle, packaged CLI, SSH paths, and speech worker all execute
 // from package directories where pnpm's symlink farm is absent. Copy the exact
 // runtime dependency closure to Resources/node_modules so bare require() calls
@@ -40,6 +46,7 @@ const packagedRuntimeNodeModuleResources = createPackagedRuntimeNodeModuleResour
 
 const commonExtraResources = [
   relayExtraResource,
+  runtimeHostExtraResource,
   ...packagedRuntimeNodeModuleResources,
   skillFreshnessResources
 ]
@@ -89,6 +96,7 @@ module.exports = {
     '!{.env,.env.*,.npmrc,pnpm-lock.yaml}',
     '!tsconfig.json',
     '!resources/skills/**',
+    '!out/runtime-host/**',
     // Why: the working Windows shim ships beside yiru.exe via extraResources;
     // an unpacked source copy has no adjacent launcher and cannot run.
     '!resources/win32{,/**/*}'

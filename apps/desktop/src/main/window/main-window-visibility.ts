@@ -18,13 +18,6 @@ export function notifyMainWindowBecameVisible(): void {
   }
 }
 
-export function onMainWindowBecameVisible(listener: MainWindowBecameVisibleListener): () => void {
-  listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
-}
-
 export function isMainWindowVisible(window: MainWindowVisibilityState | null): boolean {
   if (window === null || window.isDestroyed()) {
     return false

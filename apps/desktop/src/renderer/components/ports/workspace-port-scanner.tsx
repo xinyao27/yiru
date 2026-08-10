@@ -14,6 +14,7 @@ import {
   workspacePortScanKeyForTarget
 } from '~renderer/lib/workspace-port-actions'
 import { getActiveRuntimeTarget, type RuntimeClientTarget } from '~renderer/runtime/rpc-client'
+import { subscribeWorkspacePortAdvertisedUrlChanges } from '~renderer/runtime/workspace-port-events-client'
 import { useAppStore } from '~renderer/store'
 import { getHasAnyWorktreesFromState } from '~renderer/store/selectors'
 import { buildExecutionHostRegistry } from '~shared/execution-host-registry'
@@ -280,9 +281,6 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
     if (!enabled) {
       return
     }
-    if (runtimeTarget.kind !== 'local') {
-      return
-    }
 
     let eventSequence = 0
     let disposed = false
@@ -295,7 +293,7 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
       retryTimer = null
     }
 
-    const unsubscribe = window.api.workspacePorts.onAdvertisedUrlChanged(() => {
+    const handleAdvertisedUrlChanged = (): void => {
       eventSequence += 1
       const sequence = eventSequence
       clearRetryTimer()
@@ -315,7 +313,12 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
           void refresh({ force: true, targets: [runtimeTarget] })
         }, WORKSPACE_PORT_ADVERTISED_URL_SETTLE_MS)
       })
-    })
+    }
+
+    const unsubscribe = subscribeWorkspacePortAdvertisedUrlChanges(
+      runtimeTarget,
+      handleAdvertisedUrlChanged
+    )
 
     return () => {
       disposed = true

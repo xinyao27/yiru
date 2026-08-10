@@ -6,6 +6,7 @@ import {
   resolveTerminalFileLink
 } from '~renderer/lib/terminal-links'
 import { isRemoteRuntimeFileOperation, runtimePathExists } from '~renderer/runtime/file-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import {
   buildCandidateLogicalLinesForBufferPosition,
@@ -22,9 +23,7 @@ import { isTerminalLinkActivation } from './terminal-link-activation'
 import {
   getTerminalHtmlFileOpenHint,
   getTerminalYiruFileOpenHint,
-  getTerminalWorktreePathOpenHint,
-  getTerminalFileOpenHint,
-  getTerminalUrlOpenHint
+  getTerminalWorktreePathOpenHint
 } from './terminal-link-open-hints'
 import {
   getTerminalPathExistsCacheKey,
@@ -41,7 +40,7 @@ import {
 
 export { openDetectedFilePath } from './terminal-file-open-routing'
 export { openFilePathLinkAtBufferPosition } from './terminal-file-link-hit-testing'
-export { getTerminalFileOpenHint, getTerminalHtmlFileOpenHint, getTerminalUrlOpenHint }
+export { getTerminalHtmlFileOpenHint }
 export { isTerminalLinkActivation } from './terminal-link-activation'
 
 export type LinkHandlerDeps = {
@@ -167,7 +166,7 @@ export function createFilePathLinkProvider(
                   cachedExists ??
                   (fileContext.connectionId || isRemoteRuntimePath
                     ? await runtimePathExists(fileContext, resolved.absolutePath)
-                    : await window.api.shell.pathExists(resolved.absolutePath))
+                    : await shellClient.shell.pathExists(resolved.absolutePath))
                 writeTerminalPathExistsCache(pathExistsCache, cacheKey, exists)
                 if (!exists) {
                   return null

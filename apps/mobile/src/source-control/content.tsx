@@ -49,7 +49,7 @@ export function MobileSourceControlContent({ state }: Props) {
     cancelGenerateCommitMessage,
     openFile,
     openBranchDiff,
-    runGitAction
+    runGitStep
   } = state
   const ioBusy = busyAction !== null || openingPath !== null || openingBranchPath !== null
   const shouldShowGenerateButton = stagedCount > 0 || generatingMessage
@@ -128,7 +128,7 @@ export function MobileSourceControlContent({ state }: Props) {
             openingPath,
             openingBranchPath,
             openFile,
-            runGitAction,
+            runGitStep,
             setDiscardTarget
           })}
           keyExtractor={(item) => `${item.area}:${item.path}:${item.oldPath ?? ''}`}

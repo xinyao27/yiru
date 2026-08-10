@@ -3,6 +3,12 @@ import { toast } from 'sonner'
 import { WindowsFirewallNotice } from '~renderer/components/mobile/windows-firewall-notice'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import {
+  getMobilePairingQR,
+  listMobileNetworkInterfaces,
+  listPairedMobileDevices,
+  revokePairedMobileDevice
+} from '~renderer/runtime/mobile-pairing-client'
 import { useAppStore } from '~renderer/store'
 
 import { MobileAutoRestoreFitSection } from './auto-restore-fit-section'
@@ -18,6 +24,9 @@ export { getMobilePaneSearchEntries } from './pane-search'
 
 export function MobilePane(): React.JSX.Element {
   const autoRestoreFitMs = useAppStore((s) => s.settings?.mobileAutoRestoreFitMs ?? null)
+  const activeRuntimeEnvironmentId = useAppStore(
+    (s) => s.settings?.activeRuntimeEnvironmentId ?? null
+  )
   const updateSettings = useAppStore((s) => s.updateSettings)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [pairingUrl, setPairingUrl] = useState<string | null>(null)
@@ -44,7 +53,7 @@ export function MobilePane(): React.JSX.Element {
 
   const loadDevices = useCallback(async () => {
     try {
-      const result = await window.api.mobile.listDevices()
+      const result = await listPairedMobileDevices({ activeRuntimeEnvironmentId })
       if (mountedRef.current) {
         devicesRef.current = result.devices
         setDevices(result.devices)
@@ -52,13 +61,13 @@ export function MobilePane(): React.JSX.Element {
     } catch {
       // Silently fail — device list is non-critical
     }
-  }, [mountedRef])
+  }, [activeRuntimeEnvironmentId, mountedRef])
 
   const loadNetworkInterfaces = useCallback(
     async (opts: { notifyOnError?: boolean } = {}) => {
       setRefreshingNetworkInterfaces(true)
       try {
-        const result = await window.api.mobile.listNetworkInterfaces()
+        const result = await listMobileNetworkInterfaces({ activeRuntimeEnvironmentId })
         if (mountedRef.current) {
           setNetworkInterfaces(result.interfaces)
           setSelectedAddress((currentAddress) =>
@@ -80,17 +89,20 @@ export function MobilePane(): React.JSX.Element {
         }
       }
     },
-    [mountedRef]
+    [activeRuntimeEnvironmentId, mountedRef]
   )
 
   const generateQR = useCallback(
     async (opts: { rotate?: boolean } = {}) => {
       setLoading(true)
       try {
-        const result = await window.api.mobile.getPairingQR({
-          ...(selectedAddress ? { address: selectedAddress } : {}),
-          ...(opts.rotate || rotateNextQr ? { rotate: true } : {})
-        })
+        const result = await getMobilePairingQR(
+          {
+            ...(selectedAddress ? { address: selectedAddress } : {}),
+            ...(opts.rotate || rotateNextQr ? { rotate: true } : {})
+          },
+          { activeRuntimeEnvironmentId }
+        )
         if (result.available) {
           useAppStore.getState().recordFeatureInteraction('mobile-pairing')
           if (mountedRef.current) {
@@ -128,7 +140,14 @@ export function MobilePane(): React.JSX.Element {
         }
       }
     },
-    [clearCodeCopiedResetTimer, loadDevices, mountedRef, rotateNextQr, selectedAddress]
+    [
+      activeRuntimeEnvironmentId,
+      clearCodeCopiedResetTimer,
+      loadDevices,
+      mountedRef,
+      rotateNextQr,
+      selectedAddress
+    ]
   )
 
   useEffect(() => {
@@ -144,7 +163,7 @@ export function MobilePane(): React.JSX.Element {
 
   async function revokeDevice(deviceId: string) {
     try {
-      await window.api.mobile.revokeDevice({ deviceId })
+      await revokePairedMobileDevice({ deviceId }, { activeRuntimeEnvironmentId })
       if (mountedRef.current) {
         setDevices((prev) => {
           const nextDevices = prev.filter((d) => d.deviceId !== deviceId)

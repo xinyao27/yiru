@@ -1,45 +1,16 @@
-// Why: every RPC method declares the authority it requires so the dispatcher can
-// adjudicate one place instead of each handler re-deriving it. Handlers must not
-// contain authorization logic — if a check is missing here, it is a contract bug.
+import type {
+  RpcAccess,
+  RpcAccessScope,
+  RpcAccessTier,
+  RpcCallerClass
+} from '@yiru/runtime-protocol/contract'
 
-/**
- * What the method reaches.
- *
- * - `worktree` — bounded by one worktree, identified by the request params.
- * - `project`  — bounded by a repo/project and the worktrees under it.
- * - `host`     — not bounded by any workspace; touches the machine itself.
- */
-export type RpcAccessScope = 'worktree' | 'project' | 'host'
-
-/**
- * What the method does within that scope.
- *
- * - `read`    — returns data, mutates no host state.
- * - `control` — mutates workspace content, or executes code scoped to a workspace.
- * - `host`    — affects the machine beyond any single workspace.
- */
-export type RpcAccessTier = 'read' | 'control' | 'host'
-
-/**
- * Which admission path a caller arrived through.
- *
- * Orthogonal to scope and tier: those describe *what* is reached and *how
- * hard*, this describes *who may ask at all*. A Coworking principal holding a
- * legitimate worktree grant satisfies `{ worktree, control }` exactly, so
- * scope+tier alone cannot express "paired runtime only".
- */
-export type RpcCallerClass = 'local' | 'mobile' | 'runtime' | 'coworking-host'
-
-export type RpcAccess = {
-  scope: RpcAccessScope
-  tier: RpcAccessTier
-  /**
-   * Optional narrowing. Absent means "any caller that satisfies scope and
-   * tier" — which is never wider than the required declaration above, so
-   * unlike `scope`/`tier` a missing value cannot silently grant anything.
-   */
-  principals?: readonly RpcCallerClass[]
-}
+export type {
+  RpcAccess,
+  RpcAccessScope,
+  RpcAccessTier,
+  RpcCallerClass
+} from '@yiru/runtime-protocol/contract'
 
 export function callerClassOf(
   principal: { kind: 'paired-device'; scope: string } | { kind: 'coworking' } | undefined

@@ -20,7 +20,6 @@ export function useAddRepoNestedImportFlow({
   nestedScan,
   nestedSelectedPaths,
   nestedRuntimeKind,
-  nestedConnectionId,
   nestedGroupName,
   nestedImportScanId,
   activeRuntimeEnvironmentId,
@@ -34,7 +33,6 @@ export function useAddRepoNestedImportFlow({
   nestedScan: NestedRepoScanResult | null
   nestedSelectedPaths: Set<string>
   nestedRuntimeKind: NestedRepoTelemetryRuntimeKind | null
-  nestedConnectionId: string | null
   nestedGroupName: string
   nestedImportScanId: string | null
   activeRuntimeEnvironmentId: string | null | undefined
@@ -43,11 +41,10 @@ export function useAddRepoNestedImportFlow({
     parentPath: string
     groupName: string
     projectPaths: string[]
-    connectionId?: string
     scanId?: string
     mode: 'group' | 'separate'
   }) => Promise<ProjectGroupImportResult | null>
-  getNestedRepoRuntimeKind: (connectionId: string | null) => NestedRepoTelemetryRuntimeKind
+  getNestedRepoRuntimeKind: () => NestedRepoTelemetryRuntimeKind
   onGitRepoReady: (repoId: string, source: AddRepoExistingWorkspaceSource) => Promise<void>
   setIsAdding: (isAdding: boolean) => void
 }): {
@@ -71,7 +68,7 @@ export function useAddRepoNestedImportFlow({
       buildNestedRepoImportActionTelemetry({
         attemptId: nestedAttemptId,
         surface: 'sidebar',
-        runtimeKind: nestedRuntimeKind ?? getNestedRepoRuntimeKind(nestedConnectionId),
+        runtimeKind: nestedRuntimeKind ?? getNestedRepoRuntimeKind(),
         action: 'back',
         foundCount: nestedScan.repos.length,
         selectedCount: nestedSelectedPaths.size
@@ -80,7 +77,6 @@ export function useAddRepoNestedImportFlow({
   }, [
     getNestedRepoRuntimeKind,
     nestedAttemptId,
-    nestedConnectionId,
     nestedRuntimeKind,
     nestedScan,
     nestedSelectedPaths.size
@@ -105,7 +101,7 @@ export function useAddRepoNestedImportFlow({
         nestedScan,
         nestedSelectedPaths
       )
-      const runtimeKind = nestedRuntimeKind ?? getNestedRepoRuntimeKind(nestedConnectionId)
+      const runtimeKind = nestedRuntimeKind ?? getNestedRepoRuntimeKind()
       const gen = ++nestedImportGenRef.current
       setIsAdding(true)
       track(
@@ -127,7 +123,6 @@ export function useAddRepoNestedImportFlow({
           // Why: Set insertion order can drift after deselect/reselect; import
           // ordering should match the visible scan order users reviewed.
           projectPaths: selectedProjectPaths,
-          ...(nestedConnectionId ? { connectionId: nestedConnectionId } : {}),
           ...(nestedImportScanId ? { scanId: nestedImportScanId } : {}),
           mode
         })
@@ -191,11 +186,9 @@ export function useAddRepoNestedImportFlow({
         }
         const repo = useAppStore.getState().repos.find((entry) => entry.id === firstRepoId)
         if (repo) {
-          const source: AddRepoExistingWorkspaceSource = nestedConnectionId
-            ? 'ssh_remote_path'
-            : activeRuntimeEnvironmentId?.trim()
-              ? 'runtime_server_path'
-              : 'local_folder_picker'
+          const source: AddRepoExistingWorkspaceSource = activeRuntimeEnvironmentId?.trim()
+            ? 'runtime_server_path'
+            : 'local_folder_picker'
           await onGitRepoReady(repo.id, source)
         }
       } catch (err) {
@@ -227,7 +220,6 @@ export function useAddRepoNestedImportFlow({
       fetchWorktrees,
       importNestedRepos,
       nestedAttemptId,
-      nestedConnectionId,
       nestedGroupName,
       nestedImportScanId,
       nestedRuntimeKind,
@@ -251,7 +243,7 @@ export function useAddRepoNestedImportFlow({
         buildNestedRepoImportActionTelemetry({
           attemptId: nestedAttemptId,
           surface: 'sidebar',
-          runtimeKind: nestedRuntimeKind ?? getNestedRepoRuntimeKind(nestedConnectionId),
+          runtimeKind: nestedRuntimeKind ?? getNestedRepoRuntimeKind(),
           action: 'open_as_folder',
           foundCount: nestedScan.repos.length,
           selectedCount: nestedSelectedPaths.size
@@ -260,15 +252,6 @@ export function useAddRepoNestedImportFlow({
     }
     setIsAdding(true)
     try {
-      const state = useAppStore.getState()
-      if (nestedConnectionId) {
-        state.closeModal()
-        state.openModal('confirm-non-git-folder', {
-          folderPath: path,
-          connectionId: nestedConnectionId
-        })
-        return
-      }
       const repo = await addNonGitFolderAndActivate(useAppStore.getState, path, {
         runtimeEnvironmentId: activeRuntimeEnvironmentId?.trim() || null
       })
@@ -291,7 +274,6 @@ export function useAddRepoNestedImportFlow({
     activeRuntimeEnvironmentId,
     getNestedRepoRuntimeKind,
     nestedAttemptId,
-    nestedConnectionId,
     nestedRuntimeKind,
     nestedScan,
     nestedSelectedPaths.size,

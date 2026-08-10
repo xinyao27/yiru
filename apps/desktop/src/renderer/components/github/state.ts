@@ -12,7 +12,13 @@ import type { StateCreator } from 'zustand'
 import { translate } from '~renderer/i18n/i18n'
 import { isMacAppDataPath } from '~renderer/lib/passive-macos-app-data-access'
 import { rightSidebarShowsPullRequestData } from '~renderer/lib/right-sidebar-visibility'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import {
+  enqueueShellGitHubPRRefresh,
+  reportShellVisibleGitHubPRRefreshCandidates
+} from '~renderer/runtime/github-shell-client'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '~renderer/store/slices/github-cache-key'
 import {
   getHostedReviewCacheKey,
@@ -106,12 +112,11 @@ function getPRRefreshRuntimeRepoTarget(
 }
 
 function shouldEnqueueLocalPRRefresh(candidate: GitHubPRRefreshCandidate): boolean {
-  // Why: the local PR coordinator owns local git and SSH bridge refreshes, but
-  // runtime-owned repos and disconnected SSH repos must not hit the IPC crash path.
-  if (getPRRefreshOwnerRuntimeEnvironmentId(candidate) !== null) {
-    return false
-  }
-  return !candidate.connectionId || candidate.connectionState === 'connected'
+  // Why: the local PR coordinator owns local git refreshes, but runtime-owned
+  // repos must not hit the IPC crash path. candidate.connectionId is always
+  // null (Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed in #63), so a disconnected-SSH check no longer applies here.
+  return getPRRefreshOwnerRuntimeEnvironmentId(candidate) === null
 }
 
 function enqueueLocalGitHubPRRefresh(
@@ -122,13 +127,9 @@ function enqueueLocalGitHubPRRefresh(
   },
   onNotQueued?: () => void | Promise<unknown>
 ): void {
-  const enqueue = window.api.gh.enqueuePRRefresh
-  if (!enqueue) {
-    return
-  }
   // Why: main can reject stale/unknown local paths; renderer refresh triggers
   // are best-effort and must not become unhandled rejection crash breadcrumbs.
-  void enqueue(args)
+  void enqueueShellGitHubPRRefresh(args)
     .then((queued) =>
       queued === false || queued?.kind === 'fallback' ? onNotQueued?.() : undefined
     )
@@ -178,7 +179,9 @@ function settingsForGitHubFocusedRepoOwner(
   settings: AppState['settings'],
   repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
 ): AppState['settings'] {
-  if (!repo?.executionHostId && !repo?.connectionId) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (!repo?.executionHostId) {
     return settings
   }
   return settingsForGitHubRepoOwner(settings, repo)
@@ -207,7 +210,9 @@ function getGitHubFocusedRepoOwnerHostId(
   settings: AppState['settings'],
   repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
 ): string {
-  if (repo?.executionHostId || repo?.connectionId) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (repo?.executionHostId) {
     return getRepoExecutionHostId(repo)
   }
   return getSettingsFocusedExecutionHostId(settings)
@@ -316,26 +321,37 @@ function getGitHubWorkItemRequestContext(
   }
 }
 
+// Why: `runtime:` hosts are the only non-local execution host (SSH was removed
+// from the product), so every GitHub read/write can take one runtime path — the
+// context only decides which target and which repo selector to address.
+function githubRuntimeRequest(context: GitHubWorkItemRequestContext): {
+  target: RuntimeClientTarget
+  repo: string
+} {
+  return context.target.kind === 'environment'
+    ? {
+        target: { kind: 'environment', environmentId: context.target.environmentId },
+        repo: context.target.runtimeRepoId
+      }
+    : { target: { kind: 'local' }, repo: context.repoId }
+}
+
 function listGitHubWorkItemsForRepo(
   context: GitHubWorkItemRequestContext,
   args: GitHubWorkItemsListArgs
 ): Promise<ListWorkItemsResult<Omit<GitHubWorkItem, 'repoId'>>> {
-  if (context.target.kind === 'environment') {
-    return callRuntimeRpc<ListWorkItemsResult<Omit<GitHubWorkItem, 'repoId'>>>(
-      { kind: 'environment', environmentId: context.target.environmentId },
-      'github.listWorkItems',
+  const { target, repo } = githubRuntimeRequest(context)
+  {
+    return callRuntimeOrpc(
+      target,
+      (client) => client.github.listWorkItems,
       {
-        repo: context.target.runtimeRepoId,
+        repo,
         ...args
       },
       { timeoutMs: 30_000 }
     )
   }
-  return window.api.gh.listWorkItems({
-    repoPath: context.repoPath,
-    repoId: context.repoId,
-    ...args
-  })
 }
 
 export type CacheEntry<T> = {
@@ -465,19 +481,10 @@ function runtimeScopedRepoCacheKey(
   repoId: string | undefined,
   suffix: string,
   settings?: AppState['settings'],
-  connectionId?: string | null,
   executionHostId?: string | null,
   hasRepoOwner = false
 ): string {
-  return getGitHubRepoCacheKey(
-    repoPath,
-    repoId,
-    suffix,
-    settings,
-    connectionId,
-    executionHostId,
-    hasRepoOwner
-  )
+  return getGitHubRepoCacheKey(repoPath, repoId, suffix, settings, executionHostId, hasRepoOwner)
 }
 
 function sourceScopedRepoCacheKey(
@@ -485,7 +492,6 @@ function sourceScopedRepoCacheKey(
   repoId: string | undefined,
   suffix: string,
   settings?: AppState['settings'],
-  connectionId?: string | null,
   executionHostId?: string | null,
   sourceContext?: ProjectSourceContext | null,
   hasRepoOwner = false
@@ -498,7 +504,6 @@ function sourceScopedRepoCacheKey(
     repoId,
     suffix,
     settings,
-    connectionId,
     executionHostId,
     hasRepoOwner
   )
@@ -509,19 +514,10 @@ function prCacheKey(
   repoId: string | undefined,
   branch: string,
   settings?: AppState['settings'],
-  connectionId?: string | null,
   executionHostId?: string | null,
   hasRepoOwner = false
 ): string {
-  return getGitHubPRCacheKey(
-    repoPath,
-    repoId,
-    branch,
-    settings,
-    connectionId,
-    executionHostId,
-    hasRepoOwner
-  )
+  return getGitHubPRCacheKey(repoPath, repoId, branch, settings, executionHostId, hasRepoOwner)
 }
 
 function repoCacheKeyPrefixes(repoId: string, repoPath?: string): string[] {
@@ -857,7 +853,6 @@ function buildPRRefreshCandidate(
     repo.id,
     branch,
     settingsForGitHubRepoOwner(state.settings, repo),
-    repo.connectionId,
     repo.executionHostId,
     true
   )
@@ -867,7 +862,6 @@ function buildPRRefreshCandidate(
     repoPath ?? repo.path,
     repo.id,
     branch,
-    repo.connectionId,
     repo.executionHostId,
     true
   )
@@ -890,9 +884,6 @@ function buildPRRefreshCandidate(
       : cachedFallbackPRNumber != null
         ? 'pr-cache'
         : 'hosted-review'
-  const sshStatus = repo.connectionId
-    ? state.sshConnectionStates.get(repo.connectionId)?.status
-    : null
   return {
     repoId: repo.id,
     repoPath: repoPath ?? repo.path,
@@ -908,13 +899,11 @@ function buildPRRefreshCandidate(
     fallbackPRSource,
     isBare: worktree.isBare,
     isArchived: worktree.isArchived,
-    connectionId: repo.connectionId ?? null,
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a repo-backed PR refresh candidate is never remote.
+    connectionId: null,
     executionHostId: repo.executionHostId ?? null,
-    connectionState: repo.connectionId
-      ? sshStatus === 'connected'
-        ? 'connected'
-        : 'disconnected'
-      : 'unknown',
+    connectionState: 'unknown',
     cachedFetchedAt: state.prCache[cacheKey]?.fetchedAt ?? null,
     cachedHasPR: cachedPR ? true : state.prCache[cacheKey] ? false : null,
     cachedPRState: cachedPR?.state ?? null,
@@ -929,7 +918,6 @@ function githubHostedReviewFallbackPRNumber(
   repoPath: string,
   repoId: string | undefined,
   branch: string,
-  connectionId?: string | null,
   executionHostId?: string | null,
   hasRepoOwner = false
 ): number | null {
@@ -938,7 +926,6 @@ function githubHostedReviewFallbackPRNumber(
     branch,
     state.settings,
     repoId,
-    connectionId,
     executionHostId,
     hasRepoOwner
   )
@@ -1002,7 +989,6 @@ function syncHostedReviewCacheFromGitHubPRResult(args: {
   branch: string
   settings: AppState['settings']
   repoId?: string
-  connectionId?: string | null
   executionHostId?: string | null
   hasRepoOwner?: boolean
   pr: PRInfo | null
@@ -1019,7 +1005,6 @@ function syncHostedReviewCacheFromGitHubPRResult(args: {
     args.branch,
     args.settings,
     args.repoId,
-    args.connectionId,
     args.executionHostId,
     args.hasRepoOwner === true
   )
@@ -1200,7 +1185,6 @@ function setGitHubPRResultCaches(
     branch: string
     settings: AppState['settings']
     repoId?: string
-    connectionId?: string | null
     executionHostId?: string | null
     hasRepoOwner?: boolean
     pr: PRInfo | null
@@ -1228,7 +1212,6 @@ function setGitHubPRResultCaches(
     branch: args.branch,
     settings: args.settings,
     repoId: args.repoId,
-    connectionId: args.connectionId,
     executionHostId: args.executionHostId,
     hasRepoOwner: args.hasRepoOwner,
     pr: args.pr,
@@ -1245,7 +1228,6 @@ function setGitHubPRResultCaches(
     args.branch,
     args.settings,
     args.repoId,
-    args.connectionId,
     args.executionHostId,
     args.hasRepoOwner === true
   )
@@ -1279,7 +1261,6 @@ function applyGitHubPRResultToCaches(args: {
   branch: string
   settings: AppState['settings']
   repoId?: string
-  connectionId?: string | null
   executionHostId?: string | null
   hasRepoOwner?: boolean
   pr: PRInfo | null
@@ -1310,7 +1291,6 @@ function applyGitHubPRResultToCaches(args: {
     branch: args.branch,
     settings: args.settings,
     repoId: args.repoId,
-    connectionId: args.connectionId,
     executionHostId: args.executionHostId,
     hasRepoOwner: args.hasRepoOwner,
     pr: args.pr,
@@ -1327,7 +1307,6 @@ function applyGitHubPRResultToCaches(args: {
     args.branch,
     args.settings,
     args.repoId,
-    args.connectionId,
     args.executionHostId,
     args.hasRepoOwner === true
   )
@@ -1546,7 +1525,7 @@ function debouncedSaveCache(state: AppState): void {
   }
   saveTimer = setTimeout(() => {
     saveTimer = null
-    window.api.cache.setGitHub({
+    rendererHostClient.cache.setGitHub({
       cache: {
         pr: state.prCache
       }
@@ -1918,7 +1897,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
 
   initGitHubCache: async () => {
     try {
-      const persisted = await window.api.cache.getGitHub()
+      const persisted = await rendererHostClient.cache.getGitHub()
       if (persisted) {
         set({
           prCache: evictStaleEntries(persisted.pr || {})
@@ -1957,7 +1936,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       branch,
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       repo !== undefined
     )
@@ -1967,7 +1945,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       branch,
       requestSettings,
       repoId,
-      repo?.connectionId,
       repo?.executionHostId,
       repo !== undefined
     )
@@ -1982,7 +1959,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoPath,
       repoId,
       branch,
-      repo?.connectionId,
       repo?.executionHostId,
       repo !== undefined
     )
@@ -2061,67 +2037,24 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           ? findUniqueWorktreeById(get(), options.worktreeId, options.executionHostId)
           : null
         const requestHeadOid = candidateWorktree?.head ?? null
-        const outcome = runtimeRepo
-          ? await callRuntimeRpc<PRInfo | null>(
-              runtimeRepo.target,
-              'github.prForBranch',
-              {
-                repo: runtimeRepo.repo.id,
-                branch,
-                linkedPRNumber,
-                currentHeadOid: requestHeadOid,
-                ...(fallbackPRNumber !== null
-                  ? { fallbackPRNumber, acceptMergedFallbackPR: fallbackPRSource !== null }
-                  : {})
-              },
-              { timeoutMs: 30_000 }
-            ).then((pr) =>
-              pr
-                ? ({ kind: 'found', pr, fetchedAt: Date.now() } as const)
-                : ({ kind: 'no-pr', fetchedAt: Date.now() } as const)
-            )
-          : await (async () => {
-              const candidate: GitHubPRRefreshCandidate = {
-                repoId: repoId ?? '',
-                repoPath,
-                repoKind: repo?.kind ?? 'git',
-                branch,
-                cacheKey,
-                worktreeId: options?.worktreeId,
-                currentHeadOid: requestHeadOid,
-                linkedPRNumber,
-                fallbackPRNumber,
-                fallbackPRSource,
-                connectionId: repo?.connectionId ?? null,
-                executionHostId: repo?.executionHostId ?? null,
-                cachedFetchedAt: cached?.fetchedAt ?? null,
-                cachedHasPR: cached?.data ? true : cached ? false : null,
-                cachedPRState: cached?.data?.state ?? null,
-                cachedChecksStatus: cached?.data?.checksStatus ?? null,
-                cachedMergeable: cached?.data?.mergeable ?? null,
-                cachedMergeStateStatus: cached?.data?.mergeStateStatus ?? null
-              }
-              return window.api.gh.refreshPRNow
-                ? await window.api.gh.refreshPRNow({ candidate })
-                : await window.api.gh
-                    .prForBranch({
-                      repoPath,
-                      repoId,
-                      branch,
-                      linkedPRNumber,
-                      fallbackPRNumber,
-                      acceptMergedFallbackPR:
-                        fallbackPRNumber !== null && fallbackPRSource !== null,
-                      currentHeadOid: requestHeadOid
-                    })
-                    .then((pr) =>
-                      pr
-                        ? ({ kind: 'found', pr, fetchedAt: Date.now() } as const)
-                        : ({ kind: 'no-pr', fetchedAt: Date.now() } as const)
-                    )
-            })()
-        const pr: PRInfo | null =
-          outcome.kind === 'found' ? outcome.pr : outcome.kind === 'no-pr' ? null : null
+        const ghRequest: { target: RuntimeClientTarget; repo: string } = runtimeRepo
+          ? { target: runtimeRepo.target, repo: runtimeRepo.repo.id }
+          : { target: { kind: 'local' }, repo: repoId ?? repoPath }
+        const outcome = await callRuntimeOrpc(
+          ghRequest.target,
+          (client) => client.github.refreshPRForBranch,
+          {
+            repo: ghRequest.repo,
+            branch,
+            linkedPRNumber,
+            currentHeadOid: requestHeadOid,
+            ...(fallbackPRNumber !== null
+              ? { fallbackPRNumber, acceptMergedFallbackPR: fallbackPRSource !== null }
+              : {})
+          },
+          { timeoutMs: 30_000 }
+        )
+        const pr: PRInfo | null = outcome.kind === 'found' ? outcome.pr : null
         if (outcome.kind === 'upstream-error') {
           return cached?.data ?? null
         }
@@ -2148,7 +2081,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
               branch,
               settings: requestSettings,
               repoId,
-              connectionId: repo?.connectionId,
               executionHostId: repo?.executionHostId,
               hasRepoOwner: repo !== undefined,
               pr,
@@ -2310,7 +2242,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       prChecksCacheSuffix(prNumber, prRepo, headSha),
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       options?.sourceContext,
       repo !== undefined
@@ -2321,7 +2252,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           repoId,
           prChecksCacheSuffix(prNumber, prRepo),
           requestSettings,
-          repo?.connectionId,
           repo?.executionHostId,
           options?.sourceContext,
           repo !== undefined
@@ -2345,7 +2275,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
         cached.headSha,
         prRepo,
         requestSettings,
-        repo?.connectionId,
         repo?.executionHostId,
         repo !== undefined
       )
@@ -2377,28 +2306,19 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           repoPath,
           options?.sourceContext
         )
-        const checks =
-          requestContext.target.kind === 'environment'
-            ? await callRuntimeRpc<PRCheckDetail[]>(
-                { kind: 'environment', environmentId: requestContext.target.environmentId },
-                'github.prChecks',
-                {
-                  repo: requestContext.target.runtimeRepoId,
-                  prNumber,
-                  headSha,
-                  prRepo: prRepo ?? null,
-                  noCache: Boolean(options?.force || options?.noCache)
-                },
-                { timeoutMs: 30_000 }
-              )
-            : ((await window.api.gh.prChecks({
-                repoPath,
-                repoId,
-                prNumber,
-                headSha,
-                prRepo: prRepo ?? null,
-                noCache: Boolean(options?.force || options?.noCache)
-              })) as PRCheckDetail[])
+        const ghRequest = githubRuntimeRequest(requestContext)
+        const checks = await callRuntimeOrpc(
+          ghRequest.target,
+          (client) => client.github.prChecks,
+          {
+            repo: ghRequest.repo,
+            prNumber,
+            headSha,
+            prRepo: prRepo ?? null,
+            noCache: Boolean(options?.force || options?.noCache)
+          },
+          { timeoutMs: 30_000 }
+        )
         set((s) => {
           const nextState: Partial<AppState> = {
             checksCache: withBoundedCacheEntry(s.checksCache, cacheKey, {
@@ -2417,7 +2337,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
             headSha,
             prRepo,
             requestSettings,
-            repo?.connectionId,
             repo?.executionHostId,
             repo !== undefined
           )
@@ -2466,29 +2385,20 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoPath,
       options?.sourceContext
     )
-    return requestContext.target.kind === 'environment'
-      ? await callRuntimeRpc<PRCheckRunDetails | null>(
-          { kind: 'environment', environmentId: requestContext.target.environmentId },
-          'github.prCheckDetails',
-          {
-            repo: requestContext.target.runtimeRepoId,
-            checkRunId: args.checkRunId,
-            workflowRunId: args.workflowRunId,
-            checkName: args.checkName,
-            url: args.url,
-            prRepo: args.prRepo ?? null
-          },
-          { timeoutMs: 30_000 }
-        )
-      : ((await window.api.gh.prCheckDetails({
-          repoPath,
-          repoId,
-          checkRunId: args.checkRunId,
-          workflowRunId: args.workflowRunId,
-          checkName: args.checkName,
-          url: args.url,
-          prRepo: args.prRepo ?? null
-        })) as PRCheckRunDetails | null)
+    const ghRequest = githubRuntimeRequest(requestContext)
+    return await callRuntimeOrpc(
+      ghRequest.target,
+      (client) => client.github.prCheckDetails,
+      {
+        repo: ghRequest.repo,
+        checkRunId: args.checkRunId,
+        workflowRunId: args.workflowRunId,
+        checkName: args.checkName,
+        url: args.url,
+        prRepo: args.prRepo ?? null
+      },
+      { timeoutMs: 30_000 }
+    )
   },
 
   fetchPRComments: async (repoPath, prNumber, options): Promise<PRComment[]> => {
@@ -2506,7 +2416,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       prCommentsCacheSuffix(prNumber, options?.prRepo),
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       options?.sourceContext,
       repo !== undefined
@@ -2530,26 +2439,18 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           repoPath,
           options?.sourceContext
         )
-        const comments =
-          requestContext.target.kind === 'environment'
-            ? await callRuntimeRpc<PRComment[]>(
-                { kind: 'environment', environmentId: requestContext.target.environmentId },
-                'github.prComments',
-                {
-                  repo: requestContext.target.runtimeRepoId,
-                  prNumber,
-                  prRepo: options?.prRepo ?? null,
-                  noCache: options?.force
-                },
-                { timeoutMs: 30_000 }
-              )
-            : ((await window.api.gh.prComments({
-                repoPath,
-                repoId,
-                prNumber,
-                prRepo: options?.prRepo ?? null,
-                noCache: options?.force
-              })) as PRComment[])
+        const ghRequest = githubRuntimeRequest(requestContext)
+        const comments = await callRuntimeOrpc(
+          ghRequest.target,
+          (client) => client.github.prComments,
+          {
+            repo: ghRequest.repo,
+            prNumber,
+            prRepo: options?.prRepo ?? null,
+            noCache: options?.force
+          },
+          { timeoutMs: 30_000 }
+        )
         set((s) => ({
           commentsCache: withBoundedCacheEntry(s.commentsCache, cacheKey, {
             data: comments,
@@ -2584,7 +2485,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       prCommentsCacheSuffix(prNumber, options?.prRepo),
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       options?.sourceContext,
       repo !== undefined
@@ -2598,26 +2498,18 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     )
     let result: GitHubCommentResult
     try {
-      result =
-        requestContext.target.kind === 'environment'
-          ? await callRuntimeRpc<GitHubCommentResult>(
-              { kind: 'environment', environmentId: requestContext.target.environmentId },
-              'github.addPRComment',
-              {
-                repo: requestContext.target.runtimeRepoId,
-                number: prNumber,
-                body,
-                prRepo: options?.prRepo ?? null
-              },
-              { timeoutMs: 30_000 }
-            )
-          : await window.api.gh.addPRComment({
-              repoPath,
-              repoId,
-              number: prNumber,
-              body,
-              prRepo: options?.prRepo ?? null
-            })
+      const ghRequest = githubRuntimeRequest(requestContext)
+      result = await callRuntimeOrpc(
+        ghRequest.target,
+        (client) => client.github.addPRComment,
+        {
+          repo: ghRequest.repo,
+          number: prNumber,
+          body,
+          prRepo: options?.prRepo ?? null
+        },
+        { timeoutMs: 30_000 }
+      )
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to post comment.'
       return { ok: false, error }
@@ -2660,7 +2552,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       prCommentsCacheSuffix(prNumber, options?.prRepo),
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       options?.sourceContext,
       repo !== undefined
@@ -2674,34 +2565,22 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     )
     let result: GitHubCommentResult
     try {
-      result =
-        requestContext.target.kind === 'environment'
-          ? await callRuntimeRpc<GitHubCommentResult>(
-              { kind: 'environment', environmentId: requestContext.target.environmentId },
-              'github.addPRReviewCommentReply',
-              {
-                repo: requestContext.target.runtimeRepoId,
-                prNumber,
-                commentId,
-                body,
-                threadId: options?.threadId,
-                path: options?.path,
-                line: options?.line,
-                prRepo: options?.prRepo ?? null
-              },
-              { timeoutMs: 30_000 }
-            )
-          : await window.api.gh.addPRReviewCommentReply({
-              repoPath,
-              repoId,
-              prNumber,
-              commentId,
-              body,
-              threadId: options?.threadId,
-              path: options?.path,
-              line: options?.line,
-              prRepo: options?.prRepo ?? null
-            })
+      const ghRequest = githubRuntimeRequest(requestContext)
+      result = await callRuntimeOrpc(
+        ghRequest.target,
+        (client) => client.github.addPRReviewCommentReply,
+        {
+          repo: ghRequest.repo,
+          prNumber,
+          commentId,
+          body,
+          threadId: options?.threadId,
+          path: options?.path,
+          line: options?.line,
+          prRepo: options?.prRepo ?? null
+        },
+        { timeoutMs: 30_000 }
+      )
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to post reply.'
       return { ok: false, error }
@@ -2750,7 +2629,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       repoId,
       prCommentsCacheSuffix(prNumber, options?.prRepo),
       requestSettings,
-      repo?.connectionId,
       repo?.executionHostId,
       options?.sourceContext,
       repo !== undefined
@@ -2780,20 +2658,13 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     )
     let ok = false
     try {
-      ok =
-        requestContext.target.kind === 'environment'
-          ? await callRuntimeRpc<boolean>(
-              { kind: 'environment', environmentId: requestContext.target.environmentId },
-              'github.resolveReviewThread',
-              { repo: requestContext.target.runtimeRepoId, threadId, resolve },
-              { timeoutMs: 30_000 }
-            )
-          : await window.api.gh.resolveReviewThread({
-              repoPath,
-              repoId,
-              threadId,
-              resolve
-            })
+      const ghRequest = githubRuntimeRequest(requestContext)
+      ok = await callRuntimeOrpc(
+        ghRequest.target,
+        (client) => client.github.resolveReviewThread,
+        { repo: ghRequest.repo, threadId, resolve },
+        { timeoutMs: 30_000 }
+      )
     } catch (err) {
       console.error('Failed to update review thread:', err)
       ok = false
@@ -2867,12 +2738,12 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
         localCandidates.push(candidate)
       }
     }
-    const reportVisible = window.api.gh.reportVisiblePRRefreshCandidates
-    if (reportVisible) {
-      void reportVisible({ candidates: localCandidates, generation }).catch((err) => {
-        console.warn('Failed to report visible PR refresh candidates:', err)
-      })
-    }
+    void reportShellVisibleGitHubPRRefreshCandidates({
+      candidates: localCandidates,
+      generation
+    }).catch((err) => {
+      console.warn('Failed to report visible PR refresh candidates:', err)
+    })
   },
 
   bumpGitHubPRVisibleRefreshGeneration: () => {
@@ -2955,7 +2826,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
                                   alias.repoId,
                                   prChecksCacheSuffix(pr.number, pr.prRepo, pr.headSha),
                                   s.settings,
-                                  alias.connectionId,
                                   aliasExecutionHostId,
                                   true
                                 )
@@ -2966,7 +2836,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
                             alias.repoId,
                             prChecksCacheSuffix(pr.number, pr.prRepo),
                             s.settings,
-                            alias.connectionId,
                             aliasExecutionHostId,
                             true
                           )
@@ -2979,7 +2848,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
                             undefined,
                             prChecksCacheSuffix(pr.number, pr.prRepo, pr.headSha),
                             s.settings,
-                            alias.connectionId,
                             aliasExecutionHostId,
                             true
                           )
@@ -2990,7 +2858,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
                       undefined,
                       prChecksCacheSuffix(pr.number, pr.prRepo),
                       s.settings,
-                      alias.connectionId,
                       aliasExecutionHostId,
                       true
                     ),
@@ -3089,7 +2956,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
             branch: alias.branch,
             settings: s.settings,
             repoId: alias.repoId,
-            connectionId: alias.connectionId,
             executionHostId: aliasExecutionHostId,
             hasRepoOwner: true,
             pr: data,
@@ -3118,7 +2984,6 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
               alias.branch,
               s.settings,
               alias.repoId,
-              alias.connectionId,
               aliasExecutionHostId,
               true
             )
@@ -3222,14 +3087,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
         }
 
         const ownerSettings = settingsForGitHubRepoOwner(state.settings, repo)
-        const cacheKey = prCacheKey(
-          repo.path,
-          repo.id,
-          branch,
-          ownerSettings,
-          repo.connectionId,
-          repo.executionHostId
-        )
+        const cacheKey = prCacheKey(repo.path, repo.id, branch, ownerSettings, repo.executionHostId)
         const entry = state.prCache[cacheKey]
         if (!entry || now - entry.fetchedAt >= CACHE_TTL) {
           const candidate = buildPRRefreshCandidate(state, worktree)
@@ -3285,14 +3143,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
 
     const branch = worktree.branch.replace(/^refs\/heads\//, '')
     const ownerSettings = settingsForGitHubRepoOwner(state.settings, repo)
-    const cacheKey = prCacheKey(
-      repo.path,
-      repo.id,
-      branch,
-      ownerSettings,
-      repo.connectionId,
-      repo.executionHostId
-    )
+    const cacheKey = prCacheKey(repo.path, repo.id, branch, ownerSettings, repo.executionHostId)
     set((current) =>
       current.prCache[cacheKey]
         ? {

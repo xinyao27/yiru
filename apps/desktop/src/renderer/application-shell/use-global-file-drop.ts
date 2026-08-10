@@ -13,6 +13,8 @@ import {
   statRuntimePath,
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import {
   NATIVE_FILE_DROP_MAX_PATHS,
@@ -56,7 +58,7 @@ export function getEditorFileDropOperationContext(
 
 export function useGlobalFileDrop(): void {
   useEffect(() => {
-    return window.api.ui.onFileDrop((data) => {
+    return shellClient.ui.onFileDrop((data) => {
       if (data.target === 'rejected') {
         showNativeFileDropRejection(data)
         return
@@ -152,7 +154,7 @@ export function useGlobalFileDrop(): void {
             const isRemoteRuntimePath = isRemoteRuntimeFileOperation(fileContext, filePath)
             // Why: remote paths don't need local auth — the relay/runtime is the security boundary.
             if (!connectionId && !isRemoteRuntimePath) {
-              await window.api.fs.authorizeExternalPath({ targetPath: filePath })
+              await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
             }
             const stat = await statRuntimePath(fileContext, filePath)
             if (stat.isDirectory) {

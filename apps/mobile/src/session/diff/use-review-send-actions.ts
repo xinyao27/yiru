@@ -4,6 +4,7 @@ import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
 import { triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import { clearSentMobileDiffComments, markMobileDiffCommentsSent } from './comment-edit'
@@ -76,15 +77,12 @@ export function useMobileDiffReviewSendActions(input: SendActionsInput) {
       if (!client || connState !== 'connected') {
         throw new Error('Waiting for desktop...')
       }
-      const response = await client.sendRequest('terminal.send', {
+      const response = await callRuntimeOrpc(client, (runtime) => runtime.terminal.send, {
         terminal,
         text: formatMobileDiffReviewPrompt(comments),
         enter: true
       })
-      if (!response.ok) {
-        throw new Error(response.error?.message || 'Failed to send notes')
-      }
-      if (!readMobileReviewTerminalSendAccepted(response.result)) {
+      if (!readMobileReviewTerminalSendAccepted(response)) {
         throw new Error('Terminal input is locked')
       }
       await markNotesSent(comments)
@@ -100,13 +98,12 @@ export function useMobileDiffReviewSendActions(input: SendActionsInput) {
       if (!client || connState !== 'connected') {
         throw new Error('Waiting for desktop...')
       }
-      const response = await client.sendRequest('session.tabs.createTerminal', {
-        worktree: `id:${worktreeId}`
-      })
-      if (!response.ok) {
-        throw new Error(response.error?.message || 'Failed to create terminal')
-      }
-      const created = readMobileReviewCreatedTerminal(response.result)
+      const response = await callRuntimeOrpc(
+        client,
+        (runtime) => runtime.session.tabs.createTerminal,
+        { worktree: `id:${worktreeId}` }
+      )
+      const created = readMobileReviewCreatedTerminal(response)
       if (!created) {
         throw new Error('Created terminal response was invalid')
       }
@@ -122,13 +119,10 @@ export function useMobileDiffReviewSendActions(input: SendActionsInput) {
     }
     setSendSheet({ kind: 'loading' })
     try {
-      const response = await client.sendRequest('session.tabs.list', {
+      const response = await callRuntimeOrpc(client, (runtime) => runtime.session.tabs.list, {
         worktree: `id:${worktreeId}`
       })
-      if (!response.ok) {
-        throw new Error(response.error?.message || 'Unable to load agent sessions')
-      }
-      setSendSheet({ kind: 'ready', terminals: readMobileReviewTerminalTabs(response.result) })
+      setSendSheet({ kind: 'ready', terminals: readMobileReviewTerminalTabs(response) })
     } catch (err) {
       setSendSheet({
         kind: 'error',

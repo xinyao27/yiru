@@ -230,17 +230,3 @@ export function buildManualOrderUpdatesForGroupDrop(args: {
     })
   }
 }
-
-export function shouldWriteManualOrderForGroupDrop(args: {
-  sortBy: string
-  sourceGroupKeys: readonly string[]
-  targetGroupKey: string
-}): boolean {
-  if (args.sortBy === 'manual') {
-    return true
-  }
-  return (
-    args.sourceGroupKeys.length > 0 &&
-    args.sourceGroupKeys.every((sourceGroupKey) => sourceGroupKey === args.targetGroupKey)
-  )
-}

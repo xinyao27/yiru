@@ -1,37 +1,41 @@
+import type {
+  RemoteServerUpdateInstallResult,
+  RemoteServerUpdaterSnapshot,
+  UpdaterCheckInput
+} from '@yiru/runtime-protocol/updater'
 import {
   checkRemoteServerUpdater,
   downloadRemoteServerUpdater,
   getRemoteServerUpdaterSnapshot,
   installRemoteServerUpdater
 } from '~main/runtime/remote-server-updater'
-import {
-  UPDATER_CHECK_CONTRACT,
-  UPDATER_DOWNLOAD_CONTRACT,
-  UPDATER_GET_STATUS_CONTRACT,
-  UPDATER_INSTALL_CONTRACT
-} from '~shared/runtime-method-contracts/runtime-updater-contracts'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-export const UPDATER_METHODS: RpcMethod[] = [
-  defineMethod({
-    contract: UPDATER_GET_STATUS_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: (_params, { runtime }) => getRemoteServerUpdaterSnapshot(runtime.getRuntimeId())
-  }),
-  defineMethod({
-    contract: UPDATER_CHECK_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: (params, { runtime }) => checkRemoteServerUpdater(runtime.getRuntimeId(), params)
-  }),
-  defineMethod({
-    contract: UPDATER_DOWNLOAD_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: (_params, { runtime }) => downloadRemoteServerUpdater(runtime.getRuntimeId())
-  }),
-  defineMethod({
-    contract: UPDATER_INSTALL_CONTRACT,
-    access: { scope: 'host', tier: 'host' },
-    handler: (_params, { runtime }) => installRemoteServerUpdater(runtime.getRuntimeId())
-  })
-]
+export function getRuntimeUpdaterStatus(
+  _params: void,
+  { runtime }: RpcContext
+): RemoteServerUpdaterSnapshot {
+  return getRemoteServerUpdaterSnapshot(runtime.getRuntimeId())
+}
+
+export function checkRuntimeUpdater(
+  params: UpdaterCheckInput,
+  { runtime }: RpcContext
+): RemoteServerUpdaterSnapshot {
+  return checkRemoteServerUpdater(runtime.getRuntimeId(), params)
+}
+
+export function downloadRuntimeUpdater(
+  _params: void,
+  { runtime }: RpcContext
+): RemoteServerUpdaterSnapshot {
+  return downloadRemoteServerUpdater(runtime.getRuntimeId())
+}
+
+export function installRuntimeUpdater(
+  _params: void,
+  { runtime }: RpcContext
+): RemoteServerUpdateInstallResult {
+  return installRemoteServerUpdater(runtime.getRuntimeId())
+}

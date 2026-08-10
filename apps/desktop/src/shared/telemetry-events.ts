@@ -129,7 +129,6 @@ export const errorClassSchema = z.enum(['binary_not_found', 'paste_readiness_tim
 export type ErrorClass = z.infer<typeof errorClassSchema>
 
 export const repoMethodSchema = z.enum(['folder_picker', 'clone_url', 'drag_drop'])
-export type RepoMethod = z.infer<typeof repoMethodSchema>
 
 // Historical setup-step affordances users could pick after `repo_added` fired.
 // Current Add Project flows skip that choice screen and auto-open the default
@@ -142,7 +141,6 @@ export const addRepoSetupStepActionSchema = z.enum([
   'open_existing',
   'back'
 ])
-export type AddRepoSetupStepAction = z.infer<typeof addRepoSetupStepActionSchema>
 
 export const addRepoExistingWorkspaceSourceSchema = z.enum([
   'local_folder_picker',
@@ -182,7 +180,6 @@ export const addRepoDefaultCheckoutHandoffReasonSchema = z.enum([
 ])
 
 export const setupScriptImportProviderSchema = z.enum(SETUP_SCRIPT_IMPORT_PROVIDERS)
-export type SetupScriptImportProviderTelemetry = z.infer<typeof setupScriptImportProviderSchema>
 
 // Deliberately a separate enum from `errorClassSchema` (PTY-spawn taxonomy):
 // different domain — this one buckets git/filesystem failures thrown by
@@ -196,7 +193,6 @@ export const workspaceCreateErrorClassSchema = z.enum([
   'base_ref_missing',
   'unknown'
 ])
-export type WorkspaceCreateErrorClass = z.infer<typeof workspaceCreateErrorClassSchema>
 
 export const workspaceSourceSchema = z.enum(WORKSPACE_SOURCE_VALUES)
 export type { WorkspaceSource }
@@ -235,13 +231,10 @@ export const featureWallWorkflowIdSchema = z.enum([
   'workbench',
   'review'
 ])
-export type FeatureWallWorkflowIdTelemetry = z.infer<typeof featureWallWorkflowIdSchema>
 
 export const featureWallTourDepthStepSchema = z.enum(FEATURE_WALL_TOUR_DEPTH_STEPS)
-export type FeatureWallTourDepthStepTelemetry = z.infer<typeof featureWallTourDepthStepSchema>
 
 export const featureWallExitActionSchema = z.enum(FEATURE_WALL_EXIT_ACTIONS)
-export type FeatureWallExitActionTelemetry = z.infer<typeof featureWallExitActionSchema>
 
 // `env_var` is deliberately absent — env-var and CI paths override consent at
 // runtime only (see consent.ts); they never mutate `optedIn` and therefore
@@ -1639,7 +1632,6 @@ function eventsWithShapeKey(key: string): ReadonlySet<EventName> {
 //   add `nth_repo_added: nthRepoAddedSchema` to the event's schema above.
 //   That is the *only* step — this set updates automatically.
 const COHORT_EXTENDED_SET = eventsWithShapeKey('nth_repo_added')
-export const COHORT_EXTENDED: readonly EventName[] = Array.from(COHORT_EXTENDED_SET)
 
 // Compile-time roster of events that must declare `nth_repo_added`. Same
 // rationale as `_OnboardingCohortRosterSync` below — guards the runtime

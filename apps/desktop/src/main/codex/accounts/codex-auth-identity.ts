@@ -50,56 +50,6 @@ export function codexAuthMatchesManagedAccount(
   )
 }
 
-// Why: the shared mirror may still hold managed credentials; only the same
-// positively identified system account may ever be read back to ~/.codex.
-export function codexAuthMatchesSystemDefaultIdentity(
-  runtimeAuthContents: string,
-  systemDefaultAuthContents: string
-): boolean {
-  const runtimeIdentity = readIdentityFromAuthContents(runtimeAuthContents)
-  const systemDefaultIdentity = readIdentityFromAuthContents(systemDefaultAuthContents)
-  if (!runtimeIdentity || !systemDefaultIdentity) {
-    return false
-  }
-  if (
-    systemDefaultIdentity.email &&
-    runtimeIdentity.email &&
-    systemDefaultIdentity.email !== runtimeIdentity.email
-  ) {
-    return false
-  }
-  if (
-    !identityFieldMatches(
-      systemDefaultIdentity.providerAccountId,
-      runtimeIdentity.providerAccountId
-    )
-  ) {
-    return false
-  }
-  if (
-    !identityFieldMatches(
-      systemDefaultIdentity.workspaceAccountId,
-      runtimeIdentity.workspaceAccountId
-    )
-  ) {
-    return false
-  }
-
-  const strongIdentityMatches = Boolean(
-    (systemDefaultIdentity.providerAccountId && runtimeIdentity.providerAccountId) ||
-    (systemDefaultIdentity.workspaceAccountId && runtimeIdentity.workspaceAccountId)
-  )
-  const emailMatches = Boolean(
-    systemDefaultIdentity.email &&
-    runtimeIdentity.email &&
-    systemDefaultIdentity.email === runtimeIdentity.email
-  )
-  return (
-    strongIdentityMatches ||
-    (emailMatches && !runtimeIdentity.providerAccountId && !runtimeIdentity.workspaceAccountId)
-  )
-}
-
 // Why: identity proves ownership, not ordering. Missing expiry/issue claims
 // cannot prove that candidate bytes should replace the baseline credential.
 export function compareCodexAuthFreshness(
@@ -116,13 +66,6 @@ export function compareCodexAuthFreshness(
     : candidateFreshness > baselineFreshness
       ? 1
       : -1
-}
-
-export function codexAuthIsFresher(
-  candidateAuthContents: string,
-  baselineAuthContents: string
-): boolean {
-  return compareCodexAuthFreshness(candidateAuthContents, baselineAuthContents) === 1
 }
 
 function readIdentityFromAuthContents(contents: string): CodexAuthIdentity | null {

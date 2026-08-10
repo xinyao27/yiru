@@ -4,12 +4,6 @@ import type { RuntimeClientTarget } from '~renderer/runtime/rpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { ProjectSourceContext } from '~shared/project-source-context'
 import { getProjectSourceRuntimeSettings } from '~shared/project-source-context'
-import type { GlobalSettings } from '~shared/types'
-
-import {
-  getExplicitRuntimeOwnerEnvironmentId,
-  type RepoRuntimeOwnerState
-} from './repo-runtime-owner'
 
 export type GitHubRuntimeHost = Extract<ParsedExecutionHost, { kind: 'runtime' }>
 
@@ -29,29 +23,6 @@ export function getGitHubSourceRuntimeTarget(
   return getActiveRuntimeTarget(
     getProjectSourceRuntimeSettings(sourceContext?.provider === 'github' ? sourceContext : null)
   )
-}
-
-// Why: PR mutations must run on the repo's explicit owner host (#6957); a
-// local or absent source never downgrades a runtime-owned repo to local IPC,
-// a runtime source still overrides, and the globally focused runtime is never
-// used as a fallback — a repo without an explicit owner is a local repo.
-export function getGitHubMutationRoutingSettings(
-  state: RepoRuntimeOwnerState,
-  repoId: string | null | undefined,
-  sourceContext: ProjectSourceContext | null | undefined
-): Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> {
-  const sourceHost = getGitHubSourceRuntimeHost(sourceContext)
-  return {
-    activeRuntimeEnvironmentId:
-      sourceHost?.environmentId ?? getExplicitRuntimeOwnerEnvironmentId(state, repoId)
-  }
-}
-
-export function canUseGitHubRepoContext(
-  repoPath: string | null | undefined,
-  sourceContext: ProjectSourceContext | null | undefined
-): boolean {
-  return Boolean(repoPath) || getGitHubSourceRuntimeHost(sourceContext) !== null
 }
 
 export function getGitHubRuntimeRepoId(

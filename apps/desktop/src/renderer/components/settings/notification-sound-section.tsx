@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 import { getNotificationSoundOptions } from '~renderer/components/notification-sound-options'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { GlobalSettings } from '~shared/types'
 
 import { Label } from '../ui/label'
@@ -55,7 +57,7 @@ export function NotificationSoundSection({
     if (customSoundId === 'system') {
       return
     }
-    const result = await window.api.notifications.playSound({
+    const result = await rendererHostClient.notifications.playSound({
       force: true,
       volume: volumeDraft
     })
@@ -72,7 +74,7 @@ export function NotificationSoundSection({
   const handleChooseCustomSound = async (): Promise<void> => {
     setIsPickingSound(true)
     try {
-      const soundPath = await window.api.shell.pickAudio()
+      const soundPath = await shellClient.shell.pickAudio()
       if (soundPath) {
         await onUpdateNotificationSettings({ customSoundId: 'custom', customSoundPath: soundPath })
         await previewSound('custom')

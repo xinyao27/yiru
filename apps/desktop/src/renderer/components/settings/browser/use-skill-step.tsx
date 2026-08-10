@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { translate } from '~renderer/i18n/i18n'
+import type { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 
 import { AgentSkillSetupPanel } from '../agent/skill-setup-panel'
 import { StepBadge } from './use-step-badge'
@@ -13,7 +14,7 @@ type Props = {
   disabled?: boolean
   terminalShellOverride?: string
   preInstallNotice?: ReactNode
-  getPrerequisiteStatus?: () => Promise<Awaited<ReturnType<typeof window.api.cli.getInstallStatus>>>
+  getPrerequisiteStatus?: () => Promise<Awaited<ReturnType<typeof readCliInstallStatus>>>
   onBeforeOpenTerminal?: () => void | Promise<void>
   onRecheck: () => void | Promise<unknown>
 }

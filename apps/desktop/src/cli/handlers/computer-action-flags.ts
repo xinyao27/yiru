@@ -60,17 +60,18 @@ export function getComputerClickActionFlags(flags: Map<string, string | boolean>
   x?: number
   y?: number
   clickCount?: number
-  mouseButton?: string
+  mouseButton?: 'left' | 'middle' | 'right'
 } {
+  const mouseButton = getOptionalStringFlag(flags, 'mouse-button')
+  validateMouseButton(mouseButton)
   const result = {
     elementIndex: getOptionalNonNegativeIntegerFlag(flags, 'element-index'),
     x: getOptionalNumberFlag(flags, 'x'),
     y: getOptionalNumberFlag(flags, 'y'),
     clickCount: getOptionalPositiveIntegerFlag(flags, 'click-count'),
-    mouseButton: getOptionalStringFlag(flags, 'mouse-button')
+    mouseButton
   }
   validateElementOrCoordinates('Click', result.elementIndex, result.x, result.y)
-  validateMouseButton(result.mouseButton)
   return result
 }
 
@@ -88,18 +89,19 @@ export function getComputerScrollActionFlags(flags: Map<string, string | boolean
   elementIndex?: number
   x?: number
   y?: number
-  direction: string
+  direction: 'down' | 'left' | 'right' | 'up'
   pages?: number
 } {
+  const direction = getRequiredStringFlag(flags, 'direction')
+  validateScrollDirection(direction)
   const result = {
     elementIndex: getOptionalNonNegativeIntegerFlag(flags, 'element-index'),
     x: getOptionalNumberFlag(flags, 'x'),
     y: getOptionalNumberFlag(flags, 'y'),
-    direction: getRequiredStringFlag(flags, 'direction'),
+    direction,
     pages: getOptionalPositiveNumberFlag(flags, 'pages')
   }
   validateElementOrCoordinates('Scroll', result.elementIndex, result.x, result.y)
-  validateScrollDirection(result.direction)
   return result
 }
 

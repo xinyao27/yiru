@@ -9,6 +9,8 @@ import {
   DialogTitle
 } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { useAppStore } from '~renderer/store'
 
 type FullOutputResult = {
   worktreeId: string
@@ -53,13 +55,16 @@ export function AutoRenameFailedDialog({
     }
   }, [])
 
+  const getWorktreeBranchRenameFailureOutput = useAppStore(
+    (s) => s.getWorktreeBranchRenameFailureOutput
+  )
+
   useEffect(() => {
     if (!open) {
       return
     }
     let stale = false
-    window.api.worktrees
-      .getBranchRenameFailureOutput({ worktreeId })
+    getWorktreeBranchRenameFailureOutput(worktreeId)
       .then((output) => {
         if (!stale) {
           setFullOutputResult({ worktreeId, error, output })
@@ -73,7 +78,7 @@ export function AutoRenameFailedDialog({
     return () => {
       stale = true
     }
-  }, [error, open, worktreeId])
+  }, [error, open, worktreeId, getWorktreeBranchRenameFailureOutput])
 
   // Why: a fetch keyed to a previous (worktreeId, error) pair must never render
   // as this failure's detail — a new failure for the same worktree carries a
@@ -91,7 +96,7 @@ export function AutoRenameFailedDialog({
       // Why: Electron's clipboard IPC, not navigator.clipboard, which fails
       // silently inside Radix dialogs — and an inline icon swap (no toast),
       // matching the app's other inline copy buttons.
-      await window.api.ui.writeClipboardText(detailText)
+      await shellClient.ui.writeClipboardText(detailText)
       setCopied(true)
       if (copiedResetTimerRef.current !== null) {
         window.clearTimeout(copiedResetTimerRef.current)

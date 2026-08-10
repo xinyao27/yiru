@@ -65,8 +65,3 @@ export async function findGhosttyConfigPaths(): Promise<string[]> {
   }
   return found
 }
-
-export async function findGhosttyConfigPath(): Promise<string | null> {
-  const paths = await findGhosttyConfigPaths()
-  return paths[0] ?? null
-}

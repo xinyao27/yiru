@@ -58,6 +58,8 @@ export function useFileExplorerModel({
     activeWorktreeId ? (state.showDotfilesByWorktree[activeWorktreeId] ?? true) : true
   )
   const worktreePath = activeWorktree?.path ?? null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a direct repo/worktree owner is never SSH.
   const runtimeDownloadContext = useMemo(
     () =>
       activeRuntimeEnvironmentId && activeWorktreeId && worktreePath
@@ -65,10 +67,10 @@ export function useFileExplorerModel({
             settings: { activeRuntimeEnvironmentId },
             worktreeId: activeWorktreeId,
             worktreePath,
-            connectionId: activeRepo?.connectionId ?? undefined
+            connectionId: undefined
           }
         : null,
-    [activeRepo?.connectionId, activeRuntimeEnvironmentId, activeWorktreeId, worktreePath]
+    [activeRuntimeEnvironmentId, activeWorktreeId, worktreePath]
   )
   const isFilesViewActive = explorerView === 'files'
   const visibleFilesWorktreePath = getVisibleFileExplorerWorktreePath({

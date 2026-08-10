@@ -28,6 +28,7 @@ import type { WorkspacePortGroup } from '~renderer/lib/workspace-port-groups'
 import { useLocalhostLabelRouteForPort } from '~renderer/lib/workspace-port-localhost-label-selector'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { WorkspacePort } from '~shared/workspace/ports'
 
@@ -161,7 +162,7 @@ export function PortRow({
       event.stopPropagation()
       recordFeatureInteraction('ports')
       const address = addressForPort(port)
-      void window.api.ui.writeClipboardText(address)
+      void shellClient.ui.writeClipboardText(address)
       toast.success(
         translate(
           'auto.components.status.bar.ports.status.popover.rows.480d8f2347',

@@ -46,23 +46,6 @@ type WorktreeCandidate = {
   normalizedPathLength: number
 }
 
-export function resolveAiVaultSessionWorktreeInfo({
-  session,
-  repos = [],
-  worktrees,
-  activeWorktreeId
-}: {
-  session: AiVaultSession
-  repos?: readonly Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>[]
-  worktrees: readonly Worktree[]
-  activeWorktreeId: string | null
-}): AiVaultSessionWorktreeInfo | null {
-  return withAiVaultCurrentWorktreeStatus(
-    resolveWorktreeInfoFromCandidates(session, buildWorktreeCandidates(worktrees, repos)),
-    activeWorktreeId
-  )
-}
-
 export function withAiVaultCurrentWorktreeStatus(
   worktreeInfo: AiVaultSessionWorktreeInfo | null,
   activeWorktreeId: string | null
@@ -118,21 +101,6 @@ export function extractWorktreePathFromSessionTitle(title: string): string | nul
 
   const inlineMatch = trimmed.match(/\bWorktree:\s*(.+)$/i)
   return inlineMatch?.[1]?.trim() ?? null
-}
-
-export function resolveAiVaultSessionWorktreeDisplay(args: {
-  session: AiVaultSession
-  repos?: readonly Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>[]
-  worktrees: readonly Worktree[]
-  activeWorktreeId: string | null
-}): AiVaultSessionWorktreeInfo | null {
-  return withAiVaultCurrentWorktreeStatus(
-    resolveWorktreeDisplayFromCandidates(
-      args.session,
-      buildWorktreeCandidates(args.worktrees, args.repos ?? [])
-    ),
-    args.activeWorktreeId
-  )
 }
 
 function resolveWorktreeDisplayFromCandidates(

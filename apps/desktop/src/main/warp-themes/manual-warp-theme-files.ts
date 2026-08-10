@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import path from 'node:path'
 
 import { BrowserWindow, dialog, type OpenDialogOptions, type WebContents } from 'electron'
@@ -27,10 +26,6 @@ export function createManualWarpThemeFileCandidates(filePaths: string[]): ThemeF
       // main so duplicate basenames get deterministic IDs without persisting paths.
       return left.path.localeCompare(right.path, undefined, { sensitivity: 'base' })
     })
-}
-
-export function manualWarpThemeContentDiscriminator(label: string, content: string): string {
-  return `${label}-${createHash('sha256').update(content).digest('hex').slice(0, 12)}`
 }
 
 export async function chooseManualWarpThemeFiles(webContents?: WebContents): Promise<

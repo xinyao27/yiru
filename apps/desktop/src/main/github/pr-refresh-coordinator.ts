@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: the coordinator keeps queueing, pacing, and
 renderer broadcast rules together so freshness and rate-limit invariants are
 reviewable in one place. */
-import { webContents } from 'electron'
+import { publishGitHubEvent } from '~main/runtime/github-events'
 import type {
   GitHubPRRefreshAlias,
   GitHubPRRefreshCandidate,
@@ -12,7 +12,6 @@ import type {
 } from '~shared/types'
 
 import { recordCoalescedCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
-import { sendToTrustedUIRenderer } from '../window/ui'
 import { getPRForBranchOutcome, type GitHubPRBranchLookupOptions } from './client'
 import { getRateLimit, noteRateLimitSpend, rateLimitGuard } from './rate-limit'
 
@@ -33,6 +32,10 @@ type PRRefreshOutcomeObserver = (
   candidate: GitHubPRRefreshCandidate,
   outcome: PRRefreshOutcome
 ) => void
+
+export type PRRefreshShellAdapter = {
+  getLiveRendererIds: () => ReadonlySet<number>
+}
 
 type PRBranchLookupCandidate = Pick<
   GitHubPRRefreshCandidate,
@@ -87,6 +90,9 @@ const errorBackoff = new Map<string, { failures: number; retryAt: number }>()
 let lastBackgroundStartAt = 0
 const visibleByWindow = new Map<number, { generation: number; keys: Set<string> }>()
 let outcomeObserver: PRRefreshOutcomeObserver | null = null
+let shellAdapter: PRRefreshShellAdapter = {
+  getLiveRendererIds: () => new Set()
+}
 const diagnosticsCounters = {
   enqueued: 0,
   coalesced: 0,
@@ -96,6 +102,10 @@ const diagnosticsCounters = {
 
 export function setPRRefreshOutcomeObserver(observer: PRRefreshOutcomeObserver | null): void {
   outcomeObserver = observer
+}
+
+export function setPRRefreshShellAdapter(adapter: PRRefreshShellAdapter): void {
+  shellAdapter = adapter
 }
 
 function removeInvisibleVisibleRefreshes(): void {
@@ -213,27 +223,22 @@ function nextQueueOrder(): number {
 
 function broadcast(event: Omit<GitHubPRRefreshEvent, 'sequence'>, sequenceOverride?: number): void {
   const payload = { ...event, sequence: sequenceOverride ?? nextSequence() } as GitHubPRRefreshEvent
-  sendToTrustedUIRenderer('gh:prRefreshEvent', payload)
+  publishGitHubEvent({ type: 'prRefresh', event: payload })
 }
 
 function refreshKey(candidate: GitHubPRRefreshCandidate): string {
-  const connectionScope = candidate.connectionId ?? 'local'
-  const runtimeScope = candidate.connectionId
-    ? 'remote'
-    : `runtime:${candidate.localGitOptions?.wslDistro ? `wsl:${candidate.localGitOptions.wslDistro}` : 'host'}`
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — candidate.connectionId is always null, so the connection
+  // scope is always 'local' and the runtime scope always falls to the local branch.
+  const runtimeScope = `runtime:${candidate.localGitOptions?.wslDistro ? `wsl:${candidate.localGitOptions.wslDistro}` : 'host'}`
   if (typeof candidate.linkedPRNumber === 'number') {
-    return `${connectionScope}::${runtimeScope}::${candidate.repoPath}::pr::${candidate.linkedPRNumber}`
+    return `local::${runtimeScope}::${candidate.repoPath}::pr::${candidate.linkedPRNumber}`
   }
-  return `${connectionScope}::${runtimeScope}::${candidate.repoPath}::branch::${candidate.branch}`
+  return `local::${runtimeScope}::${candidate.repoPath}::branch::${candidate.branch}`
 }
 
 function isVisibleKey(key: string): boolean {
-  const liveWindowIds = new Set(
-    webContents
-      .getAllWebContents()
-      .filter((wc) => !wc.isDestroyed())
-      .map((wc) => wc.id)
-  )
+  const liveWindowIds = shellAdapter.getLiveRendererIds()
   for (const windowId of Array.from(visibleByWindow.keys())) {
     if (!liveWindowIds.has(windowId)) {
       visibleByWindow.delete(windowId)
@@ -279,9 +284,9 @@ function validateCandidate(
   if (candidate.isArchived) {
     return 'archived'
   }
-  if (candidate.connectionId && candidate.connectionState === 'disconnected') {
-    return 'disconnected'
-  }
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — candidate.connectionId is always null, so a disconnected
+  // SSH repo can no longer reach this validation.
   if (!candidate.branch && typeof candidate.linkedPRNumber !== 'number') {
     return 'fresh'
   }
@@ -322,7 +327,11 @@ function aliasFromCandidate(candidate: GitHubPRRefreshCandidate): GitHubPRRefres
     repoPath: candidate.repoPath,
     branch: candidate.branch,
     worktreeId: candidate.worktreeId,
-    connectionId: candidate.connectionId ?? null,
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+    // removed (#63) — candidate.connectionId is always null. Keeping the field
+    // in the alias (rather than omitting it) matches the wire shape paired
+    // clients already read.
+    connectionId: null,
     currentHeadOid: candidate.currentHeadOid ?? null,
     linkedPRNumber: candidate.linkedPRNumber ?? null,
     fallbackPRNumber:
@@ -546,9 +555,10 @@ function nextBudgetDelay(): number {
 }
 
 function activeBurstScope(entry: QueueEntry): string {
-  const runtimeScope = entry.candidate.connectionId
-    ? `ssh:${entry.candidate.connectionId}`
-    : `local:${entry.candidate.localGitOptions?.wslDistro ?? 'host'}`
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — entry.candidate.connectionId is always null, so the scope
+  // is always the local branch.
+  const runtimeScope = `local:${entry.candidate.localGitOptions?.wslDistro ?? 'host'}`
   return `${entry.windowId ?? 'global'}::${runtimeScope}`
 }
 
@@ -745,7 +755,9 @@ async function drainQueue(): Promise<void> {
         next.candidate.repoPath,
         next.candidate.branch,
         next.candidate.linkedPRNumber ?? null,
-        next.candidate.connectionId ?? null,
+        // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+        // were removed (#63) — a registered repo is never remote.
+        null,
         next.candidate.linkedPRNumber == null ? (next.candidate.fallbackPRNumber ?? null) : null,
         ...hostedReviewOptionArgs(next.candidate)
       )
@@ -886,7 +898,9 @@ export async function refreshPRNow(candidate: GitHubPRRefreshCandidate): Promise
     candidate.repoPath,
     candidate.branch,
     candidate.linkedPRNumber ?? null,
-    candidate.connectionId ?? null,
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+    // removed (#63) — a registered repo is never remote.
+    null,
     candidate.linkedPRNumber == null ? (candidate.fallbackPRNumber ?? null) : null,
     ...hostedReviewOptionArgs(candidate)
   )

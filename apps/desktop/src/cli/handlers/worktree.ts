@@ -1,10 +1,3 @@
-import {
-  WORKTREE_CREATE_CONTRACT,
-  WORKTREE_LIST_CONTRACT,
-  WORKTREE_REMOVE_CONTRACT,
-  WORKTREE_SET_CONTRACT
-} from '~shared/runtime-method-contracts/workspace-contracts'
-import type { RuntimeWorktreePsResult, RuntimeWorktreeRecord } from '~shared/runtime-types'
 import { isTuiAgent } from '~shared/tui-agent/config'
 import type { TuiAgent } from '~shared/types'
 import { isWorkspaceKey, worktreeWorkspaceKey } from '~shared/workspace/scope'
@@ -170,26 +163,26 @@ async function getCreateRepoSelector(
 
 export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
   'worktree ps': async ({ flags, client, json }) => {
-    const result = await client.call<RuntimeWorktreePsResult>('worktree.ps', {
+    const result = await client.call(client.rpc.worktree.ps, {
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')
     })
     printResult(result, json, formatWorktreePs)
   },
   'worktree list': async ({ flags, client, json }) => {
-    const result = await client.call(WORKTREE_LIST_CONTRACT, {
+    const result = await client.call(client.rpc.worktree.list, {
       repo: getOptionalStringFlag(flags, 'repo'),
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')
     })
     printResult(result, json, formatWorktreeList)
   },
   'worktree show': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ worktree: RuntimeWorktreeRecord }>('worktree.show', {
+    const result = await client.call(client.rpc.worktree.show, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client)
     })
     printResult(result, json, formatWorktreeShow)
   },
   'worktree current': async ({ client, cwd, json }) => {
-    const result = await client.call<{ worktree: RuntimeWorktreeRecord }>('worktree.show', {
+    const result = await client.call(client.rpc.worktree.show, {
       worktree: await resolveCurrentWorktreeSelector(cwd, client)
     })
     printResult(result, json, formatWorktreeShow)
@@ -227,7 +220,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
         cwdParentWorktree = undefined
       }
     }
-    const result = await client.call(WORKTREE_CREATE_CONTRACT, {
+    const result = await client.call(client.rpc.worktree.create, {
       repo: await getCreateRepoSelector(flags, cwdParentWorktree, client),
       name: getRequiredStringFlag(flags, 'name'),
       baseBranch: getOptionalStringFlag(flags, 'base-branch'),
@@ -255,7 +248,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
   },
   'worktree set': async ({ flags, client, cwd, json }) => {
     assertParentWorktreeFlagsCompatible(flags)
-    const result = await client.call(WORKTREE_SET_CONTRACT, {
+    const result = await client.call(client.rpc.worktree.set, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client),
       displayName: getOptionalStringFlag(flags, 'display-name'),
       comment: getOptionalStringFlag(flags, 'comment'),
@@ -266,7 +259,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatWorktreeShow)
   },
   'worktree rm': async ({ flags, client, cwd, json }) => {
-    const result = await client.call(WORKTREE_REMOVE_CONTRACT, {
+    const result = await client.call(client.rpc.worktree.rm, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client),
       force: flags.get('force') === true,
       runHooks: flags.get('run-hooks') === true

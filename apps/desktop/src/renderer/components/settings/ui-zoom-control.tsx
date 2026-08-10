@@ -2,16 +2,19 @@ import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons
 import { useEffect, useState, useCallback } from 'react'
 import { applyUIZoom } from '~renderer/components/settings/ui-zoom'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { setRuntimeUIState } from '~renderer/runtime/ui-client'
+import { useAppStore } from '~renderer/store'
 
 import { Button } from '../ui/button'
 import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './constants'
 
 export function UIZoomControl(): React.JSX.Element {
-  const [zoomLevel, setZoomLevel] = useState(() => window.api.ui.getZoomLevel())
+  const [zoomLevel, setZoomLevel] = useState(() => shellClient.ui.getZoomLevel())
 
   useEffect(() => {
-    return window.api.ui.onTerminalZoom(() => {
-      setZoomLevel(window.api.ui.getZoomLevel())
+    return shellClient.ui.onTerminalZoom(() => {
+      setZoomLevel(shellClient.ui.getZoomLevel())
     })
   }, [])
 
@@ -19,7 +22,7 @@ export function UIZoomControl(): React.JSX.Element {
     const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, level))
     applyUIZoom(clamped)
     setZoomLevel(clamped)
-    window.api.ui.set({ uiZoomLevel: clamped })
+    void setRuntimeUIState(useAppStore.getState().settings, { uiZoomLevel: clamped })
   }, [])
 
   const percent = zoomLevelToPercent(zoomLevel)

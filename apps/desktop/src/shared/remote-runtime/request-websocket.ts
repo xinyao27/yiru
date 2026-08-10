@@ -20,6 +20,7 @@ export type RemoteRuntimeWebSocketCallbacks = {
   onClose: (ws: WebSocket, code: number, reason: Buffer) => void
   onError: (ws: WebSocket, error: RemoteRuntimeClientError) => void
   onTextFrame: (ws: WebSocket, frame: string) => void
+  onBinaryFrame?: (ws: WebSocket, frame: Uint8Array<ArrayBufferLike>) => void
   // Why: protocol-level pongs (and server heartbeat pings) are the liveness
   // signal for detecting half-open tunnels that never deliver `close` (#7718).
   onPong?: (ws: WebSocket) => void
@@ -53,10 +54,14 @@ export function openRemoteRuntimeWebSocket(
   const onClose = (code: number, reason: Buffer): void => callbacks.onClose(ws, code, reason)
   const onMessage = (data: WebSocket.RawData, isBinary: boolean): void => {
     if (isBinary) {
-      callbacks.onError(
-        ws,
-        invalidRemoteRuntimeResponseError('Runtime host returned an unexpected binary frame.')
-      )
+      if (!callbacks.onBinaryFrame) {
+        callbacks.onError(
+          ws,
+          invalidRemoteRuntimeResponseError('Runtime host returned an unexpected binary frame.')
+        )
+        return
+      }
+      callbacks.onBinaryFrame(ws, websocketRawDataBytes(data))
       return
     }
     callbacks.onTextFrame(ws, data.toString())
@@ -88,6 +93,16 @@ export function openRemoteRuntimeWebSocket(
   ws.on('pong', onPong)
   ws.on('ping', onPing)
   return { ok: true, socket: { ws, sharedKey, cleanup } }
+}
+
+function websocketRawDataBytes(data: WebSocket.RawData): Uint8Array<ArrayBufferLike> {
+  if (Array.isArray(data)) {
+    return Buffer.concat(data)
+  }
+  if (data instanceof ArrayBuffer) {
+    return new Uint8Array(data)
+  }
+  return new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
 }
 
 function ignoreLateSocketError(): void {}

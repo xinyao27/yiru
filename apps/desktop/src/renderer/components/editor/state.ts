@@ -46,6 +46,7 @@ import {
 } from '~renderer/runtime/git-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { pushRecentlyClosedTabKind } from '~renderer/store/slices/recently-closed-tabs'
 import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
 import type { AppState } from '~renderer/store/types'
@@ -1384,16 +1385,16 @@ function migrateHydratedEditorTabsAndGroups(
 
 function deleteUntouchedUntitledFile(state: AppState, file: OpenFile): void {
   const worktree = findWorktreeById(state.worktreesByRepo, file.worktreeId)
-  const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(file.worktreeId)
-  const repo = state.repos.find((candidate) => candidate.id === repoId)
   const owningRuntimeEnvironmentId = file.runtimeEnvironmentId?.trim()
   // Why: untitled placeholders may live on a remote runtime or SSH target.
   // Route through the runtime-aware client instead of assuming client-local FS.
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a direct repo/worktree owner is never SSH.
   const context = {
     settings: settingsForRuntimeOwner(state.settings, file.runtimeEnvironmentId),
     worktreeId: file.worktreeId,
     worktreePath: worktree?.path ?? null,
-    connectionId: repo?.connectionId ?? undefined
+    connectionId: undefined
   }
   void deleteRuntimeRelativePath(context, file.relativePath)
     .then((deletedRemotely) => {
@@ -1972,12 +1973,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       return
     }
     try {
-      const connectionId =
-        state.repos.find((entry) => entry.id === worktree.repoId)?.connectionId ?? undefined
+      // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+      // were removed (#63) — a direct repo/worktree owner is never SSH.
       const fileInfo = await createUntitledMarkdownFileWithTemplateSelection(
         worktree.path,
         worktreeId,
-        connectionId,
+        undefined,
         get().settings
       )
       if (!fileInfo) {
@@ -4502,7 +4503,9 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         // Why: terminal file links already authorize clicked external paths
         // before opening them in Yiru. Markdown file:// links need the same
         // user-gesture authorization so /tmp screenshots can use ImageViewer.
-        await window.api.fs.authorizeExternalPath({ targetPath: target.absolutePath })
+        await workspaceHostClient.fileHost.authorizeExternalPath({
+          targetPath: target.absolutePath
+        })
       } else {
         let stats: { isDirectory: boolean }
         try {

@@ -2,6 +2,7 @@
 // can't resolve Node's builtin in a React Native bundle.
 import { Buffer } from 'buffer'
 
+import type { BrowserScreencastResult } from '@yiru/runtime-protocol/contract'
 import { cn } from 'cnfast'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -26,7 +27,12 @@ import type {
   BrowserScreencastFrameMetadata
 } from '../transport/browser-screencast-protocol'
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcSuccess } from '../transport/types'
+import {
+  callRuntimeOrpc,
+  subscribeRuntimeOrpc,
+  type RuntimeOrpcClient,
+  type RuntimeOrpcProcedure
+} from '../transport/runtime-orpc-client'
 import { resolveMobileBrowserAddressSync } from './address-sync'
 import { MobileBrowserKeyboardChrome, MobileBrowserTopChrome } from './chrome'
 import type { BrowserPointerModifier } from './pointer-modifiers'
@@ -466,23 +472,17 @@ export function MobileBrowserPane({
         startupTimer = null
       }
     }
-    const unsubscribe = client.subscribe(
-      'browser.screencast',
+    const unsubscribe = subscribeRuntimeOrpc(
+      client,
+      (runtime) => runtime.browser.screencast.subscribe,
       {
         worktree: `id:${worktreeId}`,
         page: tab.browserPageId,
         ...streamRequest
       },
-      (payload) => {
+      (event: BrowserScreencastResult) => {
         if (streamGenerationRef.current !== generation) {
           return
-        }
-        const event = payload as {
-          type?: string
-          message?: string
-          error?: { message?: string }
-          dialogType?: string
-          tab?: { url?: string; title?: string; canGoBack?: boolean; canGoForward?: boolean }
         }
         if (event.type === 'ready') {
           clearStartupTimer()
@@ -494,12 +494,10 @@ export function MobileBrowserPane({
             busyRef.current = false
             setBusy(false)
           }
-          if (typeof event.tab?.url === 'string') {
-            setAddressValue(displayBrowserUrl(event.tab.url))
-            if (event.tab.url !== lastZoomResetUrlRef.current) {
-              lastZoomResetUrlRef.current = event.tab.url
-              resetBrowserZoomState()
-            }
+          setAddressValue(displayBrowserUrl(event.tab.url))
+          if (event.tab.url !== lastZoomResetUrlRef.current) {
+            lastZoomResetUrlRef.current = event.tab.url
+            resetBrowserZoomState()
           }
         } else if (event.type === 'end') {
           clearStartupTimer()
@@ -513,9 +511,8 @@ export function MobileBrowserPane({
           }
         } else if (event.type === 'dialog') {
           setDialog({
-            dialogType: event.dialogType ?? 'alert',
-            message:
-              event.message ?? translate('mobile.browser.dialogFallbackMessage', 'Browser dialog')
+            dialogType: event.dialogType,
+            message: event.message
           })
         } else if (event.type === 'dialogClosed') {
           setDialog(null)
@@ -525,16 +522,12 @@ export function MobileBrowserPane({
             busyRef.current = false
             setBusy(false)
           }
-          const message =
-            event.message ??
-            event.error?.message ??
-            translate('mobile.browser.streamFailed', 'Browser stream failed.')
-          if (shouldSurfaceBrowserError(message)) {
+          if (shouldSurfaceBrowserError(event.message)) {
             if (readyRef.current) {
               readyRef.current = false
               setReady(false)
             }
-            setError(message)
+            setError(event.message)
           }
         }
       },
@@ -570,13 +563,12 @@ export function MobileBrowserPane({
   /* oxlint-enable react-doctor/no-adjust-state-on-prop-change */
 
   const sendBrowserRequest = useCallback(
-    async (
-      method: string,
-      params: Record<string, unknown> = {},
+    async <TInput, TOutput>(
+      selectProcedure: (runtime: RuntimeOrpcClient) => RuntimeOrpcProcedure<TInput, TOutput>,
+      input: TInput,
       opts: { showBusy?: boolean; suppressError?: boolean; timeoutMs?: number } = {}
-    ): Promise<unknown | null> => {
-      const base = pageParams()
-      if (!client || !base) {
+    ): Promise<TOutput | null> => {
+      if (!client) {
         return null
       }
       if (opts.showBusy) {
@@ -584,16 +576,11 @@ export function MobileBrowserPane({
         setBusy(true)
       }
       try {
-        const response = await client.sendRequest(
-          method,
-          { ...base, ...params },
-          { timeoutMs: opts.timeoutMs ?? 15_000 }
-        )
-        if (!response.ok) {
-          throw new Error((response as RpcFailure).error.message)
-        }
+        const result = await callRuntimeOrpc(client, selectProcedure, input, {
+          timeoutMs: opts.timeoutMs ?? 15_000
+        })
         setError(null)
-        return (response as RpcSuccess).result
+        return result
       } catch (err) {
         const message = browserErrorMessage(
           err,
@@ -610,7 +597,7 @@ export function MobileBrowserPane({
         }
       }
     },
-    [client, pageParams]
+    [client]
   )
 
   const navigateToAddress = useCallback(async () => {
@@ -619,17 +606,21 @@ export function MobileBrowserPane({
       setError(translate('mobile.browser.invalidUrl', 'Enter a valid URL.'))
       return
     }
-    const result = (await sendBrowserRequest(
-      'browser.goto',
-      { url },
+    const base = pageParams()
+    if (!base) {
+      return
+    }
+    const result = await sendBrowserRequest(
+      (runtime) => runtime.browser.goto,
+      { ...base, url },
       { showBusy: true, timeoutMs: 30_000 }
-    )) as { url?: string } | null
-    if (typeof result?.url === 'string') {
+    )
+    if (result) {
       setAddressValue(displayBrowserUrl(result.url))
       lastZoomResetUrlRef.current = result.url
       resetBrowserZoomState()
     }
-  }, [addressValue, resetBrowserZoomState, sendBrowserRequest])
+  }, [addressValue, pageParams, resetBrowserZoomState, sendBrowserRequest])
 
   const flushPendingWheelCommand = useCallback(() => {
     if (wheelCommandInFlightRef.current) {
@@ -643,22 +634,16 @@ export function MobileBrowserPane({
     wheelCommandInFlightRef.current = true
     void (async () => {
       try {
-        assertRpcOk(
-          await client.sendRequest('browser.mouseMove', {
-            ...pending.base,
-            x: pending.point.x,
-            y: pending.point.y
-          }),
-          'Browser pointer move failed'
-        )
-        assertRpcOk(
-          await client.sendRequest('browser.mouseWheel', {
-            ...pending.base,
-            dx: pending.dx,
-            dy: pending.dy
-          }),
-          'Browser scroll failed'
-        )
+        await callRuntimeOrpc(client, (runtime) => runtime.browser.mouseMove, {
+          ...pending.base,
+          x: pending.point.x,
+          y: pending.point.y
+        })
+        await callRuntimeOrpc(client, (runtime) => runtime.browser.mouseWheel, {
+          ...pending.base,
+          dx: pending.dx,
+          dy: pending.dy
+        })
         setError(null)
       } catch {
         // Scroll bursts commonly race page reload/navigation. Avoid replacing
@@ -677,8 +662,9 @@ export function MobileBrowserPane({
         return
       }
       const clickResult = await sendBrowserRequest(
-        'browser.mouseClick',
+        (runtime) => runtime.browser.mouseClick,
         {
+          ...base,
           x: point.x,
           y: point.y,
           button,
@@ -700,18 +686,13 @@ export function MobileBrowserPane({
         return
       }
       try {
-        assertRpcOk(
-          await client.sendRequest('browser.mouseMove', { ...base, x: point.x, y: point.y }),
-          'Browser pointer move failed'
-        )
-        assertRpcOk(
-          await client.sendRequest('browser.mouseDown', { ...base, button }),
-          'Browser pointer down failed'
-        )
-        assertRpcOk(
-          await client.sendRequest('browser.mouseUp', { ...base, button }),
-          'Browser pointer up failed'
-        )
+        await callRuntimeOrpc(client, (runtime) => runtime.browser.mouseMove, {
+          ...base,
+          x: point.x,
+          y: point.y
+        })
+        await callRuntimeOrpc(client, (runtime) => runtime.browser.mouseDown, { ...base, button })
+        await callRuntimeOrpc(client, (runtime) => runtime.browser.mouseUp, { ...base, button })
         setError(null)
       } catch {
         // Pointer commands can race page navigation. Keep the stream visible;
@@ -952,9 +933,14 @@ export function MobileBrowserPane({
       return
     }
     setKeyboardValue('')
+    const base = pageParams()
+    if (!base) {
+      setKeyboardValue(text)
+      return
+    }
     const result = await sendBrowserRequest(
-      'browser.keyboardInsertText',
-      { text },
+      (runtime) => runtime.browser.keyboardInsertText,
+      { ...base, text },
       { suppressError: true }
     )
     if (result !== null) {
@@ -962,21 +948,36 @@ export function MobileBrowserPane({
     } else {
       setKeyboardValue(text)
     }
-  }, [keyboardValue, onToast, sendBrowserRequest])
+  }, [keyboardValue, onToast, pageParams, sendBrowserRequest])
 
   const sendKeypress = useCallback(
     async (key: string) => {
-      await sendBrowserRequest('browser.keypress', { key }, { suppressError: true })
+      const base = pageParams()
+      if (!base) {
+        return
+      }
+      await sendBrowserRequest(
+        (runtime) => runtime.browser.keypress,
+        { ...base, key },
+        { suppressError: true }
+      )
     },
-    [sendBrowserRequest]
+    [pageParams, sendBrowserRequest]
   )
 
   const sendDialogCommand = useCallback(
-    async (method: 'browser.dialogAccept' | 'browser.dialogDismiss') => {
+    async (method: 'dialogAccept' | 'dialogDismiss') => {
       setDialog(null)
-      await sendBrowserRequest(method, {}, { suppressError: true, timeoutMs: 5_000 })
+      const base = pageParams()
+      if (!base) {
+        return
+      }
+      await sendBrowserRequest((runtime) => runtime.browser[method], base, {
+        suppressError: true,
+        timeoutMs: 5_000
+      })
     },
-    [sendBrowserRequest]
+    [pageParams, sendBrowserRequest]
   )
 
   const setBrowserImageRef = useCallback((layer: FrameLayer, image: Image | null) => {
@@ -1042,20 +1043,32 @@ export function MobileBrowserPane({
     if (controlsDisabled || !tab.canGoBack) {
       return
     }
-    void sendBrowserRequest('browser.back', {}, { suppressError: true })
-  }, [controlsDisabled, sendBrowserRequest, tab.canGoBack])
+    const base = pageParams()
+    if (!base) {
+      return
+    }
+    void sendBrowserRequest((runtime) => runtime.browser.back, base, { suppressError: true })
+  }, [controlsDisabled, pageParams, sendBrowserRequest, tab.canGoBack])
   const goForward = useCallback(() => {
     if (controlsDisabled || !tab.canGoForward) {
       return
     }
-    void sendBrowserRequest('browser.forward', {}, { suppressError: true })
-  }, [controlsDisabled, sendBrowserRequest, tab.canGoForward])
+    const base = pageParams()
+    if (!base) {
+      return
+    }
+    void sendBrowserRequest((runtime) => runtime.browser.forward, base, { suppressError: true })
+  }, [controlsDisabled, pageParams, sendBrowserRequest, tab.canGoForward])
   const reloadPage = useCallback(() => {
     if (controlsDisabled) {
       return
     }
-    void sendBrowserRequest('browser.reload', {}, { suppressError: true })
-  }, [controlsDisabled, sendBrowserRequest])
+    const base = pageParams()
+    if (!base) {
+      return
+    }
+    void sendBrowserRequest((runtime) => runtime.browser.reload, base, { suppressError: true })
+  }, [controlsDisabled, pageParams, sendBrowserRequest])
   const selectBrowserViewMode = useCallback(
     (mode: MobileBrowserViewMode) => {
       if (browserViewMode === mode) {
@@ -1217,13 +1230,13 @@ export function MobileBrowserPane({
                 {dialog.dialogType !== 'alert' ? (
                   <MobileGlassTextButton
                     label={translate('mobile.browser.dialogCancel', 'Cancel')}
-                    onPress={() => void sendDialogCommand('browser.dialogDismiss')}
+                    onPress={() => void sendDialogCommand('dialogDismiss')}
                   />
                 ) : null}
                 <MobileGlassTextButton
                   isProminent
                   label={translate('mobile.browser.dialogConfirm', 'OK')}
-                  onPress={() => void sendDialogCommand('browser.dialogAccept')}
+                  onPress={() => void sendDialogCommand('dialogAccept')}
                 />
               </MobileGlassGroup>
             </MobileGlassSurface>
@@ -1331,15 +1344,6 @@ function updateBrowserImageSource(image: Image | null, uri: string): void {
   // source avoids re-rendering the whole tab view for every streamed frame.
   const source = [{ uri }]
   image?.setNativeProps({ source, src: source })
-}
-
-function assertRpcOk(
-  response: RpcSuccess | RpcFailure,
-  fallbackMessage: string
-): asserts response is RpcSuccess {
-  if (!response.ok) {
-    throw new Error(response.error.message || fallbackMessage)
-  }
 }
 
 function browserFrameMetadataEqual(

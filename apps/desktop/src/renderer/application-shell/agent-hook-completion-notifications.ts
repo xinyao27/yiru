@@ -34,9 +34,30 @@ type PaneCoordinatorLivenessSnapshot = Pick<
 
 const coordinatorsByPaneKey = new Map<string, CoordinatorEntry>()
 const paneKeysRequiringFreshWorking = new Set<string>()
-let wasAgentTaskCompleteTrackingEnabled = isAgentTaskCompleteTrackingEnabled()
-let requireFreshWorkingForNewTrackingCoordinators = !wasAgentTaskCompleteTrackingEnabled
+let trackingBaselineResolved = false
+let wasAgentTaskCompleteTrackingEnabled = false
+let requireFreshWorkingForNewTrackingCoordinators = false
 let lastPrunedLivenessSnapshot: PaneCoordinatorLivenessSnapshot | null = null
+
+// Why: this module is reached through the store's own import cycle, so
+// `useAppStore` is still undefined while this module body evaluates. Reading
+// settings at module scope therefore threw and aborted renderer bootstrap
+// before React mounted — `#root` stayed empty and the whole app was blank.
+// Resolve the baseline on first use instead, when the store is initialized.
+// Keep every read of the two latches behind this.
+function ensureTrackingBaseline(): void {
+  if (trackingBaselineResolved) {
+    return
+  }
+  trackingBaselineResolved = true
+  wasAgentTaskCompleteTrackingEnabled = isAgentTaskCompleteTrackingEnabled()
+  requireFreshWorkingForNewTrackingCoordinators = !wasAgentTaskCompleteTrackingEnabled
+}
+
+function shouldRequireFreshWorkingForNewCoordinator(): boolean {
+  ensureTrackingBaseline()
+  return requireFreshWorkingForNewTrackingCoordinators
+}
 
 function disposeCoordinatorForPaneKey(paneKey: string): void {
   coordinatorsByPaneKey.get(paneKey)?.coordinator.dispose()
@@ -114,6 +135,7 @@ function isAgentTaskCompleteTrackingEnabled(): boolean {
 
 export function syncAgentHookCompletionNotificationSettings(): boolean {
   pruneClosedPaneCoordinators()
+  ensureTrackingBaseline()
   const enabled = isAgentTaskCompleteTrackingEnabled()
   if (enabled !== wasAgentTaskCompleteTrackingEnabled) {
     requireFreshWorkingForNewTrackingCoordinators = true
@@ -294,7 +316,7 @@ export function observeAgentHookCompletionForNotification({
       coordinator: createCoordinator(paneKey, worktreeId)
     }
     coordinatorsByPaneKey.set(paneKey, entry)
-    if (requireFreshWorkingForNewTrackingCoordinators) {
+    if (shouldRequireFreshWorkingForNewCoordinator()) {
       paneKeysRequiringFreshWorking.add(paneKey)
     }
   }
@@ -313,6 +335,6 @@ export function resetAgentHookCompletionNotificationCoordinators(): void {
   coordinatorsByPaneKey.clear()
   paneKeysRequiringFreshWorking.clear()
   lastPrunedLivenessSnapshot = null
-  wasAgentTaskCompleteTrackingEnabled = isAgentTaskCompleteTrackingEnabled()
-  requireFreshWorkingForNewTrackingCoordinators = !wasAgentTaskCompleteTrackingEnabled
+  trackingBaselineResolved = false
+  ensureTrackingBaseline()
 }

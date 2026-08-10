@@ -5,10 +5,8 @@ import {
 import { buildAutomationRrule, isValidAutomationSchedule } from '~shared/automation/schedules'
 /* eslint-disable max-lines -- Why: automation handlers share schedule parsing, target resolution, and RPC payload shaping for one command family. */
 import type {
-  Automation,
   AutomationCreateInput,
   AutomationPrecheck,
-  AutomationRun,
   AutomationSchedulePreset,
   AutomationUpdateInput
 } from '~shared/automations-types'
@@ -421,11 +419,11 @@ function buildAutomationRunContextFromSetup(setup: ProjectHostSetup): WorkspaceR
 
 export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
   'automations list': async ({ client, json }) => {
-    const result = await client.call<{ automations: Automation[] }>('automation.list')
+    const result = await client.call(client.rpc.automation.list, undefined)
     printResult(result, json, formatAutomationList)
   },
   'automations show': async ({ flags, client, json }) => {
-    const result = await client.call<{ automation: Automation }>('automation.show', {
+    const result = await client.call(client.rpc.automation.show, {
       id: getRequiredStringFlag(flags, 'id')
     })
     printResult(result, json, formatAutomationShow)
@@ -439,7 +437,7 @@ export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
     const sourceContext = getSourceContextFlag(flags)
     const workspaceMode =
       getWorkspaceModeFlag(flags) ?? (target.workspace ? 'existing' : 'new_per_run')
-    const result = await client.call<{ automation: Automation }>('automation.create', {
+    const result = await client.call(client.rpc.automation.create, {
       name: getRequiredStringFlag(flags, 'name'),
       prompt: getRequiredStringFlag(flags, 'prompt'),
       precheck: getPrecheckFlag(flags),
@@ -462,7 +460,7 @@ export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
     const target = await getExplicitTarget(flags, cwd, client)
     const schedule = getScheduleFlag(flags, false)
     const sourceContext = getSourceContextFlag(flags)
-    const result = await client.call<{ automation: Automation }>('automation.update', {
+    const result = await client.call(client.rpc.automation.update, {
       id: getRequiredStringFlag(flags, 'id'),
       updates: {
         name: getOptionalStringFlag(flags, 'name'),
@@ -486,17 +484,17 @@ export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
   },
   'automations remove': async ({ flags, client, json }) => {
     const id = getRequiredStringFlag(flags, 'id')
-    const result = await client.call<{ removed: boolean; id: string }>('automation.delete', { id })
+    const result = await client.call(client.rpc.automation.delete, { id })
     printResult(result, json, formatAutomationRemoved)
   },
   'automations run': async ({ flags, client, json }) => {
-    const result = await client.call<{ run: AutomationRun }>('automation.runNow', {
+    const result = await client.call(client.rpc.automation.runNow, {
       id: getRequiredStringFlag(flags, 'id')
     })
     printResult(result, json, formatAutomationRun)
   },
   'automations runs': async ({ flags, client, json }) => {
-    const result = await client.call<{ runs: AutomationRun[] }>('automation.runs', {
+    const result = await client.call(client.rpc.automation.runs, {
       automationId: getOptionalStringFlag(flags, 'id')
     })
     printResult(result, json, formatAutomationRuns)

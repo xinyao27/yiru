@@ -1,8 +1,3 @@
-import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
-import type {
-  TerminalSideEffectBatch,
-  TerminalSideEffectFact
-} from '~shared/terminal/side-effect-facts'
 /**
  * Renderer consumer registry for the `pty:sideEffect` channel.
  *
@@ -16,6 +11,16 @@ import type {
  * registered consumer are dropped — mirroring today's eager-buffer behavior
  * where pre-mount output produces no attention side effects.
  */
+import { getRendererSettingsSync } from '~renderer/runtime/settings-client'
+import {
+  getRendererTerminalSideEffectSnapshot,
+  subscribeRendererTerminalSideEffects
+} from '~renderer/runtime/terminal-side-effect-client'
+import type { TerminalGitHubPRLink } from '~shared/terminal/github-pr-link-detector'
+import type {
+  TerminalSideEffectBatch,
+  TerminalSideEffectFact
+} from '~shared/terminal/side-effect-facts'
 import type { GlobalSettings } from '~shared/types'
 
 // Why: cached once per session — the blocking read should only ever run on
@@ -24,13 +29,7 @@ let persistedAuthorityFlagCache: boolean | null | undefined
 
 function readPersistedSideEffectAuthorityFlagSync(): boolean | null {
   if (persistedAuthorityFlagCache === undefined) {
-    try {
-      const getSync = (globalThis as { window?: Window }).window?.api?.settings?.getSync
-      persistedAuthorityFlagCache =
-        typeof getSync === 'function' ? (getSync()?.terminalMainSideEffectAuthority ?? null) : null
-    } catch {
-      persistedAuthorityFlagCache = null
-    }
+    persistedAuthorityFlagCache = getRendererSettingsSync()?.terminalMainSideEffectAuthority ?? null
   }
   return persistedAuthorityFlagCache
 }
@@ -56,8 +55,8 @@ export function isMainTerminalSideEffectAuthorityForPty(args: {
   // here at transport/watcher creation is never revisited. A pane bound
   // before hydration must honor the persisted kill switch — otherwise a user
   // who turned main authority off gets startup panes with no byte parsers
-  // and a fact consumer they disabled. Surfaces without the sync read (web
-  // remote clients, tests) keep the default-on behavior.
+  // and a fact consumer they disabled. Surfaces without the sync read keep
+  // the default-on behavior.
   return readPersistedSideEffectAuthorityFlagSync() !== false
 }
 
@@ -172,13 +171,7 @@ function ensureSideEffectChannelSubscription(): void {
   if (channelUnsubscribe !== null) {
     return
   }
-  // Why: optional-chained from globalThis so unit tests (and any non-preload
-  // surface) without window.api degrade to "no channel" instead of throwing.
-  const onSideEffect = (globalThis as { window?: Window }).window?.api?.pty?.onSideEffect
-  if (typeof onSideEffect !== 'function') {
-    return
-  }
-  channelUnsubscribe = onSideEffect(handleSideEffectBatch)
+  channelUnsubscribe = subscribeRendererTerminalSideEffects(handleSideEffectBatch)
 }
 
 export type TerminalSideEffectFactConsumerOptions = {
@@ -207,18 +200,15 @@ export function registerTerminalSideEffectFactConsumer(
   consumersByPtyId.set(options.ptyId, entry)
 
   if (options.restoreTitleOnRegister) {
-    const getSnapshot = (globalThis as { window?: Window }).window?.api?.pty?.getSideEffectSnapshot
-    if (typeof getSnapshot === 'function') {
-      void getSnapshot(options.ptyId)
-        .then((batch) => {
-          // Why: apply only while this registration is still the live
-          // consumer; a slow snapshot must not fire into a replaced one.
-          if (batch && consumersByPtyId.get(options.ptyId) === entry) {
-            applyBatchToConsumer(entry, { ...batch, replay: true })
-          }
-        })
-        .catch(() => {})
-    }
+    void getRendererTerminalSideEffectSnapshot(options.ptyId)
+      .then((batch) => {
+        // Why: apply only while this registration is still the live
+        // consumer; a slow snapshot must not fire into a replaced one.
+        if (batch && consumersByPtyId.get(options.ptyId) === entry) {
+          applyBatchToConsumer(entry, { ...batch, replay: true })
+        }
+      })
+      .catch(() => {})
   }
 
   return () => {

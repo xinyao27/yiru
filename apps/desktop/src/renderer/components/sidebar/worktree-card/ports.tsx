@@ -18,6 +18,7 @@ import { useLocalhostLabelRouteForPort } from '~renderer/lib/workspace-port-loca
 import { addressForPort } from '~renderer/lib/workspace-port-urls'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { WorkspacePort } from '~shared/workspace/ports'
 
@@ -172,7 +173,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
       event.stopPropagation()
       recordFeatureInteraction('ports')
       const address = addressForPort(port)
-      void window.api.ui.writeClipboardText(address)
+      void shellClient.ui.writeClipboardText(address)
       toast.success(
         translate('auto.components.sidebar.WorktreeCardPorts.c89f290e25', 'Copied {{value0}}', {
           value0: address

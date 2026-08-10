@@ -42,6 +42,8 @@ import {
 import { resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import {
   registerRuntimeTerminalTab,
   scheduleRuntimeGraphSync
@@ -113,11 +115,10 @@ import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
 import {
   createFilePathLinkProvider,
-  getTerminalFileOpenHint,
-  getTerminalUrlOpenHint,
   installFilePathLinkClickFallback
 } from './terminal-link-handlers'
 import type { LinkHandlerDeps } from './terminal-link-handlers'
+import { getTerminalFileOpenHint, getTerminalUrlOpenHint } from './terminal-link-open-hints'
 import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 import { handleOscLink } from './terminal-osc-link-routing'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
@@ -374,7 +375,7 @@ function hydrateTerminalScrollbackRefs(layout: TerminalLayoutSnapshot): {
       continue
     }
     try {
-      const buffer = window.api.session.readTerminalScrollback({ ref })
+      const buffer = rendererHostClient.session.readTerminalScrollback({ ref })
       if (buffer) {
         buffers[leafId] = buffer
         hydrated = true
@@ -839,7 +840,7 @@ export function useTerminalPaneLifecycle({
           guardParserHandler('osc-52-clipboard', (data) =>
             handleOsc52ClipboardRequest(data, {
               allowClipboardWrite: settingsRef.current?.terminalAllowOsc52Clipboard === true,
-              writeClipboardText: window.api.ui.writeClipboardText,
+              writeClipboardText: shellClient.ui.writeClipboardText,
               onBlockedWrite: showOsc52ClipboardBlockedToast
             })
           )
@@ -1129,7 +1130,7 @@ export function useTerminalPaneLifecycle({
           if (!selection) {
             return
           }
-          void window.api.ui.writeClipboardText(selection).catch(() => {
+          void shellClient.ui.writeClipboardText(selection).catch(() => {
             /* ignore clipboard write failures */
           })
         })
@@ -1447,7 +1448,7 @@ export function useTerminalPaneLifecycle({
         const currentTab = storeState.tabsByWorktree[worktreeId]?.find(
           (candidate) => candidate.id === tabId
         )
-        const platformInfo = window.api.platform?.get?.()
+        const platformInfo = rendererHostClient.platform?.get?.()
         // Why: launch identity belongs only to the pane consuming this one-shot
         // startup. A tab-wide hint would leak Grok's KKP exception to shell splits.
         const knownTuiAgent = resolvePaneKeyboardProtocolAgent(

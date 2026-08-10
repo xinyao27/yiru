@@ -1,3 +1,4 @@
+import type { WorktreeCreateInput } from '@yiru/runtime-protocol/contract'
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
 import type { RpcClient } from '../transport/rpc-client'
@@ -21,7 +22,7 @@ export async function createBlankWorkspace(args: {
     client: args.client,
     baseName: args.baseName,
     buildParams: (name) => {
-      const params: Record<string, unknown> = {
+      const params: WorktreeCreateInput = {
         repo: `id:${args.repoId}`,
         setupDecision: args.setupDecision,
         name,

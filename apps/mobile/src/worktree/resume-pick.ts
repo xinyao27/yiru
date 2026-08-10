@@ -5,7 +5,7 @@
 
 export type ResumeCandidate = {
   isActive?: boolean
-  lastOutputAt?: number
+  lastOutputAt?: number | null
 }
 
 export function pickResumeWorktree<T extends ResumeCandidate>(worktrees: T[]): T | null {

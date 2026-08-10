@@ -1,7 +1,8 @@
+import type { WorktreeSetInput } from '@yiru/runtime-protocol/contract'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 // Link / unlink review metadata via worktree.set (the same path desktop uses).
 // GitHub's existing manual link flow writes linkedPR; hosted-review creation maps
@@ -14,7 +15,7 @@ export type MobilePrLinkOutcome = { ok: true } | { ok: false; error: string }
 export function buildWorktreeSetLinkParams(
   worktreeId: string,
   linkedPR: number | null
-): Record<string, unknown> {
+): WorktreeSetInput {
   return { worktree: `id:${worktreeId}`, linkedPR }
 }
 
@@ -23,7 +24,7 @@ export function buildWorktreeSetHostedReviewLinkParams(
   provider: HostedReviewProvider,
   number: number | null,
   options?: { baseRef?: string | null }
-): Record<string, unknown> {
+): WorktreeSetInput {
   const trimmedBaseRef = options?.baseRef?.trim()
   const base = {
     worktree: `id:${worktreeId}`,
@@ -46,18 +47,16 @@ export function buildWorktreeSetHostedReviewLinkParams(
 }
 
 async function setLinkedPr(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   linkedPR: number | null
 ): Promise<MobilePrLinkOutcome> {
   try {
-    const response = await client.sendRequest(
-      'worktree.set',
+    await callRuntimeOrpc(
+      client,
+      (runtime) => runtime.worktree.set,
       buildWorktreeSetLinkParams(worktreeId, linkedPR)
     )
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || 'Failed to update linked pull request' }
-    }
     return { ok: true }
   } catch (err) {
     // Why: a transport drop must not escape as an unhandled rejection — normalize
@@ -70,7 +69,7 @@ async function setLinkedPr(
 }
 
 export function linkMobilePr(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   prNumber: number
 ): Promise<MobilePrLinkOutcome> {
@@ -78,7 +77,7 @@ export function linkMobilePr(
 }
 
 export async function linkMobileHostedReview(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string,
   provider: HostedReviewProvider,
   number: number,
@@ -89,10 +88,7 @@ export async function linkMobileHostedReview(
     return { ok: true }
   }
   try {
-    const response = await client.sendRequest('worktree.set', params)
-    if (!response.ok) {
-      return { ok: false, error: response.error?.message || 'Failed to update linked review' }
-    }
+    await callRuntimeOrpc(client, (runtime) => runtime.worktree.set, params)
     return { ok: true }
   } catch (err) {
     // Why: the review was already created; normalize link failures so callers can
@@ -105,7 +101,7 @@ export async function linkMobileHostedReview(
 }
 
 export function unlinkMobilePr(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<MobilePrLinkOutcome> {
   return setLinkedPr(client, worktreeId, null)
@@ -115,15 +111,13 @@ export function unlinkMobilePr(
 // surface a linked PR even when it's closed/merged and the branch-based lookup
 // returns nothing. Returns null when unset or on any read failure.
 export async function fetchWorktreeLinkedPR(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   worktreeId: string
 ): Promise<number | null> {
   try {
-    const response = await client.sendRequest('worktree.show', { worktree: `id:${worktreeId}` })
-    if (!response.ok) {
-      return null
-    }
-    const result = (response as RpcSuccess).result as { worktree?: { linkedPR?: number | null } }
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.worktree.show, {
+      worktree: `id:${worktreeId}`
+    })
     const linked = result?.worktree?.linkedPR
     return typeof linked === 'number' ? linked : null
   } catch {

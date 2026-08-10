@@ -7,10 +7,16 @@ import { createServer, type Server, type Socket } from 'node:net'
 import { performance } from 'node:perf_hooks'
 import { StringDecoder } from 'node:string_decoder'
 
+import type { AgentHookRelayEnvelope } from '~shared/agent/hook-relay'
 import { extractHiddenStartupRendererQueryData } from '~shared/terminal/reply-query-extraction'
 import { isTuiAgent } from '~shared/tui-agent/config'
 
 import { readCurrentProcessMacSystemResolverHealth } from '../network/macos-system-resolver-health'
+import {
+  DaemonAgentHookHost,
+  type DaemonAgentHookHostConfig,
+  type DaemonAgentHookHostStatus
+} from './agent-hook-host'
 import {
   BackgroundTransientFactRelay,
   BACKGROUND_STREAM_DROP_ENABLED
@@ -37,6 +43,10 @@ export type DaemonServerOptions = {
   socketPath: string
   tokenPath: string
   log?: DaemonFileLog
+  agentHookHost?: { endpointDir: string; env: string }
+  isAgentHookHostRequired?: boolean
+  onAgentHook?: (envelope: AgentHookRelayEnvelope) => void
+  onShutdownRequested?: () => void
   spawnSubprocess: (opts: {
     sessionId: string
     cols: number
@@ -62,6 +72,12 @@ export class DaemonServer {
   private tokenPath: string
   private ptySpawnHealthCheck: () => Promise<void>
   private log: DaemonFileLog
+  private agentHookHost: DaemonAgentHookHost | null
+  private agentHookHostConfig: DaemonAgentHookHostConfig | null
+  private isAgentHookHostRequired: boolean
+  private onAgentHook: ((envelope: AgentHookRelayEnvelope) => void) | null
+  private onShutdownRequested: (() => void) | null
+  private agentHookHostConfiguration = Promise.resolve()
 
   private clients = new Map<string, ConnectedClient>()
   private streamDataBatcher = new DaemonStreamDataBatcher(
@@ -121,9 +137,36 @@ export class DaemonServer {
       backgroundedSessionIdSuffixes: this.transientFactRelay.backgroundedSessionIdSuffixes()
     }))
     this.log = opts.log ?? createNoopDaemonFileLog()
+    this.agentHookHostConfig = opts.agentHookHost ?? null
+    this.isAgentHookHostRequired = opts.isAgentHookHostRequired === true
+    this.onAgentHook = opts.onAgentHook ?? null
+    this.onShutdownRequested = opts.onShutdownRequested ?? null
+    this.agentHookHost = opts.agentHookHost
+      ? new DaemonAgentHookHost({
+          ...opts.agentHookHost,
+          forward: (envelope) => this.broadcastAgentHook(envelope)
+        })
+      : null
   }
 
   async start(): Promise<void> {
+    if (this.isAgentHookHostRequired && !this.agentHookHost) {
+      throw new Error('The required daemon agent hook host was not configured')
+    }
+    if (this.agentHookHost) {
+      try {
+        await this.agentHookHost.start()
+      } catch (error) {
+        this.log.log('agent-hook-host-start-failed', {
+          error: error instanceof Error ? error.message : String(error)
+        })
+        this.agentHookHost = null
+        this.agentHookHostConfig = null
+        if (this.isAgentHookHostRequired) {
+          throw error
+        }
+      }
+    }
     return new Promise((resolve, reject) => {
       this.server = createServer((socket) => this.handleConnection(socket))
       const onListenError = (err: Error): void => {
@@ -136,7 +179,16 @@ export class DaemonServer {
         // Why: after bind, steady-state socket errors are handled per client;
         // the startup promise listener would otherwise retain this closure.
         this.server?.off('error', onListenError)
-        writeFileSync(this.tokenPath, this.token, { mode: 0o600 })
+        try {
+          writeFileSync(this.tokenPath, this.token, { mode: 0o600 })
+        } catch (error) {
+          // Why: this callback runs after listen() has bound. Reject through
+          // startDaemon so its shared shutdown path closes both sockets and the
+          // hook host instead of turning a token write failure into an uncaught
+          // exception with live handles.
+          reject(error)
+          return
+        }
         try {
           chmodSync(this.socketPath, 0o600)
         } catch {
@@ -148,6 +200,7 @@ export class DaemonServer {
   }
 
   async shutdown(): Promise<void> {
+    this.agentHookHost?.stop()
     this.stopStreamBacklogProbe()
     this.transientFactRelay.dispose()
     try {
@@ -173,6 +226,9 @@ export class DaemonServer {
           try {
             unlinkSync(this.socketPath)
           } catch {}
+          try {
+            unlinkSync(this.tokenPath)
+          } catch {}
           resolve()
         })
         this.server = null
@@ -180,6 +236,10 @@ export class DaemonServer {
         resolve()
       }
     })
+  }
+
+  getAgentHookHostStatus(): DaemonAgentHookHostStatus | null {
+    return this.agentHookHost?.getStatus() ?? null
   }
 
   private handleConnection(socket: Socket): void {
@@ -347,7 +407,7 @@ export class DaemonServer {
           cols: p.cols,
           rows: p.rows,
           cwd: p.cwd,
-          env: p.env,
+          env: { ...p.env, ...this.agentHookHost?.buildPtyEnv() },
           envToDelete: p.envToDelete,
           command: p.command,
           startupCommandDelivery: p.startupCommandDelivery,
@@ -583,6 +643,13 @@ export class DaemonServer {
         await this.ptySpawnHealthCheck()
         return { healthy: true }
 
+      case 'getAgentHookPtyEnv':
+        this.agentHookHost?.replayCachedPayloads()
+        return { env: this.agentHookHost?.buildPtyEnv() ?? {} }
+
+      case 'configureAgentHookHost':
+        return { env: await this.configureAgentHookHost(request.payload.config) }
+
       case 'shutdown':
         this.log.log('shutdown', {
           reason: 'rpc',
@@ -600,10 +667,66 @@ export class DaemonServer {
             })
           }
         }
-        process.nextTick(() => this.shutdown())
+        process.nextTick(() => {
+          if (this.onShutdownRequested) {
+            this.onShutdownRequested()
+            return
+          }
+          void this.shutdown()
+        })
         return {}
     }
     throw new Error(`Unknown request type: ${(request as { type: string }).type}`)
+  }
+
+  private async configureAgentHookHost(
+    config: DaemonAgentHookHostConfig | null
+  ): Promise<Record<string, string>> {
+    const configure = () => this.applyAgentHookHostConfiguration(config)
+    const result = this.agentHookHostConfiguration.then(configure, configure)
+    this.agentHookHostConfiguration = result.then(
+      () => {},
+      () => {}
+    )
+    return result
+  }
+
+  private async applyAgentHookHostConfiguration(
+    config: DaemonAgentHookHostConfig | null
+  ): Promise<Record<string, string>> {
+    if (
+      config &&
+      this.agentHookHost &&
+      this.agentHookHostConfig?.endpointDir === config.endpointDir &&
+      this.agentHookHostConfig.env === config.env
+    ) {
+      this.agentHookHost.replayCachedPayloads()
+      return this.agentHookHost.buildPtyEnv()
+    }
+    this.agentHookHost?.stop()
+    this.agentHookHost = null
+    this.agentHookHostConfig = null
+    if (!config) {
+      return {}
+    }
+
+    const host = new DaemonAgentHookHost({
+      ...config,
+      forward: (envelope) => this.broadcastAgentHook(envelope)
+    })
+    try {
+      await host.start()
+      this.agentHookHost = host
+      this.agentHookHostConfig = config
+      host.replayCachedPayloads()
+      return host.buildPtyEnv()
+    } catch (error) {
+      host.stop()
+      this.log.log('agent-hook-host-configure-failed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+      throw error
+    }
   }
 
   private sendExitEvent(
@@ -624,5 +747,19 @@ export class DaemonServer {
       payload: { code }
     })
     this.streamDataBatcher.flush(client.clientId)
+  }
+
+  private broadcastAgentHook(envelope: AgentHookRelayEnvelope): void {
+    const event = encodeNdjson({ type: 'event', event: 'agentHook', payload: envelope })
+    for (const client of this.clients.values()) {
+      client.streamSocket?.write(event)
+    }
+    try {
+      this.onAgentHook?.(envelope)
+    } catch (error) {
+      this.log.log('agent-hook-host-ingest-failed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
   }
 }

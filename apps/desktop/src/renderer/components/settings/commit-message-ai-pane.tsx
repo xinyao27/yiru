@@ -2,25 +2,15 @@ import { useRef } from 'react'
 import type React from 'react'
 import { Switch } from '~renderer/components/ui/switch'
 import { translate } from '~renderer/i18n/i18n'
-import { getRuntimeGitScope } from '~renderer/runtime/git-client'
 import { useAppStore } from '~renderer/store'
-import {
-  CUSTOM_AGENT_ID,
-  isCustomAgentId,
-  type CommitMessageModelCapability
-} from '~shared/commit-message/agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
-import {
-  normalizeSourceControlAiSettings,
-  readSourceControlAiModelChoiceForHost,
-  selectSourceControlAiModelChoiceForHost
-} from '~shared/source-control/ai'
+import { CUSTOM_AGENT_ID, isCustomAgentId } from '~shared/commit-message/agent-spec'
+import { normalizeSourceControlAiSettings } from '~shared/source-control/ai'
 import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '~shared/source-control/ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
 } from '~shared/source-control/ai-types'
-import type { GlobalSettings, TuiAgent } from '~shared/types'
+import type { GlobalSettings } from '~shared/types'
 
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
@@ -41,55 +31,6 @@ type CommitMessageAiPaneProps = {
 
 function readSettings(settings: GlobalSettings): SourceControlAiSettings {
   return normalizeSourceControlAiSettings(settings.sourceControlAi, settings.commitMessageAi)
-}
-
-export function mergeDiscoveredModelsIntoCommitMessageConfig(
-  config: SourceControlAiSettings,
-  agentId: TuiAgent,
-  models: CommitMessageModelCapability[],
-  defaultModelId: string,
-  hostKey = 'local'
-): SourceControlAiSettings {
-  const currentChoice = {
-    selectedModelByAgent: config.selectedModelByAgent,
-    selectedModelByAgentByHost: config.selectedModelByAgentByHost
-  }
-  const persisted = readSourceControlAiModelChoiceForHost(currentChoice, hostKey, agentId)
-  const nextModelId = models.some((model) => model.id === persisted) ? persisted : defaultModelId
-  const selectedModelChoice =
-    nextModelId && nextModelId !== persisted
-      ? selectSourceControlAiModelChoiceForHost(currentChoice, hostKey, agentId, nextModelId)
-      : currentChoice
-  return {
-    ...config,
-    discoveredModelsByAgent:
-      hostKey === 'local'
-        ? {
-            ...config.discoveredModelsByAgent,
-            [agentId]: models
-          }
-        : config.discoveredModelsByAgent,
-    discoveredModelsByAgentByHost: {
-      ...config.discoveredModelsByAgentByHost,
-      [hostKey]: {
-        ...config.discoveredModelsByAgentByHost?.[hostKey],
-        [agentId]: models
-      }
-    },
-    selectedModelByAgent: selectedModelChoice.selectedModelByAgent ?? config.selectedModelByAgent,
-    selectedModelByAgentByHost: selectedModelChoice.selectedModelByAgentByHost
-  }
-}
-
-export function getCommitMessageSettingsPaneDiscoveryHostKey(
-  settings: GlobalSettings,
-  activeConnectionId: string | null | undefined,
-  hasActiveWorktree: boolean
-): string {
-  const runtimeScope = hasActiveWorktree
-    ? getRuntimeGitScope(settings, activeConnectionId)
-    : activeConnectionId
-  return getCommitMessageModelDiscoveryHostKeyForScope(runtimeScope)
 }
 
 export function CommitMessageAiPane({

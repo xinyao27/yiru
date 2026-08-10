@@ -50,10 +50,6 @@ export function getSuggestedCreatureName(
   }
 }
 
-export function shouldApplySuggestedName(name: string, previousSuggestedName: string): boolean {
-  return !name.trim() || name === previousSuggestedName
-}
-
 export function normalizeSuggestedName(name: string): string {
   return name.trim().toLowerCase()
 }

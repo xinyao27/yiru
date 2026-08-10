@@ -113,10 +113,7 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
   const resolvedLaunchPlatform =
     launchPlatform ??
     (repo
-      ? getAgentLaunchPlatformForRepo(
-          repo,
-          repo.connectionId ? undefined : getLocalProjectExecutionRuntimeContext(store, worktreeId)
-        )
+      ? getAgentLaunchPlatformForRepo(getLocalProjectExecutionRuntimeContext(store, worktreeId))
       : CLIENT_PLATFORM)
   // Why: SSH remotes must use the relay's public CLI command.
   const isRemote = repo ? repoIsRemote(repo) : false

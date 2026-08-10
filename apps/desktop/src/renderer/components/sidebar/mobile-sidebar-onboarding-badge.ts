@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { listPairedMobileDevices } from '~renderer/runtime/mobile-pairing-client'
+import { useAppStore } from '~renderer/store'
 
 const DISMISS_KEY = 'yiru.mobile.sidebar-onboarding-dismissed'
 
@@ -26,6 +28,9 @@ export function useMobileSidebarOnboardingBadge(enabled = true): {
 } {
   const [dismissed, setDismissed] = useState<boolean>(() => readDismissed())
   const [hasPairedDevice, setHasPairedDevice] = useState<boolean | null>(null)
+  const activeRuntimeEnvironmentId = useAppStore(
+    (s) => s.settings?.activeRuntimeEnvironmentId ?? null
+  )
 
   useEffect(() => {
     if (!shouldLoadMobileSidebarOnboardingBadge(enabled, dismissed)) {
@@ -34,7 +39,7 @@ export function useMobileSidebarOnboardingBadge(enabled = true): {
     let cancelled = false
     void (async () => {
       try {
-        const result = await window.api.mobile.listDevices()
+        const result = await listPairedMobileDevices({ activeRuntimeEnvironmentId })
         if (!cancelled) {
           setHasPairedDevice(result.devices.length > 0)
         }
@@ -47,7 +52,7 @@ export function useMobileSidebarOnboardingBadge(enabled = true): {
     return () => {
       cancelled = true
     }
-  }, [dismissed, enabled])
+  }, [activeRuntimeEnvironmentId, dismissed, enabled])
 
   const dismiss = useCallback(() => {
     if (dismissed) {

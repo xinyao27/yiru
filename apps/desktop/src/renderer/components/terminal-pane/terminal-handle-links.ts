@@ -1,7 +1,7 @@
 import type { ILink, ILinkProvider, Terminal } from '@xterm/xterm'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
 import type { AppState } from '~renderer/store'
 import { useAppStore } from '~renderer/store'
@@ -276,5 +276,5 @@ async function focusRuntimeTerminalHandle(
     : ({ kind: 'local' } as const)
   // Why: main owns the `term_*` mapping. Defer to terminal.focus on click
   // instead of mirroring that state in renderer hover parsing.
-  await callRuntimeRpc(target, 'terminal.focus', { terminal: handle })
+  await callRuntimeOrpc(target, (client) => client.terminal.focus, { terminal: handle })
 }

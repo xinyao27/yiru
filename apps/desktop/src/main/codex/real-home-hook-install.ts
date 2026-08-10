@@ -44,10 +44,6 @@ export type RealHomeCodexHookLane = 'pending' | 'installed' | 'unavailable' | 'r
 let currentLane: RealHomeCodexHookLane = 'pending'
 let installRetryAfterMs = 0
 
-export function getRealHomeCodexHookLane(): RealHomeCodexHookLane {
-  return currentLane
-}
-
 /**
  * Routing gate consumed by CodexRuntimeHomeService. Both a failed install and
  * a failed opt-out cleanup use the managed lane so no half-mutated hook state

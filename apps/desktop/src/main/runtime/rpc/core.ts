@@ -1,3 +1,7 @@
+import type {
+  MobileDevelopmentPairingInput,
+  MobileDevelopmentPairingResult
+} from '@yiru/runtime-protocol/mobile-development-pairing'
 // Why: this is the single boundary between raw RPC frames and the YiruRuntimeService.
 // Keeping the schema, handler, and result type attached to one object makes the
 // CLI-facing contract greppable and lets the dispatcher verify every payload
@@ -61,6 +65,9 @@ export type RpcContext = {
   browserCommands: RuntimeBrowserCommands
   emulatorCommands: RuntimeEmulatorCommands
   mobileNotifications: MobileNotificationChannel
+  mobileDevelopmentPairing?: (
+    input: MobileDevelopmentPairingInput
+  ) => MobileDevelopmentPairingResult
   orchestrationCapability?: string
   recordMutationReceipt?: (receipt: unknown) => void
   orchestrationMutation?: {
@@ -110,6 +117,11 @@ export type RpcContext = {
     streamId: number,
     handler: (frame: TerminalStreamFrame) => void
   ) => () => void
+  // Why: reverse shell calls target the renderer paired with this forward
+  // connection. The id is transport-neutral: Electron derives it from the
+  // WebContents handshake, while authenticated web clients derive it from the
+  // E2EE WebSocket connection. Missing or disconnected ids degrade normally.
+  shellConnectionId?: string
 }
 
 export type RpcHandler<TParams, TResult = unknown> = (
@@ -240,6 +252,16 @@ export class InvalidArgumentError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'InvalidArgumentError'
+  }
+}
+
+export class RuntimeRpcHandlerError extends Error {
+  readonly code: string
+
+  constructor(code: string, message: string) {
+    super(message)
+    this.name = 'RuntimeRpcHandlerError'
+    this.code = code
   }
 }
 

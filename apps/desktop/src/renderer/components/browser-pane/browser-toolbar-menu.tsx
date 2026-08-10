@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { setBrowserViewportOverride } from '~renderer/runtime/browser-client'
 import { useAppStore } from '~renderer/store'
 import {
   browserViewportPresetToOverride,
@@ -56,7 +57,7 @@ export function BrowserToolbarMenu({
     setBrowserPageViewportPreset(browserPageId, nextId)
     const preset = getBrowserViewportPreset(nextId)
     const override = preset ? browserViewportPresetToOverride(preset) : null
-    void window.api.browser.setViewportOverride({ browserPageId, override })
+    void setBrowserViewportOverride(browserPageId, override)
   }
 
   const [newProfileDialogOpen, setNewProfileDialogOpen] = useState(false)

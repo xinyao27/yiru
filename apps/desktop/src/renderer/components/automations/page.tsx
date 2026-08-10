@@ -22,7 +22,6 @@ import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
  * orchestration while the form and detail presentation live in sibling files. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import type { PreflightStatus } from '~preload/api-types'
 import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
 import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
@@ -58,7 +57,9 @@ import { getSettingsForRepoRuntimeOwner } from '~renderer/lib/repo-runtime-owner
 import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility-interval'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getRuntimeUIState } from '~renderer/runtime/ui-client'
 import { useAppStore } from '~renderer/store'
 import { useRepoMap, useWorktreeMap } from '~renderer/store/selectors'
 import { getAutomationRunRepoId } from '~shared/automation/run-identity'
@@ -99,6 +100,7 @@ import {
 } from './automation-editor-dialog'
 import {
   createAutomationForTarget,
+  createExternalAutomationForTarget,
   deleteAutomationForTarget,
   type AutomationHostTarget,
   getAutomationListTarget,
@@ -106,8 +108,12 @@ import {
   getAutomationTargetFromHostId,
   listAutomationRunsForTarget,
   listAutomationsForTarget,
+  listExternalAutomationManagersForTarget,
+  listExternalAutomationRunsForTarget,
   runAutomationNowForTarget,
-  updateAutomationForTarget
+  runExternalAutomationActionForTarget,
+  updateAutomationForTarget,
+  updateExternalAutomationForTarget
 } from './automation-host-client'
 import {
   formatAutomationDateTimeWithRelative,
@@ -349,9 +355,11 @@ function getAutomationRunContent(run: AutomationRun): string {
   return run.error ?? run.usage?.unavailableMessage ?? 'No output content available.'
 }
 
+// Why: a paired host running an older Yiru build may not have shipped
+// `automation.listExternalRuns` yet — fall back to the job's own embedded
+// run list rather than surfacing a hard error for that version skew.
 function isMissingExternalRunsApiError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error)
-  return /listExternalRuns|automations:listExternalRuns|No handler registered/i.test(message)
+  return isRuntimeOrpcErrorCode(error, 'NOT_FOUND')
 }
 
 async function waitForAutomationRerunPendingVisibility(pendingStartedAt: number): Promise<void> {
@@ -829,10 +837,10 @@ export default function AutomationsPage(): React.JSX.Element {
       }
       // Why: automation sources can be owned by a different Coworking host than
       // the run target; provider auth/tooling must be checked on the source host.
-      void callRuntimeRpc<PreflightStatus>(
+      void callRuntimeOrpc(
         { kind: 'environment', environmentId: parsed.environmentId },
-        'preflight.check',
-        undefined,
+        (client) => client.preflight.check,
+        {},
         { timeoutMs: 15_000 }
       )
         .then((status) => {
@@ -976,7 +984,7 @@ export default function AutomationsPage(): React.JSX.Element {
       const [nextAutomations, nextRuns, nextExternalManagers] = await Promise.all([
         listAutomationsForTarget(automationHostTarget),
         listAutomationRunsForTarget(automationHostTarget),
-        window.api.automations.listExternalManagers()
+        listExternalAutomationManagersForTarget(automationHostTarget)
       ])
       const currentSelectedId = useAppStore.getState().selectedAutomationId
       const hasCurrentSelection = nextAutomations.some(
@@ -1022,7 +1030,8 @@ export default function AutomationsPage(): React.JSX.Element {
   }, [automationHostTargetKey, isLoading, pendingAutomationRunNavigation, refresh])
 
   const hydratePersistedUIState = useCallback(async (): Promise<void> => {
-    useAppStore.getState().hydratePersistedUI(await window.api.ui.get(), 'sync')
+    const store = useAppStore.getState()
+    store.hydratePersistedUI(await getRuntimeUIState(store.settings), 'sync')
   }, [])
 
   useEffect(() => {
@@ -1121,7 +1130,7 @@ export default function AutomationsPage(): React.JSX.Element {
     }
     void Promise.all(
       completedRuns.map((run) =>
-        window.api.automations.markDispatchResult({
+        rendererHostClient.automations.markDispatchResult({
           runId: run.id,
           status: 'completed',
           workspaceId: run.workspaceId,
@@ -1290,8 +1299,9 @@ export default function AutomationsPage(): React.JSX.Element {
     let latest = automation
     try {
       latest =
-        (await window.api.automations.list()).find((entry) => entry.id === automation.id) ??
-        automation
+        (
+          await listAutomationsForTarget(getAutomationOwnerTarget(automation, automationHostTarget))
+        ).find((entry) => entry.id === automation.id) ?? automation
     } catch {
       latest = automation
     }
@@ -1341,11 +1351,7 @@ export default function AutomationsPage(): React.JSX.Element {
     const targetWorktree =
       Object.values(worktreesByRepo)
         .flat()
-        .find((worktree) => {
-          const repo = repoMap.get(worktree.repoId)
-          const repoTargetMatches = !repo?.connectionId
-          return repoTargetMatches && job.workdir !== null && worktree.path === job.workdir
-        }) ?? null
+        .find((worktree) => job.workdir !== null && worktree.path === job.workdir) ?? null
     const fallbackTarget = getDefaultTarget()
     const projectId = targetWorktree?.repoId ?? fallbackTarget.projectId
     const workspaceId = targetWorktree?.id ?? fallbackTarget.workspaceId
@@ -1485,16 +1491,10 @@ export default function AutomationsPage(): React.JSX.Element {
           return
         }
         const target = editingExternalTarget?.manager.target ?? { type: 'local' as const }
-        const repoTargetMatches = !repo.connectionId
-        if (!repoTargetMatches) {
-          toast.error(
-            translate(
-              'auto.components.automations.AutomationsPage.e431bb85d4',
-              'Choose a workspace on the same host as this Hermes automation.'
-            )
-          )
-          return
-        }
+        // Why: this used to reject a workspace whose repo.connectionId didn't
+        // match the automation's host, but Repo.connectionId is dead —
+        // nothing sets it since remote hosts were removed (#63) — so every
+        // repo already matches.
         const schedule = buildHermesCronSchedule(draft)
         const managerId = editingExternalTarget?.manager.id ?? 'hermes:local'
         const input = {
@@ -1506,12 +1506,17 @@ export default function AutomationsPage(): React.JSX.Element {
           schedule,
           workdir: selectedWorktree.path
         }
+        // Why: `automationHostTarget` is only populated after the first
+        // `refresh()` resolves — fall back to the same target `refresh()`
+        // itself would compute so a save before that first load still lands
+        // on the right host.
+        const hermesHostTarget = automationHostTarget ?? getAutomationListTarget(settings)
         await (editingExternalTarget
-          ? window.api.automations.updateExternal({
+          ? updateExternalAutomationForTarget(hermesHostTarget, {
               ...input,
               jobId: editingExternalTarget.job.id
             })
-          : window.api.automations.createExternal(input))
+          : createExternalAutomationForTarget(hermesHostTarget, input))
         if (!editingExternalTarget) {
           useAppStore.getState().recordFeatureInteraction('automation-created')
         }
@@ -1622,12 +1627,11 @@ export default function AutomationsPage(): React.JSX.Element {
         updates.dtstart = now
       }
       const automation = editingAutomationId
-        ? currentAutomation
-          ? await updateAutomationForTarget(currentAutomation, updates, automationHostTarget)
-          : await window.api.automations.update({
-              id: editingAutomationId,
-              updates
-            })
+        ? await updateAutomationForTarget(
+            currentAutomation ?? { id: editingAutomationId, runContext: null },
+            updates,
+            automationHostTarget
+          )
         : await createAutomationForTarget({
             name: draft.name,
             prompt: draft.prompt,
@@ -1825,13 +1829,16 @@ export default function AutomationsPage(): React.JSX.Element {
     const key = `${manager.id}:${job.id}:${action}`
     setExternalActionKey(key)
     try {
-      await window.api.automations.runExternalAction({
-        managerId: manager.id,
-        provider: manager.provider,
-        target: manager.target,
-        jobId: job.id,
-        action
-      })
+      await runExternalAutomationActionForTarget(
+        automationHostTarget ?? getAutomationListTarget(settings),
+        {
+          managerId: manager.id,
+          provider: manager.provider,
+          target: manager.target,
+          jobId: job.id,
+          action
+        }
+      )
       if (action === 'run') {
         useAppStore.getState().recordFeatureInteraction('automation-run')
       }
@@ -1878,21 +1885,18 @@ export default function AutomationsPage(): React.JSX.Element {
         runs: job.runs.slice(page * pageSize, page * pageSize + pageSize),
         totalCount: job.runCount
       }
-      const listExternalRuns = (
-        window.api.automations as Partial<Pick<typeof window.api.automations, 'listExternalRuns'>>
-      ).listExternalRuns
-      if (typeof listExternalRuns !== 'function') {
-        return fallbackRunsPage
-      }
       try {
-        const result = await listExternalRuns({
-          managerId: manager.id,
-          provider: manager.provider,
-          target: manager.target,
-          jobId: job.id,
-          page: page + 1,
-          pageSize
-        })
+        const result = await listExternalAutomationRunsForTarget(
+          automationHostTarget ?? getAutomationListTarget(settings),
+          {
+            managerId: manager.id,
+            provider: manager.provider,
+            target: manager.target,
+            jobId: job.id,
+            page: page + 1,
+            pageSize
+          }
+        )
         return {
           runs: result.runs,
           totalCount: result.total
@@ -1904,7 +1908,7 @@ export default function AutomationsPage(): React.JSX.Element {
         throw error
       }
     },
-    []
+    [automationHostTarget, settings]
   )
 
   const openExternalRunPage = (

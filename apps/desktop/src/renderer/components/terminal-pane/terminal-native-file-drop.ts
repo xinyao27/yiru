@@ -9,6 +9,7 @@ import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 
 import { resolveNativeTerminalDropPane } from './drop/pane-resolution'
@@ -201,10 +202,11 @@ async function pasteLocalDropPaths(
   // dropped paths must use the distro-aware resolver before terminal paste.
   if (isWslUncPath(args.worktreePath)) {
     try {
-      const { resolvedPaths, skipped, failed } = await window.api.fs.resolveDroppedPathsForAgent({
-        paths: args.dataPaths,
-        worktreePath: args.worktreePath
-      })
+      const { resolvedPaths, skipped, failed } =
+        await workspaceHostClient.fileHost.resolveDroppedPathsForAgent({
+          paths: args.dataPaths,
+          worktreePath: args.worktreePath
+        })
       await pasteResolvedDropPaths({ ...args, paths: resolvedPaths, targetShell: 'posix' })
       reportTerminalDropUploadSkipsAndFailures(skipped, failed)
     } catch (err) {
@@ -233,11 +235,12 @@ async function uploadRemoteDropPaths(
     )
   )
   try {
-    const { resolvedPaths, skipped, failed } = await window.api.fs.resolveDroppedPathsForAgent({
-      paths: args.dataPaths,
-      worktreePath: args.worktreePath,
-      connectionId: args.connectionId
-    })
+    const { resolvedPaths, skipped, failed } =
+      await workspaceHostClient.fileHost.resolveDroppedPathsForAgent({
+        paths: args.dataPaths,
+        worktreePath: args.worktreePath,
+        connectionId: args.connectionId
+      })
     await pasteResolvedDropPaths({ ...args, paths: resolvedPaths, targetShell: args.targetShell })
     reportTerminalDropUploadSkipsAndFailures(skipped, failed)
   } catch (err) {

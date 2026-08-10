@@ -40,8 +40,9 @@ function WorkspaceSidebarInner(): React.JSX.Element | null {
   }
 
   const selectView = (view: ActiveRightSidebarTab): void => {
-    if (view === effectiveView && isOpen && !(view === 'explorer' && explorerView === 'search')) {
-      setOpen(false)
+    const isCurrentDestination =
+      view === effectiveView && (view !== 'explorer' || explorerView === 'files')
+    if (isCurrentDestination) {
       return
     }
     if (view === 'explorer') {

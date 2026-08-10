@@ -1,20 +1,9 @@
-import type { TuiAgent } from '../types'
 import { cleanGeneratedCommitMessage, truncateDiffForPrompt } from './prompt'
-
-export type CommitMessageDraftAgent = TuiAgent | 'custom'
 
 export type CommitMessageDraftContext = {
   branch: string | null
   stagedSummary: string
   stagedPatch: string
-}
-
-export type CommitMessageDraftOptions = {
-  agentId: CommitMessageDraftAgent
-  model: string
-  thinkingLevel?: string
-  customPrompt?: string
-  customAgentCommand?: string
 }
 
 export type GeneratedCommitMessage = {

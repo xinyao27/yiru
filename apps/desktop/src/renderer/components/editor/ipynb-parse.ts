@@ -249,12 +249,6 @@ function serializeNotebook(root: Record<string, unknown>): string {
   return `${JSON.stringify(root, null, 1)}\n`
 }
 
-export function updateIpynbCellSource(content: string, index: number, source: string): string {
-  const root = parseNotebookRoot(content)
-  ensureCell(root, index).source = splitIpynbSource(source)
-  return serializeNotebook(root)
-}
-
 export function updateIpynbCellSources(
   content: string,
   updates: { index: number; source: string }[]

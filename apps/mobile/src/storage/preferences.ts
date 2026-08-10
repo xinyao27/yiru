@@ -127,14 +127,6 @@ export async function readDisabledTerminalLiveInputHandlesPreference(
   }
 }
 
-export async function loadDisabledTerminalLiveInputHandles(
-  hostId: string,
-  worktreeId: string
-): Promise<Set<string>> {
-  const preference = await readDisabledTerminalLiveInputHandlesPreference(hostId, worktreeId)
-  return preference.handles
-}
-
 export async function saveDisabledTerminalLiveInputHandles(
   hostId: string,
   worktreeId: string,

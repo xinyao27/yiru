@@ -1,8 +1,14 @@
+import { useEffect } from 'react'
 // Executes a due resume: replay the prompt that the provider limit cut short
 // into the same pane, then report the outcome back to main.
-
-import { useEffect } from 'react'
 import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  markRateLimitResumeFailed,
+  markRateLimitResumeFired,
+  markRateLimitResumeStale,
+  notifyRateLimitResumeRendererReady
+} from '~renderer/runtime/rate-limit-resume-client'
 import { useAppStore } from '~renderer/store'
 import type { RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
 
@@ -16,7 +22,15 @@ function paneIsStillLive(schedule: RateLimitResumeSchedule): boolean {
   return ptyIds.includes(schedule.ptyId)
 }
 
-async function replayResume(schedule: RateLimitResumeSchedule): Promise<void> {
+// Why: Phase 5 slice S5 — this used to be the callback registered on
+// the former preload dispatch callback. That push now arrives as
+// the reverse `shellServices.rateLimitResume.dispatch` RPC call (see
+// `renderer/runtime/shell-services-handler.ts`), which calls this function
+// directly. The outcome (`markFired`/`markFailed`/`markStale`) reports through
+// the same forward oRPC target that owns the schedule.
+export async function handleRateLimitResumeDispatchRequest(
+  schedule: RateLimitResumeSchedule
+): Promise<void> {
   if (replayingScheduleIds.has(schedule.id)) {
     return
   }
@@ -24,7 +38,7 @@ async function replayResume(schedule: RateLimitResumeSchedule): Promise<void> {
   const { applyRateLimitResume } = useAppStore.getState()
   try {
     if (!paneIsStillLive(schedule)) {
-      applyRateLimitResume(await window.api.rateLimitResume.markStale({ id: schedule.id }))
+      applyRateLimitResume(await markRateLimitResumeStale(schedule.id))
       return
     }
     const submitted = await submitPromptToAgentPty({
@@ -34,11 +48,14 @@ async function replayResume(schedule: RateLimitResumeSchedule): Promise<void> {
     })
     applyRateLimitResume(
       submitted
-        ? await window.api.rateLimitResume.markFired({ id: schedule.id })
-        : await window.api.rateLimitResume.markFailed({
-            id: schedule.id,
-            reason: 'The agent pane did not accept the replayed prompt.'
-          })
+        ? await markRateLimitResumeFired(schedule.id)
+        : await markRateLimitResumeFailed(
+            schedule.id,
+            translate(
+              'auto.components.rate.limit.resume.use.rate.limit.resume.dispatch.8ec3ff2193',
+              'The agent pane did not accept the replayed prompt.'
+            )
+          )
     )
   } catch (error) {
     console.error('Failed to resume after rate limit:', error)
@@ -47,16 +64,17 @@ async function replayResume(schedule: RateLimitResumeSchedule): Promise<void> {
   }
 }
 
-/** Mounted once at App level: hydrates live schedules and runs due resumes. */
+// Why: `rendererReady` still matters even though the dispatch push moved to
+// the shellServices reverse link (connected earlier, at the local MessagePort
+// handshake, before rateLimitResumes are loaded into the store). This
+// mount-time signal both flushes any resume that came due while the app was
+// closed and tells RateLimitResumeService the renderer can execute one now.
 export function useRateLimitResumeDispatch(): void {
+  const activeRuntimeEnvironmentId = useAppStore(
+    (state) => state.settings?.activeRuntimeEnvironmentId ?? null
+  )
   useEffect(() => {
-    const unsubscribe = window.api.rateLimitResume.onDispatchRequested((schedule) => {
-      void replayResume(schedule)
-    })
     void useAppStore.getState().loadRateLimitResumes()
-    // Why: signals main that dispatches can land now, which also flushes any
-    // resume that came due while the app was closed.
-    void window.api.rateLimitResume.rendererReady()
-    return unsubscribe
-  }, [])
+    void notifyRateLimitResumeRendererReady()
+  }, [activeRuntimeEnvironmentId])
 }

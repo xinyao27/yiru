@@ -4,6 +4,7 @@ import type { MutableRefObject } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { DiffComment } from '~shared/types'
 
 import { openHttpLink, type HttpLinkSourceOwner } from '../http-link-routing'
@@ -222,7 +223,7 @@ function openMarkdownLinkInClientOs({
     return
   }
   if (classified.kind === 'markdown') {
-    void window.api.shell.pathExists(classified.absolutePath).then((exists) => {
+    void shellClient.shell.pathExists(classified.absolutePath).then((exists) => {
       if (!exists) {
         toast.error(
           translate(
@@ -233,9 +234,9 @@ function openMarkdownLinkInClientOs({
         )
         return
       }
-      void window.api.shell.openFileUri(toFileUrlForOsEscape(classified.absolutePath))
+      void shellClient.shell.openFileUri(toFileUrlForOsEscape(classified.absolutePath))
     })
     return
   }
-  void window.api.shell.openFileUri(classified.uri)
+  void shellClient.shell.openFileUri(classified.uri)
 }

@@ -1,5 +1,5 @@
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcSuccess } from '../transport/types'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '../transport/runtime-orpc-client'
 
 export const MOBILE_CLIPBOARD_IMAGE_MAX_BASE64_CHARS = 24 * 1024 * 1024
 export const MOBILE_CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS = 512 * 1024
@@ -92,59 +92,55 @@ export async function prepareMobileClipboardImageBase64(
   return data
 }
 
-function assertSuccess<T>(response: RpcSuccess | RpcFailure): T {
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  return response.result as T
-}
-
 export async function saveMobileClipboardImageAsTempFile(
-  client: Pick<RpcClient, 'sendRequest'>,
+  client: Pick<RpcClient, 'orpc'>,
   imageData: string
 ): Promise<string> {
   const contentBase64 = normalizeMobileClipboardImageBase64(imageData)
-  const startResponse = await client.sendRequest('clipboard.startImageUpload', {
-    expectedBase64Length: contentBase64.length
-  })
-
-  if (!startResponse.ok) {
+  let uploadId: string
+  try {
+    const started = await callRuntimeOrpc(client, (runtime) => runtime.clipboard.startImageUpload, {
+      expectedBase64Length: contentBase64.length
+    })
+    uploadId = started.uploadId
+  } catch (error) {
+    // Why: hosts predating chunked upload reject the method outright; a small
+    // enough image still fits the original single-frame call.
     if (
-      startResponse.error.code === 'method_not_found' &&
+      isRuntimeOrpcErrorCode(error, 'method_not_found') &&
       contentBase64.length <= MOBILE_CLIPBOARD_IMAGE_SINGLE_FRAME_FALLBACK_BASE64_CHARS
     ) {
-      return assertSuccess<string>(
-        await client.sendRequest('clipboard.saveImageAsTempFile', { contentBase64 })
-      )
+      return await callRuntimeOrpc(client, (runtime) => runtime.clipboard.saveImageAsTempFile, {
+        contentBase64
+      })
     }
-    throw new Error(startResponse.error.message)
+    throw error
   }
 
-  const { uploadId } = startResponse.result as { uploadId: string }
   try {
     for (
       let offset = 0;
       offset < contentBase64.length;
       offset += MOBILE_CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS
     ) {
-      assertSuccess(
-        await client.sendRequest('clipboard.appendImageUploadChunk', {
-          uploadId,
+      await callRuntimeOrpc(client, (runtime) => runtime.clipboard.appendImageUploadChunk, {
+        uploadId,
+        offset,
+        contentBase64: contentBase64.slice(
           offset,
-          contentBase64: contentBase64.slice(
-            offset,
-            offset + MOBILE_CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS
-          )
-        })
-      )
+          offset + MOBILE_CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS
+        )
+      })
     }
-    return assertSuccess<string>(
-      await client.sendRequest('clipboard.commitImageUpload', { uploadId })
-    )
+    return await callRuntimeOrpc(client, (runtime) => runtime.clipboard.commitImageUpload, {
+      uploadId
+    })
   } catch (error) {
     // Why: failed mobile image sends create server-side upload state; abort so
     // the bounded upload slot is released immediately instead of waiting for TTL.
-    await client.sendRequest('clipboard.abortImageUpload', { uploadId }).catch(() => {})
+    await callRuntimeOrpc(client, (runtime) => runtime.clipboard.abortImageUpload, {
+      uploadId
+    }).catch(() => {})
     throw error
   }
 }

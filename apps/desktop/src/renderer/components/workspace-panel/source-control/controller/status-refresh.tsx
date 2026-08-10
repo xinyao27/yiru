@@ -7,7 +7,9 @@ import type { PullRequestGenerationContext } from '~renderer/components/workspac
 import { localizedHostedReviewCopy } from '~renderer/i18n/hosted-review-localized-copy'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getRuntimeRepoBaseRefDefault } from '~renderer/runtime/repo-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 
 import {
   resolveSourceControlBaseRef,
@@ -88,7 +90,19 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
     }
   }, [refreshActiveGitStatus])
   useEffect(() => {
-    if (!repositoryHuge || !activeWorktreeId || !worktreePath || activeConnectionId) {
+    // Why: findHugeFoldersToIgnore/appendGitignore are preload-only (no
+    // runtime contract member exists) and always scan/write *this*
+    // Electron process's filesystem — never the worktree's actual host. Gate
+    // on the repo owner's target so a worktree hosted on a non-local runtime
+    // environment doesn't get warned about, or have its .gitignore edited
+    // from, the wrong machine.
+    if (
+      !repositoryHuge ||
+      !activeWorktreeId ||
+      !worktreePath ||
+      activeConnectionId ||
+      getActiveRuntimeTarget(activeRepoSettings).kind !== 'local'
+    ) {
       return
     }
     const warningProbe = beginHugeRepoWarningProbe({
@@ -99,7 +113,7 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
       return
     }
     let cancelled = false
-    void window.api.git
+    void rendererHostClient.git
       .findHugeFoldersToIgnore({ worktreePath })
       .then((folders) => {
         if (cancelled || folders.length === 0 || hasDismissedHugeRepoWarning(warningProbe)) {
@@ -127,7 +141,7 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
                 if (!hasDismissedHugeRepoWarning(warningProbe)) {
                   return
                 }
-                void window.api.git
+                void rendererHostClient.git
                   .appendGitignore({ worktreePath, folderName })
                   .then(() => refreshActiveGitStatus())
                   .catch((error) => console.warn('[SourceControl] add to .gitignore failed', error))
@@ -141,6 +155,7 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
       cancelled = true
     }
   }, [
+    activeRepoSettings,
     repositoryHuge,
     activeWorktreeId,
     activeWorktreeInstanceId,

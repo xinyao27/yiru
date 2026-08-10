@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   CodexUsageBreakdownRow,
@@ -45,7 +46,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
   setCodexUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = (await window.api.codexUsage.setEnabled({
+      const nextScanState = (await rendererHostClient.codexUsage.setEnabled({
         enabled
       })) as CodexUsageScanState | undefined
       // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
@@ -90,7 +91,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   fetchCodexUsage: async (opts) => {
     set({ codexUsageSnapshotReady: false })
     try {
-      const scanState = (await window.api.codexUsage.getScanState()) as
+      const scanState = (await rendererHostClient.codexUsage.getScanState()) as
         | CodexUsageScanState
         | undefined
       if (!scanState) {
@@ -116,7 +117,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
       }
 
       const { codexUsageScope, codexUsageRange } = get()
-      const snapshot = (await window.api.codexUsage.getSnapshot({
+      const snapshot = (await rendererHostClient.codexUsage.getSnapshot({
         scope: codexUsageScope,
         range: codexUsageRange,
         limit: 10
@@ -146,11 +147,11 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
         })
       }
 
-      await window.api.codexUsage.refresh({
+      await rendererHostClient.codexUsage.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { codexUsageScope: refreshedScope, codexUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = (await window.api.codexUsage.getSnapshot({
+      const refreshedSnapshot = (await rendererHostClient.codexUsage.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

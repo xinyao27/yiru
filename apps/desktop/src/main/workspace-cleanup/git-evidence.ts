@@ -1,9 +1,8 @@
-import type { GitStatusResult, Repo, Worktree } from '~shared/types'
+import type { GitStatusResult, Worktree } from '~shared/types'
 import type { WorkspaceCleanupBlocker } from '~shared/workspace/cleanup'
 
 import { gitExecFileAsync } from '../git/runner'
 import { getStatus } from '../git/status'
-import type { IGitProvider } from '../providers/types'
 import {
   WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
   withWorkspaceCleanupTimeout
@@ -28,20 +27,17 @@ export function createEmptyWorkspaceCleanupGitEvidence(): WorkspaceCleanupGitEvi
 }
 
 export async function readWorkspaceCleanupGitEvidence(
-  worktree: Worktree,
-  repo: Repo,
-  provider: IGitProvider | null
+  worktree: Worktree
 ): Promise<WorkspaceCleanupGitEvidence> {
   const blockers: WorkspaceCleanupBlocker[] = []
   let status: GitStatusResult
   const checkedAt = Date.now()
 
   try {
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a repo's git status is always read locally.
     status = await withWorkspaceCleanupTimeout(
-      (signal) =>
-        repo.connectionId
-          ? provider!.getStatus(worktree.path, { signal })
-          : getStatus(worktree.path, { signal }),
+      (signal) => getStatus(worktree.path, { signal }),
       WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
       'Timed out reading git status.'
     )
@@ -70,7 +66,7 @@ export async function readWorkspaceCleanupGitEvidence(
     blockers.push('unpushed-commits')
   }
   if (clean && upstreamAhead === null) {
-    const unpushedCommitCount = await readUnpushedCommitCount(worktree, repo, provider)
+    const unpushedCommitCount = await readUnpushedCommitCount(worktree)
     if (unpushedCommitCount === null) {
       blockers.push('unknown-base')
     } else if (unpushedCommitCount > 0) {
@@ -87,22 +83,16 @@ export async function readWorkspaceCleanupGitEvidence(
   }
 }
 
-async function readUnpushedCommitCount(
-  worktree: Worktree,
-  repo: Repo,
-  provider: IGitProvider | null
-): Promise<number | null> {
+async function readUnpushedCommitCount(worktree: Worktree): Promise<number | null> {
   try {
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a repo's git log is always read locally.
     const result = await withWorkspaceCleanupTimeout(
       (signal) =>
-        repo.connectionId
-          ? provider!.exec(['rev-list', '--count', 'HEAD', '--not', '--remotes'], worktree.path, {
-              signal
-            })
-          : gitExecFileAsync(['rev-list', '--count', 'HEAD', '--not', '--remotes'], {
-              cwd: worktree.path,
-              signal
-            }),
+        gitExecFileAsync(['rev-list', '--count', 'HEAD', '--not', '--remotes'], {
+          cwd: worktree.path,
+          signal
+        }),
       WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
       'Timed out checking unpushed commits.'
     )

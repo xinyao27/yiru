@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
 import { app } from 'electron'
@@ -103,26 +103,6 @@ export function installServeSupervisorDisconnectQuit(
   const quit = (): void => app.quit()
   parent.once('disconnect', quit)
   return () => parent.off('disconnect', quit)
-}
-
-export function getServeUpdateHandoffFailure(): string | null {
-  const handoffPath = getConfiguredHandoffPath()
-  if (!handoffPath) {
-    return null
-  }
-  try {
-    const state = parseServeUpdateHandoffState(JSON.parse(readFileSync(handoffPath, 'utf8')))
-    if (state?.phase !== 'failed') {
-      return null
-    }
-    if (state.targetVersion === app.getVersion()) {
-      unlinkSync(handoffPath)
-      return null
-    }
-    return state.reason
-  } catch {
-    return null
-  }
 }
 
 function writeHandoffState(path: string, state: ServeUpdateHandoffState): boolean {

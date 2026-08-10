@@ -9,10 +9,7 @@ import {
   orchestrationSkillRecoveryData
 } from '~shared/orchestration-rpc-contract'
 import { abbreviateOrchestrationTasks } from '~shared/orchestration-task-summary'
-import type {
-  OrchestrationWorkerReadResult,
-  OrchestrationWorkerReadSource
-} from '~shared/orchestration-worker-output'
+import type { OrchestrationWorkerReadResult } from '~shared/orchestration-worker-output'
 import type { RuntimeTerminalRead } from '~shared/runtime-types'
 import { parsePositiveSafeIntegerText } from '~shared/timer-delay'
 
@@ -26,6 +23,7 @@ import {
 import { printResult } from '../format'
 import type { RuntimeClient } from '../runtime-client'
 import { RuntimeClientError } from '../runtime-client'
+import type { RuntimeOrpcProcedure } from '../runtime/orpc-client-types'
 import type { RuntimeRpcSuccess } from '../runtime/types'
 import { getTerminalHandle } from '../selectors'
 
@@ -76,6 +74,21 @@ const TASK_STATUS_VALUES = [
   'failed',
   'blocked'
 ] as const
+const MESSAGE_TYPE_VALUES = [
+  'status',
+  'dispatch',
+  'worker_done',
+  'merge_ready',
+  'escalation',
+  'handoff',
+  'decision_gate',
+  'question',
+  'heartbeat'
+] as const
+const MESSAGE_PRIORITY_VALUES = ['normal', 'high', 'urgent'] as const
+const WORKER_SETUP_VALUES = ['run', 'skip', 'inherit'] as const
+const WORKER_READ_SOURCE_VALUES = ['auto', 'transcript', 'terminal'] as const
+const GATE_STATUS_VALUES = ['pending', 'resolved', 'timeout'] as const
 
 type MessageSummary = {
   id: string
@@ -151,26 +164,6 @@ function formatLegacyAwareCheckMessages(
     })
     .join('\n\n')
 }
-
-type LifecycleSendRejection = {
-  action: 'rejected'
-  code: string
-  reason: string
-}
-
-type OrchestrationSendResult =
-  | { message: { id: string }; lifecycle?: LifecycleSendRejection }
-  | { messages: { id: string }[]; recipients: number }
-  | {
-      relay: {
-        messageId: string
-        sequence: number
-        dispatchId: string
-        destination?: 'run_home' | 'worker'
-        accepted: true
-      }
-      lifecycle?: { action: 'completed' | 'failed' }
-    }
 
 function getOptionalStructuredMessagePayload(
   flags: Map<string, string | boolean>
@@ -267,7 +260,7 @@ async function isLiveTerminalHandle(
   client: Parameters<CommandHandler>[0]['client']
 ): Promise<boolean> {
   try {
-    await client.call('terminal.show', { terminal: handle })
+    await client.call(client.rpc.terminal.show, { terminal: handle })
     return true
   } catch (err) {
     if (isStaleTerminalIdentityError(err)) {
@@ -304,7 +297,7 @@ async function resolveOrchestrationPaneTerminalHandle(
   }
   try {
     // Why: pane-key reminting preserves caller identity; focus-based active-terminal fallback can point at a different pane.
-    const response = await client.call<{ terminal: { handle: string } }>('terminal.resolvePane', {
+    const response = await client.call(client.rpc.terminal.resolvePane, {
       paneKey
     })
     return response.result.terminal.handle
@@ -414,20 +407,43 @@ function rejectLifecycleGroupRecipient(type: string | undefined, to: string): vo
   }
 }
 
-function callMutation<TResult>(
+function requireChoice<TValue extends string>(
+  value: string,
+  choices: readonly TValue[],
+  message: string
+): TValue {
+  for (const choice of choices) {
+    if (value === choice) {
+      return choice
+    }
+  }
+  throw new RuntimeClientError('invalid_argument', message)
+}
+
+function getOptionalChoiceFlag<TValue extends string>(
+  flags: Map<string, string | boolean>,
+  name: string,
+  choices: readonly TValue[]
+): TValue | undefined {
+  const value = getOptionalStringFlag(flags, name)
+  if (value === undefined) {
+    return undefined
+  }
+  return requireChoice(value, choices, `Invalid --${name}. Expected one of: ${choices.join(', ')}.`)
+}
+
+function callMutation<TInput, TOutput>(
   client: RuntimeClient,
   flags: Map<string, string | boolean>,
-  method: string,
-  params: unknown,
+  procedure: RuntimeOrpcProcedure<TInput, TOutput>,
+  params: TInput,
   options?: { timeoutMs?: number; orchestrationCapability?: string }
-) {
+): Promise<RuntimeRpcSuccess<TOutput>> {
   const requestId = getOptionalStringFlag(flags, 'retry-request')
   if (!requestId) {
-    return options
-      ? client.call<TResult>(method, params, options)
-      : client.call<TResult>(method, params)
+    return options ? client.call(procedure, params, options) : client.call(procedure, params)
   }
-  return client.call<TResult>(method, params, {
+  return client.call(procedure, params, {
     ...options,
     orchestrationRequestId: requestId
   })
@@ -472,9 +488,7 @@ function safeJson(value: unknown): string {
 export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   'orchestration run-create': async ({ flags, client, cwd, json }) => {
     const from = await resolveCoordinatorTerminalHandle(flags, cwd, client)
-    const result = await callMutation<{
-      run: { id: string; objective: string; consumer_generation: number }
-    }>(client, flags, 'orchestration.runCreate', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.runCreate, {
       objective: getRequiredStringFlag(flags, 'objective'),
       from
     })
@@ -483,9 +497,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
 
   'orchestration run-use': async ({ flags, client, cwd, json }) => {
     const from = await resolveCoordinatorTerminalHandle(flags, cwd, client)
-    const result = await callMutation<{
-      run: { id: string; objective: string; consumer_generation: number }
-    }>(client, flags, 'orchestration.runUse', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.runUse, {
       id: getRequiredStringFlag(flags, 'id'),
       from
     })
@@ -494,18 +506,14 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
 
   'orchestration run-current': async ({ flags, client, cwd, json }) => {
     const from = await resolveCoordinatorTerminalHandle(flags, cwd, client)
-    const result = await client.call<{
-      run: { id: string; objective: string } | null
-    }>('orchestration.runCurrent', { from })
+    const result = await client.call(client.rpc.orchestration.runCurrent, { from })
     printResult(result, json, (r) =>
       r.run ? `${r.run.id} ${r.run.objective}` : 'No Run is bound to this terminal.'
     )
   },
 
   'orchestration run-list': async ({ client, json }) => {
-    const result = await client.call<{
-      runs: { id: string; objective: string; legacy: number }[]
-    }>('orchestration.runList', {})
+    const result = await client.call(client.rpc.orchestration.runList, {})
     printResult(result, json, (r) =>
       r.runs.length === 0
         ? 'No Runs found.'
@@ -518,15 +526,9 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration run-show': async ({ flags, client, json }) => {
-    const result = await client.call<{
-      run: {
-        id: string
-        objective: string
-        consumer_generation: number
-        legacy: number
-        created_at: string
-      }
-    }>('orchestration.runShow', { id: getRequiredStringFlag(flags, 'id') })
+    const result = await client.call(client.rpc.orchestration.runShow, {
+      id: getRequiredStringFlag(flags, 'id')
+    })
     printResult(
       result,
       json,
@@ -538,7 +540,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
 
   'orchestration send': async ({ flags, client, cwd, json }) => {
     const to = getOptionalStringFlag(flags, 'to')
-    const type = getOptionalStringFlag(flags, 'type')
+    const type = getOptionalChoiceFlag(flags, 'type', MESSAGE_TYPE_VALUES)
     if (to) {
       rejectLifecycleGroupRecipient(type, to)
     }
@@ -575,7 +577,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       subject: getRequiredStringFlag(flags, 'subject'),
       body: getOptionalStringFlag(flags, 'body'),
       type,
-      priority: getOptionalStringFlag(flags, 'priority'),
+      priority: getOptionalChoiceFlag(flags, 'priority', MESSAGE_PRIORITY_VALUES),
       threadId: getOptionalStringFlag(flags, 'thread-id'),
       payload: getOptionalStructuredMessagePayload(flags),
       // Why: pane key is the remint-stable sender identity the runtime verifies lifecycle ownership against; older runtimes strip it.
@@ -583,10 +585,10 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       devMode: isDevCliInvocation()
     }
     const dispatchCapability = getOptionalStringFlag(flags, 'dispatch-capability')
-    const result = await callMutation<OrchestrationSendResult>(
+    const result = await callMutation(
       client,
       flags,
-      'orchestration.send',
+      client.rpc.orchestration.send,
       sendParams,
       dispatchCapability ? { orchestrationCapability: dispatchCapability } : undefined
     )
@@ -639,7 +641,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
     }
     let result: RuntimeRpcSuccess<CheckResult>
     try {
-      result = await callMutation<CheckResult>(client, flags, 'orchestration.check', {
+      result = await callMutation(client, flags, client.rpc.orchestration.check, {
         terminal,
         terminalPaneKey: explicitTerminal ? undefined : process.env.YIRU_PANE_KEY || undefined,
         // Why: peek also sends unread:false so pre-peek runtimes degrade to non-consuming all mode instead of destructive mark-read.
@@ -721,26 +723,18 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
 
   'orchestration reply': async ({ flags, client, cwd, json }) => {
     const from = await resolveOrchestrationTerminalHandle(flags, cwd, client, 'from')
-    const result = await callMutation<{ message: { id: string } }>(
-      client,
-      flags,
-      'orchestration.reply',
-      {
-        id: getRequiredStringFlag(flags, 'id'),
-        body: getRequiredStringFlag(flags, 'body'),
-        run: getOptionalStringFlag(flags, 'run'),
-        from
-      }
-    )
+    const result = await callMutation(client, flags, client.rpc.orchestration.reply, {
+      id: getRequiredStringFlag(flags, 'id'),
+      body: getRequiredStringFlag(flags, 'body'),
+      run: getOptionalStringFlag(flags, 'run'),
+      from
+    })
     printResult(result, json, (r) => `Replied ${r.message.id}`)
   },
 
   'orchestration inbox': async ({ flags, client, json }) => {
     const full = flags.has('full')
-    const result = await client.call<{
-      messages: MessageSummary[]
-      count: number
-    }>('orchestration.inbox', {
+    const result = await client.call(client.rpc.orchestration.inbox, {
       limit: getOptionalPositiveIntegerFlag(flags, 'limit'),
       terminal: getOptionalStringFlag(flags, 'terminal')
     })
@@ -770,20 +764,15 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
 
   'orchestration task-create': async ({ flags, client, cwd, json }) => {
     const callerTerminalHandle = await resolveCoordinatorTerminalHandle(flags, cwd, client)
-    const result = await callMutation<{ task: { id: string; status: string } }>(
-      client,
-      flags,
-      'orchestration.taskCreate',
-      {
-        spec: getRequiredStringFlag(flags, 'spec'),
-        taskTitle: getOptionalStringFlag(flags, 'task-title'),
-        displayName: getOptionalStringFlag(flags, 'display-name'),
-        deps: getOptionalStringFlag(flags, 'deps'),
-        parent: getOptionalStringFlag(flags, 'parent'),
-        run: getOptionalStringFlag(flags, 'run'),
-        callerTerminalHandle
-      }
-    )
+    const result = await callMutation(client, flags, client.rpc.orchestration.taskCreate, {
+      spec: getRequiredStringFlag(flags, 'spec'),
+      taskTitle: getOptionalStringFlag(flags, 'task-title'),
+      displayName: getOptionalStringFlag(flags, 'display-name'),
+      deps: getOptionalStringFlag(flags, 'deps'),
+      parent: getOptionalStringFlag(flags, 'parent'),
+      run: getOptionalStringFlag(flags, 'run'),
+      callerTerminalHandle
+    })
     printResult(result, json, (r) => `Created ${r.task.id} [${r.task.status}]`)
   },
 
@@ -793,22 +782,8 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
     const callerTerminalHandle = run
       ? undefined
       : await resolveCoordinatorTerminalHandle(flags, cwd, client)
-    const result = await client.call<{
-      tasks: {
-        id: string
-        spec: string
-        task_title?: string | null
-        display_name?: string | null
-        status: string
-        assignee_handle?: string | null
-        dispatch_id?: string | null
-        spec_truncated?: boolean
-      }[]
-      count: number
-      runId?: string
-      legacyReadOnly?: boolean
-    }>('orchestration.taskList', {
-      status: getOptionalStringFlag(flags, 'status'),
+    const result = await client.call(client.rpc.orchestration.taskList, {
+      status: getOptionalChoiceFlag(flags, 'status', TASK_STATUS_VALUES),
       ready: flags.has('ready') ? true : undefined,
       brief: brief ? true : undefined,
       run,
@@ -842,40 +817,24 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration task-update': async ({ flags, client, cwd, json }) => {
-    const status = getRequiredStringFlag(flags, 'status')
-    if (!TASK_STATUS_VALUES.includes(status as (typeof TASK_STATUS_VALUES)[number])) {
-      throw new RuntimeClientError(
-        'invalid_argument',
-        `invalid status '${status}', expected one of: ${TASK_STATUS_VALUES.join(', ')}`
-      )
-    }
-    const result = await callMutation<{ task: { id: string; status: string } }>(
-      client,
-      flags,
-      'orchestration.taskUpdate',
-      {
-        id: getRequiredStringFlag(flags, 'id'),
-        status,
-        result: getOptionalStringFlag(flags, 'result'),
-        run: getOptionalStringFlag(flags, 'run'),
-        callerTerminalHandle: await resolveCoordinatorTerminalHandle(flags, cwd, client)
-      }
+    const statusValue = getRequiredStringFlag(flags, 'status')
+    const status = requireChoice(
+      statusValue,
+      TASK_STATUS_VALUES,
+      `invalid status '${statusValue}', expected one of: ${TASK_STATUS_VALUES.join(', ')}`
     )
+    const result = await callMutation(client, flags, client.rpc.orchestration.taskUpdate, {
+      id: getRequiredStringFlag(flags, 'id'),
+      status,
+      result: getOptionalStringFlag(flags, 'result'),
+      run: getOptionalStringFlag(flags, 'run'),
+      callerTerminalHandle: await resolveCoordinatorTerminalHandle(flags, cwd, client)
+    })
     printResult(result, json, (r) => `Updated ${r.task.id} -> ${r.task.status}`)
   },
 
   'orchestration worker-start': async ({ flags, client, cwd, json }) => {
-    const result = await callMutation<{
-      runId: string
-      taskId: string
-      dispatchId: string
-      state: string
-      failedStage?: string
-      lastError?: string
-      warning?: string
-      effects: unknown[]
-      residualResources: unknown[]
-    }>(client, flags, 'orchestration.workerStart', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.workerStart, {
       task: getRequiredStringFlag(flags, 'task'),
       on: getOptionalStringFlag(flags, 'on'),
       worktree: getOptionalStringFlag(flags, 'worktree'),
@@ -884,7 +843,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       baseBranch: getOptionalStringFlag(flags, 'base-branch'),
       displayName: getOptionalStringFlag(flags, 'display-name'),
       comment: getOptionalStringFlag(flags, 'comment'),
-      setup: getOptionalStringFlag(flags, 'setup'),
+      setup: getOptionalChoiceFlag(flags, 'setup', WORKER_SETUP_VALUES),
       agent: getOptionalStringFlag(flags, 'agent'),
       terminal: getOptionalStringFlag(flags, 'terminal'),
       retryOf: getOptionalStringFlag(flags, 'retry-of'),
@@ -906,18 +865,14 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration worker-show': async ({ flags, client, json }) => {
-    const result = await client.call<{
-      dispatch: { id: string; task_id: string; status: string }
-      worker: { state: string; stage: string; agent_terminal_handle: string | null }
-    }>('orchestration.workerShow', {
+    const result = await client.call(client.rpc.orchestration.workerShow, {
       dispatch: getRequiredStringFlag(flags, 'dispatch')
     })
-    printResult(
-      result,
-      json,
-      (value) =>
-        `${value.dispatch.id} task=${value.dispatch.task_id} [${value.worker.state}] stage=${value.worker.stage}`
-    )
+    printResult(result, json, (value) => {
+      const dispatch = value.dispatch
+      const task = dispatch ? ` task=${dispatch.task_id}` : ''
+      return `${dispatch?.id ?? value.worker.dispatch_id}${task} [${value.worker.state}] stage=${value.worker.stage}`
+    })
   },
 
   'orchestration worker-read': async ({ flags, client, json }) => {
@@ -926,32 +881,18 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       cursorFlag !== undefined && /^\d+$/.test(cursorFlag)
         ? Number.parseInt(cursorFlag, 10)
         : cursorFlag
-    const source = getOptionalStringFlag(flags, 'source')
-    if (source && !['auto', 'transcript', 'terminal'].includes(source)) {
-      throw new RuntimeClientError(
-        'invalid_argument',
-        '--source must be auto, transcript, or terminal'
-      )
-    }
-    const result = await client.call<OrchestrationWorkerReadResult | LegacyWorkerReadResult>(
-      'orchestration.workerRead',
-      {
-        dispatch: getRequiredStringFlag(flags, 'dispatch'),
-        cursor,
-        limit: getOptionalPositiveIntegerFlag(flags, 'limit'),
-        source: source as OrchestrationWorkerReadSource | undefined
-      }
-    )
+    const source = getOptionalChoiceFlag(flags, 'source', WORKER_READ_SOURCE_VALUES)
+    const result = await client.call(client.rpc.orchestration.workerRead, {
+      dispatch: getRequiredStringFlag(flags, 'dispatch'),
+      cursor,
+      limit: getOptionalPositiveIntegerFlag(flags, 'limit'),
+      source
+    })
     printResult(result, json, formatWorkerRead)
   },
 
   'orchestration worker-stop': async ({ flags, client, json }) => {
-    const result = await callMutation<{
-      dispatchId: string
-      state: string
-      processAction: string
-      lastError?: string
-    }>(client, flags, 'orchestration.workerStop', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.workerStop, {
       dispatch: getRequiredStringFlag(flags, 'dispatch')
     })
     if (result.result.state === 'stop_unknown') {
@@ -966,11 +907,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration worker-abandon': async ({ flags, client, json }) => {
-    const result = await callMutation<{
-      dispatchId: string
-      state: string
-      warning: string
-    }>(client, flags, 'orchestration.workerAbandon', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.workerAbandon, {
       dispatch: getRequiredStringFlag(flags, 'dispatch')
     })
     printResult(
@@ -986,12 +923,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
     const returnPreamble = flags.has('return-preamble') ? true : undefined
     // Why: --to is only required for non-dry-run; the RPC handler re-enforces.
     const to = dryRun ? getOptionalStringFlag(flags, 'to') : getRequiredStringFlag(flags, 'to')
-    const result = await callMutation<{
-      dispatch: { id: string; task_id: string; status: string } | null
-      injected?: boolean
-      dryRun?: boolean
-      preamble?: string
-    }>(client, flags, 'orchestration.dispatch', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.dispatch, {
       task: getRequiredStringFlag(flags, 'task'),
       run: getOptionalStringFlag(flags, 'run'),
       to,
@@ -1002,10 +934,10 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       devMode: isDevCliInvocation()
     })
     printResult(result, json, (r) => {
-      if (r.dryRun) {
-        return r.preamble ?? ''
+      if (r.dispatch === null) {
+        return r.preamble
       }
-      const base = `Dispatched ${r.dispatch?.task_id} -> ${r.dispatch?.id} [${r.dispatch?.status}]`
+      const base = `Dispatched ${r.dispatch.task_id} -> ${r.dispatch.id} [${r.dispatch.status}]`
       return r.preamble ? `${base}\n\n--- Preamble ---\n${r.preamble}` : base
     })
   },
@@ -1028,18 +960,10 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
         '--options is only valid when creating a new question.'
       )
     }
-    const result = await callMutation<{
-      answer: string | null
-      messageId: string | null
-      threadId: string
-      timedOut: boolean
-      timeoutMs?: number
-      cancelled?: boolean
-      connectionLost?: boolean
-    }>(
+    const result = await callMutation(
       client,
       flags,
-      'orchestration.ask',
+      client.rpc.orchestration.ask,
       {
         to: getOptionalStringFlag(flags, 'to'),
         run: getOptionalStringFlag(flags, 'run'),
@@ -1087,10 +1011,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
     const from = showPreamble
       ? await resolveCoordinatorTerminalHandle(flags, cwd, client)
       : undefined
-    const result = await client.call<{
-      dispatch: { id: string; task_id: string; status: string } | null
-      preamble?: string
-    }>('orchestration.dispatchShow', {
+    const result = await client.call(client.rpc.orchestration.dispatchShow, {
       task: getRequiredStringFlag(flags, 'task'),
       preamble: showPreamble,
       from,
@@ -1124,9 +1045,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration gate-create': async ({ flags, client, json }) => {
-    const result = await callMutation<{
-      gate: { id: string; task_id: string; status: string }
-    }>(client, flags, 'orchestration.gateCreate', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.gateCreate, {
       task: getRequiredStringFlag(flags, 'task'),
       question: getRequiredStringFlag(flags, 'question'),
       options: getOptionalStringFlag(flags, 'options')
@@ -1139,9 +1058,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration gate-resolve': async ({ flags, client, json }) => {
-    const result = await callMutation<{
-      gate: { id: string; task_id: string; status: string; resolution: string }
-    }>(client, flags, 'orchestration.gateResolve', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.gateResolve, {
       id: getRequiredStringFlag(flags, 'id'),
       resolution: getRequiredStringFlag(flags, 'resolution')
     })
@@ -1149,12 +1066,9 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
   },
 
   'orchestration gate-list': async ({ flags, client, json }) => {
-    const result = await client.call<{
-      gates: { id: string; task_id: string; question: string; status: string }[]
-      count: number
-    }>('orchestration.gateList', {
+    const result = await client.call(client.rpc.orchestration.gateList, {
       task: getOptionalStringFlag(flags, 'task'),
-      status: getOptionalStringFlag(flags, 'status')
+      status: getOptionalChoiceFlag(flags, 'status', GATE_STATUS_VALUES)
     })
     printResult(result, json, (r) => {
       if (r.gates.length === 0) {
@@ -1176,7 +1090,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
         'Choose exactly one reset scope: --all, --tasks, or --messages.'
       )
     }
-    const result = await callMutation<{ reset: string }>(client, flags, 'orchestration.reset', {
+    const result = await callMutation(client, flags, client.rpc.orchestration.reset, {
       all: flags.has('all') ? true : undefined,
       tasks: flags.has('tasks') ? true : undefined,
       messages: flags.has('messages') ? true : undefined

@@ -8,6 +8,7 @@ import {
   TooltipTrigger
 } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 const EXAMPLE_PROMPTS: string[] = [
   'Using Yiru CLI, open https://github.com/notifications and click the first unread pull request.',
@@ -17,7 +18,7 @@ const EXAMPLE_PROMPTS: string[] = [
 
 async function handleCopyText(text: string, label: string): Promise<void> {
   try {
-    await window.api.ui.writeClipboardText(text)
+    await shellClient.ui.writeClipboardText(text)
     toast.success(
       translate('auto.components.settings.BrowserUseExamples.a602d43069', 'Copied {{value0}}.', {
         value0: label

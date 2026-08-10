@@ -1,3 +1,4 @@
+import { createORPCClient, ORPCError, type ClientLink } from '@orpc/client'
 import {
   MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION,
   RUNTIME_PROTOCOL_VERSION
@@ -6,13 +7,15 @@ import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 
 import { MOBILE_AI_VAULT_CAPABILITY } from '../agent-history/capability'
 import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcResponse, RpcSuccess } from '../transport/types'
+import type { RuntimeOrpcClient } from '../transport/runtime-orpc-client'
+import { isRuntimeOrpcStreamPath } from '../transport/runtime-orpc-compatibility'
 import {
   mobileUiLabScenarioFromHostId,
   UI_LAB_FILE_PATHS,
   UI_LAB_MARKDOWN,
   UI_LAB_TERMINAL_HANDLE
 } from './fixtures'
+import { createUiLabSubscription } from './rpc-client-subscriptions'
 import {
   uiLabAgentSessions,
   uiLabBranchCompare,
@@ -27,21 +30,6 @@ import {
 } from './runtime-fixtures'
 import { uiLabInitialChatMessages, uiLabSessionTabs } from './session-fixtures'
 
-const UI_LAB_RUNTIME_ID = 'ui-lab-runtime'
-
-function success(result: unknown): RpcSuccess {
-  return { id: 'ui-lab', ok: true, result, _meta: { runtimeId: UI_LAB_RUNTIME_ID } }
-}
-
-function failure(method: string): RpcFailure {
-  return {
-    id: 'ui-lab',
-    ok: false,
-    error: { code: 'method_not_found', message: `UI Lab does not mock ${method}` },
-    _meta: { runtimeId: UI_LAB_RUNTIME_ID }
-  }
-}
-
 function requestParameter(params: unknown, key: string): unknown {
   return typeof params === 'object' && params !== null ? Reflect.get(params, key) : undefined
 }
@@ -54,9 +42,6 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
 
   const nativeChatListeners = new Set<(result: unknown) => void>()
   let localMessageCounter = 0
-  const deliver = (listener: (result: unknown) => void, payload: unknown): void => {
-    queueMicrotask(() => listener(payload))
-  }
   const appendLocalChatTurn = (text: string): void => {
     const turn = ++localMessageCounter
     const messages: NativeChatMessage[] = [
@@ -81,67 +66,81 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
       }
     ]
     for (const listener of nativeChatListeners) {
-      deliver(listener, { type: 'appended', messages })
+      queueMicrotask(() => listener({ type: 'appended', messages }))
     }
   }
 
-  const sendRequest = async (method: string, params?: unknown): Promise<RpcResponse> => {
+  // Why: the UI Lab is a local fixture with no real host — it implements the
+  // typed contract directly rather than negotiating oRPC over a transport, so
+  // there is no bare-string fallback to translate through (see slice 124).
+  const call = async (
+    path: readonly string[],
+    input: unknown,
+    options: { signal?: AbortSignal }
+  ): Promise<unknown> => {
+    if (isRuntimeOrpcStreamPath(path)) {
+      return createUiLabSubscription(path, { scenario, nativeChatListeners }, options.signal)
+    }
+    return dispatchUiLabCall(path.join('.'), input)
+  }
+
+  const dispatchUiLabCall = (method: string, params: unknown): unknown => {
     switch (method) {
       case 'status.get':
-        return success({
+        return {
           capabilities: [MOBILE_AI_VAULT_CAPABILITY, 'browser.screencast.v1'],
           runtimeProtocolVersion: RUNTIME_PROTOCOL_VERSION,
           minCompatibleRuntimeClientVersion: MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION
-        })
+        }
       case 'ui.get':
-        return success({ ui: {} })
+        return { ui: {} }
       case 'repo.list':
-        return success(uiLabRepos())
+        return uiLabRepos()
       case 'repo.baseRefDefault':
-        return success({ defaultBaseRef: 'main' })
+        return { defaultBaseRef: 'main' }
       case 'worktree.ps':
-        return success({ worktrees: uiLabWorktrees() })
+        return { worktrees: uiLabWorktrees() }
       case 'worktree.show':
-        return success(uiLabWorktreeMetadata())
+        return uiLabWorktreeMetadata()
       case 'git.status':
-        return success(uiLabGitStatus())
+        return uiLabGitStatus()
       case 'git.branchCompare':
-        return success(uiLabBranchCompare())
+        return uiLabBranchCompare()
       case 'git.diff':
       case 'git.branchDiff':
-        return success(uiLabDiff())
+        return uiLabDiff()
       case 'git.history':
-        return success(uiLabGitHistory())
+        return uiLabGitHistory()
       case 'files.readDir': {
         const relativePath = requestParameter(params, 'relativePath')
-        return success(uiLabDirectory(typeof relativePath === 'string' ? relativePath : ''))
+        return uiLabDirectory(typeof relativePath === 'string' ? relativePath : '')
       }
       case 'files.read': {
         const relativePath = requestParameter(params, 'relativePath')
-        return success(uiLabFile(typeof relativePath === 'string' ? relativePath : 'README.md'))
+        return uiLabFile(typeof relativePath === 'string' ? relativePath : 'README.md')
       }
       case 'aiVault.listSessions':
-        return success(uiLabAgentSessions(hostId))
+        return uiLabAgentSessions(hostId)
       case 'session.tabs.list':
-        return success(uiLabSessionTabs(scenario))
+        return uiLabSessionTabs(scenario)
       case 'terminal.list':
-        return success({
+        return {
           terminals: [{ handle: UI_LAB_TERMINAL_HANDLE, title: 'Codex fixture', isActive: true }]
-        })
+        }
       case 'nativeChat.readSession':
-        return success({ messages: uiLabInitialChatMessages(scenario), hasMore: false })
+        return { messages: uiLabInitialChatMessages(scenario), hasMore: false }
       case 'markdown.readTab':
-        return success({
+        return {
           content: UI_LAB_MARKDOWN,
           version: 'ui-lab-v1',
           isDirty: false,
           editable: true
-        })
+        }
       case 'files.searchPaths':
       case 'files.list':
-        return success({ files: UI_LAB_FILE_PATHS.map((relativePath) => ({ relativePath })) })
+        return { files: UI_LAB_FILE_PATHS.map((relativePath) => ({ relativePath })) }
       case 'files.resolveTerminalPath':
-        return success({ exists: false, isDirectory: false })
+        return { exists: false, isDirectory: false }
       case 'browser.goto':
       case 'browser.back':
       case 'browser.forward':
@@ -160,77 +159,50 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
       case 'git.push':
       case 'git.pull':
       case 'git.fetch':
-        return success({})
+        return {}
       case 'terminal.send': {
         const text = requestParameter(params, 'text')
         const enter = requestParameter(params, 'enter')
-        if (typeof text === 'string' && text.trim() && enter !== false && text !== '\u001b') {
+        if (typeof text === 'string' && text.trim() && enter !== false && text !== '') {
           appendLocalChatTurn(text.trim())
         }
-        return success({ send: { accepted: true } })
+        return { send: { accepted: true } }
       }
       case 'worktree.activate':
       case 'worktree.set':
       case 'session.tabs.activate':
       case 'terminal.focus':
       case 'terminal.clearBuffer':
-        return success({})
+        return {}
       case 'terminal.setDisplayMode': {
         const mode = requestParameter(params, 'mode')
-        return success({ mode: mode === 'desktop' ? 'desktop' : 'auto' })
+        return { mode: mode === 'desktop' ? 'desktop' : 'auto' }
       }
       default:
-        return failure(method)
+        throw new ORPCError('NOT_FOUND', { message: `UI Lab does not mock ${method}` })
     }
   }
 
-  return {
-    sendRequest,
-    subscribe(method, _params, onData) {
-      let active = true
-      const emit = (payload: unknown): void => {
-        if (active) {
-          onData(payload)
-        }
-      }
-      if (method === 'nativeChat.subscribe') {
-        nativeChatListeners.add(emit)
-        deliver(
-          emit,
-          scenario === 'error'
-            ? { type: 'error', message: 'Fixture transcript is unavailable.' }
-            : { type: 'snapshot', messages: uiLabInitialChatMessages(scenario), hasMore: false }
-        )
-      } else if (method === 'session.tabs.subscribe') {
-        deliver(emit, { type: 'snapshot', ...uiLabSessionTabs(scenario) })
-      } else if (method === 'terminal.subscribe') {
-        deliver(emit, { type: 'subscribed' })
-      } else if (method === 'browser.screencast') {
-        deliver(emit, {
-          type: 'ready',
-          tab: {
-            url: 'https://yiru.app/ui-lab',
-            title: 'Yiru UI Lab',
-            canGoBack: true,
-            canGoForward: false
-          }
-        })
-      } else if (method === 'runtime.clientEvents.subscribe') {
-        deliver(emit, { type: 'ready' })
-      }
-      return () => {
-        active = false
-        nativeChatListeners.delete(emit)
-      }
-    },
-    updateTerminalSubscriptionViewport() {},
+  const link: ClientLink<Record<never, never>> = {
+    call: (path, input, callOptions) => call(path, input, callOptions)
+  }
+  const orpc = createORPCClient<RuntimeOrpcClient>(link)
+
+  const client: RpcClient = {
+    orpc,
     getState: () => 'connected',
     getReconnectAttempt: () => 0,
     getLastConnectedAt: () => Date.now(),
     onStateChange: () => () => {},
     notifyForeground() {},
+    // Why: the UI Lab mock never talks to a real host, so there is nothing
+    // for the protocol-compat fallback probe to learn — callers already
+    // treat `null` as "no answer" and keep gates hidden.
+    probeStatusForProtocolCompat: async () => null,
     close() {
       nativeChatListeners.clear()
     }
   }
+
+  return client
 }

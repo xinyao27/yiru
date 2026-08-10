@@ -20,7 +20,6 @@ import { cn } from '~renderer/lib/class-names'
 import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { useAppStore } from '~renderer/store'
-import { useRepoById } from '~renderer/store/selectors'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '~shared/workspace/panel-titlebar-pinned'
 
@@ -44,7 +43,6 @@ export function TabBarOpenInMenuButton({
   dropIndicator = null
 }: TabBarOpenInMenuButtonProps): React.JSX.Element | null {
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
-  const repo = useRepoById(worktree?.repoId ?? null)
   const runtimeEnvironmentId = useAppStore((state) =>
     getRuntimeEnvironmentIdForWorktree(state, worktreeId)
   )
@@ -72,7 +70,9 @@ export function TabBarOpenInMenuButton({
     void openWorktreePath({
       target: entry.target,
       worktreePath: worktree.path,
-      connectionId: repo?.connectionId ?? null,
+      // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+      // were removed (#63) — a repo-backed worktree is never remote.
+      connectionId: null,
       runtimeEnvironmentId,
       command: entry.command
     })
@@ -160,7 +160,7 @@ export function TabBarOpenInMenuButton({
         <DropdownMenuContent align="end" side="bottom" sideOffset={4} className="w-52">
           <WorktreeOpenInMenuContent
             worktreePath={worktree.path}
-            connectionId={repo?.connectionId ?? null}
+            connectionId={null}
             runtimeEnvironmentId={runtimeEnvironmentId}
             onEntryOpen={rememberEntry}
           />

@@ -1,4 +1,3 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
 import type {
@@ -7,7 +6,7 @@ import type {
 } from '~shared/runtime-types'
 import type { TuiAgent } from '~shared/types'
 
-import { unwrapRuntimeRpcResult } from './rpc-client'
+import { callRuntimeOrpc } from './orpc-client'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
 import { recordWebSessionFocusIntent } from './web-session-focus-intent'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
@@ -34,10 +33,10 @@ export async function createWebSessionTerminalCommand(args: {
   activate?: boolean
 }): Promise<WebSessionCommandResult<RuntimeMobileSessionCreateTerminalResult>> {
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: args.environmentId,
-      method: 'session.tabs.createTerminal',
-      params: {
+    const value = await callRuntimeOrpc(
+      { kind: 'environment', environmentId: args.environmentId },
+      (client) => client.session.tabs.createTerminal,
+      {
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         afterTabId: args.afterTabId ? toHostSessionTabId(args.afterTabId) : undefined,
         targetGroupId: args.targetGroupId,
@@ -52,10 +51,7 @@ export async function createWebSessionTerminalCommand(args: {
         ...(args.viewMode ? { viewMode: args.viewMode } : {}),
         activate: args.activate !== false
       },
-      timeoutMs: 15_000
-    })
-    const value = unwrapRuntimeRpcResult(
-      response as RuntimeRpcResponse<RuntimeMobileSessionCreateTerminalResult>
+      { timeoutMs: 15_000 }
     )
     if (args.activate !== false) {
       recordWebSessionFocusIntent(args.worktreeId, value.tab.id)
@@ -75,10 +71,15 @@ export async function createWebSessionBrowserTabCommand(args: {
   targetGroupId?: string
 }): Promise<WebSessionCommandResult<BrowserTabCreateResult>> {
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: args.environmentId,
-      method: 'browser.tabCreate',
-      params: {
+    // Why: dispatches by contract path through the negotiated oRPC client
+    // instead of `window.api.runtimeEnvironments.call` with a bare method
+    // string — the bare-string channel skips capability negotiation and
+    // always lands on the legacy dispatcher, which no longer serves domains
+    // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
+    const value = await callRuntimeOrpc(
+      { kind: 'environment', environmentId: args.environmentId },
+      (client) => client.browser.tabCreate,
+      {
         browserPageId: args.browserPageId,
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         url: args.url,
@@ -88,9 +89,8 @@ export async function createWebSessionBrowserTabCommand(args: {
         // Why: paired clients stage the local mirror while the host webview registers.
         waitForRegistration: false
       },
-      timeoutMs: 15_000
-    })
-    const value = unwrapRuntimeRpcResult(response as RuntimeRpcResponse<BrowserTabCreateResult>)
+      { timeoutMs: 15_000 }
+    )
     recordWebSessionFocusIntent(args.worktreeId, value.browserPageId)
     return { status: 'completed', value }
   } catch (error) {
@@ -109,28 +109,23 @@ export function setWebSessionTabPropsCommand(args: {
   const hostTabId = isWebTerminalSurfaceTabId(args.tabId)
     ? toHostSessionTabId(args.tabId)
     : args.tabId
-  void window.api.runtimeEnvironments
-    .call({
-      selector: args.environmentId,
-      method: 'session.tabs.setTabProps',
-      params: {
-        worktree: toRuntimeWorktreeSelector(args.worktreeId),
-        tabId: hostTabId,
-        ...(args.color !== undefined ? { color: args.color } : {}),
-        ...(args.isPinned !== undefined ? { isPinned: args.isPinned } : {}),
-        ...(args.viewMode !== undefined ? { viewMode: args.viewMode } : {})
-      },
-      timeoutMs: 15_000
-    })
-    .then((response) => {
-      unwrapRuntimeRpcResult(response as RuntimeRpcResponse<{ updated: true }>)
-    })
-    .catch((error) => {
-      console.warn(
-        '[web-session-command] failed to set tab props:',
-        error instanceof Error ? error.message : String(error)
-      )
-    })
+  void callRuntimeOrpc(
+    { kind: 'environment', environmentId: args.environmentId },
+    (client) => client.session.tabs.setTabProps,
+    {
+      worktree: toRuntimeWorktreeSelector(args.worktreeId),
+      tabId: hostTabId,
+      ...(args.color !== undefined ? { color: args.color } : {}),
+      ...(args.isPinned !== undefined ? { isPinned: args.isPinned } : {}),
+      ...(args.viewMode !== undefined ? { viewMode: args.viewMode } : {})
+    },
+    { timeoutMs: 15_000 }
+  ).catch((error) => {
+    console.warn(
+      '[web-session-command] failed to set tab props:',
+      error instanceof Error ? error.message : String(error)
+    )
+  })
 }
 
 export async function closeWebSessionTabCommand(args: {
@@ -143,16 +138,13 @@ export async function closeWebSessionTabCommand(args: {
     : args.tabId
   recordWebSessionCloseIntent(args.worktreeId, hostTabId, Date.now())
   try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: args.environmentId,
-      method: 'session.tabs.close',
-      params: { worktree: toRuntimeWorktreeSelector(args.worktreeId), tabId: hostTabId },
-      timeoutMs: 15_000
-    })
-    return {
-      status: 'completed',
-      value: unwrapRuntimeRpcResult(response as RuntimeRpcResponse<unknown>)
-    }
+    const value = await callRuntimeOrpc(
+      { kind: 'environment', environmentId: args.environmentId },
+      (client) => client.session.tabs.close,
+      { worktree: toRuntimeWorktreeSelector(args.worktreeId), tabId: hostTabId },
+      { timeoutMs: 15_000 }
+    )
+    return { status: 'completed', value }
   } catch (error) {
     return { status: 'failed', error }
   }

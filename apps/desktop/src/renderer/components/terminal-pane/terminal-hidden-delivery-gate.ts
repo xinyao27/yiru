@@ -7,6 +7,7 @@
  * picks which mode-2031 responder is registered (byte sidecar vs fact reply),
  * so it must never flip per chunk.
  */
+import { getRendererSettingsSync } from '~renderer/runtime/settings-client'
 import type { GlobalSettings } from '~shared/types'
 
 // Why: cached once per session — the blocking read should only ever run on
@@ -15,13 +16,7 @@ let persistedGateFlagCache: boolean | null | undefined
 
 function readPersistedHiddenDeliveryGateFlagSync(): boolean | null {
   if (persistedGateFlagCache === undefined) {
-    try {
-      const getSync = (globalThis as { window?: Window }).window?.api?.settings?.getSync
-      persistedGateFlagCache =
-        typeof getSync === 'function' ? (getSync()?.terminalHiddenDeliveryGate ?? null) : null
-    } catch {
-      persistedGateFlagCache = null
-    }
+    persistedGateFlagCache = getRendererSettingsSync()?.terminalHiddenDeliveryGate ?? null
   }
   return persistedGateFlagCache
 }

@@ -7,7 +7,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-import { net, session } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 import type { NetworkProxySettings } from '~shared/network-proxy'
 import type {
   ProviderRateLimits,
@@ -36,7 +36,6 @@ import {
 } from '../claude/accounts/oauth-refresh'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
-import { ensureElectronProxyFromEnvironment } from '../network/proxy-settings'
 import { createOAuthUsageError, OAuthUsageError } from './claude-oauth-usage-error'
 import { fetchViaPty } from './claude-pty'
 import {
@@ -52,23 +51,6 @@ const CLAUDE_CODE_USER_AGENT = 'claude-code/2.1.0'
 const API_TIMEOUT_MS = 10_000
 const LIVE_CLAUDE_REFRESH_DEFERRED_MESSAGE =
   'Claude usage refresh is waiting for the live Claude terminal to rotate its credentials.'
-
-/**
- * Bridge standard HTTP proxy env vars into Electron's session proxy config.
- *
- * Why: Electron's net.fetch uses Chromium's networking stack which respects
- * OS-level proxy settings but ignores HTTP_PROXY / HTTPS_PROXY env vars.
- * Users in regions where api.anthropic.com is only reachable via proxy (see
- * #521, #800) often set these env vars rather than configuring system proxy.
- * Without this bridge, the usage indicator silently fails and the app may hit
- * Anthropic from an unexpected IP, risking rate-limit signals on the account.
- */
-async function ensureProxyFromEnv(): Promise<void> {
-  await ensureElectronProxyFromEnvironment({
-    proxySession: session.defaultSession,
-    probeUrl: OAUTH_USAGE_URL
-  }).catch(() => {})
-}
 
 // ---------------------------------------------------------------------------
 // Credential reading — tries multiple sources for an OAuth bearer token
@@ -431,7 +413,6 @@ async function fetchViaOAuth(token: string, signal?: AbortSignal): Promise<Provi
   if (signal?.aborted) {
     return abortedClaudeRateLimitResult()
   }
-  await ensureProxyFromEnv()
   if (signal?.aborted) {
     return abortedClaudeRateLimitResult()
   }
@@ -443,9 +424,9 @@ async function fetchViaOAuth(token: string, signal?: AbortSignal): Promise<Provi
     : AbortSignal.timeout(API_TIMEOUT_MS)
 
   try {
-    // Why: net.fetch uses Chromium's networking stack which respects OS proxy
-    // settings and certificates. Env var proxies are bridged by ensureProxyFromEnv.
-    const res = await net.fetch(OAUTH_USAGE_URL, {
+    // Why: Electron injects its configured Chromium network stack for proxy and
+    // certificate behavior; the pure Node runtime host uses its native fetch.
+    const res = await fetchHttp(OAUTH_USAGE_URL, {
       headers: {
         Authorization: `Bearer ${token}`,
         'anthropic-beta': OAUTH_BETA_HEADER,

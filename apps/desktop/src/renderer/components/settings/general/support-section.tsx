@@ -9,6 +9,12 @@ import { Separator } from '~renderer/components/ui/separator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import {
+  checkShellYiruStarred,
+  completeShellStarNag,
+  starYiruFromShell
+} from '~renderer/runtime/github-shell-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
@@ -42,7 +48,7 @@ export function GeneralSupportSection({
 
   useEffect(() => {
     let cancelled = false
-    void window.api.gh.checkYiruStarred().then((result) => {
+    void checkShellYiruStarred().then((result) => {
       if (cancelled) {
         return
       }
@@ -60,7 +66,7 @@ export function GeneralSupportSection({
   const handleStarClick = async (): Promise<void> => {
     if (starState === 'web-fallback') {
       setStarState('opening-github')
-      await window.api.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
+      await shellClient.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
       if (mountedRef.current) {
         setStarState('web-fallback')
       }
@@ -70,7 +76,7 @@ export function GeneralSupportSection({
       return
     }
     setStarState('starring')
-    const ok = await window.api.gh.starYiru('settings')
+    const ok = await starYiruFromShell('settings')
     if (!ok) {
       if (mountedRef.current) {
         setStarState('web-fallback')
@@ -82,7 +88,7 @@ export function GeneralSupportSection({
     }
     // Why: clicking star anywhere should also permanently mute the
     // threshold-based nag so the user isn't re-prompted via the popup.
-    await window.api.starNag.complete()
+    await completeShellStarNag()
   }
 
   return (

@@ -103,23 +103,6 @@ export function getPastePayloadUtf8ByteLength(text: string): number {
   return measurePastePayloadMetadata(text).byteLength
 }
 
-export function countPastePayloadLines(text: string): number {
-  return measurePastePayloadMetadata(text).lineCount
-}
-
-export function hasPastePayloadControlSequence(text: string): boolean {
-  for (let index = 0; index < text.length; index += 1) {
-    const codePoint = text.codePointAt(index) ?? 0
-    if (isPasteControlSequenceCodePoint(codePoint)) {
-      return true
-    }
-    if (codePoint > 0xffff) {
-      index += 1
-    }
-  }
-  return false
-}
-
 function createEmptyPastePayloadMetadata(): PastePayloadMetadata {
   return {
     byteLength: 0,

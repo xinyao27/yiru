@@ -1,33 +1,6 @@
-import { GitMerge } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React from 'react'
 import { cn } from '~renderer/lib/class-names'
-
-import { PullRequestIcon } from './checks-panel/content'
-
-function hostedReviewStateClass(review: HostedReviewInfo): string {
-  if (review.state === 'merged') {
-    return 'text-purple-500/80'
-  }
-  if (review.state === 'open') {
-    return 'text-emerald-500/80'
-  }
-  if (review.state === 'closed') {
-    return 'text-muted-foreground/60'
-  }
-  return 'text-muted-foreground/50'
-}
-
-export function HostedReviewIcon({
-  review,
-  className
-}: {
-  review: HostedReviewInfo
-  className?: string
-}): React.JSX.Element {
-  const Icon = review.provider === 'gitlab' ? GitMerge : PullRequestIcon
-  return <Icon className={cn(className, hostedReviewStateClass(review))} />
-}
 
 function hostedReviewLabel(review: HostedReviewInfo): string {
   return `${review.provider === 'gitlab' ? 'MR' : 'PR'} #${review.number}`

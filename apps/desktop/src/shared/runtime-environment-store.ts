@@ -5,7 +5,6 @@ import { isCoworkingRuntimeEnvironmentId } from './coworking/runtime-environment
 import type { PairingOffer } from './pairing'
 import {
   createEnvironmentFromPairingOffer,
-  getPreferredPairingOffer,
   KnownRuntimeEnvironmentSchema,
   RuntimeEnvironmentStoreSchema,
   type KnownRuntimeEnvironment,
@@ -87,13 +86,6 @@ export function resolveEnvironment(
   selector: string
 ): KnownRuntimeEnvironment {
   return resolveEnvironmentFromStore(readEnvironmentStore(userDataPath), selector)
-}
-
-export function resolveEnvironmentPairingOffer(
-  userDataPath: string,
-  selector: string
-): PairingOffer {
-  return getPreferredPairingOffer(resolveEnvironment(userDataPath, selector))
 }
 
 // Why: markEnvironmentUsed runs on every runtime round-trip; persisting lastUsedAt each

@@ -10,10 +10,7 @@ import type {
   TerminalPasteSource,
   TerminalPasteTarget
 } from './model'
-import {
-  measureTerminalPastePayloadMetadata,
-  measureTerminalPastePayloadMetadataWithYield
-} from './payload-metadata'
+import { measureTerminalPastePayloadMetadataWithYield } from './payload-metadata'
 
 export {
   TERMINAL_PASTE_CHUNK_MAX_BYTES,
@@ -52,53 +49,6 @@ type PlanTerminalPasteArgs = {
 type PlanTerminalPasteWithYieldArgs = PlanTerminalPasteArgs & {
   measureYieldAfterCodeUnits?: number
   yieldToEventLoop?: () => Promise<void>
-}
-
-export function createTerminalPastePayload({
-  text,
-  source,
-  hasRichText = false,
-  maxBytes
-}: {
-  text: string
-  source: TerminalPasteSource
-  hasRichText?: boolean
-  maxBytes?: number
-}): TerminalPastePayload {
-  const metadata = measureTerminalPastePayloadMetadata(text, { stopAfterBytes: maxBytes })
-  return {
-    plainText: text,
-    source,
-    byteLength: metadata.byteLength,
-    lineCount: metadata.lineCount,
-    hasRichText,
-    hasControlSequences: metadata.hasControlSequences
-  }
-}
-
-export function planTerminalPaste({
-  text,
-  source,
-  target,
-  forceBracketedPaste = false,
-  forceBracketedPasteForMultiline = false,
-  terminalBracketedPasteMode = false,
-  hasRichText = false,
-  maxDirectBytes = TERMINAL_PASTE_DIRECT_MAX_BYTES,
-  maxChunkBytes = TERMINAL_PASTE_CHUNK_MAX_BYTES,
-  maxBytes = TERMINAL_PASTE_MAX_BYTES
-}: PlanTerminalPasteArgs): TerminalPastePlan {
-  const payload = createTerminalPastePayload({ text, source, hasRichText, maxBytes })
-  return buildTerminalPastePlan({
-    forceBracketedPaste,
-    forceBracketedPasteForMultiline,
-    maxBytes,
-    maxChunkBytes,
-    maxDirectBytes,
-    payload,
-    target,
-    terminalBracketedPasteMode
-  })
 }
 
 export async function planTerminalPasteWithYield({

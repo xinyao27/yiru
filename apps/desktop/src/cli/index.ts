@@ -106,10 +106,8 @@ async function runClaudeTeams(argv: string[], cwd: string): Promise<void> {
 async function runAgentTeamsTmuxShim(argv: string[]): Promise<void> {
   try {
     const client = new RuntimeClient(undefined, 10_000)
-    const response = await client.call<{
-      tmux: { stdout: string; stderr: string; exitCode: number }
-    }>(
-      'agentTeams.tmuxCompat',
+    const response = await client.call(
+      client.rpc.agentTeams.tmuxCompat,
       {
         teamId: process.env.YIRU_AGENT_TEAMS_TEAM_ID,
         token: process.env.YIRU_AGENT_TEAMS_TOKEN,

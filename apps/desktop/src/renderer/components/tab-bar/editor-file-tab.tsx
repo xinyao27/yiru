@@ -21,7 +21,7 @@ import { detectLanguage } from '~renderer/lib/language-detect'
 import { basename, normalizeRelativePath } from '~renderer/lib/path'
 import { renameFileOnDisk } from '~renderer/lib/rename-file'
 import { useAppStore } from '~renderer/store'
-import { useRepoById, useWorktreeById } from '~renderer/store/selectors'
+import { useWorktreeById } from '~renderer/store/selectors'
 import type { GitFileStatus } from '~shared/types'
 
 import type { OpenFile } from '../editor/state'
@@ -70,7 +70,6 @@ export default function EditorFileTab({
   dropIndicator?: DropIndicator
 }): React.JSX.Element {
   const worktree = useWorktreeById(file.worktreeId)
-  const repo = useRepoById(worktree?.repoId ?? null)
   const FileIcon = getFileTypeIcon(file.filePath)
   // Why: no transform/transition/isDragging styling — the drag design is
   // that tabs stay visually anchored; only the blue insertion bar moves.
@@ -423,7 +422,9 @@ export default function EditorFileTab({
         canRename={canRename}
         canShowMarkdownPreview={canShowMarkdownPreview}
         resolvedLanguage={resolvedLanguage}
-        repoConnectionId={repo?.connectionId ?? null}
+        // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+        // were removed (#63) — a repo-backed editor tab is never remote.
+        repoConnectionId={null}
         skipMenuFocusRestoreRef={skipMenuFocusRestoreRef}
         onActivate={onActivate}
         onOpenRenameInput={openRenameInput}

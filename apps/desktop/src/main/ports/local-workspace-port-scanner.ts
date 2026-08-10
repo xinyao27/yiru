@@ -83,13 +83,6 @@ function makeUnavailableScan(reason: string): WorkspacePortScanResult {
   }
 }
 
-export function attributePortToWorkspace(
-  port: Pick<RawListeningPort, 'cwd' | 'commandLine'>,
-  worktrees: WorkspacePortProbe[]
-): WorkspacePortOwner | undefined {
-  return attributePortToNormalizedWorkspaces(port, normalizeWorkspacePortProbes(worktrees))
-}
-
 function normalizeWorkspacePortProbes(
   worktrees: readonly WorkspacePortProbe[]
 ): NormalizedWorkspacePortProbe[] {

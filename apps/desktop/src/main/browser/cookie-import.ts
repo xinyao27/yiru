@@ -18,7 +18,7 @@ import { DatabaseSync } from 'node:sqlite'
 
 /* eslint-disable max-lines -- Why: cookie import is a single pipeline (detect → decrypt → stage → swap)
    that must stay together so the encryption, schema, and staging steps remain in sync. */
-import { app, type BrowserWindow, dialog, session } from 'electron'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 // Why: writing to userData instead of tmpdir() so the diag log is only
 // readable by the current user, not world-readable in /tmp.
@@ -26,7 +26,7 @@ let _diagLog: string | null = null
 function getDiagLogPath(): string {
   if (!_diagLog) {
     try {
-      _diagLog = join(app.getPath('userData'), 'cookie-import-diag.log')
+      _diagLog = join(getRuntimeHostPathsProvider().userDataPath(), 'cookie-import-diag.log')
     } catch {
       _diagLog = join(tmpdir(), 'yiru-cookie-import-diag.log')
     }
@@ -83,6 +83,7 @@ import {
   createChromiumCookieSnapshot,
   type ChromiumCookieSnapshot
 } from './chromium-cookie-snapshot'
+import type { BrowserCookieStore, BrowserSession } from './session'
 import { browserSessionRegistry } from './session-registry'
 import { setupClientHintsOverride } from './session-ua'
 
@@ -468,7 +469,7 @@ type ValidatedCookie = {
 // Why: Chromium's SQLite schema uses CookieSameSiteForStorage enum:
 // 0=UNSPECIFIED, 1=NO_RESTRICTION(None), 2=LAX, 3=STRICT.
 // This differs from Firefox (0=None, 1=Lax, 2=Strict).
-function chromiumSameSite(raw: number): 'unspecified' | 'no_restriction' | 'lax' | 'strict' {
+export function chromiumSameSite(raw: number): 'unspecified' | 'no_restriction' | 'lax' | 'strict' {
   switch (raw) {
     case 1:
       return 'no_restriction'
@@ -517,7 +518,7 @@ function normalizeSameSite(raw: unknown): 'unspecified' | 'no_restriction' | 'la
 // Why: Electron's cookies.set() requires a url field to determine the cookie's
 // scope. Derive it from the domain + secure flag so the caller doesn't need
 // to supply it.
-function deriveUrl(domain: string, secure: boolean): string | null {
+export function deriveUrl(domain: string, secure: boolean): string | null {
   const cleanDomain = domain.startsWith('.') ? domain.slice(1) : domain
   if (!cleanDomain || cleanDomain.includes(' ')) {
     return null
@@ -570,12 +571,12 @@ function validateCookieEntry(raw: RawCookieEntry): ValidatedCookie | null {
 async function importValidatedCookies(
   cookies: ValidatedCookie[],
   totalInput: number,
-  targetPartition: string
+  targetPartition: string,
+  targetCookies: BrowserCookieStore
 ): Promise<BrowserCookieImportResult> {
   diag(
     `importValidatedCookies: ${cookies.length} validated of ${totalInput} total, partition="${targetPartition}"`
   )
-  const targetSession = session.fromPartition(targetPartition)
   let importedCount = 0
   let skipped = totalInput - cookies.length
   const domainSet = new Set<string>()
@@ -586,7 +587,7 @@ async function importValidatedCookies(
 
   for (const cookie of cookies) {
     try {
-      await targetSession.cookies.set({
+      await targetCookies.set({
         url: cookie.url,
         name: cookie.name,
         value: stripNonPrintable(cookie.value),
@@ -640,30 +641,10 @@ async function importValidatedCookies(
 // Import from JSON file
 // ---------------------------------------------------------------------------
 
-// Why: source selection must be main-owned via a native open dialog so a
-// compromised renderer cannot turn cookie import into arbitrary file reads.
-export async function pickCookieFile(parentWindow: BrowserWindow | null): Promise<string | null> {
-  const opts = {
-    title: 'Import Cookies',
-    filters: [
-      { name: 'Cookie Files', extensions: ['json'] },
-      { name: 'All Files', extensions: ['*'] }
-    ],
-    properties: ['openFile' as const]
-  }
-  const result = parentWindow
-    ? await dialog.showOpenDialog(parentWindow, opts)
-    : await dialog.showOpenDialog(opts)
-
-  if (result.canceled || result.filePaths.length === 0) {
-    return null
-  }
-  return result.filePaths[0]
-}
-
 export async function importCookiesFromFile(
   filePath: string,
-  targetPartition: string
+  targetPartition: string,
+  targetCookies: BrowserCookieStore
 ): Promise<BrowserCookieImportResult> {
   let rawContent: string
   try {
@@ -709,7 +690,7 @@ export async function importCookiesFromFile(
     }
   }
 
-  return importValidatedCookies(validated, parsed.length, targetPartition)
+  return importValidatedCookies(validated, parsed.length, targetPartition, targetCookies)
 }
 
 // ---------------------------------------------------------------------------
@@ -789,7 +770,7 @@ const PBKDF2_SALT = 'saltysalt'
 
 const CHROMIUM_EPOCH_OFFSET = 11644473600n
 
-function chromiumTimestampToUnix(chromiumTs: bigint | number | string): number {
+export function chromiumTimestampToUnix(chromiumTs: bigint | number | string): number {
   if (!chromiumTs || chromiumTs === 0n || chromiumTs === 0 || chromiumTs === '0') {
     return 0
   }
@@ -812,7 +793,7 @@ function chromiumTimestampToUnix(chromiumTs: bigint | number | string): number {
 // Linux: PBKDF2(keyring password or "peanuts", "saltysalt", 1 iteration) → AES-128-CBC
 // Windows: DPAPI-encrypted master key from Local State → AES-256-GCM
 
-type EncryptionKeyResult = {
+export type EncryptionKeyResult = {
   key: Buffer
   mode: 'aes-128-cbc' | 'aes-256-gcm'
   // Why: Linux v10 cookies use a hardcoded "peanuts" password while v11 uses the
@@ -934,7 +915,7 @@ export function buildChromiumCookieInsertParams(
   })
 }
 
-function getEncryptionKey(
+export function getEncryptionKey(
   keychainService: string,
   keychainAccount: string,
   browser?: DetectedBrowser
@@ -1083,7 +1064,7 @@ function stripHmac(buf: Buffer): Buffer {
   return hasHmacPrefix(buf) ? buf.subarray(CHROMIUM_COOKIE_HMAC_LEN) : buf
 }
 
-function decryptCookieValueRaw(
+export function decryptCookieValueRaw(
   encryptedBuffer: Buffer,
   keyResult: EncryptionKeyResult
 ): Buffer | null {
@@ -1288,9 +1269,10 @@ function readCString(buf: Buffer, offset: number, end: number): string | null {
 // Firefox import
 // ---------------------------------------------------------------------------
 
-async function importCookiesFromFirefox(
+export async function importCookiesFromFirefox(
   browser: DetectedBrowser,
-  targetPartition: string
+  targetPartition: string,
+  targetCookies: BrowserCookieStore
 ): Promise<BrowserCookieImportResult> {
   diag(`importCookiesFromFirefox: partition="${targetPartition}"`)
 
@@ -1378,7 +1360,7 @@ async function importCookiesFromFirefox(
       return { ok: false, reason: 'No valid cookies found in Firefox.' }
     }
 
-    return importValidatedCookies(validated, rows.length, targetPartition)
+    return importValidatedCookies(validated, rows.length, targetPartition, targetCookies)
   } catch (err) {
     rmSync(tmpDir, { recursive: true, force: true })
     diag(`  Firefox import failed: ${err}`)
@@ -1393,9 +1375,10 @@ async function importCookiesFromFirefox(
 // Safari import
 // ---------------------------------------------------------------------------
 
-async function importCookiesFromSafari(
+export async function importCookiesFromSafari(
   browser: DetectedBrowser,
-  targetPartition: string
+  targetPartition: string,
+  targetCookies: BrowserCookieStore
 ): Promise<BrowserCookieImportResult> {
   diag(`importCookiesFromSafari: partition="${targetPartition}"`)
 
@@ -1433,7 +1416,7 @@ async function importCookiesFromSafari(
       return { ok: false, reason: 'All Safari cookies are expired.' }
     }
 
-    return importValidatedCookies(valid, cookies.length, targetPartition)
+    return importValidatedCookies(valid, cookies.length, targetPartition, targetCookies)
   } catch (err) {
     diag(`  Safari import failed: ${err}`)
     return { ok: false, reason: 'Could not import cookies from Safari.' }
@@ -1446,7 +1429,8 @@ async function importCookiesFromSafari(
 
 export async function importCookiesFromBrowser(
   browser: DetectedBrowser,
-  targetPartition: string
+  targetPartition: string,
+  targetSession: BrowserSession
 ): Promise<BrowserCookieImportResult> {
   diag(`importCookiesFromBrowser: browser=${browser.family} partition="${targetPartition}"`)
   if (!existsSync(browser.cookiesPath)) {
@@ -1455,10 +1439,10 @@ export async function importCookiesFromBrowser(
   }
 
   if (browser.family === 'firefox') {
-    return importCookiesFromFirefox(browser, targetPartition)
+    return importCookiesFromFirefox(browser, targetPartition, targetSession.cookies)
   }
   if (browser.family === 'safari') {
-    return importCookiesFromSafari(browser, targetPartition)
+    return importCookiesFromSafari(browser, targetPartition, targetSession.cookies)
   }
 
   // Why: Electron's cookies.set() API rejects many valid cookie values (binary
@@ -1474,11 +1458,11 @@ export async function importCookiesFromBrowser(
   // on flush/shutdown. Writing directly to the live DB is futile. Instead,
   // copy the live DB to a staging location, populate it there, and let the
   // next cold start swap it in before CookieMonster initializes.
-  const targetSession = session.fromPartition(targetPartition)
-  await targetSession.cookies.flushStore()
+  await targetSession.cookies.flush()
 
   const partitionName = targetPartition.replace('persist:', '')
-  const partitionDir = join(app.getPath('userData'), 'Partitions', partitionName)
+  const userDataPath = getRuntimeHostPathsProvider().userDataPath()
+  const partitionDir = join(userDataPath, 'Partitions', partitionName)
   let liveCookiesPath = resolveChromiumCookiesPath(partitionDir)
 
   // Why: Electron only creates the partition's Cookies SQLite file after the
@@ -1489,7 +1473,7 @@ export async function importCookiesFromBrowser(
     try {
       await targetSession.cookies.set({ url: 'https://localhost', name: '__init', value: '1' })
       await targetSession.cookies.remove('https://localhost', '__init')
-      await targetSession.cookies.flushStore()
+      await targetSession.cookies.flush()
     } catch {
       // ignore — the set/remove may fail but flushStore should still create the file
     }
@@ -1500,7 +1484,7 @@ export async function importCookiesFromBrowser(
     return { ok: false, reason: 'Target cookie database not found. Open a browser tab first.' }
   }
 
-  const stagingDir = join(app.getPath('userData'), 'cookie-import-staging')
+  const stagingDir = join(userDataPath, 'cookie-import-staging')
   const partitionSegment = partitionName.replace(/[^a-zA-Z0-9_-]/g, '_')
   const stagingCookiesPath = join(
     stagingDir,
@@ -1722,7 +1706,7 @@ export async function importCookiesFromBrowser(
     // cookies prevents stale cookies from a previous Yiru browsing session from
     // mixing with the imported set. Mixed state (some old, some imported) causes
     // sites like Google to detect inconsistent session cookies and reject them.
-    await targetSession.clearStorageData({ storages: ['cookies'] })
+    await targetSession.clearCookies()
     diag(
       `  cleared existing session cookies before loading ${decryptedCookies.length} imported cookies`
     )

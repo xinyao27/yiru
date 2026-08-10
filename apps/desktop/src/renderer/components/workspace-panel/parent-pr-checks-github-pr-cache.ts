@@ -61,13 +61,13 @@ export function getParentPrChecksGitHubPRCacheEntry({
     repo.id,
     branch,
     settings,
-    repo.connectionId,
     repo.executionHostId,
     true
   )
   const executionHostId = normalizeExecutionHostId(repo.executionHostId)
-  const canUseLegacyPRCache =
-    !repo.connectionId && (!executionHostId || executionHostId === LOCAL_EXECUTION_HOST_ID)
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const canUseLegacyPRCache = !executionHostId || executionHostId === LOCAL_EXECUTION_HOST_ID
   const legacyRepoKey = canUseLegacyPRCache
     ? getLegacyGitHubPRCacheKey(repo.path, repo.id, branch)
     : ''

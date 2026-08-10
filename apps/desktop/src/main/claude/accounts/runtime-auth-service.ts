@@ -6,10 +6,10 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
-import { app } from 'electron'
 import type { AiVaultSessionRuntimeTarget } from '~main/ai-vault/session/root-configuration'
 import { writeFileAtomically } from '~main/codex/accounts/fs-utils'
 import type { Store } from '~main/persistence'
+import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { getDefaultWslDistro, getWslHome, getWslHomeAsync, toWindowsWslPath } from '~main/wsl'
 import { buildEncodedWslBashCommand } from '~main/wsl-bash-command'
 import type { ClaudeManagedAccount } from '~shared/types'
@@ -1876,7 +1876,7 @@ export class ClaudeRuntimeAuthService {
   }
 
   private getRuntimeMetadataDir(): string {
-    const metadataDir = join(app.getPath('userData'), 'claude-runtime-auth')
+    const metadataDir = join(getRuntimeHostPathsProvider().userDataPath(), 'claude-runtime-auth')
     mkdirSync(metadataDir, { recursive: true })
     return metadataDir
   }

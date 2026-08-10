@@ -139,6 +139,10 @@ export const WorktreeCreate = z
       .unknown()
       .transform((value) => (isTuiAgent(value) ? value : undefined))
       .optional(),
+    // Why: mirrors preload's `CreateWorktreeArgs.pendingFirstAgentMessageRename`
+    // — see packages/runtime-protocol's WorktreeCreateInputSchema for the oRPC
+    // twin of this legacy schema.
+    pendingFirstAgentMessageRename: OptionalBoolean,
     automationProvenanceRequest: AutomationWorkspaceProvenanceRequest.optional()
   })
   .superRefine((params, ctx) => {

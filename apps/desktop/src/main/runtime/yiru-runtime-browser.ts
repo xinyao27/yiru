@@ -1,7 +1,28 @@
 /* eslint-disable max-lines -- Why: this file is a command adapter for one external surface, Agent Browser automation. It stays separate from YiruRuntimeService so runtime state does not grow further while browser routing remains easy to scan in one place. */
 import { randomUUID } from 'node:crypto'
 
-import { ipcMain, webContents, type BrowserWindow } from 'electron'
+import type {
+  BrowserAnnotationViewportInput,
+  BrowserAgentCommandResult,
+  BrowserControlBooleanResult,
+  BrowserDownloadCancelInput,
+  BrowserForwardResult,
+  BrowserGrabAwaitInput,
+  BrowserGrabCaptureInput,
+  BrowserGrabCaptureResult,
+  BrowserGrabExtractResult,
+  BrowserGrabResult,
+  BrowserGrabSetModeInput,
+  BrowserGrabSetModeResult,
+  BrowserInterceptListResult,
+  BrowserMouseClickResult,
+  BrowserPageIdInput,
+  BrowserPageRegisterInput,
+  BrowserPageUnregisterInput,
+  BrowserViewportOverrideInput,
+  RuntimeBrowserGuestEvent
+} from '@yiru/runtime-protocol/contract'
+import type { RuntimeWindowTarget } from '~main/runtime/host/renderer-target'
 import type {
   BrowserBackResult,
   BrowserCaptureStartResult,
@@ -55,20 +76,26 @@ import type { BrowserCertificateProceedResult } from '~shared/types'
 
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'
-import { waitForTabRegistration, waitForWorktreeTabRegistration } from '../browser/browser'
 import { BrowserError } from '../browser/cdp-bridge'
 import {
   detectInstalledBrowsers,
   importCookiesFromBrowser,
   selectBrowserProfile
 } from '../browser/cookie-import'
-import { browserCertificateTrustController, browserManager } from '../browser/manager'
+import { importCookiesIntoHeadlessProfile } from '../browser/headless-cookie-import'
+import type { BrowserPageHandle } from '../browser/page/handle'
 import { startBrowserScreencast, type BrowserScreencastSession } from '../browser/screencast-stream'
+import { requireBrowserSession } from '../browser/session'
 import { browserSessionRegistry } from '../browser/session-registry'
 import {
   BrowserRemoteScreencastAuthority,
   type BrowserRemoteScreencastStartResult
 } from './browser-remote-screencast-authority'
+import {
+  requestShellBrowserTabClose,
+  requestShellBrowserTabCreate,
+  requestShellBrowserTabSetProfile
+} from './rpc/orpc/shell-services-browser-client'
 
 export type BrowserCommandTargetParams = {
   worktree?: string
@@ -80,9 +107,9 @@ type ResolvedBrowserCommandTarget = {
   browserPageId?: string
 }
 
-type ResolvedBrowserPageWebContents = {
+type ResolvedBrowserPage = {
   browserPageId: string
-  webContents: Electron.WebContents
+  page: BrowserPageHandle
 }
 
 type BrowserScreencastParams = {
@@ -139,14 +166,15 @@ function clampOptionalNumber(
 
 export type RuntimeBrowserCommandHost = {
   getAgentBrowserBridge(): AgentBrowserBridge | null
-  resolveWorktreeSelector(selector: string): Promise<{ id: string }>
-  getAuthoritativeWindow(): BrowserWindow
-  getAvailableAuthoritativeWindow(): BrowserWindow | null
+  resolveWorktreeSelector(selector: string): Promise<{ id: string; path: string }>
+  resolveBrowserFilePath(path: string): Promise<string>
+  getAuthoritativeWindow(): RuntimeWindowTarget
+  getAvailableAuthoritativeWindow(): RuntimeWindowTarget | null
   // Why: headless serve has no renderer window; browser pages are backed by a
   // main-process offscreen backend instead. Null when offscreen browsing is
   // unavailable (e.g. environment can't support it), which keeps capability
   // reporting honest.
-  getOffscreenBrowserBackend(): BrowserBackend | null
+  getBrowserBackend(): BrowserBackend | null
   // Why: the session-tab snapshot is the source of truth for which tab is
   // focused. A headless browser create must mark itself active there so paired
   // clients keep focus on the new tab instead of the reconcile snapping back to
@@ -163,6 +191,67 @@ export type RuntimeBrowserCommandHost = {
   ): void
   cleanupSubscription(subscriptionId: string): void
   notifyBrowserDriverChanged(browserPageId: string, driver: RuntimeBrowserDriverState): void
+  // Why: CDP-driven navigation has no renderer window in headless serve, and
+  // paired clients have none at all — republish so `browser.guestEvents`
+  // subscribers see the same address-bar/title change the shell does.
+  emitBrowserGuestEvent(event: RuntimeBrowserGuestEvent): void
+}
+
+export type RuntimeBrowserShellAdapter = {
+  browserPageRegister(
+    input: BrowserPageRegisterInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult>
+  browserPageUnregister(
+    input: BrowserPageUnregisterInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult
+  browserPageSetActive(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult
+  browserOpenDevTools(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult>
+  browserSetViewportOverride(
+    input: BrowserViewportOverrideInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult>
+  browserSetAnnotationViewport(
+    input: BrowserAnnotationViewportInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult>
+  browserCancelDownload(
+    input: BrowserDownloadCancelInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult
+  browserSetGrabMode(
+    input: BrowserGrabSetModeInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabSetModeResult>
+  browserAwaitGrabSelection(
+    input: BrowserGrabAwaitInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabResult>
+  browserCancelGrab(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult
+  browserCaptureSelection(
+    input: BrowserGrabCaptureInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabCaptureResult>
+  browserExtractHover(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabExtractResult>
+  browserProceedCertificate(
+    browserPageId: string,
+    challengeId: string
+  ): BrowserCertificateProceedResult
+  waitForTabRegistration(browserPageId: string): Promise<void>
+  waitForWorktreeTabRegistration(worktreeId: string | undefined): Promise<void>
 }
 
 export class RuntimeBrowserCommands {
@@ -171,7 +260,10 @@ export class RuntimeBrowserCommands {
   private readonly stoppingScreencastPageIds = new Map<string, Promise<void>>()
   private readonly remoteScreencasts: BrowserRemoteScreencastAuthority<BrowserScreencastParams>
 
-  constructor(private readonly host: RuntimeBrowserCommandHost) {
+  constructor(
+    private readonly host: RuntimeBrowserCommandHost,
+    private readonly shellAdapter: RuntimeBrowserShellAdapter | null = null
+  ) {
     this.remoteScreencasts = new BrowserRemoteScreencastAuthority({
       startScreencast: (params, stream) => this.startScreencastSession(params, stream),
       registerSubscriptionCleanup: (subscriptionId, cleanup, connectionId) =>
@@ -184,6 +276,128 @@ export class RuntimeBrowserCommands {
 
   getDrivers(): Map<string, RuntimeBrowserDriverState> {
     return this.remoteScreencasts.getDrivers()
+  }
+
+  async browserPageRegister(
+    input: BrowserPageRegisterInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult> {
+    return (
+      (await this.shellAdapter?.browserPageRegister(input, shellConnectionId)) ?? {
+        accepted: false
+      }
+    )
+  }
+
+  browserPageUnregister(
+    input: BrowserPageUnregisterInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult {
+    return this.shellAdapter?.browserPageUnregister(input, shellConnectionId) ?? { accepted: false }
+  }
+
+  browserPageSetActive(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult {
+    return this.shellAdapter?.browserPageSetActive(input, shellConnectionId) ?? { accepted: false }
+  }
+
+  async browserOpenDevTools(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult> {
+    return (
+      (await this.shellAdapter?.browserOpenDevTools(input, shellConnectionId)) ?? {
+        accepted: false
+      }
+    )
+  }
+
+  async browserSetViewportOverride(
+    input: BrowserViewportOverrideInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult> {
+    return (
+      (await this.shellAdapter?.browserSetViewportOverride(input, shellConnectionId)) ?? {
+        accepted: false
+      }
+    )
+  }
+
+  async browserSetAnnotationViewport(
+    input: BrowserAnnotationViewportInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserControlBooleanResult> {
+    return (
+      (await this.shellAdapter?.browserSetAnnotationViewport(input, shellConnectionId)) ?? {
+        accepted: false
+      }
+    )
+  }
+
+  browserCancelDownload(
+    input: BrowserDownloadCancelInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult {
+    return this.shellAdapter?.browserCancelDownload(input, shellConnectionId) ?? { accepted: false }
+  }
+
+  async browserSetGrabMode(
+    input: BrowserGrabSetModeInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabSetModeResult> {
+    return (
+      (await this.shellAdapter?.browserSetGrabMode(input, shellConnectionId)) ?? {
+        ok: false,
+        reason: shellConnectionId ? 'not-ready' : 'not-authorized'
+      }
+    )
+  }
+
+  browserAwaitGrabSelection(
+    input: BrowserGrabAwaitInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabResult> {
+    return (
+      this.shellAdapter?.browserAwaitGrabSelection(input, shellConnectionId) ??
+      Promise.resolve({
+        kind: 'error',
+        opId: input.opId,
+        reason: shellConnectionId ? 'Guest not ready' : 'Not authorized'
+      })
+    )
+  }
+
+  browserCancelGrab(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): BrowserControlBooleanResult {
+    return this.shellAdapter?.browserCancelGrab(input, shellConnectionId) ?? { accepted: false }
+  }
+
+  async browserCaptureSelection(
+    input: BrowserGrabCaptureInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabCaptureResult> {
+    return (
+      (await this.shellAdapter?.browserCaptureSelection(input, shellConnectionId)) ?? {
+        ok: false,
+        reason: shellConnectionId ? 'Guest not ready' : 'Not authorized'
+      }
+    )
+  }
+
+  async browserExtractHover(
+    input: BrowserPageIdInput,
+    shellConnectionId: string | undefined
+  ): Promise<BrowserGrabExtractResult> {
+    return (
+      (await this.shellAdapter?.browserExtractHover(input, shellConnectionId)) ?? {
+        ok: false,
+        reason: shellConnectionId ? 'Guest not ready' : 'Not authorized'
+      }
+    )
   }
 
   reclaimForDesktop(browserPageId: string): boolean {
@@ -202,9 +416,8 @@ export class RuntimeBrowserCommands {
     bridge: AgentBrowserBridge,
     worktreeId: string | undefined
   ): boolean {
-    for (const [, webContentsId] of bridge.getRegisteredTabs(worktreeId)) {
-      const guest = webContents.fromId(webContentsId)
-      if (guest && !guest.isDestroyed()) {
+    for (const [browserPageId] of bridge.getRegisteredTabs(worktreeId)) {
+      if (bridge.getPage(browserPageId)) {
         return true
       }
     }
@@ -216,12 +429,10 @@ export class RuntimeBrowserCommands {
     worktreeId: string | undefined,
     browserPageId: string
   ): boolean {
-    const webContentsId = bridge.getRegisteredTabs(worktreeId).get(browserPageId)
-    if (webContentsId == null) {
+    if (!bridge.getRegisteredTabs(worktreeId).has(browserPageId)) {
       return false
     }
-    const guest = webContents.fromId(webContentsId)
-    return Boolean(guest && !guest.isDestroyed())
+    return bridge.getPage(browserPageId) !== null
   }
 
   // Why: the CLI sends worktree selectors (e.g. "path:/Users/...") but the
@@ -293,31 +504,30 @@ export class RuntimeBrowserCommands {
     }
   }
 
-  private resolveBrowserPageWebContents(
+  private resolveBrowserPage(
     worktreeId: string | undefined,
     browserPageId: string | undefined
-  ): ResolvedBrowserPageWebContents {
+  ): ResolvedBrowserPage {
     const bridge = this.requireAgentBrowserBridge()
     const resolvedPageId = browserPageId ?? bridge.getActivePageId(worktreeId)
     if (!resolvedPageId) {
       throw new BrowserError('browser_no_tab', 'No browser tab open in this worktree')
     }
-    const webContentsId = bridge.getRegisteredTabs(worktreeId).get(resolvedPageId)
-    if (webContentsId == null) {
+    if (!bridge.getRegisteredTabs(worktreeId).has(resolvedPageId)) {
       const scope = worktreeId ? ' in this worktree' : ''
       throw new BrowserError(
         'browser_tab_not_found',
         `Browser page ${resolvedPageId} was not found${scope}`
       )
     }
-    const guest = webContents.fromId(webContentsId)
-    if (!guest || guest.isDestroyed()) {
+    const page = bridge.getPage(resolvedPageId)
+    if (!page) {
       throw new BrowserError(
         'browser_tab_not_found',
         `Browser page ${resolvedPageId} is no longer available`
       )
     }
-    return { browserPageId: resolvedPageId, webContents: guest }
+    return { browserPageId: resolvedPageId, page }
   }
 
   // Why: browser tabs must become paintable before their webview guest starts
@@ -325,24 +535,30 @@ export class RuntimeBrowserCommands {
   // worktree/browser pane. Ask the renderer to background-mount the worktree and
   // acquire a hidden automation visibility lease instead of activating the UI.
   private async ensureBrowserWorktreeActive(worktreeId: string | undefined): Promise<void> {
+    if (!this.shellAdapter) {
+      return
+    }
     const win = this.host.getAuthoritativeWindow()
     win.webContents.send('browser:activateView', worktreeId ? { worktreeId } : {})
     // Why: hidden/restored browser panes become operable only after the
     // renderer's webview mounts and calls registerGuest. Waiting on that IPC is
     // both faster and less flaky than sleeping for an arbitrary fixed delay.
-    await waitForWorktreeTabRegistration(worktreeId)
+    await this.shellAdapter.waitForWorktreeTabRegistration(worktreeId)
   }
 
   private async ensureBrowserPageActive(
     worktreeId: string | undefined,
     browserPageId: string
   ): Promise<void> {
+    if (!this.shellAdapter) {
+      return
+    }
     const win = this.host.getAuthoritativeWindow()
     win.webContents.send(
       'browser:activateView',
       worktreeId ? { worktreeId, browserPageId } : { browserPageId }
     )
-    await waitForTabRegistration(browserPageId)
+    await this.shellAdapter.waitForTabRegistration(browserPageId)
   }
 
   // Why: agent-browser drives navigation via CDP, which bypasses Electron's
@@ -351,6 +567,7 @@ export class RuntimeBrowserCommands {
   // address bar and tab title) stale. Push updates from main → renderer after
   // any navigation-causing command so the UI stays in sync.
   private notifyRendererNavigation(browserPageId: string, url: string, title: string): void {
+    this.host.emitBrowserGuestEvent({ type: 'navigationUpdate', browserPageId, url, title })
     try {
       const win = this.host.getAuthoritativeWindow()
       win.webContents.send('browser:navigation-update', { browserPageId, url, title })
@@ -528,10 +745,7 @@ export class RuntimeBrowserCommands {
     }
   ): Promise<BrowserRemoteScreencastStartResult> {
     const target = await this.resolveBrowserCommandTarget(params)
-    const { browserPageId, webContents: guest } = this.resolveBrowserPageWebContents(
-      target.worktreeId,
-      target.browserPageId
-    )
+    const { browserPageId, page } = this.resolveBrowserPage(target.worktreeId, target.browserPageId)
     let stopping = this.stoppingScreencastPageIds.get(browserPageId)
     if (stopping) {
       await stopping
@@ -570,7 +784,7 @@ export class RuntimeBrowserCommands {
     }
     this.activeScreencastsByPageId.set(browserPageId, activeRecord)
     try {
-      session = await startBrowserScreencast(guest, {
+      session = await startBrowserScreencast(page, {
         format,
         quality: clampInteger(params.quality, 10, 100, 70),
         maxWidth: clampInteger(params.maxWidth, 320, 3840, 1440),
@@ -677,7 +891,12 @@ export class RuntimeBrowserCommands {
     if (!target.browserPageId) {
       return { ok: false, reason: 'missing' }
     }
-    return browserCertificateTrustController.proceed(target.browserPageId, params.challengeId)
+    return (
+      this.shellAdapter?.browserProceedCertificate(target.browserPageId, params.challengeId) ?? {
+        ok: false,
+        reason: 'missing'
+      }
+    )
   }
 
   async browserTabShow(params: { page: string; worktree?: string }): Promise<BrowserTabShowResult> {
@@ -710,7 +929,7 @@ export class RuntimeBrowserCommands {
       // The renderer NEVER yanks the user across worktrees on this signal
       // (see focusBrowserTabInWorktree).
       const worktreeId =
-        target.worktreeId ?? browserManager.getWorktreeIdForTab(result.browserPageId) ?? undefined
+        target.worktreeId ?? bridge.getWorktreeIdForTab(result.browserPageId) ?? undefined
       this.notifyRendererBrowserPaneFocus(worktreeId, result.browserPageId)
     }
     return result
@@ -959,7 +1178,9 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserInterceptList(params: BrowserCommandTargetParams): Promise<{ requests: unknown[] }> {
+  async browserInterceptList(
+    params: BrowserCommandTargetParams
+  ): Promise<BrowserInterceptListResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().interceptList(target.worktreeId, target.browserPageId)
   }
@@ -1004,7 +1225,7 @@ export class RuntimeBrowserCommands {
 
   async browserDblclick(
     params: { element: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserClickResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().dblclick(
       params.element,
@@ -1013,14 +1234,14 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserForward(params: BrowserCommandTargetParams): Promise<unknown> {
+  async browserForward(params: BrowserCommandTargetParams): Promise<BrowserForwardResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().forward(target.worktreeId, target.browserPageId)
   }
 
   async browserScrollIntoView(
     params: { element: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().scrollIntoView(
       params.element,
@@ -1034,7 +1255,7 @@ export class RuntimeBrowserCommands {
       what: string
       selector?: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().get(
       params.what,
@@ -1046,7 +1267,7 @@ export class RuntimeBrowserCommands {
 
   async browserIs(
     params: { what: string; selector: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().is(
       params.what,
@@ -1060,7 +1281,7 @@ export class RuntimeBrowserCommands {
 
   async browserKeyboardInsertText(
     params: { text: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().keyboardInsertText(
       params.text,
@@ -1073,7 +1294,7 @@ export class RuntimeBrowserCommands {
 
   async browserMouseMove(
     params: { x: number; y: number } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().mouseMove(
       params.x,
@@ -1085,7 +1306,7 @@ export class RuntimeBrowserCommands {
 
   async browserMouseDown(
     params: { button?: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().mouseDown(
       params.button,
@@ -1102,7 +1323,7 @@ export class RuntimeBrowserCommands {
       radius?: number
       modifiers?: ('cmd' | 'ctrl' | 'alt' | 'shift')[]
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserMouseClickResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().mouseClick(
       params.x,
@@ -1115,7 +1336,9 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserMouseUp(params: { button?: string } & BrowserCommandTargetParams): Promise<unknown> {
+  async browserMouseUp(
+    params: { button?: string } & BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().mouseUp(
       params.button,
@@ -1129,7 +1352,7 @@ export class RuntimeBrowserCommands {
       dy: number
       dx?: number
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().mouseWheel(
       params.dy,
@@ -1148,7 +1371,7 @@ export class RuntimeBrowserCommands {
       action: string
       text?: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().find(
       params.locator,
@@ -1162,7 +1385,9 @@ export class RuntimeBrowserCommands {
 
   // ── Set commands ──
 
-  async browserSetDevice(params: { name: string } & BrowserCommandTargetParams): Promise<unknown> {
+  async browserSetDevice(
+    params: { name: string } & BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().setDevice(
       params.name,
@@ -1173,7 +1398,7 @@ export class RuntimeBrowserCommands {
 
   async browserSetOffline(
     params: { state?: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().setOffline(
       params.state,
@@ -1184,7 +1409,7 @@ export class RuntimeBrowserCommands {
 
   async browserSetHeaders(
     params: { headers: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().setHeaders(
       params.headers,
@@ -1198,7 +1423,7 @@ export class RuntimeBrowserCommands {
       user: string
       pass: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().setCredentials(
       params.user,
@@ -1213,7 +1438,7 @@ export class RuntimeBrowserCommands {
       colorScheme?: string
       reducedMotion?: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().setMedia(
       params.colorScheme,
@@ -1225,14 +1450,16 @@ export class RuntimeBrowserCommands {
 
   // ── Clipboard commands ──
 
-  async browserClipboardRead(params: BrowserCommandTargetParams): Promise<unknown> {
+  async browserClipboardRead(
+    params: BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().clipboardRead(target.worktreeId, target.browserPageId)
   }
 
   async browserClipboardWrite(
     params: { text: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().clipboardWrite(
       params.text,
@@ -1245,7 +1472,7 @@ export class RuntimeBrowserCommands {
 
   async browserDialogAccept(
     params: { text?: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().dialogAccept(
       params.text,
@@ -1254,7 +1481,9 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserDialogDismiss(params: BrowserCommandTargetParams): Promise<unknown> {
+  async browserDialogDismiss(
+    params: BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().dialogDismiss(target.worktreeId, target.browserPageId)
   }
@@ -1263,7 +1492,7 @@ export class RuntimeBrowserCommands {
 
   async browserStorageLocalGet(
     params: { key: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageLocalGet(
       params.key,
@@ -1277,7 +1506,7 @@ export class RuntimeBrowserCommands {
       key: string
       value: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageLocalSet(
       params.key,
@@ -1287,7 +1516,9 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserStorageLocalClear(params: BrowserCommandTargetParams): Promise<unknown> {
+  async browserStorageLocalClear(
+    params: BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageLocalClear(
       target.worktreeId,
@@ -1297,7 +1528,7 @@ export class RuntimeBrowserCommands {
 
   async browserStorageSessionGet(
     params: { key: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageSessionGet(
       params.key,
@@ -1311,7 +1542,7 @@ export class RuntimeBrowserCommands {
       key: string
       value: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageSessionSet(
       params.key,
@@ -1321,7 +1552,9 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserStorageSessionClear(params: BrowserCommandTargetParams): Promise<unknown> {
+  async browserStorageSessionClear(
+    params: BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().storageSessionClear(
       target.worktreeId,
@@ -1336,7 +1569,7 @@ export class RuntimeBrowserCommands {
       selector: string
       path: string
     } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().download(
       params.selector,
@@ -1350,7 +1583,7 @@ export class RuntimeBrowserCommands {
 
   async browserHighlight(
     params: { selector: string } & BrowserCommandTargetParams
-  ): Promise<unknown> {
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().highlight(
       params.selector,
@@ -1361,7 +1594,9 @@ export class RuntimeBrowserCommands {
 
   // ── New: exec passthrough + tab lifecycle ──
 
-  async browserExec(params: { command: string } & BrowserCommandTargetParams): Promise<unknown> {
+  async browserExec(
+    params: { command: string } & BrowserCommandTargetParams
+  ): Promise<BrowserAgentCommandResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     return this.requireAgentBrowserBridge().exec(
       params.command,
@@ -1370,15 +1605,18 @@ export class RuntimeBrowserCommands {
     )
   }
 
-  async browserTabCreate(params: {
-    browserPageId?: string
-    url?: string
-    worktree?: string
-    profileId?: string
-    waitForRegistration?: boolean
-    activate?: boolean
-    targetGroupId?: string
-  }): Promise<{ browserPageId: string }> {
+  async browserTabCreate(
+    params: {
+      browserPageId?: string
+      url?: string
+      worktree?: string
+      profileId?: string
+      waitForRegistration?: boolean
+      activate?: boolean
+      targetGroupId?: string
+    },
+    context: { shellConnectionId?: string } = {}
+  ): Promise<{ browserPageId: string }> {
     const url = params.url ?? 'about:blank'
     const worktreeId = params.worktree
       ? (await this.host.resolveWorktreeSelector(params.worktree)).id
@@ -1394,18 +1632,19 @@ export class RuntimeBrowserCommands {
     // backs the page with a main-process offscreen WebContents instead. Both
     // register into BrowserManager so all downstream commands resolve uniformly.
     if (!this.host.getAvailableAuthoritativeWindow()) {
-      const offscreen = this.host.getOffscreenBrowserBackend()
-      if (!offscreen) {
+      const backend = this.host.getBrowserBackend()
+      if (!backend) {
         throw new BrowserError('browser_error', 'This host does not support browser panes.')
       }
       return this.createBrowserTabOffscreen(
-        offscreen,
+        backend,
         url,
         worktreeId,
         params.profileId,
         params.activate,
         params.targetGroupId,
-        params.browserPageId
+        params.browserPageId,
+        context.shellConnectionId
       )
     }
     const { browserPageId } = await this.createBrowserTabInRenderer(
@@ -1423,7 +1662,7 @@ export class RuntimeBrowserCommands {
     // tab exists in the UI but may not be ready for automation commands yet.
     if (params.waitForRegistration !== false) {
       try {
-        await waitForTabRegistration(browserPageId)
+        await this.shellAdapter?.waitForTabRegistration(browserPageId)
       } catch {
         // Tab was created in the renderer but the webview hasn't finished mounting.
         // Return success since the tab exists; subsequent commands will fail with a
@@ -1436,9 +1675,8 @@ export class RuntimeBrowserCommands {
     // tab switch. Without this, the bridge's active tab still points at the
     // previously active tab and the new tab shows active: false in tab list.
     const bridge = this.requireAgentBrowserBridge()
-    const wcId = bridge.getRegisteredTabs(worktreeId).get(browserPageId)
-    if (wcId != null) {
-      bridge.setActiveTab(wcId, worktreeId)
+    if (bridge.getRegisteredTabs(worktreeId).has(browserPageId)) {
+      bridge.setActiveTab(browserPageId, worktreeId)
     }
 
     // Why: the renderer sets webview.src=url on mount, but agent-browser connects
@@ -1481,7 +1719,8 @@ export class RuntimeBrowserCommands {
 
     // Why: short-circuit no-op switches so the renderer doesn't tear down and
     // remount the webview when the tab is already on the requested profile.
-    const currentProfileId = browserManager.getSessionProfileIdForTab(browserPageId) ?? 'default'
+    const currentProfileId =
+      this.requireAgentBrowserBridge().getSessionProfileIdForTab(browserPageId) ?? 'default'
     if (currentProfileId === profile.id) {
       return {
         browserPageId,
@@ -1490,37 +1729,37 @@ export class RuntimeBrowserCommands {
       }
     }
 
-    const win = this.host.getAuthoritativeWindow()
-    const requestId = randomUUID()
-    await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        ipcMain.removeListener('browser:tabSetProfileReply', handler)
-        reject(new Error('Tab profile update timed out'))
-      }, 10_000)
-
-      const handler = (
-        _event: Electron.IpcMainEvent,
-        reply: { requestId: string; error?: string }
-      ): void => {
-        if (reply.requestId !== requestId) {
-          return
-        }
-        clearTimeout(timer)
-        ipcMain.removeListener('browser:tabSetProfileReply', handler)
-        if (reply.error) {
-          reject(new Error(reply.error))
-        } else {
-          resolve()
-        }
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    if (backend) {
+      if (!backend.setTabProfile) {
+        throw new BrowserError('browser_error', 'This host cannot change browser profiles.')
       }
-      ipcMain.on('browser:tabSetProfileReply', handler)
-      win.webContents.send('browser:requestTabSetProfile', {
-        requestId,
+      await backend.setTabProfile(browserPageId, profile.id === 'default' ? null : profile.id)
+      return {
         browserPageId,
         profileId: profile.id,
-        sessionPartition: profile.partition
-      })
+        profileLabel: profile.label
+      }
+    }
+
+    // Why: uses the non-throwing window getter (not `getAuthoritativeWindow`,
+    // which this method called directly before this migration) — a missing
+    // window degrades to `renderer_unavailable` below instead of throwing
+    // before the reverse call is even attempted. There is no offscreen
+    // fallback here (profile switching is a UI-only operation, unlike
+    // browserTabCreate/Close below), so headless serve without a window
+    // always takes this degrade path.
+    const winId = this.host.getAvailableAuthoritativeWindow()?.webContents.id
+    const result = await requestShellBrowserTabSetProfile(winId, {
+      browserPageId,
+      profileId: profile.id,
+      sessionPartition: profile.partition
     })
+    if (!result.ok) {
+      throw new Error('renderer_unavailable')
+    }
 
     // Why: the renderer destroys the old webview and remounts on the new
     // partition. Wait for the re-register so a follow-up tab list
@@ -1528,7 +1767,7 @@ export class RuntimeBrowserCommands {
     // instead of stale data, and so subsequent CLI ops (snapshot, click, etc.)
     // hit a guest that's already attached.
     try {
-      await waitForTabRegistration(browserPageId)
+      await this.shellAdapter?.waitForTabRegistration(browserPageId)
     } catch {
       // Best-effort: re-register won't fire if the worktree is hidden. The
       // store already reflects the new profile; downstream commands retry
@@ -1575,6 +1814,23 @@ export class RuntimeBrowserCommands {
         `Browser profile ${params.profileId} was not found`
       )
     }
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    if (backend) {
+      const created = await this.createBrowserTabOffscreen(
+        backend,
+        sourceTab.url,
+        sourceTab.worktreeId ?? target.worktreeId,
+        profile.id
+      )
+      return {
+        browserPageId: created.browserPageId,
+        sourceBrowserPageId,
+        profileId: profile.id,
+        profileLabel: profile.label
+      }
+    }
     const created = await this.createBrowserTabInRenderer(
       sourceTab.url,
       sourceTab.worktreeId ?? target.worktreeId,
@@ -1584,7 +1840,7 @@ export class RuntimeBrowserCommands {
     // Why: parity with browserTabCreate. Wait for the cloned tab's webview to
     // register so the returned browserPageId is operable by the next CLI call.
     try {
-      await waitForTabRegistration(created.browserPageId)
+      await this.shellAdapter?.waitForTabRegistration(created.browserPageId)
     } catch {
       // Best-effort: registration may not fire if the worktree is hidden.
     }
@@ -1604,12 +1860,33 @@ export class RuntimeBrowserCommands {
     label: string
     scope: 'isolated' | 'imported'
   }): Promise<BrowserProfileCreateResult> {
-    return {
-      profile: browserSessionRegistry.createProfile(params.scope, params.label)
+    const profile = browserSessionRegistry.createProfile(params.scope, params.label)
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    if (!profile || !backend) {
+      return { profile }
+    }
+    if (!backend.createProfile) {
+      return { profile }
+    }
+    try {
+      await backend.createProfile(profile.id)
+      return { profile }
+    } catch (error) {
+      await browserSessionRegistry.deleteProfile(profile.id)
+      throw error
     }
   }
 
   async browserProfileDelete(params: { profileId: string }): Promise<BrowserProfileDeleteResult> {
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    const profile = browserSessionRegistry.getProfile(params.profileId)
+    if (backend?.deleteProfile && profile && profile.scope !== 'default') {
+      await backend.deleteProfile(profile.id)
+    }
     return {
       deleted: await browserSessionRegistry.deleteProfile(params.profileId),
       profileId: params.profileId
@@ -1662,7 +1939,16 @@ export class RuntimeBrowserCommands {
       browser = reselected
     }
 
-    const result = await importCookiesFromBrowser(browser, profile.partition)
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    const result = backend
+      ? await importCookiesIntoHeadlessProfile(browser, profile.id, backend)
+      : await importCookiesFromBrowser(
+          browser,
+          profile.partition,
+          requireBrowserSession(profile.partition)
+        )
     if (!result.ok) {
       return result
     }
@@ -1679,6 +1965,14 @@ export class RuntimeBrowserCommands {
   }
 
   async browserProfileClearDefaultCookies(): Promise<BrowserProfileClearDefaultCookiesResult> {
+    const backend = this.host.getAvailableAuthoritativeWindow()
+      ? null
+      : this.host.getBrowserBackend()
+    if (backend?.clearProfileCookies) {
+      await backend.clearProfileCookies(null)
+      browserSessionRegistry.clearDefaultProfileMetadata()
+      return { cleared: true }
+    }
     return { cleared: await browserSessionRegistry.clearDefaultSessionCookies() }
   }
 
@@ -1718,7 +2012,7 @@ export class RuntimeBrowserCommands {
       // the webview hasn't mounted yet, e.g. tab was just created).
       const tabs = bridge.getRegisteredTabs(worktreeId)
       const entries = [...tabs.entries()]
-      const activeEntry = entries.find(([, wcId]) => wcId === bridge.getActiveWebContentsId())
+      const activeEntry = entries.find(([pageId]) => pageId === bridge.getActiveBrowserPageId())
       if (activeEntry) {
         tabId = activeEntry[0]
       }
@@ -1727,51 +2021,34 @@ export class RuntimeBrowserCommands {
     // Why: headless serve owns its pages via the offscreen backend, with no
     // renderer to ask. Destroy the offscreen page directly when that backend is
     // the one serving this host (no renderer window).
-    const offscreen = this.host.getAvailableAuthoritativeWindow()
+    const backend = this.host.getAvailableAuthoritativeWindow()
       ? null
-      : this.host.getOffscreenBrowserBackend()
-    if (offscreen) {
+      : this.host.getBrowserBackend()
+    if (backend) {
       // Why: for implicit close (no --page/--index) resolve the active page like
       // the renderer path does, so we don't report success while closing nothing.
       const resolvedTabId = tabId ?? bridge.getActivePageId(worktreeId)
       if (!resolvedTabId) {
         return { closed: false }
       }
-      await offscreen.closeTab(resolvedTabId)
+      await backend.closeTab(resolvedTabId)
       return { closed: true }
     }
 
-    const win = this.host.getAuthoritativeWindow()
-    const requestId = randomUUID()
-    await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        ipcMain.removeListener('browser:tabCloseReply', handler)
-        reject(new Error('Tab close timed out'))
-      }, 10_000)
-
-      const handler = (
-        _event: Electron.IpcMainEvent,
-        reply: { requestId: string; error?: string }
-      ): void => {
-        if (reply.requestId !== requestId) {
-          return
-        }
-        clearTimeout(timer)
-        ipcMain.removeListener('browser:tabCloseReply', handler)
-        if (reply.error) {
-          reject(new Error(reply.error))
-        } else {
-          resolve()
-        }
-      }
-      ipcMain.on('browser:tabCloseReply', handler)
-      // Why: when main cannot resolve a concrete tab id itself (for example if a
-      // browser workspace exists in the renderer before its guest mounts), the
-      // renderer still needs the intended worktree scope. Otherwise it falls
-      // back to the globally active browser tab and can close a tab in the
-      // wrong worktree.
-      win.webContents.send('browser:requestTabClose', { requestId, tabId, worktreeId })
-    })
+    // Why: when main cannot resolve a concrete tab id itself (for example if a
+    // browser workspace exists in the renderer before its guest mounts), the
+    // renderer still needs the intended worktree scope. Otherwise it falls
+    // back to the globally active browser tab and can close a tab in the
+    // wrong worktree.
+    // Why: non-throwing getter — a missing window here (no offscreen backend
+    // either, or offscreen exists but this host still somehow has no window)
+    // degrades to the `renderer_unavailable` throw below instead of throwing
+    // before the reverse call is even attempted.
+    const winId = this.host.getAvailableAuthoritativeWindow()?.webContents.id
+    const result = await requestShellBrowserTabClose(winId, { tabId, worktreeId })
+    if (!result.ok) {
+      throw new Error('renderer_unavailable')
+    }
 
     return { closed: true }
   }
@@ -1779,13 +2056,14 @@ export class RuntimeBrowserCommands {
   private enrichBrowserTabInfo(
     tab: BrowserTabListResult['tabs'][number]
   ): BrowserTabListResult['tabs'][number] {
-    const rawProfileId = browserManager.getSessionProfileIdForTab(tab.browserPageId)
+    const bridge = this.requireAgentBrowserBridge()
+    const rawProfileId = bridge.getSessionProfileIdForTab(tab.browserPageId)
     const profile =
       browserSessionRegistry.getProfile(rawProfileId ?? 'default') ??
       browserSessionRegistry.getDefaultProfile()
     return {
       ...tab,
-      worktreeId: browserManager.getWorktreeIdForTab(tab.browserPageId) ?? null,
+      worktreeId: bridge.getWorktreeIdForTab(tab.browserPageId) ?? null,
       profileId: profile.id,
       profileLabel: profile.label
     }
@@ -1795,8 +2073,9 @@ export class RuntimeBrowserCommands {
     browserPageId: string,
     explicitWorktreeId?: string
   ): BrowserTabListResult['tabs'][number] {
-    const worktreeId = explicitWorktreeId ?? browserManager.getWorktreeIdForTab(browserPageId)
-    const tab = this.requireAgentBrowserBridge()
+    const bridge = this.requireAgentBrowserBridge()
+    const worktreeId = explicitWorktreeId ?? bridge.getWorktreeIdForTab(browserPageId)
+    const tab = bridge
       .tabList(worktreeId)
       .tabs.find((entry) => entry.browserPageId === browserPageId)
     if (!tab) {
@@ -1814,24 +2093,25 @@ export class RuntimeBrowserCommands {
   // URL during createTab, so we only sync the bridge's active tab and notify the
   // (absent) renderer is skipped — nav state is read from the live WebContents.
   private async createBrowserTabOffscreen(
-    offscreen: BrowserBackend,
+    backend: BrowserBackend,
     url: string,
     worktreeId?: string,
     profileId?: string,
     activate?: boolean,
     targetGroupId?: string,
-    requestedBrowserPageId?: string
+    requestedBrowserPageId?: string,
+    shellConnectionId?: string
   ): Promise<{ browserPageId: string }> {
-    const { browserPageId } = await offscreen.createTab({
+    const { browserPageId } = await backend.createTab({
       browserPageId: requestedBrowserPageId,
       url,
       worktreeId,
-      profileId
+      profileId,
+      shellConnectionId
     })
     const bridge = this.host.getAgentBrowserBridge()
-    const wcId = bridge?.getRegisteredTabs(worktreeId).get(browserPageId)
-    if (bridge && wcId != null) {
-      bridge.setActiveTab(wcId, worktreeId)
+    if (bridge?.getRegisteredTabs(worktreeId).has(browserPageId)) {
+      bridge.setActiveTab(browserPageId, worktreeId)
     }
     // Why: only a user-initiated create (activate:true, e.g. the UI or a mobile
     // HTML-link tap) should steal focus by marking the tab active in the session
@@ -1851,46 +2131,28 @@ export class RuntimeBrowserCommands {
     sessionPartition: string | undefined,
     activate?: boolean
   ): Promise<{ browserPageId: string }> {
-    const win = this.host.getAuthoritativeWindow()
-    const requestId = randomUUID()
-
-    const browserPageId = await new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        ipcMain.removeListener('browser:tabCreateReply', handler)
-        reject(new Error('Tab creation timed out'))
-      }, 10_000)
-
-      const handler = (
-        event: Electron.IpcMainEvent,
-        reply: { requestId: string; browserPageId?: string; error?: string }
-      ): void => {
-        if (event.sender !== win.webContents || reply.requestId !== requestId) {
-          return
-        }
-        clearTimeout(timer)
-        ipcMain.removeListener('browser:tabCreateReply', handler)
-        if (reply.error) {
-          reject(new Error(reply.error))
-        } else {
-          resolve(reply.browserPageId!)
-        }
-      }
-      ipcMain.on('browser:tabCreateReply', handler)
-      win.webContents.send('browser:requestTabCreate', {
-        requestId,
-        url,
-        worktreeId,
-        // Why: leave sessionProfileId/sessionPartition undefined when no explicit
-        // profile was chosen so the renderer still applies the user's configured
-        // default-profile inheritance. Only thread the resolved partition when a
-        // profile is named — sending null here would suppress inheritance and
-        // force the shared default partition.
-        sessionProfileId: profileId,
-        sessionPartition,
-        activate
-      })
+    // Why: the caller (browserTabCreate) already confirmed a window exists —
+    // this is `getAvailableAuthoritativeWindow` (not the throwing getter)
+    // anyway, so an unregistered reverse link (e.g. a startup handshake race)
+    // degrades to `renderer_unavailable` instead of throwing before the
+    // reverse call is attempted.
+    const winId = this.host.getAvailableAuthoritativeWindow()?.webContents.id
+    const result = await requestShellBrowserTabCreate(winId, {
+      url,
+      worktreeId,
+      // Why: leave sessionProfileId/sessionPartition undefined when no explicit
+      // profile was chosen so the renderer still applies the user's configured
+      // default-profile inheritance. Only thread the resolved partition when a
+      // profile is named — sending null here would suppress inheritance and
+      // force the shared default partition.
+      sessionProfileId: profileId,
+      sessionPartition,
+      activate
     })
+    if (!result.ok) {
+      throw new Error('renderer_unavailable')
+    }
 
-    return { browserPageId }
+    return { browserPageId: result.browserPageId }
   }
 }

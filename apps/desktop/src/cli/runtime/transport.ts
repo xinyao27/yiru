@@ -1,211 +1,156 @@
 import { randomUUID } from 'node:crypto'
-import { createConnection } from 'node:net'
 
+import {
+  RUNTIME_ORPC_ORCHESTRATION_CAPABILITY_HEADER,
+  RUNTIME_ORPC_ORCHESTRATION_CONTRACT_VERSION_HEADER,
+  RUNTIME_ORPC_ORCHESTRATION_REQUEST_ID_HEADER,
+  RUNTIME_ORPC_REQUEST_ID_HEADER
+} from '@yiru/runtime-protocol/orpc-peer-frame'
 import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
 import { findTransport, type RuntimeMetadata } from '~shared/runtime-bootstrap'
-import type {
-  RuntimeMethodContract,
-  RuntimeMethodParams,
-  RuntimeMethodResult
-} from '~shared/runtime-method-contract'
 
-import { isKeepaliveFrame, RuntimeRpcEnvelopeSchema } from './envelope-schema'
-import { RuntimeClientError, type RuntimeRpcResponse } from './types'
+import { createRuntimeOrpcSocketLink } from './orpc-client-facade'
+import type { RuntimeOrpcResponseMetadata } from './orpc-client-types'
+import { RuntimeOrpcSocketPeer } from './socket-peer'
+import { retainRuntimeOrpcSocketStream } from './socket-stream-lifecycle'
+import { RuntimeClientError, RuntimeRpcFailureError } from './types'
 
-export function sendRequest<TContract extends RuntimeMethodContract>(
+export type RuntimeOrpcCallResult<TResult> = RuntimeOrpcResponseMetadata & {
+  result: TResult
+}
+
+export async function sendOrpcRequest<TResult>(
   metadata: RuntimeMetadata,
-  contract: TContract,
-  params: RuntimeMethodParams<TContract>,
+  path: readonly string[],
+  input: unknown,
   timeoutMs: number,
-  envelope?: RuntimeOrchestrationEnvelope
-): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
-export function sendRequest<TResult>(
-  metadata: RuntimeMetadata,
-  method: string,
-  params: unknown,
-  timeoutMs: number,
-  envelope?: RuntimeOrchestrationEnvelope
-): Promise<RuntimeRpcResponse<TResult>>
-export async function sendRequest<TResult>(
-  metadata: RuntimeMetadata,
-  contract: string | RuntimeMethodContract,
-  params: unknown,
-  timeoutMs: number,
-  envelope?: RuntimeOrchestrationEnvelope
-): Promise<RuntimeRpcResponse<TResult>> {
-  const method = typeof contract === 'string' ? contract : contract.name
-  return await new Promise((resolve, reject) => {
-    const transport = findTransport(metadata, 'unix', 'named-pipe')
-    if (!transport) {
-      reject(
-        new RuntimeClientError(
-          'runtime_unavailable',
-          'No compatible transport found in Yiru runtime metadata.'
-        )
-      )
-      return
+  envelope: RuntimeOrchestrationEnvelope = {},
+  signal?: AbortSignal
+): Promise<RuntimeOrpcCallResult<TResult>> {
+  if (signal?.aborted) {
+    throw abortReason(signal)
+  }
+  const transport = findTransport(metadata, 'unix', 'named-pipe')
+  if (!transport) {
+    throw new RuntimeClientError(
+      'runtime_unavailable',
+      'No compatible transport found in Yiru runtime metadata.'
+    )
+  }
+  if (!metadata.authToken) {
+    throw new RuntimeClientError(
+      'runtime_unavailable',
+      'The Yiru runtime metadata does not include an authentication token.'
+    )
+  }
+  const authenticatedMetadata = { ...metadata, authToken: metadata.authToken }
+
+  const requestId = randomUUID()
+  const peer = new RuntimeOrpcSocketPeer(
+    transport.endpoint,
+    authenticatedMetadata,
+    requestId,
+    timeoutMs
+  )
+  const link = createRuntimeOrpcSocketLink(peer, requestHeaders(requestId, envelope))
+  try {
+    const output = await link.call(path, input, { context: {}, signal })
+    const result = retainRuntimeOrpcSocketStream(
+      output,
+      () => peer.close(),
+      (error) => runtimeOrpcRequestFailure(error, peer, signal, requestId, metadata.runtimeId)
+    )
+    return {
+      requestId,
+      runtimeId: metadata.runtimeId,
+      // Why: the contract-typed outer client owns TResult; the bundled link deliberately
+      // exposes unknown at this module boundary because it serves every procedure.
+      result: result as TResult
     }
-    const socket = createConnection(transport.endpoint)
-    let buffer = ''
-    let settled = false
-    const requestId = randomUUID()
+  } catch (error) {
+    peer.close()
+    throw runtimeOrpcRequestFailure(error, peer, signal, requestId, metadata.runtimeId)
+  }
+}
 
-    const timeout = setTimeout(() => {
-      if (settled) {
-        return
-      }
-      settled = true
-      socket.destroy()
-      reject(
-        new RuntimeClientError(
-          'runtime_timeout',
-          'Timed out waiting for the Yiru runtime to respond.'
-        )
-      )
-    }, timeoutMs)
+function runtimeOrpcRequestFailure(
+  error: unknown,
+  peer: RuntimeOrpcSocketPeer,
+  signal: AbortSignal | undefined,
+  requestId: string,
+  runtimeId: string
+): Error {
+  const transportFailure = peer.transportFailure()
+  if (transportFailure) {
+    return transportFailure
+  }
+  if (signal?.aborted) {
+    return abortReason(signal)
+  }
+  return runtimeOrpcFailure(error, requestId, runtimeId)
+}
 
-    const finish = (
-      result: { ok: true; response: RuntimeRpcResponse<TResult> } | { ok: false; error: Error }
-    ): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      clearTimeout(timeout)
-      socket.end()
-      if (result.ok === false) {
-        reject(result.error)
-      } else {
-        resolve(result.response)
-      }
-    }
-
-    socket.setEncoding('utf8')
-    socket.once('error', () => {
-      finish({
-        ok: false,
-        error: new RuntimeClientError(
-          'runtime_unavailable',
-          'Could not connect to the running Yiru app. Restart Yiru and try again.'
-        )
-      })
-    })
-    // Why: a clean peer close (FIN, no 'error') before a terminal frame never
-    // settles the promise, so the call would otherwise hang until the full
-    // timeout fires. Reject promptly. finish() guards double-settle, so this
-    // no-ops on the normal success/error paths that already called socket.end().
-    socket.once('close', () => {
-      finish({
-        ok: false,
-        error: new RuntimeClientError(
-          'runtime_unavailable',
-          'The Yiru runtime closed the connection before responding. Restart Yiru and try again.'
-        )
-      })
-    })
-    socket.on('data', (chunk) => {
-      buffer += chunk
-      // Why: the server may interleave `{"_keepalive":true}\n` frames with the
-      // final success/failure frame to keep both idle timers alive during a
-      // long-poll (see design doc §3.1). Read frames in a loop until we see a
-      // terminal frame. Each keepalive refreshes the client-side timer so a
-      // 10 min wait doesn't trip the 60 s default ceiling.
-      let newlineIndex = buffer.indexOf('\n')
-      while (newlineIndex !== -1 && !settled) {
-        const line = buffer.slice(0, newlineIndex)
-        buffer = buffer.slice(newlineIndex + 1)
-        if (line.trim().length === 0) {
-          newlineIndex = buffer.indexOf('\n')
-          continue
+function requestHeaders(
+  requestId: string,
+  envelope: RuntimeOrchestrationEnvelope
+): Record<string, string> {
+  return {
+    [RUNTIME_ORPC_REQUEST_ID_HEADER]: requestId,
+    ...(envelope.orchestrationCapability
+      ? {
+          [RUNTIME_ORPC_ORCHESTRATION_CAPABILITY_HEADER]: envelope.orchestrationCapability
         }
+      : {}),
+    ...(envelope.orchestrationContractVersion !== undefined
+      ? {
+          [RUNTIME_ORPC_ORCHESTRATION_CONTRACT_VERSION_HEADER]: String(
+            envelope.orchestrationContractVersion
+          )
+        }
+      : {}),
+    ...(envelope.orchestrationRequestId
+      ? {
+          [RUNTIME_ORPC_ORCHESTRATION_REQUEST_ID_HEADER]: envelope.orchestrationRequestId
+        }
+      : {})
+  }
+}
 
-        let raw: unknown
-        try {
-          raw = JSON.parse(line)
-        } catch {
-          finish({
-            ok: false,
-            error: new RuntimeClientError(
-              'invalid_runtime_response',
-              'The Yiru runtime returned an invalid response frame.'
-            )
-          })
-          return
-        }
-
-        // Fast-path: ignore keepalives without running the full schema.
-        // setTimeout().refresh() is stable since Node 10 (Yiru ships on
-        // Node 20+ via Electron and the standalone CLI targets the same
-        // major). See §7 risk #9.
-        if (isKeepaliveFrame(raw)) {
-          timeout.refresh()
-          newlineIndex = buffer.indexOf('\n')
-          continue
-        }
-
-        // Why: validate the envelope shape (id, ok, result/error, _meta) at
-        // the decode boundary so version skew between the CLI and the Yiru
-        // main runtime surfaces as a single invalid_runtime_response instead
-        // of a downstream mis-typed field access. `result` is left as
-        // unknown — the TResult generic is the caller's responsibility.
-        const parsed = RuntimeRpcEnvelopeSchema.safeParse(raw)
-        if (!parsed.success) {
-          finish({
-            ok: false,
-            error: new RuntimeClientError(
-              'invalid_runtime_response',
-              'The Yiru runtime returned an invalid response frame.'
-            )
-          })
-          return
-        }
-
-        // Narrow out keepalive (already filtered above) so TS can see a
-        // Success|Failure shape here.
-        const frame = parsed.data
-        if ('_keepalive' in frame) {
-          timeout.refresh()
-          newlineIndex = buffer.indexOf('\n')
-          continue
-        }
-
-        const response = frame as RuntimeRpcResponse<TResult>
-        if (response.id !== requestId) {
-          finish({
-            ok: false,
-            error: new RuntimeClientError(
-              'invalid_runtime_response',
-              'The Yiru runtime returned a mismatched response id.'
-            )
-          })
-          return
-        }
-        if (response._meta?.runtimeId && response._meta.runtimeId !== metadata.runtimeId) {
-          finish({
-            ok: false,
-            error: new RuntimeClientError(
-              'runtime_unavailable',
-              'The Yiru runtime changed while the request was in flight. Retry the command.'
-            )
-          })
-          return
-        }
-        finish({ ok: true, response })
-        return
-      }
-    })
-    socket.on('connect', () => {
-      socket.write(
-        `${JSON.stringify({
-          id: requestId,
-          authToken: metadata.authToken,
-          method,
-          params,
-          orchestrationCapability: envelope?.orchestrationCapability,
-          orchestrationContractVersion: envelope?.orchestrationContractVersion,
-          orchestrationRequestId: envelope?.orchestrationRequestId
-        })}\n`
-      )
-    })
+function runtimeOrpcFailure(error: unknown, requestId: string, runtimeId: string): Error {
+  if (!isRecord(error)) {
+    return invalidRuntimeResponse(error)
+  }
+  const code = typeof error.code === 'string' ? error.code : null
+  const message = typeof error.message === 'string' ? error.message : null
+  if (!code || !message) {
+    return invalidRuntimeResponse(error)
+  }
+  return new RuntimeRpcFailureError({
+    id: requestId,
+    ok: false,
+    error: {
+      code,
+      message,
+      ...('data' in error ? { data: error.data } : {})
+    },
+    _meta: { runtimeId }
   })
+}
+
+function invalidRuntimeResponse(cause: unknown): RuntimeClientError {
+  return new RuntimeClientError(
+    'invalid_runtime_response',
+    'The Yiru runtime returned an invalid response frame.',
+    cause instanceof Error ? { cause: cause.message } : undefined
+  )
+}
+
+function abortReason(signal: AbortSignal): Error {
+  return signal.reason instanceof Error
+    ? signal.reason
+    : new RuntimeClientError('request_cancelled', 'The runtime request was cancelled.')
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }

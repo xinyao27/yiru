@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { subscribeLocalSpeechDownloadEvents } from '~renderer/runtime/speech-events-client'
 import { useAppStore } from '~renderer/store'
 import { getDefaultVoiceSettings } from '~shared/constants'
-import type { SpeechModelManifest, VoiceSettings } from '~shared/speech-types'
+import type { VoiceSettings } from '~shared/speech-types'
 import type { GlobalSettings } from '~shared/types'
 
 import { Separator } from '../ui/separator'
@@ -28,7 +31,6 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
   const refreshModelStates = useAppStore((s) => s.refreshModelStates)
   const markFeatureTipsSeen = useAppStore((s) => s.markFeatureTipsSeen)
   const settingsSearchQuery = useAppStore((s) => s.settingsSearchQuery ?? '')
-  const [catalog, setCatalog] = useState<SpeechModelManifest[]>([])
   const [permissionPending, setPermissionPending] = useState(false)
   const [openAiDialogOpen, setOpenAiDialogOpen] = useState(false)
   const [openAiApiKeyDraft, setOpenAiApiKeyDraft] = useState('')
@@ -55,16 +57,11 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
   useEffect(() => {
     let cancelled = false
     refreshModelStates()
-    void window.api.speech
-      .getCatalog()
-      .then((nextCatalog) => {
-        if (!cancelled) {
-          setCatalog(nextCatalog)
-        }
-      })
-      .catch(() => {})
-    void window.api.speech
-      .getOpenAiApiKeyStatus()
+    void callRuntimeOrpc(
+      { kind: 'local' },
+      (client) => client.speech.openaiKey.getStatus,
+      undefined
+    )
       .then((status) => {
         if (!cancelled && status.configured !== voiceSettings.openAiApiKeyConfigured) {
           updateVoiceSettings({ openAiApiKeyConfigured: status.configured })
@@ -77,12 +74,24 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
     }
   }, [refreshModelStates, updateVoiceSettings, voiceSettings.openAiApiKeyConfigured])
 
-  useEffect(() => {
-    const cleanup = window.api.speech.onDownloadProgress(() => {
-      refreshModelStates()
-    })
-    return cleanup
-  }, [refreshModelStates])
+  useEffect(
+    () =>
+      subscribeLocalSpeechDownloadEvents(
+        { kind: 'local' },
+        {
+          onProgress: refreshModelStates,
+          onFailed: (_modelId, error) =>
+            toast.error(
+              translate(
+                'auto.components.settings.VoicePane.cfde55c7b0',
+                'Failed to download model.'
+              ),
+              { description: error }
+            )
+        }
+      ),
+    [refreshModelStates]
+  )
 
   const toggleVoiceDictation = async (): Promise<void> => {
     await handleVoiceDictationToggle({
@@ -90,7 +99,7 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
       markFeatureTipsSeen,
       updateVoiceSettings,
       requestMicrophonePermission: () =>
-        window.api.developerPermissions.request({ id: 'microphone' }),
+        rendererHostClient.developerPermissions.request({ id: 'microphone' }),
       setPermissionPending,
       isMounted: () => mountedRef.current,
       notifyPermissionGranted: () =>
@@ -124,7 +133,7 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
     })
   }
 
-  const selectedModel = catalog.find((m) => m.id === voiceSettings.sttModel)
+  const selectedModel = modelStates.find((m) => m.id === voiceSettings.sttModel)
   const showOpenAiSettingsRow =
     voiceSettings.openAiApiKeyConfigured ||
     selectedModel?.provider === 'openai' ||
@@ -140,7 +149,9 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
   const saveOpenAiApiKey = async (): Promise<void> => {
     setOpenAiKeyPending(true)
     try {
-      await window.api.speech.saveOpenAiApiKey(openAiApiKeyDraft)
+      await callRuntimeOrpc({ kind: 'local' }, (client) => client.speech.openaiKey.save, {
+        apiKey: openAiApiKeyDraft
+      })
       updateVoiceSettings({
         openAiApiKeyConfigured: true,
         sttModel: pendingCloudModelId ?? voiceSettings.sttModel
@@ -171,7 +182,7 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
   const clearOpenAiApiKey = async (): Promise<void> => {
     setOpenAiKeyPending(true)
     try {
-      await window.api.speech.clearOpenAiApiKey()
+      await callRuntimeOrpc({ kind: 'local' }, (client) => client.speech.openaiKey.clear, undefined)
       updateVoiceSettings({
         openAiApiKeyConfigured: false,
         sttModel: selectedModel?.provider === 'openai' ? '' : voiceSettings.sttModel
@@ -210,7 +221,6 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
 
       <VoiceSpeechModelSection
         voiceSettings={voiceSettings}
-        catalog={catalog}
         modelStates={modelStates}
         onUpdateVoiceSettings={updateVoiceSettings}
         onOpenOpenAiDialog={openOpenAiDialog}

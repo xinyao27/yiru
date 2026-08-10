@@ -5,12 +5,21 @@ import { getPreferredPairingOffer } from '~shared/runtime-environments'
 
 import { enqueueRuntimeCall } from './environment-call-queue'
 import {
+  connectRemoteRuntimeExistingSharedControlOrpcTunnel,
   sendRemoteRuntimeExistingSharedControlRequest,
   subscribeRemoteRuntimeExistingSharedControlRequest,
   subscribeRemoteRuntimeRetainedExistingSharedControlRequest
 } from './environment-request-connections'
+import { supportsRuntimeOrpcTunnel } from './environment-shared-control'
+import { callRuntimeEnvironmentUnaryOrpc } from './rpc/orpc/environment-orpc-unary-client'
 
 const DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS = 15_000
+
+// Why: distinct from `callRuntimeEnvironment`'s own pool namespace so neither
+// caller's `.orpc.connect()` replaces the other's tunnel on the same
+// environment's shared-control connection (`SharedControlOrpcTunnels` keys
+// tunnels by owner id and drops whichever one loses that race).
+const EXISTING_ROUTE_UNARY_ORPC_POOL_NAMESPACE = 'main-process-existing-route-unary'
 
 type RuntimeEnvironmentRouteEvent =
   | { type: 'response'; response: RuntimeRpcResponse<unknown> }
@@ -35,6 +44,34 @@ export async function callRuntimeEnvironmentExistingRoute(
   return enqueueRuntimeCall(environment.id, method, async () => {
     const currentEnvironment = resolveEnvironment(userDataPath, environment.id)
     const pairing = getPreferredPairingOffer(currentEnvironment)
+    // Why: this helper only ever forwards unary coworking.host.* leaves
+    // (listWorktrees/inspectWorktree/canonicalizePath/invoke/invokeSession/
+    // listLiveSessions/listHistoricalSessionPage/releaseHistoricalSessionPage/
+    // revokeWorktree/releaseChannel) — its streaming siblings go through
+    // `subscribeRuntimeEnvironmentExistingRoute`/`...RetainedExistingRoute`
+    // instead — so trying the negotiated oRPC tunnel first is safe for every
+    // method this function receives (docs/runtime-orpc-migration.md Phase 6
+    // D-stage: coworking.host.* is the main-process↔main-process bare-envelope
+    // class the renderer's capability negotiation could never reach).
+    if (await supportsRuntimeOrpcTunnel(userDataPath, currentEnvironment, pairing, timeoutMs)) {
+      const refreshedRuntimeId = resolveEnvironment(userDataPath, currentEnvironment.id).runtimeId
+      if (refreshedRuntimeId) {
+        const response = await callRuntimeEnvironmentUnaryOrpc({
+          connect: connectRemoteRuntimeExistingSharedControlOrpcTunnel,
+          poolNamespace: EXISTING_ROUTE_UNARY_ORPC_POOL_NAMESPACE,
+          environmentId: currentEnvironment.id,
+          pairing,
+          runtimeId: refreshedRuntimeId,
+          path: method.split('.'),
+          params,
+          timeoutMs,
+          signal: options.signal,
+          beforeSend: options.beforeSend
+        })
+        markEnvironmentUsed(userDataPath, currentEnvironment.id, { runtimeId: refreshedRuntimeId })
+        return response
+      }
+    }
     const response = await sendRemoteRuntimeExistingSharedControlRequest(
       currentEnvironment.id,
       pairing,

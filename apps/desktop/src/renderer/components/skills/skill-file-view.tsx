@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { translate } from '~renderer/i18n/i18n'
+import { readSkillManageDirFile } from '~renderer/runtime/skill-manage-client'
 import type { SkillFileReadResult } from '~shared/skills'
 
 export type SkillFileViewProps = {
@@ -76,8 +77,7 @@ export function SkillFileView({
   useEffect(() => {
     let cancelled = false
     setState({ status: 'loading' })
-    window.api.skills
-      .readSkillDirFile({ directoryPath, relativePath })
+    readSkillManageDirFile({ directoryPath, relativePath })
       .then((result) => {
         if (!cancelled) {
           setState(toViewState(relativePath, result))

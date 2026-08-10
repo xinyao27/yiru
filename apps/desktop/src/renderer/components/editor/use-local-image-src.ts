@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
 import { readRuntimeFilePreview } from '~renderer/runtime/file-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 
 import { resolveImageAbsolutePath } from './markdown-preview-links'
 
@@ -320,7 +321,7 @@ function readImagePreview(
 ) {
   try {
     if (!runtimeContext) {
-      return window.api.fs.readFile({
+      return workspaceHostClient.fileHost.readFile({
         filePath: absolutePath,
         connectionId: connectionId ?? undefined
       })

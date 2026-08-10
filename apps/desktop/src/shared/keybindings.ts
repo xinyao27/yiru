@@ -1382,10 +1382,6 @@ function normalizeKeybindingWithOptions(
   return { ok: true, value: canonicalizeParsedKeybinding(parsed) }
 }
 
-export function normalizeKeybinding(binding: string): KeybindingValidationResult {
-  return normalizeKeybindingWithOptions(binding)
-}
-
 export function isDoubleTapBinding(binding: string): boolean {
   return Boolean(parseKeybinding(binding)?.doubleTapModifier)
 }
@@ -1409,10 +1405,6 @@ function normalizeKeybindingListWithOptions(
     }
   }
   return normalized
-}
-
-export function normalizeKeybindingList(input: string): KeybindingValidationResult | string[] {
-  return normalizeKeybindingListWithOptions(input)
 }
 
 function normalizeKeybindingArrayWithOptions(
@@ -1717,13 +1709,6 @@ function keybindingFromInputWithOptions(
   parts.push(key)
 
   return normalizeKeybindingWithOptions(parts.join('+'), options)
-}
-
-export function keybindingFromInput(
-  input: KeybindingInput,
-  platform: NodeJS.Platform
-): KeybindingValidationResult {
-  return keybindingFromInputWithOptions(input, platform)
 }
 
 export function keybindingFromInputForAction(

@@ -27,10 +27,6 @@ export function measureUtf8ByteLength(
   return { byteLength, exceededLimit: false }
 }
 
-export function getUtf8ByteLength(text: string): number {
-  return measureUtf8ByteLength(text).byteLength
-}
-
 export function clampUtf8TextTail(text: string, maxBytes: number): Utf8TextTail {
   if (!text || maxBytes <= 0) {
     return { text: '', bytes: 0 }
@@ -50,24 +46,6 @@ export function clampUtf8TextTail(text: string, maxBytes: number): Utf8TextTail 
     }
   }
   return { text: text.slice(start), bytes }
-}
-
-export function clampUtf8TextPrefix(text: string, maxBytes: number): string {
-  if (!text || maxBytes <= 0) {
-    return ''
-  }
-  let bytes = 0
-  let end = 0
-  while (end < text.length) {
-    const codePoint = text.codePointAt(end) ?? 0
-    const codePointBytes = getUtf8ByteLengthForCodePoint(codePoint)
-    if (bytes + codePointBytes > maxBytes) {
-      break
-    }
-    bytes += codePointBytes
-    end += codePoint > 0xffff ? 2 : 1
-  }
-  return end === text.length ? text : text.slice(0, end)
 }
 
 export function getUtf8ByteLengthForCodePoint(codePoint: number): number {

@@ -6,13 +6,13 @@ import {
   type OrchestrationMigrationReason
 } from '~shared/orchestration-rpc-contract'
 
-import type { RpcEnvelopeMeta, RpcRequest, RpcResponse } from './core'
+import type { RpcEnvelopeMeta, RpcFailure, RpcRequest } from './core'
 import { errorResponse } from './errors'
 
 export function orchestrationMigrationFence(
   request: RpcRequest,
   meta: RpcEnvelopeMeta
-): RpcResponse | undefined {
+): RpcFailure | undefined {
   if (!isOrchestrationMutation(request.method, request.params)) {
     return undefined
   }

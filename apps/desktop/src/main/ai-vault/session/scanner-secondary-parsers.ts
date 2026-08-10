@@ -45,20 +45,6 @@ export async function parseCopilotSessionFile(
   return parseCopilotSessionLines({ file, lines, platform })
 }
 
-export async function parseCopilotSessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseCopilotSessionLines({
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
-}
-
 function consumeCopilotRecordLine(accumulator: SessionAccumulator, line: string): void {
   const record = parseJsonObject(line)
   if (!record) {
@@ -143,20 +129,6 @@ export async function parseCursorSessionFile(
     crlfDelay: Infinity
   })
   return parseCursorSessionLines({ file, lines, platform })
-}
-
-export async function parseCursorSessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseCursorSessionLines({
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
 }
 
 function consumeCursorRecordLine(accumulator: SessionAccumulator, line: string): void {

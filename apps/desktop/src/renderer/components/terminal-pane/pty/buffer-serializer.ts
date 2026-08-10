@@ -1,7 +1,8 @@
 // Why: mobile terminal streaming needs the exact screen state from the
 // desktop's xterm.js instance. This module maintains a global registry of
-// serialize functions keyed by ptyId, and handles IPC requests from the
-// main process to serialize a specific terminal's buffer.
+// serialize functions keyed by ptyId; the main process reads it via
+// `serializePtyBufferForRequest` (shell-services reverse contract) and via
+// the still-IPC `pty:clearBuffer:request` push.
 
 import type { IDisposable } from '@xterm/xterm'
 
@@ -127,40 +128,38 @@ function ensureSerializerListener(): void {
     // scrollback that the user explicitly removed.
     serializersByPtyId.get(request.ptyId)?.clear?.()
   })
+}
 
-  window.api.pty.onSerializeBufferRequest((request) => {
-    const entry = serializersByPtyId.get(request.ptyId)
-    void Promise.resolve(entry?.fn(request.opts) ?? null)
-      .then((result) => {
-        // Why: cold parking and remounts can replace the serializer while its
-        // parse wait is in flight; never publish a fossil from the old xterm.
-        if (serializersByPtyId.get(request.ptyId) !== entry) {
-          window.api.pty.sendSerializedBuffer(request.requestId, null)
-          return
-        }
-        if (!result) {
-          window.api.pty.sendSerializedBuffer(request.requestId, null)
-          return
-        }
-        const titleEntry = lastTitleByPtyId.get(request.ptyId)
-        const lastTitle = titleEntry && titleEntry.title.length > 0 ? titleEntry.title : undefined
-        const payload: SerializedBuffer = {
-          data: result.data,
-          cols: result.cols,
-          rows: result.rows
-        }
-        if (result.seq !== undefined) {
-          payload.seq = result.seq
-        }
-        if (lastTitle !== undefined) {
-          payload.lastTitle = lastTitle
-        } else if (result.lastTitle !== undefined) {
-          payload.lastTitle = result.lastTitle
-        }
-        window.api.pty.sendSerializedBuffer(request.requestId, payload)
-      })
-      .catch(() => {
-        window.api.pty.sendSerializedBuffer(request.requestId, null)
-      })
-  })
+// Why: Phase 5 step 4, `pty` group A — the reverse-contract handler
+// (shell-services-handler.ts's `pty.serializeBuffer`) calls this directly
+// instead of a `pty:serializeBuffer:request`/`:response` IPC round trip. Same
+// entry lookup, staleness check (a cold-park/remount can replace the
+// serializer while this is in flight — never publish a fossil from the old
+// xterm), and title-merge logic as before; only the transport changed.
+export async function serializePtyBufferForRequest(
+  ptyId: string,
+  opts?: SerializeOpts
+): Promise<SerializedBuffer | null> {
+  const entry = serializersByPtyId.get(ptyId)
+  let result: SerializedBuffer | null
+  try {
+    result = (await entry?.fn(opts)) ?? null
+  } catch {
+    return null
+  }
+  if (serializersByPtyId.get(ptyId) !== entry || !result) {
+    return null
+  }
+  const titleEntry = lastTitleByPtyId.get(ptyId)
+  const lastTitle = titleEntry && titleEntry.title.length > 0 ? titleEntry.title : undefined
+  const payload: SerializedBuffer = { data: result.data, cols: result.cols, rows: result.rows }
+  if (result.seq !== undefined) {
+    payload.seq = result.seq
+  }
+  if (lastTitle !== undefined) {
+    payload.lastTitle = lastTitle
+  } else if (result.lastTitle !== undefined) {
+    payload.lastTitle = result.lastTitle
+  }
+  return payload
 }

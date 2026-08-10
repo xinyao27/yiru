@@ -82,28 +82,6 @@ export function getPullRequestGenerationRecordKey({
   return JSON.stringify([repoId, worktreeKey, branch])
 }
 
-export function arePullRequestGenerationFieldsEqual(
-  left: PullRequestGenerationFields,
-  right: PullRequestGenerationFields
-): boolean {
-  return (
-    left.base === right.base &&
-    left.title === right.title &&
-    left.body === right.body &&
-    left.draft === right.draft
-  )
-}
-
-export function shouldApplyPullRequestGenerationResult({
-  record,
-  requestId
-}: {
-  record: PullRequestGenerationRecord | null | undefined
-  requestId: number
-}): boolean {
-  return record?.context.requestId === requestId && record.status === 'running'
-}
-
 export function shouldHydratePullRequestGenerationResult({
   record
 }: {

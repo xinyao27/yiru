@@ -14,11 +14,9 @@ import { useMobileSourceControlActionSheetRunners } from './use-action-sheet-run
 import { useMobileCommitMessageGeneration } from './use-commit-message-generation'
 import { useMobileSourceControlCommitRunners } from './use-commit-runners'
 import { useMobileCreatePrRunner } from './use-create-pr-runner'
+import { runMobileGitStep, type MobileGitRequests, type MobileGitStep } from './use-git-requests'
 import { useMobileSourceControlHistoryOpener } from './use-history-opener'
 import { useMobileSourceControlWorkflowRunner } from './use-workflow-runner'
-
-type GitStep = { method: string; params?: Record<string, unknown> }
-type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
 
 type Params = {
   client: RpcClient | null
@@ -32,7 +30,7 @@ type Params = {
   stageablePaths: string[]
   unstageablePaths: string[]
   router: ReturnType<typeof useRouter>
-  sendGitRequest: SendGitRequest
+  gitRequests: MobileGitRequests
   sendCommitRequest: (message: string) => Promise<unknown>
   runGitSyncSteps: () => Promise<MobileSourceControlWorkflowResult>
   loadStatus: (options?: LoadStatusOptions) => Promise<boolean>
@@ -66,7 +64,7 @@ export function useMobileSourceControlRunners(params: Params) {
     stageablePaths,
     unstageablePaths,
     router,
-    sendGitRequest,
+    gitRequests,
     sendCommitRequest,
     runGitSyncSteps,
     loadStatus,
@@ -87,7 +85,7 @@ export function useMobileSourceControlRunners(params: Params) {
   } = params
 
   const runGitWorkflow = useMobileSourceControlWorkflowRunner({
-    sendGitRequest,
+    gitFetch: gitRequests.fetch,
     loadStatus,
     mountedRef,
     busyActionRef,
@@ -98,28 +96,32 @@ export function useMobileSourceControlRunners(params: Params) {
     onHostedReviewRefresh
   })
 
-  const runGitAction = useCallback(
-    async (actionId: string, method: string, p: Record<string, unknown>) => {
+  const runGitStep = useCallback(
+    async (actionId: string, step: MobileGitStep) => {
       return await runGitWorkflow(actionId, async () => {
-        await sendGitRequest<unknown>(method, p)
+        await runMobileGitStep(gitRequests, step)
       })
     },
-    [runGitWorkflow, sendGitRequest]
+    [gitRequests, runGitWorkflow]
   )
 
   const runGitSequence = useCallback(
-    async (actionId: string, steps: GitStep[], options?: { clearCommitMessage?: boolean }) => {
+    async (
+      actionId: string,
+      steps: MobileGitStep[],
+      options?: { clearCommitMessage?: boolean }
+    ) => {
       return await runGitWorkflow(
         actionId,
         async () => {
           for (const step of steps) {
-            await sendGitRequest<unknown>(step.method, step.params)
+            await runMobileGitStep(gitRequests, step)
           }
         },
         options
       )
     },
-    [runGitWorkflow, sendGitRequest]
+    [gitRequests, runGitWorkflow]
   )
 
   const runGitSync = useCallback(
@@ -131,20 +133,20 @@ export function useMobileSourceControlRunners(params: Params) {
     if (stageablePaths.length === 0) {
       return
     }
-    await runGitAction('stage-all', 'git.bulkStage', { filePaths: stageablePaths })
-  }, [runGitAction, stageablePaths])
+    await runGitStep('stage-all', { kind: 'bulkStage', filePaths: stageablePaths })
+  }, [runGitStep, stageablePaths])
 
   const unstageAll = useCallback(async () => {
     if (unstageablePaths.length === 0) {
       return
     }
-    await runGitAction('unstage-all', 'git.bulkUnstage', { filePaths: unstageablePaths })
-  }, [runGitAction, unstageablePaths])
+    await runGitStep('unstage-all', { kind: 'bulkUnstage', filePaths: unstageablePaths })
+  }, [runGitStep, unstageablePaths])
 
   const { commit, runCommitSequence, runCommitSyncSequence } = useMobileSourceControlCommitRunners({
     commitMessage,
     stagedEntries,
-    sendGitRequest,
+    gitRequests,
     sendCommitRequest,
     runGitSyncSteps,
     runGitWorkflow,
@@ -192,7 +194,8 @@ export function useMobileSourceControlRunners(params: Params) {
     setLocalBranches(null)
     setShowBranchPicker(true)
     if (client) {
-      void sendGitRequest<RuntimeGitLocalBranches>('git.localBranches')
+      void gitRequests
+        .localBranches()
         .then((result) => {
           if (mountedRef.current) {
             setLocalBranches(result)
@@ -204,14 +207,7 @@ export function useMobileSourceControlRunners(params: Params) {
           }
         })
     }
-  }, [
-    client,
-    mountedRef,
-    sendGitRequest,
-    setLocalBranches,
-    setShowActionSheet,
-    setShowBranchPicker
-  ])
+  }, [client, gitRequests, mountedRef, setLocalBranches, setShowActionSheet, setShowBranchPicker])
 
   const openHistory = useMobileSourceControlHistoryOpener({
     hostId,
@@ -224,15 +220,15 @@ export function useMobileSourceControlRunners(params: Params) {
   const checkoutBranch = useCallback(
     async (branch: string) => {
       setShowBranchPicker(false)
-      await runGitAction('checkout', 'git.checkout', { branch })
+      await runGitStep('checkout', { kind: 'checkout', branch })
     },
-    [runGitAction, setShowBranchPicker]
+    [runGitStep, setShowBranchPicker]
   )
 
   const actionSheetRunners = useMobileSourceControlActionSheetRunners({
     client,
     worktreeId,
-    sendGitRequest,
+    gitRequests,
     runGitWorkflow,
     runGitSequence,
     runGitSync,
@@ -244,18 +240,22 @@ export function useMobileSourceControlRunners(params: Params) {
 
   const abortConflictOperation = useCallback(
     async (operation: string) => {
-      const method =
-        operation === 'merge' ? 'git.abortMerge' : operation === 'rebase' ? 'git.abortRebase' : null
-      if (!method) {
+      const step: MobileGitStep | null =
+        operation === 'merge'
+          ? { kind: 'abortMerge' }
+          : operation === 'rebase'
+            ? { kind: 'abortRebase' }
+            : null
+      if (!step) {
         return
       }
-      await runGitAction(`abort-${operation}`, method, {})
+      await runGitStep(`abort-${operation}`, step)
     },
-    [runGitAction]
+    [runGitStep]
   )
 
   return {
-    runGitAction,
+    runGitStep,
     stageAll,
     unstageAll,
     commit,

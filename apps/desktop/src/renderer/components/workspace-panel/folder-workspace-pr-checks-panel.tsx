@@ -85,12 +85,7 @@ export default function FolderWorkspacePrChecksPanel({
     () =>
       refreshCandidates
         .map((candidate) =>
-          [
-            candidate.identity,
-            candidate.repo.path,
-            candidate.repo.connectionId ?? '',
-            candidate.repo.executionHostId ?? ''
-          ].join('|')
+          [candidate.identity, candidate.repo.path, candidate.repo.executionHostId ?? ''].join('|')
         )
         .sort()
         .join(';;'),

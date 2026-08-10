@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { useAppStore } from '~renderer/store'
 import type { CoworkingRemoteDesktop } from '~shared/coworking/catalog-contract'
 
@@ -83,7 +85,7 @@ function CoworkingRemoteHostRow({
   const requestHostAccess = async (): Promise<void> => {
     setIsRequesting(true)
     try {
-      const result = await window.api.coworkingSharing.requestHostAccess({
+      const result = await coworkingSharingClient.requestHostAccess({
         desktopRef: desktop.desktopRef
       })
       if (result.status !== 'granted') {
@@ -100,7 +102,7 @@ function CoworkingRemoteHostRow({
         )
         return
       }
-      setRuntimeEnvironments(await window.api.runtimeEnvironments.list())
+      setRuntimeEnvironments(await runtimeEnvironmentsClient.list())
       await refreshRuntimeEnvironmentStatus(result.environmentId)
       toast.success(
         translate(

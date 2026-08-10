@@ -309,15 +309,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       EMPTY_WORKSPACE_PORTS
   )
 
-  // SSH disconnected state
-  const sshStatus = useAppStore((s) => {
-    if (!repo?.connectionId) {
-      return null
-    }
-    const state = s.sshConnectionStates.get(repo.connectionId)
-    return state?.status ?? 'disconnected'
-  })
-  const isSshDisconnected = sshStatus != null && sshStatus !== 'connected'
   // Why: runtime hosts get the same disconnected treatment as
   // SSH — when the host's runtime environment has no live status, its worktrees
   // are dimmed and marked disconnected instead of looking fully available.
@@ -349,27 +340,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const showIdentity = hasPathIdentityEnabled && Boolean(identityDisplay)
   const hostedReviewCacheKey =
     repo && branch
-      ? getHostedReviewCacheKey(
-          repo.path,
-          branch,
-          settings,
-          repo.id,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
+      ? getHostedReviewCacheKey(repo.path, branch, settings, repo.id, repo.executionHostId, true)
       : ''
   const prCacheKey =
     repo && branch
-      ? getGitHubPRCacheKey(
-          repo.path,
-          repo.id,
-          branch,
-          settings,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
+      ? getGitHubPRCacheKey(repo.path, repo.id, branch, settings, repo.executionHostId, true)
       : ''
   // Subscribe to ONLY the specific cache entry, not entire review/issue caches.
   const hostedReviewEntry = useAppStore((s) =>
@@ -617,8 +592,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
       recordRendererCrashBreadcrumb('sidebar_worktree_activate', {
         worktreeId: worktree.id,
         repoId: worktree.repoId,
-        wasActive: isActive,
-        sshDisconnected: isSshDisconnected
+        wasActive: isActive
       })
       onImmediateActivate?.(worktree.id, activationRowKey)
       activateWorktreeFromSidebar(worktree.id)
@@ -631,7 +605,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       isActive,
       isDeleting,
       activationRowKey,
-      isSshDisconnected,
       onActivate,
       onImmediateActivate,
       onSelectionGesture
@@ -1028,12 +1001,15 @@ const WorktreeCard = React.memo(function WorktreeCard({
               </RepoIdentityChip>
             )}
 
-            {repo?.connectionId && (
+            {/* Why: Repo.connectionId is dead — nothing sets it since remote
+            hosts were removed (#63) — so an SSH badge here would never render;
+            only the runtime-host badge below remains reachable. */}
+            {parseExecutionHostId(repo?.executionHostId)?.kind === 'runtime' && (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <span className="inline-flex shrink-0 items-center">
-                      {isSshDisconnected ? (
+                      {isRuntimeDisconnected ? (
                         <ServerOff className="size-3 text-red-400" />
                       ) : (
                         <Server className="text-muted-foreground size-3" />
@@ -1042,46 +1018,18 @@ const WorktreeCard = React.memo(function WorktreeCard({
                   }
                 />
                 <TooltipContent side="right" sideOffset={8}>
-                  {isSshDisconnected
+                  {isRuntimeDisconnected
                     ? translate(
-                        'auto.components.sidebar.WorktreeCard.021538e1d1',
-                        'SSH disconnected'
+                        'auto.components.sidebar.WorktreeCard.runtimeHostDisconnected',
+                        'Runtime host disconnected'
                       )
                     : translate(
-                        'auto.components.sidebar.WorktreeCard.ca74db7550',
-                        'Project on SSH host'
+                        'auto.components.sidebar.WorktreeCard.runtimeHostProject',
+                        'Project on runtime host'
                       )}
                 </TooltipContent>
               </Tooltip>
             )}
-
-            {!repo?.connectionId &&
-              parseExecutionHostId(repo?.executionHostId)?.kind === 'runtime' && (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <span className="inline-flex shrink-0 items-center">
-                        {isRuntimeDisconnected ? (
-                          <ServerOff className="size-3 text-red-400" />
-                        ) : (
-                          <Server className="text-muted-foreground size-3" />
-                        )}
-                      </span>
-                    }
-                  />
-                  <TooltipContent side="right" sideOffset={8}>
-                    {isRuntimeDisconnected
-                      ? translate(
-                          'auto.components.sidebar.WorktreeCard.runtimeHostDisconnected',
-                          'Runtime host disconnected'
-                        )
-                      : translate(
-                          'auto.components.sidebar.WorktreeCard.runtimeHostProject',
-                          'Project on runtime host'
-                        )}
-                  </TooltipContent>
-                </Tooltip>
-              )}
 
             {showInlineRepoBadge && (
               <RepoIdentityChip repo={repo}>
@@ -1433,7 +1381,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         ],
         titleRenaming && '!border-transparent !bg-transparent    ',
         isDeleting && 'opacity-50 grayscale cursor-not-allowed',
-        (isSshDisconnected || isRuntimeDisconnected) && !isDeleting && 'opacity-60'
+        isRuntimeDisconnected && !isDeleting && 'opacity-60'
       )}
       onClick={handleClick}
       onDoubleClick={affiliateListMode ? undefined : handleDoubleClick}

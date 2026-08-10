@@ -38,7 +38,9 @@ export function getRuntimeEnvironmentIdForRepo(
     return null
   }
   const repo = findRepoOwner(state, repoId)
-  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim() || repo?.connectionId?.trim())
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim())
   if (repo && hasExplicitOwner) {
     const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
     return parsed?.kind === 'runtime' ? parsed.environmentId : null
@@ -57,7 +59,9 @@ export function getExplicitRuntimeOwnerEnvironmentId(
     return null
   }
   const repo = findRepoOwner(state, repoId)
-  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim() || repo?.connectionId?.trim())
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  const hasExplicitOwner = Boolean(repo?.executionHostId?.trim())
   if (!repo || !hasExplicitOwner) {
     return null
   }

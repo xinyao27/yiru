@@ -5,6 +5,7 @@ import {
   pasteTextIntoTextControl,
   TEXT_CONTROL_PASTE_MAX_BYTES
 } from '~renderer/lib/text-control-paste'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { NativeChatComposerHandle } from './composer'
 
@@ -32,7 +33,7 @@ export function useNativeChatPasteBridge({
     }
     // Text-only on purpose: the answer input takes no image attachments.
     void (async () => {
-      const text = await window.api.ui
+      const text = await shellClient.ui
         .readClipboardText({ maxBytes: TEXT_CONTROL_PASTE_MAX_BYTES })
         .catch(() => '')
       if (text.length > 0) {

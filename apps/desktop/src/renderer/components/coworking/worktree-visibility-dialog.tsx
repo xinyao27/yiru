@@ -12,6 +12,7 @@ import {
   DialogTitle
 } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'
+import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 
 type VisibilityConfirmationCopy = {
   title: string
@@ -106,7 +107,7 @@ export function CoworkingWorktreeVisibilityDialog({
       open={open}
       onOpenChange={onOpenChange}
       publish={() =>
-        window.api.coworkingSharing.setWorktreeVisibility({
+        coworkingSharingClient.setWorktreeVisibility({
           worktreeId,
           visibility: 'public'
         })
@@ -158,7 +159,7 @@ export function CoworkingProjectVisibilityDialog({
       open={open}
       onOpenChange={onOpenChange}
       publish={() =>
-        window.api.coworkingSharing.setProjectVisibility({
+        coworkingSharingClient.setProjectVisibility({
           projectId,
           visibility: 'public'
         })

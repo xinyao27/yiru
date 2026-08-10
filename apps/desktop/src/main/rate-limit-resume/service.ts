@@ -1,8 +1,5 @@
-// Owns the rate-limit resume lifecycle in main: enrich a reported banner with
-// a reset time, persist the schedule, and dispatch the replay to the renderer
-// once the provider window has rolled over.
-
-import { powerMonitor, type WebContents } from 'electron'
+import type { ShellServicesConnectionId } from '~main/runtime/rpc/orpc/shell-services-identity'
+import { requestShellRateLimitResumeDispatch } from '~main/runtime/rpc/orpc/shell-services-reverse-link'
 import {
   buildRateLimitResumeAt,
   isFinalRateLimitResumeStatus,
@@ -12,41 +9,51 @@ import {
 } from '~shared/rate-limit-resume/types'
 
 import type { Store } from '../persistence'
-import type { RateLimitService } from '../rate-limits/service'
-import { resolveRateLimitHit } from './reset-resolution'
+import { resolveRateLimitHit, type RateLimitResumeUsageState } from './reset-resolution'
 
 const DEFAULT_TICK_MS = 30 * 1000
 
-export const RATE_LIMIT_RESUME_DISPATCH_CHANNEL = 'rateLimitResume:dispatchRequested'
-
 export class RateLimitResumeService {
   private readonly store: Store
-  private readonly rateLimits: RateLimitService
+  private readonly rateLimits: { getState: () => RateLimitResumeUsageState }
   private readonly tickMs: number
   private timer: ReturnType<typeof setInterval> | null = null
-  private webContents: WebContents | null = null
+  private shellConnectionId: ShellServicesConnectionId | null = null
   private rendererReady = false
   private readonly unsubscribeResume: () => void
 
-  constructor(store: Store, rateLimits: RateLimitService, opts: { tickMs?: number } = {}) {
+  constructor(
+    store: Store,
+    rateLimits: { getState: () => RateLimitResumeUsageState },
+    opts: {
+      tickMs?: number
+      subscribeToWake?: (listener: () => void) => () => void
+    } = {}
+  ) {
     this.store = store
     this.rateLimits = rateLimits
     this.tickMs = opts.tickMs ?? DEFAULT_TICK_MS
-    // Why: the interval does not fire while the machine sleeps, so a resume
-    // scheduled across a sleep would sit due until the next tick after wake.
-    const onResume = (): void => this.dispatchDueResumes()
-    powerMonitor.on('resume', onResume)
-    this.unsubscribeResume = () => powerMonitor.off('resume', onResume)
+    this.unsubscribeResume = opts.subscribeToWake?.(() => this.dispatchDueResumes()) ?? (() => {})
   }
 
-  setWebContents(webContents: WebContents | null): void {
-    this.webContents = webContents
+  setShellConnectionId(shellConnectionId: ShellServicesConnectionId | null): void {
+    this.shellConnectionId = shellConnectionId
     this.rendererReady = false
   }
 
-  setRendererReady(): void {
+  clearShellConnectionId(shellConnectionId: ShellServicesConnectionId): void {
+    if (this.shellConnectionId === shellConnectionId) {
+      this.setShellConnectionId(null)
+    }
+  }
+
+  setRendererReady(shellConnectionId: ShellServicesConnectionId): boolean {
+    if (this.shellConnectionId !== shellConnectionId) {
+      return false
+    }
     this.rendererReady = true
     this.dispatchDueResumes()
+    return true
   }
 
   start(): void {
@@ -102,12 +109,12 @@ export class RateLimitResumeService {
     return this.store.updateRateLimitResume(id, { status: 'stale' })
   }
 
-  runNow(id: string): RateLimitResumeSchedule {
+  async runNow(id: string): Promise<RateLimitResumeSchedule> {
     const schedule = this.list().find((entry) => entry.id === id)
     if (!schedule) {
       throw new Error('Rate-limit resume not found.')
     }
-    if (!this.sendDispatch(schedule)) {
+    if (!(await this.sendDispatch(schedule))) {
       throw new Error('No Yiru window was available to resume the session.')
     }
     return schedule
@@ -119,17 +126,20 @@ export class RateLimitResumeService {
       if (isFinalRateLimitResumeStatus(schedule.status) || schedule.resumeAt > now) {
         continue
       }
-      // A dispatch with no window stays scheduled and retries on the next tick.
-      this.sendDispatch(schedule)
+      // A dispatch with no window/shell link stays scheduled and retries on
+      // the next tick — fire-and-forget matches the pre-reverse-link
+      // behavior, where a `webContents.send` into an unmounted listener also
+      // silently went nowhere.
+      void this.sendDispatch(schedule)
     }
   }
 
-  private sendDispatch(schedule: RateLimitResumeSchedule): boolean {
-    const webContents = this.webContents
-    if (!webContents || webContents.isDestroyed() || !this.rendererReady) {
+  private async sendDispatch(schedule: RateLimitResumeSchedule): Promise<boolean> {
+    const shellConnectionId = this.shellConnectionId
+    if (!shellConnectionId || !this.rendererReady) {
       return false
     }
-    webContents.send(RATE_LIMIT_RESUME_DISPATCH_CHANNEL, schedule)
-    return true
+    const result = await requestShellRateLimitResumeDispatch(shellConnectionId, schedule)
+    return result.ok
   }
 }

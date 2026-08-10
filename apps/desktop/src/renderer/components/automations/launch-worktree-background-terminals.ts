@@ -265,8 +265,9 @@ export async function launchWorktreeBackgroundTerminals(
   if (!worktree) {
     throw new Error('The target workspace is no longer available.')
   }
-  const repo = store.repos.find((entry) => entry.id === worktree.repoId)
-  const connectionId = repo?.connectionId ?? null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a background terminal's owning repo is never SSH.
+  const connectionId = null
   const defaultLaunches = getDefaultTabLaunches(args.defaultTabs)
   const launchedTabs: BackgroundTab[] = []
 

@@ -1,7 +1,7 @@
 import { lstatSync } from 'node:fs'
 import { lstat, opendir } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 
 import { GrokSessionPathLookupQueue } from './grok-session-path-lookup-queue'
 
@@ -262,14 +262,4 @@ async function isSafeChatHistoryFile(sessionsDir: string, candidate: string): Pr
   } catch {
     return false
   }
-}
-
-/** True when path looks like a Grok chat history under a safe session id. */
-export function isGrokChatHistoryPath(path: string, sessionId: string): boolean {
-  const trimmedId = sessionId.trim()
-  return (
-    isSafeGrokSessionId(trimmedId) &&
-    basename(path) === GROK_CHAT_HISTORY_FILE &&
-    basename(dirname(path)) === trimmedId
-  )
 }

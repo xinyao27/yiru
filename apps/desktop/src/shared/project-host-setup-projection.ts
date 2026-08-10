@@ -200,13 +200,6 @@ export function projectHostSetupProjectionFromRepos(
   }
 }
 
-export function getProjectHostSetupsForProject(
-  setups: readonly ProjectHostSetup[],
-  projectId: string
-): ProjectHostSetup[] {
-  return setups.filter((setup) => setup.projectId === projectId)
-}
-
 export function getProjectHostSetupForRepo(
   setups: readonly ProjectHostSetup[],
   repo: Repo

@@ -160,10 +160,6 @@ export async function shutdownObservability(): Promise<void> {
   consent = null
 }
 
-export function getObservabilityConsent(): ObservabilityConsent | null {
-  return consent
-}
-
 // ── Bundle / trace-folder operations exposed to IPC ─────────────────────
 
 export type DiagnosticsStatus = {

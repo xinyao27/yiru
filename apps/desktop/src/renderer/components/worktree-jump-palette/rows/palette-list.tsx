@@ -20,7 +20,6 @@ type PaletteResultsListProps = Pick<
   | 'ptyIdsByTabId'
   | 'runtimePaneTitlesByTabId'
   | 'activeWorktreeId'
-  | 'sshConnectionStates'
 > &
   Pick<PaletteHostOptionsResult, 'repoMap' | 'hostOptions'> &
   Pick<WorktreeSearchResult, 'liveAgentStatusByWorktreeId' | 'worktreeMap' | 'isLoading'> & {
@@ -52,7 +51,6 @@ export function PaletteResultsList({
   runtimePaneTitlesByTabId,
   liveAgentStatusByWorktreeId,
   activeWorktreeId,
-  sshConnectionStates,
   onSelectItem,
   onCreateWorktree
 }: PaletteResultsListProps): React.JSX.Element {
@@ -110,7 +108,6 @@ export function PaletteResultsList({
               runtimePaneTitlesByTabId={runtimePaneTitlesByTabId}
               liveAgentStatusByWorktreeId={liveAgentStatusByWorktreeId}
               activeWorktreeId={activeWorktreeId}
-              sshConnectionStates={sshConnectionStates}
               onSelect={onSelectItem}
             />
           )

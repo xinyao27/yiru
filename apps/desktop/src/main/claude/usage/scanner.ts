@@ -393,29 +393,6 @@ function buildClaudeUsageDedupeKey(parsed: ClaudeUsageSourceRecord): string | nu
   return null
 }
 
-export function parseClaudeUsageRecord(line: string): ClaudeUsageParsedTurn | null {
-  const parsed = parseClaudeUsageSourceRecord(line)
-  return parsed ? stripClaudeSourceMetadata(parsed) : null
-}
-
-export async function parseClaudeUsageFile(filePath: string): Promise<ClaudeUsageParsedTurn[]> {
-  const turns: ClaudeUsageParsedSourceTurn[] = []
-  const fallbackSessionId = basename(filePath, '.jsonl')
-  const lines = createInterface({
-    input: createReadStream(filePath, { encoding: 'utf-8' }),
-    crlfDelay: Infinity
-  })
-
-  for await (const line of lines) {
-    const parsed = parseClaudeUsageSourceRecord(line, fallbackSessionId)
-    if (parsed) {
-      turns.push(parsed)
-    }
-  }
-
-  return dedupeClaudeUsageTurns(turns).map(stripClaudeSourceMetadata)
-}
-
 async function readClaudeUsageScanFile(filePath: string): Promise<{
   processedFile: ClaudeUsageProcessedFile
   turns: ClaudeUsageParsedSourceTurn[]

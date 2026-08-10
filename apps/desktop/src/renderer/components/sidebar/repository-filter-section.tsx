@@ -1,4 +1,4 @@
-import { HardDrives as Server, X } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 import RepoBadgeLabel from '~renderer/components/repo/badge-label'
 import { Badge } from '~renderer/components/ui/badge'
@@ -195,15 +195,6 @@ const SidebarRepositoryFilterSection = React.memo(function SidebarRepositoryFilt
                     color={repo.badgeColor}
                     className="max-w-full"
                   />
-                  {repo.connectionId && (
-                    <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
-                      <Server className="size-2.5" />
-                      {translate(
-                        'auto.components.sidebar.SidebarRepositoryFilterSection.2656053db4',
-                        'SSH'
-                      )}
-                    </span>
-                  )}
                 </span>
               </CommandItem>
             ))}

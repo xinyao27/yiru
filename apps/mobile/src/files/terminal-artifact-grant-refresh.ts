@@ -1,8 +1,9 @@
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcResponse, RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { isTerminalArtifactGrantError } from './terminal-artifact-grant-error'
 
-type MobileFilePreviewClient = Pick<RpcClient, 'sendRequest'>
+type MobileFilePreviewClient = Pick<RpcClient, 'orpc'>
 
 export type MobileTerminalArtifactPreviewSource = {
   source: 'terminalArtifact'
@@ -22,22 +23,23 @@ export type TerminalArtifactRetryOptions = {
 export async function refreshTerminalArtifactSourceAfterGrantFailure(
   client: MobileFilePreviewClient,
   source: MobileTerminalArtifactPreviewSource,
-  response: RpcResponse,
+  error: unknown,
   options: TerminalArtifactRetryOptions = {}
 ): Promise<MobileTerminalArtifactPreviewSource | null> {
-  if (response.ok || !isTerminalArtifactGrantFailure(response, options)) {
+  if (!isTerminalArtifactGrantFailure(error, options)) {
     return null
   }
-  const refreshed = await client.sendRequest('files.resolveTerminalPath', {
-    worktree: `id:${source.worktreeId}`,
-    pathText: source.pathText ?? source.absolutePath,
-    ...(source.cwd ? { cwd: source.cwd } : {}),
-    ...(source.terminalHandle ? { terminal: source.terminalHandle } : {})
-  })
-  if (!refreshed.ok) {
+  let result: unknown
+  try {
+    result = await callRuntimeOrpc(client, (runtime) => runtime.files.resolveTerminalPath, {
+      worktree: `id:${source.worktreeId}`,
+      pathText: source.pathText ?? source.absolutePath,
+      ...(source.cwd ? { cwd: source.cwd } : {}),
+      ...(source.terminalHandle ? { terminal: source.terminalHandle } : {})
+    })
+  } catch {
     return null
   }
-  const result = (refreshed as RpcSuccess).result
   if (!isTerminalArtifactResolution(result)) {
     return null
   }
@@ -56,13 +58,13 @@ export async function refreshTerminalArtifactSourceAfterGrantFailure(
 }
 
 function isTerminalArtifactGrantFailure(
-  response: RpcFailure,
+  error: unknown,
   options: TerminalArtifactRetryOptions
 ): boolean {
   if (options.refreshGrant === false) {
     return false
   }
-  return isTerminalArtifactGrantError(`${response.error.code} ${response.error.message}`)
+  return isTerminalArtifactGrantError(error instanceof Error ? error.message : String(error))
 }
 
 function isTerminalArtifactResolution(result: unknown): result is {

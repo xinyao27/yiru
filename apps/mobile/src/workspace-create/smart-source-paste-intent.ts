@@ -9,8 +9,8 @@ import type { GitLabWorkItem } from '@yiru/workbench-model/review'
 import type { GitHubWorkItem } from '@yiru/workbench-model/review'
 import { isSmartWorkspaceSourceQueryWithinLimit } from '@yiru/workbench-model/workspace'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
 
 // A repo the picker can switch to for a cross-repo GitHub paste. Slug is derived
 // best-effort from the repo's remote metadata.
@@ -106,15 +106,16 @@ export async function findRepoMatchingSlugForPaste(
     let resolved = cache.get(repo.id)
     if (!cache.has(repo.id)) {
       try {
-        const response = await client.sendRequest('github.repoSlug', { repo: `id:${repo.id}` })
-        if (!response.ok && response.error.code === 'method_not_found') {
+        resolved = await callRuntimeOrpc(client, (runtime) => runtime.github.repoSlug, {
+          repo: `id:${repo.id}`
+        })
+      } catch (error) {
+        if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
           // Why: RPC availability is host-wide; avoid repeating an unsupported
           // probe for every repo or on the next paste attempt.
           repos.forEach((candidate) => cache.set(candidate.id, null))
           return null
         }
-        resolved = response.ok ? ((response as RpcSuccess).result as RepoSlug | null) : null
-      } catch {
         resolved = null
       }
       cache.set(repo.id, resolved ?? null)
@@ -131,11 +132,10 @@ export async function lookupGitHubItemByNumber(
   repoId: string,
   number: number
 ): Promise<GitHubWorkItem | null> {
-  const response = await client.sendRequest('github.workItem', { repo: `id:${repoId}`, number })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const item = (response as RpcSuccess).result as GitHubWorkItem | null
+  const item = await callRuntimeOrpc(client, (runtime) => runtime.github.workItem, {
+    repo: `id:${repoId}`,
+    number
+  })
   return item ? { ...item, repoId } : null
 }
 
@@ -146,17 +146,13 @@ export async function lookupGitHubItemByOwnerRepo(
   number: number,
   type: 'pr'
 ): Promise<GitHubWorkItem | null> {
-  const response = await client.sendRequest('github.workItemByOwnerRepo', {
+  const item = await callRuntimeOrpc(client, (runtime) => runtime.github.workItemByOwnerRepo, {
     repo: `id:${repoId}`,
     owner: slug.owner,
     ownerRepo: slug.repo,
     number,
     type
   })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const item = (response as RpcSuccess).result as GitHubWorkItem | null
   return item ? { ...item, repoId } : null
 }
 
@@ -165,16 +161,12 @@ export async function lookupGitLabItemByPath(
   repoId: string,
   link: NonNullable<ReturnType<typeof parseGitLabMergeRequestLink>>
 ): Promise<GitLabWorkItem | null> {
-  const response = await client.sendRequest('gitlab.workItemByPath', {
+  const item = await callRuntimeOrpc(client, (runtime) => runtime.gitlab.workItemByPath, {
     repo: `id:${repoId}`,
     host: link.slug.host,
     path: link.slug.path,
     iid: link.number,
     type: link.type
   })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const item = (response as RpcSuccess).result as GitLabWorkItem | null
   return item ? { ...item, repoId } : null
 }

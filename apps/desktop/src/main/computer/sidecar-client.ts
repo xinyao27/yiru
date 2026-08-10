@@ -9,6 +9,7 @@ import type {
   ComputerSnapshotResult
 } from '~shared/runtime-types'
 
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { normalizeComputerActionResult } from './action-verification-normalization'
 import { RuntimeClientError } from './runtime-client-error'
 import { validateComputerSidecarPasteText } from './sidecar-paste-validation'
@@ -95,21 +96,13 @@ function getComputerSidecar(): ComputerSidecarProcess {
 }
 
 function getComputerSidecarEntryPath(): string {
-  const app = loadElectronApp()
-  const appPath = app?.getAppPath() ?? process.cwd()
-  const isPackaged = app?.isPackaged ?? false
+  const pathsProvider = getRuntimeHostPathsProvider()
+  const appPath = pathsProvider.appPath()
+  const isPackaged = pathsProvider.isPackaged()
   // Why: packaged sidecars must be forked from app.asar.unpacked because
   // ELECTRON_RUN_AS_NODE bypasses Electron's asar require integration.
   const basePath = isPackaged ? appPath.replace('app.asar', 'app.asar.unpacked') : appPath
   return join(basePath, 'out', 'main', 'computer-sidecar.js')
-}
-
-function loadElectronApp(): { getAppPath(): string; isPackaged: boolean } | null {
-  try {
-    return require('electron').app
-  } catch {
-    return null
-  }
 }
 
 class ComputerSidecarProcess {

@@ -1,0 +1,212 @@
+import { isProcedure, type AnyRouter } from '@orpc/server'
+import { runtimeContract } from '@yiru/runtime-protocol/contract'
+
+import {
+  checkRuntimeUpdater,
+  downloadRuntimeUpdater,
+  getRuntimeUpdaterStatus,
+  installRuntimeUpdater
+} from '../rpc/methods/updater'
+import { runtimeImplementation } from '../rpc/orpc/access-middleware'
+import { wireRuntimeMethod } from '../rpc/orpc/registered-method'
+import { assertRuntimeOrpcRouterComplete } from '../rpc/orpc/router-completeness'
+import { agentSessionRuntimeHandlers } from '../rpc/orpc/router-direct/agent-session'
+import { aiVaultRuntimeHandlers } from '../rpc/orpc/router-direct/ai-vault'
+import { automationRuntimeHandlers } from '../rpc/orpc/router-direct/automation'
+import { clientSurfaceRuntimeHandlers } from '../rpc/orpc/router-direct/client-surface'
+import { computerUseRuntimeHandlers } from '../rpc/orpc/router-direct/computer-use'
+import { coworkingHostRuntimeHandlers } from '../rpc/orpc/router-direct/coworking-host'
+import { editorDocumentsRuntimeHandlers } from '../rpc/orpc/router-direct/editor-documents'
+import { emulatorRuntimeHandlers } from '../rpc/orpc/router-direct/emulator'
+import { filesRuntimeHandlers } from '../rpc/orpc/router-direct/files'
+import { gitRuntimeHandlers } from '../rpc/orpc/router-direct/git'
+import { githubRuntimeHandlers } from '../rpc/orpc/router-direct/github'
+import { gitlabRuntimeHandlers } from '../rpc/orpc/router-direct/gitlab'
+import { hostTelemetryRuntimeHandlers } from '../rpc/orpc/router-direct/host-telemetry'
+import { hostedReviewRuntimeHandlers } from '../rpc/orpc/router-direct/hosted-review'
+import { orchestrationRuntimeHandlers } from '../rpc/orpc/router-direct/orchestration'
+import { portableHostToolingRuntimeHandlers } from '../rpc/orpc/router-direct/portable-host-tooling'
+import { providerToolingRuntimeHandlers } from '../rpc/orpc/router-direct/provider-tooling'
+import { providerUsageRuntimeHandlers } from '../rpc/orpc/router-direct/provider-usage'
+import { runtimeEventsRuntimeHandlers } from '../rpc/orpc/router-direct/runtime-events'
+import { sourceControlRuntimeHandlers } from '../rpc/orpc/router-direct/source-control'
+import { workspaceRuntimeHandlers } from '../rpc/orpc/router-direct/workspace'
+import { nodeBrowserRuntimeContract, nodeBrowserRuntimeHandlers } from './browser-router'
+import { getNodeRuntimeHostStatus } from './status'
+import { nodeTerminalRuntimeContract, nodeTerminalRuntimeHandlers } from './terminal-router'
+
+const { mobile: nodeMobileHandlers, ...nodeAgentSessionHandlers } = agentSessionRuntimeHandlers
+// Why: both streams retain cleanup under their physical oRPC connection. Terminal
+// subscriptions close only their own host subscription/request id; requester
+// subscriptions additionally bind the caller connection to their UUID.
+const nodeCoworkingHostHandlers = coworkingHostRuntimeHandlers.coworking.host
+const nodeCoworkingSharingHandlers = coworkingHostRuntimeHandlers.coworking.sharing
+
+// Why: the Node host exposes the complete contract; platform-specific domains
+// retain their precise domain-level refusal semantics behind mounted procedures.
+const nodeRuntimeHostHandlers = {
+  ...nodeBrowserRuntimeHandlers,
+  ...nodeTerminalRuntimeHandlers,
+  ...nodeAgentSessionHandlers,
+  // Why: the Node daemon feeds real hook state into the host event-source bridge.
+  agentStatus: agentSessionRuntimeHandlers.agentStatus,
+  // Why: the host's attached RateLimitService owns snapshots and change notifications.
+  accounts: providerToolingRuntimeHandlers.accounts,
+  ...aiVaultRuntimeHandlers,
+  ...automationRuntimeHandlers,
+  clipboard: clientSurfaceRuntimeHandlers.clipboard,
+  // Why: host RPC mutations notify the same Store bridged by host/event-sources.ts.
+  settings: clientSurfaceRuntimeHandlers.settings,
+  // Why: host UI mutations publish from that Store without requiring a BrowserWindow.
+  ui: clientSurfaceRuntimeHandlers.ui,
+  ...computerUseRuntimeHandlers,
+  emulator: emulatorRuntimeHandlers.emulator,
+  coworking: {
+    // Why: session-tab and terminal-binding changes are produced by this host's runtime.
+    host: nodeCoworkingHostHandlers,
+    // Why: owner attachment registers a real sharing controller before host readiness.
+    sharing: nodeCoworkingSharingHandlers
+  },
+  ...editorDocumentsRuntimeHandlers,
+  externalEditor: portableHostToolingRuntimeHandlers.externalEditor,
+  ...filesRuntimeHandlers,
+  ...gitRuntimeHandlers,
+  ...githubRuntimeHandlers,
+  ...gitlabRuntimeHandlers,
+  host: {
+    ...portableHostToolingRuntimeHandlers.host
+  },
+  diagnostics: hostTelemetryRuntimeHandlers.diagnostics,
+  stats: hostTelemetryRuntimeHandlers.stats,
+  ...hostedReviewRuntimeHandlers,
+  ...orchestrationRuntimeHandlers,
+  rateLimitResume: providerToolingRuntimeHandlers.rateLimitResume,
+  skills: {
+    discover: providerToolingRuntimeHandlers.skills.discover,
+    // Why: host skill mutations drive the process-wide runner bridged into this runtime.
+    manage: providerToolingRuntimeHandlers.skills.manage
+  },
+  ...providerUsageRuntimeHandlers,
+  // Why: save stays mounted so the storage domain can report its precise
+  // encryption-unavailable failure; host composition forbids plaintext fallback.
+  speech: providerToolingRuntimeHandlers.speech,
+  mobile: nodeMobileHandlers,
+  updater: {
+    // Why: the default remote-server updater adapter is the headless authority:
+    // status reports manual mode and mutations reject with remote_update_manual_required.
+    getStatus: runtimeImplementation.updater.getStatus.handler(
+      wireRuntimeMethod('updater.getStatus', getRuntimeUpdaterStatus)
+    ),
+    check: runtimeImplementation.updater.check.handler(
+      wireRuntimeMethod('updater.check', checkRuntimeUpdater)
+    ),
+    download: runtimeImplementation.updater.download.handler(
+      wireRuntimeMethod('updater.download', downloadRuntimeUpdater)
+    ),
+    install: runtimeImplementation.updater.install.handler(
+      wireRuntimeMethod('updater.install', installRuntimeUpdater)
+    )
+  },
+  cli: portableHostToolingRuntimeHandlers.cli,
+  preflight: portableHostToolingRuntimeHandlers.preflight,
+  ...sourceControlRuntimeHandlers,
+  // Why: host repo/worktree operations emit real progress through the runtime bridge.
+  runtime: runtimeEventsRuntimeHandlers.runtime,
+  ...workspaceRuntimeHandlers,
+  // Why: host PTY output drives the advertised-URL watcher with Store ownership filtering.
+  workspacePorts: workspaceRuntimeHandlers.workspacePorts,
+  status: {
+    get: runtimeImplementation.status.get.handler(
+      wireRuntimeMethod('status.get', getNodeRuntimeHostStatus)
+    )
+  }
+} as const
+
+const nodeCoworkingHostContract = runtimeContract.coworking.host
+const nodeCoworkingSharingContract = runtimeContract.coworking.sharing
+
+const nodeRuntimeHostContract = {
+  ...nodeBrowserRuntimeContract,
+  ...nodeTerminalRuntimeContract,
+  accounts: runtimeContract.accounts,
+  agentStatus: runtimeContract.agentStatus,
+  agentTeams: runtimeContract.agentTeams,
+  aiVault: runtimeContract.aiVault,
+  automation: runtimeContract.automation,
+  clipboard: runtimeContract.clipboard,
+  cli: runtimeContract.cli,
+  computer: runtimeContract.computer,
+  coworking: {
+    host: nodeCoworkingHostContract,
+    sharing: nodeCoworkingSharingContract
+  },
+  diagnostics: runtimeContract.diagnostics,
+  emulator: runtimeContract.emulator,
+  externalEditor: runtimeContract.externalEditor,
+  files: runtimeContract.files,
+  folderWorkspace: runtimeContract.folderWorkspace,
+  git: runtimeContract.git,
+  github: runtimeContract.github,
+  gitlab: runtimeContract.gitlab,
+  host: {
+    platform: runtimeContract.host.platform,
+    wsl: runtimeContract.host.wsl,
+    pwsh: runtimeContract.host.pwsh,
+    gitBash: runtimeContract.host.gitBash
+  },
+  hostedReview: runtimeContract.hostedReview,
+  markdown: runtimeContract.markdown,
+  nativeChat: runtimeContract.nativeChat,
+  mobile: runtimeContract.mobile,
+  notebook: runtimeContract.notebook,
+  notifications: runtimeContract.notifications,
+  orchestration: runtimeContract.orchestration,
+  repo: runtimeContract.repo,
+  project: runtimeContract.project,
+  projectGroup: runtimeContract.projectGroup,
+  projectHostSetup: runtimeContract.projectHostSetup,
+  preflight: runtimeContract.preflight,
+  rateLimitResume: runtimeContract.rateLimitResume,
+  runtime: runtimeContract.runtime,
+  settings: runtimeContract.settings,
+  session: runtimeContract.session,
+  speech: runtimeContract.speech,
+  skills: {
+    discover: runtimeContract.skills.discover,
+    manage: runtimeContract.skills.manage
+  },
+  stats: runtimeContract.stats,
+  status: runtimeContract.status,
+  ui: runtimeContract.ui,
+  updater: runtimeContract.updater,
+  usage: runtimeContract.usage,
+  workspace: runtimeContract.workspace,
+  workspaceCleanup: runtimeContract.workspaceCleanup,
+  workspacePorts: runtimeContract.workspacePorts,
+  workspaceSpace: runtimeContract.workspaceSpace,
+  worktree: runtimeContract.worktree
+} as const
+
+// Why: the shared implementer is typed against all 569 procedures. The
+// independent completeness walk proves every leaf is mounted on this host.
+const nodeRuntimeHostRouterInput: unknown = nodeRuntimeHostHandlers
+export const nodeRuntimeHostRouter: AnyRouter = runtimeImplementation.router(
+  nodeRuntimeHostRouterInput as Parameters<typeof runtimeImplementation.router>[0]
+)
+
+assertRuntimeOrpcRouterComplete(nodeRuntimeHostRouter, nodeRuntimeHostContract)
+
+export function isNodeRuntimeHostProcedureMounted(path: readonly string[]): boolean {
+  let node: unknown = nodeRuntimeHostRouter
+  for (const segment of path) {
+    if (!isRecord(node)) {
+      return false
+    }
+    node = node[segment]
+  }
+  return isProcedure(node)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}

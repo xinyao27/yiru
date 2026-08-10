@@ -28,6 +28,7 @@ import { useCloseHost, useForceReconnect, usePrimeHosts } from '~/transport/clie
 import { removeHostAndCloseClient } from '~/transport/host-removal-lifecycle'
 import { loadHosts } from '~/transport/host-store'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState, HostProfile } from '~/transport/types'
 import { scheduleWidgetSnapshotUpdate } from '~/widgets/snapshot-sync'
 import { pickResumeWorktree } from '~/worktree/resume-pick'
@@ -42,7 +43,7 @@ type WorktreeSummary = {
   // The worktree the desktop currently has focused (exactly one is true).
   isActive?: boolean
   // Last terminal-output time (ms); breaks ties when nothing is focused.
-  lastOutputAt?: number
+  lastOutputAt?: number | null
 }
 
 type HostWorktreeInfo = {
@@ -101,43 +102,37 @@ function fetchWorktreeInfo(
     })
   }
 
-  client
-    // Why: worktree.ps defaults to 200 and silently truncates; request the full
-    // set so the host worktree count and active count are accurate.
-    .sendRequest('worktree.ps', { limit: 10000 })
-    .then((response) => {
+  // Why: worktree.ps defaults to 200 and silently truncates; request the full
+  // set so the host worktree count and active count are accurate.
+  callRuntimeOrpc(client, (runtime) => runtime.worktree.ps, { limit: 10000 })
+    .then((result) => {
       if (disposed()) {
         return
       }
-      if (response.ok) {
-        const result = response.result as { worktrees: WorktreeSummary[] }
-        const worktrees = result.worktrees ?? []
-        setCachedWorktrees(hostId, worktrees)
-        const activeStatuses = new Set(['working', 'active', 'permission'])
-        const active = worktrees.filter((w) => w.status && activeStatuses.has(w.status))
-        // Mirror the desktop's focused workspace (see pickResumeWorktree).
-        const lastActive = pickResumeWorktree(worktrees)
-        const orderedActive =
-          lastActive && active.some((worktree) => worktree.worktreeId === lastActive.worktreeId)
-            ? [
-                lastActive,
-                ...active.filter((worktree) => worktree.worktreeId !== lastActive.worktreeId)
-              ]
-            : active
-        setInfo((prev) => ({
-          ...prev,
-          [hostId]: {
-            hostId,
-            totalWorktrees: worktrees.length,
-            activeCount: active.length,
-            activeWorktrees: orderedActive.slice(0, 2),
-            attentionCount: active.filter((worktree) => worktree.status === 'permission').length,
-            lastActiveWorktree: lastActive
-          }
-        }))
-      } else {
-        markLoadedIfMissing()
-      }
+      const worktrees = result.worktrees ?? []
+      setCachedWorktrees(hostId, worktrees)
+      const activeStatuses = new Set(['working', 'active', 'permission'])
+      const active = worktrees.filter((w) => w.status && activeStatuses.has(w.status))
+      // Mirror the desktop's focused workspace (see pickResumeWorktree).
+      const lastActive = pickResumeWorktree(worktrees)
+      const orderedActive =
+        lastActive && active.some((worktree) => worktree.worktreeId === lastActive.worktreeId)
+          ? [
+              lastActive,
+              ...active.filter((worktree) => worktree.worktreeId !== lastActive.worktreeId)
+            ]
+          : active
+      setInfo((prev) => ({
+        ...prev,
+        [hostId]: {
+          hostId,
+          totalWorktrees: worktrees.length,
+          activeCount: active.length,
+          activeWorktrees: orderedActive.slice(0, 2),
+          attentionCount: active.filter((worktree) => worktree.status === 'permission').length,
+          lastActiveWorktree: lastActive
+        }
+      }))
     })
     .catch(() => {
       if (!disposed()) {
@@ -154,16 +149,12 @@ function fetchAccountsSnapshot(
   ) => void,
   disposed: () => boolean
 ) {
-  client
-    .sendRequest('accounts.list')
-    .then((response) => {
+  callRuntimeOrpc(client, (runtime) => runtime.accounts.list, undefined)
+    .then((snapshot) => {
       if (disposed()) {
         return
       }
-      if (response.ok) {
-        const snapshot = response.result as AccountsSnapshot
-        setSnapshots((prev) => ({ ...prev, [hostId]: snapshot }))
-      }
+      setSnapshots((prev) => ({ ...prev, [hostId]: snapshot }))
     })
     .catch(() => {})
 }
@@ -413,15 +404,17 @@ export default function HomeScreen(): React.JSX.Element {
             unsubNotif = subscribeToDesktopNotifications(entry.client, entry.hostId)
           }
           if (!unsubAccounts) {
-            unsubAccounts = entry.client.subscribe('accounts.subscribe', null, (payload) => {
-              if (!payload || typeof payload !== 'object') {
-                return
+            unsubAccounts = subscribeRuntimeOrpc(
+              entry.client,
+              (runtime) => runtime.accounts.subscribe,
+              undefined,
+              (event) => {
+                if ((event.type === 'ready' || event.type === 'snapshot') && event.snapshot) {
+                  const snapshot = event.snapshot
+                  setAccountsByHost((prev) => ({ ...prev, [entry.hostId]: snapshot }))
+                }
               }
-              const evt = payload as { type?: string; snapshot?: AccountsSnapshot }
-              if ((evt.type === 'ready' || evt.type === 'snapshot') && evt.snapshot) {
-                setAccountsByHost((prev) => ({ ...prev, [entry.hostId]: evt.snapshot! }))
-              }
-            })
+            )
           }
           if (reconnected) {
             void refreshHomeStatsForHost(entry.client, entry.hostId)

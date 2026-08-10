@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type { AgentsStepId } from '~shared/agents-orchestration-steps'
 import {
@@ -89,8 +90,8 @@ export function useFeatureWallCompletion(
 
   const readUsageAccountState = useCallback(async (): Promise<boolean> => {
     const [claude, codex] = await Promise.all([
-      window.api.claudeAccounts.list().catch(() => null),
-      window.api.codexAccounts.list().catch(() => null)
+      rendererHostClient.claudeAccounts.list().catch(() => null),
+      rendererHostClient.codexAccounts.list().catch(() => null)
     ])
     return hasFeatureWallUsageTracking({
       claudeManagedAccountCount: claude?.accounts.length ?? 0,

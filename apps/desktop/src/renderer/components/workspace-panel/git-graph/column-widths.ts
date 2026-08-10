@@ -27,12 +27,3 @@ export function gitGraphColumnFlexStyle(
 ): { flexBasis: number; flexGrow: number } {
   return { flexBasis: widths[columnId], flexGrow: columnId === 'description' ? 1 : 0 }
 }
-
-export function resizeGitGraphColumn(
-  widths: GitGraphColumnWidths,
-  columnId: GitGraphColumnId,
-  startWidth: number,
-  deltaX: number
-): GitGraphColumnWidths {
-  return { ...widths, [columnId]: clampGitGraphColumnWidth(startWidth + deltaX) }
-}

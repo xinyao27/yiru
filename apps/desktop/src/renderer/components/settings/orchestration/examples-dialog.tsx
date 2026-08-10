@@ -12,6 +12,7 @@ import {
 } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'
 import { ORCHESTRATION_SKILL_NAME } from '~renderer/lib/agent-feature-install-commands'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { OrchestrationUsageExample } from './usage-examples'
 
@@ -51,7 +52,7 @@ export function OrchestrationExampleDialog(props: {
 
   const copyPrompt = async (prompt: string): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(prompt)
+      await shellClient.ui.writeClipboardText(prompt)
       toast.success(
         translate(
           'auto.components.settings.OrchestrationExamplesDialog.80c6f2feb8',

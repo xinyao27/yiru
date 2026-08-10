@@ -16,6 +16,7 @@ import {
   type AgentStartupPlan
 } from '~renderer/lib/tui-agent-startup'
 import { activateAndRevealFolderWorkspace } from '~renderer/lib/worktree-activation'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -135,9 +136,8 @@ export function buildFolderWorkspaceLinkedStartupPlan(args: {
 async function preflightFolderWorkspaceAgentTrust(args: {
   agent: TuiAgent | null
   workspacePath: string | null
-  connectionId?: string | null
 }): Promise<void> {
-  if (!args.agent || !window.api.agentTrust?.markTrusted) {
+  if (!args.agent || !rendererHostClient.agentTrust?.markTrusted) {
     return
   }
   const preflight = TUI_AGENT_CONFIG[args.agent].preflightTrust
@@ -145,10 +145,9 @@ async function preflightFolderWorkspaceAgentTrust(args: {
     return
   }
   try {
-    await window.api.agentTrust.markTrusted({
+    await rendererHostClient.agentTrust.markTrusted({
       preset: preflight,
-      workspacePath: args.workspacePath,
-      ...(args.connectionId ? { connectionId: args.connectionId } : {})
+      workspacePath: args.workspacePath
     })
   } catch {
     // Best-effort: the user can still accept the agent trust prompt manually.
@@ -239,8 +238,7 @@ export async function submitFolderWorkspaceCreate({
   }
   await preflightFolderWorkspaceAgentTrust({
     agent: quickAgent,
-    workspacePath: workspace.folderPath,
-    connectionId: workspace.connectionId ?? projectGroup.connectionId
+    workspacePath: workspace.folderPath
   })
   if (startupPlan && !startupPlan.launchToken) {
     // Why: delayed delivery must target the exact pane spawned from this queued

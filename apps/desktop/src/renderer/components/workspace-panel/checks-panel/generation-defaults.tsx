@@ -17,8 +17,10 @@ export function useChecksPanelGenerationDefaults(context: useChecksPanelReviewCo
     if (!settings) {
       return DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS
     }
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — a checks-panel repo is never remote.
     const hostKey = getCommitMessageModelDiscoveryHostKeyForScope(
-      getRuntimeGitScope(settings, repo?.connectionId)
+      getRuntimeGitScope(settings, null)
     )
     const resolved = resolveSourceControlAiForOperation({
       settings,

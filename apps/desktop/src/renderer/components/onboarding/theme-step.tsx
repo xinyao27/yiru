@@ -5,6 +5,7 @@ import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { track } from '~renderer/lib/telemetry'
+import { previewGhosttyImportOnActiveHost } from '~renderer/runtime/settings-import-client'
 import type { DiscoveryStatusEmitted, GhosttyImportPreview, GlobalSettings } from '~shared/types'
 
 import { GhosttyDiscoveryRow } from './ghostty-discovery-row'
@@ -79,8 +80,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
     let cancelled = false
     // oxlint-disable-next-line react-doctor/no-initialize-state -- Why: non-Mac intentionally remains idle; only Mac enters detecting before IPC.
     setDiscovery({ status: 'detecting' })
-    void window.api.settings
-      .previewGhosttyImport()
+    void previewGhosttyImportOnActiveHost()
       .then((preview) => {
         if (cancelled) {
           return
@@ -129,7 +129,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
     track('onboarding_ghostty_import_clicked', {})
     setImporting(true)
     try {
-      const resolved = preview.found ? preview : await window.api.settings.previewGhosttyImport()
+      const resolved = preview.found ? preview : await previewGhosttyImportOnActiveHost()
       if (!resolved.found || Object.keys(resolved.diff).length === 0) {
         if (mountedRef.current) {
           toast.info(

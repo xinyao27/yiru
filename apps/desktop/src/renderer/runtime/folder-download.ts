@@ -58,7 +58,7 @@ async function downloadRuntimeEntry(
   const remotePath = `${normalizedDirectory.replace(/\/+$/g, '')}/${entry.name}`
   const pathSegments = [...localPathSegments, entry.name]
   if (entry.isDirectory) {
-    await window.api.fs.createDownloadedFolderDirectory({ transferId, pathSegments })
+    await window.api.fileHost.createDownloadedFolderDirectory({ transferId, pathSegments })
     await downloadRuntimeDirectoryTree(
       context,
       remotePath,
@@ -69,7 +69,7 @@ async function downloadRuntimeEntry(
     return
   }
   await streamRuntimeFileDownloadChunks(context, remotePath, async (chunk) => {
-    await window.api.fs.appendDownloadedFolderFileChunk({
+    await window.api.fileHost.appendDownloadedFolderFileChunk({
       transferId,
       pathSegments,
       contentBase64: chunk.contentBase64,
@@ -84,7 +84,7 @@ export async function downloadRuntimeFolder(
   dirPath: string,
   suggestedName: string
 ): Promise<RuntimeFileDownloadResult> {
-  const download = await window.api.fs.startDownloadedFolder({ suggestedName })
+  const download = await window.api.fileHost.startDownloadedFolder({ suggestedName })
   if (download.canceled) {
     return download
   }
@@ -97,12 +97,14 @@ export async function downloadRuntimeFolder(
       download.transferId,
       isWindowsAbsolutePathLike(dirPath)
     )
-    const result = await window.api.fs.finishDownloadedFolder({ transferId: download.transferId })
+    const result = await window.api.fileHost.finishDownloadedFolder({
+      transferId: download.transferId
+    })
     finished = true
     return result
   } finally {
     if (!finished) {
-      await window.api.fs
+      await window.api.fileHost
         .cancelDownloadedFolder({ transferId: download.transferId })
         .catch(() => {})
     }

@@ -15,7 +15,6 @@ import {
   type ExecutionHostId,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
-import { app, ipcMain } from 'electron'
 
 import {
   configureAiVaultSessionSources,
@@ -30,7 +29,7 @@ import { claudeProjectsRootDirs } from './session/scanner-source-discovery'
 const AI_VAULT_CACHE_TTL_MS = 15_000
 const AI_VAULT_ALL_HOST_RUNTIME_TIMEOUT_MS = 3_000
 
-type AiVaultHandlerOptions = AiVaultSessionSources & {
+export type AiVaultHandlerOptions = AiVaultSessionSources & {
   // Why: hosts this process can no longer read transcripts from. The "all hosts"
   // merge must still name them, or their sessions disappear from the result with
   // no trace and the user reads it as "nothing was recorded on that machine".
@@ -63,7 +62,7 @@ let inflightList: Promise<AiVaultListResult> | null = null
 let inflightKey: string | null = null
 let handlerOptions: AiVaultHandlerOptions = {}
 
-async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
+export async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
   const executionHostScope = normalizeExecutionHostScope(
     args?.executionHostScope ?? LOCAL_EXECUTION_HOST_ID
   )
@@ -242,33 +241,18 @@ async function scanLocalAiVaultSessions(args?: AiVaultListArgs): Promise<AiVault
   })
 }
 
-export function registerAiVaultHandlers(options: AiVaultHandlerOptions = {}): void {
+export function configureAiVaultHandlers(options: AiVaultHandlerOptions = {}): void {
   handlerOptions = options
   // Why: configure the SAME shared cache module the runtime RPC method uses so
   // there is exactly one cache instance and neither caller drops codex-home or
   // WSL injection. The runtime also configures these sources from its deps
   // (serve-mode reachable); this desktop path supplies the same source.
   configureAiVaultSessionSources(options)
-  ipcMain.handle('aiVault:listSessions', (_event, args?: AiVaultListArgs) =>
-    listAiVaultSessions(args)
-  )
-  ipcMain.handle(
-    'aiVault:listSubagentSessions',
-    (_event, args?: AiVaultSubagentListArgs): Promise<AiVaultSubagentListResult> =>
-      listAiVaultSubagentSessions(args)
-  )
-  // DOM focus/visibility events don't fire in the renderer on macOS app
-  // activation, so refresh-on-refocus needs this main-process signal.
-  app.on('browser-window-focus', (_event, window) => {
-    if (!window.isDestroyed()) {
-      window.webContents.send('aiVault:windowFocused')
-    }
-  })
 }
 
 // Provider-gated: only Claude materializes Task subagent transcripts as
 // sibling files today; other agents resolve to an empty list.
-async function listAiVaultSubagentSessions(
+export async function listAiVaultSubagentSessions(
   args?: AiVaultSubagentListArgs
 ): Promise<AiVaultSubagentListResult> {
   // IPC payloads are untyped at runtime; malformed input resolves empty like

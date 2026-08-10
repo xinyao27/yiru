@@ -134,12 +134,6 @@ export function acquireWatcherRemovalGate(
   }
 }
 
-export function isWatcherRemovalInProgressError(
-  error: unknown
-): error is WatcherRemovalInProgressError {
-  return error instanceof WatcherRemovalInProgressError
-}
-
 function watcherRemovalGateKey(normalizedRoot: string, connectionId?: string): string {
   // Why: the same path can exist on local and multiple SSH hosts, while
   // Windows-equivalent spellings must still share one physical-removal fence.

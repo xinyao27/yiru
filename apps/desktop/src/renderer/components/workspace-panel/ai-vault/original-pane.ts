@@ -1,5 +1,4 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
-import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { resolveRuntimePaneTitleLeafId } from '~renderer/lib/runtime-pane-title-leaf-id'
 import type { AppState } from '~renderer/store/types'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
@@ -170,32 +169,6 @@ export function resolveOriginalPaneTarget(args: {
     return null
   }
   return { paneKey, worktreeId, tabId: legacy.tabId, leafId }
-}
-
-/**
- * The hook-reported live state of the agent currently running this session,
- * or null when the session is not live in any pane. Matches by provider
- * session id first; falls back to a prompt match only when it is unambiguous.
- */
-export function findAiVaultSessionLiveState(
-  state: Pick<AppState, 'agentStatusByPaneKey'>,
-  session: AiVaultSession
-): AgentStatusState | null {
-  const promptMatchedStates: AgentStatusState[] = []
-
-  for (const entry of Object.values(state.agentStatusByPaneKey)) {
-    if (!agentMatches(session, entry.agentType)) {
-      continue
-    }
-    if (providerSessionMatches(session, entry.providerSession?.id)) {
-      return entry.state
-    }
-    if (entry.providerSession === undefined && promptsMatchSession(session, entry)) {
-      promptMatchedStates.push(entry.state)
-    }
-  }
-
-  return promptMatchedStates.length === 1 ? promptMatchedStates[0] : null
 }
 
 export function findOriginalAiVaultSessionPane(

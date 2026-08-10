@@ -1,6 +1,6 @@
-import { isTerminalSendRpcAccepted } from '~/terminal/send-rpc-response'
 import type { RpcClient } from '~/transport/rpc-client'
 import { isRpcDeliveryUnknown } from '~/transport/rpc-delivery-ambiguity'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import { isLogicalClientCutoverError } from '~/transport/stable-logical-rpc-client'
 
 type MobileTerminalClient = {
@@ -9,7 +9,7 @@ type MobileTerminalClient = {
 }
 
 type MobileNativeChatSendArgs = {
-  client: Pick<RpcClient, 'sendRequest'>
+  client: Pick<RpcClient, 'orpc'>
   terminal: string
   text: string
   enter?: boolean
@@ -22,13 +22,13 @@ export async function sendMobileNativeChatMessageWithOutcome(
   args: MobileNativeChatSendArgs
 ): Promise<MobileNativeChatSendOutcome> {
   try {
-    const response = await args.client.sendRequest('terminal.send', {
+    const response = await callRuntimeOrpc(args.client, (runtime) => runtime.terminal.send, {
       terminal: args.terminal,
       text: args.text,
       enter: args.enter ?? true,
       ...(args.mobileClient ? { client: args.mobileClient } : {})
     })
-    return isTerminalSendRpcAccepted(response) ? 'accepted' : 'rejected'
+    return response.send.accepted ? 'accepted' : 'rejected'
   } catch (error) {
     // Why: a cutover or post-write transport failure may have delivered the
     // input; preserving unknown prevents a retry from duplicating a real send.

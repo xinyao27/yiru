@@ -6,6 +6,7 @@ import { basename } from 'node:path'
 
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 import { isShellProcess } from '~shared/agent/detection'
+import type { AgentHookRelayEnvelope } from '~shared/agent/hook-relay'
 import { recognizeAgentProcessFromCommandLine } from '~shared/agent/process-recognition'
 import { shouldUseShellReadyStartupDelivery } from '~shared/codex-startup-delivery'
 
@@ -70,6 +71,7 @@ export type DaemonPtyAdapterOptions = {
   /** Called when the daemon socket is unreachable (process died). Expected to
    *  fork a fresh daemon so the next connection attempt can succeed. */
   respawn?: () => Promise<void>
+  onAgentHook?: (envelope: AgentHookRelayEnvelope) => void
 }
 
 const MAX_TOMBSTONES = 1000
@@ -90,6 +92,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
   private historyManager: HistoryManager | null
   private historyReader: HistoryReader | null
   private respawnFn: (() => Promise<void>) | null
+  private onAgentHook: ((envelope: AgentHookRelayEnvelope) => void) | null
   // Why: multiple pane mounts can call spawn() concurrently. If the daemon is
   // dead, all calls enter withDaemonRetry's catch block at once. Without a
   // lock, each would fork its own daemon process. This promise coalesces
@@ -174,6 +177,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
     this.historyManager = opts.historyPath ? new HistoryManager(opts.historyPath) : null
     this.historyReader = opts.historyPath ? new HistoryReader(opts.historyPath) : null
     this.respawnFn = opts.respawn ?? null
+    this.onAgentHook = opts.onAgentHook ?? null
     this.supportsCheckpoints = this.protocolVersion >= 4
     this.supportsIncrementalCheckpoints = this.protocolVersion >= 13
     this.supportsProducerFlowControl = this.protocolVersion >= 19
@@ -188,6 +192,18 @@ export class DaemonPtyAdapter implements IPtyProvider {
 
   getHistoryManager(): HistoryManager | null {
     return this.historyManager
+  }
+
+  async initializeAgentHookHost(config?: {
+    endpointDir: string
+    env: string
+  }): Promise<Record<string, string>> {
+    await this.ensureConnected()
+    const result = await this.client.request<{ env: Record<string, string> }>(
+      'configureAgentHookHost',
+      { config: config ?? null }
+    )
+    return result.env
   }
 
   async spawn(opts: PtySpawnOptions): Promise<PtySpawnResult> {
@@ -1327,7 +1343,9 @@ export class DaemonPtyAdapter implements IPtyProvider {
         return
       }
 
-      if (event.event === 'data') {
+      if (event.event === 'agentHook') {
+        this.onAgentHook?.(event.payload)
+      } else if (event.event === 'data') {
         this.markSessionDirty(event.sessionId)
         // oxlint-disable-next-line unicorn/no-useless-spread -- copy-safe: listeners may unsubscribe during iteration
         for (const listener of [...this.dataListeners]) {

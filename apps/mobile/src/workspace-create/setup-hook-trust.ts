@@ -1,6 +1,7 @@
 import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
 
-import type { RpcClient } from '../transport/rpc-client'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 export type SetupHookTrust = {
   contentHash: string
@@ -46,10 +47,7 @@ export async function persistSetupHookTrustApproval(args: {
   alwaysTrust: boolean
 }): Promise<PersistedTrustedYiruHooks> {
   const next = trustedYiruHooksWithSetupApproval(args)
-  const response = await args.client.sendRequest('ui.set', { trustedYiruHooks: next })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
+  await callRuntimeOrpc(args.client, (runtime) => runtime.ui.set, { trustedYiruHooks: next })
   return next
 }
 

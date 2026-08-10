@@ -135,7 +135,9 @@ export function WorktreeContextMenuContent({
         <>
           <WorktreeOpenInContextSubMenu
             worktreePath={worktree.path}
-            connectionId={repo?.connectionId ?? null}
+            // Why: Repo.connectionId is dead — nothing sets it since remote
+            // hosts were removed (#63) — a direct worktree's owner is never SSH.
+            connectionId={null}
             runtimeEnvironmentId={runtimeEnvironmentId}
             disabled={isDeleting}
           />

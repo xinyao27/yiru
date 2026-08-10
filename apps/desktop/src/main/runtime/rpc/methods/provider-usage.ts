@@ -1,12 +1,14 @@
+import type { ProviderRateLimits } from '@yiru/runtime-protocol/contract'
 import { fetchCursorRateLimits } from '~main/runtime/cursor-usage/fetcher'
-import { CURSOR_USAGE_GET_CONTRACT } from '~shared/runtime-method-contracts/provider-usage-contracts'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext } from '../core'
 
-export const PROVIDER_USAGE_METHODS: RpcMethod[] = [
-  defineMethod({
-    contract: CURSOR_USAGE_GET_CONTRACT,
-    access: { scope: 'host', tier: 'read' },
-    handler: (_params, { signal }) => fetchCursorRateLimits({ signal, target: { runtime: 'host' } })
-  })
-]
+// Why: 切片 80 retired this leaf's legacy `defineMethod` registration —
+// `orpc/router-direct/provider-usage.ts` wires this handler straight to the
+// contract now.
+export function fetchRuntimeCursorUsage(
+  _params: void,
+  { signal }: RpcContext
+): Promise<ProviderRateLimits> {
+  return fetchCursorRateLimits({ signal, target: { runtime: 'host' } })
+}

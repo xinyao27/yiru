@@ -7,10 +7,11 @@ import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import { isGitRepoKind } from '~shared/repo-kind'
-import type { Repo } from '~shared/types'
 
 import { upsertAddedRepoWithProjectHostSetup } from './add-repo/store-upsert'
 
@@ -24,7 +25,6 @@ export function useCreateRepo(
   options: {
     hostId?: string | null
     runtimeEnvironmentId?: string | null
-    sshTargetId?: string | null
   } = {}
 ) {
   const [createName, setCreateName] = useState('')
@@ -32,7 +32,7 @@ export function useCreateRepo(
   const [createError, setCreateError] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const mountedRef = useMountedRef()
-  const hostToken = options.hostId ?? options.sshTargetId ?? ''
+  const hostToken = options.hostId ?? ''
   const hostTokenRef = useRef(hostToken)
   hostTokenRef.current = hostToken
 
@@ -50,17 +50,6 @@ export function useCreateRepo(
   }, [])
 
   const handlePickParent = useCallback(async (): Promise<string | null> => {
-    if (options.sshTargetId) {
-      // Why: the native picker can only browse the client machine. SSH create
-      // uses a host path typed by the user until remote folder picking exists.
-      toast.error(
-        translate(
-          'auto.components.sidebar.AddRepoCreateStep.ssh_parent_manual',
-          'Enter an SSH parent path.'
-        )
-      )
-      return null
-    }
     if (options.runtimeEnvironmentId?.trim()) {
       // Why: the native folder picker returns a client-local path. Runtime
       // project creation needs an explicit host parent path.
@@ -73,14 +62,14 @@ export function useCreateRepo(
       return null
     }
     const gen = createGenRef.current
-    const dir = await window.api.repos.pickDirectory()
+    const dir = await workspaceHostClient.repos.pickDirectory()
     if (dir && gen === createGenRef.current && mountedRef.current) {
       setCreateParent(dir)
       setCreateError(null)
       return dir
     }
     return null
-  }, [mountedRef, options.runtimeEnvironmentId, options.sshTargetId])
+  }, [mountedRef, options.runtimeEnvironmentId])
 
   const handleCreate = useCallback(async () => {
     const name = createName.trim()
@@ -102,17 +91,11 @@ export function useCreateRepo(
       // Why: Create Project is intentionally Git-only; non-Git folders use the
       // existing add-folder flows instead of this path.
       const createKind = 'git' as const
-      const result = options.sshTargetId
-        ? await window.api.repos.createRemote({
-            connectionId: options.sshTargetId,
-            parentPath,
-            name,
-            kind: createKind
-          })
-        : target.kind === 'environment'
-          ? await callRuntimeRpc<{ repo: Repo } | { error: string }>(
+      const result =
+        target.kind === 'environment'
+          ? await callRuntimeOrpc(
               target,
-              'repo.create',
+              (client) => client.repo.create,
               {
                 parentPath,
                 name,
@@ -120,7 +103,7 @@ export function useCreateRepo(
               },
               { timeoutMs: 60_000 }
             )
-          : await window.api.repos.create({
+          : await workspaceHostClient.repos.create({
               parentPath,
               name,
               kind: createKind
@@ -223,8 +206,7 @@ export function useCreateRepo(
     mountedRef,
     closeModal,
     onGitRepoReady,
-    options.runtimeEnvironmentId,
-    options.sshTargetId
+    options.runtimeEnvironmentId
   ])
 
   return {

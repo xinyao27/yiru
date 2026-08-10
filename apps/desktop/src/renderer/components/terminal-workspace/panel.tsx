@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useMemo } from 'react'
 import { cn } from '~renderer/lib/class-names'
 import { setForegroundTerminalTabIds } from '~renderer/lib/foreground-terminal-tabs'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { useAllWorktrees } from '~renderer/store/selectors'
 import { hasFeatureInteraction } from '~shared/feature-interactions'
@@ -422,7 +423,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
         onCancel={() => setWindowCloseDialogOpen(false)}
         onConfirmClose={() => {
           setWindowCloseDialogOpen(false)
-          window.api.ui.confirmWindowClose()
+          shellClient.ui.confirmWindowClose()
         }}
       />
     </div>

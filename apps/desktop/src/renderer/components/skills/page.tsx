@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from '~renderer/runtime/installed-agent-skill-discovery-state'
+import { discoverSkills } from '~renderer/runtime/skill-manage-client'
 import { useAppStore } from '~renderer/store'
 import { skillDirectoryName, type DiscoveredSkill, type SkillDiscoveryResult } from '~shared/skills'
 
@@ -48,7 +49,7 @@ export default function SkillsPage(): React.JSX.Element {
   const loadSkills = useCallback(async (): Promise<void> => {
     setLoading(true)
     try {
-      const nextResult = await window.api.skills.discover()
+      const nextResult = await discoverSkills()
       if (mountedRef.current) {
         setResult(nextResult)
       }

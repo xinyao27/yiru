@@ -47,7 +47,13 @@ export function normalizeMobileFilePreviewResponse(
     )
   }
 
-  const result = (response as RpcSuccess).result
+  return normalizeMobileFilePreviewResult(relativePath, (response as RpcSuccess).result)
+}
+
+export function normalizeMobileFilePreviewResult(
+  relativePath: string,
+  result: unknown
+): MobileFilePreviewResult {
   if (classifyMobileArtifact(relativePath) === 'image') {
     return normalizeImagePreviewResult(result)
   }

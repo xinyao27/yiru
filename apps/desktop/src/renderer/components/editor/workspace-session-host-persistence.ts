@@ -268,22 +268,6 @@ export function listKnownRuntimeHostIds(
   return [...hostIds]
 }
 
-/** Boot-time hydration: fetch the local partition plus one partition per known
- *  runtime host (from loaded repos and saved runtime ids), then merge them into
- *  the unified session the hydrators expect.
- *
- *  Fail-soft: a partition whose fetch rejects is skipped — boot proceeds with
- *  the rest. Corrupt partitions never reach here; persistence zod-validates
- *  each one and falls back to defaults on the main side. */
-export async function fetchWorkspaceSessionFromHosts(
-  api: Pick<SessionApi, 'get'>,
-  repos: readonly Pick<Repo, 'connectionId' | 'executionHostId'>[],
-  additionalRuntimeHostIds: readonly ExecutionHostId[] = []
-): Promise<WorkspaceSessionState> {
-  return (await fetchWorkspaceSessionWithRuntimeHostOwners(api, repos, additionalRuntimeHostIds))
-    .session
-}
-
 export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   api: Pick<SessionApi, 'get'>,
   repos: readonly Pick<Repo, 'connectionId' | 'executionHostId'>[],

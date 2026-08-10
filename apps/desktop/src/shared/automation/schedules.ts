@@ -422,16 +422,6 @@ function classifyParsedCronSchedule(rule: ParsedCron): AutomationCronScheduleCla
   return { kind: 'custom', label: 'Custom schedule' }
 }
 
-export function classifyAutomationCronSchedule(
-  schedule: string
-): AutomationCronScheduleClassification {
-  try {
-    return classifyParsedCronSchedule(parseCronExpression(schedule.trim()))
-  } catch {
-    return { kind: 'invalid', label: 'Invalid schedule' }
-  }
-}
-
 export function formatAutomationSchedule(scheduleExpression: string): string {
   try {
     const trimmed = scheduleExpression.trim()

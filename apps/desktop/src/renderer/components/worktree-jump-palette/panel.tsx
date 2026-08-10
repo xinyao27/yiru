@@ -260,7 +260,6 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
             runtimePaneTitlesByTabId={storeState.runtimePaneTitlesByTabId}
             liveAgentStatusByWorktreeId={worktreeSearch.liveAgentStatusByWorktreeId}
             activeWorktreeId={storeState.activeWorktreeId}
-            sshConnectionStates={storeState.sshConnectionStates}
             onSelectItem={handleSelectItem}
             onCreateWorktree={handleCreateWorktree}
           />

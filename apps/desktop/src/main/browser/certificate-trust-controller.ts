@@ -19,16 +19,19 @@ import {
   SUPPORTED_CERTIFICATE_ERROR_CODE
 } from './certificate-identity'
 import { BrowserCertificateRequestGuard } from './certificate-request-guard'
+import type { BrowserSession } from './session'
 
 export type { ManagedBrowserGuestContext } from './certificate-challenge'
 
 export class BrowserCertificateTrustController {
+  private readonly dependencies: BrowserCertificateTrustControllerDependencies
   private readonly pendingByGuestId = new Map<number, PendingCertificateChallenge>()
   private readonly navigationSequenceByGuestId = new Map<number, number>()
   private readonly expiryTimerByGuestId = new Map<number, ReturnType<typeof setTimeout>>()
   private readonly requestGuard: BrowserCertificateRequestGuard
 
-  constructor(private readonly dependencies: BrowserCertificateTrustControllerDependencies) {
+  constructor(dependencies: BrowserCertificateTrustControllerDependencies) {
+    this.dependencies = dependencies
     this.requestGuard = new BrowserCertificateRequestGuard({
       onBlockedMainFrame: (blocked) => {
         const context = this.dependencies.resolveManagedGuestContext(blocked.webContentsId)
@@ -42,10 +45,10 @@ export class BrowserCertificateTrustController {
     })
   }
 
-  installSessionRequestGuard(session: Electron.Session): void {
+  installSessionRequestGuard(session: BrowserSession): void {
     this.requestGuard.installSession(session)
   }
-  removeSessionRequestGuard(session: Electron.Session): void {
+  removeSessionRequestGuard(session: BrowserSession): void {
     this.requestGuard.removeSession(session)
   }
 

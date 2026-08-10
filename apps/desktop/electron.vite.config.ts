@@ -217,7 +217,7 @@ export default defineConfig({
           // Why: electron-vite cleans out/main in dev. The dev CLI imports
           // this path for `yiru agent hooks ...`, so it must survive rebuilds.
           'agent-hooks/managed-agent-hook-controls': resolve(
-            'src/main/agent-hooks/managed-agent-hook-controls.ts'
+            'src/main/agent-hooks/managed-agent-hook-cli-entry.ts'
           )
         },
         plugins: [createStartupDiagnosticsBootstrapPlugin(), createPlainNodeEntryGuardPlugin()]

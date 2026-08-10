@@ -1,5 +1,6 @@
 import { buildDismissedOnboardingFolderAgentStartup } from '~renderer/lib/onboarding-folder-agent-startup'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { AppState } from '~renderer/store/types'
 import type { Repo } from '~shared/types'
 
@@ -23,7 +24,7 @@ export async function addNonGitFolderAndActivate(
     return repo
   }
 
-  const onboarding = await window.api.onboarding.get().catch(() => null)
+  const onboarding = await rendererHostClient.onboarding.get().catch(() => null)
   const startup = buildDismissedOnboardingFolderAgentStartup(
     getState().settings,
     onboarding,

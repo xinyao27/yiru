@@ -32,7 +32,9 @@ export function splitRepoReorderByHost(
   const focusedHostId = getSettingsFocusedExecutionHostId(settings)
   const remainingHostsByRepoId = new Map<string, RepoHostCursor>()
   for (const repo of repos) {
-    const hasExplicitOwner = Boolean(repo.executionHostId?.trim() || repo.connectionId?.trim())
+    // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+    // were removed (#63) — only executionHostId can still make a repo non-local.
+    const hasExplicitOwner = Boolean(repo.executionHostId?.trim())
     const hostId = hasExplicitOwner ? getRepoExecutionHostId(repo) : focusedHostId
     const existing = remainingHostsByRepoId.get(repo.id)
     if (existing) {

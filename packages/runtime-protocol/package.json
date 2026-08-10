@@ -6,6 +6,33 @@
   "type": "commonjs",
   "sideEffects": false,
   "exports": {
+    "./ai-vault": {
+      "types": "./src/ai-vault.ts",
+      "react-native": "./src/ai-vault.ts",
+      "browser": "./src/ai-vault.ts",
+      "development": "./src/ai-vault.ts",
+      "import": "./dist/esm/ai-vault.mjs",
+      "require": "./dist/ai-vault.js",
+      "default": "./dist/ai-vault.js"
+    },
+    "./clipboard": {
+      "types": "./src/clipboard.ts",
+      "react-native": "./src/clipboard.ts",
+      "browser": "./src/clipboard.ts",
+      "development": "./src/clipboard.ts",
+      "import": "./dist/esm/clipboard.mjs",
+      "require": "./dist/clipboard.js",
+      "default": "./dist/clipboard.js"
+    },
+    "./contract": {
+      "types": "./src/contract/router.ts",
+      "react-native": "./src/contract/router.ts",
+      "browser": "./src/contract/router.ts",
+      "development": "./src/contract/router.ts",
+      "import": "./dist/esm/contract.mjs",
+      "require": "./dist/cjs/contract.cjs",
+      "default": "./dist/cjs/contract.cjs"
+    },
     "./capabilities": {
       "types": "./src/capabilities.ts",
       "react-native": "./src/capabilities.ts",
@@ -33,6 +60,24 @@
       "require": "./dist/runtime-rpc-envelope.js",
       "default": "./dist/runtime-rpc-envelope.js"
     },
+    "./stats": {
+      "types": "./src/stats.ts",
+      "react-native": "./src/stats.ts",
+      "browser": "./src/stats.ts",
+      "development": "./src/stats.ts",
+      "import": "./dist/esm/stats.mjs",
+      "require": "./dist/stats.js",
+      "default": "./dist/stats.js"
+    },
+    "./status": {
+      "types": "./src/status.ts",
+      "react-native": "./src/status.ts",
+      "browser": "./src/status.ts",
+      "development": "./src/status.ts",
+      "import": "./dist/esm/status.mjs",
+      "require": "./dist/status.js",
+      "default": "./dist/status.js"
+    },
     "./mobile-runtime-types": {
       "types": "./src/mobile-runtime-types.ts",
       "react-native": "./src/mobile-runtime-types.ts",
@@ -41,6 +86,24 @@
       "import": "./dist/esm/mobile-runtime-types.mjs",
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
+    },
+    "./mobile-development-pairing": {
+      "types": "./src/mobile-development-pairing.ts",
+      "react-native": "./src/mobile-development-pairing.ts",
+      "browser": "./src/mobile-development-pairing.ts",
+      "development": "./src/mobile-development-pairing.ts",
+      "import": "./dist/esm/mobile-development-pairing.mjs",
+      "require": "./dist/mobile-development-pairing.js",
+      "default": "./dist/mobile-development-pairing.js"
+    },
+    "./orpc-peer-frame": {
+      "types": "./src/runtime-orpc-peer-frame.ts",
+      "react-native": "./src/runtime-orpc-peer-frame.ts",
+      "browser": "./src/runtime-orpc-peer-frame.ts",
+      "development": "./src/runtime-orpc-peer-frame.ts",
+      "import": "./dist/esm/orpc-peer-frame.mjs",
+      "require": "./dist/runtime-orpc-peer-frame.js",
+      "default": "./dist/runtime-orpc-peer-frame.js"
     },
     "./subscription-replay": {
       "types": "./src/runtime-subscription-replay.ts",
@@ -77,6 +140,15 @@
       "import": "./dist/esm/terminal-query-reply.mjs",
       "require": "./dist/terminal-query-reply.js",
       "default": "./dist/terminal-query-reply.js"
+    },
+    "./updater": {
+      "types": "./src/updater.ts",
+      "react-native": "./src/updater.ts",
+      "browser": "./src/updater.ts",
+      "development": "./src/updater.ts",
+      "import": "./dist/esm/updater.mjs",
+      "require": "./dist/updater.js",
+      "default": "./dist/updater.js"
     }
   },
   "scripts": {
@@ -86,6 +158,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@opentelemetry/api": "catalog:",
+    "@orpc/contract": "catalog:",
     "@yiru/workbench-model": "workspace:*",
     "zod": "catalog:"
   },

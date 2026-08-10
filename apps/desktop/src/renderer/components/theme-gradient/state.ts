@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { setRuntimeUIState } from '~renderer/runtime/ui-client'
 import type { AppState } from '~renderer/store/types'
 import { normalizeThemeGradient, type ThemeGradientTheme } from '~shared/theme-gradient/theme'
 
@@ -43,7 +44,7 @@ export const createThemeGradientSlice: StateCreator<AppState, [], [], ThemeGradi
     const normalized = theme ? normalizeThemeGradient(theme) : null
     if (scope.kind === 'default') {
       set({ themeGradientDefault: normalized })
-      window.api.ui.set({ themeGradientDefault: normalized }).catch(console.error)
+      setRuntimeUIState(get().settings, { themeGradientDefault: normalized }).catch(console.error)
       return
     }
     const next = { ...get().themeGradientsByWorkspaceId }
@@ -55,6 +56,6 @@ export const createThemeGradientSlice: StateCreator<AppState, [], [], ThemeGradi
       delete next[scope.workspaceId]
     }
     set({ themeGradientsByWorkspaceId: next })
-    window.api.ui.set({ themeGradientsByWorkspaceId: next }).catch(console.error)
+    setRuntimeUIState(get().settings, { themeGradientsByWorkspaceId: next }).catch(console.error)
   }
 })

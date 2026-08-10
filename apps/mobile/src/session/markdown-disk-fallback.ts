@@ -1,11 +1,13 @@
-import type { RpcFailure } from '../transport/types'
+import { isRuntimeOrpcErrorCode } from '../transport/runtime-orpc-client'
 
 const RENDERER_UNAVAILABLE = 'renderer_unavailable'
 
-export function shouldReadMarkdownFromDiskAfterReadTabFailure(response: RpcFailure): boolean {
+export function shouldReadMarkdownFromDiskAfterReadTabFailure(error: unknown): boolean {
   return (
-    response.error.code === RENDERER_UNAVAILABLE ||
-    (response.error.code === 'runtime_error' && response.error.message === RENDERER_UNAVAILABLE)
+    isRuntimeOrpcErrorCode(error, RENDERER_UNAVAILABLE) ||
+    (isRuntimeOrpcErrorCode(error, 'runtime_error') &&
+      error instanceof Error &&
+      error.message === RENDERER_UNAVAILABLE)
   )
 }
 

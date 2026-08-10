@@ -7,10 +7,11 @@ import { useCSSVariable } from 'uniwind'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '~/components/uniwind-icons'
 import { resolveCssNumber } from '~/style/resolve-css-variable'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { useForceReconnect } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
-import type { ConnectionState, RpcSuccess } from '../transport/types'
+import type { ConnectionState } from '../transport/types'
 import { fetchMobileGitHistory, mapMobileCommitRows, type MobileCommitRow } from './git-history'
 import { resolveMobileHistoryScreenView } from './history-screen-state'
 
@@ -110,12 +111,12 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
           return
         }
         setFilesById((prev) => ({ ...prev, [row.id]: 'loading' }))
-        void client
-          .sendRequest('git.commitCompare', { worktree: `id:${worktreeId}`, commitId: row.id })
-          .then((response) => {
-            const entries = response.ok
-              ? ((response as RpcSuccess).result as { entries: GitBranchChangeEntry[] }).entries
-              : []
+        void callRuntimeOrpc(client, (runtime) => runtime.git.commitCompare, {
+          worktree: `id:${worktreeId}`,
+          commitId: row.id
+        })
+          .then((result) => {
+            const entries = result.entries
             setFilesById((prev) => {
               // Drop stale responses if the row is no longer loading (collapsed + re-opened).
               if (prev[row.id] !== 'loading') {

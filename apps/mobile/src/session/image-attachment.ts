@@ -7,7 +7,7 @@ import {
 } from './native-chat/send'
 
 export type AttachMobileImageDeps = {
-  readonly client: Pick<RpcClient, 'sendRequest'>
+  readonly client: Pick<RpcClient, 'orpc'>
   readonly terminal: string
   readonly deviceToken: string | null
   // Supplied by the view so this transport module stays free of Expo/native imports.

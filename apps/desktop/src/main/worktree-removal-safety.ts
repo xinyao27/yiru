@@ -104,18 +104,6 @@ function isLikelyPosixHomeDirectory(resolvedWorktreePath: string, pathOps: PathO
   )
 }
 
-export function getRegisteredDeletableWorktree(
-  repoPath: string,
-  requestedWorktreePath: string,
-  worktrees: readonly GitWorktreeInfo[]
-): GitWorktreeInfo {
-  const worktree = findRegisteredDeletableWorktree(repoPath, requestedWorktreePath, worktrees)
-  if (!worktree) {
-    throw new Error(`Refusing to delete unregistered worktree path: ${requestedWorktreePath}`)
-  }
-  return worktree
-}
-
 export function findRegisteredDeletableWorktree(
   repoPath: string,
   requestedWorktreePath: string,

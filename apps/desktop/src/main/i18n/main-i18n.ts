@@ -1,4 +1,3 @@
-import { app } from 'electron'
 import {
   renderCompiledMessage,
   type TranslationVariables
@@ -8,14 +7,21 @@ import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '~sha
 
 import * as messages from '../../../generated/paraglide/messages.js'
 
+export type MainSystemLocaleProvider = () => string
+
 let activeLocale: SupportedUiLocale = DEFAULT_UI_LOCALE
+let systemLocaleProvider: MainSystemLocaleProvider = () => DEFAULT_UI_LOCALE
 
 export function getMainSystemLocale(): string {
   try {
-    return app.getLocale()
+    return systemLocaleProvider()
   } catch {
     return DEFAULT_UI_LOCALE
   }
+}
+
+export function setMainSystemLocaleProvider(provider: MainSystemLocaleProvider): void {
+  systemLocaleProvider = provider
 }
 
 export function setMainUiLanguage(language: UiLanguage): SupportedUiLocale {

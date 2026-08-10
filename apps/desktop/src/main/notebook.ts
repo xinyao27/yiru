@@ -1,8 +1,5 @@
 import { spawn } from 'node:child_process'
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
-import { dirname } from 'node:path'
-
-import { ipcMain } from 'electron'
 
 import { resolveAuthorizedPath } from './filesystem/auth'
 import type { Store } from './persistence'
@@ -197,7 +194,9 @@ async function runPythonCandidate(
   })
 }
 
-async function runPythonCell(
+// Why: exported so the oRPC runtime method (rpc/methods/notebook.ts) can spawn
+// the same interpreter logic without duplicating it.
+export async function runPythonCell(
   code: string,
   preamble: string,
   cwd: string
@@ -217,25 +216,22 @@ async function runPythonCell(
   return { stdout: '', stderr: '', exitCode: null, error: lastError }
 }
 
-export function registerNotebookHandlers(store: Store): void {
-  ipcMain.handle(
-    'notebook:runPythonCell',
-    async (
-      _event,
-      args: { filePath: string; code: string; preamble?: string; connectionId?: string | null }
-    ): Promise<NotebookRunResult> => {
-      if (args.connectionId) {
-        return {
-          stdout: '',
-          stderr: '',
-          exitCode: null,
-          error: 'Notebook execution is currently supported for local files only.'
-        }
-      }
-      const filePath = await resolveAuthorizedPath(args.filePath, store)
-      // Why: execute relative to the notebook file so local imports and data
-      // paths behave the same way users expect from a notebook opened on disk.
-      return runPythonCell(args.code, args.preamble ?? '', dirname(filePath))
-    }
-  )
+let authorizedStore: Store | null = null
+
+// Why: mirrors `resolveAuthorizedLogTailPath` (filesystem/local-log-tail.ts) —
+// the oRPC runtime method has no per-call `Store` in its context, so it reuses
+// the same store reference set at startup.
+export async function resolveAuthorizedNotebookFilePath(filePath: string): Promise<string> {
+  if (!authorizedStore) {
+    throw new Error('Notebook execution is unavailable before store initialization')
+  }
+  return resolveAuthorizedPath(filePath, authorizedStore)
+}
+
+// Why: the only preload channel this module backed (`notebook:runPythonCell`)
+// is gone — both the local and paired-environment call sites now go straight
+// through the `notebook.runPythonCell` oRPC contract (rpc/methods/notebook.ts),
+// which still needs this store reference to resolve/authorize a host path.
+export function initializeNotebookAuthorizedStore(store: Store): void {
+  authorizedStore = store
 }

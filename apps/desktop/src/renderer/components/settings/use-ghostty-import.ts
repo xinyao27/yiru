@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { previewGhosttyImportOnActiveHost } from '~renderer/runtime/settings-import-client'
 import type { GhosttyImportPreview, GlobalSettings } from '~shared/types'
 
 export type UseGhosttyImportReturn = {
@@ -32,7 +33,7 @@ export function useGhosttyImport(
     setOpen(true)
     setLoading(true)
     try {
-      const result = await window.api.settings.previewGhosttyImport()
+      const result = await previewGhosttyImportOnActiveHost()
       if (mountedRef.current) {
         setPreview(result)
       }

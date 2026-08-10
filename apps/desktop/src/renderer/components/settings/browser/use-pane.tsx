@@ -19,6 +19,7 @@ import {
 } from '~renderer/lib/agent-skill-cli-prerequisite'
 import { BROWSER_USE_ENABLED_STORAGE_KEY } from '~renderer/lib/browser-use-setup-state'
 import { cn } from '~renderer/lib/class-names'
+import { readCliInstallStatus, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { useAppStore } from '~renderer/store'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import { BROWSER_FAMILY_LABELS } from '~shared/constants'
@@ -94,10 +95,8 @@ export function BrowserUseSetup({
       }
       const nextStatus =
         activeSkillRuntime.agentRuntime?.runtime === 'wsl'
-          ? await window.api.cli.getWslInstallStatus(
-              getWslCliDistroRequest(activeSkillRuntime.agentRuntime)
-            )
-          : await window.api.cli.getInstallStatus()
+          ? await readWslCliInstallStatus(getWslCliDistroRequest(activeSkillRuntime.agentRuntime))
+          : await readCliInstallStatus()
       handleCliStatusChange(nextStatus)
     } catch (error) {
       if (mountedRef.current) {
@@ -283,10 +282,8 @@ export function BrowserUseSetup({
             preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
             getPrerequisiteStatus={() =>
               activeSkillRuntime.agentRuntime?.runtime === 'wsl'
-                ? window.api.cli.getWslInstallStatus(
-                    getWslCliDistroRequest(activeSkillRuntime.agentRuntime)
-                  )
-                : window.api.cli.getInstallStatus()
+                ? readWslCliInstallStatus(getWslCliDistroRequest(activeSkillRuntime.agentRuntime))
+                : readCliInstallStatus()
             }
             onBeforeOpenTerminal={async () => {
               useAppStore.getState().recordFeatureInteraction('agent-browser-setup')

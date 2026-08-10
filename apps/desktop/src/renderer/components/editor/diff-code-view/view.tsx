@@ -18,6 +18,7 @@ import {
   ContextMenuTrigger
 } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 import { registerCursorPierreThemes } from '../cursor-pierre-theme'
 import { setWithLRU } from '../scroll-cache'
@@ -359,7 +360,7 @@ export function DiffCodeView({
   const handleCopy = useCallback(() => {
     const selectedText = window.getSelection()?.toString() ?? ''
     if (selectedText) {
-      void window.api.ui.writeClipboardText(selectedText)
+      void shellClient.ui.writeClipboardText(selectedText)
       return
     }
     const hovered = hoveredLineRef.current
@@ -371,7 +372,7 @@ export function DiffCodeView({
       hovered.side === 'deletions' ? target.source.originalContent : target.source.modifiedContent
     const line = source.split(/\r\n?|\n/u)[hovered.lineNumber - 1]
     if (line !== undefined) {
-      void window.api.ui.writeClipboardText(line)
+      void shellClient.ui.writeClipboardText(line)
     }
   }, [fileById])
 

@@ -4,7 +4,7 @@ import {
   isManualSimulatorLaunchPending
 } from '~renderer/components/emulator-pane/simulator-launch-coordination'
 import { shutdownManagedSimulatorIfNoPane } from '~renderer/components/emulator-pane/simulator-pane-shutdown-scheduler'
-import { callRuntimeRpc } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { useAppStore } from '~renderer/store'
 
 import { resolveEmulatorAttachTarget } from './emulator-attach-target'
@@ -71,9 +71,9 @@ export function useEmulatorPaneSession({
   const refreshDevices = useCallback(async (bootedTarget?: string | null) => {
     try {
       // Unified list so Android devices/AVDs appear alongside iOS simulators.
-      const raw = (await callRuntimeRpc(
+      const raw = (await callRuntimeOrpc(
         { kind: 'local' },
-        'emulator.listDevices',
+        (client) => client.emulator.listDevices,
         {}
       )) as RawEmulatorDevice[]
       const list = toSimulatorDeviceRows(raw)
@@ -197,7 +197,7 @@ export function useEmulatorPaneSession({
           liveTargetRef.current = null
           resetVisualOrientation()
         }
-        const res = (await callRuntimeRpc({ kind: 'local' }, 'emulator.attach', {
+        const res = (await callRuntimeOrpc({ kind: 'local' }, (client) => client.emulator.attach, {
           device: target,
           worktree: worktreeId,
           focus: false

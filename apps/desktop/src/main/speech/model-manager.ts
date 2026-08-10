@@ -10,12 +10,16 @@ import {
 } from 'node:fs'
 import { readdir, rm } from 'node:fs/promises'
 import { join, resolve, relative } from 'node:path'
-import { pipeline } from 'node:stream/promises'
 
 /* eslint-disable max-lines -- Why: model download, checksum, extraction, and cleanup share one state machine so progress/error transitions stay coupled. */
-import { app, net } from 'electron'
 import type { SpeechModelManifest, SpeechModelState, SpeechModelStatus } from '~shared/speech-types'
 
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
+import {
+  createSpeechDownloadRequest,
+  type SpeechDownloadRequest,
+  type SpeechDownloadResponse
+} from './download-request'
 import {
   getSpeechModelCacheDirCandidates,
   migrateSpeechModelCacheIfNeeded,
@@ -30,11 +34,6 @@ type DownloadHandle = {
 }
 
 type ProgressCallback = (modelId: string, progress: number) => void
-type DownloadIncomingMessage = Electron.IncomingMessage &
-  NodeJS.ReadableStream & {
-    headers: Record<string, string | string[] | undefined>
-    destroy?: () => void
-  }
 type HttpStatusError = Error & {
   httpStatusCode?: number
   retryAfterMs?: number
@@ -166,7 +165,8 @@ export class ModelManager {
   private progressCallbacks = new Set<ProgressCallback>()
 
   constructor(customModelsDir?: string) {
-    const requestedModelsDir = customModelsDir || join(app.getPath('userData'), 'speech-models')
+    const requestedModelsDir =
+      customModelsDir || join(getRuntimeHostPathsProvider().userDataPath(), 'speech-models')
     const prepared = this.prepareModelsDir(requestedModelsDir)
     this.modelsDir = prepared.modelsDir
     this.migrationSourceDir = prepared.migrationSourceDir
@@ -587,7 +587,7 @@ export class ModelManager {
       }
 
       let settled = false
-      let request: Electron.ClientRequest | null = null
+      let request: SpeechDownloadRequest | null = null
       let idleTimeout: ReturnType<typeof setTimeout> | null = null
       const onSignalAbort = (): void => {
         const activeRequest = request
@@ -606,9 +606,9 @@ export class ModelManager {
         if (!activeRequest) {
           return
         }
-        activeRequest.off('error', onRequestError)
-        activeRequest.off('response', onResponse)
-        activeRequest.off('redirect', onRedirect)
+        activeRequest.offError(onRequestError)
+        activeRequest.offResponse(onResponse)
+        activeRequest.offRedirect(onRedirect)
         signal?.removeEventListener('abort', onSignalAbort)
         request = null
       }
@@ -681,8 +681,7 @@ export class ModelManager {
           .then(resolveOnce)
           .catch(rejectOnce)
       }
-      const onResponse = (incoming: Electron.IncomingMessage): void => {
-        const response = incoming as DownloadIncomingMessage
+      const onResponse = (response: SpeechDownloadResponse): void => {
         const contentLength = response.headers['content-length']
         const headerLength = Number.parseInt(getHeaderValue(contentLength) || '0', 10)
         const parsedLength =
@@ -751,13 +750,13 @@ export class ModelManager {
         const fileStream = createWriteStream(dest, { flags: resumed ? 'a' : 'w' })
 
         const cleanupResponseProgressListener = (): void => {
-          response.off('data', onResponseData)
+          response.offData(onResponseData)
         }
         const onResponseData = (chunk: Buffer): void => {
           resetIdleTimeout()
           if (isAborted()) {
             request?.abort()
-            response.destroy?.()
+            response.destroy()
             fileStream.destroy()
             return
           }
@@ -766,8 +765,9 @@ export class ModelManager {
           this.updateState(modelId, 'downloading', progress)
         }
 
-        response.on('data', onResponseData)
-        pipeline(response, fileStream)
+        response.onData(onResponseData)
+        response
+          .pipeTo(fileStream)
           .then(() => {
             cleanupResponseProgressListener()
             if (isAborted()) {
@@ -782,17 +782,17 @@ export class ModelManager {
           })
       }
 
-      request = net.request({ method: 'GET', url: parsedUrl.toString() })
+      request = createSpeechDownloadRequest(parsedUrl.toString())
       if (resumeOffset > 0) {
         request.setHeader('Range', `bytes=${resumeOffset}-`)
       }
 
-      // Why: Electron's net stack honors app proxy settings, unlike Node's
-      // https client, but it does not expose request.setTimeout().
+      // Why: the Electron composition root installs its proxy-aware net stack;
+      // standalone Node hosts use the HTTPS adapter with the same idle timeout.
       resetIdleTimeout()
-      request.on('error', onRequestError)
-      request.on('response', onResponse)
-      request.on('redirect', onRedirect)
+      request.onError(onRequestError)
+      request.onResponse(onResponse)
+      request.onRedirect(onRedirect)
       if (signal) {
         signal.addEventListener('abort', onSignalAbort, { once: true })
       }

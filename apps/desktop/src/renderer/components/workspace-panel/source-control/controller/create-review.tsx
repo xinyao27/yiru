@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 import { resolveBlockedCreateReviewNoticeMessage } from '../create-review-blocked-action'
@@ -104,7 +105,7 @@ export function useSourceControlCreateReview(scope: SourceControlReviewDialogCon
           url: result.url
         })
         if (resolvedPrCreationDefaults.openAfterCreate) {
-          window.api.shell.openUrl(result.url)
+          shellClient.shell.openUrl(result.url)
         }
         return
       }
@@ -130,7 +131,7 @@ export function useSourceControlCreateReview(scope: SourceControlReviewDialogCon
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () => window.api.shell.openUrl(result.existingReview!.url)
+              onClick: () => shellClient.shell.openUrl(result.existingReview!.url)
             }
           }
         )

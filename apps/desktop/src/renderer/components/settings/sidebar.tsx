@@ -1,4 +1,4 @@
-import { MagnifyingGlass as Search, HardDrives as Server, ArrowLeft } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, ArrowLeft } from '@phosphor-icons/react'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { CSSProperties, RefObject } from 'react'
 import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
@@ -37,7 +37,6 @@ type NavGroup = {
 
 type RepoNavSection = NavSection & {
   badgeColor?: string
-  isRemote?: boolean
   repoIcon?: RepoIcon | null
   upstream?: GitHubRepositoryIdentity | null
 }
@@ -332,12 +331,6 @@ export function SettingsSidebar({
                       />
                       <span className="truncate">{section.title}</span>
                       <RepoForkIndicator upstream={section.upstream} />
-                      {section.isRemote && (
-                        <span className="text-muted-foreground ml-auto inline-flex shrink-0 items-center gap-1 text-[10px]">
-                          <Server className="size-3" />
-                          {translate('auto.components.settings.SettingsSidebar.e0900f83e7', 'SSH')}
-                        </span>
-                      )}
                     </Button>
                   )
                 })}

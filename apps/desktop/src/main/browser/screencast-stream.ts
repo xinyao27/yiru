@@ -1,7 +1,6 @@
 /* eslint-disable max-lines -- Why: screencast setup, CDP lifecycle, metadata normalization, and stream teardown stay together so frame behavior cannot drift across files. */
 import { Buffer } from 'node:buffer'
 
-import type { WebContents } from 'electron'
 import {
   BrowserScreencastOpcode,
   encodeBrowserScreencastFrame,
@@ -10,7 +9,7 @@ import {
 } from '~shared/browser/screencast-protocol'
 
 import { BrowserError } from './cdp-bridge'
-import { acquireElectronDebugger, type ElectronDebuggerLease } from './electron-debugger-lease'
+import type { BrowserPageCdpEvent, BrowserPageCdpLease, BrowserPageHandle } from './page/handle'
 import { readBrowserScreencastImageSize } from './screencast-image-size'
 
 const DEBUGGER_COMMAND_TIMEOUT_MS = 8_000
@@ -183,14 +182,14 @@ function positiveNumber(value: number | undefined): number | null {
 }
 
 async function sendDebuggerCommand(
-  dbg: WebContents['debugger'],
+  cdp: BrowserPageCdpLease,
   method: string,
   params: Record<string, unknown> = {}
 ): Promise<unknown> {
   let timeout: ReturnType<typeof setTimeout> | null = null
   try {
     return await Promise.race([
-      Promise.resolve().then(() => dbg.sendCommand(method, params)),
+      Promise.resolve().then(() => cdp.sendCommand(method, params)),
       new Promise<never>((_, reject) => {
         timeout = setTimeout(() => {
           reject(new Error(`Timed out while running ${method}.`))
@@ -205,23 +204,23 @@ async function sendDebuggerCommand(
 }
 
 export async function startBrowserScreencast(
-  webContents: WebContents,
+  page: BrowserPageHandle,
   options: BrowserScreencastOptions
 ): Promise<BrowserScreencastSession> {
-  if (webContents.isDestroyed()) {
+  if (page.isClosed()) {
     throw new BrowserError('browser_tab_not_found', 'Browser tab is no longer available')
   }
 
-  const dbg = webContents.debugger
-  let debuggerLease: ElectronDebuggerLease | null = null
+  let cdp: BrowserPageCdpLease | null = null
   try {
-    debuggerLease = acquireElectronDebugger(webContents)
+    cdp = page.acquireCdp()
   } catch {
     throw new BrowserError(
       'browser_error',
       'Could not attach debugger. DevTools may already be open for this tab.'
     )
   }
+  const activeCdp = cdp
 
   let closed = false
   let stopping = false
@@ -232,6 +231,7 @@ export async function startBrowserScreencast(
   let navigationCaptureTimer: ReturnType<typeof setTimeout> | null = null
   let pendingFrame: PendingScreencastFrame | null = null
   let pendingFrameTimer: ReturnType<typeof setTimeout> | null = null
+  let unsubscribeCdp = (): void => {}
   let resolveDone!: () => void
   const done = new Promise<void>((resolve) => {
     resolveDone = resolve
@@ -250,7 +250,7 @@ export async function startBrowserScreencast(
     }
     // Why: CDP only sends the next frame after ACK; delaying ACK for
     // throttled frames applies back-pressure before Chromium/base64 work piles up.
-    void sendDebuggerCommand(dbg, 'Page.screencastFrameAck', { sessionId }).catch(() => {})
+    void sendDebuggerCommand(activeCdp, 'Page.screencastFrameAck', { sessionId }).catch(() => {})
   }
 
   const clearPendingFrameTimer = (ackPending = false): void => {
@@ -355,11 +355,11 @@ export async function startBrowserScreencast(
   }
 
   const clearDeviceMetricsOverride = async (): Promise<void> => {
-    if (webContents.isDestroyed() || !dbg.isAttached()) {
+    if (page.isClosed() || !activeCdp.isConnected()) {
       deviceMetricsOverridden = false
       return
     }
-    await sendDebuggerCommand(dbg, 'Emulation.clearDeviceMetricsOverride')
+    await sendDebuggerCommand(activeCdp, 'Emulation.clearDeviceMetricsOverride')
     deviceMetricsOverridden = false
   }
 
@@ -373,13 +373,13 @@ export async function startBrowserScreencast(
     // Why: Back/Forward and cross-process navigations can drop emulation while
     // the screencast remains attached. Reapply before fallback captures so the
     // page lays out at the client pane size, not the host BrowserView size.
-    await sendDebuggerCommand(dbg, 'Emulation.setDeviceMetricsOverride', {
+    await sendDebuggerCommand(activeCdp, 'Emulation.setDeviceMetricsOverride', {
       width: viewportWidth,
       height: viewportHeight,
       deviceScaleFactor,
       mobile: options.mobile === true
     })
-    await sendDebuggerCommand(dbg, 'Emulation.setVisibleSize', {
+    await sendDebuggerCommand(activeCdp, 'Emulation.setVisibleSize', {
       width: viewportWidth,
       height: viewportHeight
     }).catch(() => {})
@@ -393,10 +393,8 @@ export async function startBrowserScreencast(
     closed = true
     clearNavigationCaptureTimer()
     clearPendingFrameTimer()
-    dbg.removeListener('message', handleMessage as never)
-    dbg.removeListener('detach', handleDetach as never)
-    debuggerLease?.release()
-    debuggerLease = null
+    unsubscribeCdp()
+    activeCdp.release()
     resolveDone()
   }
 
@@ -405,7 +403,7 @@ export async function startBrowserScreencast(
     finish()
   }
 
-  const handleMessage = (_event: unknown, method: string, params: unknown): void => {
+  const handleMessage = (method: string, params: unknown): void => {
     if (closed) {
       return
     }
@@ -449,7 +447,7 @@ export async function startBrowserScreencast(
       return
     }
     if (stopping) {
-      void sendDebuggerCommand(dbg, 'Page.screencastFrameAck', { sessionId }).catch(() => {})
+      void sendDebuggerCommand(activeCdp, 'Page.screencastFrameAck', { sessionId }).catch(() => {})
       return
     }
 
@@ -510,20 +508,18 @@ export async function startBrowserScreencast(
       if (isSnapshotStale(initialOnly, generation)) {
         return
       }
-      if (viewportWidth && viewportHeight && typeof webContents.capturePage === 'function') {
+      if (viewportWidth && viewportHeight && page.captureCompositorFrame) {
         try {
           // Why: CDP captureScreenshot can tile BrowserView surfaces under
           // mobile emulation; Electron captures the actual visible viewport.
-          const nativeImage = await webContents.capturePage({
-            x: 0,
-            y: 0,
-            width: viewportWidth,
-            height: viewportHeight
+          const captured = await page.captureCompositorFrame({
+            format: options.format,
+            quality: options.quality,
+            captureBeyondViewport: false,
+            clip: { x: 0, y: 0, width: viewportWidth, height: viewportHeight, scale: 1 }
           })
-          const buffer =
-            options.format === 'png' ? nativeImage.toPNG() : nativeImage.toJPEG(options.quality)
-          if (buffer.byteLength > 0) {
-            image = new Uint8Array(buffer)
+          if (captured) {
+            image = new Uint8Array(Buffer.from(captured.data, 'base64'))
           }
         } catch {
           image = null
@@ -532,7 +528,7 @@ export async function startBrowserScreencast(
       // Why: Page.startScreencast may not produce a frame for an already-painted
       // blank/static page, which leaves remote browser clients showing only the shell.
       if (!image) {
-        const result = await sendDebuggerCommand(dbg, 'Page.captureScreenshot', {
+        const result = await sendDebuggerCommand(activeCdp, 'Page.captureScreenshot', {
           format: options.format,
           ...(options.format === 'jpeg' ? { quality: options.quality } : {}),
           ...(viewportWidth && viewportHeight
@@ -586,13 +582,19 @@ export async function startBrowserScreencast(
     }
   }
 
-  dbg.on('message', handleMessage as never)
-  dbg.on('detach', handleDetach as never)
+  const handleCdpEvent = (event: BrowserPageCdpEvent): void => {
+    if (event.type === 'detached') {
+      handleDetach()
+      return
+    }
+    handleMessage(event.method, event.params)
+  }
+  unsubscribeCdp = activeCdp.subscribe(handleCdpEvent)
 
   try {
-    await sendDebuggerCommand(dbg, 'Page.enable')
+    await sendDebuggerCommand(activeCdp, 'Page.enable')
     await applyDeviceMetricsOverride()
-    await sendDebuggerCommand(dbg, 'Page.startScreencast', {
+    await sendDebuggerCommand(activeCdp, 'Page.startScreencast', {
       format: options.format,
       quality: options.quality,
       maxWidth: options.maxWidth,
@@ -622,7 +624,7 @@ export async function startBrowserScreencast(
       clearPendingFrameTimer(true)
       try {
         void (async () => {
-          await sendDebuggerCommand(dbg, 'Page.stopScreencast').catch(() => {})
+          await sendDebuggerCommand(activeCdp, 'Page.stopScreencast').catch(() => {})
           if (deviceMetricsOverridden) {
             await clearDeviceMetricsOverride().catch(() => {})
           }

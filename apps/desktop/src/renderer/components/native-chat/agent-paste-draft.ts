@@ -1,10 +1,6 @@
 import { agentDeliversDraftViaNativePrefill } from '~renderer/lib/agent-native-draft-prefill'
 import { POST_PASTE_SUBMIT_DELAY_MS } from '~renderer/lib/agent-paste-submit-delay'
-import {
-  BRACKETED_PASTE_END,
-  BRACKETED_PASTE_START,
-  sanitizeTerminalPasteText
-} from '~renderer/lib/terminal-bracketed-paste'
+import { BRACKETED_PASTE_END, BRACKETED_PASTE_START } from '~renderer/lib/terminal-bracketed-paste'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
 import {
   inspectRuntimeTerminalProcess,
@@ -35,10 +31,6 @@ export {
 export const BRACKETED_PASTE_BEGIN = BRACKETED_PASTE_START
 export { BRACKETED_PASTE_END }
 export { POST_PASTE_SUBMIT_DELAY_MS }
-
-export function sanitizeBracketedPasteContent(content: string): string {
-  return sanitizeTerminalPasteText(content)
-}
 
 // Why: deterministic signal can fail in two ways: (1) the agent never
 // emits DECSET 2004 (no shipped agent does this — guarded as a fallback),
@@ -169,24 +161,6 @@ export async function pasteDraftToAgentPtyWhenReady(args: {
   })
 }
 
-export async function submitPromptToAgentTab(args: {
-  tabId: string
-  content: string
-  timeoutMs?: number
-}): Promise<boolean> {
-  const { tabId, content, timeoutMs } = args
-  const ptyId = await waitForPtyId(tabId, timeoutMs ?? READINESS_TIMEOUT_MS)
-  if (!ptyId) {
-    return false
-  }
-  return await sendBracketedPasteToAgent({
-    settings: getSettingsForAgentTabRuntimeOwner(tabId),
-    ptyId,
-    content,
-    submit: true
-  })
-}
-
 export async function submitPromptToAgentPty(args: {
   tabId: string
   ptyId: string
@@ -198,13 +172,6 @@ export async function submitPromptToAgentPty(args: {
     content: args.content,
     submit: true
   })
-}
-
-export async function sendBracketedPasteToRunningAgent(args: {
-  ptyId: string
-  content: string
-}): Promise<boolean> {
-  return await sendBracketedPasteToAgent({ ptyId: args.ptyId, content: args.content, submit: true })
 }
 
 async function sendBracketedPasteToAgent(args: {

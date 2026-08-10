@@ -80,24 +80,6 @@ function getFurthestDepthStep(
   return furthest
 }
 
-export function getFeatureWallTourDepthStep(input: {
-  workflowId: FeatureWallWorkflowId
-  agentStepId?: AgentsStepId
-  workbenchStepId?: WorkbenchStepId
-  reviewStepId?: ReviewStepId
-}): FeatureWallTourDepthStep {
-  if (input.workflowId === 'agents-orchestration') {
-    return AGENT_DEPTH_STEP[input.agentStepId ?? 'statuses']
-  }
-  if (input.workflowId === 'workbench') {
-    return WORKBENCH_DEPTH_STEP[input.workbenchStepId ?? 'terminal']
-  }
-  if (input.workflowId === 'review') {
-    return REVIEW_DEPTH_STEP[input.reviewStepId ?? 'notes']
-  }
-  return input.workflowId
-}
-
 export function buildFeatureWallTourDepthSummary(
   input: FeatureWallTourDepthInput
 ): FeatureWallTourDepthSummary {

@@ -2,6 +2,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { detectLanguage } from '~renderer/lib/language-detect'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import type { AppState } from '~renderer/store/types'
@@ -89,7 +90,7 @@ export async function openAiVaultSessionLogInYiru(session: AiVaultLogSession): P
     try {
       // The exact scanned path is the authorization oracle; the user click is the
       // trust gesture. Reuses Yiru's existing external R/W open grant.
-      await window.api.fs.authorizeExternalPath({ targetPath: filePath })
+      await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
     } catch {
       toast.error(
         translate(

@@ -1,8 +1,6 @@
 import { DEFAULT_APP_FONT_FAMILY, getDefaultRepoHookSettings } from '~shared/constants'
 import { DESKTOP_TERMINAL_SCROLLBACK_ROW_PRESETS } from '~shared/terminal/scrollback-policy'
-import type { YiruHooks } from '~shared/types'
 
-export type HookName = keyof YiruHooks['scripts']
 export const DEFAULT_REPO_HOOK_SETTINGS = getDefaultRepoHookSettings()
 export const MAX_THEME_RESULTS = 80
 export const SCROLLBACK_PRESETS_ROWS = DESKTOP_TERMINAL_SCROLLBACK_ROW_PRESETS

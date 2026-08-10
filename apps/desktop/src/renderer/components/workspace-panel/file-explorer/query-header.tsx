@@ -26,7 +26,9 @@ function FileExplorerQueryHeader({
       <FileExplorerToolbar
         repoName={display.repoName}
         worktreePath={owner.worktreePath!}
-        connectionId={owner.activeRepo?.connectionId ?? null}
+        // Why: Repo.connectionId is dead — nothing sets it since remote hosts
+        // were removed (#63) — a direct repo/worktree owner is never SSH.
+        connectionId={null}
         runtimeEnvironmentId={owner.activeRuntimeEnvironmentId}
         refresh={display.manualRefresh}
         canRefresh={view.isFilesViewActive}

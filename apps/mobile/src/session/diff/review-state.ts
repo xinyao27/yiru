@@ -62,10 +62,6 @@ export function normalizeMobileDiffReviewState(value: unknown): MobileDiffReview
   }
 }
 
-export function createMobileDiffReviewState(now: number): MobileDiffReviewState {
-  return { version: 1, updatedAt: now, files: {} }
-}
-
 export function mergeMobileDiffReviewState(
   state: MobileDiffReviewState,
   descriptors: readonly MobileDiffReviewFileDescriptor[],
@@ -101,31 +97,6 @@ export function mergeMobileDiffReviewState(
     updatedAt: now,
     completedAt: invalidatedReview ? undefined : state.completedAt,
     files
-  }
-}
-
-export function markMobileDiffReviewFileOpened(
-  state: MobileDiffReviewState,
-  descriptor: MobileDiffReviewFileDescriptor,
-  now: number
-): MobileDiffReviewState {
-  const previous = state.files[descriptor.key]
-  return {
-    ...state,
-    updatedAt: now,
-    files: {
-      ...state.files,
-      [descriptor.key]: {
-        key: descriptor.key,
-        filePath: descriptor.filePath,
-        oldPath: descriptor.oldPath,
-        scope: descriptor.scope,
-        reviewedAt: previous?.reviewedAt,
-        reviewDiffIdentity: previous?.reviewDiffIdentity,
-        lastOpenedAt: now,
-        lastSeenDiffIdentity: descriptor.diffIdentity
-      }
-    }
   }
 }
 

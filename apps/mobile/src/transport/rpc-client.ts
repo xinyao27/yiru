@@ -8,28 +8,22 @@ import {
   publicKeyFromBase64,
   publicKeyToBase64,
   encrypt,
+  encryptBytes,
   decrypt,
   decryptBytes
 } from './e2ee'
+import { createMobileRpcActivityProbe } from './rpc-client-activity-probe'
+import { createMobileRuntimeOrpcTransport } from './rpc-client-orpc-wiring'
+import { createMobileStatusCompatProbe, type DesktopStatusPayload } from './rpc-client-status-probe'
 import {
   handleTerminalBinaryFrame,
   type TerminalSnapshotState
 } from './rpc-client-terminal-binary-frame'
-import {
-  buildStreamUnsubscribe,
-  buildTerminalUnsubscribeParams,
-  updateTerminalSubscriptionViewport as updateCachedTerminalSubscriptionViewport
-} from './rpc-client-terminal-subscription'
 import { markRpcDeliveryUnknown } from './rpc-delivery-ambiguity'
 import { isRpcResponse } from './rpc-response-shape'
+import type { RuntimeOrpcClient } from './runtime-orpc-client'
 import { describeSocketEvent } from './socket-event-debug'
-import type {
-  RpcResponse,
-  RpcSuccess,
-  ConnectionState,
-  ConnectionLogLevel,
-  ConnectionLogSink
-} from './types'
+import type { RpcResponse, ConnectionState, ConnectionLogLevel, ConnectionLogSink } from './types'
 import { websocketPayloadToUint8 } from './websocket-payload-bytes'
 
 type PendingRequest = {
@@ -43,42 +37,13 @@ type ConnectWaiter = {
   timeout: ReturnType<typeof setTimeout> | null
 }
 
-type SendRequestOptions = {
-  timeoutMs?: number
-}
-
-type SubscribeOptions = {
-  onBinaryFrame?: (frame: BrowserScreencastFrame) => void
-}
-
 type StreamingListener = (result: unknown) => void
 
-type StreamRequest = {
-  method: string
-  params: unknown
-  listener: StreamingListener
-  onBinaryFrame?: (frame: BrowserScreencastFrame) => void
-  subscriptionId?: string
-  cancelled?: boolean
-  sent?: boolean
-}
-
 export type RpcClient = {
-  sendRequest: (
-    method: string,
-    params?: unknown,
-    options?: SendRequestOptions
-  ) => Promise<RpcResponse>
-  subscribe: (
-    method: string,
-    params: unknown,
-    onData: StreamingListener,
-    options?: SubscribeOptions
-  ) => () => void
-  updateTerminalSubscriptionViewport: (
-    terminal: string,
-    viewport: { cols: number; rows: number }
-  ) => void
+  // Typed runtime contract client — every runtime RPC and subscription goes
+  // through this. Mobile requires an oRPC-capable host unconditionally; there
+  // is no bare-string fallback.
+  orpc: RuntimeOrpcClient
   getState: () => ConnectionState
   // Why: UI escalates "Reconnecting…" to "Can't connect" once attempts cross
   // a threshold. 0 means never failed; counter is reset on successful open.
@@ -92,6 +57,9 @@ export type RpcClient = {
   // reconnect loop while the app is backgrounded; callers invoke this on
   // AppState 'active' so the session recovers without an app restart.
   notifyForeground: () => void
+  // Why: diagnostic-only fallback for the protocol-compat gate (see
+  // rpc-client-status-probe.ts) — not a general request primitive.
+  probeStatusForProtocolCompat: (timeoutMs?: number) => Promise<DesktopStatusPayload | null>
   close: () => void
 }
 
@@ -130,18 +98,11 @@ const TRICKLE_RECONNECT_DELAY_MS = 90_000
 // revoked token is rejected on every attempt and converges to auth-failed in
 // seconds; a one-off glitch self-heals without the user re-pairing.
 const AUTH_RETRY_BUDGET = 3
-const REQUEST_TIMEOUT_MS = 30_000
 const CONNECT_TIMEOUT_MS = 12_000
 const HANDSHAKE_TIMEOUT_MS = 5_000
 // Why: RN's WebSocket implementation may not expose static readyState
 // constants, but the protocol value for CONNECTING is stable across runtimes.
 const WEBSOCKET_CONNECTING_STATE = 0
-
-// Why: RN auto-pongs WebSocket pings natively, so JS needs an app-level
-// liveness probe to detect half-open sockets. Any inbound app traffic after
-// a probe starts proves the link is alive; otherwise an unanswered probe
-// force-closes the socket so the reconnect path can recover.
-const ACTIVITY_PROBE_INTERVAL_MS = 20_000
 
 export type ConnectOptions = {
   onStateChange?: (state: ConnectionState) => void
@@ -184,7 +145,6 @@ export function connect(
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
   let connectTimer: ReturnType<typeof setTimeout> | null = null
   let handshakeTimer: ReturnType<typeof setTimeout> | null = null
-  let activityProbeTimer: ReturnType<typeof setInterval> | null = null
   let intentionallyClosed = false
   // Why: consecutive auth rejections since the last successful connect. We
   // tolerate up to AUTH_RETRY_BUDGET (issue #5200) before latching auth-failed
@@ -206,12 +166,8 @@ export function connect(
   const serverPublicKey = publicKeyFromBase64(serverPublicKeyB64)
 
   const pending = new Map<string, PendingRequest>()
-  const streamListeners = new Map<string, StreamRequest>()
   const terminalStreamListeners = new Map<number, StreamingListener>()
-  const terminalStreamIdsByRequest = new Map<string, Set<number>>()
   const terminalSnapshots = new Map<number, TerminalSnapshotState>()
-  let activeBrowserScreencastRequestId: string | null = null
-  let pendingBrowserScreencastRequestId: string | null = null
   const stateListeners = new Set<(state: ConnectionState) => void>()
   const connectWaiters: ConnectWaiter[] = []
 
@@ -267,6 +223,14 @@ export function connect(
     }
     for (const listener of stateListeners) {
       listener(next)
+    }
+    // Why: the oRPC link is bound to one socket generation. Rebuild it on every
+    // fresh channel so in-flight calls fail loudly instead of silently writing
+    // into a dead port, and tear it down whenever the channel drops.
+    if (next === 'connected') {
+      orpcTransport.connected()
+    } else if (prev === 'connected') {
+      orpcTransport.disconnected()
     }
   }
 
@@ -477,37 +441,10 @@ export function connect(
               clearTimeout(handshakeTimer)
               handshakeTimer = null
             }
-            console.log('[net] e2ee_authenticated — connected', {
-              streamCount: streamListeners.size
-            })
+            console.log('[net] e2ee_authenticated — connected')
             setState('connected')
             emitLog('success', 'Authenticated', 'Channel ready for RPC')
-            startActivityProbe()
-            for (const [id, stream] of streamListeners) {
-              if (stream.cancelled) {
-                removeStreamListener(id)
-                continue
-              }
-              // Why: setState('connected') notifies UI listeners synchronously;
-              // a listener may subscribe and send immediately before this
-              // reconnect replay loop resumes.
-              if (stream.sent) {
-                continue
-              }
-              if (stream.method === 'browser.screencast') {
-                pendingBrowserScreencastRequestId = id
-                activeBrowserScreencastRequestId = null
-              }
-              resetTerminalStreamRoutingForRequest(id)
-              if (
-                sendEncrypted({ id, deviceToken, method: stream.method, params: stream.params })
-              ) {
-                stream.sent = true
-              } else {
-                emitStreamError(stream, 'Connection interrupted')
-                removeStreamListener(id)
-              }
-            }
+            activityProbe.start()
           } else if (msg.type === 'e2ee_error' || (!msg.ok && msg.error?.code === 'unauthorized')) {
             console.log('[net] e2ee auth FAILED', { msgType: msg.type, error: msg.error })
             if (handshakeTimer) {
@@ -549,6 +486,11 @@ export function connect(
         return
       }
 
+      if (orpcTransport.receiveText(plaintext)) {
+        recordValidatedInboundTraffic()
+        return
+      }
+
       let response: unknown
       try {
         response = JSON.parse(plaintext)
@@ -566,80 +508,6 @@ export function connect(
       // budget so a genuinely revoked token doesn't reconnect forever.
       if (!response.ok && response.error.code === 'unauthorized') {
         handleAuthRejection('Unauthorized — pairing may be revoked')
-        return
-      }
-
-      const isStreaming = response.ok && (response as RpcSuccess).streaming === true
-
-      if (isStreaming) {
-        const stream = streamListeners.get(response.id)
-        if (stream && response.ok) {
-          const result = (response as RpcSuccess).result
-          if (isStreamingSubscriptionReadyResult(result)) {
-            stream.subscriptionId = result.subscriptionId
-            if (stream.cancelled) {
-              sendServerSubscriptionUnsubscribe(stream)
-              removeStreamListener(response.id)
-              return
-            }
-            if (stream.method === 'browser.screencast') {
-              if (
-                pendingBrowserScreencastRequestId !== response.id &&
-                activeBrowserScreencastRequestId !== response.id
-              ) {
-                sendBrowserScreencastUnsubscribe(result.subscriptionId)
-                removeStreamListener(response.id)
-                return
-              }
-              pendingBrowserScreencastRequestId = null
-              activeBrowserScreencastRequestId = response.id
-            }
-          }
-          if (isTerminalSubscribedResult(result)) {
-            let ids = terminalStreamIdsByRequest.get(response.id)
-            if (!ids) {
-              ids = new Set()
-              terminalStreamIdsByRequest.set(response.id, ids)
-            }
-            ids.add(result.streamId)
-            terminalStreamListeners.set(result.streamId, stream.listener)
-          }
-          if (!stream.cancelled) {
-            stream.listener(result)
-          }
-        }
-        return
-      }
-
-      if (response.ok) {
-        const result = (response as RpcSuccess).result as Record<string, unknown> | null
-        if (result && result.type === 'end') {
-          const stream = streamListeners.get(response.id)
-          if (stream) {
-            if (!stream.cancelled) {
-              stream.listener(result)
-            }
-            removeStreamListener(response.id)
-            return
-          }
-        }
-        if (result && result.type === 'scrollback') {
-          const stream = streamListeners.get(response.id)
-          if (stream) {
-            stream.listener(result)
-            return
-          }
-        }
-      }
-
-      const stream = streamListeners.get(response.id)
-      if (stream) {
-        if (!response.ok) {
-          emitStreamError(stream, response.error.message, response.error)
-        } else {
-          emitStreamError(stream, 'Streaming request ended before it was ready.')
-        }
-        removeStreamListener(response.id)
         return
       }
 
@@ -720,14 +588,11 @@ export function connect(
     clearConnectTimer()
     ws = null
     sharedKey = null
-    activeBrowserScreencastRequestId = null
-    pendingBrowserScreencastRequestId = null
-    markStreamsForReplay()
     if (handshakeTimer) {
       clearTimeout(handshakeTimer)
       handshakeTimer = null
     }
-    stopActivityProbe()
+    activityProbe.stop()
     if (intentionallyClosed) {
       console.log('[net] handleSocketClosed — intentional close')
       setState('disconnected')
@@ -737,7 +602,6 @@ export function connect(
     console.log('[net] handleSocketClosed → reconnect', {
       timedOut: !!opts.timedOut,
       pendingCount: pending.size,
-      streamCount: streamListeners.size,
       attempt: reconnectAttempt
     })
     emitLog('warn', 'WebSocket closed', 'Will attempt to reconnect')
@@ -752,8 +616,6 @@ export function connect(
   // glitch self-heals instead of forcing the user to re-pair. A genuinely
   // revoked token fails every retry and latches auth-failed within seconds.
   function handleAuthRejection(reason: string): void {
-    activeBrowserScreencastRequestId = null
-    pendingBrowserScreencastRequestId = null
     authRejectionCount++
     if (authRejectionCount < AUTH_RETRY_BUDGET) {
       console.log('[net] auth rejected — retrying handshake', {
@@ -772,8 +634,6 @@ export function connect(
       const closing = ws
       ws = null
       sharedKey = null
-      // Why: close cleanup stale-bails here, so mark active streams for replay.
-      markStreamsForReplay()
       // Why: in-flight requests were already written to the wire, so losing
       // their response is ambiguous — same marker as every other socket-loss path.
       rejectAllPending(reason, { deliveryUnknown: true })
@@ -838,61 +698,22 @@ export function connect(
     }
   }
 
-  // Why: app-level liveness probe — see ACTIVITY_PROBE_INTERVAL_MS comment
-  // at the top of the file. Fires while the channel is in 'connected'
-  // state, sends a tiny status.get, and force-closes the WS if the probe
-  // fails (which the existing onclose path then turns into a reconnect).
-  function runActivityProbe() {
-    if (state !== 'connected' || !ws) {
-      return
-    }
-    const probeWs = ws
-    const id = nextId()
-    const probeInboundSequence = inboundSequence
-    let timedOut = false
-    const timeout = setTimeout(() => {
-      timedOut = true
-      pending.delete(id)
-      if (inboundSequence > probeInboundSequence) {
-        return
-      }
-      console.log('[net] activity-probe TIMEOUT — forcing reconnect', { state })
-      // Why: stale probe timers must not close a replacement socket.
-      if (probeWs === ws && probeWs.readyState === WebSocket.OPEN) {
-        probeWs.close()
-      }
-    }, 8_000)
-    pending.set(id, {
-      resolve: () => {
-        if (timedOut) {
-          return
-        }
-        clearTimeout(timeout)
-      },
-      reject: () => {
-        if (timedOut) {
-          return
-        }
-        clearTimeout(timeout)
-      }
-    })
-    if (!sendEncrypted({ id, deviceToken, method: 'status.get' })) {
-      clearTimeout(timeout)
-      pending.delete(id)
-    }
-  }
+  const activityProbe = createMobileRpcActivityProbe({
+    isConnected: () => state === 'connected',
+    currentSocket: () => ws,
+    nextRequestId: nextId,
+    inboundSequence: () => inboundSequence,
+    registerPending: (id, settle) => pending.set(id, { resolve: settle, reject: settle }),
+    dropPending: (id) => pending.delete(id),
+    sendProbe: (id) => sendEncrypted({ id, deviceToken, method: 'status.get' })
+  })
 
-  function startActivityProbe() {
-    stopActivityProbe()
-    activityProbeTimer = setInterval(runActivityProbe, ACTIVITY_PROBE_INTERVAL_MS)
-  }
-
-  function stopActivityProbe() {
-    if (activityProbeTimer) {
-      clearInterval(activityProbeTimer)
-      activityProbeTimer = null
-    }
-  }
+  const probeStatusForProtocolCompat = createMobileStatusCompatProbe({
+    nextRequestId: nextId,
+    registerPending: (id, resolve, reject) => pending.set(id, { resolve, reject }),
+    dropPending: (id) => pending.delete(id),
+    sendProbe: (id) => sendEncrypted({ id, deviceToken, method: 'status.get' })
+  })
 
   function rejectAllPending(reason: string, options?: { deliveryUnknown?: boolean }) {
     // Why: pending requests were written successfully, so losing their response
@@ -906,96 +727,15 @@ export function connect(
     }
   }
 
-  function removeStreamListener(id: string): void {
-    const stream = streamListeners.get(id)
-    streamListeners.delete(id)
-    if (activeBrowserScreencastRequestId === id) {
-      activeBrowserScreencastRequestId = null
-    }
-    if (pendingBrowserScreencastRequestId === id) {
-      pendingBrowserScreencastRequestId = null
-    }
-    const terminalStreamIds = terminalStreamIdsByRequest.get(id)
-    if (terminalStreamIds) {
-      for (const streamId of terminalStreamIds) {
-        terminalStreamListeners.delete(streamId)
-        terminalSnapshots.delete(streamId)
-      }
-      terminalStreamIdsByRequest.delete(id)
-    }
-    if (stream?.method === 'browser.screencast') {
-      stream.cancelled = true
-    }
-  }
-
-  function markStreamsForReplay(): void {
-    for (const [id, stream] of streamListeners) {
-      stream.sent = false
-      resetTerminalStreamRoutingForRequest(id)
-    }
-  }
-
-  function resetTerminalStreamRoutingForRequest(id: string): void {
-    const terminalStreamIds = terminalStreamIdsByRequest.get(id)
-    if (!terminalStreamIds) {
-      return
-    }
-    for (const streamId of terminalStreamIds) {
-      terminalStreamListeners.delete(streamId)
-      terminalSnapshots.delete(streamId)
-    }
-    terminalStreamIdsByRequest.delete(id)
-  }
-
-  function emitStreamError(stream: StreamRequest, message: string, error?: unknown): void {
-    if (stream.cancelled) {
-      return
-    }
-    stream.listener({ type: 'error', message, error })
-  }
-
-  function disposeBrowserScreencastStream(id: string): void {
-    const stream = streamListeners.get(id)
-    if (!stream || stream.method !== 'browser.screencast') {
-      return
-    }
-    stream.cancelled = true
-    if (activeBrowserScreencastRequestId === id) {
-      activeBrowserScreencastRequestId = null
-    }
-    if (pendingBrowserScreencastRequestId === id) {
-      pendingBrowserScreencastRequestId = null
-    }
-    disposeServerSubscriptionStream(id, stream)
-  }
-
-  function disposeRuntimeClientEventsStream(id: string): void {
-    const stream = streamListeners.get(id)
-    if (!stream || stream.method !== 'runtime.clientEvents.subscribe') {
-      return
-    }
-    disposeServerSubscriptionStream(id, stream)
-  }
-
-  function disposeServerSubscriptionStream(id: string, stream: StreamRequest): void {
-    stream.cancelled = true
-    if (stream.subscriptionId) {
-      sendServerSubscriptionUnsubscribe(stream)
-      removeStreamListener(id)
-      return
-    }
-    // Why: sent streams may still reply with `ready`; keep a tombstone so we
-    // can immediately unsubscribe. Queued streams never reached desktop.
-    if (!stream.sent) {
-      removeStreamListener(id)
-    }
-  }
-
   function recordValidatedInboundTraffic(): void {
     inboundSequence++
   }
 
   function handleBinaryFrame(bytes: Uint8Array): void {
+    if (orpcTransport.receiveBinary(bytes)) {
+      recordValidatedInboundTraffic()
+      return
+    }
     const browserFrame = decodeBrowserScreencastFrame(bytes)
     if (browserFrame) {
       recordValidatedInboundTraffic()
@@ -1009,15 +749,30 @@ export function connect(
     })
   }
 
-  function handleBrowserBinaryFrame(frame: BrowserScreencastFrame) {
-    if (!activeBrowserScreencastRequestId) {
-      return
+  function handleBrowserBinaryFrame(frame: BrowserScreencastFrame): void {
+    orpcTransport.handleBrowserBinaryFrame(frame)
+  }
+
+  // Writes an already-framed oRPC payload onto the same encrypted channel the
+  // legacy JSON-RPC envelopes use, so oRPC never bypasses E2EE.
+  function sendEncryptedFrame(payload: string | Uint8Array<ArrayBufferLike>): boolean {
+    if (!ws || ws.readyState !== WebSocket.OPEN || !sharedKey) {
+      return false
     }
-    const stream = streamListeners.get(activeBrowserScreencastRequestId)
-    if (!stream || stream.cancelled || stream.method !== 'browser.screencast') {
-      return
+    ws.send(
+      typeof payload === 'string' ? encrypt(payload, sharedKey) : encryptBytes(payload, sharedKey)
+    )
+    return true
+  }
+
+  function registerOrpcTerminalStream(streamId: number, listener: StreamingListener): () => void {
+    terminalStreamListeners.set(streamId, listener)
+    return () => {
+      if (terminalStreamListeners.get(streamId) === listener) {
+        terminalStreamListeners.delete(streamId)
+        terminalSnapshots.delete(streamId)
+      }
     }
-    stream.onBinaryFrame?.(frame)
   }
 
   function sendEncrypted(request: unknown): boolean {
@@ -1045,177 +800,18 @@ export function connect(
     return false
   }
 
-  function sendBrowserScreencastUnsubscribe(subscriptionId: string): void {
-    sendEncrypted({
-      id: nextId(),
-      deviceToken,
-      method: 'browser.screencast.unsubscribe',
-      params: { subscriptionId }
-    })
-  }
-
-  function sendServerSubscriptionUnsubscribe(stream: StreamRequest): void {
-    if (!stream.subscriptionId) {
-      return
-    }
-    if (stream.method === 'browser.screencast') {
-      sendBrowserScreencastUnsubscribe(stream.subscriptionId)
-      return
-    }
-    if (stream.method === 'runtime.clientEvents.subscribe') {
-      sendEncrypted({
-        id: nextId(),
-        deviceToken,
-        method: 'runtime.clientEvents.unsubscribe',
-        params: { subscriptionId: stream.subscriptionId }
-      })
-    }
-  }
+  const orpcTransport = createMobileRuntimeOrpcTransport({
+    waitForConnected: () => waitForConnected(),
+    getState: () => state,
+    nextRequestId: nextId,
+    sendFrame: sendEncryptedFrame,
+    registerTerminalStream: registerOrpcTerminalStream
+  })
 
   openConnection()
 
-  return {
-    async sendRequest(
-      method: string,
-      params?: unknown,
-      options?: SendRequestOptions
-    ): Promise<RpcResponse> {
-      const waitStart = Date.now()
-      const wasConnected = state === 'connected'
-      // Why: without a default here the connect-wait phase had no timer at all,
-      // so an offline caller hung until the reconnect retry cap (~6 min). One
-      // deadline now covers connect-wait plus the RPC itself.
-      const deadlineMs = options?.timeoutMs ?? REQUEST_TIMEOUT_MS
-      await waitForConnected(deadlineMs)
-      if (!wasConnected) {
-        console.log('[net] sendRequest waited for connect', {
-          method,
-          waitedMs: Date.now() - waitStart
-        })
-      }
-
-      return new Promise((resolve, reject) => {
-        const id = nextId()
-        const timeoutMs = Math.max(1, deadlineMs - (Date.now() - waitStart))
-        const timeout = setTimeout(() => {
-          pending.delete(id)
-          console.log('[net] sendRequest TIMEOUT', {
-            method,
-            timeoutMs,
-            state
-          })
-          reject(markRpcDeliveryUnknown(new Error(`Request timed out: ${method}`)))
-        }, timeoutMs)
-
-        pending.set(id, {
-          resolve: (response) => {
-            clearTimeout(timeout)
-            resolve(response)
-          },
-          reject: (error) => {
-            clearTimeout(timeout)
-            reject(error)
-          }
-        })
-
-        if (!sendEncrypted({ id, deviceToken, method, params })) {
-          pending.delete(id)
-          clearTimeout(timeout)
-          reject(new Error('Connection interrupted'))
-        }
-      })
-    },
-
-    subscribe(
-      method: string,
-      params: unknown,
-      onData: StreamingListener,
-      options?: SubscribeOptions
-    ): () => void {
-      if (intentionallyClosed) {
-        // Why: a closed client never reconnects, so a queued stream would never
-        // emit anything — fail fast instead of hanging the caller's UI.
-        queueMicrotask(() => onData({ type: 'error', message: 'Client closed' }))
-        return () => {}
-      }
-      const id = nextId()
-      const stream: StreamRequest = {
-        method,
-        params,
-        listener: onData,
-        onBinaryFrame: options?.onBinaryFrame
-      }
-      streamListeners.set(id, stream)
-      if (method === 'browser.screencast') {
-        if (activeBrowserScreencastRequestId && activeBrowserScreencastRequestId !== id) {
-          disposeBrowserScreencastStream(activeBrowserScreencastRequestId)
-        }
-        if (pendingBrowserScreencastRequestId && pendingBrowserScreencastRequestId !== id) {
-          disposeBrowserScreencastStream(pendingBrowserScreencastRequestId)
-        }
-        // Why: browser screencast frames are connection-scoped and carry no
-        // stream id. Wait for the replacement stream's ready response before
-        // routing frames, so in-flight old-page pixels are dropped.
-        pendingBrowserScreencastRequestId = id
-        activeBrowserScreencastRequestId = null
-      }
-
-      if (state === 'connected') {
-        if (sendEncrypted({ id, deviceToken, method, params })) {
-          stream.sent = true
-        } else {
-          emitStreamError(stream, 'Connection interrupted')
-          removeStreamListener(id)
-        }
-      } else {
-        // Stream is registered but the actual outbound subscribe will be
-        // sent (or re-sent) when the channel reaches 'connected'. Useful
-        // when terminals don't load — confirms the request is queued.
-        console.log('[net] subscribe queued — waiting for connected', { method, state })
-      }
-
-      return () => {
-        const stream = streamListeners.get(id)
-        if (stream?.method === 'browser.screencast') {
-          disposeBrowserScreencastStream(id)
-          return
-        }
-        if (stream?.method === 'runtime.clientEvents.subscribe') {
-          disposeRuntimeClientEventsStream(id)
-          return
-        }
-        if (stream?.method === 'terminal.subscribe') {
-          // Why: the runtime registers cleanup under the composite key
-          // `${terminal}:${clientId}` so two phones subscribing to the same
-          // terminal handle don't evict each other. Echo that composite key
-          // back on unsubscribe; also include `client.id` so the server can
-          // reconstruct it if a stale build emits a bare-handle id. See
-          // docs/mobile-presence-lock.md.
-          const unsubscribeParams = buildTerminalUnsubscribeParams(stream.params)
-          if (unsubscribeParams) {
-            sendEncrypted({
-              id: nextId(),
-              deviceToken,
-              method: 'terminal.unsubscribe',
-              params: unsubscribeParams
-            })
-          }
-        } else {
-          const unsub = buildStreamUnsubscribe(stream?.method, stream?.params)
-          if (unsub) {
-            sendEncrypted({ id: nextId(), deviceToken, method: unsub.method, params: unsub.params })
-          }
-        }
-        removeStreamListener(id)
-      }
-    },
-
-    updateTerminalSubscriptionViewport(
-      terminal: string,
-      viewport: { cols: number; rows: number }
-    ): void {
-      updateCachedTerminalSubscriptionViewport(streamListeners.values(), terminal, viewport)
-    },
+  const client: RpcClient = {
+    orpc: orpcTransport.client,
 
     getState(): ConnectionState {
       return state
@@ -1244,8 +840,8 @@ export function connect(
         // blackholes input. Probe now so death is detected in ≤8s instead
         // of waiting out the 20s interval (issue #5049).
         console.log('[net] foreground — probing live connection')
-        startActivityProbe()
-        runActivityProbe()
+        activityProbe.start()
+        activityProbe.run()
         return
       }
       if (state === 'reconnecting') {
@@ -1266,8 +862,11 @@ export function connect(
       }
     },
 
+    probeStatusForProtocolCompat,
+
     close() {
       intentionallyClosed = true
+      orpcTransport.close()
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)
         reconnectTimer = null
@@ -1277,7 +876,7 @@ export function connect(
         clearTimeout(handshakeTimer)
         handshakeTimer = null
       }
-      stopActivityProbe()
+      activityProbe.stop()
       if (ws) {
         ws.close()
         ws = null
@@ -1285,35 +884,8 @@ export function connect(
       sharedKey = null
       setState('disconnected')
       rejectAllPending('Client closed', { deliveryUnknown: true })
-      // Why: close() used to leave stream subscribers with no terminal event at
-      // all, so their screens sat on a loading state forever.
-      const openStreams = Array.from(streamListeners)
-      for (const [id, stream] of openStreams) {
-        emitStreamError(stream, 'Client closed')
-        removeStreamListener(id)
-      }
     }
   }
-}
 
-function isTerminalSubscribedResult(
-  value: unknown
-): value is { type: 'subscribed'; streamId: number } {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    (value as { type?: unknown }).type === 'subscribed' &&
-    typeof (value as { streamId?: unknown }).streamId === 'number'
-  )
-}
-
-function isStreamingSubscriptionReadyResult(
-  value: unknown
-): value is { type: 'ready'; subscriptionId: string } {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    (value as { type?: unknown }).type === 'ready' &&
-    typeof (value as { subscriptionId?: unknown }).subscriptionId === 'string'
-  )
+  return client
 }

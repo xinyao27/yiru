@@ -11,8 +11,7 @@ import {
 } from 'node:fs'
 import { dirname, join, win32 as winPath } from 'node:path'
 
-import { app } from 'electron'
-
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 import { parseDaemonPidFile, startTimeMatches } from './health'
 
 /**
@@ -115,14 +114,15 @@ function resolveEntrySourcePath(resourcesPath: string): string {
 // Discover the relocation inputs from the live packaged process, or null when
 // relocation does not apply (non-win32, dev, or missing resourcesPath).
 function collectDaemonHostSources(): DaemonHostSources | null {
-  if (process.platform !== 'win32' || !app.isPackaged) {
+  const pathsProvider = getRuntimeHostPathsProvider()
+  if (process.platform !== 'win32' || !pathsProvider.isPackaged()) {
     return null
   }
-  const resourcesPath = process.resourcesPath
-  if (typeof resourcesPath !== 'string' || resourcesPath.length === 0) {
+  const resourcesPath = pathsProvider.resourcesPath()
+  if (!resourcesPath) {
     return null
   }
-  const execPath = process.execPath
+  const execPath = pathsProvider.executablePath()
   const appDir = winPath.dirname(execPath)
   const entrySourcePath = resolveEntrySourcePath(resourcesPath)
   return {
@@ -252,7 +252,7 @@ function hostRootDir(): string {
   const base =
     typeof localAppData === 'string' && localAppData.length > 0
       ? join(localAppData, LOCAL_HOST_ROOT_NAME)
-      : app.getPath('userData')
+      : getRuntimeHostPathsProvider().userDataPath()
   return join(base, HOST_SUBDIR)
 }
 
@@ -266,7 +266,7 @@ function getRelocatedDaemonHost(): RelocatedDaemonHost | null {
   if (!sources) {
     return null
   }
-  const version = app.getVersion()
+  const version = getRuntimeHostPathsProvider().version()
   const dest = join(hostRootDir(), version)
   const marker = readMarker(dest)
   if (!marker || marker.version !== version) {
@@ -296,7 +296,7 @@ export function materializeRelocatedDaemonHost(): RelocatedDaemonHost | null {
   if (!sources) {
     return null
   }
-  const version = app.getVersion()
+  const version = getRuntimeHostPathsProvider().version()
   const root = hostRootDir()
   const dest = join(root, version)
   const staging = join(root, `${version}.staging-${randomBytes(6).toString('hex')}`)
@@ -374,10 +374,11 @@ export function collectPinnedDaemonVersions(runtimeDir: string): Set<string> {
  * concurrently-staging dir is simply retried on a future launch.
  */
 export function pruneOldDaemonHosts(pinnedVersions: ReadonlySet<string>): void {
-  if (process.platform !== 'win32' || !app.isPackaged) {
+  const pathsProvider = getRuntimeHostPathsProvider()
+  if (process.platform !== 'win32' || !pathsProvider.isPackaged()) {
     return
   }
-  const version = app.getVersion()
+  const version = pathsProvider.version()
   const root = hostRootDir()
   let entries
   try {

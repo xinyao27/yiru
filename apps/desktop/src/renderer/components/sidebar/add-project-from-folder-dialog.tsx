@@ -1,6 +1,5 @@
 import { FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {
@@ -15,7 +14,6 @@ import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 import { isGitRepoKind } from '~shared/repo-kind'
-import type { Repo } from '~shared/types'
 
 import { finishProjectAddWithDefaultCheckout } from './project-added-default-checkout'
 
@@ -38,7 +36,6 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
   const isOpen = activeModal === 'confirm-add-project-from-folder'
   const [previousOpen, setPreviousOpen] = useState(isOpen)
   const folderPath = typeof modalData.folderPath === 'string' ? modalData.folderPath : ''
-  const connectionId = typeof modalData.connectionId === 'string' ? modalData.connectionId : ''
 
   if (isOpen !== previousOpen) {
     setPreviousOpen(isOpen)
@@ -53,11 +50,8 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
 
   const openNonGitConfirmation = useCallback(() => {
     closeModal()
-    openModal('confirm-non-git-folder', {
-      folderPath,
-      ...(connectionId ? { connectionId } : {})
-    })
-  }, [closeModal, connectionId, folderPath, openModal])
+    openModal('confirm-non-git-folder', { folderPath })
+  }, [closeModal, folderPath, openModal])
 
   const handleConfirm = useCallback(async () => {
     if (!folderPath || isAdding) {
@@ -67,39 +61,7 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
     setIsAdding(true)
     setError(null)
     try {
-      let repo: Repo | null
-      if (connectionId) {
-        const result = await window.api.repos.addRemote({
-          connectionId,
-          remotePath: folderPath
-        })
-        if ('error' in result) {
-          throw new Error(result.error)
-        }
-        repo = result.repo
-        const state = useAppStore.getState()
-        const existingIdx = state.repos.findIndex((r) => r.id === repo?.id)
-        if (existingIdx !== -1) {
-          state.clearYiruHookTrustForRepo(repo.id)
-          const updated = [...state.repos]
-          updated[existingIdx] = repo
-          useAppStore.setState({ repos: updated })
-        } else {
-          useAppStore.setState({ repos: [...state.repos, repo] })
-        }
-        if (!mountedRef.current || gen !== addGenRef.current) {
-          return
-        }
-        toast.success(
-          translate(
-            'auto.components.sidebar.AddProjectFromFolderDialog.e643b30398',
-            'Project added on SSH host'
-          ),
-          { description: repo.displayName }
-        )
-      } else {
-        repo = await addRepoPath(folderPath)
-      }
+      const repo = await addRepoPath(folderPath)
 
       if (!mountedRef.current || gen !== addGenRef.current) {
         return
@@ -119,7 +81,7 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
       }
       await finishProjectAddWithDefaultCheckout({
         repoId: repo.id,
-        source: connectionId ? 'ssh_remote_path' : 'local_folder_picker',
+        source: 'local_folder_picker',
         selectedPath: folderPath,
         closeModal,
         setHideDefaultBranchWorkspace
@@ -143,7 +105,6 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
   }, [
     addRepoPath,
     closeModal,
-    connectionId,
     fetchWorktrees,
     folderPath,
     isAdding,

@@ -30,20 +30,6 @@ export async function parseAntigravitySessionFile(
   return parseAntigravitySessionLines({ file, lines, platform })
 }
 
-export async function parseAntigravitySessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseAntigravitySessionLines({
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
-}
-
 export function createAntigravitySessionResumeState(
   file: FileWithMtime
 ): ResumableSessionParseState {

@@ -1,6 +1,5 @@
-import { spawn } from 'node:child_process'
-import { constants, copyFile, readFile, stat } from 'node:fs/promises'
-import { basename, extname, isAbsolute, normalize } from 'node:path'
+import { readFile, stat } from 'node:fs/promises'
+import { basename, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { MAX_REPO_ICON_UPLOAD_BYTES } from '@yiru/workbench-model/workspace'
@@ -11,39 +10,12 @@ import type {
   ShellOpenLocalPathResult
 } from '~shared/shell-open-types'
 
-import {
-  EXTERNAL_EDITOR_CLI_COMMAND,
-  resolveExternalEditorLaunchSpec,
-  type ExternalEditorLaunchSpec
-} from '../external-editor-launch'
-import { getSpawnArgsForWindows } from '../win32-utils'
+import { openInExternalEditor, pathExists, validateLocalPathTarget } from '../external-editor/open'
 
-export { EXTERNAL_EDITOR_CLI_COMMAND }
+export { EXTERNAL_EDITOR_CLI_COMMAND } from '../external-editor/open'
 
 const REPO_ICON_IMAGE_MIME_TYPES: Record<string, string> = {
   '.png': 'image/png'
-}
-
-async function pathExists(pathValue: string): Promise<boolean> {
-  try {
-    await stat(pathValue)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function validateLocalPathTarget(
-  pathValue: string
-): Promise<{ ok: true; path: string } | { ok: false; reason: 'not-absolute' | 'not-found' }> {
-  const normalizedPath = normalize(pathValue)
-  if (!isAbsolute(normalizedPath)) {
-    return { ok: false, reason: 'not-absolute' }
-  }
-  if (!(await pathExists(normalizedPath))) {
-    return { ok: false, reason: 'not-found' }
-  }
-  return { ok: true, path: normalizedPath }
 }
 
 async function openInFileManager(pathValue: string): Promise<ShellOpenLocalPathResult> {
@@ -55,70 +27,6 @@ async function openInFileManager(pathValue: string): Promise<ShellOpenLocalPathR
     // Why: the file-manager action uses reveal semantics, matching the
     // previous sidebar behavior while still validating the path per click.
     shell.showItemInFolder(target.path)
-    return { ok: true }
-  } catch {
-    return { ok: false, reason: 'launch-failed' }
-  }
-}
-
-async function launchExternalEditor(launchSpec: ExternalEditorLaunchSpec): Promise<void> {
-  const { spawnCmd, spawnArgs } =
-    launchSpec.kind === 'executable'
-      ? getSpawnArgsForWindows(launchSpec.spawnCmd, launchSpec.spawnArgs)
-      : { spawnCmd: launchSpec.spawnCmd, spawnArgs: launchSpec.spawnArgs }
-
-  await new Promise<void>((resolvePromise, rejectPromise) => {
-    const child = spawn(spawnCmd, spawnArgs, {
-      detached: true,
-      stdio: 'ignore',
-      // Why: terminal editors such as nvim need a visible console on Windows;
-      // GUI editor launches stay hidden to avoid command-shim flashes.
-      windowsHide: launchSpec.hideWindowsConsole
-    })
-    let settled = false
-
-    function cleanup(): void {
-      child.off('error', onError)
-      child.off('spawn', onSpawn)
-    }
-
-    function settle(callback: () => void): void {
-      if (settled) {
-        return
-      }
-      settled = true
-      cleanup()
-      callback()
-    }
-
-    function onError(error: Error): void {
-      settle(() => rejectPromise(error))
-    }
-
-    function onSpawn(): void {
-      child.unref()
-      settle(resolvePromise)
-    }
-    child.once('error', onError)
-    child.once('spawn', onSpawn)
-  })
-}
-
-export async function openInExternalEditor(
-  request: ShellOpenExternalEditorRequest
-): Promise<ShellOpenExternalEditorResult> {
-  // Why: a connectionId only ever named an SSH host, and its VS Code Remote-SSH
-  // authority is gone. Refuse rather than resolving the remote path locally.
-  if (request.connectionId?.trim()) {
-    return { ok: false, reason: 'remote-runtime-unsupported' }
-  }
-
-  const target = await validateLocalPathTarget(request.path)
-  if (!target.ok) {
-    return target
-  }
-  try {
-    await launchExternalEditor(resolveExternalEditorLaunchSpec(request.command, target.path))
     return { ok: true }
   } catch {
     return { ok: false, reason: 'launch-failed' }
@@ -295,23 +203,4 @@ export function registerShellHandlers(): void {
     }
     return result.filePaths[0]
   })
-
-  // Why: copying a picked image next to the markdown file lets us insert a
-  // relative path (e.g. `![](image.png)`) instead of embedding base64,
-  // keeping markdown files small and portable.
-  ipcMain.handle(
-    'shell:copyFile',
-    async (_event, args: { srcPath: string; destPath: string }): Promise<void> => {
-      const src = normalize(args.srcPath)
-      const dest = normalize(args.destPath)
-      if (!isAbsolute(src) || !isAbsolute(dest)) {
-        throw new Error('Both source and destination must be absolute paths')
-      }
-      // Why: COPYFILE_EXCL prevents silently overwriting an existing file.
-      // The renderer-side deconfliction loop already picks a unique name, so
-      // the dest should never exist — if it does, something is wrong and we
-      // should fail loudly rather than clobber data.
-      await copyFile(src, dest, constants.COPYFILE_EXCL)
-    }
-  )
 }

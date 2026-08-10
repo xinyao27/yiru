@@ -2,6 +2,7 @@ import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
 import { triggerError, triggerSuccess } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import type { MobileDiffReviewQueueItem } from './review-queue'
@@ -31,12 +32,13 @@ export function useMobileDiffReviewGitActions(input: GitActionsInput) {
       setBusyAction(`${method}:${item.filePath}`)
       setActionError(null)
       try {
-        const response = await client.sendRequest(method, {
-          worktree: `id:${worktreeId}`,
-          filePath: item.filePath
-        })
-        if (!response.ok) {
-          throw new Error(response.error?.message || 'Source control action failed')
+        const params = { worktree: `id:${worktreeId}`, filePath: item.filePath }
+        if (method === 'git.stage') {
+          await callRuntimeOrpc(client, (runtime) => runtime.git.stage, params)
+        } else if (method === 'git.unstage') {
+          await callRuntimeOrpc(client, (runtime) => runtime.git.unstage, params)
+        } else {
+          await callRuntimeOrpc(client, (runtime) => runtime.git.discard, params)
         }
         triggerSuccess()
         await loadReviewData()
@@ -66,13 +68,13 @@ export function useMobileDiffReviewGitActions(input: GitActionsInput) {
     let staged = 0
     let failed = 0
     for (const item of files) {
-      const response = await client.sendRequest('git.stage', {
-        worktree: `id:${worktreeId}`,
-        filePath: item.filePath
-      })
-      if (response.ok) {
+      try {
+        await callRuntimeOrpc(client, (runtime) => runtime.git.stage, {
+          worktree: `id:${worktreeId}`,
+          filePath: item.filePath
+        })
         staged += 1
-      } else {
+      } catch {
         failed += 1
       }
     }

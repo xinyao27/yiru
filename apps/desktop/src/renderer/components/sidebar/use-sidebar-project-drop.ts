@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
+import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
 import { NATIVE_FILE_DROP_TARGET, hasNativeFileDragTypes } from '~shared/native-file-drop'
 
@@ -77,8 +79,10 @@ export function useSidebarProjectDrop(): {
 
       setIsHandlingDrop(true)
       try {
-        await window.api.fs.authorizeExternalPath({ targetPath: pathResolution.path })
-        const stat = await window.api.fs.stat({ filePath: pathResolution.path })
+        await workspaceHostClient.fileHost.authorizeExternalPath({
+          targetPath: pathResolution.path
+        })
+        const stat = await workspaceHostClient.fileHost.stat({ filePath: pathResolution.path })
         if (!mountedRef.current) {
           return
         }
@@ -114,7 +118,7 @@ export function useSidebarProjectDrop(): {
   )
 
   useEffect(() => {
-    return window.api.ui.onFileDrop((data) => {
+    return shellClient.ui.onFileDrop((data) => {
       if (data.target !== NATIVE_FILE_DROP_TARGET.projectSidebar) {
         return
       }

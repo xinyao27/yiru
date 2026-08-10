@@ -1,10 +1,6 @@
 import { translate } from '~renderer/i18n/i18n'
 import { isChromiumCertificateErrorCode } from '~shared/browser/certificate-errors'
-import type {
-  BrowserDownloadFinishedEvent,
-  BrowserPermissionDeniedEvent,
-  BrowserPopupEvent
-} from '~shared/browser/guest-events'
+import type { BrowserPermissionDeniedEvent, BrowserPopupEvent } from '~shared/browser/guest-events'
 import type { BrowserLoadError } from '~shared/types'
 
 export type LoadFailureMeta = {
@@ -39,16 +35,6 @@ export function formatPopupNotice(event: BrowserPopupEvent): string {
     return `${target} opened a new window in your default browser.`
   }
   return `${target} tried to open a popup Yiru does not support here.`
-}
-
-export function formatDownloadFinishedNotice(event: BrowserDownloadFinishedEvent): string {
-  if (event.status === 'completed') {
-    return event.savePath ? `Downloaded to ${event.savePath}.` : 'Download complete.'
-  }
-  if (event.status === 'failed') {
-    return event.error ?? 'Download failed.'
-  }
-  return event.error ?? 'Download canceled.'
 }
 
 export function formatByteCount(bytes: number | null): string | null {

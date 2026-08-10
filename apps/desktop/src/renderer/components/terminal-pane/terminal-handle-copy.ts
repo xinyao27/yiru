@@ -1,45 +1,30 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { makePaneKey } from '~shared/stable-pane-id'
 
 type CopyTerminalHandleDeps = {
   tabId: string
   leafId: string
-  callRuntime: (request: {
-    method: 'terminal.resolvePane'
-    params: { paneKey: string }
-  }) => Promise<RuntimeRpcResponse<unknown>>
   writeClipboardText: (text: string) => Promise<void>
 }
 
 export async function copyTerminalHandleForPane({
   tabId,
   leafId,
-  callRuntime,
   writeClipboardText
 }: CopyTerminalHandleDeps): Promise<string> {
   const paneKey = makePaneKey(tabId, leafId)
-  const response = await callRuntime({
-    method: 'terminal.resolvePane',
-    params: { paneKey }
-  })
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const handle = readResolvedTerminalHandle(response.result)
-  if (!handle) {
+  // Why: this action only ever inspects the pane it was invoked from, which
+  // is always owned by this desktop's own runtime, never a paired environment.
+  const { terminal } = await callRuntimeOrpc(
+    { kind: 'local' },
+    (client) => client.terminal.resolvePane,
+    {
+      paneKey
+    }
+  )
+  if (!terminal.handle) {
     throw new Error('Terminal ID unavailable')
   }
-  await writeClipboardText(handle)
-  return handle
-}
-
-function readResolvedTerminalHandle(result: unknown): string | null {
-  if (!isRecord(result) || !isRecord(result.terminal)) {
-    return null
-  }
-  return typeof result.terminal.handle === 'string' ? result.terminal.handle : null
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  await writeClipboardText(terminal.handle)
+  return terminal.handle
 }

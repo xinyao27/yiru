@@ -181,34 +181,6 @@ export function getDefaultTabsLaunch(
   return { tabs, runCommands }
 }
 
-export function getSetupCommandSource(
-  repo: Repo,
-  worktreePath?: string
-): { source: 'yaml' | 'local' | 'both'; command: string } | null {
-  const hooksRoot = worktreePath ?? repo.path
-  const yamlHooks = loadHooks(hooksRoot)
-  const yamlSetup = yamlHooks?.scripts.setup?.trim()
-  const localSetup = repo.hookSettings?.scripts.setup?.trim()
-  const rawPolicy = repo.hookSettings?.commandSourcePolicy
-  const policy = resolveHookCommandSourcePolicy(rawPolicy, {
-    hasLocalScript: Boolean(localSetup)
-  })
-
-  if (policy === 'local-only') {
-    return localSetup ? { source: 'local', command: localSetup } : null
-  }
-
-  if (policy === 'run-both' && yamlSetup && localSetup) {
-    return { source: 'both', command: `${yamlSetup}\n${localSetup}` }
-  }
-
-  if (yamlSetup) {
-    return { source: 'yaml', command: yamlSetup }
-  }
-
-  return null
-}
-
 function* iterateLfScriptLines(script: string): Generator<string> {
   let lineStart = 0
   for (let index = 0; index < script.length; index++) {

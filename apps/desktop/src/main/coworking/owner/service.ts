@@ -26,7 +26,7 @@ import type {
 } from '~shared/coworking/windows-firewall-contract'
 import type { AuthenticatedCoworkingPrincipal } from '~shared/coworking/wire-contract'
 
-import type { CoworkingSharingIpcController } from '../sharing'
+import type { CoworkingSharingController } from '../sharing'
 import { CoworkingWindowsFirewallRecovery } from '../windows-firewall-recovery'
 import { projectCoworkingAvailabilityDiagnostic } from './availability-diagnostic'
 import type { CoworkingOwnerCatalogSnapshot, CoworkingRequesterSubscriptionSink } from './catalog'
@@ -40,7 +40,7 @@ import {
 } from './snapshot-projection'
 import { CoworkingOwnerStartRecovery } from './start-recovery'
 
-export class CoworkingOwnerService implements CoworkingSharingIpcController {
+export class CoworkingOwnerService implements CoworkingSharingController {
   private readonly listeners = new Set<(snapshot: CoworkingSharingSnapshot) => void>()
   private readonly unsubscribes: (() => void)[] = []
   private remoteSnapshot: CoworkingOwnerCatalogSnapshot = { desktops: [], controlStates: [] }

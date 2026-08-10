@@ -21,6 +21,7 @@ export function isBackgroundRuntimeMethod(method: string): boolean {
   return (
     method === 'hostedReview.forBranch' ||
     method === 'github.prForBranch' ||
+    method === 'github.refreshPRForBranch' ||
     method === 'github.listWorkItems' ||
     method === 'github.countWorkItems' ||
     method === 'git.status' ||

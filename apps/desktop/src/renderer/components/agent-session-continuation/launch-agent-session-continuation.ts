@@ -4,6 +4,7 @@ import { getAgentLabel } from '~renderer/lib/agent-catalog'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
@@ -75,17 +76,15 @@ async function ensureAgentAvailable(agent: TuiAgent, worktreeId: string): Promis
 async function preflightAgentTrust(args: {
   agent: TuiAgent
   workspacePath: string
-  connectionId: string | null | undefined
 }): Promise<void> {
   const preset = TUI_AGENT_CONFIG[args.agent].preflightTrust
-  if (!preset || !args.workspacePath || !window.api.agentTrust?.markTrusted) {
+  if (!preset || !args.workspacePath || !rendererHostClient.agentTrust?.markTrusted) {
     return
   }
   try {
-    await window.api.agentTrust.markTrusted({
+    await rendererHostClient.agentTrust.markTrusted({
       preset,
-      workspacePath: args.workspacePath,
-      ...(args.connectionId ? { connectionId: args.connectionId } : {})
+      workspacePath: args.workspacePath
     })
   } catch {
     // Why: a failed best-effort trust write should not discard a prepared handoff.
@@ -106,8 +105,7 @@ export async function launchAgentSessionContinuation({
     return false
   }
 
-  const connectionId = getConnectionIdFromState(useAppStore.getState(), worktreeId)
-  await preflightAgentTrust({ agent, workspacePath, connectionId })
+  await preflightAgentTrust({ agent, workspacePath })
 
   const label = getAgentLabel(agent)
   const result = launchAgentInNewTab({

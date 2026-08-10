@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router'
 import { useCallback, useRef, useState, type MutableRefObject } from 'react'
 
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
+
 import { triggerError, triggerSelection } from '../platform/haptics'
 import { buildMobileDiffLines } from '../session/diff/lines'
 import { highlightMobileDiffLines, resolveMobileSyntaxLanguage } from '../session/file-syntax'
 import type { RpcClient } from '../transport/rpc-client'
-import type { ConnectionState, RpcSuccess } from '../transport/types'
+import type { ConnectionState } from '../transport/types'
 import { canOpenMobileBranchCompareDiff, type MobileGitBranchChangeEntry } from './branch-compare'
 import {
   canOpenMobileGitStatusEntry,
@@ -13,11 +15,7 @@ import {
   type MobileGitStatusEntry
 } from './git-status'
 import { buildMobileReviewFileRoute } from './review-route'
-import type {
-  GitDiffTextResult,
-  MobileBranchCompareState,
-  MobileBranchDiffPreviewState
-} from './screen-state'
+import type { MobileBranchCompareState, MobileBranchDiffPreviewState } from './screen-state'
 
 type Params = {
   client: RpcClient | null
@@ -105,19 +103,25 @@ export function useMobileSourceControlOpeners(params: Params) {
         // the session uses it to avoid stealing focus if the user switches tabs
         // during the RPC window.
         onFileOpenStart?.()
-        let response = await client.sendRequest('files.openDiff', {
-          worktree: `id:${worktreeId}`,
-          relativePath: entry.path,
-          staged: entry.area === 'staged'
-        })
-        if (!response.ok && isMobileGitUnavailable(response.error?.code, response.error?.message)) {
-          response = await client.sendRequest('files.open', {
+        try {
+          await callRuntimeOrpc(client, (runtime) => runtime.files.openDiff, {
+            worktree: `id:${worktreeId}`,
+            relativePath: entry.path,
+            staged: entry.area === 'staged'
+          })
+        } catch (error) {
+          const message = error instanceof Error ? error.message : undefined
+          const isUnavailable =
+            isRuntimeOrpcErrorCode(error, 'forbidden') ||
+            isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+            isMobileGitUnavailable(undefined, message)
+          if (!isUnavailable) {
+            throw error
+          }
+          await callRuntimeOrpc(client, (runtime) => runtime.files.open, {
             worktree: `id:${worktreeId}`,
             relativePath: entry.path
           })
-        }
-        if (!response.ok) {
-          throw new Error(response.error?.message || 'Unable to open diff')
         }
         if (!mountedRef.current) {
           return
@@ -209,7 +213,7 @@ export function useMobileSourceControlOpeners(params: Params) {
       }
       setBranchDiffPreview({ kind: 'loading', entry })
       try {
-        const response = await client.sendRequest('git.branchDiff', {
+        const result = await callRuntimeOrpc(client, (runtime) => runtime.git.branchDiff, {
           worktree: `id:${worktreeId}`,
           filePath: entry.path,
           ...(entry.oldPath ? { oldPath: entry.oldPath } : {}),
@@ -220,10 +224,6 @@ export function useMobileSourceControlOpeners(params: Params) {
             mergeBase: summary.mergeBase
           }
         })
-        if (!response.ok) {
-          throw new Error(response.error?.message || 'Unable to load committed diff')
-        }
-        const result = (response as RpcSuccess).result as GitDiffTextResult | { kind: 'binary' }
         if (result.kind !== 'text') {
           throw new Error('Binary branch diff preview unavailable on mobile')
         }

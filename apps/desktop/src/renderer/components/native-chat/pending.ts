@@ -335,8 +335,3 @@ export function commandMarkersAsMessages(
     source: 'scrape' as const
   }))
 }
-
-/** True when a message id was minted for a slash-command marker. */
-export function isCommandMarkerId(id: string): boolean {
-  return id.startsWith('command:')
-}

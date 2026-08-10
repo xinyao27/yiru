@@ -1,7 +1,7 @@
 import type { GitHubPrStartPoint } from '@yiru/workbench-model/workspace'
 
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcSuccess } from '../transport/types'
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 // The resolved start point for a linked PR/MR: the base branch to create from
 // plus the optional review-compare ref, push target, and exact branch name.
@@ -9,8 +9,6 @@ export type ComposerHostedBase = Pick<
   GitHubPrStartPoint,
   'baseBranch' | 'compareBaseRef' | 'pushTarget' | 'branchNameOverride' | 'maintainerCanModify'
 >
-
-type HostedBaseResult = ComposerHostedBase | { error: string }
 
 // Resolves a GitHub PR's base via worktree.resolvePrBase, mirroring desktop's
 // select-time resolution. The runtime returns a soft { error } payload rather
@@ -24,8 +22,9 @@ export async function resolveComposerPrBase(args: {
   isCrossRepository?: boolean
 }): Promise<GitHubPrStartPoint> {
   const { client, repoId, prNumber, headRefName, baseRefName, isCrossRepository } = args
-  const response = await client.sendRequest(
-    'worktree.resolvePrBase',
+  const result = await callRuntimeOrpc(
+    client,
+    (runtime) => runtime.worktree.resolvePrBase,
     {
       repo: `id:${repoId}`,
       prNumber,
@@ -35,10 +34,6 @@ export async function resolveComposerPrBase(args: {
     },
     { timeoutMs: 30_000 }
   )
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const result = (response as RpcSuccess).result as GitHubPrStartPoint | { error: string }
   if ('error' in result) {
     throw new Error(result.error)
   }
@@ -55,8 +50,9 @@ export async function resolveComposerMrBase(args: {
   isCrossRepository?: boolean
 }): Promise<ComposerHostedBase> {
   const { client, repoId, mrIid, sourceBranch, targetBranch, isCrossRepository } = args
-  const response = await client.sendRequest(
-    'worktree.resolveMrBase',
+  const result = await callRuntimeOrpc(
+    client,
+    (runtime) => runtime.worktree.resolveMrBase,
     {
       repo: `id:${repoId}`,
       mrIid,
@@ -66,10 +62,6 @@ export async function resolveComposerMrBase(args: {
     },
     { timeoutMs: 30_000 }
   )
-  if (!response.ok) {
-    throw new Error(response.error.message)
-  }
-  const result = (response as RpcSuccess).result as HostedBaseResult
   if ('error' in result) {
     throw new Error(result.error)
   }

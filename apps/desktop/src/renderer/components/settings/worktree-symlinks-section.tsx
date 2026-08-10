@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
+import { readRuntimeDirectory } from '~renderer/runtime/file-client'
 import type { Repo } from '~shared/types'
 
 import { Button } from '../ui/button'
@@ -51,8 +52,14 @@ export function WorktreeSymlinksSection({
       return
     }
     let cancelled = false
-    void window.api.fs
-      .readDir({ dirPath: repo.path })
+    void readRuntimeDirectory(
+      {
+        settings: null,
+        worktreeId: null,
+        worktreePath: repo.path
+      },
+      repo.path
+    )
       .then((list) => {
         if (cancelled) {
           return
@@ -69,7 +76,7 @@ export function WorktreeSymlinksSection({
     return () => {
       cancelled = true
     }
-  }, [useLocalDirectorySuggestions, repo.path, repo.connectionId, directorySuggestionKey])
+  }, [useLocalDirectorySuggestions, repo.path, directorySuggestionKey])
 
   const { queryTrimmed, filtered, showLiteralItem } = useMemo(() => {
     const suggestionEntries =

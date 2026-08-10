@@ -37,6 +37,11 @@ import {
 
 const WORKTREE_SCAN_CONCURRENCY = 3
 
+// Why: the runtime service facade (`RuntimeStore`) only exposes a subset of
+// `Store` — narrowing to what the scan actually reads lets it pass that
+// facade directly instead of the concrete class.
+type WorkspaceCleanupStore = Pick<Store, 'getRepos' | 'getWorktreeMeta'>
+
 type WorkspaceCleanupScanOptions = {
   onProgress?: (progress: WorkspaceCleanupScanProgress) => void
 }
@@ -54,7 +59,7 @@ type WorkspaceCleanupProgressEmitter = {
 }
 
 export async function scanWorkspaceCleanup(
-  store: Store,
+  store: WorkspaceCleanupStore,
   args: WorkspaceCleanupScanArgs = {},
   options: WorkspaceCleanupScanOptions = {}
 ): Promise<WorkspaceCleanupScanResult> {
@@ -93,7 +98,7 @@ export async function scanWorkspaceCleanup(
 
 async function scanRepoWorkspaces(
   args: {
-    store: Store
+    store: WorkspaceCleanupStore
     repo: Repo
     scannedAt: number
     targetWorktreeId?: string
@@ -142,7 +147,7 @@ async function scanRepoWorkspaces(
       // filesystem metadata is a conservative guard before suggesting deletion.
       const worktreeWithActivity = activityStatsUnavailable
         ? resolvePersistedWorkspaceCleanupActivityWorktree(worktree)
-        : await resolveCleanupActivityWithTimeout(repo, worktree, () => {
+        : await resolveCleanupActivityWithTimeout(worktree, () => {
             activityStatsUnavailable = true
           })
       if (!targetWorktreeId && !isWorkspaceInactiveForCleanup(worktreeWithActivity, scannedAt)) {
@@ -153,7 +158,6 @@ async function scanRepoWorkspaces(
         repo,
         worktree: worktreeWithActivity,
         scannedAt,
-        provider: null,
         skipGit: skipGitWorktreeIds.has(worktreeWithActivity.id),
         forceGitCheck: Boolean(targetWorktreeId)
       }).catch((error) => {
@@ -172,13 +176,12 @@ async function scanRepoWorkspaces(
 }
 
 async function resolveCleanupActivityWithTimeout(
-  repo: Repo,
   worktree: Worktree,
   onActivityStatsUnavailable: () => void
 ): Promise<Worktree> {
   try {
     return await withWorkspaceCleanupTimeout(
-      () => resolveWorkspaceCleanupActivityWorktree(repo, worktree),
+      () => resolveWorkspaceCleanupActivityWorktree(worktree),
       WORKSPACE_CLEANUP_GIT_READ_TIMEOUT_MS,
       'Timed out reading worktree activity.'
     )

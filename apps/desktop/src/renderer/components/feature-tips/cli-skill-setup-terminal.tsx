@@ -5,11 +5,12 @@ import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND } from '~renderer/lib/agent-feature-install-commands'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 export function CliSkillSetupTerminal(): React.JSX.Element {
   const handleCopySkillCommand = async (): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND)
+      await shellClient.ui.writeClipboardText(YIRU_CLI_ORCHESTRATION_DEBUG_SKILL_INSTALL_COMMAND)
       toast.success(
         translate(
           'auto.components.feature.tips.CliSkillSetupTerminal.b8ad063571',

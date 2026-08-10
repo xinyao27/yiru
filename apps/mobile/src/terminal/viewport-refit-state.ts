@@ -1,6 +1,6 @@
-import type { RpcResponse } from '../transport/types'
-
 export type TerminalUpdateViewportCapability = 'unknown' | 'supported' | 'unsupported'
+
+type TerminalUpdateViewportResult = { updated?: boolean; applied?: boolean }
 
 export type TerminalViewportRefitTargetState = {
   activeHandle: string | null
@@ -12,27 +12,12 @@ export type TerminalViewportRefitTargetState = {
   currentRunSeq: number
 }
 
-export function isTerminalUpdateViewportUpdated(response: RpcResponse): boolean {
-  if (!response.ok || typeof response.result !== 'object' || response.result == null) {
-    return false
-  }
-  return (response.result as { updated?: unknown }).updated === true
+export function isTerminalUpdateViewportUpdated(result: TerminalUpdateViewportResult): boolean {
+  return result.updated === true
 }
 
-export function isTerminalUpdateViewportApplied(response: RpcResponse): boolean {
-  if (!response.ok || typeof response.result !== 'object' || response.result == null) {
-    return false
-  }
-  return (response.result as { applied?: unknown }).applied === true
-}
-
-export function resolveTerminalUpdateViewportCapability(
-  response: RpcResponse
-): TerminalUpdateViewportCapability {
-  if (response.ok) {
-    return 'supported'
-  }
-  return response.error.code === 'method_not_found' ? 'unsupported' : 'unknown'
+export function isTerminalUpdateViewportApplied(result: TerminalUpdateViewportResult): boolean {
+  return result.applied === true
 }
 
 // Why: defer height refits while typing, then coalesce every skipped layout

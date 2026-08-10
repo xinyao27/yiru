@@ -168,10 +168,15 @@
         "cb4d287238": "主机名称",
         "3affe7de3a": "粘贴来自该浏览器可以访问的运行时主机的配对 URL。",
         "e3bcd082ac": "连接到 Yiru",
-        "mobileScopeRejected": "此连接仅有受限的移动端访问权限。请让主机所有者通过 Coworking 授权此客户端，以使用完整 Web 应用。"
+        "runtimeHostName": "Runtime host",
+        "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
+        "mobileScopeRejected": "此连接仅有受限的移动端访问权限。请让主机所有者通过 Coworking 授权此客户端，以使用完整 Web 应用。",
+        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint."
       },
       "webPreloadApi": {
-        "aiVaultUnavailableForHost": "此执行主机不支持 Agent 会话历史记录。"
+        "aiVaultUnavailableForHost": "此执行主机不支持 Agent 会话历史记录。",
+        "feedbackUnavailable": "Feedback is unavailable in the web client.",
+        "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
       },
       "web": {
         "preload": {
@@ -213,6 +218,12 @@
         "downloadIncomplete": "主机更新未下载完成。",
         "reconnectTimeout": "主机未以更新后的版本重新连接。",
         "runtimeChanged": "更新过程中配对主机发生变化，请重新检查后再重试。"
+      },
+      "orpcCallbackStream": {
+        "streamFailed": "Runtime stream failed."
+      },
+      "webUiShellClient": {
+        "selectionClipboardUnavailable": "Selection clipboard is unavailable in the web client."
       }
     },
     "store": {
@@ -1027,8 +1038,6 @@
         "dabd819ca1": "输入关键词，查看全部 {{value0}} 个工作树",
         "20af998bff": "{{value0}} 个可选项{{value1}}",
         "bb72c08e63": "{{value0}} 个搜索结果{{value1}}",
-        "34c8fbb46e": "SSH 远程主机",
-        "63c2be1914": "SSH 连接已断开",
         "95be6587d3": "创建工作树“{{value0}}”",
         "worktreesHeader": "工作树",
         "recentWorktreesHeader": "最近使用的工作树",
@@ -1882,7 +1891,6 @@
             "bd19fd7a59": "杀死所有会话",
             "c9382662bb": "重新启动守护进程",
             "59f178fe11": "{{value0}}，守护进程无法访问",
-            "21cacb16d1": "· 偏僻的",
             "73a3fd68a9": "折叠仓库",
             "b12e31dfcb": "展开仓库",
             "d659d71d2d": "恢复工作区 {{value0}}",
@@ -1908,31 +1916,6 @@
             "c7e3b1a0d9f2": "终止 {{value0}} 个孤立终端",
             "d8f4c2b1e0a3": "终止 {{value0}} 个孤立终端",
             "e9a5d3c2b1f0": "终止 {{value0}}？"
-          },
-          "SshStatusSegment": {
-            "3ad70e0365": "管理远程主机",
-            "6e8a9a4242": "远程主机",
-            "d09ec41831": "远程主机",
-            "fdc57e9970": "远程主机连接状态",
-            "59b553e2aa": "断开连接",
-            "63f36455cc": "连接",
-            "bf07aee59e": "断开连接失败",
-            "2c29e2de68": "连接失败",
-            "bc5a3fd41a": "部分",
-            "3d0128b105": "已连接",
-            "fd9a3c600e": "错误",
-            "fbb3f9f05e": "冲突",
-            "95e4ff5b4b": "推送中",
-            "63a2b965f6": "拉取中",
-            "remote_server": "Coworking 主机",
-            "runtime_checking": "检查中",
-            "runtime_online": "已连接",
-            "runtime_unavailable": "已断开",
-            "runtime_connect_unavailable": "远程主机不可达",
-            "runtime_disconnect_failed": "断开连接失败",
-            "runtime_reconnecting": "重新连接中",
-            "runtime_last_close_reason": "已关闭：{{value0}}",
-            "runtime_reconnect_attempt": "第 {{value0}} 次尝试"
           },
           "StatusBar": {
             "9659e38343": "端口",
@@ -2219,311 +2202,6 @@
             "requesting": "Waiting…",
             "useAsHost": "Use as host"
           }
-        }
-      },
-      "stats": {
-        "ClaudeUsageDailyChart": {
-          "2a6360c7cb": "缓存写入",
-          "61c58f8976": "缓存读取",
-          "7d2efeff5e": "输出",
-          "d7fb787e6b": "输入",
-          "a7902d3c1d": "token",
-          "059945f71d": "按天汇总的输入、输出、缓存读取和缓存写入。",
-          "c9f7cd30e9": "每日使用量"
-        },
-        "ClaudeUsagePane": {
-          "21ea00bfa8": "缓存",
-          "a8b7487ff7": "输出",
-          "faf3444859": "输入",
-          "0f03975d59": "轮次",
-          "1afc25eb06": "模型",
-          "c17bed0416": "项目",
-          "01476891c7": "最后活跃",
-          "abfc4a4943": "缓存复用率：",
-          "7e76c84153": "最近的会话",
-          "32176e1d44": "轮次",
-          "02a046792e": "会话 •",
-          "f97435845c": "用量最高的项目：",
-          "7dc9e5613b": "按项目",
-          "c3fdbc5474": "常用模型：",
-          "0f394c24e3": "按模型",
-          "51ae85fa00": "缓存复用率 = 缓存读取token /（输入token + 缓存读取token）。",
-          "b26d4ddb58": "预估 API 等效成本",
-          "0f3e696ca9": "会话/轮次",
-          "8cc23be4a3": "零缓存读取轮次",
-          "1634c4f404": "缓存复用率",
-          "b786fb4a70": "缓存写入",
-          "268cf0af51": "缓存读取",
-          "2b8a2f14aa": "输出token",
-          "ea71fae8fc": "输入token",
-          "7dde9331fd": "此范围内尚无本地 Claude 使用记录。",
-          "424cd50412": "启用 Claude 使用量分析",
-          "8d18bbb771": "刷新",
-          "c5b9b344d0": "刷新 Claude 使用量",
-          "505be9aac4": "时间范围",
-          "f61cffb9c8": "范围",
-          "dd29209b21": "筛选",
-          "e9bf9fce0e": "Claude 使用量选项",
-          "6afacbee37": "Claude 使用量跟踪",
-          "0cb1a36d7d": "读取本地 Claude 使用日志，显示token、模型和会话统计。",
-          "5ce4842c2c": "所有本地 Claude 使用情况",
-          "4f8368c272": "仅 Yiru 工作树",
-          "cfe2282ffa": "未知",
-          "7765a4c3e1": "不适用",
-          "2d41fd45c6": "• 上次扫描错误：{{value0}}",
-          "rangeLast7Days": "过去 7 天",
-          "rangeLast30Days": "过去 30 天",
-          "rangeLast90Days": "过去 90 天",
-          "rangeAllTime": "全部时间"
-        },
-        "CodexUsageDailyChart": {
-          "1e6f62d7e3": "推理",
-          "c646e1783c": "缓存输入",
-          "7b596a88b2": "输出",
-          "99a91d3143": "输入",
-          "e4bdcf0071": "token",
-          "c756cda6a8": "按天汇总的输入、缓存输入、输出和推理。",
-          "609aa96e8b": "每日使用量"
-        },
-        "CodexUsagePane": {
-          "e0b988599d": "总计",
-          "bbd20344b8": "输出",
-          "3acc582214": "输入",
-          "bd0822ca47": "事件",
-          "c2478bcc3c": "模型",
-          "1a65900aea": "项目",
-          "0c36b100be": "最后活跃",
-          "0bd8655475": "此范围内最近的本地 Codex 会话。",
-          "0cb0983c07": "最近的会话",
-          "79a69522a5": "事件",
-          "bf1bf2f674": "会话 •",
-          "829ee743f2": "用量最高的项目：",
-          "b98718aaab": "按项目",
-          "95d2d89285": "常用模型：",
-          "5a0d1d69cd": "按模型",
-          "94ac1f1ee7": "显示推理token便于查看，但成本仅按未缓存输入、缓存输入和输出计算。",
-          "1a18fbd56b": "预估 API 等效成本",
-          "907b31865f": "会话/事件",
-          "6e18146e9b": "推理输出",
-          "a9ac0f423a": "缓存输入",
-          "5d8eba87bd": "输出token",
-          "e365eaa6fd": "输入token",
-          "4c865393b4": "此范围内尚无本地 Codex 使用记录。",
-          "f7c1affbd5": "启用 Codex 使用量分析",
-          "3022cda443": "刷新",
-          "ec4d270e2c": "刷新 Codex 使用量",
-          "89162e019b": "时间范围",
-          "6d68e8399a": "范围",
-          "1af1a39b2f": "筛选",
-          "70b5b8581f": "Codex 使用量选项",
-          "408210470c": "Codex 使用量跟踪",
-          "13badcd8f2": "读取本地 Codex 使用日志，显示token、模型和会话统计。",
-          "4fe8820098": "所有本地 Codex 使用情况",
-          "201766b754": "仅 Yiru 工作树",
-          "bf6cf2d4dd": "未知",
-          "ae255c3dba": "不适用",
-          "247c93ca92": "• 推理定价",
-          "8a6655f7a2": "• 上次扫描错误：{{value0}}",
-          "rangeLast7Days": "过去 7 天",
-          "rangeLast30Days": "过去 30 天",
-          "rangeLast90Days": "过去 90 天",
-          "rangeAllTime": "全部时间"
-        },
-        "OpenCodeUsagePane": {
-          "349f7c3f5c": "全部的",
-          "dfc4513657": "输出",
-          "0f2f266c9d": "输入",
-          "d416f5cf92": "活动",
-          "08c78441b7": "模型",
-          "a4738de041": "项目",
-          "d97bdf6e27": "最后活跃",
-          "81817a641a": "此范围内的最新本地 OpenCode 会话。",
-          "4799177b1c": "最近的会话",
-          "1e5d410df0": "事件",
-          "bc0cb89901": "会话 •",
-          "048ffe4d65": "顶级项目：",
-          "0f0a1684bb": "按项目",
-          "a15206a63a": "顶级型号：",
-          "040c044d39": "按型号",
-          "e5bb23d85e": "助手消息录制时，成本来自本地OpenCode数据库。",
-          "15c34d4b08": "记录成本",
-          "7e9433469a": "会话/活动",
-          "5a65d68b77": "推理输出",
-          "603504ee3b": "缓存输入",
-          "7aa4d8ce35": "输出token",
-          "d637a892ed": "输入token",
-          "bb6363e08c": "尚未找到此范围的本地 OpenCode 用法。",
-          "f04131b3be": "启用 OpenCode 使用情况分析",
-          "603cd138dc": "刷新",
-          "bed558df0b": "刷新 OpenCode 使用情况",
-          "b5ed5c9fd0": "范围",
-          "40d283c837": "范围",
-          "01583b30aa": "筛选条件",
-          "230d6de108": "OpenCode 使用选项",
-          "bea80ceae0": "OpenCode 使用情况跟踪",
-          "b8b3522436": "读取本地 OpenCode 使用日志以显示token、模型和会话统计信息。",
-          "144a6050e9": "所有本地 OpenCode 使用情况",
-          "e04c58327c": "仅 Yiru 工作树",
-          "362231082f": "未知",
-          "8095a63426": "不适用",
-          "6cc7782458": "• 上次扫描错误：{{value0}}",
-          "rangeLast7Days": "过去 7 天",
-          "rangeLast30Days": "过去 30 天",
-          "rangeLast90Days": "过去 90 天",
-          "rangeAllTime": "全部时间"
-        },
-        "ShareUsageButton": {
-          "7d6b25323d": "分享到 X",
-          "b295c1c75d": "复制图像",
-          "bd82c76a70": "已复制",
-          "bce08eccb9": "分享使用情况",
-          "cecefa7c32": "分享"
-        },
-        "ShareUsageCard": {
-          "4a4c6c79a3": "会话·",
-          "66c83284cf": "每日token",
-          "b760c0b622": "顶级模型",
-          "2d9eb39264": "token总数",
-          "beb6f24f37": "预计成本",
-          "da62578d9d": "用法",
-          "0eb31e79ee": "Yiru IDE",
-          "960324e9b8": "事件",
-          "6adac63cfe": "轮流"
-        },
-        "StatsPane": {
-          "42d3e0bdf7": "使用情况分析提供商：{{value0}}",
-          "c79f073d4c": "使用情况分析",
-          "a58aba506f": "已创建 PR",
-          "1c96f433e2": "Agent 工作时间",
-          "9dbec9e675": "已启动 Agent",
-          "73ed07859c": "启动第一个 Agent 以开始统计",
-          "1e696db2f6": "OpenCode",
-          "7d26110cea": "Codex",
-          "85457c02fe": "Claude",
-          "b2cf4310ce": "概览",
-          "908c470587": "codex",
-          "eb6a066185": "claude",
-          "eee19cfade": "概览",
-          "grokUsageTab": "Grok"
-        },
-        "UsageOverviewPane": {
-          "22ed1b7669": "会话",
-          "444585cb41": "有数据",
-          "ecb0cd8a4c": "已启用 -",
-          "33f7b043d2": "供应商",
-          "60002bb22f": "尚未找到 Provider 用量。概览将在下一个支持的 Agent 会话写入 Token 日志后填充。",
-          "70f36452d4": "缓存共享",
-          "327603fe8b": "活跃天数",
-          "0eaf937335": "预计成本",
-          "3887b94ce5": "token总数",
-          "2d13e57f72": "启用OpenCode",
-          "2f1ee2878b": "启用 Codex",
-          "0ea0cae435": "启用 Claude",
-          "6c00c46815": "启用提供商以扫描本地 Agent 日志并构建组合的token账本。",
-          "49405ccc8d": "开始跟踪token",
-          "ca6bc5fded": "刷新",
-          "e06d1baf5c": "刷新使用概览",
-          "c760c481c5": "使用概述",
-          "55c910f4f1": "- 部分型号价格不详",
-          "cursorMeteredValue": "Cursor-metered spend: {{value}} (actual plan deduction; API value above is a list-price estimate)."
-        },
-        "share": {
-          "card": {
-            "utils": {
-              "d864fc5f98": "输出",
-              "5d66fdd7c2": "输入",
-              "7080aeaebb": "推理",
-              "4ee864629a": "缓存输入",
-              "33d38e2177": "输出",
-              "c2d7b23d57": "输入",
-              "9d166247ee": "缓存写入",
-              "cc28cb965e": "缓存读取"
-            }
-          }
-        },
-        "stats": {
-          "search": {
-            "cb6a9f0334": "缓存",
-            "eaf251e183": "Token",
-            "6953af58e6": "opencode",
-            "b77826fca3": "codex",
-            "e9dc37d889": "claude",
-            "8efeae0b22": "追踪",
-            "5acbe1fdf2": "时间",
-            "ef8bbf7739": "PR",
-            "ce8533f02e": "Agent",
-            "0bba8ca244": "统计数据",
-            "0e2a0b6431": "用法",
-            "372debfac0": "统计数据",
-            "26bb901fcd": "Yiru 统计，以及 Provider Token 分析和 Grok 订阅使用量。",
-            "cb2430ae6a": "统计和使用情况",
-            "f8a1b2c3d4": "grok",
-            "e7f0a1b2c3": "订阅",
-            "d6e9f0a1b2": "额度",
-            "a3b6c7d8e9": "grok 使用量",
-            "9f2a3b4c5d": "xai"
-          }
-        },
-        "usage": {
-          "overview": {
-            "model": {
-              "bc474051e5": "OpenCode",
-              "eb220d193b": "Codex",
-              "544d6d4c16": "Claude",
-              "other": "Other agents"
-            },
-            "sections": {
-              "9564a3b21b": "会话 -",
-              "32330a6e66": "{{value0}}：{{value1}} token",
-              "57d1448ef8": "启用",
-              "f6df0d7d6d": "更多的",
-              "1dd166c920": "较少的",
-              "52d9221dc0": "近期token活动热图",
-              "c424eb3f8e": "最好的：",
-              "f28ff1f852": "近期各 Provider 的综合 Token 活动。",
-              "69e2b50427": "每日强度",
-              "3a795542fa": "综合token分布",
-              "e65084cb4b": "推理",
-              "3bc4a01b24": "汇总已启用提供商的输入、输出和缓存token。",
-              "4ff104da47": "token分布",
-              "0015facc1f": "缓存",
-              "7f270458af": "输出",
-              "9365b14a4e": "新输入",
-              "3de9bf87fc": "还没有型号",
-              "6762f6a682": "token",
-              "a7f937fb29": "{{value0}} 个会话 - {{value1}} {{value2}}",
-              "c8f3a2d1e0b4": "轮次",
-              "d9a4b3e2f1c5": "事件",
-              "usageLedger": "Token ledger"
-            }
-          }
-        },
-        "UsageBreakdownSection": {
-          "7765a4c3e1": "n/a",
-          "247c93ca92": "• 推理价格"
-        },
-        "UsageSessionsTable": {
-          "1afc25eb06": "轮次",
-          "0f03975d59": "事件",
-          "21ea00bfa8": "缓存",
-          "e0b988599d": "合计",
-          "01476891c7": "最后活跃",
-          "c17bed0416": "项目",
-          "f6a2c8d019": "模型",
-          "faf3444859": "输入",
-          "a8b7487ff7": "输出",
-          "cfe2282ffa": "未知"
-        },
-        "GrokUsagePane": {
-          "g8h9i0j1k2": "Grok 使用量",
-          "b2d3e4f5c6": "来自 Grok CLI OAuth（~/.grok/auth.json）的每周订阅额度。与状态栏使用同一来源。",
-          "c3e4f5a6b7": "在账户中设置",
-          "h9i0j1k2l3": " • {{value0}}",
-          "i0j1k2l3m4": "刷新 Grok 使用量",
-          "d4f5a6b7c8": "刷新",
-          "e5a6b7c8d9": "已用每周额度",
-          "f6b7c8d9e0": "计费周期重置",
-          "a7b8c9d0e1": "Grok 账户设置"
         }
       },
       "sparse": {
@@ -3074,7 +2752,6 @@
           "d3a9c4cea1": "清除",
           "7679f0c268": "项目",
           "f10ca29601": "删除 {{value0}} 筛选条件",
-          "2656053db4": "SSH",
           "83a820fa71": "筛选项目...",
           "5a273fbfce": "添加项目...",
           "4815c70605": "没有匹配的项目",
@@ -3184,8 +2861,6 @@
           "01f45d3d8a": "侧边栏",
           "93aebe4529": "文件夹",
           "0d224eff10": "主工作树",
-          "ca74db7550": "SSH 主机上的项目",
-          "021538e1d1": "SSH 已断开连接",
           "runtimeHostDisconnected": "主机已断开连接",
           "runtimeHostProject": "运行时主机上的项目",
           "automationCreated": "由自动化创建",
@@ -3432,8 +3107,6 @@
             "create": {
               "state": {
                 "992cfbc44b": "为 {{value0}} 创建新工作树",
-                "3a70acd808": "在为 {{value0}} 创建工作区之前重新连接 SSH 目标",
-                "6d022563a8": "创建工作区之前重新连接 SSH 目标",
                 "62e71f2d5d": "为 {{value0}} 创建工作区"
               }
             }
@@ -5756,7 +5429,6 @@
           "search_terminal_themes": "搜索终端主题"
         },
         "SettingsSidebar": {
-          "e0900f83e7": "SSH",
           "5c9669ff9c": "项目",
           "dbceaa8840": "搜索设置",
           "60f8a673a7": "返回应用",
@@ -9289,7 +8961,6 @@
         "RepoCombobox": {
           "b3e15f4525": "添加项目",
           "b4a235e886": "添加项目",
-          "3639fd9da2": "SSH",
           "e7ed739236": "没有项目/文件夹与您的搜索匹配。",
           "a0c48f5f29": "搜索项目/文件夹...",
           "116812151a": "添加项目..."
@@ -11442,7 +11113,6 @@
           "244727e655": "自动化已更新。",
           "77b81bc4ac": "爱马仕自动化创建。",
           "08efc3ae12": "Hermes 自动化已更新。",
-          "e431bb85d4": "选择与此 Hermes 自动化位于同一主机上的工作区。",
           "32534e7c9c": "保存前选择一个可用的工作区。",
           "2360ffc956": "保存前选择已启用的 Agent。",
           "6e91dab317": "保存前输入有效的高级计划。",
@@ -12056,6 +11726,23 @@
             "subjectCopyFailed": "Failed to copy commit subject"
           }
         }
+      },
+      "rate": {
+        "limit": {
+          "resume": {
+            "use": {
+              "rate": {
+                "limit": {
+                  "resume": {
+                    "dispatch": {
+                      "8ec3ff2193": "The agent pane did not accept the replayed prompt."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "i18n": {
@@ -12313,6 +12000,19 @@
       "certificateChallengeChanged": "The certificate request changed. Retry the page and review the new warning.",
       "certificateChallengeUnavailable": "This certificate request is no longer available. Retry the page to request a new one.",
       "certificateProceedFailed": "Yiru could not approve this certificate request. Retry the page and try again."
+    },
+    "cookieImport": {
+      "dialogTitle": "导入 Cookie",
+      "cookieFiles": "Cookie 文件",
+      "allFiles": "所有文件"
+    },
+    "chrome": {
+      "notConfigured": "此 runtime host 未配置 Chrome 可执行文件",
+      "notAvailable": "Chrome 可执行文件不可用：{{path}}",
+      "startFailed": "无法启动 Chrome：{{reason}}",
+      "exitedWithDiagnostic": "Chrome 在 DevTools 就绪前退出：{{reason}}",
+      "exitedBeforeReady": "Chrome 在 DevTools 就绪前退出（退出码 {{exitCode}}）",
+      "startTimeout": "等待 Chrome DevTools 就绪超时（{{timeoutMs}} 毫秒）"
     }
   },
   "worktree": {
@@ -12406,5 +12106,31 @@
       "applyNumbered": "应用第 {{value0}} 个配色预设，共 {{value1}} 个",
       "next": "下一组配色"
     }
+  },
+  "runtimeHost": {
+    "appDataRequired": "需要 APPDATA 才能解析 Yiru runtime 数据路径",
+    "fatal": "Runtime host 运行失败",
+    "invalidPort": "Runtime host 端口无效：{{port}}",
+    "mobileClient": "移动端 runtime 客户端",
+    "mobilePairingQr": "移动端配对二维码",
+    "optionValueRequired": "`{{option}}` 需要一个值",
+    "pairingAddressRequiresMobile": "`--pairing-address` 需要同时使用 `--mobile-pairing`",
+    "pairingUrl": "配对 URL",
+    "procedureUnavailable": "此 runtime host 未挂载该 procedure",
+    "ready": "Yiru runtime host 已就绪",
+    "shutdownFailed": "Runtime host 关闭失败",
+    "unknownOption": "未知的 runtime host 选项：{{option}}",
+    "userDataPathRequired": "`--user-data-path` 需要一个路径",
+    "webClient": "Runtime web client",
+    "pairedDeviceUnauthorized": "已配对设备不再有权访问",
+    "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
+    "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
+    "invalidBinaryStream": "The runtime host received an invalid binary stream"
+  },
+  "automations": {
+    "workspaceTerminalMissing": "Automation workspace was created, but no agent terminal started.",
+    "targetWorkspaceMissing": "The target workspace is no longer available.",
+    "agentBlocked": "Automation agent is blocked: {{reason}}.",
+    "agentIncomplete": "Automation agent did not report completion."
   }
 }

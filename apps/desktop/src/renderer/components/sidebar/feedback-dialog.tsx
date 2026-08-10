@@ -16,6 +16,9 @@ import {
 import { Textarea } from '~renderer/components/ui/textarea'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { getShellGitHubViewer } from '~renderer/runtime/github-shell-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { GitHubViewer } from '~shared/types'
 
 type SubmitIdentity = {
@@ -29,7 +32,7 @@ type SidebarFeedbackDialogProps = {
 }
 
 function openExternalUrl(url: string): void {
-  void window.api.shell.openUrl(url)
+  void shellClient.shell.openUrl(url)
 }
 
 function getSubmitIdentity(viewer: GitHubViewer | null, anonymous: boolean): SubmitIdentity {
@@ -65,8 +68,7 @@ export function SidebarFeedbackDialog({
 
     let cancelled = false
     setIsViewerLoading(true)
-    void window.api.gh
-      .viewer()
+    void getShellGitHubViewer()
       .then((nextViewer) => {
         if (!cancelled) {
           setViewer(nextViewer)
@@ -109,7 +111,7 @@ export function SidebarFeedbackDialog({
       // cross-origin fetch() fail CORS preflight. Electron's net module in
       // the main process has no CORS restrictions and works uniformly in dev
       // and prod.
-      const result = await window.api.feedback.submit({
+      const result = await rendererHostClient.feedback.submit({
         feedback: trimmed,
         submitAnonymously,
         githubLogin: identity.githubLogin,

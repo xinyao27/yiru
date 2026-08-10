@@ -43,6 +43,7 @@ const RUNTIME_PASSTHROUGH_CODES: ReadonlySet<string> = new Set([
   'terminal_not_writable',
   'terminal_exited',
   'terminal_gone',
+  'binary_terminal_stream_required',
   'terminal_tab_close_timeout',
   'terminal_tab_not_found',
   'terminal_tab_pinned',
@@ -91,7 +92,9 @@ const STRUCTURED_RUNTIME_PASSTHROUGH_CODES: ReadonlySet<string> = new Set([
   'answer_conflict',
   'stale_delivery',
   'waiter_exists',
-  'invalid_argument'
+  'invalid_argument',
+  'method_not_found',
+  'runtime_unavailable'
 ])
 
 export function mapRuntimeError(id: string, meta: RpcEnvelopeMeta, error: unknown): RpcFailure {

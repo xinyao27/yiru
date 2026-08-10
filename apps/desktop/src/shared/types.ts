@@ -386,27 +386,6 @@ export type SetupAgentStartupPolicy = 'start-immediately' | 'wait-for-setup'
 export type SetupDecision = WorkbenchWorkspaceTypes.SetupDecision
 export type HookCommandSourcePolicy = 'shared-only' | 'local-only' | 'run-both'
 
-/**
- * Envelope returned by the `repos:getBaseRefDefault` IPC handler.
- *
- * Why: declared in `shared/` rather than colocated with the handler so the
- * preload bridge and renderer can import the same named type. Before this
- * lived in `src/main/git/repo.ts` — the preload layer cannot import from
- * `src/main/`, which forced three sites to inline the same structural shape
- * and risk silent drift.
- *
- * Why `remoteCount`: BaseRefPicker renders a multi-remote hint when the repo
- * has more than one configured remote; piggybacking the count on this IPC
- * avoids a second round-trip.
- *
- * Why `defaultBaseRef` (not `default`): `default` is a reserved word and is
- * awkward to destructure.
- */
-export type BaseRefDefaultResult = {
-  defaultBaseRef: string | null
-  remoteCount: number
-}
-
 export type BaseRefSearchResult = WorkbenchWorkspaceTypes.BaseRefSearchResult
 
 // ─── Worktree (git-level) ────────────────────────────────────────────
@@ -1385,46 +1364,12 @@ export type WorktreeRemoteBranchConflictEvent = {
 
 // Why: the release object sent to the renderer omits `version` (redundant
 // with the top-level UpdateStatus.version) to keep one source of truth.
-export type ChangelogRelease = {
-  title: string
-  description: string
-  mediaUrl?: string
-  releaseNotesUrl: string
-}
-
-export type ChangelogData = {
-  release: ChangelogRelease
-  releasesBehind: number | null
-}
-
-export type UpdateCheckOptions = {
-  includePrerelease?: boolean
-  includePerfPrerelease?: boolean
-}
-
-export type UpdateStatus =
-  | { state: 'idle' }
-  | { state: 'checking'; userInitiated?: boolean }
-  | {
-      state: 'available'
-      version: string
-      activeNudgeId?: string
-      // Why: releaseUrl is not currently populated by the update-available handler
-      // (it always sends undefined). Kept on the type for the Settings page's
-      // release-notes link fallback and for potential future use if the main
-      // process starts extracting release URLs from electron-updater metadata.
-      releaseUrl?: string
-      // Why: changelog is always explicitly set by the main process — null means
-      // the fetch failed or the version wasn't in the JSON (simple mode), and a
-      // populated object means rich mode. Using `| null` (not `?`) avoids a
-      // three-state ambiguity (undefined vs null vs present) and makes exhaustive
-      // checks straightforward.
-      changelog: ChangelogData | null
-    }
-  | { state: 'not-available'; userInitiated?: boolean }
-  | { state: 'downloading'; percent: number; version: string; activeNudgeId?: string }
-  | { state: 'downloaded'; version: string; releaseUrl?: string; activeNudgeId?: string }
-  | { state: 'error'; message: string; userInitiated?: boolean; activeNudgeId?: string }
+export type {
+  ChangelogData,
+  ChangelogRelease,
+  UpdateCheckOptions,
+  UpdateStatus
+} from '@yiru/runtime-protocol/updater'
 
 // ─── Settings ────────────────────────────────────────────────────────
 export type NotificationSettings = {
@@ -2151,25 +2096,6 @@ export type NotificationDispatchRequest = {
   agentToolInput?: string
   agentLastAssistantMessage?: string
   agentInterrupted?: boolean
-}
-
-export type NotificationDispatchResult = {
-  delivered: boolean
-  /** Present when delivered is false. Tells the caller why delivery was skipped.
-   *  'blocked-by-system' means the OS-level permission readout says macOS
-   *  would silently swallow the notification (denied or prompt unanswered). */
-  reason?:
-    | 'disabled'
-    | 'source-disabled'
-    | 'suppressed-focus'
-    | 'cooldown'
-    | 'not-supported'
-    | 'not-displayed'
-    | 'blocked-by-system'
-}
-
-export type NotificationDismissResult = {
-  dismissed: number
 }
 
 export type NotificationSoundResult = {

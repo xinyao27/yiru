@@ -33,11 +33,6 @@ export function encodeWorkspaceFilePaths(paths: readonly string[]): string {
   return paths.length === 1 ? paths[0] : JSON.stringify(paths)
 }
 
-export function decodeWorkspaceFilePaths(data: string): string[] {
-  const result = decodeWorkspaceFilePathPayload(data)
-  return result.status === 'accepted' ? result.paths : []
-}
-
 function decodeWorkspaceFilePathPayload(
   data: string,
   options: { maxPaths?: number } = {}
@@ -180,11 +175,6 @@ export function readWorkspaceFileDragPaths(
     paths,
     status: 'accepted'
   }
-}
-
-export function getWorkspaceFileDragPaths(dataTransfer: Pick<DataTransfer, 'getData'>): string[] {
-  const result = readWorkspaceFileDragPaths(dataTransfer)
-  return result.status === 'accepted' ? result.paths : []
 }
 
 export function getWorkspaceFileDragRejectionMessage(

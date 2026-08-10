@@ -8,12 +8,6 @@ export function getProviderRuntimeContextKey(
   return `${baseKey}#${providerRuntimeSessionGeneration}`
 }
 
-export function hasRemoteProviderRuntime(
-  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
-): boolean {
-  return Boolean(settings?.activeRuntimeEnvironmentId?.trim())
-}
-
 let providerRuntimeSessionGeneration = 0
 
 export function bumpProviderRuntimeSessionGeneration(): number {

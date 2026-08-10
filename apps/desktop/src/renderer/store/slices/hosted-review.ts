@@ -13,7 +13,8 @@ import {
 /* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
 and race protection are kept together so branch review lookup invariants stay testable. */
 import type { StateCreator } from 'zustand'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { Repo } from '~shared/types'
 
 import type { AppState } from '../types'
@@ -179,7 +180,9 @@ function settingsForHostedReviewActionOwner(
   settings: AppState['settings'],
   repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
 ): AppState['settings'] {
-  if (!repo?.executionHostId && !repo?.connectionId) {
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — only executionHostId can still make a repo non-local.
+  if (!repo?.executionHostId) {
     return settings
   }
   return settingsForHostedReviewRepoOwner(settings, repo)
@@ -241,25 +244,18 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
     const repo = findHostedReviewRepoByPath(get().repos, args.repoPath, args.repoId)
     const ownerSettings = settingsForHostedReviewActionOwner(settings, repo)
     const target = getActiveRuntimeTarget(ownerSettings)
-    if (target.kind === 'environment') {
-      const { repoPath: _repoPath, worktreePath, ...runtimeArgs } = args
-      void _repoPath
-      return callRuntimeRpc<HostedReviewCreationEligibility>(
-        target,
-        'hostedReview.getCreationEligibility',
-        {
-          repo: repo?.id ?? args.repoPath,
-          ...(worktreePath ? { worktree: `path:${worktreePath}` } : {}),
-          ...runtimeArgs
-        },
-        { timeoutMs: 30_000 }
-      )
-    }
-    return window.api.hostedReview.getCreationEligibility({
-      ...args,
-      repoId: repo?.id ?? args.repoId,
-      connectionId: repo?.connectionId ?? null
-    })
+    const { repoPath: _repoPath, worktreePath, ...runtimeArgs } = args
+    void _repoPath
+    return callRuntimeOrpc(
+      target,
+      (client) => client.hostedReview.getCreationEligibility,
+      {
+        repo: repo?.id ?? args.repoPath,
+        ...(worktreePath ? { worktree: `path:${worktreePath}` } : {}),
+        ...runtimeArgs
+      },
+      { timeoutMs: 30_000 }
+    )
   },
 
   createHostedReview: async (repoPath, input) => {
@@ -267,26 +263,19 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
     const repo = findHostedReviewRepoByPath(get().repos, repoPath, input.repoId)
     const ownerSettings = settingsForHostedReviewActionOwner(settings, repo)
     const target = getActiveRuntimeTarget(ownerSettings)
-    const { repoId: inputRepoId, ...hostedReviewInput } = input
-    if (target.kind === 'environment') {
-      const { worktreePath, ...runtimeInput } = hostedReviewInput
-      return callRuntimeRpc<CreateHostedReviewResult>(
-        target,
-        'hostedReview.create',
-        {
-          repo: repo?.id ?? repoPath,
-          ...(worktreePath ? { worktree: `path:${worktreePath}` } : {}),
-          ...runtimeInput
-        },
-        { timeoutMs: 60_000 }
-      )
-    }
-    return window.api.hostedReview.create({
-      repoPath,
-      repoId: repo?.id ?? inputRepoId ?? undefined,
-      connectionId: repo?.connectionId ?? null,
-      ...hostedReviewInput
-    })
+    const { repoId: _inputRepoId, ...hostedReviewInput } = input
+    void _inputRepoId
+    const { worktreePath, ...runtimeInput } = hostedReviewInput
+    return callRuntimeOrpc(
+      target,
+      (client) => client.hostedReview.create,
+      {
+        repo: repo?.id ?? repoPath,
+        ...(worktreePath ? { worktree: `path:${worktreePath}` } : {}),
+        ...runtimeInput
+      },
+      { timeoutMs: 60_000 }
+    )
   },
 
   fetchHostedReviewForBranch: async (
@@ -312,7 +301,6 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
       branch,
       ownerSettings,
       repoId,
-      repo?.connectionId,
       repo?.executionHostId,
       repo !== undefined
     )
@@ -355,22 +343,16 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
             linkedAzureDevOpsPR: options?.linkedAzureDevOpsPR ?? null,
             linkedGiteaPR: options?.linkedGiteaPR ?? null
           }
-          const review =
-            target.kind === 'environment'
-              ? await callRuntimeRpc<HostedReviewInfo | null>(
-                  target,
-                  'hostedReview.forBranch',
-                  { repo: repo?.id ?? options?.repoId ?? repoPath, repoPath, ...args },
-                  // Why: remote dev boxes can be slower at `git`/`gh` lookups
-                  // than local desktop repos, especially on Windows filesystem
-                  // paths. The main-process queue caps concurrency, so a longer
-                  // timeout no longer risks a background socket stampede.
-                  { timeoutMs: 30_000 }
-                )
-              : await window.api.hostedReview.forBranch({
-                  repoPath,
-                  ...args
-                })
+          const review = await callRuntimeOrpc(
+            target,
+            (client) => client.hostedReview.forBranch,
+            { repo: repo?.id ?? options?.repoId ?? repoPath, repoPath, ...args },
+            // Why: remote dev boxes can be slower at `git`/`gh` lookups than
+            // local desktop repos, especially on Windows filesystem paths. The
+            // main-process queue caps concurrency, so a longer timeout no
+            // longer risks a background socket stampede.
+            { timeoutMs: 30_000 }
+          )
           if (requestGenerations.get(cacheKey) === generation) {
             set((state) => {
               if (
@@ -389,7 +371,6 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
                   repoId,
                   branch,
                   ownerSettings,
-                  repo?.connectionId,
                   repo?.executionHostId,
                   repo !== undefined
                 ),

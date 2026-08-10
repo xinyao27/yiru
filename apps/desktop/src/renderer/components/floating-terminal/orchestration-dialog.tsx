@@ -27,6 +27,7 @@ import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
 } from '~renderer/lib/orchestration-install-command'
+import { readCliInstallStatus, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { useAppStore } from '~renderer/store'
 
 import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
@@ -143,10 +144,8 @@ export function FloatingTerminalOrchestrationDialog({
           preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
           getPrerequisiteStatus={() =>
             activeSkillRuntime.agentRuntime?.runtime === 'wsl'
-              ? window.api.cli.getWslInstallStatus(
-                  getWslCliDistroRequest(activeSkillRuntime.agentRuntime)
-                )
-              : window.api.cli.getInstallStatus()
+              ? readWslCliInstallStatus(getWslCliDistroRequest(activeSkillRuntime.agentRuntime))
+              : readCliInstallStatus()
           }
           onBeforeOpenTerminal={async () => {
             useAppStore.getState().recordFeatureInteraction('agent-orchestration-setup')

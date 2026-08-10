@@ -114,13 +114,10 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
         'yiru claude-teams must be run inside a Yiru terminal.'
       )
     }
-    const response = await client.call<{ launch: { env: Record<string, string> } }>(
-      'agentTeams.prepareLaunch',
-      {
-        paneKey,
-        env: envRecord()
-      }
-    )
+    const response = await client.call(client.rpc.agentTeams.prepareLaunch, {
+      paneKey,
+      env: envRecord()
+    })
     process.exitCode = await runClaudeAgentTeams(
       {
         ...envRecord(),
@@ -149,7 +146,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
 
     const targetPath = contextWorktree ? cwd : resolveRepoPathArgument(directory, cwd)
     await client.openYiru()
-    const result = await client.call<RuntimeWorkspaceOpenPathResult>('workspace.openPath', {
+    const result = await client.call(client.rpc.workspace.openPath, {
       path: targetPath,
       ...(contextWorktree ? { contextWorktree } : {})
     })
@@ -157,10 +154,8 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
   },
   serve: async ({ flags, json }) => {
     const mobilePairing = flags.get('mobile-pairing') === true
-    const pairingAddress =
-      typeof flags.get('pairing-address') === 'string'
-        ? (flags.get('pairing-address') as string)
-        : null
+    const pairingAddressFlag = flags.get('pairing-address')
+    const pairingAddress = typeof pairingAddressFlag === 'string' ? pairingAddressFlag : null
     if (pairingAddress && !mobilePairing) {
       throw new RuntimeClientError(
         'invalid_argument',
@@ -169,6 +164,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
     }
     const port = getOptionalServePort(flags)
     const exitCode = await serveYiruApp({
+      electron: flags.get('electron') === true,
       json,
       port,
       pairingAddress,

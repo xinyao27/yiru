@@ -37,9 +37,10 @@ export function useChecksPanelStateCore(isVisible: boolean) {
   })
   const activeWorktreeId = activeWorktree?.id ?? null
   const repo = useRepoById(activeWorktree?.repoId ?? null)
-  const activeConnectionId = activeWorktreeId
-    ? (getConnectionId(activeWorktreeId) ?? repo?.connectionId ?? null)
-    : null
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — getConnectionId already resolves the live folder-workspace
+  // case and falls back to null for a plain repo-backed worktree.
+  const activeConnectionId = activeWorktreeId ? (getConnectionId(activeWorktreeId) ?? null) : null
   const settings = useAppStore((s) => s.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const updateRepo = useAppStore((s) => s.updateRepo)
@@ -185,10 +186,9 @@ export function useChecksPanelStateCore(isVisible: boolean) {
           : { ...settings, activeRuntimeEnvironmentId: null },
     [runtimeEnvironmentId, settings]
   )
-  const repoConnectionId = repo?.connectionId?.trim() || null
-  const sshConnectionStatus = useAppStore((s) =>
-    repoConnectionId ? s.sshConnectionStates.get(repoConnectionId)?.status : undefined
-  )
+  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
+  // removed (#63) — a checks-panel repo is never remote.
+  const repoConnectionId: string | null = null
   const panelContextKey = buildChecksPanelGitStatusContextKey({
     repoId: repo?.id,
     worktreeId: activeWorktreeId,
@@ -325,7 +325,6 @@ export function useChecksPanelStateCore(isVisible: boolean) {
     runtimeEnvironmentId,
     ownerSettings,
     repoConnectionId,
-    sshConnectionStatus,
     panelContextKey,
     panelContextKeyRef,
     clearTitleInputFocusTimer,

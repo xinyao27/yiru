@@ -1,11 +1,8 @@
 import { realpath } from 'node:fs/promises'
 
-import { isRuntimePathAbsolute } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { RemoteHostPlatform } from '~main/remote-host/platform'
 
-import type { IFilesystemProvider } from '../providers/types'
 import {
   isAbsoluteForCurrentPlatform,
   isDefinitiveCoworkingFilesystemFailure,
@@ -51,24 +48,6 @@ function scopeLocalRuntimePath(
 ): CoworkingInternalHostPathResult {
   const runtimeScope = wslDistro ? `wsl:${wslDistro.trim().toLowerCase()}` : 'native'
   return { ...result, path: withCoworkingActualHostSubscope(result.path, runtimeScope) }
-}
-
-export async function canonicalizeCoworkingSshHostPath(
-  context: { platform: RemoteHostPlatform; filesystem: IFilesystemProvider },
-  executionHostId: ExecutionHostId,
-  candidatePath: string
-): Promise<CoworkingInternalHostPathResult> {
-  if (!isRuntimePathAbsolute(candidatePath, context.platform.pathFlavor)) {
-    return { status: 'invalid' }
-  }
-  try {
-    const canonicalPath = await context.filesystem.realpath(candidatePath)
-    return isRuntimePathAbsolute(canonicalPath, context.platform.pathFlavor)
-      ? resolveCoworkingCanonicalHostPath(executionHostId, canonicalPath)
-      : { status: 'invalid' }
-  } catch (error) {
-    return classifyCanonicalizationFailure(error)
-  }
 }
 
 function classifyCanonicalizationFailure(error: unknown): CoworkingInternalHostPathResult {

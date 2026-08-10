@@ -9,6 +9,7 @@ import {
   type FridayRequestMode
 } from '~renderer/lib/friday'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type { AppState } from '~renderer/store/types'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
@@ -60,7 +61,9 @@ export function useFridayFloatingTab({
       }, 200)
 
       const request =
-        mode === 'restart' ? window.api.friday.restart() : window.api.friday.getOrCreate()
+        mode === 'restart'
+          ? rendererHostClient.friday.restart()
+          : rendererHostClient.friday.getOrCreate()
       requestRef.current = request
       void request
         .then((session) => {

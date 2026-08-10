@@ -5,6 +5,7 @@ import {
 } from '~/source-control/branch-compare'
 import { isMobileGitUnavailable } from '~/source-control/git-status'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~/transport/runtime-orpc-client'
 
 import { highlightMobileDiffLines, resolveMobileSyntaxLanguage } from '../file-syntax'
 import { normalizeMobileDiffComments } from './comments'
@@ -43,21 +44,18 @@ export async function loadMobileDiffReviewBranchCompare(
     if (!baseRef) {
       return { result: null }
     }
-    const response = await client.sendRequest('git.branchCompare', {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.git.branchCompare, {
       worktree: `id:${worktreeId}`,
       baseRef
     })
-    if (!response.ok) {
-      if (isMobileGitUnavailable(response.error?.code, response.error?.message)) {
-        return { result: null }
-      }
-      return { result: null, error: response.error?.message || 'Committed changes unavailable' }
-    }
-    const parsed = readMobileBranchCompareResult(response.result)
+    const parsed = readMobileBranchCompareResult(result)
     return parsed
       ? { result: parsed }
       : { result: null, error: 'Committed changes response was invalid' }
   } catch (err) {
+    if (isMobileGitOrpcUnavailable(err)) {
+      return { result: null }
+    }
     return { result: null, error: err instanceof Error ? err.message : 'Committed changes failed' }
   }
 }
@@ -66,27 +64,30 @@ export async function loadMobileDiffReviewSnapshot(
   client: RpcClient,
   worktreeId: string
 ): Promise<ReviewScreenState> {
-  const statusResponse = await client.sendRequest('git.status', { worktree: `id:${worktreeId}` })
-  if (!statusResponse.ok) {
-    if (isMobileGitUnavailable(statusResponse.error?.code, statusResponse.error?.message)) {
+  let statusResult: unknown
+  try {
+    statusResult = await callRuntimeOrpc(client, (runtime) => runtime.git.status, {
+      worktree: `id:${worktreeId}`
+    })
+  } catch (error) {
+    if (isMobileGitOrpcUnavailable(error)) {
       return { kind: 'unavailable', message: 'Update Yiru desktop to review changes on mobile.' }
     }
-    throw new Error(statusResponse.error?.message || 'Unable to load changes')
+    throw error
   }
-  const status = readMobileGitStatusResult(statusResponse.result)
+  const status = readMobileGitStatusResult(statusResult)
   if (!status) {
     throw new Error('Source control response was invalid')
   }
 
   const [branch, worktreeResponse] = await Promise.all([
     loadMobileDiffReviewBranchCompare(client, worktreeId),
-    client.sendRequest('worktree.show', { worktree: `id:${worktreeId}` })
+    callRuntimeOrpc(client, (runtime) => runtime.worktree.show, {
+      worktree: `id:${worktreeId}`
+    })
   ])
-  if (!worktreeResponse.ok) {
-    throw new Error(worktreeResponse.error?.message || 'Unable to load review notes')
-  }
 
-  const metadata = readMobileReviewWorktreeMetadata(worktreeResponse.result)
+  const metadata = readMobileReviewWorktreeMetadata(worktreeResponse)
   const comments = normalizeMobileDiffComments(metadata.diffComments, worktreeId)
   const normalizedReviewState = normalizeMobileDiffReviewState(metadata.mobileDiffReview)
   const branchEntries =
@@ -119,21 +120,23 @@ export async function loadMobileDiffReviewSnapshot(
 
 export async function loadMobileDiffReviewDiff(input: DiffLoadInput): Promise<ReviewDiffState> {
   const { client, worktreeId, item, branchCompare } = input
-  const response =
-    item.scope === 'branch'
-      ? await loadBranchFileDiff(client, worktreeId, item, branchCompare)
-      : await client.sendRequest('git.diff', {
-          worktree: `id:${worktreeId}`,
-          filePath: item.filePath,
-          staged: item.scope === 'staged'
-        })
-  if (!response.ok) {
+  let response: unknown
+  try {
+    response =
+      item.scope === 'branch'
+        ? await loadBranchFileDiff(client, worktreeId, item, branchCompare)
+        : await callRuntimeOrpc(client, (runtime) => runtime.git.diff, {
+            worktree: `id:${worktreeId}`,
+            filePath: item.filePath,
+            staged: item.scope === 'staged'
+          })
+  } catch (error) {
     if (item.status === 'deleted') {
       return { kind: 'deleted', itemKey: item.key }
     }
-    throw new Error(response.error?.message || 'Unable to load diff')
+    throw error
   }
-  const result = readMobileReviewGitDiffResult(response.result)
+  const result = readMobileReviewGitDiffResult(response)
   if (!result) {
     throw new Error('Diff response was invalid')
   }
@@ -164,7 +167,7 @@ async function loadBranchFileDiff(
   if (!summary || !summary.headOid || !summary.mergeBase) {
     throw new Error('Committed diff is unavailable')
   }
-  return client.sendRequest('git.branchDiff', {
+  return callRuntimeOrpc(client, (runtime) => runtime.git.branchDiff, {
     worktree: `id:${worktreeId}`,
     filePath: item.filePath,
     ...(item.oldPath ? { oldPath: item.oldPath } : {}),
@@ -175,4 +178,12 @@ async function loadBranchFileDiff(
       mergeBase: summary.mergeBase
     }
   })
+}
+
+function isMobileGitOrpcUnavailable(error: unknown): boolean {
+  return (
+    isRuntimeOrpcErrorCode(error, 'forbidden') ||
+    isRuntimeOrpcErrorCode(error, 'method_not_found') ||
+    isMobileGitUnavailable(undefined, error instanceof Error ? error.message : undefined)
+  )
 }

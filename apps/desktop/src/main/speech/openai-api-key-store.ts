@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { safeStorage } from 'electron'
+import { getRuntimeHostSecureStorageProvider } from '../runtime/host/secure-storage-provider'
 
 type StoredOpenAiKey = {
   encryptedKeyBase64: string
@@ -10,9 +10,20 @@ type StoredOpenAiKey = {
 
 const OPENAI_SPEECH_TOKEN_FILE = 'openai-speech-token.enc'
 let cachedOpenAiSpeechApiKey: string | null = null
+let allowPlaintextStorage = true
+let storageDirectoryProvider = (): string => join(homedir(), '.yiru')
 
 function getYiruDir(): string {
-  return join(homedir(), '.yiru')
+  return storageDirectoryProvider()
+}
+
+export function configureOpenAiSpeechStorage(options: {
+  allowPlaintext: boolean
+  directory: () => string
+}): void {
+  allowPlaintextStorage = options.allowPlaintext
+  storageDirectoryProvider = options.directory
+  cachedOpenAiSpeechApiKey = null
 }
 
 function ensureYiruDir(): void {
@@ -45,7 +56,9 @@ function readLegacyJsonStoredOpenAiKey(): StoredOpenAiKey | null {
 export function hasOpenAiSpeechApiKey(): boolean {
   // Why: Settings and model-state refresh call this on startup; checking file
   // existence avoids decrypting safeStorage and triggering macOS keychain prompts.
-  return existsSync(getOpenAiKeyPath())
+  const canRead =
+    allowPlaintextStorage || getRuntimeHostSecureStorageProvider()?.isEncryptionAvailable() === true
+  return canRead && existsSync(getOpenAiKeyPath())
 }
 
 export function saveOpenAiSpeechApiKey(apiKey: string): void {
@@ -54,12 +67,16 @@ export function saveOpenAiSpeechApiKey(apiKey: string): void {
     throw new Error('OpenAI API key is required')
   }
   ensureYiruDir()
-  if (safeStorage.isEncryptionAvailable()) {
-    writeFileSync(getOpenAiKeyPath(), safeStorage.encryptString(trimmed), { mode: 0o600 })
+  const secureStorage = getRuntimeHostSecureStorageProvider()
+  if (secureStorage?.isEncryptionAvailable()) {
+    writeFileSync(getOpenAiKeyPath(), secureStorage.encryptString(trimmed), { mode: 0o600 })
     cachedOpenAiSpeechApiKey = trimmed
     return
   }
 
+  if (!allowPlaintextStorage) {
+    throw new Error('Speech key encryption is unavailable')
+  }
   console.warn(
     '[speech] safeStorage encryption unavailable — storing OpenAI speech key in plaintext'
   )
@@ -80,18 +97,34 @@ export function readOpenAiSpeechApiKey(): string {
     const raw = readFileSync(keyPath)
     const legacyJson = readLegacyJsonStoredOpenAiKey()
     if (legacyJson) {
-      cachedOpenAiSpeechApiKey = safeStorage.decryptString(
+      const secureStorage = getRuntimeHostSecureStorageProvider()
+      if (!secureStorage?.isEncryptionAvailable()) {
+        throw new Error('Speech key encryption is unavailable')
+      }
+      cachedOpenAiSpeechApiKey = secureStorage.decryptString(
         Buffer.from(legacyJson.encryptedKeyBase64, 'base64')
       )
       return cachedOpenAiSpeechApiKey
     }
-    cachedOpenAiSpeechApiKey = safeStorage.isEncryptionAvailable()
-      ? safeStorage.decryptString(raw)
-      : raw.toString('utf8')
+    const secureStorage = getRuntimeHostSecureStorageProvider()
+    if (!secureStorage?.isEncryptionAvailable() && !allowPlaintextStorage) {
+      throw new Error('Speech key encryption is unavailable')
+    }
+    cachedOpenAiSpeechApiKey = secureStorage?.isEncryptionAvailable()
+      ? secureStorage.decryptString(raw)
+      : readPlaintextKey(raw)
     return cachedOpenAiSpeechApiKey
   } catch {
     throw new Error('OpenAI API key could not be decrypted')
   }
+}
+
+function readPlaintextKey(raw: Buffer): string {
+  const plaintext = raw.toString('utf8').trim()
+  if (!plaintext || !Buffer.from(plaintext, 'utf8').equals(raw)) {
+    throw new Error('Speech key encryption is unavailable')
+  }
+  return plaintext
 }
 
 export function clearOpenAiSpeechApiKey(): void {

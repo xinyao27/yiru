@@ -1,3 +1,4 @@
+import { shellClient } from '~renderer/runtime/shell-client'
 // Coordinates the single main->renderer window-close-request subscription (owned
 // by the always-mounted App root) with the rich close-confirmation handler in
 // Terminal, which only mounts once a workspace exists. Without this, quitting on
@@ -69,5 +70,5 @@ export async function dispatchWindowCloseRequest(data: { isQuitting: boolean }):
     activeHandler(data)
     return
   }
-  window.api.ui.confirmWindowClose()
+  shellClient.ui.confirmWindowClose()
 }

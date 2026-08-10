@@ -41,6 +41,19 @@ type ResolvedReset = {
   window: RateLimitResumeWindow | null
 }
 
+export type RateLimitResumeUsageState = Pick<
+  RateLimitState,
+  | 'claude'
+  | 'codex'
+  | 'cursor'
+  | 'gemini'
+  | 'opencodeGo'
+  | 'kimi'
+  | 'antigravity'
+  | 'minimax'
+  | 'grok'
+>
+
 // Why: the usage parser anchors its time-zone match to end-of-string, so a
 // banner written as a sentence ("… reset at 4am (America/Los_Angeles).") loses
 // the zone and silently resolves 4am in local time instead. Drop the sentence
@@ -107,7 +120,7 @@ function windowFromUsage(
  */
 export function resolveRateLimitHit(
   report: RateLimitBannerReport,
-  rateLimits: RateLimitState,
+  rateLimits: RateLimitResumeUsageState,
   now: number
 ): RateLimitHit {
   const provider = resolveRateLimitProvider(report.agent)

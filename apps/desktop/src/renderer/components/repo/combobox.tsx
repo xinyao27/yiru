@@ -1,9 +1,4 @@
-import {
-  Check,
-  HardDrives as Server,
-  CaretUpDown as ChevronsUpDown,
-  FolderPlus
-} from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown, FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import {
@@ -213,12 +208,6 @@ export default function RepoCombobox({
                     color={selectedRepo.badgeColor}
                     badgeClassName="size-1.5"
                   />
-                  {selectedRepo.connectionId && (
-                    <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
-                      <Server className="size-2.5" />
-                      {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
-                    </span>
-                  )}
                 </span>
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
@@ -276,12 +265,6 @@ export default function RepoCombobox({
                         color={repo.badgeColor}
                         className="max-w-full"
                       />
-                      {repo.connectionId && (
-                        <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
-                          <Server className="size-2.5" />
-                          {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
-                        </span>
-                      )}
                     </span>
                     <p className="text-muted-foreground mt-0.5 truncate text-[11px]">{repo.path}</p>
                   </div>

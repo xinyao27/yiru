@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import { AppState, Platform, useWindowDimensions, type AppStateStatus } from 'react-native'
 
 import type { RpcClient } from '../transport/rpc-client'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '../transport/runtime-orpc-client'
 import type { ConnectionState } from '../transport/types'
 import { shouldRecoverTerminalOnAppStateChange } from './foreground-recovery'
 import {
@@ -9,7 +10,6 @@ import {
   isTerminalUpdateViewportUpdated,
   isTerminalViewportRefitTargetCurrent,
   reduceTerminalFrameHeightRefit,
-  resolveTerminalUpdateViewportCapability,
   type TerminalFrameHeightRefitEvent,
   type TerminalFrameHeightRefitState,
   type TerminalUpdateViewportCapability
@@ -153,18 +153,20 @@ export function useTerminalViewportRefit(
           const deviceToken = deviceTokenRef.current
           if (rpc && deviceToken && updateViewportCapabilityRef.current !== 'unsupported') {
             try {
-              const response = await rpc.sendRequest('terminal.updateViewport', {
-                terminal: handle,
-                client: { id: deviceToken, type: 'mobile' as const },
-                viewport: dims
-              })
+              const response = await callRuntimeOrpc(
+                rpc,
+                (runtime) => runtime.terminal.updateViewport,
+                {
+                  terminal: handle,
+                  client: { id: deviceToken, type: 'mobile' as const },
+                  viewport: dims
+                }
+              )
               if (!isCurrentTarget()) {
                 return
               }
-              updateViewportCapabilityRef.current =
-                resolveTerminalUpdateViewportCapability(response)
+              updateViewportCapabilityRef.current = 'supported'
               if (isTerminalUpdateViewportUpdated(response)) {
-                rpc.updateTerminalSubscriptionViewport(handle, dims)
                 if (isTerminalUpdateViewportApplied(response)) {
                   // Why: updateViewport reflows the server PTY and re-streams only
                   // the visible screen, so the WebView's local xterm scrollback
@@ -175,7 +177,13 @@ export function useTerminalViewportRefit(
                 }
                 return
               }
-            } catch {
+            } catch (error) {
+              updateViewportCapabilityRef.current = isRuntimeOrpcErrorCode(
+                error,
+                'method_not_found'
+              )
+                ? 'unsupported'
+                : 'unknown'
               // Fall through to legacy resubscribe.
             }
           }

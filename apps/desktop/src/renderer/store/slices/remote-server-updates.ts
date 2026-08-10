@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { runRemoteServerUpdateBatch } from '~renderer/runtime/remote-server-update-batch'
 import {
   checkingRemoteServerUpdateEntry,
@@ -7,14 +8,10 @@ import {
   type RemoteServerUpdateEntry,
   type RemoteServerUpdateTransport
 } from '~renderer/runtime/remote-server-update-coordinator'
-import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '~renderer/runtime/rpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getRuntimeEnvironmentStatus } from '~renderer/runtime/rpc-client'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { isValidAppVersion } from '~shared/app-version'
-import {
-  UPDATER_CHECK_CONTRACT,
-  UPDATER_DOWNLOAD_CONTRACT,
-  UPDATER_GET_STATUS_CONTRACT,
-  UPDATER_INSTALL_CONTRACT
-} from '~shared/runtime-method-contracts/runtime-updater-contracts'
 import type { UpdateCheckOptions } from '~shared/types'
 
 import type { AppState } from '../types'
@@ -24,21 +21,33 @@ const MAX_CONCURRENT_REMOTE_SERVER_UPDATES = 2
 const transport: RemoteServerUpdateTransport = {
   getRuntimeStatus: getRuntimeEnvironmentStatus,
   getUpdaterStatus: (environmentId) =>
-    callRuntimeRpc({ kind: 'environment', environmentId }, UPDATER_GET_STATUS_CONTRACT, undefined, {
-      timeoutMs: 15_000
-    }),
+    callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.updater.getStatus,
+      undefined,
+      { timeoutMs: 15_000 }
+    ),
   check: (environmentId, options) =>
-    callRuntimeRpc({ kind: 'environment', environmentId }, UPDATER_CHECK_CONTRACT, options, {
-      timeoutMs: 15_000
-    }),
+    callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.updater.check,
+      options,
+      { timeoutMs: 15_000 }
+    ),
   download: (environmentId) =>
-    callRuntimeRpc({ kind: 'environment', environmentId }, UPDATER_DOWNLOAD_CONTRACT, undefined, {
-      timeoutMs: 15_000
-    }),
+    callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.updater.download,
+      undefined,
+      { timeoutMs: 15_000 }
+    ),
   install: (environmentId) =>
-    callRuntimeRpc({ kind: 'environment', environmentId }, UPDATER_INSTALL_CONTRACT, undefined, {
-      timeoutMs: 15_000
-    }),
+    callRuntimeOrpc(
+      { kind: 'environment', environmentId },
+      (client) => client.updater.install,
+      undefined,
+      { timeoutMs: 15_000 }
+    ),
   wait: (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds))
 }
 
@@ -88,7 +97,7 @@ export const createRemoteServerUpdatesSlice: StateCreator<
       ...(requestedOptions ? { remoteServerUpdateCheckOptions: requestedOptions } : {})
     })
     try {
-      const listed = await window.api.runtimeEnvironments.list()
+      const listed = await runtimeEnvironmentsClient.list()
       const environments = listed
       get().setRuntimeEnvironments(listed)
       const previous = get().remoteServerUpdates
@@ -105,7 +114,7 @@ export const createRemoteServerUpdatesSlice: StateCreator<
           })
         )
       })
-      const clientVersion = await window.api.updater.getVersion()
+      const clientVersion = await rendererHostClient.updater.getVersion()
       // Why: the web client has no app build version; ask each owning runtime's
       // updater instead of comparing against the sentinel "web" version.
       const effectiveOptions =

@@ -1,15 +1,10 @@
-import {
-  finishAutomationWorkspaceProvenanceRequest,
-  releaseAutomationWorkspaceProvenanceRequest,
-  resolveAutomationWorkspaceProvenance
-} from '~main/automations/workspace-provenance'
-import {
-  WORKTREE_CREATE_CONTRACT,
+import type { z } from 'zod'
+import type {
   WORKTREE_LIST_CONTRACT,
   WORKTREE_REMOVE_CONTRACT,
   WORKTREE_SET_CONTRACT
 } from '~shared/runtime-method-contracts/workspace-contracts'
-import {
+import type {
   WorktreeDetectedListParams,
   WorktreeActivate,
   WorktreeForceDeleteBranch,
@@ -21,245 +16,137 @@ import {
   WorktreeSortOrder
 } from '~shared/runtime-method-contracts/worktree-method-params'
 
-import { defineMethod, type RpcMethod } from '../core'
+import type { RpcContext, RpcHandler } from '../core'
 
-export const WORKTREE_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'worktree.ps',
-    mobile: true,
-    params: WorktreePsParams,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.getWorktreePs(params.limit)
-  }),
-  defineMethod({
-    contract: WORKTREE_LIST_CONTRACT,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.listManagedWorktrees(params.repo, params.limit)
-  }),
-  defineMethod({
-    name: 'worktree.detectedList',
-    params: WorktreeDetectedListParams,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => runtime.listDetectedManagedWorktrees(params.repo)
-  }),
-  defineMethod({
-    name: 'worktree.lineageList',
-    params: null,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (_params, { runtime }) => ({
-      lineage: await runtime.listWorktreeLineage(),
-      workspaceLineage: await runtime.listWorkspaceLineage()
-    })
-  }),
-  defineMethod({
-    name: 'worktree.show',
-    mobile: true,
-    params: WorktreeSelector,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) => ({
-      worktree: await runtime.showManagedWorktree(params.worktree)
-    })
-  }),
-  defineMethod({
-    name: 'worktree.sleep',
-    mobile: true,
-    params: WorktreeSelector,
-    access: { scope: 'worktree', tier: 'control' },
-    handler: async (params, { runtime }) => runtime.sleepManagedWorktree(params.worktree)
-  }),
-  defineMethod({
-    name: 'worktree.activate',
-    mobile: true,
-    params: WorktreeActivate,
-    access: { scope: 'worktree', tier: 'control' },
-    handler: async (params, { runtime, clientKind }) =>
-      // Why: clientKind ('mobile'|'runtime') scopes the host-renderer slept-agent
-      // wake to phones so web/desktop activation behavior is unchanged.
-      runtime.activateManagedWorktree(params.worktree, {
-        notifyClients: params.notifyClients !== false,
-        clientKind
-      })
-  }),
-  defineMethod({
-    contract: WORKTREE_CREATE_CONTRACT,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) => {
-      const repo = await runtime.showRepo(params.repo)
-      const automationProvenance = resolveAutomationWorkspaceProvenance({
-        authority: runtime,
-        repoSelector: params.repo,
-        repo,
-        request: params.automationProvenanceRequest
-      })
-      // Why: provenance tokens are reserved before creation so retries can recover,
-      // but failed create attempts must release the reservation for a safe retry.
-      try {
-        const result = await runtime.createManagedWorktree({
-          repoSelector: params.repo,
-          name: params.name ?? '',
-          baseBranch: params.baseBranch,
-          compareBaseRef: params.compareBaseRef,
-          branchNameOverride: params.branchNameOverride,
-          linkedPR: params.linkedPR,
-          linkedGitLabMR: params.linkedGitLabMR,
-          linkedBitbucketPR: params.linkedBitbucketPR,
-          linkedAzureDevOpsPR: params.linkedAzureDevOpsPR,
-          linkedGiteaPR: params.linkedGiteaPR,
-          comment: params.comment,
-          displayName: params.displayName,
-          telemetrySource: params.telemetrySource,
-          workspaceStatus: params.workspaceStatus,
-          manualOrder: params.manualOrder,
-          sparseCheckout: params.sparseCheckout,
-          pushTarget: params.pushTarget,
-          runHooks: params.runHooks === true,
-          activate: params.activate === true,
-          setupDecision: params.setupDecision,
-          createdWithAgent: params.createdWithAgent ?? params.startupAgent,
-          automationProvenance,
-          // Why: an unknown-capability Mobile client sends both launch forms.
-          // This host owns launch policy, so structured agent intent wins.
-          startup:
-            !params.startupAgent && params.startupCommand
-              ? {
-                  command: params.startupCommand,
-                  ...(params.startupEnv ? { env: params.startupEnv } : {}),
-                  ...(params.startupLaunchConfig
-                    ? { launchConfig: params.startupLaunchConfig }
-                    : {}),
-                  ...(params.startupCommandDelivery
-                    ? { startupCommandDelivery: params.startupCommandDelivery }
-                    : {})
-                }
-              : undefined,
-          ...(params.startupAgent ? { startupAgent: params.startupAgent } : {}),
-          ...(params.startupPrompt !== undefined ? { startupPrompt: params.startupPrompt } : {}),
-          startupDraft: params.startupDraft,
-          lineage: {
-            parentWorkspace: params.parentWorkspace,
-            envParentWorkspace: params.envParentWorkspace,
-            parentWorktree: params.parentWorktree,
-            ...(params.cwdParentWorktree ? { cwdParentWorktree: params.cwdParentWorktree } : {}),
-            noParent: params.noParent === true,
-            callerTerminalHandle: params.callerTerminalHandle,
-            orchestrationContext: params.orchestrationContext
-          }
-        })
-        finishAutomationWorkspaceProvenanceRequest(params.automationProvenanceRequest)
-        // Why: agent callers need a stable dispatch target without traversing
-        // terminal-list layout duplicates after creating the worktree.
-        return params.startupAgent && result.startupTerminal?.handle
-          ? { ...result, agentTerminalHandle: result.startupTerminal.handle }
-          : result
-      } catch (error) {
-        releaseAutomationWorkspaceProvenanceRequest(params.automationProvenanceRequest)
-        throw error
-      }
-    }
-  }),
-  defineMethod({
-    name: 'worktree.prefetchCreateBase',
-    mobile: true,
-    params: WorktreePrefetchCreateBase,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) => {
-      await runtime.prefetchManagedWorktreeCreateBase({
-        repoSelector: params.repo,
-        baseBranch: params.baseBranch
-      })
-      return null
-    }
-  }),
-  defineMethod({
-    contract: WORKTREE_SET_CONTRACT,
-    access: { scope: 'worktree', tier: 'control' },
-    handler: async (params, { runtime }) => ({
-      worktree: await runtime.updateManagedWorktreeMeta(params.worktree, {
-        displayName: params.displayName,
-        linkedPR: params.linkedPR,
-        linkedGitLabMR: params.linkedGitLabMR,
-        linkedBitbucketPR: params.linkedBitbucketPR,
-        linkedAzureDevOpsPR: params.linkedAzureDevOpsPR,
-        linkedGiteaPR: params.linkedGiteaPR,
-        comment: params.comment,
-        isArchived: params.isArchived,
-        isUnread: params.isUnread,
-        isPinned: params.isPinned,
-        sortOrder: params.sortOrder,
-        manualOrder: params.manualOrder,
-        lastActivityAt: params.lastActivityAt,
-        createdAt: params.createdAt,
-        sparseDirectories: params.sparseDirectories,
-        sparseBaseRef: params.sparseBaseRef,
-        sparsePresetId: params.sparsePresetId,
-        baseRef: params.baseRef,
-        workspaceStatus: params.workspaceStatus,
-        pushTarget: params.pushTarget,
-        diffComments: params.diffComments,
-        mobileDiffReview: params.mobileDiffReview,
-        lineage:
-          params.parentWorktree || params.noParent === true
-            ? {
-                parentWorktree: params.parentWorktree,
-                noParent: params.noParent === true
-              }
-            : undefined
-      } as Parameters<typeof runtime.updateManagedWorktreeMeta>[1])
-    })
-  }),
-  defineMethod({
-    name: 'worktree.persistSortOrder',
-    params: WorktreeSortOrder,
-    access: { scope: 'project', tier: 'control' },
-    handler: async (params, { runtime }) =>
-      runtime.persistManagedWorktreeSortOrder(params.orderedIds)
-  }),
-  defineMethod({
-    name: 'worktree.resolvePrBase',
-    mobile: true,
-    params: WorktreeResolvePrBase,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.resolveManagedPrBase({
-        repoSelector: params.repo,
-        prNumber: params.prNumber,
-        headRefName: params.headRefName,
-        baseRefName: params.baseRefName,
-        isCrossRepository: params.isCrossRepository
-      })
-  }),
-  defineMethod({
-    name: 'worktree.resolveMrBase',
-    mobile: true,
-    params: WorktreeResolveMrBase,
-    access: { scope: 'project', tier: 'read' },
-    handler: async (params, { runtime }) =>
-      runtime.resolveManagedMrBase({
-        repoSelector: params.repo,
-        mrIid: params.mrIid,
-        sourceBranch: params.sourceBranch,
-        targetBranch: params.targetBranch,
-        isCrossRepository: params.isCrossRepository
-      })
-  }),
-  defineMethod({
-    contract: WORKTREE_REMOVE_CONTRACT,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) => {
-      const result = await runtime.removeManagedWorktree(
-        params.worktree,
-        params.force === true,
-        params.runHooks === true
-      )
-      return { removed: true, ...result }
-    }
-  }),
-  defineMethod({
-    name: 'worktree.forceDeleteBranch',
-    mobile: true,
-    params: WorktreeForceDeleteBranch,
-    access: { scope: 'project', tier: 'host' },
-    handler: async (params, { runtime }) =>
-      runtime.forceDeletePreservedBranch(params.worktree, params.branchName, params.expectedHead)
+export const handleWorktreePs = ((params, { runtime }) =>
+  runtime.getWorktreePs(params.limit)) satisfies RpcHandler<z.infer<typeof WorktreePsParams>>
+
+export const handleWorktreeList = ((params, { runtime }) =>
+  runtime.listManagedWorktrees(params.repo, params.limit)) satisfies RpcHandler<
+  z.infer<(typeof WORKTREE_LIST_CONTRACT)['params']>
+>
+
+export const handleWorktreeDetectedList = ((params, { runtime }) =>
+  runtime.listDetectedManagedWorktrees(params.repo)) satisfies RpcHandler<
+  z.infer<typeof WorktreeDetectedListParams>
+>
+
+export const handleWorktreeLineageList = async (_params: unknown, { runtime }: RpcContext) => ({
+  lineage: await runtime.listWorktreeLineage(),
+  workspaceLineage: await runtime.listWorkspaceLineage()
+})
+
+export const handleWorktreeShow = (async (params, { runtime }) => ({
+  worktree: await runtime.showManagedWorktree(params.worktree)
+})) satisfies RpcHandler<z.infer<typeof WorktreeSelector>>
+
+export const handleWorktreeSleep = ((params, { runtime }) =>
+  runtime.sleepManagedWorktree(params.worktree)) satisfies RpcHandler<
+  z.infer<typeof WorktreeSelector>
+>
+
+export const handleWorktreeActivate = ((params, { runtime, clientKind }) =>
+  runtime.activateManagedWorktree(params.worktree, {
+    notifyClients: params.notifyClients !== false,
+    clientKind
+  })) satisfies RpcHandler<z.infer<typeof WorktreeActivate>>
+
+export async function handleWorktreePrefetchCreateBase(
+  params: z.infer<typeof WorktreePrefetchCreateBase>,
+  { runtime }: RpcContext
+) {
+  await runtime.prefetchManagedWorktreeCreateBase({
+    repoSelector: params.repo,
+    baseBranch: params.baseBranch
   })
-]
+  return null
+}
+
+export async function handleWorktreeSet(
+  params: z.infer<(typeof WORKTREE_SET_CONTRACT)['params']>,
+  { runtime }: RpcContext
+) {
+  const lineage =
+    params.parentWorktree || params.noParent === true
+      ? { parentWorktree: params.parentWorktree, noParent: params.noParent === true }
+      : undefined
+  return {
+    worktree: await runtime.updateManagedWorktreeMeta(params.worktree, {
+      displayName: params.displayName,
+      linkedPR: params.linkedPR,
+      linkedGitLabMR: params.linkedGitLabMR,
+      linkedBitbucketPR: params.linkedBitbucketPR,
+      linkedAzureDevOpsPR: params.linkedAzureDevOpsPR,
+      linkedGiteaPR: params.linkedGiteaPR,
+      comment: params.comment,
+      isArchived: params.isArchived,
+      isUnread: params.isUnread,
+      isPinned: params.isPinned,
+      sortOrder: params.sortOrder,
+      manualOrder: params.manualOrder,
+      lastActivityAt: params.lastActivityAt,
+      createdAt: params.createdAt,
+      sparseDirectories: params.sparseDirectories,
+      sparseBaseRef: params.sparseBaseRef,
+      sparsePresetId: params.sparsePresetId,
+      baseRef: params.baseRef,
+      workspaceStatus: params.workspaceStatus,
+      pushTarget: params.pushTarget,
+      diffComments: params.diffComments,
+      mobileDiffReview: params.mobileDiffReview,
+      lineage
+    } as Parameters<typeof runtime.updateManagedWorktreeMeta>[1])
+  }
+}
+
+export const handleWorktreePersistSortOrder = ((params, { runtime }) =>
+  runtime.persistManagedWorktreeSortOrder(params.orderedIds)) satisfies RpcHandler<
+  z.infer<typeof WorktreeSortOrder>
+>
+
+export const handleWorktreeResolvePrBase = ((params, { runtime }) =>
+  runtime.resolveManagedPrBase({
+    repoSelector: params.repo,
+    prNumber: params.prNumber,
+    headRefName: params.headRefName,
+    baseRefName: params.baseRefName,
+    isCrossRepository: params.isCrossRepository
+  })) satisfies RpcHandler<z.infer<typeof WorktreeResolvePrBase>>
+
+export const handleWorktreeResolveMrBase = ((params, { runtime }) =>
+  runtime.resolveManagedMrBase({
+    repoSelector: params.repo,
+    mrIid: params.mrIid,
+    sourceBranch: params.sourceBranch,
+    targetBranch: params.targetBranch,
+    isCrossRepository: params.isCrossRepository
+  })) satisfies RpcHandler<z.infer<typeof WorktreeResolveMrBase>>
+
+export async function handleWorktreeRemove(
+  params: z.infer<(typeof WORKTREE_REMOVE_CONTRACT)['params']>,
+  { runtime }: RpcContext
+) {
+  const result = await runtime.removeManagedWorktree(
+    params.worktree,
+    params.force === true,
+    params.runHooks === true
+  )
+  return { removed: true, ...result }
+}
+
+export const handleWorktreeForceDeleteBranch = ((params, { runtime }) =>
+  runtime.forceDeletePreservedBranch(
+    params.worktree,
+    params.branchName,
+    params.expectedHead
+  )) satisfies RpcHandler<z.infer<typeof WorktreeForceDeleteBranch>>
+
+// Why: exposes the in-memory branch-auto-rename failure output (module state
+// in main/agent-hooks/branch-rename-failure-output.ts, not tied to any
+// window) so paired/environment hosts can surface it too — previously
+// preload-only, so remote-created worktrees could never show the full CLI
+// output of their own rename failure.
+export const handleWorktreeBranchRenameFailureOutput = ((params, { runtime }) =>
+  runtime.getBranchRenameFailureOutputForWorktree(params.worktree)) satisfies RpcHandler<
+  z.infer<typeof WorktreeSelector>
+>

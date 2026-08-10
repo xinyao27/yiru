@@ -1,248 +1,151 @@
-import {
-  BrowserTarget,
-  requiredString
-} from '~shared/runtime-method-contracts/runtime-method-params'
+import type {
+  BrowserCertificateProceedInput,
+  BrowserCheckInput,
+  BrowserDragInput,
+  BrowserElementInput,
+  BrowserEvalInput,
+  BrowserExecInput,
+  BrowserFindInput,
+  BrowserFullScreenshotInput,
+  BrowserGetInput,
+  BrowserGotoInput,
+  BrowserHighlightInput,
+  BrowserIsInput,
+  BrowserKeypressInput,
+  BrowserLimitInput,
+  BrowserScreenshotInput,
+  BrowserScrollInput,
+  BrowserSelectInput,
+  BrowserSelectorPathInput,
+  BrowserTargetInput,
+  BrowserUploadInput,
+  BrowserWaitInput
+} from '@yiru/runtime-protocol/contract'
 
-import { defineMethod, type RpcMethod } from '../core'
-import {
-  Check,
-  Drag,
-  Element,
-  Eval,
-  Exec,
-  Find,
-  FullScreenshot,
-  Get,
-  Goto,
-  Highlight,
-  Is,
-  Keypress,
-  LimitParam,
-  Screenshot,
-  Scroll,
-  Select,
-  SelectorPath,
-  Upload,
-  Wait
-} from './browser-schemas'
-import { BROWSER_TAB_PROFILE_METHODS } from './browser-tab-profiles'
-import { BROWSER_TEXT_METHODS } from './browser-text-rpc-methods'
+import type { RpcContext } from '../core'
 
-const CertificateProceed = BrowserTarget.extend({
-  challengeId: requiredString('Missing required challengeId')
-})
+export const handleBrowserSnapshot = (
+  params: BrowserTargetInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserSnapshot(params)
 
-export const BROWSER_CORE_METHODS: RpcMethod[] = [
-  defineMethod({
-    name: 'browser.snapshot',
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserSnapshot(params)
-  }),
-  defineMethod({
-    name: 'browser.click',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserClick(params)
-  }),
-  defineMethod({
-    name: 'browser.goto',
-    mobile: true,
-    params: Goto,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserGoto(params)
-  }),
-  defineMethod({
-    name: 'browser.certificate.proceed',
-    params: CertificateProceed,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) =>
-      browserCommands.browserProceedCertificate(params)
-  }),
-  ...BROWSER_TEXT_METHODS,
-  defineMethod({
-    name: 'browser.select',
-    params: Select,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserSelect(params)
-  }),
-  defineMethod({
-    name: 'browser.scroll',
-    params: Scroll,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserScroll(params)
-  }),
-  defineMethod({
-    name: 'browser.back',
-    mobile: true,
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserBack(params)
-  }),
-  defineMethod({
-    name: 'browser.reload',
-    mobile: true,
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserReload(params)
-  }),
-  defineMethod({
-    name: 'browser.screenshot',
-    params: Screenshot,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserScreenshot(params)
-  }),
-  defineMethod({
-    name: 'browser.eval',
-    params: Eval,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserEval(params)
-  }),
-  defineMethod({
-    name: 'browser.hover',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserHover(params)
-  }),
-  defineMethod({
-    name: 'browser.drag',
-    params: Drag,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserDrag(params)
-  }),
-  defineMethod({
-    name: 'browser.upload',
-    params: Upload,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserUpload(params)
-  }),
-  defineMethod({
-    name: 'browser.wait',
-    params: Wait,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserWait(params)
-  }),
-  defineMethod({
-    name: 'browser.check',
-    params: Check,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserCheck(params)
-  }),
-  defineMethod({
-    name: 'browser.focus',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserFocus(params)
-  }),
-  defineMethod({
-    name: 'browser.clear',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserClear(params)
-  }),
-  defineMethod({
-    name: 'browser.selectAll',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserSelectAll(params)
-  }),
-  defineMethod({
-    name: 'browser.keypress',
-    mobile: true,
-    params: Keypress,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserKeypress(params)
-  }),
-  defineMethod({
-    name: 'browser.pdf',
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserPdf(params)
-  }),
-  defineMethod({
-    name: 'browser.fullScreenshot',
-    params: FullScreenshot,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserFullScreenshot(params)
-  }),
-  defineMethod({
-    name: 'browser.dblclick',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserDblclick(params)
-  }),
-  defineMethod({
-    name: 'browser.forward',
-    mobile: true,
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserForward(params)
-  }),
-  defineMethod({
-    name: 'browser.scrollIntoView',
-    params: Element,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserScrollIntoView(params)
-  }),
-  defineMethod({
-    name: 'browser.get',
-    params: Get,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserGet(params)
-  }),
-  defineMethod({
-    name: 'browser.is',
-    params: Is,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserIs(params)
-  }),
-  defineMethod({
-    name: 'browser.find',
-    params: Find,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserFind(params)
-  }),
-  defineMethod({
-    name: 'browser.console',
-    params: LimitParam,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserConsoleLog(params)
-  }),
-  defineMethod({
-    name: 'browser.network',
-    params: LimitParam,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserNetworkLog(params)
-  }),
-  defineMethod({
-    name: 'browser.exec',
-    params: Exec,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserExec(params)
-  }),
-  defineMethod({
-    name: 'browser.capture.start',
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserCaptureStart(params)
-  }),
-  defineMethod({
-    name: 'browser.capture.stop',
-    params: BrowserTarget,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserCaptureStop(params)
-  }),
-  defineMethod({
-    name: 'browser.download',
-    params: SelectorPath,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserDownload(params)
-  }),
-  defineMethod({
-    name: 'browser.highlight',
-    params: Highlight,
-    access: { scope: 'host', tier: 'host' },
-    handler: async (params, { browserCommands }) => browserCommands.browserHighlight(params)
-  }),
-  ...BROWSER_TAB_PROFILE_METHODS
-]
+export const handleBrowserClick = (params: BrowserElementInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserClick(params)
+
+export const handleBrowserGoto = (params: BrowserGotoInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserGoto(params)
+
+export const handleBrowserCertificateProceed = (
+  params: BrowserCertificateProceedInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserProceedCertificate(params)
+
+export const handleBrowserSelect = (params: BrowserSelectInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserSelect(params)
+
+export const handleBrowserScroll = (params: BrowserScrollInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserScroll(params)
+
+export const handleBrowserBack = (params: BrowserTargetInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserBack(params)
+
+export const handleBrowserReload = (params: BrowserTargetInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserReload(params)
+
+export const handleBrowserScreenshot = (
+  params: BrowserScreenshotInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserScreenshot(params)
+
+export const handleBrowserEval = (params: BrowserEvalInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserEval(params)
+
+export const handleBrowserHover = (params: BrowserElementInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserHover(params)
+
+export const handleBrowserDrag = (params: BrowserDragInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserDrag(params)
+
+export const handleBrowserUpload = (params: BrowserUploadInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserUpload(params)
+
+export const handleBrowserWait = (params: BrowserWaitInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserWait(params)
+
+export const handleBrowserCheck = (params: BrowserCheckInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserCheck(params)
+
+export const handleBrowserFocus = (params: BrowserElementInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserFocus(params)
+
+export const handleBrowserClear = (params: BrowserElementInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserClear(params)
+
+export const handleBrowserSelectAll = (
+  params: BrowserElementInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserSelectAll(params)
+
+export const handleBrowserKeypress = (
+  params: BrowserKeypressInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserKeypress(params)
+
+export const handleBrowserPdf = (params: BrowserTargetInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserPdf(params)
+
+export const handleBrowserFullScreenshot = (
+  params: BrowserFullScreenshotInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserFullScreenshot(params)
+
+export const handleBrowserDblclick = (
+  params: BrowserElementInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserDblclick(params)
+
+export const handleBrowserForward = (params: BrowserTargetInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserForward(params)
+
+export const handleBrowserScrollIntoView = (
+  params: BrowserElementInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserScrollIntoView(params)
+
+export const handleBrowserGet = (params: BrowserGetInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserGet(params)
+
+export const handleBrowserIs = (params: BrowserIsInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserIs(params)
+
+export const handleBrowserFind = (params: BrowserFindInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserFind(params)
+
+export const handleBrowserConsole = (params: BrowserLimitInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserConsoleLog(params)
+
+export const handleBrowserNetwork = (params: BrowserLimitInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserNetworkLog(params)
+
+export const handleBrowserExec = (params: BrowserExecInput, { browserCommands }: RpcContext) =>
+  browserCommands.browserExec(params)
+
+export const handleBrowserCaptureStart = (
+  params: BrowserTargetInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserCaptureStart(params)
+
+export const handleBrowserCaptureStop = (
+  params: BrowserTargetInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserCaptureStop(params)
+
+export const handleBrowserDownload = (
+  params: BrowserSelectorPathInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserDownload(params)
+
+export const handleBrowserHighlight = (
+  params: BrowserHighlightInput,
+  { browserCommands }: RpcContext
+) => browserCommands.browserHighlight(params)

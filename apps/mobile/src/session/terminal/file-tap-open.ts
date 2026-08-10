@@ -1,9 +1,8 @@
-import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { filesystemPathToFileUri } from '@yiru/workbench-model/platform'
 
 import { createMobileFilePreviewHref } from '~/files/file-preview-route'
 import type { RpcClient } from '~/transport/rpc-client'
-import type { RpcSuccess } from '~/transport/types'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { classifyMobileArtifact } from '../artifact-kind'
 import { shouldActivateOpenedMobileSessionTab } from '../opened-mobile-session-tab'
@@ -14,7 +13,7 @@ type TerminalFileTapSessionTab = {
 }
 
 type OpenMobileTerminalFileTapOptions<T extends TerminalFileTapSessionTab> = {
-  client: Pick<RpcClient, 'sendRequest'>
+  client: Pick<RpcClient, 'orpc'>
   hostId: string
   worktreeId: string
   worktreeName?: string
@@ -54,8 +53,9 @@ async function openMobileTerminalFileTapAsync<T extends TerminalFileTapSessionTa
   options: OpenMobileTerminalFileTapOptions<T>
 ): Promise<void> {
   const worktree = `id:${options.worktreeId}`
-  const response = await options.client.sendRequest(
-    'files.resolveTerminalPath',
+  const resolved = await callRuntimeOrpc(
+    options.client,
+    (runtime) => runtime.files.resolveTerminalPath,
     {
       worktree,
       pathText: options.pathText,
@@ -66,10 +66,6 @@ async function openMobileTerminalFileTapAsync<T extends TerminalFileTapSessionTa
     },
     { timeoutMs: 10_000 }
   )
-  if (!response.ok) {
-    return
-  }
-  const resolved = (response as RpcSuccess).result as RuntimeTerminalPathResolution
   if (!resolved.exists || resolved.isDirectory) {
     return
   }
@@ -131,14 +127,12 @@ async function openMobileTerminalFileTapAsync<T extends TerminalFileTapSessionTa
     options.openBrowser(filesystemPathToFileUri(resolved.openTarget.absolutePath))
     return
   }
-  const openResponse = await options.client.sendRequest(
-    'files.open',
+  await callRuntimeOrpc(
+    options.client,
+    (runtime) => runtime.files.open,
     { worktree, relativePath: openedPath },
     { timeoutMs: 15_000 }
   )
-  if (!openResponse.ok) {
-    return
-  }
   scheduleOpenedWorktreeTabActivation(options, openedPath)
 }
 

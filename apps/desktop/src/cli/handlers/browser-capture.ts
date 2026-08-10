@@ -1,13 +1,3 @@
-import type {
-  BrowserCaptureStartResult,
-  BrowserCaptureStopResult,
-  BrowserConsoleResult,
-  BrowserInterceptDisableResult,
-  BrowserInterceptEnableResult,
-  BrowserInterceptedRequest,
-  BrowserNetworkLogResult
-} from '~shared/runtime-types'
-
 import type { CommandHandler } from '../dispatch'
 import { getOptionalPositiveIntegerFlag, getOptionalStringFlag } from '../flags'
 import { printResult } from '../format'
@@ -21,10 +11,7 @@ export const BROWSER_CAPTURE_HANDLERS: Record<string, CommandHandler> = {
       params.patterns = patternsStr.split(',').map((p) => p.trim())
     }
     Object.assign(params, await getBrowserCommandTarget(flags, cwd, client))
-    const result = await client.call<BrowserInterceptEnableResult>(
-      'browser.intercept.enable',
-      params
-    )
+    const result = await client.call(client.rpc.browser.intercept.enable, params)
     printResult(
       result,
       json,
@@ -33,18 +20,12 @@ export const BROWSER_CAPTURE_HANDLERS: Record<string, CommandHandler> = {
   },
   'intercept disable': async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserInterceptDisableResult>(
-      'browser.intercept.disable',
-      target
-    )
+    const result = await client.call(client.rpc.browser.intercept.disable, target)
     printResult(result, json, () => 'Interception disabled')
   },
   'intercept list': async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<{ requests: BrowserInterceptedRequest[] }>(
-      'browser.intercept.list',
-      target
-    )
+    const result = await client.call(client.rpc.browser.intercept.list, target)
     printResult(result, json, (v) => {
       if (v.requests.length === 0) {
         return 'No paused requests'
@@ -54,12 +35,12 @@ export const BROWSER_CAPTURE_HANDLERS: Record<string, CommandHandler> = {
   },
   'capture start': async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserCaptureStartResult>('browser.capture.start', target)
+    const result = await client.call(client.rpc.browser.capture.start, target)
     printResult(result, json, () => 'Capture started (console + network)')
   },
   'capture stop': async ({ flags, client, cwd, json }) => {
     const target = await getBrowserCommandTarget(flags, cwd, client)
-    const result = await client.call<BrowserCaptureStopResult>('browser.capture.stop', target)
+    const result = await client.call(client.rpc.browser.capture.stop, target)
     printResult(result, json, () => 'Capture stopped')
   },
   console: async ({ flags, client, cwd, json }) => {
@@ -69,7 +50,7 @@ export const BROWSER_CAPTURE_HANDLERS: Record<string, CommandHandler> = {
       params.limit = limit
     }
     Object.assign(params, await getBrowserCommandTarget(flags, cwd, client))
-    const result = await client.call<BrowserConsoleResult>('browser.console', params)
+    const result = await client.call(client.rpc.browser.console, params)
     printResult(result, json, (v) => {
       if (v.entries.length === 0) {
         return 'No console entries'
@@ -84,7 +65,7 @@ export const BROWSER_CAPTURE_HANDLERS: Record<string, CommandHandler> = {
       params.limit = limit
     }
     Object.assign(params, await getBrowserCommandTarget(flags, cwd, client))
-    const result = await client.call<BrowserNetworkLogResult>('browser.network', params)
+    const result = await client.call(client.rpc.browser.network, params)
     printResult(result, json, (v) => {
       if (v.entries.length === 0) {
         return 'No network entries'

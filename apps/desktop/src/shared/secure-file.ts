@@ -131,23 +131,6 @@ export function hardenExistingSecureFile(targetPath: string): void {
   }
 }
 
-/** Applies the platform-appropriate permission restriction to a path once, bypassing the cache. */
-export function hardenSecurePath(
-  targetPath: string,
-  options: {
-    isDirectory: boolean
-    platform: NodeJS.Platform
-    sync?: boolean
-  }
-): void {
-  applySecurePathRestriction(
-    targetPath,
-    options.isDirectory,
-    options.platform,
-    options.sync ?? false
-  )
-}
-
 /** Applies hardening; async Windows calls only report that best-effort ACL work was accepted. */
 function applySecurePathRestriction(
   targetPath: string,

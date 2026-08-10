@@ -10,6 +10,9 @@ import {
   YIRU_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
 } from '~renderer/lib/agent-feature-install-commands'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 
 import type {
   OnboardingFeatureSetupId,
@@ -256,8 +259,11 @@ function useComputerUsePermissionStatus(enabled: boolean): {
     let stale = false
     const refresh = (): void => {
       setStatus((current) => ({ ...current, checking: true }))
-      window.api.computerUsePermissions
-        .getStatus()
+      callRuntimeOrpc(
+        getActiveRuntimeTarget(useAppStore.getState().settings),
+        (client) => client.computer.permissionsStatus,
+        {}
+      )
         .then((next) => {
           if (stale) {
             return

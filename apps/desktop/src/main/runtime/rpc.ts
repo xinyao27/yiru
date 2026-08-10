@@ -8,16 +8,17 @@ import { randomBytes } from 'node:crypto'
 import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
+import {
+  MOBILE_DEVELOPMENT_PAIRING_METHOD,
+  type MobileDevelopmentPairingInput,
+  type MobileDevelopmentPairingResult
+} from '@yiru/runtime-protocol/mobile-development-pairing'
+import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 import type { WebSocket } from 'ws'
 import type {
   CoworkingHostAccessTier,
   CoworkingHostDeviceView
 } from '~shared/coworking/host-access-contract'
-import {
-  MOBILE_DEVELOPMENT_PAIRING_METHOD,
-  MobileDevelopmentPairingParamsSchema,
-  type MobileDevelopmentPairingResult
-} from '~shared/mobile-development-pairing/contract'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '~shared/pairing'
 import type { PairingOffer } from '~shared/pairing'
 import {
@@ -25,7 +26,6 @@ import {
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
 } from '~shared/remote-runtime/request-cancellation'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '~shared/runtime-bootstrap'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import type { DeviceScope } from '~shared/runtime-types'
 import {
   decodeTerminalStreamFrame,
@@ -38,12 +38,21 @@ import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
 import { grantedAccessForDevice } from './rpc/access-adjudication'
-import type { RpcRequest, RpcResponse } from './rpc/core'
+import { RuntimeRpcHandlerError, type RpcRequest, type RpcResponse } from './rpc/core'
 import { RpcDispatcher } from './rpc/dispatcher'
 import { errorResponse, successResponse } from './rpc/errors'
 import { ALL_RPC_METHODS } from './rpc/methods'
-import { MobileSocketWiring } from './rpc/mobile-socket-wiring'
+import { MobileSocketWiring, type AuthenticatedMobileSocket } from './rpc/mobile-socket-wiring'
+import type { RuntimeOrpcInvocationDetails } from './rpc/orpc/bridge'
+import { runtimeOrpcRouter } from './rpc/orpc/router'
+import {
+  RuntimeOrpcSocketHandler,
+  type RuntimeOrpcSocketInvocationLease,
+  startRuntimeOrpcSocketKeepalive
+} from './rpc/orpc/socket-handler'
+import { RuntimeOrpcWsHandler, type RuntimeOrpcWsInvocationLease } from './rpc/orpc/ws-handler'
 import type { RpcMessageContext, RpcTransport } from './rpc/transport'
+import { createRuntimeTransportMetadata } from './rpc/transport-metadata'
 import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { readWsFallbackPort, writeWsFallbackPort } from './rpc/ws-fallback-port-store'
 import { WebSocketTransport } from './rpc/ws-transport'
@@ -179,7 +188,11 @@ export class YiruRuntimeRpcServer {
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
-    this.dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
+    this.dispatcher = new RpcDispatcher({
+      runtime,
+      methods: ALL_RPC_METHODS,
+      mobileDevelopmentPairing: (params) => this.createDevelopmentMobilePairing(params)
+    })
     this.userDataPath = userDataPath
     this.pid = pid
     this.platform = platform
@@ -459,6 +472,103 @@ export class YiruRuntimeRpcServer {
     }
   }
 
+  private resolveRuntimeOrpcAdmission(socket: AuthenticatedMobileSocket) {
+    const device = this.deviceRegistry?.validateToken(socket.device.deviceToken)
+    if (!device || device.deviceId !== socket.device.deviceId) {
+      return null
+    }
+    const grantedAccess = grantedAccessForDevice(device)
+    return {
+      principal: {
+        kind: 'paired-device' as const,
+        deviceId: device.deviceId,
+        scope: device.scope
+      },
+      ...(grantedAccess ? { grantedAccess } : {})
+    }
+  }
+
+  private beforeRuntimeOrpcInvocation(
+    socket: AuthenticatedMobileSocket,
+    invocation: RuntimeOrpcInvocationDetails
+  ): RuntimeOrpcWsInvocationLease | void {
+    const device = this.deviceRegistry?.validateToken(socket.device.deviceToken)
+    if (!device || device.deviceId !== socket.device.deviceId) {
+      return {
+        denial: {
+          code: 'unauthorized',
+          status: 401,
+          message: 'The paired device is no longer authorized'
+        }
+      }
+    }
+    const request: RpcRequest = {
+      id: invocation.requestId ?? 'orpc',
+      authToken: device.token,
+      method: invocation.method,
+      params: invocation.input
+    }
+    if (device.scope === 'coworking-host' && !this.recordCoworkingHostOperation(request, device)) {
+      return {
+        denial: {
+          code: 'internal_error',
+          status: 500,
+          message: 'Privileged operation audit unavailable'
+        }
+      }
+    }
+    if (!isLongPollRequest(request)) {
+      return
+    }
+    if (this.activeLongPolls >= LONG_POLL_CAP) {
+      return {
+        denial: {
+          code: 'runtime_busy',
+          status: 429,
+          message: 'long-poll capacity reached; retry with backoff'
+        }
+      }
+    }
+    this.activeLongPolls += 1
+    return {
+      release: () => {
+        this.activeLongPolls = Math.max(0, this.activeLongPolls - 1)
+      }
+    }
+  }
+
+  private beforeRuntimeOrpcSocketInvocation(
+    invocation: RuntimeOrpcInvocationDetails,
+    connection: Parameters<RuntimeOrpcSocketHandler['open']>[1]
+  ): RuntimeOrpcSocketInvocationLease | void {
+    const request: RpcRequest = {
+      id: invocation.requestId ?? 'orpc',
+      authToken: this.authToken,
+      method: invocation.method,
+      params: invocation.input
+    }
+    if (!isLongPollRequest(request)) {
+      return
+    }
+    if (this.activeLongPolls >= LONG_POLL_CAP) {
+      return {
+        denial: {
+          code: 'runtime_busy',
+          status: 429,
+          message: 'long-poll capacity reached; retry with backoff'
+        }
+      }
+    }
+    this.activeLongPolls += 1
+    const stopKeepalive = startRuntimeOrpcSocketKeepalive(connection)
+    return {
+      release: () => {
+        stopKeepalive()
+        this.activeLongPolls = Math.max(0, this.activeLongPolls - 1)
+      }
+    }
+  }
+
   async start(): Promise<void> {
     if (this.activeTransports.length > 0) {
       return
@@ -485,6 +595,14 @@ export class YiruRuntimeRpcServer {
       endpoint: transportMeta.endpoint,
       kind: transportMeta.kind as 'unix' | 'named-pipe'
     })
+    const runtimeOrpcSocketHandler = new RuntimeOrpcSocketHandler({
+      runtime: this.runtime,
+      authToken: this.authToken,
+      mobileDevelopmentPairing: (params) => this.createDevelopmentMobilePairing(params),
+      beforeInvocation: (invocation, connection) =>
+        this.beforeRuntimeOrpcSocketInvocation(invocation, connection)
+    })
+    socketTransport.onProtocol(runtimeOrpcSocketHandler)
 
     // Why: Unix socket transport uses the shared runtime auth token. This is
     // the existing security model for CLI connections — the token lives in a
@@ -544,10 +662,23 @@ export class YiruRuntimeRpcServer {
           ...(this.wsPort !== 0 ? { fallbackPort: readWsFallbackPort(this.userDataPath) } : {}),
           ...(this.preferPinnedWsPort ? { preferPinnedPort: true } : {})
         })
+        const runtimeOrpcWsHandler = new RuntimeOrpcWsHandler({
+          runtime: this.runtime,
+          router: runtimeOrpcRouter,
+          resolveAdmission: (socket) => this.resolveRuntimeOrpcAdmission(socket),
+          beforeInvocation: (socket, invocation) =>
+            this.beforeRuntimeOrpcInvocation(socket, invocation),
+          registerBinaryStreamHandler: (connectionId, streamId, handler) =>
+            this.registerBinaryStreamHandler(connectionId, streamId, handler)
+        })
         const mobileSocketWiring = new MobileSocketWiring({
           deviceRegistry: this.deviceRegistry,
           e2eeKeypair: this.e2eeKeypair,
+          getRuntimeId: () => this.runtime.getRuntimeId(),
           onText: (socket, plaintext, reply, sendBinary) => {
+            if (runtimeOrpcWsHandler.handleText(socket, plaintext)) {
+              return
+            }
             void this.handleWebSocketMessage(
               plaintext,
               reply,
@@ -557,11 +688,16 @@ export class YiruRuntimeRpcServer {
               socket.device.deviceToken
             )
           },
-          onBinary: (socket, bytes) => this.handleWebSocketBinaryMessage(bytes, socket.ws),
+          onBinary: (socket, bytes) => {
+            if (!runtimeOrpcWsHandler.handleBinary(socket, bytes)) {
+              this.handleWebSocketBinaryMessage(bytes, socket.ws)
+            }
+          },
           onClose: (socket, hasOtherConnections) => {
             if (!socket) {
               return
             }
+            runtimeOrpcWsHandler.close(socket)
             this.abortWebSocketDispatches(socket.ws)
             // Why: subscriptions and binary streams are socket-scoped, while
             // client disconnect state is device-scoped across both transports.
@@ -651,10 +787,6 @@ export class YiruRuntimeRpcServer {
     }
     const request = parsed.request
 
-    if (request.method === MOBILE_DEVELOPMENT_PAIRING_METHOD) {
-      return this.handleDevelopmentMobilePairing(request)
-    }
-
     // Why: long-poll admission fence. Short RPCs bypass the counter entirely
     // — it only guards handlers that can block for minutes. See §7 risk #2.
     const longPoll = isLongPollRequest(request)
@@ -683,26 +815,22 @@ export class YiruRuntimeRpcServer {
     }
   }
 
-  private handleDevelopmentMobilePairing(request: RpcRequest): RpcResponse {
+  private createDevelopmentMobilePairing(
+    params: MobileDevelopmentPairingInput
+  ): MobileDevelopmentPairingResult {
     if (!this.enableDevelopmentMobilePairing) {
-      return this.buildError(request.id, 'method_not_found', `Unknown method: ${request.method}`)
-    }
-    const params = MobileDevelopmentPairingParamsSchema.safeParse(request.params ?? {})
-    if (!params.success) {
-      return this.buildError(
-        request.id,
-        'invalid_argument',
-        'Expected a valid --address and non-empty --device-name'
+      throw new RuntimeRpcHandlerError(
+        'method_not_found',
+        `Unknown method: ${MOBILE_DEVELOPMENT_PAIRING_METHOD}`
       )
     }
     const offer = this.createMobilePairingOffer({
-      address: params.data.address,
-      name: params.data.deviceName,
+      address: params.address,
+      name: params.deviceName,
       credentialPolicy: 'reuse-named'
     })
     if (!offer.available) {
-      return this.buildError(
-        request.id,
+      throw new RuntimeRpcHandlerError(
         'runtime_unavailable',
         'Mobile WebSocket transport is unavailable'
       )
@@ -712,7 +840,7 @@ export class YiruRuntimeRpcServer {
       endpoint: offer.endpoint,
       deviceId: offer.deviceId
     }
-    return successResponse(request.id, { runtimeId: this.runtime.getRuntimeId() }, result)
+    return result
   }
 
   private parseAndAuth(rawMessage: string): { request: RpcRequest } | { error: RpcResponse } {
@@ -919,7 +1047,7 @@ export class YiruRuntimeRpcServer {
 
 /**
  * Why: the regex MUST stay in lockstep with createRuntimeTransportMetadata()
- * below, which emits `o-${pid}-${endpointSuffix}.sock` where endpointSuffix
+ * in transport-metadata.ts, which emits `o-${pid}-${endpointSuffix}.sock` where endpointSuffix
  * is `[A-Za-z0-9_-]{1,4}` (derived from a sanitised runtimeId prefix, or
  * `'rt'` as the fallback). Update both sides together when the transport-name
  * shape changes.
@@ -969,27 +1097,5 @@ export function sweepOrphanedRuntimeSockets(userDataPath: string, ownPid: number
         }
       }
     }
-  }
-}
-
-export function createRuntimeTransportMetadata(
-  userDataPath: string,
-  pid: number,
-  platform: NodeJS.Platform,
-  runtimeId = 'runtime'
-): RuntimeTransportMetadata {
-  const endpointSuffix = runtimeId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 4) || 'rt'
-  if (platform === 'win32') {
-    return {
-      kind: 'named-pipe',
-      // Why: Windows named pipes do not get the same chmod hardening path as
-      // Unix sockets, so include a per-runtime suffix to avoid exposing a
-      // stable, guessable control endpoint name across launches.
-      endpoint: `\\\\.\\pipe\\yiru-${pid}-${endpointSuffix}`
-    }
-  }
-  return {
-    kind: 'unix',
-    endpoint: join(userDataPath, `o-${pid}-${endpointSuffix}.sock`)
   }
 }

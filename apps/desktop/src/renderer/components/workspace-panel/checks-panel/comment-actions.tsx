@@ -20,6 +20,7 @@ import {
 } from '~renderer/components/ui/dropdown-menu'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { PRComment } from '~shared/types'
 
 import { setPRBotAuthorOverride } from '../pr-bot-author-overrides'
@@ -60,7 +61,7 @@ export function CopyButton({
   const handleCopy = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      void window.api.ui.writeClipboardText(text).then(() => {
+      void shellClient.ui.writeClipboardText(text).then(() => {
         if (!isMountedRef.current) {
           return
         }
@@ -233,7 +234,7 @@ export function CommentMoreMenu({
         ) : null}
         {hasQueue && (hasGoToComment || hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasGoToComment && (
-          <DropdownMenuItem onClick={() => window.api.shell.openUrl(comment.url)}>
+          <DropdownMenuItem onClick={() => shellClient.shell.openUrl(comment.url)}>
             <ExternalLink />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.d3923d18fe',

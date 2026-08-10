@@ -5,10 +5,7 @@ import {
 
 import { TEXT_CONTROL_PASTE_MAX_BYTES, pasteTextIntoTextControl } from './text-control-paste'
 import { createTextControlRejectedResult } from './text-control-paste-diagnostics'
-import {
-  findOwnedTextControlPasteTarget,
-  shouldClaimTextControlPastePayload
-} from './text-control-paste-ownership'
+import { findOwnedTextControlPasteTarget } from './text-control-paste-ownership'
 
 export const APP_MENU_PASTE_EVENT = 'yiru-app-menu-paste'
 
@@ -131,8 +128,4 @@ export async function handleAppMenuPasteRequest({
     reason: result.reason,
     redactedDiagnostic: result.redactedDiagnostic
   })
-}
-
-export function shouldOwnAppMenuTextControlPaste(text: string): boolean {
-  return shouldClaimTextControlPastePayload(text)
 }

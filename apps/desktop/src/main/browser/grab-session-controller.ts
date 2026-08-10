@@ -2,12 +2,13 @@ import type { BrowserGrabCancelReason, BrowserGrabResult } from '~shared/browser
 
 import { buildGuestOverlayScript } from './grab-guest-script'
 import { clampGrabPayload } from './grab-payload'
+import { evaluateBrowserPage } from './page/evaluation'
+import type { BrowserPageHandle } from './page/handle'
 
 /** Tracks the lifecycle of a single grab operation on one browser tab. */
 type ActiveGrabOp = {
   opId: string
   browserTabId: string
-  guestWebContentsId: number
   resolve: (result: BrowserGrabResult) => void
   /** Cleanup listeners and optionally inject teardown.
    *  @param preserveOverlay When true, skip teardown injection so the guest
@@ -79,10 +80,8 @@ export class BrowserGrabSessionController {
    * resolves exactly once when the user clicks, cancels, or an error occurs.
    *
    * Why the click is handled in-guest rather than via main-side interception:
-   * Electron's `before-input-event` only fires for keyboard events, not mouse
-   * events on guest webContents. The design doc anticipated a main-owned
-   * interceptor, but the spike showed this API gap. The fallback (documented
-   * in the design doc) is to let the guest overlay's full-viewport hit-catcher
+   * Browser backends expose keyboard/CDP events but not a portable main-owned
+   * mouse interceptor. The guest overlay's full-viewport hit-catcher therefore
    * consume the click. The overlay calls `stopPropagation()` and
    * `preventDefault()` so the page underneath does not receive the event.
    * This is not a perfect guarantee (capture-phase listeners on window may
@@ -91,7 +90,7 @@ export class BrowserGrabSessionController {
   awaitGrabSelection(
     browserTabId: string,
     opId: string,
-    guest: Electron.WebContents
+    page: BrowserPageHandle
   ): Promise<BrowserGrabResult> {
     // Why: only one active grab operation per tab prevents race conditions
     // where a late click from a previous operation resolves the wrong Promise.
@@ -106,7 +105,6 @@ export class BrowserGrabSessionController {
     }
 
     return new Promise<BrowserGrabResult>((resolve) => {
-      const guestWebContentsId = guest.id
       let settled = false
 
       const settleOnce = (result: BrowserGrabResult): void => {
@@ -130,7 +128,7 @@ export class BrowserGrabSessionController {
       // Main just needs to run that script and await its result.
       const awaitGuestClick = async (): Promise<void> => {
         try {
-          const rawPayload = await guest.executeJavaScript(buildGuestOverlayScript('awaitClick'))
+          const rawPayload = await evaluateBrowserPage(page, buildGuestOverlayScript('awaitClick'))
           if (!rawPayload || typeof rawPayload !== 'object') {
             settleOnce({ opId, kind: 'cancelled', reason: 'user' })
             return
@@ -171,20 +169,13 @@ export class BrowserGrabSessionController {
 
       // Why: only cancel on main-frame navigations. Subframe navigations
       // (e.g., iframe ads loading) should not spuriously cancel the grab.
-      const handleNavigation = (
-        _event: unknown,
-        _url: unknown,
-        _isInPlace: unknown,
-        isMainFrame: boolean
-      ): void => {
-        if (isMainFrame) {
+      const unsubscribePage = page.subscribe((event) => {
+        if (event.type === 'load-finished' || event.type === 'load-failed') {
           settleOnce({ opId, kind: 'cancelled', reason: 'navigation' })
+        } else if (event.type === 'closed') {
+          settleOnce({ opId, kind: 'cancelled', reason: 'evicted' })
         }
-      }
-
-      const handleDestroyed = (): void => {
-        settleOnce({ opId, kind: 'cancelled', reason: 'evicted' })
-      }
+      })
 
       const timeoutId = setTimeout(() => {
         settleOnce({ opId, kind: 'cancelled', reason: 'timeout' })
@@ -195,17 +186,8 @@ export class BrowserGrabSessionController {
         timeoutId.unref()
       }
 
-      guest.on('did-start-navigation', handleNavigation)
-      guest.on('destroyed', handleDestroyed)
-
       const cleanup = (preserveOverlay?: boolean): void => {
-        try {
-          guest.off('did-start-navigation', handleNavigation)
-          guest.off('destroyed', handleDestroyed)
-        } catch {
-          // Why: the guest may already be destroyed during teardown.
-          // Cleanup is best-effort.
-        }
+        unsubscribePage()
         // Why: skip teardown injection when (a) the op is being replaced by a
         // new op (skipTeardown), or (b) the selection succeeded and the overlay
         // should stay visible while the copy menu is shown (preserveOverlay).
@@ -213,8 +195,8 @@ export class BrowserGrabSessionController {
           return
         }
         try {
-          if (!guest.isDestroyed()) {
-            void guest.executeJavaScript(buildGuestOverlayScript('teardown'))
+          if (!page.isClosed()) {
+            void evaluateBrowserPage(page, buildGuestOverlayScript('teardown'))
           }
         } catch {
           // Best-effort overlay removal
@@ -224,7 +206,6 @@ export class BrowserGrabSessionController {
       const op: ActiveGrabOp = {
         opId,
         browserTabId,
-        guestWebContentsId,
         resolve: settleOnce,
         cleanup
       }

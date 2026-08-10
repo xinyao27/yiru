@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 const PULL_POLICY_ERROR_PREFIX = 'Pull needs a Git pull policy for divergent branches.'
 
@@ -53,7 +54,7 @@ export function PullPolicyRemoteActionNotice({
   }, [copiedCommand])
 
   const handleCopyCommand = useCallback((command: string) => {
-    void window.api.ui.writeClipboardText(command)
+    void shellClient.ui.writeClipboardText(command)
     setCopiedCommand(command)
   }, [])
 

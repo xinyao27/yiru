@@ -9,6 +9,7 @@ import {
   type ProjectAgentSkillRuntime
 } from '~renderer/lib/project-skill-runtime'
 import { useWindowsTerminalCapabilities } from '~renderer/lib/windows-terminal-capabilities'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { useAppStore } from '~renderer/store'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 import type { SkillDiscoveryTarget } from '~shared/skills'
@@ -70,7 +71,7 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
 
 function getCurrentPlatform(): NodeJS.Platform {
   const platform =
-    typeof window === 'undefined' ? undefined : window.api?.platform?.get?.()?.platform
+    typeof window === 'undefined' ? undefined : rendererHostClient?.platform?.get?.()?.platform
   if (platform) {
     return platform
   }

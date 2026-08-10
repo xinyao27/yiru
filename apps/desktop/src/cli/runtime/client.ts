@@ -9,12 +9,6 @@ import {
   isOrchestrationMutation,
   orchestrationMigrationData
 } from '~shared/orchestration-rpc-contract'
-import type {
-  RuntimeMethodContract,
-  RuntimeMethodParams,
-  RuntimeMethodResult
-} from '~shared/runtime-method-contract'
-import { STATUS_GET_CONTRACT } from '~shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult } from '~shared/runtime-types'
 
 import {
@@ -25,20 +19,27 @@ import {
 } from './client-lifecycle'
 import { launchYiruApp } from './launch'
 import { getDefaultUserDataPath, readMetadata } from './metadata'
+import { createRuntimeOrpcClient, runtimeContractValue } from './orpc-client-facade'
+import type {
+  RuntimeOrpcClient,
+  RuntimeOrpcClientContext,
+  RuntimeOrpcProcedure,
+  RuntimeOrpcResponseMetadata
+} from './orpc-client-types'
 import { getCliStatus } from './status'
-import { sendRequest } from './transport'
-import { RuntimeClientError, RuntimeRpcFailureError, type RuntimeRpcSuccess } from './types'
+import { sendOrpcRequest } from './transport'
+import { RuntimeClientError, type RuntimeRpcSuccess } from './types'
 
-// Why: for long-poll methods the caller's method-level
-// `params.timeoutMs` is the inner waiter budget; we extend the client-side
-// socket timeout to `timeoutMs + GRACE_MS` so the client's own idle timer
-// never fires before the server-side waiter has had a chance to resolve and
-// emit its terminal frame. The 10 s grace absorbs round-trip + one final
-// keepalive window. See design doc §3.1.
 const LONG_POLL_CLIENT_GRACE_MS = 10_000
-type RuntimeClientCallOptions = { timeoutMs?: number } & RuntimeOrchestrationEnvelope
+
+export type RuntimeClientCallOptions = RuntimeOrchestrationEnvelope & {
+  timeoutMs?: number
+  signal?: AbortSignal
+}
 
 export class RuntimeClient {
+  readonly rpc: RuntimeOrpcClient
+
   private readonly userDataPath: string
   private readonly requestTimeoutMs: number
   private orchestrationContractCheck: Promise<void> | null = null
@@ -49,96 +50,47 @@ export class RuntimeClient {
   constructor(userDataPath = getDefaultUserDataPath(), requestTimeoutMs = 60_000) {
     this.userDataPath = userDataPath
     this.requestTimeoutMs = requestTimeoutMs
+    this.rpc = createRuntimeOrpcClient({
+      call: (path, input, options) => this.invoke(path, input, options)
+    })
   }
 
-  async call<TResult>(
-    contract: string,
-    params?: unknown,
-    options?: RuntimeClientCallOptions
-  ): Promise<RuntimeRpcSuccess<TResult>>
-  async call<TContract extends RuntimeMethodContract>(
-    contract: TContract,
-    params: RuntimeMethodParams<TContract>,
-    options?: RuntimeClientCallOptions
-  ): Promise<RuntimeRpcSuccess<RuntimeMethodResult<TContract>>>
-  async call<TResult>(
-    contract: string | RuntimeMethodContract,
-    params?: unknown,
-    options?: RuntimeClientCallOptions
-  ): Promise<RuntimeRpcSuccess<TResult>> {
-    const method = typeof contract === 'string' ? contract : contract.name
-    const effectiveTimeoutMs = options?.timeoutMs ?? this.resolveMethodTimeoutMs(method, params)
-    const orchestrationMutation = isOrchestrationMutation(method, params)
-    if (orchestrationMutation) {
-      await this.ensureOrchestrationContractCompatible(effectiveTimeoutMs)
-    }
-    const orchestrationRequestId = orchestrationMutation
-      ? (options?.orchestrationRequestId ?? randomUUID())
-      : undefined
-    const envelope: RuntimeOrchestrationEnvelope = {
-      orchestrationCapability: options?.orchestrationCapability,
-      orchestrationContractVersion: method.startsWith('orchestration.')
-        ? ORCHESTRATION_CONTRACT_VERSION
-        : undefined,
-      orchestrationRequestId
-    }
-    const metadata = readMetadata(this.userDataPath)
-    let response
-    try {
-      response = await sendRequest<TResult>(metadata, method, params, effectiveTimeoutMs, envelope)
-    } catch (error) {
-      throw attachMutationRecovery(error, orchestrationRequestId)
-    }
-    if (response.ok === false) {
-      throw new RuntimeRpcFailureError(response)
-    }
-    return response
-  }
-
-  // Why: centralises the per-method timeout policy. Long-poll inner waiter
-  // budgets live in `params.timeoutMs`; widen the client-side socket timeout
-  // to `timeoutMs + grace` so it doesn't fire before the server has a chance
-  // to resolve. Without this, a 5 min wait would still die at the 60 s default.
-  // See design doc §3.1.
-  private resolveMethodTimeoutMs(method: string, params?: unknown): number {
-    if (
-      (method === 'orchestration.check' && isWaitingCheck(params)) ||
-      method === 'terminal.wait'
-    ) {
-      const inner = Number(getTimeoutMsParam(params))
-      if (Number.isFinite(inner) && inner > 0) {
-        return Math.max(inner + LONG_POLL_CLIENT_GRACE_MS, this.requestTimeoutMs)
+  async call<TInput, TOutput>(
+    procedure: RuntimeOrpcProcedure<TInput, TOutput>,
+    input: TInput,
+    options: RuntimeClientCallOptions = {}
+  ): Promise<RuntimeRpcSuccess<TOutput>> {
+    let responseMetadata: RuntimeOrpcResponseMetadata | undefined
+    const { signal, ...contextOptions } = options
+    const result = await procedure(input, {
+      signal,
+      context: {
+        ...contextOptions,
+        onResponse: (metadata) => {
+          responseMetadata = metadata
+        }
       }
+    })
+    if (!responseMetadata) {
+      throw new RuntimeClientError(
+        'invalid_runtime_response',
+        'The Yiru runtime returned no response metadata.'
+      )
     }
-    return this.requestTimeoutMs
+    return {
+      id: responseMetadata.requestId,
+      ok: true,
+      result,
+      _meta: { runtimeId: responseMetadata.runtimeId }
+    }
   }
 
   async getCliStatus(): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     return getCliStatus(this.userDataPath)
   }
 
-  private async ensureOrchestrationContractCompatible(timeoutMs: number): Promise<void> {
-    if (!this.orchestrationContractCheck) {
-      this.orchestrationContractCheck = this.checkOrchestrationContractCompatibility(timeoutMs)
-    }
-    await this.orchestrationContractCheck
-  }
-
-  private async checkOrchestrationContractCompatibility(timeoutMs: number): Promise<void> {
-    const response = await this.call(STATUS_GET_CONTRACT, undefined, { timeoutMs })
-    if (!response.result.capabilities?.includes(ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY)) {
-      throw new RuntimeClientError(
-        'orchestration_migration_required',
-        'The connected Yiru runtime does not support the current orchestration contract. No effects were applied.',
-        orchestrationMigrationData('runtime_capability_missing')
-      )
-    }
-  }
-
   async openYiru(timeoutMs = 15_000): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     const initial = await this.getCliStatus()
-    // Why: a blocked runtime can't open a window, so spawning the app would
-    // only hit the single-instance lock and exit — bail before launching.
     if (initial.result.app.desktopWindowStatus === 'blocked') {
       throwDesktopActivationBlocked()
     }
@@ -164,20 +116,102 @@ export class RuntimeClient {
       'Timed out waiting for a ready Yiru desktop window. The runtime may still be running headlessly.'
     )
   }
-}
 
-function isWaitingCheck(params: unknown): boolean {
-  return (
-    typeof params === 'object' &&
-    params !== null &&
-    'wait' in params &&
-    (params as { wait: unknown }).wait === true
-  )
-}
-
-function getTimeoutMsParam(params: unknown): unknown {
-  if (typeof params !== 'object' || params === null || !('timeoutMs' in params)) {
-    return undefined
+  private async invoke(
+    path: readonly string[],
+    input: unknown,
+    options: { signal?: AbortSignal; context: RuntimeOrpcClientContext }
+  ): Promise<unknown> {
+    const method = runtimeMethodForPath(path)
+    const timeoutMs = options.context.timeoutMs ?? this.resolveMethodTimeoutMs(method, input)
+    const orchestrationMutation = isOrchestrationMutation(method, input)
+    if (orchestrationMutation) {
+      await this.ensureOrchestrationContractCompatible(timeoutMs)
+    }
+    const orchestrationRequestId = orchestrationMutation
+      ? (options.context.orchestrationRequestId ?? randomUUID())
+      : undefined
+    const envelope: RuntimeOrchestrationEnvelope = {
+      orchestrationCapability: options.context.orchestrationCapability,
+      orchestrationContractVersion: method.startsWith('orchestration.')
+        ? ORCHESTRATION_CONTRACT_VERSION
+        : undefined,
+      orchestrationRequestId
+    }
+    try {
+      const metadata = readMetadata(this.userDataPath)
+      const response = await sendOrpcRequest(
+        metadata,
+        path,
+        input,
+        timeoutMs,
+        envelope,
+        options.signal
+      )
+      options.context.onResponse?.({
+        requestId: response.requestId,
+        runtimeId: response.runtimeId
+      })
+      return response.result
+    } catch (error) {
+      throw attachMutationRecovery(error, orchestrationRequestId)
+    }
   }
-  return (params as { timeoutMs?: unknown }).timeoutMs
+
+  private resolveMethodTimeoutMs(method: string, input: unknown): number {
+    if ((method === 'orchestration.check' && isWaitingCheck(input)) || method === 'terminal.wait') {
+      const inner = Number(getTimeoutMsParam(input))
+      if (Number.isFinite(inner) && inner > 0) {
+        return Math.max(inner + LONG_POLL_CLIENT_GRACE_MS, this.requestTimeoutMs)
+      }
+    }
+    return this.requestTimeoutMs
+  }
+
+  private async ensureOrchestrationContractCompatible(timeoutMs: number): Promise<void> {
+    if (!this.orchestrationContractCheck) {
+      this.orchestrationContractCheck = this.checkOrchestrationContractCompatibility(timeoutMs)
+    }
+    await this.orchestrationContractCheck
+  }
+
+  private async checkOrchestrationContractCompatibility(timeoutMs: number): Promise<void> {
+    const response = await this.call(this.rpc.status.get, undefined, { timeoutMs })
+    if (!response.result.capabilities?.includes(ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY)) {
+      throw new RuntimeClientError(
+        'orchestration_migration_required',
+        'The connected Yiru runtime does not support the current orchestration contract. No effects were applied.',
+        orchestrationMigrationData('runtime_capability_missing')
+      )
+    }
+  }
+}
+
+function runtimeMethodForPath(path: readonly string[]): string {
+  let node: unknown = runtimeContractValue
+  for (const segment of path) {
+    if (!isRecord(node) || !(segment in node)) {
+      return path.join('.')
+    }
+    node = node[segment]
+  }
+  if (isRecord(node) && isRecord(node['~orpc']) && isRecord(node['~orpc'].meta)) {
+    const legacyMethod = node['~orpc'].meta.legacyMethod
+    if (typeof legacyMethod === 'string' && legacyMethod.length > 0) {
+      return legacyMethod
+    }
+  }
+  return path.join('.')
+}
+
+function isWaitingCheck(input: unknown): boolean {
+  return isRecord(input) && input.wait === true
+}
+
+function getTimeoutMsParam(input: unknown): unknown {
+  return isRecord(input) ? input.timeoutMs : undefined
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }

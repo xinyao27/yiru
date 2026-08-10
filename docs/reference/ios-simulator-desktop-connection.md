@@ -152,7 +152,7 @@ The UI supports manually advertising an IPv4 address or hostname, optionally wit
 [`apps/desktop/src/renderer/components/mobile/network-interface-picker.tsx:8-14`](../../apps/desktop/src/renderer/components/mobile/network-interface-picker.tsx#L8-L14),
 [`apps/desktop/src/shared/network/manual-address.ts:21-58`](../../apps/desktop/src/shared/network/manual-address.ts#L21-L58).
 Generating the QR uses the chosen address but preserves the server's actual bound port:
-[`apps/desktop/src/main/runtime/mobile.ts:80-127`](../../apps/desktop/src/main/runtime/mobile.ts#L80-L127),
+[`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts),
 [`apps/desktop/src/main/runtime/rpc.ts:64-81`](../../apps/desktop/src/main/runtime/rpc.ts#L64-L81).
 
 Apple's archived Xcode 7 release notes explicitly say that a simulated app reaches TCP/IP services
@@ -200,7 +200,7 @@ reaches `connected`:
 [`apps/mobile/src/transport/pre-profile-pairing-coordinator.ts:74-88`](../../apps/mobile/src/transport/pre-profile-pairing-coordinator.ts#L74-L88).
 The desktop's **Settings → Mobile** device list excludes never-connected pending QR credentials, so a
 new row there is also evidence that the simulator completed its first connection:
-[`apps/desktop/src/main/runtime/mobile.ts:161-179`](../../apps/desktop/src/main/runtime/mobile.ts#L161-L179).
+[`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts).
 
 ## Path B: one-command mobile-development runtime
 
@@ -355,7 +355,7 @@ transport is absent. If using a LAN address instead of loopback, also check the 
 The endpoint was reachable, but the device token or pinned desktop public key was rejected. The code
 may be stale, the device may have been revoked, or it may belong to another desktop profile. Regenerate
 the QR and pair again. A regenerated QR intentionally rotates the pending credential:
-[`apps/desktop/src/main/runtime/mobile.ts:97-107`](../../apps/desktop/src/main/runtime/mobile.ts#L97-L107),
+[`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts),
 [`apps/desktop/src/renderer/components/settings/mobile/pane.tsx:86-104`](../../apps/desktop/src/renderer/components/settings/mobile/pane.tsx#L86-L104).
 
 ### Pairing remains on “Connecting…”

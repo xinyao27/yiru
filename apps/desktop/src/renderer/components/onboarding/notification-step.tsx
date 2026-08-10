@@ -18,6 +18,8 @@ import {
 } from '~renderer/components/ui/select'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { GlobalSettings } from '~shared/types'
 
 type NotificationStepProps = {
@@ -92,7 +94,7 @@ export function NotificationStep({
     if (customSoundId === 'system') {
       return
     }
-    const result = await window.api.notifications.playSound({
+    const result = await rendererHostClient.notifications.playSound({
       force: true,
       volume: getCustomSoundVolume()
     })
@@ -111,7 +113,7 @@ export function NotificationStep({
   const handleChooseCustomSound = async (): Promise<void> => {
     setIsPickingSound(true)
     try {
-      const soundPath = await window.api.shell.pickAudio()
+      const soundPath = await shellClient.shell.pickAudio()
       if (soundPath) {
         await updateNotificationSettings({ customSoundId: 'custom', customSoundPath: soundPath })
         await previewSound('custom')

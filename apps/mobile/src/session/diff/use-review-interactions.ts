@@ -3,6 +3,7 @@ import type { FlatList } from 'react-native'
 
 import { triggerSelection } from '~/platform/haptics'
 import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 import type { ConnectionState } from '~/transport/types'
 
 import { findNextMobileDiffHunkIndex, findPreviousMobileDiffHunkIndex } from './hunks'
@@ -181,13 +182,14 @@ export function useMobileDiffReviewInteractions(input: InteractionInput) {
       if (!client || !currentItem || currentItem.scope === 'branch') {
         return
       }
-      const response = await client.sendRequest('files.openDiff', {
-        worktree: `id:${worktreeId}`,
-        relativePath: currentItem.filePath,
-        staged: currentItem.scope === 'staged'
-      })
-      if (!response.ok) {
-        setActionError(response.error?.message || 'Unable to open in session')
+      try {
+        await callRuntimeOrpc(client, (runtime) => runtime.files.openDiff, {
+          worktree: `id:${worktreeId}`,
+          relativePath: currentItem.filePath,
+          staged: currentItem.scope === 'staged'
+        })
+      } catch (error) {
+        setActionError(error instanceof Error ? error.message : 'Unable to open in session')
         return
       }
       onOpenSession()

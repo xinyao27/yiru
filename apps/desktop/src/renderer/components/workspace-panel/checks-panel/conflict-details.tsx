@@ -2,6 +2,7 @@ import { Check, Copy, Files } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { PRConflictSummary, PRMergeableState } from '~shared/types'
 
 export type ConflictReview = {
@@ -129,7 +130,7 @@ function MergeabilityRecalculationCommandBox({
   )
 
   const copyCommands = useCallback((): void => {
-    void window.api.ui
+    void shellClient.ui
       .writeClipboardText(commands)
       .then(() => {
         if (!isMountedRef.current) {

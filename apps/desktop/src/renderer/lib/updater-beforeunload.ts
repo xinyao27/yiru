@@ -7,10 +7,6 @@ import {
 
 let intentionalAppRestartInProgress = false
 
-export function isUpdaterQuitAndInstallInProgress(): boolean {
-  return isIntentionalAppRestartInProgress()
-}
-
 export function isIntentionalAppRestartInProgress(): boolean {
   return intentionalAppRestartInProgress
 }

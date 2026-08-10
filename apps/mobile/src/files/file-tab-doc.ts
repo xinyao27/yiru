@@ -1,12 +1,13 @@
 import { buildImageDataUri } from '@yiru/workbench-model/ui'
 
+import type { RpcClient } from '~/transport/rpc-client'
+import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+
 import { classifyMobileArtifact } from '../session/artifact-kind'
 import { buildMobileDiffLines, type MobileDiffLine } from '../session/diff/lines'
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcFailure, RpcSuccess } from '../transport/types'
-import { mobileDiffImageDataUri, type MobileBinaryDiffResult } from './diff-image-preview'
+import { mobileDiffImageDataUri } from './diff-image-preview'
 
-type FileTabDocClient = Pick<RpcClient, 'sendRequest'>
+type FileTabDocClient = Pick<RpcClient, 'orpc'>
 
 // The ready doc a session file tab renders. Mirrors the ready arm of the route's
 // FileDocState; kept in src so the loader stays testable without the route.
@@ -31,17 +32,11 @@ export async function resolveMobileFileTabDoc(
   const worktree = `id:${request.worktreeId}`
   const { relativePath } = request
   if (request.diffSource === 'staged' || request.diffSource === 'unstaged') {
-    const response = await client.sendRequest('git.diff', {
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.git.diff, {
       worktree,
       filePath: relativePath,
       staged: request.diffSource === 'staged'
     })
-    if (!response.ok) {
-      throw new Error((response as RpcFailure).error.message)
-    }
-    const result = (response as RpcSuccess).result as
-      | { kind: 'text'; originalContent: string; modifiedContent: string }
-      | MobileBinaryDiffResult
     if (result.kind !== 'text') {
       // Render image diffs (add/modify/delete) from the base64 the host already
       // sends; only non-previewable binaries stay unavailable.
@@ -57,15 +52,10 @@ export async function resolveMobileFileTabDoc(
 
   const artifactKind = classifyMobileArtifact(relativePath)
   if (artifactKind === 'image') {
-    const preview = await client.sendRequest('files.readPreview', { worktree, relativePath })
-    if (!preview.ok) {
-      throw new Error((preview as RpcFailure).error.message)
-    }
-    const result = (preview as RpcSuccess).result as {
-      content: string
-      isImage?: boolean
-      mimeType?: string
-    }
+    const result = await callRuntimeOrpc(client, (runtime) => runtime.files.readPreview, {
+      worktree,
+      relativePath
+    })
     const dataUri = result.isImage ? buildImageDataUri(result.mimeType, result.content) : null
     if (!dataUri) {
       throw new Error('binary_file')
@@ -73,15 +63,10 @@ export async function resolveMobileFileTabDoc(
     return { status: 'ready', kind: 'image', dataUri }
   }
 
-  const response = await client.sendRequest('files.read', { worktree, relativePath })
-  if (!response.ok) {
-    throw new Error((response as RpcFailure).error.message)
-  }
-  const result = (response as RpcSuccess).result as {
-    content: string
-    truncated: boolean
-    byteLength: number
-  }
+  const result = await callRuntimeOrpc(client, (runtime) => runtime.files.read, {
+    worktree,
+    relativePath
+  })
   if (artifactKind === 'html') {
     return { status: 'ready', kind: 'html', content: result.content }
   }

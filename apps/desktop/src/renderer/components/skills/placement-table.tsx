@@ -5,6 +5,7 @@ import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { SkillPlacement } from '~shared/skills'
 
 import { formatUpdatedAt, providerLabels } from './labels'
@@ -19,7 +20,7 @@ export type SkillPlacementTableProps = {
 }
 
 async function revealPlacement(placement: SkillPlacement): Promise<void> {
-  const result = await window.api.shell.openInFileManager(placement.skillFilePath)
+  const result = await shellClient.shell.openInFileManager(placement.skillFilePath)
   if (!result.ok) {
     toast.error(
       translate('auto.components.skills.SkillsPage.995fde8337', 'Could not reveal skill file')

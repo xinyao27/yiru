@@ -1,4 +1,4 @@
-import { net } from 'electron'
+import { fetchHttp } from '~main/network/http-fetch'
 import type {
   ProviderRateLimits,
   RateLimitWindow,
@@ -176,7 +176,7 @@ async function fetchBillingData(
   const requestSignal = signal
     ? AbortSignal.any([signal, AbortSignal.timeout(API_TIMEOUT_MS)])
     : AbortSignal.timeout(API_TIMEOUT_MS)
-  const res = await net.fetch(url, {
+  const res = await fetchHttp(url, {
     headers: grokRequestHeaders(session),
     signal: requestSignal
   })

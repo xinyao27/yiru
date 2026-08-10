@@ -30,8 +30,6 @@ export type UnifiedWorktreeRow = {
   memory: Metric
   history: number[]
   hasLocalSamples: boolean
-  /** Why: repo connectionId, not sample presence, drives the remote chip. */
-  isRemote: boolean
   sessions: UnifiedSessionRow[]
   browsers: BrowserWorkspace[]
 }
@@ -41,8 +39,6 @@ export type UnifiedProjectGroup = {
   repoName: string
   cpu: Metric
   memory: Metric
-  /** Why: kept for callsite stability; this now means SSH-backed repo rows. */
-  hasRemoteChildren: boolean
   worktrees: UnifiedWorktreeRow[]
 }
 
@@ -59,8 +55,6 @@ export type MergeContext = {
   workspaceSessionReady: boolean
   /** Repo display names by repo id for daemon-only groups. */
   repoDisplayNameById: Map<string, string>
-  /** Repo connectionId by repo id (null/missing == local). */
-  repoConnectionIdById: Map<string, string | null>
   /** Repo runtime-host scope by repo id (missing == keep row). */
   repoRuntimeScopedById: Map<string, boolean>
   /** Browser inventory is open-only; the Resource Manager never scans it in the background. */

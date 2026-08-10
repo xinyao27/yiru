@@ -210,20 +210,6 @@ export async function parseClaudeSessionFile(
   return parseClaudeSessionLines({ file, lines, platform })
 }
 
-export async function parseClaudeSessionContent(
-  file: FileWithMtime,
-  content: string,
-  platform: NodeJS.Platform = process.platform,
-  options: ParserSessionOptions = {}
-): Promise<AiVaultSession | null> {
-  return parseClaudeSessionLines({
-    file,
-    lines: content.split(/\r?\n/),
-    platform,
-    options
-  })
-}
-
 async function parseClaudeSessionLines(args: {
   file: FileWithMtime
   lines: AsyncIterable<string> | Iterable<string>

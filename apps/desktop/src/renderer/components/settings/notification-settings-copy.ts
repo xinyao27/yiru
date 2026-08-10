@@ -1,5 +1,9 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { useAppStore } from '~renderer/store'
 import type { GlobalSettings } from '~shared/types'
 
 type SystemNotificationSettingsCopy = {
@@ -64,7 +68,7 @@ export async function sendNotificationSettingsTestNotification(
   volumeDraft: number,
   options?: SendTestNotificationOptions
 ): Promise<NotificationTestOutcome> {
-  const permissionStatus = await window.api.notifications.getPermissionStatus()
+  const permissionStatus = await rendererHostClient.notifications.getPermissionStatus()
   if (!permissionStatus.supported) {
     toast.error(
       translate(
@@ -75,14 +79,15 @@ export async function sendNotificationSettingsTestNotification(
     return 'not-sent'
   }
 
-  const result = await window.api.notifications.dispatch({
+  const target = getActiveRuntimeTarget(useAppStore.getState().settings)
+  const result = await callRuntimeOrpc(target, (client) => client.notifications.report, {
     source: 'test',
     requireDisplayConfirmation: true
   })
   if (result.delivered) {
     const soundResult =
       notificationSettings.customSoundId !== 'system'
-        ? await window.api.notifications.playSound({
+        ? await rendererHostClient.notifications.playSound({
             force: true,
             volume: volumeDraft
           })
@@ -117,7 +122,7 @@ export async function sendNotificationSettingsTestNotification(
               'Open Settings'
             ),
             onClick: () => {
-              void window.api.notifications.openSystemSettings()
+              void rendererHostClient.notifications.openSystemSettings()
             }
           }
         }
@@ -144,7 +149,7 @@ export async function sendNotificationSettingsTestNotification(
             'Open Settings'
           ),
           onClick: () => {
-            void window.api.notifications.openSystemSettings()
+            void rendererHostClient.notifications.openSystemSettings()
           }
         }
       })

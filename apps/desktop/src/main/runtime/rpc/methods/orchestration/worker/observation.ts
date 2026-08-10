@@ -1,3 +1,8 @@
+import {
+  ORCHESTRATION_FEDERATION_SHOW_CONTRACT,
+  type OrchestrationFederationShowResult,
+  type RuntimeJsonValue
+} from '@yiru/runtime-protocol/contract'
 import type { OrchestrationDb } from '~main/runtime/orchestration/db'
 import { OrchestrationError } from '~main/runtime/orchestration/orchestration-error'
 import type { FederatedDispatchRow, WorkerDispatchRow } from '~main/runtime/orchestration/types'
@@ -35,9 +40,9 @@ export async function inspectWorkerTerminal(
 export function exposeWorker(worker: WorkerDispatchRow) {
   return {
     ...worker,
-    effects: JSON.parse(worker.effects) as unknown[],
-    residualResources: JSON.parse(worker.residual_resources) as unknown[],
-    startOptions: JSON.parse(worker.start_options) as unknown
+    effects: JSON.parse(worker.effects) as RuntimeJsonValue[],
+    residualResources: JSON.parse(worker.residual_resources) as RuntimeJsonValue[],
+    startOptions: JSON.parse(worker.start_options) as RuntimeJsonValue
   }
 }
 
@@ -58,25 +63,11 @@ export function resolvePinnedFederatedServer(
 export async function callFederatedWorkerShow(
   runtime: YiruRuntimeService,
   federated: FederatedDispatchRow
-): Promise<{
-  runtimeEpoch: string
-  attachment: {
-    state: string
-    stage: string
-    last_error: string | null
-    worktree_id: string | null
-    terminal_handle: string | null
-    setup_state: string
-    effects: unknown[]
-    residualResources: unknown[]
-  }
-  terminal: unknown
-  observation: { status: string; exactWorker: boolean }
-}> {
-  return (await runtime.callOrchestrationWorkerServer(
+): Promise<OrchestrationFederationShowResult> {
+  return await runtime.callOrchestrationWorkerServer(
     federated.environment_id,
-    'orchestration.federationShow',
+    ORCHESTRATION_FEDERATION_SHOW_CONTRACT,
     { dispatchId: federated.dispatch_id },
     15_000
-  )) as Awaited<ReturnType<typeof callFederatedWorkerShow>>
+  )
 }

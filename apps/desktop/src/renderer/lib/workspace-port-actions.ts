@@ -1,10 +1,12 @@
 import * as executionHost from '@yiru/workbench-model/workspace'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import {
-  callRuntimeRpc,
-  RuntimeRpcCallError,
+  callRuntimeOrpc,
+  isRuntimeOrpcErrorCode,
   type RuntimeClientTarget
-} from '~renderer/runtime/rpc-client'
+} from '~renderer/runtime/orpc-client'
+import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import type { useAppStore } from '~renderer/store'
 import type { LocalhostWorktreeLabelRoute } from '~shared/localhost-worktree-labels'
@@ -101,14 +103,15 @@ export async function openWorkspacePortInBrowser(args: {
   let url = rawUrl
   if (args.runtimeTarget.kind === 'local' && args.localhostLabelRoute) {
     try {
-      url = (await window.api.localhostWorktreeLabels.register(args.localhostLabelRoute)).url
+      url = (await rendererHostClient.localhostWorktreeLabels.register(args.localhostLabelRoute))
+        .url
     } catch {
       url = rawUrl
     }
   }
   if (args.openInYiruBrowser === false && args.runtimeTarget.kind === 'local') {
     try {
-      await window.api.shell.openUrl(url)
+      await shellClient.shell.openUrl(url)
       return { ok: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -124,9 +127,9 @@ export async function openWorkspacePortInBrowser(args: {
   activateAndRevealWorktree(worktreeId)
   if (args.runtimeTarget.kind === 'environment') {
     try {
-      const remotePage = await callRuntimeRpc<{ browserPageId: string }>(
+      const remotePage = await callRuntimeOrpc(
         args.runtimeTarget,
-        'browser.tabCreate',
+        (client) => client.browser.tabCreate,
         { worktree: toRuntimeWorktreeSelector(worktreeId), url },
         { timeoutMs: 30_000 }
       )
@@ -277,15 +280,12 @@ async function runWorkspacePortScanForTarget(
   repoId?: string
 ): Promise<WorkspacePortScanResult> {
   const params = repoId ? { repoId } : {}
-  if (target.kind === 'local') {
-    return window.api.workspacePorts.scan(params)
-  }
   try {
-    return await callRuntimeRpc<WorkspacePortScanResult>(target, 'workspacePorts.scan', params, {
+    return await callRuntimeOrpc(target, (client) => client.workspacePorts.scan, params, {
       timeoutMs: 15_000
     })
   } catch (error) {
-    if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
+    if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
       return {
         platform: 'unknown',
         scannedAt: Date.now(),
@@ -323,15 +323,12 @@ export async function killWorkspacePortForTarget(
   target: RuntimeClientTarget,
   args: { repoId: string; pid: number; port: number }
 ): Promise<WorkspacePortKillResult> {
-  if (target.kind === 'local') {
-    return window.api.workspacePorts.kill(args)
-  }
   try {
-    return await callRuntimeRpc<WorkspacePortKillResult>(target, 'workspacePorts.kill', args, {
+    return await callRuntimeOrpc(target, (client) => client.workspacePorts.kill, args, {
       timeoutMs: 15_000
     })
   } catch (error) {
-    if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
+    if (isRuntimeOrpcErrorCode(error, 'method_not_found')) {
       return {
         ok: false,
         reason: 'The connected runtime does not support workspace port management yet.'

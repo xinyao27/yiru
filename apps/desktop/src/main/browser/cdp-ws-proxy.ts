@@ -1,17 +1,17 @@
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http'
 
-import type { WebContents } from 'electron'
 /* eslint-disable max-lines -- Why: this proxy owns HTTP discovery, websocket client lifecycle, and CDP debugger forwarding together. */
 import { WebSocketServer, WebSocket } from 'ws'
 
 import { ANTI_DETECTION_SCRIPT } from './anti-detection'
 import { buildPrintToPdfOptions, CdpPdfStreamStore } from './cdp-print-to-pdf'
 import { captureScreenshot } from './cdp-screenshot'
-import { acquireElectronDebugger, type ElectronDebuggerLease } from './electron-debugger-lease'
+import type { BrowserPageCdpLease, BrowserPageHandle } from './page/handle'
 
 const LIFECYCLE_PRIMING_TIMEOUT_MS = 1_000
 
 export class CdpWsProxy {
+  private readonly page: BrowserPageHandle
   // Why: holds each session's last DOM.focus params to replay right before the next
   // Input.insertText, countering the native webContents.focus() that would blur the target.
   private pendingDomFocusBySession = new Map<
@@ -24,9 +24,8 @@ export class CdpWsProxy {
   private readonly responseSessionIdsByClient = new WeakMap<WebSocket, Map<number, string>>()
   private detachClientListeners: (() => void) | null = null
   private port = 0
-  private debuggerMessageHandler: ((...args: unknown[]) => void) | null = null
-  private debuggerDetachHandler: ((...args: unknown[]) => void) | null = null
-  private debuggerLease: ElectronDebuggerLease | null = null
+  private unsubscribeCdp: (() => void) | null = null
+  private cdpLease: BrowserPageCdpLease | null = null
   private attached = false
   // Why: agent-browser filters events by sessionId from Target.attachToTarget.
   private clientSessionId: string | undefined = undefined
@@ -36,7 +35,9 @@ export class CdpWsProxy {
   private nextClientBrowserSessionOrdinal = 0
   private readonly pdfStreams = new CdpPdfStreamStore()
 
-  constructor(private readonly webContents: WebContents) {}
+  constructor(page: BrowserPageHandle) {
+    this.page = page
+  }
 
   async start(): Promise<string> {
     await this.attachDebugger()
@@ -108,10 +109,6 @@ export class CdpWsProxy {
     }
   }
 
-  getPort(): number {
-    return this.port
-  }
-
   private closeClient(): void {
     const client = this.client
     this.detachClientListeners?.()
@@ -165,12 +162,13 @@ export class CdpWsProxy {
   }
 
   private buildTargetInfo(): Record<string, unknown> {
-    const destroyed = this.webContents.isDestroyed()
+    const closed = this.page.isClosed()
+    const info = this.page.getInfo()
     return {
       targetId: 'yiru-proxy-target',
       type: 'page',
-      title: destroyed ? '' : this.webContents.getTitle(),
-      url: destroyed ? '' : this.webContents.getURL(),
+      title: closed ? '' : info.title,
+      url: closed ? '' : info.url,
       attached: true,
       canAccessOpener: false
     }
@@ -185,7 +183,7 @@ export class CdpWsProxy {
       // could affect downstream detection heuristics.
       // Why: process.versions.chrome contains the exact Chromium version
       // bundled with Electron, producing a realistic version string.
-      const chromeVersion = process.versions.chrome ?? '134.0.0.0'
+      const chromeVersion = this.page.getInfo().browserVersion
       res.end(
         JSON.stringify({
           Browser: `Chrome/${chromeVersion}`,
@@ -217,7 +215,7 @@ export class CdpWsProxy {
       return
     }
     try {
-      this.debuggerLease = acquireElectronDebugger(this.webContents)
+      this.cdpLease = this.page.acquireCdp()
     } catch {
       throw new Error('Could not attach debugger. DevTools may already be open for this tab.')
     }
@@ -227,51 +225,39 @@ export class CdpWsProxy {
     // exposes other automation signals that Cloudflare Turnstile checks.
     // Inject before any page loads so challenges succeed.
     try {
-      await this.webContents.debugger.sendCommand('Page.enable', {})
-      await this.webContents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
+      await this.sendDebuggerCommand('Page.enable', {})
+      await this.sendDebuggerCommand('Page.addScriptToEvaluateOnNewDocument', {
         source: ANTI_DETECTION_SCRIPT
       })
     } catch {
       /* best-effort — page domain may not be ready yet */
     }
 
-    this.debuggerMessageHandler = (_event: unknown, ...rest: unknown[]) => {
-      const [method, params, sessionId] = rest as [
-        string,
-        Record<string, unknown>,
-        string | undefined
-      ]
+    this.unsubscribeCdp = this.cdpLease.subscribe((event) => {
+      if (event.type === 'detached') {
+        this.attached = false
+        const lease = this.cdpLease
+        this.cdpLease = null
+        lease?.release()
+        void this.stop()
+        return
+      }
       if (!this.client || this.client.readyState !== WebSocket.OPEN) {
         return
       }
       // Why: Electron passes empty string (not undefined) for root-session events, but
       // agent-browser filters events by the sessionId from Target.attachToTarget.
-      const msg: Record<string, unknown> = { method, params }
-      msg.sessionId = sessionId || this.clientSessionId
+      const msg: Record<string, unknown> = { method: event.method, params: event.params }
+      msg.sessionId = event.sessionId || this.clientSessionId
       this.client.send(JSON.stringify(msg))
-    }
-    this.debuggerDetachHandler = () => {
-      this.attached = false
-      const lease = this.debuggerLease
-      this.debuggerLease = null
-      lease?.release()
-      this.stop()
-    }
-    this.webContents.debugger.on('message', this.debuggerMessageHandler as never)
-    this.webContents.debugger.on('detach', this.debuggerDetachHandler as never)
+    })
   }
 
   private detachDebugger(): void {
-    if (this.debuggerMessageHandler) {
-      this.webContents.debugger.removeListener('message', this.debuggerMessageHandler as never)
-      this.debuggerMessageHandler = null
-    }
-    if (this.debuggerDetachHandler) {
-      this.webContents.debugger.removeListener('detach', this.debuggerDetachHandler as never)
-      this.debuggerDetachHandler = null
-    }
-    const lease = this.debuggerLease
-    this.debuggerLease = null
+    this.unsubscribeCdp?.()
+    this.unsubscribeCdp = null
+    const lease = this.cdpLease
+    this.cdpLease = null
     lease?.release()
     this.attached = false
   }
@@ -334,7 +320,7 @@ export class CdpWsProxy {
     if (msg.method === 'Browser.getVersion') {
       // Why: returning "Yiru/Electron" identifies this as an embedded automation
       // surface to agent-browser. Use a generic Chrome product string instead.
-      const chromeVersion = process.versions.chrome ?? '134.0.0.0'
+      const chromeVersion = this.page.getInfo().browserVersion
       this.sendResult(
         clientId,
         {
@@ -354,10 +340,11 @@ export class CdpWsProxy {
       this.pendingDomFocusBySession.delete(effectiveSessionId)
     }
     if (msg.method === 'Page.bringToFront') {
-      if (!this.webContents.isDestroyed()) {
-        this.webContents.focus()
-      }
-      this.sendResult(clientId, {}, client)
+      void this.page.focus().then(
+        () => this.sendResult(clientId, {}, client),
+        (error: unknown) =>
+          this.sendError(clientId, error instanceof Error ? error.message : String(error), client)
+      )
       return
     }
     if (msg.method === 'DOM.focus') {
@@ -398,21 +385,24 @@ export class CdpWsProxy {
     // polling and read-only JS probes use those methods heavily, and focusing on
     // every eval steals the user's foreground window while background automation
     // is running.
-    if (msg.method === 'Input.insertText' && !this.webContents.isDestroyed()) {
-      this.webContents.focus()
-      void this.forwardInsertText(client, clientId, msg.params ?? {}, effectiveSessionId)
+    if (msg.method === 'Input.insertText' && !this.page.isClosed()) {
+      void this.page.focus().then(
+        () => this.forwardInsertText(client, clientId, msg.params ?? {}, effectiveSessionId),
+        (error: unknown) =>
+          this.sendError(clientId, error instanceof Error ? error.message : String(error), client)
+      )
       return
     }
     // Why: agent-browser waits for network idle to detect navigation completion.
     // Electron webview CDP subscriptions silently lapse after cross-process swaps.
     // Page.reload needs the same priming: forwarding it unprimed closed the tab (#7031).
-    if (msg.method === 'Page.navigate' && !this.webContents.isDestroyed()) {
+    if (msg.method === 'Page.navigate' && !this.page.isClosed()) {
       void this.navigateWithLifecycle(client, clientId, msg.params ?? {}, msg.sessionId)
       return
     }
     // Why: CDP Page.reload can destroy Electron webview targets during process swaps.
     // Use the same direct webContents reload path as Yiru's own browser.reload.
-    if (msg.method === 'Page.reload' && !this.webContents.isDestroyed()) {
+    if (msg.method === 'Page.reload' && !this.page.isClosed()) {
       void this.reloadWithLifecycle(client, clientId, msg.params ?? {}, msg.sessionId)
       return
     }
@@ -449,10 +439,11 @@ export class CdpWsProxy {
     params: Record<string, unknown>,
     sessionId?: string
   ): Promise<unknown> {
-    const command = sessionId
-      ? this.webContents.debugger.sendCommand(method, params, sessionId)
-      : this.webContents.debugger.sendCommand(method, params)
-    return Promise.resolve(command)
+    const cdp = this.cdpLease
+    if (!cdp) {
+      return Promise.reject(new Error('Browser debugger is no longer attached'))
+    }
+    return cdp.sendCommand(method, params, sessionId)
   }
 
   private forwardCommand(
@@ -462,7 +453,7 @@ export class CdpWsProxy {
     params: Record<string, unknown>,
     msgSessionId?: string
   ): void {
-    if (this.webContents.isDestroyed()) {
+    if (this.page.isClosed()) {
       this.sendError(clientId, 'Browser tab is no longer available', client)
       return
     }
@@ -517,16 +508,12 @@ export class CdpWsProxy {
       this.forwardCommand(client, clientId, 'Page.reload', params, msgSessionId)
       return
     }
-    if (this.webContents.isDestroyed()) {
+    if (this.page.isClosed()) {
       this.sendError(clientId, 'Browser tab is no longer available', client)
       return
     }
     try {
-      if (params.ignoreCache === true) {
-        this.webContents.reloadIgnoringCache()
-      } else {
-        this.webContents.reload()
-      }
+      await this.page.reload({ ignoreCache: params.ignoreCache === true })
       this.sendResult(clientId, {}, client)
     } catch (err) {
       this.sendError(clientId, err instanceof Error ? err.message : String(err), client)
@@ -580,7 +567,7 @@ export class CdpWsProxy {
     params: Record<string, unknown>,
     effectiveSessionId?: string
   ): Promise<Record<string, unknown> | undefined> {
-    if (this.webContents.isDestroyed()) {
+    if (this.page.isClosed()) {
       this.sendError(clientId, 'Browser tab is no longer available', client)
       return undefined
     }
@@ -609,7 +596,7 @@ export class CdpWsProxy {
       return
     }
     if (pendingFocusParams) {
-      if (this.webContents.isDestroyed()) {
+      if (this.page.isClosed()) {
         this.sendError(clientId, 'Browser tab is no longer available', client)
         return
       }
@@ -633,12 +620,12 @@ export class CdpWsProxy {
     clientId: number,
     params: Record<string, unknown>
   ): Promise<void> {
-    if (this.webContents.isDestroyed()) {
+    if (this.page.isClosed()) {
       this.sendError(clientId, 'Browser tab is no longer available', client)
       return
     }
     try {
-      const pdf = await this.webContents.printToPDF(buildPrintToPdfOptions(params))
+      const pdf = await this.page.printToPdf(buildPrintToPdfOptions(params))
       // Why: printToPDF can resolve after the client disconnected (or was
       // replaced). Bail before registering a stream so its buffer isn't
       // orphaned in pdfStreams past the disconnect's clear() until the TTL.
@@ -684,8 +671,14 @@ export class CdpWsProxy {
     clientId: number,
     params?: Record<string, unknown>
   ): void {
+    const cdp = this.cdpLease
+    if (!cdp) {
+      this.sendError(clientId, 'Browser debugger is no longer attached', client)
+      return
+    }
     captureScreenshot(
-      this.webContents,
+      this.page,
+      cdp,
       params,
       (result) => this.sendResult(clientId, result, client),
       (message) => this.sendError(clientId, message, client)
