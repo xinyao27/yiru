@@ -3,6 +3,7 @@ import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
 
 import { updateHomeStatsByHost } from './stats-state'
 import { parseRuntimeStatsSummary } from './stats-summary'
+import { ensureUsageRange } from './usage/range-preference'
 
 export async function refreshHomeStatsForHost(
   client: RpcClient,
@@ -10,7 +11,11 @@ export async function refreshHomeStatsForHost(
   isDisposed: () => boolean = () => false
 ): Promise<void> {
   try {
+    // Why: home and activity insights share one stats store, so both read the
+    // same selected window rather than overwriting each other's range.
+    const range = await ensureUsageRange()
     const result = await callRuntimeOrpc(client, (runtime) => runtime.stats.summary, {
+      range,
       refreshUsage: true
     })
     if (isDisposed()) {

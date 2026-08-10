@@ -1,5 +1,15 @@
 import type { RuntimeStatsSummary } from '@yiru/runtime-protocol/mobile-runtime-types'
+import { isStatsUsageRange } from '@yiru/runtime-protocol/stats-usage-range'
 import { AI_VAULT_AGENTS, type AiVaultAgent } from '@yiru/workbench-model/agent'
+
+import { recordValue } from './stats-payload-record'
+import {
+  mergeDailyProviderUsage,
+  mergeProjectUsage,
+  parseDailyProviderUsage,
+  parseProjectUsage
+} from './usage/breakdown'
+import { aggregateSupplementalUsage, parseSupplementalUsage } from './usage/supplemental'
 
 const AI_VAULT_AGENT_SET = new Set<string>(AI_VAULT_AGENTS)
 
@@ -80,11 +90,14 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
     totalAgentTimeMs: record.totalAgentTimeMs,
     firstEventAt: record.firstEventAt,
     dailyActivity,
+    dailyProviderUsage: parseDailyProviderUsage(record.dailyProviderUsage),
     dailyTokens,
     dailyUnpricedTokens,
     dailyValues,
     modelUsage,
+    projectUsage: parseProjectUsage(record.projectUsage),
     supplementalUsage,
+    usageRange: isStatsUsageRange(record.usageRange) ? record.usageRange : undefined,
     tokenDataAvailable:
       typeof record.tokenDataAvailable === 'boolean' ? record.tokenDataAvailable : undefined,
     tokenUnavailableAgents,
@@ -178,6 +191,7 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
     dailyValues: [...dailyValues.entries()]
       .flatMap(([day, valueUsd]) => (dailyUnpricedTokens.has(day) ? [] : [{ day, valueUsd }]))
       .sort((left, right) => left.day.localeCompare(right.day)),
+    dailyProviderUsage: mergeDailyProviderUsage(summaries),
     modelUsage: [...models.values()]
       .map((model) => ({
         key: model.key,
@@ -186,6 +200,8 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
         valueUsd: model.hasUnpricedValue ? null : model.valueUsd
       }))
       .sort((left, right) => right.tokens - left.tokens),
+    projectUsage: mergeProjectUsage(summaries),
+    usageRange: mergedUsageRange(summaries),
     tokenDataAvailable: summaries.every((entry) => entry.tokenDataAvailable === true),
     tokenUnavailableAgents: [...unavailableAgents],
     supplementalUsage,
@@ -196,112 +212,16 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
   }
 }
 
-function parseSupplementalUsage(
-  value: unknown
-): RuntimeStatsSummary['supplementalUsage'] | undefined {
-  const record = recordValue(value)
-  if (!record || !Array.isArray(record.dailyTokens) || !Array.isArray(record.modelUsage)) {
-    return undefined
-  }
-  const dailyTokens = record.dailyTokens.flatMap((entry) => {
-    const item = recordValue(entry)
-    return item &&
-      typeof item.day === 'string' &&
-      typeof item.tokens === 'number' &&
-      (item.valueUsd === null || typeof item.valueUsd === 'number') &&
-      typeof item.unpricedTokens === 'number'
-      ? [
-          {
-            day: item.day,
-            tokens: item.tokens,
-            valueUsd: item.valueUsd,
-            unpricedTokens: item.unpricedTokens
-          }
-        ]
-      : []
-  })
-  const modelUsage = record.modelUsage.flatMap((entry) => {
-    const item = recordValue(entry)
-    return item &&
-      typeof item.key === 'string' &&
-      typeof item.label === 'string' &&
-      typeof item.tokens === 'number' &&
-      (item.valueUsd === null || typeof item.valueUsd === 'number')
-      ? [
-          {
-            key: item.key,
-            label: item.label,
-            tokens: item.tokens,
-            valueUsd: item.valueUsd
-          }
-        ]
-      : []
-  })
-  const meteredValueUsd = parseOptionalMeteredValue(record.meteredValueUsd)
-  return {
-    dailyTokens,
-    modelUsage,
-    ...(meteredValueUsd === undefined ? {} : { meteredValueUsd })
-  }
-}
-
-function aggregateSupplementalUsage(
+// Why: one host that predates ranged reads answers with all-time usage, so a
+// mixed answer reports no single range instead of mislabelling the window.
+function mergedUsageRange(
   summaries: readonly RuntimeStatsSummary[]
-): RuntimeStatsSummary['supplementalUsage'] | undefined {
-  const dailyTokens = [] as NonNullable<RuntimeStatsSummary['supplementalUsage']>['dailyTokens']
-  const modelUsage = [] as NonNullable<RuntimeStatsSummary['supplementalUsage']>['modelUsage']
-  let meteredValueUsd: number | null | undefined
-  let hasSupplementalUsage = false
-  for (const summary of summaries) {
-    const usage = summary.supplementalUsage
-    if (!usage) {
-      continue
-    }
-    hasSupplementalUsage = true
-    dailyTokens.push(...usage.dailyTokens)
-    modelUsage.push(...usage.modelUsage)
-    meteredValueUsd = mergeMeteredValue(meteredValueUsd, usage.meteredValueUsd)
-  }
-  if (!hasSupplementalUsage) {
-    return undefined
-  }
-  return {
-    dailyTokens,
-    modelUsage,
-    ...(meteredValueUsd === undefined ? {} : { meteredValueUsd })
-  }
-}
-
-function mergeMeteredValue(
-  left: number | null | undefined,
-  right: number | null | undefined
-): number | null | undefined {
-  if (left === undefined) {
-    return right
-  }
-  if (right === undefined) {
-    return left
-  }
-  if (left === null || right === null) {
-    return null
-  }
-  return left + right
-}
-
-function parseOptionalMeteredValue(value: unknown): number | null | undefined {
-  if (value === undefined) {
-    return undefined
-  }
-  if (value === null) {
-    return null
-  }
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
-}
-
-function recordValue(value: unknown): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null
-    ? Object.fromEntries(Object.entries(value))
-    : null
+): RuntimeStatsSummary['usageRange'] {
+  const [first, ...rest] = summaries
+  const range = first?.usageRange
+  return range !== undefined && rest.every((summary) => summary.usageRange === range)
+    ? range
+    : undefined
 }
 
 function isAiVaultAgent(value: unknown): value is AiVaultAgent {

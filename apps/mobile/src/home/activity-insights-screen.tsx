@@ -1,3 +1,4 @@
+import type { StatsUsageBoundedRange } from '@yiru/runtime-protocol/stats-usage-range'
 import { Stack, useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { AppState, Platform, RefreshControl, ScrollView, View } from 'react-native'
@@ -14,6 +15,7 @@ import { MobileActivityInsightsDashboard } from './dashboard'
 import { refreshHomeStatsForHost } from './stats-refresh'
 import { getHomeStatsByHost, hydrateHomeStatsByHost, subscribeHomeStatsByHost } from './stats-state'
 import { aggregateHomeStats } from './stats-summary'
+import { getUsageRange, subscribeUsageRange } from './usage/range-preference'
 
 const ACTIVITY_STATS_REFRESH_INTERVAL_MS = 60_000
 
@@ -35,6 +37,8 @@ export function MobileActivityInsightsScreen(): React.JSX.Element {
     getHomeStatsByHost
   )
   const summary = useMemo(() => aggregateHomeStats(statsByHost), [statsByHost])
+  const usageRange = useSyncExternalStore(subscribeUsageRange, getUsageRange, getUsageRange)
+  const [loadedUsageRange, setLoadedUsageRange] = useState<StatsUsageBoundedRange | null>(null)
   const close = useCallback(() => router.back(), [router])
   const refreshStats = useCallback(
     async (isDisposed: () => boolean = () => false): Promise<void> => {
@@ -43,8 +47,11 @@ export function MobileActivityInsightsScreen(): React.JSX.Element {
           refreshHomeStatsForHost(entry.client, entry.hostId, isDisposed)
         )
       )
+      if (!isDisposed()) {
+        setLoadedUsageRange(usageRange)
+      }
     },
-    [connectedClients]
+    [connectedClients, usageRange]
   )
   const refreshManually = useCallback(() => {
     setIsRefreshing(true)
@@ -144,7 +151,10 @@ export function MobileActivityInsightsScreen(): React.JSX.Element {
         }
         showsVerticalScrollIndicator={false}
       >
-        <MobileActivityInsightsDashboard summary={summary} />
+        <MobileActivityInsightsDashboard
+          isUsageRangePending={loadedUsageRange !== usageRange}
+          summary={summary}
+        />
       </ScrollView>
     </View>
   )

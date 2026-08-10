@@ -1,10 +1,12 @@
 import type { RuntimeStatsSummary } from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { StatsUsageBoundedRange } from '@yiru/runtime-protocol/stats-usage-range'
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { Text, View } from 'react-native'
 
 import { MobileContentSection } from '../components/content-section'
+import { MobileSegmentedControl } from '../components/segmented-control'
 import { translate } from '../i18n/translate'
 import type { ContributionDisplayMetric } from './chart-data'
 import { formatMetricValue } from './chart-data'
@@ -17,9 +19,19 @@ import {
   subscribeContributionMetric
 } from './contribution-metric-preference'
 import { ModelUsageChart } from './model-usage-chart'
+import { ProjectUsageList } from './usage/project-list'
+import { ProviderUsageChart } from './usage/provider-chart'
+import { HOME_USAGE_RANGE_OPTIONS } from './usage/range'
+import {
+  ensureUsageRange,
+  getUsageRange,
+  setUsageRange,
+  subscribeUsageRange
+} from './usage/range-preference'
 
 type MobileActivityInsightsDashboardProps = {
   summary: RuntimeStatsSummary | null
+  isUsageRangePending: boolean
 }
 
 type SummaryMetricProps = {
@@ -28,7 +40,8 @@ type SummaryMetricProps = {
 }
 
 export function MobileActivityInsightsDashboard({
-  summary
+  summary,
+  isUsageRangePending
 }: MobileActivityInsightsDashboardProps): React.JSX.Element {
   const stats = summary ?? EMPTY_SUMMARY
   const metric = useSyncExternalStore(
@@ -36,9 +49,11 @@ export function MobileActivityInsightsDashboard({
     getContributionMetric,
     getContributionMetric
   )
+  const usageRange = useSyncExternalStore(subscribeUsageRange, getUsageRange, getUsageRange)
 
   useEffect(() => {
     loadContributionMetric()
+    void ensureUsageRange()
   }, [])
 
   const activityPoints = useMemo<ContributionPoint[]>(
@@ -104,16 +119,66 @@ export function MobileActivityInsightsDashboard({
         </View>
       </MobileContentSection>
 
+      {metric === 'activity' ? null : (
+        <View className="mb-4 gap-2">
+          <MobileSegmentedControl
+            accessibilityLabel={translate('mobile.home.usageRange.label', 'Usage range')}
+            onChange={setUsageRange}
+            options={HOME_USAGE_RANGE_OPTIONS}
+            value={usageRange}
+          />
+          <UsageRangeNotice isPending={isUsageRangePending} range={usageRange} summary={summary} />
+        </View>
+      )}
+
       <MobileContributionCard summary={stats} metric={metric} onMetricChange={selectMetric} />
       <ContributionCharts points={points} metric={metric} onMetricChange={selectMetric} />
       {metric === 'activity' ? null : (
-        <ModelUsageChart
-          metric={metric}
-          models={stats.modelUsage ?? []}
-          onMetricChange={selectMetric}
-        />
+        <>
+          <ProviderUsageChart
+            daily={stats.dailyProviderUsage ?? []}
+            metric={metric}
+            range={usageRange}
+            onMetricChange={selectMetric}
+          />
+          <ModelUsageChart
+            metric={metric}
+            models={stats.modelUsage ?? []}
+            onMetricChange={selectMetric}
+          />
+          <ProjectUsageList metric={metric} projects={stats.projectUsage ?? []} />
+        </>
       )}
     </View>
+  )
+}
+
+function UsageRangeNotice({
+  isPending,
+  range,
+  summary
+}: {
+  isPending: boolean
+  range: StatsUsageBoundedRange
+  summary: RuntimeStatsSummary | null
+}): React.JSX.Element | null {
+  if (isPending) {
+    return (
+      <Text className="text-muted-foreground text-xs">
+        {translate('mobile.home.usageRange.updating', 'Updating usage for the selected range…')}
+      </Text>
+    )
+  }
+  if (summary === null || summary.usageRange === range) {
+    return null
+  }
+  return (
+    <Text className="text-muted-foreground text-xs">
+      {translate(
+        'mobile.home.usageRange.unsupported',
+        'A connected host reported all-time usage instead of this range.'
+      )}
+    </Text>
   )
 }
 
