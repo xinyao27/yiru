@@ -69,9 +69,24 @@ function isPackagedExternalSpecifier(specifier) {
   )
 }
 
+function findPackageJsonByNodeModulesWalk(packageName, fromDir) {
+  // Why: walk ancestors the way Node resolves bare imports. pnpm often places a
+  // dependency in a parent node_modules (sibling of @scope/), and types-only
+  // packages like type-fest have no require()-able entry or package.json export.
+  let dir = fromDir
+  while (dir !== dirname(dir)) {
+    const candidate = join(dir, 'node_modules', packageName, 'package.json')
+    if (existsSync(candidate)) {
+      return candidate
+    }
+    dir = dirname(dir)
+  }
+  return null
+}
+
 function resolvePackageJsonPath(packageName, fromDir = projectDir) {
-  const nested = join(fromDir, 'node_modules', packageName, 'package.json')
-  if (existsSync(nested)) {
+  const nested = findPackageJsonByNodeModulesWalk(packageName, fromDir)
+  if (nested) {
     return nested
   }
   // Why: published serve-sim has no "." export (only ./middleware and ./state), so
