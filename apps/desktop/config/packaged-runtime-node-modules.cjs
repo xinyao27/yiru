@@ -15,6 +15,9 @@ const requireFromProject = createRequire(join(projectDir, 'package.json'))
 
 const PACKAGED_RUNTIME_PACKAGE_ROOTS = [
   '@electron-toolkit/utils',
+  // Why: main/CLI keep oRPC as bare requires after the host RPC migration.
+  '@orpc/client',
+  '@orpc/server',
   '@parcel/watcher',
   // Why: the plain-tsc CLI preserves these workspace imports as bare requires.
   '@yiru/mobile-relay-protocol',
@@ -28,6 +31,8 @@ const PACKAGED_RUNTIME_PACKAGE_ROOTS = [
   'serve-sim',
   'qrcode',
   'tweetnacl',
+  // Why: main-process HTTP uses undici's EnvHttpProxyAgent as a bare require.
+  'undici',
   'ws',
   'yaml',
   'zod'
