@@ -4,6 +4,7 @@ import {
   DeviceMobile as Smartphone,
   ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
+import { useMemo } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import {
   Select,
@@ -50,6 +51,10 @@ export function EmulatorPaneToolbar({
   const statusClassName = subtleStatus
     ? 'text-muted-foreground'
     : 'border-border bg-muted text-muted-foreground'
+  const deviceItems = useMemo(
+    () => devices.map((device) => ({ label: device.name, value: device.udid })),
+    [devices]
+  )
 
   return (
     <div className="border-border flex items-center gap-2 border-b px-3 py-2">
@@ -66,6 +71,7 @@ export function EmulatorPaneToolbar({
       </span>
       <div className="flex-1" />
       <Select
+        items={deviceItems}
         value={selectedUdid ?? ''}
         onValueChange={(value) => value && onSelectDevice(value)}
         disabled={loading || devices.length === 0}
